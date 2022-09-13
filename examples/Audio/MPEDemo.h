@@ -689,8 +689,8 @@ public:
     }
 
     //==============================================================================
-    void audioDeviceIOCallback (const float** /*inputChannelData*/, int /*numInputChannels*/,
-                                float** outputChannelData, int numOutputChannels,
+    void audioDeviceIOCallback (const float* const* /*inputChannelData*/, int /*numInputChannels*/,
+                                float* const* outputChannelData, int numOutputChannels,
                                 int numSamples) override
     {
         AudioBuffer<float> buffer (outputChannelData, numOutputChannels, numSamples);

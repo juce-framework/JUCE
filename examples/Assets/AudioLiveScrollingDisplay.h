@@ -45,8 +45,8 @@ public:
         clear();
     }
 
-    void audioDeviceIOCallback (const float** inputChannelData, int numInputChannels,
-                                float** outputChannelData, int numOutputChannels,
+    void audioDeviceIOCallback (const float* const* inputChannelData, int numInputChannels,
+                                float* const* outputChannelData, int numOutputChannels,
                                 int numberOfSamples) override
     {
         for (int i = 0; i < numberOfSamples; ++i)

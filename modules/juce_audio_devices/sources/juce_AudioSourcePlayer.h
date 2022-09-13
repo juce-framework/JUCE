@@ -80,9 +80,9 @@ public:
 
     //==============================================================================
     /** Implementation of the AudioIODeviceCallback method. */
-    void audioDeviceIOCallback (const float** inputChannelData,
+    void audioDeviceIOCallback (const float* const* inputChannelData,
                                 int totalNumInputChannels,
-                                float** outputChannelData,
+                                float* const* outputChannelData,
                                 int totalNumOutputChannels,
                                 int numSamples) override;
 

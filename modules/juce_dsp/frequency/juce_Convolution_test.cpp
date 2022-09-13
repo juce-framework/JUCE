@@ -62,7 +62,7 @@ class ConvolutionTest  : public UnitTest
         AudioBuffer<float> result (2, length);
         result.clear();
 
-        auto** channels = result.getArrayOfWritePointers();
+        auto* const* channels = result.getArrayOfWritePointers();
         std::for_each (channels, channels + result.getNumChannels(), [length] (auto* channel)
         {
             std::fill (channel, channel + length, 1.0f);

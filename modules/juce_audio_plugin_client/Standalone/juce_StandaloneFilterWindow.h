@@ -448,9 +448,9 @@ private:
             inner.audioDeviceAboutToStart (device);
         }
 
-        void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+        void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
                                                int numInputChannels,
-                                               float** outputChannelData,
+                                               float* const* outputChannelData,
                                                int numOutputChannels,
                                                int numSamples,
                                                const AudioIODeviceCallbackContext& context) override
@@ -600,9 +600,9 @@ private:
     };
 
     //==============================================================================
-    void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+    void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
                                            int numInputChannels,
-                                           float** outputChannelData,
+                                           float* const* outputChannelData,
                                            int numOutputChannels,
                                            int numSamples,
                                            const AudioIODeviceCallbackContext& context) override

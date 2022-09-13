@@ -119,7 +119,7 @@ void AudioVisualiserComponent::clear()
         c->clear();
 }
 
-void AudioVisualiserComponent::pushBuffer (const float** d, int numChannels, int num)
+void AudioVisualiserComponent::pushBuffer (const float* const* d, int numChannels, int num)
 {
     numChannels = jmin (numChannels, channels.size());
 

@@ -134,8 +134,8 @@ public:
         sampleRate = 0;
     }
 
-    void audioDeviceIOCallback (const float** inputChannelData, int numInputChannels,
-                                float** outputChannelData, int numOutputChannels,
+    void audioDeviceIOCallback (const float* const* inputChannelData, int numInputChannels,
+                                float* const* outputChannelData, int numOutputChannels,
                                 int numSamples) override
     {
         const ScopedLock sl (writerLock);

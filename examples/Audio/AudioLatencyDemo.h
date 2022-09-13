@@ -136,8 +136,8 @@ public:
 
     void audioDeviceStopped() override {}
 
-    void audioDeviceIOCallback (const float** inputChannelData, int numInputChannels,
-                                float** outputChannelData, int numOutputChannels, int numSamples) override
+    void audioDeviceIOCallback (const float* const* inputChannelData, int numInputChannels,
+                                float* const* outputChannelData, int numOutputChannels, int numSamples) override
     {
         const ScopedLock sl (lock);
 

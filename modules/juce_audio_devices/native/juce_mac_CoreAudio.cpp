@@ -852,7 +852,7 @@ public:
 
             const auto nanos = timeStamp != nullptr ? timeConversions.hostTimeToNanos (timeStamp->mHostTime) : 0;
 
-            callback->audioDeviceIOCallbackWithContext (const_cast<const float**> (tempInputBuffers.get()),
+            callback->audioDeviceIOCallbackWithContext (tempInputBuffers.get(),
                                                         numInputChans,
                                                         tempOutputBuffers,
                                                         numOutputChans,
@@ -1685,8 +1685,8 @@ private:
     bool active = false;
     String lastError;
     AudioBuffer<float> fifos;
-    const float** fifoReadPointers = nullptr;
-    float** fifoWritePointers = nullptr;
+    const float* const* fifoReadPointers = nullptr;
+    float* const* fifoWritePointers = nullptr;
     WaitableEvent threadInitialised;
     CriticalSection closeLock;
 
@@ -2032,9 +2032,9 @@ private:
             outputFifo.finishedWrite (size1 + size2);
         }
 
-        void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+        void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
                                                int numInputChannels,
-                                               float** outputChannelData,
+                                               float* const* outputChannelData,
                                                int numOutputChannels,
                                                int numSamples,
                                                const AudioIODeviceCallbackContext&) override

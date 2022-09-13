@@ -91,9 +91,9 @@ public:
                                     performance. So make sure your code can cope with reasonable
                                     changes in the buffer size from one callback to the next.
     */
-    virtual void audioDeviceIOCallback (const float** inputChannelData,
+    virtual void audioDeviceIOCallback (const float* const* inputChannelData,
                                         int numInputChannels,
-                                        float** outputChannelData,
+                                        float* const* outputChannelData,
                                         int numOutputChannels,
                                         int numSamples)
     {
@@ -105,9 +105,9 @@ public:
         The default implementation of this function will call audioDeviceIOCallback(),
         but you can override this function if you need to make use of the context information.
     */
-    virtual void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+    virtual void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
                                                    int numInputChannels,
-                                                   float** outputChannelData,
+                                                   float* const* outputChannelData,
                                                    int numOutputChannels,
                                                    int numSamples,
                                                    const AudioIODeviceCallbackContext& context)
