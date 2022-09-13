@@ -980,15 +980,27 @@ public:
     void updateScreen()
     {
         const auto screen = getCurrentScreen();
-        lastScreen = screen;
+        const auto display = ScopedDisplayLink::getDisplayIdForScreen (screen);
 
-        const auto newRefreshPeriod = sharedDisplayLinks->getNominalVideoRefreshPeriodSForScreen (screen);
+        if (lastDisplay.exchange (display) == display)
+            return;
+
+        const auto newRefreshPeriod = sharedDisplayLinks->getNominalVideoRefreshPeriodSForScreen (display);
 
         if (newRefreshPeriod != 0.0 && std::exchange (refreshPeriod, newRefreshPeriod) != newRefreshPeriod)
             nativeContext->setNominalVideoRefreshPeriodS (newRefreshPeriod);
+
+        updateColourSpace();
     }
 
-    std::atomic<NSScreen*> lastScreen { nullptr };
+    void updateColourSpace()
+    {
+        if (auto* view = nativeContext->getNSView())
+            if (auto* window = [view window])
+                [window setColorSpace: [NSColorSpace sRGBColorSpace]];
+    }
+
+    std::atomic<CGDirectDisplayID> lastDisplay { 0 };
     double refreshPeriod = 0.0;
 
     FunctionNotificationCenterObserver observer { NSWindowDidChangeScreenNotification,

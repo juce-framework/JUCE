@@ -178,6 +178,7 @@ public:
                                                        styleMask: getNSWindowStyleMask (windowStyleFlags)
                                                          backing: NSBackingStoreBuffered
                                                            defer: YES];
+            [window setColorSpace: [NSColorSpace sRGBColorSpace]];
             setOwner (window, this);
 
             if (@available (macOS 10.10, *))
@@ -1617,16 +1618,16 @@ private:
     */
     PerScreenDisplayLinks::Connection connection
     {
-        sharedDisplayLinks->registerFactory ([this] (auto* screen)
+        sharedDisplayLinks->registerFactory ([this] (CGDirectDisplayID display)
         {
-            return [peerRef = WeakReference<NSViewComponentPeer> { this }, screen]
+            return [peerRef = WeakReference<NSViewComponentPeer> { this }, display]
             {
-                MessageManager::callAsync ([peerRef, screen]
+                MessageManager::callAsync ([peerRef, display]
                 {
                     if (auto* peer = peerRef.get())
                         if (auto* peerView = peer->view)
                             if (auto* peerWindow = [peerView window])
-                                if (screen == [peerWindow screen])
+                                if (display == ScopedDisplayLink::getDisplayIdForScreen ([peerWindow screen]))
                                     peer->setNeedsDisplayRectangles();
                 });
             };
