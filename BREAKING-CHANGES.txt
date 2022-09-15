@@ -6,6 +6,26 @@ develop
 
 Change
 ------
+The function AudioIODeviceCallback::audioDeviceIOCallback() was removed.
+
+Possible Issues
+---------------
+Code overriding audioDeviceIOCallback() will fail to compile.
+
+Workaround
+----------
+Affected classes should override the audioDeviceIOCallbackWithContext() function
+instead.
+
+Rationale
+---------
+The audioDeviceIOCallbackWithContext() function fulfills the same role as
+audioDeviceIOCallback(), it just has an extra parameter. Hence the
+audioDeviceIOCallback() function was superfluous.
+
+
+Change
+------
 The type representing multi-channel audio data has been changed from T** to
 T* const*. Affected classes are AudioIODeviceCallback, AudioBuffer and
 AudioFormatReader.

@@ -1891,10 +1891,19 @@ private:
         std::function<void()> stopped;
         std::function<void()> error;
 
-        void audioDeviceIOCallback (const float* const*, int, float* const*, int, int) override { NullCheckedInvocation::invoke (callback); }
-        void audioDeviceAboutToStart (AudioIODevice*)                                  override { NullCheckedInvocation::invoke (aboutToStart); }
-        void audioDeviceStopped()                                                      override { NullCheckedInvocation::invoke (stopped); }
-        void audioDeviceError (const String&)                                          override { NullCheckedInvocation::invoke (error); }
+        void audioDeviceIOCallbackWithContext (const float* const*,
+                                               int,
+                                               float* const*,
+                                               int,
+                                               int,
+                                               const AudioIODeviceCallbackContext&) override
+        {
+            NullCheckedInvocation::invoke (callback);
+        }
+
+        void audioDeviceAboutToStart (AudioIODevice*) override { NullCheckedInvocation::invoke (aboutToStart); }
+        void audioDeviceStopped()                     override { NullCheckedInvocation::invoke (stopped); }
+        void audioDeviceError (const String&)         override { NullCheckedInvocation::invoke (error); }
     };
 
     void initialiseManager (AudioDeviceManager& manager)

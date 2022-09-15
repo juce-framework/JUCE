@@ -425,7 +425,7 @@ private:
 
         On some platforms (such as iOS 10), the expected buffer size reported in
         audioDeviceAboutToStart may be smaller than the blocks passed to
-        audioDeviceIOCallback. This can lead to out-of-bounds reads if the render
+        audioDeviceIOCallbackWithContext. This can lead to out-of-bounds reads if the render
         callback depends on additional buffers which were initialised using the
         smaller size.
 
