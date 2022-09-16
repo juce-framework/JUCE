@@ -596,8 +596,7 @@ private:
         {
             if (stream != nullptr)
             {
-                oboe::Result result = stream->close();
-                ignoreUnused (result);
+                [[maybe_unused]] oboe::Result result = stream->close();
                 JUCE_OBOE_LOG ("Requested Oboe stream close with result: " + getOboeString (result));
             }
         }
@@ -693,14 +692,15 @@ private:
         }
 
         // Not strictly required as these should not change, but recommended by Google anyway
-        void checkStreamSetup (OboeStream* stream, int deviceId, int numChannels, int expectedSampleRate,
-                               int expectedBufferSize, oboe::AudioFormat format)
+        void checkStreamSetup (OboeStream* stream,
+                               [[maybe_unused]] int deviceId,
+                               [[maybe_unused]] int numChannels,
+                               [[maybe_unused]] int expectedSampleRate,
+                               [[maybe_unused]] int expectedBufferSize,
+                               oboe::AudioFormat format)
         {
-            if (auto* nativeStream = stream != nullptr ? stream->getNativeStream() : nullptr)
+            if ([[maybe_unused]] auto* nativeStream = stream != nullptr ? stream->getNativeStream() : nullptr)
             {
-                ignoreUnused (deviceId, numChannels, sampleRate, expectedBufferSize);
-                ignoreUnused (streamFormat, bitDepth);
-
                 jassert (numChannels == 0 || numChannels == nativeStream->getChannelCount());
                 jassert (expectedSampleRate == 0 || expectedSampleRate == nativeStream->getSampleRate());
                 jassert (format == nativeStream->getFormat());
@@ -860,10 +860,8 @@ private:
             return oboe::DataCallbackResult::Continue;
         }
 
-        void printStreamDebugInfo (oboe::AudioStream* stream)
+        void printStreamDebugInfo ([[maybe_unused]] oboe::AudioStream* stream)
         {
-            ignoreUnused (stream);
-
             JUCE_OBOE_LOG ("\nUses AAudio = " + (stream != nullptr ? String ((int) stream->usesAAudio()) : String ("?"))
                  + "\nDirection = " + (stream != nullptr ? getOboeString (stream->getDirection()) : String ("?"))
                  + "\nSharingMode = " + (stream != nullptr ? getOboeString (stream->getSharingMode()) : String ("?"))
@@ -928,10 +926,8 @@ private:
             return time.tv_sec * oboe::kNanosPerSecond + time.tv_nsec;
         }
 
-        void onErrorBeforeClose (oboe::AudioStream* stream, oboe::Result error) override
+        void onErrorBeforeClose (oboe::AudioStream* stream, [[maybe_unused]] oboe::Result error) override
         {
-            ignoreUnused (error);
-
             // only output stream should be the master stream receiving callbacks
             jassert (stream->getDirection() == oboe::Direction::Output);
 
@@ -1167,10 +1163,8 @@ public:
 
         JUCE_OBOE_LOG ("-----InputDevices:");
 
-        for (auto& device : inputDevices)
+        for ([[maybe_unused]] auto& device : inputDevices)
         {
-            ignoreUnused (device);
-
             JUCE_OBOE_LOG ("name = " << device.name);
             JUCE_OBOE_LOG ("id = " << String (device.id));
             JUCE_OBOE_LOG ("sample rates size = " << String (device.sampleRates.size()));
@@ -1179,10 +1173,8 @@ public:
 
         JUCE_OBOE_LOG ("-----OutputDevices:");
 
-        for (auto& device : outputDevices)
+        for ([[maybe_unused]] auto& device : outputDevices)
         {
-            ignoreUnused (device);
-
             JUCE_OBOE_LOG ("name = " << device.name);
             JUCE_OBOE_LOG ("id = " << String (device.id));
             JUCE_OBOE_LOG ("sample rates size = " << String (device.sampleRates.size()));
@@ -1392,17 +1384,15 @@ public:
         return oboe::DataCallbackResult::Continue;
     }
 
-    void onErrorBeforeClose (oboe::AudioStream*, oboe::Result error) override
+    void onErrorBeforeClose (oboe::AudioStream*, [[maybe_unused]] oboe::Result error) override
     {
         JUCE_OBOE_LOG ("OboeRealtimeThread: Oboe stream onErrorBeforeClose(): " + getOboeString (error));
-        ignoreUnused (error);
         jassertfalse;  // Should never get here!
     }
 
-    void onErrorAfterClose (oboe::AudioStream*, oboe::Result error) override
+    void onErrorAfterClose (oboe::AudioStream*, [[maybe_unused]] oboe::Result error) override
     {
         JUCE_OBOE_LOG ("OboeRealtimeThread: Oboe stream onErrorAfterClose(): " + getOboeString (error));
-        ignoreUnused (error);
         jassertfalse;  // Should never get here!
     }
 

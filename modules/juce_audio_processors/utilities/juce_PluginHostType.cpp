@@ -56,7 +56,7 @@ void PluginHostType::switchToHostApplication() const
    #endif
 }
 
-bool PluginHostType::isInAAXAudioSuite (AudioProcessor& processor)
+bool PluginHostType::isInAAXAudioSuite ([[maybe_unused]] AudioProcessor& processor)
 {
    #if JucePlugin_Build_AAX
     if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_AAX
@@ -66,14 +66,11 @@ bool PluginHostType::isInAAXAudioSuite (AudioProcessor& processor)
     }
    #endif
 
-    ignoreUnused (processor);
     return false;
 }
 
-Image PluginHostType::getHostIcon (int size) const
+Image PluginHostType::getHostIcon ([[maybe_unused]] int size) const
 {
-    ignoreUnused (size);
-
    #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
     if (isInterAppAudioConnected())
         return juce_getIAAHostIcon (size);

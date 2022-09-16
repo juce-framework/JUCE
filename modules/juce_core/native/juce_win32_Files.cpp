@@ -960,7 +960,7 @@ bool File::createShortcut (const String& description, const File& linkFileToCrea
     ComSmartPtr<IShellLink> shellLink;
     ComSmartPtr<IPersistFile> persistFile;
 
-    ignoreUnused (CoInitialize (nullptr));
+    [[maybe_unused]] const auto result = CoInitialize (nullptr);
 
     return SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
         && SUCCEEDED (shellLink->SetPath (getFullPathName().toWideCharPointer()))

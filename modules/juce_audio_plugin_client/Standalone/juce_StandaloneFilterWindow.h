@@ -386,13 +386,12 @@ public:
         return false;
     }
 
-    Image getIAAHostIcon (int size)
+    Image getIAAHostIcon ([[maybe_unused]] int size)
     {
        #if JUCE_IOS && JucePlugin_Enable_IAA
         if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
             return device->getIcon (size);
        #else
-        ignoreUnused (size);
        #endif
 
         return {};

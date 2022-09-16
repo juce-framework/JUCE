@@ -534,11 +534,11 @@ public:
     {
         PMAssertion()  : assertionID (kIOPMNullAssertionID)
         {
-            IOReturn res = IOPMAssertionCreateWithName (kIOPMAssertionTypePreventUserIdleDisplaySleep,
-                                                        kIOPMAssertionLevelOn,
-                                                        CFSTR ("JUCE Playback"),
-                                                        &assertionID);
-            jassert (res == kIOReturnSuccess); ignoreUnused (res);
+            [[maybe_unused]] IOReturn res = IOPMAssertionCreateWithName (kIOPMAssertionTypePreventUserIdleDisplaySleep,
+                                                                         kIOPMAssertionLevelOn,
+                                                                         CFSTR ("JUCE Playback"),
+                                                                         &assertionID);
+            jassert (res == kIOReturnSuccess);
         }
 
         ~PMAssertion()
@@ -750,10 +750,9 @@ void Process::setDockIconVisible (bool isVisible)
 {
     ProcessSerialNumber psn { 0, kCurrentProcess };
 
-    OSStatus err = TransformProcessType (&psn, isVisible ? kProcessTransformToForegroundApplication
-                                                         : kProcessTransformToUIElementApplication);
+    [[maybe_unused]] OSStatus err = TransformProcessType (&psn, isVisible ? kProcessTransformToForegroundApplication
+                                                                          : kProcessTransformToUIElementApplication);
     jassert (err == 0);
-    ignoreUnused (err);
 }
 
 } // namespace juce

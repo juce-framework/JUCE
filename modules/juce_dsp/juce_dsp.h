@@ -208,10 +208,10 @@ namespace juce
             inline void snapToZero (long double& x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
            #endif
           #else
-            inline void snapToZero (float&       x) noexcept            { ignoreUnused (x); }
+            inline void snapToZero ([[maybe_unused]] float&       x) noexcept            {}
            #ifndef DOXYGEN
-            inline void snapToZero (double&      x) noexcept            { ignoreUnused (x); }
-            inline void snapToZero (long double& x) noexcept            { ignoreUnused (x); }
+            inline void snapToZero ([[maybe_unused]] double&      x) noexcept            {}
+            inline void snapToZero ([[maybe_unused]] long double& x) noexcept            {}
            #endif
           #endif
         }

@@ -641,7 +641,7 @@ public:
         return usingCoreGraphics ? 1 : 0;
     }
 
-    void setCurrentRenderingEngine (int index) override
+    void setCurrentRenderingEngine ([[maybe_unused]] int index) override
     {
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics != (index > 0))
@@ -649,8 +649,6 @@ public:
             usingCoreGraphics = index > 0;
             [view setNeedsDisplay: true];
         }
-       #else
-        ignoreUnused (index);
        #endif
     }
 
@@ -2491,10 +2489,8 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
         // Instead, the NSWindow attempts to process the event, fails, and
         // triggers an annoying NSBeep.
         // Overriding keyDown to "handle" the event seems to suppress the beep.
-        addMethod (@selector (keyDown:), [] (id, SEL, NSEvent* ev)
+        addMethod (@selector (keyDown:), [] (id, SEL, [[maybe_unused]] NSEvent* ev)
         {
-            ignoreUnused (ev);
-
            #if JUCE_DEBUG_UNHANDLED_KEYPRESSES
             DBG ("unhandled key down event with keycode: " << [ev keyCode]);
            #endif

@@ -234,8 +234,7 @@ StringArray Font::findAllTypefaceStyles (const String& family)
     {
         BOOL fontFound = false;
         uint32 fontIndex = 0;
-        auto hr = factories->systemFonts->FindFamilyName (family.toWideCharPointer(), &fontIndex, &fontFound);
-        ignoreUnused (hr);
+        [[maybe_unused]] auto hr = factories->systemFonts->FindFamilyName (family.toWideCharPointer(), &fontIndex, &fontFound);
 
         if (! fontFound)
             fontIndex = 0;

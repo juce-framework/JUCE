@@ -359,11 +359,9 @@ public:
 
         AudioProcessor& processor = getAudioProcessor();
 
-        if (AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))
+        if ([[maybe_unused]] AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))
         {
           #ifdef JucePlugin_PreferredChannelConfigurations
-            ignoreUnused (bus);
-
             short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
 
             if (! AudioUnitHelpers::isLayoutSupported (processor, isInput, busIdx, newNumChannels, configs))
@@ -603,10 +601,8 @@ public:
     };
 
     //==============================================================================
-    void audioProcessorChanged (AudioProcessor* processor, const ChangeDetails& details) override
+    void audioProcessorChanged ([[maybe_unused]] AudioProcessor* processor, const ChangeDetails& details) override
     {
-        ignoreUnused (processor);
-
         if (! details.programChanged)
             return;
 
@@ -1109,10 +1105,9 @@ private:
     }
 
     // When parameters are discrete we need to use integer values.
-    float getMaximumParameterValue (AudioProcessorParameter* juceParam) const
+    float getMaximumParameterValue ([[maybe_unused]] AudioProcessorParameter* juceParam) const
     {
        #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-        ignoreUnused (juceParam);
         return 1.0f;
        #else
         return juceParam->isDiscrete() ? (float) (juceParam->getNumSteps() - 1) : 1.0f;
@@ -1355,10 +1350,8 @@ private:
     }
 
     //==============================================================================
-    void processEvents (const AURenderEvent *__nullable realtimeEventListHead, int numParams, AUEventSampleTime startTime)
+    void processEvents (const AURenderEvent *__nullable realtimeEventListHead, [[maybe_unused]] int numParams, AUEventSampleTime startTime)
     {
-        ignoreUnused (numParams);
-
         for (const AURenderEvent* event = realtimeEventListHead; event != nullptr; event = event->head.next)
         {
             switch (event->head.eventType)

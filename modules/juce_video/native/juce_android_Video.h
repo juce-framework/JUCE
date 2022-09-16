@@ -774,20 +774,18 @@ private:
 
             //==============================================================================
             // MediaSessionController callbacks
-            static void audioInfoChanged (JNIEnv*, jobject, jlong host, jobject playbackInfo)
+            static void audioInfoChanged (JNIEnv*, jobject, jlong host, [[maybe_unused]] jobject playbackInfo)
             {
                 if (auto* myself = reinterpret_cast<VideoComponent::Pimpl::MediaSession::Controller*> (host))
                 {
-                    ignoreUnused (playbackInfo);
                     JUCE_VIDEO_LOG ("MediaSessionController::audioInfoChanged()");
                 }
             }
 
-            static void metadataChanged (JNIEnv*, jobject, jlong host, jobject metadata)
+            static void metadataChanged (JNIEnv*, jobject, jlong host, [[maybe_unused]] jobject metadata)
             {
                 if (auto* myself = reinterpret_cast<VideoComponent::Pimpl::MediaSession::Controller*> (host))
                 {
-                    ignoreUnused (metadata);
                     JUCE_VIDEO_LOG ("MediaSessionController::metadataChanged()");
                 }
             }
@@ -835,10 +833,8 @@ private:
                     getEnv()->CallVoidMethod (nativeMediaPlayer, AndroidMediaPlayer.setDisplay, videoSurfaceHolder.get());
             }
 
-            void load (const LocalRef<jstring>& mediaId, const LocalRef<jobject>& extras)
+            void load (const LocalRef<jstring>& mediaId, [[maybe_unused]] const LocalRef<jobject>& extras)
             {
-                ignoreUnused (extras);
-
                 closeVideo();
 
                 auto* env = getEnv();
@@ -1114,38 +1110,30 @@ private:
             State currentState = State::idle;
 
             //==============================================================================
-            void onPrepared (LocalRef<jobject>& mediaPlayer) override
+            void onPrepared ([[maybe_unused]] LocalRef<jobject>& mediaPlayer) override
             {
                 JUCE_VIDEO_LOG ("MediaPlayer::onPrepared()");
-
-                ignoreUnused (mediaPlayer);
 
                 currentState = State::prepared;
 
                 owner.playerPrepared();
             }
 
-            void onBufferingUpdate (LocalRef<jobject>& mediaPlayer, int progress) override
+            void onBufferingUpdate ([[maybe_unused]] LocalRef<jobject>& mediaPlayer, int progress) override
             {
-                ignoreUnused (mediaPlayer);
-
                 owner.playerBufferingUpdated (progress);
             }
 
-            void onSeekComplete (LocalRef<jobject>& mediaPlayer) override
+            void onSeekComplete ([[maybe_unused]] LocalRef<jobject>& mediaPlayer) override
             {
                 JUCE_VIDEO_LOG ("MediaPlayer::onSeekComplete()");
-
-                ignoreUnused (mediaPlayer);
 
                 owner.playerSeekCompleted();
             }
 
-            void onCompletion (LocalRef<jobject>& mediaPlayer) override
+            void onCompletion ([[maybe_unused]] LocalRef<jobject>& mediaPlayer) override
             {
                 JUCE_VIDEO_LOG ("MediaPlayer::onCompletion()");
-
-                ignoreUnused (mediaPlayer);
 
                 currentState = State::complete;
 
@@ -1169,12 +1157,10 @@ private:
                 MEDIA_INFO_SUBTITLE_TIMED_OUT    = 902
             };
 
-            bool onInfo (LocalRef<jobject>& mediaPlayer, int what, int extra) override
+            bool onInfo ([[maybe_unused]] LocalRef<jobject>& mediaPlayer, int what, [[maybe_unused]] int extra) override
             {
                 JUCE_VIDEO_LOG ("MediaPlayer::onInfo(), infoCode: " + String (what) + " (" + infoCodeToString (what) + ")"
                                 + ", extraCode: " + String (extra));
-
-                ignoreUnused (mediaPlayer, extra);
 
                 if (what == MEDIA_INFO_BUFFERING_START)
                     owner.playerBufferingStarted();
@@ -1205,7 +1191,7 @@ private:
                 }
             }
 
-            bool onError (LocalRef<jobject>& mediaPlayer, int what, int extra) override
+            bool onError ([[maybe_unused]] LocalRef<jobject>& mediaPlayer, int what, int extra) override
             {
                 auto errorMessage = errorCodeToString (what);
                 auto extraMessage = errorCodeToString (extra);
@@ -1215,8 +1201,6 @@ private:
 
                 JUCE_VIDEO_LOG ("MediaPlayer::onError(), errorCode: " + String (what) + " (" + errorMessage + ")"
                                 + ", extraCode: " + String (extra) + " (" + extraMessage + ")");
-
-                ignoreUnused (mediaPlayer);
 
                 currentState = State::error;
 

@@ -1799,10 +1799,8 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskComp, bool enableOrDisable, [[maybe_unused]] bool allowMenusAndBars)
 {
-    ignoreUnused (allowMenusAndBars);
-
     if (AndroidComponentPeer* peer = dynamic_cast<AndroidComponentPeer*> (kioskComp->getPeer()))
         peer->setFullScreen (enableOrDisable);
     else

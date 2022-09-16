@@ -33,9 +33,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 namespace WasapiClasses
 {
 
-static void logFailure (HRESULT hr)
+static void logFailure ([[maybe_unused]] HRESULT hr)
 {
-    ignoreUnused (hr);
     jassert (hr != (HRESULT) 0x800401f0); // If you hit this, it means you're trying to call from
                                           // a thread which hasn't been initialised with CoInitialize().
 

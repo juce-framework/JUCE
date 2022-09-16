@@ -587,8 +587,8 @@ void ComponentPeer::setRepresentedFile (const File&)
 }
 
 //==============================================================================
-int ComponentPeer::getCurrentRenderingEngine() const            { return 0; }
-void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); ignoreUnused (index); }
+int ComponentPeer::getCurrentRenderingEngine() const                             { return 0; }
+void ComponentPeer::setCurrentRenderingEngine ([[maybe_unused]] int index)       { jassert (index == 0); }
 
 //==============================================================================
 std::function<ModifierKeys()> ComponentPeer::getNativeRealtimeModifiers = nullptr;

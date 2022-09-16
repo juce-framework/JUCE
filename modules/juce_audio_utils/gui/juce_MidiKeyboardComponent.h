@@ -193,7 +193,7 @@ public:
 
         @see mouseDraggedToKey
     */
-    virtual bool mouseDownOnKey (int midiNoteNumber, const MouseEvent& e)     { ignoreUnused (midiNoteNumber, e); return true; }
+    virtual bool mouseDownOnKey (int midiNoteNumber, const MouseEvent& e);
 
     /** Callback when the mouse is dragged from one key onto another.
 
@@ -202,13 +202,13 @@ public:
 
         @see mouseDownOnKey
     */
-    virtual bool mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e)  { ignoreUnused (midiNoteNumber, e); return true; }
+    virtual bool mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e);
 
     /** Callback when the mouse is released from a key.
 
         @see mouseDownOnKey
     */
-    virtual void mouseUpOnKey (int midiNoteNumber, const MouseEvent& e)       { ignoreUnused (midiNoteNumber, e); }
+    virtual void mouseUpOnKey (int midiNoteNumber, const MouseEvent& e);
 
     /** Allows text to be drawn on the white notes.
 

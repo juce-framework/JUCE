@@ -242,11 +242,9 @@ public:
     }
 
     //==============================================================================
-    bool BusCountWritable (AudioUnitScope scope) override
+    bool BusCountWritable ([[maybe_unused]] AudioUnitScope scope) override
     {
        #ifdef JucePlugin_PreferredChannelConfigurations
-        ignoreUnused (scope);
-
         return false;
        #else
         bool isInput;
@@ -774,11 +772,9 @@ public:
     }
 
     //==============================================================================
-    bool busIgnoresLayout (bool isInput, int busNr) const
+    bool busIgnoresLayout ([[maybe_unused]] bool isInput, [[maybe_unused]] int busNr) const
     {
        #ifdef JucePlugin_PreferredChannelConfigurations
-        ignoreUnused (isInput, busNr);
-
         return true;
        #else
         if (const AudioProcessor::Bus* bus = juceFilter->getBus (isInput, busNr))
@@ -878,10 +874,9 @@ public:
 
     //==============================================================================
     // When parameters are discrete we need to use integer values.
-    float getMaximumParameterValue (AudioProcessorParameter* juceParam)
+    float getMaximumParameterValue ([[maybe_unused]] AudioProcessorParameter* juceParam)
     {
        #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-        ignoreUnused (juceParam);
         return 1.0f;
        #else
         return juceParam->isDiscrete() ? (float) (juceParam->getNumSteps() - 1) : 1.0f;
@@ -1234,7 +1229,7 @@ public:
         if (newNumChannels == oldNumChannels)
             return true;
 
-        if (AudioProcessor::Bus* bus = juceFilter->getBus (info.isInput, info.busNr))
+        if ([[maybe_unused]] AudioProcessor::Bus* bus = juceFilter->getBus (info.isInput, info.busNr))
         {
             if (! MusicDeviceBase::ValidFormat (inScope, inElement, inNewFormat))
                 return false;
@@ -1242,7 +1237,6 @@ public:
            #ifdef JucePlugin_PreferredChannelConfigurations
             short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
 
-            ignoreUnused (bus);
             return AudioUnitHelpers::isLayoutSupported (*juceFilter, info.isInput, info.busNr, newNumChannels, configs);
            #else
             return bus->isNumberOfChannelsSupported (newNumChannels);
@@ -1395,7 +1389,11 @@ public:
     ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32) override   { return noErr; }
 
     //==============================================================================
-    OSStatus HandleMIDIEvent (UInt8 inStatus, UInt8 inChannel, UInt8 inData1, UInt8 inData2, UInt32 inStartFrame) override
+    OSStatus HandleMIDIEvent ([[maybe_unused]] UInt8 inStatus,
+                              [[maybe_unused]] UInt8 inChannel,
+                              [[maybe_unused]] UInt8 inData1,
+                              [[maybe_unused]] UInt8 inData2,
+                              [[maybe_unused]] UInt32 inStartFrame) override
     {
        #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
         const juce::uint8 data[] = { (juce::uint8) (inStatus | inChannel),
@@ -1406,20 +1404,17 @@ public:
         incomingEvents.addEvent (data, 3, (int) inStartFrame);
         return noErr;
        #else
-        ignoreUnused (inStatus, inChannel, inData1);
-        ignoreUnused (inData2, inStartFrame);
         return kAudioUnitErr_PropertyNotInUse;
        #endif
     }
 
-    OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
+    OSStatus HandleSysEx ([[maybe_unused]] const UInt8* inData, [[maybe_unused]] UInt32 inLength) override
     {
        #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
         const ScopedLock sl (incomingMidiLock);
         incomingEvents.addEvent (inData, (int) inLength, 0);
         return noErr;
        #else
-        ignoreUnused (inData, inLength);
         return kAudioUnitErr_PropertyNotInUse;
        #endif
     }
@@ -1950,7 +1945,7 @@ private:
         }
     }
 
-    void pushMidiOutput (UInt32 nFrames) noexcept
+    void pushMidiOutput ([[maybe_unused]] UInt32 nFrames) noexcept
     {
         MIDIPacket* end = nullptr;
 
@@ -1979,7 +1974,6 @@ private:
         for (const auto metadata : midiEvents)
         {
             jassert (isPositiveAndBelow (metadata.samplePosition, nFrames));
-            ignoreUnused (nFrames);
 
             add (metadata);
 

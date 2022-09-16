@@ -29,7 +29,7 @@ namespace juce
 
 namespace CoreMidiHelpers
 {
-    static bool checkError (OSStatus err, int lineNum)
+    static bool checkError (OSStatus err, [[maybe_unused]] int lineNum)
     {
         if (err == noErr)
             return true;
@@ -38,7 +38,6 @@ namespace CoreMidiHelpers
         Logger::writeToLog ("CoreMIDI error: " + String (lineNum) + " - " + String::toHexString ((int) err));
        #endif
 
-        ignoreUnused (lineNum);
         return false;
     }
 

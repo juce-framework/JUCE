@@ -715,7 +715,7 @@ private:
         {
             auto key = LocalRef<jobject> (env->CallObjectMethod (keysList, JavaList.get, i));
             auto jKeyName = LocalRef<jstring> ((jstring) env->CallObjectMethod (key, CameraCharacteristicsKey.getName));
-            auto keyName = juceString (jKeyName);
+            [[maybe_unused]] auto keyName = juceString (jKeyName);
 
             auto keyValue = LocalRef<jobject> (env->CallObjectMethod (characteristics, CameraCharacteristics.get, key.get()));
             auto jKeyValueString = LocalRef<jstring> ((jstring) env->CallObjectMethod (keyValue, JavaObject.toString));
@@ -747,16 +747,12 @@ private:
                     JUCE_CAMERA_LOG ("Key: " + keyName + ", value: " + keyValueString);
                 }
             }
-
-            ignoreUnused (keyName);
         }
     }
 
-    static void printPrimitiveArrayElements (const LocalRef<jobject>& keyValue, const String& keyName,
+    static void printPrimitiveArrayElements (const LocalRef<jobject>& keyValue, [[maybe_unused]] const String& keyName,
                                              const String& keyValueString)
     {
-        ignoreUnused (keyName);
-
         String result = "[";
 
         auto* env = getEnv();
@@ -790,7 +786,7 @@ private:
         JUCE_CAMERA_LOG ("Key: " + keyName + ", value: " + result);
     }
 
-    static void printRangeArrayElements (const LocalRef<jobject>& rangeArray, const String& keyName)
+    static void printRangeArrayElements (const LocalRef<jobject>& rangeArray, [[maybe_unused]] const String& keyName)
     {
         auto* env = getEnv();
 
@@ -809,7 +805,6 @@ private:
             result << juceString (jRangeString) << " ";
         }
 
-        ignoreUnused (keyName);
         JUCE_CAMERA_LOG ("Key: " + keyName + ", value: " + result);
     }
 
@@ -921,10 +916,8 @@ private:
                                                                         javaString (name).get()));
         }
 
-        static void printSizesLog (const Array<Rectangle<int>>& sizes, const String& className)
+        static void printSizesLog ([[maybe_unused]] const Array<Rectangle<int>>& sizes, [[maybe_unused]] const String& className)
         {
-            ignoreUnused (sizes, className);
-
             JUCE_CAMERA_LOG ("Sizes for class " + className);
 
           #if JUCE_CAMERA_LOG_ENABLED
@@ -1489,18 +1482,14 @@ private:
             Desktop::getInstance().setOrientationsEnabled (orientationsEnabled);
         }
 
-        void onInfo (LocalRef<jobject>& recorder, int what, int extra) override
+        void onInfo ([[maybe_unused]] LocalRef<jobject>& recorder, [[maybe_unused]] int what, [[maybe_unused]] int extra) override
         {
-            ignoreUnused (recorder, what, extra);
-
             JUCE_CAMERA_LOG ("MediaRecorder::OnInfo: " + getInfoStringFromCode (what)
                                      + ", extra code = " + String (extra));
         }
 
-        void onError (LocalRef<jobject>& recorder, int what, int extra) override
+        void onError ([[maybe_unused]] LocalRef<jobject>& recorder, [[maybe_unused]] int what, [[maybe_unused]] int extra) override
         {
-            ignoreUnused (recorder, what, extra);
-
             JUCE_CAMERA_LOG ("MediaRecorder::onError: " + getErrorStringFromCode (what)
                                      + ", extra code = " + String (extra));
         }
@@ -1976,11 +1965,12 @@ private:
                 }
 
                 //==============================================================================
-                void cameraCaptureSessionCaptureCompleted (bool isPreview, jobject session, jobject request, jobject result)
+                void cameraCaptureSessionCaptureCompleted (bool isPreview,
+                                                           [[maybe_unused]] jobject session,
+                                                           [[maybe_unused]] jobject request,
+                                                           jobject result)
                 {
                     JUCE_CAMERA_LOG ("cameraCaptureSessionCaptureCompleted()");
-
-                    ignoreUnused (session, request);
 
                     if (isPreview)
                         updateState (result);
@@ -1988,42 +1978,47 @@ private:
                         unlockFocus();
                 }
 
-                void cameraCaptureSessionCaptureFailed (bool isPreview, jobject session, jobject request, jobject failure)
+                void cameraCaptureSessionCaptureFailed ([[maybe_unused]] bool isPreview,
+                                                        [[maybe_unused]] jobject session,
+                                                        [[maybe_unused]] jobject request,
+                                                        [[maybe_unused]] jobject failure)
                 {
                     JUCE_CAMERA_LOG ("cameraCaptureSessionCaptureFailed()");
-
-                    ignoreUnused (isPreview, session, request, failure);
                 }
 
-                void cameraCaptureSessionCaptureProgressed (bool isPreview, jobject session, jobject request, jobject partialResult)
+                void cameraCaptureSessionCaptureProgressed (bool isPreview,
+                                                            [[maybe_unused]] jobject session,
+                                                            [[maybe_unused]] jobject request,
+                                                            jobject partialResult)
                 {
                     JUCE_CAMERA_LOG ("cameraCaptureSessionCaptureProgressed()");
-
-                    ignoreUnused (session, request);
 
                     if (isPreview)
                         updateState (partialResult);
                 }
 
-                void cameraCaptureSessionCaptureSequenceAborted (bool isPreview, jobject session, int sequenceId)
+                void cameraCaptureSessionCaptureSequenceAborted ([[maybe_unused]] bool isPreview,
+                                                                 [[maybe_unused]] jobject session,
+                                                                 [[maybe_unused]] int sequenceId)
                 {
                     JUCE_CAMERA_LOG ("cameraCaptureSessionCaptureSequenceAborted()");
-
-                    ignoreUnused (isPreview, isPreview, session, sequenceId);
                 }
 
-                void cameraCaptureSessionCaptureSequenceCompleted (bool isPreview, jobject session, int sequenceId, int64 frameNumber)
+                void cameraCaptureSessionCaptureSequenceCompleted ([[maybe_unused]] bool isPreview,
+                                                                   [[maybe_unused]] jobject session,
+                                                                   [[maybe_unused]] int sequenceId,
+                                                                   [[maybe_unused]] int64 frameNumber)
                 {
                     JUCE_CAMERA_LOG ("cameraCaptureSessionCaptureSequenceCompleted()");
-
-                    ignoreUnused (isPreview, session, sequenceId, frameNumber);
                 }
 
-                void cameraCaptureSessionCaptureStarted (bool isPreview, jobject session, jobject request, int64 timestamp, int64 frameNumber)
+                void cameraCaptureSessionCaptureStarted ([[maybe_unused]] bool isPreview,
+                                                         [[maybe_unused]] jobject session,
+                                                         [[maybe_unused]] jobject request,
+                                                         [[maybe_unused]] int64 timestamp,
+                                                         [[maybe_unused]] int64 frameNumber)
                 {
                     JUCE_CAMERA_LOG ("cameraCaptureSessionCaptureStarted()");
-
-                    ignoreUnused (isPreview, session, request, timestamp, frameNumber);
                 }
 
                 //==============================================================================
@@ -2166,24 +2161,21 @@ private:
                 env->CallVoidMethod (captureRequestBuilder, CaptureRequestBuilder.set, jKey.get(), jValue.get());
             }
 
-            void cameraCaptureSessionActive (jobject session)
+            void cameraCaptureSessionActive ([[maybe_unused]] jobject session)
             {
                 JUCE_CAMERA_LOG ("cameraCaptureSessionActive()");
-                ignoreUnused (session);
             }
 
-            void cameraCaptureSessionClosed (jobject session)
+            void cameraCaptureSessionClosed ([[maybe_unused]] jobject session)
             {
                 JUCE_CAMERA_LOG ("cameraCaptureSessionClosed()");
-                ignoreUnused (session);
 
                 closedEvent.signal();
             }
 
-            void cameraCaptureSessionConfigureFailed (jobject session)
+            void cameraCaptureSessionConfigureFailed ([[maybe_unused]] jobject session)
             {
                 JUCE_CAMERA_LOG ("cameraCaptureSessionConfigureFailed()");
-                ignoreUnused (session);
 
                 MessageManager::callAsync ([weakRef = WeakReference<CaptureSession> { this }]
                 {
@@ -2231,10 +2223,9 @@ private:
                 });
             }
 
-            void cameraCaptureSessionReady (const LocalRef<jobject>& session)
+            void cameraCaptureSessionReady ([[maybe_unused]] const LocalRef<jobject>& session)
             {
                 JUCE_CAMERA_LOG ("cameraCaptureSessionReady()");
-                ignoreUnused (session);
             }
 
             //==============================================================================

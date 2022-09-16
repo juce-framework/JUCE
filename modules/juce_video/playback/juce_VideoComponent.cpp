@@ -145,7 +145,6 @@ Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool loadAsync)
 {
    #if JUCE_ANDROID || JUCE_IOS
     ignoreUnused (fileOrUrl, loadAsync);
-
     // You need to use loadAsync on Android & iOS.
     jassertfalse;
     return Result::fail ("load() is not supported on this platform. Use loadAsync() instead.");
@@ -155,7 +154,7 @@ Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool loadAsync)
     if (loadAsync)
         startTimer (50);
     else
-       resized();
+        resized();
 
     return result;
    #endif

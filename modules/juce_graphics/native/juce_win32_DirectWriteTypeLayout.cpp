@@ -200,8 +200,7 @@ namespace DirectWriteTypeLayout
             }
 
             ComSmartPtr<IDWriteFont> dwFont;
-            auto hr = fontCollection.GetFontFromFontFace (glyphRun.fontFace, dwFont.resetAndGetPointerAddress());
-            ignoreUnused (hr);
+            [[maybe_unused]] auto hr = fontCollection.GetFontFromFontFace (glyphRun.fontFace, dwFont.resetAndGetPointerAddress());
             jassert (dwFont != nullptr);
 
             ComSmartPtr<IDWriteFontFamily> dwFontFamily;
@@ -299,8 +298,7 @@ namespace DirectWriteTypeLayout
                 fontIndex = 0;
 
             ComSmartPtr<IDWriteFontFamily> fontFamily;
-            auto hr = fontCollection.GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress());
-            ignoreUnused (hr);
+            [[maybe_unused]] auto hr = fontCollection.GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress());
 
             ComSmartPtr<IDWriteFont> dwFont;
             uint32 fontFacesCount = 0;
@@ -420,8 +418,7 @@ namespace DirectWriteTypeLayout
             return;
 
         UINT32 actualLineCount = 0;
-        auto hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
-        ignoreUnused (hr);
+        [[maybe_unused]] auto hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
 
         layout.ensureStorageAllocated ((int) actualLineCount);
 
@@ -486,7 +483,7 @@ static bool canAllTypefacesAndFontsBeUsedInLayout (const AttributedString& text)
 
 #endif
 
-bool TextLayout::createNativeLayout (const AttributedString& text)
+bool TextLayout::createNativeLayout ([[maybe_unused]] const AttributedString& text)
 {
    #if JUCE_USE_DIRECTWRITE
     if (! canAllTypefacesAndFontsBeUsedInLayout (text))
@@ -506,8 +503,6 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
 
         return true;
     }
-   #else
-    ignoreUnused (text);
    #endif
 
     return false;

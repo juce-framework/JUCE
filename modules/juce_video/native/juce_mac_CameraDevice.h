@@ -306,8 +306,7 @@ private:
             {
                 if (error != nil)
                 {
-                    String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-                    ignoreUnused (errorString);
+                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
 
                     JUCE_CAMERA_LOG ("Still picture capture failed, error: " + errorString);
                     jassertfalse;

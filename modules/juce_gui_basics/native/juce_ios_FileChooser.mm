@@ -137,8 +137,7 @@ public:
         {
             if (err != nil)
             {
-                auto desc = [err localizedDescription];
-                ignoreUnused (desc);
+                [[maybe_unused]] auto desc = [err localizedDescription];
                 jassertfalse;
                 return;
             }
@@ -168,8 +167,7 @@ public:
                 }
                 else
                 {
-                    auto desc = [error localizedDescription];
-                    ignoreUnused (desc);
+                    [[maybe_unused]] auto desc = [error localizedDescription];
                     jassertfalse;
                 }
 

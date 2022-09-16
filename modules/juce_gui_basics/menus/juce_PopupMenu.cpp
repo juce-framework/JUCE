@@ -2098,7 +2098,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
 
 int PopupMenu::showWithOptionalCallback (const Options& options,
                                          ModalComponentManager::Callback* userCallback,
-                                         bool canBeModal)
+                                         [[maybe_unused]] bool canBeModal)
 {
     std::unique_ptr<ModalComponentManager::Callback> userCallbackDeleter (userCallback);
     std::unique_ptr<PopupMenuCompletionCallback> callback (new PopupMenuCompletionCallback());
@@ -2120,7 +2120,6 @@ int PopupMenu::showWithOptionalCallback (const Options& options,
         if (userCallback == nullptr && canBeModal)
             return window->runModalLoop();
        #else
-        ignoreUnused (canBeModal);
         jassert (! (userCallback == nullptr && canBeModal));
        #endif
     }

@@ -542,7 +542,7 @@ private:
     template <typename... Elements>
     void addImpl (Elements&&... toAdd)
     {
-        ignoreUnused (std::initializer_list<int> { (((void) checkSourceIsNotAMember (toAdd)), 0)... });
+        (checkSourceIsNotAMember (toAdd), ...);
         ensureAllocatedSize (numUsed + (int) sizeof... (toAdd));
         addAssumingCapacityIsReady (std::forward<Elements> (toAdd)...);
     }
@@ -550,7 +550,7 @@ private:
     template <typename... Elements>
     void addAssumingCapacityIsReady (Elements&&... toAdd)
     {
-        ignoreUnused (std::initializer_list<int> { ((void) (new (elements + numUsed++) ElementType (std::forward<Elements> (toAdd))), 0)... });
+        (new (elements + numUsed++) ElementType (std::forward<Elements> (toAdd)), ...);
     }
 
     //==============================================================================

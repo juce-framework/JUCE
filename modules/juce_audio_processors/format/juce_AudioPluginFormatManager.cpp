@@ -64,10 +64,8 @@ void AudioPluginFormatManager::addDefaultFormats()
 
    #if JUCE_DEBUG
     // you should only call this method once!
-    for (auto* format : formats)
+    for (auto* format [[maybe_unused]] : formats)
     {
-        ignoreUnused (format);
-
        #if HAS_VST
         jassert (dynamic_cast<VSTPluginFormat*> (format) == nullptr);
        #endif

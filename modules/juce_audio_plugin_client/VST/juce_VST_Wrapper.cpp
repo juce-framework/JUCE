@@ -962,14 +962,12 @@ public:
                               , public Timer
                              #endif
     {
-        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor, float initialScale)
+        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor, [[maybe_unused]] float initialScale)
             : wrapper (w)
         {
             editor.setOpaque (true);
            #if ! JUCE_MAC
             editor.setScaleFactor (initialScale);
-           #else
-            ignoreUnused (initialScale);
            #endif
             addAndMakeVisible (editor);
 
@@ -1714,13 +1712,12 @@ private:
         return 0;
     }
 
-    pointer_sized_int handlePreAudioProcessingEvents (VstOpCodeArguments args)
+    pointer_sized_int handlePreAudioProcessingEvents ([[maybe_unused]] VstOpCodeArguments args)
     {
        #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
         VSTMidiEventList::addEventsToMidiBuffer ((Vst2::VstEvents*) args.ptr, midiEvents);
         return 1;
        #else
-        ignoreUnused (args);
         return 0;
        #endif
     }
@@ -2013,7 +2010,7 @@ private:
         return 0;
     }
 
-    pointer_sized_int handleSetContentScaleFactor (float scale, bool force = false)
+    pointer_sized_int handleSetContentScaleFactor ([[maybe_unused]] float scale, [[maybe_unused]] bool force = false)
     {
         checkWhetherMessageThreadIsCorrect();
        #if JUCE_LINUX || JUCE_BSD
@@ -2030,9 +2027,6 @@ private:
             if (editorComp != nullptr)
                 editorComp->setContentScaleFactor (editorScaleFactor);
         }
-
-       #else
-        ignoreUnused (scale, force);
        #endif
 
         return 1;

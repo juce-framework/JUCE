@@ -528,8 +528,8 @@ Direct2DLowLevelGraphicsContext::Direct2DLowLevelGraphicsContext (HWND hwnd_)
 
     if (pimpl->factories->d2dFactory != nullptr)
     {
-        auto hr = pimpl->factories->d2dFactory->CreateHwndRenderTarget ({}, { hwnd, size }, pimpl->renderingTarget.resetAndGetPointerAddress());
-        jassert (SUCCEEDED (hr)); ignoreUnused (hr);
+        [[maybe_unused]] auto hr = pimpl->factories->d2dFactory->CreateHwndRenderTarget ({}, { hwnd, size }, pimpl->renderingTarget.resetAndGetPointerAddress());
+        jassert (SUCCEEDED (hr));
         hr = pimpl->renderingTarget->CreateSolidColorBrush (D2D1::ColorF::ColorF (0.0f, 0.0f, 0.0f, 1.0f), pimpl->colourBrush.resetAndGetPointerAddress());
     }
 }

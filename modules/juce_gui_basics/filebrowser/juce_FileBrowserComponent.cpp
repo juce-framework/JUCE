@@ -440,7 +440,7 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
 
 void FileBrowserComponent::browserRootChanged (const File&) {}
 
-bool FileBrowserComponent::keyPressed (const KeyPress& key)
+bool FileBrowserComponent::keyPressed ([[maybe_unused]] const KeyPress& key)
 {
    #if JUCE_LINUX || JUCE_BSD || JUCE_WINDOWS
     if (key.getModifiers().isCommandDown()
@@ -452,7 +452,6 @@ bool FileBrowserComponent::keyPressed (const KeyPress& key)
     }
    #endif
 
-    ignoreUnused (key);
     return false;
 }
 

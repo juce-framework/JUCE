@@ -587,7 +587,7 @@ struct PushNotifications::Pimpl
         }
     }
 
-    void removeDeliveredNotification (const String& identifier)
+    void removeDeliveredNotification ([[maybe_unused]] const String& identifier)
     {
         if (@available (iOS 10, *))
         {
@@ -598,15 +598,13 @@ struct PushNotifications::Pimpl
         }
         else
         {
-            ignoreUnused (identifier);
             // Not supported on this platform
             jassertfalse;
         }
     }
 
-    void setupChannels (const Array<ChannelGroup>& groups, const Array<Channel>& channels)
+    void setupChannels ([[maybe_unused]] const Array<ChannelGroup>& groups, [[maybe_unused]] const Array<Channel>& channels)
     {
-        ignoreUnused (groups, channels);
     }
 
     void getPendingLocalNotifications() const
@@ -679,18 +677,16 @@ struct PushNotifications::Pimpl
         return deviceToken;
     }
 
-    void subscribeToTopic (const String& topic)     { ignoreUnused (topic); }
-    void unsubscribeFromTopic (const String& topic) { ignoreUnused (topic); }
+    void subscribeToTopic ([[maybe_unused]] const String& topic)     {}
+    void unsubscribeFromTopic ([[maybe_unused]] const String& topic) {}
 
-    void sendUpstreamMessage (const String& serverSenderId,
-                              const String& collapseKey,
-                              const String& messageId,
-                              const String& messageType,
-                              int timeToLive,
-                              const StringPairArray& additionalData)
+    void sendUpstreamMessage ([[maybe_unused]] const String& serverSenderId,
+                              [[maybe_unused]] const String& collapseKey,
+                              [[maybe_unused]] const String& messageId,
+                              [[maybe_unused]] const String& messageType,
+                              [[maybe_unused]] int timeToLive,
+                              [[maybe_unused]] const StringPairArray& additionalData)
     {
-        ignoreUnused (serverSenderId, collapseKey, messageId, messageType);
-        ignoreUnused (timeToLive, additionalData);
     }
 
 private:
@@ -719,10 +715,8 @@ private:
         owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (deviceToken); });
     }
 
-    void failedToRegisterForRemoteNotifications (NSError* error)
+    void failedToRegisterForRemoteNotifications ([[maybe_unused]] NSError* error)
     {
-        ignoreUnused (error);
-
         deviceToken.clear();
     }
 
@@ -794,14 +788,12 @@ private:
 
     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-    void willPresentNotificationWithCompletionHandler (UNNotification* notification,
+    void willPresentNotificationWithCompletionHandler ([[maybe_unused]] UNNotification* notification,
                                                        void (^completionHandler)(UNNotificationPresentationOptions options))
     {
         NSUInteger options = NSUInteger ((int)settings.allowBadge << 0
                                        | (int)settings.allowSound << 1
                                        | (int)settings.allowAlert << 2);
-
-        ignoreUnused (notification);
 
         completionHandler (options);
     }

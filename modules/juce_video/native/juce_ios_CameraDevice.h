@@ -524,11 +524,9 @@ private:
 
         private:
             //==============================================================================
-            static void started (id self, SEL, NSNotification* notification)
+            static void started (id self, SEL, [[maybe_unused]] NSNotification* notification)
             {
                 JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-
-                ignoreUnused (notification);
 
                 dispatch_async (dispatch_get_main_queue(),
                                 ^{
@@ -536,11 +534,9 @@ private:
                                 });
             }
 
-            static void stopped (id, SEL, NSNotification* notification)
+            static void stopped (id, SEL, [[maybe_unused]] NSNotification* notification)
             {
                 JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-
-                ignoreUnused (notification);
             }
 
             static void runtimeError (id self, SEL, NSNotification* notification)
@@ -555,18 +551,14 @@ private:
                                 });
             }
 
-            static void interrupted (id, SEL, NSNotification* notification)
+            static void interrupted (id, SEL, [[maybe_unused]] NSNotification* notification)
             {
                 JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-
-                ignoreUnused (notification);
             }
 
-            static void interruptionEnded (id, SEL, NSNotification* notification)
+            static void interruptionEnded (id, SEL, [[maybe_unused]] NSNotification* notification)
             {
                 JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-
-                ignoreUnused (notification);
             }
         };
 
@@ -788,8 +780,7 @@ private:
 
                 static void didFinishCaptureForSettings (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*, NSError* error)
                 {
-                    String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-                    ignoreUnused (errorString);
+                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
 
                     JUCE_CAMERA_LOG ("didFinishCaptureForSettings(), error = " + errorString);
                 }
@@ -799,8 +790,7 @@ private:
                 {
                     getOwner (self).takingPicture = false;
 
-                    String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-                    ignoreUnused (errorString);
+                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
 
                     JUCE_CAMERA_LOG ("didFinishProcessingPhoto(), error = " + errorString);
 
@@ -904,8 +894,7 @@ private:
                 {
                     getOwner (self).takingPicture = false;
 
-                    String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-                    ignoreUnused (errorString);
+                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
 
                     JUCE_CAMERA_LOG ("didFinishProcessingPhotoSampleBuffer(), error = " + errorString);
 
@@ -1019,10 +1008,8 @@ private:
             }
 
         private:
-            static void printVideoOutputDebugInfo (AVCaptureMovieFileOutput* output)
+            static void printVideoOutputDebugInfo ([[maybe_unused]] AVCaptureMovieFileOutput* output)
             {
-                ignoreUnused (output);
-
                 JUCE_CAMERA_LOG ("Available video codec types:");
 
                #if JUCE_CAMERA_LOG_ENABLED

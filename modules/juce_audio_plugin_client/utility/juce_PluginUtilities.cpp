@@ -134,7 +134,10 @@ namespace juce
 
 #if JucePlugin_Build_VST
  bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float);
- bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
+ bool JUCE_API handleManufacturerSpecificVST2Opcode ([[maybe_unused]] int32 index,
+                                                     [[maybe_unused]] pointer_sized_int value,
+                                                     [[maybe_unused]] void* ptr,
+                                                     float)
  {
     #if VST3_REPLACEMENT_AVAILABLE
      if ((index == (int32) ByteOrder::bigEndianInt ("stCA") || index == (int32) ByteOrder::bigEndianInt ("stCa"))
@@ -145,8 +148,6 @@ namespace juce
          ::memcpy (ptr, fuid, 16);
          return true;
      }
-    #else
-     ignoreUnused (index, value, ptr);
     #endif
      return false;
  }

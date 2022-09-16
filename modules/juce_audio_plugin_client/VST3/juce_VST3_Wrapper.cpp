@@ -1075,14 +1075,15 @@ public:
     }
 
     //==============================================================================
-    tresult PLUGIN_API getMidiControllerAssignment (Steinberg::int32 /*busIndex*/, Steinberg::int16 channel,
-                                                    Vst::CtrlNumber midiControllerNumber, Vst::ParamID& resultID) override
+    tresult PLUGIN_API getMidiControllerAssignment ([[maybe_unused]] Steinberg::int32 busIndex,
+                                                    [[maybe_unused]] Steinberg::int16 channel,
+                                                    [[maybe_unused]] Vst::CtrlNumber midiControllerNumber,
+                                                    [[maybe_unused]] Vst::ParamID& resultID) override
     {
        #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
         resultID = midiControllerToParameter[channel][midiControllerNumber];
         return kResultTrue; // Returning false makes some hosts stop asking for further MIDI Controller Assignments
        #else
-        ignoreUnused (channel, midiControllerNumber, resultID);
         return kResultFalse;
        #endif
     }
@@ -1991,7 +1992,7 @@ private:
             return kResultFalse;
         }
 
-        tresult PLUGIN_API setContentScaleFactor (const Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
+        tresult PLUGIN_API setContentScaleFactor ([[maybe_unused]] const Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
             const auto scaleToApply = [&]
@@ -2016,7 +2017,6 @@ private:
 
             return kResultTrue;
            #else
-            ignoreUnused (factor);
             return kResultFalse;
            #endif
         }
@@ -2427,9 +2427,8 @@ public:
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
-        const int numConfigs = numElementsInArray (configs);
+        [[maybe_unused]] const int numConfigs = numElementsInArray (configs);
 
-        ignoreUnused (numConfigs);
         jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
 
         pluginInstance->setPlayConfigDetails (configs[0][0], configs[0][1], 44100.0, 1024);

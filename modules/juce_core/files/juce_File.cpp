@@ -953,7 +953,7 @@ File File::createTempFile (StringRef fileNameEnding)
 }
 
 bool File::createSymbolicLink (const File& linkFileToCreate,
-                               const String& nativePathOfTarget,
+                               [[maybe_unused]] const String& nativePathOfTarget,
                                bool overwriteExisting)
 {
     if (linkFileToCreate.exists())
@@ -986,7 +986,6 @@ bool File::createSymbolicLink (const File& linkFileToCreate,
                                nativePathOfTarget.toWideCharPointer(),
                                targetFile.isDirectory() ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0) != FALSE;
    #else
-    ignoreUnused (nativePathOfTarget);
     jassertfalse; // symbolic links not supported on this platform!
     return false;
    #endif
