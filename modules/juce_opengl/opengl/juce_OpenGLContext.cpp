@@ -440,20 +440,25 @@ public:
                 return areaAndScale.get().scale;
             }();
            #else
-            const auto displayScale = Desktop::getInstance().getDisplays().getDisplayForRect (component.getTopLevelComponent()->getScreenBounds())->scale;
+            const auto displayScale = Desktop::getInstance().getDisplays()
+                                                            .getDisplayForRect (component.getTopLevelComponent()
+                                                                                        ->getScreenBounds())
+                                                           ->scale;
            #endif
 
-            auto localBounds = component.getLocalBounds();
-            auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
+            const auto localBounds = component.getLocalBounds();
+            const auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
 
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            auto newScale = getScaleFactorForWindow (nativeContext->getNativeHandle());
-            auto desktopScale = Desktop::getInstance().getGlobalScaleFactor();
-
-            if (! approximatelyEqual (1.0f, desktopScale))
-                newScale *= desktopScale;
+            // Some hosts (Pro Tools 2022.7) do not take the current DPI into account when sizing
+            // plugin editor windows. Instead of querying the OS for the DPI of the editor window,
+            // we approximate based on the physical size of the window that was actually provided
+            // for the context to draw into. This may break if the OpenGL context's component is
+            // scaled differently in its width and height - but in this case, a single scale factor
+            // isn't that helpful anyway.
+            const auto newScale = (float) newArea.getWidth() / (float) localBounds.getWidth();
            #else
-            auto newScale = displayScale;
+            const auto newScale = (float) displayScale;
            #endif
 
             areaAndScale.set ({ newArea, newScale }, [&]
