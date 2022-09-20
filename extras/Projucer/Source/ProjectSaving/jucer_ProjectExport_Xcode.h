@@ -1049,7 +1049,7 @@ public:
     struct XcodeTarget : build_tools::ProjectType::Target
     {
         //==============================================================================
-        XcodeTarget (build_tools::ProjectType::Target::Type targetType, const XcodeProjectExporter& exporter)
+        XcodeTarget (Type targetType, const XcodeProjectExporter& exporter)
             : Target (targetType),
               owner (exporter)
         {
@@ -1702,10 +1702,17 @@ public:
                 s.set ("CODE_SIGN_ENTITLEMENTS", getEntitlementsFilename().quoted());
 
             {
-                auto cppStandard = owner.project.getCppStandardString();
+                const auto cppStandard = [&]() -> String
+                {
+                    if (owner.project.getCppStandardString() == "latest")
+                        return owner.project.getLatestNumberedCppStandardString();
 
-                if (cppStandard == "latest")
-                    cppStandard = owner.project.getLatestNumberedCppStandardString();
+                    // The AudioUnitSDK requires C++17
+                    if (type == AudioUnitPlugIn)
+                        return "17";
+
+                    return owner.project.getCppStandardString();
+                }();
 
                 s.set ("CLANG_CXX_LANGUAGE_STANDARD", (String (owner.shouldUseGNUExtensions() ? "gnu++"
                                                                                               : "c++") + cppStandard).quoted());
@@ -1982,10 +1989,15 @@ public:
 
             if (owner.project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
-                // Needed to compile .r files
-                paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
-                                .rebased (owner.projectFolder, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder)
-                                .toUnixStyle());
+                const auto pluginClientModule = owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client");
+                for (const auto& path : { pluginClientModule,                          // For AU resource fork
+                                          pluginClientModule.getChildFile ("AU") })    // For AudioUnitSDK includes
+                {
+                    paths.add (path.rebased (owner.projectFolder,
+                                             owner.getTargetFolder(),
+                                             build_tools::RelativePath::buildTargetFolder)
+                                   .toUnixStyle());
+                }
             }
 
             sanitiseAndEscapeSearchPaths (config, paths);
