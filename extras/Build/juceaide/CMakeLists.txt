@@ -51,12 +51,52 @@ if(JUCE_BUILD_HELPER_TOOLS)
 else()
     # If we're building using the NDK, the gradle wrapper will try to inject its own compiler using
     # environment variables, which is unfortunate because we really don't want to cross-compile
-    # juceaide. If you really want to set the compilers for juceaide, pass the appropriate
-    # CMAKE_<lang>_COMPILER flags when configuring CMake.
+    # juceaide.
+    # Similarly, when cross-compiling from Linux->Windows (e.g. using
+    # Fedora's mingw64-cmake command), the environment might be configured
+    # for cross-compiling, and we'll need to attempt to put it back to the
+    # host settings in order to build an executable that can run on the host
+    # machine.
     if(CMAKE_CROSSCOMPILING)
+        unset(ENV{ADDR2LINE})
+        unset(ENV{AR})
         unset(ENV{ASM})
+        unset(ENV{AS})
         unset(ENV{CC})
+        unset(ENV{CPP})
+        unset(ENV{CXXFILT})
         unset(ENV{CXX})
+        unset(ENV{DLLTOOL})
+        unset(ENV{DLLWRAP})
+        unset(ENV{ELFEDIT})
+        unset(ENV{GCC})
+        unset(ENV{GCOV_DUMP})
+        unset(ENV{GCOV_TOOL})
+        unset(ENV{GCOV})
+        unset(ENV{GPROF})
+        unset(ENV{GXX})
+        unset(ENV{LDFLAGS})
+        unset(ENV{LD_BFD})
+        unset(ENV{LD})
+        unset(ENV{LTO_DUMP})
+        unset(ENV{NM})
+        unset(ENV{OBJCOPY})
+        unset(ENV{OBJDUMP})
+        unset(ENV{PKG_CONFIG_LIBDIR})
+        unset(ENV{PKG_CONFIG})
+        unset(ENV{RANLIB})
+        unset(ENV{RC})
+        unset(ENV{READELF})
+        unset(ENV{SIZE})
+        unset(ENV{STRINGS})
+        unset(ENV{STRIP})
+        unset(ENV{WIDL})
+        unset(ENV{WINDMC})
+        unset(ENV{WINDRES})
+
+        if(DEFINED ENV{PATH_ORIG})
+            set(ENV{PATH} "$ENV{PATH_ORIG}")
+        endif()
     else()
         # When building with clang-cl in Clion on Windows for an x64 target, the ABI detection phase
         # of the inner build can fail unless we pass through these flags too

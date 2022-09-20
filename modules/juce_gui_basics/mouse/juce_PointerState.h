@@ -41,13 +41,13 @@ public:
     bool operator== (const PointerState& other) const noexcept   { return tie() == other.tie(); }
     bool operator!= (const PointerState& other) const noexcept   { return tie() != other.tie(); }
 
-    JUCE_NODISCARD PointerState withPositionOffset (Point<float> x)        const noexcept { return with (&PointerState::position, position + x); }
-    JUCE_NODISCARD PointerState withPosition (Point<float> x)              const noexcept { return with (&PointerState::position, x); }
-    JUCE_NODISCARD PointerState withPressure (float x)                     const noexcept { return with (&PointerState::pressure, x); }
-    JUCE_NODISCARD PointerState withOrientation (float x)                  const noexcept { return with (&PointerState::orientation, x); }
-    JUCE_NODISCARD PointerState withRotation (float x)                     const noexcept { return with (&PointerState::rotation, x); }
-    JUCE_NODISCARD PointerState withTiltX (float x)                        const noexcept { return with (&PointerState::tiltX, x); }
-    JUCE_NODISCARD PointerState withTiltY (float x)                        const noexcept { return with (&PointerState::tiltY, x); }
+    [[nodiscard]] PointerState withPositionOffset (Point<float> x)        const noexcept { return with (&PointerState::position, position + x); }
+    [[nodiscard]] PointerState withPosition (Point<float> x)              const noexcept { return with (&PointerState::position, x); }
+    [[nodiscard]] PointerState withPressure (float x)                     const noexcept { return with (&PointerState::pressure, x); }
+    [[nodiscard]] PointerState withOrientation (float x)                  const noexcept { return with (&PointerState::orientation, x); }
+    [[nodiscard]] PointerState withRotation (float x)                     const noexcept { return with (&PointerState::rotation, x); }
+    [[nodiscard]] PointerState withTiltX (float x)                        const noexcept { return with (&PointerState::tiltX, x); }
+    [[nodiscard]] PointerState withTiltY (float x)                        const noexcept { return with (&PointerState::tiltY, x); }
 
     Point<float> position;
     float pressure    = MouseInputSource::defaultPressure;

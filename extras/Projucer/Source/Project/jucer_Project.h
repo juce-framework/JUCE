@@ -220,8 +220,8 @@ public:
     bool shouldDisplaySplashScreen() const               { return displaySplashScreenValue.get(); }
     String getSplashScreenColourString() const           { return splashScreenColourValue.get(); }
 
-    static StringArray getCppStandardStrings()           { return { "C++14", "C++17", "C++20", "Use Latest" }; }
-    static Array<var> getCppStandardVars()               { return { "14",    "17",    "20",    "latest" }; }
+    static StringArray getCppStandardStrings()           { return { "C++17", "C++20", "Use Latest" }; }
+    static Array<var> getCppStandardVars()               { return { "17",    "20",    "latest" }; }
 
     static String getLatestNumberedCppStandardString()
     {

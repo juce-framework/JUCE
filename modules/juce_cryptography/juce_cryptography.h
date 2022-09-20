@@ -40,7 +40,7 @@
   description:        Classes for various basic cryptography functions, including RSA, Blowfish, MD5, SHA, etc.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_core
 

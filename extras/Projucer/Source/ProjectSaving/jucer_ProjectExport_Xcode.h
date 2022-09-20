@@ -1707,10 +1707,6 @@ public:
                     if (owner.project.getCppStandardString() == "latest")
                         return owner.project.getLatestNumberedCppStandardString();
 
-                    // The AudioUnitSDK requires C++17
-                    if (type == AudioUnitPlugIn)
-                        return "17";
-
                     return owner.project.getCppStandardString();
                 }();
 
@@ -1987,17 +1983,16 @@ public:
             StringArray paths (owner.extraSearchPaths);
             paths.addArray (config.getHeaderSearchPaths());
 
-            if (owner.project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
+            constexpr auto audioPluginClient = "juce_audio_plugin_client";
+
+            if (owner.project.getEnabledModules().isModuleEnabled (audioPluginClient))
             {
-                const auto pluginClientModule = owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client");
-                for (const auto& path : { pluginClientModule,                          // For AU resource fork
-                                          pluginClientModule.getChildFile ("AU") })    // For AudioUnitSDK includes
-                {
-                    paths.add (path.rebased (owner.projectFolder,
-                                             owner.getTargetFolder(),
-                                             build_tools::RelativePath::buildTargetFolder)
-                                   .toUnixStyle());
-                }
+                paths.add (owner.getModuleFolderRelativeToProject (audioPluginClient)
+                                .getChildFile ("AU")
+                                .rebased (owner.projectFolder,
+                                          owner.getTargetFolder(),
+                                          build_tools::RelativePath::buildTargetFolder)
+                                .toUnixStyle());
             }
 
             sanitiseAndEscapeSearchPaths (config, paths);

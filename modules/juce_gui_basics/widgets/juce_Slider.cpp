@@ -221,7 +221,6 @@ public:
 
             updateText();
             owner.repaint();
-            updatePopupDisplay (newValue);
 
             triggerChangeMessage (notification);
         }
@@ -255,7 +254,7 @@ public:
             lastValueMin = newValue;
             valueMin = newValue;
             owner.repaint();
-            updatePopupDisplay (newValue);
+            updatePopupDisplay();
 
             triggerChangeMessage (notification);
         }
@@ -289,7 +288,7 @@ public:
             lastValueMax = newValue;
             valueMax = newValue;
             owner.repaint();
-            updatePopupDisplay (valueMax.getValue());
+            updatePopupDisplay();
 
             triggerChangeMessage (notification);
         }
@@ -456,6 +455,8 @@ public:
             if (newValue != valueBox->getText())
                 valueBox->setText (newValue, dontSendNotification);
         }
+
+        updatePopupDisplay();
     }
 
     double constrainedValue (double value) const
@@ -1064,25 +1065,36 @@ public:
                                             | ComponentPeer::windowIgnoresKeyPresses
                                             | ComponentPeer::windowIgnoresMouseClicks);
 
-            if (style == SliderStyle::TwoValueHorizontal
-                || style == SliderStyle::TwoValueVertical)
-            {
-                updatePopupDisplay (sliderBeingDragged == 2 ? getMaxValue()
-                                                            : getMinValue());
-            }
-            else
-            {
-                updatePopupDisplay (getValue());
-            }
-
+            updatePopupDisplay();
             popupDisplay->setVisible (true);
         }
     }
 
-    void updatePopupDisplay (double valueToShow)
+    void updatePopupDisplay()
     {
-        if (popupDisplay != nullptr)
-            popupDisplay->updatePosition (owner.getTextFromValue (valueToShow));
+        if (popupDisplay == nullptr)
+            return;
+
+        const auto valueToShow = [this]
+        {
+            constexpr SliderStyle multiSliderStyles[] { SliderStyle::TwoValueHorizontal,
+                                                        SliderStyle::TwoValueVertical,
+                                                        SliderStyle::ThreeValueHorizontal,
+                                                        SliderStyle::ThreeValueVertical };
+
+            if (std::find (std::begin (multiSliderStyles), std::end (multiSliderStyles), style) == std::end (multiSliderStyles))
+                return getValue();
+
+            if (sliderBeingDragged == 2)
+                return getMaxValue();
+
+            if (sliderBeingDragged == 1)
+                return getMinValue();
+
+            return getValue();
+        }();
+
+        popupDisplay->updatePosition (owner.getTextFromValue (valueToShow));
     }
 
     bool canDoubleClickToValue() const

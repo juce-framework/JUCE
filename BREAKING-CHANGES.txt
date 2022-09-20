@@ -6,6 +6,24 @@ develop
 
 Change
 ------
+The minimum supported C++ standard is now C++17 and the oldest supported
+compilers on Linux are now GCC 7.0 and Clang 6.0.
+
+Possible Issues
+---------------
+Older compilers will no longer be able to compile JUCE.
+
+Workaround
+----------
+No workaround is available.
+
+Rationale
+---------
+This compiler upgrade will allow the use of C++17 within the framework.
+
+
+Change
+------
 Resource forks are no longer generated for Audio Unit plug-ins.
 
 Possible Issues

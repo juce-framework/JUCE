@@ -217,7 +217,7 @@ private:
         template <typename Func, typename... Items>
         static constexpr void forEach (Func&& func, Items&&... items)
         {
-            (void) std::initializer_list<int> { ((void) func (std::forward<Items> (items)), 0)... };
+            (func (std::forward<Items> (items)), ...);
         }
 
     public:

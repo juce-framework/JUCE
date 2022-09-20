@@ -163,9 +163,8 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${JUCE_SOURCE_DIR}")
+    _juce_add_lv2_manifest_helper_target()
     install(TARGETS juce_lv2_helper EXPORT LV2_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
     install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
-else()
-    set_target_properties(juce_lv2_helper PROPERTIES EXCLUDE_FROM_ALL ON)
 endif()
 

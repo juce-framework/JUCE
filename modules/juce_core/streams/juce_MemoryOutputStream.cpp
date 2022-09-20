@@ -172,7 +172,7 @@ bool MemoryOutputStream::setPosition (int64 newPosition)
 int64 MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite)
 {
     // before writing from an input, see if we can preallocate to make it more efficient..
-    int64 availableData = source.getTotalLength() - source.getPosition();
+    const auto availableData = source.getTotalLength() - source.getPosition();
 
     if (availableData > 0)
     {
@@ -180,7 +180,7 @@ int64 MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNu
             maxNumBytesToWrite = availableData;
 
         if (blockToUse != nullptr)
-            preallocate (blockToUse->getSize() + (size_t) maxNumBytesToWrite);
+            preallocate (position + (size_t) availableData);
     }
 
     return OutputStream::writeFromInputStream (source, maxNumBytesToWrite);

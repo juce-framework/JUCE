@@ -2365,7 +2365,7 @@ private:
                #ifdef JucePlugin_PreferredChannelConfigurations
                 const short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
                 if (AudioUnitHelpers::isLayoutSupported (*juceFilter, isInput, busNum, ch, configs))
-                    tags.addIfNotAlreadyThere (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));
+                    tags.insert (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));
                #else
                 if (bus->isLayoutSupported (AudioChannelSet::discreteChannels (ch)))
                     tags.insert (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));

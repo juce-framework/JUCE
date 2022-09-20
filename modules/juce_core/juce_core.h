@@ -37,7 +37,7 @@
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
   license:            ISC
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:
   OSXFrameworks:      Cocoa Foundation IOKit

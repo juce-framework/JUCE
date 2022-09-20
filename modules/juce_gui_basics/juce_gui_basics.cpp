@@ -67,9 +67,19 @@
  #include <vfw.h>
  #include <commdlg.h>
  #include <commctrl.h>
- #include <UIAutomation.h>
  #include <sapi.h>
- #include <Dxgi.h>
+ #include <dxgi.h>
+
+ #if JUCE_MINGW
+  // Some MinGW headers use 'new' as a parameter name
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wkeyword-macro")
+  #define new new_
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+ #endif
+
+ #include <uiautomation.h>
+
+ #undef new
 
  #if JUCE_WEB_BROWSER
   #include <exdisp.h>

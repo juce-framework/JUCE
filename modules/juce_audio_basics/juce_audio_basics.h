@@ -37,7 +37,7 @@
   description:        Classes for audio buffer manipulation, midi message handling, synthesis, etc.
   website:            http://www.juce.com/juce
   license:            ISC
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_core
   OSXFrameworks:      Accelerate

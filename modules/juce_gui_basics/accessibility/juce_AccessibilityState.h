@@ -50,73 +50,73 @@ public:
 
         @see isCheckable
     */
-    JUCE_NODISCARD AccessibleState withCheckable() const noexcept            { return withFlag (Flags::checkable); }
+    [[nodiscard]] AccessibleState withCheckable() const noexcept            { return withFlag (Flags::checkable); }
 
     /** Sets the checked flag and returns the new state.
 
         @see isChecked
     */
-    JUCE_NODISCARD AccessibleState withChecked() const noexcept              { return withFlag (Flags::checked); }
+    [[nodiscard]] AccessibleState withChecked() const noexcept              { return withFlag (Flags::checked); }
 
     /** Sets the collapsed flag and returns the new state.
 
         @see isCollapsed
     */
-    JUCE_NODISCARD AccessibleState withCollapsed() const noexcept            { return withFlag (Flags::collapsed); }
+    [[nodiscard]] AccessibleState withCollapsed() const noexcept            { return withFlag (Flags::collapsed); }
 
     /** Sets the expandable flag and returns the new state.
 
         @see isExpandable
     */
-    JUCE_NODISCARD AccessibleState withExpandable() const noexcept           { return withFlag (Flags::expandable); }
+    [[nodiscard]] AccessibleState withExpandable() const noexcept           { return withFlag (Flags::expandable); }
 
     /** Sets the expanded flag and returns the new state.
 
         @see isExpanded
     */
-    JUCE_NODISCARD AccessibleState withExpanded() const noexcept             { return withFlag (Flags::expanded); }
+    [[nodiscard]] AccessibleState withExpanded() const noexcept             { return withFlag (Flags::expanded); }
 
     /** Sets the focusable flag and returns the new state.
 
         @see isFocusable
     */
-    JUCE_NODISCARD AccessibleState withFocusable() const noexcept            { return withFlag (Flags::focusable); }
+    [[nodiscard]] AccessibleState withFocusable() const noexcept            { return withFlag (Flags::focusable); }
 
     /** Sets the focused flag and returns the new state.
 
         @see isFocused
     */
-    JUCE_NODISCARD AccessibleState withFocused() const noexcept              { return withFlag (Flags::focused); }
+    [[nodiscard]] AccessibleState withFocused() const noexcept              { return withFlag (Flags::focused); }
 
     /** Sets the ignored flag and returns the new state.
 
         @see isIgnored
     */
-    JUCE_NODISCARD AccessibleState withIgnored() const noexcept              { return withFlag (Flags::ignored); }
+    [[nodiscard]] AccessibleState withIgnored() const noexcept              { return withFlag (Flags::ignored); }
 
     /** Sets the selectable flag and returns the new state.
 
         @see isSelectable
     */
-    JUCE_NODISCARD AccessibleState withSelectable() const noexcept           { return withFlag (Flags::selectable); }
+    [[nodiscard]] AccessibleState withSelectable() const noexcept           { return withFlag (Flags::selectable); }
 
     /** Sets the multiSelectable flag and returns the new state.
 
         @see isMultiSelectable
     */
-    JUCE_NODISCARD AccessibleState withMultiSelectable() const noexcept      { return withFlag (Flags::multiSelectable); }
+    [[nodiscard]] AccessibleState withMultiSelectable() const noexcept      { return withFlag (Flags::multiSelectable); }
 
     /** Sets the selected flag and returns the new state.
 
         @see isSelected
     */
-    JUCE_NODISCARD AccessibleState withSelected() const noexcept             { return withFlag (Flags::selected); }
+    [[nodiscard]] AccessibleState withSelected() const noexcept             { return withFlag (Flags::selected); }
 
     /** Sets the accessible offscreen flag and returns the new state.
 
         @see isSelected
     */
-    JUCE_NODISCARD AccessibleState withAccessibleOffscreen() const noexcept  { return withFlag (Flags::accessibleOffscreen); }
+    [[nodiscard]] AccessibleState withAccessibleOffscreen() const noexcept  { return withFlag (Flags::accessibleOffscreen); }
 
     //==============================================================================
     /** Returns true if the UI element is checkable.
@@ -208,7 +208,7 @@ private:
         accessibleOffscreen = (1 << 11)
     };
 
-    JUCE_NODISCARD AccessibleState withFlag (int flag) const noexcept
+    [[nodiscard]] AccessibleState withFlag (int flag) const noexcept
     {
         auto copy = *this;
         copy.flags |= flag;

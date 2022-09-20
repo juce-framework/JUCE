@@ -227,7 +227,7 @@ public:
         screen. The RefreshCallback returned by the factory will be called every time that screen's
         display link callback fires.
     */
-    JUCE_NODISCARD Connection registerFactory (Factory factory)
+    [[nodiscard]] Connection registerFactory (Factory factory)
     {
         const ScopedLock lock (mutex);
         factories.push_front (std::move (factory));
