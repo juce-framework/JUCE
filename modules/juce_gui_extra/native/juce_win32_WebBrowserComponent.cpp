@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -28,8 +28,8 @@ namespace juce
 
 struct InternalWebViewType
 {
-    InternalWebViewType() {}
-    virtual ~InternalWebViewType() {}
+    InternalWebViewType() = default;
+    virtual ~InternalWebViewType() = default;
 
     virtual void createBrowser() = 0;
     virtual bool hasBrowserBeenCreated() = 0;
@@ -46,20 +46,6 @@ struct InternalWebViewType
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalWebViewType)
 };
-
-#if JUCE_MINGW
- JUCE_DECLARE_UUID_GETTER (IOleClientSite,           "00000118-0000-0000-c000-000000000046")
- JUCE_DECLARE_UUID_GETTER (IDispatch,                "00020400-0000-0000-c000-000000000046")
-
- #ifndef WebBrowser
-  class WebBrowser;
- #endif
-#endif
-
-JUCE_DECLARE_UUID_GETTER (DWebBrowserEvents2,        "34A715A0-6587-11D0-924A-0020AFC7AC4D")
-JUCE_DECLARE_UUID_GETTER (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00AA00341D07")
-JUCE_DECLARE_UUID_GETTER (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
-JUCE_DECLARE_UUID_GETTER (WebBrowser,                "8856F961-340A-11D0-A96B-00C04FD705A2")
 
 //==============================================================================
 class Win32WebView   : public InternalWebViewType,
@@ -623,7 +609,7 @@ private:
         ComSmartPtr<ICoreWebView2Settings> settings;
         webView->get_Settings (settings.resetAndGetPointerAddress());
 
-        if (settings == nullptr)
+        if (settings != nullptr)
         {
             settings->put_IsStatusBarEnabled (! preferences.getIsStatusBarDisabled());
             settings->put_IsBuiltInErrorPageEnabled (! preferences.getIsBuiltInErrorPageDisabled());

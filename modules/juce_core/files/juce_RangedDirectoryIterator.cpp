@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -39,11 +39,13 @@ float DirectoryEntry::getEstimatedProgress() const
 RangedDirectoryIterator::RangedDirectoryIterator (const File& directory,
                                                   bool isRecursive,
                                                   const String& wildCard,
-                                                  int whatToLookFor)
+                                                  int whatToLookFor,
+                                                  File::FollowSymlinks followSymlinks)
     : iterator (new DirectoryIterator (directory,
                                        isRecursive,
                                        wildCard,
-                                       whatToLookFor))
+                                       whatToLookFor,
+                                       followSymlinks))
 {
     entry.iterator = iterator;
     increment();

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -39,9 +39,9 @@ class BlurOverlayWithComponent  : public Component,
 {
 public:
     BlurOverlayWithComponent (MainWindow& window, std::unique_ptr<Component> comp)
-       : ComponentMovementWatcher (&window),
-         mainWindow (window),
-         componentToShow (std::move (comp))
+        : ComponentMovementWatcher (&window),
+          mainWindow (window),
+          componentToShow (std::move (comp))
     {
         kernel.createGaussianBlur (1.25f);
 
@@ -300,11 +300,16 @@ void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
 
         parent->openFile (newProjectFileToOpen, [parent, openInIDE] (bool openedSuccessfully)
         {
-            if (parent == nullptr)
+            if (! (openedSuccessfully && parent != nullptr && parent->currentProject != nullptr && openInIDE == OpenInIDE::yes))
                 return;
 
-            if (openedSuccessfully && parent->currentProject != nullptr && openInIDE == OpenInIDE::yes)
-                ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::openInIDE, false);
+            // The project component knows how to process the saveAndOpenInIDE command, but the
+            // main application does not. In order to process the command successfully, we need
+            // to ensure that the project content component has focus.
+            auto& manager = ProjucerApplication::getApp().getCommandManager();
+            manager.setFirstCommandTarget (parent->getProjectContentComponent());
+            ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveAndOpenInIDE, false);
+            manager.setFirstCommandTarget (nullptr);
         });
     });
 }
@@ -325,6 +330,11 @@ void MainWindow::setProject (std::unique_ptr<Project> newProject)
         createProjectContentCompIfNeeded();
         getProjectContentComponent()->setProject (currentProject.get());
     }
+
+    if (currentProject != nullptr)
+        currentProject->addChangeListener (this);
+
+    changeListenerCallback (currentProject.get());
 
     projectNameValue.referTo (currentProject != nullptr ? currentProject->getProjectValue (Ids::name) : Value());
     initialiseProjectWindow();
@@ -707,6 +717,16 @@ void MainWindow::valueChanged (Value& value)
                                            : "Projucer");
 }
 
+void MainWindow::changeListenerCallback (ChangeBroadcaster* source)
+{
+    auto* project = getProject();
+
+    if (source == project)
+        if (auto* peer = getPeer())
+            peer->setHasChangedSinceSaved (project != nullptr ? project->hasChangedSinceSaved()
+                                                              : false);
+}
+
 //==============================================================================
 MainWindowList::MainWindowList()
 {
@@ -992,7 +1012,8 @@ void MainWindowList::checkWindowBounds (MainWindow& windowToCheck)
         auto screenLimits = Desktop::getInstance().getDisplays().getDisplayForRect (windowBounds)->userArea;
 
         if (auto* peer = windowToCheck.getPeer())
-            peer->getFrameSize().subtractFrom (screenLimits);
+            if (const auto frameSize = peer->getFrameSizeIfPresent())
+                frameSize->subtractFrom (screenLimits);
 
         auto constrainedX = jlimit (screenLimits.getX(), jmax (screenLimits.getX(), screenLimits.getRight()  - windowBounds.getWidth()),  windowBounds.getX());
         auto constrainedY = jlimit (screenLimits.getY(), jmax (screenLimits.getY(), screenLimits.getBottom() - windowBounds.getHeight()), windowBounds.getY());

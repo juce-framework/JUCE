@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,14 +36,14 @@ public:
     {
     }
 
-    SharedCursorHandle (const Image& image, Point<int> hotSpot, float scaleFactor)
-        : info { image, hotSpot, scaleFactor },
+    SharedCursorHandle (const ScaledImage& image, Point<int> hotSpot)
+        : info { image, hotSpot },
           handle (info),
           standardType (MouseCursor::NormalCursor),
           standard (false)
     {
         // your hotspot needs to be within the bounds of the image!
-        jassert (image.getBounds().contains (hotSpot));
+        jassert (image.getScaledBounds().toNearestInt().contains (hotSpot));
     }
 
     static std::shared_ptr<SharedCursorHandle> createStandard (const MouseCursor::StandardCursorType type)
@@ -92,12 +92,17 @@ MouseCursor::MouseCursor (const StandardCursorType type)
 }
 
 MouseCursor::MouseCursor (const Image& image, int hotSpotX, int hotSpotY)
-    : MouseCursor (image, hotSpotX, hotSpotY, 1.0f)
+    : MouseCursor (ScaledImage (image), { hotSpotX, hotSpotY })
 {
 }
 
 MouseCursor::MouseCursor (const Image& image, int hotSpotX, int hotSpotY, float scaleFactor)
-    : cursorHandle (std::make_shared<SharedCursorHandle> (image, Point<int> { hotSpotX, hotSpotY }, scaleFactor))
+    : MouseCursor (ScaledImage (image, scaleFactor), { hotSpotX, hotSpotY })
+{
+}
+
+MouseCursor::MouseCursor (const ScaledImage& image, Point<int> hotSpot)
+        : cursorHandle (std::make_shared<SharedCursorHandle> (image, hotSpot))
 {
 }
 

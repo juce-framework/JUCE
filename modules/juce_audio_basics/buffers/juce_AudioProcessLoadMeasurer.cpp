@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -23,8 +23,8 @@
 namespace juce
 {
 
-AudioProcessLoadMeasurer::AudioProcessLoadMeasurer()    = default;
-AudioProcessLoadMeasurer::~AudioProcessLoadMeasurer()   = default;
+AudioProcessLoadMeasurer::AudioProcessLoadMeasurer()  = default;
+AudioProcessLoadMeasurer::~AudioProcessLoadMeasurer() = default;
 
 void AudioProcessLoadMeasurer::reset()
 {
@@ -33,38 +33,47 @@ void AudioProcessLoadMeasurer::reset()
 
 void AudioProcessLoadMeasurer::reset (double sampleRate, int blockSize)
 {
+    const SpinLock::ScopedLockType lock (mutex);
+
     cpuUsageProportion = 0;
     xruns = 0;
 
-    if (sampleRate > 0.0 && blockSize > 0)
-    {
-        msPerSample = 1000.0 / sampleRate;
-        timeToCpuScale = (msPerSample > 0.0) ? (1.0 / msPerSample) : 0.0;
-    }
-    else
-    {
-        msPerSample = 0;
-        timeToCpuScale = 0;
-    }
+    samplesPerBlock = blockSize;
+    msPerSample = (sampleRate > 0.0 && blockSize > 0) ? 1000.0 / sampleRate : 0;
 }
 
 void AudioProcessLoadMeasurer::registerBlockRenderTime (double milliseconds)
 {
-    registerRenderTime (milliseconds, samplesPerBlock);
+    const SpinLock::ScopedTryLockType lock (mutex);
+
+    if (lock.isLocked())
+        registerRenderTimeLocked (milliseconds, samplesPerBlock);
 }
 
 void AudioProcessLoadMeasurer::registerRenderTime (double milliseconds, int numSamples)
 {
+    const SpinLock::ScopedTryLockType lock (mutex);
+
+    if (lock.isLocked())
+        registerRenderTimeLocked (milliseconds, numSamples);
+}
+
+void AudioProcessLoadMeasurer::registerRenderTimeLocked (double milliseconds, int numSamples)
+{
+    if (msPerSample == 0)
+        return;
+
     const auto maxMilliseconds = numSamples * msPerSample;
     const auto usedProportion = milliseconds / maxMilliseconds;
     const auto filterAmount = 0.2;
-    cpuUsageProportion += filterAmount * (usedProportion - cpuUsageProportion);
+    const auto proportion = cpuUsageProportion.load();
+    cpuUsageProportion = proportion + filterAmount * (usedProportion - proportion);
 
     if (milliseconds > maxMilliseconds)
         ++xruns;
 }
 
-double AudioProcessLoadMeasurer::getLoadAsProportion() const   { return jlimit (0.0, 1.0, cpuUsageProportion); }
+double AudioProcessLoadMeasurer::getLoadAsProportion() const   { return jlimit (0.0, 1.0, cpuUsageProportion.load()); }
 double AudioProcessLoadMeasurer::getLoadAsPercentage() const   { return 100.0 * getLoadAsProportion(); }
 
 int AudioProcessLoadMeasurer::getXRunCount() const             { return xruns; }
@@ -77,6 +86,9 @@ AudioProcessLoadMeasurer::ScopedTimer::ScopedTimer (AudioProcessLoadMeasurer& p)
 AudioProcessLoadMeasurer::ScopedTimer::ScopedTimer (AudioProcessLoadMeasurer& p, int numSamplesInBlock)
     : owner (p), startTime (Time::getMillisecondCounterHiRes()), samplesInBlock (numSamplesInBlock)
 {
+    // numSamplesInBlock should never be zero. Did you remember to call AudioProcessLoadMeasurer::reset(),
+    // passing the expected samples per block?
+    jassert (numSamplesInBlock);
 }
 
 AudioProcessLoadMeasurer::ScopedTimer::~ScopedTimer()

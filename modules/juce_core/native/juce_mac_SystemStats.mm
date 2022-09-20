@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -69,6 +69,8 @@ void CPUInformation::initialise() noexcept
                                     hasAVX512VL,
                                     hasAVX512VBMI,
                                     hasAVX512VPOPCNTDQ);
+   #elif JUCE_ARM && __ARM_ARCH > 7
+    hasNeon = true;
    #endif
 
     numLogicalCPUs = (int) [[NSProcessInfo processInfo] activeProcessorCount];
@@ -93,14 +95,12 @@ static String getOSXVersion()
         {
             const String systemVersionPlist ("/System/Library/CoreServices/SystemVersion.plist");
 
-           #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13
             if (@available (macOS 10.13, *))
             {
                 NSError* error = nullptr;
                 return [NSDictionary dictionaryWithContentsOfURL: createNSURLFromFile (systemVersionPlist)
                                                            error: &error];
             }
-           #endif
 
             return [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (systemVersionPlist)];
         }();
@@ -349,6 +349,36 @@ bool Time::setSystemTimeToThisTime() const
 int SystemStats::getPageSize()
 {
     return (int) NSPageSize();
+}
+
+String SystemStats::getUniqueDeviceID()
+{
+    static const auto deviceId = []
+    {
+        ChildProcess proc;
+
+        if (proc.start ("ioreg -rd1 -c IOPlatformExpertDevice", ChildProcess::wantStdOut))
+        {
+            constexpr const char key[] = "\"IOPlatformUUID\"";
+            constexpr const auto keyLen = (int) sizeof (key);
+
+            auto output = proc.readAllProcessOutput();
+            auto index = output.indexOf (key);
+
+            if (index >= 0)
+            {
+                auto start = output.indexOf (index + keyLen, "\"");
+                auto end = output.indexOf (start + 1, "\"");
+                return output.substring (start + 1, end).replace("-", "");
+            }
+        }
+
+        return String();
+    }();
+
+    // Please tell someone at JUCE if this occurs
+    jassert (deviceId.isNotEmpty());
+    return deviceId;
 }
 
 } // namespace juce

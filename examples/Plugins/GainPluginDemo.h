@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -33,7 +33,7 @@
                    juce_audio_plugin_client, juce_audio_processors,
                    juce_audio_utils, juce_core, juce_data_structures,
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2019
+ exporters:        xcode_mac, vs2022
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -59,7 +59,7 @@ public:
         : AudioProcessor (BusesProperties().withInput  ("Input",  AudioChannelSet::stereo())
                                            .withOutput ("Output", AudioChannelSet::stereo()))
     {
-        addParameter (gain = new AudioParameterFloat ("gain", "Gain", 0.0f, 1.0f, 0.5f));
+        addParameter (gain = new AudioParameterFloat ({ "gain", 1 }, "Gain", 0.0f, 1.0f, 0.5f));
     }
 
     //==============================================================================

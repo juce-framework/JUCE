@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,19 +41,17 @@ public:
 
         auto numComponents = (size_t) lineStride * (size_t) jmax (1, height);
 
-       # if JUCE_MAC && defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14
-        // This version of the SDK intermittently requires a bit of extra space
+        // SDK version 10.14+ intermittently requires a bit of extra space
         // at the end of the image data. This feels like something has gone
         // wrong in Apple's code.
         numComponents += (size_t) lineStride;
-       #endif
 
-        imageDataHolder->data.allocate (numComponents, clearImage);
+        imageData->data.allocate (numComponents, clearImage);
 
         auto colourSpace = detail::ColorSpacePtr { CGColorSpaceCreateWithName ((format == Image::SingleChannel) ? kCGColorSpaceGenericGrayGamma2_2
                                                                                                                 : kCGColorSpaceSRGB) };
 
-        context = detail::ContextPtr { CGBitmapContextCreate (imageDataHolder->data, (size_t) width, (size_t) height, 8, (size_t) lineStride,
+        context = detail::ContextPtr { CGBitmapContextCreate (imageData->data, (size_t) width, (size_t) height, 8, (size_t) lineStride,
                                                               colourSpace.get(), getCGImageFlags (format)) };
     }
 
@@ -71,7 +69,9 @@ public:
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        bitmap.data = imageDataHolder->data + x * pixelStride + y * lineStride;
+        const auto offset = (size_t) (x * pixelStride + y * lineStride);
+        bitmap.data = imageData->data + offset;
+        bitmap.size = (size_t) (lineStride * height) - offset;
         bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
@@ -86,7 +86,7 @@ public:
     ImagePixelData::Ptr clone() override
     {
         auto im = new CoreGraphicsPixelData (pixelFormat, width, height, false);
-        memcpy (im->imageDataHolder->data, imageDataHolder->data, (size_t) (lineStride * height));
+        memcpy (im->imageData->data, imageData->data, (size_t) (lineStride * height));
         return *im;
     }
 
@@ -98,12 +98,9 @@ public:
         auto cgim = dynamic_cast<CoreGraphicsPixelData*> (juceImage.getPixelData());
 
         if (cgim != nullptr && cgim->cachedImageRef != nullptr)
-        {
-            CGImageRetain (cgim->cachedImageRef.get());
-            return cgim->cachedImageRef.get();
-        }
+            return CGImageRetain (cgim->cachedImageRef.get());
 
-        CGImageRef ref = createImage (juceImage, colourSpace, false);
+        CGImageRef ref = createImage (juceImage, colourSpace);
 
         if (cgim != nullptr)
             cgim->cachedImageRef.reset (CGImageRetain (ref));
@@ -111,56 +108,47 @@ public:
         return ref;
     }
 
-    static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace, bool mustOutliveSource)
+    static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace)
     {
         const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
-        detail::DataProviderPtr provider;
 
-        if (mustOutliveSource)
+        const auto provider = [&]
         {
-            CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr,
-                                                       (const UInt8*) srcData.data,
-                                                       (CFIndex) ((size_t) srcData.lineStride * (size_t) srcData.height)));
-            provider = detail::DataProviderPtr { CGDataProviderCreateWithCFData (data.get()) };
-        }
-        else
-        {
-            auto* imageDataContainer = [] (const Image& img) -> HeapBlockContainer::Ptr*
+            if (auto* cgim = dynamic_cast<CoreGraphicsPixelData*> (juceImage.getPixelData()))
             {
-                if (auto* cgim = dynamic_cast<CoreGraphicsPixelData*> (img.getPixelData()))
-                    return new HeapBlockContainer::Ptr (cgim->imageDataHolder);
-
-                return nullptr;
-            } (juceImage);
-
-            provider = detail::DataProviderPtr { CGDataProviderCreateWithData (imageDataContainer,
+                return detail::DataProviderPtr { CGDataProviderCreateWithData (new ImageDataContainer::Ptr (cgim->imageData),
                                                                                srcData.data,
-                                                                               (size_t) srcData.lineStride * (size_t) srcData.height,
-                                                                               [] (void * __nullable info, const void*, size_t) { delete (HeapBlockContainer::Ptr*) info; }) };
-        }
+                                                                               srcData.size,
+                                                                               [] (void * __nullable info, const void*, size_t) { delete (ImageDataContainer::Ptr*) info; }) };
+            }
 
-        CGImageRef imageRef = CGImageCreate ((size_t) srcData.width,
-                                             (size_t) srcData.height,
-                                             8,
-                                             (size_t) srcData.pixelStride * 8,
-                                             (size_t) srcData.lineStride,
-                                             colourSpace, getCGImageFlags (juceImage.getFormat()), provider.get(),
-                                             nullptr, true, kCGRenderingIntentDefault);
+            const auto usableSize = jmin ((size_t) srcData.lineStride * (size_t) srcData.height, srcData.size);
+            CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) usableSize));
+            return detail::DataProviderPtr { CGDataProviderCreateWithCFData (data.get()) };
+        }();
 
-        return imageRef;
+        return CGImageCreate ((size_t) srcData.width,
+                              (size_t) srcData.height,
+                              8,
+                              (size_t) srcData.pixelStride * 8,
+                              (size_t) srcData.lineStride,
+                              colourSpace, getCGImageFlags (juceImage.getFormat()), provider.get(),
+                              nullptr, true, kCGRenderingIntentDefault);
     }
 
     //==============================================================================
     detail::ContextPtr context;
     detail::ImagePtr cachedImageRef;
 
-    struct HeapBlockContainer   : public ReferenceCountedObject
+    struct ImageDataContainer   : public ReferenceCountedObject
     {
-        using Ptr = ReferenceCountedObjectPtr<HeapBlockContainer>;
+        ImageDataContainer() = default;
+
+        using Ptr = ReferenceCountedObjectPtr<ImageDataContainer>;
         HeapBlock<uint8> data;
     };
 
-    HeapBlockContainer::Ptr imageDataHolder = new HeapBlockContainer();
+    ImageDataContainer::Ptr imageData = new ImageDataContainer();
     int pixelStride, lineStride;
 
 private:
@@ -329,7 +317,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         if (sourceImage.getFormat() != Image::SingleChannel)
             singleChannelImage = sourceImage.convertedToFormat (Image::SingleChannel);
 
-        auto image = detail::ImagePtr { CoreGraphicsPixelData::createImage (singleChannelImage, greyColourSpace.get(), true) };
+        auto image = detail::ImagePtr { CoreGraphicsPixelData::createImage (singleChannelImage, greyColourSpace.get()) };
 
         flip();
         auto t = AffineTransform::verticalFlip (sourceImage.getHeight()).followedBy (transform);
@@ -440,6 +428,26 @@ void CoreGraphicsContext::setInterpolationQuality (Graphics::ResamplingQuality q
 }
 
 //==============================================================================
+void CoreGraphicsContext::fillAll()
+{
+    // The clip rectangle is expanded in order to avoid having alpha blended pixels at the edges.
+    // The clipping mechanism will take care of cutting off pixels beyond the clip bounds. This is
+    // a hard cutoff and will ensure that no semi-transparent pixels will remain inside the filled
+    // area.
+    const auto clipBounds = getClipBounds();
+
+    const auto clipBoundsOnDevice = CGContextConvertSizeToDeviceSpace (context.get(),
+                                                                       CGSize { (CGFloat) clipBounds.getWidth(),
+                                                                                (CGFloat) clipBounds.getHeight() });
+
+    const auto inverseScale = clipBoundsOnDevice.width > (CGFloat) 0.0
+                            ? (int) (clipBounds.getWidth() / clipBoundsOnDevice.width)
+                            : 0;
+    const auto expansion = jmax (1, inverseScale);
+
+    fillRect (clipBounds.expanded (expansion), false);
+}
+
 void CoreGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExistingContents)
 {
     fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), replaceExistingContents);
@@ -521,7 +529,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
 
     auto colourSpace = sourceImage.getFormat() == Image::PixelFormat::SingleChannel ? greyColourSpace.get()
                                                                                     : rgbColourSpace.get();
-    auto image = detail::ImagePtr { CoreGraphicsPixelData::getCachedImageRef (sourceImage, colourSpace) };
+    detail::ImagePtr image { CoreGraphicsPixelData::getCachedImageRef (sourceImage, colourSpace) };
 
     ScopedCGContextState scopedState (context.get());
     CGContextSetAlpha (context.get(), state->fillType.getOpacity());
@@ -899,10 +907,9 @@ Image juce_createImageFromCIImage (CIImage* im, int w, int h)
     return Image (*cgImage);
 }
 
-CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, CGColorSpaceRef colourSpace,
-                                         const bool mustOutliveSource)
+CGImageRef juce_createCoreGraphicsImage (const Image& juceImage, CGColorSpaceRef colourSpace)
 {
-    return CoreGraphicsPixelData::createImage (juceImage, colourSpace, mustOutliveSource);
+    return CoreGraphicsPixelData::createImage (juceImage, colourSpace);
 }
 
 CGContextRef juce_getImageContext (const Image& image)
@@ -929,8 +936,11 @@ CGContextRef juce_getImageContext (const Image& image)
 #endif
 
 #if JUCE_MAC
- NSImage* imageToNSImage (const Image& image, float scaleFactor)
+ NSImage* imageToNSImage (const ScaledImage& scaled)
  {
+     const auto image = scaled.getImage();
+     const auto scaleFactor = scaled.getScale();
+
      JUCE_AUTORELEASEPOOL
      {
          NSImage* im = [[NSImage alloc] init];
@@ -938,7 +948,7 @@ CGContextRef juce_getImageContext (const Image& image)
 
          [im setSize: requiredSize];
          detail::ColorSpacePtr colourSpace { CGColorSpaceCreateWithName (kCGColorSpaceSRGB) };
-         detail::ImagePtr imageRef { juce_createCoreGraphicsImage (image, colourSpace.get(), true) };
+         detail::ImagePtr imageRef { juce_createCoreGraphicsImage (image, colourSpace.get()) };
 
          NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef.get()];
          [imageRep setSize: requiredSize];

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -240,6 +240,22 @@ private:
     OpenGLTargetSaver& operator= (const OpenGLTargetSaver&);
 };
 
+static bool contextRequiresTexture2DEnableDisable()
+{
+   #if JUCE_OPENGL_ES
+    return false;
+   #else
+    clearGLError();
+    GLint mask = 0;
+    glGetIntegerv (GL_CONTEXT_PROFILE_MASK, &mask);
+
+    if (glGetError() == GL_INVALID_ENUM)
+        return true;
+
+    return (mask & (GLint) GL_CONTEXT_CORE_PROFILE_BIT) == 0;
+   #endif
+}
+
 } // namespace juce
 
 //==============================================================================
@@ -263,6 +279,16 @@ private:
 #elif JUCE_WINDOWS
  #include "opengl/juce_wgl.h"
  #include "native/juce_OpenGL_win32.h"
+
+#define JUCE_IMPL_WGL_EXTENSION_FUNCTION(name) \
+    decltype (juce::OpenGLContext::NativeContext::name) juce::OpenGLContext::NativeContext::name = nullptr;
+
+JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglChoosePixelFormatARB)
+JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglSwapIntervalEXT)
+JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT)
+JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB)
+
+#undef JUCE_IMPL_WGL_EXTENSION_FUNCTION
 
 #elif JUCE_LINUX || JUCE_BSD
  #include "native/juce_OpenGL_linux_X11.h"

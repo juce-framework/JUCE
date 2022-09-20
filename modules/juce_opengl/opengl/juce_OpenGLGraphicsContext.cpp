@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -964,8 +964,10 @@ struct StateHelpers
     //==============================================================================
     struct ActiveTextures
     {
-        ActiveTextures (const OpenGLContext& c) noexcept  : context (c)
-        {}
+        explicit ActiveTextures (const OpenGLContext& c) noexcept
+            : context (c)
+        {
+        }
 
         void clear() noexcept
         {
@@ -979,23 +981,28 @@ struct StateHelpers
             {
                 quadQueue.flush();
 
-                for (int i = 3; --i >= 0;)
+                for (int i = numTextures; --i >= 0;)
                 {
                     if ((texturesEnabled & (1 << i)) != (textureIndexMask & (1 << i)))
                     {
                         setActiveTexture (i);
                         JUCE_CHECK_OPENGL_ERROR
 
-                       #if ! JUCE_ANDROID
-                        if ((textureIndexMask & (1 << i)) != 0)
-                            glEnable (GL_TEXTURE_2D);
-                        else
-                        {
-                            glDisable (GL_TEXTURE_2D);
-                            currentTextureID[i] = 0;
-                        }
+                        const auto thisTextureEnabled = (textureIndexMask & (1 << i)) != 0;
 
-                        clearGLError();
+                        if (! thisTextureEnabled)
+                            currentTextureID[i] = 0;
+
+                       #if ! JUCE_ANDROID
+                        if (needsToEnableTexture)
+                        {
+                            if (thisTextureEnabled)
+                                glEnable (GL_TEXTURE_2D);
+                            else
+                                glDisable (GL_TEXTURE_2D);
+
+                            JUCE_CHECK_OPENGL_ERROR
+                        }
                        #endif
                     }
                 }
@@ -1079,6 +1086,7 @@ struct StateHelpers
         GLuint currentTextureID[numTextures];
         int texturesEnabled = 0, currentActiveTexture = -1;
         const OpenGLContext& context;
+        const bool needsToEnableTexture = contextRequiresTexture2DEnableDisable();
 
         ActiveTextures& operator= (const ActiveTextures&);
     };

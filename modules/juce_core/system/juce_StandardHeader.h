@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -27,8 +27,8 @@
 
     See also SystemStats::getJUCEVersion() for a string version.
 */
-#define JUCE_MAJOR_VERSION      6
-#define JUCE_MINOR_VERSION      1
+#define JUCE_MAJOR_VERSION      7
+#define JUCE_MINOR_VERSION      0
 #define JUCE_BUILDNUMBER        2
 
 /** Current JUCE version number.
@@ -41,6 +41,11 @@
 */
 #define JUCE_VERSION   ((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
+#if ! DOXYGEN
+#define JUCE_VERSION_ID \
+    volatile auto juceVersionId = "juce_version_" JUCE_STRINGIFY(JUCE_MAJOR_VERSION) "_" JUCE_STRINGIFY(JUCE_MINOR_VERSION) "_" JUCE_STRINGIFY(JUCE_BUILDNUMBER); \
+    ignoreUnused (juceVersionId);
+#endif
 
 //==============================================================================
 #include <algorithm>
@@ -55,15 +60,19 @@
 #include <limits>
 #include <list>
 #include <map>
-#include <unordered_map>
 #include <memory>
 #include <mutex>
 #include <numeric>
 #include <queue>
+#include <set>
 #include <sstream>
 #include <typeindex>
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
+#include <set>
+#include <optional>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

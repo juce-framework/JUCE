@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -126,8 +126,8 @@ public:
     {
         ModifierKeys::currentModifiers = mods;
 
-        handleMouseEvent (juce::MouseInputSource::mouse, position, mods, juce::MouseInputSource::invalidPressure,
-                          juce::MouseInputSource::invalidOrientation, juce::Time::currentTimeMillis());
+        handleMouseEvent (juce::MouseInputSource::mouse, position, mods, juce::MouseInputSource::defaultPressure,
+                          juce::MouseInputSource::defaultOrientation, juce::Time::currentTimeMillis());
     }
 
     void forwardKeyPress (int code, String name, ModifierKeys mods)
@@ -162,7 +162,9 @@ private:
         {
             ignoreUnused (mode);
 
-            bitmap.data = imageData + x * pixelStride + y * lineStride;
+            const auto offset = (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
+            bitmap.data = imageData + offset;
+            bitmap.size = (size_t) (lineStride * height) - offset;
             bitmap.pixelFormat = pixelFormat;
             bitmap.lineStride = lineStride;
             bitmap.pixelStride = pixelStride;
@@ -199,7 +201,7 @@ private:
 
                 if (! ms.getCurrentModifiers().isLeftButtonDown())
                     owner.handleMouseEvent (juce::MouseInputSource::mouse, owner.globalToLocal (pos.toFloat()), {},
-                                            juce::MouseInputSource::invalidPressure, juce::MouseInputSource::invalidOrientation, juce::Time::currentTimeMillis());
+                                            juce::MouseInputSource::defaultPressure, juce::MouseInputSource::defaultOrientation, juce::Time::currentTimeMillis());
 
                 lastMousePos = pos;
             }
@@ -270,6 +272,7 @@ private:
     bool isFocused() const override                                   { return true; }
     void grabFocus() override                                         {}
     void* getNativeHandle() const override                            { return nullptr; }
+    OptionalBorderSize getFrameSizeIfPresent() const override         { return {}; }
     BorderSize<int> getFrameSize() const override                     { return {}; }
     void setVisible (bool) override                                   {}
     void setTitle (const String&) override                            {}
@@ -283,7 +286,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnityPeer)
 };
 
-ComponentPeer* createUnityPeer (Component& c)    { return new UnityPeer (c); }
+static ComponentPeer* createUnityPeer (Component& c)    { return new UnityPeer (c); }
 
 //==============================================================================
 class AudioProcessorUnityWrapper
@@ -349,6 +352,11 @@ public:
 
     void process (float* inBuffer, float* outBuffer, int bufferSize, int numInChannels, int numOutChannels, bool isBypassed)
     {
+        // If the plugin has a bypass parameter, set it to the current bypass state
+        if (auto* param = pluginInstance->getBypassParameter())
+            if (isBypassed != (param->getValue() >= 0.5f))
+                param->setValueNotifyingHost (isBypassed ? 1.0f : 0.0f);
+
         for (int pos = 0; pos < bufferSize;)
         {
             auto max = jmin (bufferSize - pos, samplesPerBlock);
@@ -451,7 +459,7 @@ private:
             {
                 MidiBuffer mb;
 
-                if (isBypassed)
+                if (isBypassed && pluginInstance->getBypassParameter() == nullptr)
                     pluginInstance->processBlockBypassed (scratchBuffer, mb);
                 else
                     pluginInstance->processBlock (scratchBuffer, mb);
@@ -485,7 +493,7 @@ private:
 };
 
 //==============================================================================
-HashMap<int, AudioProcessorUnityWrapper*>& getWrapperMap()
+static HashMap<int, AudioProcessorUnityWrapper*>& getWrapperMap()
 {
     static HashMap<int, AudioProcessorUnityWrapper*> wrapperMap;
     return wrapperMap;
@@ -502,9 +510,28 @@ static void onWrapperDeletion (AudioProcessorUnityWrapper* wrapperToRemove)
 }
 
 //==============================================================================
-namespace UnityCallbacks
+static UnityAudioEffectDefinition getEffectDefinition()
 {
-    int UNITY_INTERFACE_API createCallback (UnityAudioEffectState* state)
+    const auto wrapper = std::make_unique<AudioProcessorUnityWrapper> (true);
+    const String originalName { JucePlugin_Name };
+    const auto name = (! originalName.startsWithIgnoreCase ("audioplugin") ? "audioplugin_" : "") + originalName;
+
+    UnityAudioEffectDefinition result{};
+    name.copyToUTF8 (result.name, (size_t) numElementsInArray (result.name));
+
+    result.structSize = sizeof (UnityAudioEffectDefinition);
+    result.parameterStructSize = sizeof (UnityAudioParameterDefinition);
+
+    result.apiVersion = UNITY_AUDIO_PLUGIN_API_VERSION;
+    result.pluginVersion = JucePlugin_VersionCode;
+
+    // effects must set this to 0, generators > 0
+    result.channels = (wrapper->getNumInputChannels() != 0 ? 0
+                                                           : static_cast<uint32> (wrapper->getNumOutputChannels()));
+
+    wrapper->declareParameters (result);
+
+    result.create = [] (UnityAudioEffectState* state)
     {
         auto* pluginInstance = new AudioProcessorUnityWrapper (false);
         pluginInstance->create (state);
@@ -514,9 +541,9 @@ namespace UnityCallbacks
         onWrapperCreation (pluginInstance);
 
         return 0;
-    }
+    };
 
-    int UNITY_INTERFACE_API releaseCallback (UnityAudioEffectState* state)
+    result.release = [] (UnityAudioEffectState* state)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         pluginInstance->release();
@@ -528,32 +555,58 @@ namespace UnityCallbacks
             shutdownJuce_GUI();
 
         return 0;
-    }
+    };
 
-    int UNITY_INTERFACE_API resetCallback (UnityAudioEffectState* state)
+    result.reset = [] (UnityAudioEffectState* state)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         pluginInstance->reset();
 
         return 0;
-    }
+    };
 
-    int UNITY_INTERFACE_API setPositionCallback (UnityAudioEffectState* state, unsigned int pos)
+    result.setPosition = [] (UnityAudioEffectState* state, unsigned int pos)
     {
         ignoreUnused (state, pos);
 
         return 0;
-    }
+    };
 
-    int UNITY_INTERFACE_API setFloatParameterCallback (UnityAudioEffectState* state, int index, float value)
+    result.process = [] (UnityAudioEffectState* state,
+                         float* inBuffer,
+                         float* outBuffer,
+                         unsigned int bufferSize,
+                         int numInChannels,
+                         int numOutChannels)
+    {
+        auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
+
+        if (pluginInstance != nullptr)
+        {
+            auto isPlaying = ((state->flags & stateIsPlaying) != 0);
+            auto isMuted   = ((state->flags & stateIsMuted)   != 0);
+            auto isPaused  = ((state->flags & stateIsPaused)  != 0);
+
+            const auto bypassed = ! isPlaying || (isMuted || isPaused);
+            pluginInstance->process (inBuffer, outBuffer, static_cast<int> (bufferSize), numInChannels, numOutChannels, bypassed);
+        }
+        else
+        {
+            FloatVectorOperations::clear (outBuffer, static_cast<int> (bufferSize) * numOutChannels);
+        }
+
+        return 0;
+    };
+
+    result.setFloatParameter = [] (UnityAudioEffectState* state, int index, float value)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         pluginInstance->setParameter (index, value);
 
         return 0;
-    }
+    };
 
-    int UNITY_INTERFACE_API getFloatParameterCallback (UnityAudioEffectState* state, int index, float* value, char* valueStr)
+    result.getFloatParameter = [] (UnityAudioEffectState* state, int index, float* value, char* valueStr)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         *value = pluginInstance->getParameter (index);
@@ -561,21 +614,21 @@ namespace UnityCallbacks
         pluginInstance->getParameterString (index).copyToUTF8 (valueStr, 15);
 
         return 0;
-    }
+    };
 
-    int UNITY_INTERFACE_API getFloatBufferCallback (UnityAudioEffectState* state, const char* name, float* buffer, int numSamples)
+    result.getFloatBuffer = [] (UnityAudioEffectState* state, const char* kind, float* buffer, int numSamples)
     {
         ignoreUnused (numSamples);
 
-        auto nameStr = String (name);
+        const StringRef kindStr { kind };
 
-        if (nameStr == "Editor")
+        if (kindStr == StringRef ("Editor"))
         {
             auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
 
             buffer[0] = pluginInstance->hasEditor() ? 1.0f : 0.0f;
         }
-        else if (nameStr == "ID")
+        else if (kindStr == StringRef ("ID"))
         {
             auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
 
@@ -590,7 +643,7 @@ namespace UnityCallbacks
 
             return 0;
         }
-        else if (nameStr == "Size")
+        else if (kindStr == StringRef ("Size"))
         {
             auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
 
@@ -605,88 +658,31 @@ namespace UnityCallbacks
         }
 
         return 0;
-    }
+    };
 
-    int UNITY_INTERFACE_API processCallback (UnityAudioEffectState* state, float* inBuffer, float* outBuffer,
-                                             unsigned int bufferSize, int numInChannels, int numOutChannels)
-    {
-        auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
-
-        if (pluginInstance != nullptr)
-        {
-            auto isPlaying = ((state->flags & stateIsPlaying) != 0);
-            auto isMuted   = ((state->flags & stateIsMuted)   != 0);
-            auto isPaused  = ((state->flags & stateIsPaused)  != 0);
-
-            auto bypassed = ! isPlaying || (isMuted || isPaused);
-
-            pluginInstance->process (inBuffer, outBuffer, static_cast<int> (bufferSize), numInChannels, numOutChannels, bypassed);
-        }
-        else
-        {
-            FloatVectorOperations::clear (outBuffer, static_cast<int> (bufferSize) * numOutChannels);
-        }
-
-        return 0;
-    }
-}
-
-//==============================================================================
-static void declareEffect (UnityAudioEffectDefinition& definition)
-{
-    memset (&definition, 0, sizeof (definition));
-
-    std::unique_ptr<AudioProcessorUnityWrapper> wrapper = std::make_unique<AudioProcessorUnityWrapper> (true);
-
-    String name (JucePlugin_Name);
-    if (! name.startsWithIgnoreCase ("audioplugin"))
-        name = "audioplugin_" + name;
-
-    name.copyToUTF8 (definition.name, (size_t) numElementsInArray (definition.name));
-
-    definition.structSize = sizeof (UnityAudioEffectDefinition);
-    definition.parameterStructSize = sizeof (UnityAudioParameterDefinition);
-
-    definition.apiVersion = UNITY_AUDIO_PLUGIN_API_VERSION;
-    definition.pluginVersion = JucePlugin_VersionCode;
-
-    // effects must set this to 0, generators > 0
-    definition.channels = (wrapper->getNumInputChannels() != 0 ? 0
-                                                               : static_cast<uint32> (wrapper->getNumOutputChannels()));
-
-    wrapper->declareParameters (definition);
-
-    definition.create            = UnityCallbacks::createCallback;
-    definition.release           = UnityCallbacks::releaseCallback;
-    definition.reset             = UnityCallbacks::resetCallback;
-    definition.setPosition       = UnityCallbacks::setPositionCallback;
-    definition.process           = UnityCallbacks::processCallback;
-    definition.setFloatParameter = UnityCallbacks::setFloatParameterCallback;
-    definition.getFloatParameter = UnityCallbacks::getFloatParameterCallback;
-    definition.getFloatBuffer    = UnityCallbacks::getFloatBufferCallback;
+    return result;
 }
 
 } // namespace juce
 
+// From reading the example code, it seems that the triple indirection indicates
+// an out-value of an array of pointers. That is, after calling this function, definitionsPtr
+// should point to a pre-existing/static array of pointer-to-effect-definition.
 UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API UnityGetAudioEffectDefinitions (UnityAudioEffectDefinition*** definitionsPtr)
 {
     if (juce::getWrapperMap().size() == 0)
         juce::initialiseJuce_GUI();
 
-    static bool hasInitialised = false;
-
-    if (! hasInitialised)
+    static std::once_flag flag;
+    std::call_once (flag, []
     {
         juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Unity;
         juce::juce_createUnityPeerFn = juce::createUnityPeer;
+    });
 
-        hasInitialised = true;
-    }
-
-    auto* definition = new UnityAudioEffectDefinition();
-    juce::declareEffect (*definition);
-
-    *definitionsPtr = &definition;
+    static auto definition = juce::getEffectDefinition();
+    static UnityAudioEffectDefinition* definitions[] { &definition };
+    *definitionsPtr = definitions;
 
     return 1;
 }
@@ -769,6 +765,8 @@ UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API unitySetScreenBounds (int id, fl
 
 //==============================================================================
 #if JUCE_WINDOWS
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
  extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID)
  {
      if (reason == DLL_PROCESS_ATTACH)
@@ -776,6 +774,8 @@ UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API unitySetScreenBounds (int id, fl
 
      return true;
  }
+
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 #endif

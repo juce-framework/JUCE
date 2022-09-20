@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -186,6 +186,21 @@ public:
     */
     virtual bool replaceColour (Colour originalColour, Colour replacementColour);
 
+    /** Sets a transformation that applies to the same coordinate system in which the rest of the
+        draw calls are made. You almost certainly want to call this function when working with
+        Drawables as opposed to Component::setTransform().
+
+        The reason for this is that the origin of a Drawable is not the same as the point returned
+        by Component::getPosition() but has an additional offset internal to the Drawable class.
+
+        Using setDrawableTransform() will take this internal offset into account when applying the
+        transform to the Component base.
+
+        You can only use Drawable::setDrawableTransform() or Component::setTransform() for a given
+        object. Using both will lead to unpredictable behaviour.
+    */
+    void setDrawableTransform (const AffineTransform& transform);
+
 protected:
     //==============================================================================
     friend class DrawableComposite;
@@ -202,8 +217,10 @@ protected:
 
     Point<int> originRelativeToComponent;
     std::unique_ptr<Drawable> drawableClipPath;
+    AffineTransform drawableTransform;
 
     void nonConstDraw (Graphics&, float opacity, const AffineTransform&);
+    void updateTransform();
 
     Drawable (const Drawable&);
     Drawable& operator= (const Drawable&);

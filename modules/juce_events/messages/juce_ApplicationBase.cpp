@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -279,8 +279,8 @@ bool JUCEApplicationBase::initialiseApp()
     }
    #endif
 
-   #if JUCE_WINDOWS && JUCE_STANDALONE_APPLICATION && (! defined (_CONSOLE)) && (! JUCE_MINGW)
-    if (AttachConsole (ATTACH_PARENT_PROCESS) != 0)
+   #if JUCE_WINDOWS && (! defined (_CONSOLE)) && (! JUCE_MINGW)
+    if (isStandaloneApp() && AttachConsole (ATTACH_PARENT_PROCESS) != 0)
     {
         // if we've launched a GUI app from cmd.exe or PowerShell, we need this to enable printf etc.
         // However, only reassign stdout, stderr, stdin if they have not been already opened by

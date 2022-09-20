@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,6 +26,13 @@
 namespace juce
 {
 
+/** Properties of an AudioParameterChoice.
+
+    @see AudioParameterChoice(), RangedAudioParameterAttributes()
+*/
+class AudioParameterChoiceAttributes : public RangedAudioParameterAttributes<AudioParameterChoiceAttributes, int> {};
+
+//==============================================================================
 /**
     Provides a class of AudioProcessorParameter that can be used to select
     an indexed, named choice from a list.
@@ -39,9 +46,32 @@ class JUCE_API  AudioParameterChoice  : public RangedAudioParameter
 public:
     /** Creates a AudioParameterChoice with the specified parameters.
 
+        Note that the attributes argument is optional and only needs to be
+        supplied if you want to change options from their default values.
+
+        Example usage:
+        @code
+        auto attributes = AudioParameterChoiceAttributes().withLabel ("selected");
+        auto param = std::make_unique<AudioParameterChoice> ("paramID", "Parameter Name", StringArray { "a", "b", "c" }, 0, attributes);
+        @endcode
+
         @param parameterID         The parameter ID to use
         @param parameterName       The parameter name to use
         @param choices             The set of choices to use
+        @param defaultItemIndex    The index of the default choice
+        @param attributes          Optional characteristics
+    */
+    AudioParameterChoice (const ParameterID& parameterID,
+                          const String& parameterName,
+                          const StringArray& choices,
+                          int defaultItemIndex,
+                          const AudioParameterChoiceAttributes& attributes = {});
+
+    /** Creates a AudioParameterChoice with the specified parameters.
+
+        @param parameterID         The parameter ID to use
+        @param parameterName       The parameter name to use
+        @param choicesToUse        The set of choices to use
         @param defaultItemIndex    The index of the default choice
         @param parameterLabel      An optional label for the parameter's value
         @param stringFromIndex     An optional lambda function that converts a choice
@@ -51,12 +81,23 @@ public:
                                    converts it into a choice index. Some hosts use this
                                    to allow users to type in parameter values.
     */
-    AudioParameterChoice (const String& parameterID, const String& parameterName,
-                          const StringArray& choices,
+    [[deprecated ("Prefer the signature taking an Attributes argument")]]
+    AudioParameterChoice (const ParameterID& parameterID,
+                          const String& parameterName,
+                          const StringArray& choicesToUse,
                           int defaultItemIndex,
-                          const String& parameterLabel = String(),
+                          const String& parameterLabel,
                           std::function<String (int index, int maximumStringLength)> stringFromIndex = nullptr,
-                          std::function<int (const String& text)> indexFromString = nullptr);
+                          std::function<int (const String& text)> indexFromString = nullptr)
+        : AudioParameterChoice (parameterID,
+                                parameterName,
+                                choicesToUse,
+                                defaultItemIndex,
+                                AudioParameterChoiceAttributes().withLabel (parameterLabel)
+                                                                .withStringFromValueFunction (std::move (stringFromIndex))
+                                                                .withValueFromStringFunction (std::move (indexFromString)))
+    {
+    }
 
     /** Destructor. */
     ~AudioParameterChoice() override;

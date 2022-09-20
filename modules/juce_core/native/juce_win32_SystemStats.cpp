@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -191,7 +191,7 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 
 //==============================================================================
 #if JUCE_MINGW
- static uint32 getWindowsVersion()
+ static uint64 getWindowsVersion()
  {
      auto filename = _T("kernel32.dll");
      DWORD handle = 0;
@@ -207,13 +207,14 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 
              if (VerQueryValue (data, (LPCTSTR) _T("\\"), (void**) &info, &verSize))
                  if (size > 0 && info != nullptr && info->dwSignature == 0xfeef04bd)
-                     return (uint32) info->dwFileVersionMS;
+                     return ((uint64) info->dwFileVersionMS << 32) | (uint64) info->dwFileVersionLS;
          }
      }
 
      return 0;
  }
 #else
+ RTL_OSVERSIONINFOW getWindowsVersionInfo();
  RTL_OSVERSIONINFOW getWindowsVersionInfo()
  {
      RTL_OSVERSIONINFOW versionInfo = {};
@@ -239,24 +240,27 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
    #if JUCE_MINGW
-    auto v = getWindowsVersion();
-    auto major = (v >> 16) & 0xff;
-    auto minor = (v >> 0)  & 0xff;
+    const auto v = getWindowsVersion();
+    const auto major = (v >> 48) & 0xffff;
+    const auto minor = (v >> 32) & 0xffff;
+    const auto build = (v >> 16) & 0xffff;
    #else
-    auto versionInfo = getWindowsVersionInfo();
-    auto major = versionInfo.dwMajorVersion;
-    auto minor = versionInfo.dwMinorVersion;
+    const auto versionInfo = getWindowsVersionInfo();
+    const auto major = versionInfo.dwMajorVersion;
+    const auto minor = versionInfo.dwMinorVersion;
+    const auto build = versionInfo.dwBuildNumber;
    #endif
 
     jassert (major <= 10); // need to add support for new version!
 
-    if (major == 10)                 return Windows10;
-    if (major == 6 && minor == 3)    return Windows8_1;
-    if (major == 6 && minor == 2)    return Windows8_0;
-    if (major == 6 && minor == 1)    return Windows7;
-    if (major == 6 && minor == 0)    return WinVista;
-    if (major == 5 && minor == 1)    return WinXP;
-    if (major == 5 && minor == 0)    return Win2000;
+    if (major == 10 && build >= 22000) return Windows11;
+    if (major == 10)                   return Windows10;
+    if (major == 6 && minor == 3)      return Windows8_1;
+    if (major == 6 && minor == 2)      return Windows8_0;
+    if (major == 6 && minor == 1)      return Windows7;
+    if (major == 6 && minor == 0)      return WinVista;
+    if (major == 5 && minor == 1)      return WinXP;
+    if (major == 5 && minor == 0)      return Win2000;
 
     jassertfalse;
     return UnknownOS;
@@ -268,6 +272,7 @@ String SystemStats::getOperatingSystemName()
 
     switch (getOperatingSystemType())
     {
+        case Windows11:         name = "Windows 11";        break;
         case Windows10:         name = "Windows 10";        break;
         case Windows8_1:        name = "Windows 8.1";       break;
         case Windows8_0:        name = "Windows 8.0";       break;
@@ -585,6 +590,35 @@ String SystemStats::getDisplayLanguage()
     // The buffer contains a zero delimited list of languages, the first being
     // the currently displayed language.
     return languagesBuffer.data();
+}
+
+String SystemStats::getUniqueDeviceID()
+{
+    #define PROVIDER(string) (DWORD) (string[0] << 24 | string[1] << 16 | string[2] << 8 | string[3])
+
+    auto bufLen = GetSystemFirmwareTable (PROVIDER ("RSMB"), PROVIDER ("RSDT"), nullptr, 0);
+
+    if (bufLen > 0)
+    {
+        HeapBlock<uint8_t> buffer { bufLen };
+        GetSystemFirmwareTable (PROVIDER ("RSMB"), PROVIDER ("RSDT"), (void*) buffer.getData(), bufLen);
+
+        return [&]
+        {
+            uint64_t hash = 0;
+            const auto start = buffer.getData();
+            const auto end = start + jmin (1024, (int) bufLen);
+
+            for (auto dataPtr = start; dataPtr != end; ++dataPtr)
+                hash = hash * (uint64_t) 101 + *dataPtr;
+
+            return String (hash);
+        }();
+    }
+
+    // Please tell someone at JUCE if this occurs
+    jassertfalse;
+    return {};
 }
 
 } // namespace juce

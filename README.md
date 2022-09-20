@@ -1,11 +1,11 @@
 ![alt text](https://assets.juce.com/juce/JUCE_banner_github.png "JUCE")
 
 JUCE is an open-source cross-platform C++ application framework for creating high quality
-desktop and mobile applications, including VST, VST3, AU, AUv3, RTAS and AAX audio plug-ins.
-JUCE can be easily integrated with existing projects via CMake, or can be used as a project
-generation tool via the [Projucer](https://juce.com/discover/projucer), which supports
-exporting projects for Xcode (macOS and iOS), Visual Studio, Android Studio, Code::Blocks
-and Linux Makefiles as well as containing a source code editor.
+desktop and mobile applications, including VST, VST3, AU, AUv3, AAX and LV2 audio plug-ins
+and plug-in hosts. JUCE can be easily integrated with existing projects via CMake, or can
+be used as a project generation tool via the [Projucer](https://juce.com/discover/projucer),
+which supports exporting projects for Xcode (macOS and iOS), Visual Studio, Android Studio,
+Code::Blocks and Linux Makefiles as well as containing a source code editor.
 
 ## Getting Started
 
@@ -24,7 +24,7 @@ tool) or with CMake.
 The repository doesn't contain a pre-built Projucer so you will need to build it
 for your platform - Xcode, Visual Studio and Linux Makefile projects are located in
 [extras/Projucer/Builds](/extras/Projucer/Builds)
-(the minumum system requirements are listed in the __System Requirements__ section below).
+(the minimum system requirements are listed in the __System Requirements__ section below).
 The Projucer can then be used to create new JUCE projects, view tutorials and run examples.
 It is also possible to include the JUCE modules source code in an existing project directly,
 or build them into a static or dynamic library which can be linked into a project.
@@ -56,9 +56,9 @@ of the target you wish to build.
 
 #### Building JUCE Projects
 
-- __macOS/iOS__: Xcode 9.2 (macOS 10.12.6)
-- __Windows__: Windows 8.1 and Visual Studio 2015 Update 3 64-bit
-- __Linux__: g++ 5.0 or Clang 3.4 (for a full list of dependencies, see
+- __macOS/iOS__: Xcode 10.1 (macOS 10.13.6)
+- __Windows__: Windows 8.1 and Visual Studio 2017
+- __Linux__: g++ 7.0 or Clang 6.0 (for a full list of dependencies, see
 [here](/docs/Linux%20Dependencies.md)).
 - __Android__: Android Studio on Windows, macOS or Linux
 
@@ -72,25 +72,47 @@ of the target you wish to build.
 
 ## Contributing
 
-For bug reports and features requests, please visit the [JUCE Forum](https://forum.juce.com/) -
-the JUCE developers are active there and will read every post and respond accordingly. When
-submitting a bug report, please ensure that it follows the
-[issue template](/.github/ISSUE_TEMPLATE.txt).
-We don't accept third party GitHub pull requests directly due to copyright restrictions
-but if you would like to contribute any changes please contact us.
+Please see our [contribution guidelines](.github/contributing.md).
 
-## License
+## Licensing
 
 The core JUCE modules (juce_audio_basics, juce_audio_devices, juce_core and juce_events)
 are permissively licensed under the terms of the
 [ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
 Other modules are covered by a
-[GPL/Commercial license](https://www.gnu.org/licenses/gpl-3.0.en.html).
+[GPL](https://www.gnu.org/licenses/gpl-3.0.en.html)/Commercial license.
 
 There are multiple commercial licensing tiers for JUCE, with different terms for each:
 - JUCE Personal (developers or startup businesses with revenue under 50K USD) - free
-- JUCE Indie (small businesses with revenue under 500K USD) - $40/month
-- JUCE Pro (no revenue limit) - $130/month
+- JUCE Indie (small businesses with revenue under 500K USD) - $40/month or $800 perpetual
+- JUCE Pro (no revenue limit) - $130/month or $2600 perpetual
 - JUCE Educational (no revenue limit) - free for bona fide educational institutes
 
 For full terms see [LICENSE.md](LICENSE.md).
+
+The JUCE framework contains the following dependencies:
+- [Oboe](modules/juce_audio_devices/native/oboe/) ([Apache 2.0](modules/juce_audio_devices/native/oboe/LICENSE))
+- [FLAC](modules/juce_audio_formats/codecs/flac/) ([BSD](modules/juce_audio_formats/codecs/flac/Flac%20Licence.txt))
+- [Ogg Vorbis](modules/juce_audio_formats/codecs/oggvorbis/) ([BSD](modules/juce_audio_formats/codecs/oggvorbis/Ogg%20Vorbis%20Licence.txt))
+- [AudioUnitSDK](modules/juce_audio_plugin_client/AU/AudioUnitSDK/) ([Apache 2.0](modules/juce_audio_plugin_client/AU/AudioUnitSDK/LICENSE.txt))
+- [AUResources.r](modules/juce_audio_plugin_client/AUResources.r) ([Apple](modules/juce_audio_plugin_client/AUResources.r))
+- [LV2](modules/juce_audio_processors/format_types/LV2_SDK/) ([ISC](modules/juce_audio_processors/format_types/LV2_SDK/lv2/COPYING))
+- [pslextensions](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h) ([Public domain](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h))
+- [VST3](modules/juce_audio_processors/format_types/VST3_SDK/) ([Proprietary Steinberg VST3/GPLv3](modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt))
+- [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
+- [Box2D](modules/juce_box2d/box2d/) ([zlib](modules/juce_box2d/box2d/Box2D.h))
+- [jpeglib](modules/juce_graphics/image_formats/jpglib/) ([Independent JPEG Group License](modules/juce_graphics/image_formats/jpglib/README))
+- [pnglib](modules/juce_graphics/image_formats/pnglib/) ([zlib](modules/juce_graphics/image_formats/pnglib/LICENSE))
+- [GLEW](modules/juce_opengl/opengl/juce_gl.h) ([BSD](modules/juce_opengl/opengl/juce_gl.h)), including [Mesa](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h)) and [Khronos](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h))
+
+The JUCE examples are licensed under the terms of the
+[ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
+
+Dependencies in the examples:
+- [reaper-sdk](examples/Plugins/extern/) ([zlib](examples/Plugins/extern/LICENSE.md))
+
+Dependencies in the bundled applications:
+- [Projucer icons](extras/Projucer/Source/Utility/UI/jucer_Icons.cpp) ([MIT](extras/Projucer/Source/Utility/UI/jucer_Icons.cpp))
+
+Dependencies in the build system:
+- [Android Gradle](examples/DemoRunner/Builds/Android/gradle/wrapper/LICENSE-for-gradlewrapper.txt) ([Apache 2.0](examples/DemoRunner/Builds/Android/gradle/wrapper/LICENSE-for-gradlewrapper.txt))

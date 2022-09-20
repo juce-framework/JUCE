@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -33,7 +33,7 @@
                         juce_audio_plugin_client, juce_audio_processors,
                         juce_audio_utils, juce_core, juce_data_structures,
                         juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:             xcode_mac, vs2019, linux_make
+ exporters:             xcode_mac, vs2022, linux_make
 
  moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -80,6 +80,9 @@ public:
     template <typename It>
     void addMessages (It begin, It end)
     {
+        if (begin == end)
+            return;
+
         const auto numNewMessages = (int) std::distance (begin, end);
         const auto numToAdd = juce::jmin (numToStore, numNewMessages);
         const auto numToRemove = jmax (0, (int) messages.size() + numToAdd - numToStore);
@@ -125,6 +128,7 @@ public:
         {
             auto header = std::make_unique<TableHeaderComponent>();
             header->addColumn ("Message", messageColumn, 200, 30, -1, TableHeaderComponent::notSortable);
+            header->addColumn ("Time",    timeColumn,    100, 30, -1, TableHeaderComponent::notSortable);
             header->addColumn ("Channel", channelColumn, 100, 30, -1, TableHeaderComponent::notSortable);
             header->addColumn ("Data",    dataColumn,    200, 30, -1, TableHeaderComponent::notSortable);
             return header;
@@ -141,6 +145,7 @@ private:
     enum
     {
         messageColumn = 1,
+        timeColumn,
         channelColumn,
         dataColumn
     };
@@ -165,6 +170,7 @@ private:
             switch (columnId)
             {
                 case messageColumn: return getEventString (message);
+                case timeColumn:    return String (message.getTimeStamp());
                 case channelColumn: return String (message.getChannel());
                 case dataColumn:    return getDataString (message);
                 default:            break;
@@ -221,7 +227,7 @@ public:
     MidiLoggerPluginDemoProcessor()
         : AudioProcessor (getBusesLayout())
     {
-        state.addChild ({ "uiState", { { "width",  500 }, { "height", 300 } }, {} }, -1, nullptr);
+        state.addChild ({ "uiState", { { "width",  600 }, { "height", 300 } }, {} }, -1, nullptr);
         startTimerHz (60);
     }
 

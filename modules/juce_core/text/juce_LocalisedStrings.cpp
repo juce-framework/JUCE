@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -46,10 +46,6 @@ LocalisedStrings& LocalisedStrings::operator= (const LocalisedStrings& other)
     translations = other.translations;
     fallback.reset (createCopyIfNotNull (other.fallback.get()));
     return *this;
-}
-
-LocalisedStrings::~LocalisedStrings()
-{
 }
 
 //==============================================================================

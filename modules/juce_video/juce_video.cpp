@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -44,14 +44,11 @@
  #import <AVKit/AVKit.h>
 
 //==============================================================================
-#elif JUCE_WINDOWS && ! JUCE_MINGW
- /* If you're using the camera classes, you'll need access to a few DirectShow headers.
-     These files are provided in the normal Windows SDK. */
- #include <dshow.h>
- #include <dshowasf.h>
- #include <evr.h>
+#elif JUCE_WINDOWS
+ #include "wmsdkidl.h"
+ #include "native/juce_win32_ComTypes.h"
 
- #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if ! JUCE_MINGW && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment (lib, "strmiids.lib")
 
   #if JUCE_USE_CAMERA

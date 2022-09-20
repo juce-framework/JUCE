@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -79,7 +79,7 @@ namespace build_tools
         if (isAppGroupsEnabled)
         {
             auto appGroups = StringArray::fromTokens (appGroupIdString, ";", {});
-            auto groups = String ("<array>");
+            String groups = "<array>";
 
             for (auto group : appGroups)
                 groups += "\n\t\t<string>" + group.trim() + "</string>";
@@ -101,13 +101,27 @@ namespace build_tools
             {
                 // no other sandbox options can be specified if sandbox inheritance is enabled!
                 jassert (appSandboxOptions.isEmpty());
+                jassert (appSandboxTemporaryPaths.empty());
 
                 entitlements.set ("com.apple.security.inherit", "<true/>");
             }
 
             if (isAppSandboxEnabled)
+            {
                 for (auto& option : appSandboxOptions)
                     entitlements.set (option, "<true/>");
+
+                for (auto& option : appSandboxTemporaryPaths)
+                {
+                    String paths = "<array>";
+
+                    for (const auto& path : option.values)
+                        paths += "\n\t\t<string>" + path + "</string>";
+
+                    paths += "\n\t</array>";
+                    entitlements.set (option.key, paths);
+                }
+            }
         }
 
         if (isNetworkingMulticastEnabled)

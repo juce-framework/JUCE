@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -71,7 +71,7 @@ namespace juce
     #pragma intrinsic (__debugbreak)
   #endif
   #define JUCE_BREAK_IN_DEBUGGER        { __debugbreak(); }
-#elif JUCE_INTEL && (JUCE_GCC || JUCE_MAC)
+#elif JUCE_INTEL && (JUCE_GCC || JUCE_CLANG || JUCE_MAC)
   #if JUCE_NO_INLINE_ASM
    #define JUCE_BREAK_IN_DEBUGGER       { }
   #else

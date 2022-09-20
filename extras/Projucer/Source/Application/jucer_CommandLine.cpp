@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -330,7 +330,7 @@ namespace
 
                     var moduleInfo (new DynamicObject());
                     moduleInfo.getDynamicObject()->setProperty ("file", getModulePackageName (module));
-                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo.getModuleInfo());
+                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleDescription.getModuleInfo());
                     infoList.append (moduleInfo);
                 }
             }
@@ -715,7 +715,7 @@ namespace
 
     static bool isValidPathIdentifier (const String& id, const String& os)
     {
-        return id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
+        return id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || id == "araPath"
             || id == "androidSDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
     }
 
@@ -877,7 +877,7 @@ namespace
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
                   << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
-                  << "defaultJuceModulePath, defaultUserModulePath, vstLegacyPath, aaxPath (not valid on linux), rtasPath (not valid on linux), or androidSDKPath. " << std::endl
+                  << "defaultJuceModulePath, defaultUserModulePath, vstLegacyPath, aaxPath (not valid on linux), or androidSDKPath. " << std::endl
                   << std::endl
                   << " " << appName << " --create-project-from-pip path/to/PIP path/to/output path/to/JUCE/modules (optional) path/to/user/modules (optional)" << std::endl
                   << "    Generates a folder containing a JUCE project in the specified output path using the specified PIP file. Use the optional JUCE and user module paths to override "

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -57,6 +57,7 @@ namespace build_tools
         virtual bool isGUIApplication() const       { return false; }
         virtual bool isCommandLineApp() const       { return false; }
         virtual bool isAudioPlugin() const          { return false; }
+        virtual bool isARAAudioPlugin() const       { return false; }
 
         //==============================================================================
         struct Target
@@ -71,14 +72,17 @@ namespace build_tools
                 VSTPlugIn         = 10,
                 VST3PlugIn        = 11,
                 AAXPlugIn         = 12,
-                RTASPlugIn        = 13,
+
                 AudioUnitPlugIn   = 14,
                 AudioUnitv3PlugIn = 15,
                 StandalonePlugIn  = 16,
                 UnityPlugIn       = 17,
+                LV2PlugIn         = 18,
 
                 SharedCodeTarget  = 20, // internal
                 AggregateTarget   = 21,
+
+                LV2TurtleProgram  = 25, // internal
 
                 unspecified       = 30
             };
@@ -110,12 +114,12 @@ namespace build_tools
                     case StandalonePlugIn:  return "Standalone Plugin";
                     case AudioUnitv3PlugIn: return "AUv3 AppExtension";
                     case AAXPlugIn:         return "AAX";
-                    case RTASPlugIn:        return "RTAS";
                     case UnityPlugIn:       return "Unity Plugin";
+                    case LV2PlugIn:         return "LV2 Plugin";
                     case SharedCodeTarget:  return "Shared Code";
                     case AggregateTarget:   return "All";
-                    case unspecified:
-                    default:                break;
+                    case LV2TurtleProgram:  return "LV2 Manifest Helper";
+                    case unspecified:       break;
                 }
 
                 return "undefined";
@@ -123,20 +127,21 @@ namespace build_tools
 
             static Type typeFromName (const String& name)
             {
-                if (name == "App") return Type::GUIApp;
-                if (name == "ConsoleApp") return Type::ConsoleApp;
-                if (name == "Static Library") return Type::StaticLibrary;
-                if (name == "Dynamic Library") return Type::DynamicLibrary;
-                if (name == "VST") return Type::VSTPlugIn;
-                if (name == "VST3") return Type::VST3PlugIn;
-                if (name == "AU") return Type::AudioUnitPlugIn;
-                if (name == "Standalone Plugin") return Type::StandalonePlugIn;
-                if (name == "AUv3 AppExtension") return Type::AudioUnitv3PlugIn;
-                if (name == "AAX") return Type::AAXPlugIn;
-                if (name == "RTAS") return Type::RTASPlugIn;
-                if (name == "Unity Plugin") return Type::UnityPlugIn;
-                if (name == "Shared Code") return Type::SharedCodeTarget;
-                if (name == "All") return Type::AggregateTarget;
+                if (name == "App")                  return Type::GUIApp;
+                if (name == "ConsoleApp")           return Type::ConsoleApp;
+                if (name == "Static Library")       return Type::StaticLibrary;
+                if (name == "Dynamic Library")      return Type::DynamicLibrary;
+                if (name == "VST")                  return Type::VSTPlugIn;
+                if (name == "VST3")                 return Type::VST3PlugIn;
+                if (name == "AU")                   return Type::AudioUnitPlugIn;
+                if (name == "Standalone Plugin")    return Type::StandalonePlugIn;
+                if (name == "AUv3 AppExtension")    return Type::AudioUnitv3PlugIn;
+                if (name == "AAX")                  return Type::AAXPlugIn;
+                if (name == "Unity Plugin")         return Type::UnityPlugIn;
+                if (name == "LV2 Plugin")           return Type::LV2PlugIn;
+                if (name == "Shared Code")          return Type::SharedCodeTarget;
+                if (name == "All")                  return Type::AggregateTarget;
+                if (name == "LV2 Manifest Helper")  return Type::LV2TurtleProgram;
 
                 jassertfalse;
                 return Type::ConsoleApp;
@@ -156,12 +161,13 @@ namespace build_tools
                     case StandalonePlugIn:  return executable;
                     case AudioUnitv3PlugIn: return macOSAppex;
                     case AAXPlugIn:         return pluginBundle;
-                    case RTASPlugIn:        return pluginBundle;
                     case UnityPlugIn:       return pluginBundle;
+                    case LV2PlugIn:         return pluginBundle;
                     case SharedCodeTarget:  return staticLibrary;
+                    case LV2TurtleProgram:  return executable;
                     case AggregateTarget:
                     case unspecified:
-                    default:                break;
+                        break;
                 }
 
                 return unknown;
@@ -238,7 +244,43 @@ namespace build_tools
                 case Target::VSTPlugIn:
                 case Target::VST3PlugIn:
                 case Target::AAXPlugIn:
-                case Target::RTASPlugIn:
+                case Target::AudioUnitPlugIn:
+                case Target::AudioUnitv3PlugIn:
+                case Target::StandalonePlugIn:
+                case Target::UnityPlugIn:
+                case Target::LV2PlugIn:
+                case Target::LV2TurtleProgram:
+                case Target::SharedCodeTarget:
+                case Target::AggregateTarget:
+                    return true;
+
+                case Target::GUIApp:
+                case Target::ConsoleApp:
+                case Target::StaticLibrary:
+                case Target::DynamicLibrary:
+                case Target::unspecified:
+                    break;
+            }
+
+            return false;
+        }
+    };
+
+    struct ProjectType_ARAAudioPlugin : public ProjectType
+    {
+        ProjectType_ARAAudioPlugin() : ProjectType (getTypeName(), "ARA Audio Plug-in") {}
+
+        static const char* getTypeName() noexcept { return "araaudioplug"; }
+        bool isAudioPlugin() const override { return true; }
+        bool isARAAudioPlugin() const override { return true; }
+
+        bool supportsTargetType (Target::Type targetType) const override
+        {
+            switch (targetType)
+            {
+                case Target::VSTPlugIn:
+                case Target::VST3PlugIn:
+                case Target::AAXPlugIn:
                 case Target::AudioUnitPlugIn:
                 case Target::AudioUnitv3PlugIn:
                 case Target::StandalonePlugIn:
@@ -252,7 +294,8 @@ namespace build_tools
                 case Target::StaticLibrary:
                 case Target::DynamicLibrary:
                 case Target::unspecified:
-                default:
+                case Target::LV2PlugIn:
+                case Target::LV2TurtleProgram:
                     break;
             }
 
@@ -268,8 +311,9 @@ namespace build_tools
         static ProjectType_StaticLibrary staticLib;
         static ProjectType_DLL dll;
         static ProjectType_AudioPlugin plugin;
+        static ProjectType_ARAAudioPlugin araplugin;
 
-        return Array<ProjectType*>(&guiApp, &consoleApp, &staticLib, &dll, &plugin);
+        return Array<ProjectType*>(&guiApp, &consoleApp, &staticLib, &dll, &plugin, &araplugin);
     }
 }
 }

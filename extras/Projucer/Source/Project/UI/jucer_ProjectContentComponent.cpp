@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -400,7 +400,12 @@ bool ProjectContentComponent::goToCounterpart()
 
 void ProjectContentComponent::saveProjectAsync()
 {
-    if (project != nullptr)
+    if (project == nullptr)
+        return;
+
+    if (project->isTemporaryProject())
+        project->saveAndMoveTemporaryProject (false);
+    else
         project->saveAsync (true, true, nullptr);
 }
 
@@ -501,6 +506,12 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
     {
         if (saveFirst)
         {
+            if (project->isTemporaryProject())
+            {
+                project->saveAndMoveTemporaryProject (true);
+                return;
+            }
+
             SafePointer<ProjectContentComponent> safeThis { this };
             project->saveAsync (true, true, [safeThis] (Project::SaveResult r)
                                 {
@@ -848,31 +859,31 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
     switch (info.commandID)
     {
-        case CommandIDs::saveProject:               saveProjectAsync();  break;
-        case CommandIDs::closeProject:              closeProject();      break;
-        case CommandIDs::saveDocument:              saveDocumentAsync(); break;
-        case CommandIDs::saveDocumentAs:            saveAsAsync();       break;
-        case CommandIDs::closeDocument:             closeDocument();     break;
-        case CommandIDs::goToPreviousDoc:           goToPreviousFile();  break;
-        case CommandIDs::goToNextDoc:               goToNextFile();      break;
-        case CommandIDs::goToCounterpart:           goToCounterpart();   break;
+        case CommandIDs::saveProject:               saveProjectAsync();             break;
+        case CommandIDs::closeProject:              closeProject();                 break;
+        case CommandIDs::saveDocument:              saveDocumentAsync();            break;
+        case CommandIDs::saveDocumentAs:            saveAsAsync();                  break;
+        case CommandIDs::closeDocument:             closeDocument();                break;
+        case CommandIDs::goToPreviousDoc:           goToPreviousFile();             break;
+        case CommandIDs::goToNextDoc:               goToNextFile();                 break;
+        case CommandIDs::goToCounterpart:           goToCounterpart();              break;
 
-        case CommandIDs::showProjectSettings:       showProjectSettings();         break;
-        case CommandIDs::showFileExplorerPanel:     showFilesPanel();              break;
-        case CommandIDs::showModulesPanel:          showModulesPanel();            break;
-        case CommandIDs::showExportersPanel:        showExportersPanel();          break;
-        case CommandIDs::showExporterSettings:      showCurrentExporterSettings(); break;
+        case CommandIDs::showProjectSettings:       showProjectSettings();          break;
+        case CommandIDs::showFileExplorerPanel:     showFilesPanel();               break;
+        case CommandIDs::showModulesPanel:          showModulesPanel();             break;
+        case CommandIDs::showExportersPanel:        showExportersPanel();           break;
+        case CommandIDs::showExporterSettings:      showCurrentExporterSettings();  break;
 
-        case CommandIDs::openInIDE:                 openInSelectedIDE (false); break;
-        case CommandIDs::saveAndOpenInIDE:          openInSelectedIDE (true);  break;
+        case CommandIDs::openInIDE:                 openInSelectedIDE (false);      break;
+        case CommandIDs::saveAndOpenInIDE:          openInSelectedIDE (true);       break;
 
-        case CommandIDs::createNewExporter:         showNewExporterMenu(); break;
+        case CommandIDs::createNewExporter:         showNewExporterMenu();          break;
 
-        case CommandIDs::deleteSelectedItem:        deleteSelectedTreeItems(); break;
+        case CommandIDs::deleteSelectedItem:        deleteSelectedTreeItems();      break;
 
-        case CommandIDs::showTranslationTool:       showTranslationTool(); break;
+        case CommandIDs::showTranslationTool:       showTranslationTool();          break;
 
-        case CommandIDs::addNewGUIFile:             addNewGUIFile();                                              break;
+        case CommandIDs::addNewGUIFile:             addNewGUIFile();                break;
 
         default:
             return false;

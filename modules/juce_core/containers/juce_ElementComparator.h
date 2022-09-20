@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -35,12 +35,14 @@ template <typename ElementComparator>
 struct SortFunctionConverter
 {
     SortFunctionConverter (ElementComparator& e) : comparator (e) {}
+    SortFunctionConverter (const SortFunctionConverter&) = default;
 
     template <typename Type>
     bool operator() (Type a, Type b)  { return comparator.compareElements (a, b) < 0; }
 
 private:
     ElementComparator& comparator;
+
     SortFunctionConverter& operator= (const SortFunctionConverter&) = delete;
 };
 

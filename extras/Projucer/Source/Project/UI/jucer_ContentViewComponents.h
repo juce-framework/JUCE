@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -302,8 +302,7 @@ public:
 
         for (auto& pp : properties)
         {
-            const auto propertyHeight = pp->getPreferredHeight()
-                                       + (getHeightMultiplier (pp.get()) * pp->getPreferredHeight());
+            const auto propertyHeight = jmax (pp->getPreferredHeight(), getApproximateLabelHeight (*pp));
 
             auto iter = std::find_if (propertyComponentsWithInfo.begin(), propertyComponentsWithInfo.end(),
                                       [&pp] (const std::unique_ptr<PropertyAndInfoWrapper>& w) { return &w->propertyComponent == pp.get(); });
@@ -418,17 +417,17 @@ private:
         }
     }
 
-    int getHeightMultiplier (PropertyComponent* pp)
+    static int getApproximateLabelHeight (const PropertyComponent& pp)
     {
         auto availableTextWidth = ProjucerLookAndFeel::getTextWidthForPropertyComponent (pp);
-
-        auto font = ProjucerLookAndFeel::getPropertyComponentFont();
-        auto nameWidth = font.getStringWidthFloat (pp->getName());
 
         if (availableTextWidth == 0)
             return 0;
 
-        return static_cast<int> (nameWidth / (float) availableTextWidth);
+        const auto font = ProjucerLookAndFeel::getPropertyComponentFont();
+        const auto labelWidth = font.getStringWidthFloat (pp.getName());
+        const auto numLines = (int) (labelWidth / (float) availableTextWidth) + 1;
+        return (int) std::round ((float) numLines * font.getHeight() * 1.1f);
     }
 
     //==============================================================================

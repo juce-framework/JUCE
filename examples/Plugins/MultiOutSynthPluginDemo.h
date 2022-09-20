@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -33,7 +33,7 @@
                         juce_audio_plugin_client, juce_audio_processors,
                         juce_audio_utils, juce_core, juce_data_structures,
                         juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:             xcode_mac, vs2019
+ exporters:             xcode_mac, vs2022
 
  moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -123,6 +123,10 @@ public:
             auto midiChannelBuffer = filterMidiMessagesForChannel (midiBuffer, busNr + 1);
             auto audioBusBuffer = getBusBuffer (buffer, false, busNr);
 
+            // Voices add to the contents of the buffer. Make sure the buffer is clear before
+            // rendering, just in case the host left old data in the buffer.
+            audioBusBuffer.clear();
+
             synth [busNr]->renderNextBlock (audioBusBuffer, midiChannelBuffer, 0, audioBusBuffer.getNumSamples());
         }
     }
@@ -146,11 +150,14 @@ public:
 
     bool isBusesLayoutSupported (const BusesLayout& layout) const override
     {
-        for (const auto& bus : layout.outputBuses)
-            if (bus != AudioChannelSet::stereo())
-                return false;
+        const auto& outputs = layout.outputBuses;
 
-        return layout.inputBuses.isEmpty() && 1 <= layout.outputBuses.size();
+        return layout.inputBuses.isEmpty()
+            && 1 <= outputs.size()
+            && std::all_of (outputs.begin(), outputs.end(), [] (const auto& bus)
+               {
+                   return bus == AudioChannelSet::stereo();
+               });
     }
 
     //==============================================================================

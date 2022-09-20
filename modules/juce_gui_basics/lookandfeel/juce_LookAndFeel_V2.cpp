@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -188,15 +188,22 @@ LookAndFeel_V2::LookAndFeel_V2()
         0x1000440, /*LassoComponent::lassoFillColourId*/        0x66dddddd,
         0x1000441, /*LassoComponent::lassoOutlineColourId*/     0x99111111,
 
+        0x1004000, /*KeyboardComponentBase::upDownButtonBackgroundColourId*/  0xffd3d3d3,
+        0x1004001, /*KeyboardComponentBase::upDownButtonArrowColourId*/       0xff000000,
+
         0x1005000, /*MidiKeyboardComponent::whiteNoteColourId*/               0xffffffff,
         0x1005001, /*MidiKeyboardComponent::blackNoteColourId*/               0xff000000,
         0x1005002, /*MidiKeyboardComponent::keySeparatorLineColourId*/        0x66000000,
         0x1005003, /*MidiKeyboardComponent::mouseOverKeyOverlayColourId*/     0x80ffff00,
         0x1005004, /*MidiKeyboardComponent::keyDownOverlayColourId*/          0xffb6b600,
         0x1005005, /*MidiKeyboardComponent::textLabelColourId*/               0xff000000,
-        0x1005006, /*MidiKeyboardComponent::upDownButtonBackgroundColourId*/  0xffd3d3d3,
-        0x1005007, /*MidiKeyboardComponent::upDownButtonArrowColourId*/       0xff000000,
-        0x1005008, /*MidiKeyboardComponent::shadowColourId*/                  0x4c000000,
+        0x1005006, /*MidiKeyboardComponent::shadowColourId*/                  0x4c000000,
+
+        0x1006000, /*MPEKeyboardComponent::whiteNoteColourId*/                0xff1a1c27,
+        0x1006001, /*MPEKeyboardComponent::blackNoteColourId*/                0x99f1f1f1,
+        0x1006002, /*MPEKeyboardComponent::textLabelColourId*/                0xfff1f1f1,
+        0x1006003, /*MPEKeyboardComponent::noteCircleFillColourId*/           0x99ba00ff,
+        0x1006004, /*MPEKeyboardComponent::noteCircleOutlineColourId*/        0xfff1f1f1,
 
         0x1004500, /*CodeEditorComponent::backgroundColourId*/                0xffffffff,
         0x1004502, /*CodeEditorComponent::highlightColourId*/                 textHighlightColour,
@@ -1598,6 +1605,11 @@ public:
     SliderLabelComp() : Label ({}, {}) {}
 
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override {}
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
 };
 
 Label* LookAndFeel_V2::createSliderTextBox (Slider& slider)
@@ -2051,9 +2063,28 @@ int LookAndFeel_V2::getDefaultMenuBarHeight()
 }
 
 //==============================================================================
-DropShadower* LookAndFeel_V2::createDropShadowerForComponent (Component*)
+std::unique_ptr<DropShadower> LookAndFeel_V2::createDropShadowerForComponent (Component&)
 {
-    return new DropShadower (DropShadow (Colours::black.withAlpha (0.4f), 10, Point<int> (0, 2)));
+    return std::make_unique<DropShadower> (DropShadow (Colours::black.withAlpha (0.4f), 10, Point<int> (0, 2)));
+}
+
+std::unique_ptr<FocusOutline> LookAndFeel_V2::createFocusOutlineForComponent (Component&)
+{
+    struct WindowProperties  : public FocusOutline::OutlineWindowProperties
+    {
+        Rectangle<int> getOutlineBounds (Component& c) override
+        {
+            return c.getScreenBounds();
+        }
+
+        void drawOutline (Graphics& g, int width, int height) override
+        {
+            g.setColour (Colours::yellow.withAlpha (0.6f));
+            g.drawRoundedRectangle ({ (float) width, (float) height }, 3.0f, 3.0f);
+        }
+    };
+
+    return std::make_unique<FocusOutline> (std::make_unique<WindowProperties>());
 }
 
 //==============================================================================
@@ -2425,7 +2456,7 @@ Button* LookAndFeel_V2::createTabBarExtrasButton()
     overImage.addAndMakeVisible (ellipse.createCopy().release());
     overImage.addAndMakeVisible (dp.createCopy().release());
 
-    auto db = new DrawableButton ("tabs", DrawableButton::ImageFitted);
+    auto db = new DrawableButton (TRANS ("Additional Items"), DrawableButton::ImageFitted);
     db->setImages (&normalImage, &overImage, nullptr);
     return db;
 }

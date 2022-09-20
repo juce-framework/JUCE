@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -30,8 +30,8 @@
 // GCC
 #if JUCE_GCC
 
- #if (__GNUC__ * 100 + __GNUC_MINOR__) < 500
-  #error "JUCE requires GCC 5.0 or later"
+ #if (__GNUC__ * 100 + __GNUC_MINOR__) < 700
+  #error "JUCE requires GCC 7.0 or later"
  #endif
 
  #ifndef JUCE_EXCEPTIONS_DISABLED
@@ -49,8 +49,8 @@
 // Clang
 #if JUCE_CLANG
 
- #if (__clang_major__ < 3) || (__clang_major__ == 3 && __clang_minor__ < 4)
-  #error "JUCE requires Clang 3.4 or later"
+ #if (__clang_major__ < 6)
+  #error "JUCE requires Clang 6 or later"
  #endif
 
  #ifndef JUCE_COMPILER_SUPPORTS_ARC
@@ -72,8 +72,8 @@
 // MSVC
 #if JUCE_MSVC
 
- #if _MSC_FULL_VER < 190024210  // VS2015
-   #error "JUCE requires Visual Studio 2015 Update 3 or later"
+ #if _MSC_FULL_VER < 191025017  // VS2017
+   #error "JUCE requires Visual Studio 2017 or later"
  #endif
 
  #ifndef JUCE_EXCEPTIONS_DISABLED
@@ -87,8 +87,8 @@
 #endif
 
 //==============================================================================
-#if ! JUCE_CXX14_IS_AVAILABLE
- #error "JUCE requires C++14 or later"
+#if ! JUCE_CXX17_IS_AVAILABLE
+ #error "JUCE requires C++17 or later"
 #endif
 
 //==============================================================================
@@ -100,4 +100,5 @@
  #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
  #define JUCE_DELETED_FUNCTION = delete
  #define JUCE_CONSTEXPR constexpr
+ #define JUCE_NODISCARD [[nodiscard]]
 #endif

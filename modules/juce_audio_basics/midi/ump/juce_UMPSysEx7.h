@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -20,13 +20,15 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
 {
 
 /**
-    This struct acts as a single-file namespace for Univeral MIDI Packet
+    This struct acts as a single-file namespace for Universal MIDI Packet
     functionality related to 7-bit SysEx.
 
     @tags{Audio}
@@ -71,3 +73,5 @@ struct SysEx7
 
 }
 }
+
+#endif

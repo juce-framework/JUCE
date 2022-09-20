@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -51,9 +51,6 @@ public:
 
     /** Creates URL referring to a local file on your disk using the file:// scheme. */
     explicit URL (File localFile);
-
-    /** Destructor. */
-    ~URL() = default;
 
     /** Compares two URLs.
 
@@ -147,7 +144,7 @@ public:
 
         @see withNewSubPath
     */
-    URL withNewDomainAndPath (const String& newFullPath) const;
+    [[nodiscard]] URL withNewDomainAndPath (const String& newFullPath) const;
 
     /** Returns a new version of this URL with a different sub-path.
 
@@ -156,7 +153,7 @@ public:
 
         @see withNewDomainAndPath
     */
-    URL withNewSubPath (const String& newPath) const;
+    [[nodiscard]] URL withNewSubPath (const String& newPath) const;
 
     /** Attempts to return a URL which is the parent folder containing this URL.
 
@@ -189,8 +186,8 @@ public:
 
         @see getParameterNames, getParameterValues
     */
-    URL withParameter (const String& parameterName,
-                       const String& parameterValue) const;
+    [[nodiscard]] URL withParameter (const String& parameterName,
+                                      const String& parameterValue) const;
 
     /** Returns a copy of this URL, with a set of GET or POST parameters added.
 
@@ -198,7 +195,7 @@ public:
 
         @see withParameter
     */
-    URL withParameters (const StringPairArray& parametersToAdd) const;
+    [[nodiscard]] URL withParameters (const StringPairArray& parametersToAdd) const;
 
     /** Returns a copy of this URL, with a file-upload type parameter added to it.
 
@@ -211,9 +208,9 @@ public:
 
         @see withDataToUpload
     */
-    URL withFileToUpload (const String& parameterName,
-                          const File& fileToUpload,
-                          const String& mimeType) const;
+    [[nodiscard]] URL withFileToUpload (const String& parameterName,
+                                         const File& fileToUpload,
+                                         const String& mimeType) const;
 
     /** Returns a copy of this URL, with a file-upload type parameter added to it.
 
@@ -225,10 +222,10 @@ public:
 
         @see withFileToUpload
     */
-    URL withDataToUpload (const String& parameterName,
-                          const String& filename,
-                          const MemoryBlock& fileContentToUpload,
-                          const String& mimeType) const;
+    [[nodiscard]] URL withDataToUpload (const String& parameterName,
+                                         const String& filename,
+                                         const MemoryBlock& fileContentToUpload,
+                                         const String& mimeType) const;
 
     /** Returns an array of the names of all the URL's parameters.
 
@@ -264,7 +261,7 @@ public:
         If no HTTP command is set when calling createInputStream() to read from
         this URL and some data has been set, it will do a POST request.
     */
-    URL withPOSTData (const String& postData) const;
+    [[nodiscard]] URL withPOSTData (const String& postData) const;
 
     /** Returns a copy of this URL, with a block of data to send as the POST data.
 
@@ -274,7 +271,7 @@ public:
         If no HTTP command is set when calling createInputStream() to read from
         this URL and some data has been set, it will do a POST request.
     */
-    URL withPOSTData (const MemoryBlock& postData) const;
+    [[nodiscard]] URL withPOSTData (const MemoryBlock& postData) const;
 
     /** Returns the data that was set using withPOSTData(). */
     String getPostData() const                                      { return postData.toString(); }
@@ -337,36 +334,36 @@ public:
 
             This can be useful for lengthy POST operations, so that you can provide user feedback.
         */
-        InputStreamOptions withProgressCallback (std::function<bool (int bytesSent, int totalBytes)> progressCallback) const;
+        [[nodiscard]] InputStreamOptions withProgressCallback (std::function<bool (int bytesSent, int totalBytes)> progressCallback) const;
 
         /** A string that will be appended onto the headers that are used for the request.
 
             It must be a valid set of HTML header directives, separated by newlines.
         */
-        InputStreamOptions withExtraHeaders (const String& extraHeaders) const;
+        [[nodiscard]] InputStreamOptions withExtraHeaders (const String& extraHeaders) const;
 
         /** Specifies a timeout for the request in milliseconds.
 
             If 0, this will use whatever default setting the OS chooses. If a negative
             number, it will be infinite.
         */
-        InputStreamOptions withConnectionTimeoutMs (int connectionTimeoutMs) const;
+        [[nodiscard]] InputStreamOptions withConnectionTimeoutMs (int connectionTimeoutMs) const;
 
         /** If this is non-null, all the (key, value) pairs received as headers
             in the response will be stored in this array.
         */
-        InputStreamOptions withResponseHeaders (StringPairArray* responseHeaders) const;
+        [[nodiscard]] InputStreamOptions withResponseHeaders (StringPairArray* responseHeaders) const;
 
         /** If this is non-null, it will get set to the http status code, if one
             is known, or 0 if a code isn't available.
         */
-        InputStreamOptions withStatusCode (int* statusCode) const;
+        [[nodiscard]] InputStreamOptions withStatusCode (int* statusCode) const;
 
         /** Specifies the number of redirects that will be followed before returning a response.
 
             N.B. This will be ignored on Android which follows up to 5 redirects.
         */
-        InputStreamOptions withNumRedirectsToFollow (int numRedirectsToFollow) const;
+        [[nodiscard]] InputStreamOptions withNumRedirectsToFollow (int numRedirectsToFollow) const;
 
         /** Specifies which HTTP request command to use.
 
@@ -375,7 +372,7 @@ public:
             via withPOSTData(), withFileToUpload(), or withDataToUpload(). Otherwise it
             will be GET.
         */
-        InputStreamOptions withHttpRequestCmd (const String& httpRequestCmd) const;
+        [[nodiscard]] InputStreamOptions withHttpRequestCmd (const String& httpRequestCmd) const;
 
         //==============================================================================
         ParameterHandling getParameterHandling() const noexcept             { return parameterHandling; }
@@ -459,7 +456,7 @@ public:
         bool usePost = false;
 
         /** Specifies headers to add to the request. */
-        auto withExtraHeaders (String value) const            { return with (&DownloadTaskOptions::extraHeaders, std::move (value)); }
+        [[nodiscard]] auto withExtraHeaders (String value) const            { return with (&DownloadTaskOptions::extraHeaders, std::move (value)); }
 
         /** On iOS, specifies the container where the downloaded file will be stored.
 
@@ -468,17 +465,17 @@ public:
 
             This is currently unused on other platforms.
         */
-        auto withSharedContainer (String value) const         { return with (&DownloadTaskOptions::sharedContainer, std::move (value)); }
+        [[nodiscard]] auto withSharedContainer (String value) const         { return with (&DownloadTaskOptions::sharedContainer, std::move (value)); }
 
         /** Specifies an observer for the download task. */
-        auto withListener (DownloadTaskListener* value) const { return with (&DownloadTaskOptions::listener, std::move (value)); }
+        [[nodiscard]] auto withListener (DownloadTaskListener* value) const { return with (&DownloadTaskOptions::listener, std::move (value)); }
 
         /** Specifies whether a post command should be used. */
-        auto withUsePost (bool value) const                   { return with (&DownloadTaskOptions::usePost, value); }
+        [[nodiscard]] auto withUsePost (bool value) const                   { return with (&DownloadTaskOptions::usePost, value); }
 
     private:
         template <typename Member, typename Value>
-        DownloadTaskOptions with (Member&& member, Value&& value) const
+        [[nodiscard]] DownloadTaskOptions with (Member&& member, Value&& value) const
         {
             auto copy = *this;
             copy.*member = std::forward<Value> (value);

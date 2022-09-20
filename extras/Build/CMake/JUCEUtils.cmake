@@ -1,15 +1,15 @@
 # ==============================================================================
 #
 #  This file is part of the JUCE library.
-#  Copyright (c) 2020 - Raw Material Software Limited
+#  Copyright (c) 2022 - Raw Material Software Limited
 #
 #  JUCE is an open source library subject to commercial or open-source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-#  Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+#  Agreement and JUCE Privacy Policy.
 #
-#  End User License Agreement: www.juce.com/juce-6-licence
+#  End User License Agreement: www.juce.com/juce-7-licence
 #  Privacy Policy: www.juce.com/juce-privacy-policy
 #
 #  Or: You may also use this code under the terms of the GPL v3 (see
@@ -75,6 +75,10 @@ define_property(TARGET PROPERTY JUCE_UNITY_COPY_DIR INHERITED
     BRIEF_DOCS "Install location for Unity plugins"
     FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
 
+define_property(TARGET PROPERTY JUCE_LV2_COPY_DIR INHERITED
+    BRIEF_DOCS "Install location for LV2 plugins"
+    FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
+
 define_property(TARGET PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD INHERITED
     BRIEF_DOCS "Whether or not plugins should be copied after building"
     FULL_DOCS "Whether or not plugins should be copied after building")
@@ -83,12 +87,6 @@ set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
     _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS webkit2gtk-4.0 gtk+-x11-3.0)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    find_program(JUCE_XCRUN xcrun)
-
-    if(NOT JUCE_XCRUN)
-        message(WARNING "failed to find xcrun; older resource-based AU plug-ins may not work correctly")
-    endif()
 endif()
 
 # We set up default/fallback copy dirs here. If you need different copy dirs, use
@@ -97,10 +95,12 @@ endif()
 
 function(_juce_set_default_properties)
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR  "$ENV{HOME}/Library/Audio/Plug-Ins/VST")
-        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
-        set_property(GLOBAL PROPERTY JUCE_AU_COPY_DIR   "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
-        set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR  "/Library/Application Support/Avid/Audio/Plug-Ins")
+        set_property(GLOBAL PROPERTY JUCE_LV2_COPY_DIR    "$ENV{HOME}/Library/Audio/Plug-Ins/LV2")
+        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR    "$ENV{HOME}/Library/Audio/Plug-Ins/VST")
+        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR   "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
+        set_property(GLOBAL PROPERTY JUCE_AU_COPY_DIR     "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR  "$ENV{HOME}/Library/Audio/Plug-Ins/Unity")
+        set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR    "/Library/Application Support/Avid/Audio/Plug-Ins")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
             set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR "$ENV{ProgramW6432}/Steinberg/Vstplugins")
@@ -110,11 +110,15 @@ function(_juce_set_default_properties)
             set(prefix "$ENV{CommonProgramFiles\(x86\)}")
         endif()
 
-        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "${prefix}/VST3")
-        set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR  "${prefix}/Avid/Audio/Plug-Ins")
+        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR   "${prefix}/VST3")
+        set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR    "${prefix}/Avid/Audio/Plug-Ins")
+        set_property(GLOBAL PROPERTY JUCE_LV2_COPY_DIR    "$ENV{APPDATA}/LV2")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR  "$ENV{APPDATA}/Unity")
     elseif((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
-        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR  "$ENV{HOME}/.vst")
-        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "$ENV{HOME}/.vst3")
+        set_property(GLOBAL PROPERTY JUCE_LV2_COPY_DIR   "$ENV{HOME}/.lv2")
+        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR   "$ENV{HOME}/.vst")
+        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR  "$ENV{HOME}/.vst3")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR "$ENV{HOME}/.unity")
     endif()
 endfunction()
 
@@ -139,67 +143,6 @@ function(juce_add_bundle_resources_directory target folder)
             HEADER_FILE_ONLY TRUE
             MACOSX_PACKAGE_LOCATION "Resources/${resource_parent_path}")
     endforeach()
-endfunction()
-
-# ==================================================================================================
-
-function(_juce_add_au_resource_fork shared_code_target au_target)
-    if(NOT JUCE_XCRUN)
-        return()
-    endif()
-
-    get_target_property(product_name ${shared_code_target} JUCE_PRODUCT_NAME)
-    get_target_property(module_sources juce::juce_audio_plugin_client_AU INTERFACE_SOURCES)
-
-    list(FILTER module_sources INCLUDE REGEX "/juce_audio_plugin_client_AU.r$")
-
-    if(NOT module_sources)
-        message(FATAL_ERROR "Failed to find AU resource file input")
-    endif()
-
-    list(GET module_sources 0 au_rez_sources)
-
-    get_target_property(juce_library_code ${shared_code_target} JUCE_GENERATED_SOURCES_DIRECTORY)
-    # We don't want our AU AppConfig.h to end up on peoples' include paths if we can help it
-    set(secret_au_resource_dir "${juce_library_code}/${au_target}/secret")
-    set(secret_au_plugindefines "${secret_au_resource_dir}/JucePluginDefines.h")
-
-    set(au_rez_output "${secret_au_resource_dir}/${product_name}.rsrc")
-
-    target_sources(${au_target} PRIVATE "${au_rez_output}")
-    set_source_files_properties("${au_rez_output}" PROPERTIES
-        GENERATED TRUE
-        MACOSX_PACKAGE_LOCATION Resources)
-
-    set(defs_file $<GENEX_EVAL:$<TARGET_PROPERTY:${shared_code_target},JUCE_DEFS_FILE>>)
-
-    # Passing all our compile definitions using generator expressions is really painful
-    # because some of the definitions have pipes and quotes and dollars and goodness-knows
-    # what else that the shell would very much like to claim for itself, thank you very much.
-    # CMake definitely knows how to escape all these things, because it's perfectly happy to pass
-    # them to compiler invocations, but I have no idea how to get it to escape them
-    # in a custom command.
-    # In the end, it's simplest to generate a special single-purpose appconfig just for the
-    # resource compiler.
-    add_custom_command(OUTPUT "${secret_au_plugindefines}"
-        COMMAND juce::juceaide auplugindefines "${defs_file}" "${secret_au_plugindefines}"
-        DEPENDS "${defs_file}"
-        VERBATIM)
-
-    add_custom_command(OUTPUT "${au_rez_output}"
-        COMMAND "${JUCE_XCRUN}" Rez
-            -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64" -d "arm64_$arm64"
-            -I "${secret_au_resource_dir}"
-            -I "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-            -I "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/AudioUnit.framework/Headers"
-            -isysroot "${CMAKE_OSX_SYSROOT}"
-            "${au_rez_sources}"
-            -useDF
-            -o "${au_rez_output}"
-        DEPENDS "${secret_au_plugindefines}"
-        VERBATIM)
-
-    set(au_resource_directory "$<TARGET_BUNDLE_DIR:${au_target}>/Contents/Resources")
 endfunction()
 
 # ==================================================================================================
@@ -312,12 +255,17 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content PLUGIN_AU_MAIN_TYPE                  ${target} JUCE_AU_MAIN_TYPE_CODE)
     _juce_append_target_property(file_content IS_AU_SANDBOX_SAFE                   ${target} JUCE_AU_SANDBOX_SAFE)
     _juce_append_target_property(file_content IS_PLUGIN_SYNTH                      ${target} JUCE_IS_SYNTH)
+    _juce_append_target_property(file_content IS_PLUGIN_ARA_EFFECT                 ${target} JUCE_IS_ARA_EFFECT)
     _juce_append_target_property(file_content SUPPRESS_AU_PLIST_RESOURCE_USAGE     ${target} JUCE_SUPPRESS_AU_PLIST_RESOURCE_USAGE)
     _juce_append_target_property(file_content HARDENED_RUNTIME_ENABLED             ${target} JUCE_HARDENED_RUNTIME_ENABLED)
     _juce_append_target_property(file_content APP_SANDBOX_ENABLED                  ${target} JUCE_APP_SANDBOX_ENABLED)
     _juce_append_target_property(file_content APP_SANDBOX_INHERIT                  ${target} JUCE_APP_SANDBOX_INHERIT)
     _juce_append_target_property(file_content HARDENED_RUNTIME_OPTIONS             ${target} JUCE_HARDENED_RUNTIME_OPTIONS)
     _juce_append_target_property(file_content APP_SANDBOX_OPTIONS                  ${target} JUCE_APP_SANDBOX_OPTIONS)
+    _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_HOME_RO      ${target} JUCE_APP_SANDBOX_FILE_ACCESS_HOME_RO)
+    _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_HOME_RW      ${target} JUCE_APP_SANDBOX_FILE_ACCESS_HOME_RW)
+    _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_ABS_RO       ${target} JUCE_APP_SANDBOX_FILE_ACCESS_ABS_RO)
+    _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_ABS_RW       ${target} JUCE_APP_SANDBOX_FILE_ACCESS_ABS_RW)
     _juce_append_target_property(file_content APP_GROUPS_ENABLED                   ${target} JUCE_APP_GROUPS_ENABLED)
     _juce_append_target_property(file_content APP_GROUP_IDS                        ${target} JUCE_APP_GROUP_IDS)
     _juce_append_target_property(file_content IS_PLUGIN                            ${target} JUCE_IS_PLUGIN)
@@ -408,7 +356,7 @@ function(juce_add_binary_data target)
 
     target_sources(${target} PRIVATE "${binary_file_names}")
     target_include_directories(${target} INTERFACE ${juce_binary_data_folder})
-    target_compile_features(${target} PRIVATE cxx_std_14)
+    target_compile_features(${target} PRIVATE cxx_std_17)
 
     # This fixes an issue where Xcode is unable to find binary data during archive.
     if(CMAKE_GENERATOR STREQUAL "Xcode")
@@ -451,7 +399,7 @@ function(_juce_to_char_literal str out_var help_text)
     string(LENGTH "${str}" string_length)
 
     if(NOT "${string_length}" EQUAL "4")
-        message(FATAL_ERROR "The ${help_text} code must contain exactly four characters, but it was set to '${str}'")
+        message(WARNING "The ${help_text} code must contain exactly four characters, but it was set to '${str}'")
     endif()
 
     # Round-tripping through a file is the simplest way to convert a string to hex...
@@ -463,7 +411,8 @@ function(_juce_to_char_literal str out_var help_text)
     file(READ "${scratch_file}" four_chars_hex HEX)
     file(REMOVE "${scratch_file}")
 
-    set(${out_var} ${four_chars_hex} PARENT_SCOPE)
+    string(SUBSTRING "${four_chars_hex}00000000" 0 8 four_chars_hex)
+    set(${out_var} "${four_chars_hex}" PARENT_SCOPE)
 endfunction()
 
 # ==================================================================================================
@@ -501,10 +450,13 @@ function(_juce_execute_juceaide)
         message(FATAL_ERROR "juceaide was imported, but it doesn't exist!")
     endif()
 
-    execute_process(COMMAND "${juceaide_location}" ${ARGN} RESULT_VARIABLE result_variable)
+    execute_process(COMMAND "${juceaide_location}" ${ARGN}
+        RESULT_VARIABLE result_variable
+        OUTPUT_VARIABLE output
+        ERROR_VARIABLE output)
 
     if(result_variable)
-        message(FATAL_ERROR "Running juceaide failed")
+        message(FATAL_ERROR "Running juceaide failed:\n${output}")
     endif()
 endfunction()
 
@@ -852,10 +804,24 @@ function(juce_enable_copy_plugin_step shared_code_target)
     get_target_property(active_targets "${shared_code_target}" JUCE_ACTIVE_PLUGIN_TARGETS)
 
     foreach(target IN LISTS active_targets)
+        get_target_property(target_kind "${target}" JUCE_TARGET_KIND_STRING)
+
+        if(target_kind STREQUAL "App")
+            continue()
+        endif()
+
         get_target_property(source "${target}" JUCE_PLUGIN_ARTEFACT_FILE)
 
         if(source)
-            get_target_property(dest   "${target}" JUCE_PLUGIN_COPY_DIR)
+            if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+                add_custom_command(TARGET ${target} POST_BUILD
+                    COMMAND "${CMAKE_COMMAND}"
+                        "-Dsrc=${source}"
+                        "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
+                    VERBATIM)
+            endif()
+
+            get_target_property(dest "${target}" JUCE_PLUGIN_COPY_DIR)
 
             if(dest)
                 _juce_copy_dir("${target}" "${source}" "$<GENEX_EVAL:${dest}>")
@@ -879,7 +845,15 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
     get_target_property(products_folder ${target_name} LIBRARY_OUTPUT_DIRECTORY)
     set(product_name $<TARGET_PROPERTY:${shared_code_target},JUCE_PRODUCT_NAME>)
 
-    if(kind STREQUAL "VST3")
+    if(kind STREQUAL "Standalone")
+        get_target_property(is_bundle "${target_name}" BUNDLE)
+
+        if(is_bundle)
+            set_target_properties("${target_name}" PROPERTIES JUCE_PLUGIN_ARTEFACT_FILE "$<TARGET_BUNDLE_DIR:${target_name}>")
+        else()
+            set_target_properties("${target_name}" PROPERTIES JUCE_PLUGIN_ARTEFACT_FILE "$<TARGET_FILE:${target_name}>")
+        endif()
+    elseif(kind STREQUAL "VST3")
         set_target_properties(${target_name} PROPERTIES
             BUNDLE_EXTENSION vst3
             PREFIX ""
@@ -979,6 +953,31 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
                 "${script_file}"
                 JUCE_UNITY_COPY_DIR)
         endif()
+    elseif(kind STREQUAL "LV2")
+        set_target_properties(${target_name} PROPERTIES BUNDLE FALSE)
+
+        get_target_property(JUCE_LV2URI "${shared_code_target}" JUCE_LV2URI)
+
+        if(NOT JUCE_LV2URI MATCHES "https?://.*")
+            message(WARNING
+                "LV2URI should be well-formed with an 'http' prefix. "
+                "Check the LV2URI argument to juce_add_plugin.")
+        endif()
+
+        set(source_header "${JUCE_CMAKE_UTILS_DIR}/JuceLV2Defines.h.in")
+        get_target_property(juce_library_code "${shared_code_target}" JUCE_GENERATED_SOURCES_DIRECTORY)
+        configure_file("${source_header}" "${juce_library_code}/JuceLV2Defines.h")
+
+        set(output_path "${products_folder}/${product_name}.lv2")
+        set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${output_path}")
+
+        _juce_add_lv2_manifest_helper_target()
+
+        add_custom_command(TARGET ${target_name} POST_BUILD
+            COMMAND juce::juce_lv2_helper "$<TARGET_FILE:${target_name}>"
+            VERBATIM)
+
+        _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_LV2_COPY_DIR)
     endif()
 endfunction()
 
@@ -1004,6 +1003,8 @@ function(_juce_get_plugin_kind_name kind out_var)
         set(${out_var} "AUv3 AppExtension" PARENT_SCOPE)
     elseif(kind STREQUAL "AAX")
         set(${out_var} "AAX" PARENT_SCOPE)
+    elseif(kind STREQUAL "LV2")
+        set(${out_var} "LV2" PARENT_SCOPE)
     elseif(kind STREQUAL "Standalone")
         set(${out_var} "Standalone Plugin" PARENT_SCOPE)
     elseif(kind STREQUAL "Unity")
@@ -1064,7 +1065,10 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
 
     add_dependencies(${shared_code_target}_All ${target_name})
 
-    _juce_configure_bundle(${shared_code_target} ${target_name})
+    if(NOT kind STREQUAL "LV2")
+        _juce_configure_bundle(${shared_code_target} ${target_name})
+    endif()
+
     _juce_set_plugin_target_properties(${shared_code_target} ${kind})
 endfunction()
 
@@ -1183,7 +1187,13 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_AAXDisableBypass=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_DISABLE_AAX_BYPASS>>
         JucePlugin_AAXDisableMultiMono=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_DISABLE_AAX_MULTI_MONO>>
         JucePlugin_VSTNumMidiInputs=$<TARGET_PROPERTY:${target},JUCE_VST_NUM_MIDI_INS>
-        JucePlugin_VSTNumMidiOutputs=$<TARGET_PROPERTY:${target},JUCE_VST_NUM_MIDI_OUTS>)
+        JucePlugin_VSTNumMidiOutputs=$<TARGET_PROPERTY:${target},JUCE_VST_NUM_MIDI_OUTS>
+        JucePlugin_Enable_ARA=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_IS_ARA_EFFECT>>
+        JucePlugin_ARAFactoryID=$<TARGET_PROPERTY:${target},JUCE_ARA_FACTORY_ID>
+        JucePlugin_ARADocumentArchiveID=$<TARGET_PROPERTY:${target},JUCE_ARA_DOCUMENT_ARCHIVE_ID>
+        JucePlugin_ARACompatibleArchiveIDs=$<TARGET_PROPERTY:${target},JUCE_ARA_COMPATIBLE_ARCHIVE_IDS>
+        JucePlugin_ARAContentTypes=$<TARGET_PROPERTY:${target},JUCE_ARA_ANALYSIS_TYPES>
+        JucePlugin_ARATransformationFlags=$<TARGET_PROPERTY:${target},JUCE_ARA_TRANSFORMATION_FLAGS>)
 
     set_target_properties(${target} PROPERTIES
         POSITION_INDEPENDENT_CODE TRUE
@@ -1208,10 +1218,6 @@ function(_juce_configure_plugin_targets target)
 
     if(TARGET ${target}_Standalone)
         _juce_configure_app_bundle(${target} ${target}_Standalone)
-    endif()
-
-    if(TARGET ${target}_AU)
-        _juce_add_au_resource_fork(${target} ${target}_AU)
     endif()
 
     if(TARGET ${target}_AAX)
@@ -1283,10 +1289,11 @@ function(_juce_set_fallback_properties target)
     _juce_set_property_if_not_set(${target} BUILD_VERSION "${final_version}")
 
     get_target_property(custom_xcassets ${target} JUCE_CUSTOM_XCASSETS_FOLDER)
+    get_target_property(custom_storyboard ${target} JUCE_LAUNCH_STORYBOARD_FILE)
 
     set(needs_storyboard TRUE)
 
-    if(custom_xcassets)
+    if((NOT custom_storyboard) AND custom_xcassets AND (EXISTS "${custom_xcassets}/LaunchImage.launchimage"))
         set(needs_storyboard FALSE)
     endif()
 
@@ -1458,6 +1465,90 @@ function(_juce_set_fallback_properties target)
     if(NOT aax_category_int STREQUAL "")
         set_target_properties(${target} PROPERTIES JUCE_AAX_CATEGORY ${aax_category_int})
     endif()
+
+    # Ensure this matches the Projucer implementation
+    get_target_property(company_website ${target} JUCE_COMPANY_WEBSITE)
+    get_target_property(plugin_name ${target} JUCE_PLUGIN_NAME)
+    string(MAKE_C_IDENTIFIER "${plugin_name}" plugin_name_sanitised)
+    _juce_set_property_if_not_set(${target} LV2URI "${company_website}/plugins/${plugin_name_sanitised}")
+
+    # ARA configuration
+    # Analysis types
+    set(ara_analysis_type_strings
+        kARAContentTypeNotes
+        kARAContentTypeTempoEntries
+        kARAContentTypeBarSignatures
+        kARAContentTypeStaticTuning
+        kARAContentTypeKeySignatures
+        kARAContentTypeSheetChords)
+
+    get_target_property(actual_ara_analysis_types ${target} JUCE_ARA_ANALYSIS_TYPES)
+
+    set(ara_analysis_types_int "")
+
+    foreach(category_string IN LISTS actual_ara_analysis_types)
+        list(FIND ara_analysis_type_strings ${category_string} ara_index)
+
+        if(ara_index GREATER_EQUAL 0)
+            set(ara_analysis_types_bit "1 << ${ara_index}")
+
+            if(ara_analysis_types_int STREQUAL "")
+                set(ara_analysis_types_int 0)
+            endif()
+
+            math(EXPR ara_analysis_types_int "${ara_analysis_types_int} | (${ara_analysis_types_bit})")
+        endif()
+    endforeach()
+
+    if(NOT ara_analysis_types_int STREQUAL "")
+        set_target_properties(${target} PROPERTIES JUCE_ARA_ANALYSIS_TYPES ${ara_analysis_types_int})
+    endif()
+
+    _juce_set_property_if_not_set(${target} ARA_ANALYSIS_TYPES 0)
+
+    # Transformation flags
+    set(ara_transformation_flags_strings
+        kARAPlaybackTransformationNoChanges
+        kARAPlaybackTransformationTimestretch
+        kARAPlaybackTransformationTimestretchReflectingTempo
+        kARAPlaybackTransformationContentBasedFadeAtTail
+        kARAPlaybackTransformationContentBasedFadeAtHead)
+
+    set(default_ara_transformation_flags kARAPlaybackTransformationNoChanges)
+
+    _juce_set_property_if_not_set(${target} ARA_TRANSFORMATION_FLAGS ${default_ara_transformation_flags})
+
+    get_target_property(actual_ara_transformation_flags ${target} JUCE_ARA_TRANSFORMATION_FLAGS)
+
+    set(ara_transformation_flags_int "")
+
+    foreach(transformation_string IN LISTS actual_ara_transformation_flags)
+        list(FIND ara_transformation_flags_strings ${transformation_string} ara_transformation_index)
+
+        if(ara_transformation_index GREATER_EQUAL 0)
+            if(ara_transformation_index EQUAL 0)
+                set(ara_transformation_bit 0)
+            else()
+                set(ara_transformation_bit "1 << (${ara_transformation_index} - 1)")
+            endif()
+
+            if(ara_transformation_flags_int STREQUAL "")
+                set(ara_transformation_flags_int 0)
+            endif()
+
+            math(EXPR ara_transformation_flags_int "${ara_transformation_flags_int} | (${ara_transformation_bit})")
+        endif()
+    endforeach()
+
+    if(NOT ara_transformation_flags_int STREQUAL "")
+        set_target_properties(${target} PROPERTIES JUCE_ARA_TRANSFORMATION_FLAGS ${ara_transformation_flags_int})
+    endif()
+
+    _juce_set_property_if_not_set(${target} IS_ARA_EFFECT FALSE)
+    get_target_property(final_bundle_id ${target} JUCE_BUNDLE_ID)
+    _juce_set_property_if_not_set(${target} ARA_FACTORY_ID "\"${final_bundle_id}.arafactory.${final_version}\"")
+    _juce_set_property_if_not_set(${target} ARA_DOCUMENT_ARCHIVE_ID "\"${final_bundle_id}.aradocumentarchive.1\"")
+    _juce_set_property_if_not_set(${target} ARA_COMPATIBLE_ARCHIVE_IDS "\"\"")
 endfunction()
 
 # ==================================================================================================
@@ -1524,6 +1615,10 @@ function(_juce_initialise_target target)
         SUPPRESS_AU_PLIST_RESOURCE_USAGE
         PLUGINHOST_AU                   # Set this true if you want to host AU plugins
         USE_LEGACY_COMPATIBILITY_PLUGIN_CODE
+        LV2URI
+        IS_ARA_EFFECT
+        ARA_FACTORY_ID
+        ARA_DOCUMENT_ARCHIVE_ID
 
         VST_COPY_DIR
         VST3_COPY_DIR
@@ -1537,11 +1632,18 @@ function(_juce_initialise_target target)
         VST3_CATEGORIES
         HARDENED_RUNTIME_OPTIONS
         APP_SANDBOX_OPTIONS
+        APP_SANDBOX_FILE_ACCESS_HOME_RO
+        APP_SANDBOX_FILE_ACCESS_HOME_RW
+        APP_SANDBOX_FILE_ACCESS_ABS_RO
+        APP_SANDBOX_FILE_ACCESS_ABS_RW
         DOCUMENT_EXTENSIONS
         AAX_CATEGORY
         IPHONE_SCREEN_ORIENTATIONS      # iOS only
         IPAD_SCREEN_ORIENTATIONS        # iOS only
-        APP_GROUP_IDS)                  # iOS only
+        APP_GROUP_IDS                   # iOS only
+        ARA_COMPATIBLE_ARCHIVE_IDS
+        ARA_ANALYSIS_TYPES
+        ARA_TRANSFORMATION_FLAGS)
 
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "${multi_value_args}" ${ARGN})
 
@@ -1612,6 +1714,21 @@ function(_juce_initialise_target target)
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
     _juce_fixup_module_source_groups()
+endfunction()
+
+# ==================================================================================================
+
+function(_juce_add_lv2_manifest_helper_target)
+    if(TARGET juce_lv2_helper)
+        return()
+    endif()
+
+    get_target_property(module_path juce::juce_audio_plugin_client INTERFACE_JUCE_MODULE_PATH)
+    add_executable(juce_lv2_helper "${module_path}/juce_audio_plugin_client/LV2/juce_LV2TurtleDumpProgram.cpp")
+    add_executable(juce::juce_lv2_helper ALIAS juce_lv2_helper)
+    target_compile_features(juce_lv2_helper PRIVATE cxx_std_17)
+    set_target_properties(juce_lv2_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
+    target_link_libraries(juce_lv2_helper PRIVATE ${CMAKE_DL_LIBS})
 endfunction()
 
 # ==================================================================================================
@@ -1735,27 +1852,49 @@ function(juce_add_pip header)
             NEEDS_STORE_KIT TRUE)
     endif()
 
+    if("JUCE_PLUGINHOST_AU=1" IN_LIST pip_moduleflags)
+        list(APPEND extra_target_args PLUGINHOST_AU TRUE)
+    endif()
+
     if(pip_kind STREQUAL "AudioProcessor")
-        set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
+        _juce_get_metadata("${metadata_dict}" documentControllerClass JUCE_PIP_DOCUMENTCONTROLLER_CLASS)
 
-        # We add AAX/VST2 targets too, if the user has set up those SDKs
+        if(JUCE_PIP_DOCUMENTCONTROLLER_CLASS)
+            if(NOT TARGET juce_ara_sdk)
+                message(WARNING
+                    "${header} specifies a documentControllerClass, but the ARA SDK could not be located. "
+                    "Use juce_set_ara_sdk_path to specify the ARA SDK location. "
+                    "This PIP will not be configured.")
+            endif()
 
-        set(extra_formats)
+            set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessorWithARA.cpp.in")
 
-        if(TARGET juce_aax_sdk)
-            list(APPEND extra_formats AAX)
+            juce_add_plugin(${JUCE_PIP_NAME}
+                FORMATS AU VST3
+                IS_ARA_EFFECT TRUE
+                ${extra_target_args})
+        else()
+            set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
+
+            # We add AAX/VST2 targets too, if the user has set up those SDKs
+
+            set(extra_formats)
+
+            if(TARGET juce_aax_sdk)
+                list(APPEND extra_formats AAX)
+            endif()
+
+            if(TARGET juce_vst2_sdk)
+                list(APPEND extra_formats VST)
+            endif()
+
+            # Standalone plugins might want to access the mic
+            list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
+
+            juce_add_plugin(${JUCE_PIP_NAME}
+                FORMATS AU AUv3 LV2 Standalone Unity VST3 ${extra_formats}
+                ${extra_target_args})
         endif()
-
-        if(TARGET juce_vst2_sdk)
-            list(APPEND extra_formats VST)
-        endif()
-
-        # Standalone plugins might want to access the mic
-        list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
-
-        juce_add_plugin(${JUCE_PIP_NAME}
-            FORMATS AU AUv3 VST3 Unity Standalone ${extra_formats}
-            ${extra_target_args})
     elseif(pip_kind STREQUAL "Component")
         set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPComponent.cpp.in")
         juce_add_gui_app(${JUCE_PIP_NAME} ${extra_target_args})
@@ -1905,6 +2044,22 @@ function(juce_set_vst3_sdk_path path)
     add_library(juce_vst3_sdk INTERFACE IMPORTED GLOBAL)
 
     target_include_directories(juce_vst3_sdk INTERFACE "${path}")
+endfunction()
+
+function(juce_set_ara_sdk_path path)
+    if(TARGET juce_ara_sdk)
+        message(FATAL_ERROR "juce_set_ara_sdk_path should only be called once")
+    endif()
+
+    _juce_make_absolute(path)
+
+    if(NOT EXISTS "${path}")
+        message(FATAL_ERROR "Could not find ARA SDK at the specified path: ${path}")
+    endif()
+
+    add_library(juce_ara_sdk INTERFACE IMPORTED GLOBAL)
+
+    target_include_directories(juce_ara_sdk INTERFACE "${path}")
 endfunction()
 
 # ==================================================================================================

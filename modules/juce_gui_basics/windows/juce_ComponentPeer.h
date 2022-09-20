@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -40,40 +40,90 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API  ComponentPeer
+class JUCE_API  ComponentPeer : private FocusChangeListener
 {
 public:
     //==============================================================================
     /** A combination of these flags is passed to the ComponentPeer constructor. */
     enum StyleFlags
     {
-        windowAppearsOnTaskbar      = (1 << 0),    /**< Indicates that the window should have a corresponding
-                                                        entry on the taskbar (ignored on MacOSX) */
-        windowIsTemporary           = (1 << 1),    /**< Indicates that the window is a temporary popup, like a menu,
-                                                        tooltip, etc. */
-        windowIgnoresMouseClicks    = (1 << 2),    /**< Indicates that the window should let mouse clicks pass
-                                                        through it (may not be possible on some platforms). */
-        windowHasTitleBar           = (1 << 3),    /**< Indicates that the window should have a normal OS-specific
-                                                        title bar and frame. if not specified, the window will be
-                                                        borderless. */
-        windowIsResizable           = (1 << 4),    /**< Indicates that the window should have a resizable border. */
-        windowHasMinimiseButton     = (1 << 5),    /**< Indicates that if the window has a title bar, it should have a
-                                                        minimise button on it. */
-        windowHasMaximiseButton     = (1 << 6),    /**< Indicates that if the window has a title bar, it should have a
-                                                        maximise button on it. */
-        windowHasCloseButton        = (1 << 7),    /**< Indicates that if the window has a title bar, it should have a
-                                                        close button on it. */
-        windowHasDropShadow         = (1 << 8),    /**< Indicates that the window should have a drop-shadow (this may
-                                                        not be possible on all platforms). */
-        windowRepaintedExplictly    = (1 << 9),    /**< Not intended for public use - this tells a window not to
-                                                        do its own repainting, but only to repaint when the
-                                                        performAnyPendingRepaintsNow() method is called. */
-        windowIgnoresKeyPresses     = (1 << 10),   /**< Tells the window not to catch any keypresses. This can
-                                                        be used for things like plugin windows, to stop them interfering
-                                                        with the host's shortcut keys. This will prevent the window from
-                                                        gaining keyboard focus. */
-        windowIsSemiTransparent     = (1 << 30)    /**< Not intended for public use - makes a window transparent. */
+        windowAppearsOnTaskbar                          = (1 << 0),   /**< Indicates that the window should have a corresponding
+                                                                           entry on the taskbar (ignored on MacOSX) */
+        windowIsTemporary                               = (1 << 1),   /**< Indicates that the window is a temporary popup, like a menu,
+                                                                           tooltip, etc. */
+        windowIgnoresMouseClicks                        = (1 << 2),   /**< Indicates that the window should let mouse clicks pass
+                                                                           through it (may not be possible on some platforms). */
+        windowHasTitleBar                               = (1 << 3),   /**< Indicates that the window should have a normal OS-specific
+                                                                           title bar and frame. if not specified, the window will be
+                                                                           borderless. */
+        windowIsResizable                               = (1 << 4),   /**< Indicates that the window should have a resizable border. */
+        windowHasMinimiseButton                         = (1 << 5),   /**< Indicates that if the window has a title bar, it should have a
+                                                                           minimise button on it. */
+        windowHasMaximiseButton                         = (1 << 6),   /**< Indicates that if the window has a title bar, it should have a
+                                                                           maximise button on it. */
+        windowHasCloseButton                            = (1 << 7),   /**< Indicates that if the window has a title bar, it should have a
+                                                                           close button on it. */
+        windowHasDropShadow                             = (1 << 8),   /**< Indicates that the window should have a drop-shadow (this may
+                                                                           not be possible on all platforms). */
+        windowRepaintedExplictly                        = (1 << 9),   /**< Not intended for public use - this tells a window not to
+                                                                           do its own repainting, but only to repaint when the
+                                                                           performAnyPendingRepaintsNow() method is called. */
+        windowIgnoresKeyPresses                         = (1 << 10),  /**< Tells the window not to catch any keypresses. This can
+                                                                           be used for things like plugin windows, to stop them interfering
+                                                                           with the host's shortcut keys. */
+        windowRequiresSynchronousCoreGraphicsRendering  = (1 << 11),  /**< Indicates that the window should not be rendered with
+                                                                           asynchronous Core Graphics drawing operations. Use this if there
+                                                                           are issues with regions not being redrawn at the expected time
+                                                                           (macOS and iOS only). */
+        windowIsSemiTransparent                         = (1 << 30)   /**< Not intended for public use - makes a window transparent. */
 
+    };
+
+    /** Represents the window borders around a window component.
+
+        You must use operator bool() to evaluate the validity of the object before accessing
+        its value.
+
+        Returned by getFrameSizeIfPresent(). A missing value may be returned on Linux for a
+        short time after window creation.
+    */
+    class JUCE_API  OptionalBorderSize final
+    {
+    public:
+        /** Default constructor. Creates an invalid object. */
+        OptionalBorderSize()                               : valid (false)                               {}
+
+        /** Constructor. Creates a valid object containing the provided BorderSize<int>. */
+        explicit OptionalBorderSize (BorderSize<int> size) : valid (true), borderSize (std::move (size)) {}
+
+        /** Returns true if a valid value has been provided. */
+        explicit operator bool() const noexcept { return valid; }
+
+        /** Returns a reference to the value.
+
+            You must not call this function on an invalid object. Use operator bool() to
+            determine validity.
+        */
+        const auto& operator*() const noexcept
+        {
+            jassert (valid);
+            return borderSize;
+        }
+
+        /** Returns a pointer to the value.
+
+            You must not call this function on an invalid object. Use operator bool() to
+            determine validity.
+        */
+        const auto* operator->() const noexcept
+        {
+            jassert (valid);
+            return &borderSize;
+        }
+
+    private:
+        bool valid;
+        BorderSize<int> borderSize;
     };
 
     //==============================================================================
@@ -85,7 +135,7 @@ public:
     ComponentPeer (Component& component, int styleFlags);
 
     /** Destructor. */
-    virtual ~ComponentPeer();
+    ~ComponentPeer() override;
 
     //==============================================================================
     /** Returns the component being represented by this peer. */
@@ -220,9 +270,24 @@ public:
     virtual bool contains (Point<int> localPos, bool trueIfInAChildWindow) const = 0;
 
     /** Returns the size of the window frame that's around this window.
+
+        Depending on the platform the border size may be invalid for a short transient
+        after creating a new window. Hence the returned value must be checked using
+        operator bool() and the contained value can be accessed using operator*() only
+        if it is present.
+
         Whether or not the window has a normal window frame depends on the flags
         that were set when the window was created by Component::addToDesktop()
     */
+    virtual OptionalBorderSize getFrameSizeIfPresent() const = 0;
+
+    /** Returns the size of the window frame that's around this window.
+        Whether or not the window has a normal window frame depends on the flags
+        that were set when the window was created by Component::addToDesktop()
+    */
+   #if JUCE_LINUX || JUCE_BSD
+    [[deprecated ("Use getFrameSizeIfPresent instead.")]]
+   #endif
     virtual BorderSize<int> getFrameSize() const = 0;
 
     /** This is called when the window's bounds change.
@@ -291,16 +356,19 @@ public:
     /** Called whenever a modifier key is pressed or released. */
     void handleModifierKeysChange();
 
-    //==============================================================================
-    /** Tells the window that text input may be required at the given position.
-        This may cause things like a virtual on-screen keyboard to appear, depending
-        on the OS.
+    /** If there's a currently active input-method context - i.e. characters are being
+        composed using multiple keystrokes - this should commit the current state of the
+        context to the text and clear the context. This should not hide the virtual keyboard.
     */
-    virtual void textInputRequired (Point<int> position, TextInputTarget&) = 0;
+    virtual void closeInputMethodContext();
 
-    /** If there's some kind of OS input-method in progress, this should dismiss it. */
-    virtual void dismissPendingTextInput();
+    /** Alerts the peer that the current text input target has changed somehow.
 
+        The peer may hide or show the virtual keyboard as a result of this call.
+    */
+    void refreshTextInputTarget();
+
+    //==============================================================================
     /** Returns the currently focused TextInputTarget, or null if none is found. */
     TextInputTarget* findCurrentTextInputTarget();
 
@@ -413,6 +481,39 @@ public:
     */
     virtual double getPlatformScaleFactor() const noexcept    { return 1.0; }
 
+    /** On platforms that support it, this will update the window's titlebar in some
+        way to indicate that the window's document needs saving.
+    */
+    virtual void setHasChangedSinceSaved (bool) {}
+
+
+    enum class Style
+    {
+        /** A style that matches the system-wide style. */
+        automatic,
+
+        /** A light style, which will probably use dark text on a light background. */
+        light,
+
+        /** A dark style, which will probably use light text on a dark background. */
+        dark
+    };
+
+    /** On operating systems that support it, this will update the style of this
+        peer as requested.
+
+        Note that this will not update the theme system-wide. This will only
+        update UI elements so that they display appropriately for this peer!
+    */
+    void setAppStyle (Style s)
+    {
+        if (std::exchange (style, s) != style)
+            appStyleChanged();
+    }
+
+    /** Returns the style requested for this app. */
+    Style getAppStyle() const { return style; }
+
 protected:
     //==============================================================================
     static void forceDisplayUpdate();
@@ -423,13 +524,36 @@ protected:
     ComponentBoundsConstrainer* constrainer = nullptr;
     static std::function<ModifierKeys()> getNativeRealtimeModifiers;
     ListenerList<ScaleFactorListener> scaleFactorListeners;
+    Style style = Style::automatic;
 
 private:
     //==============================================================================
+    virtual void appStyleChanged() {}
+
+    /** Tells the window that text input may be required at the given position.
+        This may cause things like a virtual on-screen keyboard to appear, depending
+        on the OS.
+
+        This function should not be called directly by Components - use refreshTextInputTarget
+        instead.
+    */
+    virtual void textInputRequired (Point<int>, TextInputTarget&) = 0;
+
+    /** If there's some kind of OS input-method in progress, this should dismiss it.
+
+        Overrides of this function should call closeInputMethodContext().
+
+        This function should not be called directly by Components - use refreshTextInputTarget
+        instead.
+    */
+    virtual void dismissPendingTextInput();
+
+    void globalFocusChanged (Component*) override;
     Component* getTargetForKeyPress();
 
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse = nullptr;
+    TextInputTarget* textInputTarget = nullptr;
     const uint32 uniqueID;
     bool isWindowMinimised = false;
 

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -33,6 +33,10 @@ namespace juce
 
     A DirectoryIterator will search through a directory and its subdirectories using
     a wildcard filepattern match.
+
+    The iterator keeps track of directories that it has previously traversed, and will
+    skip any previously-seen directories in the case of cycles caused by symbolic links.
+    It is also possible to avoid following symbolic links altogether.
 
     If you may be scanning a large number of files, it's usually smarter to use this
     class than File::findChildFiles() because it allows you to stop at any time, rather
@@ -73,17 +77,10 @@ public:
     DirectoryIterator (const File& directory,
                        bool recursive,
                        const String& pattern = "*",
-                       int type = File::findFiles)
-        : wildCards (parseWildcards (pattern)),
-          fileFinder (directory, (recursive || wildCards.size() > 1) ? "*" : pattern),
-          wildCard (pattern),
-          path (File::addTrailingSeparator (directory.getFullPathName())),
-          whatToLookFor (type),
-          isRecursive (recursive)
+                       int type = File::findFiles,
+                       File::FollowSymlinks follow = File::FollowSymlinks::yes)
+        : DirectoryIterator (directory, recursive, pattern, type, follow, nullptr)
     {
-        // you have to specify the type of files you're looking for!
-        jassert ((whatToLookFor & (File::findFiles | File::findDirectories)) != 0);
-        jassert (whatToLookFor > 0 && whatToLookFor <= 7);
     }
 
     /** Moves the iterator along to the next file.
@@ -126,6 +123,39 @@ public:
     float getEstimatedProgress() const;
 
 private:
+    using KnownPaths = std::set<File>;
+
+    DirectoryIterator (const File& directory,
+                       bool recursive,
+                       const String& pattern,
+                       int type,
+                       File::FollowSymlinks follow,
+                       KnownPaths* seenPaths)
+            : wildCards (parseWildcards (pattern)),
+              fileFinder (directory, (recursive || wildCards.size() > 1) ? "*" : pattern),
+              wildCard (pattern),
+              path (File::addTrailingSeparator (directory.getFullPathName())),
+              whatToLookFor (type),
+              isRecursive (recursive),
+              followSymlinks (follow),
+              knownPaths (seenPaths)
+    {
+        // you have to specify the type of files you're looking for!
+        jassert ((whatToLookFor & (File::findFiles | File::findDirectories)) != 0);
+        jassert (whatToLookFor > 0 && whatToLookFor <= 7);
+
+        if (followSymlinks == File::FollowSymlinks::noCycles)
+        {
+            if (knownPaths == nullptr)
+            {
+                heapKnownPaths = std::make_unique<KnownPaths>();
+                knownPaths = heapKnownPaths.get();
+            }
+
+            knownPaths->insert (directory);
+        }
+    }
+
     //==============================================================================
     struct NativeIterator
     {
@@ -152,6 +182,9 @@ private:
     bool hasBeenAdvanced = false;
     std::unique_ptr<DirectoryIterator> subIterator;
     File currentFile;
+    File::FollowSymlinks followSymlinks = File::FollowSymlinks::yes;
+    KnownPaths* knownPaths = nullptr;
+    std::unique_ptr<KnownPaths> heapKnownPaths;
 
     static StringArray parseWildcards (const String& pattern);
     static bool fileMatches (const StringArray& wildCards, const String& filename);

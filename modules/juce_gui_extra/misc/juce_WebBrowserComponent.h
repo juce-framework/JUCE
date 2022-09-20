@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -182,7 +182,7 @@ public:
     /** Sets a custom location for the WebView2Loader.dll that is not a part of the
         standard system DLL search paths.
     */
-    WebView2Preferences withDLLLocation (const File& location) const   { return with (&WebView2Preferences::dllLocation, location); }
+    [[nodiscard]] WebView2Preferences withDLLLocation (const File& location) const   { return with (&WebView2Preferences::dllLocation, location); }
 
     /** Sets a non-default location for storing user data for the browser instance. */
     WebView2Preferences withUserDataFolder (const File& folder) const  { return with (&WebView2Preferences::userDataFolder, folder); }
@@ -190,19 +190,19 @@ public:
     /** If this is set, the status bar usually displayed in the lower-left of the webview
         will be disabled.
     */
-    WebView2Preferences withStatusBarDisabled() const                  { return with (&WebView2Preferences::disableStatusBar, true); }
+    [[nodiscard]] WebView2Preferences withStatusBarDisabled() const                  { return with (&WebView2Preferences::disableStatusBar, true); }
 
     /** If this is set, a blank page will be displayed on error instead of the default
         built-in error page.
     */
-    WebView2Preferences withBuiltInErrorPageDisabled() const           { return with (&WebView2Preferences::disableBuiltInErrorPage, true); }
+    [[nodiscard]] WebView2Preferences withBuiltInErrorPageDisabled() const           { return with (&WebView2Preferences::disableBuiltInErrorPage, true); }
 
     /** Sets the background colour that WebView2 renders underneath all web content.
 
         This colour must either be fully opaque or transparent. On Windows 7 this
         colour must be opaque.
     */
-    WebView2Preferences withBackgroundColour (const Colour& colour) const
+    [[nodiscard]] WebView2Preferences withBackgroundColour (const Colour& colour) const
     {
         // the background colour must be either fully opaque or transparent!
         jassert (colour.isOpaque() || colour.isTransparent());

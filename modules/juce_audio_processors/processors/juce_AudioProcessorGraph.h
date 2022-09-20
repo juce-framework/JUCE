@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -43,8 +43,7 @@ namespace juce
     @tags{Audio}
 */
 class JUCE_API  AudioProcessorGraph   : public AudioProcessor,
-                                        public ChangeBroadcaster,
-                                        private AsyncUpdater
+                                        public ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -81,15 +80,19 @@ public:
     /**
         Represents an input or output channel of a node in an AudioProcessorGraph.
     */
-    struct NodeAndChannel
+    class NodeAndChannel
     {
+        auto tie() const { return std::tie (nodeID, channelIndex); }
+
+    public:
         NodeID nodeID;
         int channelIndex;
 
         bool isMIDI() const noexcept                                    { return channelIndex == midiChannelIndex; }
 
-        bool operator== (const NodeAndChannel& other) const noexcept    { return nodeID == other.nodeID && channelIndex == other.channelIndex; }
-        bool operator!= (const NodeAndChannel& other) const noexcept    { return ! operator== (other); }
+        bool operator== (const NodeAndChannel& other) const noexcept    { return tie() == other.tie(); }
+        bool operator!= (const NodeAndChannel& other) const noexcept    { return tie() != other.tie(); }
+        bool operator<  (const NodeAndChannel& other) const noexcept    { return tie() <  other.tie(); }
     };
 
     //==============================================================================
@@ -119,57 +122,55 @@ public:
 
         //==============================================================================
         /** Returns if the node is bypassed or not. */
-        bool isBypassed() const noexcept;
+        bool isBypassed() const noexcept
+        {
+            if (processor != nullptr)
+            {
+                if (auto* bypassParam = processor->getBypassParameter())
+                    return (bypassParam->getValue() != 0.0f);
+            }
+
+            return bypassed;
+        }
 
         /** Tell this node to bypass processing. */
-        void setBypassed (bool shouldBeBypassed) noexcept;
+        void setBypassed (bool shouldBeBypassed) noexcept
+        {
+            if (processor != nullptr)
+            {
+                if (auto* bypassParam = processor->getBypassParameter())
+                    bypassParam->setValueNotifyingHost (shouldBeBypassed ? 1.0f : 0.0f);
+            }
+
+            bypassed = shouldBeBypassed;
+        }
 
         //==============================================================================
         /** A convenient typedef for referring to a pointer to a node object. */
         using Ptr = ReferenceCountedObjectPtr<Node>;
 
+        /** @internal
+
+            Returns true if setBypassed(true) was called on this node.
+            This behaviour is different from isBypassed(), which may additionally return true if
+            the node has a bypass parameter that is not set to 0.
+        */
+        bool userRequestedBypass() const { return bypassed; }
+
+        /** @internal
+
+            To create a new node, use AudioProcessorGraph::addNode.
+        */
+        Node (NodeID n, std::unique_ptr<AudioProcessor> p) noexcept
+            : nodeID (n), processor (std::move (p))
+        {
+            jassert (processor != nullptr);
+        }
+
     private:
         //==============================================================================
-        friend class AudioProcessorGraph;
-        template <typename Float>
-        friend struct GraphRenderSequence;
-        template <typename Float>
-        friend struct RenderSequenceBuilder;
-
-        struct Connection
-        {
-            Node* otherNode;
-            int otherChannel, thisChannel;
-
-            bool operator== (const Connection&) const noexcept;
-        };
-
         std::unique_ptr<AudioProcessor> processor;
-        Array<Connection> inputs, outputs;
-        bool isPrepared = false;
         std::atomic<bool> bypassed { false };
-
-        Node (NodeID, std::unique_ptr<AudioProcessor>) noexcept;
-
-        void setParentGraph (AudioProcessorGraph*) const;
-        void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*, ProcessingPrecision);
-        void unprepare();
-
-        template <typename Sample>
-        void processBlock (AudioBuffer<Sample>& audio, MidiBuffer& midi)
-        {
-            const ScopedLock lock (processorLock);
-            processor->processBlock (audio, midi);
-        }
-
-        template <typename Sample>
-        void processBlockBypassed (AudioBuffer<Sample>& audio, MidiBuffer& midi)
-        {
-            const ScopedLock lock (processorLock);
-            processor->processBlockBypassed (audio, midi);
-        }
-
-        CriticalSection processorLock;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Node)
     };
@@ -201,22 +202,35 @@ public:
     };
 
     //==============================================================================
+    /** Indicates how the graph should be updated after a change.
+
+        If you need to make lots of changes to a graph (e.g. lots of separate calls
+        to addNode, addConnection etc.) you can avoid rebuilding the graph on each
+        change by using the async update kind.
+    */
+    enum class UpdateKind
+    {
+        sync,   ///< Indicates that the graph should be rebuilt immediately after modification.
+        async   ///< Indicates that the graph rebuild should be deferred.
+    };
+
+    //==============================================================================
     /** Deletes all nodes and connections from this graph.
         Any processor objects in the graph will be deleted.
     */
-    void clear();
+    void clear (UpdateKind = UpdateKind::sync);
 
     /** Returns the array of nodes in the graph. */
-    const ReferenceCountedArray<Node>& getNodes() const noexcept    { return nodes; }
+    const ReferenceCountedArray<Node>& getNodes() const noexcept;
 
     /** Returns the number of nodes in the graph. */
-    int getNumNodes() const noexcept                                { return nodes.size(); }
+    int getNumNodes() const noexcept                                { return getNodes().size(); }
 
     /** Returns a pointer to one of the nodes in the graph.
         This will return nullptr if the index is out of range.
         @see getNodeForId
     */
-    Node::Ptr getNode (int index) const noexcept                    { return nodes[index]; }
+    Node::Ptr getNode (int index) const noexcept                    { return getNodes()[index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
         If no such node was found, this returns nullptr.
@@ -235,17 +249,17 @@ public:
 
         If this succeeds, it returns a pointer to the newly-created node.
     */
-    Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, NodeID nodeId = {});
+    Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, NodeID nodeId = {}, UpdateKind = UpdateKind::sync);
 
     /** Deletes a node within the graph which has the specified ID.
         This will also delete any connections that are attached to this node.
     */
-    Node::Ptr removeNode (NodeID);
+    Node::Ptr removeNode (NodeID, UpdateKind = UpdateKind::sync);
 
     /** Deletes a node within the graph.
         This will also delete any connections that are attached to this node.
     */
-    Node::Ptr removeNode (Node*);
+    Node::Ptr removeNode (Node*, UpdateKind = UpdateKind::sync);
 
     /** Returns the list of connections in the graph. */
     std::vector<Connection> getConnections() const;
@@ -261,7 +275,12 @@ public:
     /** Does a recursive check to see if there's a direct or indirect series of connections
         between these two nodes.
     */
-    bool isAnInputTo (Node& source, Node& destination) const noexcept;
+    bool isAnInputTo (const Node& source, const Node& destination) const noexcept;
+
+    /** Does a recursive check to see if there's a direct or indirect series of connections
+        between these two nodes.
+    */
+    bool isAnInputTo (NodeID source, NodeID destination) const noexcept;
 
     /** Returns true if it would be legal to connect the specified points. */
     bool canConnect (const Connection&) const;
@@ -271,13 +290,13 @@ public:
         If this isn't allowed (e.g. because you're trying to connect a midi channel
         to an audio one or other such nonsense), then it'll return false.
     */
-    bool addConnection (const Connection&);
+    bool addConnection (const Connection&, UpdateKind = UpdateKind::sync);
 
     /** Deletes the given connection. */
-    bool removeConnection (const Connection&);
+    bool removeConnection (const Connection&, UpdateKind = UpdateKind::sync);
 
     /** Removes all connections from the specified node. */
-    bool disconnectNode (NodeID);
+    bool disconnectNode (NodeID, UpdateKind = UpdateKind::sync);
 
     /** Returns true if the given connection's channel numbers map on to valid
         channels at each end.
@@ -291,7 +310,7 @@ public:
         This might be useful if some of the processors are doing things like changing
         their channel counts, which could render some connections obsolete.
     */
-    bool removeIllegalConnections();
+    bool removeIllegalConnections (UpdateKind = UpdateKind::sync);
 
     //==============================================================================
     /** A special type of AudioProcessor that can live inside an AudioProcessorGraph
@@ -405,50 +424,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
-    struct PrepareSettings
-    {
-        ProcessingPrecision precision = ProcessingPrecision::singlePrecision;
-        double sampleRate             = 0.0;
-        int blockSize                 = 0;
-        bool valid                    = false;
-
-        using Tied = std::tuple<const ProcessingPrecision&,
-                                const double&,
-                                const int&,
-                                const bool&>;
-
-        Tied tie() const noexcept { return std::tie (precision, sampleRate, blockSize, valid); }
-
-        bool operator== (const PrepareSettings& other) const noexcept { return tie() == other.tie(); }
-        bool operator!= (const PrepareSettings& other) const noexcept { return tie() != other.tie(); }
-    };
-
-    //==============================================================================
-    ReferenceCountedArray<Node> nodes;
-    NodeID lastNodeID = {};
-
-    struct RenderSequenceFloat;
-    struct RenderSequenceDouble;
-    std::unique_ptr<RenderSequenceFloat> renderSequenceFloat;
-    std::unique_ptr<RenderSequenceDouble> renderSequenceDouble;
-
-    PrepareSettings prepareSettings;
-
-    friend class AudioGraphIOProcessor;
-
-    std::atomic<bool> isPrepared { false };
-
-    void topologyChanged();
-    void unprepare();
-    void handleAsyncUpdate() override;
-    void clearRenderingSequence();
-    void buildRenderingSequence();
-    bool anyNodesNeedPreparing() const noexcept;
-    bool isConnected (Node* src, int sourceChannel, Node* dest, int destChannel) const noexcept;
-    bool isAnInputTo (Node& src, Node& dst, int recursionCheck) const noexcept;
-    bool canConnect (Node* src, int sourceChannel, Node* dest, int destChannel) const noexcept;
-    bool isLegal (Node* src, int sourceChannel, Node* dest, int destChannel) const noexcept;
-    static void getNodeConnections (Node&, std::vector<Connection>&);
+    class Pimpl;
+    std::unique_ptr<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorGraph)
 };

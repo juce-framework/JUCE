@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -167,7 +167,7 @@ int juce_siginterrupt (int sig, int flag)
 //==============================================================================
 namespace
 {
-   #if JUCE_LINUX || (JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T) // (this iOS stuff is to avoid a simulator bug)
+   #if JUCE_LINUX || (JUCE_IOS && (! TARGET_OS_MACCATALYST) && (! __DARWIN_ONLY_64_BIT_INO_T)) // (this iOS stuff is to avoid a simulator bug)
     using juce_statStruct = struct stat64;
     #define JUCE_STAT  stat64
    #else
@@ -286,6 +286,12 @@ bool File::hasWriteAccess() const
         return getParentDirectory().hasWriteAccess();
 
     return false;
+}
+
+bool File::hasReadAccess() const
+{
+    return fullPath.isNotEmpty()
+           && access (fullPath.toUTF8(), R_OK) == 0;
 }
 
 static bool setFileModeFlags (const String& fullPath, mode_t flags, bool shouldSet) noexcept
@@ -960,7 +966,12 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 bool Thread::setThreadPriority (void* handle, int priority)
 {
     constexpr auto maxInputPriority = 10;
-    constexpr auto lowestRealtimePriority = 8;
+
+   #if JUCE_LINUX || JUCE_BSD
+    constexpr auto lowestRrPriority = 8;
+   #else
+    constexpr auto lowestRrPriority = 0;
+   #endif
 
     struct sched_param param;
     int policy;
@@ -971,7 +982,7 @@ bool Thread::setThreadPriority (void* handle, int priority)
     if (pthread_getschedparam ((pthread_t) handle, &policy, &param) != 0)
         return false;
 
-    policy = priority < lowestRealtimePriority ? SCHED_OTHER : SCHED_RR;
+    policy = priority < lowestRrPriority ? SCHED_OTHER : SCHED_RR;
 
     const auto minPriority = sched_get_priority_min (policy);
     const auto maxPriority = sched_get_priority_max (policy);
@@ -981,7 +992,7 @@ bool Thread::setThreadPriority (void* handle, int priority)
         if (policy == SCHED_OTHER)
             return 0;
 
-        return jmap (priority, lowestRealtimePriority, maxInputPriority, minPriority, maxPriority);
+        return jmap (priority, lowestRrPriority, maxInputPriority, minPriority, maxPriority);
     }();
 
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;

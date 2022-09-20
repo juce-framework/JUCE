@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -95,14 +95,13 @@ private:
     //==============================================================================
     struct ChannelState
     {
-        ChannelState() noexcept;
         bool handleController (int channel, int controllerNumber,
                                int value, MidiRPNMessage&) noexcept;
         void resetValue() noexcept;
         bool sendIfReady (int channel, MidiRPNMessage&) noexcept;
 
-        uint8 parameterMSB, parameterLSB, valueMSB, valueLSB;
-        bool isNRPN;
+        uint8 parameterMSB = 0xff, parameterLSB = 0xff, valueMSB = 0xff, valueLSB = 0xff;
+        bool isNRPN = false;
     };
 
     //==============================================================================

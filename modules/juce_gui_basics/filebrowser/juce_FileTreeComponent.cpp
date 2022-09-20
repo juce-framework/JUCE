@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -117,39 +117,30 @@ public:
         newList->addChangeListener (this);
     }
 
-    bool selectFile (const File& target)
+    void selectFile (const File& target)
     {
         if (file == target)
         {
             setSelected (true, true);
-            return true;
+            return;
         }
 
-        if (target.isAChildOf (file))
+        if (subContentsList != nullptr && subContentsList->isStillLoading())
         {
-            setOpen (true);
-
-            for (int maxRetries = 500; --maxRetries > 0;)
-            {
-                for (int i = 0; i < getNumSubItems(); ++i)
-                    if (auto* f = dynamic_cast<FileListTreeItem*> (getSubItem (i)))
-                        if (f->selectFile (target))
-                            return true;
-
-                // if we've just opened and the contents are still loading, wait for it..
-                if (subContentsList != nullptr && subContentsList->isStillLoading())
-                {
-                    Thread::sleep (10);
-                    rebuildItemsFromContentList();
-                }
-                else
-                {
-                    break;
-                }
-            }
+            pendingFileSelection.emplace (*this, target);
+            return;
         }
 
-        return false;
+        pendingFileSelection.reset();
+
+        if (! target.isAChildOf (file))
+            return;
+
+        setOpen (true);
+
+        for (int i = 0; i < getNumSubItems(); ++i)
+            if (auto* f = dynamic_cast<FileListTreeItem*> (getSubItem (i)))
+                f->selectFile (target);
     }
 
     void changeListenerCallback (ChangeBroadcaster*) override
@@ -224,6 +215,33 @@ public:
     const File file;
 
 private:
+    class PendingFileSelection   : private Timer
+    {
+    public:
+        PendingFileSelection (FileListTreeItem& item, const File& f)
+            : owner (item), fileToSelect (f)
+        {
+            startTimer (10);
+        }
+
+        ~PendingFileSelection() override
+        {
+            stopTimer();
+        }
+
+    private:
+        void timerCallback() override
+        {
+            // Take a copy of the file here, in case this PendingFileSelection
+            // object is destroyed during the call to selectFile.
+            owner.selectFile (File { fileToSelect });
+        }
+
+        FileListTreeItem& owner;
+        File fileToSelect;
+    };
+
+    Optional<PendingFileSelection> pendingFileSelection;
     FileTreeComponent& owner;
     DirectoryContentsList* parentContentsList;
     int indexInContentsList;
@@ -316,8 +334,7 @@ void FileTreeComponent::setDragAndDropDescription (const String& description)
 void FileTreeComponent::setSelectedFile (const File& target)
 {
     if (auto* t = dynamic_cast<FileListTreeItem*> (getRootItem()))
-        if (! t->selectFile (target))
-            clearSelectedItems();
+        t->selectFile (target);
 }
 
 void FileTreeComponent::setItemHeight (int newHeight)

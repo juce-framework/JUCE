@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,6 +36,7 @@ public:
                    void* contextToShare,
                    bool shouldUseMultisampling,
                    OpenGLVersion version)
+        : owner (component)
     {
         NSOpenGLPixelFormatAttribute attribs[64] = { 0 };
         createAttribs (attribs, version, pixFormat, shouldUseMultisampling);
@@ -81,8 +82,17 @@ public:
         int numAttribs = 0;
 
         attribs[numAttribs++] = NSOpenGLPFAOpenGLProfile;
-        attribs[numAttribs++] = version >= openGL3_2 ? NSOpenGLProfileVersion3_2Core
-                                                     : NSOpenGLProfileVersionLegacy;
+        attribs[numAttribs++] = [version]
+        {
+            if (version == openGL3_2)
+                return NSOpenGLProfileVersion3_2Core;
+
+            if (version != defaultGLVersion)
+                if (@available (macOS 10.10, *))
+                    return NSOpenGLProfileVersion4_1Core;
+
+            return NSOpenGLProfileVersionLegacy;
+        }();
 
         attribs[numAttribs++] = NSOpenGLPFADoubleBuffer;
         attribs[numAttribs++] = NSOpenGLPFAClosestPolicy;
@@ -113,7 +123,7 @@ public:
     void shutdownOnRenderThread()                     { deactivateCurrentContext(); }
 
     bool createdOk() const noexcept                   { return getRawContext() != nullptr; }
-    void* getRawContext() const noexcept              { return static_cast<void*> (renderContext); }
+    NSOpenGLContext* getRawContext() const noexcept   { return renderContext; }
     GLuint getFrameBufferID() const noexcept          { return 0; }
 
     bool makeActive() const noexcept
@@ -195,7 +205,16 @@ public:
         lastSwapTime = now;
     }
 
-    void updateWindowPosition (Rectangle<int>) {}
+    void updateWindowPosition (Rectangle<int>)
+    {
+        if (auto* peer = owner.getTopLevelComponent()->getPeer())
+        {
+            const auto newArea = peer->getAreaCoveredBy (owner);
+
+            if (convertToRectInt ([view frame]) != newArea)
+                [view setFrame: makeNSRect (newArea)];
+        }
+    }
 
     bool setSwapInterval (int numFramesPerSwapIn)
     {
@@ -236,19 +255,19 @@ public:
 
     static NSOpenGLContextParameter getSwapIntervalParameter()
     {
-        #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
-         if (@available (macOS 10.12, *))
-             return NSOpenGLContextParameterSwapInterval;
-        #endif
+        if (@available (macOS 10.12, *))
+            return NSOpenGLContextParameterSwapInterval;
 
         return NSOpenGLCPSwapInterval;
     }
 
+    Component& owner;
     NSOpenGLContext* renderContext = nil;
     NSOpenGLView* view = nil;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
     double lastSwapTime = 0;
-    int minSwapTimeMs = 0, underrunCounter = 0, numFramesPerSwap = 0;
+    std::atomic<int> minSwapTimeMs { 0 };
+    int underrunCounter = 0, numFramesPerSwap = 0;
     double videoRefreshPeriodS = 1.0 / 60.0;
 
     //==============================================================================
@@ -256,9 +275,10 @@ public:
     {
         MouseForwardingNSOpenGLViewClass()  : ObjCClass<NSOpenGLView> ("JUCEGLView_")
         {
-            addMethod (@selector (rightMouseDown:),      rightMouseDown,     "v@:@");
-            addMethod (@selector (rightMouseUp:),        rightMouseUp,       "v@:@");
-            addMethod (@selector (acceptsFirstMouse:),   acceptsFirstMouse,  "v@:@");
+            addMethod (@selector (rightMouseDown:),       rightMouseDown);
+            addMethod (@selector (rightMouseUp:),         rightMouseUp);
+            addMethod (@selector (acceptsFirstMouse:),    acceptsFirstMouse);
+            addMethod (@selector (accessibilityHitTest:), accessibilityHitTest);
 
             registerClass();
         }
@@ -267,6 +287,7 @@ public:
         static void rightMouseDown (id self, SEL, NSEvent* ev)      { [[(NSOpenGLView*) self superview] rightMouseDown: ev]; }
         static void rightMouseUp   (id self, SEL, NSEvent* ev)      { [[(NSOpenGLView*) self superview] rightMouseUp:   ev]; }
         static BOOL acceptsFirstMouse (id, SEL, NSEvent*)           { return YES; }
+        static id accessibilityHitTest (id self, SEL, NSPoint p)    { return [[(NSOpenGLView*) self superview] accessibilityHitTest: p]; }
     };
 
 

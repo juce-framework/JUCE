@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,46 +26,36 @@
 namespace juce
 {
 
-AudioParameterBool::AudioParameterBool (const String& idToUse, const String& nameToUse,
-                                        bool def, const String& labelToUse,
-                                        std::function<String (bool, int)> stringFromBool,
-                                        std::function<bool (const String&)> boolFromString)
-   : RangedAudioParameter (idToUse, nameToUse, labelToUse),
-     value (def ? 1.0f : 0.0f),
-     defaultValue (value),
-     stringFromBoolFunction (stringFromBool),
-     boolFromStringFunction (boolFromString)
+AudioParameterBool::AudioParameterBool (const ParameterID& idToUse,
+                                        const String& nameToUse,
+                                        bool def,
+                                        const AudioParameterBoolAttributes& attributes)
+    : RangedAudioParameter (idToUse, nameToUse, attributes.getAudioProcessorParameterWithIDAttributes()),
+      value (def ? 1.0f : 0.0f),
+      valueDefault (def),
+      stringFromBoolFunction (attributes.getStringFromValueFunction() != nullptr
+                                  ? attributes.getStringFromValueFunction()
+                                  : [] (bool v, int) { return v ? TRANS("On") : TRANS("Off"); }),
+      boolFromStringFunction (attributes.getValueFromStringFunction() != nullptr
+                                  ? attributes.getValueFromStringFunction()
+                                  : [] (const String& text)
+                                    {
+                                        static const StringArray onStrings { TRANS ("on"), TRANS ("yes"), TRANS ("true") };
+                                        static const StringArray offStrings { TRANS ("off"), TRANS ("no"), TRANS ("false") };
+
+                                        String lowercaseText (text.toLowerCase());
+
+                                        for (auto& testText : onStrings)
+                                            if (lowercaseText == testText)
+                                                return true;
+
+                                        for (auto& testText : offStrings)
+                                            if (lowercaseText == testText)
+                                                return false;
+
+                                        return text.getIntValue() != 0;
+                                    })
 {
-    if (stringFromBoolFunction == nullptr)
-        stringFromBoolFunction = [] (bool v, int) { return v ? TRANS("On") : TRANS("Off"); };
-
-    if (boolFromStringFunction == nullptr)
-    {
-        StringArray onStrings;
-        onStrings.add (TRANS("on"));
-        onStrings.add (TRANS("yes"));
-        onStrings.add (TRANS("true"));
-
-        StringArray offStrings;
-        offStrings.add (TRANS("off"));
-        offStrings.add (TRANS("no"));
-        offStrings.add (TRANS("false"));
-
-        boolFromStringFunction = [onStrings, offStrings] (const String& text)
-        {
-            String lowercaseText (text.toLowerCase());
-
-            for (auto& testText : onStrings)
-                if (lowercaseText == testText)
-                    return true;
-
-            for (auto& testText : offStrings)
-                if (lowercaseText == testText)
-                    return false;
-
-            return text.getIntValue() != 0;
-        };
-    }
 }
 
 AudioParameterBool::~AudioParameterBool()
@@ -78,7 +68,7 @@ AudioParameterBool::~AudioParameterBool()
 
 float AudioParameterBool::getValue() const                               { return value; }
 void AudioParameterBool::setValue (float newValue)                       { value = newValue; valueChanged (get()); }
-float AudioParameterBool::getDefaultValue() const                        { return defaultValue; }
+float AudioParameterBool::getDefaultValue() const                        { return valueDefault; }
 int AudioParameterBool::getNumSteps() const                              { return 2; }
 bool AudioParameterBool::isDiscrete() const                              { return true; }
 bool AudioParameterBool::isBoolean() const                               { return true; }

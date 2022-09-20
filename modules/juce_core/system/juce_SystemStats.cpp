@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -252,5 +252,26 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
     return false;
    #endif
 }
+
+#if JUCE_UNIT_TESTS
+
+class UniqueHardwareIDTest  : public UnitTest
+{
+public:
+    //==============================================================================
+    UniqueHardwareIDTest() : UnitTest ("UniqueHardwareID", UnitTestCategories::analytics) {}
+
+    void runTest() override
+    {
+        beginTest ("getUniqueDeviceID returns usable data.");
+        {
+            expect (SystemStats::getUniqueDeviceID().isNotEmpty());
+        }
+    }
+};
+
+static UniqueHardwareIDTest uniqueHardwareIDTest;
+
+#endif
 
 } // namespace juce

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -164,7 +164,7 @@ inline var nsDictionaryToVar (NSDictionary* dictionary)
     DynamicObject::Ptr dynamicObject (new DynamicObject());
 
     for (NSString* key in dictionary)
-        dynamicObject->setProperty (nsStringToJuce (key), nsObjectToVar (dictionary[key]));
+        dynamicObject->setProperty (nsStringToJuce (key), nsObjectToVar ([dictionary objectForKey: key]));
 
     return var (dynamicObject.get());
 }
@@ -306,11 +306,52 @@ public:
     bool operator== (const ObjCObjectHandle& other) const { return item == other.item; }
     bool operator!= (const ObjCObjectHandle& other) const { return ! (*this == other); }
 
+    bool operator== (std::nullptr_t) const { return item == nullptr; }
+    bool operator!= (std::nullptr_t) const { return ! (*this == nullptr); }
+
 private:
     void swap (ObjCObjectHandle& other) noexcept { std::swap (other.item, item); }
 
     T item{};
 };
+
+//==============================================================================
+namespace detail
+{
+    constexpr auto makeCompileTimeStr()
+    {
+        return std::array<char, 1> { { '\0' } };
+    }
+
+    template <typename A, size_t... As, typename B, size_t... Bs>
+    constexpr auto joinCompileTimeStrImpl (A&& a, std::index_sequence<As...>,
+                                           B&& b, std::index_sequence<Bs...>)
+    {
+        return std::array<char, sizeof... (As) + sizeof... (Bs) + 1> { { a[As]..., b[Bs]..., '\0' } };
+    }
+
+    template <size_t A, size_t B>
+    constexpr auto joinCompileTimeStr (const char (&a)[A], std::array<char, B> b)
+    {
+        return joinCompileTimeStrImpl (a, std::make_index_sequence<A - 1>(),
+                                       b, std::make_index_sequence<B - 1>());
+    }
+
+    template <size_t A, typename... Others>
+    constexpr auto makeCompileTimeStr (const char (&v)[A], Others&&... others)
+    {
+        return joinCompileTimeStr (v, makeCompileTimeStr (others...));
+    }
+
+    template <typename Functor, typename Return, typename... Args>
+    static constexpr auto toFnPtr (Functor functor, Return (Functor::*) (Args...) const)
+    {
+        return static_cast<Return (*) (Args...)> (functor);
+    }
+
+    template <typename Functor>
+    static constexpr auto toFnPtr (Functor functor) { return toFnPtr (functor, &Functor::operator()); }
+} // namespace detail
 
 //==============================================================================
 template <typename Type>
@@ -354,29 +395,15 @@ struct ObjCClass
         jassert (b); ignoreUnused (b);
     }
 
-    template <typename FunctionType>
-    void addMethod (SEL selector, FunctionType callbackFn, const char* signature)
-    {
-        BOOL b = class_addMethod (cls, selector, (IMP) callbackFn, signature);
-        jassert (b); ignoreUnused (b);
-    }
+    template <typename Fn>
+    void addMethod (SEL selector, Fn callbackFn) { addMethod (selector, detail::toFnPtr (callbackFn)); }
 
-    template <typename FunctionType>
-    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2)
+    template <typename Result, typename... Args>
+    void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
     {
-        addMethod (selector, callbackFn, (String (sig1) + sig2).toUTF8());
-    }
-
-    template <typename FunctionType>
-    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2, const char* sig3)
-    {
-        addMethod (selector, callbackFn, (String (sig1) + sig2 + sig3).toUTF8());
-    }
-
-    template <typename FunctionType>
-    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2, const char* sig3, const char* sig4)
-    {
-        addMethod (selector, callbackFn, (String (sig1) + sig2 + sig3 + sig4).toUTF8());
+        const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
+        const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
+        jassertquiet (b);
     }
 
     void addProtocol (Protocol* protocol)
@@ -413,10 +440,10 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
         addIvar<JuceClass*> ("cppObject");
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        addMethod (@selector (initWithJuceObject:), initWithJuceObject, "@@:@");
+        addMethod (@selector (initWithJuceObject:), initWithJuceObject);
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        addMethod (@selector (dealloc),             dealloc,            "v@:");
+        addMethod (@selector (dealloc),             dealloc);
 
         registerClass();
     }
@@ -465,13 +492,31 @@ Class* getJuceClassFromNSObject (NSObject* obj)
     return obj != nullptr ? getIvar<Class*> (obj, "cppObject") : nullptr;
 }
 
-template <typename ReturnT, class Class, typename... Params>
-ReturnT (^CreateObjCBlock(Class* object, ReturnT (Class::*fn)(Params...))) (Params...)
+namespace detail
 {
-    __block Class* _this = object;
-    __block ReturnT (Class::*_fn)(Params...) = fn;
+template <typename> struct Signature;
+template <typename R, typename... A> struct Signature<R (A...)> {};
 
-    return [[^ReturnT (Params... params) { return (_this->*_fn) (params...); } copy] autorelease];
+template <typename Class, typename Result, typename... Args>
+constexpr auto getSignature (Result (Class::*) (Args...))       { return Signature<Result (Args...)>{}; }
+
+template <typename Class, typename Result, typename... Args>
+constexpr auto getSignature (Result (Class::*) (Args...) const) { return Signature<Result (Args...)>{}; }
+
+template <typename Class, typename Fn, typename Result, typename... Params>
+auto createObjCBlockImpl (Class* object, Fn func, Signature<Result (Params...)>)
+{
+    __block auto _this = object;
+    __block auto _func = func;
+
+    return [[^Result (Params... params) { return (_this->*_func) (params...); } copy] autorelease];
+}
+} // namespace detail
+
+template <typename Class, typename MemberFunc>
+auto CreateObjCBlock (Class* object, MemberFunc fn)
+{
+    return detail::createObjCBlockImpl (object, fn, detail::getSignature (fn));
 }
 
 template <typename BlockType>
@@ -487,10 +532,63 @@ public:
     bool operator!= (const void* ptr) const  { return ((const void*) block != ptr); }
     ~ObjCBlock() { if (block != nullptr) [block release]; }
 
-    operator BlockType() { return block; }
+    operator BlockType() const { return block; }
 
 private:
     BlockType block;
+};
+
+//==============================================================================
+class ScopedNotificationCenterObserver
+{
+public:
+    ScopedNotificationCenterObserver() = default;
+
+    ScopedNotificationCenterObserver (id observerIn, SEL selector, NSNotificationName nameIn, id objectIn)
+        : observer (observerIn), name (nameIn), object (objectIn)
+    {
+        [[NSNotificationCenter defaultCenter] addObserver: observer
+                                                 selector: selector
+                                                     name: name
+                                                   object: object];
+    }
+
+    ~ScopedNotificationCenterObserver()
+    {
+        if (observer != nullptr && name != nullptr)
+        {
+            [[NSNotificationCenter defaultCenter] removeObserver: observer
+                                                            name: name
+                                                          object: object];
+        }
+    }
+
+    ScopedNotificationCenterObserver (ScopedNotificationCenterObserver&& other) noexcept
+    {
+        swap (other);
+    }
+
+    ScopedNotificationCenterObserver& operator= (ScopedNotificationCenterObserver&& other) noexcept
+    {
+        auto moved = std::move (other);
+        swap (moved);
+        return *this;
+    }
+
+    ScopedNotificationCenterObserver (const ScopedNotificationCenterObserver&) = delete;
+    ScopedNotificationCenterObserver& operator= (const ScopedNotificationCenterObserver&) = delete;
+
+private:
+    void swap (ScopedNotificationCenterObserver& other) noexcept
+    {
+        std::swap (other.observer, observer);
+        std::swap (other.name, name);
+        std::swap (other.object, object);
+    }
+
+    id observer = nullptr;
+    NSNotificationName name = nullptr;
+    id object = nullptr;
 };
 
 } // namespace juce

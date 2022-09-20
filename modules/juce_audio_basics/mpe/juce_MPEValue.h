@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -52,6 +52,12 @@ public:
         (using 14-bit precision).
     */
     static MPEValue from14BitInt (int value) noexcept;
+
+    /** Constructs an MPEValue from a float between 0.0f and 1.0f. */
+    static MPEValue fromUnsignedFloat (float value) noexcept;
+
+    /** Constructs an MPEValue from a float between -1.0f and 1.0f. */
+    static MPEValue fromSignedFloat (float value) noexcept;
 
     /** Constructs an MPEValue corresponding to the centre value. */
     static MPEValue centreValue() noexcept;

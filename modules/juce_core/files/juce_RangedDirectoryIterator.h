@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -118,11 +118,13 @@ public:
                                 separated by a semi-colon or comma, e.g. "*.jpg;*.png"
         @param whatToLookFor    a value from the File::TypesOfFileToFind enum, specifying
                                 whether to look for files, directories, or both.
+        @param followSymlinks   the policy to use when symlinks are encountered
     */
     RangedDirectoryIterator (const File& directory,
                              bool isRecursive,
                              const String& wildCard = "*",
-                             int whatToLookFor = File::findFiles);
+                             int whatToLookFor = File::findFiles,
+                             File::FollowSymlinks followSymlinks = File::FollowSymlinks::yes);
 
     /** Returns true if both iterators are in their end/sentinel state,
         otherwise returns false.

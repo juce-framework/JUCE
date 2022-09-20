@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -363,6 +363,13 @@ public:
     /** Draws the line that extends vertically up towards one of its parents, or down to one of its children. */
     virtual void paintVerticalConnectingLine (Graphics&, const Line<float>& line);
 
+    /** This should return true if you want to use a custom component, and also use
+        the TreeView's built-in mouse handling support, enabling drag-and-drop,
+        itemClicked() and itemDoubleClicked(); return false if the component should
+        consume all mouse clicks.
+    */
+    virtual bool customComponentUsesTreeViewMouseHandler() const     { return false; }
+
     /** Called when the user clicks on this item.
 
         If you're using createItemComponent() to create a custom component for the
@@ -606,7 +613,7 @@ private:
     int getIndentX() const noexcept;
     void setOwnerView (TreeView*) noexcept;
     TreeViewItem* getTopLevelItem() noexcept;
-    TreeViewItem* getDeepestOpenParentItem() noexcept;
+    const TreeViewItem* getDeepestOpenParentItem() const noexcept;
     int getNumRows() const noexcept;
     TreeViewItem* getItemOnRow (int) noexcept;
     void deselectAllRecursively (TreeViewItem*);
@@ -791,7 +798,7 @@ public:
     TreeViewItem* getItemAt (int yPosition) const noexcept;
 
     /** Tries to scroll the tree so that this item is on-screen somewhere. */
-    void scrollToKeepItemVisible (TreeViewItem* item);
+    void scrollToKeepItemVisible (const TreeViewItem* item);
 
     /** Returns the TreeView's Viewport object. */
     Viewport* getViewport() const noexcept;

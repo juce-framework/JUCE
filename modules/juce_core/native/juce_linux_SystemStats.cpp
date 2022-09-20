@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -302,6 +302,64 @@ void CPUInformation::initialise() noexcept
     if (numPhysicalCPUs <= 0)
         numPhysicalCPUs = numLogicalCPUs;
   #endif
+}
+
+String SystemStats::getUniqueDeviceID()
+{
+    static const auto deviceId = []()
+    {
+        const auto call = [] (auto command) -> String
+        {
+            ChildProcess proc;
+
+            if (proc.start (command, ChildProcess::wantStdOut))
+                return proc.readAllProcessOutput();
+
+            return {};
+        };
+
+        auto data = call ("cat /sys/class/dmi/id/board_serial");
+
+        // 'board_serial' is enough on its own, fallback to bios stuff if we can't find it.
+        if (data.isEmpty())
+        {
+            data = call ("cat /sys/class/dmi/id/bios_date")
+                 + call ("cat /sys/class/dmi/id/bios_release")
+                 + call ("cat /sys/class/dmi/id/bios_vendor")
+                 + call ("cat /sys/class/dmi/id/bios_version");
+        }
+
+        auto cpuData = call ("lscpu");
+
+        if (cpuData.isNotEmpty())
+        {
+            auto getCpuInfo = [&cpuData] (auto key) -> String
+            {
+                auto index = cpuData.indexOf (key);
+
+                if (index >= 0)
+                {
+                    auto start = cpuData.indexOf (index, ":");
+                    auto end = cpuData.indexOf (start, "\n");
+
+                    return cpuData.substring (start + 1, end).trim();
+                }
+
+                return {};
+            };
+
+            data += getCpuInfo ("CPU family:");
+            data += getCpuInfo ("Model:");
+            data += getCpuInfo ("Model name:");
+            data += getCpuInfo ("Vendor ID:");
+        }
+
+        return String ((uint64_t) data.hashCode64());
+    }();
+
+    // Please tell someone at JUCE if this occurs
+    jassert (deviceId.isNotEmpty());
+    return deviceId;
 }
 
 //==============================================================================

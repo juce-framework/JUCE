@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -31,10 +31,6 @@ StringPairArray::StringPairArray (const StringPairArray& other)
     : keys (other.keys),
       values (other.values),
       ignoreCase (other.ignoreCase)
-{
-}
-
-StringPairArray::~StringPairArray()
 {
 }
 
@@ -171,7 +167,8 @@ void StringPairArray::minimiseStorageOverheads()
     values.minimiseStorageOverheads();
 }
 
-void StringPairArray::addMap (const std::map<String, String>& toAdd)
+template <typename Map>
+void StringPairArray::addMapImpl (const Map& toAdd)
 {
     // If we just called `set` for each item in `toAdd`, that would
     // perform badly when adding to large StringPairArrays, as `set`
@@ -204,6 +201,9 @@ void StringPairArray::addMap (const std::map<String, String>& toAdd)
         }
     }
 }
+
+void StringPairArray::addUnorderedMap (const std::unordered_map<String, String>& toAdd) { addMapImpl (toAdd); }
+void StringPairArray::addMap (const std::map<String, String>& toAdd)                    { addMapImpl (toAdd); }
 
 //==============================================================================
 //==============================================================================

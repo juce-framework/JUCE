@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -54,7 +54,8 @@ bool PluginDescription::matchesIdentifierString (const String& identifierString)
 
 String PluginDescription::createIdentifierString() const
 {
-    return pluginFormatName + "-" + name + getPluginDescSuffix (*this, uniqueId);
+    const auto idToUse = uniqueId != 0 ? uniqueId : deprecatedUid;
+    return pluginFormatName + "-" + name + getPluginDescSuffix (*this, idToUse);
 }
 
 std::unique_ptr<XmlElement> PluginDescription::createXml() const
@@ -78,6 +79,7 @@ std::unique_ptr<XmlElement> PluginDescription::createXml() const
     e->setAttribute ("numInputs", numInputChannels);
     e->setAttribute ("numOutputs", numOutputChannels);
     e->setAttribute ("isShell", hasSharedContainer);
+    e->setAttribute ("hasARAExtension", hasARAExtension);
 
     e->setAttribute ("uid", String::toHexString (deprecatedUid));
 
@@ -101,6 +103,7 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
         numInputChannels    = xml.getIntAttribute ("numInputs");
         numOutputChannels   = xml.getIntAttribute ("numOutputs");
         hasSharedContainer  = xml.getBoolAttribute ("isShell", false);
+        hasARAExtension     = xml.getBoolAttribute ("hasARAExtension", false);
 
         deprecatedUid       = xml.getStringAttribute ("uid").getHexValue32();
         uniqueId            = xml.getStringAttribute ("uniqueId", "0").getHexValue32();

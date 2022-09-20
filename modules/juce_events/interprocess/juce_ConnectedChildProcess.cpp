@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -51,6 +51,8 @@ struct ChildProcessPingThread  : public Thread,
         pingReceived();
     }
 
+    void startPinging()                     { startThread (4); }
+
     void pingReceived() noexcept            { countdown = timeoutMs / 1000 + 1; }
     void triggerConnectionLostMessage()     { triggerAsyncUpdate(); }
 
@@ -58,6 +60,8 @@ struct ChildProcessPingThread  : public Thread,
     virtual void pingFailed() = 0;
 
     int timeoutMs;
+
+    using AsyncUpdater::cancelPendingUpdate;
 
 private:
     Atomic<int> countdown;
@@ -90,14 +94,16 @@ struct ChildProcessCoordinator::Connection  : public InterprocessConnection,
           ChildProcessPingThread (timeout),
           owner (m)
     {
-        if (createPipe (pipeName, timeoutMs))
-            startThread (4);
+        createPipe (pipeName, timeoutMs);
     }
 
     ~Connection() override
     {
+        cancelPendingUpdate();
         stopThread (10000);
     }
+
+    using ChildProcessPingThread::startPinging;
 
 private:
     void connectionMade() override  {}
@@ -166,6 +172,7 @@ bool ChildProcessCoordinator::launchWorkerProcess (const File& executable, const
 
         if (connection->isConnected())
         {
+            connection->startPinging();
             sendMessageToWorker ({ startMessage, specialMessageSize });
             return true;
         }
@@ -198,13 +205,16 @@ struct ChildProcessWorker::Connection  : public InterprocessConnection,
           owner (p)
     {
         connectToPipe (pipeName, timeoutMs);
-        startThread (4);
     }
 
     ~Connection() override
     {
+        cancelPendingUpdate();
         stopThread (10000);
+        disconnect();
     }
+
+    using ChildProcessPingThread::startPinging;
 
 private:
     ChildProcessWorker& owner;
@@ -274,7 +284,9 @@ bool ChildProcessWorker::initialiseFromCommandLine (const String& commandLine,
         {
             connection.reset (new Connection (*this, pipeName, timeoutMs <= 0 ? defaultTimeoutMs : timeoutMs));
 
-            if (! connection->isConnected())
+            if (connection->isConnected())
+                connection->startPinging();
+            else
                 connection.reset();
         }
     }

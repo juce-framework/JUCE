@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -669,6 +669,9 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoMa
 {
     jassert (object != nullptr || source.object == nullptr); // Trying to add properties to a null ValueTree will fail!
 
+    if (source == *this)
+        return;
+
     if (source.object == nullptr)
         removeAllProperties (undoManager);
     else if (object != nullptr)
@@ -678,6 +681,9 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoMa
 void ValueTree::copyPropertiesAndChildrenFrom (const ValueTree& source, UndoManager* undoManager)
 {
     jassert (object != nullptr || source.object == nullptr); // Trying to copy to a null ValueTree will fail!
+
+    if (source == *this)
+        return;
 
     copyPropertiesFrom (source, undoManager);
     removeAllChildren (undoManager);

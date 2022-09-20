@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -87,6 +87,7 @@
  #endif
 
 #elif JUCE_LINUX || JUCE_BSD
+ #include "native/juce_linux_EventLoopInternal.h"
  #include "native/juce_linux_Messaging.cpp"
 
 #elif JUCE_ANDROID

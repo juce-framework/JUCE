@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,6 +27,18 @@ namespace juce
 {
 
 extern XContext windowHandleXContext;
+
+struct XFreeDeleter
+{
+    void operator() (void* ptr) const
+    {
+        if (ptr != nullptr)
+            X11Symbols::getInstance()->xFree (ptr);
+    }
+};
+
+template <typename Data>
+std::unique_ptr<Data, XFreeDeleter> makeXFreePtr (Data* raw) { return std::unique_ptr<Data, XFreeDeleter> (raw); }
 
 //==============================================================================
 // Defined juce_linux_Windowing.cpp
@@ -80,15 +92,15 @@ public:
         jassert (peer != nullptr);
 
         auto windowH = (Window) peer->getNativeHandle();
-        auto colourMap = X11Symbols::getInstance()->xCreateColormap (display, windowH, bestVisual->visual, AllocNone);
+        auto visual = glXGetVisualFromFBConfig (display, *bestConfig);
+        auto colourMap = X11Symbols::getInstance()->xCreateColormap (display, windowH, visual->visual, AllocNone);
 
         XSetWindowAttributes swa;
         swa.colormap = colourMap;
         swa.border_pixel = 0;
         swa.event_mask = embeddedWindowEventMask;
 
-        auto glBounds = component.getTopLevelComponent()
-                           ->getLocalArea (&component, component.getLocalBounds());
+        auto glBounds = component.getTopLevelComponent()->getLocalArea (&component, component.getLocalBounds());
 
         glBounds = Desktop::getInstance().getDisplays().logicalToPhysical (glBounds);
 
@@ -96,9 +108,9 @@ public:
                                                                    glBounds.getX(), glBounds.getY(),
                                                                    (unsigned int) jmax (1, glBounds.getWidth()),
                                                                    (unsigned int) jmax (1, glBounds.getHeight()),
-                                                                   0, bestVisual->depth,
+                                                                   0, visual->depth,
                                                                    InputOutput,
-                                                                   bestVisual->visual,
+                                                                   visual->visual,
                                                                    CWBorderPixel | CWColormap | CWEventMask,
                                                                    &swa);
 
@@ -135,18 +147,59 @@ public:
                 }
             }
         }
-
-        if (bestVisual != nullptr)
-            X11Symbols::getInstance()->xFree (bestVisual);
     }
 
     bool initialiseOnRenderThread (OpenGLContext& c)
     {
         XWindowSystemUtilities::ScopedXLock xLock;
-        renderContext = glXCreateContext (display, bestVisual, (GLXContext) contextToShareWith, GL_TRUE);
+
+        const auto components = [&]() -> Optional<Version>
+        {
+            switch (c.versionRequired)
+            {
+                case OpenGLVersion::openGL3_2: return Version { 3, 2 };
+                case OpenGLVersion::openGL4_1: return Version { 4, 1 };
+                case OpenGLVersion::openGL4_3: return Version { 4, 3 };
+
+                case OpenGLVersion::defaultGLVersion: break;
+            }
+
+            return {};
+        }();
+
+        if (components.hasValue())
+        {
+            using GLXCreateContextAttribsARB = GLXContext (*) (Display*, GLXFBConfig, GLXContext, Bool, const int*);
+
+            if (const auto glXCreateContextAttribsARB = (GLXCreateContextAttribsARB) OpenGLHelpers::getExtensionFunction ("glXCreateContextAttribsARB"))
+            {
+               #if JUCE_DEBUG
+                constexpr auto contextFlags = GLX_CONTEXT_DEBUG_BIT_ARB;
+               #else
+                constexpr auto contextFlags = 0;
+               #endif
+
+                const int attribs[]
+                {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, components->major,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, components->minor,
+                    GLX_CONTEXT_PROFILE_MASK_ARB,  GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
+                    GLX_CONTEXT_FLAGS_ARB,         contextFlags,
+                    None
+                };
+
+                renderContext = glXCreateContextAttribsARB (display, *bestConfig, (GLXContext) contextToShareWith, GL_TRUE, attribs);
+            }
+        }
+
+        if (renderContext == nullptr)
+            renderContext = glXCreateNewContext (display, *bestConfig, GLX_RGBA_TYPE, (GLXContext) contextToShareWith, GL_TRUE);
+
+        if (renderContext == nullptr)
+            return false;
+
         c.makeActive();
         context = &c;
-
         return true;
     }
 
@@ -227,15 +280,19 @@ public:
             context->triggerRepaint();
     }
 
-    struct Locker { Locker (NativeContext&) {} };
+    struct Locker
+    {
+        explicit Locker (NativeContext& ctx) : lock (ctx.mutex) {}
+        const ScopedLock lock;
+    };
 
 private:
     bool tryChooseVisual (const OpenGLPixelFormat& format, const std::vector<GLint>& optionalAttribs)
     {
         std::vector<GLint> allAttribs
         {
-            GLX_RGBA,
-            GLX_DOUBLEBUFFER,
+            GLX_RENDER_TYPE,      GLX_RGBA_BIT,
+            GLX_DOUBLEBUFFER,     True,
             GLX_RED_SIZE,         format.redBits,
             GLX_GREEN_SIZE,       format.greenBits,
             GLX_BLUE_SIZE,        format.blueBits,
@@ -252,20 +309,22 @@ private:
 
         allAttribs.push_back (None);
 
-        bestVisual = glXChooseVisual (display, X11Symbols::getInstance()->xDefaultScreen (display), allAttribs.data());
+        int nElements = 0;
+        bestConfig = makeXFreePtr (glXChooseFBConfig (display, X11Symbols::getInstance()->xDefaultScreen (display), allAttribs.data(), &nElements));
 
-        return bestVisual != nullptr;
+        return nElements != 0 && bestConfig != nullptr;
     }
 
     static constexpr int embeddedWindowEventMask = ExposureMask | StructureNotifyMask;
 
+    CriticalSection mutex;
     Component& component;
     GLXContext renderContext = {};
     Window embeddedWindow = {};
 
     int swapFrames = 1;
     Rectangle<int> bounds;
-    XVisualInfo* bestVisual = nullptr;
+    std::unique_ptr<GLXFBConfig, XFreeDeleter> bestConfig;
     void* contextToShareWith;
 
     OpenGLContext* context = nullptr;

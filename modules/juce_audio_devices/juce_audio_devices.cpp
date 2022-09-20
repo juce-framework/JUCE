@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -44,6 +44,8 @@
 #endif
 
 #include "juce_audio_devices.h"
+
+#include "audio_io/juce_SampleRateHelpers.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS

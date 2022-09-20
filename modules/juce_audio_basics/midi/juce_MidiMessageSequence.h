@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -53,9 +53,6 @@ public:
     /** Move assignment operator */
     MidiMessageSequence& operator= (MidiMessageSequence&&) noexcept;
 
-    /** Destructor. */
-    ~MidiMessageSequence();
-
     //==============================================================================
     /** Structure used to hold midi events in the sequence.
 
@@ -68,9 +65,6 @@ public:
     {
     public:
         //==============================================================================
-        /** Destructor. */
-        ~MidiEventHolder();
-
         /** The message itself, whose timestamp is used to specify the event's time. */
         MidiMessage message;
 

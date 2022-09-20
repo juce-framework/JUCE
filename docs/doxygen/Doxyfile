@@ -802,8 +802,8 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = build \
-                         "../JUCE Module Format.md" \
-                         "../CMake API.md"
+                         "build/JUCE Module Format.md" \
+                         "build/CMake API.md"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -849,7 +849,7 @@ EXCLUDE                = build/juce_graphics/image_formats \
                          build/juce_audio_formats/codecs/flac \
                          build/juce_audio_formats/codecs/oggvorbis \
                          build/juce_audio_devices/native \
-                         build/juce_audio_plugin_client/AU/CoreAudioUtilityClasses \
+                         build/juce_audio_plugin_client/AU/AudioUnitSDK \
                          build/juce_browser_plugin_client/juce_browser_plugin.h \
                          build/juce_core/native \
                          build/juce_events/native \

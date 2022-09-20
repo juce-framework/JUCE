@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -423,7 +423,7 @@ public:
     /** Returns the current index of the caret.
         @see setCaretPosition
     */
-    int getCaretPosition() const;
+    int getCaretPosition() const override;
 
     /** Moves the caret to be in front of a given character.
         @see getCaretPosition, moveCaretToEnd
@@ -443,12 +443,11 @@ public:
     */
     void scrollEditorToPositionCaret (int desiredCaretX, int desiredCaretY);
 
-    /** Get the graphical position of the caret.
+    /** Get the graphical position of the caret for a particular index in the text.
 
         The rectangle returned is relative to the component's top-left corner.
-        @see scrollEditorToPositionCaret
     */
-    Rectangle<int> getCaretRectangle() override;
+    Rectangle<int> getCaretRectangleForCharIndex (int index) const override;
 
     /** Selects a section of the text. */
     void setHighlightedRegion (const Range<int>& newSelection) override;
@@ -467,12 +466,22 @@ public:
     */
     int getTextIndexAt (int x, int y) const;
 
+    /** Finds the index of the character at a given position.
+        The coordinates are relative to the component's top-left.
+    */
+    int getTextIndexAt (Point<int>) const;
+
+    /** Like getTextIndexAt, but doesn't snap to the beginning/end of the range for
+        points vertically outside the text.
+    */
+    int getCharIndexForPoint (Point<int> point) const override;
+
     /** Counts the number of characters in the text.
 
         This is quicker than getting the text as a string if you just need to know
         the length.
     */
-    int getTotalNumChars() const;
+    int getTotalNumChars() const override;
 
     /** Returns the total width of the text, as it is currently laid-out.
 
@@ -541,7 +550,7 @@ public:
         The bounds are relative to the component's top-left and may extend beyond the bounds
         of the component if the text is long and word wrapping is disabled.
     */
-    RectangleList<int> getTextBounds (Range<int> textRange);
+    RectangleList<int> getTextBounds (Range<int> textRange) const override;
 
     //==============================================================================
     void moveCaretToEnd();
@@ -665,7 +674,23 @@ public:
     void setInputRestrictions (int maxTextLength,
                                const String& allowedCharacters = String());
 
+    /** Sets the type of virtual keyboard that should be displayed when this editor has
+        focus.
+    */
     void setKeyboardType (VirtualKeyboardType type) noexcept    { keyboardType = type; }
+
+    /** Sets the behaviour of mouse/touch interactions outside this component.
+
+        If true, then presses outside of the TextEditor will dismiss the virtual keyboard.
+        If false, then the virtual keyboard will remain onscreen for as long as the TextEditor has
+        keyboard focus.
+    */
+    void setClicksOutsideDismissVirtualKeyboard (bool);
+
+    /** Returns true if the editor is configured to hide the virtual keyboard when the mouse is
+        pressed on another component.
+    */
+    bool getClicksOutsideDismissVirtualKeyboard() const     { return clicksOutsideDismissVirtualKeyboard; }
 
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
@@ -744,6 +769,7 @@ private:
     struct TextEditorViewport;
     struct InsertAction;
     struct RemoveAction;
+    class EditorAccessibilityHandler;
 
     std::unique_ptr<Viewport> viewport;
     TextHolderComponent* textHolder;
@@ -765,6 +791,8 @@ private:
     bool valueTextNeedsUpdating = false;
     bool consumeEscAndReturnKeys = true;
     bool underlineWhitespace = true;
+    bool mouseDownInEditor = false;
+    bool clicksOutsideDismissVirtualKeyboard = false;
 
     UndoManager undoManager;
     std::unique_ptr<CaretComponent> caret;
@@ -807,7 +835,6 @@ private:
     void reinsert (int insertIndex, const OwnedArray<UniformTextSection>&);
     void remove (Range<int>, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, Point<float>&, float& lineHeight) const;
-    Rectangle<float> getCaretRectangleFloat() const;
     void updateCaretPosition();
     void updateValueFromText();
     void textWasChangedByValue();

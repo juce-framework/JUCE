@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -62,6 +62,9 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
         currentRoot = initialFileOrDirectory.getParentDirectory();
         filename = initialFileOrDirectory.getFileName();
     }
+
+    // The thread must be started before the DirectoryContentsList attempts to scan any file
+    thread.startThread (4);
 
     fileList.reset (new DirectoryContentsList (this, thread));
     fileList->setDirectory (currentRoot, true, true);
@@ -121,8 +124,6 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
     if (filename.isNotEmpty())
         setFileName (filename);
-
-    thread.startThread (4);
 
     startTimer (2000);
 }

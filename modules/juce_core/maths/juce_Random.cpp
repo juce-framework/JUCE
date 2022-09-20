@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -30,10 +30,6 @@ Random::Random (int64 seedValue) noexcept  : seed (seedValue)
 Random::Random()  : seed (1)
 {
     setSeedRandomly();
-}
-
-Random::~Random() noexcept
-{
 }
 
 void Random::setSeed (const int64 newSeed) noexcept

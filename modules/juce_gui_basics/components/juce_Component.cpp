@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -25,6 +25,17 @@
 
 namespace juce
 {
+
+static Component* findFirstEnabledAncestor (Component* in)
+{
+    if (in == nullptr)
+        return nullptr;
+
+    if (in->isEnabled())
+        return in;
+
+    return findFirstEnabledAncestor (in->getParentComponent());
+}
 
 Component* Component::currentlyFocusedComponent = nullptr;
 
@@ -264,6 +275,18 @@ struct ScalingHelpers
     static Rectangle<int>   subtractPosition (Rectangle<int> p,   const Component& c) noexcept  { return p - c.getPosition(); }
     static Point<float>     subtractPosition (Point<float> p,     const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
     static Rectangle<float> subtractPosition (Rectangle<float> p, const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
+
+    static Point<float> screenPosToLocalPos (Component& comp, Point<float> pos)
+    {
+        if (auto* peer = comp.getPeer())
+        {
+            pos = peer->globalToLocal (pos);
+            auto& peerComp = peer->getComponent();
+            return comp.getLocalPoint (&peerComp, unscaledScreenPosToScaled (peerComp, pos));
+        }
+
+        return comp.getLocalPoint (nullptr, unscaledScreenPosToScaled (comp, pos));
+    }
 };
 
 static const char colourPropertyPrefix[] = "jcclr_";
@@ -304,7 +327,7 @@ struct Component::ComponentHelpers
     static bool hitTest (Component& comp, Point<float> localPoint)
     {
         const auto intPoint = localPoint.roundToInt();
-        return Rectangle<int> { comp.getWidth(), comp.getHeight() }.toFloat().contains (localPoint)
+        return Rectangle<int> { comp.getWidth(), comp.getHeight() }.contains (intPoint)
                && comp.hitTest (intPoint.x, intPoint.y);
     }
 
@@ -486,7 +509,7 @@ struct Component::ComponentHelpers
         for (auto& ms : Desktop::getInstance().getMouseSources())
             if (auto* c = ms.getComponentUnderMouse())
                 if (modalWouldBlockComponent (*c, &modal))
-                    (c->*function) (ms, ms.getScreenPosition(), Time::getCurrentTime());
+                    (c->*function) (ms, ScalingHelpers::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
     }
 };
 
@@ -729,6 +752,16 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             peer->setConstrainer (currentConstrainer);
 
             repaint();
+
+           #if JUCE_LINUX
+            // Creating the peer Image on Linux will change the reported position of the window. If
+            // the Image creation is interleaved with the coming configureNotifyEvents the window
+            // will appear in the wrong position. To avoid this, we force the Image creation here,
+            // before handling any of the configureNotifyEvents. The Linux implementation of
+            // performAnyPendingRepaintsNow() will force update the peer position if necessary.
+            peer->performAnyPendingRepaintsNow();
+           #endif
+
             internalHierarchyChanged();
 
             if (auto* handler = getAccessibilityHandler())
@@ -1347,7 +1380,7 @@ AffineTransform Component::getTransform() const
     return affineTransform != nullptr ? *affineTransform : AffineTransform();
 }
 
-float Component::getApproximateScaleFactorForComponent (Component* targetComponent)
+float Component::getApproximateScaleFactorForComponent (const Component* targetComponent)
 {
     AffineTransform transform;
 
@@ -1761,6 +1794,8 @@ void Component::enterModalState (bool shouldTakeKeyboardFocus,
 
 void Component::exitModalState (int returnValue)
 {
+    WeakReference<Component> deletionChecker (this);
+
     if (isCurrentlyModal (false))
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
@@ -1772,7 +1807,8 @@ void Component::exitModalState (int returnValue)
             // While this component is in modal state it may block other components from receiving
             // mouseEnter events. To keep mouseEnter and mouseExit calls balanced on these components,
             // we must manually force the mouse to "enter" blocked components.
-            ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*this, &Component::internalMouseEnter);
+            if (deletionChecker != nullptr)
+                ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*deletionChecker, &Component::internalMouseEnter);
         }
         else
         {
@@ -1971,7 +2007,7 @@ void Component::paintComponentAndChildren (Graphics& g)
 {
     auto clipBounds = g.getClipBounds();
 
-    if (flags.dontClipGraphicsFlag)
+    if (flags.dontClipGraphicsFlag && getNumChildComponents() == 0)
     {
         paint (g);
     }
@@ -2266,16 +2302,16 @@ void Component::mouseDoubleClick (const MouseEvent&)    {}
 
 void Component::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    // the base class just passes this event up to its parent..
-    if (parentComponent != nullptr && parentComponent->isEnabled())
-        parentComponent->mouseWheelMove (e.getEventRelativeTo (parentComponent), wheel);
+    // the base class just passes this event up to the nearest enabled ancestor
+    if (auto* enabledComponent = findFirstEnabledAncestor (getParentComponent()))
+        enabledComponent->mouseWheelMove (e.getEventRelativeTo (enabledComponent), wheel);
 }
 
 void Component::mouseMagnify (const MouseEvent& e, float magnifyAmount)
 {
-    // the base class just passes this event up to its parent..
-    if (parentComponent != nullptr && parentComponent->isEnabled())
-        parentComponent->mouseMagnify (e.getEventRelativeTo (parentComponent), magnifyAmount);
+    // the base class just passes this event up to the nearest enabled ancestor
+    if (auto* enabledComponent = findFirstEnabledAncestor (getParentComponent()))
+        enabledComponent->mouseMagnify (e.getEventRelativeTo (enabledComponent), magnifyAmount);
 }
 
 //==============================================================================
@@ -2379,10 +2415,16 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
 
     BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                         this, this, time, relativePos, time, 0, false);
+    const auto me = makeMouseEvent (source,
+                                    PointerState().withPosition (relativePos),
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePos,
+                                    time,
+                                    0,
+                                    false);
     mouseEnter (me);
 
     flags.cachedMouseInsideComponent = true;
@@ -2411,10 +2453,16 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
 
     BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                         this, this, time, relativePos, time, 0, false);
+    const auto me = makeMouseEvent (source,
+                                    PointerState().withPosition (relativePos),
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePos,
+                                    time,
+                                    0,
+                                    false);
 
     mouseExit (me);
 
@@ -2426,8 +2474,7 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
     MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseExit, me);
 }
 
-void Component::internalMouseDown (MouseInputSource source, Point<float> relativePos, Time time,
-                                   float pressure, float orientation, float rotation, float tiltX, float tiltY)
+void Component::internalMouseDown (MouseInputSource source, const PointerState& relativePointerState, Time time)
 {
     auto& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
@@ -2445,9 +2492,16 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
         if (isCurrentlyBlockedByAnotherModalComponent())
         {
             // allow blocked mouse-events to go to global listeners..
-            const MouseEvent me (source, relativePos, source.getCurrentModifiers(), pressure,
-                                 orientation, rotation, tiltX, tiltY, this, this, time, relativePos,
-                                 time, source.getNumberOfMultipleClicks(), false);
+            const auto me = makeMouseEvent (source,
+                                            relativePointerState,
+                                            source.getCurrentModifiers(),
+                                            this,
+                                            this,
+                                            time,
+                                            relativePointerState.position,
+                                            time,
+                                            source.getNumberOfMultipleClicks(),
+                                            false);
 
             desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (me); });
             return;
@@ -2478,9 +2532,16 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), pressure,
-                         orientation, rotation, tiltX, tiltY, this, this, time, relativePos,
-                         time, source.getNumberOfMultipleClicks(), false);
+    const auto me = makeMouseEvent (source,
+                                    relativePointerState,
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePointerState.position,
+                                    time,
+                                    source.getNumberOfMultipleClicks(),
+                                    false);
     mouseDown (me);
 
     if (checker.shouldBailOut())
@@ -2491,8 +2552,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
     MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseDown, me);
 }
 
-void Component::internalMouseUp (MouseInputSource source, Point<float> relativePos, Time time,
-                                 const ModifierKeys oldModifiers, float pressure, float orientation, float rotation, float tiltX, float tiltY)
+void Component::internalMouseUp (MouseInputSource source, const PointerState& relativePointerState, Time time, const ModifierKeys oldModifiers)
 {
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())
         return;
@@ -2502,12 +2562,16 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
-    const MouseEvent me (source, relativePos, oldModifiers, pressure, orientation,
-                         rotation, tiltX, tiltY, this, this, time,
-                         getLocalPoint (nullptr, source.getLastMouseDownPosition()),
-                         source.getLastMouseDownTime(),
-                         source.getNumberOfMultipleClicks(),
-                         source.isLongPressOrDrag());
+    const auto me = makeMouseEvent (source,
+                                    relativePointerState,
+                                    oldModifiers,
+                                    this,
+                                    this,
+                                    time,
+                                    getLocalPoint (nullptr, source.getLastMouseDownPosition()),
+                                    source.getLastMouseDownTime(),
+                                    source.getNumberOfMultipleClicks(),
+                                    source.isLongPressOrDrag());
     mouseUp (me);
 
     if (checker.shouldBailOut())
@@ -2534,19 +2598,22 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
     }
 }
 
-void Component::internalMouseDrag (MouseInputSource source, Point<float> relativePos, Time time,
-                                   float pressure, float orientation, float rotation, float tiltX, float tiltY)
+void Component::internalMouseDrag (MouseInputSource source, const PointerState& relativePointerState, Time time)
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {
         BailOutChecker checker (this);
 
-        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                             pressure, orientation, rotation, tiltX, tiltY, this, this, time,
-                             getLocalPoint (nullptr, source.getLastMouseDownPosition()),
-                             source.getLastMouseDownTime(),
-                             source.getNumberOfMultipleClicks(),
-                             source.isLongPressOrDrag());
+        const auto me = makeMouseEvent (source,
+                                        relativePointerState,
+                                        source.getCurrentModifiers(),
+                                        this,
+                                        this,
+                                        time,
+                                        getLocalPoint (nullptr, source.getLastMouseDownPosition()),
+                                        source.getLastMouseDownTime(),
+                                        source.getNumberOfMultipleClicks(),
+                                        source.isLongPressOrDrag());
         mouseDrag (me);
 
         if (checker.shouldBailOut())
@@ -2571,10 +2638,16 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
     {
         BailOutChecker checker (this);
 
-        const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                             MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                             MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                             this, this, time, relativePos, time, 0, false);
+        const auto me = makeMouseEvent (source,
+                                        PointerState().withPosition (relativePos),
+                                        source.getCurrentModifiers(),
+                                        this,
+                                        this,
+                                        time,
+                                        relativePos,
+                                        time,
+                                        0,
+                                        false);
         mouseMove (me);
 
         if (checker.shouldBailOut())
@@ -2592,10 +2665,16 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
     auto& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                         this, this, time, relativePos, time, 0, false);
+    const auto me = makeMouseEvent (source,
+                                    PointerState().withPosition (relativePos),
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePos,
+                                    time,
+                                    0,
+                                    false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2622,10 +2701,16 @@ void Component::internalMagnifyGesture (MouseInputSource source, Point<float> re
     auto& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                         this, this, time, relativePos, time, 0, false);
+    const auto me = makeMouseEvent (source,
+                                    PointerState().withPosition (relativePos),
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePos,
+                                    time,
+                                    0,
+                                    false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2858,6 +2943,11 @@ void Component::takeKeyboardFocus (FocusChangeType cause)
             return;
 
         WeakReference<Component> componentLosingFocus (currentlyFocusedComponent);
+
+        if (auto* losingFocus = componentLosingFocus.get())
+            if (auto* otherPeer = losingFocus->getPeer())
+                otherPeer->closeInputMethodContext();
+
         currentlyFocusedComponent = this;
 
         Desktop::getInstance().triggerFocusCallback();
@@ -2923,6 +3013,9 @@ void Component::giveAwayKeyboardFocusInternal (bool sendFocusLossEvent)
     {
         if (auto* componentLosingFocus = currentlyFocusedComponent)
         {
+            if (auto* otherPeer = componentLosingFocus->getPeer())
+                otherPeer->closeInputMethodContext();
+
             currentlyFocusedComponent = nullptr;
 
             if (sendFocusLossEvent && componentLosingFocus != nullptr)
@@ -3215,6 +3308,18 @@ AccessibilityHandler* Component::getAccessibilityHandler()
         || accessibilityHandler->getTypeIndex() != std::type_index (typeid (*this)))
     {
         accessibilityHandler = createAccessibilityHandler();
+
+        // On Android, notifying that an element was created can cause the system to request
+        // the accessibility node info for the new element. If we're not careful, this will lead
+        // to recursive calls, as each time an element is created, new node info will be requested,
+        // causing an element to be created, causing a new info request...
+        // By assigning the accessibility handler before notifying the system that an element was
+        // created, the if() predicate above should evaluate to false on recursive calls,
+        // terminating the recursion.
+        if (accessibilityHandler != nullptr)
+            notifyAccessibilityEventInternal (*accessibilityHandler, InternalAccessibilityEvent::elementCreated);
+        else
+            jassertfalse; // createAccessibilityHandler must return non-null
     }
 
     return accessibilityHandler.get();

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -45,20 +45,20 @@
 
 #include "juce_gui_basics.h"
 
+#include <cctype>
+
 //==============================================================================
 #if JUCE_MAC
  #import <WebKit/WebKit.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
-
- #if JUCE_SUPPORT_CARBON
-  #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
- #endif
+ #import <MetalKit/MetalKit.h>
 
 #elif JUCE_IOS
- #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+ #if JUCE_PUSH_NOTIFICATIONS
   #import <UserNotifications/UserNotifications.h>
  #endif
 
+ #import <MetalKit/MetalKit.h>
  #import <UIKit/UIActivityViewController.h>
 
 //==============================================================================
@@ -67,11 +67,19 @@
  #include <vfw.h>
  #include <commdlg.h>
  #include <commctrl.h>
+ #include <sapi.h>
+ #include <dxgi.h>
 
- #if ! JUCE_MINGW
-  #include <UIAutomation.h>
-  #include <sapi.h>
+ #if JUCE_MINGW
+  // Some MinGW headers use 'new' as a parameter name
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wkeyword-macro")
+  #define new new_
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #endif
+
+ #include <uiautomation.h>
+
+ #undef new
 
  #if JUCE_WEB_BROWSER
   #include <exdisp.h>
@@ -84,6 +92,7 @@
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
   #pragma comment(lib, "comctl32.lib")
+  #pragma comment(lib, "dxgi.lib")
 
   #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")
@@ -96,8 +105,6 @@
   #endif
  #endif
 #endif
-
-#include <set>
 
 //==============================================================================
 #define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
@@ -127,17 +134,24 @@ namespace juce
 
     struct CustomMouseCursorInfo
     {
-        CustomMouseCursorInfo() = default;
-
-        CustomMouseCursorInfo (const Image& im, Point<int> hs, float scale = 1.0f) noexcept
-            : image (im), hotspot (hs), scaleFactor (scale)
-        {}
-
-        Image image;
+        ScaledImage image;
         Point<int> hotspot;
-        float scaleFactor = 1.0f;
     };
+
+    template <typename MemberFn>
+    static const AccessibilityHandler* getEnclosingHandlerWithInterface (const AccessibilityHandler* handler, MemberFn fn)
+    {
+        if (handler == nullptr)
+            return nullptr;
+
+        if ((handler->*fn)() != nullptr)
+            return handler;
+
+        return getEnclosingHandlerWithInterface (handler->getParent(), fn);
+    }
 } // namespace juce
+
+#include "mouse/juce_PointerState.h"
 
 #include "accessibility/juce_AccessibilityHandler.cpp"
 #include "components/juce_Component.cpp"
@@ -256,6 +270,7 @@ namespace juce
 #include "application/juce_Application.cpp"
 #include "misc/juce_BubbleComponent.cpp"
 #include "misc/juce_DropShadower.cpp"
+#include "misc/juce_FocusOutline.cpp"
 #include "misc/juce_JUCESplashScreen.cpp"
 
 #include "layout/juce_FlexBox.cpp"
@@ -266,39 +281,16 @@ namespace juce
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
-#if JUCE_ANDROID || JUCE_WINDOWS
+#if JUCE_ANDROID || JUCE_WINDOWS || JUCE_IOS || JUCE_UNIT_TESTS
  #include "native/accessibility/juce_AccessibilityTextHelpers.h"
 #endif
-
-namespace juce
-{
-
-static const juce::Identifier disableAsyncLayerBackedViewIdentifier { "disableAsyncLayerBackedView" };
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
-
-/** Used by the macOS and iOS peers. */
-void setComponentAsyncLayerBackedViewDisabled (juce::Component& comp, bool shouldDisableAsyncLayerBackedView)
-{
-    comp.getProperties().set (disableAsyncLayerBackedViewIdentifier, shouldDisableAsyncLayerBackedView);
-}
-
-/** Used by the macOS and iOS peers. */
-bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
-{
-    return comp.getProperties()[disableAsyncLayerBackedViewIdentifier];
-}
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-} // namespace juce
 
 #if JUCE_MAC || JUCE_IOS
  #include "native/accessibility/juce_mac_AccessibilitySharedCode.mm"
 
  #if JUCE_IOS
-  #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_UIViewComponentPeer.mm"
+  #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_Windowing.mm"
   #include "native/juce_ios_FileChooser.mm"
 
@@ -308,6 +300,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
  #else
   #include "native/accessibility/juce_mac_Accessibility.mm"
+  #include "native/juce_mac_PerScreenDisplayLinks.h"
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
   #include "native/juce_mac_MainMenu.mm"
@@ -317,26 +310,13 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include "native/juce_mac_MouseCursor.mm"
 
 #elif JUCE_WINDOWS
-
- #if ! JUCE_MINGW
-  #include "native/accessibility/juce_win32_WindowsUIAWrapper.h"
-  #include "native/accessibility/juce_win32_AccessibilityElement.h"
-  #include "native/accessibility/juce_win32_UIAHelpers.h"
-  #include "native/accessibility/juce_win32_UIAProviders.h"
-  #include "native/accessibility/juce_win32_AccessibilityElement.cpp"
-  #include "native/accessibility/juce_win32_Accessibility.cpp"
- #else
-  namespace juce
-  {
-      namespace WindowsAccessibility
-      {
-          long getUiaRootObjectId()  { return -1; }
-          bool handleWmGetObject (AccessibilityHandler*, WPARAM, LPARAM, LRESULT*) { return false; }
-          void revokeUIAMapEntriesForWindow (HWND) {}
-      }
-  }
- #endif
-
+ #include "native/accessibility/juce_win32_ComInterfaces.h"
+ #include "native/accessibility/juce_win32_WindowsUIAWrapper.h"
+ #include "native/accessibility/juce_win32_AccessibilityElement.h"
+ #include "native/accessibility/juce_win32_UIAHelpers.h"
+ #include "native/accessibility/juce_win32_UIAProviders.h"
+ #include "native/accessibility/juce_win32_AccessibilityElement.cpp"
+ #include "native/accessibility/juce_win32_Accessibility.cpp"
  #include "native/juce_win32_Windowing.cpp"
  #include "native/juce_win32_DragAndDrop.cpp"
  #include "native/juce_win32_FileChooser.cpp"
@@ -355,9 +335,9 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID
+ #include "juce_core/files/juce_common_MimeTypes.h"
  #include "native/accessibility/juce_android_Accessibility.cpp"
  #include "native/juce_android_Windowing.cpp"
- #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
 
  #if JUCE_CONTENT_SHARING
@@ -388,6 +368,34 @@ namespace juce
 
 //==============================================================================
 #if JUCE_WINDOWS
+namespace juce
+{
+
+JUCE_COMCLASS (JuceIVirtualDesktopManager, "a5cd92ff-29be-454c-8d04-d82879fb3f1b") : public IUnknown
+{
+public:
+    virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(
+         __RPC__in HWND topLevelWindow,
+         __RPC__out BOOL * onCurrentDesktop) = 0;
+
+    virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(
+         __RPC__in HWND topLevelWindow,
+         __RPC__out GUID * desktopId) = 0;
+
+    virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(
+         __RPC__in HWND topLevelWindow,
+         __RPC__in REFGUID desktopId) = 0;
+};
+
+JUCE_COMCLASS (JuceVirtualDesktopManager, "aa509086-5ca9-4c25-8f95-589d3c07b48a");
+
+} // namespace juce
+
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::JuceIVirtualDesktopManager, 0xa5cd92ff, 0x29be, 0x454c, 0x8d, 0x04, 0xd8, 0x28, 0x79, 0xfb, 0x3f, 0x1b)
+__CRT_UUID_DECL (juce::JuceVirtualDesktopManager,  0xaa509086, 0x5ca9, 0x4c25, 0x8f, 0x95, 0x58, 0x9d, 0x3c, 0x07, 0xb4, 0x8a)
+#endif
+
 bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 {
     if (x == nullptr)
@@ -395,36 +403,16 @@ bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 
     static auto* desktopManager = []
     {
-        // IVirtualDesktopManager Copied from ShObjdl_core.h, because it may not be defined
-        MIDL_INTERFACE ("a5cd92ff-29be-454c-8d04-d82879fb3f1b")
-        juce_IVirtualDesktopManager : public IUnknown
-        {
-        public:
-            virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(
-                 __RPC__in HWND topLevelWindow,
-                 __RPC__out BOOL * onCurrentDesktop) = 0;
-
-            virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(
-                 __RPC__in HWND topLevelWindow,
-                 __RPC__out GUID * desktopId) = 0;
-
-            virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(
-                 __RPC__in HWND topLevelWindow,
-                 __RPC__in REFGUID desktopId) = 0;
-        };
-
-        juce_IVirtualDesktopManager* result = nullptr;
+        JuceIVirtualDesktopManager* result = nullptr;
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
-        class DECLSPEC_UUID("aa509086-5ca9-4c25-8f95-589d3c07b48a") juce_VirtualDesktopManager;
-
-        if (SUCCEEDED (CoCreateInstance (__uuidof (juce_VirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
+        if (SUCCEEDED (CoCreateInstance (__uuidof (JuceVirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
             return result;
 
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        return static_cast<juce_IVirtualDesktopManager*> (nullptr);
+        return static_cast<JuceIVirtualDesktopManager*> (nullptr);
     }();
 
     BOOL current = false;
@@ -435,6 +423,7 @@ bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 
     return true;
 }
+
 #else
  bool juce::isWindowOnCurrentVirtualDesktop (void*) { return true; }
  juce::ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()  { ignoreUnused (previousContext); }
@@ -443,3 +432,7 @@ bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 
 // Depends on types defined in platform-specific windowing files
 #include "mouse/juce_MouseCursor.cpp"
+
+#if JUCE_UNIT_TESTS
+#include "native/accessibility/juce_AccessibilityTextHelpers_test.cpp"
+#endif

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -63,12 +63,12 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
     /*
       ==========================================================================
 
-       In accordance with the terms of the JUCE 6 End-Use License Agreement, the
+       In accordance with the terms of the JUCE 7 End-Use License Agreement, the
        JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
        ineffective unless you have a JUCE Indie or Pro license, or are using
        JUCE under the GPL v3 license.
 
-       End User License Agreement: www.juce.com/juce-6-licence
+       End User License Agreement: www.juce.com/juce-7-licence
 
       ==========================================================================
     */
@@ -532,9 +532,12 @@ String ResizableWindow::getWindowStateAsString()
    #if JUCE_LINUX
     if (auto* peer = isOnDesktop() ? getPeer() : nullptr)
     {
-        const auto frameSize = peer->getFrameSize();
-        stateString << " frame " << frameSize.getTop() << ' ' << frameSize.getLeft()
-                    << ' ' << frameSize.getBottom() << ' ' << frameSize.getRight();
+        if (const auto optionalFrameSize = peer->getFrameSizeIfPresent())
+        {
+            const auto& frameSize = *optionalFrameSize;
+            stateString << " frame " << frameSize.getTop() << ' ' << frameSize.getLeft()
+                        << ' ' << frameSize.getBottom() << ' ' << frameSize.getRight();
+        }
     }
    #endif
 
@@ -566,10 +569,12 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
     if (peer != nullptr)
     {
-        peer->getFrameSize().addTo (newPos);
+        if (const auto frameSize = peer->getFrameSizeIfPresent())
+            frameSize->addTo (newPos);
     }
+
    #if JUCE_LINUX
-    else
+    if (peer == nullptr || ! peer->getFrameSizeIfPresent())
     {
         // We need to adjust for the frame size before we create a peer, as X11
         // doesn't provide this information at construction time.
@@ -580,7 +585,9 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
                                     tokens[firstCoord + 7].getIntValue(),
                                     tokens[firstCoord + 8].getIntValue() };
 
-            frame.addTo (newPos);
+            newPos.setX (newPos.getX() - frame.getLeft());
+            newPos.setY (newPos.getY() - frame.getTop());
+
             setBounds (newPos);
         }
     }
@@ -606,7 +613,9 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
     if (peer != nullptr)
     {
-        peer->getFrameSize().subtractFrom (newPos);
+        if (const auto frameSize = peer->getFrameSizeIfPresent())
+            frameSize->subtractFrom (newPos);
+
         peer->setNonFullScreenBounds (newPos);
     }
 

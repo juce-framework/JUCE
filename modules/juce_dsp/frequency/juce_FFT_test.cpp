@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -135,7 +135,7 @@ struct FFTUnitTest  : public UnitTest
 
     struct FrequencyOnlyTest
     {
-        static void run(FFTUnitTest& u)
+        static void run (FFTUnitTest& u)
         {
             Random random (378272);
             for (size_t order = 0; order <= 8; ++order)
@@ -144,19 +144,23 @@ struct FFTUnitTest  : public UnitTest
 
                 FFT fft ((int) order);
 
-                HeapBlock<float> inout (n << 1), reference (n << 1);
-                HeapBlock<Complex<float>> frequency (n);
+                std::vector<float> inout ((size_t) n << 1), reference ((size_t) n << 1);
+                std::vector<Complex<float>> frequency (n);
 
-                fillRandom (random, inout.getData(), n);
-                zeromem (reference.getData(), sizeof (float) * ((size_t) n << 1));
-                performReferenceFourier (inout.getData(), frequency.getData(), n, false);
+                fillRandom (random, inout.data(), n);
+                zeromem (reference.data(), sizeof (float) * ((size_t) n << 1));
+                performReferenceFourier (inout.data(), frequency.data(), n, false);
 
                 for (size_t i = 0; i < n; ++i)
-                    reference.getData()[i] = std::abs (frequency.getData()[i]);
+                    reference[i] = std::abs (frequency[i]);
 
-                fft.performFrequencyOnlyForwardTransform (inout.getData());
-
-                u.expect (checkArrayIsSimilar (inout.getData(), reference.getData(), n));
+                for (auto ignoreNegative : { false, true })
+                {
+                    auto inoutCopy = inout;
+                    fft.performFrequencyOnlyForwardTransform (inoutCopy.data(), ignoreNegative);
+                    auto numMatching = ignoreNegative ? (n / 2) + 1 : n;
+                    u.expect (checkArrayIsSimilar (inoutCopy.data(), reference.data(), numMatching));
+                }
             }
         }
     };

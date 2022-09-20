@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -115,7 +115,7 @@ struct JUCE_API  MPENote
     */
     MPEValue noteOnVelocity  { MPEValue::minValue() };
 
-    /** Current per-note pitchbend of the note  (in units of MIDI pitchwheel
+    /** Current per-note pitchbend of the note (in units of MIDI pitchwheel
         position). This dimension can be modulated while the note sounds.
 
         Note: This value is not aware of the currently used pitchbend range,

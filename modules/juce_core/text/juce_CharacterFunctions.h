@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -500,10 +500,10 @@ public:
 
             while (! t.isEmpty())
             {
-                auto hexValue = static_cast<ResultType> (CharacterFunctions::getHexDigitValue (t.getAndAdvance()));
+                auto hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
 
                 if (hexValue >= 0)
-                    result = static_cast<ResultType> (result << 4) | hexValue;
+                    result = static_cast<ResultType> (result << 4) | static_cast<ResultType> (hexValue);
             }
 
             return result;

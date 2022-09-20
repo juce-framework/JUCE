@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -40,16 +40,8 @@
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
-#include <set>
 
 //==============================================================================
-#if JUCE_MAC
- #if JUCE_SUPPORT_CARBON && (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU)
-  #include <Carbon/Carbon.h>
-  #include <juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h>
- #endif
-#endif
-
 #if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && (JUCE_LINUX || JUCE_BSD)
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
@@ -57,7 +49,7 @@
  #undef KeyPress
 #endif
 
-#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX && ! JUCE_BSD
+#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX
  #undef JUCE_PLUGINHOST_VST3
  #define JUCE_PLUGINHOST_VST3 0
 #endif
@@ -66,11 +58,10 @@
  #include <AudioUnit/AudioUnit.h>
 #endif
 
-//==============================================================================
 namespace juce
 {
 
-#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD))
+#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX)
 
 static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                  const PluginDescription& desc)
@@ -83,6 +74,26 @@ static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
 }
 
 #endif
+
+template <typename Callback>
+void callOnMessageThread (Callback&& callback)
+{
+    if (MessageManager::getInstance()->existsAndIsLockedByCurrentThread())
+    {
+        callback();
+        return;
+    }
+
+    WaitableEvent completionEvent;
+
+    MessageManager::callAsync ([&callback, &completionEvent]
+                               {
+                                   callback();
+                                   completionEvent.signal();
+                               });
+
+    completionEvent.wait();
+}
 
 #if JUCE_MAC
 
@@ -143,39 +154,34 @@ private:
         }
     }
 
-    struct FlippedNSView : public ObjCClass<NSView>
+    struct InnerNSView : public ObjCClass<NSView>
     {
-        FlippedNSView()
-            : ObjCClass ("JuceFlippedNSView_")
+        InnerNSView()
+            : ObjCClass ("JuceInnerNSView_")
         {
             addIvar<NSViewComponentWithParent*> ("owner");
 
-            addMethod (@selector (isFlipped),      isFlipped,     "c@:");
-            addMethod (@selector (isOpaque),       isOpaque,      "c@:");
-            addMethod (@selector (didAddSubview:), didAddSubview, "v@:@");
+            addMethod (@selector (isOpaque),       isOpaque);
+            addMethod (@selector (didAddSubview:), didAddSubview);
 
             registerClass();
         }
 
-        static BOOL isFlipped (id, SEL) { return YES; }
         static BOOL isOpaque  (id, SEL) { return YES; }
 
-        static void nudge (NSView* self)
+        static void nudge (id self)
         {
             if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
                 if (owner->wantsNudge == WantsNudge::yes)
                     owner->triggerAsyncUpdate();
         }
 
-        static void viewDidUnhide (NSView* self, SEL)               { nudge (self); }
-        static void didAddSubview (NSView* self, SEL, NSView*)      { nudge (self); }
-        static void viewDidMoveToSuperview (NSView* self, SEL)      { nudge (self); }
-        static void viewDidMoveToWindow (NSView* self, SEL)         { nudge (self); }
+        static void didAddSubview (id self, SEL, NSView*)      { nudge (self); }
     };
 
-    static FlippedNSView& getViewClass()
+    static InnerNSView& getViewClass()
     {
-        static FlippedNSView result;
+        static InnerNSView result;
         return result;
     }
 };
@@ -184,6 +190,7 @@ private:
 
 } // namespace juce
 
+#include "utilities/juce_FlagCache.h"
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"
 #include "format_types/juce_LegacyAudioParameter.cpp"
@@ -193,10 +200,12 @@ private:
 #include "processors/juce_AudioProcessorGraph.cpp"
 #include "processors/juce_GenericAudioProcessorEditor.cpp"
 #include "processors/juce_PluginDescription.cpp"
+#include "format_types/juce_ARACommon.cpp"
 #include "format_types/juce_LADSPAPluginFormat.cpp"
 #include "format_types/juce_VSTPluginFormat.cpp"
 #include "format_types/juce_VST3PluginFormat.cpp"
 #include "format_types/juce_AudioUnitPluginFormat.mm"
+#include "format_types/juce_ARAHosting.cpp"
 #include "scanning/juce_KnownPluginList.cpp"
 #include "scanning/juce_PluginDirectoryScanner.cpp"
 #include "scanning/juce_PluginListComponent.cpp"
@@ -210,3 +219,17 @@ private:
 #include "utilities/juce_ParameterAttachments.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
 #include "utilities/juce_PluginHostType.cpp"
+#include "utilities/juce_NativeScaleFactorNotifier.cpp"
+#include "utilities/ARA/juce_ARA_utils.cpp"
+
+#include "format_types/juce_LV2PluginFormat.cpp"
+
+#if JUCE_UNIT_TESTS
+ #if JUCE_PLUGINHOST_VST3
+  #include "format_types/juce_VST3PluginFormat_test.cpp"
+ #endif
+
+ #if JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))
+  #include "format_types/juce_LV2PluginFormat_test.cpp"
+ #endif
+#endif

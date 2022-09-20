@@ -22,9 +22,9 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>
-    <string>6.1.2</string>
+    <string>7.0.2</string>
     <key>CFBundleVersion</key>
-    <string>6.1.2</string>
+    <string>7.0.2</string>
     <key>NSHumanReadableCopyright</key>
     <string>Raw Material Software Limited</string>
     <key>NSHighResolutionCapable</key>
@@ -46,6 +46,8 @@
         <string>Icon</string>
         <key>NSPersistentStoreTypeKey</key>
         <string>XML</string>
+        <key>LSHandlerRank</key>
+        <string>Default</string>
       </dict>
     </array>
   </dict>

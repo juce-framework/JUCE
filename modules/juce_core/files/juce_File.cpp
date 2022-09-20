@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -561,18 +561,18 @@ void File::readLines (StringArray& destLines) const
 }
 
 //==============================================================================
-Array<File> File::findChildFiles (int whatToLookFor, bool searchRecursively, const String& wildcard) const
+Array<File> File::findChildFiles (int whatToLookFor, bool searchRecursively, const String& wildcard, FollowSymlinks followSymlinks) const
 {
     Array<File> results;
-    findChildFiles (results, whatToLookFor, searchRecursively, wildcard);
+    findChildFiles (results, whatToLookFor, searchRecursively, wildcard, followSymlinks);
     return results;
 }
 
-int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRecursively, const String& wildcard) const
+int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRecursively, const String& wildcard, FollowSymlinks followSymlinks) const
 {
     int total = 0;
 
-    for (const auto& di : RangedDirectoryIterator (*this, searchRecursively, wildcard, whatToLookFor))
+    for (const auto& di : RangedDirectoryIterator (*this, searchRecursively, wildcard, whatToLookFor, followSymlinks))
     {
         results.add (di.getFile());
         ++total;
@@ -1146,10 +1146,17 @@ public:
         expect (home.getChildFile ("./../xyz") == home.getParentDirectory().getChildFile ("xyz"));
         expect (home.getChildFile ("a1/a2/a3/./../../a4") == home.getChildFile ("a1/a4"));
 
+        expect (! File().hasReadAccess());
+        expect (! File().hasWriteAccess());
+
+        expect (! tempFile.hasReadAccess());
+
         {
             FileOutputStream fo (tempFile);
             fo.write ("0123456789", 10);
         }
+
+        expect (tempFile.hasReadAccess());
 
         expect (tempFile.exists());
         expect (tempFile.getSize() == 10);

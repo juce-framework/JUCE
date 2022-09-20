@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -154,26 +154,17 @@ public:
     //==============================================================================
     StringArray findAllFamilyNames() const
     {
-        StringArray s;
+        std::set<String> set;
 
         for (auto* face : faces)
-            s.addIfNotAlreadyThere (face->family);
+            set.insert (face->family);
+
+        StringArray s;
+
+        for (const auto& family : set)
+            s.add (family);
 
         return s;
-    }
-
-    static int indexOfRegularStyle (const StringArray& styles)
-    {
-        int i = styles.indexOf ("Regular", true);
-
-        if (i >= 0)
-            return i;
-
-        for (i = 0; i < styles.size(); ++i)
-            if (! (styles[i].containsIgnoreCase ("Bold") || styles[i].containsIgnoreCase ("Italic")))
-                return i;
-
-        return -1;
     }
 
     StringArray findAllTypefaceStyles (const String& family) const
@@ -184,12 +175,7 @@ public:
             if (face->family == family)
                 s.addIfNotAlreadyThere (face->style);
 
-        // try to get a regular style to be first in the list
-        auto regular = indexOfRegularStyle (s);
-
-        if (regular > 0)
-            s.strings.swap (0, regular);
-
+        // scanFontPaths ensures that regular styles are ordered before other styles
         return s;
     }
 
@@ -198,9 +184,48 @@ public:
         for (auto& path : paths)
         {
             for (const auto& iter : RangedDirectoryIterator (File::getCurrentWorkingDirectory().getChildFile (path), true))
+            {
                 if (iter.getFile().hasFileExtension ("ttf;pfb;pcf;otf"))
                     scanFont (iter.getFile());
+            }
         }
+
+        std::sort (faces.begin(), faces.end(), [] (const auto* a, const auto* b)
+        {
+            const auto tie = [] (const KnownTypeface& t)
+            {
+                // Used to order styles like "Regular", "Roman" etc. before "Bold", "Italic", etc.
+                const auto computeStyleNormalcy = [] (const String& style)
+                {
+                    if (style == "Regular")
+                        return 0;
+
+                    if (style == "Roman")
+                        return 1;
+
+                    if (style == "Book")
+                        return 2;
+
+                    if (style.containsIgnoreCase ("Bold"))
+                        return 3;
+
+                    if (style.containsIgnoreCase ("Italic"))
+                        return 4;
+
+                    return 5;
+                };
+
+                return std::make_tuple (t.family,
+                                        computeStyleNormalcy (t.style),
+                                        t.style,
+                                        t.isSansSerif,
+                                        t.isMonospaced,
+                                        t.faceIndex,
+                                        t.file);
+            };
+
+            return tie (*a) < tie (*b);
+        });
     }
 
     void getMonospacedNames (StringArray& monoSpaced) const

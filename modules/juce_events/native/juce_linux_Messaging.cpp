@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -108,125 +108,168 @@ private:
 JUCE_IMPLEMENT_SINGLETON (InternalMessageQueue)
 
 //==============================================================================
+/*
+    Stores callbacks associated with file descriptors (FD).
+
+    The callback for a particular FD should be called whenever that file has data to read.
+
+    For standalone apps, the main thread will call poll to wait for new data on any FD, and then
+    call the associated callbacks for any FDs that changed.
+
+    For plugins, the host (generally) provides some kind of run loop mechanism instead.
+    - In VST2 plugins, the host should call effEditIdle at regular intervals, and plugins can
+      dispatch all pending events inside this callback. The host doesn't know about any of the
+      plugin's FDs, so it's possible there will be a bit of latency between an FD becoming ready,
+      and its associated callback being called.
+    - In VST3 plugins, it's possible to register each FD individually with the host. In this case,
+      the facilities in LinuxEventLoopInternal can be used to observe added/removed FD callbacks,
+      and the host can be notified whenever the set of FDs changes. The host will call onFDIsSet
+      whenever a particular FD has data ready. This call should be forwarded through to
+      InternalRunLoop::dispatchEvent.
+*/
 struct InternalRunLoop
 {
 public:
-    InternalRunLoop()
-    {
-        fdReadCallbacks.reserve (16);
-    }
+    InternalRunLoop() = default;
 
-    void registerFdCallback (int fd, std::function<void (int)>&& cb, short eventMask)
+    void registerFdCallback (int fd, std::function<void()>&& cb, short eventMask)
     {
-        const ScopedLock sl (lock);
-
-        if (shouldDeferModifyingReadCallbacks)
         {
-            deferredReadCallbackModifications.emplace_back ([this, fd, cb, eventMask]() mutable
-                                                            {
-                                                                registerFdCallback (fd, std::move (cb), eventMask);
-                                                            });
-            return;
+            const ScopedLock sl (lock);
+
+            callbacks.emplace (fd, std::make_shared<std::function<void()>> (std::move (cb)));
+
+            const auto iter = getPollfd (fd);
+
+            if (iter == pfds.end() || iter->fd != fd)
+                pfds.insert (iter, { fd, eventMask, 0 });
+            else
+                jassertfalse;
+
+            jassert (pfdsAreSorted());
         }
 
-        fdReadCallbacks.push_back ({ fd, std::move (cb) });
-        pfds.push_back ({ fd, eventMask, 0 });
+        listeners.call ([] (auto& l) { l.fdCallbacksChanged(); });
     }
 
     void unregisterFdCallback (int fd)
     {
-        const ScopedLock sl (lock);
-
-        if (shouldDeferModifyingReadCallbacks)
         {
-            deferredReadCallbackModifications.emplace_back ([this, fd] { unregisterFdCallback (fd); });
-            return;
+            const ScopedLock sl (lock);
+
+            callbacks.erase (fd);
+
+            const auto iter = getPollfd (fd);
+
+            if (iter != pfds.end() && iter->fd == fd)
+                pfds.erase (iter);
+            else
+                jassertfalse;
+
+            jassert (pfdsAreSorted());
         }
 
-        {
-            auto removePredicate = [=] (const std::pair<int, std::function<void (int)>>& cb)  { return cb.first == fd; };
-
-            fdReadCallbacks.erase (std::remove_if (std::begin (fdReadCallbacks), std::end (fdReadCallbacks), removePredicate),
-                                   std::end (fdReadCallbacks));
-        }
-
-        {
-            auto removePredicate = [=] (const pollfd& pfd)  { return pfd.fd == fd; };
-
-            pfds.erase (std::remove_if (std::begin (pfds), std::end (pfds), removePredicate),
-                        std::end (pfds));
-        }
+        listeners.call ([] (auto& l) { l.fdCallbacksChanged(); });
     }
 
     bool dispatchPendingEvents()
     {
-        const ScopedLock sl (lock);
+        callbackStorage.clear();
+        getFunctionsToCallThisTime (callbackStorage);
 
-        if (poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), 0) == 0)
-            return false;
+        // CriticalSection should be available during the callback
+        for (auto& fn : callbackStorage)
+            (*fn)();
 
-        bool eventWasSent = false;
+        return ! callbackStorage.empty();
+    }
 
-        for (auto& pfd : pfds)
+    void dispatchEvent (int fd) const
+    {
+        const auto fn = [&]
         {
-            if (pfd.revents == 0)
-                continue;
+            const ScopedLock sl (lock);
+            const auto iter = callbacks.find (fd);
+            return iter != callbacks.end() ? iter->second : nullptr;
+        }();
 
-            pfd.revents = 0;
-
-            auto fd = pfd.fd;
-
-            for (auto& fdAndCallback : fdReadCallbacks)
-            {
-                if (fdAndCallback.first == fd)
-                {
-                    {
-                        ScopedValueSetter<bool> insideFdReadCallback (shouldDeferModifyingReadCallbacks, true);
-                        fdAndCallback.second (fd);
-                    }
-
-                    if (! deferredReadCallbackModifications.empty())
-                    {
-                        for (auto& deferredRegisterEvent : deferredReadCallbackModifications)
-                            deferredRegisterEvent();
-
-                        deferredReadCallbackModifications.clear();
-
-                        // elements may have been removed from the fdReadCallbacks/pfds array so we really need
-                        // to call poll again
-                        return true;
-                    }
-
-                    eventWasSent = true;
-                }
-            }
-        }
-
-        return eventWasSent;
+        // CriticalSection should be available during the callback
+        if (auto* callback = fn.get())
+            (*callback)();
     }
 
-    void sleepUntilNextEvent (int timeoutMs)
-    {
-        poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), timeoutMs);
-    }
-
-    std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks()
+    bool sleepUntilNextEvent (int timeoutMs)
     {
         const ScopedLock sl (lock);
-        return fdReadCallbacks;
+        return poll (pfds.data(), static_cast<nfds_t> (pfds.size()), timeoutMs) != 0;
     }
+
+    std::vector<int> getRegisteredFds()
+    {
+        const ScopedLock sl (lock);
+        std::vector<int> result;
+        result.reserve (callbacks.size());
+        std::transform (callbacks.begin(),
+                        callbacks.end(),
+                        std::back_inserter (result),
+                        [] (const auto& pair) { return pair.first; });
+        return result;
+    }
+
+    void addListener    (LinuxEventLoopInternal::Listener& listener)         { listeners.add    (&listener); }
+    void removeListener (LinuxEventLoopInternal::Listener& listener)         { listeners.remove (&listener); }
 
     //==============================================================================
     JUCE_DECLARE_SINGLETON (InternalRunLoop, false)
 
 private:
+    using SharedCallback = std::shared_ptr<std::function<void()>>;
+
+    /*  Appends any functions that need to be called to the passed-in vector.
+
+        We take a copy of each shared function so that the functions can be called without
+        locking or racing in the event that the function attempts to register/deregister a
+        new FD callback.
+    */
+    void getFunctionsToCallThisTime (std::vector<SharedCallback>& functions)
+    {
+        const ScopedLock sl (lock);
+
+        if (! sleepUntilNextEvent (0))
+            return;
+
+        for (auto& pfd : pfds)
+        {
+            if (std::exchange (pfd.revents, 0) != 0)
+            {
+                const auto iter = callbacks.find (pfd.fd);
+
+                if (iter != callbacks.end())
+                    functions.emplace_back (iter->second);
+            }
+        }
+    }
+
+    std::vector<pollfd>::iterator getPollfd (int fd)
+    {
+        return std::lower_bound (pfds.begin(), pfds.end(), fd, [] (auto descriptor, auto toFind)
+        {
+            return descriptor.fd < toFind;
+        });
+    }
+
+    bool pfdsAreSorted() const
+    {
+        return std::is_sorted (pfds.begin(), pfds.end(), [] (auto a, auto b) { return a.fd < b.fd; });
+    }
+
     CriticalSection lock;
 
-    std::vector<std::pair<int, std::function<void (int)>>> fdReadCallbacks;
+    std::map<int, SharedCallback> callbacks;
+    std::vector<SharedCallback> callbackStorage;
     std::vector<pollfd> pfds;
 
-    bool shouldDeferModifyingReadCallbacks = false;
-    std::vector<std::function<void()>> deferredReadCallbackModifications;
+    ListenerList<LinuxEventLoopInternal::Listener> listeners;
 };
 
 JUCE_IMPLEMENT_SINGLETON (InternalRunLoop)
@@ -236,13 +279,13 @@ namespace LinuxErrorHandling
 {
     static bool keyboardBreakOccurred = false;
 
-    void keyboardBreakSignalHandler (int sig)
+    static void keyboardBreakSignalHandler (int sig)
     {
         if (sig == SIGINT)
             keyboardBreakOccurred = true;
     }
 
-    void installKeyboardBreakHandler()
+    static void installKeyboardBreakHandler()
     {
         struct sigaction saction;
         sigset_t maskSet;
@@ -313,7 +356,7 @@ bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 void LinuxEventLoop::registerFdCallback (int fd, std::function<void (int)> readCallback, short eventMask)
 {
     if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
-        runLoop->registerFdCallback (fd, std::move (readCallback), eventMask);
+        runLoop->registerFdCallback (fd, [cb = std::move (readCallback), fd] { cb (fd); }, eventMask);
 }
 
 void LinuxEventLoop::unregisterFdCallback (int fd)
@@ -322,15 +365,31 @@ void LinuxEventLoop::unregisterFdCallback (int fd)
         runLoop->unregisterFdCallback (fd);
 }
 
-} // namespace juce
-
-JUCE_API std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks()
+//==============================================================================
+void LinuxEventLoopInternal::registerLinuxEventLoopListener (LinuxEventLoopInternal::Listener& listener)
 {
-    using namespace juce;
-
     if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
-        return runLoop->getFdReadCallbacks();
+        runLoop->addListener (listener);
+}
 
-    jassertfalse;
+void LinuxEventLoopInternal::deregisterLinuxEventLoopListener (LinuxEventLoopInternal::Listener& listener)
+{
+    if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
+        runLoop->removeListener (listener);
+}
+
+void LinuxEventLoopInternal::invokeEventLoopCallbackForFd (int fd)
+{
+    if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
+        runLoop->dispatchEvent (fd);
+}
+
+std::vector<int> LinuxEventLoopInternal::getRegisteredFds()
+{
+    if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
+        return runLoop->getRegisteredFds();
+
     return {};
 }
+
+} // namespace juce

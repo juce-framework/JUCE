@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -71,8 +71,32 @@ public:
     /** Inserts some text, overwriting the selected text region, if there is one. */
     virtual void insertTextAtCaret (const String& textToInsert) = 0;
 
+    /** Returns the current index of the caret. */
+    virtual int getCaretPosition() const = 0;
+
     /** Returns the position of the caret, relative to the component's origin. */
-    virtual Rectangle<int> getCaretRectangle() = 0;
+    Rectangle<int> getCaretRectangle() const        { return getCaretRectangleForCharIndex (getCaretPosition()); }
+
+    /** Returns the bounding box of the character at the given index. */
+    virtual Rectangle<int> getCaretRectangleForCharIndex (int characterIndex) const = 0;
+
+    /** Returns the total number of codepoints in the string. */
+    virtual int getTotalNumChars() const = 0;
+
+    /** Returns the index closest to the given point.
+
+        This is the location where the cursor might be placed after clicking at the given
+        point in a text field.
+    */
+    virtual int getCharIndexForPoint (Point<int> point) const = 0;
+
+    /** Returns the bounding box for a range of text in the editor. As the range may span
+        multiple lines, this method returns a RectangleList.
+
+        The bounds are relative to the component's top-left and may extend beyond the bounds
+        of the component if the text is long and word wrapping is disabled.
+    */
+    virtual RectangleList<int> getTextBounds (Range<int> textRange) const = 0;
 
     /** A set of possible on-screen keyboard types, for use in the
         getKeyboardType() method.

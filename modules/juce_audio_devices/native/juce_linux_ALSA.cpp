@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -50,17 +50,15 @@ namespace
 
 static void getDeviceSampleRates (snd_pcm_t* handle, Array<double>& rates)
 {
-    const int ratesToTry[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
-
     snd_pcm_hw_params_t* hwParams;
     snd_pcm_hw_params_alloca (&hwParams);
 
-    for (int i = 0; ratesToTry[i] != 0; ++i)
+    for (const auto rateToTry : SampleRateHelpers::getAllSampleRates())
     {
         if (snd_pcm_hw_params_any (handle, hwParams) >= 0
-             && snd_pcm_hw_params_test_rate (handle, hwParams, (unsigned int) ratesToTry[i], 0) == 0)
+             && snd_pcm_hw_params_test_rate (handle, hwParams, (unsigned int) rateToTry, 0) == 0)
         {
-            rates.addIfNotAlreadyThere ((double) ratesToTry[i]);
+            rates.addIfNotAlreadyThere (rateToTry);
         }
     }
 }
@@ -713,11 +711,12 @@ public:
 
                 if (callback != nullptr)
                 {
-                    callback->audioDeviceIOCallback (inputChannelDataForCallback.getRawDataPointer(),
-                                                     inputChannelDataForCallback.size(),
-                                                     outputChannelDataForCallback.getRawDataPointer(),
-                                                     outputChannelDataForCallback.size(),
-                                                     bufferSize);
+                    callback->audioDeviceIOCallbackWithContext (inputChannelDataForCallback.getRawDataPointer(),
+                                                                inputChannelDataForCallback.size(),
+                                                                outputChannelDataForCallback.getRawDataPointer(),
+                                                                outputChannelDataForCallback.size(),
+                                                                bufferSize,
+                                                                {});
                 }
                 else
                 {
@@ -792,7 +791,7 @@ private:
     const String inputId, outputId;
     std::unique_ptr<ALSADevice> outputDevice, inputDevice;
     std::atomic<int> numCallbacks { 0 };
-    bool audioIoInProgress = false;
+    std::atomic<bool> audioIoInProgress { false };
 
     CriticalSection callbackLock;
 
@@ -1289,12 +1288,12 @@ private:
 }
 
 //==============================================================================
-AudioIODeviceType* createAudioIODeviceType_ALSA_Soundcards()
+static inline AudioIODeviceType* createAudioIODeviceType_ALSA_Soundcards()
 {
     return new ALSAAudioIODeviceType (true, "ALSA HW");
 }
 
-AudioIODeviceType* createAudioIODeviceType_ALSA_PCMDevices()
+static inline AudioIODeviceType* createAudioIODeviceType_ALSA_PCMDevices()
 {
     return new ALSAAudioIODeviceType (false, "ALSA");
 }

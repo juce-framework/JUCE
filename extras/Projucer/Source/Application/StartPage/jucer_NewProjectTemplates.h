@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -53,7 +53,8 @@ namespace NewProjectTemplates
         main,
         header,
         headerAndCpp,
-        processorAndEditor
+        processorAndEditor,
+        araPluginFiles
     };
 
     using FilenameAndContent = std::pair<String, String>;
@@ -94,6 +95,7 @@ namespace NewProjectTemplates
         if (opt == FileCreationOptions::header)              return "header";
         if (opt == FileCreationOptions::headerAndCpp)        return "headercpp";
         if (opt == FileCreationOptions::processorAndEditor)  return "processoreditor";
+        if (opt == FileCreationOptions::araPluginFiles)      return "arapluginfiles";
 
         jassertfalse;
         return {};
@@ -106,6 +108,7 @@ namespace NewProjectTemplates
         if (opt == "header")           return FileCreationOptions::header;
         if (opt == "headercpp")        return FileCreationOptions::headerAndCpp;
         if (opt == "processoreditor")  return FileCreationOptions::processorAndEditor;
+        if (opt == "arapluginfiles")   return FileCreationOptions::araPluginFiles;
 
         jassertfalse;
         return {};
@@ -118,6 +121,7 @@ namespace NewProjectTemplates
         if (opt == FileCreationOptions::header)             return "Main.cpp + .h";
         if (opt == FileCreationOptions::headerAndCpp)       return "Main.cpp + .h/.cpp ";
         if (opt == FileCreationOptions::processorAndEditor) return "Processor and Editor";
+        if (opt == FileCreationOptions::araPluginFiles)     return "ARA Plugin Files";
 
         jassertfalse;
         return {};
@@ -227,6 +231,24 @@ namespace NewProjectTemplates
                                                              { "PluginEditor.h",      "jucer_AudioPluginEditorTemplate_h" } } }
               },
               FileCreationOptions::processorAndEditor
+            },
+
+            { ProjectCategory::plugin,
+              "ARA", "Creates an ARA audio plug-in, augmenting the basic audio plug-in with ARA functionality.",
+              build_tools::ProjectType_ARAAudioPlugin::getTypeName(),
+              BinaryData::wizard_AudioPlugin_svg,
+              getModulesRequiredForAudioProcessor(),
+              {
+                  { FileCreationOptions::araPluginFiles, { { "PluginProcessor.cpp",               "jucer_AudioPluginFilterTemplate_cpp" },
+                                                           { "PluginProcessor.h",                 "jucer_AudioPluginFilterTemplate_h" },
+                                                           { "PluginEditor.cpp",                  "jucer_AudioPluginEditorTemplate_cpp" },
+                                                           { "PluginEditor.h",                    "jucer_AudioPluginEditorTemplate_h" },
+                                                           { "PluginARADocumentController.cpp",   "jucer_AudioPluginARADocumentControllerTemplate_cpp" },
+                                                           { "PluginARADocumentController.h",     "jucer_AudioPluginARADocumentControllerTemplate_h" },
+                                                           { "PluginARAPlaybackRenderer.cpp",     "jucer_AudioPluginARAPlaybackRendererTemplate_cpp" },
+                                                           { "PluginARAPlaybackRenderer.h",       "jucer_AudioPluginARAPlaybackRendererTemplate_h" }} }
+              },
+              FileCreationOptions::araPluginFiles
             },
 
             { ProjectCategory::library,

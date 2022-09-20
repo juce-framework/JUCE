@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -17,13 +17,10 @@
   ==============================================================================
 */
 
-#pragma once
+#ifndef PIP_DEMO_UTILITIES_INCLUDED
+#define PIP_DEMO_UTILITIES_INCLUDED 1
 
 #include <JuceHeader.h>
-
-#ifndef PIP_DEMO_UTILITIES_INCLUDED
- #define PIP_DEMO_UTILITIES_INCLUDED 1
-#endif
 
 //==============================================================================
 /*
@@ -244,3 +241,5 @@ struct SlowerBouncingNumber  : public BouncingNumber
         speed *= 0.3;
     }
 };
+
+#endif   // PIP_DEMO_UTILITIES_INCLUDED

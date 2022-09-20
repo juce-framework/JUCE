@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -72,24 +72,19 @@ public:
 
                 [((UIView*) peer->getNativeHandle()) addSubview: view];
 
-                if (version == openGL3_2 && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0)
-                {
-                    if (! createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
-                    {
-                        releaseContext();
-                        createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
-                    }
-                }
-                else
-                {
-                    createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
-                }
+                const auto shouldUseES3 = version != defaultGLVersion
+                                       && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0;
+
+                const auto gotContext = (shouldUseES3 && createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
+                                     || createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
+
+                jassertquiet (gotContext);
 
                 if (context != nil)
                 {
                     // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
                     // so causes mysterious timing-related failures.
-                    [EAGLContext setCurrentContext: context];
+                    [EAGLContext setCurrentContext: context.get()];
                     gl::loadFunctions();
                     createGLBuffers();
                     deactivateCurrentContext();
@@ -108,7 +103,7 @@ public:
 
     ~NativeContext()
     {
-        releaseContext();
+        context.reset();
         [view removeFromSuperview];
         [view release];
     }
@@ -123,12 +118,12 @@ public:
     }
 
     bool createdOk() const noexcept             { return getRawContext() != nullptr; }
-    void* getRawContext() const noexcept        { return context; }
+    void* getRawContext() const noexcept        { return context.get(); }
     GLuint getFrameBufferID() const noexcept    { return useMSAA ? msaaBufferHandle : frameBufferHandle; }
 
     bool makeActive() const noexcept
     {
-        if (! [EAGLContext setCurrentContext: context])
+        if (! [EAGLContext setCurrentContext: context.get()])
             return false;
 
         glBindFramebuffer (GL_FRAMEBUFFER, useMSAA ? msaaBufferHandle
@@ -138,7 +133,7 @@ public:
 
     bool isActive() const noexcept
     {
-        return [EAGLContext currentContext] == context;
+        return [EAGLContext currentContext] == context.get();
     }
 
     static void deactivateCurrentContext()
@@ -170,7 +165,7 @@ public:
         }
 
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
-        [context presentRenderbuffer: GL_RENDERBUFFER];
+        [context.get() presentRenderbuffer: GL_RENDERBUFFER];
 
         if (needToRebuildBuffers)
         {
@@ -203,13 +198,18 @@ public:
 
     int getSwapInterval() const noexcept    { return swapFrames; }
 
-    struct Locker { Locker (NativeContext&) {} };
+    struct Locker
+    {
+        explicit Locker (NativeContext& ctx) : lock (ctx.mutex) {}
+        const ScopedLock lock;
+    };
 
 private:
+    CriticalSection mutex;
     Component& component;
     JuceGLView* view = nil;
     CAEAGLLayer* glLayer = nil;
-    EAGLContext* context = nil;
+    NSUniquePtr<EAGLContext> context;
     const OpenGLVersion openGLversion;
     const bool useDepthBuffer, useMSAA;
 
@@ -223,19 +223,14 @@ private:
     bool createContext (EAGLRenderingAPI type, void* contextToShare)
     {
         jassert (context == nil);
-        context = [EAGLContext alloc];
+        context.reset ([EAGLContext alloc]);
 
-        context = contextToShare != nullptr
-                    ? [context initWithAPI: type  sharegroup: [(EAGLContext*) contextToShare sharegroup]]
-                    : [context initWithAPI: type];
+        if (contextToShare != nullptr)
+            [context.get() initWithAPI: type  sharegroup: [(EAGLContext*) contextToShare sharegroup]];
+        else
+            [context.get() initWithAPI: type];
 
         return context != nil;
-    }
-
-    void releaseContext()
-    {
-        [context release];
-        context = nil;
     }
 
     //==============================================================================
@@ -249,7 +244,7 @@ private:
 
         glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBufferHandle);
 
-        bool ok = [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: glLayer];
+        bool ok = [context.get() renderbufferStorage: GL_RENDERBUFFER fromDrawable: glLayer];
         jassert (ok); ignoreUnused (ok);
 
         GLint width, height;
@@ -289,7 +284,7 @@ private:
     void freeGLBuffers()
     {
         JUCE_CHECK_OPENGL_ERROR
-        [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: nil];
+        [context.get() renderbufferStorage: GL_RENDERBUFFER fromDrawable: nil];
 
         deleteFrameBuffer (frameBufferHandle);
         deleteFrameBuffer (msaaBufferHandle);

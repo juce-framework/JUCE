@@ -6,7 +6,7 @@
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
-    <VS2019 targetFolder="Builds/VisualStudio2019">
+    <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="juce_dll"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="juce_dll"/>
@@ -27,7 +27,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
-    </VS2019>
+    </VS2022>
   </EXPORTFORMATS>
   <MAINGROUP id="tNa6Wh" name="WindowsDLL">
     <GROUP id="N2ZGxS" name="Source"/>

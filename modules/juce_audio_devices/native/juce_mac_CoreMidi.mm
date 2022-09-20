@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -82,10 +82,8 @@ namespace CoreMidiHelpers
     struct Sender;
 
    #if JUCE_HAS_NEW_COREMIDI_API
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
-
     template <>
-    struct Sender<ImplementationStrategy::onlyNew> : public SenderBase
+    struct API_AVAILABLE (macos (11.0), ios (14.0)) Sender<ImplementationStrategy::onlyNew> : public SenderBase
     {
         explicit Sender (MIDIEndpointRef ep)
             : umpConverter (getProtocolForEndpoint (ep))
@@ -177,8 +175,6 @@ namespace CoreMidiHelpers
             send();
         }
     };
-
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
 
    #if JUCE_HAS_OLD_COREMIDI_API
@@ -665,11 +661,11 @@ namespace CoreMidiHelpers
             : u32InputHandler (std::make_unique<ump::U32ToBytestreamHandler> (input, callback))
         {}
 
-        void dispatch (const MIDIEventList& list, double time) const
+        void dispatch (const MIDIEventList* list, double time) const
         {
-            auto* packet = &list.packet[0];
+            auto* packet = list->packet;
 
-            for (uint32_t i = 0; i < list.numPackets; ++i)
+            for (uint32_t i = 0; i < list->numPackets; ++i)
             {
                 static_assert (sizeof (uint32_t) == sizeof (UInt32)
                                && alignof (uint32_t) == alignof (UInt32),
@@ -699,11 +695,11 @@ namespace CoreMidiHelpers
             : bytestreamInputHandler (std::make_unique<ump::BytestreamToBytestreamHandler> (input, callback))
         {}
 
-        void dispatch (const MIDIPacketList& list, double time) const
+        void dispatch (const MIDIPacketList* list, double time) const
         {
-            auto* packet = &list.packet[0];
+            auto* packet = list->packet;
 
-            for (unsigned int i = 0; i < list.numPackets; ++i)
+            for (unsigned int i = 0; i < list->numPackets; ++i)
             {
                 auto len = readUnaligned<decltype (packet->length)> (&(packet->length));
                 bytestreamInputHandler->pushMidiData (packet->data, len, time);
@@ -729,12 +725,12 @@ namespace CoreMidiHelpers
             : newReceiver (input, callback), oldReceiver (input, callback)
         {}
 
-        void dispatch (const MIDIEventList& list, double time) const
+        void dispatch (const MIDIEventList* list, double time) const
         {
             newReceiver.dispatch (list, time);
         }
 
-        void dispatch (const MIDIPacketList& list, double time) const
+        void dispatch (const MIDIPacketList* list, double time) const
         {
             oldReceiver.dispatch (list, time);
         }
@@ -772,7 +768,7 @@ namespace CoreMidiHelpers
         }
 
         template <typename EventList>
-        void handlePackets (const EventList& list)
+        void handlePackets (const EventList* list)
         {
             const auto time = Time::getMillisecondCounterHiRes() * 0.001;
 
@@ -829,10 +825,8 @@ namespace CoreMidiHelpers
     struct CreatorFunctions;
 
    #if JUCE_HAS_NEW_COREMIDI_API
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
-
     template <>
-    struct CreatorFunctions<ImplementationStrategy::onlyNew>
+    struct API_AVAILABLE (macos (11.0), ios (14.0)) CreatorFunctions<ImplementationStrategy::onlyNew>
     {
         static OSStatus createInputPort (ump::PacketProtocol protocol,
                                          MIDIClientRef client,
@@ -891,11 +885,9 @@ namespace CoreMidiHelpers
 
         static void newMidiInputProc (const MIDIEventList* list, void* readProcRefCon, void*)
         {
-            static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (*list);
+            static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (list);
         }
     };
-
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
 
    #if JUCE_HAS_OLD_COREMIDI_API
@@ -936,7 +928,7 @@ namespace CoreMidiHelpers
     private:
         static void oldMidiInputProc (const MIDIPacketList* list, void* readProcRefCon, void*)
         {
-            static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (*list);
+            static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (list);
         }
     };
    #endif

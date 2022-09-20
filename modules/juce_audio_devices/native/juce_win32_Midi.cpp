@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -258,7 +258,7 @@ private:
 
         struct MidiHeader
         {
-            MidiHeader() {}
+            MidiHeader() = default;
 
             void prepare (HMIDIIN device)
             {

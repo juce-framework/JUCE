@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -33,7 +33,7 @@
                         juce_audio_plugin_client, juce_audio_processors,
                         juce_audio_utils, juce_core, juce_data_structures,
                         juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:             xcode_mac, vs2017, vs2019, linux_make, xcode_iphone, androidstudio
+ exporters:             xcode_mac, vs2017, vs2022, linux_make, xcode_iphone, androidstudio
 
  moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -182,8 +182,8 @@ public:
     JuceDemoPluginAudioProcessor()
         : AudioProcessor (getBusesProperties()),
           state (*this, nullptr, "state",
-                 { std::make_unique<AudioParameterFloat> ("gain",  "Gain",           NormalisableRange<float> (0.0f, 1.0f), 0.9f),
-                   std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
+                 { std::make_unique<AudioParameterFloat> (ParameterID { "gain",  1 }, "Gain",           NormalisableRange<float> (0.0f, 1.0f), 0.9f),
+                   std::make_unique<AudioParameterFloat> (ParameterID { "delay", 1 }, "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
     {
         // Add a sub-tree to store the state of our UI
         state.state.addChild ({ "uiState", { { "width",  400 }, { "height", 200 } }, {} }, -1, nullptr);
@@ -321,12 +321,10 @@ public:
     class SpinLockedPosInfo
     {
     public:
-        SpinLockedPosInfo() { info.resetToDefault(); }
-
         // Wait-free, but setting new info may fail if the main thread is currently
         // calling `get`. This is unlikely to matter in practice because
         // we'll be calling `set` much more frequently than `get`.
-        void set (const AudioPlayHead::CurrentPositionInfo& newInfo)
+        void set (const AudioPlayHead::PositionInfo& newInfo)
         {
             const juce::SpinLock::ScopedTryLockType lock (mutex);
 
@@ -334,7 +332,7 @@ public:
                 info = newInfo;
         }
 
-        AudioPlayHead::CurrentPositionInfo get() const noexcept
+        AudioPlayHead::PositionInfo get() const noexcept
         {
             const juce::SpinLock::ScopedLockType lock (mutex);
             return info;
@@ -342,7 +340,7 @@ public:
 
     private:
         juce::SpinLock mutex;
-        AudioPlayHead::CurrentPositionInfo info;
+        AudioPlayHead::PositionInfo info;
     };
 
     //==============================================================================
@@ -510,13 +508,13 @@ private:
         }
 
         // quick-and-dirty function to format a bars/beats string
-        static String quarterNotePositionToBarsBeatsString (double quarterNotes, int numerator, int denominator)
+        static String quarterNotePositionToBarsBeatsString (double quarterNotes, AudioPlayHead::TimeSignature sig)
         {
-            if (numerator == 0 || denominator == 0)
+            if (sig.numerator == 0 || sig.denominator == 0)
                 return "1|1|000";
 
-            auto quarterNotesPerBar = (numerator * 4 / denominator);
-            auto beats  = (fmod (quarterNotes, quarterNotesPerBar) / quarterNotesPerBar) * numerator;
+            auto quarterNotesPerBar = (sig.numerator * 4 / sig.denominator);
+            auto beats  = (fmod (quarterNotes, quarterNotesPerBar) / quarterNotesPerBar) * sig.numerator;
 
             auto bar    = ((int) quarterNotes) / quarterNotesPerBar + 1;
             auto beat   = ((int) beats) + 1;
@@ -526,21 +524,21 @@ private:
         }
 
         // Updates the text in our position label.
-        void updateTimecodeDisplay (AudioPlayHead::CurrentPositionInfo pos)
+        void updateTimecodeDisplay (const AudioPlayHead::PositionInfo& pos)
         {
             MemoryOutputStream displayText;
 
-            displayText << "[" << SystemStats::getJUCEVersion() << "]   "
-            << String (pos.bpm, 2) << " bpm, "
-            << pos.timeSigNumerator << '/' << pos.timeSigDenominator
-            << "  -  " << timeToTimecodeString (pos.timeInSeconds)
-            << "  -  " << quarterNotePositionToBarsBeatsString (pos.ppqPosition,
-                                                                pos.timeSigNumerator,
-                                                                pos.timeSigDenominator);
+            const auto sig = pos.getTimeSignature().orFallback (AudioPlayHead::TimeSignature{});
 
-            if (pos.isRecording)
+            displayText << "[" << SystemStats::getJUCEVersion() << "]   "
+                        << String (pos.getBpm().orFallback (120.0), 2) << " bpm, "
+                        << sig.numerator << '/' << sig.denominator
+                        << "  -  " << timeToTimecodeString (pos.getTimeInSeconds().orFallback (0.0))
+                        << "  -  " << quarterNotePositionToBarsBeatsString (pos.getPpqPosition().orFallback (0.0), sig);
+
+            if (pos.getIsRecording())
                 displayText << "  (recording)";
-            else if (pos.isPlaying)
+            else if (pos.getIsPlaying())
                 displayText << "  (playing)";
 
             timecodeDisplayLabel.setText (displayText.toString(), dontSendNotification);
@@ -647,17 +645,11 @@ private:
         const auto newInfo = [&]
         {
             if (auto* ph = getPlayHead())
-            {
-                AudioPlayHead::CurrentPositionInfo result;
-
-                if (ph->getCurrentPosition (result))
-                    return result;
-            }
+                if (auto result = ph->getPosition())
+                    return *result;
 
             // If the host fails to provide the current time, we'll just use default values
-            AudioPlayHead::CurrentPositionInfo result;
-            result.resetToDefault();
-            return result;
+            return AudioPlayHead::PositionInfo{};
         }();
 
         lastPosInfo.set (newInfo);

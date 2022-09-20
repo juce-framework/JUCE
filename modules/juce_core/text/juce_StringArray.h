@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -99,7 +99,7 @@ public:
     StringArray (const wchar_t* const* strings, int numberOfStrings);
 
     /** Destructor. */
-    ~StringArray();
+    ~StringArray() = default;
 
     /** Copies the contents of another string array into this one */
     StringArray& operator= (const StringArray&);

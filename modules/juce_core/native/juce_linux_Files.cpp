@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -145,11 +145,10 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
         case currentExecutableFile:
         case currentApplicationFile:
-           #if ! JUCE_STANDALONE_APPLICATION
-            return juce_getExecutableFile();
-           #endif
-            // deliberate fall-through if this is not a shared-library
-            JUCE_FALLTHROUGH
+        {
+            const auto f = juce_getExecutableFile();
+            return f.isSymbolicLink() ? f.getLinkedTarget() : f;
+        }
 
         case hostApplicationPath:
         {

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              version="6.1.2" bundleIdentifier="com.juce.theprojucer" splashScreenColour="Dark"
+              version="7.0.2" bundleIdentifier="com.juce.theprojucer" splashScreenColour="Dark"
               displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="Zrx1Gl"
+    <XCODE_MAC targetFolder="Builds/MacOSX" documentExtensions=".jucer" bigIcon="Zrx1Gl"
                extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime"
                microphonePermissionNeeded="1" cameraPermissionNeeded="1" smallIcon="Zrx1Gl"
                applicationCategory="public.app-category.developer-tools">
@@ -28,25 +27,6 @@
         <MODULEPATH id="juce_build_tools" path="../Build"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="Zrx1Gl" extraCompilerFlags="/bigobj"
-            smallIcon="Zrx1Gl">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"
-                       useRuntimeLibDLL="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" useRuntimeLibDLL="0"
-                       debugInformationFormat="None" linkTimeOptimisation="0"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
-        <MODULEPATH id="juce_graphics" path="../../modules"/>
-        <MODULEPATH id="juce_events" path="../../modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../modules"/>
-        <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_build_tools" path="../Build"/>
-      </MODULEPATHS>
-    </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="Zrx1Gl" extraCompilerFlags="/w44265 /w45038 /w44062"
             smallIcon="Zrx1Gl">
       <CONFIGURATIONS>
@@ -83,6 +63,24 @@
         <MODULEPATH id="juce_build_tools" path="../Build"/>
       </MODULEPATHS>
     </VS2019>
+    <VS2022 targetFolder="Builds/VisualStudio2022" bigIcon="Zrx1Gl" extraCompilerFlags="/w44265 /w45038 /w44062"
+            smallIcon="Zrx1Gl">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" useRuntimeLibDLL="0"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
+                       debugInformationFormat="None" useRuntimeLibDLL="0" linkTimeOptimisation="0"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_build_tools" path="../Build"/>
+      </MODULEPATHS>
+    </VS2022>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" bigIcon="Zrx1Gl" smallIcon="Zrx1Gl">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer"/>
@@ -170,10 +168,14 @@
             file="Source/Application/jucer_MainWindow.h"/>
     </GROUP>
     <GROUP id="{BFDB3102-5EB6-41E0-043A-05C0DFF7A34D}" name="BinaryData">
+      <FILE id="wkLB4B" name="JuceLV2Defines.h.in" compile="0" resource="1"
+            file="../Build/CMake/JuceLV2Defines.h.in"/>
       <FILE id="QRvesq" name="LaunchScreen.storyboard" compile="0" resource="1"
             file="../Build/CMake/LaunchScreen.storyboard"/>
       <FILE id="QCgjY8" name="PIPAudioProcessor.cpp.in" compile="0" resource="1"
             file="../Build/CMake/PIPAudioProcessor.cpp.in"/>
+      <FILE id="oxq0Fs" name="PIPAudioProcessorWithARA.cpp.in" compile="0"
+            resource="1" file="../Build/CMake/PIPAudioProcessorWithARA.cpp.in"/>
       <FILE id="AwIYFr" name="PIPComponent.cpp.in" compile="0" resource="1"
             file="../Build/CMake/PIPComponent.cpp.in"/>
       <FILE id="SncItz" name="PIPConsole.cpp.in" compile="0" resource="1"
@@ -194,8 +196,6 @@
               file="Source/BinaryData/Icons/background_logo.svg"/>
         <FILE id="qqeJmA" name="export_android.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_android.svg"/>
-        <FILE id="WF3jeY" name="export_clion.svg" compile="0" resource="1"
-              file="Source/BinaryData/Icons/export_clion.svg"/>
         <FILE id="FiwPHz" name="export_codeBlocks.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_codeBlocks.svg"/>
         <FILE id="WBmsi6" name="export_linux.svg" compile="0" resource="1"
@@ -238,6 +238,14 @@
               resource="1" file="Source/BinaryData/Templates/jucer_AudioComponentTemplate.cpp"/>
         <FILE id="i9bm2b" name="jucer_AudioComponentTemplate.h" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_AudioComponentTemplate.h"/>
+        <FILE id="qqnMJs" name="jucer_AudioPluginARADocumentControllerTemplate.cpp"
+              compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.cpp"/>
+        <FILE id="nEnvoi" name="jucer_AudioPluginARADocumentControllerTemplate.h"
+              compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.h"/>
+        <FILE id="H2uvhd" name="jucer_AudioPluginARAPlaybackRendererTemplate.cpp"
+              compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.cpp"/>
+        <FILE id="U7eXlD" name="jucer_AudioPluginARAPlaybackRendererTemplate.h"
+              compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.h"/>
         <FILE id="BYSiw7" name="jucer_AudioPluginEditorTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.cpp"/>
         <FILE id="wcuIlm" name="jucer_AudioPluginEditorTemplate.h" compile="0"
@@ -542,8 +550,6 @@
     <GROUP id="{00CEE998-91CD-5001-DE85-4F4895E99A32}" name="ProjectSaving">
       <FILE id="JBLk8Y" name="jucer_ProjectExport_Android.h" compile="0"
             resource="0" file="Source/ProjectSaving/jucer_ProjectExport_Android.h"/>
-      <FILE id="l1SmNV" name="jucer_ProjectExport_CLion.h" compile="0" resource="0"
-            file="Source/ProjectSaving/jucer_ProjectExport_CLion.h"/>
       <FILE id="Kxo6ef" name="jucer_ProjectExport_CodeBlocks.h" compile="0"
             resource="0" file="Source/ProjectSaving/jucer_ProjectExport_CodeBlocks.h"/>
       <FILE id="wLX3RL" name="jucer_ProjectExport_Make.h" compile="0" resource="0"
@@ -602,8 +608,6 @@
               file="Source/Utility/Helpers/jucer_TranslationHelpers.h"/>
         <FILE id="EuC4K4" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_ValueSourceHelpers.h"/>
-        <FILE id="W5a5Fy" name="jucer_ValueWithDefaultWrapper.h" compile="0"
-              resource="0" file="Source/Utility/Helpers/jucer_ValueWithDefaultWrapper.h"/>
         <FILE id="BPCoKV" name="jucer_VersionInfo.cpp" compile="1" resource="0"
               file="Source/Utility/Helpers/jucer_VersionInfo.cpp"/>
         <FILE id="TnBQtv" name="jucer_VersionInfo.h" compile="0" resource="0"

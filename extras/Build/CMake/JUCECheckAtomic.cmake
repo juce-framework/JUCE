@@ -1,15 +1,15 @@
 # ==============================================================================
 #
 #  This file is part of the JUCE library.
-#  Copyright (c) 2020 - Raw Material Software Limited
+#  Copyright (c) 2022 - Raw Material Software Limited
 #
 #  JUCE is an open source library subject to commercial or open-source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-#  Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+#  Agreement and JUCE Privacy Policy.
 #
-#  End User License Agreement: www.juce.com/juce-6-licence
+#  End User License Agreement: www.juce.com/juce-7-licence
 #  Privacy Policy: www.juce.com/juce-privacy-policy
 #
 #  Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,7 +29,19 @@ function(_juce_create_atomic_target target_name)
         return()
     endif()
 
-    set(test_file_contents
+    set(test_atomic_with_is_lock_free_file_contents
+            [[
+            #include <atomic>
+
+            int main (int argc, char** argv)
+            {
+                std::atomic<long long> ll { static_cast<long long> (argc) };
+                ll ^= static_cast<long long> (ll.is_lock_free());
+                return static_cast<int> (ll);
+            }
+        ]])
+
+    set(test_simple_atomic_file_contents
         [[
             #include <atomic>
 
@@ -47,7 +59,7 @@ function(_juce_create_atomic_target target_name)
     string(RANDOM LENGTH 16 random_dir_string)
     set(test_bindir "${CMAKE_CURRENT_BINARY_DIR}/check_atomic_dir_${random_dir_string}")
 
-    file(WRITE "${test_file_name}" "${test_file_contents}")
+    file(WRITE "${test_file_name}" "${test_atomic_with_is_lock_free_file_contents}")
 
     try_compile(compile_result "${test_bindir}" "${test_file_name}"
         OUTPUT_VARIABLE test_build_output_0
@@ -64,15 +76,37 @@ function(_juce_create_atomic_target target_name)
             CXX_EXTENSIONS FALSE)
 
         if (NOT compile_result)
-            message(FATAL_ERROR
-                "First build output:\n"
-                "${test_build_output_0}"
-                "\n\nSecond build output:\n"
-                "${test_build_output_1}"
-                "\n\nJUCE requires support for std::atomic, but this system cannot "
-                "successfully compile a program which uses std::atomic. "
-                "You may need to install a dedicated libatomic package using your "
-                "system's package manager.")
+            file(WRITE "${test_file_name}" "${test_simple_atomic_file_contents}")
+
+            try_compile(compile_result "${test_bindir}" "${test_file_name}"
+                    OUTPUT_VARIABLE test_build_output_2
+                    LINK_LIBRARIES atomic
+                    CXX_STANDARD 14
+                    CXX_STANDARD_REQUIRED TRUE
+                    CXX_EXTENSIONS FALSE)
+
+            if (NOT compile_result)
+                message(FATAL_ERROR
+                    "First build output:\n"
+                    "${test_build_output_0}"
+                    "\n\nSecond build output:\n"
+                    "${test_build_output_1}"
+                    "\n\nThird build output:\n"
+                    "${test_build_output_2}"
+                    "\n\nJUCE requires support for std::atomic, but this system cannot "
+                    "successfully compile a program which uses std::atomic. "
+                    "You may need to install a dedicated libatomic package using your "
+                    "system's package manager.")
+            else()
+                message(WARNING
+                    "First build output:\n"
+                    "${test_build_output_0}"
+                    "\n\nSecond build output:\n"
+                    "${test_build_output_1}"
+                    "\n\nIf you are seeing this warning it means that the libatomic library"
+                    "on this system doesn't support is_lock_free."
+                    "Please let the JUCE team know.")
+            endif()
         endif()
 
         target_link_libraries("${target_name}" INTERFACE atomic)

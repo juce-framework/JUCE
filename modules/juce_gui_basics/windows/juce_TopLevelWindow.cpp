@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -150,7 +150,7 @@ TopLevelWindow::TopLevelWindow (const String& name, const bool shouldAddToDeskto
 
 TopLevelWindow::~TopLevelWindow()
 {
-    shadower.reset();
+    shadower = nullptr;
     TopLevelWindowManager::getInstance()->removeWindow (this);
 }
 
@@ -213,7 +213,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
 
     if (isOnDesktop())
     {
-        shadower.reset();
+        shadower = nullptr;
         Component::addToDesktop (getDesktopWindowStyleFlags());
     }
     else
@@ -222,7 +222,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
         {
             if (shadower == nullptr)
             {
-                shadower.reset (getLookAndFeel().createDropShadowerForComponent (this));
+                shadower = getLookAndFeel().createDropShadowerForComponent (*this);
 
                 if (shadower != nullptr)
                     shadower->setOwner (this);
@@ -230,7 +230,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
         }
         else
         {
-            shadower.reset();
+            shadower = nullptr;
         }
     }
 }
@@ -257,7 +257,7 @@ void TopLevelWindow::recreateDesktopWindow()
 
 void TopLevelWindow::addToDesktop()
 {
-    shadower.reset();
+    shadower = nullptr;
     Component::addToDesktop (getDesktopWindowStyleFlags());
     setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary.
 }
@@ -301,7 +301,7 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
         const auto scale = getDesktopScaleFactor() / Desktop::getInstance().getGlobalScaleFactor();
 
         auto targetCentre = c->localPointToGlobal (c->getLocalBounds().getCentre()) / scale;
-        auto parentArea = c->getParentMonitorArea();
+        auto parentArea = getLocalArea (nullptr, c->getParentMonitorArea());
 
         if (auto* parent = getParentComponent())
         {

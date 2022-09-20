@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -97,15 +97,18 @@ static Version getOpenGLVersion()
     const std::string versionString (versionBegin, versionEnd);
     const auto spaceSeparated = StringArray::fromTokens (versionString.c_str(), false);
 
-    if (spaceSeparated.isEmpty())
-        return {};
+    for (const auto& token : spaceSeparated)
+    {
+        const auto pointSeparated = StringArray::fromTokens (token, ".", "");
 
-    const auto pointSeparated = StringArray::fromTokens (spaceSeparated[0], ".", "");
+        const auto major = pointSeparated[0].getIntValue();
+        const auto minor = pointSeparated[1].getIntValue();
 
-    const auto major = pointSeparated[0].getIntValue();
-    const auto minor = pointSeparated[1].getIntValue();
+        if (major != 0)
+            return { major, minor };
+    }
 
-    return { major, minor };
+    return {};
 }
 
 void OpenGLHelpers::resetErrorState()
@@ -129,6 +132,23 @@ bool OpenGLHelpers::isExtensionSupported (const char* const extensionName)
 {
     jassert (extensionName != nullptr); // you must supply a genuine string for this.
     jassert (isContextActive()); // An OpenGL context will need to be active before calling this.
+
+    if (getOpenGLVersion().major >= 3)
+    {
+        using GetStringi = const GLubyte* (*) (GLenum, GLuint);
+
+        if (auto* thisGlGetStringi = reinterpret_cast<GetStringi> (getExtensionFunction ("glGetStringi")))
+        {
+            GLint n = 0;
+            glGetIntegerv (GL_NUM_EXTENSIONS, &n);
+
+            for (auto i = (decltype (n)) 0; i < n; ++i)
+                if (StringRef (extensionName) == StringRef ((const char*) thisGlGetStringi (GL_EXTENSIONS, (GLuint) i)))
+                    return true;
+
+            return false;
+        }
+    }
 
     const char* extensions = (const char*) glGetString (GL_EXTENSIONS);
     jassert (extensions != nullptr); // Perhaps you didn't activate an OpenGL context before calling this?

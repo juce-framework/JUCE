@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,6 +35,7 @@ namespace juce
 {
 
 #if JucePlugin_Build_Unity
+ bool juce_isRunningInUnity();
  bool juce_isRunningInUnity()    { return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Unity; }
 #endif
 
@@ -46,7 +47,8 @@ namespace juce
  #define VST3_REPLACEMENT_AVAILABLE 1
 
  // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.
- void JUCE_API getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
+ void getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16]);
+ void getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
  {
      #if JUCE_MSVC
       const auto juce_sprintf = [] (auto&& head, auto&&... tail) { sprintf_s (head, numElementsInArray (head), tail...); };
@@ -131,6 +133,7 @@ namespace juce
 #endif
 
 #if JucePlugin_Build_VST
+ bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float);
  bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
  {
     #if VST3_REPLACEMENT_AVAILABLE

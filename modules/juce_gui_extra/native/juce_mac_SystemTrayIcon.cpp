@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,7 +26,7 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new", "-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
 extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelMenuId,
                              int topLevelIndex, bool addDelegate);
@@ -36,7 +36,7 @@ struct StatusItemContainer   : public Timer
 {
     //==============================================================================
     StatusItemContainer (SystemTrayIconComponent& iconComp, const Image& im)
-        : owner (iconComp), statusIcon (imageToNSImage (im))
+        : owner (iconComp), statusIcon (imageToNSImage (ScaledImage (im)))
     {
     }
 
@@ -51,7 +51,7 @@ struct StatusItemContainer   : public Timer
 
     void updateIcon (const Image& newImage)
     {
-        statusIcon.reset (imageToNSImage (newImage));
+        statusIcon.reset (imageToNSImage (ScaledImage (newImage)));
         setIconSize();
         configureIcon();
     }
@@ -87,7 +87,7 @@ struct StatusItemContainer   : public Timer
 };
 
 //==============================================================================
-struct ButtonBasedStatusItem   : public StatusItemContainer
+struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem : public StatusItemContainer
 {
     //==============================================================================
     ButtonBasedStatusItem (SystemTrayIconComponent& iconComp, const Image& im)
@@ -105,11 +105,12 @@ struct ButtonBasedStatusItem   : public StatusItemContainer
         button.image = statusIcon.get();
         button.target = eventForwarder.get();
         button.action = @selector (handleEvent:);
-       #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
         [button sendActionOn: NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown | NSEventMaskScrollWheel];
-       #else
-        [button sendActionOn: NSLeftMouseDownMask | NSRightMouseDownMask | NSScrollWheelMask];
-       #endif
+    }
+
+    ~ButtonBasedStatusItem() override
+    {
+        [statusItem.get() button].image = nullptr;
     }
 
     void configureIcon() override
@@ -155,22 +156,22 @@ struct ButtonBasedStatusItem   : public StatusItemContainer
                                    eventMods.withFlags (isLeft ? ModifierKeys::leftButtonModifier
                                                                : ModifierKeys::rightButtonModifier),
                                    pressure,
-                                   MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                                   MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                   MouseInputSource::defaultOrientation, MouseInputSource::defaultRotation,
+                                   MouseInputSource::defaultTiltX, MouseInputSource::defaultTiltY,
                                    &owner, &owner, now, {}, now, 1, false });
 
                 owner.mouseUp   ({ mouseSource, {},
                                    eventMods.withoutMouseButtons(),
                                    pressure,
-                                   MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                                   MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                   MouseInputSource::defaultOrientation, MouseInputSource::defaultRotation,
+                                   MouseInputSource::defaultTiltX, MouseInputSource::defaultTiltY,
                                    &owner, &owner, now, {}, now, 1, false });
             }
             else if (type == NSEventTypeMouseMoved)
             {
                 owner.mouseMove (MouseEvent (mouseSource, {}, eventMods, pressure,
-                                             MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                                             MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                             MouseInputSource::defaultOrientation, MouseInputSource::defaultRotation,
+                                             MouseInputSource::defaultTiltX, MouseInputSource::defaultTiltY,
                                              &owner, &owner, now, {}, now, 1, false));
             }
         }
@@ -184,7 +185,7 @@ struct ButtonBasedStatusItem   : public StatusItemContainer
         {
             addIvar<ButtonBasedStatusItem*> ("owner");
 
-            addMethod (@selector (handleEvent:), handleEvent, "v@:@");
+            addMethod (@selector (handleEvent:), handleEvent);
 
             registerClass();
         }
@@ -284,20 +285,20 @@ struct ViewBasedStatusItem   : public StatusItemContainer
                 owner.mouseDown (MouseEvent (mouseSource, {},
                                              eventMods.withFlags (isLeft ? ModifierKeys::leftButtonModifier
                                                                          : ModifierKeys::rightButtonModifier),
-                                             pressure, MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                                             MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                             pressure, MouseInputSource::defaultOrientation, MouseInputSource::defaultRotation,
+                                             MouseInputSource::defaultTiltX, MouseInputSource::defaultTiltY,
                                              &owner, &owner, now, {}, now, 1, false));
 
                 owner.mouseUp (MouseEvent (mouseSource, {}, eventMods.withoutMouseButtons(), pressure,
-                                           MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                                           MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                           MouseInputSource::defaultOrientation, MouseInputSource::defaultRotation,
+                                           MouseInputSource::defaultTiltX, MouseInputSource::defaultTiltY,
                                            &owner, &owner, now, {}, now, 1, false));
             }
             else if (type == NSEventTypeMouseMoved)
             {
                 owner.mouseMove (MouseEvent (mouseSource, {}, eventMods, pressure,
-                                             MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                                             MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
+                                             MouseInputSource::defaultOrientation, MouseInputSource::defaultRotation,
+                                             MouseInputSource::defaultTiltX, MouseInputSource::defaultTiltY,
                                              &owner, &owner, now, {}, now, 1, false));
             }
         }
@@ -311,12 +312,12 @@ struct ViewBasedStatusItem   : public StatusItemContainer
             addIvar<ViewBasedStatusItem*> ("owner");
             addIvar<NSImage*> ("image");
 
-            addMethod (@selector (mouseDown:),      handleEventDown, "v@:@");
-            addMethod (@selector (rightMouseDown:), handleEventDown, "v@:@");
-            addMethod (@selector (drawRect:),       drawRect,        "v@:@");
+            addMethod (@selector (mouseDown:),      handleEventDown);
+            addMethod (@selector (rightMouseDown:), handleEventDown);
+            addMethod (@selector (drawRect:),       drawRect);
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (frameChanged:),   frameChanged,    "v@:@");
+            addMethod (@selector (frameChanged:),   frameChanged);
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();
@@ -379,7 +380,7 @@ public:
     //==============================================================================
     Pimpl (SystemTrayIconComponent& iconComp, const Image& im)
     {
-        if (std::floor (NSFoundationVersionNumber) > NSFoundationVersionNumber10_10)
+        if (@available (macOS 10.10, *))
             statusItemHolder = std::make_unique<ButtonBasedStatusItem> (iconComp, im);
         else
             statusItemHolder = std::make_unique<ViewBasedStatusItem> (iconComp, im);

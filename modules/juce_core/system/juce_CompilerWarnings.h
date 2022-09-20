@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -200,7 +200,7 @@
 #endif
 
 #if JUCE_MAC || JUCE_IOS
-    #define JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION 10
+    #define JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION 11
 #else
     #define JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION 9
 #endif

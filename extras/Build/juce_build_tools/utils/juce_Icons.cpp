@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -341,8 +341,6 @@ namespace build_tools
         { "iphone",          "29x29",     "Icon-29@3x.png",                    "3x", 87   },
         { "iphone",          "40x40",     "Icon-Spotlight-40@2x.png",          "2x", 80   },
         { "iphone",          "40x40",     "Icon-Spotlight-40@3x.png",          "3x", 120  },
-        { "iphone",          "57x57",     "Icon.png",                          "1x", 57   },
-        { "iphone",          "57x57",     "Icon@2x.png",                       "2x", 114  },
         { "iphone",          "60x60",     "Icon-60@2x.png",                    "2x", 120  },
         { "iphone",          "60x60",     "Icon-@3x.png",                      "3x", 180  },
         { "ipad",            "20x20",     "Icon-Notifications-20.png",         "1x", 20   },
@@ -351,10 +349,6 @@ namespace build_tools
         { "ipad",            "29x29",     "Icon-Small@2x-1.png",               "2x", 58   },
         { "ipad",            "40x40",     "Icon-Spotlight-40.png",             "1x", 40   },
         { "ipad",            "40x40",     "Icon-Spotlight-40@2x-1.png",        "2x", 80   },
-        { "ipad",            "50x50",     "Icon-Small-50.png",                 "1x", 50   },
-        { "ipad",            "50x50",     "Icon-Small-50@2x.png",              "2x", 100  },
-        { "ipad",            "72x72",     "Icon-72.png",                       "1x", 72   },
-        { "ipad",            "72x72",     "Icon-72@2x.png",                    "2x", 144  },
         { "ipad",            "76x76",     "Icon-76.png",                       "1x", 76   },
         { "ipad",            "76x76",     "Icon-76@2x.png",                    "2x", 152  },
         { "ipad",            "83.5x83.5", "Icon-83.5@2x.png",                  "2x", 167  },

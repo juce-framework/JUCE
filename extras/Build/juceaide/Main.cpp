@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -270,6 +270,7 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
     updateField ("PLUGIN_AU_MAIN_TYPE",                  result.auMainType);
     updateField ("IS_AU_SANDBOX_SAFE",                   result.isAuSandboxSafe);
     updateField ("IS_PLUGIN_SYNTH",                      result.isPluginSynth);
+    updateField ("IS_PLUGIN_ARA_EFFECT",                 result.isPluginARAEffect);
     updateField ("SUPPRESS_AU_PLIST_RESOURCE_USAGE",     result.suppressResourceUsage);
     updateField ("BUNDLE_ID",                            result.bundleIdentifier);
     updateField ("ICON_FILE",                            result.iconFile);
@@ -342,6 +343,29 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
     updateField ("APP_SANDBOX_INHERIT",             result.isAppSandboxInhertianceEnabled);
     updateField ("APP_SANDBOX_OPTIONS",             result.appSandboxOptions);
     updateField ("NETWORK_MULTICAST_ENABLED",       result.isNetworkingMulticastEnabled);
+
+    struct SandboxTemporaryAccessKey
+    {
+        juce::String cMakeVar, key;
+    };
+
+    SandboxTemporaryAccessKey sandboxTemporaryAccessKeys[]
+    {
+        { "APP_SANDBOX_FILE_ACCESS_HOME_RO", "home-relative-path.read-only" },
+        { "APP_SANDBOX_FILE_ACCESS_HOME_RW", "home-relative-path.read-write" },
+        { "APP_SANDBOX_FILE_ACCESS_ABS_RO",  "absolute-path.read-only" },
+        { "APP_SANDBOX_FILE_ACCESS_ABS_RW",  "absolute-path.read-write" }
+    };
+
+    for (const auto& entry : sandboxTemporaryAccessKeys)
+    {
+        juce::StringArray values;
+        updateField (entry.cMakeVar, values);
+
+        if (! values.isEmpty())
+            result.appSandboxTemporaryPaths.push_back ({ "com.apple.security.temporary-exception.files." + entry.key,
+                                                         std::move (values) });
+    }
 
     result.type = type;
 

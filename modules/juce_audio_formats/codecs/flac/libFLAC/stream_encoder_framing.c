@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2011-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,14 +39,15 @@
 #include "include/private/stream_encoder_framing.h"
 #include "include/private/crc.h"
 #include "../assert.h"
+#include "../compat.h"
 
 static FLAC__bool add_entropy_coding_method_(FLAC__BitWriter *bw, const FLAC__EntropyCodingMethod *method);
-static FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32 residual[], const unsigned residual_samples, const unsigned predictor_order, const unsigned rice_parameters[], const unsigned raw_bits[], const unsigned partition_order, const FLAC__bool is_extended);
+static FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32 residual[], const uint32_t residual_samples, const uint32_t predictor_order, const uint32_t rice_parameters[], const uint32_t raw_bits[], const uint32_t partition_order, const FLAC__bool is_extended);
 
 FLAC__bool FLAC__add_metadata_block(const FLAC__StreamMetadata *metadata, FLAC__BitWriter *bw)
 {
-	unsigned i, j;
-	const unsigned vendor_string_length = (unsigned)strlen(FLAC__VENDOR_STRING);
+	uint32_t i, j;
+	const uint32_t vendor_string_length = (uint32_t)strlen(FLAC__VENDOR_STRING);
 
 	if(!FLAC__bitwriter_write_raw_uint32(bw, metadata->is_last, FLAC__STREAM_METADATA_IS_LAST_LEN))
 		return false;
@@ -64,6 +65,9 @@ FLAC__bool FLAC__add_metadata_block(const FLAC__StreamMetadata *metadata, FLAC__
 		i += vendor_string_length;
 	}
 	FLAC__ASSERT(i < (1u << FLAC__STREAM_METADATA_LENGTH_LEN));
+	/* double protection */
+	if(i >= (1u << FLAC__STREAM_METADATA_LENGTH_LEN))
+		return false;
 	if(!FLAC__bitwriter_write_raw_uint32(bw, i, FLAC__STREAM_METADATA_LENGTH_LEN))
 		return false;
 
@@ -92,6 +96,7 @@ FLAC__bool FLAC__add_metadata_block(const FLAC__StreamMetadata *metadata, FLAC__
 			FLAC__ASSERT(metadata->data.stream_info.bits_per_sample <= (1u << FLAC__STREAM_METADATA_STREAMINFO_BITS_PER_SAMPLE_LEN));
 			if(!FLAC__bitwriter_write_raw_uint32(bw, metadata->data.stream_info.bits_per_sample-1, FLAC__STREAM_METADATA_STREAMINFO_BITS_PER_SAMPLE_LEN))
 				return false;
+			FLAC__ASSERT(metadata->data.stream_info.total_samples < (FLAC__U64L(1) << FLAC__STREAM_METADATA_STREAMINFO_TOTAL_SAMPLES_LEN));
 			if(!FLAC__bitwriter_write_raw_uint64(bw, metadata->data.stream_info.total_samples, FLAC__STREAM_METADATA_STREAMINFO_TOTAL_SAMPLES_LEN))
 				return false;
 			if(!FLAC__bitwriter_write_byte_block(bw, metadata->data.stream_info.md5sum, 16))
@@ -214,7 +219,7 @@ FLAC__bool FLAC__add_metadata_block(const FLAC__StreamMetadata *metadata, FLAC__
 
 FLAC__bool FLAC__frame_add_header(const FLAC__FrameHeader *header, FLAC__BitWriter *bw)
 {
-	unsigned u, blocksize_hint, sample_rate_hint;
+	uint32_t u, blocksize_hint, sample_rate_hint;
 	FLAC__byte crc;
 
 	FLAC__ASSERT(FLAC__bitwriter_is_byte_aligned(bw));
@@ -359,7 +364,7 @@ FLAC__bool FLAC__frame_add_header(const FLAC__FrameHeader *header, FLAC__BitWrit
 	return true;
 }
 
-FLAC__bool FLAC__subframe_add_constant(const FLAC__Subframe_Constant *subframe, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw)
+FLAC__bool FLAC__subframe_add_constant(const FLAC__Subframe_Constant *subframe, uint32_t subframe_bps, uint32_t wasted_bits, FLAC__BitWriter *bw)
 {
 	FLAC__bool ok;
 
@@ -372,9 +377,9 @@ FLAC__bool FLAC__subframe_add_constant(const FLAC__Subframe_Constant *subframe, 
 	return ok;
 }
 
-FLAC__bool FLAC__subframe_add_fixed(const FLAC__Subframe_Fixed *subframe, unsigned residual_samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw)
+FLAC__bool FLAC__subframe_add_fixed(const FLAC__Subframe_Fixed *subframe, uint32_t residual_samples, uint32_t subframe_bps, uint32_t wasted_bits, FLAC__BitWriter *bw)
 {
-	unsigned i;
+	uint32_t i;
 
 	if(!FLAC__bitwriter_write_raw_uint32(bw, FLAC__SUBFRAME_TYPE_FIXED_BYTE_ALIGNED_MASK | (subframe->order<<1) | (wasted_bits? 1:0), FLAC__SUBFRAME_ZERO_PAD_LEN + FLAC__SUBFRAME_TYPE_LEN + FLAC__SUBFRAME_WASTED_BITS_FLAG_LEN))
 		return false;
@@ -410,9 +415,9 @@ FLAC__bool FLAC__subframe_add_fixed(const FLAC__Subframe_Fixed *subframe, unsign
 	return true;
 }
 
-FLAC__bool FLAC__subframe_add_lpc(const FLAC__Subframe_LPC *subframe, unsigned residual_samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw)
+FLAC__bool FLAC__subframe_add_lpc(const FLAC__Subframe_LPC *subframe, uint32_t residual_samples, uint32_t subframe_bps, uint32_t wasted_bits, FLAC__BitWriter *bw)
 {
-	unsigned i;
+	uint32_t i;
 
 	if(!FLAC__bitwriter_write_raw_uint32(bw, FLAC__SUBFRAME_TYPE_LPC_BYTE_ALIGNED_MASK | ((subframe->order-1)<<1) | (wasted_bits? 1:0), FLAC__SUBFRAME_ZERO_PAD_LEN + FLAC__SUBFRAME_TYPE_LEN + FLAC__SUBFRAME_WASTED_BITS_FLAG_LEN))
 		return false;
@@ -456,9 +461,9 @@ FLAC__bool FLAC__subframe_add_lpc(const FLAC__Subframe_LPC *subframe, unsigned r
 	return true;
 }
 
-FLAC__bool FLAC__subframe_add_verbatim(const FLAC__Subframe_Verbatim *subframe, unsigned samples, unsigned subframe_bps, unsigned wasted_bits, FLAC__BitWriter *bw)
+FLAC__bool FLAC__subframe_add_verbatim(const FLAC__Subframe_Verbatim *subframe, uint32_t samples, uint32_t subframe_bps, uint32_t wasted_bits, FLAC__BitWriter *bw)
 {
-	unsigned i;
+	uint32_t i;
 	const FLAC__int32 *signal = subframe->data;
 
 	if(!FLAC__bitwriter_write_raw_uint32(bw, FLAC__SUBFRAME_TYPE_VERBATIM_BYTE_ALIGNED_MASK | (wasted_bits? 1:0), FLAC__SUBFRAME_ZERO_PAD_LEN + FLAC__SUBFRAME_TYPE_LEN + FLAC__SUBFRAME_WASTED_BITS_FLAG_LEN))
@@ -490,13 +495,13 @@ FLAC__bool add_entropy_coding_method_(FLAC__BitWriter *bw, const FLAC__EntropyCo
 	return true;
 }
 
-FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32 residual[], const unsigned residual_samples, const unsigned predictor_order, const unsigned rice_parameters[], const unsigned raw_bits[], const unsigned partition_order, const FLAC__bool is_extended)
+FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32 residual[], const uint32_t residual_samples, const uint32_t predictor_order, const uint32_t rice_parameters[], const uint32_t raw_bits[], const uint32_t partition_order, const FLAC__bool is_extended)
 {
-	const unsigned plen = is_extended? FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN : FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
-	const unsigned pesc = is_extended? FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ESCAPE_PARAMETER : FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER;
+	const uint32_t plen = is_extended? FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN : FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN;
+	const uint32_t pesc = is_extended? FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ESCAPE_PARAMETER : FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCAPE_PARAMETER;
 
 	if(partition_order == 0) {
-		unsigned i;
+		uint32_t i;
 
 		if(raw_bits[0] == 0) {
 			if(!FLAC__bitwriter_write_raw_uint32(bw, rice_parameters[0], plen))
@@ -518,9 +523,9 @@ FLAC__bool add_residual_partitioned_rice_(FLAC__BitWriter *bw, const FLAC__int32
 		return true;
 	}
 	else {
-		unsigned i, j, k = 0, k_last = 0;
-		unsigned partition_samples;
-		const unsigned default_partition_samples = (residual_samples+predictor_order) >> partition_order;
+		uint32_t i, j, k = 0, k_last = 0;
+		uint32_t partition_samples;
+		const uint32_t default_partition_samples = (residual_samples+predictor_order) >> partition_order;
 		for(i = 0; i < (1u<<partition_order); i++) {
 			partition_samples = default_partition_samples;
 			if(i == 0)

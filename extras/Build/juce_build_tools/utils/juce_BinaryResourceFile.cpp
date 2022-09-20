@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -135,7 +135,9 @@ namespace build_tools
 
         cpp << "/* ==================================== " << resourceFileIdentifierString << " ====================================";
         writeComment (cpp);
-        cpp << "namespace " << className << newLine
+        cpp << "#include <cstring>" << newLine
+            << newLine
+            << "namespace " << className << newLine
             << "{" << newLine;
 
         while (i < files.size())
@@ -221,10 +223,8 @@ namespace build_tools
                 << "const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)"                         << newLine
                 << "{"                                                                                                   << newLine
                 << "    for (unsigned int i = 0; i < (sizeof (namedResourceList) / sizeof (namedResourceList[0])); ++i)" << newLine
-                << "    {"                                                                                               << newLine
-                << "        if (namedResourceList[i] == resourceNameUTF8)"                                               << newLine
+                << "        if (strcmp (namedResourceList[i], resourceNameUTF8) == 0)"                                   << newLine
                 << "            return originalFilenames[i];"                                                            << newLine
-                << "    }"                                                                                               << newLine
                 <<                                                                                                          newLine
                 << "    return nullptr;"                                                                                 << newLine
                 << "}"                                                                                                   << newLine

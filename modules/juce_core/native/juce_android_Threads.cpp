@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -56,8 +56,9 @@ JNIEnv* getEnv() noexcept
     return nullptr;
 }
 
-void JNICALL juce_JavainitialiseJUCE (JNIEnv* env, jobject /*jclass*/, jobject context)
+static void JNICALL juce_JavainitialiseJUCE (JNIEnv* env, jobject /*jclass*/, jobject context)
 {
+    JNIClassBase::initialiseAllClasses (env, context);
     Thread::initialiseJUCE (env, context);
 }
 
@@ -88,8 +89,6 @@ extern "C" jint JNIEXPORT JNI_OnLoad (JavaVM* vm, void*)
         // call Thread::initialiseJUCE manually
         env->ExceptionClear();
     }
-
-    JNIClassBase::initialiseAllClasses (env);
 
     return JNI_VERSION_1_2;
 }

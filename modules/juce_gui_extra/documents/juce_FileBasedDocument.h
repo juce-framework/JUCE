@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -232,7 +232,7 @@ public:
         If it does need saving it'll prompt the user, and if they say "discard changes" the
         callback will be called with savedOk, so again, you can safely delete the document.
 
-        If the user clicks "cancel", the callback will be aclled with userCancelledSave, so
+        If the user clicks "cancel", the callback will be called with userCancelledSave, so
         you can abort the close-document operation.
 
         And if they click "save changes", it'll try to save and the callback will be called

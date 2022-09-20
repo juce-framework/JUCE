@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -33,7 +33,7 @@
                    juce_audio_plugin_client, juce_audio_processors,
                    juce_audio_utils, juce_core, juce_data_structures,
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2019
+ exporters:        xcode_mac, vs2022
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -551,7 +551,14 @@ inline std::unique_ptr<AudioFormatReader> makeAudioFormatReader (AudioFormatMana
 class AudioFormatReaderFactory
 {
 public:
+    AudioFormatReaderFactory() = default;
+    AudioFormatReaderFactory (const AudioFormatReaderFactory&) = default;
+    AudioFormatReaderFactory (AudioFormatReaderFactory&&) = default;
+    AudioFormatReaderFactory& operator= (const AudioFormatReaderFactory&) = default;
+    AudioFormatReaderFactory& operator= (AudioFormatReaderFactory&&) = default;
+
     virtual ~AudioFormatReaderFactory() noexcept = default;
+
     virtual std::unique_ptr<AudioFormatReader> make (AudioFormatManager&) const = 0;
     virtual std::unique_ptr<AudioFormatReaderFactory> clone() const = 0;
 };
@@ -604,22 +611,6 @@ private:
 
 namespace juce
 {
-
-bool operator== (const MPEZoneLayout& a, const MPEZoneLayout& b)
-{
-    if (a.getLowerZone() != b.getLowerZone())
-        return false;
-
-    if (a.getUpperZone() != b.getUpperZone())
-        return false;
-
-    return true;
-}
-
-bool operator!= (const MPEZoneLayout& a, const MPEZoneLayout& b)
-{
-    return ! (a == b);
-}
 
 template<>
 struct VariantConverter<LoopMode>

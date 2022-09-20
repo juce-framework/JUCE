@@ -1,0 +1,247 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ui: <http://lv2plug.in/ns/extensions/ui#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/atom>
+	a owl:Ontology ;
+	rdfs:seeAlso <atom.h> ,
+		<util.h> ,
+		<forge.h> ,
+		<atom.meta.ttl> ;
+	rdfs:label "LV2 Atom" ;
+	rdfs:comment "A generic value container and several data types." .
+
+atom:cType
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "C type" ;
+	rdfs:comment "The C type that describes the binary representation of an Atom type." ;
+	rdfs:domain rdfs:Class ;
+	rdfs:range lv2:Symbol .
+
+atom:Atom
+	a rdfs:Class ;
+	rdfs:label "Atom" ;
+	rdfs:comment "Abstract base class for all atoms." ;
+	atom:cType "LV2_Atom" .
+
+atom:Chunk
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Chunk" ;
+	rdfs:comment "A chunk of memory with undefined contents." ;
+	owl:onDatatype xsd:base64Binary .
+
+atom:Number
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Number" ;
+	rdfs:comment "Base class for numeric types." .
+
+atom:Int
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:Number ;
+	rdfs:label "Int" ;
+	rdfs:comment "A native `int32_t`." ;
+	atom:cType "LV2_Atom_Int" ;
+	owl:onDatatype xsd:int .
+
+atom:Long
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:Number ;
+	rdfs:label "Long" ;
+	rdfs:comment "A native `int64_t`." ;
+	atom:cType "LV2_Atom_Long" ;
+	owl:onDatatype xsd:long .
+
+atom:Float
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:Number ;
+	rdfs:label "Float" ;
+	rdfs:comment "A native `float`." ;
+	atom:cType "LV2_Atom_Float" ;
+	owl:onDatatype xsd:float .
+
+atom:Double
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:Number ;
+	rdfs:label "Double" ;
+	rdfs:comment "A native `double`." ;
+	atom:cType "LV2_Atom_Double" ;
+	owl:onDatatype xsd:double .
+
+atom:Bool
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Bool" ;
+	rdfs:comment "An atom:Int where 0 is false and any other value is true." ;
+	atom:cType "LV2_Atom_Bool" ;
+	owl:onDatatype xsd:boolean .
+
+atom:String
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "String" ;
+	rdfs:comment "A UTF-8 string." ;
+	atom:cType "LV2_Atom_String" ;
+	owl:onDatatype xsd:string .
+
+atom:Literal
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Literal" ;
+	rdfs:comment "A UTF-8 string literal with optional datatype or language." ;
+	atom:cType "LV2_Atom_Literal" .
+
+atom:Path
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:URI ;
+	owl:onDatatype atom:URI ;
+	rdfs:label "Path" ;
+	rdfs:comment "A local file path." .
+
+atom:URI
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf atom:String ;
+	owl:onDatatype xsd:anyURI ;
+	rdfs:label "URI" ;
+	rdfs:comment "A URI string." .
+
+atom:URID
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "URID" ;
+	rdfs:comment "An unsigned 32-bit integer ID for a URI." ;
+	atom:cType "LV2_Atom_URID" .
+
+atom:Vector
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Vector" ;
+	rdfs:comment "A homogeneous sequence of atom bodies with equivalent type and size." ;
+	atom:cType "LV2_Atom_Vector" .
+
+atom:Tuple
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Tuple" ;
+	rdfs:comment "A sequence of atoms with varying type and size." .
+
+atom:Property
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Property" ;
+	rdfs:comment "A property of an atom:Object." ;
+	atom:cType "LV2_Atom_Property" .
+
+atom:Object
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Object" ;
+	rdfs:comment "A collection of properties." ;
+	atom:cType "LV2_Atom_Object" .
+
+atom:Resource
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Object ;
+	rdfs:label "Resource" ;
+	rdfs:comment "A named collection of properties with a URI." ;
+	owl:deprecated "true"^^xsd:boolean ;
+	atom:cType "LV2_Atom_Object" .
+
+atom:Blank
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Object ;
+	rdfs:label "Blank" ;
+	rdfs:comment "An anonymous collection of properties without a URI." ;
+	owl:deprecated "true"^^xsd:boolean ;
+	atom:cType "LV2_Atom_Object" .
+
+atom:Sound
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Vector ;
+	rdfs:label "Sound" ;
+	rdfs:comment "A atom:Vector of atom:Float which represents an audio waveform." ;
+	atom:cType "LV2_Atom_Vector" .
+
+atom:frameTime
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:range xsd:decimal ;
+	rdfs:label "frame time" ;
+	rdfs:comment "A time stamp in audio frames." .
+
+atom:beatTime
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:range xsd:decimal ;
+	rdfs:label "beat time" ;
+	rdfs:comment "A time stamp in beats." .
+
+atom:Event
+	a rdfs:Class ;
+	rdfs:label "Event" ;
+	atom:cType "LV2_Atom_Event" ;
+	rdfs:comment "An atom with a time stamp prefix in a sequence." .
+
+atom:Sequence
+	a rdfs:Class ;
+	rdfs:subClassOf atom:Atom ;
+	rdfs:label "Sequence" ;
+	atom:cType "LV2_Atom_Sequence" ;
+	rdfs:comment "A sequence of events." .
+
+atom:AtomPort
+	a rdfs:Class ;
+	rdfs:subClassOf lv2:Port ;
+	rdfs:label "Atom Port" ;
+	rdfs:comment "A port which contains an atom:Atom." .
+
+atom:bufferType
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain atom:AtomPort ;
+	rdfs:range rdfs:Class ;
+	rdfs:label "buffer type" ;
+	rdfs:comment "An atom type that a port may be connected to." .
+
+atom:childType
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:label "child type" ;
+	rdfs:comment "The type of children in a container." .
+
+atom:supports
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:label "supports" ;
+	rdfs:comment "A supported atom type." ;
+	rdfs:range rdfs:Class .
+
+atom:eventTransfer
+	a ui:PortProtocol ;
+	rdfs:label "event transfer" ;
+	rdfs:comment "A port protocol for transferring events." .
+
+atom:atomTransfer
+	a ui:PortProtocol ;
+	rdfs:label "atom transfer" ;
+	rdfs:comment "A port protocol for transferring atoms." .
+

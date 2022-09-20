@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -121,11 +121,28 @@ static std::map<String, String> getPluginFileTokenReplacements (const String& na
     processorClassName = processorClassName.substring (0, 1).toUpperCase() + processorClassName.substring (1);
     auto editorClassName = processorClassName + "Editor";
 
+    const auto araDocumentControllerCppFile = sourceFolder.getChildFile ("PluginARADocumentController.cpp");
+    const auto araDocumentControllerHFile   = araDocumentControllerCppFile.withFileExtension (".h");
+    const auto araPlaybackRendererCppFile = sourceFolder.getChildFile ("PluginARAPlaybackRenderer.cpp");
+    const auto araPlaybackRendererHFile   = araPlaybackRendererCppFile.withFileExtension (".h");
+
+    const auto araDocumentControllerHInclude = CodeHelpers::createIncludeStatement (araDocumentControllerHFile, araDocumentControllerCppFile);
+    const auto araPlaybackRendererHInclude = CodeHelpers::createIncludeStatement (araPlaybackRendererHFile, araPlaybackRendererCppFile);
+
+    auto araDocumentControllerClassName = build_tools::makeValidIdentifier (name, true, true, false) + "DocumentController";
+    araDocumentControllerClassName = araDocumentControllerClassName.substring (0, 1).toUpperCase() + araDocumentControllerClassName.substring (1);
+    auto araPlaybackRendererClassName = build_tools::makeValidIdentifier (name, true, true, false) + "PlaybackRenderer";
+    araPlaybackRendererClassName = araPlaybackRendererClassName.substring (0, 1).toUpperCase() + araPlaybackRendererClassName.substring (1);
+
     tokenReplacements.insert ({"%%filter_headers%%",     processorHInclude + newLine + editorHInclude });
     tokenReplacements.insert ({"%%filter_class_name%%",  processorClassName });
     tokenReplacements.insert ({"%%editor_class_name%%",  editorClassName });
     tokenReplacements.insert ({"%%editor_cpp_headers%%", processorHInclude + newLine + editorHInclude });
     tokenReplacements.insert ({"%%editor_headers%%",     getJuceHeaderInclude() + newLine + processorHInclude });
+    tokenReplacements.insert ({"%%aradocumentcontroller_headers%%",     araDocumentControllerHInclude });
+    tokenReplacements.insert ({"%%aradocumentcontroller_class_name%%",  araDocumentControllerClassName });
+    tokenReplacements.insert ({"%%araplaybackrenderer_headers%%",       araPlaybackRendererHInclude });
+    tokenReplacements.insert ({"%%araplaybackrenderer_class_name%%",    araPlaybackRendererClassName });
 
     return tokenReplacements;
 }

@@ -17,7 +17,7 @@ JUCE convention for naming modules is lower-case with underscores, e.g.
     juce_events
     juce_graphics
 
-But any name that is a valid C++ identifer is OK.
+But any name that is a valid C++ identifier is OK.
 
 Inside the root of this folder, there must be a set of public header and source files which
 the user's' project will include. The module may have as many other internal source files as
@@ -185,11 +185,18 @@ Possible values:
     parent folder, which need to be added to a project's header search path
 
 - OSXFrameworks
-  - (Optional) A list (space or comma-separated) of OSX frameworks that are needed
+  - (Optional) A list (space or comma-separated) of OSX frameworks that are needed by this module
+
+- WeakOSXFrameworks
+  - (Optional) A list (space or comma-separated) of weak linked OSX frameworks that are needed
     by this module
 
 - iOSFrameworks
-  - (Optional) Like OSXFrameworks, but for iOS targets
+  - (Optional) A list (space or comma-separated) of iOS frameworks that are needed by this module
+
+- WeakiOSFrameworks
+  - (Optional) A list (space or comma-separated) of weak linked iOS frameworks that are needed
+    by this module
 
 - linuxPackages
   - (Optional) A list (space or comma-separated) pkg-config packages that should be used to pass

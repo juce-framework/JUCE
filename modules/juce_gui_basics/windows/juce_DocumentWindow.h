@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -82,6 +82,10 @@ public:
                                 that it can be "allButtons" to get them all. You
                                 can change this later with the setTitleBarButtonsRequired()
                                 method, which can also specify where they are positioned.
+                                The behaviour of native titlebars on macOS is slightly different:
+                                the maximiseButton flag controls whether or not the window can enter
+                                native fullscreen mode, and the zoom button can be disabled by
+                                making the window non-resizable.
         @param addToDesktop     if true, the window will be automatically added to the
                                 desktop; if false, you can use it as a child component
         @see TitleBarButtons
@@ -124,6 +128,10 @@ public:
                                 should be shown on the title bar. This value is a bitwise
                                 combination of values from the TitleBarButtons enum. Note
                                 that it can be "allButtons" to get them all.
+                                The behaviour of native titlebars on macOS is slightly different:
+                                the maximiseButton flag controls whether or not the window can enter
+                                native fullscreen mode, and the zoom button can be disabled by
+                                making the window non-resizable.
         @param positionTitleBarButtonsOnLeft    if true, the buttons should go at the
                                 left side of the bar; if false, they'll be placed at the right
     */
@@ -188,6 +196,8 @@ public:
 
     /** Callback that is triggered when the minimise button is pressed.
 
+        This function is only called when using a non-native titlebar.
+
         The default implementation of this calls ResizableWindow::setMinimised(), but
         you can override it to do more customised behaviour.
     */
@@ -195,6 +205,8 @@ public:
 
     /** Callback that is triggered when the maximise button is pressed, or when the
         title-bar is double-clicked.
+
+        This function is only called when using a non-native titlebar.
 
         The default implementation of this calls ResizableWindow::setFullScreen(), but
         you can override it to do more customised behaviour.

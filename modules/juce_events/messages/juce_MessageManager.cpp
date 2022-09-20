@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -26,6 +26,8 @@ namespace juce
 MessageManager::MessageManager() noexcept
   : messageThreadId (Thread::getCurrentThreadId())
 {
+    JUCE_VERSION_ID
+
     if (JUCEApplicationBase::isStandaloneApp())
         Thread::setCurrentThreadName ("JUCE Message Thread");
 }
@@ -223,6 +225,8 @@ void MessageManager::deregisterBroadcastListener (ActionListener* const listener
 //==============================================================================
 bool MessageManager::isThisTheMessageThread() const noexcept
 {
+    const std::lock_guard<std::mutex> lock { messageThreadIdMutex };
+
     return Thread::getCurrentThreadId() == messageThreadId;
 }
 
@@ -230,10 +234,10 @@ void MessageManager::setCurrentThreadAsMessageThread()
 {
     auto thisThread = Thread::getCurrentThreadId();
 
-    if (messageThreadId != thisThread)
-    {
-        messageThreadId = thisThread;
+    const std::lock_guard<std::mutex> lock { messageThreadIdMutex };
 
+    if (std::exchange (messageThreadId, thisThread) != thisThread)
+    {
        #if JUCE_WINDOWS
         // This is needed on windows to make sure the message window is created by this thread
         doPlatformSpecificShutdown();

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -25,12 +25,10 @@ namespace juce
 
 MPESynthesiser::MPESynthesiser()
 {
-    MPEZoneLayout zoneLayout;
-    zoneLayout.setLowerZone (15);
-    setZoneLayout (zoneLayout);
 }
 
-MPESynthesiser::MPESynthesiser (MPEInstrument* mpeInstrument)  : MPESynthesiserBase (mpeInstrument)
+MPESynthesiser::MPESynthesiser (MPEInstrument& mpeInstrument)
+    : MPESynthesiserBase (mpeInstrument)
 {
 }
 
@@ -314,7 +312,7 @@ void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
     }
 
     // finally make sure the MPE Instrument also doesn't have any notes anymore.
-    instrument->releaseAllNotes();
+    instrument.releaseAllNotes();
 }
 
 //==============================================================================

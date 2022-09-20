@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -54,13 +54,13 @@ private:
         {
             addIvar<SKDelegateAndPaymentObserver*> ("self");
 
-            addMethod (@selector (productsRequest:didReceiveResponse:),                       didReceiveResponse,                          "v@:@@");
-            addMethod (@selector (requestDidFinish:),                                         requestDidFinish,                            "v@:@");
-            addMethod (@selector (request:didFailWithError:),                                 requestDidFailWithError,                     "v@:@@");
-            addMethod (@selector (paymentQueue:updatedTransactions:),                         updatedTransactions,                         "v@:@@");
-            addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), restoreCompletedTransactionsFailedWithError, "v@:@@");
-            addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:),         restoreCompletedTransactionsFinished,        "v@:@");
-            addMethod (@selector (paymentQueue:updatedDownloads:),                            updatedDownloads,                            "v@:@@");
+            addMethod (@selector (productsRequest:didReceiveResponse:),                       didReceiveResponse);
+            addMethod (@selector (requestDidFinish:),                                         requestDidFinish);
+            addMethod (@selector (request:didFailWithError:),                                 requestDidFailWithError);
+            addMethod (@selector (paymentQueue:updatedTransactions:),                         updatedTransactions);
+            addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), restoreCompletedTransactionsFailedWithError);
+            addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:),         restoreCompletedTransactionsFinished);
+            addMethod (@selector (paymentQueue:updatedDownloads:),                            updatedDownloads);
 
             registerClass();
         }
@@ -544,10 +544,10 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     void fetchReceiptDetailsFromAppStore (NSData* receiptData, const String& secret)
     {
         auto requestContents = [NSMutableDictionary dictionaryWithCapacity: (NSUInteger) (secret.isNotEmpty() ? 2 : 1)];
-        [requestContents setObject: [receiptData base64EncodedStringWithOptions:0] forKey: nsStringLiteral ("receipt-data")];
+        [requestContents setObject: [receiptData base64EncodedStringWithOptions:0] forKey: @"receipt-data"];
 
         if (secret.isNotEmpty())
-            [requestContents setObject: juceStringToNS (secret) forKey: nsStringLiteral ("password")];
+            [requestContents setObject: juceStringToNS (secret) forKey: @"password"];
 
         NSError* error;
         auto requestData = [NSJSONSerialization dataWithJSONObject: requestContents
@@ -559,47 +559,62 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             return;
         }
 
-       #if JUCE_IN_APP_PURCHASES_USE_SANDBOX_ENVIRONMENT
-        auto storeURL = "https://sandbox.itunes.apple.com/verifyReceipt";
-       #else
-        auto storeURL = "https://buy.itunes.apple.com/verifyReceipt";
-       #endif
+        verifyReceipt ("https://buy.itunes.apple.com/verifyReceipt", requestData);
+    }
 
-        // TODO: use juce URL here
-        auto* urlPtr = [NSURL URLWithString: nsStringLiteral (storeURL)];
-        auto storeRequest = [NSMutableURLRequest requestWithURL: urlPtr];
-        [storeRequest setHTTPMethod: nsStringLiteral ("POST")];
+    void verifyReceipt (const String& endpoint, NSData* requestData)
+    {
+        const auto nsurl = [NSURL URLWithString: juceStringToNS (endpoint)];
+
+        if (nsurl == nullptr)
+            return;
+
+        const auto storeRequest = [NSMutableURLRequest requestWithURL: nsurl];
+        [storeRequest setHTTPMethod: @"POST"];
         [storeRequest setHTTPBody: requestData];
 
-        auto task = [[NSURLSession sharedSession] dataTaskWithRequest: storeRequest
-                                                    completionHandler:
-                                                       ^(NSData* data, NSURLResponse*, NSError* connectionError)
-                                                       {
-                                                           if (connectionError != nil)
-                                                           {
-                                                               sendReceiptFetchFail();
-                                                           }
-                                                           else
-                                                           {
-                                                               NSError* err;
+        constexpr auto sandboxURL = "https://sandbox.itunes.apple.com/verifyReceipt";
 
-                                                               if (NSDictionary* receiptDetails = [NSJSONSerialization JSONObjectWithData: data options: 0 error: &err])
-                                                                   processReceiptDetails (receiptDetails);
-                                                               else
-                                                                   sendReceiptFetchFail();
-                                                           }
-                                                       }];
+        const auto shouldRetryWithSandboxUrl = [isProduction = (endpoint != sandboxURL)] (NSDictionary* receiptDetails)
+        {
+            if (isProduction)
+                if (const auto* status = getAs<NSNumber> (receiptDetails[@"status"]))
+                    return [status intValue] == 21007;
 
-        [task resume];
+            return false;
+        };
+
+        [[[NSURLSession sharedSession] dataTaskWithRequest: storeRequest
+                                         completionHandler: ^(NSData* responseData, NSURLResponse*, NSError* connectionError)
+                                                            {
+                                                                if (connectionError == nullptr)
+                                                                {
+                                                                    NSError* err = nullptr;
+
+                                                                    if (NSDictionary* receiptDetails = [NSJSONSerialization JSONObjectWithData: responseData options: 0 error: &err])
+                                                                    {
+                                                                        if (shouldRetryWithSandboxUrl (receiptDetails))
+                                                                        {
+                                                                            verifyReceipt (sandboxURL, requestData);
+                                                                            return;
+                                                                        }
+
+                                                                        processReceiptDetails (receiptDetails);
+                                                                        return;
+                                                                    }
+                                                                }
+
+                                                                sendReceiptFetchFail();
+                                                            }] resume];
     }
 
     void processReceiptDetails (NSDictionary* receiptDetails)
     {
-        if (auto receipt = getAs<NSDictionary> (receiptDetails[nsStringLiteral ("receipt")]))
+        if (auto receipt = getAs<NSDictionary> (receiptDetails[@"receipt"]))
         {
-            if (auto bundleId = getAs<NSString> (receipt[nsStringLiteral ("bundle_id")]))
+            if (auto bundleId = getAs<NSString> (receipt[@"bundle_id"]))
             {
-                if (auto inAppPurchases = getAs<NSArray> (receipt[nsStringLiteral ("in_app")]))
+                if (auto inAppPurchases = getAs<NSArray> (receipt[@"in_app"]))
                 {
                     Array<Listener::PurchaseInfo> purchases;
 
@@ -608,14 +623,14 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                         if (auto* purchaseData = getAs<NSDictionary> (inAppPurchaseData))
                         {
                             // Ignore products that were cancelled.
-                            if (purchaseData[nsStringLiteral ("cancellation_date")] != nil)
+                            if (purchaseData[@"cancellation_date"] != nil)
                                 continue;
 
-                            if (auto transactionId = getAs<NSString> (purchaseData[nsStringLiteral ("original_transaction_id")]))
+                            if (auto transactionId = getAs<NSString> (purchaseData[@"original_transaction_id"]))
                             {
-                                if (auto productId = getAs<NSString> (purchaseData[nsStringLiteral ("product_id")]))
+                                if (auto productId = getAs<NSString> (purchaseData[@"product_id"]))
                                 {
-                                    auto purchaseTime = getPurchaseDateMs (purchaseData[nsStringLiteral ("purchase_date_ms")]);
+                                    auto purchaseTime = getPurchaseDateMs (purchaseData[@"purchase_date_ms"]);
 
                                     if (purchaseTime > 0)
                                     {

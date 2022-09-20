@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,13 +26,9 @@
 namespace juce
 {
 
-#if JUCE_MAC && defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
- #define WKWEBVIEW_OPENPANEL_SUPPORTED 1
-#endif
-
 static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
 {
-    if (@available (macOS 10.9, *))
+    if (@available (macOS 10.10, *))
     {
         const auto parameterNames = url.getParameterNames();
         const auto parameterValues = url.getParameterValues();
@@ -117,62 +113,119 @@ struct WebViewKeyEquivalentResponder : public ObjCClass<WebViewClass>
     WebViewKeyEquivalentResponder()
         : ObjCClass<WebViewClass> ("WebViewKeyEquivalentResponder_")
     {
-        ObjCClass<WebViewClass>::addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
-        ObjCClass<WebViewClass>::registerClass();
-    }
+        this->addMethod (@selector (performKeyEquivalent:),
+                         [] (id self, SEL selector, NSEvent* event)
+                         {
+                             const auto isCommandDown = [event]
+                             {
+                                 const auto modifierFlags = [event modifierFlags];
 
-private:
-    static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
-    {
-        const auto isCommandDown = [event]
-        {
-            const auto modifierFlags = [event modifierFlags];
+                                 if (@available (macOS 10.12, *))
+                                     return (modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagCommand;
 
-           #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
-            if (@available (macOS 10.12, *))
-                return (modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagCommand;
-           #endif
+                                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+                                 return (modifierFlags & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask;
+                                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+                             }();
 
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-            return (modifierFlags & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask;
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }();
+                             if (isCommandDown)
+                             {
+                                 auto sendAction = [&] (SEL actionSelector) -> BOOL
+                                 {
+                                     return [NSApp sendAction:actionSelector
+                                                           to:[[self window] firstResponder]
+                                                         from:self];
+                                 };
 
-        if (isCommandDown)
-        {
-            auto sendAction = [&] (SEL actionSelector) -> BOOL
-            {
-                return [NSApp sendAction: actionSelector
-                                      to: [[self window] firstResponder]
-                                    from: self];
-            };
+                                 if ([[event charactersIgnoringModifiers] isEqualToString:@"x"])
+                                     return sendAction (@selector (cut:));
+                                 if ([[event charactersIgnoringModifiers] isEqualToString:@"c"])
+                                     return sendAction (@selector (copy:));
+                                 if ([[event charactersIgnoringModifiers] isEqualToString:@"v"])
+                                     return sendAction (@selector (paste:));
+                                 if ([[event charactersIgnoringModifiers] isEqualToString:@"a"])
+                                     return sendAction (@selector (selectAll:));
+                             }
 
-            if ([[event charactersIgnoringModifiers] isEqualToString: @"x"])  return sendAction (@selector (cut:));
-            if ([[event charactersIgnoringModifiers] isEqualToString: @"c"])  return sendAction (@selector (copy:));
-            if ([[event charactersIgnoringModifiers] isEqualToString: @"v"])  return sendAction (@selector (paste:));
-            if ([[event charactersIgnoringModifiers] isEqualToString: @"a"])  return sendAction (@selector (selectAll:));
-        }
-
-        return ObjCClass<WebViewClass>::template sendSuperclassMessage<BOOL> (self, selector, event);
+                             return ObjCClass<WebViewClass>::template sendSuperclassMessage<BOOL> (self, selector, event);
+                         });
+        this->registerClass();
     }
 };
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
 {
-    DownloadClickDetectorClass()  : ObjCClass<NSObject> ("JUCEWebClickDetector_")
+    DownloadClickDetectorClass()  : ObjCClass ("JUCEWebClickDetector_")
     {
         addIvar<WebBrowserComponent*> ("owner");
 
+        addMethod (@selector (webView:didFailLoadWithError:forFrame:),            didFailLoadWithError);
+        addMethod (@selector (webView:didFailProvisionalLoadWithError:forFrame:), didFailLoadWithError);
+
         addMethod (@selector (webView:decidePolicyForNavigationAction:request:frame:decisionListener:),
-                   decidePolicyForNavigationAction, "v@:@@@@@");
+                   [] (id self, SEL, WebView*, NSDictionary* actionInformation, NSURLRequest*, WebFrame*, id<WebPolicyDecisionListener> listener)
+                   {
+                       if (getOwner (self)->pageAboutToLoad (getOriginalURL (actionInformation)))
+                           [listener use];
+                       else
+                           [listener ignore];
+                   });
+
         addMethod (@selector (webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:),
-                   decidePolicyForNewWindowAction, "v@:@@@@@");
-        addMethod (@selector (webView:didFinishLoadForFrame:), didFinishLoadForFrame, "v@:@@");
-        addMethod (@selector (webView:didFailLoadWithError:forFrame:),  didFailLoadWithError,  "v@:@@@");
-        addMethod (@selector (webView:didFailProvisionalLoadWithError:forFrame:),  didFailLoadWithError,  "v@:@@@");
-        addMethod (@selector (webView:willCloseFrame:), willCloseFrame, "v@:@@");
-        addMethod (@selector (webView:runOpenPanelForFileButtonWithResultListener:allowMultipleFiles:), runOpenPanel, "v@:@@", @encode (BOOL));
+                   [] (id self, SEL, WebView*, NSDictionary* actionInformation, NSURLRequest*, NSString*, id<WebPolicyDecisionListener> listener)
+                   {
+                       getOwner (self)->newWindowAttemptingToLoad (getOriginalURL (actionInformation));
+                       [listener ignore];
+                   });
+
+        addMethod (@selector (webView:didFinishLoadForFrame:),
+                   [] (id self, SEL, WebView* sender, WebFrame* frame)
+                   {
+                       if ([frame isEqual:[sender mainFrame]])
+                       {
+                           NSURL* url = [[[frame dataSource] request] URL];
+                           getOwner (self)->pageFinishedLoading (nsStringToJuce ([url absoluteString]));
+                       }
+                   });
+
+        addMethod (@selector (webView:willCloseFrame:),
+                   [] (id self, SEL, WebView*, WebFrame*)
+                   {
+                       getOwner (self)->windowCloseRequest();
+                   });
+
+        addMethod (@selector (webView:runOpenPanelForFileButtonWithResultListener:allowMultipleFiles:),
+                   [] (id, SEL, WebView*, id<WebOpenPanelResultListener> resultListener, BOOL allowMultipleFiles)
+                   {
+                       struct DeletedFileChooserWrapper : private DeletedAtShutdown
+                       {
+                           DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, id<WebOpenPanelResultListener> rl)
+                               : chooser (std::move (fc)), listener (rl)
+                           {
+                               [listener.get() retain];
+                           }
+
+                           std::unique_ptr<FileChooser> chooser;
+                           ObjCObjectHandle<id<WebOpenPanelResultListener>> listener;
+                       };
+
+                       auto chooser = std::make_unique<FileChooser> (TRANS ("Select the file you want to upload..."),
+                                                                     File::getSpecialLocation (File::userHomeDirectory),
+                                                                     "*");
+                       auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), resultListener);
+
+                       auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
+                                    | (allowMultipleFiles ? FileBrowserComponent::canSelectMultipleItems : 0);
+
+                       wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
+                       {
+                           for (auto& f : wrapper->chooser->getResults())
+                               [wrapper->listener.get() chooseFilename: juceStringToNS (f.getFullPathName())];
+
+                           delete wrapper;
+                       });
+                   });
 
         registerClass();
     }
@@ -189,31 +242,6 @@ private:
         return {};
     }
 
-    static void decidePolicyForNavigationAction (id self, SEL, WebView*, NSDictionary* actionInformation,
-                                                 NSURLRequest*, WebFrame*, id<WebPolicyDecisionListener> listener)
-    {
-        if (getOwner (self)->pageAboutToLoad (getOriginalURL (actionInformation)))
-            [listener use];
-        else
-            [listener ignore];
-    }
-
-    static void decidePolicyForNewWindowAction (id self, SEL, WebView*, NSDictionary* actionInformation,
-                                                NSURLRequest*, NSString*, id<WebPolicyDecisionListener> listener)
-    {
-        getOwner (self)->newWindowAttemptingToLoad (getOriginalURL (actionInformation));
-        [listener ignore];
-    }
-
-    static void didFinishLoadForFrame (id self, SEL, WebView* sender, WebFrame* frame)
-    {
-        if ([frame isEqual: [sender mainFrame]])
-        {
-            NSURL* url = [[[frame dataSource] request] URL];
-            getOwner (self)->pageFinishedLoading (nsStringToJuce ([url absoluteString]));
-        }
-    }
-
     static void didFailLoadWithError (id self, SEL, WebView* sender, NSError* error, WebFrame* frame)
     {
         if ([frame isEqual: [sender mainFrame]] && error != nullptr && [error code] != NSURLErrorCancelled)
@@ -226,63 +254,123 @@ private:
                 getOwner (self)->goToURL ("data:text/plain;charset=UTF-8," + errorString);
         }
     }
-
-    static void willCloseFrame (id self, SEL, WebView*, WebFrame*)
-    {
-        getOwner (self)->windowCloseRequest();
-    }
-
-    static void runOpenPanel (id, SEL, WebView*, id<WebOpenPanelResultListener> resultListener, BOOL allowMultipleFiles)
-    {
-        struct DeletedFileChooserWrapper   : private DeletedAtShutdown
-        {
-            DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, id<WebOpenPanelResultListener> rl)
-                : chooser (std::move (fc)), listener (rl)
-            {
-                [listener.get() retain];
-            }
-
-            std::unique_ptr<FileChooser> chooser;
-            ObjCObjectHandle<id<WebOpenPanelResultListener>> listener;
-        };
-
-        auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
-                                                      File::getSpecialLocation (File::userHomeDirectory), "*");
-        auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), resultListener);
-
-        auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
-                    | (allowMultipleFiles ? FileBrowserComponent::canSelectMultipleItems : 0);
-
-        wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
-        {
-            for (auto& f : wrapper->chooser->getResults())
-                [wrapper->listener.get() chooseFilename: juceStringToNS (f.getFullPathName())];
-
-            delete wrapper;
-        });
-    }
 };
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
-struct WebViewDelegateClass  : public ObjCClass<NSObject>
+struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NSObject>
 {
-    WebViewDelegateClass()  : ObjCClass<NSObject> ("JUCEWebViewDelegate_")
+    WebViewDelegateClass()  : ObjCClass ("JUCEWebViewDelegate_")
     {
         addIvar<WebBrowserComponent*> ("owner");
 
-        addMethod (@selector (webView:decidePolicyForNavigationAction:decisionHandler:),  decidePolicyForNavigationAction, "v@:@@@");
-        addMethod (@selector (webView:didFinishNavigation:),                              didFinishNavigation,             "v@:@@");
-        addMethod (@selector (webView:didFailNavigation:withError:),                      didFailNavigation,               "v@:@@@");
-        addMethod (@selector (webView:didFailProvisionalNavigation:withError:),           didFailProvisionalNavigation,    "v@:@@@");
-        addMethod (@selector (webViewDidClose:),                                          webViewDidClose,                 "v@:@");
-        addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:
-                              windowFeatures:),                                           createWebView,                   "@@:@@@@");
+        addMethod (@selector (webView:decidePolicyForNavigationAction:decisionHandler:),
+                   [] (id self, SEL, WKWebView*, WKNavigationAction* navigationAction, void (^decisionHandler) (WKNavigationActionPolicy))
+                   {
+                       if (getOwner (self)->pageAboutToLoad (nsStringToJuce ([[[navigationAction request] URL] absoluteString])))
+                           decisionHandler (WKNavigationActionPolicyAllow);
+                       else
+                           decisionHandler (WKNavigationActionPolicyCancel);
+                   });
 
-       #if WKWEBVIEW_OPENPANEL_SUPPORTED
+        addMethod (@selector (webView:didFinishNavigation:),
+                   [] (id self, SEL, WKWebView* webview, WKNavigation*)
+                   {
+                       getOwner (self)->pageFinishedLoading (nsStringToJuce ([[webview URL] absoluteString]));
+                   });
+
+        addMethod (@selector (webView:didFailNavigation:withError:),
+                   [] (id self, SEL, WKWebView*, WKNavigation*, NSError* error)
+                   {
+                       displayError (getOwner (self), error);
+                   });
+
+        addMethod (@selector (webView:didFailProvisionalNavigation:withError:),
+                   [] (id self, SEL, WKWebView*, WKNavigation*, NSError* error)
+                   {
+                       displayError (getOwner (self), error);
+                   });
+
+        addMethod (@selector (webViewDidClose:),
+                   [] (id self, SEL, WKWebView*)
+                   {
+                       getOwner (self)->windowCloseRequest();
+                   });
+
+        addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:),
+                   [] (id self, SEL, WKWebView*, WKWebViewConfiguration*, WKNavigationAction* navigationAction, WKWindowFeatures*)
+                   {
+                       getOwner (self)->newWindowAttemptingToLoad (nsStringToJuce ([[[navigationAction request] URL] absoluteString]));
+                       return nil;
+                   });
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         if (@available (macOS 10.12, *))
-            addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:), runOpenPanel, "v@:@@@@");
-       #endif
+        {
+            addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:),
+                       [] (id, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*, void (^completionHandler)(NSArray<NSURL*>*))
+                       {
+                           using CompletionHandlerType = decltype (completionHandler);
+
+                           class DeletedFileChooserWrapper   : private DeletedAtShutdown
+                           {
+                           public:
+                               DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, CompletionHandlerType h)
+                                   : chooser (std::move (fc)), handler (h)
+                               {
+                                   [handler.get() retain];
+                               }
+
+                               ~DeletedFileChooserWrapper()
+                               {
+                                   callHandler (nullptr);
+                               }
+
+                               void callHandler (NSArray<NSURL*>* urls)
+                               {
+                                   if (handlerCalled)
+                                       return;
+
+                                   handler.get() (urls);
+                                   handlerCalled = true;
+                               }
+
+                               std::unique_ptr<FileChooser> chooser;
+
+                           private:
+                               ObjCObjectHandle<CompletionHandlerType> handler;
+                               bool handlerCalled = false;
+                           };
+
+                           auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
+                                                                         File::getSpecialLocation (File::userHomeDirectory), "*");
+                           auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), completionHandler);
+
+                           auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
+                                        | ([parameters allowsMultipleSelection] ? FileBrowserComponent::canSelectMultipleItems : 0);
+
+                          #if JUCE_MAC
+                           if (@available (macOS 10.14, *))
+                           {
+                               if ([parameters allowsDirectories])
+                                   flags |= FileBrowserComponent::canSelectDirectories;
+                           }
+                          #endif
+
+                           wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
+                           {
+                               auto results = wrapper->chooser->getResults();
+                               auto urls = [NSMutableArray arrayWithCapacity: (NSUInteger) results.size()];
+
+                               for (auto& f : results)
+                                   [urls addObject: [NSURL fileURLWithPath: juceStringToNS (f.getFullPathName())]];
+
+                               wrapper->callHandler (urls);
+                               delete wrapper;
+                           });
+                       });
+        }
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         registerClass();
     }
@@ -291,20 +379,6 @@ struct WebViewDelegateClass  : public ObjCClass<NSObject>
     static WebBrowserComponent* getOwner (id self)               { return getIvar<WebBrowserComponent*> (self, "owner"); }
 
 private:
-    static void decidePolicyForNavigationAction (id self, SEL, WKWebView*, WKNavigationAction* navigationAction,
-                                                 void (^decisionHandler)(WKNavigationActionPolicy))
-    {
-        if (getOwner (self)->pageAboutToLoad (nsStringToJuce ([[[navigationAction request] URL] absoluteString])))
-            decisionHandler (WKNavigationActionPolicyAllow);
-        else
-            decisionHandler (WKNavigationActionPolicyCancel);
-    }
-
-    static void didFinishNavigation (id self, SEL, WKWebView* webview, WKNavigation*)
-    {
-        getOwner (self)->pageFinishedLoading (nsStringToJuce ([[webview URL] absoluteString]));
-    }
-
     static void displayError (WebBrowserComponent* owner, NSError* error)
     {
         if ([error code] != NSURLErrorCancelled)
@@ -317,95 +391,6 @@ private:
                 owner->goToURL ("data:text/plain;charset=UTF-8," + errorString);
         }
     }
-
-    static void didFailNavigation (id self, SEL, WKWebView*, WKNavigation*, NSError* error)
-    {
-        displayError (getOwner (self), error);
-    }
-
-    static void didFailProvisionalNavigation (id self, SEL, WKWebView*, WKNavigation*, NSError* error)
-    {
-        displayError (getOwner (self), error);
-    }
-
-    static void webViewDidClose (id self, SEL, WKWebView*)
-    {
-        getOwner (self)->windowCloseRequest();
-    }
-
-    static WKWebView* createWebView (id self, SEL, WKWebView*, WKWebViewConfiguration*,
-                                     WKNavigationAction* navigationAction, WKWindowFeatures*)
-    {
-        getOwner (self)->newWindowAttemptingToLoad (nsStringToJuce ([[[navigationAction request] URL] absoluteString]));
-        return nil;
-    }
-
-   #if WKWEBVIEW_OPENPANEL_SUPPORTED
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
-    static void runOpenPanel (id, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*,
-                              void (^completionHandler)(NSArray<NSURL*>*))
-    {
-        using CompletionHandlerType = decltype (completionHandler);
-
-        class DeletedFileChooserWrapper   : private DeletedAtShutdown
-        {
-        public:
-            DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, CompletionHandlerType h)
-                : chooser (std::move (fc)), handler (h)
-            {
-                [handler.get() retain];
-            }
-
-            ~DeletedFileChooserWrapper()
-            {
-                callHandler (nullptr);
-            }
-
-            void callHandler (NSArray<NSURL*>* urls)
-            {
-                if (handlerCalled)
-                    return;
-
-                handler.get() (urls);
-                handlerCalled = true;
-            }
-
-            std::unique_ptr<FileChooser> chooser;
-
-        private:
-            ObjCObjectHandle<CompletionHandlerType> handler;
-            bool handlerCalled = false;
-        };
-
-        auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
-                                                      File::getSpecialLocation (File::userHomeDirectory), "*");
-        auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), completionHandler);
-
-        auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
-                    | ([parameters allowsMultipleSelection] ? FileBrowserComponent::canSelectMultipleItems : 0);
-
-       #if (defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14)
-        if (@available (macOS 10.14, *))
-        {
-            if ([parameters allowsDirectories])
-                flags |= FileBrowserComponent::canSelectDirectories;
-        }
-       #endif
-
-        wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
-        {
-            auto results = wrapper->chooser->getResults();
-            auto urls = [NSMutableArray arrayWithCapacity: (NSUInteger) results.size()];
-
-            for (auto& f : results)
-                [urls addObject: [NSURL fileURLWithPath: juceStringToNS (f.getFullPathName())]];
-
-            wrapper->callHandler (urls);
-            delete wrapper;
-        });
-    }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-   #endif
 };
 
 //==============================================================================
@@ -509,25 +494,29 @@ private:
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
-class WKWebViewImpl  : public WebViewBase
+class API_AVAILABLE (macos (10.11)) WKWebViewImpl : public WebViewBase
 {
 public:
     WKWebViewImpl (WebBrowserComponent* owner)
     {
-        #if JUCE_MAC
-         static WebViewKeyEquivalentResponder<WKWebView> webviewClass;
+       #if JUCE_MAC
+        static WebViewKeyEquivalentResponder<WKWebView> webviewClass;
 
-         webView.reset ([webviewClass.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)]);
-        #else
-         webView.reset ([[WKWebView alloc] initWithFrame: CGRectMake (0, 0, 100.0f, 100.0f)]);
-        #endif
+        webView.reset ([webviewClass.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)]);
+       #else
+        webView.reset ([[WKWebView alloc] initWithFrame: CGRectMake (0, 0, 100.0f, 100.0f)]);
+       #endif
 
-         static WebViewDelegateClass cls;
-         webViewDelegate.reset ([cls.createInstance() init]);
-         WebViewDelegateClass::setOwner (webViewDelegate.get(), owner);
+        static WebViewDelegateClass cls;
+        webViewDelegate.reset ([cls.createInstance() init]);
+        WebViewDelegateClass::setOwner (webViewDelegate.get(), owner);
 
-         [webView.get() setNavigationDelegate: webViewDelegate.get()];
-         [webView.get() setUIDelegate:         webViewDelegate.get()];
+        [webView.get() setNavigationDelegate: webViewDelegate.get()];
+        [webView.get() setUIDelegate:         webViewDelegate.get()];
+
+       #if JUCE_DEBUG
+        [[[webView.get() configuration] preferences] setValue: @(true) forKey: @"developerExtrasEnabled"];
+       #endif
     }
 
     ~WKWebViewImpl() override
@@ -589,7 +578,7 @@ class WebBrowserComponent::Pimpl
 public:
     Pimpl (WebBrowserComponent* owner)
     {
-        if (@available (macOS 10.10, *))
+        if (@available (macOS 10.11, *))
             webView = std::make_unique<WKWebViewImpl> (owner);
        #if JUCE_MAC
         else
@@ -599,7 +588,7 @@ public:
         setView (webView->getWebView());
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         webView = nullptr;
         setView (nil);

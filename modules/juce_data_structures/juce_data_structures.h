@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,12 +35,12 @@
 
   ID:                 juce_data_structures
   vendor:             juce
-  version:            6.1.2
+  version:            7.0.2
   name:               JUCE data model helper classes
   description:        Classes for undo/redo management, and smart data structures.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_events
 
@@ -61,6 +61,6 @@
 #include "values/juce_ValueTree.h"
 #include "values/juce_ValueTreeSynchroniser.h"
 #include "values/juce_CachedValue.h"
-#include "values/juce_ValueWithDefault.h"
+#include "values/juce_ValueTreePropertyWithDefault.h"
 #include "app_properties/juce_PropertiesFile.h"
 #include "app_properties/juce_ApplicationProperties.h"

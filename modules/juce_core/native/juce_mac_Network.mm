@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -339,13 +339,13 @@ private:
         {
             addIvar<URLConnectionStatePreYosemite*> ("state");
 
-            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,            "v@:@@");
-            addMethod (@selector (connection:didFailWithError:),   didFailWithError,              "v@:@@");
-            addMethod (@selector (connection:didReceiveData:),     didReceiveData,                "v@:@@");
+            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse);
+            addMethod (@selector (connection:didFailWithError:),   didFailWithError);
+            addMethod (@selector (connection:didReceiveData:),     didReceiveData);
             addMethod (@selector (connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:),
-                                                                   connectionDidSendBodyData,     "v@:@iii");
-            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading,    "v@:@");
-            addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest, "@@:@@@");
+                                                                   connectionDidSendBodyData);
+            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading);
+            addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest);
 
             registerClass();
         }
@@ -393,7 +393,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 //==============================================================================
-class URLConnectionState   : public URLConnectionStateBase
+class API_AVAILABLE (macos (10.9)) URLConnectionState : public URLConnectionStateBase
 {
 public:
     URLConnectionState (NSURLRequest* req, const int maxRedirects)
@@ -608,14 +608,14 @@ private:
             addIvar<URLConnectionState*> ("state");
 
             addMethod (@selector (URLSession:dataTask:didReceiveResponse:completionHandler:),
-                                                                            didReceiveResponse,         "v@:@@@@");
-            addMethod (@selector (URLSession:didBecomeInvalidWithError:),   didBecomeInvalidWithError,  "v@:@@");
-            addMethod (@selector (URLSession:dataTask:didReceiveData:),     didReceiveData,             "v@:@@@");
+                                                                            didReceiveResponse);
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),   didBecomeInvalidWithError);
+            addMethod (@selector (URLSession:dataTask:didReceiveData:),     didReceiveData);
             addMethod (@selector (URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:),
-                                                                            didSendBodyData,            "v@:@@qqq");
+                                                                            didSendBodyData);
             addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
-                                                                            willPerformHTTPRedirection, "v@:@@@@@");
-            addMethod (@selector (URLSession:task:didCompleteWithError:),   didCompleteWithError,       "v@:@@@");
+                                                                            willPerformHTTPRedirection);
+            addMethod (@selector (URLSession:task:didCompleteWithError:),   didCompleteWithError);
 
             registerClass();
         }
@@ -872,11 +872,10 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
         {
             addIvar<BackgroundDownloadTask*> ("state");
 
-            addMethod (@selector (URLSession:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:),
-                                                                                        didWriteData,               "v@:@@qqq");
-            addMethod (@selector (URLSession:downloadTask:didFinishDownloadingToURL:),  didFinishDownloadingToURL,  "v@:@@@");
-            addMethod (@selector (URLSession:task:didCompleteWithError:),               didCompleteWithError,       "v@:@@@");
-            addMethod (@selector (URLSession:didBecomeInvalidWithError:),               didBecomeInvalidWithError,  "v@:@@@");
+            addMethod (@selector (URLSession:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:), didWriteData);
+            addMethod (@selector (URLSession:downloadTask:didFinishDownloadingToURL:),  didFinishDownloadingToURL);
+            addMethod (@selector (URLSession:task:didCompleteWithError:),               didCompleteWithError);
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),               didBecomeInvalidWithError);
 
             registerClass();
         }
@@ -970,6 +969,7 @@ public:
 
         if (! connection->start (owner, webInputListener))
         {
+            const auto errorCode = connection->getErrorCode();
             connection.reset();
 
             if (@available (macOS 10.10, *))
@@ -977,7 +977,7 @@ public:
 
             // Workaround for macOS versions below 10.10 where HTTPS POST requests with keep-alive
             // fail with the NSURLErrorNetworkConnectionLost error code.
-            if (numRetries == 0 && connection->getErrorCode() == NSURLErrorNetworkConnectionLost)
+            if (numRetries == 0 && errorCode == NSURLErrorNetworkConnectionLost)
                 return connect (webInputListener, ++numRetries);
 
             return false;

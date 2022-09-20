@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -61,7 +61,7 @@ void* getUser32Function (const char*);
 
 #if JUCE_DEBUG
  int numActiveScopedDpiAwarenessDisablers = 0;
- bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
+ static bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
  extern HWND juce_messageWindowHandle;
 #endif
 
@@ -472,17 +472,18 @@ static bool isPerMonitorDPIAwareWindow (HWND nativeWindow)
    #endif
 }
 
-static bool isPerMonitorDPIAwareThread()
+static bool isPerMonitorDPIAwareThread (GetThreadDPIAwarenessContextFunc getThreadDPIAwarenessContextIn = getThreadDPIAwarenessContext,
+                                        GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromDPIAwarenessContextIn = getAwarenessFromDPIAwarenessContext)
 {
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
     return false;
    #else
     setDPIAwareness();
 
-    if (getThreadDPIAwarenessContext != nullptr
-        && getAwarenessFromDPIAwarenessContext != nullptr)
+    if (getThreadDPIAwarenessContextIn != nullptr
+        && getAwarenessFromDPIAwarenessContextIn != nullptr)
     {
-        return (getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext())
+        return (getAwarenessFromDPIAwarenessContextIn (getThreadDPIAwarenessContextIn())
                   == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
     }
 
@@ -576,12 +577,17 @@ ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter() = default;
 
 ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
 {
-    if (! isPerMonitorDPIAwareThread())
+    static auto localGetThreadDpiAwarenessContext            = (GetThreadDPIAwarenessContextFunc)        getUser32Function ("GetThreadDpiAwarenessContext");
+    static auto localGetAwarenessFromDpiAwarenessContextFunc = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+
+    if (! isPerMonitorDPIAwareThread (localGetThreadDpiAwarenessContext, localGetAwarenessFromDpiAwarenessContextFunc))
         return;
 
-    if (setThreadDPIAwarenessContext != nullptr)
+    static auto localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+
+    if (localSetThreadDPIAwarenessContext != nullptr)
     {
-        previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+        previousContext = localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
 
        #if JUCE_DEBUG
         ++numActiveScopedDpiAwarenessDisablers;
@@ -593,7 +599,10 @@ ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
 {
     if (previousContext != nullptr)
     {
-        setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
+        static auto localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+
+        if (localSetThreadDPIAwarenessContext != nullptr)
+            localSetThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
 
        #if JUCE_DEBUG
         --numActiveScopedDpiAwarenessDisablers;
@@ -649,6 +658,7 @@ static Point<int> convertLogicalScreenPointToPhysical (Point<int> p, HWND h) noe
     return p;
 }
 
+JUCE_API double getScaleFactorForWindow (HWND h);
 JUCE_API double getScaleFactorForWindow (HWND h)
 {
     // NB. Using a local function here because we need to call this method from the plug-in wrappers
@@ -758,6 +768,11 @@ public:
        #endif
     }
 
+    ~NativeDarkModeChangeDetectorImpl()
+    {
+        UnhookWindowsHookEx (hook);
+    }
+
     bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
 
 private:
@@ -825,6 +840,7 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return upright;
 }
 
+int64 getMouseEventTime();
 int64 getMouseEventTime()
 {
     static int64 eventTimeOffset = 0;
@@ -990,7 +1006,9 @@ public:
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        bitmap.data = imageData + x * pixelStride + y * lineStride;
+        const auto offset = (size_t) (x * pixelStride + y * lineStride);
+        bitmap.data = imageData + offset;
+        bitmap.size = (size_t) (lineStride * height) - offset;
         bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
@@ -1095,7 +1113,7 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 //==============================================================================
 namespace IconConverters
 {
-    Image createImageFromHICON (HICON icon)
+    static Image createImageFromHICON (HICON icon)
     {
         if (icon == nullptr)
             return {};
@@ -1133,7 +1151,6 @@ namespace IconConverters
 
         if (auto* dc = ::CreateCompatibleDC (deviceContext.dc))
         {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
             BITMAPV5HEADER header = {};
             header.bV5Size = sizeof (BITMAPV5HEADER);
             header.bV5Width = bm.bmWidth;
@@ -1145,15 +1162,8 @@ namespace IconConverters
             header.bV5GreenMask = 0x0000FF00;
             header.bV5BlueMask = 0x000000FF;
             header.bV5AlphaMask = 0xFF000000;
-
-           #if JUCE_MINGW
-            header.bV5CSType = 'Win ';
-           #else
-            header.bV5CSType = LCS_WINDOWS_COLOR_SPACE;
-           #endif
-
+            header.bV5CSType = 0x57696E20; // 'Win '
             header.bV5Intent = LCS_GM_IMAGES;
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             uint32* bitmapImageData = nullptr;
 
@@ -1211,6 +1221,7 @@ namespace IconConverters
         return {};
     }
 
+    HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY);
     HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)
     {
         auto nativeBitmap = new WindowsBitmapImage (Image::ARGB, image.getWidth(), image.getHeight(), true);
@@ -1234,7 +1245,7 @@ namespace IconConverters
         DeleteObject (mask);
         return hi;
     }
-}
+} // namespace IconConverters
 
 //==============================================================================
 JUCE_IUNKNOWNCLASS (ITipInvocation, "37c994e7-432b-4834-a2f7-dce1f13b834b")
@@ -1244,92 +1255,14 @@ JUCE_IUNKNOWNCLASS (ITipInvocation, "37c994e7-432b-4834-a2f7-dce1f13b834b")
     JUCE_COMCALL Toggle (HWND) = 0;
 };
 
-struct OnScreenKeyboard   : public DeletedAtShutdown,
-                            private Timer
+} // namespace juce
+
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::ITipInvocation, 0x37c994e7, 0x432b, 0x4834, 0xa2, 0xf7, 0xdc, 0xe1, 0xf1, 0x3b, 0x83, 0x4b)
+#endif
+
+namespace juce
 {
-    void activate()
-    {
-        shouldBeActive = true;
-        startTimer (10);
-    }
-
-    void deactivate()
-    {
-        shouldBeActive = false;
-        startTimer (10);
-    }
-
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED (OnScreenKeyboard, false)
-
-private:
-    OnScreenKeyboard()
-    {
-        tipInvocation.CoCreateInstance (ITipInvocation::getCLSID(), CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER);
-    }
-
-    ~OnScreenKeyboard() override
-    {
-        clearSingletonInstance();
-    }
-
-    void timerCallback() override
-    {
-        stopTimer();
-
-        if (reentrant || tipInvocation == nullptr)
-            return;
-
-        const ScopedValueSetter<bool> setter (reentrant, true, false);
-
-        auto isActive = isKeyboardVisible();
-
-        if (isActive != shouldBeActive)
-        {
-            if (! isActive)
-            {
-                tipInvocation->Toggle (GetDesktopWindow());
-            }
-            else
-            {
-                if (auto hwnd = FindWindow (L"IPTip_Main_Window", nullptr))
-                    PostMessage (hwnd, WM_SYSCOMMAND, (int) SC_CLOSE, 0);
-            }
-        }
-    }
-
-    bool isVisible()
-    {
-        if (auto hwnd = FindWindowEx (nullptr, nullptr, L"ApplicationFrameWindow", nullptr))
-            return FindWindowEx (hwnd, nullptr, L"Windows.UI.Core.CoreWindow", L"Microsoft Text Input Application") != nullptr;
-
-        return false;
-    }
-
-    bool isVisibleLegacy()
-    {
-        if (auto hwnd = FindWindow (L"IPTip_Main_Window", nullptr))
-        {
-            auto style = GetWindowLong (hwnd, GWL_STYLE);
-            return (style & WS_DISABLED) == 0 && (style & WS_VISIBLE) != 0;
-        }
-
-        return false;
-    }
-
-    bool isKeyboardVisible()
-    {
-        if (isVisible())
-            return true;
-
-        // isVisible() may fail on Win10 versions < 1709 so try the old method too
-        return isVisibleLegacy();
-    }
-
-    bool shouldBeActive = false, reentrant = false;
-    ComSmartPtr<ITipInvocation> tipInvocation;
-};
-
-JUCE_IMPLEMENT_SINGLETON (OnScreenKeyboard)
 
 //==============================================================================
 struct HSTRING_PRIVATE;
@@ -1358,7 +1291,15 @@ JUCE_COMCLASS (IUIViewSettings, "c63657f6-8850-470d-88f8-455e16ea2c26")  : publi
     JUCE_COMCALL GetUserInteractionMode (UserInteractionMode*) = 0;
 };
 
+} // namespace juce
 
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::IUIViewSettingsInterop, 0x3694dbf9, 0x8f68, 0x44be, 0x8f, 0xf5, 0x19, 0x5c, 0x98, 0xed, 0xe8, 0xa6)
+__CRT_UUID_DECL (juce::IUIViewSettings,        0xc63657f6, 0x8850, 0x470d, 0x88, 0xf8, 0x45, 0x5e, 0x16, 0xea, 0x2c, 0x26)
+#endif
+
+namespace juce
+{
 struct UWPUIViewSettings
 {
     UWPUIViewSettings()
@@ -1382,7 +1323,7 @@ struct UWPUIViewSettings
                 return;
 
             LPCWSTR uwpClassName = L"Windows.UI.ViewManagement.UIViewSettings";
-            HSTRING uwpClassId;
+            HSTRING uwpClassId = nullptr;
 
             if (createHString (uwpClassName, (::UINT32) wcslen (uwpClassName), &uwpClassId) != S_OK
                  || uwpClassId == nullptr)
@@ -1402,35 +1343,11 @@ struct UWPUIViewSettings
         }
     }
 
-    bool isTabletModeActivatedForWindow (::HWND hWnd) const
-    {
-        if (viewSettingsInterop == nullptr)
-            return false;
-
-        ComSmartPtr<IUIViewSettings> viewSettings;
-
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-
-        if (viewSettingsInterop->GetForWindow (hWnd, __uuidof (IUIViewSettings),
-                                               (void**) viewSettings.resetAndGetPointerAddress()) == S_OK
-             && viewSettings != nullptr)
-        {
-            IUIViewSettings::UserInteractionMode mode;
-
-            if (viewSettings->GetUserInteractionMode (&mode) == S_OK)
-                return mode == IUIViewSettings::Touch;
-        }
-
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-        return false;
-    }
-
 private:
     //==============================================================================
     struct ComBaseModule
     {
-        ComBaseModule() {}
+        ComBaseModule() = default;
         ComBaseModule (LPCWSTR libraryName) : h (::LoadLibrary (libraryName)) {}
         ComBaseModule (ComBaseModule&& o) : h (o.h) { o.h = nullptr; }
         ~ComBaseModule() { release(); }
@@ -1456,7 +1373,251 @@ private:
 };
 
 //==============================================================================
+static HMONITOR getMonitorFromOutput (ComSmartPtr<IDXGIOutput> output)
+{
+    DXGI_OUTPUT_DESC desc = {};
+    return (FAILED (output->GetDesc (&desc)) || ! desc.AttachedToDesktop)
+        ? nullptr
+        : desc.Monitor;
+}
+
+struct VBlankListener
+{
+    virtual void onVBlank() = 0;
+};
+
+//==============================================================================
+class VSyncThread : private Thread,
+                    private AsyncUpdater
+{
+public:
+    VSyncThread (ComSmartPtr<IDXGIOutput> out,
+                 HMONITOR mon,
+                 VBlankListener& listener)
+        : Thread ("VSyncThread"),
+          output (out),
+          monitor (mon)
+    {
+        listeners.push_back (listener);
+        startThread (10);
+    }
+
+    ~VSyncThread() override
+    {
+        stopThread (-1);
+        cancelPendingUpdate();
+    }
+
+    void updateMonitor()
+    {
+        monitor = getMonitorFromOutput (output);
+    }
+
+    HMONITOR getMonitor() const noexcept { return monitor; }
+
+    void addListener (VBlankListener& listener)
+    {
+        listeners.push_back (listener);
+    }
+
+    bool removeListener (const VBlankListener& listener)
+    {
+        auto it = std::find_if (listeners.cbegin(),
+                                listeners.cend(),
+                                [&listener] (const auto& l) { return &(l.get()) == &listener; });
+
+        if (it != listeners.cend())
+        {
+            listeners.erase (it);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool hasNoListeners() const noexcept
+    {
+        return listeners.empty();
+    }
+
+    bool hasListener (const VBlankListener& listener) const noexcept
+    {
+        return std::any_of (listeners.cbegin(),
+                            listeners.cend(),
+                            [&listener] (const auto& l) { return &(l.get()) == &listener; });
+    }
+
+private:
+    //==============================================================================
+    void run() override
+    {
+        while (! threadShouldExit())
+        {
+            if (output->WaitForVBlank() == S_OK)
+                triggerAsyncUpdate();
+            else
+                Thread::sleep (1);
+        }
+    }
+
+    void handleAsyncUpdate() override
+    {
+        for (auto& listener : listeners)
+            listener.get().onVBlank();
+    }
+
+    //==============================================================================
+    ComSmartPtr<IDXGIOutput> output;
+    HMONITOR monitor = nullptr;
+    std::vector<std::reference_wrapper<VBlankListener>> listeners;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSyncThread)
+    JUCE_DECLARE_NON_MOVEABLE (VSyncThread)
+};
+
+//==============================================================================
+class VBlankDispatcher : public DeletedAtShutdown
+{
+public:
+    void updateDisplay (VBlankListener& listener, HMONITOR monitor)
+    {
+        if (monitor == nullptr)
+        {
+            removeListener (listener);
+            return;
+        }
+
+        auto threadWithListener = threads.end();
+        auto threadWithMonitor  = threads.end();
+
+        for (auto it = threads.begin(); it != threads.end(); ++it)
+        {
+            if ((*it)->hasListener (listener))
+                threadWithListener = it;
+
+            if ((*it)->getMonitor() == monitor)
+                threadWithMonitor = it;
+
+            if (threadWithListener != threads.end()
+                && threadWithMonitor != threads.end())
+            {
+                if (threadWithListener == threadWithMonitor)
+                    return;
+
+                (*threadWithMonitor)->addListener (listener);
+
+                // This may invalidate iterators, so be careful!
+                removeListener (threadWithListener, listener);
+                return;
+            }
+        }
+
+        if (threadWithMonitor != threads.end())
+        {
+            (*threadWithMonitor)->addListener (listener);
+            return;
+        }
+
+        if (threadWithListener != threads.end())
+            removeListener (threadWithListener, listener);
+
+        for (auto adapter : adapters)
+        {
+            UINT i = 0;
+            ComSmartPtr<IDXGIOutput> output;
+
+            while (adapter->EnumOutputs (i, output.resetAndGetPointerAddress()) != DXGI_ERROR_NOT_FOUND)
+            {
+                if (getMonitorFromOutput (output) == monitor)
+                {
+                    threads.emplace_back (std::make_unique<VSyncThread> (output, monitor, listener));
+                    return;
+                }
+
+                ++i;
+            }
+        }
+    }
+
+    void removeListener (const VBlankListener& listener)
+    {
+        for (auto it = threads.begin(); it != threads.end(); ++it)
+            if (removeListener (it, listener))
+                return;
+    }
+
+    void reconfigureDisplays()
+    {
+        adapters.clear();
+
+        ComSmartPtr<IDXGIFactory> factory;
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        CreateDXGIFactory (__uuidof (IDXGIFactory), (void**)factory.resetAndGetPointerAddress());
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        UINT i = 0;
+        ComSmartPtr<IDXGIAdapter> adapter;
+
+        while (factory->EnumAdapters (i, adapter.resetAndGetPointerAddress()) != DXGI_ERROR_NOT_FOUND)
+        {
+            adapters.push_back (adapter);
+            ++i;
+        }
+
+        for (auto& thread : threads)
+            thread->updateMonitor();
+
+        threads.erase (std::remove_if (threads.begin(),
+                                       threads.end(),
+                                       [] (const auto& thread) { return thread->getMonitor() == nullptr; }),
+                       threads.end());
+    }
+
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED (VBlankDispatcher, false)
+
+private:
+    //==============================================================================
+    using Threads = std::vector<std::unique_ptr<VSyncThread>>;
+
+    VBlankDispatcher()
+    {
+        reconfigureDisplays();
+    }
+
+    ~VBlankDispatcher() override
+    {
+        threads.clear();
+        clearSingletonInstance();
+    }
+
+    // This may delete the corresponding thread and invalidate iterators,
+    // so be careful!
+    bool removeListener (Threads::iterator it, const VBlankListener& listener)
+    {
+        if ((*it)->removeListener (listener))
+        {
+            if ((*it)->hasNoListeners())
+                threads.erase (it);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    //==============================================================================
+    std::vector<ComSmartPtr<IDXGIAdapter>> adapters;
+    Threads threads;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VBlankDispatcher)
+    JUCE_DECLARE_NON_MOVEABLE (VBlankDispatcher)
+};
+
+JUCE_IMPLEMENT_SINGLETON (VBlankDispatcher)
+
+//==============================================================================
 class HWNDComponentPeer  : public ComponentPeer,
+                           private VBlankListener,
                            private Timer
                           #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
                            , public ModifierKeyReceiver
@@ -1481,8 +1642,6 @@ public:
         setTitle (component.getName());
         updateShadower();
 
-        OnScreenKeyboard::getInstance();
-
         getNativeRealtimeModifiers = []
         {
             HWNDComponentPeer::updateKeyModifiers();
@@ -1496,10 +1655,15 @@ public:
 
             return ModifierKeys::currentModifiers;
         };
+
+        if (updateCurrentMonitor())
+            VBlankDispatcher::getInstance()->updateDisplay (*this, currentMonitor);
     }
 
     ~HWNDComponentPeer() override
     {
+        VBlankDispatcher::getInstance()->removeListener (*this);
+
         // do this first to avoid messages arriving for this window before it's destroyed
         JuceWindowIdentifier::setAsJUCEWindow (hwnd, false);
 
@@ -1574,6 +1738,13 @@ public:
 
     void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen) override
     {
+        // If we try to set new bounds while handling an existing position change,
+        // Windows may get confused about our current scale and size.
+        // This can happen when moving a window between displays, because the mouse-move
+        // generator in handlePositionChanged can cause the window to move again.
+        if (inHandlePositionChanged)
+            return;
+
         const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
 
         fullScreen = isNowFullScreen;
@@ -1599,7 +1770,7 @@ public:
         if (! hasMoved)    flags |= SWP_NOMOVE;
         if (! hasResized)  flags |= SWP_NOSIZE;
 
-        setWindowPos (hwnd, newBounds, flags, numInDpiChange == 0);
+        setWindowPos (hwnd, newBounds, flags, ! inDpiChange);
 
         if (hasResized && isValidPeer (this))
         {
@@ -1748,6 +1919,11 @@ public:
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
+    OptionalBorderSize getFrameSizeIfPresent() const override
+    {
+        return ComponentPeer::OptionalBorderSize { windowBorder };
+    }
+
     BorderSize<int> getFrameSize() const override
     {
         return windowBorder;
@@ -1829,36 +2005,61 @@ public:
     void textInputRequired (Point<int>, TextInputTarget&) override
     {
         if (! hasCreatedCaret)
+            hasCreatedCaret = CreateCaret (hwnd, (HBITMAP) 1, 0, 0);
+
+        if (hasCreatedCaret)
         {
-            hasCreatedCaret = true;
-            CreateCaret (hwnd, (HBITMAP) 1, 0, 0);
+            SetCaretPos (0, 0);
+            ShowCaret (hwnd);
         }
 
-        ShowCaret (hwnd);
-        SetCaretPos (0, 0);
+        ImmAssociateContext (hwnd, nullptr);
 
-        if (uwpViewSettings.isTabletModeActivatedForWindow (hwnd))
-            OnScreenKeyboard::getInstance()->activate();
+        // MSVC complains about the nullptr argument, but the docs for this
+        // function say that the second argument is ignored when the third
+        // argument is IACE_DEFAULT.
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387)
+        ImmAssociateContextEx (hwnd, nullptr, IACE_DEFAULT);
+        JUCE_END_IGNORE_WARNINGS_MSVC
+    }
+
+    void closeInputMethodContext() override
+    {
+        imeHandler.handleSetContext (hwnd, false);
     }
 
     void dismissPendingTextInput() override
     {
-        imeHandler.handleSetContext (hwnd, false);
+        closeInputMethodContext();
 
-        if (uwpViewSettings.isTabletModeActivatedForWindow (hwnd))
-            OnScreenKeyboard::getInstance()->deactivate();
+        ImmAssociateContext (hwnd, nullptr);
+
+        if (std::exchange (hasCreatedCaret, false))
+            DestroyCaret();
     }
 
     void repaint (const Rectangle<int>& area) override
     {
-        auto r = RECTFromRectangle ((area.toDouble() * getPlatformScaleFactor()).getSmallestIntegerContainer());
-        InvalidateRect (hwnd, &r, FALSE);
+        deferredRepaints.add ((area.toDouble() * getPlatformScaleFactor()).getSmallestIntegerContainer());
+    }
+
+    void dispatchDeferredRepaints()
+    {
+        for (auto deferredRect : deferredRepaints)
+        {
+            auto r = RECTFromRectangle (deferredRect);
+            InvalidateRect (hwnd, &r, FALSE);
+        }
+
+        deferredRepaints.clear();
     }
 
     void performAnyPendingRepaintsNow() override
     {
         if (component.isVisible())
         {
+            dispatchDeferredRepaints();
+
             WeakReference<Component> localRef (&component);
             MSG m;
 
@@ -1866,6 +2067,12 @@ public:
                 if (localRef != nullptr) // (the PeekMessage call can dispatch messages, which may delete this comp)
                     handlePaintMessage();
         }
+    }
+
+    //==============================================================================
+    void onVBlank() override
+    {
+        dispatchDeferredRepaints();
     }
 
     //==============================================================================
@@ -1972,8 +2179,9 @@ public:
     private:
         Point<float> getMousePos (POINTL mousePos) const
         {
-            return peer.getComponent().getLocalPoint (nullptr, convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }),
-                                                                                                    (HWND) peer.getNativeHandle()).toFloat());
+            const auto originalPos = pointFromPOINT ({ mousePos.x, mousePos.y });
+            const auto logicalPos = convertPhysicalScreenPointToLogical (originalPos, peer.hwnd);
+            return ScalingHelpers::screenPosToLocalPos (peer.component, logicalPos.toFloat());
         }
 
         struct DroppedData
@@ -2116,7 +2324,8 @@ private:
    #endif
 
     double scaleFactor = 1.0;
-    int numInDpiChange = 0;
+    bool inDpiChange = 0, inHandlePositionChanged = 0;
+    HMONITOR currentMonitor = nullptr;
 
     bool isAccessibilityActive = false;
 
@@ -2385,6 +2594,13 @@ private:
         }
         else
         {
+            TCHAR messageBuffer[256] = {};
+
+            FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                           nullptr, GetLastError(), MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                           messageBuffer, (DWORD) numElementsInArray (messageBuffer) - 1, nullptr);
+
+            DBG (messageBuffer);
             jassertfalse;
         }
     }
@@ -2443,7 +2659,7 @@ private:
         if (! component.isCurrentlyModal() && (styleFlags & windowHasDropShadow) != 0
             && ((! hasTitleBar()) || SystemStats::getOperatingSystemType() < SystemStats::WinVista))
         {
-            shadower.reset (component.getLookAndFeel().createDropShadowerForComponent (&component));
+            shadower = component.getLookAndFeel().createDropShadowerForComponent (component);
 
             if (shadower != nullptr)
                 shadower->setOwner (&component);
@@ -2789,8 +3005,8 @@ private:
         if (now >= lastMouseTime + minTimeBetweenMouses)
         {
             lastMouseTime = now;
-            doMouseEvent (position, MouseInputSource::invalidPressure,
-                          MouseInputSource::invalidOrientation, modsToSend);
+            doMouseEvent (position, MouseInputSource::defaultPressure,
+                          MouseInputSource::defaultOrientation, modsToSend);
         }
     }
 
@@ -2816,7 +3032,7 @@ private:
 
             isDragging = true;
 
-            doMouseEvent (position, MouseInputSource::invalidPressure);
+            doMouseEvent (position, MouseInputSource::defaultPressure);
         }
     }
 
@@ -2843,7 +3059,7 @@ private:
         // NB: under some circumstances (e.g. double-clicking a native title bar), a mouse-up can
         // arrive without a mouse-down, so in that case we need to avoid sending a message.
         if (wasDragging)
-            doMouseEvent (position, MouseInputSource::invalidPressure);
+            doMouseEvent (position, MouseInputSource::defaultPressure);
     }
 
     void doCaptureChanged()
@@ -2865,7 +3081,7 @@ private:
         isMouseOver = false;
 
         if (! areOtherTouchSourcesActive())
-            doMouseEvent (getCurrentMousePos(), MouseInputSource::invalidPressure);
+            doMouseEvent (getCurrentMousePos(), MouseInputSource::defaultPressure);
     }
 
     ComponentPeer* findPeerUnderMouse (Point<float>& localPos)
@@ -2982,7 +3198,7 @@ private:
     }
 
     bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp,
-                           const float touchPressure = MouseInputSource::invalidPressure,
+                           const float touchPressure = MouseInputSource::defaultPressure,
                            const float orientation = 0.0f)
     {
         auto isCancel = false;
@@ -3059,9 +3275,9 @@ private:
                 return false;
 
             const auto pressure = touchInfo.touchMask & TOUCH_MASK_PRESSURE ? static_cast<float> (touchInfo.pressure)
-                                                                            : MouseInputSource::invalidPressure;
+                                                                            : MouseInputSource::defaultPressure;
             const auto orientation = touchInfo.touchMask & TOUCH_MASK_ORIENTATION ? degreesToRadians (static_cast<float> (touchInfo.orientation))
-                                                                                  : MouseInputSource::invalidOrientation;
+                                                                                  : MouseInputSource::defaultOrientation;
 
             if (! handleTouchInput (emulateTouchEventFromPointer (touchInfo.pointerInfo.ptPixelLocationRaw, wParam),
                                     isDown, isUp, pressure, orientation))
@@ -3074,7 +3290,7 @@ private:
             if (! getPointerPenInfo (GET_POINTERID_WPARAM (wParam), &penInfo))
                 return false;
 
-            const auto pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? (float) penInfo.pressure / 1024.0f : MouseInputSource::invalidPressure;
+            const auto pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? (float) penInfo.pressure / 1024.0f : MouseInputSource::defaultPressure;
 
             if (! handlePenInput (penInfo, globalToLocal (convertPhysicalScreenPointToLogical (pointFromPOINT (getPOINTFromLParam (lParam)), hwnd).toFloat()),
                                   pressure, isDown, isUp))
@@ -3105,9 +3321,9 @@ private:
         ModifierKeys modsToSend (ModifierKeys::currentModifiers);
         PenDetails penDetails;
 
-        penDetails.rotation = (penInfo.penMask & PEN_MASK_ROTATION) ? degreesToRadians (static_cast<float> (penInfo.rotation)) : MouseInputSource::invalidRotation;
-        penDetails.tiltX = (penInfo.penMask & PEN_MASK_TILT_X) ? (float) penInfo.tiltX / 90.0f : MouseInputSource::invalidTiltX;
-        penDetails.tiltY = (penInfo.penMask & PEN_MASK_TILT_Y) ? (float) penInfo.tiltY / 90.0f : MouseInputSource::invalidTiltY;
+        penDetails.rotation = (penInfo.penMask & PEN_MASK_ROTATION) ? degreesToRadians (static_cast<float> (penInfo.rotation)) : MouseInputSource::defaultRotation;
+        penDetails.tiltX = (penInfo.penMask & PEN_MASK_TILT_X) ? (float) penInfo.tiltX / 90.0f : MouseInputSource::defaultTiltX;
+        penDetails.tiltY = (penInfo.penMask & PEN_MASK_TILT_Y) ? (float) penInfo.tiltY / 90.0f : MouseInputSource::defaultTiltY;
 
         auto pInfoFlags = penInfo.pointerInfo.pointerFlags;
 
@@ -3122,7 +3338,7 @@ private:
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
             handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend.withoutMouseButtons(),
-                              pressure, MouseInputSource::invalidOrientation, time, penDetails);
+                              pressure, MouseInputSource::defaultOrientation, time, penDetails);
 
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return false;
@@ -3134,7 +3350,7 @@ private:
         }
 
         handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend, pressure,
-                          MouseInputSource::invalidOrientation, time, penDetails);
+                          MouseInputSource::defaultOrientation, time, penDetails);
 
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
             return false;
@@ -3142,7 +3358,7 @@ private:
         if (isUp)
         {
             handleMouseEvent (MouseInputSource::InputSourceType::pen, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers,
-                              pressure, MouseInputSource::invalidOrientation, time, penDetails);
+                              pressure, MouseInputSource::defaultOrientation, time, penDetails);
 
             if (! isValidPeer (this))
                 return false;
@@ -3393,7 +3609,7 @@ private:
 
     LRESULT handlePositionChanging (WINDOWPOS& wp)
     {
-        if (isConstrainedNativeWindow())
+        if (isConstrainedNativeWindow() && ! isFullScreen())
         {
             if ((wp.flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
                  && (wp.x > -32000 && wp.y > -32000)
@@ -3433,20 +3649,31 @@ private:
         return 0;
     }
 
+    bool updateCurrentMonitor()
+    {
+        auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL);
+        return std::exchange (currentMonitor, monitor) != monitor;
+    }
+
     bool handlePositionChanged()
     {
         auto pos = getCurrentMousePos();
 
         if (contains (pos.roundToInt(), false))
         {
+            const ScopedValueSetter<bool> scope (inHandlePositionChanged, true);
+
             if (! areOtherTouchSourcesActive())
-                doMouseEvent (pos, MouseInputSource::invalidPressure);
+                doMouseEvent (pos, MouseInputSource::defaultPressure);
 
             if (! isValidPeer (this))
                 return true;
         }
 
         handleMovedOrResized();
+
+        if (updateCurrentMonitor())
+            VBlankDispatcher::getInstance()->updateDisplay (*this, currentMonitor);
 
         return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly.
     }
@@ -3468,15 +3695,27 @@ private:
         scaleFactor = newScale;
 
         {
-            const ScopedValueSetter<int> setter (numInDpiChange, numInDpiChange + 1);
-            setBounds (windowBorder.subtractedFrom (convertPhysicalScreenRectangleToLogical (rectangleFromRECT (newRect), hwnd)), fullScreen);
+            const ScopedValueSetter<bool> setter (inDpiChange, true);
+            SetWindowPos (hwnd,
+                          nullptr,
+                          newRect.left,
+                          newRect.top,
+                          newRect.right  - newRect.left,
+                          newRect.bottom - newRect.top,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
         // This is to handle reentrancy. If responding to a DPI change triggers further DPI changes,
         // we should only notify listeners and resize windows once all of the DPI changes have
         // resolved.
-        if (numInDpiChange != 0)
+        if (inDpiChange)
+        {
+            // Danger! Re-entrant call to handleDPIChanging.
+            // Please report this issue on the JUCE forum, along with instructions
+            // so that a JUCE developer can reproduce the issue.
+            jassertfalse;
             return 0;
+        }
 
         updateShadower();
         InvalidateRect (hwnd, nullptr, FALSE);
@@ -3589,6 +3828,11 @@ private:
             setWindowPos (hwnd, ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays()
                                                                                               .getDisplayForRect (component.getScreenBounds())->userArea),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
+
+        auto* dispatcher = VBlankDispatcher::getInstance();
+        dispatcher->reconfigureDisplays();
+        updateCurrentMonitor();
+        dispatcher->updateDisplay (*this, currentMonitor);
     }
 
     //==============================================================================
@@ -4033,7 +4277,9 @@ private:
             return false;
 
         if (auto* current = Component::getCurrentlyModalComponent())
-            current->inputAttemptWhenModal();
+            if (auto* owner = getOwnerOfWindow ((HWND) current->getWindowHandle()))
+                if (! owner->shouldIgnoreModalDismiss)
+                    current->inputAttemptWhenModal();
 
         return true;
     }
@@ -4050,13 +4296,18 @@ private:
         {
             if (compositionInProgress && ! windowIsActive)
             {
-                compositionInProgress = false;
-
                 if (HIMC hImc = ImmGetContext (hWnd))
                 {
                     ImmNotifyIME (hImc, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
                     ImmReleaseContext (hWnd, hImc);
                 }
+
+                // If the composition is still in progress, calling ImmNotifyIME may call back
+                // into handleComposition to let us know that the composition has finished.
+                // We need to set compositionInProgress *after* calling handleComposition, so that
+                // the text replaces the current selection, rather than being inserted after the
+                // caret.
+                compositionInProgress = false;
             }
         }
 
@@ -4346,6 +4597,8 @@ private:
     IMEHandler imeHandler;
     bool shouldIgnoreModalDismiss = false;
 
+    RectangleList<int> deferredRepaints;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)
 };
@@ -4358,6 +4611,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
     return new HWNDComponentPeer (*this, styleFlags, (HWND) parentHWND, false);
 }
 
+JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND);
 JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND)
 {
     return new HWNDComponentPeer (component, ComponentPeer::windowIgnoresMouseClicks,
@@ -4397,6 +4651,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 }
 
 // (This internal function is used by the plugin client module)
+bool offerKeyMessageToJUCEWindow (MSG& m);
 bool offerKeyMessageToJUCEWindow (MSG& m)   { return HWNDComponentPeer::offerKeyMessageToJUCEWindow (m); }
 
 //==============================================================================
@@ -4526,8 +4781,8 @@ class PreVistaMessageBox  : public WindowsMessageBoxBase
 public:
     PreVistaMessageBox (const MessageBoxOptions& opts,
                         UINT extraFlags,
-                        std::unique_ptr<ModalComponentManager::Callback>&& callback)
-        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (callback)),
+                        std::unique_ptr<ModalComponentManager::Callback>&& cb)
+        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (cb)),
           flags (extraFlags | getMessageBoxFlags (opts.getIconType())),
           title (opts.getTitle()), message (opts.getMessage())
     {
@@ -4579,8 +4834,8 @@ class WindowsTaskDialog  : public WindowsMessageBoxBase
 {
 public:
     WindowsTaskDialog (const MessageBoxOptions& opts,
-                       std::unique_ptr<ModalComponentManager::Callback>&& callback)
-        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (callback)),
+                       std::unique_ptr<ModalComponentManager::Callback>&& cb)
+        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (cb)),
           iconType (opts.getIconType()),
           title (opts.getTitle()), message (opts.getMessage()),
           button1 (opts.getButtonText (0)), button2 (opts.getButtonText (1)), button3 (opts.getButtonText (2))
@@ -4592,6 +4847,7 @@ public:
         TASKDIALOGCONFIG config{};
 
         config.cbSize         = sizeof (config);
+        config.hwndParent     = getParentHWND();
         config.pszWindowTitle = title.toWideCharPointer();
         config.pszContent     = message.toWideCharPointer();
         config.hInstance      = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
@@ -5177,8 +5433,7 @@ private:
     class ImageImpl : public Impl
     {
     public:
-        ImageImpl (Image imageIn, Point<int> hotspotIn)
-            : image (std::move (imageIn)), hotspot (hotspotIn) {}
+        explicit ImageImpl (const CustomMouseCursorInfo& infoIn) : info (infoIn) {}
 
         ~ImageImpl() override
         {
@@ -5198,23 +5453,24 @@ private:
             if (iter != cursorsBySize.end())
                 return iter->second;
 
-            const auto imgW = jmax (1, image.getWidth());
-            const auto imgH = jmax (1, image.getHeight());
-
+            const auto logicalSize = info.image.getScaledBounds();
             const auto scale = (float) size / (float) unityCursorSize;
-            const auto scaleToUse = scale * jmin (1.0f, jmin ((float) unityCursorSize / (float) imgW,
-                                                              (float) unityCursorSize / (float) imgH));
-            const auto rescaled = image.rescaled (roundToInt (scaleToUse * (float) imgW),
-                                                  roundToInt (scaleToUse * (float) imgH));
-            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) hotspot.x));
-            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) hotspot.y));
+            const auto physicalSize = logicalSize * scale;
+
+            const auto& image = info.image.getImage();
+            const auto rescaled = image.rescaled (roundToInt ((float) physicalSize.getWidth()),
+                                                  roundToInt ((float) physicalSize.getHeight()));
+
+            const auto effectiveScale = rescaled.getWidth() / logicalSize.getWidth();
+
+            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt ((float) info.hotspot.x * effectiveScale));
+            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt ((float) info.hotspot.y * effectiveScale));
 
             return cursorsBySize.emplace (size, IconConverters::createHICONFromImage (rescaled, false, hx, hy)).first->second;
         }
 
     private:
-        Image image;
-        Point<int> hotspot;
+        const CustomMouseCursorInfo info;
         std::map<int, HCURSOR> cursorsBySize;
     };
 
@@ -5263,7 +5519,7 @@ private:
 
     static std::unique_ptr<Impl> makeHandle (const CustomMouseCursorInfo& info)
     {
-        return std::make_unique<ImageImpl> (info.image, info.hotspot);
+        return std::make_unique<ImageImpl> (info);
     }
 
     static std::unique_ptr<Impl> makeHandle (const MouseCursor::StandardCursorType type)
@@ -5303,7 +5559,7 @@ private:
                       16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,
                       98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
-                return makeHandle ({ ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), { 8, 7 } });
+                return makeHandle ({ ScaledImage (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData))), { 8, 7 } });
             }
 
             case CopyingCursor:
@@ -5314,7 +5570,7 @@ private:
                       12,108,212,87,235,174, 15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,252,114,147,74,83,
                       5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
 
-                return makeHandle ({ ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData)), { 1, 3 } });
+                return makeHandle ({ ScaledImage (ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData))), { 1, 3 } });
             }
 
             case NumStandardCursorTypes: JUCE_FALLTHROUGH

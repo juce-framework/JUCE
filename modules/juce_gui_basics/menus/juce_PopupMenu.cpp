@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,8 +41,20 @@ struct PopupMenu::HelperClasses
 class MouseSourceState;
 struct MenuWindow;
 
-static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
-static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
+static bool canBeTriggered (const PopupMenu::Item& item) noexcept
+{
+    return item.isEnabled
+        && item.itemID != 0
+        && ! item.isSectionHeader
+        && (item.customComponent == nullptr || item.customComponent->isTriggeredAutomatically());
+}
+
+static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept
+{
+    return item.isEnabled
+        && item.subMenu != nullptr
+        && item.subMenu->items.size() > 0;
+}
 
 //==============================================================================
 struct HeaderItemComponent  : public PopupMenu::CustomComponent
@@ -73,6 +85,11 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
         idealWidth += idealWidth / 4;
     }
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     const Options& options;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HeaderItemComponent)
@@ -81,9 +98,7 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
 //==============================================================================
 struct ItemComponent  : public Component
 {
-    ItemComponent (const PopupMenu::Item& i,
-                   const PopupMenu::Options& o,
-                   MenuWindow& parent)
+    ItemComponent (const PopupMenu::Item& i, const PopupMenu::Options& o, MenuWindow& parent)
         : item (i), parentWindow (parent), options (o), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
@@ -164,6 +179,11 @@ struct ItemComponent  : public Component
         }
     }
 
+    static bool isAccessibilityHandlerRequired (const PopupMenu::Item& item)
+    {
+        return item.isSectionHeader || hasActiveSubMenu (item) || canBeTriggered (item);
+    }
+
     PopupMenu::Item item;
 
 private:
@@ -173,7 +193,8 @@ private:
     public:
         explicit ItemAccessibilityHandler (ItemComponent& itemComponentToWrap)
             : AccessibilityHandler (itemComponentToWrap,
-                                    AccessibilityRole::menuItem,
+                                    isAccessibilityHandlerRequired (itemComponentToWrap.item) ? AccessibilityRole::menuItem
+                                                                                              : AccessibilityRole::ignored,
                                     getAccessibilityActions (*this, itemComponentToWrap)),
               itemComponent (itemComponentToWrap)
         {
@@ -195,6 +216,9 @@ private:
                                                                       : state.withExpandable().withCollapsed();
             }
 
+            if (itemComponent.item.isTicked)
+                state = state.withCheckable().withChecked();
+
             return state.isFocused() ? state.withSelected() : state;
         }
 
@@ -209,12 +233,6 @@ private:
                 item.parentWindow.setCurrentlyHighlightedChild (&item);
             };
 
-            auto onPress = [&item]
-            {
-                item.parentWindow.setCurrentlyHighlightedChild (&item);
-                item.parentWindow.triggerCurrentlyHighlightedItem();
-            };
-
             auto onToggle = [&handler, &item, onFocus]
             {
                 if (handler.getCurrentState().isSelected())
@@ -224,8 +242,16 @@ private:
             };
 
             auto actions = AccessibilityActions().addAction (AccessibilityActionType::focus,  std::move (onFocus))
-                                                 .addAction (AccessibilityActionType::press,  std::move (onPress))
                                                  .addAction (AccessibilityActionType::toggle, std::move (onToggle));
+
+            if (canBeTriggered (item.item))
+            {
+                actions.addAction (AccessibilityActionType::press, [&item]
+                {
+                    item.parentWindow.setCurrentlyHighlightedChild (&item);
+                    item.parentWindow.triggerCurrentlyHighlightedItem();
+                });
+            }
 
             if (hasActiveSubMenu (item.item))
             {
@@ -249,7 +275,8 @@ private:
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
-        return item.isSeparator ? nullptr : std::make_unique<ItemAccessibilityHandler> (*this);
+        return item.isSeparator ? createIgnoredAccessibilityHandler (*this)
+                                : std::make_unique<ItemAccessibilityHandler> (*this);
     }
 
     //==============================================================================
@@ -491,8 +518,13 @@ struct MenuWindow  : public Component
 
             exitModalState (resultID);
 
-            if (makeInvisible && deletionChecker != nullptr)
-                setVisible (false);
+            if (deletionChecker != nullptr)
+            {
+                exitingModalState = true;
+
+                if (makeInvisible)
+                    setVisible (false);
+            }
 
             if (resultID != 0
                  && item != nullptr
@@ -687,6 +719,9 @@ struct MenuWindow  : public Component
         if (auto* currentlyModalWindow = dynamic_cast<MenuWindow*> (Component::getCurrentlyModalComponent()))
             if (! treeContains (currentlyModalWindow))
                 return false;
+
+        if (exitingModalState)
+            return false;
 
         return true;
     }
@@ -1176,10 +1211,7 @@ struct MenuWindow  : public Component
 
     void triggerCurrentlyHighlightedItem()
     {
-        if (currentChild != nullptr
-             && canBeTriggered (currentChild->item)
-             && (currentChild->item.customComponent == nullptr
-                  || currentChild->item.customComponent->isTriggeredAutomatically()))
+        if (currentChild != nullptr && canBeTriggered (currentChild->item))
         {
             dismissMenu (&currentChild->item);
         }
@@ -1275,6 +1307,7 @@ struct MenuWindow  : public Component
     uint32 windowCreationTime, lastFocusedTime, timeEnteredCurrentChildComp;
     OwnedArray<MouseSourceState> mouseSourceStates;
     float scaleFactor;
+    bool exitingModalState = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuWindow)
 };
@@ -1720,7 +1753,7 @@ PopupMenu::Item&& PopupMenu::Item::setImage (std::unique_ptr<Drawable> newImage)
 void PopupMenu::addItem (Item newItem)
 {
     // An ID of 0 is used as a return value to indicate that the user
-    // didn't pick anything, so you shouldn't use it as the ID for an item..
+    // didn't pick anything, so you shouldn't use it as the ID for an item.
     jassert (newItem.itemID != 0
               || newItem.isSeparator || newItem.isSectionHeader
               || newItem.subMenu != nullptr);
@@ -1828,12 +1861,23 @@ void PopupMenu::addColouredItem (int itemResultID, String itemText, Colour itemT
 
 void PopupMenu::addCustomItem (int itemResultID,
                                std::unique_ptr<CustomComponent> cc,
-                               std::unique_ptr<const PopupMenu> subMenu)
+                               std::unique_ptr<const PopupMenu> subMenu,
+                               const String& itemTitle)
 {
     Item i;
+    i.text = itemTitle;
     i.itemID = itemResultID;
     i.customComponent = cc.release();
     i.subMenu.reset (createCopyIfNotNull (subMenu.get()));
+
+    // If this assertion is hit, this item will be visible to screen readers but with
+    // no name, which may be confusing to users.
+    // It's probably a good idea to add a title for this menu item that describes
+    // the meaning of the item, or the contents of the submenu, as appropriate.
+    // If you don't want this menu item to be press-able directly, pass "false" to the
+    // constructor of the CustomComponent.
+    jassert (! (HelperClasses::ItemComponent::isAccessibilityHandlerRequired (i) && itemTitle.isEmpty()));
+
     addItem (std::move (i));
 }
 
@@ -1841,11 +1885,12 @@ void PopupMenu::addCustomItem (int itemResultID,
                                Component& customComponent,
                                int idealWidth, int idealHeight,
                                bool triggerMenuItemAutomaticallyWhenClicked,
-                               std::unique_ptr<const PopupMenu> subMenu)
+                               std::unique_ptr<const PopupMenu> subMenu,
+                               const String& itemTitle)
 {
     auto comp = std::make_unique<HelperClasses::NormalComponentWrapper> (customComponent, idealWidth, idealHeight,
                                                                          triggerMenuItemAutomaticallyWhenClicked);
-    addCustomItem (itemResultID, std::move (comp), std::move (subMenu));
+    addCustomItem (itemResultID, std::move (comp), std::move (subMenu), itemTitle);
 }
 
 void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive)
@@ -1984,6 +2029,17 @@ PopupMenu::Options PopupMenu::Options::withInitiallySelectedItem (int idOfItemTo
 Component* PopupMenu::createWindow (const Options& options,
                                     ApplicationCommandManager** managerOfChosenCommand) const
 {
+   #if JUCE_WINDOWS
+    const auto scope = [&]() -> std::unique_ptr<ScopedThreadDPIAwarenessSetter>
+    {
+        if (auto* target = options.getTargetComponent())
+            if (auto* handle = target->getWindowHandle())
+                return std::make_unique<ScopedThreadDPIAwarenessSetter> (handle);
+
+        return nullptr;
+    }();
+   #endif
+
     return items.isEmpty() ? nullptr
                            : new HelperClasses::MenuWindow (*this, nullptr, options,
                                                             ! options.getTargetScreenArea().isEmpty(),
@@ -2211,12 +2267,10 @@ void PopupMenu::setItem (CustomComponent& c, const Item* itemToUse)
 }
 
 //==============================================================================
+PopupMenu::CustomComponent::CustomComponent() : CustomComponent (true) {}
+
 PopupMenu::CustomComponent::CustomComponent (bool autoTrigger)
     : triggeredAutomatically (autoTrigger)
-{
-}
-
-PopupMenu::CustomComponent::~CustomComponent()
 {
 }
 

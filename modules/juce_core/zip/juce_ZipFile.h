@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -179,6 +179,25 @@ public:
                             const File& targetDirectory,
                             bool shouldOverwriteFiles = true);
 
+    enum class OverwriteFiles { no, yes };
+    enum class FollowSymlinks { no, yes };
+
+    /** Uncompresses one of the entries from the zip file.
+
+        This will expand the entry and write it in a target directory. The entry's path is used to
+        determine which subfolder of the target should contain the new file.
+
+        @param index                the index of the entry to uncompress - this must be a valid index
+                                    between 0 and (getNumEntries() - 1).
+        @param targetDirectory      the root folder to uncompress into
+        @param overwriteFiles       whether to overwrite existing files with similarly-named ones
+        @param followSymlinks       whether to follow symlinks inside the target directory
+        @returns success if all the files are successfully unzipped
+    */
+    Result uncompressEntry (int index,
+                            const File& targetDirectory,
+                            OverwriteFiles overwriteFiles,
+                            FollowSymlinks followSymlinks);
 
     //==============================================================================
     /** Used to create a new zip file.

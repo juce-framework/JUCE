@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -33,7 +33,7 @@
                    juce_audio_plugin_client, juce_audio_processors,
                    juce_audio_utils, juce_core, juce_data_structures,
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2019, linux_make
+ exporters:        xcode_mac, vs2022, linux_make
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -50,245 +50,77 @@
 
 
 //==============================================================================
-class ChannelClickListener
+class ProcessorWithLevels : public AudioProcessor,
+                            private AsyncUpdater,
+                            private Timer
 {
 public:
-    virtual ~ChannelClickListener() {}
-    virtual void channelButtonClicked (int channelIndex) = 0;
-    virtual bool isChannelActive (int channelIndex) = 0;
-};
-
-class SurroundEditor : public AudioProcessorEditor,
-                       private Timer
-{
-public:
-    SurroundEditor (AudioProcessor& parent)
-        : AudioProcessorEditor (parent),
-          currentChannelLayout (AudioChannelSet::disabled()),
-          layoutTitle          ("LayoutTitleLabel", getLayoutName())
+    ProcessorWithLevels()
+        : AudioProcessor (BusesProperties().withInput  ("Input", AudioChannelSet::stereo())
+                                           .withInput  ("Aux", AudioChannelSet::stereo(), false)
+                                           .withOutput ("Output", AudioChannelSet::stereo())
+                                           .withOutput ("Aux", AudioChannelSet::stereo(), false))
     {
-        layoutTitle.setJustificationType (Justification::centred);
-        addAndMakeVisible (layoutTitle);
-        addAndMakeVisible (noChannelsLabel);
-
-        setSize (600, 100);
-
-        lastSuspended = ! getAudioProcessor()->isSuspended();
-        timerCallback();
-        startTimer (500);
+        startTimerHz (60);
+        applyBusLayouts (getBusesLayout());
     }
 
-    void resized() override
+    ~ProcessorWithLevels() override
     {
-        auto r = getLocalBounds();
-
-        layoutTitle.setBounds (r.removeFromBottom (16));
-
-        noChannelsLabel.setBounds (r);
-
-        if (channelButtons.size() > 0)
-        {
-            auto buttonWidth = r.getWidth() / channelButtons.size();
-            for (auto channelButton : channelButtons)
-                channelButton->setBounds (r.removeFromLeft (buttonWidth));
-        }
+        stopTimer();
+        cancelPendingUpdate();
     }
 
-    void paint (Graphics& g) override
+    void prepareToPlay (double, int) override
     {
-        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
-    }
-
-    void updateButton (Button* btn)
-    {
-        if (auto* textButton = dynamic_cast<TextButton*> (btn))
-        {
-            auto channelIndex = channelButtons.indexOf (textButton);
-
-            if (auto* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
-                listener->channelButtonClicked (channelIndex);
-        }
-    }
-
-    void updateGUI()
-    {
-        const auto& channelSet = getAudioProcessor()->getChannelLayoutOfBus (false, 0);
-
-        if (channelSet != currentChannelLayout)
-        {
-            currentChannelLayout = channelSet;
-
-            layoutTitle.setText (currentChannelLayout.getDescription(), NotificationType::dontSendNotification);
-            channelButtons.clear();
-            activeChannels.resize (currentChannelLayout.size());
-
-            if (currentChannelLayout == AudioChannelSet::disabled())
-            {
-                noChannelsLabel.setVisible (true);
-            }
-            else
-            {
-                auto numChannels = currentChannelLayout.size();
-
-                for (auto i = 0; i < numChannels; ++i)
-                {
-                    auto channelName =
-                    AudioChannelSet::getAbbreviatedChannelTypeName (currentChannelLayout.getTypeOfChannel (i));
-
-                    TextButton* newButton;
-                    channelButtons.add (newButton = new TextButton (channelName, channelName));
-
-                    newButton->onClick = [this, newButton] { updateButton (newButton); };
-                    addAndMakeVisible (newButton);
-                }
-
-                noChannelsLabel.setVisible (false);
-                resized();
-            }
-
-            if (auto* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
-            {
-                auto   activeColour = getLookAndFeel().findColour (Slider::thumbColourId);
-                auto inactiveColour = getLookAndFeel().findColour (Slider::trackColourId);
-
-                for (auto i = 0; i < activeChannels.size(); ++i)
-                {
-                    auto isActive = listener->isChannelActive (i);
-                    activeChannels.getReference (i) = isActive;
-                    channelButtons[i]->setColour (TextButton::buttonColourId, isActive ? activeColour : inactiveColour);
-                    channelButtons[i]->repaint();
-                }
-            }
-        }
-    }
-
-private:
-    String getLayoutName() const
-    {
-        if (auto* p = getAudioProcessor())
-            return p->getChannelLayoutOfBus (false, 0).getDescription();
-
-        return "Unknown";
-    }
-
-    void timerCallback() override
-    {
-        if (getAudioProcessor()->isSuspended() != lastSuspended)
-        {
-            lastSuspended = getAudioProcessor()->isSuspended();
-            updateGUI();
-        }
-
-        if (! lastSuspended)
-        {
-            if (auto* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
-            {
-                auto   activeColour = getLookAndFeel().findColour (Slider::thumbColourId);
-                auto inactiveColour = getLookAndFeel().findColour (Slider::trackColourId);
-
-                for (auto i = 0; i < activeChannels.size(); ++i)
-                {
-                    auto isActive = listener->isChannelActive (i);
-                    if (activeChannels.getReference (i) != isActive)
-                    {
-                        activeChannels.getReference (i) = isActive;
-                        channelButtons[i]->setColour (TextButton::buttonColourId, isActive ? activeColour : inactiveColour);
-                        channelButtons[i]->repaint();
-                    }
-                }
-            }
-        }
-    }
-
-    AudioChannelSet currentChannelLayout;
-    Label noChannelsLabel { "noChannelsLabel", "Input disabled" },
-          layoutTitle;
-    OwnedArray<TextButton> channelButtons;
-    Array<bool> activeChannels;
-
-    bool lastSuspended;
-};
-
-//==============================================================================
-class SurroundProcessor  : public AudioProcessor,
-                           public ChannelClickListener,
-                           private AsyncUpdater
-{
-public:
-    SurroundProcessor()
-        : AudioProcessor(BusesProperties().withInput  ("Input",  AudioChannelSet::stereo())
-                                          .withOutput ("Output", AudioChannelSet::stereo()))
-    {}
-
-    //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override
-    {
-        channelClicked = 0;
-        sampleOffset = static_cast<int> (std::ceil (sampleRate));
-
-        auto numChannels = getChannelCountOfBus (true, 0);
-        channelActive.resize (numChannels);
-        alphaCoeffs  .resize (numChannels);
+        samplesToPlay = (int) getSampleRate();
         reset();
-
-        triggerAsyncUpdate();
-
-        ignoreUnused (samplesPerBlock);
     }
+
+    void processBlock (AudioBuffer<float>&  audio, MidiBuffer&) override { processAudio (audio); }
+    void processBlock (AudioBuffer<double>& audio, MidiBuffer&) override { processAudio (audio); }
 
     void releaseResources() override { reset(); }
 
-    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
+    float getLevel (int bus, int channel) const
     {
-        for (auto ch = 0; ch < buffer.getNumChannels(); ++ch)
-        {
-            auto& channelTime = channelActive.getReference (ch);
-            auto& alpha       = alphaCoeffs  .getReference (ch);
-
-            for (auto j = 0; j < buffer.getNumSamples(); ++j)
-            {
-                auto sample = buffer.getReadPointer (ch)[j];
-                alpha = (0.8f * alpha) + (0.2f * sample);
-
-                if (std::abs (alpha) >= 0.1f)
-                    channelTime = static_cast<int> (getSampleRate() / 2.0);
-            }
-
-            channelTime = jmax (0, channelTime - buffer.getNumSamples());
-        }
-
-        auto fillSamples = jmin (static_cast<int> (std::ceil (getSampleRate())) - sampleOffset,
-                                 buffer.getNumSamples());
-
-        if (isPositiveAndBelow (channelClicked, buffer.getNumChannels()))
-        {
-            auto* channelBuffer = buffer.getWritePointer (channelClicked);
-            auto freq = (float) (440.0 / getSampleRate());
-
-            for (auto i = 0; i < fillSamples; ++i)
-                channelBuffer[i] += std::sin (MathConstants<float>::twoPi * freq * static_cast<float> (sampleOffset++));
-        }
+        return readableLevels[(size_t) getChannelIndexInProcessBlockBuffer (true, bus, channel)];
     }
 
-    using AudioProcessor::processBlock;
-
-    //==============================================================================
-    AudioProcessorEditor* createEditor() override { return new SurroundEditor (*this); }
-    bool hasEditor() const override               { return true; }
-
-    //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        return ((! layouts.getMainInputChannelSet() .isDiscreteLayout())
-             && (! layouts.getMainOutputChannelSet().isDiscreteLayout())
-             && (layouts.getMainInputChannelSet() == layouts.getMainOutputChannelSet())
-             && (! layouts.getMainInputChannelSet().isDisabled()));
+        const auto isSetValid = [] (const AudioChannelSet& set)
+        {
+            return ! set.isDisabled()
+                   && ! (set.isDiscreteLayout() && set.getChannelIndexForType (AudioChannelSet::discreteChannel0) == -1);
+        };
+
+        return isSetValid (layouts.getMainOutputChannelSet())
+               && isSetValid (layouts.getMainInputChannelSet());
     }
 
     void reset() override
     {
-        for (auto& channel : channelActive)
-            channel = 0;
+        channelClicked = 0;
+        samplesPlayed = samplesToPlay;
+    }
+
+    bool applyBusLayouts (const BusesLayout& layouts) override
+    {
+        // Some very badly-behaved hosts will call this during processing!
+        const SpinLock::ScopedLockType lock (levelMutex);
+
+        const auto result = AudioProcessor::applyBusLayouts (layouts);
+
+        size_t numInputChannels = 0;
+
+        for (auto i = 0; i < getBusCount (true); ++i)
+            numInputChannels += (size_t) getBus (true, i)->getLastEnabledLayout().size();
+
+        incomingLevels = readableLevels = std::vector<float> (numInputChannels, 0.0f);
+
+        triggerAsyncUpdate();
+        return result;
     }
 
     //==============================================================================
@@ -308,30 +140,322 @@ public:
     void getStateInformation (MemoryBlock&) override       {}
     void setStateInformation (const void*, int) override   {}
 
-    void channelButtonClicked (int channelIndex) override
+    void channelButtonClicked (int bus, int channelIndex)
     {
-        channelClicked = channelIndex;
-        sampleOffset = 0;
+        channelClicked = getChannelIndexInProcessBlockBuffer (false, bus, channelIndex);
+        samplesPlayed = 0;
     }
 
-    bool isChannelActive (int channelIndex) override
-    {
-        return channelActive[channelIndex] > 0;
-    }
+    std::function<void()> updateEditor;
 
+private:
     void handleAsyncUpdate() override
     {
-        if (auto* editor = getActiveEditor())
-            if (auto* surroundEditor = dynamic_cast<SurroundEditor*> (editor))
-                surroundEditor->updateGUI();
+        NullCheckedInvocation::invoke (updateEditor);
+    }
+
+    template <typename Float>
+    void processAudio (AudioBuffer<Float>& audio)
+    {
+        {
+            SpinLock::ScopedTryLockType lock (levelMutex);
+
+            if (lock.isLocked())
+            {
+                const auto numInputChannels = (size_t) getTotalNumInputChannels();
+
+                for (size_t i = 0; i < numInputChannels; ++i)
+                {
+                    const auto minMax = audio.findMinMax ((int) i, 0, audio.getNumSamples());
+                    const auto newMax = (float) std::max (std::abs (minMax.getStart()), std::abs (minMax.getEnd()));
+
+                    auto& toUpdate = incomingLevels[i];
+                    toUpdate = jmax (toUpdate, newMax);
+                }
+            }
+        }
+
+        audio.clear (0, audio.getNumSamples());
+
+        auto fillSamples = jmin (samplesToPlay - samplesPlayed, audio.getNumSamples());
+
+        if (isPositiveAndBelow (channelClicked, audio.getNumChannels()))
+        {
+            auto* channelBuffer = audio.getWritePointer (channelClicked);
+            auto freq = (float) (440.0 / getSampleRate());
+
+            for (auto i = 0; i < fillSamples; ++i)
+                channelBuffer[i] += std::sin (MathConstants<float>::twoPi * freq * (float) samplesPlayed++);
+        }
+    }
+
+    void timerCallback() override
+    {
+        const SpinLock::ScopedLockType lock (levelMutex);
+
+        for (size_t i = 0; i < readableLevels.size(); ++i)
+            readableLevels[i] = std::max (readableLevels[i] * 0.95f, std::exchange (incomingLevels[i], 0.0f));
+    }
+
+    SpinLock levelMutex;
+    std::vector<float> incomingLevels;
+    std::vector<float> readableLevels;
+
+    int channelClicked;
+    int samplesPlayed;
+    int samplesToPlay;
+};
+
+//==============================================================================
+const Colour textColour = Colours::white.withAlpha (0.8f);
+
+inline void drawBackground (Component& comp, Graphics& g)
+{
+    g.setColour (comp.getLookAndFeel().findColour (ResizableWindow::backgroundColourId).darker (0.8f));
+    g.fillRoundedRectangle (comp.getLocalBounds().toFloat(), 4.0f);
+}
+
+inline void configureLabel (Label& label, const AudioProcessor::Bus* layout)
+{
+    const auto text = layout != nullptr
+                          ? (layout->getName() + ": " + layout->getCurrentLayout().getDescription())
+                          : "";
+    label.setText (text, dontSendNotification);
+    label.setJustificationType (Justification::centred);
+    label.setColour (Label::textColourId, textColour);
+}
+
+class InputBusViewer : public Component,
+                       private Timer
+{
+public:
+    InputBusViewer (ProcessorWithLevels& proc, int busNumber)
+        : processor (proc),
+          bus (busNumber)
+    {
+        configureLabel (layoutName, processor.getBus (true, bus));
+        addAndMakeVisible (layoutName);
+
+        startTimerHz (60);
+    }
+
+    ~InputBusViewer() override
+    {
+        stopTimer();
+    }
+
+    void paint (Graphics& g) override
+    {
+        drawBackground (*this, g);
+
+        auto* layout = processor.getBus (true, bus);
+
+        if (layout == nullptr)
+            return;
+
+        const auto channelSet = layout->getCurrentLayout();
+        const auto numChannels = channelSet.size();
+
+        Grid grid;
+
+        grid.autoFlow = Grid::AutoFlow::column;
+        grid.autoColumns = grid.autoRows = Grid::TrackInfo (Grid::Fr (1));
+        grid.items.insertMultiple (0, GridItem(), numChannels);
+        grid.performLayout (getLocalBounds());
+
+        const auto minDb = -50.0f;
+        const auto maxDb = 6.0f;
+
+        for (auto i = 0; i < numChannels; ++i)
+        {
+            g.setColour (Colours::orange.darker());
+
+            const auto levelInDb = Decibels::gainToDecibels (processor.getLevel (bus, i), minDb);
+            const auto fractionOfHeight = jmap (levelInDb, minDb, maxDb, 0.0f, 1.0f);
+            const auto bounds = grid.items[i].currentBounds;
+            const auto trackBounds = bounds.withSizeKeepingCentre (16, bounds.getHeight() - 10).toFloat();
+            g.fillRect (trackBounds.withHeight (trackBounds.proportionOfHeight (fractionOfHeight)).withBottomY (trackBounds.getBottom()));
+
+            g.setColour (textColour);
+
+            g.drawText (channelSet.getAbbreviatedChannelTypeName (channelSet.getTypeOfChannel (i)),
+                        bounds,
+                        Justification::centredBottom);
+        }
+    }
+
+    void resized() override
+    {
+        layoutName.setBounds (getLocalBounds().removeFromTop (20));
+    }
+
+    int getNumChannels() const
+    {
+        if (auto* b = processor.getBus (true, bus))
+            return b->getCurrentLayout().size();
+
+        return 0;
     }
 
 private:
-    Array<int> channelActive;
-    Array<float> alphaCoeffs;
-    int channelClicked;
-    int sampleOffset;
+    void timerCallback() override { repaint(); }
 
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SurroundProcessor)
+    ProcessorWithLevels& processor;
+    int bus = 0;
+    Label layoutName;
+};
+
+//==============================================================================
+class OutputBusViewer : public Component
+{
+public:
+    OutputBusViewer (ProcessorWithLevels& proc, int busNumber)
+        : processor (proc),
+          bus (busNumber)
+    {
+        auto* layout = processor.getBus (false, bus);
+
+        configureLabel (layoutName, layout);
+        addAndMakeVisible (layoutName);
+
+        if (layout == nullptr)
+            return;
+
+        const auto& channelSet = layout->getCurrentLayout();
+
+        const auto numChannels = channelSet.size();
+
+        for (auto i = 0; i < numChannels; ++i)
+        {
+            const auto channelName = channelSet.getAbbreviatedChannelTypeName (channelSet.getTypeOfChannel (i));
+
+            channelButtons.emplace_back (channelName, channelName);
+
+            auto& newButton = channelButtons.back();
+            newButton.onClick = [&proc = processor, bus = bus, i] { proc.channelButtonClicked (bus, i); };
+            addAndMakeVisible (newButton);
+        }
+
+        resized();
+    }
+
+    void paint (Graphics& g) override
+    {
+        drawBackground (*this, g);
+    }
+
+    void resized() override
+    {
+        auto b = getLocalBounds();
+
+        layoutName.setBounds (b.removeFromBottom (20));
+
+        Grid grid;
+        grid.autoFlow = Grid::AutoFlow::column;
+        grid.autoColumns = grid.autoRows = Grid::TrackInfo (Grid::Fr (1));
+
+        for (auto& channelButton : channelButtons)
+            grid.items.add (GridItem (channelButton));
+
+        grid.performLayout (b.reduced (2));
+    }
+
+    int getNumChannels() const
+    {
+        if (auto* b = processor.getBus (false, bus))
+            return b->getCurrentLayout().size();
+
+        return 0;
+    }
+
+private:
+    ProcessorWithLevels& processor;
+    int bus = 0;
+    Label layoutName;
+    std::list<TextButton> channelButtons;
+};
+
+//==============================================================================
+class SurroundEditor : public AudioProcessorEditor
+{
+public:
+    explicit SurroundEditor (ProcessorWithLevels& parent)
+        : AudioProcessorEditor (parent),
+          customProcessor (parent),
+          scopedUpdateEditor (customProcessor.updateEditor, [this] { updateGUI(); })
+    {
+        updateGUI();
+        setResizable (true, true);
+    }
+
+    void resized() override
+    {
+        auto r = getLocalBounds();
+        doLayout (inputViewers, r.removeFromTop (proportionOfHeight (0.5f)));
+        doLayout (outputViewers, r);
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    }
+
+private:
+    template <typename Range>
+    void doLayout (Range& range, Rectangle<int> bounds) const
+    {
+        FlexBox fb;
+
+        for (auto& viewer : range)
+        {
+            if (viewer.getNumChannels() != 0)
+            {
+                fb.items.add (FlexItem (viewer)
+                                  .withFlex ((float) viewer.getNumChannels())
+                                  .withMargin (4.0f));
+            }
+        }
+
+        fb.performLayout (bounds);
+    }
+
+    void updateGUI()
+    {
+        inputViewers.clear();
+        outputViewers.clear();
+
+        const auto inputBuses = getAudioProcessor()->getBusCount (true);
+
+        for (auto i = 0; i < inputBuses; ++i)
+        {
+            inputViewers.emplace_back (customProcessor, i);
+            addAndMakeVisible (inputViewers.back());
+        }
+
+        const auto outputBuses = getAudioProcessor()->getBusCount (false);
+
+        for (auto i = 0; i < outputBuses; ++i)
+        {
+            outputViewers.emplace_back (customProcessor, i);
+            addAndMakeVisible (outputViewers.back());
+        }
+
+        const auto channels = jmax (processor.getTotalNumInputChannels(),
+                                    processor.getTotalNumOutputChannels());
+        setSize (jmax (150, channels * 40), 200);
+
+        resized();
+    }
+
+    ProcessorWithLevels& customProcessor;
+    ScopedValueSetter<std::function<void()>> scopedUpdateEditor;
+    std::list<InputBusViewer> inputViewers;
+    std::list<OutputBusViewer> outputViewers;
+};
+
+//==============================================================================
+struct SurroundProcessor  : public ProcessorWithLevels
+{
+    AudioProcessorEditor* createEditor() override { return new SurroundEditor (*this); }
+    bool hasEditor() const override               { return true; }
 };

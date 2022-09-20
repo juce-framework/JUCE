@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -36,7 +36,7 @@ namespace juce
     Only after a Bluetooth MIDI device has been paired will its MIDI ports
     be available through JUCE's MidiInput and MidiOutput classes.
 
-    This dialogue is currently only available on macOS targetting versions 10.11+,
+    This dialogue is currently only available on macOS targeting versions 10.11+,
     iOS and Android. When targeting older versions of macOS you should instead
     pair Bluetooth MIDI devices using the "Audio MIDI Setup" app (located in
     /Applications/Utilities). On Windows, you should use the system settings. On

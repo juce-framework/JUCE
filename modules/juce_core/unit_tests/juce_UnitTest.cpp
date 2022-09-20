@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -194,6 +194,11 @@ bool UnitTestRunner::shouldAbortTests()
     return false;
 }
 
+static String getTestNameString (const String& testName, const String& subCategory)
+{
+    return testName + " / " + subCategory;
+}
+
 void UnitTestRunner::beginNewTest (UnitTest* const test, const String& subCategory)
 {
     endTest();
@@ -203,7 +208,7 @@ void UnitTestRunner::beginNewTest (UnitTest* const test, const String& subCatego
     results.add (new TestResult (testName, subCategory));
 
     logMessage ("-----------------------------------------------------------------");
-    logMessage ("Starting test: " + testName + " / " + subCategory + "...");
+    logMessage ("Starting tests in: " + getTestNameString (testName, subCategory) + "...");
 
     resultsUpdated();
 }
@@ -226,7 +231,7 @@ void UnitTestRunner::endTest()
         }
         else
         {
-            logMessage ("All tests completed successfully");
+            logMessage ("Completed tests in " + getTestNameString (r->unitTestName, r->subcategoryName));
         }
     }
 }

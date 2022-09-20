@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -28,24 +28,21 @@ namespace juce
 
 //==============================================================================
 class UIATextProvider  : public UIAProviderBase,
-                         public ComBaseClassHelper<ITextProvider2>
+                         public ComBaseClassHelper<ComTypes::ITextProvider2>
 {
 public:
-    explicit UIATextProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT QueryInterface (REFIID iid, void** result) override
     {
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
-        if (iid == _uuidof (IUnknown) || iid == _uuidof (ITextProvider))
-            return castToType<ITextProvider> (result);
+        if (iid == __uuidof (IUnknown) || iid == __uuidof (ComTypes::ITextProvider))
+            return castToType<ComTypes::ITextProvider> (result);
 
-        if (iid == _uuidof (ITextProvider2))
-            return castToType<ITextProvider2> (result);
+        if (iid == __uuidof (ComTypes::ITextProvider2))
+            return castToType<ComTypes::ITextProvider2> (result);
 
         *result = nullptr;
         return E_NOINTERFACE;
@@ -54,7 +51,7 @@ public:
     }
 
     //=============================================================================
-    JUCE_COMRESULT get_DocumentRange (ITextRangeProvider** pRetVal) override
+    JUCE_COMRESULT get_DocumentRange (ComTypes::ITextRangeProvider** pRetVal) override
     {
         return withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
         {
@@ -63,11 +60,11 @@ public:
         });
     }
 
-    JUCE_COMRESULT get_SupportedTextSelection (SupportedTextSelection* pRetVal) override
+    JUCE_COMRESULT get_SupportedTextSelection (ComTypes::SupportedTextSelection* pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, [&]
         {
-            *pRetVal = SupportedTextSelection_Single;
+            *pRetVal = ComTypes::SupportedTextSelection_Single;
             return S_OK;
         });
     }
@@ -124,7 +121,7 @@ public:
         });
     }
 
-    JUCE_COMRESULT RangeFromChild (IRawElementProviderSimple*, ITextRangeProvider** pRetVal) override
+    JUCE_COMRESULT RangeFromChild (IRawElementProviderSimple*, ComTypes::ITextRangeProvider** pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, []
         {
@@ -132,7 +129,7 @@ public:
         });
     }
 
-    JUCE_COMRESULT RangeFromPoint (UiaPoint point, ITextRangeProvider** pRetVal) override
+    JUCE_COMRESULT RangeFromPoint (ComTypes::UiaPoint point, ComTypes::ITextRangeProvider** pRetVal) override
     {
         return withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
         {
@@ -146,7 +143,7 @@ public:
     }
 
     //==============================================================================
-    JUCE_COMRESULT GetCaretRange (BOOL* isActive, ITextRangeProvider** pRetVal) override
+    JUCE_COMRESULT GetCaretRange (BOOL* isActive, ComTypes::ITextRangeProvider** pRetVal) override
     {
         return withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
         {
@@ -159,7 +156,7 @@ public:
         });
     }
 
-    JUCE_COMRESULT RangeFromAnnotation (IRawElementProviderSimple*, ITextRangeProvider** pRetVal) override
+    JUCE_COMRESULT RangeFromAnnotation (IRawElementProviderSimple*, ComTypes::ITextRangeProvider** pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, []
         {
@@ -183,7 +180,7 @@ private:
 
     //==============================================================================
     class UIATextRangeProvider  : public UIAProviderBase,
-                                  public ComBaseClassHelper<ITextRangeProvider>
+                                  public ComBaseClassHelper<ComTypes::ITextRangeProvider>
     {
     public:
         UIATextRangeProvider (UIATextProvider& textProvider, Range<int> range)
@@ -202,7 +199,7 @@ private:
             return Select();
         }
 
-        JUCE_COMRESULT Clone (ITextRangeProvider** pRetVal) override
+        JUCE_COMRESULT Clone (ComTypes::ITextRangeProvider** pRetVal) override
         {
             return withCheckedComArgs (pRetVal, *this, [&]
             {
@@ -211,7 +208,7 @@ private:
             });
         }
 
-        JUCE_COMRESULT Compare (ITextRangeProvider* range, BOOL* pRetVal) override
+        JUCE_COMRESULT Compare (ComTypes::ITextRangeProvider* range, BOOL* pRetVal) override
         {
             return withCheckedComArgs (pRetVal, *this, [&]
             {
@@ -220,9 +217,9 @@ private:
             });
         }
 
-        JUCE_COMRESULT CompareEndpoints (TextPatternRangeEndpoint endpoint,
-                                         ITextRangeProvider* targetRange,
-                                         TextPatternRangeEndpoint targetEndpoint,
+        JUCE_COMRESULT CompareEndpoints (ComTypes::TextPatternRangeEndpoint endpoint,
+                                         ComTypes::ITextRangeProvider* targetRange,
+                                         ComTypes::TextPatternRangeEndpoint targetEndpoint,
                                          int* pRetVal) override
         {
             if (targetRange == nullptr)
@@ -230,36 +227,41 @@ private:
 
             return withCheckedComArgs (pRetVal, *this, [&]
             {
-                auto offset = (endpoint == TextPatternRangeEndpoint_Start ? selectionRange.getStart()
-                                                                          : selectionRange.getEnd());
+                auto offset = (endpoint == ComTypes::TextPatternRangeEndpoint_Start ? selectionRange.getStart()
+                                                                                    : selectionRange.getEnd());
 
                 auto otherRange = static_cast<UIATextRangeProvider*> (targetRange)->getSelectionRange();
-                auto otherOffset = (targetEndpoint == TextPatternRangeEndpoint_Start ? otherRange.getStart()
-                                                                                     : otherRange.getEnd());
+                auto otherOffset = (targetEndpoint == ComTypes::TextPatternRangeEndpoint_Start ? otherRange.getStart()
+                                                                                               : otherRange.getEnd());
 
                 *pRetVal = offset - otherOffset;
                 return S_OK;
             });
         }
 
-        JUCE_COMRESULT ExpandToEnclosingUnit (TextUnit unit) override
+        JUCE_COMRESULT ExpandToEnclosingUnit (ComTypes::TextUnit unit) override
         {
             if (! isElementValid())
                 return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
             if (auto* textInterface = owner->getHandler().getTextInterface())
             {
+                using ATH = AccessibilityTextHelpers;
+
                 const auto boundaryType = getBoundaryType (unit);
+                const auto start = ATH::findTextBoundary (*textInterface,
+                                                          selectionRange.getStart(),
+                                                          boundaryType,
+                                                          ATH::Direction::backwards,
+                                                          ATH::IncludeThisBoundary::yes,
+                                                          ATH::IncludeWhitespaceAfterWords::no);
 
-                const auto start = AccessibilityTextHelpers::findTextBoundary (*textInterface,
-                                                                               selectionRange.getStart(),
-                                                                               boundaryType,
-                                                                               AccessibilityTextHelpers::Direction::backwards);
-
-                const auto end = AccessibilityTextHelpers::findTextBoundary (*textInterface,
-                                                                             start,
-                                                                             boundaryType,
-                                                                             AccessibilityTextHelpers::Direction::forwards);
+                const auto end = ATH::findTextBoundary (*textInterface,
+                                                        start,
+                                                        boundaryType,
+                                                        ATH::Direction::forwards,
+                                                        ATH::IncludeThisBoundary::no,
+                                                        ATH::IncludeWhitespaceAfterWords::yes);
 
                 selectionRange = Range<int> (start, end);
 
@@ -269,7 +271,7 @@ private:
             return (HRESULT) UIA_E_NOTSUPPORTED;
         }
 
-        JUCE_COMRESULT FindAttribute (TEXTATTRIBUTEID, VARIANT, BOOL, ITextRangeProvider** pRetVal) override
+        JUCE_COMRESULT FindAttribute (TEXTATTRIBUTEID, VARIANT, BOOL, ComTypes::ITextRangeProvider** pRetVal) override
         {
             return withCheckedComArgs (pRetVal, *this, []
             {
@@ -278,7 +280,7 @@ private:
         }
 
         JUCE_COMRESULT FindText (BSTR text, BOOL backward, BOOL ignoreCase,
-                                 ITextRangeProvider** pRetVal) override
+                                 ComTypes::ITextRangeProvider** pRetVal) override
         {
             return owner->withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
             {
@@ -301,6 +303,8 @@ private:
             {
                 VariantHelpers::clear (pRetVal);
 
+                using namespace ComTypes::Constants;
+
                 switch (attributeId)
                 {
                     case UIA_IsReadOnlyAttributeId:
@@ -316,12 +320,12 @@ private:
                         auto caretPos = [&]
                         {
                             if (cursorPos == 0)
-                                return CaretPosition_BeginningOfLine;
+                                return ComTypes::CaretPosition_BeginningOfLine;
 
                             if (cursorPos == textInterface.getTotalNumCharacters())
-                                return CaretPosition_EndOfLine;
+                                return ComTypes::CaretPosition_EndOfLine;
 
-                            return CaretPosition_Unknown;
+                            return ComTypes::CaretPosition_Unknown;
                         }();
 
                         VariantHelpers::setInt (caretPos, pRetVal);
@@ -412,28 +416,48 @@ private:
             });
         }
 
-        JUCE_COMRESULT Move (TextUnit unit, int count, int* pRetVal) override
+        JUCE_COMRESULT Move (ComTypes::TextUnit unit, int count, int* pRetVal) override
         {
-            return owner->withTextInterface (pRetVal, [&] (const AccessibilityTextInterface&)
+            return owner->withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
             {
-                if (count > 0)
+                using ATH = AccessibilityTextHelpers;
+
+                const auto boundaryType = getBoundaryType (unit);
+                const auto previousUnitBoundary = ATH::findTextBoundary (textInterface,
+                                                                         selectionRange.getStart(),
+                                                                         boundaryType,
+                                                                         ATH::Direction::backwards,
+                                                                         ATH::IncludeThisBoundary::yes,
+                                                                         ATH::IncludeWhitespaceAfterWords::no);
+
+                auto numMoved = 0;
+                auto movedEndpoint = previousUnitBoundary;
+
+                for (; numMoved < std::abs (count); ++numMoved)
                 {
-                    MoveEndpointByUnit (TextPatternRangeEndpoint_End, unit, count, pRetVal);
-                    MoveEndpointByUnit (TextPatternRangeEndpoint_Start, unit, count, pRetVal);
-                }
-                else if (count < 0)
-                {
-                    MoveEndpointByUnit (TextPatternRangeEndpoint_Start, unit, count, pRetVal);
-                    MoveEndpointByUnit (TextPatternRangeEndpoint_End, unit, count, pRetVal);
+                    const auto nextEndpoint = ATH::findTextBoundary (textInterface,
+                                                                     movedEndpoint,
+                                                                     boundaryType,
+                                                                     count > 0 ? ATH::Direction::forwards : ATH::Direction::backwards,
+                                                                     ATH::IncludeThisBoundary::no,
+                                                                     count > 0 ? ATH::IncludeWhitespaceAfterWords::yes : ATH::IncludeWhitespaceAfterWords::no);
+
+                    if (nextEndpoint == movedEndpoint)
+                        break;
+
+                    movedEndpoint = nextEndpoint;
                 }
 
+                *pRetVal = numMoved;
+
+                ExpandToEnclosingUnit (unit);
                 return S_OK;
             });
         }
 
-        JUCE_COMRESULT MoveEndpointByRange (TextPatternRangeEndpoint endpoint,
-                                            ITextRangeProvider* targetRange,
-                                            TextPatternRangeEndpoint targetEndpoint) override
+        JUCE_COMRESULT MoveEndpointByRange (ComTypes::TextPatternRangeEndpoint endpoint,
+                                            ComTypes::ITextRangeProvider* targetRange,
+                                            ComTypes::TextPatternRangeEndpoint targetEndpoint) override
         {
             if (targetRange == nullptr)
                 return E_INVALIDARG;
@@ -441,11 +465,11 @@ private:
             if (! isElementValid())
                 return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
-            if (auto* textInterface = owner->getHandler().getTextInterface())
+            if (owner->getHandler().getTextInterface() != nullptr)
             {
                 auto otherRange = static_cast<UIATextRangeProvider*> (targetRange)->getSelectionRange();
-                auto targetPoint = (targetEndpoint == TextPatternRangeEndpoint_Start ? otherRange.getStart()
-                                                                                     : otherRange.getEnd());
+                auto targetPoint = (targetEndpoint == ComTypes::TextPatternRangeEndpoint_Start ? otherRange.getStart()
+                                                                                               : otherRange.getEnd());
 
                 setEndpointChecked (endpoint, targetPoint);
                 return S_OK;
@@ -454,8 +478,8 @@ private:
             return (HRESULT) UIA_E_NOTSUPPORTED;
         }
 
-        JUCE_COMRESULT MoveEndpointByUnit (TextPatternRangeEndpoint endpoint,
-                                           TextUnit unit,
+        JUCE_COMRESULT MoveEndpointByUnit (ComTypes::TextPatternRangeEndpoint endpoint,
+                                           ComTypes::TextUnit unit,
                                            int count,
                                            int* pRetVal) override
         {
@@ -464,34 +488,37 @@ private:
                 if (count == 0 || textInterface.getTotalNumCharacters() == 0)
                     return S_OK;
 
-                auto endpointToMove = (endpoint == TextPatternRangeEndpoint_Start ? selectionRange.getStart()
-                                                                                  : selectionRange.getEnd());
+                const auto endpointToMove = (endpoint == ComTypes::TextPatternRangeEndpoint_Start ? selectionRange.getStart()
+                                                                                                  : selectionRange.getEnd());
 
-                const auto direction = (count > 0 ? AccessibilityTextHelpers::Direction::forwards
-                                                  : AccessibilityTextHelpers::Direction::backwards);
+                using ATH = AccessibilityTextHelpers;
+
+                const auto direction = (count > 0 ? ATH::Direction::forwards
+                                                  : ATH::Direction::backwards);
 
                 const auto boundaryType = getBoundaryType (unit);
+                auto movedEndpoint = endpointToMove;
 
-                // handle case where endpoint is on a boundary
-                if (AccessibilityTextHelpers::findTextBoundary (textInterface, endpointToMove, boundaryType, direction) == endpointToMove)
-                    endpointToMove += (direction == AccessibilityTextHelpers::Direction::forwards ? 1 : -1);
-
-                int numMoved;
-                for (numMoved = 0; numMoved < std::abs (count); ++numMoved)
+                int numMoved = 0;
+                for (; numMoved < std::abs (count); ++numMoved)
                 {
-                    auto nextEndpoint = AccessibilityTextHelpers::findTextBoundary (textInterface,
-                                                                                    endpointToMove,
-                                                                                    boundaryType,
-                                                                                    direction);
+                    auto nextEndpoint = ATH::findTextBoundary (textInterface,
+                                                               movedEndpoint,
+                                                               boundaryType,
+                                                               direction,
+                                                               ATH::IncludeThisBoundary::no,
+                                                               direction == ATH::Direction::forwards ? ATH::IncludeWhitespaceAfterWords::yes
+                                                                                                     : ATH::IncludeWhitespaceAfterWords::no);
 
-                    if (nextEndpoint == endpointToMove)
+                    if (nextEndpoint == movedEndpoint)
                         break;
 
-                    endpointToMove = nextEndpoint;
+                    movedEndpoint = nextEndpoint;
                 }
 
                 *pRetVal = numMoved;
-                setEndpointChecked (endpoint, endpointToMove);
+
+                setEndpointChecked (endpoint, movedEndpoint);
 
                 return S_OK;
             });
@@ -536,23 +563,23 @@ private:
         }
 
     private:
-        static AccessibilityTextHelpers::BoundaryType getBoundaryType (TextUnit unit)
+        static AccessibilityTextHelpers::BoundaryType getBoundaryType (ComTypes::TextUnit unit)
         {
             switch (unit)
             {
-                case TextUnit_Character:
+                case ComTypes::TextUnit_Character:
                     return AccessibilityTextHelpers::BoundaryType::character;
 
-                case TextUnit_Format:
-                case TextUnit_Word:
+                case ComTypes::TextUnit_Format:
+                case ComTypes::TextUnit_Word:
                     return AccessibilityTextHelpers::BoundaryType::word;
 
-                case TextUnit_Line:
+                case ComTypes::TextUnit_Line:
                     return AccessibilityTextHelpers::BoundaryType::line;
 
-                case TextUnit_Paragraph:
-                case TextUnit_Page:
-                case TextUnit_Document:
+                case ComTypes::TextUnit_Paragraph:
+                case ComTypes::TextUnit_Page:
+                case ComTypes::TextUnit_Document:
                     return AccessibilityTextHelpers::BoundaryType::document;
             };
 
@@ -560,9 +587,9 @@ private:
             return AccessibilityTextHelpers::BoundaryType::character;
         }
 
-        void setEndpointChecked (TextPatternRangeEndpoint endpoint, int newEndpoint)
+        void setEndpointChecked (ComTypes::TextPatternRangeEndpoint endpoint, int newEndpoint)
         {
-            if (endpoint == TextPatternRangeEndpoint_Start)
+            if (endpoint == ComTypes::TextPatternRangeEndpoint_Start)
             {
                 if (selectionRange.getEnd() < newEndpoint)
                     selectionRange.setEnd (newEndpoint);

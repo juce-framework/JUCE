@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -49,9 +49,6 @@ public:
         Internally, this calls setSeedRandomly() to randomise the seed.
     */
     Random();
-
-    /** Destructor. */
-    ~Random() noexcept;
 
     /** Returns the next random 32 bit integer.
         @returns a random integer from the full range 0x80000000 to 0x7fffffff

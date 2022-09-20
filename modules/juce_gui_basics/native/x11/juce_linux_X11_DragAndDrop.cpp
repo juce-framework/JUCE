@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -156,9 +156,10 @@ public:
         if (windowH == 0)
             windowH = (::Window) peer->getNativeHandle();
 
-        auto dropPos = Desktop::getInstance().getDisplays().physicalToLogical (Point<int> ((int) clientMsg.data.l[2] >> 16,
-                                                                                           (int) clientMsg.data.l[2] & 0xffff));
-        dropPos -= peer->getBounds().getPosition();
+        const auto displays = Desktop::getInstance().getDisplays();
+        const auto logicalPos = displays.physicalToLogical (Point<int> ((int) clientMsg.data.l[2] >> 16,
+                                                                        (int) clientMsg.data.l[2] & 0xffff));
+        const auto dropPos = ScalingHelpers::screenPosToLocalPos (peer->getComponent(), logicalPos.toFloat()).roundToInt();
 
         const auto& atoms = getAtoms();
 
@@ -273,6 +274,8 @@ public:
     {
         if (auto* peer = getPeerFor (windowH))
             peer->handleDragExit (dragInfo);
+
+        resetDragAndDrop();
     }
 
     void handleDragAndDropSelection (const XEvent& evt)
@@ -339,6 +342,8 @@ public:
 
         if (completionCallback != nullptr)
             completionCallback();
+
+        dragging = false;
     }
 
     bool externalDragInit (::Window window, bool text, const String& str, std::function<void()>&& cb)
@@ -566,10 +571,21 @@ private:
         ComponentPeer::DragInfo dragInfoCopy (dragInfo);
 
         sendDragAndDropFinish();
+        resetDragAndDrop();
 
         if (! dragInfoCopy.isEmpty())
             if (auto* peer = getPeerFor (windowH))
                 peer->handleDragDrop (dragInfoCopy);
+    }
+
+    void resetDragAndDrop()
+    {
+        dragInfo.clear();
+        dragInfo.position = Point<int> (-1, -1);
+        dragAndDropCurrentMimeType = 0;
+        dragAndDropSourceWindow = 0;
+        srcMimeTypeAtomList.clear();
+        finishAfterDropDataReceived = false;
     }
 
     //==============================================================================

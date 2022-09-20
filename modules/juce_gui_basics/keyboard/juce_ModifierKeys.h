@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -163,23 +163,23 @@ public:
 
     //==============================================================================
     /** Returns a copy of only the mouse-button flags */
-    ModifierKeys withOnlyMouseButtons() const noexcept                  { return ModifierKeys (flags & allMouseButtonModifiers); }
+    [[nodiscard]] ModifierKeys withOnlyMouseButtons() const noexcept                  { return ModifierKeys (flags & allMouseButtonModifiers); }
 
     /** Returns a copy of only the non-mouse flags */
-    ModifierKeys withoutMouseButtons() const noexcept                   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
+    [[nodiscard]] ModifierKeys withoutMouseButtons() const noexcept                   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
 
-    bool operator== (const ModifierKeys other) const noexcept           { return flags == other.flags; }
-    bool operator!= (const ModifierKeys other) const noexcept           { return flags != other.flags; }
+    bool operator== (const ModifierKeys other) const noexcept                          { return flags == other.flags; }
+    bool operator!= (const ModifierKeys other) const noexcept                          { return flags != other.flags; }
 
     //==============================================================================
     /** Returns the raw flags for direct testing. */
-    inline int getRawFlags() const noexcept                             { return flags; }
+    inline int getRawFlags() const noexcept                                            { return flags; }
 
-    ModifierKeys withoutFlags (int rawFlagsToClear) const noexcept      { return ModifierKeys (flags & ~rawFlagsToClear); }
-    ModifierKeys withFlags (int rawFlagsToSet) const noexcept           { return ModifierKeys (flags | rawFlagsToSet); }
+    [[nodiscard]] ModifierKeys withoutFlags (int rawFlagsToClear) const noexcept      { return ModifierKeys (flags & ~rawFlagsToClear); }
+    [[nodiscard]] ModifierKeys withFlags (int rawFlagsToSet) const noexcept           { return ModifierKeys (flags | rawFlagsToSet); }
 
     /** Tests a combination of flags and returns true if any of them are set. */
-    bool testFlags (int flagsToTest) const noexcept                     { return (flags & flagsToTest) != 0; }
+    bool testFlags (int flagsToTest) const noexcept                                    { return (flags & flagsToTest) != 0; }
 
     /** Returns the total number of mouse buttons that are down. */
     int getNumMouseButtonsDown() const noexcept;
@@ -194,7 +194,7 @@ public:
         This method is here for backwards compatibility and there's no need to call it anymore,
         you should use the public currentModifiers member directly.
      */
-    static ModifierKeys getCurrentModifiers() noexcept                  { return currentModifiers; }
+    static ModifierKeys getCurrentModifiers() noexcept                                 { return currentModifiers; }
 
     /** Creates a ModifierKeys object to represent the current state of the
         keyboard and mouse buttons.

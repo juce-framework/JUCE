@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -32,7 +32,7 @@
 
  dependencies:     juce_core, juce_data_structures, juce_events, juce_graphics,
                    juce_gui_basics
- exporters:        xcode_mac, vs2019, androidstudio, xcode_iphone
+ exporters:        xcode_mac, vs2022, androidstudio, xcode_iphone
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 
@@ -190,10 +190,13 @@ private:
         ButtonsComponent()
         {
             addAndMakeVisible (radioButtons);
+
+            textButton.setHasFocusOutline (true);
             addAndMakeVisible (textButton);
 
             shapeButton.setShape (getJUCELogoPath(), false, true, false);
             shapeButton.onClick = [] { AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon, "Alert", "This is an AlertWindow"); };
+            shapeButton.setHasFocusOutline (true);
             addAndMakeVisible (shapeButton);
         }
 
@@ -217,6 +220,7 @@ private:
                 {
                     b.setRadioGroupId (1);
                     b.setButtonText ("Button " + String (index++));
+                    b.setHasFocusOutline (true);
                     addAndMakeVisible (b);
                 }
 
@@ -418,6 +422,7 @@ constexpr NameAndRole accessibilityRoles[]
     { "Ignored",       AccessibilityRole::ignored },
     { "Unspecified",   AccessibilityRole::unspecified },
     { "Button",        AccessibilityRole::button },
+    { "Toggle",        AccessibilityRole::toggleButton },
     { "ComboBox",      AccessibilityRole::comboBox },
     { "Slider",        AccessibilityRole::slider },
     { "Static Text",   AccessibilityRole::staticText },

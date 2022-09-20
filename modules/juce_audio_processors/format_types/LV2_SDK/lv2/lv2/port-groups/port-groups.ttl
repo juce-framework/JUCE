@@ -1,0 +1,807 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pg: <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/port-groups>
+	a owl:Ontology ;
+	rdfs:label "LV2 Port Groups" ;
+	rdfs:comment "Multi-channel groups of LV2 ports." ;
+	rdfs:seeAlso <port-groups.meta.ttl> .
+
+pg:Group
+	a rdfs:Class ;
+	rdfs:label "Port Group" ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty lv2:symbol ;
+		owl:cardinality 1 ;
+		rdfs:comment "A Group MUST have exactly one string lv2:symbol."
+	] ;
+	rdfs:comment "A set of ports that are logicaly grouped together." .
+
+pg:InputGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:Group ;
+	rdfs:label "Input Group" ;
+	rdfs:comment "A group which contains exclusively inputs." .
+
+pg:OutputGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:Group ;
+	rdfs:label "Output Group" ;
+	rdfs:comment "A group which contains exclusively outputs." .
+
+pg:Element
+	a rdfs:Class ;
+	rdfs:label "Element" ;
+	rdfs:comment "An ordered element of a group." ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty lv2:designation ;
+		owl:cardinality 1 ;
+		rdfs:comment "An element MUST have exactly one lv2:designation."
+	] ;
+	rdfs:comment "An element of a group, with a designation and optional index." .
+
+pg:element
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:range pg:Element ;
+	rdfs:label "element" ;
+	rdfs:comment "An element within a port group." .
+
+pg:sideChainOf
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:label "side-chain of" ;
+	rdfs:comment "Port or group is a side chain of another." .
+
+pg:subGroupOf
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain pg:Group ;
+	rdfs:range pg:Group ;
+	rdfs:label "sub-group of" ;
+	rdfs:comment "Group is a child of another group." .
+
+pg:source
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain pg:OutputGroup ;
+	rdfs:range pg:InputGroup ;
+	rdfs:label "source" ;
+	rdfs:comment "Port or group that this group is the output of." .
+
+pg:mainInput
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain lv2:Plugin ;
+	rdfs:range pg:InputGroup ;
+	rdfs:label "main input" ;
+	rdfs:comment "Input group that is the primary input of the plugin." .
+
+pg:mainOutput
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain lv2:Plugin ;
+	rdfs:range pg:OutputGroup ;
+	rdfs:label "main output" ;
+	rdfs:comment "Output group that is the primary output of the plugin." .
+
+pg:group
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain lv2:Port ;
+	rdfs:range pg:Group ;
+	rdfs:label "group" ;
+	rdfs:comment "Group that this port is a part of." .
+
+pg:DiscreteGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:Group ;
+	rdfs:label "Discrete Group" ;
+	rdfs:comment "A group of discrete channels." .
+
+pg:left
+	a lv2:Channel ;
+	rdfs:label "left" ;
+	rdfs:comment "The left channel of a stereo audio group." .
+
+pg:right
+	a lv2:Channel ;
+	rdfs:label "right" ;
+	rdfs:comment "The right channel of a stereo audio group." .
+
+pg:center
+	a lv2:Channel ;
+	rdfs:label "center" ;
+	rdfs:comment "The center channel of a discrete audio group." .
+
+pg:side
+	a lv2:Channel ;
+	rdfs:label "side" ;
+	rdfs:comment "The side channel of a mid-side audio group." .
+
+pg:centerLeft
+	a lv2:Channel ;
+	rdfs:label "center left" ;
+	rdfs:comment "The center-left channel of a 7.1 wide surround sound group." .
+
+pg:centerRight
+	a lv2:Channel ;
+	rdfs:label "center right" ;
+	rdfs:comment "The center-right channel of a 7.1 wide surround sound group." .
+
+pg:sideLeft
+	a lv2:Channel ;
+	rdfs:label "side left" ;
+	rdfs:comment "The side-left channel of a 6.1 or 7.1 surround sound group." .
+
+pg:sideRight
+	a lv2:Channel ;
+	rdfs:label "side right" ;
+	rdfs:comment "The side-right channel of a 6.1 or 7.1 surround sound group." .
+
+pg:rearLeft
+	a lv2:Channel ;
+	rdfs:label "rear left" ;
+	rdfs:comment "The rear-left channel of a surround sound group." .
+
+pg:rearRight
+	a lv2:Channel ;
+	rdfs:label "rear right" ;
+	rdfs:comment "The rear-right channel of a surround sound group." .
+
+pg:rearCenter
+	a lv2:Channel ;
+	rdfs:label "rear center" ;
+	rdfs:comment "The rear-center channel of a surround sound group." .
+
+pg:lowFrequencyEffects
+	a lv2:Channel ;
+	rdfs:label "low-frequency effects" ;
+	rdfs:comment "The LFE channel of a *.1 surround sound group." .
+
+pg:MonoGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "Mono" ;
+	rdfs:comment "A single channel audio group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:center
+	] .
+
+pg:StereoGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "Stereo" ;
+	rdfs:comment "A 2-channel discrete stereo audio group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:left
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:right
+	] .
+
+pg:MidSideGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "Mid-Side Stereo" ;
+	rdfs:comment "A 2-channel mid-side stereo audio group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:center
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:side
+	] .
+
+pg:ThreePointZeroGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "3.0 Surround" ;
+	rdfs:comment "A 3.0 discrete surround sound group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:left
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:right
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:rearCenter
+	] .
+
+pg:FourPointZeroGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "4.0 Surround" ;
+	rdfs:comment "A 4.0 (Quadraphonic) discrete surround sound group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:left
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:center
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:right
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:rearCenter
+	] .
+
+pg:FivePointZeroGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "5.0 Surround" ;
+	rdfs:comment "A 5.0 (3-2 stereo) discrete surround sound group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:left
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:center
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:right
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:rearLeft
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:rearRight
+	] .
+
+pg:FivePointOneGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "5.1 Surround" ;
+	rdfs:comment "A 5.1 (3-2 stereo with sub) discrete surround sound group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:left
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:center
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:right
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:rearLeft
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:rearRight
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:lowFrequencyEffects
+	] .
+
+pg:SixPointOneGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "6.1 Surround" ;
+	rdfs:comment "A 6.1 discrete surround sound group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:left
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:center
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:right
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:sideLeft
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:sideRight
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:rearCenter
+	] , [
+		lv2:index 6 ;
+		lv2:designation pg:lowFrequencyEffects
+	] .
+
+pg:SevenPointOneGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "7.1 Surround" ;
+	rdfs:comment "A 7.1 discrete surround sound group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:left
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:center
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:right
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:sideLeft
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:sideRight
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:rearLeft
+	] , [
+		lv2:index 6 ;
+		lv2:designation pg:rearRight
+	] , [
+		lv2:index 7 ;
+		lv2:designation pg:lowFrequencyEffects
+	] .
+
+pg:SevenPointOneWideGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:DiscreteGroup ;
+	rdfs:label "7.1 Surround (Wide)" ;
+	rdfs:comment "A 7.1 wide discrete surround sound group." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:left
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:centerLeft
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:center
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:centerRight
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:right
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:rearLeft
+	] , [
+		lv2:index 6 ;
+		lv2:designation pg:rearRight
+	] , [
+		lv2:index 7 ;
+		lv2:designation pg:lowFrequencyEffects
+	] .
+
+pg:letterCode
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:domain lv2:Channel ;
+	rdfs:range rdf:PlainLiteral ;
+	rdfs:label "ambisonic letter code" ;
+	rdfs:comment "The YuMa letter code for an Ambisonic channel." .
+
+pg:harmonicDegree
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:domain lv2:Channel ;
+	rdfs:range xsd:integer ;
+	rdfs:label "harmonic degree" ;
+	rdfs:comment "The degree coefficient (l) of the spherical harmonic for an Ambisonic channel." .
+
+pg:harmonicIndex
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:domain lv2:Channel ;
+	rdfs:range xsd:integer ;
+	rdfs:label "harmonic index" ;
+	rdfs:comment "The index coefficient (m) of the spherical harmonic for an Ambisonic channel." .
+
+pg:ACN0
+	a lv2:Channel ;
+	pg:letterCode "W" ;
+	pg:harmonicDegree 0 ;
+	pg:harmonicIndex 0 ;
+	rdfs:label "ACN0" ;
+	rdfs:comment "Ambisonic channel 0 (W): degree 0, index 0." .
+
+pg:ACN1
+	a lv2:Channel ;
+	pg:letterCode "Y" ;
+	pg:harmonicDegree 1 ;
+	pg:harmonicIndex -1 ;
+	rdfs:label "ACN1" ;
+	rdfs:comment "Ambisonic channel 1 (Y): degree 1, index -1." .
+
+pg:ACN2
+	a lv2:Channel ;
+	pg:letterCode "Z" ;
+	pg:harmonicDegree 1 ;
+	pg:harmonicIndex 0 ;
+	rdfs:label "ACN2" ;
+	rdfs:comment "Ambisonic channel 2 (Z): degree 1, index 0." .
+
+pg:ACN3
+	a lv2:Channel ;
+	pg:letterCode "X" ;
+	pg:harmonicDegree 1 ;
+	pg:harmonicIndex 1 ;
+	rdfs:label "ACN3" ;
+	rdfs:comment "Ambisonic channel 3 (X): degree 1, index 1." .
+
+pg:ACN4
+	a lv2:Channel ;
+	pg:letterCode "V" ;
+	pg:harmonicDegree 2 ;
+	pg:harmonicIndex -2 ;
+	rdfs:label "ACN4" ;
+	rdfs:comment "Ambisonic channel 4 (V): degree 2, index -2." .
+
+pg:ACN5
+	a lv2:Channel ;
+	pg:letterCode "T" ;
+	pg:harmonicDegree 2 ;
+	pg:harmonicIndex -1 ;
+	rdfs:label "ACN5" ;
+	rdfs:comment "Ambisonic channel 5 (T): degree 2, index -1." .
+
+pg:ACN6
+	a lv2:Channel ;
+	pg:letterCode "R" ;
+	pg:harmonicDegree 2 ;
+	pg:harmonicIndex 0 ;
+	rdfs:label "ACN6" ;
+	rdfs:comment "Ambisonic channel 6 (R): degree 2, index 0." .
+
+pg:ACN7
+	a lv2:Channel ;
+	pg:letterCode "S" ;
+	pg:harmonicDegree 2 ;
+	pg:harmonicIndex 1 ;
+	rdfs:label "ACN7" ;
+	rdfs:comment "Ambisonic channel 7 (S): degree 2, index 1." .
+
+pg:ACN8
+	a lv2:Channel ;
+	pg:letterCode "U" ;
+	pg:harmonicDegree 2 ;
+	pg:harmonicIndex 2 ;
+	rdfs:label "ACN8" ;
+	rdfs:comment "Ambisonic channel 8 (U): degree 2, index 2." .
+
+pg:ACN9
+	a lv2:Channel ;
+	pg:letterCode "Q" ;
+	pg:harmonicDegree 3 ;
+	pg:harmonicIndex -3 ;
+	rdfs:label "ACN9" ;
+	rdfs:comment "Ambisonic channel 9 (Q): degree 3, index -3." .
+
+pg:ACN10
+	a lv2:Channel ;
+	pg:letterCode "O" ;
+	pg:harmonicDegree 3 ;
+	pg:harmonicIndex -2 ;
+	rdfs:label "ACN10" ;
+	rdfs:comment "Ambisonic channel 10 (O): degree 3, index -2." .
+
+pg:ACN11
+	a lv2:Channel ;
+	pg:letterCode "M" ;
+	pg:harmonicDegree 3 ;
+	pg:harmonicIndex -1 ;
+	rdfs:label "ACN11" ;
+	rdfs:comment "Ambisonic channel 11 (M): degree 3, index -1." .
+
+pg:ACN12
+	a lv2:Channel ;
+	pg:letterCode "K" ;
+	pg:harmonicDegree 3 ;
+	pg:harmonicIndex 0 ;
+	rdfs:label "ACN12" ;
+	rdfs:comment "Ambisonic channel 12 (K): degree 3, index 0." .
+
+pg:ACN13
+	a lv2:Channel ;
+	pg:letterCode "L" ;
+	pg:harmonicDegree 3 ;
+	pg:harmonicIndex 1 ;
+	rdfs:label "ACN13" ;
+	rdfs:comment "Ambisonic channel 13 (L): degree 3, index 1." .
+
+pg:ACN14
+	a lv2:Channel ;
+	pg:letterCode "N" ;
+	pg:harmonicDegree 3 ;
+	pg:harmonicIndex 2 ;
+	rdfs:label "ACN14" ;
+	rdfs:comment "Ambisonic channel 14 (N): degree 3, index 2." .
+
+pg:ACN15
+	a lv2:Channel ;
+	pg:letterCode "P" ;
+	pg:harmonicDegree 3 ;
+	pg:harmonicIndex 3 ;
+	rdfs:label "ACN15" ;
+	rdfs:comment "Ambisonic channel 15 (P): degree 3, index 3." .
+
+pg:AmbisonicGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:Group ;
+	rdfs:label "Ambisonic Group" ;
+	rdfs:comment "A group of Ambisonic channels." .
+
+pg:AmbisonicBH1P0Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH1P0" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 1 and peripheral order 0." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN3
+	] .
+
+pg:AmbisonicBH1P1Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH1P1" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 1 and peripheral order 1." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN2
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:ACN3
+	] .
+
+pg:AmbisonicBH2P0Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH2P0" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 2 and peripheral order 0." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN3
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:ACN4
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:ACN8
+	] .
+
+pg:AmbisonicBH2P1Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH2P1" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 2 and peripheral order 1." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN2
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:ACN3
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:ACN4
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:ACN8
+	] .
+
+pg:AmbisonicBH2P2Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH2P2" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 2 and peripheral order 2." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN2
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:ACN3
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:ACN4
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:ACN5
+	] , [
+		lv2:index 6 ;
+		lv2:designation pg:ACN6
+	] , [
+		lv2:index 7 ;
+		lv2:designation pg:ACN7
+	] , [
+		lv2:index 8 ;
+		lv2:designation pg:ACN8
+	] .
+
+pg:AmbisonicBH3P0Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH3P0" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 3 and peripheral order 0." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN3
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:ACN4
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:ACN8
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:ACN9
+	] , [
+		lv2:index 6 ;
+		lv2:designation pg:ACN15
+	] .
+
+pg:AmbisonicBH3P1Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH3P1" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 3 and peripheral order 1." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN2
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:ACN3
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:ACN4
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:ACN8
+	] , [
+		lv2:index 6 ;
+		lv2:designation pg:ACN9
+	] , [
+		lv2:index 7 ;
+		lv2:designation pg:ACN15
+	] .
+
+pg:AmbisonicBH3P2Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH3P2" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 3 and peripheral order 2." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN2
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:ACN3
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:ACN4
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:ACN5
+	] , [
+		lv2:index 6 ;
+		lv2:designation pg:ACN6
+	] , [
+		lv2:index 7 ;
+		lv2:designation pg:ACN7
+	] , [
+		lv2:index 8 ;
+		lv2:designation pg:ACN8
+	] , [
+		lv2:index 9 ;
+		lv2:designation pg:ACN9
+	] , [
+		lv2:index 10 ;
+		lv2:designation pg:ACN15
+	] .
+
+pg:AmbisonicBH3P3Group
+	a rdfs:Class ;
+	rdfs:subClassOf pg:AmbisonicGroup ;
+	rdfs:label "Ambisonic BH3P3" ;
+	rdfs:comment "Ambisonic B stream of horizontal order 3 and peripheral order 3." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation pg:ACN0
+	] , [
+		lv2:index 1 ;
+		lv2:designation pg:ACN1
+	] , [
+		lv2:index 2 ;
+		lv2:designation pg:ACN2
+	] , [
+		lv2:index 3 ;
+		lv2:designation pg:ACN3
+	] , [
+		lv2:index 4 ;
+		lv2:designation pg:ACN4
+	] , [
+		lv2:index 5 ;
+		lv2:designation pg:ACN5
+	] , [
+		lv2:index 6 ;
+		lv2:designation pg:ACN6
+	] , [
+		lv2:index 7 ;
+		lv2:designation pg:ACN7
+	] , [
+		lv2:index 8 ;
+		lv2:designation pg:ACN8
+	] , [
+		lv2:index 9 ;
+		lv2:designation pg:ACN9
+	] , [
+		lv2:index 10 ;
+		lv2:designation pg:ACN10
+	] , [
+		lv2:index 11 ;
+		lv2:designation pg:ACN11
+	] , [
+		lv2:index 12 ;
+		lv2:designation pg:ACN12
+	] , [
+		lv2:index 13 ;
+		lv2:designation pg:ACN13
+	] , [
+		lv2:index 14 ;
+		lv2:designation pg:ACN14
+	] , [
+		lv2:index 15 ;
+		lv2:designation pg:ACN15
+	] .
+

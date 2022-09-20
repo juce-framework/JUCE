@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -68,13 +68,13 @@ public:
 
     //==============================================================================
     /** Sets the type of icon that should be used for the dialog box. */
-    MessageBoxOptions withIconType (MessageBoxIconType type) const          { return with (*this, &MessageBoxOptions::iconType, type); }
+    [[nodiscard]] MessageBoxOptions withIconType (MessageBoxIconType type) const          { return with (*this, &MessageBoxOptions::iconType, type); }
 
     /** Sets the title of the dialog box. */
-    MessageBoxOptions withTitle (const String& boxTitle) const              { return with (*this, &MessageBoxOptions::title, boxTitle); }
+    [[nodiscard]] MessageBoxOptions withTitle (const String& boxTitle) const              { return with (*this, &MessageBoxOptions::title, boxTitle); }
 
     /** Sets the message that should be displayed in the dialog box. */
-    MessageBoxOptions withMessage (const String& boxMessage) const          { return with (*this, &MessageBoxOptions::message, boxMessage); }
+    [[nodiscard]] MessageBoxOptions withMessage (const String& boxMessage) const          { return with (*this, &MessageBoxOptions::message, boxMessage); }
 
     /** If the string passed in is not empty, this will add a button to the
         dialog box with the specified text.
@@ -82,10 +82,10 @@ public:
         Generally up to 3 buttons are supported for dialog boxes, so adding any more
         than this may have no effect.
     */
-    MessageBoxOptions withButton (const String& text) const                 { auto copy = *this; copy.buttons.add (text); return copy; }
+    [[nodiscard]] MessageBoxOptions withButton (const String& text) const                 { auto copy = *this; copy.buttons.add (text); return copy; }
 
     /** The component that the dialog box should be associated with. */
-    MessageBoxOptions withAssociatedComponent (Component* component) const  { return with (*this, &MessageBoxOptions::associatedComponent, component); }
+    [[nodiscard]] MessageBoxOptions withAssociatedComponent (Component* component) const  { return with (*this, &MessageBoxOptions::associatedComponent, component); }
 
     //==============================================================================
     /** Returns the icon type of the dialog box.

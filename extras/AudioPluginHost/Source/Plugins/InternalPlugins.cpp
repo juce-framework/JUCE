@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,6 +29,25 @@
 
 #include "InternalPlugins.h"
 #include "PluginGraph.h"
+
+#define PIP_DEMO_UTILITIES_INCLUDED 1
+
+// An alternative version of createAssetInputStream from the demo utilities header
+// that fetches resources from embedded binary data instead of files
+static std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
+{
+    for (int i = 0; i < BinaryData::namedResourceListSize; ++i)
+    {
+        if (String (BinaryData::originalFilenames[i]) == String (resourcePath))
+        {
+            int dataSizeInBytes;
+            auto* resource = BinaryData::getNamedResource (BinaryData::namedResourceList[i], dataSizeInBytes);
+            return std::make_unique<MemoryInputStream> (resource, dataSizeInBytes, false);
+        }
+    }
+
+    return {};
+}
 
 #include "../../../../examples/Plugins/AUv3SynthPluginDemo.h"
 #include "../../../../examples/Plugins/ArpeggiatorPluginDemo.h"
@@ -92,6 +111,7 @@ public:
     void setPlayHead (AudioPlayHead* p) override                                  { inner->setPlayHead (p); }
     void updateTrackProperties (const TrackProperties& p) override                { inner->updateTrackProperties (p); }
     bool isBusesLayoutSupported (const BusesLayout& layout) const override        { return inner->checkBusesLayoutSupported (layout); }
+    bool applyBusLayouts (const BusesLayout& layouts) override                    { return inner->setBusesLayout (layouts) && AudioPluginInstance::applyBusLayouts (layouts); }
 
     bool canAddBus (bool) const override                                          { return true; }
     bool canRemoveBus (bool) const override                                       { return true; }

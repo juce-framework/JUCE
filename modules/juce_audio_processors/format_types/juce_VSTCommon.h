@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -300,35 +300,6 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
             return 0;
 
         return speakerTypeMap.at (type);
-    }
-
-    static AudioChannelSet::ChannelType getChannelType (int32 type) noexcept
-    {
-        switch (type)
-        {
-            case Vst2::kSpeakerL:      return AudioChannelSet::left;
-            case Vst2::kSpeakerR:      return AudioChannelSet::right;
-            case Vst2::kSpeakerC:      return AudioChannelSet::centre;
-            case Vst2::kSpeakerLfe:    return AudioChannelSet::LFE;
-            case Vst2::kSpeakerLs:     return AudioChannelSet::leftSurround;
-            case Vst2::kSpeakerRs:     return AudioChannelSet::rightSurround;
-            case Vst2::kSpeakerLc:     return AudioChannelSet::leftCentre;
-            case Vst2::kSpeakerRc:     return AudioChannelSet::rightCentre;
-            case Vst2::kSpeakerS:      return AudioChannelSet::surround;
-            case Vst2::kSpeakerSl:     return AudioChannelSet::leftSurroundRear;
-            case Vst2::kSpeakerSr:     return AudioChannelSet::rightSurroundRear;
-            case Vst2::kSpeakerTm:     return AudioChannelSet::topMiddle;
-            case Vst2::kSpeakerTfl:    return AudioChannelSet::topFrontLeft;
-            case Vst2::kSpeakerTfc:    return AudioChannelSet::topFrontCentre;
-            case Vst2::kSpeakerTfr:    return AudioChannelSet::topFrontRight;
-            case Vst2::kSpeakerTrl:    return AudioChannelSet::topRearLeft;
-            case Vst2::kSpeakerTrc:    return AudioChannelSet::topRearCentre;
-            case Vst2::kSpeakerTrr:    return AudioChannelSet::topRearRight;
-            case Vst2::kSpeakerLfe2:   return AudioChannelSet::LFE2;
-            default: break;
-        }
-
-        return AudioChannelSet::unknown;
     }
 };
 

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -197,7 +197,8 @@ public:
                 NativeMessageBox::showAsync (MessageBoxOptions()
                                                .withIconType (MessageBoxIconType::InfoIcon)
                                                .withTitle ("Device token")
-                                               .withMessage (token),
+                                               .withMessage (token)
+                                               .withButton ("OK"),
                                              nullptr);
         };
 
@@ -315,7 +316,8 @@ private:
             NativeMessageBox::showAsync (MessageBoxOptions()
                                            .withIconType (MessageBoxIconType::InfoIcon)
                                            .withTitle ("Incorrect notifications setup")
-                                           .withMessage ("Please make sure that " + requiredFields + " are set."),
+                                           .withMessage ("Please make sure that " + requiredFields + " are set.")
+                                           .withButton ("OK"),
                                          nullptr);
 
             return;
@@ -568,7 +570,8 @@ private:
                                        .withTitle ("Received notification")
                                        .withMessage ("ID: " + n.identifier
                                                      + ", title: " + n.title
-                                                     + ", body: " + n.body),
+                                                     + ", body: " + n.body)
+                                       .withButton ("OK"),
                                      nullptr);
     }
 
@@ -586,7 +589,8 @@ private:
                                                      + ", title: " + n.title
                                                      + ", body: " + n.body
                                                      + ", action: " + actionIdentifier
-                                                     + ", optionalResponse: " + optionalResponse),
+                                                     + ", optionalResponse: " + optionalResponse)
+                                       .withButton ("OK"),
                                      nullptr);
 
         PushNotifications::getInstance()->removeDeliveredNotification (n.identifier);
@@ -599,7 +603,8 @@ private:
                                        .withTitle ("Notification dismissed by a user")
                                        .withMessage ("ID: " + n.identifier
                                                      + ", title: " + n.title
-                                                     + ", body: " + n.body),
+                                                     + ", body: " + n.body)
+                                       .withButton ("OK"),
                                      nullptr);
     }
 
@@ -613,7 +618,8 @@ private:
         NativeMessageBox::showAsync (MessageBoxOptions()
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Received notification list")
-                                       .withMessage (text),
+                                       .withMessage (text)
+                                       .withButton ("OK"),
                                      nullptr);
     }
 
@@ -627,7 +633,8 @@ private:
         NativeMessageBox::showAsync (MessageBoxOptions()
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Pending notification list")
-                                       .withMessage (text),
+                                       .withMessage (text)
+                                       .withButton ("OK"),
                                      nullptr);
     }
 
@@ -636,7 +643,8 @@ private:
         NativeMessageBox::showAsync (MessageBoxOptions()
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Device token refreshed")
-                                       .withMessage (token),
+                                       .withMessage (token)
+                                       .withButton ("OK"),
                                      nullptr);
     }
 
@@ -646,7 +654,8 @@ private:
         NativeMessageBox::showAsync (MessageBoxOptions()
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Remote notifications deleted")
-                                       .withMessage ("Some of the pending messages were removed!"),
+                                       .withMessage ("Some of the pending messages were removed!")
+                                       .withButton ("OK"),
                                      nullptr);
     }
 
@@ -655,7 +664,8 @@ private:
         NativeMessageBox::showAsync (MessageBoxOptions()
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Upstream message sent")
-                                       .withMessage ("Message id: " + messageId),
+                                       .withMessage ("Message id: " + messageId)
+                                       .withButton ("OK"),
                                      nullptr);
     }
 
@@ -665,7 +675,8 @@ private:
                                        .withIconType (MessageBoxIconType::InfoIcon)
                                        .withTitle ("Upstream message sending error")
                                        .withMessage ("Message id: " + messageId
-                                                     + "\nerror: " + error),
+                                                     + "\nerror: " + error)
+                                       .withButton ("OK"),
                                      nullptr);
     }
 
@@ -1223,7 +1234,8 @@ private:
                                        .withMessage ("In order to be able to test remote notifications "
                                                      "ensure that the app is signed and that you register "
                                                      "the bundle ID for remote notifications in "
-                                                     "Apple Developer Center."),
+                                                     "Apple Developer Center.")
+                                       .withButton ("OK"),
                                      nullptr);
        #endif
     }

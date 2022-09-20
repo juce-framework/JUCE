@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -271,16 +271,39 @@ public:
     */
     bool canScrollHorizontally() const noexcept;
 
-    /** Enables or disables drag-to-scroll functionality in the viewport.
+    /** Enables or disables drag-to-scroll functionality for mouse sources in the viewport.
 
         If your viewport contains a Component that you don't want to receive mouse events when the
         user is drag-scrolling, you can disable this with the Component::setViewportIgnoreDragFlag()
         method.
     */
-    void setScrollOnDragEnabled (bool shouldScrollOnDrag);
+    [[deprecated ("Use setScrollOnDragMode instead.")]]
+    void setScrollOnDragEnabled (bool shouldScrollOnDrag)
+    {
+        setScrollOnDragMode (shouldScrollOnDrag ? ScrollOnDragMode::all : ScrollOnDragMode::never);
+    }
 
-    /** Returns true if drag-to-scroll functionality is enabled. */
-    bool isScrollOnDragEnabled() const noexcept;
+    /** Returns true if drag-to-scroll functionality is enabled for mouse input sources. */
+    [[deprecated ("Use getScrollOnDragMode instead.")]]
+    bool isScrollOnDragEnabled() const noexcept { return getScrollOnDragMode() == ScrollOnDragMode::all; }
+
+    enum class ScrollOnDragMode
+    {
+        never,          /**< Dragging will never scroll the viewport. */
+        nonHover,       /**< Dragging will only scroll the viewport if the input source cannot hover. */
+        all             /**< Dragging will always scroll the viewport. */
+    };
+
+    /** Sets the current scroll-on-drag mode. The default is ScrollOnDragMode::nonHover.
+
+        If your viewport contains a Component that you don't want to receive mouse events when the
+        user is drag-scrolling, you can disable this with the Component::setViewportIgnoreDragFlag()
+        method.
+    */
+    void setScrollOnDragMode (ScrollOnDragMode scrollOnDragMode);
+
+    /** Returns the current scroll-on-drag mode. */
+    ScrollOnDragMode getScrollOnDragMode() const { return scrollOnDragMode; }
 
     /** Returns true if the user is currently dragging-to-scroll.
         @see setScrollOnDragEnabled
@@ -294,6 +317,8 @@ public:
     void scrollBarMoved (ScrollBar*, double newRangeStart) override;
     /** @internal */
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
+    /** @internal */
+    void mouseDown (const MouseEvent& e) override;
     /** @internal */
     bool keyPressed (const KeyPress&) override;
     /** @internal */
@@ -314,12 +339,21 @@ protected:
 
 private:
     //==============================================================================
+    class AccessibilityIgnoredComponent : public Component
+    {
+        std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+        {
+            return createIgnoredAccessibilityHandler (*this);
+        }
+    };
+
     std::unique_ptr<ScrollBar> verticalScrollBar, horizontalScrollBar;
-    Component contentHolder;
+    AccessibilityIgnoredComponent contentHolder;
     WeakReference<Component> contentComp;
     Rectangle<int> lastVisibleArea;
     int scrollBarThickness = 0;
     int singleStepX = 16, singleStepY = 16;
+    ScrollOnDragMode scrollOnDragMode = ScrollOnDragMode::nonHover;
     bool showHScrollbar = true, showVScrollbar = true, deleteContent = true;
     bool customScrollBarThickness = false;
     bool allowScrollingWithoutScrollbarV = false, allowScrollingWithoutScrollbarH = false;

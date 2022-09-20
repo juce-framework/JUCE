@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -772,7 +772,7 @@ struct IntelFFT  : public FFT::Instance
         : order (orderToUse), c2c (c2cToUse), c2r (cr2ToUse)
     {}
 
-    ~IntelFFT()
+    ~IntelFFT() override
     {
         DftiFreeDescriptor (&c2c);
         DftiFreeDescriptor (&c2r);
@@ -904,9 +904,6 @@ private:
             if (Traits::init (&specPtr, order, flag, hint, specBuf.get(), initBuf.get()) != ippStsNoErr)
                 return {};
 
-            if (reinterpret_cast<const Ipp8u*> (specPtr) != specBuf.get())
-                return {};
-
             return { std::move (specBuf), IppPtr (ippsMalloc_8u (workSize)), specPtr };
         }
 
@@ -972,10 +969,10 @@ void FFT::perform (const Complex<float>* input, Complex<float>* output, bool inv
         engine->perform (input, output, inverse);
 }
 
-void FFT::performRealOnlyForwardTransform (float* inputOutputData, bool ignoreNeagtiveFreqs) const noexcept
+void FFT::performRealOnlyForwardTransform (float* inputOutputData, bool ignoreNegativeFreqs) const noexcept
 {
     if (engine != nullptr)
-        engine->performRealOnlyForwardTransform (inputOutputData, ignoreNeagtiveFreqs);
+        engine->performRealOnlyForwardTransform (inputOutputData, ignoreNegativeFreqs);
 }
 
 void FFT::performRealOnlyInverseTransform (float* inputOutputData) const noexcept
@@ -984,18 +981,20 @@ void FFT::performRealOnlyInverseTransform (float* inputOutputData) const noexcep
         engine->performRealOnlyInverseTransform (inputOutputData);
 }
 
-void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData) const noexcept
+void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData, bool ignoreNegativeFreqs) const noexcept
 {
     if (size == 1)
         return;
 
-    performRealOnlyForwardTransform (inputOutputData);
+    performRealOnlyForwardTransform (inputOutputData, ignoreNegativeFreqs);
     auto* out = reinterpret_cast<Complex<float>*> (inputOutputData);
 
-    for (int i = 0; i < size; ++i)
+    const auto limit = ignoreNegativeFreqs ? (size / 2) + 1 : size;
+
+    for (int i = 0; i < limit; ++i)
         inputOutputData[i] = std::abs (out[i]);
 
-    zeromem (&inputOutputData[size], static_cast<size_t> (size) * sizeof (float));
+    zeromem (inputOutputData + limit, static_cast<size_t> (size * 2 - limit) * sizeof (float));
 }
 
 } // namespace dsp

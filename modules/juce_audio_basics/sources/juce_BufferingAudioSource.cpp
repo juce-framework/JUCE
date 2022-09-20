@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -91,9 +91,9 @@ void BufferingAudioSource::releaseResources()
 
     buffer.setSize (numberOfChannels, 0);
 
-    // MSVC2015 seems to need this if statement to not generate a warning during linking.
+    // MSVC2017 seems to need this if statement to not generate a warning during linking.
     // As source is set in the constructor, there is no way that source could
-    // ever equal this, but it seems to make MSVC2015 happy.
+    // ever equal this, but it seems to make MSVC2017 happy.
     if (source != this)
         source->releaseResources();
 }

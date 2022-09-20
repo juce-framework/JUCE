@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,7 +30,8 @@ static std::unique_ptr<XmlElement> findFontsConfFile()
 {
     static const char* pathsToSearch[] = { "/etc/fonts/fonts.conf",
                                            "/usr/share/fonts/fonts.conf",
-                                           "/usr/local/etc/fonts/fonts.conf" };
+                                           "/usr/local/etc/fonts/fonts.conf",
+                                           "/usr/share/defaults/fonts/fonts.conf" };
 
     for (auto* path : pathsToSearch)
         if (auto xml = parseXML (File (path)))
@@ -110,9 +111,9 @@ bool TextLayout::createNativeLayout (const AttributedString&)
 }
 
 //==============================================================================
-struct DefaultFontNames
+struct DefaultFontInfo
 {
-    DefaultFontNames()
+    DefaultFontInfo()
         : defaultSans  (getDefaultSansSerifFontName()),
           defaultSerif (getDefaultSerifFontName()),
           defaultFixed (getDefaultMonospacedFontName())
@@ -131,20 +132,19 @@ struct DefaultFontNames
     String defaultSans, defaultSerif, defaultFixed;
 
 private:
-    static String pickBestFont (const StringArray& names, const char* const* choicesArray)
+    template <typename Range>
+    static String pickBestFont (const StringArray& names, Range&& choicesArray)
     {
-        const StringArray choices (choicesArray);
-
-        for (auto& choice : choices)
+        for (auto& choice : choicesArray)
             if (names.contains (choice, true))
                 return choice;
 
-        for (auto& choice : choices)
+        for (auto& choice : choicesArray)
             for (auto& name : names)
                 if (name.startsWithIgnoreCase (choice))
                     return name;
 
-        for (auto& choice : choices)
+        for (auto& choice : choicesArray)
             for (auto& name : names)
                 if (name.containsIgnoreCase (choice))
                     return name;
@@ -157,8 +157,12 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getSansSerifNames (allFonts);
 
-        static const char* targets[] = { "Verdana", "Bitstream Vera Sans", "Luxi Sans",
-                                         "Liberation Sans", "DejaVu Sans", "Sans", nullptr };
+        static constexpr const char* targets[] { "Verdana",
+                                                 "Bitstream Vera Sans",
+                                                 "Luxi Sans",
+                                                 "Liberation Sans",
+                                                 "DejaVu Sans",
+                                                 "Sans" };
         return pickBestFont (allFonts, targets);
     }
 
@@ -167,8 +171,12 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getSerifNames (allFonts);
 
-        static const char* targets[] = { "Bitstream Vera Serif", "Times", "Nimbus Roman",
-                                         "Liberation Serif", "DejaVu Serif", "Serif", nullptr };
+        static constexpr const char* targets[] { "Bitstream Vera Serif",
+                                                 "Times",
+                                                 "Nimbus Roman",
+                                                 "Liberation Serif",
+                                                 "DejaVu Serif",
+                                                 "Serif" };
         return pickBestFont (allFonts, targets);
     }
 
@@ -177,20 +185,34 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getMonospacedNames (allFonts);
 
-        static const char* targets[] = { "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Sans Mono",
-                                         "Liberation Mono", "Courier", "DejaVu Mono", "Mono", nullptr };
+        static constexpr const char* targets[] { "DejaVu Sans Mono",
+                                                 "Bitstream Vera Sans Mono",
+                                                 "Sans Mono",
+                                                 "Liberation Mono",
+                                                 "Courier",
+                                                 "DejaVu Mono",
+                                                 "Mono" };
         return pickBestFont (allFonts, targets);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (DefaultFontNames)
+    JUCE_DECLARE_NON_COPYABLE (DefaultFontInfo)
 };
 
 Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 {
-    static DefaultFontNames defaultNames;
+    static const DefaultFontInfo defaultInfo;
 
     Font f (font);
-    f.setTypefaceName (defaultNames.getRealFontName (font.getTypefaceName()));
+
+    const auto name = font.getTypefaceName();
+    const auto realName = defaultInfo.getRealFontName (name);
+    f.setTypefaceName (realName);
+
+    const auto styles = findAllTypefaceStyles (realName);
+
+    if (! styles.contains (font.getTypefaceStyle()))
+        f.setTypefaceStyle (styles[0]);
+
     return Typeface::createSystemTypefaceFor (f);
 }
 

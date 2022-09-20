@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -48,8 +48,12 @@ public:
     }
 
     /** Displays a default value when no value is specified by the user. */
-    FilePathPropertyComponent (ValueWithDefault& valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
-                               const String& wildcardsToUse = "*", const File& relativeRoot = File())
+    FilePathPropertyComponent (ValueTreePropertyWithDefault valueToControl,
+                               const String& propertyName,
+                               bool isDir,
+                               bool thisOS = true,
+                               const String& wildcardsToUse = "*",
+                               const File& relativeRoot = File())
        : PropertyComponent (propertyName),
          text (valueToControl, propertyName, 1024, false),
          isDirectory (isDir), isThisOS (thisOS), wildcards (wildcardsToUse), root (relativeRoot)
@@ -211,8 +215,8 @@ private:
 class FilePathPropertyComponentWithEnablement  : public FilePathPropertyComponent
 {
 public:
-    FilePathPropertyComponentWithEnablement (ValueWithDefault& valueToControl,
-                                             ValueWithDefault valueToListenTo,
+    FilePathPropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
+                                             ValueTreePropertyWithDefault valueToListenTo,
                                              const String& propertyName,
                                              bool isDir,
                                              bool thisOS = true,
@@ -224,7 +228,7 @@ public:
                                      thisOS,
                                      wildcardsToUse,
                                      relativeRoot),
-          valueWithDefault (valueToListenTo),
+          propertyWithDefault (valueToListenTo),
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
@@ -237,9 +241,9 @@ private:
     void valueChanged (Value& v) override
     {
         FilePathPropertyComponent::valueChanged (v);
-        setEnabled (valueWithDefault.get());
+        setEnabled (propertyWithDefault.get());
     }
 
-    ValueWithDefault valueWithDefault;
+    ValueTreePropertyWithDefault propertyWithDefault;
     Value value;
 };

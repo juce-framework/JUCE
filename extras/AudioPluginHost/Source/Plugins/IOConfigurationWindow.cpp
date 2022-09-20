@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -171,7 +171,6 @@ private:
 
 //==============================================================================
 class IOConfigurationWindow::InputOutputConfig  : public Component,
-                                                  private ComboBox::Listener,
                                                   private Button::Listener,
                                                   private NumberedBoxes::Listener
 {
@@ -187,7 +186,6 @@ public:
         layoutLabel.setFont (layoutLabel.getFont().withStyle (Font::bold));
         enabledToggle.setClickingTogglesState (true);
 
-        layouts.addListener (this);
         enabledToggle.addListener (this);
 
         addAndMakeVisible (layoutLabel);
@@ -262,26 +260,32 @@ private:
             {
                 name.setText (bus->getName(), NotificationType::dontSendNotification);
 
-                int i;
-                for (i = 1; i < AudioChannelSet::maxChannelsOfNamedLayout; ++i)
-                    if ((layouts.indexOfItemId(i) == -1) != bus->supportedLayoutWithChannels (i).isDisabled())
-                        break;
-
                 // supported layouts have changed
-                if (i < AudioChannelSet::maxChannelsOfNamedLayout)
+                layouts.clear (dontSendNotification);
+                auto* menu = layouts.getRootMenu();
+
+                auto itemId = 1;
+                auto selectedId = -1;
+
+                for (auto i = 1; i < AudioChannelSet::maxChannelsOfNamedLayout; ++i)
                 {
-                    layouts.clear();
-
-                    for (i = 1; i < AudioChannelSet::maxChannelsOfNamedLayout; ++i)
+                    for (const auto& set : AudioChannelSet::channelSetsWithNumberOfChannels (i))
                     {
-                        auto set = bus->supportedLayoutWithChannels (i);
+                        if (bus->isLayoutSupported (set))
+                        {
+                            menu->addItem (PopupMenu::Item { set.getDescription() }
+                                               .setAction ([this, set] { applyBusLayout (set); })
+                                               .setID (itemId));
+                        }
 
-                        if (! set.isDisabled())
-                            layouts.addItem (set.getDescription(), i);
+                        if (bus->getCurrentLayout() == set)
+                            selectedId = itemId;
+
+                        ++itemId;
                     }
                 }
 
-                layouts.setSelectedId (bus->getLastEnabledLayout().size());
+                layouts.setSelectedId (selectedId);
 
                 const bool canBeDisabled = bus->isNumberOfChannelsSupported (0);
 
@@ -294,27 +298,18 @@ private:
     }
 
     //==============================================================================
-    void comboBoxChanged (ComboBox* combo) override
+    void applyBusLayout (const AudioChannelSet& set)
     {
-        if (combo == &layouts)
+        if (auto* p = owner.getAudioProcessor())
         {
-            if (auto* p = owner.getAudioProcessor())
+            if (auto* bus = p->getBus (isInput, currentBus))
             {
-                if (auto* bus = p->getBus (isInput, currentBus))
+                if (bus->setCurrentLayoutWithoutEnabling (set))
                 {
-                    auto selectedNumChannels = layouts.getSelectedId();
+                    if (auto* config = owner.getConfig (! isInput))
+                        config->updateBusLayout();
 
-                    if (selectedNumChannels != bus->getLastEnabledLayout().size())
-                    {
-                        if (isPositiveAndBelow (selectedNumChannels, AudioChannelSet::maxChannelsOfNamedLayout)
-                             && bus->setCurrentLayoutWithoutEnabling (bus->supportedLayoutWithChannels (selectedNumChannels)))
-                        {
-                            if (auto* config = owner.getConfig (! isInput))
-                                config->updateBusLayout();
-
-                            owner.update();
-                        }
-                    }
+                    owner.update();
                 }
             }
         }

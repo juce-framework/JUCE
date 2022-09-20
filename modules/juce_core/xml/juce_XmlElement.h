@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -144,8 +144,8 @@ public:
         int lineWrapLength = 60;           /**< A maximum line length before wrapping is done. (If newLineChars is nullptr, this is ignored) */
         const char* newLineChars = "\r\n"; /**< Allows the newline characters to be set. If you set this to nullptr, then the whole XML document will be placed on a single line. */
 
-        TextFormat singleLine() const;     /**< returns a copy of this format with newLineChars set to nullptr. */
-        TextFormat withoutHeader() const;  /**< returns a copy of this format with the addDefaultHeader flag set to false. */
+        [[nodiscard]] TextFormat singleLine() const;     /**< returns a copy of this format with newLineChars set to nullptr. */
+        [[nodiscard]] TextFormat withoutHeader() const;  /**< returns a copy of this format with the addDefaultHeader flag set to false. */
     };
 
     /** Returns a text version of this XML element.

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -44,9 +44,6 @@ public:
     //==============================================================================
     /** Creates an empty MidiFile object. */
     MidiFile();
-
-    /** Destructor. */
-    ~MidiFile();
 
     /** Creates a copy of another MidiFile. */
     MidiFile (const MidiFile&);
@@ -136,7 +133,7 @@ public:
     */
     void findAllTimeSigEvents (MidiMessageSequence& timeSigEvents) const;
 
-    /** Makes a list of all the time-signature meta-events from all tracks in the midi file.
+    /** Makes a list of all the key-signature meta-events from all tracks in the midi file.
         @param keySigEvents         a list to which all the events will be added
     */
     void findAllKeySigEvents (MidiMessageSequence& keySigEvents) const;

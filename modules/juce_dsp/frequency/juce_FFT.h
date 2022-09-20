@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -70,22 +70,22 @@ public:
         As the coefficients of the negative frequencies (frequencies higher than
         N/2 or pi) are the complex conjugate of their positive counterparts,
         it may not be necessary to calculate them for your particular application.
-        You can use dontCalculateNegativeFrequencies to let the FFT
+        You can use onlyCalculateNonNegativeFrequencies to let the FFT
         engine know that you do not plan on using them. Note that this is only a
         hint: some FFT engines (currently only the Fallback engine), will still
-        calculate the negative frequencies even if dontCalculateNegativeFrequencies
+        calculate the negative frequencies even if onlyCalculateNonNegativeFrequencies
         is true.
 
         The size of the array passed in must be 2 * getSize(), and the first half
         should contain your raw input sample data. On return, if
-        dontCalculateNegativeFrequencies is false, the array will contain size
+        onlyCalculateNonNegativeFrequencies is false, the array will contain size
         complex real + imaginary parts data interleaved. If
-        dontCalculateNegativeFrequencies is true, the array will contain at least
+        onlyCalculateNonNegativeFrequencies is true, the array will contain at least
         (size / 2) + 1 complex numbers. Both outputs can be passed to
         performRealOnlyInverseTransform() in order to convert it back to reals.
     */
     void performRealOnlyForwardTransform (float* inputOutputData,
-                                          bool dontCalculateNegativeFrequencies = false) const noexcept;
+                                          bool onlyCalculateNonNegativeFrequencies = false) const noexcept;
 
     /** Performs a reverse operation to data created in performRealOnlyForwardTransform().
 
@@ -99,8 +99,13 @@ public:
     /** Takes an array and simply transforms it to the magnitude frequency response
         spectrum. This may be handy for things like frequency displays or analysis.
         The size of the array passed in must be 2 * getSize().
+
+        On return, if onlyCalculateNonNegativeFrequencies is false, the array will contain size
+        magnitude values. If onlyCalculateNonNegativeFrequencies is true, the array will contain
+        at least size / 2 + 1 magnitude values.
     */
-    void performFrequencyOnlyForwardTransform (float* inputOutputData) const noexcept;
+    void performFrequencyOnlyForwardTransform (float* inputOutputData,
+                                               bool onlyCalculateNonNegativeFrequencies = false) const noexcept;
 
     /** Returns the number of data points that this FFT was created to work with. */
     int getSize() const noexcept            { return size; }

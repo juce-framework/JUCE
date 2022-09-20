@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -49,6 +49,19 @@ static AccessibilityActions getListRowAccessibilityActions (RowComponentType& ro
     return AccessibilityActions().addAction (AccessibilityActionType::focus,  std::move (onFocus))
                                  .addAction (AccessibilityActionType::press,  std::move (onPress))
                                  .addAction (AccessibilityActionType::toggle, std::move (onToggle));
+}
+
+void ListBox::checkModelPtrIsValid() const
+{
+   #if ! JUCE_DISABLE_ASSERTIONS
+    // If this is hit, the model was destroyed while the ListBox was still using it.
+    // You should ensure that the model remains alive for as long as the ListBox holds a pointer to it.
+    // If this assertion is hit in the destructor of a ListBox instance, do one of the following:
+    // - Adjust the order in which your destructors run, so that the ListBox destructor runs
+    //   before the destructor of your ListBoxModel, or
+    // - Call ListBox::setModel (nullptr) before destroying your ListBoxModel.
+    jassert ((model == nullptr) == (weakModelPtr.lock() == nullptr));
+   #endif
 }
 
 class ListBox::RowComponent  : public Component,
@@ -107,14 +120,6 @@ public:
             m->listBoxItemClicked (row, e);
     }
 
-    bool isInDragToScrollViewport() const noexcept
-    {
-        if (auto* vp = owner.getViewport())
-            return vp->isScrollOnDragEnabled() && (vp->canScrollVertically() || vp->canScrollHorizontally());
-
-        return false;
-    }
-
     void mouseDown (const MouseEvent& e) override
     {
         isDragging = false;
@@ -123,7 +128,7 @@ public:
 
         if (isEnabled())
         {
-            if (owner.selectOnMouseDown && ! (isSelected || isInDragToScrollViewport()))
+            if (owner.selectOnMouseDown && ! isSelected && ! viewportWouldScrollOnEvent (owner.getViewport(), e.source))
                 performSelection (e, false);
             else
                 selectRowOnMouseUp = true;
@@ -236,21 +241,6 @@ public:
         public:
             explicit RowCellInterface (RowAccessibilityHandler& h)  : handler (h)  {}
 
-            int getColumnIndex() const override      { return 0; }
-            int getColumnSpan() const override       { return 1; }
-
-            int getRowIndex() const override
-            {
-                const auto index = handler.rowComponent.row;
-
-                if (handler.rowComponent.owner.hasAccessibleHeaderComponent())
-                    return index + 1;
-
-                return index;
-            }
-
-            int getRowSpan() const override          { return 1; }
-
             int getDisclosureLevel() const override  { return 0; }
 
             const AccessibilityHandler* getTableHandler() const override
@@ -289,41 +279,43 @@ public:
     {
         setWantsKeyboardFocus (false);
 
-        auto content = std::make_unique<Component>();
+        struct IgnoredComponent : Component
+        {
+            std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+            {
+                return createIgnoredAccessibilityHandler (*this);
+            }
+        };
+
+        auto content = std::make_unique<IgnoredComponent>();
         content->setWantsKeyboardFocus (false);
 
         setViewedComponent (content.release());
     }
 
-    RowComponent* getComponentForRow (int row) const noexcept
-    {
-        if (isPositiveAndBelow (row, rows.size()))
-            return rows[row];
-
-        return nullptr;
-    }
-
-    RowComponent* getComponentForRowWrapped (int row) const noexcept
-    {
-        return rows[row % jmax (1, rows.size())];
-    }
+    int getIndexOfFirstVisibleRow() const { return jmax (0, firstIndex - 1); }
 
     RowComponent* getComponentForRowIfOnscreen (int row) const noexcept
     {
-        return (row >= firstIndex && row < firstIndex + rows.size())
-                 ? getComponentForRowWrapped (row) : nullptr;
+        const auto startIndex = getIndexOfFirstVisibleRow();
+
+        return (startIndex <= row && row < startIndex + (int) rows.size())
+                 ? rows[(size_t) (row % jmax (1, (int) rows.size()))].get()
+                 : nullptr;
     }
 
-    int getRowNumberOfComponent (Component* const rowComponent) const noexcept
+    int getRowNumberOfComponent (const Component* const rowComponent) const noexcept
     {
-        const int index = getViewedComponent()->getIndexOfChildComponent (rowComponent);
-        const int num = rows.size();
+        const auto iter = std::find_if (rows.begin(), rows.end(), [=] (auto& ptr) { return ptr.get() == rowComponent; });
 
-        for (int i = num; --i >= 0;)
-            if (((firstIndex + i) % jmax (1, num)) == index)
-                return firstIndex + i;
+        if (iter == rows.end())
+            return -1;
 
-        return -1;
+        const auto index = (int) std::distance (rows.begin(), iter);
+        const auto mod = jmax (1, (int) rows.size());
+        const auto startIndex = getIndexOfFirstVisibleRow();
+
+        return index + mod * ((startIndex / mod) + (index < (startIndex % mod) ? 1 : 0));
     }
 
     void visibleAreaChanged (const Rectangle<int>&) override
@@ -366,29 +358,32 @@ public:
             auto y = getViewPositionY();
             auto w = content.getWidth();
 
-            const int numNeeded = 4 + getMaximumVisibleHeight() / rowH;
-            rows.removeRange (numNeeded, rows.size());
+            const auto numNeeded = (size_t) (4 + getMaximumVisibleHeight() / rowH);
+            rows.resize (jmin (numNeeded, rows.size()));
 
             while (numNeeded > rows.size())
             {
-                auto* newRow = rows.add (new RowComponent (owner));
-                content.addAndMakeVisible (newRow);
+                rows.emplace_back (new RowComponent (owner));
+                content.addAndMakeVisible (*rows.back());
             }
 
             firstIndex = y / rowH;
             firstWholeIndex = (y + rowH - 1) / rowH;
             lastWholeIndex = (y + getMaximumVisibleHeight() - 1) / rowH;
 
-            auto startIndex = jmax (0, firstIndex - 1);
+            const auto startIndex = getIndexOfFirstVisibleRow();
+            const auto lastIndex = startIndex + (int) rows.size();
 
-            for (int i = 0; i < numNeeded; ++i)
+            for (auto row = startIndex; row < lastIndex; ++row)
             {
-                const int row = i + startIndex;
-
-                if (auto* rowComp = getComponentForRowWrapped (row))
+                if (auto* rowComp = getComponentForRowIfOnscreen (row))
                 {
                     rowComp->setBounds (0, row * rowH, w, rowH);
                     rowComp->update (row, owner.isRowSelected (row));
+                }
+                else
+                {
+                    jassertfalse;
                 }
             }
         }
@@ -483,7 +478,7 @@ private:
     }
 
     ListBox& owner;
-    OwnedArray<RowComponent> rows;
+    std::vector<std::unique_ptr<RowComponent>> rows;
     int firstIndex = 0, firstWholeIndex = 0, lastWholeIndex = 0;
     bool hasUpdated = false;
 
@@ -521,7 +516,7 @@ struct ListBoxMouseMoveSelector  : public MouseListener
 
 //==============================================================================
 ListBox::ListBox (const String& name, ListBoxModel* const m)
-    : Component (name), model (m)
+    : Component (name)
 {
     viewport.reset (new ListViewport (*this));
     addAndMakeVisible (viewport.get());
@@ -529,6 +524,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
     setWantsKeyboardFocus (true);
     setFocusContainerType (FocusContainerType::focusContainer);
     colourChanged();
+
+    assignModelPtr (m);
 }
 
 ListBox::~ListBox()
@@ -537,11 +534,20 @@ ListBox::~ListBox()
     viewport.reset();
 }
 
+void ListBox::assignModelPtr (ListBoxModel* const newModel)
+{
+    model = newModel;
+
+   #if ! JUCE_DISABLE_ASSERTIONS
+    weakModelPtr = model != nullptr ? model->sharedState : nullptr;
+   #endif
+}
+
 void ListBox::setModel (ListBoxModel* const newModel)
 {
     if (model != newModel)
     {
-        model = newModel;
+        assignModelPtr (newModel);
         repaint();
         updateContent();
     }
@@ -605,6 +611,7 @@ Viewport* ListBox::getViewport() const noexcept
 //==============================================================================
 void ListBox::updateContent()
 {
+    checkModelPtrIsValid();
     hasDoneInitialUpdate = true;
     totalItems = (model != nullptr) ? model->getNumRows() : 0;
 
@@ -641,6 +648,8 @@ void ListBox::selectRowInternal (const int row,
                                  bool deselectOthersFirst,
                                  bool isMouseClick)
 {
+    checkModelPtrIsValid();
+
     if (! multipleSelection)
         deselectOthersFirst = true;
 
@@ -676,6 +685,8 @@ void ListBox::selectRowInternal (const int row,
 
 void ListBox::deselectRow (const int row)
 {
+    checkModelPtrIsValid();
+
     if (selected.contains (row))
     {
         selected.removeRange ({ row, row + 1 });
@@ -694,6 +705,8 @@ void ListBox::deselectRow (const int row)
 void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
                                const NotificationType sendNotificationEventToModel)
 {
+    checkModelPtrIsValid();
+
     selected = setOfRowsToBeSelected;
     selected.removeRange ({ totalItems, std::numeric_limits<int>::max() });
 
@@ -741,6 +754,8 @@ void ListBox::flipRowSelection (const int row)
 
 void ListBox::deselectAllRows()
 {
+    checkModelPtrIsValid();
+
     if (! selected.isEmpty())
     {
         selected.clear();
@@ -825,7 +840,7 @@ Component* ListBox::getComponentForRowNumber (const int row) const noexcept
     return nullptr;
 }
 
-int ListBox::getRowNumberOfComponent (Component* const rowComponent) const noexcept
+int ListBox::getRowNumberOfComponent (const Component* const rowComponent) const noexcept
 {
     return viewport->getRowNumberOfComponent (rowComponent);
 }
@@ -870,6 +885,8 @@ void ListBox::scrollToEnsureRowIsOnscreen (const int row)
 //==============================================================================
 bool ListBox::keyPressed (const KeyPress& key)
 {
+    checkModelPtrIsValid();
+
     const int numVisibleRows = viewport->getHeight() / getRowHeight();
 
     const bool multiple = multipleSelection
@@ -975,6 +992,8 @@ void ListBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whee
 
 void ListBox::mouseUp (const MouseEvent& e)
 {
+    checkModelPtrIsValid();
+
     if (e.mouseWasClicked() && model != nullptr)
         model->backgroundClicked (e);
 }
@@ -1040,7 +1059,7 @@ void ListBox::repaintRow (const int rowNumber) noexcept
     repaint (getRowPosition (rowNumber, true));
 }
 
-Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, int& imageY)
+ScaledImage ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, int& imageY)
 {
     Rectangle<int> imageArea;
     auto firstRow = getRowContainingPosition (0, viewport->getY());
@@ -1062,7 +1081,8 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
     imageX = imageArea.getX();
     imageY = imageArea.getY();
 
-    auto listScale = Component::getApproximateScaleFactorForComponent (this);
+    const auto additionalScale = 2.0f;
+    const auto listScale = Component::getApproximateScaleFactorForComponent (this) * additionalScale;
     Image snapshot (Image::ARGB,
                     roundToInt ((float) imageArea.getWidth() * listScale),
                     roundToInt ((float) imageArea.getHeight() * listScale),
@@ -1075,9 +1095,9 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
             if (auto* rowComp = viewport->getComponentForRowIfOnscreen (firstRow + i))
             {
                 Graphics g (snapshot);
-                g.setOrigin (getLocalPoint (rowComp, Point<int>()) - imageArea.getPosition());
+                g.setOrigin ((getLocalPoint (rowComp, Point<int>()) - imageArea.getPosition()) * additionalScale);
 
-                auto rowScale = Component::getApproximateScaleFactorForComponent (rowComp);
+                const auto rowScale = Component::getApproximateScaleFactorForComponent (rowComp) * additionalScale;
 
                 if (g.reduceClipRegion (rowComp->getLocalBounds() * rowScale))
                 {
@@ -1090,7 +1110,7 @@ Image ListBox::createSnapshotOfRows (const SparseSet<int>& rows, int& imageX, in
         }
     }
 
-    return snapshot;
+    return { snapshot, additionalScale };
 }
 
 void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsToDrag, const var& dragDescription, bool allowDraggingToOtherWindows)
@@ -1123,15 +1143,10 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
 
         int getNumRows() const override
         {
-            if (listBox.model == nullptr)
-                return 0;
+            listBox.checkModelPtrIsValid();
 
-            const auto numRows = listBox.model->getNumRows();
-
-            if (listBox.hasAccessibleHeaderComponent())
-                return numRows + 1;
-
-            return numRows;
+            return listBox.model != nullptr ? listBox.model->getNumRows()
+                                            : 0;
         }
 
         int getNumColumns() const override
@@ -1139,24 +1154,7 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
             return 1;
         }
 
-        const AccessibilityHandler* getCellHandler (int row, int) const override
-        {
-            if (auto* headerHandler = getHeaderHandler())
-            {
-                if (row == 0)
-                    return headerHandler;
-
-                --row;
-            }
-
-            if (auto* rowComponent = listBox.viewport->getComponentForRow (row))
-                return rowComponent->getAccessibilityHandler();
-
-            return nullptr;
-        }
-
-    private:
-        const AccessibilityHandler* getHeaderHandler() const
+        const AccessibilityHandler* getHeaderHandler() const override
         {
             if (listBox.hasAccessibleHeaderComponent())
                 return listBox.headerComponent->getAccessibilityHandler();
@@ -1164,6 +1162,39 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
             return nullptr;
         }
 
+        const AccessibilityHandler* getRowHandler (int row) const override
+        {
+            if (auto* rowComponent = listBox.viewport->getComponentForRowIfOnscreen (row))
+                return rowComponent->getAccessibilityHandler();
+
+            return nullptr;
+        }
+
+        const AccessibilityHandler* getCellHandler (int, int) const override
+        {
+            return nullptr;
+        }
+
+        Optional<Span> getRowSpan (const AccessibilityHandler& handler) const override
+        {
+            const auto rowNumber = listBox.getRowNumberOfComponent (&handler.getComponent());
+
+            return rowNumber != -1 ? makeOptional (Span { rowNumber, 1 })
+                                   : nullopt;
+        }
+
+        Optional<Span> getColumnSpan (const AccessibilityHandler&) const override
+        {
+            return Span { 0, 1 };
+        }
+
+        void showCell (const AccessibilityHandler& h) const override
+        {
+            if (const auto row = getRowSpan (h))
+                listBox.scrollToEnsureRowIsOnscreen (row->begin);
+        }
+
+    private:
         ListBox& listBox;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableInterface)

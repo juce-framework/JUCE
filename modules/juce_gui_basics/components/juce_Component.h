@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -615,7 +615,7 @@ public:
     /** Returns the approximate scale factor for a given component by traversing its parent hierarchy
         and applying each transform and finally scaling this by the global scale factor.
     */
-    static float JUCE_CALLTYPE getApproximateScaleFactorForComponent (Component* targetComponent);
+    static float JUCE_CALLTYPE getApproximateScaleFactorForComponent (const Component* targetComponent);
 
     //==============================================================================
     /** Returns a proportion of the component's width.
@@ -1113,10 +1113,10 @@ public:
         number of simple components being rendered, and where they are guaranteed never to do any drawing
         beyond their own boundaries, setting this to true will reduce the overhead involved in clipping
         the graphics context that gets passed to the component's paint() callback.
+
         If you enable this mode, you'll need to make sure your paint method doesn't call anything like
         Graphics::fillAll(), and doesn't draw beyond the component's bounds, because that'll produce
-        artifacts. Your component also can't have any child components that may be placed beyond its
-        bounds.
+        artifacts. This option will have no effect on components that contain any child components.
     */
     void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) noexcept;
 
@@ -1261,7 +1261,7 @@ public:
     */
     int getExplicitFocusOrder() const;
 
-    /** A focus container type that can be passed to setFocusContainer().
+    /** A focus container type that can be passed to setFocusContainerType().
 
         If a component is marked as a focus container or keyboard focus container then
         it will act as the top-level component within which focus or keyboard focus is
@@ -1318,25 +1318,25 @@ public:
 
     /** Returns true if this component has been marked as a focus container.
 
-        @see setFocusContainer
+        @see setFocusContainerType
     */
     bool isFocusContainer() const noexcept;
 
     /** Returns true if this component has been marked as a keyboard focus container.
 
-        @see setFocusContainer
+        @see setFocusContainerType
     */
     bool isKeyboardFocusContainer() const noexcept;
 
     /** Returns the focus container for this component.
 
-        @see isFocusContainer, setFocusContainer
+        @see isFocusContainer, setFocusContainerType
     */
     Component* findFocusContainer() const;
 
     /** Returns the keyboard focus container for this component.
 
-        @see isFocusContainer, setFocusContainer
+        @see isFocusContainer, setFocusContainerType
     */
     Component* findKeyboardFocusContainer() const;
 
@@ -1386,7 +1386,7 @@ public:
           by calling getWantsKeyboardFocus), it gets it.
         - if the component itself doesn't want focus, it will try to pass it
           on to whichever of its children is the default component, as determined by
-          the getDefaultComponent() implemetation of the ComponentTraverser returned
+          the getDefaultComponent() implementation of the ComponentTraverser returned
           by createKeyboardFocusTraverser().
         - if none of its children want focus at all, it will pass it up to its
           parent instead, unless it's a top-level component without a parent,
@@ -1427,14 +1427,14 @@ public:
     /** Tries to move the keyboard focus to one of this component's siblings.
 
         This will try to move focus to either the next or previous component, as
-        determined by the getNextComponent() and getPreviousComponent() implemetations
+        determined by the getNextComponent() and getPreviousComponent() implementations
         of the ComponentTraverser returned by createKeyboardFocusTraverser().
 
         This is the method that is used when shifting focus by pressing the tab key.
 
         @param moveToNext   if true, the focus will move forwards; if false, it will
                             move backwards
-        @see grabKeyboardFocus, giveAwayKeyboardFocus, setFocusContainer, setWantsKeyboardFocus
+        @see grabKeyboardFocus, giveAwayKeyboardFocus, setFocusContainerType, setWantsKeyboardFocus
     */
     void moveKeyboardFocusToSibling (bool moveToNext);
 
@@ -1452,8 +1452,8 @@ public:
         passed from this component.
 
         The default implementation of this method will return an instance of FocusTraverser
-        if this component is a focus container (as determined by the setFocusContainer() method).
-        If the component isn't a focus container, then it will recursively call
+        if this component is a focus container (as determined by the setFocusContainerType()
+        method). If the component isn't a focus container, then it will recursively call
         createFocusTraverser() on its parents.
 
         If you override this to return a custom traverser object, then this component and
@@ -1466,14 +1466,31 @@ public:
 
         The default implementation of this method will return an instance of
         KeyboardFocusTraverser if this component is a keyboard focus container (as determined by
-        the setFocusContainer() method). If the component isn't a keyboard focus container, then
-        it will recursively call createKeyboardFocusTraverser() on its parents.
+        the setFocusContainerType() method). If the component isn't a keyboard focus container,
+        then it will recursively call createKeyboardFocusTraverser() on its parents.
 
         If you override this to return a custom traverser object, then this component and
         all its sub-components will use the new object to make their keyboard focusing
         decisions.
     */
     virtual std::unique_ptr<ComponentTraverser> createKeyboardFocusTraverser();
+
+    /** Use this to indicate that the component should have an outline drawn around it
+        when it has keyboard focus.
+
+        If this is set to true, then when the component gains keyboard focus the
+        LookAndFeel::createFocusOutlineForComponent() method will be used to draw an outline
+        around it.
+
+        @see FocusOutline, hasFocusOutline
+    */
+    void setHasFocusOutline (bool hasFocusOutline) noexcept  { flags.hasFocusOutlineFlag = hasFocusOutline; }
+
+    /** Returns true if this component should have a focus outline.
+
+        @see FocusOutline, setHasFocusOutline
+    */
+    bool hasFocusOutline() const noexcept                    { return flags.hasFocusOutlineFlag; }
 
     //==============================================================================
     /** Returns true if the component (and all its parents) are enabled.
@@ -2548,6 +2565,7 @@ private:
         bool isKeyboardFocusContainerFlag : 1;
         bool childKeyboardFocusedFlag     : 1;
         bool dontFocusOnMouseClickFlag    : 1;
+        bool hasFocusOutlineFlag          : 1;
         bool alwaysOnTopFlag              : 1;
         bool bufferToImageFlag            : 1;
         bool bringToFrontOnClickFlag      : 1;
@@ -2576,9 +2594,9 @@ private:
     //==============================================================================
     void internalMouseEnter (MouseInputSource, Point<float>, Time);
     void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, Point<float>, Time, float, float, float, float, float);
-    void internalMouseUp    (MouseInputSource, Point<float>, Time, const ModifierKeys oldModifiers, float, float, float, float, float);
-    void internalMouseDrag  (MouseInputSource, Point<float>, Time, float, float, float, float, float);
+    void internalMouseDown  (MouseInputSource, const PointerState&, Time);
+    void internalMouseUp    (MouseInputSource, const PointerState&, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, const PointerState&, Time);
     void internalMouseMove  (MouseInputSource, Point<float>, Time);
     void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -62,6 +62,17 @@ public:
             you still want to draw a background but should not position important content.
         */
         BorderSize<int> safeAreaInsets;
+
+        /** Represents the area of this display in logical pixels that is obscured by an
+            onscreen keyboard.
+
+            This is currently only supported on iOS, and on Android 11+.
+
+            This will only return the bounds of the keyboard when it is in 'docked' mode.
+            If the keyboard is floating (e.g. on an iPad using the split keyboard mode),
+            no insets will be reported.
+        */
+        BorderSize<int> keyboardInsets;
 
         /** The top-left of this display in physical coordinates. */
         Point<int> topLeftPhysical;
@@ -166,8 +177,6 @@ public:
    #ifndef DOXYGEN
     /** @internal */
     void refresh();
-    /** @internal */
-    ~Displays() = default;
 
     [[deprecated ("Use the getDisplayForPoint or getDisplayForRect methods instead "
                  "as they can deal with converting between logical and physical pixels.")]]

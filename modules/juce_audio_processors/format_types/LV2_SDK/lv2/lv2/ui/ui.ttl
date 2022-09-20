@@ -1,0 +1,248 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix opts: <http://lv2plug.in/ns/ext/options#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ui: <http://lv2plug.in/ns/extensions/ui#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/extensions/ui>
+	a owl:Ontology ;
+	rdfs:label "LV2 UI" ;
+	rdfs:comment "User interfaces for LV2 plugins." ;
+	owl:imports <http://lv2plug.in/ns/lv2core> ;
+	rdfs:seeAlso <ui.h> ,
+		<ui.meta.ttl> .
+
+ui:UI
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:label "User Interface" ;
+	rdfs:comment "A UI for an LV2 plugin." .
+
+ui:GtkUI
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf ui:UI ;
+	rdfs:label "GTK2 UI" ;
+	rdfs:comment "A UI where the widget is a pointer to a Gtk+ 2.0 GtkWidget." .
+
+ui:Gtk3UI
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf ui:UI ;
+	rdfs:label "GTK3 UI" ;
+	rdfs:comment "A UI where the widget is a pointer to a Gtk+ 3.0 GtkWidget." .
+
+ui:Qt4UI
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf ui:UI ;
+	rdfs:label "Qt4 UI" ;
+	rdfs:comment "A UI where the widget is a pointer to a Qt4 QWidget." .
+
+ui:Qt5UI
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf ui:UI ;
+	rdfs:label "Qt5 UI" ;
+	rdfs:comment "A UI where the widget is a pointer to a Qt5 QWidget." .
+
+ui:X11UI
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf ui:UI ;
+	rdfs:label "X11 UI" ;
+	rdfs:comment "A UI where the widget is an X11 Window window ID." .
+
+ui:WindowsUI
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf ui:UI ;
+	rdfs:label "Windows UI" ;
+	rdfs:comment "A UI where the widget is a Windows HWND window ID." .
+
+ui:CocoaUI
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf ui:UI ;
+	rdfs:label "Cocoa UI" ;
+	rdfs:comment "A UI where the widget is a pointer to a NSView." .
+
+ui:ui
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain lv2:Plugin ;
+	rdfs:range ui:UI ;
+	rdfs:label "user interface" ;
+	rdfs:comment "Relates a plugin to a UI that applies to it." .
+
+ui:binary
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	owl:sameAs lv2:binary ;
+	owl:deprecated "true"^^xsd:boolean ;
+	rdfs:label "binary" ;
+	rdfs:comment "The shared library that a UI resides in." .
+
+ui:makeSONameResident
+	a lv2:Feature ;
+	owl:deprecated "true"^^xsd:boolean ;
+	rdfs:label "make SO name resident" ;
+	rdfs:comment "UI binary must not be unloaded." .
+
+ui:noUserResize
+	a lv2:Feature ;
+	rdfs:label "no user resize" ;
+	rdfs:comment "Non-resizable UI." .
+
+ui:fixedSize
+	a lv2:Feature ;
+	rdfs:label "fixed size" ;
+	rdfs:comment "Non-resizable UI that will never resize itself." .
+
+ui:scaleFactor
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		opts:Option ;
+	rdfs:range xsd:float ;
+	rdfs:label "scale factor" ;
+	rdfs:comment "Scale factor for high resolution screens." .
+
+ui:backgroundColor
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		opts:Option ;
+	rdfs:label "background color" ;
+	rdfs:comment """The background color of the host's UI.""" .
+
+ui:foregroundColor
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		opts:Option ;
+	rdfs:label "foreground color" ;
+	rdfs:comment """The foreground color of the host's UI.""" .
+
+ui:parent
+	a lv2:Feature ;
+	rdfs:label "parent" ;
+	rdfs:comment "The parent for a UI." .
+
+ui:PortNotification
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty ui:plugin ;
+		owl:cardinality 1 ;
+		rdfs:comment "A PortNotification MUST have exactly one ui:plugin."
+	] ;
+	rdfs:label "Port Notification" ;
+	rdfs:comment "A description of port updates that a host must send a UI." .
+
+ui:portNotification
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain ui:UI ;
+	rdfs:range ui:PortNotification ;
+	rdfs:label "port notification" ;
+	rdfs:comment "Specifies a port notification that is required by a UI." .
+
+ui:plugin
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain ui:PortNotification ;
+	rdfs:range lv2:Plugin ;
+	rdfs:label "plugin" ;
+	rdfs:comment "The plugin a portNotification applies to." .
+
+ui:portIndex
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:domain ui:PortNotification ;
+	rdfs:range xsd:decimal ;
+	rdfs:label "port index" ;
+	rdfs:comment "The index of the port a portNotification applies to." .
+
+ui:notifyType
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain ui:PortNotification ;
+	rdfs:label "notify type" ;
+	rdfs:comment "A particular type that the UI should be notified of." .
+
+ui:resize
+	a lv2:Feature ,
+		lv2:ExtensionData ;
+	rdfs:label "resize" ;
+	rdfs:comment """A feature that control of, and notifications about, a UI's size.""" .
+
+ui:portMap
+	a lv2:Feature ;
+	rdfs:label "port map" ;
+	rdfs:comment "A feature for accessing the index of a port by symbol." .
+
+ui:portSubscribe
+	a lv2:Feature ;
+	rdfs:label "port subscribe" ;
+	rdfs:comment "A feature for dynamically subscribing to updates from a port." .
+
+ui:touch
+	a lv2:Feature ;
+	rdfs:label "touch" ;
+	rdfs:comment "A feature to notify that the user has grabbed a port control." .
+
+ui:requestValue
+	a lv2:Feature ;
+	rdfs:label "request value" ;
+	rdfs:comment "A feature to request a parameter value from the user via the host." .
+
+ui:idleInterface
+	a lv2:Feature ,
+		lv2:ExtensionData ;
+	rdfs:label "idle interface" ;
+	rdfs:comment "A feature that provides a callback for the host to drive the UI." .
+
+ui:showInterface
+	a lv2:ExtensionData ;
+	rdfs:label "show interface" ;
+	rdfs:comment "An interface for showing and hiding a window for a UI." .
+
+ui:windowTitle
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:range xsd:string ;
+	rdfs:label "window title" ;
+	rdfs:comment "The title for the window shown by LV2UI_Show_Interface." .
+
+ui:updateRate
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:range xsd:float ;
+	rdfs:label "update rate" ;
+	rdfs:comment "The target rate, in Hz, to send updates to the UI." .
+
+ui:protocol
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain ui:PortNotification ;
+	rdfs:range ui:PortProtocol ;
+	rdfs:label "protocol" ;
+	rdfs:comment "The protocol to be used for this notification." .
+
+ui:PortProtocol
+	a rdfs:Class ;
+	rdfs:subClassOf lv2:Feature ;
+	rdfs:label "Port Protocol" ;
+	rdfs:comment "A method to communicate port data between a UI and plugin." .
+
+ui:floatProtocol
+	a ui:PortProtocol ;
+	rdfs:label "float protocol" ;
+	rdfs:comment "A protocol for transferring single floating point values." .
+
+ui:peakProtocol
+	a ui:PortProtocol ;
+	rdfs:label "peak protocol" ;
+	rdfs:comment "A protocol for sending continuous peak measurements of an audio signal." .
+

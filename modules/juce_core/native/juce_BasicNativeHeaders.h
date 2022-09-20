@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -28,67 +28,24 @@
 #if JUCE_MAC || JUCE_IOS
 
  #if JUCE_IOS
-  #if JUCE_MODULE_AVAILABLE_juce_opengl && defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
+  #if JUCE_MODULE_AVAILABLE_juce_opengl
    #define GLES_SILENCE_DEPRECATION 1
   #endif
 
+  #define Component CarbonDummyCompName
   #import <Foundation/Foundation.h>
+  #undef Component
+
   #import <UIKit/UIKit.h>
   #import <CoreData/CoreData.h>
   #import <MobileCoreServices/MobileCoreServices.h>
   #include <sys/fcntl.h>
  #else
-  #if JUCE_MODULE_AVAILABLE_juce_opengl && defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14
+  #if JUCE_MODULE_AVAILABLE_juce_opengl
    #define GL_SILENCE_DEPRECATION 1
   #endif
 
   #import <Cocoa/Cocoa.h>
-  #if (! defined MAC_OS_X_VERSION_10_12) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12
-   #define NSEventModifierFlagCommand       NSCommandKeyMask
-   #define NSEventModifierFlagControl       NSControlKeyMask
-   #define NSEventModifierFlagHelp          NSHelpKeyMask
-   #define NSEventModifierFlagNumericPad    NSNumericPadKeyMask
-   #define NSEventModifierFlagOption        NSAlternateKeyMask
-   #define NSEventModifierFlagShift         NSShiftKeyMask
-   #define NSCompositingOperationSourceOver NSCompositeSourceOver
-   #define NSEventMaskApplicationDefined    NSApplicationDefinedMask
-   #define NSEventTypeApplicationDefined    NSApplicationDefined
-   #define NSEventTypeCursorUpdate          NSCursorUpdate
-   #define NSEventTypeMouseMoved            NSMouseMoved
-   #define NSEventTypeLeftMouseDown         NSLeftMouseDown
-   #define NSEventTypeRightMouseDown        NSRightMouseDown
-   #define NSEventTypeOtherMouseDown        NSOtherMouseDown
-   #define NSEventTypeLeftMouseUp           NSLeftMouseUp
-   #define NSEventTypeRightMouseUp          NSRightMouseUp
-   #define NSEventTypeOtherMouseUp          NSOtherMouseUp
-   #define NSEventTypeLeftMouseDragged      NSLeftMouseDragged
-   #define NSEventTypeRightMouseDragged     NSRightMouseDragged
-   #define NSEventTypeOtherMouseDragged     NSOtherMouseDragged
-   #define NSEventTypeScrollWheel           NSScrollWheel
-   #define NSEventTypeKeyDown               NSKeyDown
-   #define NSEventTypeKeyUp                 NSKeyUp
-   #define NSEventTypeFlagsChanged          NSFlagsChanged
-   #define NSEventMaskAny                   NSAnyEventMask
-   #define NSWindowStyleMaskBorderless      NSBorderlessWindowMask
-   #define NSWindowStyleMaskClosable        NSClosableWindowMask
-   #define NSWindowStyleMaskFullScreen      NSFullScreenWindowMask
-   #define NSWindowStyleMaskMiniaturizable  NSMiniaturizableWindowMask
-   #define NSWindowStyleMaskResizable       NSResizableWindowMask
-   #define NSWindowStyleMaskTitled          NSTitledWindowMask
-   #define NSAlertStyleCritical             NSCriticalAlertStyle
-   #define NSControlSizeRegular             NSRegularControlSize
-   #define NSEventTypeMouseEntered          NSMouseEntered
-   #define NSEventTypeMouseExited           NSMouseExited
-   #define NSAlertStyleInformational        NSInformationalAlertStyle
-   #define NSEventTypeTabletPoint           NSTabletPoint
-   #define NSEventTypeTabletProximity       NSTabletProximity
-   #define NSEventTypeFlagsChanged          NSFlagsChanged
-   #define NSEventTypeAppKitDefined         NSAppKitDefined
-   #define NSEventTypeSystemDefined         NSSystemDefined
-   #define NSEventTypeApplicationDefined    NSApplicationDefined
-   #define NSEventTypePeriodic              NSPeriodic
-   #define NSEventTypeSmartMagnify          NSEventTypeSmartMagnify
-  #endif
   #import <CoreAudio/HostTime.h>
   #include <sys/dir.h>
  #endif
@@ -132,7 +89,9 @@
  #define STRICT 1
  #define WIN32_LEAN_AND_MEAN 1
  #if JUCE_MINGW
-  #define _WIN32_WINNT 0x0600
+  #if ! defined (_WIN32_WINNT)
+   #define _WIN32_WINNT 0x0600
+  #endif
  #else
   #define _WIN32_WINNT 0x0602
  #endif
@@ -152,6 +111,8 @@
  #include <winsock2.h>
  #include <ws2tcpip.h>
  #include <iphlpapi.h>
+ #include <accctrl.h>
+ #include <aclapi.h>
  #include <mapi.h>
  #include <float.h>
  #include <process.h>
