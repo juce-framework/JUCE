@@ -540,18 +540,16 @@ void Graphics::fillRectList (const RectangleList<int>& rects) const
 
 void Graphics::fillAll() const
 {
-    fillRect (context.getClipBounds());
+    context.fillAll();
 }
 
 void Graphics::fillAll (Colour colourToUse) const
 {
     if (! colourToUse.isTransparent())
     {
-        auto clip = context.getClipBounds();
-
         context.saveState();
         context.setFill (colourToUse);
-        context.fillRect (clip, false);
+        context.fillAll();
         context.restoreState();
     }
 }
