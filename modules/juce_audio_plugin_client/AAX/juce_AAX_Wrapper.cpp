@@ -1162,18 +1162,9 @@ namespace AAXClasses
 
             if (details.parameterInfoChanged)
             {
-                auto numParameters = juceParameters.getNumParameters();
-
-                for (int i = 0; i < numParameters; ++i)
-                {
-                    if (auto* p = mParameterManager.GetParameterByID (getAAXParamIDFromJuceIndex (i)))
-                    {
-                        auto newName = juceParameters.getParamForIndex (i)->getName (31);
-
-                        if (p->Name() != newName.toRawUTF8())
-                            p->SetName (AAX_CString (newName.toRawUTF8()));
-                    }
-                }
+                for (const auto* param : juceParameters)
+                    if (auto* aaxParam = mParameterManager.GetParameterByID (getAAXParamIDFromJuceIndex (param->getParameterIndex())))
+                        syncParameterAttributes (aaxParam, param);
             }
 
             if (details.latencyChanged)
@@ -2062,6 +2053,40 @@ namespace AAXClasses
             // Your processor must support the default layout
             jassert (p.checkBusesLayoutSupported (defaultLayout));
             return defaultLayout;
+        }
+
+        void syncParameterAttributes (AAX_IParameter* aaxParam, const AudioProcessorParameter* juceParam)
+        {
+            if (juceParam == nullptr)
+                return;
+
+            {
+                auto newName = juceParam->getName (31);
+
+                if (aaxParam->Name() != newName.toRawUTF8())
+                    aaxParam->SetName (AAX_CString (newName.toRawUTF8()));
+            }
+
+            {
+                auto newType = juceParam->isDiscrete() ? AAX_eParameterType_Discrete : AAX_eParameterType_Continuous;
+
+                if (aaxParam->GetType() != newType)
+                    aaxParam->SetType (newType);
+            }
+
+            {
+                auto newNumSteps = static_cast<uint32_t> (juceParam->getNumSteps());
+
+                if (aaxParam->GetNumberOfSteps() != newNumSteps)
+                    aaxParam->SetNumberOfSteps (newNumSteps);
+            }
+
+            {
+                auto defaultValue = juceParam->getDefaultValue();
+
+                if (! approximatelyEqual (static_cast<float> (aaxParam->GetNormalizedDefaultValue()), defaultValue))
+                    aaxParam->SetNormalizedDefaultValue (defaultValue);
+            }
         }
 
         //==============================================================================
