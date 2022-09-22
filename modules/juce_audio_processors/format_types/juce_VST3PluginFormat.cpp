@@ -3148,7 +3148,7 @@ private:
     HostBufferMapper inputBusMap, outputBusMap;
 
     StringArray programNames;
-    Vst::ParamID programParameterID = (Vst::ParamID) -1;
+    Vst::ParamID programParameterID = Vst::kNoParamId;
 
     std::map<Vst::ParamID, VST3Parameter*> idToParamMap;
     EditControllerParameterDispatcher parameterDispatcher;
@@ -3517,22 +3517,26 @@ private:
         if (processor == nullptr || editController == nullptr)
             return;
 
-        Vst::UnitID programUnitID;
-        Vst::ParameterInfo paramInfo{};
+        programParameterID = Vst::kNoParamId;
+        int programParameterSteps = -1;
+        Vst::UnitID programParameterUnitID = (Vst::UnitID) -1;
 
         {
-            int idx, num = editController->getParameterCount();
+            // Iterate through the list of parameters and pick the first program change parameter that is found
+            const int num = editController->getParameterCount();
 
-            for (idx = 0; idx < num; ++idx)
-                if (editController->getParameterInfo (idx, paramInfo) == kResultOk
-                     && (paramInfo.flags & Steinberg::Vst::ParameterInfo::kIsProgramChange) != 0)
+            for (int idx = 0; idx < num; ++idx)
+            {
+                Vst::ParameterInfo paramInfo{};
+                if (editController->getParameterInfo(idx, paramInfo) == kResultOk
+                    && (paramInfo.flags & Steinberg::Vst::ParameterInfo::kIsProgramChange) != 0)
+                {
+                    programParameterID = paramInfo.id;
+                    programParameterSteps = paramInfo.stepCount;
+                    programParameterUnitID = paramInfo.unitId;
                     break;
-
-            if (idx >= num)
-                return;
-
-            programParameterID = paramInfo.id;
-            programUnitID = paramInfo.unitId;
+                }
+            }
         }
 
         if (unitInfo != nullptr)
@@ -3542,8 +3546,10 @@ private:
 
             for (int idx = 0; idx < unitCount; ++idx)
             {
+                // Find a unit info for the previously found program change parameter or take the first
+                // available program list if the programParameterID is not set.
                 if (unitInfo->getUnitInfo(idx, uInfo) == kResultOk
-                      && uInfo.id == programUnitID)
+                      && (programParameterID == Vst::kNoParamId || uInfo.id == programParameterUnitID))
                 {
                     const int programListCount = unitInfo->getProgramListCount();
 
@@ -3551,6 +3557,7 @@ private:
                     {
                         Vst::ProgramListInfo programListInfo{};
 
+                        // Find the program list associated to this unit info
                         if (unitInfo->getProgramListInfo (j, programListInfo) == kResultOk
                               && programListInfo.id == uInfo.programListId)
                         {
@@ -3569,16 +3576,17 @@ private:
             }
         }
 
-        if (editController != nullptr && paramInfo.stepCount > 0)
+        // When no program list was found in the unit infos, try to gather program names from a program change parameter
+        if ((editController != nullptr) && (programParameterID != Vst::kNoParamId))
         {
-            auto numPrograms = paramInfo.stepCount + 1;
+            auto numPrograms = programParameterSteps + 1;
 
             for (int i = 0; i < numPrograms; ++i)
             {
-                auto valueNormalized = static_cast<Vst::ParamValue> (i) / static_cast<Vst::ParamValue> (paramInfo.stepCount);
+                auto valueNormalized = static_cast<Vst::ParamValue> (i) / static_cast<Vst::ParamValue> (jmax(1, programParameterSteps));
 
                 Vst::String128 programName;
-                if (editController->getParamStringByValue (paramInfo.id, valueNormalized, programName) == kResultOk)
+                if (editController->getParamStringByValue (programParameterID, valueNormalized, programName) == kResultOk)
                     programNames.add (toString (programName));
             }
         }
@@ -3767,7 +3775,10 @@ tresult VST3HostContext::ContextMenu::popup (Steinberg::UCoord x, Steinberg::UCo
 tresult VST3HostContext::notifyProgramListChange (Vst::ProgramListID, Steinberg::int32)
 {
     if (plugin != nullptr)
+    {
         plugin->syncProgramNames();
+        plugin->updateHostDisplay(AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+    }
 
     return kResultTrue;
 }

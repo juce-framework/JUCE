@@ -293,12 +293,7 @@ private:
 
             for (int i = 0; i < numPrograms; ++i)
             {
-                auto name = p.getProgramName (i).trim();
-
-                if (name.isEmpty())
-                    name = "Unnamed";
-
-                auto pc = new PropertyComp (name, p);
+                auto pc = new PropertyComp (i, p);
                 programs.add (pc);
                 totalHeight += pc->getPreferredHeight();
             }
@@ -322,8 +317,9 @@ private:
         struct PropertyComp  : public PropertyComponent,
                                private AudioProcessorListener
         {
-            PropertyComp (const String& name, AudioProcessor& p)  : PropertyComponent (name), owner (p)
+            PropertyComp (const int index, AudioProcessor& p)  : PropertyComponent ("Unnamed"), programIndex(index), owner (p)
             {
+                refresh();
                 owner.addListener (this);
             }
 
@@ -332,10 +328,29 @@ private:
                 owner.removeListener (this);
             }
 
-            void refresh() override {}
-            void audioProcessorChanged (AudioProcessor*, const ChangeDetails&) override {}
-            void audioProcessorParameterChanged (AudioProcessor*, int, float) override {}
+            void refresh() override 
+            {
+                auto name = owner.getProgramName(programIndex).trim();
 
+                if (name.isEmpty())
+                    name = "Unnamed";
+
+                if (!name.equalsIgnoreCase(getName()))
+                {
+                    setName(name);
+                    repaint();
+                }
+            }
+
+            void audioProcessorChanged(AudioProcessor*, const ChangeDetails& details) override 
+            { 
+                if (details.programChanged)
+                    refresh(); 
+            }
+
+            void audioProcessorParameterChanged (AudioProcessor*, int, float) override {}
+            
+            int programIndex;
             AudioProcessor& owner;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyComp)
