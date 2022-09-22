@@ -1612,6 +1612,47 @@ private:
     // avoid unnecessarily duplicating display-link threads.
     SharedResourcePointer<PerScreenDisplayLinks> sharedDisplayLinks;
 
+    class AsyncRepainter : private AsyncUpdater
+    {
+    public:
+        explicit AsyncRepainter (NSViewComponentPeer& o) : owner (o) {}
+        ~AsyncRepainter() override { cancelPendingUpdate(); }
+
+        void markUpdated (const CGDirectDisplayID x)
+        {
+            {
+                const std::scoped_lock lock { mutex };
+
+                if (std::find (backgroundDisplays.cbegin(), backgroundDisplays.cend(), x) == backgroundDisplays.cend())
+                    backgroundDisplays.push_back (x);
+            }
+
+            triggerAsyncUpdate();
+        }
+
+    private:
+        void handleAsyncUpdate() override
+        {
+            {
+                const std::scoped_lock lock { mutex };
+                mainThreadDisplays = backgroundDisplays;
+                backgroundDisplays.clear();
+            }
+
+            for (const auto& display : mainThreadDisplays)
+                if (auto* peerView = owner.view)
+                    if (auto* peerWindow = [peerView window])
+                        if (display == ScopedDisplayLink::getDisplayIdForScreen ([peerWindow screen]))
+                            owner.setNeedsDisplayRectangles();
+        }
+
+        NSViewComponentPeer& owner;
+        std::mutex mutex;
+        std::vector<CGDirectDisplayID> backgroundDisplays, mainThreadDisplays;
+    };
+
+    AsyncRepainter asyncRepainter { *this };
+
     /*  Creates a function object that can be called from an arbitrary thread (probably a CVLink
         thread). When called, this function object will trigger a call to setNeedsDisplayRectangles
         as soon as possible on the main thread, for any peers currently on the provided NSScreen.
@@ -1620,17 +1661,7 @@ private:
     {
         sharedDisplayLinks->registerFactory ([this] (CGDirectDisplayID display)
         {
-            return [peerRef = WeakReference<NSViewComponentPeer> { this }, display]
-            {
-                MessageManager::callAsync ([peerRef, display]
-                {
-                    if (auto* peer = peerRef.get())
-                        if (auto* peerView = peer->view)
-                            if (auto* peerWindow = [peerView window])
-                                if (display == ScopedDisplayLink::getDisplayIdForScreen ([peerWindow screen]))
-                                    peer->setNeedsDisplayRectangles();
-                });
-            };
+            return [this, display] { asyncRepainter.markUpdated (display); };
         })
     };
 
