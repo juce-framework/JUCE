@@ -298,6 +298,7 @@ String SystemStats::getOperatingSystemName()
         case MacOSX_10_15:      JUCE_FALLTHROUGH
         case MacOS_11:          JUCE_FALLTHROUGH
         case MacOS_12:          JUCE_FALLTHROUGH
+        case MacOS_13:          JUCE_FALLTHROUGH
 
         case UnknownOS:         JUCE_FALLTHROUGH
         case WASM:              JUCE_FALLTHROUGH
