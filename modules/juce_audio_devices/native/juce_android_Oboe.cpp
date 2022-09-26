@@ -423,8 +423,8 @@ private:
         }
     }
 
-    void process (const float** inputChannelData, int numInputChannels,
-                  float** outputChannelData, int numOutputChannels, int32_t numFrames)
+    void process (const float* const* inputChannelData, int numInputChannels,
+                  float* const* outputChannelData, int numOutputChannels, int32_t numFrames)
     {
         if (auto* cb = callback.exchange (nullptr))
         {

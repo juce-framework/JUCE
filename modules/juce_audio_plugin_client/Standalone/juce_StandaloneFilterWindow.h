@@ -425,7 +425,7 @@ private:
 
         On some platforms (such as iOS 10), the expected buffer size reported in
         audioDeviceAboutToStart may be smaller than the blocks passed to
-        audioDeviceIOCallback. This can lead to out-of-bounds reads if the render
+        audioDeviceIOCallbackWithContext. This can lead to out-of-bounds reads if the render
         callback depends on additional buffers which were initialised using the
         smaller size.
 
@@ -448,9 +448,9 @@ private:
             inner.audioDeviceAboutToStart (device);
         }
 
-        void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+        void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
                                                int numInputChannels,
-                                               float** outputChannelData,
+                                               float* const* outputChannelData,
                                                int numOutputChannels,
                                                int numSamples,
                                                const AudioIODeviceCallbackContext& context) override
@@ -600,9 +600,9 @@ private:
     };
 
     //==============================================================================
-    void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+    void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
                                            int numInputChannels,
-                                           float** outputChannelData,
+                                           float* const* outputChannelData,
                                            int numOutputChannels,
                                            int numSamples,
                                            const AudioIODeviceCallbackContext& context) override

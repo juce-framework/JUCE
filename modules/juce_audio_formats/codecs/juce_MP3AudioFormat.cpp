@@ -2975,7 +2975,7 @@ public:
         }
     }
 
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         if (destSamples == nullptr)
@@ -3033,7 +3033,7 @@ public:
             }
 
             const int numToCopy = jmin (decodedEnd - decodedStart, numSamples);
-            float* const* const dst = reinterpret_cast<float**> (destSamples);
+            float* const* const dst = reinterpret_cast<float* const*> (destSamples);
             memcpy (dst[0] + startOffsetInDestBuffer, decoded0 + decodedStart, (size_t) numToCopy * sizeof (float));
 
             if (numDestChannels > 1 && dst[1] != nullptr)

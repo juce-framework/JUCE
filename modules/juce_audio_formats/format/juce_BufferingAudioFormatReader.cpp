@@ -53,7 +53,7 @@ void BufferingAudioReader::setReadTimeout (int timeoutMilliseconds) noexcept
     timeoutMs = timeoutMilliseconds;
 }
 
-bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+bool BufferingAudioReader::readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                         int64 startSampleInFile, int numSamples)
 {
     auto startTime = Time::getMillisecondCounter();
@@ -218,7 +218,7 @@ struct TestAudioFormatReader  : public AudioFormatReader
         numChannels           = (unsigned int) buffer.getNumChannels();
     }
 
-    bool readSamples (int** destChannels, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destChannels, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destChannels, numDestChannels, startOffsetInDestBuffer,
@@ -270,7 +270,7 @@ public:
                     numChannels           = 2;
                 }
 
-                bool readSamples (int**, int, int, int64, int) override
+                bool readSamples (int* const*, int, int, int64, int) override
                 {
                     Thread::sleep (100);
                     return true;

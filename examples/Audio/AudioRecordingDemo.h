@@ -134,10 +134,12 @@ public:
         sampleRate = 0;
     }
 
-    void audioDeviceIOCallback (const float** inputChannelData, int numInputChannels,
-                                float** outputChannelData, int numOutputChannels,
-                                int numSamples) override
+    void audioDeviceIOCallbackWithContext (const float* const* inputChannelData, int numInputChannels,
+                                           float* const* outputChannelData, int numOutputChannels,
+                                           int numSamples, const AudioIODeviceCallbackContext& context) override
     {
+        ignoreUnused (context);
+
         const ScopedLock sl (writerLock);
 
         if (activeWriter.load() != nullptr && numInputChannels >= thumbnail.getNumChannels())

@@ -293,7 +293,6 @@ private:
                          Process process)
     {
         auto originalIn = input;
-        auto pos = subSamplePos;
         bool exceeded = false;
 
         const auto pushSample = [&]
@@ -321,38 +320,11 @@ private:
             }
         };
 
-        if (speedRatio < 1.0)
-        {
-            for (int i = numOutputSamplesToProduce; --i >= 0;)
-            {
-                if (pos >= 1.0)
-                {
-                    pushSample();
-                    pos -= 1.0;
-                }
-
-                *output = process (*output, InterpolatorTraits::valueAtOffset (lastInputSamples, (float) pos, indexBuffer));
-                ++output;
-                pos += speedRatio;
-            }
-        }
-        else
-        {
-            for (int i = numOutputSamplesToProduce; --i >= 0;)
-            {
-                while (pos < speedRatio)
-                {
-                    pushSample();
-                    pos += 1.0;
-                }
-
-                pos -= speedRatio;
-                *output = process (*output, InterpolatorTraits::valueAtOffset (lastInputSamples, jmax (0.0f, 1.0f - (float) pos), indexBuffer));
-                ++output;
-            }
-        }
-
-        subSamplePos = pos;
+        interpolateImpl (speedRatio,
+                         output,
+                         numOutputSamplesToProduce,
+                         process,
+                         pushSample);
 
         if (wrap == 0)
             return (int) (input - originalIn);
@@ -367,25 +339,40 @@ private:
                          int numOutputSamplesToProduce,
                          Process process)
     {
-        auto pos = subSamplePos;
         int numUsed = 0;
 
-        while (numOutputSamplesToProduce > 0)
+        interpolateImpl (speedRatio,
+                         output,
+                         numOutputSamplesToProduce,
+                         process,
+                         [this, input, &numUsed] { pushInterpolationSample (input[numUsed++]); });
+
+        return numUsed;
+    }
+
+    template <typename Process, typename PushSample>
+    void interpolateImpl (double speedRatio,
+                          float* output,
+                          int numOutputSamplesToProduce,
+                          Process process,
+                          PushSample pushSample)
+    {
+        auto pos = subSamplePos;
+
+        for (auto i = 0; i < numOutputSamplesToProduce; ++i)
         {
             while (pos >= 1.0)
             {
-                pushInterpolationSample (input[numUsed++]);
+                pushSample();
                 pos -= 1.0;
             }
 
             *output = process (*output, InterpolatorTraits::valueAtOffset (lastInputSamples, (float) pos, indexBuffer));
             ++output;
             pos += speedRatio;
-            --numOutputSamplesToProduce;
         }
 
         subSamplePos = pos;
-        return numUsed;
     }
 
     //==============================================================================

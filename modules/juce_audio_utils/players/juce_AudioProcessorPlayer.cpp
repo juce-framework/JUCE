@@ -30,10 +30,10 @@ template <typename Value>
 struct ChannelInfo
 {
     ChannelInfo() = default;
-    ChannelInfo (Value** dataIn, int numChannelsIn)
+    ChannelInfo (Value* const* dataIn, int numChannelsIn)
         : data (dataIn), numChannels (numChannelsIn)  {}
 
-    Value** data = nullptr;
+    Value* const* data = nullptr;
     int numChannels = 0;
 };
 
@@ -235,9 +235,9 @@ void AudioProcessorPlayer::setMidiOutput (MidiOutput* midiOutputToUse)
 }
 
 //==============================================================================
-void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float** const inputChannelData,
+void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const* const inputChannelData,
                                                              const int numInputChannels,
-                                                             float** const outputChannelData,
+                                                             float* const* const outputChannelData,
                                                              const int numOutputChannels,
                                                              const int numSamples,
                                                              const AudioIODeviceCallbackContext& context)

@@ -484,7 +484,7 @@ public:
     template<typename UnaryFunction>
     static void iterateAudioBuffer (AudioBuffer<float>& ab, UnaryFunction fn)
     {
-        float** sampleData = ab.getArrayOfWritePointers();
+        float* const* sampleData = ab.getArrayOfWritePointers();
 
         for (int c = ab.getNumChannels(); --c >= 0;)
             for (int s = ab.getNumSamples(); --s >= 0;)

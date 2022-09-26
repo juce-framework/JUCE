@@ -115,7 +115,7 @@ void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource)
     invalidate();
 }
 
-bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+bool ARAAudioSourceReader::readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                         int64 startSampleInFile, int numSamples)
 {
     const auto destSize = (bitsPerSample / 8) * (size_t) numSamples;
@@ -237,7 +237,7 @@ void ARAPlaybackRegionReader::invalidate()
     playbackRenderer.reset();
 }
 
-bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+bool ARAPlaybackRegionReader::readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                            int64 startSampleInFile, int numSamples)
 {
     bool success = false;
