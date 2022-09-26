@@ -689,7 +689,7 @@ public:
                        "added separated by a semicolon. The App Groups Capability setting must be enabled for this setting to have any effect.");
 
         props.add (new ChoicePropertyComponent (keepCustomXcodeSchemesValue, "Keep Custom Xcode Schemes"),
-                   "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in"
+                   "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in "
                    "various hosts. If disabled, all schemes are replaced by a default set.");
 
         props.add (new ChoicePropertyComponent (useHeaderMapValue, "USE_HEADERMAP"),
