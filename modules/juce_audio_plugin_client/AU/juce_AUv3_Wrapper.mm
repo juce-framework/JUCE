@@ -1064,18 +1064,43 @@ private:
 
         for (int i = 0; i < numWrapperBuses; ++i)
         {
-            std::unique_ptr<AUAudioUnitBus, NSObjectDeleter> audioUnitBus;
+            using AVAudioFormatPtr = std::unique_ptr<AVAudioFormat, NSObjectDeleter>;
 
+            const auto audioFormat = [&]() -> AVAudioFormatPtr
             {
-                const auto channels = numProcessorBuses <= i ? 2 : processor.getChannelCountOfBus (isInput, i);
-                std::unique_ptr<AVAudioFormat, NSObjectDeleter> defaultFormat ([[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
-                                                                                                                              channels: static_cast<AVAudioChannelCount> (channels)]);
+                const auto tag = i < numProcessorBuses ? CoreAudioLayouts::toCoreAudio (processor.getChannelLayoutOfBus (isInput, i))
+                                                       : kAudioChannelLayoutTag_Stereo;
+                const std::unique_ptr<AVAudioChannelLayout, NSObjectDeleter> layout { [[AVAudioChannelLayout alloc] initWithLayoutTag: tag] };
 
-                audioUnitBus.reset ([[AUAudioUnitBus alloc] initWithFormat: defaultFormat.get()
-                                                                     error: nullptr]);
-            }
+                if (auto format = AVAudioFormatPtr { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
+                                                                                               channelLayout: layout.get()] })
+                    return format;
 
-            [array.get() addObject: audioUnitBus.get()];
+                const auto channels = i < numProcessorBuses ? processor.getChannelCountOfBus (isInput, i)
+                                                            : 2;
+
+                // According to the docs, this will fail if the number of channels is greater than 2.
+                if (auto format = AVAudioFormatPtr { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
+                                                                                                    channels: static_cast<AVAudioChannelCount> (channels)] })
+                    return format;
+
+                jassertfalse;
+                return nullptr;
+            }();
+
+            using AUAudioUnitBusPtr = std::unique_ptr<AUAudioUnitBus, NSObjectDeleter>;
+
+            const auto audioUnitBus = [&]() -> AUAudioUnitBusPtr
+            {
+                if (audioFormat != nullptr)
+                    return AUAudioUnitBusPtr { [[AUAudioUnitBus alloc] initWithFormat: audioFormat.get() error: nullptr] };
+
+                jassertfalse;
+                return nullptr;
+            }();
+
+            if (audioUnitBus != nullptr)
+                [array.get() addObject: audioUnitBus.get()];
         }
 
         (isInput ? inputBusses : outputBusses).reset ([[AUAudioUnitBusArray alloc] initWithAudioUnit: au
