@@ -3129,6 +3129,12 @@ XWindowSystem::VisualAndDepth XWindowSystem::DisplayVisuals::getBestVisualForWin
     if (visual24Bit != nullptr)
         return { visual24Bit, 24 };
 
+    if (visual32Bit != nullptr)
+        return { visual32Bit, 32 };
+
+    // No visual available!
+    jassert (visual16Bit != nullptr);
+
     return { visual16Bit, 16 };
 }
 
