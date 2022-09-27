@@ -1614,9 +1614,10 @@ public:
             for (const auto& xcodeFlags : { XcodeWarningFlags { recommendedWarnings.common, "OTHER_CFLAGS" },
                                             XcodeWarningFlags { recommendedWarnings.cpp,    "OTHER_CPLUSPLUSFLAGS" } })
             {
-                auto flags = (xcodeFlags.flags.joinIntoString (" ")
-                                 + " " + owner.getExtraCompilerFlagsString()).trim();
-                flags = owner.replacePreprocessorTokens (config, flags);
+                const auto flags = owner.replacePreprocessorTokens (config,
+                                                                    (xcodeFlags.flags.joinIntoString (" ")
+                                                                     + " "
+                                                                     + config.getAllCompilerFlagsString()).trim());
 
                 if (flags.isNotEmpty())
                     s.set (xcodeFlags.variable, flags.quoted());
@@ -1854,7 +1855,7 @@ public:
                     flags.add (getLinkerFlagForLib (l));
             }
 
-            flags.add (owner.replacePreprocessorTokens (config, owner.getExtraLinkerFlagsString()));
+            flags.add (owner.replacePreprocessorTokens (config, config.getAllLinkerFlagsString()));
             flags = getCleanedStringArray (flags);
         }
 

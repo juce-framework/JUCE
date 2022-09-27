@@ -404,7 +404,7 @@ private:
         if (config.isDebug())
             flags.add ("-g");
 
-        flags.addTokens (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim(),
+        flags.addTokens (replacePreprocessorTokens (config, config.getAllCompilerFlagsString()).trim(),
                          " \n", "\"'");
 
         if (config.exporter.isLinux())
@@ -445,7 +445,7 @@ private:
         if (config.isLinkTimeOptimisationEnabled())
             flags.add ("-flto");
 
-        flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");
+        flags.addTokens (replacePreprocessorTokens (config, config.getAllLinkerFlagsString()).trim(), " \n", "\"'");
 
         if (config.exporter.isLinux())
         {

@@ -625,7 +625,8 @@ public:
                     if (config.isFastMathEnabled())
                         cl->createNewChildElement ("FloatingPointModel")->addTextElement ("Fast");
 
-                    auto extraFlags = getOwner().replacePreprocessorTokens (config, getOwner().getExtraCompilerFlagsString()).trim();
+                    auto extraFlags = getOwner().replacePreprocessorTokens (config, config.getAllCompilerFlagsString()).trim();
+
                     if (extraFlags.isNotEmpty())
                         cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
 
@@ -684,7 +685,7 @@ public:
                     if (additionalDependencies.isNotEmpty())
                         link->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
 
-                    auto extraLinkerOptions = getOwner().getExtraLinkerFlagsString();
+                    auto extraLinkerOptions = config.getAllLinkerFlagsString();
                     if (extraLinkerOptions.isNotEmpty())
                         link->createNewChildElement ("AdditionalOptions")->addTextElement (getOwner().replacePreprocessorTokens (config, extraLinkerOptions).trim()
                                                                                            + " %(AdditionalOptions)");

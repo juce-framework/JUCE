@@ -407,13 +407,6 @@ private:
                 mo << ")" << newLine << newLine;
             }
 
-            auto cfgExtraLinkerFlags = getExtraLinkerFlagsString();
-            if (cfgExtraLinkerFlags.isNotEmpty())
-            {
-                mo << "set( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\")" << newLine;
-                mo << "set( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
-            }
-
             mo << "enable_language(ASM)" << newLine << newLine;
 
             const auto userLibraries = getUserLibraries();
@@ -456,6 +449,14 @@ private:
 
                     if (cfgDefines.size() > 0)
                         mo << "    add_definitions(" << getEscapedPreprocessorDefs (cfgDefines).joinIntoString (" ") << ")" << newLine;
+
+                    const auto cfgExtraLinkerFlags = cfg.getAllLinkerFlagsString();
+
+                    if (cfgExtraLinkerFlags.isNotEmpty())
+                    {
+                        mo << "    set( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\" )"       << newLine
+                           << "    set( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_SHARED_LINKER_FLAGS} ${JUCE_LDFLAGS}\" )" << newLine << newLine;
+                    }
 
                     writeCmakePathLines (mo, "    ", "include_directories( AFTER", cfgHeaderPaths);
 
@@ -537,26 +538,27 @@ private:
                 mo << newLine;
             }
 
-            auto flags = getProjectCompilerFlags();
-
-            if (flags.size() > 0)
-                mo << "target_compile_options( ${BINARY_NAME} PRIVATE " << flags.joinIntoString (" ") << " )" << newLine << newLine;
-
             for (ConstConfigIterator config (*this); config.next();)
             {
                 auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
-                mo << "if( JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() << "\" )" << newLine;
-                mo << "    target_compile_options( ${BINARY_NAME} PRIVATE";
+                mo << "if( JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() << "\" )" << newLine
+                   << "    target_compile_options( ${BINARY_NAME} PRIVATE";
 
-                auto recommendedFlags = cfg.getRecommendedCompilerWarningFlags();
+                const auto recommendedFlags = cfg.getRecommendedCompilerWarningFlags();
 
                 for (auto& recommendedFlagsType : { recommendedFlags.common, recommendedFlags.cpp })
                     for (auto& flag : recommendedFlagsType)
                         mo << " " << flag;
 
-                mo << ")" << newLine;
-                mo << "endif()" << newLine << newLine;
+                const auto flags = getConfigCompilerFlags (cfg);
+
+                if (! flags.isEmpty())
+                    mo << " " << flags.joinIntoString (" ");
+
+                mo << " )"      << newLine
+                   << "endif()" << newLine
+                   <<              newLine;
             }
 
             auto libraries = getAndroidLibraries();
@@ -1371,8 +1373,10 @@ private:
     }
 
     //==============================================================================
-    void addCompileUnits (const Project::Item& projectItem, MemoryOutputStream& mo,
-                          Array<build_tools::RelativePath>& excludeFromBuild, Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
+    void addCompileUnits (const Project::Item& projectItem,
+                          MemoryOutputStream& mo,
+                          Array<build_tools::RelativePath>& excludeFromBuild,
+                          Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         if (projectItem.isGroup())
         {
@@ -1405,7 +1409,8 @@ private:
         }
     }
 
-    void addCompileUnits (MemoryOutputStream& mo, Array<build_tools::RelativePath>& excludeFromBuild,
+    void addCompileUnits (MemoryOutputStream& mo,
+                          Array<build_tools::RelativePath>& excludeFromBuild,
                           Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
@@ -1452,10 +1457,10 @@ private:
         return cFlags;
     }
 
-    StringArray getProjectCompilerFlags() const
+    StringArray getConfigCompilerFlags (const BuildConfiguration& config) const
     {
         auto cFlags = getAndroidCompilerFlags();
-        cFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
+        cFlags.addArray (getEscapedFlags (StringArray::fromTokens (config.getAllCompilerFlagsString(), true)));
         return cFlags;
     }
 
