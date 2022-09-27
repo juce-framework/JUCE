@@ -3519,14 +3519,12 @@ set_source_files_properties(
     "../../../JuceLibraryCode/JuceHeader.h"
     PROPERTIES HEADER_FILE_ONLY TRUE)
 
-target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" )
-
 if( JUCE_BUILD_CONFIGURATION MATCHES "DEBUG" )
-    target_compile_options( ${BINARY_NAME} PRIVATE)
+    target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" )
 endif()
 
 if( JUCE_BUILD_CONFIGURATION MATCHES "RELEASE" )
-    target_compile_options( ${BINARY_NAME} PRIVATE)
+    target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" )
 endif()
 
 find_library(log "log")

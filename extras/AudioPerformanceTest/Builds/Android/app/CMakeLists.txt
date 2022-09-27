@@ -3363,14 +3363,12 @@ set_source_files_properties(
     "../../../JuceLibraryCode/JuceHeader.h"
     PROPERTIES HEADER_FILE_ONLY TRUE)
 
-target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" [[-mfpu=neon]] [[-mfloat-abi=hard]] [[-ffast-math]] [[-funroll-loops]] [[--param]] [[max-unroll-times=8]] [[-mhard-float]] [[-D_NDK_MATH_NO_SOFTFP=1]] [[-DJUCE_DISABLE_ASSERTIONS=1]] )
-
 if( JUCE_BUILD_CONFIGURATION MATCHES "DEBUG" )
-    target_compile_options( ${BINARY_NAME} PRIVATE)
+    target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" [[-mfpu=neon]] [[-mfloat-abi=hard]] [[-ffast-math]] [[-funroll-loops]] [[--param]] [[max-unroll-times=8]] [[-mhard-float]] [[-D_NDK_MATH_NO_SOFTFP=1]] [[-DJUCE_DISABLE_ASSERTIONS=1]] )
 endif()
 
 if( JUCE_BUILD_CONFIGURATION MATCHES "RELEASE" )
-    target_compile_options( ${BINARY_NAME} PRIVATE)
+    target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" [[-mfpu=neon]] [[-mfloat-abi=hard]] [[-ffast-math]] [[-funroll-loops]] [[--param]] [[max-unroll-times=8]] [[-mhard-float]] [[-D_NDK_MATH_NO_SOFTFP=1]] [[-DJUCE_DISABLE_ASSERTIONS=1]] )
 endif()
 
 find_library(log "log")
