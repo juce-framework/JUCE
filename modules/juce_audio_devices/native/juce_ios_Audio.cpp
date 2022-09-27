@@ -892,8 +892,8 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
             if ((int) numFrames > channelData.getFloatBufferSize())
                 channelData.setFloatBufferSize ((int) numFrames);
 
-            float** const inputData = channelData.audioData.getArrayOfWritePointers();
-            float** const outputData = inputData + channelData.inputs->numActiveChannels;
+            float* const* const inputData = channelData.audioData.getArrayOfWritePointers();
+            float* const* const outputData = inputData + channelData.inputs->numActiveChannels;
 
             if (useInput)
             {

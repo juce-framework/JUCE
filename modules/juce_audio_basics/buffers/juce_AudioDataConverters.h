@@ -662,7 +662,7 @@ private:
     {
         using ElementType = std::remove_pointer_t<decltype (DataFormat::data)>;
         using ChannelType = std::conditional_t<IsConst, const ElementType*, ElementType*>;
-        using DataType = std::conditional_t<IsInterleaved, ChannelType, ChannelType*>;
+        using DataType = std::conditional_t<IsInterleaved, ChannelType, ChannelType const*>;
         using PointerType = Pointer<DataFormat,
                                     Endianness,
                                     std::conditional_t<IsInterleaved, Interleaved, NonInterleaved>,

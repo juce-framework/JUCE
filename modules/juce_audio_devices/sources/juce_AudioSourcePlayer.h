@@ -79,12 +79,13 @@ public:
     float getGain() const noexcept                      { return gain; }
 
     //==============================================================================
-    /** Implementation of the AudioIODeviceCallback method. */
-    void audioDeviceIOCallback (const float** inputChannelData,
-                                int totalNumInputChannels,
-                                float** outputChannelData,
-                                int totalNumOutputChannels,
-                                int numSamples) override;
+    /** Implementation of the AudioIODeviceCallbackWithContext method. */
+    void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
+                                           int totalNumInputChannels,
+                                           float* const* outputChannelData,
+                                           int totalNumOutputChannels,
+                                           int numSamples,
+                                           const AudioIODeviceCallbackContext& context) override;
 
     /** Implementation of the AudioIODeviceCallback method. */
     void audioDeviceAboutToStart (AudioIODevice* device) override;

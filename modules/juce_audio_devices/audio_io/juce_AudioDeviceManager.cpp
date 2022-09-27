@@ -69,9 +69,9 @@ public:
     CallbackHandler (AudioDeviceManager& adm) noexcept  : owner (adm) {}
 
 private:
-    void audioDeviceIOCallbackWithContext (const float** ins,
+    void audioDeviceIOCallbackWithContext (const float* const* ins,
                                            int numIns,
-                                           float** outs,
+                                           float* const* outs,
                                            int numOuts,
                                            int numSamples,
                                            const AudioIODeviceCallbackContext& context) override
@@ -982,9 +982,9 @@ void AudioDeviceManager::removeAudioCallback (AudioIODeviceCallback* callbackToR
     }
 }
 
-void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelData,
+void AudioDeviceManager::audioDeviceIOCallbackInt (const float* const* inputChannelData,
                                                    int numInputChannels,
-                                                   float** outputChannelData,
+                                                   float* const* outputChannelData,
                                                    int numOutputChannels,
                                                    int numSamples,
                                                    const AudioIODeviceCallbackContext& context)
@@ -1006,7 +1006,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
                                                                      numSamples,
                                                                      context);
 
-        auto** tempChans = tempBuffer.getArrayOfWritePointers();
+        auto* const* tempChans = tempBuffer.getArrayOfWritePointers();
 
         for (int i = callbacks.size(); --i > 0;)
         {
@@ -1048,7 +1048,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
             testSound.reset();
     }
 
-    outputLevelGetter->updateLevel (const_cast<const float**> (outputChannelData), numOutputChannels, numSamples);
+    outputLevelGetter->updateLevel (outputChannelData, numOutputChannels, numSamples);
 }
 
 void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device)
@@ -1891,10 +1891,19 @@ private:
         std::function<void()> stopped;
         std::function<void()> error;
 
-        void audioDeviceIOCallback (const float**, int, float**, int, int) override { NullCheckedInvocation::invoke (callback); }
-        void audioDeviceAboutToStart (AudioIODevice*)                      override { NullCheckedInvocation::invoke (aboutToStart); }
-        void audioDeviceStopped()                                          override { NullCheckedInvocation::invoke (stopped); }
-        void audioDeviceError (const String&)                              override { NullCheckedInvocation::invoke (error); }
+        void audioDeviceIOCallbackWithContext (const float* const*,
+                                               int,
+                                               float* const*,
+                                               int,
+                                               int,
+                                               const AudioIODeviceCallbackContext&) override
+        {
+            NullCheckedInvocation::invoke (callback);
+        }
+
+        void audioDeviceAboutToStart (AudioIODevice*) override { NullCheckedInvocation::invoke (aboutToStart); }
+        void audioDeviceStopped()                     override { NullCheckedInvocation::invoke (stopped); }
+        void audioDeviceError (const String&)         override { NullCheckedInvocation::invoke (error); }
     };
 
     void initialiseManager (AudioDeviceManager& manager)

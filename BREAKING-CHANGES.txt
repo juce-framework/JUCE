@@ -6,6 +6,55 @@ develop
 
 Change
 ------
+The function AudioIODeviceCallback::audioDeviceIOCallback() was removed.
+
+Possible Issues
+---------------
+Code overriding audioDeviceIOCallback() will fail to compile.
+
+Workaround
+----------
+Affected classes should override the audioDeviceIOCallbackWithContext() function
+instead.
+
+Rationale
+---------
+The audioDeviceIOCallbackWithContext() function fulfills the same role as
+audioDeviceIOCallback(), it just has an extra parameter. Hence the
+audioDeviceIOCallback() function was superfluous.
+
+
+Change
+------
+The type representing multi-channel audio data has been changed from T** to
+T* const*. Affected classes are AudioIODeviceCallback, AudioBuffer and
+AudioFormatReader.
+
+Possible Issues
+---------------
+Code overriding the affected AudioIODeviceCallback and AudioFormatReader
+functions will fail to compile. Code that interacts with the return value of
+AudioBuffer::getArrayOfReadPointers() and AudioBuffer::getArrayOfWritePointers()
+may fail to compile.
+
+Workaround
+----------
+Functions overriding the affected AudioIODeviceCallback and AudioFormatReader
+members will need to be changed to confirm to the new signature. Type
+declarations related to getArrayOfReadPointers() and getArrayOfWritePointers()
+of AudioBuffer may have to be adjusted.
+
+Rationale
+---------
+While the previous signature permitted it, changing the channel pointers by the
+previously used types was already being considered illegal. The earlier type
+however prevented passing T** values to parameters with type const T**. In some
+places this necessitated the usage of const_cast. The new signature can bind to
+T** values and the awkward casting can be avoided.
+
+
+Change
+------
 The minimum supported C++ standard is now C++17 and the oldest supported
 compilers on Linux are now GCC 7.0 and Clang 6.0.
 

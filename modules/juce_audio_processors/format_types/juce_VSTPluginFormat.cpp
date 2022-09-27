@@ -829,6 +829,34 @@ static const int defaultVSTBlockSizeValue = 512;
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
+class TempChannelPointers
+{
+public:
+    template <typename T>
+    auto getArrayOfModifiableWritePointers (AudioBuffer<T>& buffer)
+    {
+        auto& pointers = getPointers (Tag<T>{});
+
+        jassert ((int) pointers.size() < buffer.getNumChannels());
+        pointers.resize (jmax (pointers.size(), (size_t) buffer.getNumChannels()));
+
+        std::copy (buffer.getArrayOfWritePointers(),
+                   buffer.getArrayOfWritePointers() + buffer.getNumChannels(),
+                   pointers.begin());
+
+        return pointers.data();
+    }
+
+private:
+    template <typename> struct Tag {};
+
+    auto& getPointers (Tag<float>)  { return floatPointers; }
+    auto& getPointers (Tag<double>) { return doublePointers; }
+
+    std::vector<float*>  floatPointers  { 128 };
+    std::vector<double*> doublePointers { 128 };
+};
+
 //==============================================================================
 struct VSTPluginInstance final   : public AudioPluginInstance,
                                    private Timer,
@@ -2026,6 +2054,7 @@ private:
     bool lastProcessBlockCallWasBypass = false, vstSupportsBypass = false;
     mutable StringArray programNames;
     AudioBuffer<float> outOfPlaceBuffer;
+    TempChannelPointers tempChannelPointers[2];
 
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
@@ -2456,16 +2485,16 @@ private:
     {
         if ((vstEffect->flags & Vst2::effFlagsCanReplacing) != 0)
         {
-            vstEffect->processReplacing (vstEffect, buffer.getArrayOfWritePointers(),
-                                                    buffer.getArrayOfWritePointers(), sampleFrames);
+            vstEffect->processReplacing (vstEffect, tempChannelPointers[0].getArrayOfModifiableWritePointers (buffer),
+                                                    tempChannelPointers[1].getArrayOfModifiableWritePointers (buffer), sampleFrames);
         }
         else
         {
             outOfPlaceBuffer.setSize (vstEffect->numOutputs, sampleFrames);
             outOfPlaceBuffer.clear();
 
-            vstEffect->process (vstEffect, buffer.getArrayOfWritePointers(),
-                                           outOfPlaceBuffer.getArrayOfWritePointers(), sampleFrames);
+            vstEffect->process (vstEffect, tempChannelPointers[0].getArrayOfModifiableWritePointers (buffer),
+                                           tempChannelPointers[1].getArrayOfModifiableWritePointers (outOfPlaceBuffer), sampleFrames);
 
             for (int i = vstEffect->numOutputs; --i >= 0;)
                 buffer.copyFrom (i, 0, outOfPlaceBuffer.getReadPointer (i), sampleFrames);
@@ -2474,8 +2503,8 @@ private:
 
     inline void invokeProcessFunction (AudioBuffer<double>& buffer, int32 sampleFrames)
     {
-        vstEffect->processDoubleReplacing (vstEffect, buffer.getArrayOfWritePointers(),
-                                                      buffer.getArrayOfWritePointers(), sampleFrames);
+        vstEffect->processDoubleReplacing (vstEffect, tempChannelPointers[0].getArrayOfModifiableWritePointers (buffer),
+                                                      tempChannelPointers[1].getArrayOfModifiableWritePointers (buffer), sampleFrames);
     }
 
     //==============================================================================

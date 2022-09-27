@@ -242,15 +242,16 @@ void SoundPlayer::playTestSound()
 }
 
 //==============================================================================
-void SoundPlayer::audioDeviceIOCallback (const float** inputChannelData,
-                                         int numInputChannels,
-                                         float** outputChannelData,
-                                         int numOutputChannels,
-                                         int numSamples)
+void SoundPlayer::audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
+                                                    int numInputChannels,
+                                                    float* const* outputChannelData,
+                                                    int numOutputChannels,
+                                                    int numSamples,
+                                                    const AudioIODeviceCallbackContext& context)
 {
-    player.audioDeviceIOCallback (inputChannelData, numInputChannels,
-                                  outputChannelData, numOutputChannels,
-                                  numSamples);
+    player.audioDeviceIOCallbackWithContext (inputChannelData, numInputChannels,
+                                             outputChannelData, numOutputChannels,
+                                             numSamples, context);
 }
 
 void SoundPlayer::audioDeviceAboutToStart (AudioIODevice* device)

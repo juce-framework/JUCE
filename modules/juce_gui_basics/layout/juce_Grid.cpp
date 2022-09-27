@@ -1047,7 +1047,7 @@ void Grid::performLayout (Rectangle<int> targetArea)
                                 + targetArea.toFloat().getPosition();
 
         if (auto* c = item->associatedComponent)
-            c->setBounds (item->currentBounds.toNearestIntEdges());
+            c->setBounds (item->currentBounds.getSmallestIntegerContainer());
     }
 }
 

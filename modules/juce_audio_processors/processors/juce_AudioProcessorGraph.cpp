@@ -444,7 +444,7 @@ struct GraphRenderSequence
 
     struct Context
     {
-        FloatType** audioBuffers;
+        FloatType* const* audioBuffers;
         MidiBuffer* midiBuffers;
         AudioPlayHead* audioPlayHead;
         int numSamples;

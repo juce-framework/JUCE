@@ -267,7 +267,7 @@ public:
                                          to begin reading. This value is guaranteed to be >= 0.
         @param numSamples                the number of samples to read
     */
-    virtual bool readSamples (int** destChannels,
+    virtual bool readSamples (int* const* destChannels,
                               int numDestChannels,
                               int startOffsetInDestBuffer,
                               int64 startSampleInFile,
@@ -306,7 +306,7 @@ protected:
     /** Used by AudioFormatReader subclasses to clear any parts of the data blocks that lie
         beyond the end of their available length.
     */
-    static void clearSamplesBeyondAvailableLength (int** destChannels, int numDestChannels,
+    static void clearSamplesBeyondAvailableLength (int* const* destChannels, int numDestChannels,
                                                    int startOffsetInDestBuffer, int64 startSampleInFile,
                                                    int& numSamples, int64 fileLengthInSamples)
     {
