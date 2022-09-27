@@ -139,7 +139,7 @@ public:
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
           gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.5.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.2.2"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.3.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
@@ -642,6 +642,7 @@ private:
 
         mo << "android {"                                                                    << newLine;
         mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
+        mo << "    namespace " << project.getBundleIdentifierString().toLowerCase().quoted() << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
         mo << "            path \"CMakeLists.txt\""                                          << newLine;
@@ -1641,7 +1642,6 @@ private:
         setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
         setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());
         setAttributeIfNotPresent (*manifest, "android:versionName",  project.getVersionString());
-        setAttributeIfNotPresent (*manifest, "package", project.getBundleIdentifierString().toLowerCase());
 
         return manifest;
     }
@@ -1734,7 +1734,6 @@ private:
         auto* act = getOrCreateChildWithName (application, "activity");
 
         setAttributeIfNotPresent (*act, "android:name", getActivityClassString());
-        setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
 
         if (! act->hasAttribute ("android:configChanges"))
             act->setAttribute ("android:configChanges", "keyboardHidden|orientation|screenSize");
