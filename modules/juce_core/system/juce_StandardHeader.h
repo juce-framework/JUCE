@@ -55,6 +55,7 @@
 #include <condition_variable>
 #include <cstddef>
 #include <functional>
+#include <future>
 #include <iomanip>
 #include <iostream>
 #include <limits>
