@@ -37,7 +37,7 @@ struct CFObjectDeleter
 };
 
 template <typename CFType>
-using CFUniquePtr = std::unique_ptr<typename std::remove_pointer<CFType>::type, CFObjectDeleter<CFType>>;
+using CFUniquePtr = std::unique_ptr<std::remove_pointer_t<CFType>, CFObjectDeleter<CFType>>;
 
 template <typename CFType>
 struct CFObjectHolder

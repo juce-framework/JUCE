@@ -123,7 +123,7 @@ public:
     template <typename SpecialisationType>
     static const ARA::ARAFactory* createARAFactory()
     {
-        static_assert (std::is_base_of<ARADocumentControllerSpecialisation, SpecialisationType>::value,
+        static_assert (std::is_base_of_v<ARADocumentControllerSpecialisation, SpecialisationType>,
                        "DocumentController specialization types must inherit from ARADocumentControllerSpecialisation");
         return ARA::PlugIn::PlugInEntry::getPlugInEntry<FactoryConfig<SpecialisationType>>()->getFactory();
     }

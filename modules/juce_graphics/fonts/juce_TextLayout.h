@@ -44,7 +44,7 @@ private:
     class DereferencingIterator
     {
     public:
-        using value_type = typename std::remove_reference<decltype(**std::declval<Iterator>())>::type;
+        using value_type = std::remove_reference_t<decltype(**std::declval<Iterator>())>;
         using difference_type = typename std::iterator_traits<Iterator>::difference_type;
         using pointer = value_type*;
         using reference = value_type&;

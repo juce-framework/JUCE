@@ -548,7 +548,7 @@ inline int nextPowerOfTwo (int n) noexcept
 int findHighestSetBit (uint32 n) noexcept;
 
 /** Returns the number of bits in a 32-bit integer. */
-inline int countNumberOfBits (uint32 n) noexcept
+constexpr int countNumberOfBits (uint32 n) noexcept
 {
     n -= ((n >> 1) & 0x55555555);
     n =  (((n >> 2) & 0x33333333) + (n & 0x33333333));
@@ -559,7 +559,7 @@ inline int countNumberOfBits (uint32 n) noexcept
 }
 
 /** Returns the number of bits in a 64-bit integer. */
-inline int countNumberOfBits (uint64 n) noexcept
+constexpr int countNumberOfBits (uint64 n) noexcept
 {
     return countNumberOfBits ((uint32) n) + countNumberOfBits ((uint32) (n >> 32));
 }
@@ -654,11 +654,8 @@ namespace TypeHelpers
 
         @tags{Core}
     */
-    template <typename Type> struct SmallestFloatType               { using type = float; };
-
-   #ifndef DOXYGEN
-    template <>              struct SmallestFloatType <double>      { using type = double; };
-   #endif
+    template <typename Type>
+    using SmallestFloatType = std::conditional_t<std::is_same_v<Type, double>, double, float>;
 
     /** These templates are designed to take an integer type, and return an unsigned int
         version with the same size.

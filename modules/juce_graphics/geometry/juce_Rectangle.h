@@ -813,7 +813,7 @@ public:
     */
     Rectangle transformedBy (const AffineTransform& transform) const noexcept
     {
-        using FloatType = typename TypeHelpers::SmallestFloatType<ValueType>::type;
+        using FloatType = TypeHelpers::SmallestFloatType<ValueType>;
 
         auto x1 = static_cast<FloatType> (pos.x),     y1 = static_cast<FloatType> (pos.y);
         auto x2 = static_cast<FloatType> (pos.x + w), y2 = static_cast<FloatType> (pos.y);

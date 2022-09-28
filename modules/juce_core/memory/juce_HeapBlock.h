@@ -87,8 +87,8 @@ class HeapBlock
 {
 private:
     template <class OtherElementType>
-    using AllowConversion = typename std::enable_if<std::is_base_of<typename std::remove_pointer<ElementType>::type,
-                                                                    typename std::remove_pointer<OtherElementType>::type>::value>::type;
+    using AllowConversion = std::enable_if_t<std::is_base_of_v<std::remove_pointer_t<ElementType>,
+                                                               std::remove_pointer_t<OtherElementType>>>;
 
 public:
     //==============================================================================
@@ -107,7 +107,7 @@ public:
         If you want an array of zero values, you can use the calloc() method or the
         other constructor that takes an InitialisationState parameter.
     */
-    template <typename SizeType, std::enable_if_t<std::is_convertible<SizeType, int>::value, int> = 0>
+    template <typename SizeType, std::enable_if_t<std::is_convertible_v<SizeType, int>, int> = 0>
     explicit HeapBlock (SizeType numElements)
         : data (static_cast<ElementType*> (std::malloc (static_cast<size_t> (numElements) * sizeof (ElementType))))
     {
@@ -119,7 +119,7 @@ public:
         The initialiseToZero parameter determines whether the new memory should be cleared,
         or left uninitialised.
     */
-    template <typename SizeType, std::enable_if_t<std::is_convertible<SizeType, int>::value, int> = 0>
+    template <typename SizeType, std::enable_if_t<std::is_convertible_v<SizeType, int>, int> = 0>
     HeapBlock (SizeType numElements, bool initialiseToZero)
         : data (static_cast<ElementType*> (initialiseToZero
                                                ? std::calloc (static_cast<size_t> (numElements), sizeof (ElementType))
@@ -152,7 +152,7 @@ public:
 
     /** Converting move constructor.
         Only enabled if this is a HeapBlock<Base*> and the other object is a HeapBlock<Derived*>,
-        where std::is_base_of<Base, Derived>::value == true.
+        where std::is_base_of_v<Base, Derived> == true.
     */
     template <class OtherElementType, bool otherThrowOnFailure, typename = AllowConversion<OtherElementType>>
     HeapBlock (HeapBlock<OtherElementType, otherThrowOnFailure>&& other) noexcept
@@ -163,7 +163,7 @@ public:
 
     /** Converting move assignment operator.
         Only enabled if this is a HeapBlock<Base*> and the other object is a HeapBlock<Derived*>,
-        where std::is_base_of<Base, Derived>::value == true.
+        where std::is_base_of_v<Base, Derived> == true.
     */
     template <class OtherElementType, bool otherThrowOnFailure, typename = AllowConversion<OtherElementType>>
     HeapBlock& operator= (HeapBlock<OtherElementType, otherThrowOnFailure>&& other) noexcept

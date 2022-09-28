@@ -191,7 +191,7 @@ public:
     void pause()
     {
         signalJobShouldExit();
-        contextsWaitingForFlush->cancelFlush (this);
+        contextsWaitingForFlush->deregisterContext (this);
         messageManagerLock.abort();
 
         if (renderThread != nullptr)
@@ -350,8 +350,7 @@ public:
             OpenGLContext::deactivateCurrentContext();
         }
 
-        if (! shouldExit())
-            contextsWaitingForFlush->flush (this);
+        contextsWaitingForFlush->flush (this);
 
         return true;
     }
@@ -555,6 +554,8 @@ public:
             return ThreadPoolJob::jobHasFinished;
         }
 
+        contextsWaitingForFlush->registerContext (this);
+
         hasInitialised = true;
 
         while (! shouldExit())
@@ -625,13 +626,13 @@ public:
         if (getOpenGLVersion() >= Version { 4, 3 } && glDebugMessageCallback != nullptr)
         {
             glEnable (GL_DEBUG_OUTPUT);
-            glDebugMessageCallback ([] (GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar* message, const void*)
+            glDebugMessageCallback ([] (GLenum type, GLenum, GLuint, GLenum severity, GLsizei, const GLchar* message, const void*)
             {
                 // This may reiterate issues that are also flagged by JUCE_CHECK_OPENGL_ERROR.
                 // The advantage of this callback is that it will catch *all* errors, even if we
                 // forget to check manually.
                 DBG ("OpenGL DBG message: " << message);
-                jassertfalse;
+                jassertquiet (type != GL_DEBUG_TYPE_ERROR && severity != GL_DEBUG_SEVERITY_HIGH);
             }, nullptr);
         }
        #endif
@@ -781,6 +782,19 @@ public:
     class ContextsWaitingForFlush : private AsyncUpdater
     {
     public:
+        void registerContext (CachedImage* ctx)
+        {
+            const std::lock_guard<std::mutex> lock (mutex);
+            needsRender.insert_or_assign (ctx, false);
+        }
+
+        void deregisterContext (CachedImage* ctx)
+        {
+            const std::lock_guard<std::mutex> lock (mutex);
+            needsRender.erase (ctx);
+            condvar.notify_all();
+        }
+
         /*  Ask to swap the CachedImage's buffers on the main thread.
 
             Will block until the buffers have been swapped, or until the swap has been cancelled.
@@ -790,8 +804,8 @@ public:
             {
                 const std::lock_guard<std::mutex> lock (mutex);
 
-                if (find (ctx) == contexts.cend())
-                    contexts.push_back (ctx);
+                if (const auto iter = needsRender.find (ctx); iter != needsRender.cend())
+                    iter->second = true;
             }
 
             if (MessageManager::getInstance()->isThisTheMessageThread())
@@ -803,21 +817,15 @@ public:
                 triggerAsyncUpdate();
 
                 std::unique_lock<std::mutex> lock { mutex };
-                condvar.wait (lock, [this, ctx] { return find (ctx) == contexts.cend(); });
-            }
-        }
+                condvar.wait (lock, [this, ctx]
+                {
+                    // If the context is still registered, continue once it no longer needs rendering.
+                    if (const auto iter = needsRender.find (ctx); iter != needsRender.cend())
+                        return ! iter->second;
 
-        /*  When a context is destroyed, this function must be called so that flush() can return. */
-        void cancelFlush (CachedImage* ctx)
-        {
-            const std::lock_guard<std::mutex> lock (mutex);
-
-            const auto iter = find (ctx);
-
-            if (iter != contexts.cend())
-            {
-                contexts.erase (iter);
-                condvar.notify_all();
+                    // If the context is no longer registered, continue so that the thread can be destroyed.
+                    return true;
+                });
             }
         }
 
@@ -826,40 +834,35 @@ public:
             cancelPendingUpdate();
 
             // There definitely shouldn't still be active CachedImages if this object is being destroyed!
-            jassert (contexts.empty());
+            jassert (needsRender.empty());
         }
 
     private:
         std::mutex mutex;
         std::condition_variable condvar;
-        std::vector<CachedImage*> contexts;
-
-        /*  Precondition: mutex is locked. */
-        std::vector<CachedImage*>::const_iterator find (CachedImage* ctx) const
-        {
-            // Linear search here because the number of OpenGL contexts probably won't
-            // ever be bigger than double/triple digits
-            return std::find (contexts.cbegin(), contexts.cend(), ctx);
-        }
+        std::map<CachedImage*, bool> needsRender;
 
         /*  Swaps the buffers for each of the pending contexts, then notifies all rendering threads
             that they may continue.
         */
         void handleAsyncUpdate() override
         {
-            std::unique_lock<std::mutex> lock (mutex);
+            const std::unique_lock<std::mutex> lock (mutex);
 
-            for (auto* ctx : contexts)
+            for (auto& [ctx, shouldSwap] : needsRender)
             {
+                if (! shouldSwap)
+                    continue;
+
                 auto& native = *ctx->nativeContext;
 
-                OpenGLContext::NativeContext::Locker nativeContextLocker (native);
+                const OpenGLContext::NativeContext::Locker nativeContextLocker { native };
                 native.makeActive();
                 native.swapBuffers();
                 native.deactivateCurrentContext();
+                shouldSwap = false;
             }
 
-            contexts.clear();
             condvar.notify_all();
         }
     };
