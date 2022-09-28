@@ -409,9 +409,9 @@ public:
         Array<double> newSampleRates;
 
         if (auto ranges = audioObjectGetProperties<AudioValueRange> (deviceID,
-                                                                     { kAudioObjectPropertyScopeWildcard,
-                                                                       juceAudioObjectPropertyElementMain,
-                                                                       kAudioDevicePropertyAvailableNominalSampleRates },
+                                                                     { kAudioDevicePropertyAvailableNominalSampleRates,
+                                                                       kAudioObjectPropertyScopeWildcard,
+                                                                       juceAudioObjectPropertyElementMain },
                                                                      err2log()); ! ranges.empty())
         {
             for (const auto rate : SampleRateHelpers::getAllSampleRates())
@@ -442,9 +442,9 @@ public:
     {
         Array<int> newBufferSizes;
 
-        if (auto ranges = audioObjectGetProperties<AudioValueRange> (deviceID, { kAudioObjectPropertyScopeWildcard,
-                                                                                 juceAudioObjectPropertyElementMain,
-                                                                                 kAudioDevicePropertyBufferFrameSizeRange },
+        if (auto ranges = audioObjectGetProperties<AudioValueRange> (deviceID, { kAudioDevicePropertyBufferFrameSizeRange,
+                                                                                 kAudioObjectPropertyScopeWildcard,
+                                                                                 juceAudioObjectPropertyElementMain },
                                                                      err2log()); ! ranges.empty())
         {
             newBufferSizes.add ((int) (ranges[0].mMinimum + 15) & ~15);
