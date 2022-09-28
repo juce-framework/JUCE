@@ -92,11 +92,11 @@ public:
                 peer->removeScaleFactorListener (this);
     }
 
-    bool initialiseOnRenderThread (OpenGLContext& c)
+    InitResult initialiseOnRenderThread (OpenGLContext& c)
     {
         threadAwarenessSetter = std::make_unique<ScopedThreadDPIAwarenessSetter> (nativeWindow->getNativeHandle());
         context = &c;
-        return true;
+        return InitResult::success;
     }
 
     void shutdownOnRenderThread()
