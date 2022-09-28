@@ -330,7 +330,7 @@ public:
         openDevice();
     }
 
-    ~ASIOAudioIODevice()
+    ~ASIOAudioIODevice() override
     {
         for (int i = 0; i < maxNumASIODevices; ++i)
             if (currentASIODev[i] == this)

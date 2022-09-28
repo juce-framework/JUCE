@@ -97,9 +97,14 @@ private:
 class ScopedDisplayLink
 {
 public:
+    static CGDirectDisplayID getDisplayIdForScreen (NSScreen* screen)
+    {
+        return (CGDirectDisplayID) [[screen.deviceDescription objectForKey: @"NSScreenNumber"] unsignedIntegerValue];
+    }
+
     ScopedDisplayLink (NSScreen* screenIn, std::function<void()> onCallbackIn)
-        : screen (screenIn),
-          link ([display = (CGDirectDisplayID) [[screen.deviceDescription objectForKey: @"NSScreenNumber"] unsignedIntegerValue]]
+        : displayId (getDisplayIdForScreen (screenIn)),
+          link ([display = displayId]
           {
               CVDisplayLinkRef ptr = nullptr;
               const auto result = CVDisplayLinkCreateWithCGDisplay (display, &ptr);
@@ -133,7 +138,7 @@ public:
             CVDisplayLinkStop (link.get());
     }
 
-    NSScreen* getScreen() const { return screen; }
+    CGDirectDisplayID getDisplayId() const { return displayId; }
 
     double getNominalVideoRefreshPeriodS() const
     {
@@ -155,7 +160,7 @@ private:
         }
     };
 
-    NSScreen* screen = nullptr;
+    CGDirectDisplayID displayId;
     std::unique_ptr<std::remove_pointer_t<CVDisplayLinkRef>, DisplayLinkDestructor> link;
     std::function<void()> onCallback;
 
@@ -179,7 +184,7 @@ public:
     }
 
     using RefreshCallback = std::function<void()>;
-    using Factory = std::function<RefreshCallback (NSScreen*)>;
+    using Factory = std::function<RefreshCallback (CGDirectDisplayID)>;
 
     /*
         Automatically unregisters a CVDisplayLink callback factory when ~Connection() is called.
@@ -235,12 +240,12 @@ public:
         return { *this, factories.begin() };
     }
 
-    double getNominalVideoRefreshPeriodSForScreen (NSScreen* screen) const
+    double getNominalVideoRefreshPeriodSForScreen (CGDirectDisplayID display) const
     {
         const ScopedLock lock (mutex);
 
         for (const auto& link : links)
-            if (link.getScreen() == screen)
+            if (link.getDisplayId() == display)
                 return link.getNominalVideoRefreshPeriodS();
 
         return 0.0;
@@ -265,7 +270,7 @@ private:
                 std::vector<RefreshCallback> callbacks;
 
                 for (auto& factory : factories)
-                    callbacks.push_back (factory (screen));
+                    callbacks.push_back (factory (ScopedDisplayLink::getDisplayIdForScreen (screen)));
 
                 // This is the callback that will actually fire in response to this screen's display
                 // link callback.
@@ -291,9 +296,9 @@ private:
     // This is a list rather than a vector because ScopedDisplayLink is non-moveable.
     std::list<ScopedDisplayLink> links;
 
-    FunctionNotificationCenterObserver observer { NSApplicationDidChangeScreenParametersNotification,
-                                                  nullptr,
-                                                  [this] { refreshScreens(); } };
+    FunctionNotificationCenterObserver screenParamsObserver { NSApplicationDidChangeScreenParametersNotification,
+                                                              nullptr,
+                                                              [this] { refreshScreens(); } };
 };
 
 } // namespace juce

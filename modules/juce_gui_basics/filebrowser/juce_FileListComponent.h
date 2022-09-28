@@ -40,9 +40,9 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API  FileListComponent  : public ListBox,
+class JUCE_API  FileListComponent  : private ListBoxModel,
+                                     public ListBox,
                                      public DirectoryContentsDisplayComponent,
-                                     private ListBoxModel,
                                      private ChangeListener
 {
 public:

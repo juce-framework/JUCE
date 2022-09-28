@@ -404,8 +404,13 @@ void CoreGraphicsContext::setFill (const FillType& fillType)
 
     if (fillType.isColour())
     {
-        CGContextSetRGBFillColor (context.get(), fillType.colour.getFloatRed(), fillType.colour.getFloatGreen(),
-                                  fillType.colour.getFloatBlue(), fillType.colour.getFloatAlpha());
+        const CGFloat components[] { fillType.colour.getFloatRed(),
+                                     fillType.colour.getFloatGreen(),
+                                     fillType.colour.getFloatBlue(),
+                                     fillType.colour.getFloatAlpha() };
+
+        const detail::ColorPtr color { CGColorCreate (rgbColourSpace.get(), components) };
+        CGContextSetFillColorWithColor (context.get(), color.get());
         CGContextSetAlpha (context.get(), 1.0f);
     }
 }
