@@ -79,10 +79,10 @@ template <typename A, typename B>
 using DisableIfSameOrDerived = std::enable_if_t<! std::is_base_of_v<A, std::remove_reference_t<B>>>;
 
 /** Copies an object, sets one of the copy's members to the specified value, and then returns the copy. */
-template <typename Object, typename OtherObject, typename Member>
-Object withMember (Object copy, Member OtherObject::* member, Member&& value)
+template <typename Object, typename OtherObject, typename Member, typename Other>
+Object withMember (Object copy, Member OtherObject::* member, Other&& value)
 {
-    copy.*member = std::forward<Member> (value);
+    copy.*member = std::forward<Other> (value);
     return copy;
 }
 
