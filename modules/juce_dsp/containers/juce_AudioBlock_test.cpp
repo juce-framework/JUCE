@@ -319,117 +319,109 @@ public:
 
 private:
     //==============================================================================
-    template <typename T>
-    using ScalarVoid = typename std::enable_if_t <  std::is_scalar <T>::value, void>;
-
-    template <typename T>
-    using SIMDVoid   = typename std::enable_if_t <! std::is_scalar <T>::value, void>;
-
-    //==============================================================================
-    template <typename T = SampleType>
-    ScalarVoid<T> copyingTests()
+    void copyingTests()
     {
-        auto unchangedElement1 = block.getSample (0, 4);
-        auto unchangedElement2 = block.getSample (1, 1);
+        if constexpr (std::is_scalar_v<SampleType>)
+        {
+            auto unchangedElement1 = block.getSample (0, 4);
+            auto unchangedElement2 = block.getSample (1, 1);
 
-        AudioBuffer<SampleType> otherBuffer (otherData.data(), (int) otherData.size(), numSamples);
+            AudioBuffer<SampleType> otherBuffer (otherData.data(), (int) otherData.size(), numSamples);
 
-        block.copyFrom (otherBuffer, 1, 2, 2);
+            block.copyFrom (otherBuffer, 1, 2, 2);
 
-        expectEquals (block.getSample (0, 4), unchangedElement1);
-        expectEquals (block.getSample (1, 1), unchangedElement2);
-        expectEquals (block.getSample (0, 2), otherBuffer.getSample (0, 1));
-        expectEquals (block.getSample (1, 3), otherBuffer.getSample (1, 2));
+            expectEquals (block.getSample (0, 4), unchangedElement1);
+            expectEquals (block.getSample (1, 1), unchangedElement2);
+            expectEquals (block.getSample (0, 2), otherBuffer.getSample (0, 1));
+            expectEquals (block.getSample (1, 3), otherBuffer.getSample (1, 2));
 
-        resetBlocks();
+            resetBlocks();
 
-        unchangedElement1 = otherBuffer.getSample (0, 4);
-        unchangedElement2 = otherBuffer.getSample (1, 3);
+            unchangedElement1 = otherBuffer.getSample (0, 4);
+            unchangedElement2 = otherBuffer.getSample (1, 3);
 
-        block.copyTo (otherBuffer, 2, 1, 2);
+            block.copyTo (otherBuffer, 2, 1, 2);
 
-        expectEquals (otherBuffer.getSample (0, 4), unchangedElement1);
-        expectEquals (otherBuffer.getSample (1, 3), unchangedElement2);
-        expectEquals (otherBuffer.getSample (0, 1), block.getSample (0, 2));
-        expectEquals (otherBuffer.getSample (1, 2), block.getSample (1, 3));
+            expectEquals (otherBuffer.getSample (0, 4), unchangedElement1);
+            expectEquals (otherBuffer.getSample (1, 3), unchangedElement2);
+            expectEquals (otherBuffer.getSample (0, 1), block.getSample (0, 2));
+            expectEquals (otherBuffer.getSample (1, 2), block.getSample (1, 3));
+        }
+       #if JUCE_USE_SIMD
+        else
+        {
+            auto numSIMDElements = SIMDRegister<NumericType>::SIMDNumElements;
+            AudioBuffer<NumericType> numericData ((int) block.getNumChannels(),
+                                                  (int) (block.getNumSamples() * numSIMDElements));
+
+            for (int c = 0; c < numericData.getNumChannels(); ++c)
+                std::fill_n (numericData.getWritePointer (c), numericData.getNumSamples(), (NumericType) 1.0);
+
+            numericData.applyGainRamp (0, numericData.getNumSamples(), (NumericType) 0.127, (NumericType) 17.3);
+
+            auto lastUnchangedIndexBeforeCopiedRange = (int) ((numSIMDElements * 2) - 1);
+            auto firstUnchangedIndexAfterCopiedRange = (int) ((numSIMDElements * 4) + 1);
+            auto unchangedElement1 = numericData.getSample (0, lastUnchangedIndexBeforeCopiedRange);
+            auto unchangedElement2 = numericData.getSample (1, firstUnchangedIndexAfterCopiedRange);
+
+            block.copyTo (numericData, 1, 2, 2);
+
+            expectEquals (numericData.getSample (0, lastUnchangedIndexBeforeCopiedRange), unchangedElement1);
+            expectEquals (numericData.getSample (1, firstUnchangedIndexAfterCopiedRange), unchangedElement2);
+            expect (SampleType (numericData.getSample (0, 2 * (int) numSIMDElements)) == block.getSample (0, 1));
+            expect (SampleType (numericData.getSample (1, 3 * (int) numSIMDElements)) == block.getSample (1, 2));
+
+            numericData.applyGainRamp (0, numericData.getNumSamples(), (NumericType) 15.1, (NumericType) 0.7);
+
+            auto unchangedSIMDElement1 = block.getSample (0, 1);
+            auto unchangedSIMDElement2 = block.getSample (1, 4);
+
+            block.copyFrom (numericData, 1, 2, 2);
+
+            expect (block.getSample (0, 1) == unchangedSIMDElement1);
+            expect (block.getSample (1, 4) == unchangedSIMDElement2);
+            expectEquals (block.getSample (0, 2).get (0), numericData.getSample (0, (int) numSIMDElements));
+            expectEquals (block.getSample (1, 3).get (0), numericData.getSample (1, (int) (numSIMDElements * 2)));
+
+            if (numSIMDElements > 1)
+            {
+                expectEquals (block.getSample (0, 2).get (1), numericData.getSample (0, (int) (numSIMDElements + 1)));
+                expectEquals (block.getSample (1, 3).get (1), numericData.getSample (1, (int) ((numSIMDElements * 2) + 1)));
+            }
+        }
+       #endif
     }
 
-   #if JUCE_USE_SIMD
-    template <typename T = SampleType>
-    SIMDVoid<T> copyingTests()
+    //==============================================================================
+    void smoothedValueTests()
     {
-        auto numSIMDElements = SIMDRegister<NumericType>::SIMDNumElements;
-        AudioBuffer<NumericType> numericData ((int) block.getNumChannels(),
-                                              (int) (block.getNumSamples() * numSIMDElements));
-
-        for (int c = 0; c < numericData.getNumChannels(); ++c)
-            std::fill_n (numericData.getWritePointer (c), numericData.getNumSamples(), (NumericType) 1.0);
-
-        numericData.applyGainRamp (0, numericData.getNumSamples(), (NumericType) 0.127, (NumericType) 17.3);
-
-        auto lastUnchangedIndexBeforeCopiedRange = (int) ((numSIMDElements * 2) - 1);
-        auto firstUnchangedIndexAfterCopiedRange = (int) ((numSIMDElements * 4) + 1);
-        auto unchangedElement1 = numericData.getSample (0, lastUnchangedIndexBeforeCopiedRange);
-        auto unchangedElement2 = numericData.getSample (1, firstUnchangedIndexAfterCopiedRange);
-
-        block.copyTo (numericData, 1, 2, 2);
-
-        expectEquals (numericData.getSample (0, lastUnchangedIndexBeforeCopiedRange), unchangedElement1);
-        expectEquals (numericData.getSample (1, firstUnchangedIndexAfterCopiedRange), unchangedElement2);
-        expect (SampleType (numericData.getSample (0, 2 * (int) numSIMDElements)) == block.getSample (0, 1));
-        expect (SampleType (numericData.getSample (1, 3 * (int) numSIMDElements)) == block.getSample (1, 2));
-
-        numericData.applyGainRamp (0, numericData.getNumSamples(), (NumericType) 15.1, (NumericType) 0.7);
-
-        auto unchangedSIMDElement1 = block.getSample (0, 1);
-        auto unchangedSIMDElement2 = block.getSample (1, 4);
-
-        block.copyFrom (numericData, 1, 2, 2);
-
-        expect (block.getSample (0, 1) == unchangedSIMDElement1);
-        expect (block.getSample (1, 4) == unchangedSIMDElement2);
-        expectEquals (block.getSample (0, 2).get (0), numericData.getSample (0, (int) numSIMDElements));
-        expectEquals (block.getSample (1, 3).get (0), numericData.getSample (1, (int) (numSIMDElements * 2)));
-
-        if (numSIMDElements > 1)
+        if constexpr (std::is_scalar_v<SampleType>)
         {
-            expectEquals (block.getSample (0, 2).get (1), numericData.getSample (0, (int) (numSIMDElements + 1)));
-            expectEquals (block.getSample (1, 3).get (1), numericData.getSample (1, (int) ((numSIMDElements * 2) + 1)));
+            block.fill ((SampleType) 1.0);
+            SmoothedValue<SampleType> sv { (SampleType) 1.0 };
+            sv.reset (1, 4);
+            sv.setTargetValue ((SampleType) 0.0);
+
+            block.multiplyBy (sv);
+            expect (block.getSample (0, 2) < (SampleType) 1.0);
+            expect (block.getSample (1, 2) < (SampleType) 1.0);
+            expect (block.getSample (0, 2) > (SampleType) 0.0);
+            expect (block.getSample (1, 2) > (SampleType) 0.0);
+            expectEquals (block.getSample (0, 5), (SampleType) 0.0);
+            expectEquals (block.getSample (1, 5), (SampleType) 0.0);
+
+            sv.setCurrentAndTargetValue (-1.0f);
+            sv.setTargetValue (0.0f);
+            otherBlock.fill (-1.0f);
+            block.replaceWithProductOf (otherBlock, sv);
+            expect (block.getSample (0, 2) < (SampleType) 1.0);
+            expect (block.getSample (1, 2) < (SampleType) 1.0);
+            expect (block.getSample (0, 2) > (SampleType) 0.0);
+            expect (block.getSample (1, 2) > (SampleType) 0.0);
+            expectEquals (block.getSample (0, 5), (SampleType) 0.0);
+            expectEquals (block.getSample (1, 5), (SampleType) 0.0);
         }
     }
-   #endif
-
-    //==============================================================================
-    template <typename T = SampleType>
-    ScalarVoid<T> smoothedValueTests()
-    {
-        block.fill ((SampleType) 1.0);
-        SmoothedValue<SampleType> sv { (SampleType) 1.0 };
-        sv.reset (1, 4);
-        sv.setTargetValue ((SampleType) 0.0);
-
-        block.multiplyBy (sv);
-        expect (block.getSample (0, 2) < (SampleType) 1.0);
-        expect (block.getSample (1, 2) < (SampleType) 1.0);
-        expect (block.getSample (0, 2) > (SampleType) 0.0);
-        expect (block.getSample (1, 2) > (SampleType) 0.0);
-        expectEquals (block.getSample (0, 5), (SampleType) 0.0);
-        expectEquals (block.getSample (1, 5), (SampleType) 0.0);
-
-        sv.setCurrentAndTargetValue (-1.0f);
-        sv.setTargetValue (0.0f);
-        otherBlock.fill (-1.0f);
-        block.replaceWithProductOf (otherBlock, sv);
-        expect (block.getSample (0, 2) < (SampleType) 1.0);
-        expect (block.getSample (1, 2) < (SampleType) 1.0);
-        expect (block.getSample (0, 2) > (SampleType) 0.0);
-        expect (block.getSample (1, 2) > (SampleType) 0.0);
-        expectEquals (block.getSample (0, 5), (SampleType) 0.0);
-        expectEquals (block.getSample (1, 5), (SampleType) 0.0);
-    }
-
-    template <typename T = SampleType>
-    SIMDVoid<T> smoothedValueTests() {}
 
     //==============================================================================
     void resetBlocks()
@@ -451,7 +443,7 @@ private:
     //==============================================================================
     static SampleType* allocateAlignedMemory (int numSamplesToAllocate)
     {
-        auto alignmentLowerBound = std::alignment_of<SampleType>::value;
+        auto alignmentLowerBound = std::alignment_of_v<SampleType>;
        #if ! JUCE_WINDOWS
         alignmentLowerBound = jmax (sizeof (void*), alignmentLowerBound);
        #endif

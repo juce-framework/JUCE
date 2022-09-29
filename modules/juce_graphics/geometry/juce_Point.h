@@ -123,7 +123,7 @@ public:
     template <typename OtherType>
     constexpr Point operator* (OtherType multiplier) const noexcept
     {
-        using CommonType = typename std::common_type<ValueType, OtherType>::type;
+        using CommonType = std::common_type_t<ValueType, OtherType>;
         return Point ((ValueType) ((CommonType) x * (CommonType) multiplier),
                       (ValueType) ((CommonType) y * (CommonType) multiplier));
     }
@@ -132,7 +132,7 @@ public:
     template <typename OtherType>
     constexpr Point operator/ (OtherType divisor) const noexcept
     {
-        using CommonType = typename std::common_type<ValueType, OtherType>::type;
+        using CommonType = std::common_type_t<ValueType, OtherType>;
         return Point ((ValueType) ((CommonType) x / (CommonType) divisor),
                       (ValueType) ((CommonType) y / (CommonType) divisor));
     }
@@ -150,7 +150,7 @@ public:
 
     //==============================================================================
     /** This type will be double if the Point's type is double, otherwise it will be float. */
-    using FloatType = typename TypeHelpers::SmallestFloatType<ValueType>::type;
+    using FloatType = TypeHelpers::SmallestFloatType<ValueType>;
 
     //==============================================================================
     /** Returns the straight-line distance between this point and the origin. */

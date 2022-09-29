@@ -108,7 +108,7 @@ public:
         [view release];
     }
 
-    bool initialiseOnRenderThread (OpenGLContext&)    { return true; }
+    InitResult initialiseOnRenderThread (OpenGLContext&)    { return InitResult::success; }
 
     void shutdownOnRenderThread()
     {

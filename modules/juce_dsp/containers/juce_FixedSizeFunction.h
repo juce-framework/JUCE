@@ -56,13 +56,13 @@ namespace detail
     }
 
     template <typename Fn, typename Ret, typename... Args>
-    typename std::enable_if<std::is_same<Ret, void>::value, Ret>::type call (void* s, Args... args)
+    std::enable_if_t<std::is_same_v<Ret, void>, Ret> call (void* s, Args... args)
     {
         (*reinterpret_cast<Fn*> (s)) (args...);
     }
 
     template <typename Fn, typename Ret, typename... Args>
-    typename std::enable_if<! std::is_same<Ret, void>::value, Ret>::type call (void* s, Args... args)
+    std::enable_if_t<! std::is_same_v<Ret, void>, Ret> call (void* s, Args... args)
     {
         return (*reinterpret_cast<Fn*> (s)) (std::forward<Args> (args)...);
     }
@@ -102,16 +102,16 @@ template <size_t len, typename Ret, typename... Args>
 class FixedSizeFunction<len, Ret (Args...)>
 {
 private:
-    using Storage = typename std::aligned_storage<len>::type;
+    using Storage = std::aligned_storage_t<len>;
 
     template <typename Item>
-    using Decay = typename std::decay<Item>::type;
+    using Decay = std::decay_t<Item>;
 
     template <typename Item, typename Fn = Decay<Item>>
-    using IntIfValidConversion = typename std::enable_if<sizeof (Fn) <= len
-                                                             && alignof (Fn) <= alignof (Storage)
-                                                             && ! std::is_same<FixedSizeFunction, Fn>::value,
-                                                         int>::type;
+    using IntIfValidConversion = std::enable_if_t<sizeof (Fn) <= len
+                                                      && alignof (Fn) <= alignof (Storage)
+                                                      && ! std::is_same_v<FixedSizeFunction, Fn>,
+                                                  int>;
 
 public:
     /** Create an empty function. */
@@ -149,7 +149,7 @@ public:
     }
 
     /** Converting constructor from smaller FixedSizeFunctions. */
-    template <size_t otherLen, typename std::enable_if<(otherLen < len), int>::type = 0>
+    template <size_t otherLen, std::enable_if_t<(otherLen < len), int> = 0>
     FixedSizeFunction (FixedSizeFunction<otherLen, Ret (Args...)>&& other) noexcept
         : vtable (other.vtable)
     {
@@ -172,7 +172,7 @@ public:
     }
 
     /** Move assignment from smaller FixedSizeFunctions. */
-    template <size_t otherLen, typename std::enable_if<(otherLen < len), int>::type = 0>
+    template <size_t otherLen, std::enable_if_t<(otherLen < len), int> = 0>
     FixedSizeFunction& operator= (FixedSizeFunction<otherLen, Ret (Args...)>&& other) noexcept
     {
         return *this = FixedSizeFunction (std::move (other));

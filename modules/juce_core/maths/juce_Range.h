@@ -270,7 +270,7 @@ public:
     }
 
     /** Scans an array of values for its min and max, and returns these as a Range. */
-    template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, int> = 0>
+    template <typename Integral, std::enable_if_t<std::is_integral_v<Integral>, int> = 0>
     static Range findMinAndMax (const ValueType* values, Integral numValues) noexcept
     {
         if (numValues <= 0)

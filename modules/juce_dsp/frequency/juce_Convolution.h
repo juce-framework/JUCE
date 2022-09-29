@@ -184,7 +184,7 @@ public:
         stereo processing.
     */
     template <typename ProcessContext,
-              std::enable_if_t<std::is_same<typename ProcessContext::SampleType, float>::value, int> = 0>
+              std::enable_if_t<std::is_same_v<typename ProcessContext::SampleType, float>, int> = 0>
     void process (const ProcessContext& context) noexcept
     {
         processSamples (context.getInputBlock(), context.getOutputBlock(), context.isBypassed);

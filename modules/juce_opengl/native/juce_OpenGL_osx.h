@@ -119,10 +119,11 @@ public:
         }
     }
 
-    bool initialiseOnRenderThread (OpenGLContext&)    { return true; }
-    void shutdownOnRenderThread()                     { deactivateCurrentContext(); }
+    InitResult initialiseOnRenderThread (OpenGLContext&)  { return InitResult::success; }
+    void shutdownOnRenderThread()                         { deactivateCurrentContext(); }
 
     bool createdOk() const noexcept                   { return getRawContext() != nullptr; }
+    NSOpenGLView* getNSView() const noexcept          { return view; }
     NSOpenGLContext* getRawContext() const noexcept   { return renderContext; }
     GLuint getFrameBufferID() const noexcept          { return 0; }
 

@@ -106,9 +106,9 @@ private:
     // a block of memory here that's big enough to be used internally as a windows
     // CRITICAL_SECTION structure.
     #if JUCE_64BIT
-     std::aligned_storage<44, 8>::type lock;
+     std::aligned_storage_t<44, 8> lock;
     #else
-     std::aligned_storage<24, 8>::type lock;
+     std::aligned_storage_t<24, 8> lock;
     #endif
    #else
     mutable pthread_mutex_t lock;

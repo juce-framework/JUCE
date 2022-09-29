@@ -201,126 +201,104 @@ public:
 
 private:
     //==============================================================================
-    template <typename T = InterpolationType>
-    typename std::enable_if <std::is_same <T, DelayLineInterpolationTypes::None>::value, SampleType>::type
-    interpolateSample (int channel) const
+    SampleType interpolateSample (int channel)
     {
-        auto index = (readPos[(size_t) channel] + delayInt) % totalSize;
-        return bufferData.getSample (channel, index);
-    }
-
-    template <typename T = InterpolationType>
-    typename std::enable_if <std::is_same <T, DelayLineInterpolationTypes::Linear>::value, SampleType>::type
-    interpolateSample (int channel) const
-    {
-        auto index1 = readPos[(size_t) channel] + delayInt;
-        auto index2 = index1 + 1;
-
-        if (index2 >= totalSize)
+        if constexpr (std::is_same_v<InterpolationType, DelayLineInterpolationTypes::None>)
         {
-            index1 %= totalSize;
-            index2 %= totalSize;
+            auto index = (readPos[(size_t) channel] + delayInt) % totalSize;
+            return bufferData.getSample (channel, index);
         }
-
-        auto value1 = bufferData.getSample (channel, index1);
-        auto value2 = bufferData.getSample (channel, index2);
-
-        return value1 + delayFrac * (value2 - value1);
-    }
-
-    template <typename T = InterpolationType>
-    typename std::enable_if <std::is_same <T, DelayLineInterpolationTypes::Lagrange3rd>::value, SampleType>::type
-    interpolateSample (int channel) const
-    {
-        auto index1 = readPos[(size_t) channel] + delayInt;
-        auto index2 = index1 + 1;
-        auto index3 = index2 + 1;
-        auto index4 = index3 + 1;
-
-        if (index4 >= totalSize)
+        else if constexpr (std::is_same_v<InterpolationType, DelayLineInterpolationTypes::Linear>)
         {
-            index1 %= totalSize;
-            index2 %= totalSize;
-            index3 %= totalSize;
-            index4 %= totalSize;
+            auto index1 = readPos[(size_t) channel] + delayInt;
+            auto index2 = index1 + 1;
+
+            if (index2 >= totalSize)
+            {
+                index1 %= totalSize;
+                index2 %= totalSize;
+            }
+
+            auto value1 = bufferData.getSample (channel, index1);
+            auto value2 = bufferData.getSample (channel, index2);
+
+            return value1 + delayFrac * (value2 - value1);
         }
-
-        auto* samples = bufferData.getReadPointer (channel);
-
-        auto value1 = samples[index1];
-        auto value2 = samples[index2];
-        auto value3 = samples[index3];
-        auto value4 = samples[index4];
-
-        auto d1 = delayFrac - 1.f;
-        auto d2 = delayFrac - 2.f;
-        auto d3 = delayFrac - 3.f;
-
-        auto c1 = -d1 * d2 * d3 / 6.f;
-        auto c2 = d2 * d3 * 0.5f;
-        auto c3 = -d1 * d3 * 0.5f;
-        auto c4 = d1 * d2 / 6.f;
-
-        return value1 * c1 + delayFrac * (value2 * c2 + value3 * c3 + value4 * c4);
-    }
-
-    template <typename T = InterpolationType>
-    typename std::enable_if <std::is_same <T, DelayLineInterpolationTypes::Thiran>::value, SampleType>::type
-    interpolateSample (int channel)
-    {
-        auto index1 = readPos[(size_t) channel] + delayInt;
-        auto index2 = index1 + 1;
-
-        if (index2 >= totalSize)
+        else if constexpr (std::is_same_v<InterpolationType, DelayLineInterpolationTypes::Lagrange3rd>)
         {
-            index1 %= totalSize;
-            index2 %= totalSize;
+            auto index1 = readPos[(size_t) channel] + delayInt;
+            auto index2 = index1 + 1;
+            auto index3 = index2 + 1;
+            auto index4 = index3 + 1;
+
+            if (index4 >= totalSize)
+            {
+                index1 %= totalSize;
+                index2 %= totalSize;
+                index3 %= totalSize;
+                index4 %= totalSize;
+            }
+
+            auto* samples = bufferData.getReadPointer (channel);
+
+            auto value1 = samples[index1];
+            auto value2 = samples[index2];
+            auto value3 = samples[index3];
+            auto value4 = samples[index4];
+
+            auto d1 = delayFrac - 1.f;
+            auto d2 = delayFrac - 2.f;
+            auto d3 = delayFrac - 3.f;
+
+            auto c1 = -d1 * d2 * d3 / 6.f;
+            auto c2 = d2 * d3 * 0.5f;
+            auto c3 = -d1 * d3 * 0.5f;
+            auto c4 = d1 * d2 / 6.f;
+
+            return value1 * c1 + delayFrac * (value2 * c2 + value3 * c3 + value4 * c4);
         }
+        else if constexpr (std::is_same_v<InterpolationType, DelayLineInterpolationTypes::Thiran>)
+        {
+            auto index1 = readPos[(size_t) channel] + delayInt;
+            auto index2 = index1 + 1;
 
-        auto value1 = bufferData.getSample (channel, index1);
-        auto value2 = bufferData.getSample (channel, index2);
+            if (index2 >= totalSize)
+            {
+                index1 %= totalSize;
+                index2 %= totalSize;
+            }
 
-        auto output = delayFrac == 0 ? value1 : value2 + alpha * (value1 - v[(size_t) channel]);
-        v[(size_t) channel] = output;
+            auto value1 = bufferData.getSample (channel, index1);
+            auto value2 = bufferData.getSample (channel, index2);
 
-        return output;
+            auto output = delayFrac == 0 ? value1 : value2 + alpha * (value1 - v[(size_t) channel]);
+            v[(size_t) channel] = output;
+
+            return output;
+        }
     }
 
     //==============================================================================
-    template <typename T = InterpolationType>
-    typename std::enable_if <std::is_same <T, DelayLineInterpolationTypes::None>::value, void>::type
-    updateInternalVariables()
+    void updateInternalVariables()
     {
-    }
-
-    template <typename T = InterpolationType>
-    typename std::enable_if <std::is_same <T, DelayLineInterpolationTypes::Linear>::value, void>::type
-    updateInternalVariables()
-    {
-    }
-
-    template <typename T = InterpolationType>
-    typename std::enable_if <std::is_same <T, DelayLineInterpolationTypes::Lagrange3rd>::value, void>::type
-    updateInternalVariables()
-    {
-        if (delayInt >= 1)
+        if constexpr (std::is_same_v<InterpolationType, DelayLineInterpolationTypes::Lagrange3rd>)
         {
-            delayFrac++;
-            delayInt--;
+            if (delayInt >= 1)
+            {
+                delayFrac++;
+                delayInt--;
+            }
         }
-    }
-
-    template <typename T = InterpolationType>
-    typename std::enable_if <std::is_same <T, DelayLineInterpolationTypes::Thiran>::value, void>::type
-    updateInternalVariables()
-    {
-        if (delayFrac < (SampleType) 0.618 && delayInt >= 1)
+        else if constexpr (std::is_same_v<InterpolationType, DelayLineInterpolationTypes::Thiran>)
         {
-            delayFrac++;
-            delayInt--;
-        }
+            if (delayFrac < (SampleType) 0.618 && delayInt >= 1)
+            {
+                delayFrac++;
+                delayInt--;
+            }
 
-        alpha = (1 - delayFrac) / (1 + delayFrac);
+            alpha = (1 - delayFrac) / (1 + delayFrac);
+        }
     }
 
     //==============================================================================

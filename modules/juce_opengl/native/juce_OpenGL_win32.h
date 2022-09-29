@@ -92,11 +92,11 @@ public:
                 peer->removeScaleFactorListener (this);
     }
 
-    bool initialiseOnRenderThread (OpenGLContext& c)
+    InitResult initialiseOnRenderThread (OpenGLContext& c)
     {
         threadAwarenessSetter = std::make_unique<ScopedThreadDPIAwarenessSetter> (nativeWindow->getNativeHandle());
         context = &c;
-        return true;
+        return InitResult::success;
     }
 
     void shutdownOnRenderThread()
@@ -228,16 +228,19 @@ private:
         {
            #if JUCE_DEBUG
             constexpr auto contextFlags = WGL_CONTEXT_DEBUG_BIT_ARB;
+            constexpr auto noErrorChecking = GL_FALSE;
            #else
             constexpr auto contextFlags = 0;
+            constexpr auto noErrorChecking = GL_TRUE;
            #endif
 
             const int attribs[] =
             {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, components->major,
-                WGL_CONTEXT_MINOR_VERSION_ARB, components->minor,
-                WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                WGL_CONTEXT_FLAGS_ARB,         contextFlags,
+                WGL_CONTEXT_MAJOR_VERSION_ARB,   components->major,
+                WGL_CONTEXT_MINOR_VERSION_ARB,   components->minor,
+                WGL_CONTEXT_PROFILE_MASK_ARB,    WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_FLAGS_ARB,           contextFlags,
+                WGL_CONTEXT_OPENGL_NO_ERROR_ARB, noErrorChecking,
                 0
             };
 

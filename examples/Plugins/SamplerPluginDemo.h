@@ -159,7 +159,7 @@ private:
     template <typename Func>
     static std::unique_ptr<Command<Proc>> makeCommand (Func&& func)
     {
-        using Decayed = typename std::decay<Func>::type;
+        using Decayed = std::decay_t<Func>;
         return std::make_unique<TemplateCommand<Proc, Decayed>> (std::forward<Func> (func));
     }
 

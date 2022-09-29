@@ -38,35 +38,35 @@ class Packet
 public:
     Packet() = default;
 
-    template <size_t w = numWords, typename std::enable_if<w == 1, int>::type = 0>
+    template <size_t w = numWords, std::enable_if_t<w == 1, int> = 0>
     Packet (uint32_t a)
         : contents { { a } }
     {
         jassert (Utils::getNumWordsForMessageType (a) == 1);
     }
 
-    template <size_t w = numWords, typename std::enable_if<w == 2, int>::type = 0>
+    template <size_t w = numWords, std::enable_if_t<w == 2, int> = 0>
     Packet (uint32_t a, uint32_t b)
         : contents { { a, b } }
     {
         jassert (Utils::getNumWordsForMessageType (a) == 2);
     }
 
-    template <size_t w = numWords, typename std::enable_if<w == 3, int>::type = 0>
+    template <size_t w = numWords, std::enable_if_t<w == 3, int> = 0>
     Packet (uint32_t a, uint32_t b, uint32_t c)
         : contents { { a, b, c } }
     {
         jassert (Utils::getNumWordsForMessageType (a) == 3);
     }
 
-    template <size_t w = numWords, typename std::enable_if<w == 4, int>::type = 0>
+    template <size_t w = numWords, std::enable_if_t<w == 4, int> = 0>
     Packet (uint32_t a, uint32_t b, uint32_t c, uint32_t d)
         : contents { { a, b, c, d } }
     {
         jassert (Utils::getNumWordsForMessageType (a) == 4);
     }
 
-    template <size_t w, typename std::enable_if<w == numWords, int>::type = 0>
+    template <size_t w, std::enable_if_t<w == numWords, int> = 0>
     explicit Packet (const std::array<uint32_t, w>& fullPacket)
         : contents (fullPacket)
     {

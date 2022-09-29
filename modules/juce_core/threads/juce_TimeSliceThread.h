@@ -131,6 +131,9 @@ public:
     /** Returns one of the registered clients. */
     TimeSliceClient* getClient (int index) const;
 
+    /** Returns true if the client is currently registered. */
+    bool contains (const TimeSliceClient*) const;
+
     //==============================================================================
    #ifndef DOXYGEN
     void run() override;

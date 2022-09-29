@@ -124,7 +124,7 @@ DECLARE_JNI_CLASS_WITH_BYTECODE (JuceOpenGLViewSurface, "com/rmsl/juce/JuceOpenG
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
-class OpenGLContext::NativeContext   : private SurfaceHolderCallback
+class OpenGLContext::NativeContext : private SurfaceHolderCallback
 {
 public:
     NativeContext (Component& comp,
@@ -132,8 +132,7 @@ public:
                    void* /*contextToShareWith*/,
                    bool useMultisamplingIn,
                    OpenGLVersion)
-        : component (comp),
-          surface (EGL_NO_SURFACE), context (EGL_NO_CONTEXT)
+        : component (comp)
     {
         auto env = getEnv();
 
@@ -175,88 +174,45 @@ public:
     }
 
     //==============================================================================
-    bool initialiseOnRenderThread (OpenGLContext& aContext)
+    InitResult initialiseOnRenderThread (OpenGLContext& ctx)
     {
-        jassert (hasInitialised);
+        // The "real" initialisation happens when the surface is created. Here, we'll
+        // just return true if the initialisation happened successfully, or false if
+        // it hasn't happened yet, or was unsuccessful.
+        const std::lock_guard lock { nativeHandleMutex };
 
-        // has the context already attached?
-        jassert (surface == EGL_NO_SURFACE && context == EGL_NO_CONTEXT);
+        if (! hasInitialised)
+            return InitResult::fatal;
 
-        auto env = getEnv();
+        if (context.get() == EGL_NO_CONTEXT && surface.get() == EGL_NO_SURFACE)
+            return InitResult::retry;
 
-        ANativeWindow* window = nullptr;
-
-        LocalRef<jobject> holder (env->CallObjectMethod (surfaceView.get(), JuceOpenGLViewSurface.getHolder));
-
-        if (holder != nullptr)
-        {
-            LocalRef<jobject> jSurface (env->CallObjectMethod (holder.get(), AndroidSurfaceHolder.getSurface));
-
-            if (jSurface != nullptr)
-            {
-                window = ANativeWindow_fromSurface(env, jSurface.get());
-
-                // if we didn't succeed the first time, wait 25ms and try again
-                if (window == nullptr)
-                {
-                    Thread::sleep (200);
-                    window = ANativeWindow_fromSurface (env, jSurface.get());
-                }
-            }
-        }
-
-        if (window == nullptr)
-        {
-            // failed to get a pointer to the native window after second try so bail out
-            jassertfalse;
-            return false;
-        }
-
-        // create the surface
-        surface = eglCreateWindowSurface (display, config, window, nullptr);
-        jassert (surface != EGL_NO_SURFACE);
-
-        ANativeWindow_release (window);
-
-        // create the OpenGL context
-        EGLint contextAttribs[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
-        context = eglCreateContext (display, config, EGL_NO_CONTEXT, contextAttribs);
-        jassert (context != EGL_NO_CONTEXT);
-
-        juceContext = &aContext;
-        return true;
+        juceContext = &ctx;
+        return InitResult::success;
     }
 
     void shutdownOnRenderThread()
     {
-        jassert (hasInitialised);
-
-        // is there a context available to detach?
-        jassert (surface != EGL_NO_SURFACE && context != EGL_NO_CONTEXT);
-
-        eglDestroyContext (display, context);
-        context = EGL_NO_CONTEXT;
-
-        eglDestroySurface (display, surface);
-        surface = EGL_NO_SURFACE;
+        const std::lock_guard lock { nativeHandleMutex };
+        juceContext = nullptr;
     }
 
     //==============================================================================
     bool makeActive() const noexcept
     {
-        if (! hasInitialised)
-            return false;
+        const std::lock_guard lock { nativeHandleMutex };
 
-        if (surface == EGL_NO_SURFACE || context == EGL_NO_CONTEXT)
-            return false;
-
-        if (! eglMakeCurrent (display, surface, surface, context))
-            return false;
-
-        return true;
+        return hasInitialised
+            && surface.get() != EGL_NO_SURFACE
+            && context.get() != EGL_NO_CONTEXT
+            && eglMakeCurrent (display, surface.get(), surface.get(), context.get());
     }
 
-    bool isActive() const noexcept              { return eglGetCurrentContext() == context; }
+    bool isActive() const noexcept
+    {
+        const std::lock_guard lock { nativeHandleMutex };
+        return eglGetCurrentContext() == context.get();
+    }
 
     static void deactivateCurrentContext()
     {
@@ -264,7 +220,7 @@ public:
     }
 
     //==============================================================================
-    void swapBuffers() const noexcept           { eglSwapBuffers (display, surface); }
+    void swapBuffers() const noexcept           { eglSwapBuffers (display, surface.get()); }
     bool setSwapInterval (const int)            { return false; }
     int getSwapInterval() const                 { return 0; }
 
@@ -295,8 +251,8 @@ public:
         ignoreUnused (holder, format, width, height);
     }
 
-    void surfaceCreated (LocalRef<jobject> holder) override;
-    void surfaceDestroyed (LocalRef<jobject> holder) override;
+    void surfaceCreated (LocalRef<jobject>) override;
+    void surfaceDestroyed (LocalRef<jobject>) override;
 
     //==============================================================================
     struct Locker
@@ -338,6 +294,8 @@ private:
 
     void dispatchDraw (jobject /*canvas*/)
     {
+        const std::lock_guard lock { nativeHandleMutex };
+
         if (juceContext != nullptr)
             juceContext->triggerRepaint();
     }
@@ -393,6 +351,34 @@ private:
         return false;
     }
 
+    struct NativeWindowReleaser
+    {
+        void operator() (ANativeWindow* ptr) const { if (ptr != nullptr) ANativeWindow_release (ptr); }
+    };
+
+    std::unique_ptr<ANativeWindow, NativeWindowReleaser> getNativeWindow() const
+    {
+        auto* env = getEnv();
+
+        const LocalRef<jobject> holder (env->CallObjectMethod (surfaceView.get(), JuceOpenGLViewSurface.getHolder));
+
+        if (holder == nullptr)
+            return nullptr;
+
+        const LocalRef<jobject> jSurface (env->CallObjectMethod (holder.get(), AndroidSurfaceHolder.getSurface));
+
+        if (jSurface == nullptr)
+            return nullptr;
+
+        constexpr auto numAttempts = 2;
+
+        for (auto i = 0; i < numAttempts; Thread::sleep (200), ++i)
+            if (auto* ptr = ANativeWindow_fromSurface (env, jSurface.get()))
+                return std::unique_ptr<ANativeWindow, NativeWindowReleaser> { ptr };
+
+        return nullptr;
+    }
+
     //==============================================================================
     CriticalSection mutex;
     bool hasInitialised = false;
@@ -400,9 +386,20 @@ private:
     GlobalRef surfaceView;
     Rectangle<int> lastBounds;
 
+    struct SurfaceDestructor
+    {
+        void operator() (EGLSurface x) const { if (x != EGL_NO_SURFACE) eglDestroySurface (display, x); }
+    };
+
+    struct ContextDestructor
+    {
+        void operator() (EGLContext x) const { if (x != EGL_NO_CONTEXT) eglDestroyContext (display, x); }
+    };
+
+    mutable std::mutex nativeHandleMutex;
     OpenGLContext* juceContext = nullptr;
-    EGLSurface surface;
-    EGLContext context;
+    std::unique_ptr<std::remove_pointer_t<EGLSurface>, SurfaceDestructor> surface { EGL_NO_SURFACE };
+    std::unique_ptr<std::remove_pointer_t<EGLContext>, ContextDestructor> context { EGL_NO_CONTEXT };
 
     GlobalRef surfaceHolderCallback;
 
@@ -411,6 +408,9 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
 };
+
+EGLDisplay OpenGLContext::NativeContext::display = EGL_NO_DISPLAY;
+EGLDisplay OpenGLContext::NativeContext::config;
 
 //==============================================================================
 void AndroidGLCallbacks::attachedToWindow (JNIEnv*, jobject /*this*/, jlong host)

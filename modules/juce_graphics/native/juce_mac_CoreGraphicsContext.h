@@ -53,12 +53,18 @@ namespace detail
         void operator() (CGGradientRef ptr) const noexcept { CGGradientRelease (ptr); }
     };
 
+    struct ColorDelete
+    {
+        void operator() (CGColorRef ptr) const noexcept { CGColorRelease (ptr); }
+    };
+
     //==============================================================================
     using ColorSpacePtr = std::unique_ptr<CGColorSpace, ColorSpaceDelete>;
     using ContextPtr = std::unique_ptr<CGContext, ContextDelete>;
     using DataProviderPtr = std::unique_ptr<CGDataProvider, DataProviderDelete>;
     using ImagePtr = std::unique_ptr<CGImage, ImageDelete>;
     using GradientPtr = std::unique_ptr<CGGradient, GradientDelete>;
+    using ColorPtr = std::unique_ptr<CGColor, ColorDelete>;
 }
 
 //==============================================================================
