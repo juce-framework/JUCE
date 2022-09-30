@@ -436,6 +436,9 @@ public:
         /** Adds a number of samples to the pointer's position. */
         Pointer& operator+= (int samplesToJump) noexcept        { this->advanceDataBy (data, samplesToJump); return *this; }
 
+        /** Returns a new pointer with the specified offset from this pointer's position. */
+        Pointer operator+ (int samplesToJump) const             { return Pointer { *this } += samplesToJump; }
+
         /** Writes a stream of samples into this pointer from another pointer.
             This will copy the specified number of samples, converting between formats appropriately.
         */
