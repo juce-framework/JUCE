@@ -120,6 +120,8 @@ public:
 
     void perform (UndoableAction* action, const String& actionName);
 
+    void moveComponentZOrder (int oldIndex, int newIndex);
+
 private:
     JucerDocument* document;
     OwnedArray<Component> components;
@@ -127,10 +129,6 @@ private:
     int nextCompUID;
 
     String getUnusedMemberName (String nameRoot, Component* comp) const;
-
-    friend class FrontBackCompAction;
-    friend class DeleteCompAction;
-    void moveComponentZOrder (int oldIndex, int newIndex);
 };
 
 void positionToCode (const RelativePositionedRectangle& position,
