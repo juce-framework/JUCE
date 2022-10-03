@@ -431,9 +431,11 @@ public:
         {
             info.id             = Vst::kRootUnitId;
             info.parentUnitId   = Vst::kNoParentUnitId;
-            info.programListId  = Vst::kNoProgramListId;
+            info.programListId  = getProgramListCount() > 0
+                                ? static_cast<Vst::ProgramListID> (programParamID)
+                                : Vst::kNoProgramListId;
 
-            toString128 (info.name, TRANS("Root Unit"));
+            toString128 (info.name, TRANS ("Root Unit"));
 
             return kResultTrue;
         }
@@ -467,7 +469,7 @@ public:
             info.id = static_cast<Vst::ProgramListID> (programParamID);
             info.programCount = static_cast<Steinberg::int32> (audioProcessor->getNumPrograms());
 
-            toString128 (info.name, TRANS("Factory Presets"));
+            toString128 (info.name, TRANS ("Factory Presets"));
 
             return kResultTrue;
         }
@@ -500,8 +502,8 @@ public:
 
     tresult PLUGIN_API getUnitByBus (Vst::MediaType, Vst::BusDirection, Steinberg::int32, Steinberg::int32, Vst::UnitID& unitId) override
     {
-        zerostruct (unitId);
-        return kNotImplemented;
+        unitId = Vst::kRootUnitId;
+        return kResultOk;
     }
 
     //==============================================================================
@@ -1127,18 +1129,18 @@ public:
         if (audioProcessor != nullptr)
             return audioProcessor->getUnitInfo (unitIndex, info);
 
+        jassertfalse;
         if (unitIndex == 0)
         {
             info.id             = Vst::kRootUnitId;
             info.parentUnitId   = Vst::kNoParentUnitId;
             info.programListId  = Vst::kNoProgramListId;
 
-            toString128 (info.name, TRANS("Root Unit"));
+            toString128 (info.name, TRANS ("Root Unit"));
 
             return kResultTrue;
         }
 
-        jassertfalse;
         zerostruct (info);
         return kResultFalse;
     }
