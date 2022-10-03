@@ -894,33 +894,22 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      librarySearchPathValue        (config, Ids::libraryPath,              getUndoManager()),
      userNotesValue                (config, Ids::userNotes,                getUndoManager()),
      usePrecompiledHeaderFileValue (config, Ids::usePrecompiledHeaderFile, getUndoManager(), false),
-     precompiledHeaderFileValue    (config, Ids::precompiledHeaderFile,    getUndoManager())
+     precompiledHeaderFileValue    (config, Ids::precompiledHeaderFile,    getUndoManager()),
+     configCompilerFlagsValue      (config, Ids::extraCompilerFlags,       getUndoManager()),
+     configLinkerFlagsValue        (config, Ids::extraLinkerFlags,         getUndoManager())
 {
     auto& llvmFlags = recommendedCompilerWarningFlags[CompilerNames::llvm] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
-    llvmFlags.common.addArray ({
-        "-Wshorten-64-to-32", "-Wconversion", "-Wint-conversion",
-        "-Wconditional-uninitialized", "-Wconstant-conversion", "-Wbool-conversion",
-        "-Wextra-semi", "-Wshift-sign-overflow",
-        "-Wshadow-all", "-Wnullable-to-nonnull-conversion",
-        "-Wmissing-prototypes"
-    });
-    llvmFlags.cpp.addArray ({
-        "-Wunused-private-field", "-Winconsistent-missing-destructor-override"
-    });
-    llvmFlags.objc.addArray ({
-        "-Wunguarded-availability", "-Wunguarded-availability-new"
-    });
+    llvmFlags.common.addArray ({ "-Wshorten-64-to-32", "-Wconversion", "-Wint-conversion",
+                                 "-Wconditional-uninitialized", "-Wconstant-conversion", "-Wbool-conversion",
+                                 "-Wextra-semi", "-Wshift-sign-overflow",
+                                 "-Wshadow-all", "-Wnullable-to-nonnull-conversion",
+                                 "-Wmissing-prototypes" });
+    llvmFlags.cpp.addArray ({ "-Wunused-private-field", "-Winconsistent-missing-destructor-override" });
+    llvmFlags.objc.addArray ({ "-Wunguarded-availability", "-Wunguarded-availability-new" });
 
     auto& gccFlags = recommendedCompilerWarningFlags[CompilerNames::gcc] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
-    gccFlags.common.addArray ({
-        "-Wextra", "-Wsign-compare", "-Wno-implicit-fallthrough", "-Wno-maybe-uninitialized",
-        "-Wredundant-decls", "-Wno-strict-overflow",
-        "-Wshadow"
-    });
-}
-
-ProjectExporter::BuildConfiguration::~BuildConfiguration()
-{
+    gccFlags.common.addArray ({ "-Wextra", "-Wsign-compare", "-Wno-implicit-fallthrough", "-Wno-maybe-uninitialized",
+                                "-Wredundant-decls", "-Wno-strict-overflow", "-Wshadow" });
 }
 
 String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
@@ -1006,6 +995,12 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
     props.add (new TextPropertyComponent (ppDefinesValue, "Preprocessor Definitions", 32768, true),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+
+    props.add (new TextPropertyComponent (configCompilerFlagsValue, "Configuration-specific Compiler Flags", 8192, true),
+               "Compiler flags that are only to be used in this configuration.");
+
+    props.add (new TextPropertyComponent (configLinkerFlagsValue, "Configuration-specific Linker Flags", 8192, true),
+               "Linker flags that are only to be used in this configuration.");
 
     props.add (new ChoicePropertyComponent (linkTimeOptimisationValue, "Link-Time Optimisation"),
                "Enable this to perform link-time code optimisation. This is recommended for release builds.");

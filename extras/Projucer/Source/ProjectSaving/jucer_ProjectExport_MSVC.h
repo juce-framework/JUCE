@@ -73,11 +73,21 @@ public:
     String getWindowsTargetPlatformVersion() const    { return targetPlatformVersion.get(); }
 
     //==============================================================================
-    void addToolsetProperty (PropertyListBuilder& props, const char** names, const var* values, int num)
+    void addToolsetProperty (PropertyListBuilder& props, std::initializer_list<const char*> valueStrings)
     {
-        props.add (new ChoicePropertyComponent (platformToolsetValue, "Platform Toolset",
-                                                StringArray (names, num), { values, num }),
-                   "Specifies the version of the platform toolset that will be used when building this project.");
+        StringArray names;
+        Array<var> values;
+
+        for (const auto& valueString : valueStrings)
+        {
+            names.add (valueString);
+            values.add (valueString);
+        }
+
+        props.add (new ChoicePropertyComponent (platformToolsetValue, "Platform Toolset", names, values),
+                   "Specifies the version of the platform toolset that will be used when building this project.\n"
+                   "In order to use the ClangCL toolset, you must first install the \"C++ Clang Tools for Windows\" "
+                   "package using the Visual Studio Installer.");
     }
 
     void create (const OwnedArray<LibraryModule>&) const override
@@ -615,7 +625,8 @@ public:
                     if (config.isFastMathEnabled())
                         cl->createNewChildElement ("FloatingPointModel")->addTextElement ("Fast");
 
-                    auto extraFlags = getOwner().replacePreprocessorTokens (config, getOwner().getExtraCompilerFlagsString()).trim();
+                    auto extraFlags = getOwner().replacePreprocessorTokens (config, config.getAllCompilerFlagsString()).trim();
+
                     if (extraFlags.isNotEmpty())
                         cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
 
@@ -674,7 +685,7 @@ public:
                     if (additionalDependencies.isNotEmpty())
                         link->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
 
-                    auto extraLinkerOptions = getOwner().getExtraLinkerFlagsString();
+                    auto extraLinkerOptions = config.getAllLinkerFlagsString();
                     if (extraLinkerOptions.isNotEmpty())
                         link->createNewChildElement ("AdditionalOptions")->addTextElement (getOwner().replacePreprocessorTokens (config, extraLinkerOptions).trim()
                                                                                            + " %(AdditionalOptions)");
@@ -1820,10 +1831,7 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp" };
-        const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp" };
-        addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
-
+        addToolsetProperty (props, { "v140", "v140_xp", "v141", "v141_xp" });
         MSVCProjectExporterBase::createExporterProperties (props);
     }
 
@@ -1865,10 +1873,7 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp", "v142" };
-        const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp", "v142" };
-        addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
-
+        addToolsetProperty (props, { "v140", "v140_xp", "v141", "v141_xp", "v142", "ClangCL" });
         MSVCProjectExporterBase::createExporterProperties (props);
     }
 
@@ -1910,10 +1915,7 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143" };
-        const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143" };
-        addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
-
+        addToolsetProperty (props, { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143", "ClangCL" });
         MSVCProjectExporterBase::createExporterProperties (props);
     }
 
