@@ -762,9 +762,9 @@ private:
             const auto iter = attributes.find (attr);
 
             if (iter != attributes.end())
-                iter->second = Attribute (std::move (value));
+                iter->second = Attribute (std::forward<Value> (value));
             else
-                attributes.emplace (attr, Attribute (std::move (value)));
+                attributes.emplace (attr, Attribute (std::forward<Value> (value)));
 
             return kResultTrue;
         }
