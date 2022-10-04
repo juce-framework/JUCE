@@ -3256,13 +3256,21 @@ public:
         if (numIns > numInputBuses || numOuts > numOutputBuses)
             return false;
 
-        auto requested = pluginInstance->getBusesLayout();
+        // see the following documentation to understand the correct way to react to this callback
+        // https://steinbergmedia.github.io/vst3_doc/vstinterfaces/classSteinberg_1_1Vst_1_1IAudioProcessor.html#ad3bc7bac3fd3b194122669be2a1ecc42
 
-        for (int i = 0; i < numIns; ++i)
-            requested.getChannelSet (true,  i) = getChannelSetForSpeakerArrangement (inputs[i]);
+        const auto requestedLayout = [&]
+        {
+            auto result = pluginInstance->getBusesLayout();
 
-        for (int i = 0; i < numOuts; ++i)
-            requested.getChannelSet (false, i) = getChannelSetForSpeakerArrangement (outputs[i]);
+            for (int i = 0; i < numIns; ++i)
+                result.getChannelSet (true,  i) = getChannelSetForSpeakerArrangement (inputs[i]);
+
+            for (int i = 0; i < numOuts; ++i)
+                result.getChannelSet (false, i) = getChannelSetForSpeakerArrangement (outputs[i]);
+
+            return result;
+        }();
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
@@ -3270,11 +3278,32 @@ public:
             return kResultFalse;
        #endif
 
-        if (! pluginInstance->setBusesLayoutWithoutEnabling (requested))
-            return kResultFalse;
+        if (pluginInstance->checkBusesLayoutSupported (requestedLayout))
+        {
+            if (! pluginInstance->setBusesLayoutWithoutEnabling (requestedLayout))
+                return kResultFalse;
 
-        bufferMapper.updateFromProcessor (*pluginInstance);
-        return kResultTrue;
+            bufferMapper.updateFromProcessor (*pluginInstance);
+            return kResultTrue;
+        }
+
+        // apply layout changes in reverse order as Steinberg says we should prioritize main buses
+        const auto nextBest = [this, numInputBuses, numOutputBuses, &requestedLayout]
+        {
+            auto layout = pluginInstance->getBusesLayout();
+
+            for (auto busIdx = jmax (numInputBuses, numOutputBuses) - 1; busIdx >= 0; --busIdx)
+                for (const auto isInput : { true, false })
+                    if (auto* bus = pluginInstance->getBus (isInput, busIdx))
+                        bus->isLayoutSupported (requestedLayout.getChannelSet (isInput, busIdx), &layout);
+
+            return layout;
+        }();
+
+        if (pluginInstance->setBusesLayoutWithoutEnabling (nextBest))
+            bufferMapper.updateFromProcessor (*pluginInstance);
+
+        return kResultFalse;
     }
 
     tresult PLUGIN_API getBusArrangement (Vst::BusDirection dir, Steinberg::int32 index, Vst::SpeakerArrangement& arr) override
