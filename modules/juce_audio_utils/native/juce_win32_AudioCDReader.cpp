@@ -1035,7 +1035,7 @@ AudioCDReader::~AudioCDReader()
     delete device;
 }
 
-bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+bool AudioCDReader::readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                  int64 startSampleInFile, int numSamples)
 {
     using namespace CDReaderHelpers;
