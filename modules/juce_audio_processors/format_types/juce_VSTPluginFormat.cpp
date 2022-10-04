@@ -837,7 +837,7 @@ public:
     {
         auto& pointers = getPointers (Tag<T>{});
 
-        jassert ((int) pointers.size() < buffer.getNumChannels());
+        jassert (buffer.getNumChannels() <= static_cast<int> (pointers.capacity()));
         pointers.resize (jmax (pointers.size(), (size_t) buffer.getNumChannels()));
 
         std::copy (buffer.getArrayOfWritePointers(),
