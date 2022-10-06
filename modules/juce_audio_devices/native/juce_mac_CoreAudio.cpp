@@ -915,15 +915,28 @@ public:
         {
             const auto scope = getScope (isInput);
 
-            const auto latency      = audioObjectGetProperty<UInt32> (parent.deviceID, { kAudioDevicePropertyLatency,
-                                                                                         scope,
-                                                                                         juceAudioObjectPropertyElementMain }).value_or (0);
+            const auto deviceLatency  = audioObjectGetProperty<UInt32> (parent.deviceID, { kAudioDevicePropertyLatency,
+                                                                                           scope,
+                                                                                           juceAudioObjectPropertyElementMain }).value_or (0);
 
-            const auto safetyOffset = audioObjectGetProperty<UInt32> (parent.deviceID, { kAudioDevicePropertySafetyOffset,
-                                                                                         scope,
-                                                                                         juceAudioObjectPropertyElementMain }).value_or (0);
+            const auto safetyOffset   = audioObjectGetProperty<UInt32> (parent.deviceID, { kAudioDevicePropertySafetyOffset,
+                                                                                           scope,
+                                                                                           juceAudioObjectPropertyElementMain }).value_or (0);
 
-            return static_cast<int> (latency + safetyOffset);
+            const auto framesInBuffer = audioObjectGetProperty<UInt32> (parent.deviceID, { kAudioDevicePropertyBufferFrameSize,
+                                                                                           kAudioObjectPropertyScopeWildcard,
+                                                                                           juceAudioObjectPropertyElementMain }).value_or (0);
+
+            UInt32 streamLatency = 0;
+
+            if (auto streams = audioObjectGetProperties<AudioStreamID> (parent.deviceID, { kAudioDevicePropertyStreams,
+                                                                                           scope,
+                                                                                           juceAudioObjectPropertyElementMain }); ! streams.empty())
+                streamLatency = audioObjectGetProperty<UInt32> (streams.front(), { kAudioStreamPropertyLatency,
+                                                                                   scope,
+                                                                                   juceAudioObjectPropertyElementMain }).value_or (0);
+
+            return static_cast<int> (deviceLatency + safetyOffset + framesInBuffer + streamLatency);
         }
 
         //==============================================================================
