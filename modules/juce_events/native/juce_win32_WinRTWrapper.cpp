@@ -42,7 +42,7 @@ WinRTWrapper::WinRTWrapper()
         return;
 
     HRESULT status = roInitialize (1);
-    initialised = ! (status != S_OK && status != S_FALSE && status != 0x80010106L);
+    initialised = ! (status != S_OK && status != S_FALSE && status != (HRESULT) 0x80010106L);
 }
 
 WinRTWrapper::~WinRTWrapper()
