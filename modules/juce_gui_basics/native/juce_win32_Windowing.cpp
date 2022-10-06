@@ -2386,9 +2386,9 @@ private:
             wcex.lpszClassName  = windowClassName.toWideCharPointer();
             wcex.cbWndExtra     = 32;
             wcex.hInstance      = moduleHandle;
-            wcex.hIcon          = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
+            wcex.hIcon          = icon = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
             iconNum = 1;
-            wcex.hIconSm        = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
+            wcex.hIconSm        = smIcon = ExtractAssociatedIcon (moduleHandle, moduleFile, &iconNum);
 
             atom = RegisterClassEx (&wcex);
             jassert (atom != 0);
@@ -2399,7 +2399,13 @@ private:
         ~WindowClassHolder()
         {
             if (ComponentPeer::getNumPeers() == 0)
+            {
                 UnregisterClass (getWindowClassName(), (HINSTANCE) Process::getCurrentModuleInstanceHandle());
+                if (icon)
+                    DestroyIcon(icon);
+                if (smIcon)
+                    DestroyIcon(smIcon);
+            }
 
             clearSingletonInstance();
         }
@@ -2410,6 +2416,8 @@ private:
 
     private:
         ATOM atom;
+		    HICON icon;
+		    HICON smIcon;
 
         static bool isHWNDBlockedByModalComponents (HWND h)
         {
