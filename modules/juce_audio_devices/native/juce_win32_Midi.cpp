@@ -29,6 +29,39 @@
 namespace juce
 {
 
+template <typename T>
+class CheckedReference
+{
+public:
+    template <typename Ptr>
+    friend auto createCheckedReference (Ptr*);
+
+    void clear()
+    {
+        std::lock_guard lock { mutex };
+        ptr = nullptr;
+    }
+
+    template <typename Callback>
+    void access (Callback&& callback)
+    {
+        std::lock_guard lock { mutex };
+        callback (ptr);
+    }
+
+private:
+    explicit CheckedReference (T* ptrIn)  : ptr (ptrIn) {}
+
+    T* ptr;
+    std::mutex mutex;
+};
+
+template <typename Ptr>
+auto createCheckedReference (Ptr* ptrIn)
+{
+    return std::shared_ptr<CheckedReference<Ptr>> { new CheckedReference<Ptr> (ptrIn) };
+}
+
 class MidiInput::Pimpl
 {
 public:
@@ -1417,59 +1450,56 @@ private:
     };
 
     //==============================================================================
-    template <typename COMFactoryType, typename COMInterfaceType, typename COMType>
-    struct OpenMidiPortThread  : public Thread
+    template <typename COMType, typename COMFactoryType, typename COMInterfaceType>
+    static void openMidiPortThread (String threadName,
+                                    String midiDeviceID,
+                                    ComSmartPtr<COMFactoryType>& comFactory,
+                                    ComSmartPtr<COMInterfaceType>& comPort)
     {
-        OpenMidiPortThread (String threadName, String midiDeviceID,
-                            ComSmartPtr<COMFactoryType>& comFactory,
-                            ComSmartPtr<COMInterfaceType>& comPort)
-            : Thread (threadName),
-              deviceID (midiDeviceID),
-              factory (comFactory),
-              port (comPort)
+        std::thread { [&]
         {
-        }
+            Thread::setCurrentThreadName (threadName);
 
-        ~OpenMidiPortThread()
-        {
-            stopThread (2000);
-        }
-
-        void run() override
-        {
-            WinRTWrapper::ScopedHString hDeviceId (deviceID);
+            const WinRTWrapper::ScopedHString hDeviceId { midiDeviceID };
             ComSmartPtr<IAsyncOperation<COMType*>> asyncOp;
-            auto hr = factory->FromIdAsync (hDeviceId.get(), asyncOp.resetAndGetPointerAddress());
+            const auto hr = comFactory->FromIdAsync (hDeviceId.get(), asyncOp.resetAndGetPointerAddress());
 
             if (FAILED (hr))
                 return;
 
-            hr = asyncOp->put_Completed (Callback<IAsyncOperationCompletedHandler<COMType*>> (
-                [this] (IAsyncOperation<COMType*>* asyncOpPtr, AsyncStatus)
-                {
-                    if (asyncOpPtr == nullptr)
-                        return E_ABORT;
+            std::promise<ComSmartPtr<COMInterfaceType>> promise;
+            auto future = promise.get_future();
 
-                    auto hr = asyncOpPtr->GetResults (port.resetAndGetPointerAddress());
+            auto callback = [p = std::move (promise)] (IAsyncOperation<COMType*>* asyncOpPtr, AsyncStatus) mutable
+            {
+               if (asyncOpPtr == nullptr)
+               {
+                   p.set_value (nullptr);
+                   return E_ABORT;
+               }
 
-                    if (FAILED (hr))
-                        return hr;
+               ComSmartPtr<COMInterfaceType> result;
+               const auto hr = asyncOpPtr->GetResults (result.resetAndGetPointerAddress());
 
-                    portOpened.signal();
-                    return S_OK;
-                }
-            ).Get());
+               if (FAILED (hr))
+               {
+                   p.set_value (nullptr);
+                   return hr;
+               }
 
-            // We need to use a timeout here, rather than waiting indefinitely, as the
-            // WinRT API can occasionally hang!
-            portOpened.wait (2000);
-        }
+               p.set_value (std::move (result));
+               return S_OK;
+           };
 
-        const String deviceID;
-        ComSmartPtr<COMFactoryType>& factory;
-        ComSmartPtr<COMInterfaceType>& port;
-        WaitableEvent portOpened { true };
-    };
+           const auto ir = asyncOp->put_Completed (Callback<IAsyncOperationCompletedHandler<COMType*>> (std::move (callback)).Get());
+
+           if (FAILED (ir))
+               return;
+
+           if (future.wait_for (std::chrono::milliseconds (2000)) == std::future_status::ready)
+               comPort = future.get();
+        } }.join();
+    }
 
     //==============================================================================
     template <typename MIDIIOStaticsType, typename MIDIPort>
@@ -1565,12 +1595,7 @@ private:
               inputDevice (input),
               callback (cb)
         {
-            OpenMidiPortThread<IMidiInPortStatics, IMidiInPort, MidiInPort> portThread ("Open WinRT MIDI input port",
-                                                                                        deviceInfo.deviceID,
-                                                                                        service.midiInFactory,
-                                                                                        midiPort);
-            portThread.startThread();
-            portThread.waitForThreadToExit (-1);
+            openMidiPortThread<MidiInPort> ("Open WinRT MIDI input port", deviceInfo.deviceID, service.midiInFactory, midiPort);
 
             if (midiPort == nullptr)
             {
@@ -1582,7 +1607,18 @@ private:
 
             auto hr = midiPort->add_MessageReceived (
                 Callback<ITypedEventHandler<MidiInPort*, MidiMessageReceivedEventArgs*>> (
-                    [this] (IMidiInPort*, IMidiMessageReceivedEventArgs* args) { return midiInMessageReceived (args); }
+                    [self = checkedReference] (IMidiInPort*, IMidiMessageReceivedEventArgs* args)
+                    {
+                        HRESULT hr = S_OK;
+
+                        self->access ([&hr, args] (auto* ptr)
+                                      {
+                                         if (ptr != nullptr)
+                                             hr = ptr->midiInMessageReceived (args);
+                                      });
+
+                        return hr;
+                    }
                 ).Get(),
                 &midiInMessageToken);
 
@@ -1595,6 +1631,7 @@ private:
 
         ~WinRTInputWrapper()
         {
+            checkedReference->clear();
             disconnect();
         }
 
@@ -1706,6 +1743,8 @@ private:
         double startTime = 0;
         bool isStarted = false;
 
+        std::shared_ptr<CheckedReference<WinRTInputWrapper>> checkedReference = createCheckedReference (this);
+
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WinRTInputWrapper);
     };
 
@@ -1716,12 +1755,7 @@ private:
         WinRTOutputWrapper (WinRTMidiService& service, const String& deviceIdentifier)
             : WinRTIOWrapper <IMidiOutPortStatics, IMidiOutPort> (*service.bleDeviceWatcher, *service.outputDeviceWatcher, deviceIdentifier)
         {
-            OpenMidiPortThread<IMidiOutPortStatics, IMidiOutPort, IMidiOutPort> portThread ("Open WinRT MIDI output port",
-                                                                                            deviceInfo.deviceID,
-                                                                                            service.midiOutFactory,
-                                                                                            midiPort);
-            portThread.startThread();
-            portThread.waitForThreadToExit (-1);
+            openMidiPortThread<IMidiOutPort> ("Open WinRT MIDI output port", deviceInfo.deviceID, service.midiOutFactory, midiPort);
 
             if (midiPort == nullptr)
                 throw std::runtime_error ("Timed out waiting for midi output port creation");

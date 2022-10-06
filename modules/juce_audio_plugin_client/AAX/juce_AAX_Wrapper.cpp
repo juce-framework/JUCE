@@ -1461,7 +1461,7 @@ namespace AAXClasses
             }
 
             const auto effectiveRate = info.getFrameRate().hasValue() ? info.getFrameRate()->getEffectiveRate() : 0.0;
-            info.setEditOriginTime (effectiveRate != 0.0 ? makeOptional (offset / effectiveRate) : nullopt);
+            info.setEditOriginTime (makeOptional (effectiveRate != 0.0 ? offset / effectiveRate : offset));
 
             return info;
         }
