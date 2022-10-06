@@ -667,6 +667,12 @@ public:
             callback->audioDeviceAboutToStart (&owner);
         }
 
+        for (auto* stream : getStreams())
+            if (stream != nullptr)
+                stream->previousSampleTime = invalidSampleTime;
+
+        owner.hadDiscontinuity = false;
+
         if (scopedProcID.get() == nullptr && deviceID != 0)
         {
             scopedProcID = [&self = *this,
@@ -729,7 +735,8 @@ public:
     double getSampleRate() const  { return sampleRate; }
     int getBufferSize() const     { return bufferSize; }
 
-    void audioCallback (const AudioTimeStamp* timeStamp,
+    void audioCallback (const AudioTimeStamp* inputTimestamp,
+                        const AudioTimeStamp* outputTimestamp,
                         const AudioBufferList* inInputData,
                         AudioBufferList* outOutputData)
     {
@@ -765,6 +772,12 @@ public:
                 }
             }
 
+            for (auto* stream : getStreams())
+                if (stream != nullptr)
+                    owner.hadDiscontinuity |= stream->checkTimestampsForDiscontinuity (stream == inStream.get() ? inputTimestamp
+                                                                                                                : outputTimestamp);
+
+            const auto* timeStamp = numOutputChans > 0 ? outputTimestamp : inputTimestamp;
             const auto nanos = timeStamp != nullptr ? timeConversions.hostTimeToNanos (timeStamp->mHostTime) : 0;
 
             callback->audioDeviceIOCallbackWithContext (getTempBuffers (inStream),  numInputChans,
@@ -795,6 +808,10 @@ public:
                 zeromem (outOutputData->mBuffers[i].mData,
                          outOutputData->mBuffers[i].mDataByteSize);
         }
+
+        for (auto* stream : getStreams())
+            if (stream != nullptr)
+                stream->previousSampleTime += static_cast<Float64> (bufferSize);
     }
 
     // called by callbacks (possibly off the main thread)
@@ -939,6 +956,26 @@ public:
             return static_cast<int> (deviceLatency + safetyOffset + framesInBuffer + streamLatency);
         }
 
+        bool checkTimestampsForDiscontinuity (const AudioTimeStamp* timestamp) noexcept
+        {
+            if (channels > 0)
+            {
+                jassert (timestamp == nullptr || (((timestamp->mFlags & kAudioTimeStampSampleTimeValid) != 0)
+                                               && ((timestamp->mFlags & kAudioTimeStampHostTimeValid)   != 0)));
+
+                if (previousSampleTime == invalidSampleTime)
+                    previousSampleTime = timestamp != nullptr ? timestamp->mSampleTime : 0.0;
+
+                if (timestamp != nullptr && std::fabs (previousSampleTime - timestamp->mSampleTime) >= 1.0)
+                {
+                    previousSampleTime = timestamp->mSampleTime;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         //==============================================================================
         const bool input;
         const int latency;
@@ -947,6 +984,7 @@ public:
         const StringArray chanNames;
         const Array<CallbackDetailsForChannel> channelInfo;
         const int channels = 0;
+        Float64 previousSampleTime;
 
         HeapBlock<float*> tempBuffers;
 
@@ -1061,14 +1099,14 @@ private:
     }
 
     static OSStatus audioIOProc (AudioDeviceID /*inDevice*/,
-                                 const AudioTimeStamp* inNow,
+                                 [[maybe_unused]] const AudioTimeStamp* inNow,
                                  const AudioBufferList* inInputData,
-                                 [[maybe_unused]] const AudioTimeStamp* inInputTime,
+                                 const AudioTimeStamp* inInputTime,
                                  AudioBufferList* outOutputData,
-                                 [[maybe_unused]] const AudioTimeStamp* inOutputTime,
+                                 const AudioTimeStamp* inOutputTime,
                                  void* device)
     {
-        static_cast<CoreAudioInternal*> (device)->audioCallback (inNow, inInputData, outOutputData);
+        static_cast<CoreAudioInternal*> (device)->audioCallback (inInputTime, inOutputTime, inInputData, outOutputData);
         return noErr;
     }
 
@@ -1313,6 +1351,7 @@ public:
 
     WeakReference<CoreAudioIODeviceType> deviceType;
     int inputIndex, outputIndex;
+    bool hadDiscontinuity;
 
 private:
     std::unique_ptr<CoreAudioInternal> internal;
@@ -1356,10 +1395,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioIODevice)
 };
 
+
 //==============================================================================
 class AudioIODeviceCombiner    : public AudioIODevice,
                                  private AsyncRestarter,
-                                 private Thread,
                                  private Timer
 {
 public:
@@ -1367,7 +1406,6 @@ public:
                            std::unique_ptr<CoreAudioIODevice>&& inputDevice,
                            std::unique_ptr<CoreAudioIODevice>&& outputDevice)
         : AudioIODevice (deviceName, "CoreAudio"),
-          Thread (deviceName),
           owner (deviceType),
           currentSampleRate (inputDevice->getCurrentSampleRate()),
           currentBufferSize (inputDevice->getCurrentBufferSizeSamples()),
@@ -1487,24 +1525,13 @@ public:
 
         currentSampleRate = sampleRate;
         currentBufferSize = bufferSize;
-
-        const int fifoSize = bufferSize * 3 + 1;
-        int totalInputChanIndex = 0, totalOutputChanIndex = 0;
-        int chanIndex = 0;
+        targetLatency = bufferSize;
 
         for (auto& d : getDeviceWrappers())
         {
-            BigInteger ins (inputChannels >> totalInputChanIndex);
-            BigInteger outs (outputChannels >> totalOutputChanIndex);
-
-            int numIns  = d->getInputChannelNames().size();
-            int numOuts = d->getOutputChannelNames().size();
-
-            totalInputChanIndex += numIns;
-            totalOutputChanIndex += numOuts;
-
-            String err = d->open (ins, outs, sampleRate, bufferSize,
-                                  chanIndex, fifoSize);
+            auto err = d->open (  d->isInput() ? inputChannels  : BigInteger(),
+                                ! d->isInput() ? outputChannels : BigInteger(),
+                                sampleRate, bufferSize);
 
             if (err.isNotEmpty())
             {
@@ -1513,15 +1540,13 @@ public:
                 return err;
             }
 
-            chanIndex += d->numInputChans + d->numOutputChans;
+            targetLatency += d->getLatencyInSamples();
         }
 
-        fifos.setSize (chanIndex, fifoSize);
-        fifoReadPointers  = fifos.getArrayOfReadPointers();
-        fifoWritePointers = fifos.getArrayOfWritePointers();
-        fifos.clear();
-        startThread (9);
-        threadInitialised.wait();
+        const auto numOuts = outputWrapper.getChannelNames().size();
+
+        fifo.setSize (numOuts, targetLatency + (bufferSize * 2));
+        scratchBuffer.setSize (numOuts, bufferSize);
 
         return {};
     }
@@ -1529,8 +1554,7 @@ public:
     void close() override
     {
         stop();
-        stopThread (10000);
-        fifos.clear();
+        fifo.clear();
         active = false;
 
         for (auto& d : getDeviceWrappers())
@@ -1603,22 +1627,12 @@ public:
 
     int getOutputLatencyInSamples() override
     {
-        int lat = 0;
-
-        for (auto& d : getDeviceWrappers())
-            lat = jmax (lat, d->device->getOutputLatencyInSamples());
-
-        return lat + currentBufferSize * 2;
+        return targetLatency - getInputLatencyInSamples();
     }
 
     int getInputLatencyInSamples() override
     {
-        int lat = 0;
-
-        for (auto& d : getDeviceWrappers())
-            lat = jmax (lat, d->device->getInputLatencyInSamples());
-
-        return lat + currentBufferSize * 2;
+        return inputWrapper.getLatencyInSamples();
     }
 
     void start (AudioIODeviceCallback* newCallback) override
@@ -1632,13 +1646,14 @@ public:
         if (shouldStart)
         {
             stop();
-            fifos.clear();
+            fifo.clear();
+            reset();
 
             {
                 ScopedErrorForwarder forwarder (*this, newCallback);
 
                 for (auto& d : getDeviceWrappers())
-                    d->start();
+                    d->start (d);
 
                 if (! forwarder.encounteredError() && newCallback != nullptr)
                     newCallback->audioDeviceAboutToStart (this);
@@ -1658,7 +1673,14 @@ public:
         return lastError;
     }
 
+    int getXRunCount() const noexcept override
+    {
+        return xruns.load();
+    }
+
 private:
+    static constexpr auto invalidSampleTime = std::numeric_limits<std::uint64_t>::max();
+
     WeakReference<CoreAudioIODeviceType> owner;
     CriticalSection callbackLock;
     AudioIODeviceCallback* callback = nullptr;
@@ -1667,77 +1689,14 @@ private:
     int currentBufferSize = 0;
     bool active = false;
     String lastError;
-    AudioBuffer<float> fifos;
-    const float* const* fifoReadPointers = nullptr;
-    float* const* fifoWritePointers = nullptr;
-    WaitableEvent threadInitialised;
+    AudioSampleBuffer fifo, scratchBuffer;
     CriticalSection closeLock;
+    int targetLatency = 0;
+    std::atomic<int> xruns { -1 };
 
     BigInteger inputChannelsRequested, outputChannelsRequested;
     double sampleRateRequested = 44100;
     int bufferSizeRequested = 512;
-
-    void run() override
-    {
-        auto numSamples = currentBufferSize;
-
-        AudioBuffer<float> buffer (fifos.getNumChannels(), numSamples);
-        buffer.clear();
-
-        Array<const float*> inputChans;
-        Array<float*> outputChans;
-
-        for (auto& d : getDeviceWrappers())
-        {
-            for (int j = 0; j < d->numInputChans; ++j)   inputChans.add  (buffer.getReadPointer  (d->inputIndex  + j));
-            for (int j = 0; j < d->numOutputChans; ++j)  outputChans.add (buffer.getWritePointer (d->outputIndex + j));
-        }
-
-        auto numInputChans  = inputChans.size();
-        auto numOutputChans = outputChans.size();
-
-        inputChans.add (nullptr);
-        outputChans.add (nullptr);
-
-        auto blockSizeMs = jmax (1, (int) (1000 * numSamples / currentSampleRate));
-
-        jassert (numInputChans + numOutputChans == buffer.getNumChannels());
-
-        threadInitialised.signal();
-
-        while (! threadShouldExit())
-        {
-            readInput (buffer, numSamples, blockSizeMs);
-
-            bool didCallback = true;
-
-            {
-                const ScopedLock sl (callbackLock);
-
-                if (callback != nullptr)
-                    callback->audioDeviceIOCallbackWithContext ((const float**) inputChans.getRawDataPointer(),
-                                                                numInputChans,
-                                                                outputChans.getRawDataPointer(),
-                                                                numOutputChans,
-                                                                numSamples,
-                                                                {}); // Can't predict when the next output callback will happen
-                else
-                    didCallback = false;
-            }
-
-            if (didCallback)
-            {
-                pushOutputData (buffer, numSamples, blockSizeMs);
-            }
-            else
-            {
-                for (int i = 0; i < numOutputChans; ++i)
-                    FloatVectorOperations::clear (outputChans[i], numSamples);
-
-                reset();
-            }
-        }
-    }
 
     void timerCallback() override
     {
@@ -1756,7 +1715,7 @@ private:
         }
 
         for (auto& d : getDeviceWrappers())
-            d->device->stopInternal();
+            d->stopInternal();
 
         if (lastCallback != nullptr)
         {
@@ -1769,90 +1728,130 @@ private:
 
     void reset()
     {
+        xruns.store (0);
+        fifo.clear();
+        scratchBuffer.clear();
+
         for (auto& d : getDeviceWrappers())
             d->reset();
     }
 
-    void underrun()
+    // AbstractFifo cannot be used here for two reasons:
+    // 1) We use absolute timestamps as the fifo's read/write positions. This not only makes the code
+    //    more readable (especially when checking for underruns/overflows) but also simplifies the
+    //    initial setup when actual latency is not known yet until both callbacks have fired.
+    // 2) AbstractFifo doesn't have the necessary mechanics to recover from underrun/overflow conditions
+    //    in a lock-free and data-race free way. It's great if you don't care (i.e. overwrite and/or
+    //    read stale data) or can abort the operation entirely, but this is not the case here. We
+    //    need bespoke underrun/overflow handling here which fits this use-case.
+    template <typename Callback>
+    void accessFifo (const uint64_t startPos, const int numChannels, const int numItems, Callback&& operateOnRange)
     {
+        const auto fifoSize = fifo.getNumSamples();
+        auto fifoPos = static_cast<int> (startPos % static_cast<std::uint64_t> (fifoSize));
+
+        for (int pos = 0; pos < numItems;)
+        {
+            const auto max = std::min (numItems - pos, fifoSize - fifoPos);
+
+            struct Args { int fifoPos, inputPos, nItems, channel; };
+
+            for (auto ch = 0; ch < numChannels; ++ch)
+                operateOnRange (Args { fifoPos, pos, max, ch });
+
+            fifoPos = (fifoPos + max) % fifoSize;
+            pos += max;
+        }
     }
 
-    void readInput (AudioBuffer<float>& buffer, const int numSamples, const int blockSizeMs)
+    void inputAudioCallback (const float* const* channels, int numChannels, int n, const AudioIODeviceCallbackContext& context) noexcept
     {
-        for (auto& d : getDeviceWrappers())
-            d->done = (d->numInputChans == 0 || d->isWaitingForInput);
+        auto& writePos = inputWrapper.sampleTime;
 
-        float totalWaitTimeMs = blockSizeMs * 5.0f;
-        constexpr int numReadAttempts = 6;
-        auto sumPower2s = [] (int maxPower) { return (1 << (maxPower + 1)) - 1; };
-        float waitTime = totalWaitTimeMs / (float) sumPower2s (numReadAttempts - 2);
-
-        for (int numReadAttemptsRemaining = numReadAttempts;;)
         {
-            bool anySamplesRemaining = false;
+            ScopedLock lock (callbackLock);
 
-            for (auto& d : getDeviceWrappers())
+            if (callback != nullptr)
             {
-                if (! d->done)
-                {
-                    if (d->isInputReady (numSamples))
-                    {
-                        d->readInput (buffer, numSamples);
-                        d->done = true;
-                    }
-                    else
-                    {
-                        anySamplesRemaining = true;
-                    }
-                }
+                callback->audioDeviceIOCallbackWithContext (channels,
+                                                            numChannels,
+                                                            scratchBuffer.getArrayOfWritePointers(),
+                                                            scratchBuffer.getNumChannels(),
+                                                            n,
+                                                            context);
             }
-
-            if (! anySamplesRemaining)
-                return;
-
-            if (--numReadAttemptsRemaining == 0)
-                break;
-
-            wait (jmax (1, roundToInt (waitTime)));
-            waitTime *= 2.0f;
+            else
+            {
+                scratchBuffer.clear();
+            }
         }
 
-        for (auto& d : getDeviceWrappers())
-            if (! d->done)
-                for (int i = 0; i < d->numInputChans; ++i)
-                    buffer.clear (d->inputIndex + i, 0, numSamples);
+        auto currentWritePos = writePos.load();
+
+        writePos.compare_exchange_strong (currentWritePos, currentWritePos + static_cast<std::uint64_t> (n));
+
+        if (currentWritePos == invalidSampleTime)
+            return;
+
+        const auto readPos = outputWrapper.sampleTime.load();
+
+        // check for fifo overflow
+        if (readPos != invalidSampleTime)
+        {
+            // write will overlap previous read
+            if (readPos > currentWritePos || (currentWritePos + static_cast<std::uint64_t> (n) - readPos) > static_cast<std::uint64_t> (fifo.getNumSamples()))
+            {
+                xrun();
+                return;
+            }
+        }
+
+        accessFifo (currentWritePos, scratchBuffer.getNumChannels(), n, [&] (const auto& args)
+        {
+            FloatVectorOperations::copy (fifo.getWritePointer (args.channel, args.fifoPos),
+                                         scratchBuffer.getReadPointer (args.channel, args.inputPos),
+                                         args.nItems);
+        });
     }
 
-    void pushOutputData (AudioBuffer<float>& buffer, const int numSamples, const int blockSizeMs)
+    void outputAudioCallback (float* const* channels, int numChannels, int n) noexcept
+    {
+        auto& readPos = outputWrapper.sampleTime;
+        auto currentReadPos = readPos.load();
+
+        if (currentReadPos == invalidSampleTime)
+            return;
+
+        const auto writePos = inputWrapper.sampleTime.load();
+
+        // check for fifo underrun
+        if (writePos != invalidSampleTime)
+        {
+            if ((currentReadPos + static_cast<std::uint64_t> (n)) > writePos)
+            {
+                xrun();
+                return;
+            }
+        }
+
+        accessFifo (currentReadPos, numChannels, n, [&] (const auto& args)
+        {
+            FloatVectorOperations::copy (channels[args.channel] + args.inputPos,
+                                         fifo.getReadPointer (args.channel, args.fifoPos),
+                                         args.nItems);
+        });
+
+        // use compare exchange here as we need to avoid the case
+        // where we overwrite readPos being equal to invalidSampleTime
+        readPos.compare_exchange_strong (currentReadPos, currentReadPos + static_cast<std::uint64_t> (n));
+    }
+
+    void xrun() noexcept
     {
         for (auto& d : getDeviceWrappers())
-            d->done = (d->numOutputChans == 0);
+            d->sampleTime.store (invalidSampleTime);
 
-        for (int tries = 5;;)
-        {
-            bool anyRemaining = false;
-
-            for (auto& d : getDeviceWrappers())
-            {
-                if (! d->done)
-                {
-                    if (d->isOutputReady (numSamples))
-                    {
-                        d->pushOutputData (buffer, numSamples);
-                        d->done = true;
-                    }
-                    else
-                    {
-                        anyRemaining = true;
-                    }
-                }
-            }
-
-            if ((! anyRemaining) || --tries == 0)
-                return;
-
-            wait (blockSizeMs);
-        }
+        ++xruns;
     }
 
     void handleAudioDeviceAboutToStart (AudioIODevice* device)
@@ -1917,102 +1916,12 @@ private:
 
         ~DeviceWrapper() override
         {
-            close();
-        }
-
-        String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
-                     double sampleRate, int bufferSize, int channelIndex, int fifoSize)
-        {
-            inputFifo.setTotalSize (fifoSize);
-            outputFifo.setTotalSize (fifoSize);
-            inputFifo.reset();
-            outputFifo.reset();
-
-            auto err = device->open (input ? inputChannels : BigInteger(),
-                                     input ? BigInteger() : outputChannels,
-                                     sampleRate, bufferSize);
-
-            numInputChans  = input ? device->getActiveInputChannels().countNumberOfSetBits() : 0;
-            numOutputChans = input ? 0 : device->getActiveOutputChannels().countNumberOfSetBits();
-
-            isWaitingForInput = numInputChans > 0;
-
-            inputIndex = channelIndex;
-            outputIndex = channelIndex + numInputChans;
-
-            return err;
-        }
-
-        void close()
-        {
             device->close();
-        }
-
-        void start()
-        {
-            reset();
-            device->start (this);
         }
 
         void reset()
         {
-            inputFifo.reset();
-            outputFifo.reset();
-        }
-
-        StringArray getOutputChannelNames() const  { return input ? StringArray() : device->getOutputChannelNames(); }
-        StringArray getInputChannelNames()  const  { return input ? device->getInputChannelNames() : StringArray(); }
-
-        bool isInputReady (int numSamples) const noexcept
-        {
-            return numInputChans == 0 || inputFifo.getNumReady() >= numSamples;
-        }
-
-        void readInput (AudioBuffer<float>& destBuffer, int numSamples)
-        {
-            if (numInputChans == 0)
-                return;
-
-            int start1, size1, start2, size2;
-            inputFifo.prepareToRead (numSamples, start1, size1, start2, size2);
-
-            for (int i = 0; i < numInputChans; ++i)
-            {
-                auto index = inputIndex + i;
-                auto dest = destBuffer.getWritePointer (index);
-                auto src = owner.fifoReadPointers[index];
-
-                if (size1 > 0)  FloatVectorOperations::copy (dest,         src + start1, size1);
-                if (size2 > 0)  FloatVectorOperations::copy (dest + size1, src + start2, size2);
-            }
-
-            inputFifo.finishedRead (size1 + size2);
-        }
-
-        bool isOutputReady (int numSamples) const noexcept
-        {
-            return numOutputChans == 0 || outputFifo.getFreeSpace() >= numSamples;
-        }
-
-        void pushOutputData (AudioBuffer<float>& srcBuffer, int numSamples)
-        {
-            if (numOutputChans == 0)
-                return;
-
-            int start1, size1, start2, size2;
-            outputFifo.prepareToWrite (numSamples, start1, size1, start2, size2);
-
-            for (int i = 0; i < numOutputChans; ++i)
-            {
-                auto index = outputIndex + i;
-                auto dest = owner.fifoWritePointers[index];
-                auto src = srcBuffer.getReadPointer (index);
-
-                if (size1 > 0)  FloatVectorOperations::copy (dest + start1, src,         size1);
-                if (size2 > 0)  FloatVectorOperations::copy (dest + start2, src + size1, size2);
-            }
-
-            outputFifo.finishedWrite (size1 + size2);
+            sampleTime.store (invalidSampleTime);
         }
 
         void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
@@ -2020,89 +1929,24 @@ private:
                                                float* const* outputChannelData,
                                                int numOutputChannels,
                                                int numSamples,
-                                               const AudioIODeviceCallbackContext&) override
+                                               const AudioIODeviceCallbackContext& context) override
         {
-            if (numInputChannels > 0)
-            {
-                isWaitingForInput = false;
+            if (std::exchange (device->hadDiscontinuity, false))
+                owner.xrun();
 
-                int start1, size1, start2, size2;
-                inputFifo.prepareToWrite (numSamples, start1, size1, start2, size2);
+            updateSampleTimeFromContext (context);
 
-                if (size1 + size2 < numSamples)
-                {
-                    inputFifo.reset();
-                    inputFifo.prepareToWrite (numSamples, start1, size1, start2, size2);
-                }
-
-                for (int i = 0; i < numInputChannels; ++i)
-                {
-                    auto dest = owner.fifoWritePointers[inputIndex + i];
-                    auto src = inputChannelData[i];
-
-                    if (size1 > 0)  FloatVectorOperations::copy (dest + start1, src,         size1);
-                    if (size2 > 0)  FloatVectorOperations::copy (dest + start2, src + size1, size2);
-                }
-
-                auto totalSize = size1 + size2;
-                inputFifo.finishedWrite (totalSize);
-
-                if (numSamples > totalSize)
-                {
-                    auto samplesRemaining = numSamples - totalSize;
-
-                    for (int i = 0; i < numInputChans; ++i)
-                        FloatVectorOperations::clear (owner.fifoWritePointers[inputIndex + i] + totalSize, samplesRemaining);
-
-                    owner.underrun();
-                }
-            }
-
-            if (numOutputChannels > 0)
-            {
-                int start1, size1, start2, size2;
-                outputFifo.prepareToRead (numSamples, start1, size1, start2, size2);
-
-                if (size1 + size2 < numSamples)
-                {
-                    Thread::sleep (1);
-                    outputFifo.prepareToRead (numSamples, start1, size1, start2, size2);
-                }
-
-                for (int i = 0; i < numOutputChannels; ++i)
-                {
-                    auto dest = outputChannelData[i];
-                    auto src = owner.fifoReadPointers[outputIndex + i];
-
-                    if (size1 > 0)  FloatVectorOperations::copy (dest,         src + start1, size1);
-                    if (size2 > 0)  FloatVectorOperations::copy (dest + size1, src + start2, size2);
-                }
-
-                auto totalSize = size1 + size2;
-                outputFifo.finishedRead (totalSize);
-
-                if (numSamples > totalSize)
-                {
-                    auto samplesRemaining = numSamples - totalSize;
-
-                    for (int i = 0; i < numOutputChannels; ++i)
-                        FloatVectorOperations::clear (outputChannelData[i] + totalSize, samplesRemaining);
-
-                    owner.underrun();
-                }
-            }
-
-            owner.notify();
+            if (input)
+                owner.inputAudioCallback (inputChannelData, numInputChannels, numSamples, context);
+            else
+                owner.outputAudioCallback (outputChannelData, numOutputChannels, numSamples);
         }
 
-        double getCurrentSampleRate()                        { return device->getCurrentSampleRate(); }
-        bool   setCurrentSampleRate (double newSampleRate)   { return device->setCurrentSampleRate (newSampleRate); }
-        int  getCurrentBufferSizeSamples()                   { return device->getCurrentBufferSizeSamples(); }
+        void audioDeviceAboutToStart (AudioIODevice* d)        override { owner.handleAudioDeviceAboutToStart (d); }
+        void audioDeviceStopped()                              override { owner.handleAudioDeviceStopped(); }
+        void audioDeviceError (const String& errorMessage)     override { owner.handleAudioDeviceError (errorMessage); }
 
-        void audioDeviceAboutToStart (AudioIODevice* d) override      { owner.handleAudioDeviceAboutToStart (d); }
-        void audioDeviceStopped() override                            { owner.handleAudioDeviceStopped(); }
-        void audioDeviceError (const String& errorMessage) override   { owner.handleAudioDeviceError (errorMessage); }
-
+        bool setCurrentSampleRate (double newSampleRate)                { return device->setCurrentSampleRate (newSampleRate); }
         StringArray getChannelNames()                             const { return input ? device->getInputChannelNames()     : device->getOutputChannelNames(); }
         BigInteger getActiveChannels()                            const { return input ? device->getActiveInputChannels()   : device->getActiveOutputChannels(); }
         int getLatencyInSamples()                                 const { return input ? device->getInputLatencyInSamples() : device->getOutputLatencyInSamples(); }
@@ -2113,15 +1957,43 @@ private:
         Array<int> getAvailableBufferSizes()                      const { return device->getAvailableBufferSizes(); }
         int getCurrentBitDepth()                                  const { return device->getCurrentBitDepth(); }
         int getDefaultBufferSize()                                const { return device->getDefaultBufferSize(); }
+        void start (AudioIODeviceCallback* callbackToNotify)      const { return device->start (callbackToNotify); }
+        AudioIODeviceCallback* stopInternal()                     const { return device->stopInternal(); }
+        void close()                                              const { return device->close(); }
+
+        String open (const BigInteger& inputChannels, const BigInteger& outputChannels, double sampleRate, int bufferSizeSamples) const
+        {
+            return device->open (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
+        }
+
+        std::uint64_t nsToSampleTime (std::uint64_t ns) const noexcept
+        {
+            return static_cast<std::uint64_t> (std::round (static_cast<double> (ns) * owner.currentSampleRate * 1e-9));
+        }
+
+        void updateSampleTimeFromContext (const AudioIODeviceCallbackContext& context) noexcept
+        {
+            auto callbackSampleTime = context.hostTimeNs != nullptr ? nsToSampleTime (*context.hostTimeNs) : 0;
+
+            if (input)
+                callbackSampleTime += static_cast<std::uint64_t> (owner.targetLatency);
+
+            auto copy = invalidSampleTime;
+
+            if (sampleTime.compare_exchange_strong (copy, callbackSampleTime) && (! input))
+                owner.fifo.clear();
+        }
+
+        bool isInput() const { return input; }
+
+        std::atomic<std::uint64_t> sampleTime { invalidSampleTime };
+
+    private:
 
         //==============================================================================
         AudioIODeviceCombiner& owner;
         std::unique_ptr<CoreAudioIODevice> device;
-        int inputIndex = 0, numInputChans = 0, outputIndex = 0, numOutputChans = 0;
-        bool input;
-        std::atomic<bool> isWaitingForInput { false };
-        AbstractFifo inputFifo { 32 }, outputFifo { 32 };
-        bool done = false;
+        const bool input;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeviceWrapper)
