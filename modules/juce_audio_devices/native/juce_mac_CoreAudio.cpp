@@ -298,18 +298,18 @@ private:
     auto err2log() const { return [this] (OSStatus err) { OK (err); }; }
 
 public:
-    CoreAudioInternal (CoreAudioIODevice& d, AudioDeviceID id, bool input, bool output)
+    CoreAudioInternal (CoreAudioIODevice& d, AudioDeviceID id, bool hasInput, bool hasOutput)
         : owner (d),
           deviceID (id),
-          isInputDevice  (input),
-          isOutputDevice (output)
+          inStream  (hasInput  ? new Stream (true,  *this, {}) : nullptr),
+          outStream (hasOutput ? new Stream (false, *this, {}) : nullptr)
     {
         jassert (deviceID != 0);
 
         updateDetailsFromDevice();
         JUCE_COREAUDIOLOG ("Creating CoreAudioInternal\n"
-                           << (isInputDevice  ? ("    inputDeviceId "  + String (deviceID) + "\n") : "")
-                           << (isOutputDevice ? ("    outputDeviceId " + String (deviceID) + "\n") : "")
+                           << (inStream  != nullptr ? ("    inputDeviceId "  + String (deviceID) + "\n") : "")
+                           << (outStream != nullptr ? ("    outputDeviceId " + String (deviceID) + "\n") : "")
                            << getDeviceDetails().joinIntoString ("\n    "));
 
         AudioObjectPropertyAddress pa;
@@ -335,17 +335,20 @@ public:
         stop (false);
     }
 
+    auto getStreams() const { return std::array<Stream*, 2> { { inStream.get(), outStream.get() } }; }
+
     void allocateTempBuffers()
     {
         auto tempBufSize = bufferSize + 4;
-        audioBuffer.calloc ((numInputChans + numOutputChans) * tempBufSize);
 
-        tempInputBuffers.calloc  (numInputChans + 2);
-        tempOutputBuffers.calloc (numOutputChans + 2);
+        auto streams = getStreams();
+        const auto total = std::accumulate (streams.begin(), streams.end(), 0,
+                                            [] (int n, const auto& s) { return n + (s != nullptr ? s->channels : 0); });
+        audioBuffer.calloc (total * tempBufSize);
 
-        int count = 0;
-        for (int i = 0; i < numInputChans;  ++i)  tempInputBuffers[i]  = audioBuffer + count++ * tempBufSize;
-        for (int i = 0; i < numOutputChans; ++i)  tempOutputBuffers[i] = audioBuffer + count++ * tempBufSize;
+        auto channels = 0;
+        for (auto* stream : streams)
+            channels += stream != nullptr ? stream->allocateTempBuffers (tempBufSize, channels, audioBuffer) : 0;
     }
 
     struct CallbackDetailsForChannel
@@ -354,55 +357,6 @@ public:
         int dataOffsetSamples;
         int dataStrideSamples;
     };
-
-    // returns the number of actual available channels
-    StringArray getChannelInfo (bool input, Array<CallbackDetailsForChannel>& newChannelInfo) const
-    {
-        StringArray newNames;
-        int chanNum = 0;
-        const auto propertyScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-
-        if (auto bufList = audioObjectGetProperty<AudioBufferList> (deviceID, { kAudioDevicePropertyStreamConfiguration,
-                                                                                propertyScope,
-                                                                                juceAudioObjectPropertyElementMain }, err2log()))
-        {
-            const int numStreams = (int) bufList->mNumberBuffers;
-
-            for (int i = 0; i < numStreams; ++i)
-            {
-                auto& b = bufList->mBuffers[i];
-
-                for (unsigned int j = 0; j < b.mNumberChannels; ++j)
-                {
-                    String name;
-
-                    const auto propertyElement = static_cast<AudioObjectPropertyElement> (chanNum + 1);
-
-                    if (auto nameNSString = audioObjectGetProperty<NSString*> (deviceID, { kAudioObjectPropertyElementName,
-                                                                                           propertyScope,
-                                                                                           propertyElement }).value_or (nullptr))
-                    {
-                        name = nsStringToJuce (nameNSString);
-                        [nameNSString release];
-                    }
-
-                    if ((input ? activeInputChans : activeOutputChans)[chanNum])
-                    {
-                        CallbackDetailsForChannel info = { i, (int) j, (int) b.mNumberChannels };
-                        newChannelInfo.add (info);
-                    }
-
-                    if (name.isEmpty())
-                        name << (input ? "Input " : "Output ") << (chanNum + 1);
-
-                    newNames.add (name);
-                    ++chanNum;
-                }
-            }
-        }
-
-        return newNames;
-    }
 
     Array<double> getSampleRatesFromDevice() const
     {
@@ -471,27 +425,6 @@ public:
         return newBufferSizes;
     }
 
-    int getLatencyFromDevice (AudioObjectPropertyScope scope) const
-    {
-        const auto latency      = audioObjectGetProperty<UInt32> (deviceID, { kAudioDevicePropertyLatency,
-                                                                              scope,
-                                                                              juceAudioObjectPropertyElementMain }).value_or (0);
-
-        const auto safetyOffset = audioObjectGetProperty<UInt32> (deviceID, { kAudioDevicePropertySafetyOffset,
-                                                                              scope,
-                                                                              juceAudioObjectPropertyElementMain }).value_or (0);
-
-        return static_cast<int> (latency + safetyOffset);
-    }
-
-    int getBitDepthFromDevice (AudioObjectPropertyScope scope) const
-    {
-        return static_cast<int> (audioObjectGetProperty<AudioStreamBasicDescription> (deviceID, { kAudioStreamPropertyPhysicalFormat,
-                                                                                                  scope,
-                                                                                                  juceAudioObjectPropertyElementMain }, err2log())
-                                                                                     .value_or (AudioStreamBasicDescription{}).mBitsPerChannel);
-    }
-
     int getFrameSizeFromDevice() const
     {
         return static_cast<int> (audioObjectGetProperty<UInt32> (deviceID, { kAudioDevicePropertyBufferFrameSize,
@@ -507,7 +440,7 @@ public:
                                                                 juceAudioObjectPropertyElementMain }, err2log()).value_or (0) != 0;
     }
 
-    bool updateDetailsFromDevice()
+    bool updateDetailsFromDevice (const BigInteger& activeIns, const BigInteger& activeOuts)
     {
         stopTimer();
 
@@ -523,16 +456,10 @@ public:
         auto newBufferSizes = getBufferSizesFromDevice();
         auto newSampleRates = getSampleRatesFromDevice();
 
-        auto newInputLatency  = getLatencyFromDevice (kAudioDevicePropertyScopeInput);
-        auto newOutputLatency = getLatencyFromDevice (kAudioDevicePropertyScopeOutput);
+        std::unique_ptr<Stream> newInput  (inStream  != nullptr ? new Stream (true,  *this, activeIns)  : nullptr);
+        std::unique_ptr<Stream> newOutput (outStream != nullptr ? new Stream (false, *this, activeOuts) : nullptr);
 
-        Array<CallbackDetailsForChannel> newInChans, newOutChans;
-        auto newInNames  = isInputDevice  ? getChannelInfo (true,  newInChans)  : StringArray();
-        auto newOutNames = isOutputDevice ? getChannelInfo (false, newOutChans) : StringArray();
-
-        auto inputBitDepth  = isInputDevice  ? getBitDepthFromDevice (kAudioDevicePropertyScopeInput)  : 0;
-        auto outputBitDepth = isOutputDevice ? getBitDepthFromDevice (kAudioDevicePropertyScopeOutput) : 0;
-        auto newBitDepth = jmax (inputBitDepth, outputBitDepth);
+        auto newBitDepth = jmax (getBitDepth (newInput), getBitDepth (newOutput));
 
         {
             const ScopedLock sl (callbackLock);
@@ -542,26 +469,23 @@ public:
             if (newSampleRate > 0)
                 sampleRate = newSampleRate;
 
-            inputLatency  = newInputLatency;
-            outputLatency = newOutputLatency;
             bufferSize = newBufferSize;
 
             sampleRates.swapWith (newSampleRates);
             bufferSizes.swapWith (newBufferSizes);
 
-            inChanNames.swapWith (newInNames);
-            outChanNames.swapWith (newOutNames);
-
-            inputChannelInfo.swapWith (newInChans);
-            outputChannelInfo.swapWith (newOutChans);
-
-            numInputChans  = inputChannelInfo.size();
-            numOutputChans = outputChannelInfo.size();
+            std::swap (inStream,  newInput);
+            std::swap (outStream, newOutput);
 
             allocateTempBuffers();
         }
 
         return true;
+    }
+
+    bool updateDetailsFromDevice()
+    {
+        return updateDetailsFromDevice (getActiveChannels (inStream), getActiveChannels (outStream));
     }
 
     StringArray getDeviceDetails()
@@ -583,12 +507,17 @@ public:
         result.add (availableBufferSizes);
         result.add ("Buffer size: " + String (bufferSize));
         result.add ("Bit depth: " + String (bitDepth));
-        result.add ("Input latency: " + String (inputLatency));
-        result.add ("Output latency: " + String (outputLatency));
-        result.add ("Input channel names: "  +  inChanNames.joinIntoString (" "));
-        result.add ("Output channel names: " + outChanNames.joinIntoString (" "));
+        result.add ("Input latency: "  + String (getLatency (inStream)));
+        result.add ("Output latency: " + String (getLatency (outStream)));
+        result.add ("Input channel names: "  + getChannelNames (inStream));
+        result.add ("Output channel names: " + getChannelNames (outStream));
 
         return result;
+    }
+
+    static auto getScope (bool input)
+    {
+        return input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
     }
 
     //==============================================================================
@@ -613,7 +542,7 @@ public:
 
             AudioObjectPropertyAddress pa;
             pa.mSelector = kAudioDevicePropertyDataSourceNameForID;
-            pa.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
+            pa.mScope = getScope (input);
             pa.mElement = juceAudioObjectPropertyElementMain;
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &transSize, &avt)))
@@ -625,12 +554,10 @@ public:
 
     int getCurrentSourceIndex (bool input) const
     {
-        const auto scope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-
         if (deviceID != 0)
         {
             if (auto currentSourceID = audioObjectGetProperty<OSType> (deviceID, { kAudioDevicePropertyDataSource,
-                                                                                   scope,
+                                                                                   getScope (input),
                                                                                    juceAudioObjectPropertyElementMain }, err2log()))
             {
                 auto types = audioObjectGetProperties<OSType> (deviceID, { kAudioDevicePropertyDataSources,
@@ -655,9 +582,8 @@ public:
 
             if (isPositiveAndBelow (index, static_cast<int> (types.size())))
             {
-                const auto scope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
                 audioObjectSetProperty<OSType> (deviceID, { kAudioDevicePropertyDataSource,
-                                                            scope,
+                                                            getScope (input),
                                                             juceAudioObjectPropertyElementMain },
                                                 types[static_cast<std::size_t> (index)], err2log());
             }
@@ -684,9 +610,7 @@ public:
     }
 
     //==============================================================================
-    String reopen (const BigInteger& inputChannels,
-                   const BigInteger& outputChannels,
-                   double newSampleRate, int bufferSizeSamples)
+    String reopen (const BigInteger& ins, const BigInteger& outs, double newSampleRate, int bufferSizeSamples)
     {
         String error;
         callbacksAllowed = false;
@@ -694,24 +618,12 @@ public:
 
         stop (false);
 
-        updateDetailsFromDevice();
-
-        activeInputChans = inputChannels;
-        activeInputChans.setRange (inChanNames.size(),
-                                   activeInputChans.getHighestBit() + 1 - inChanNames.size(),
-                                   false);
-
-        activeOutputChans = outputChannels;
-        activeOutputChans.setRange (outChanNames.size(),
-                                    activeOutputChans.getHighestBit() + 1 - outChanNames.size(),
-                                    false);
-
-        numInputChans = activeInputChans.countNumberOfSetBits();
-        numOutputChans = activeOutputChans.countNumberOfSetBits();
+        const auto activeIns  = BigInteger().setRange (0, jmin (ins .getHighestBit() + 1, getNumChannelNames (inStream)),  true);
+        const auto activeOuts = BigInteger().setRange (0, jmin (outs.getHighestBit() + 1, getNumChannelNames (outStream)), true);
 
         if (! setNominalSampleRate (newSampleRate))
         {
-            updateDetailsFromDevice();
+            updateDetailsFromDevice (activeIns, activeOuts);
             error = "Couldn't change sample rate";
         }
         else
@@ -721,7 +633,7 @@ public:
                                                       juceAudioObjectPropertyElementMain },
                                           static_cast<UInt32> (bufferSizeSamples), err2log()))
             {
-                updateDetailsFromDevice();
+                updateDetailsFromDevice (activeIns, activeOuts);
                 error = "Couldn't change buffer size";
             }
             else
@@ -730,7 +642,7 @@ public:
                 // correctly report their new settings until some random time in the future, so
                 // after calling updateDetailsFromDevice, we need to manually bodge these values
                 // to make sure we're using the correct numbers..
-                updateDetailsFromDevice();
+                updateDetailsFromDevice (activeIns, activeOuts);
                 sampleRate = newSampleRate;
                 bufferSize = bufferSizeSamples;
 
@@ -831,12 +743,15 @@ public:
             return;
         }
 
+        const auto numInputChans  = getChannels (inStream);
+        const auto numOutputChans = getChannels (outStream);
+
         if (callback != nullptr)
         {
             for (int i = numInputChans; --i >= 0;)
             {
-                auto& info = inputChannelInfo.getReference (i);
-                auto dest = tempInputBuffers[i];
+                auto& info = inStream->channelInfo.getReference (i);
+                auto dest = inStream->tempBuffers[i];
                 auto src = ((const float*) inInputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples;
                 auto stride = info.dataStrideSamples;
 
@@ -852,17 +767,15 @@ public:
 
             const auto nanos = timeStamp != nullptr ? timeConversions.hostTimeToNanos (timeStamp->mHostTime) : 0;
 
-            callback->audioDeviceIOCallbackWithContext (tempInputBuffers.get(),
-                                                        numInputChans,
-                                                        tempOutputBuffers,
-                                                        numOutputChans,
+            callback->audioDeviceIOCallbackWithContext (getTempBuffers (inStream),  numInputChans,
+                                                        getTempBuffers (outStream), numOutputChans,
                                                         bufferSize,
                                                         { timeStamp != nullptr ? &nanos : nullptr });
 
             for (int i = numOutputChans; --i >= 0;)
             {
-                auto& info = outputChannelInfo.getReference (i);
-                auto src = tempOutputBuffers[i];
+                auto& info = outStream->channelInfo.getReference (i);
+                auto src = outStream->tempBuffers[i];
                 auto dest = ((float*) outOutputData->mBuffers[info.streamNum].mData) + info.dataOffsetSamples;
                 auto stride = info.dataStrideSamples;
 
@@ -901,15 +814,162 @@ public:
     bool isPlaying() const { return playing.load(); }
 
     //==============================================================================
+    struct Stream
+    {
+        Stream (bool isInput, CoreAudioInternal& parent, const BigInteger& active)
+            : input (isInput),
+              latency (getLatencyFromDevice (isInput, parent)),
+              bitDepth (getBitDepthFromDevice (isInput, parent)),
+              activeChans (active),
+              chanNames (getChannelNames (isInput, parent)),
+              channelInfo (getChannelInfos (isInput, parent, active)),
+              channels (static_cast<int> (channelInfo.size()))
+        {}
+
+        int allocateTempBuffers (int tempBufSize, int channelCount, HeapBlock<float>& buffer)
+        {
+            tempBuffers.calloc (channels + 2);
+
+            for (int i = 0; i < channels;  ++i)
+                tempBuffers[i] = buffer + channelCount++ * tempBufSize;
+
+            return channels;
+        }
+
+        template <typename Visitor>
+        static auto visitChannels (bool isInput, CoreAudioInternal& parent, Visitor&& visitor)
+        {
+            struct Args { int stream, channelIdx, chanNum, streamChannels; };
+            using VisitorResultType = typename std::invoke_result_t<Visitor, const Args&>::value_type;
+            Array<VisitorResultType> result;
+            int chanNum = 0;
+
+            if (auto bufList = audioObjectGetProperty<AudioBufferList> (parent.deviceID, { kAudioDevicePropertyStreamConfiguration,
+                                                                                           getScope (isInput),
+                                                                                           juceAudioObjectPropertyElementMain }, parent.err2log()))
+            {
+                const int numStreams = static_cast<int> (bufList->mNumberBuffers);
+
+                for (int i = 0; i < numStreams; ++i)
+                {
+                    auto& b = bufList->mBuffers[i];
+
+                    for (unsigned int j = 0; j < b.mNumberChannels; ++j)
+                    {
+                        // Passing an anonymous struct ensures that callback can't confuse the argument order
+                        if (auto opt = visitor (Args { i, static_cast<int> (j), chanNum++, static_cast<int> (b.mNumberChannels) }))
+                            result.add (std::move (*opt));
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        static Array<CallbackDetailsForChannel> getChannelInfos (bool isInput, CoreAudioInternal& parent, const BigInteger& active)
+        {
+            return visitChannels (isInput, parent,
+                                  [&] (const auto& args) -> std::optional<CallbackDetailsForChannel>
+                                  {
+                                      if (! active[args.chanNum])
+                                          return {};
+
+                                      return CallbackDetailsForChannel { args.stream, args.channelIdx, args.streamChannels };
+                                  });
+        }
+
+        static StringArray getChannelNames (bool isInput, CoreAudioInternal& parent)
+        {
+            auto names = visitChannels (isInput, parent,
+                                        [&] (const auto& args) -> std::optional<String>
+                                        {
+                                            String name;
+                                            const auto element = static_cast<AudioObjectPropertyElement> (args.chanNum + 1);
+
+                                            if (auto nameNSString = audioObjectGetProperty<NSString*> (parent.deviceID, { kAudioObjectPropertyElementName,
+                                                                                                                          getScope (isInput),
+                                                                                                                          element }).value_or (nullptr))
+                                            {
+                                                name = nsStringToJuce (nameNSString);
+                                                [nameNSString release];
+                                            }
+
+                                            if (name.isEmpty())
+                                                name << (isInput ? "Input " : "Output ") << (args.chanNum + 1);
+
+                                            return name;
+                                        });
+
+            return { names };
+        }
+
+        static int getBitDepthFromDevice (bool isInput, CoreAudioInternal& parent)
+        {
+            return static_cast<int> (audioObjectGetProperty<AudioStreamBasicDescription> (parent.deviceID, { kAudioStreamPropertyPhysicalFormat,
+                                                                                                             getScope (isInput),
+                                                                                                             juceAudioObjectPropertyElementMain }, parent.err2log())
+                                                                                         .value_or (AudioStreamBasicDescription{}).mBitsPerChannel);
+        }
+
+        static int getLatencyFromDevice (bool isInput, CoreAudioInternal& parent)
+        {
+            const auto scope = getScope (isInput);
+
+            const auto latency      = audioObjectGetProperty<UInt32> (parent.deviceID, { kAudioDevicePropertyLatency,
+                                                                                         scope,
+                                                                                         juceAudioObjectPropertyElementMain }).value_or (0);
+
+            const auto safetyOffset = audioObjectGetProperty<UInt32> (parent.deviceID, { kAudioDevicePropertySafetyOffset,
+                                                                                         scope,
+                                                                                         juceAudioObjectPropertyElementMain }).value_or (0);
+
+            return static_cast<int> (latency + safetyOffset);
+        }
+
+        //==============================================================================
+        const bool input;
+        const int latency;
+        const int bitDepth;
+        const BigInteger activeChans;
+        const StringArray chanNames;
+        const Array<CallbackDetailsForChannel> channelInfo;
+        const int channels = 0;
+
+        HeapBlock<float*> tempBuffers;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Stream)
+    };
+
+    template <typename Callback>
+    static auto getWithDefault (const std::unique_ptr<Stream>& ptr, Callback&& callback)
+    {
+        return ptr != nullptr ? callback (*ptr) : decltype (callback (*ptr)) {};
+    }
+
+    template <typename Value>
+    static auto getWithDefault (const std::unique_ptr<Stream>& ptr, Value (Stream::* member))
+    {
+        return getWithDefault (ptr, [&] (Stream& s) { return s.*member; });
+    }
+
+    static int          getLatency          (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::latency); }
+    static int          getBitDepth         (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::bitDepth); }
+    static int          getChannels         (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::channels); }
+    static int          getNumChannelNames  (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::chanNames).size(); }
+    static String       getChannelNames     (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::chanNames).joinIntoString (" "); }
+    static BigInteger   getActiveChannels   (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, &Stream::activeChans); }
+    static float**      getTempBuffers      (const std::unique_ptr<Stream>& ptr) { return getWithDefault (ptr, [] (auto& s) { return s.tempBuffers.get(); }); }
+
+    //==============================================================================
+    static constexpr Float64 invalidSampleTime = std::numeric_limits<Float64>::max();
+
     CoreAudioIODevice& owner;
-    int inputLatency  = 0;
-    int outputLatency = 0;
     int bitDepth = 32;
     int xruns = 0;
-    BigInteger activeInputChans, activeOutputChans;
-    StringArray inChanNames, outChanNames;
     Array<double> sampleRates;
     Array<int> bufferSizes;
+    AudioDeviceID deviceID;
+    std::unique_ptr<Stream> inStream, outStream;
 
 private:
     class ScopedAudioDeviceIOProcID
@@ -954,24 +1014,17 @@ private:
         AudioDeviceIOProcID proc = {};
     };
 
+    //==============================================================================
     ScopedAudioDeviceIOProcID scopedProcID;
-
     CoreAudioTimeConversions timeConversions;
     AudioIODeviceCallback* callback = nullptr;
     CriticalSection callbackLock;
-    AudioDeviceID deviceID;
     bool audioDeviceStopPending = false;
     std::atomic<bool> playing { false };
     double sampleRate = 0;
     int bufferSize = 0;
     HeapBlock<float> audioBuffer;
-    int numInputChans  = 0;
-    int numOutputChans = 0;
     Atomic<int> callbacksAllowed { 1 };
-    const bool isInputDevice, isOutputDevice;
-
-    Array<CallbackDetailsForChannel> inputChannelInfo, outputChannelInfo;
-    HeapBlock<float*> tempInputBuffers, tempOutputBuffers;
 
     //==============================================================================
     void timerCallback() override
@@ -997,9 +1050,9 @@ private:
     static OSStatus audioIOProc (AudioDeviceID /*inDevice*/,
                                  const AudioTimeStamp* inNow,
                                  const AudioBufferList* inInputData,
-                                 const AudioTimeStamp* /*inInputTime*/,
+                                 [[maybe_unused]] const AudioTimeStamp* inInputTime,
                                  AudioBufferList* outOutputData,
-                                 const AudioTimeStamp* /*inOutputTime*/,
+                                 [[maybe_unused]] const AudioTimeStamp* inOutputTime,
                                  void* device)
     {
         static_cast<CoreAudioInternal*> (device)->audioCallback (inNow, inInputData, outOutputData);
@@ -1109,8 +1162,8 @@ public:
         AudioObjectRemovePropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal.get());
     }
 
-    StringArray getOutputChannelNames() override        { return internal->outChanNames; }
-    StringArray getInputChannelNames() override         { return internal->inChanNames; }
+    StringArray getOutputChannelNames() override        { return internal->outStream != nullptr ? internal->outStream->chanNames : StringArray(); }
+    StringArray getInputChannelNames() override         { return internal->inStream  != nullptr ? internal->inStream ->chanNames : StringArray(); }
 
     bool isOpen() override                              { return isOpen_; }
 
@@ -1121,6 +1174,8 @@ public:
     int getCurrentBitDepth() override                   { return internal->bitDepth; }
     int getCurrentBufferSizeSamples() override          { return internal->getBufferSize(); }
     int getXRunCount() const noexcept override          { return internal->xruns; }
+
+    int getIndexOfDevice (bool asInput) const           { return asInput ? inputIndex : outputIndex; }
 
     int getDefaultBufferSize() override
     {
@@ -1165,21 +1220,10 @@ public:
         internal->stop (false);
     }
 
-    BigInteger getActiveOutputChannels() const override     { return internal->activeOutputChans; }
-    BigInteger getActiveInputChannels() const override      { return internal->activeInputChans; }
-
-    int getOutputLatencyInSamples() override
-    {
-        // this seems like a good guess at getting the latency right - comparing
-        // this with a round-trip measurement, it gets it to within a few millisecs
-        // for the built-in mac soundcard
-        return internal->outputLatency;
-    }
-
-    int getInputLatencyInSamples() override
-    {
-        return internal->inputLatency;
-    }
+    BigInteger getActiveOutputChannels()      const override { return CoreAudioInternal::getActiveChannels (internal->outStream); }
+    BigInteger getActiveInputChannels()       const override { return CoreAudioInternal::getActiveChannels (internal->inStream); }
+    int getOutputLatencyInSamples()                 override { return CoreAudioInternal::getLatency (internal->outStream); }
+    int getInputLatencyInSamples()                  override { return CoreAudioInternal::getLatency (internal->inStream); }
 
     void start (AudioIODeviceCallback* callback) override
     {
@@ -1306,78 +1350,42 @@ class AudioIODeviceCombiner    : public AudioIODevice,
                                  private Timer
 {
 public:
-    AudioIODeviceCombiner (const String& deviceName, CoreAudioIODeviceType* deviceType)
+    AudioIODeviceCombiner (const String& deviceName, CoreAudioIODeviceType* deviceType,
+                           std::unique_ptr<CoreAudioIODevice>&& inputDevice,
+                           std::unique_ptr<CoreAudioIODevice>&& outputDevice)
         : AudioIODevice (deviceName, "CoreAudio"),
           Thread (deviceName),
-          owner (deviceType)
+          owner (deviceType),
+          currentSampleRate (inputDevice->getCurrentSampleRate()),
+          currentBufferSize (inputDevice->getCurrentBufferSizeSamples()),
+          inputWrapper  (*this, std::move (inputDevice),  true),
+          outputWrapper (*this, std::move (outputDevice), false)
     {
+        if (getAvailableSampleRates().isEmpty())
+            lastError = TRANS("The input and output devices don't share a common sample rate!");
     }
 
     ~AudioIODeviceCombiner() override
     {
         close();
-        devices.clear();
     }
 
-    void addDevice (std::unique_ptr<CoreAudioIODevice> device, bool useInputs, bool useOutputs)
-    {
-        jassert (device != nullptr);
-        jassert (! isOpen());
-        jassert (! device->isOpen());
-        auto* devicePtr = device.get();
+    auto getDeviceWrappers()       { return std::array<      DeviceWrapper*, 2> { { &inputWrapper, &outputWrapper } }; }
+    auto getDeviceWrappers() const { return std::array<const DeviceWrapper*, 2> { { &inputWrapper, &outputWrapper } }; }
 
-        devices.add (std::make_unique<DeviceWrapper> (*this, std::move (device), useInputs, useOutputs));
-
-        if (currentSampleRate == 0)
-            currentSampleRate = devicePtr->getCurrentSampleRate();
-
-        if (currentBufferSize == 0)
-            currentBufferSize = devicePtr->getCurrentBufferSizeSamples();
-
-        if (getAvailableSampleRates().isEmpty())
-            lastError = TRANS("The input and output devices don't share a common sample rate!");
-    }
-
-    Array<AudioIODevice*> getDevices() const
-    {
-        Array<AudioIODevice*> devs;
-
-        for (auto* d : devices)
-            devs.add (d->device.get());
-
-        return devs;
-    }
-
-    StringArray getOutputChannelNames() override
-    {
-        StringArray names;
-
-        for (auto* d : devices)
-            names.addArray (d->getOutputChannelNames());
-
-        names.appendNumbersToDuplicates (false, true);
-        return names;
-    }
-
-    StringArray getInputChannelNames() override
-    {
-        StringArray names;
-
-        for (auto* d : devices)
-            names.addArray (d->getInputChannelNames());
-
-        names.appendNumbersToDuplicates (false, true);
-        return names;
-    }
+    StringArray getOutputChannelNames() override        { return outputWrapper.getChannelNames(); }
+    StringArray getInputChannelNames()  override        { return inputWrapper .getChannelNames(); }
+    BigInteger getActiveOutputChannels() const override { return outputWrapper.getActiveChannels(); }
+    BigInteger getActiveInputChannels() const override  { return inputWrapper .getActiveChannels(); }
 
     Array<double> getAvailableSampleRates() override
     {
         Array<double> commonRates;
         bool first = true;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
         {
-            auto rates = d->device->getAvailableSampleRates();
+            auto rates = d->getAvailableSampleRates();
 
             if (first)
             {
@@ -1398,9 +1406,9 @@ public:
         Array<int> commonSizes;
         bool first = true;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
         {
-            auto sizes = d->device->getAvailableBufferSizes();
+            auto sizes = d->getAvailableBufferSizes();
 
             if (first)
             {
@@ -1425,8 +1433,8 @@ public:
     {
         int depth = 32;
 
-        for (auto* d : devices)
-            depth = jmin (depth, d->device->getCurrentBitDepth());
+        for (auto& d : getDeviceWrappers())
+            depth = jmin (depth, d->getCurrentBitDepth());
 
         return depth;
     }
@@ -1435,8 +1443,8 @@ public:
     {
         int size = 0;
 
-        for (auto* d : devices)
-            size = jmax (size, d->device->getDefaultBufferSize());
+        for (auto& d : getDeviceWrappers())
+            size = jmax (size, d->getDefaultBufferSize());
 
         return size;
     }
@@ -1471,7 +1479,7 @@ public:
         int totalInputChanIndex = 0, totalOutputChanIndex = 0;
         int chanIndex = 0;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
         {
             BigInteger ins (inputChannels >> totalInputChanIndex);
             BigInteger outs (outputChannels >> totalOutputChanIndex);
@@ -1512,7 +1520,7 @@ public:
         fifos.clear();
         active = false;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
             d->close();
     }
 
@@ -1525,7 +1533,7 @@ public:
         auto newSampleRate = sampleRateRequested;
         auto newBufferSize = bufferSizeRequested;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
         {
             auto deviceSampleRate = d->getCurrentSampleRate();
 
@@ -1534,8 +1542,8 @@ public:
                 if (! getAvailableSampleRates().contains (deviceSampleRate))
                     return;
 
-                for (auto* d2 : devices)
-                    if (d2 != d)
+                for (auto& d2 : getDeviceWrappers())
+                    if (&d2 != &d)
                         d2->setCurrentSampleRate (deviceSampleRate);
 
                 newSampleRate = deviceSampleRate;
@@ -1543,7 +1551,7 @@ public:
             }
         }
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
         {
             auto deviceBufferSize = d->getCurrentBufferSizeSamples();
 
@@ -1580,49 +1588,11 @@ public:
         startTimer (100);
     }
 
-    BigInteger getActiveOutputChannels() const override
-    {
-        BigInteger chans;
-        int start = 0;
-
-        for (auto* d : devices)
-        {
-            auto numChans = d->getOutputChannelNames().size();
-
-            if (numChans > 0)
-            {
-                chans |= (d->device->getActiveOutputChannels() << start);
-                start += numChans;
-            }
-        }
-
-        return chans;
-    }
-
-    BigInteger getActiveInputChannels() const override
-    {
-        BigInteger chans;
-        int start = 0;
-
-        for (auto* d : devices)
-        {
-            auto numChans = d->getInputChannelNames().size();
-
-            if (numChans > 0)
-            {
-                chans |= (d->device->getActiveInputChannels() << start);
-                start += numChans;
-            }
-        }
-
-        return chans;
-    }
-
     int getOutputLatencyInSamples() override
     {
         int lat = 0;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
             lat = jmax (lat, d->device->getOutputLatencyInSamples());
 
         return lat + currentBufferSize * 2;
@@ -1632,7 +1602,7 @@ public:
     {
         int lat = 0;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
             lat = jmax (lat, d->device->getInputLatencyInSamples());
 
         return lat + currentBufferSize * 2;
@@ -1654,7 +1624,7 @@ public:
             {
                 ScopedErrorForwarder forwarder (*this, newCallback);
 
-                for (auto* d : devices)
+                for (auto& d : getDeviceWrappers())
                     d->start();
 
                 if (! forwarder.encounteredError() && newCallback != nullptr)
@@ -1704,7 +1674,7 @@ private:
         Array<const float*> inputChans;
         Array<float*> outputChans;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
         {
             for (int j = 0; j < d->numInputChans; ++j)   inputChans.add  (buffer.getReadPointer  (d->inputIndex  + j));
             for (int j = 0; j < d->numOutputChans; ++j)  outputChans.add (buffer.getWritePointer (d->outputIndex + j));
@@ -1772,7 +1742,7 @@ private:
             std::swap (callback, lastCallback);
         }
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
             d->device->stopInternal();
 
         if (lastCallback != nullptr)
@@ -1786,7 +1756,7 @@ private:
 
     void reset()
     {
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
             d->reset();
     }
 
@@ -1796,7 +1766,7 @@ private:
 
     void readInput (AudioBuffer<float>& buffer, const int numSamples, const int blockSizeMs)
     {
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
             d->done = (d->numInputChans == 0 || d->isWaitingForInput);
 
         float totalWaitTimeMs = blockSizeMs * 5.0f;
@@ -1808,7 +1778,7 @@ private:
         {
             bool anySamplesRemaining = false;
 
-            for (auto* d : devices)
+            for (auto& d : getDeviceWrappers())
             {
                 if (! d->done)
                 {
@@ -1834,7 +1804,7 @@ private:
             waitTime *= 2.0f;
         }
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
             if (! d->done)
                 for (int i = 0; i < d->numInputChans; ++i)
                     buffer.clear (d->inputIndex + i, 0, numSamples);
@@ -1842,14 +1812,14 @@ private:
 
     void pushOutputData (AudioBuffer<float>& buffer, const int numSamples, const int blockSizeMs)
     {
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
             d->done = (d->numOutputChans == 0);
 
         for (int tries = 5;;)
         {
             bool anyRemaining = false;
 
-            for (auto* d : devices)
+            for (auto& d : getDeviceWrappers())
             {
                 if (! d->done)
                 {
@@ -1903,7 +1873,7 @@ private:
         currentSampleRate = newSampleRate;
         bool anySampleRateChanges = false;
 
-        for (auto* d : devices)
+        for (auto& d : getDeviceWrappers())
         {
             if (d->getCurrentSampleRate() != currentSampleRate)
             {
@@ -1923,11 +1893,11 @@ private:
     void handleAudioDeviceError (const String& errorMessage)   { shutdown (errorMessage.isNotEmpty() ? errorMessage : String ("unknown")); }
 
     //==============================================================================
-    struct DeviceWrapper  : private AudioIODeviceCallback
+    struct DeviceWrapper  : public AudioIODeviceCallback
     {
-        DeviceWrapper (AudioIODeviceCombiner& cd, std::unique_ptr<CoreAudioIODevice> d, bool useIns, bool useOuts)
+        DeviceWrapper (AudioIODeviceCombiner& cd, std::unique_ptr<CoreAudioIODevice> d, bool shouldBeInput)
             : owner (cd), device (std::move (d)),
-              useInputs (useIns), useOutputs (useOuts)
+              input (shouldBeInput)
         {
             device->setAsyncRestarter (&owner);
         }
@@ -1945,12 +1915,12 @@ private:
             inputFifo.reset();
             outputFifo.reset();
 
-            auto err = device->open (useInputs  ? inputChannels  : BigInteger(),
-                                     useOutputs ? outputChannels : BigInteger(),
+            auto err = device->open (input ? inputChannels : BigInteger(),
+                                     input ? BigInteger() : outputChannels,
                                      sampleRate, bufferSize);
 
-            numInputChans  = useInputs  ? device->getActiveInputChannels().countNumberOfSetBits()  : 0;
-            numOutputChans = useOutputs ? device->getActiveOutputChannels().countNumberOfSetBits() : 0;
+            numInputChans  = input ? device->getActiveInputChannels().countNumberOfSetBits() : 0;
+            numOutputChans = input ? 0 : device->getActiveOutputChannels().countNumberOfSetBits();
 
             isWaitingForInput = numInputChans > 0;
 
@@ -1977,8 +1947,8 @@ private:
             outputFifo.reset();
         }
 
-        StringArray getOutputChannelNames() const  { return useOutputs ? device->getOutputChannelNames() : StringArray(); }
-        StringArray getInputChannelNames()  const  { return useInputs  ? device->getInputChannelNames()  : StringArray(); }
+        StringArray getOutputChannelNames() const  { return input ? StringArray() : device->getOutputChannelNames(); }
+        StringArray getInputChannelNames()  const  { return input ? device->getInputChannelNames() : StringArray(); }
 
         bool isInputReady (int numSamples) const noexcept
         {
@@ -2120,14 +2090,27 @@ private:
         void audioDeviceStopped() override                            { owner.handleAudioDeviceStopped(); }
         void audioDeviceError (const String& errorMessage) override   { owner.handleAudioDeviceError (errorMessage); }
 
+        StringArray getChannelNames()                             const { return input ? device->getInputChannelNames()     : device->getOutputChannelNames(); }
+        BigInteger getActiveChannels()                            const { return input ? device->getActiveInputChannels()   : device->getActiveOutputChannels(); }
+        int getLatencyInSamples()                                 const { return input ? device->getInputLatencyInSamples() : device->getOutputLatencyInSamples(); }
+        int getIndexOfDevice (bool asInput)                       const { return device->getIndexOfDevice (asInput); }
+        double getCurrentSampleRate()                             const { return device->getCurrentSampleRate(); }
+        int getCurrentBufferSizeSamples()                         const { return device->getCurrentBufferSizeSamples(); }
+        Array<double> getAvailableSampleRates()                   const { return device->getAvailableSampleRates(); }
+        Array<int> getAvailableBufferSizes()                      const { return device->getAvailableBufferSizes(); }
+        int getCurrentBitDepth()                                  const { return device->getCurrentBitDepth(); }
+        int getDefaultBufferSize()                                const { return device->getDefaultBufferSize(); }
+
+        //==============================================================================
         AudioIODeviceCombiner& owner;
         std::unique_ptr<CoreAudioIODevice> device;
         int inputIndex = 0, numInputChans = 0, outputIndex = 0, numOutputChans = 0;
-        bool useInputs = false, useOutputs = false;
+        bool input;
         std::atomic<bool> isWaitingForInput { false };
         AbstractFifo inputFifo { 32 }, outputFifo { 32 };
         bool done = false;
 
+        //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeviceWrapper)
     };
 
@@ -2185,7 +2168,7 @@ private:
         bool error = false;
     };
 
-    OwnedArray<DeviceWrapper> devices;
+    DeviceWrapper inputWrapper, outputWrapper;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioIODeviceCombiner)
 };
@@ -2299,19 +2282,12 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         if (auto* d = dynamic_cast<CoreAudioIODevice*> (device))
-            return asInput ? d->inputIndex
-                           : d->outputIndex;
+            return d->getIndexOfDevice (asInput);
 
         if (auto* d = dynamic_cast<AudioIODeviceCombiner*> (device))
-        {
-            for (auto* dev : d->getDevices())
-            {
-                auto index = getIndexOfDevice (dev, asInput);
-
-                if (index >= 0)
+            for (auto* dev : d->getDeviceWrappers())
+                if (const auto index = dev->getIndexOfDevice (asInput); index >= 0)
                     return index;
-            }
-        }
 
         return -1;
     }
@@ -2347,9 +2323,7 @@ public:
         if (in  == nullptr)  return out.release();
         if (out == nullptr)  return in.release();
 
-        auto combo = std::make_unique<AudioIODeviceCombiner> (combinedName, this);
-        combo->addDevice (std::move (in),  true, false);
-        combo->addDevice (std::move (out), false, true);
+        auto combo = std::make_unique<AudioIODeviceCombiner> (combinedName, this, std::move (in), std::move (out));
         return combo.release();
     }
 
@@ -2374,10 +2348,9 @@ private:
     static int getNumChannels (AudioDeviceID deviceID, bool input)
     {
         int total = 0;
-        auto scope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
 
         if (auto bufList = audioObjectGetProperty<AudioBufferList> (deviceID, { kAudioDevicePropertyStreamConfiguration,
-                                                                                scope,
+                                                                                CoreAudioInternal::getScope (input),
                                                                                 juceAudioObjectPropertyElementMain }))
         {
             auto numStreams = (int) bufList->mNumberBuffers;
