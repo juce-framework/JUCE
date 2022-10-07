@@ -3299,7 +3299,7 @@ public:
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
-        if (! AudioProcessor::containsLayout (requested, configs))
+        if (! AudioProcessor::containsLayout (requestedLayout, configs))
             return kResultFalse;
        #endif
 
