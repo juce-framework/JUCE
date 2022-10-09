@@ -102,16 +102,16 @@ public:
 
     //==============================================================================
     /** Resets the value to 0. */
-    void clear() noexcept;
+    BigInteger& clear() noexcept;
 
     /** Clears a particular bit in the number. */
-    void clearBit (int bitNumber) noexcept;
+    BigInteger& clearBit (int bitNumber) noexcept;
 
     /** Sets a specified bit to 1. */
-    void setBit (int bitNumber);
+    BigInteger& setBit (int bitNumber);
 
     /** Sets or clears a specified bit. */
-    void setBit (int bitNumber, bool shouldBeSet);
+    BigInteger& setBit (int bitNumber, bool shouldBeSet);
 
     /** Sets a range of bits to be either on or off.
 
@@ -119,10 +119,10 @@ public:
         @param numBits      the number of bits to change
         @param shouldBeSet  whether to turn these bits on or off
     */
-    void setRange (int startBit, int numBits, bool shouldBeSet);
+    BigInteger& setRange (int startBit, int numBits, bool shouldBeSet);
 
     /** Inserts a bit an a given position, shifting up any bits above it. */
-    void insertBit (int bitNumber, bool shouldBeSet);
+    BigInteger& insertBit (int bitNumber, bool shouldBeSet);
 
     /** Returns a range of bits as a new BigInteger.
 
@@ -145,14 +145,14 @@ public:
         Copies the given integer onto a range of bits, starting at startBit,
         and using up to numBits of the available bits.
     */
-    void setBitRangeAsInt (int startBit, int numBits, uint32 valueToSet);
+    BigInteger& setBitRangeAsInt (int startBit, int numBits, uint32 valueToSet);
 
     /** Shifts a section of bits left or right.
 
         @param howManyBitsLeft  how far to move the bits (+ve numbers shift it left, -ve numbers shift it right).
         @param startBit         the first bit to affect - if this is > 0, only bits above that index will be affected.
     */
-    void shiftBits (int howManyBitsLeft, int startBit);
+    BigInteger& shiftBits (int howManyBitsLeft, int startBit);
 
     /** Returns the total number of set bits in the value. */
     int countNumberOfSetBits() const noexcept;
