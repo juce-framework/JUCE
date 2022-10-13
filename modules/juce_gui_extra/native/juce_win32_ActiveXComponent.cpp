@@ -251,6 +251,11 @@ public:
 
     ~Pimpl() override
     {
+        // If the wndproc of the ActiveX HWND isn't set back to it's original
+        // wndproc, then clientSite will leak when control is released
+        if (controlHWND != nullptr)
+            SetWindowLongPtr ((HWND) controlHWND, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
+
         if (control != nullptr)
         {
             control->Close (OLECLOSE_NOSAVE);

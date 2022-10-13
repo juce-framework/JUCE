@@ -60,7 +60,10 @@ public:
     ~Win32WebView() override
     {
         if (connectionPoint != nullptr)
+        {
             connectionPoint->Unadvise (adviseCookie);
+            connectionPoint->Release();
+        }
 
         if (browser != nullptr)
             browser->Release();
@@ -91,6 +94,8 @@ public:
                     handler->Release();
                 }
             }
+
+            connectionPointContainer->Release();
         }
 
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
