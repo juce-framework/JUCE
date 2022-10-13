@@ -36,7 +36,7 @@ namespace juce
 
     @tags{GUI}
 */
-class AnimatedAppComponent   : public Component,
+class JUCE_API  AnimatedAppComponent   : public Component,
                                private Timer
 {
 public:
