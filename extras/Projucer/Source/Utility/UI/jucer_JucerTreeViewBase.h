@@ -108,7 +108,6 @@ protected:
 
 private:
     class ItemSelectionTimer;
-    friend class ItemSelectionTimer;
     std::unique_ptr<Timer> delayedSelectionTimer;
 
     void invokeShowDocument();

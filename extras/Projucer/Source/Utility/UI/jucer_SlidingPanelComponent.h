@@ -58,7 +58,6 @@ public:
 
 private:
     struct DotButton;
-    friend struct DotButton;
 
     struct PageInfo
     {

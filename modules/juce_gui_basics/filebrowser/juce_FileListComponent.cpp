@@ -74,6 +74,7 @@ void FileListComponent::setSelectedFile (const File& f)
             {
                 fileWaitingToBeSelected = File();
 
+                updateContent();
                 selectRow (i);
                 return;
             }

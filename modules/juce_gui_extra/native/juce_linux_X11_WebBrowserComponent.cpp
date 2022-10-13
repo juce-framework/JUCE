@@ -117,6 +117,10 @@ public:
                                          (gpointer, const gchar*, GCallback, gpointer, GClosureNotify, GConnectFlags), gulong)
 
     //==============================================================================
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (gdk_set_allowed_backends, juce_gdk_set_allowed_backends,
+                                         (const char*), void)
+
+    //==============================================================================
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (WebKitSymbols)
 
 private:
@@ -182,18 +186,19 @@ private:
     bool loadGtkSymbols()
     {
         return loadSymbols (gtkLib,
-                            makeSymbolBinding (juce_gtk_init,                "gtk_init"),
-                            makeSymbolBinding (juce_gtk_plug_new,            "gtk_plug_new"),
-                            makeSymbolBinding (juce_gtk_scrolled_window_new, "gtk_scrolled_window_new"),
-                            makeSymbolBinding (juce_gtk_container_add,       "gtk_container_add"),
-                            makeSymbolBinding (juce_gtk_widget_show_all,     "gtk_widget_show_all"),
-                            makeSymbolBinding (juce_gtk_plug_get_id,         "gtk_plug_get_id"),
-                            makeSymbolBinding (juce_gtk_main,                "gtk_main"),
-                            makeSymbolBinding (juce_gtk_main_quit,           "gtk_main_quit"),
-                            makeSymbolBinding (juce_g_unix_fd_add,           "g_unix_fd_add"),
-                            makeSymbolBinding (juce_g_object_ref,            "g_object_ref"),
-                            makeSymbolBinding (juce_g_object_unref,          "g_object_unref"),
-                            makeSymbolBinding (juce_g_signal_connect_data,   "g_signal_connect_data"));
+                            makeSymbolBinding (juce_gtk_init,                 "gtk_init"),
+                            makeSymbolBinding (juce_gtk_plug_new,             "gtk_plug_new"),
+                            makeSymbolBinding (juce_gtk_scrolled_window_new,  "gtk_scrolled_window_new"),
+                            makeSymbolBinding (juce_gtk_container_add,        "gtk_container_add"),
+                            makeSymbolBinding (juce_gtk_widget_show_all,      "gtk_widget_show_all"),
+                            makeSymbolBinding (juce_gtk_plug_get_id,          "gtk_plug_get_id"),
+                            makeSymbolBinding (juce_gtk_main,                 "gtk_main"),
+                            makeSymbolBinding (juce_gtk_main_quit,            "gtk_main_quit"),
+                            makeSymbolBinding (juce_g_unix_fd_add,            "g_unix_fd_add"),
+                            makeSymbolBinding (juce_g_object_ref,             "g_object_ref"),
+                            makeSymbolBinding (juce_g_object_unref,           "g_object_unref"),
+                            makeSymbolBinding (juce_g_signal_connect_data,    "g_signal_connect_data"),
+                            makeSymbolBinding (juce_gdk_set_allowed_backends, "gdk_set_allowed_backends"));
     }
 
     //==============================================================================
@@ -347,6 +352,9 @@ public:
     int entry()
     {
         CommandReceiver::setBlocking (outChannel, true);
+
+        // webkit2gtk crashes when using the wayland backend embedded into an x11 window
+        WebKitSymbols::getInstance()->juce_gdk_set_allowed_backends ("x11");
 
         WebKitSymbols::getInstance()->juce_gtk_init (nullptr, nullptr);
 

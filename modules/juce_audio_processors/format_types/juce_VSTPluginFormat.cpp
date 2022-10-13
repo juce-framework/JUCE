@@ -66,9 +66,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
  #ifndef WM_APPCOMMAND
   #define WM_APPCOMMAND 0x0319
  #endif
-
- extern "C" void _fpreset();
- extern "C" void _clearfp();
 #elif ! JUCE_WINDOWS
  static void _fpreset() {}
  static void _clearfp() {}
@@ -707,7 +704,7 @@ struct ModuleHandle    : public ReferenceCountedObject
                 if (auto hGlob = LoadResource (dllModule, res))
                 {
                     auto* data = static_cast<const char*> (LockResource (hGlob));
-                    return String::fromUTF8 (data, SizeofResource (dllModule, res));
+                    return String::fromUTF8 (data, (int) SizeofResource (dllModule, res));
                 }
             }
         }
@@ -3139,10 +3136,10 @@ private:
         pluginWantsKeys = (dispatch (Vst2::effKeysRequired, 0, 0, nullptr, 0) == 0);
 
        #if JUCE_WINDOWS
-        originalWndProc = 0;
+        originalWndProc = nullptr;
         auto* pluginHWND = getPluginHWND();
 
-        if (pluginHWND == 0)
+        if (pluginHWND == nullptr)
         {
             isOpen = false;
             setSize (300, 150);
@@ -3182,7 +3179,7 @@ private:
                 {
                     ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
 
-                    SetWindowPos (pluginHWND, 0,
+                    SetWindowPos (pluginHWND, nullptr,
                                   0, 0, rw, rh,
                                   SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 
@@ -3252,11 +3249,11 @@ private:
             JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4244)
             auto* pluginHWND = getPluginHWND();
 
-            if (originalWndProc != 0 && pluginHWND != 0 && IsWindow (pluginHWND))
+            if (originalWndProc != nullptr && pluginHWND != nullptr && IsWindow (pluginHWND))
                 SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
             JUCE_END_IGNORE_WARNINGS_MSVC
 
-            originalWndProc = 0;
+            originalWndProc = nullptr;
            #elif JUCE_LINUX || JUCE_BSD
             pluginWindow = 0;
            #endif

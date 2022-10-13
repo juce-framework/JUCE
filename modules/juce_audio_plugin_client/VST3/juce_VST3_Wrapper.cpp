@@ -435,9 +435,11 @@ public:
         {
             info.id             = Vst::kRootUnitId;
             info.parentUnitId   = Vst::kNoParentUnitId;
-            info.programListId  = Vst::kNoProgramListId;
+            info.programListId  = getProgramListCount() > 0
+                                ? static_cast<Vst::ProgramListID> (programParamID)
+                                : Vst::kNoProgramListId;
 
-            toString128 (info.name, TRANS("Root Unit"));
+            toString128 (info.name, TRANS ("Root Unit"));
 
             return kResultTrue;
         }
@@ -471,7 +473,7 @@ public:
             info.id = static_cast<Vst::ProgramListID> (programParamID);
             info.programCount = static_cast<Steinberg::int32> (audioProcessor->getNumPrograms());
 
-            toString128 (info.name, TRANS("Factory Presets"));
+            toString128 (info.name, TRANS ("Factory Presets"));
 
             return kResultTrue;
         }
@@ -504,8 +506,8 @@ public:
 
     tresult PLUGIN_API getUnitByBus (Vst::MediaType, Vst::BusDirection, Steinberg::int32, Steinberg::int32, Vst::UnitID& unitId) override
     {
-        zerostruct (unitId);
-        return kNotImplemented;
+        unitId = Vst::kRootUnitId;
+        return kResultOk;
     }
 
     //==============================================================================
@@ -1161,18 +1163,18 @@ public:
         if (audioProcessor != nullptr)
             return audioProcessor->getUnitInfo (unitIndex, info);
 
+        jassertfalse;
         if (unitIndex == 0)
         {
             info.id             = Vst::kRootUnitId;
             info.parentUnitId   = Vst::kNoParentUnitId;
             info.programListId  = Vst::kNoProgramListId;
 
-            toString128 (info.name, TRANS("Root Unit"));
+            toString128 (info.name, TRANS ("Root Unit"));
 
             return kResultTrue;
         }
 
-        jassertfalse;
         zerostruct (info);
         return kResultFalse;
     }
@@ -1826,8 +1828,7 @@ private:
             // constructor, we don't have a host plugFrame, so
             // ContentWrapperComponent::resizeHostWindow() won't do anything, and the content
             // wrapper component will be left at the wrong size.
-            if (! approximatelyEqual (editorScaleFactor, owner->lastScaleFactorReceived))
-                setContentScaleFactor (owner->lastScaleFactorReceived);
+            applyScaleFactor (StoredScaleFactor{}.withInternal (owner->lastScaleFactorReceived));
 
             // Check the host scale factor *before* calling addToDesktop, so that the initial
             // window size during addToDesktop is correct for the current platform scale factor.
@@ -2030,35 +2031,28 @@ private:
             return kResultFalse;
         }
 
-        tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
+        tresult PLUGIN_API setContentScaleFactor (const Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
-            if (! approximatelyEqual ((float) factor, editorScaleFactor))
+            const auto scaleToApply = [&]
             {
                #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
                 // Cubase 10 only sends integer scale factors, so correct this for fractional scales
-                if (getHostType().type == PluginHostType::SteinbergCubase10)
-                {
-                    auto hostWindowScale = (Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getScaleFactorForWindow ((HWND) systemWindow);
+                if (getHostType().type != PluginHostType::SteinbergCubase10)
+                    return factor;
 
-                    if (hostWindowScale > 0.0 && ! approximatelyEqual (factor, hostWindowScale))
-                        factor = hostWindowScale;
-                }
+                const auto hostWindowScale = (Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getScaleFactorForWindow (static_cast<HWND> (systemWindow));
+
+                if (hostWindowScale <= 0.0 || approximatelyEqual (factor, hostWindowScale))
+                    return factor;
+
+                return hostWindowScale;
+               #else
+                return factor;
                #endif
+            }();
 
-                editorScaleFactor = (float) factor;
-
-                if (owner != nullptr)
-                    owner->lastScaleFactorReceived = editorScaleFactor;
-
-                if (component != nullptr)
-                {
-                   #if JUCE_LINUX || JUCE_BSD
-                    const MessageManagerLock mmLock;
-                   #endif
-                    component->setEditorScaleFactor (editorScaleFactor);
-                }
-            }
+            applyScaleFactor (scaleFactor.withHost (scaleToApply));
 
             return kResultTrue;
            #else
@@ -2143,7 +2137,7 @@ private:
 
                     pluginEditor->setHostContext (editorHostContext.get());
                    #if ! JUCE_MAC
-                    pluginEditor->setScaleFactor (owner.editorScaleFactor);
+                    pluginEditor->setScaleFactor (owner.scaleFactor.get());
                    #endif
 
                     addAndMakeVisible (pluginEditor.get());
@@ -2274,10 +2268,10 @@ private:
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
             void checkHostWindowScaleFactor()
             {
-                auto hostWindowScale = (float) getScaleFactorForWindow ((HWND) owner.systemWindow);
+                const auto estimatedScale = (float) getScaleFactorForWindow (static_cast<HWND> (owner.systemWindow));
 
-                if (hostWindowScale > 0.0 && ! approximatelyEqual (hostWindowScale, owner.editorScaleFactor))
-                    owner.setContentScaleFactor (hostWindowScale);
+                if (estimatedScale > 0.0)
+                    owner.applyScaleFactor (owner.scaleFactor.withInternal (estimatedScale));
             }
 
             void timerCallback() override
@@ -2361,7 +2355,38 @@ private:
 
         std::unique_ptr<Cubase10WindowResizeWorkaround> cubase10Workaround;
        #else
-        float editorScaleFactor = 1.0f;
+        class StoredScaleFactor
+        {
+        public:
+            StoredScaleFactor withHost     (float x) const { return withMember (*this, &StoredScaleFactor::host,     x); }
+            StoredScaleFactor withInternal (float x) const { return withMember (*this, &StoredScaleFactor::internal, x); }
+            float get() const { return host.value_or (internal); }
+
+        private:
+            std::optional<float> host;
+            float internal = 1.0f;
+        };
+
+        void applyScaleFactor (const StoredScaleFactor newFactor)
+        {
+            const auto previous = std::exchange (scaleFactor, newFactor).get();
+
+            if (previous == scaleFactor.get())
+                return;
+
+            if (owner != nullptr)
+                owner->lastScaleFactorReceived = scaleFactor.get();
+
+            if (component != nullptr)
+            {
+               #if JUCE_LINUX || JUCE_BSD
+                const MessageManagerLock mmLock;
+               #endif
+                component->setEditorScaleFactor (scaleFactor.get());
+            }
+        }
+
+        StoredScaleFactor scaleFactor;
 
         #if JUCE_WINDOWS
          WindowsHooks hooks;
@@ -3317,7 +3342,7 @@ public:
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
-        if (! AudioProcessor::containsLayout (requested, configs))
+        if (! AudioProcessor::containsLayout (requestedLayout, configs))
             return kResultFalse;
        #endif
 
