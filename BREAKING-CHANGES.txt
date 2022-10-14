@@ -6,6 +6,43 @@ develop
 
 Change
 ------
+The constructor of WebBrowserComponent now requires passing in an instance of
+a new Options class instead of a single option boolean. The
+WindowsWebView2WebBrowserComponent class was removed.
+
+Possible Issues
+---------------
+Code using the WebBrowserComponent's boolean parameter to indicate if a
+webpage should be unloaded when the component is hidden, will now fail to
+compile. Additionally, any code using the WindowsWebView2WebBrowserComponent
+class will fail to compile. Code relying on the default value of the
+WebBrowserComponent's constructor are not affected.
+
+Workaround
+----------
+Instead of passing in a single boolean to the WebBrowserComponent's
+constructor you should now set this option via tha
+WebBrowserComponent::Options::withKeepPageLoadedWhenBrowserIsHidden method.
+
+If you were previously using WindowsWebView2WebBrowserComponent to indicate to
+JUCE that you prefer JUCE to use Windows' Webview2 browser backend, you now do
+this by setting the WebBrowserComponent::Options::withBackend method. The
+WebView2Preferences can now be modified with the methods in
+WebBrowserComponent::Options::WinWebView2.
+
+Rationale
+---------
+The old API made adding further options to the WebBrowserComponent cumbersome
+especially as the WindowsWebView2WebBrowserComponent already had a parameter
+very similar to the above Options class, whereas the base class did not use
+such a parameter. Furthermore, using an option to specify the preferred
+browser backend is more intuitive then requiring the user to derive from a
+special class, especially if additional browser backends are added in the
+future.
+
+
+Change
+------
 The function AudioIODeviceCallback::audioDeviceIOCallback() was removed.
 
 Possible Issues
