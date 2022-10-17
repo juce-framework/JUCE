@@ -78,6 +78,9 @@ public:
     /** Returns the search path as a semicolon-separated list of directories. */
     String toString() const;
 
+    /** Returns the search paths, joined with the provided separator. */
+    String toStringWithSeparator (StringRef separator) const;
+
     //==============================================================================
     /** Adds a new directory to the search path.
 
