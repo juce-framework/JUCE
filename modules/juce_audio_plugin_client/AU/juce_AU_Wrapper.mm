@@ -2425,6 +2425,10 @@ AUSDK_COMPONENT_ENTRY (FACTORY_BASE_CLASS, JuceAU)
 #define JUCE_AU_ENTRY_POINT_NAME JUCE_CONCAT (JucePlugin_AUExportPrefix, Factory)
 
              extern "C" void* JUCE_AU_ENTRY_POINT_NAME (const AudioComponentDescription* inDesc);
-AUSDK_EXPORT extern "C" void* JUCE_AU_ENTRY_POINT_NAME (const AudioComponentDescription* inDesc) { return JuceAUFactory (inDesc); }
+AUSDK_EXPORT extern "C" void* JUCE_AU_ENTRY_POINT_NAME (const AudioComponentDescription* inDesc)
+{
+    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnit;
+    return JuceAUFactory (inDesc);
+}
 
 #endif
