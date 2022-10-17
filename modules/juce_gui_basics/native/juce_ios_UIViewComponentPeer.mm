@@ -87,7 +87,7 @@ static UIInterfaceOrientation getWindowOrientation()
     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 }
 
-namespace Orientations
+struct Orientations
 {
     static Desktop::DisplayOrientation convertToJuce (UIInterfaceOrientation orientation)
     {
@@ -119,8 +119,7 @@ namespace Orientations
         return UIInterfaceOrientationPortrait;
     }
 
-
-    static NSUInteger getSupportedOrientations()
+    static UIInterfaceOrientationMask getSupportedOrientations()
     {
         NSUInteger allowed = 0;
         auto& d = Desktop::getInstance();
@@ -132,7 +131,7 @@ namespace Orientations
 
         return allowed;
     }
-}
+};
 
 enum class MouseEventFlags
 {
@@ -1917,6 +1916,40 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
 
 void Desktop::allowedOrientationsChanged()
 {
+   #if defined (__IPHONE_16_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_0
+    if (@available (iOS 16.0, *))
+    {
+        UIApplication* sharedApplication = [UIApplication sharedApplication];
+
+        const NSUniquePtr<UIWindowSceneGeometryPreferences> preferences { [UIWindowSceneGeometryPreferencesIOS alloc] };
+        [preferences.get() initWithInterfaceOrientations: Orientations::getSupportedOrientations()];
+
+        for (UIScene* scene in [sharedApplication connectedScenes])
+        {
+            if ([scene isKindOfClass: [UIWindowScene class]])
+            {
+                [static_cast<UIWindowScene*> (scene) requestGeometryUpdateWithPreferences: preferences.get()
+                                                                             errorHandler: ^([[maybe_unused]] NSError* error)
+                 {
+                    // Failed to set the new set of supported orientations.
+                    // You may have hit this assertion because you're trying to restrict the supported orientations
+                    // of an app that allows multitasking (i.e. the app does not require fullscreen, and supports
+                    // all orientations).
+                    // iPadOS apps that allow multitasking must support all interface orientations,
+                    // so attempting to change the set of supported orientations will fail.
+                    // If you hit this assertion in an application that requires fullscreen, it may be because the
+                    // set of supported orientations declared in the app's plist doesn't have any entries in common
+                    // with the orientations passed to Desktop::setOrientationsEnabled.
+                    DBG (nsStringToJuce ([error localizedDescription]));
+                    jassertfalse;
+                }];
+            }
+        }
+
+        return;
+    }
+   #endif
+
     // if the current orientation isn't allowed anymore then switch orientations
     if (! isOrientationEnabled (getCurrentOrientation()))
     {
