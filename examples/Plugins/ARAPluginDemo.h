@@ -63,7 +63,7 @@ public:
     SharedTimeSliceThread()
         : TimeSliceThread (String (JucePlugin_Name) + " ARA Sample Reading Thread")
     {
-        startThread (7);  // Above default priority so playback is fluent, but below realtime
+        startThread (Priority::high);  // Above default priority so playback is fluent, but below realtime
     }
 };
 

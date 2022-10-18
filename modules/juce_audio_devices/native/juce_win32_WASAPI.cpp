@@ -1387,7 +1387,7 @@ public:
         shouldShutdown = false;
         deviceSampleRateChanged = false;
 
-        startThread (8);
+        startThread (Priority::high);
         Thread::sleep (5);
 
         if (inputDevice != nullptr && inputDevice->client != nullptr)

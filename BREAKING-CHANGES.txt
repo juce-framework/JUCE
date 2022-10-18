@@ -1,8 +1,36 @@
 JUCE breaking changes
 =====================
 
-develop
+Develop
 =======
+
+Change
+------
+The Thread::startThread (int) and Thread::setPriority (int) methods have been
+removed. A new Thread priority API has been introduced.
+
+Possible Issues
+---------------
+Code will fail to compile.
+
+Workaround
+----------
+Rather than using an integer thread priority you must instead use a value from
+the Thread::Priority enum. Thread::setPriority and Thread::getPriority should
+only be called from the target thread. To start a Thread with a realtime
+performance profile you must call startRealtimeThread.
+
+Rationale
+---------
+Operating systems are moving away from a specific thread priority and towards
+more granular control over which types of cores can be used and things like
+power throttling options. In particular, it is no longer possible to map a 0-10
+integer to a meaningful performance range on macOS ARM using the pthread
+interface. Using a more modern interface grants us access to more runtime
+options, but also changes how we can work with threads. The two most
+significant changes are that we cannot mix operations using the new and old
+interfaces, and that changing a priority using the new interface can only be
+done on the currently running thread.
 
 Change
 ------
@@ -39,7 +67,6 @@ such a parameter. Furthermore, using an option to specify the preferred
 browser backend is more intuitive then requiring the user to derive from a
 special class, especially if additional browser backends are added in the
 future.
-
 
 Change
 ------

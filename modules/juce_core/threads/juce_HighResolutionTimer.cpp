@@ -23,13 +23,96 @@
 namespace juce
 {
 
-HighResolutionTimer::HighResolutionTimer() : pimpl (new Pimpl (*this)) {}
-HighResolutionTimer::~HighResolutionTimer()                   { stopTimer(); }
+class HighResolutionTimer::Pimpl : private Thread
+{
+    using steady_clock = std::chrono::steady_clock;
+    using milliseconds = std::chrono::milliseconds;
 
-void HighResolutionTimer::startTimer (int periodMs)           { pimpl->start (jmax (1, periodMs)); }
-void HighResolutionTimer::stopTimer()                         { pimpl->stop(); }
+public:
+    explicit Pimpl (HighResolutionTimer& ownerRef)
+        : Thread ("HighResolutionTimerThread"),
+          owner (ownerRef)
+    {
+    }
 
-bool HighResolutionTimer::isTimerRunning() const noexcept     { return pimpl->periodMs != 0; }
-int HighResolutionTimer::getTimerInterval() const noexcept    { return pimpl->periodMs; }
+    using Thread::isThreadRunning;
+
+    void start (int periodMs)
+    {
+        {
+            const std::scoped_lock lk { mutex };
+            periodMillis = periodMs;
+            nextTickTime = steady_clock::now() + milliseconds (periodMillis);
+        }
+
+        if (! isThreadRunning())
+            startThread (Thread::Priority::high);
+    }
+
+    void stop()
+    {
+        {
+            const std::scoped_lock lk { mutex };
+            periodMillis = 0;
+        }
+
+        waitEvent.notify_one();
+
+        if (Thread::getCurrentThreadId() != getThreadId())
+            stopThread (-1);
+    }
+
+    int getPeriod() const
+    {
+        return periodMillis;
+    }
+
+private:
+    void run() override
+    {
+        for (;;)
+        {
+            {
+                std::unique_lock lk { mutex };
+
+                if (waitEvent.wait_until (lk, nextTickTime, [this] { return periodMillis == 0; }))
+                    break;
+
+                nextTickTime = steady_clock::now() + milliseconds (periodMillis);
+            }
+
+            owner.hiResTimerCallback();
+        }
+    }
+
+    HighResolutionTimer& owner;
+    std::atomic<int> periodMillis { 0 };
+    steady_clock::time_point nextTickTime;
+    std::mutex mutex;
+    std::condition_variable waitEvent;
+};
+
+HighResolutionTimer::HighResolutionTimer()
+    : pimpl (new Pimpl (*this))
+{
+}
+
+HighResolutionTimer::~HighResolutionTimer()
+{
+    stopTimer();
+}
+
+void HighResolutionTimer::startTimer (int periodMs)
+{
+    pimpl->start (jmax (1, periodMs));
+}
+
+void HighResolutionTimer::stopTimer()
+{
+    pimpl->stop();
+}
+
+bool HighResolutionTimer::isTimerRunning() const noexcept     { return getTimerInterval() != 0; }
+int HighResolutionTimer::getTimerInterval() const noexcept    { return pimpl->getPeriod(); }
 
 } // namespace juce

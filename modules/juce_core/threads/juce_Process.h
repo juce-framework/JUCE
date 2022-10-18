@@ -50,7 +50,7 @@ public:
         @param priority     the process priority, where
                             0=low, 1=normal, 2=high, 3=realtime
     */
-    static void JUCE_CALLTYPE setPriority (const ProcessPriority priority);
+    static void JUCE_CALLTYPE setPriority (ProcessPriority priority);
 
     /** Kills the current process immediately.
 

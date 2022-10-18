@@ -1403,7 +1403,7 @@ public:
           monitor (mon)
     {
         listeners.push_back (listener);
-        startThread (10);
+        startThread (Priority::highest);
     }
 
     ~VSyncThread() override

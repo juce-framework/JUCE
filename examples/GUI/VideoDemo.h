@@ -154,7 +154,7 @@ public:
         setOpaque (true);
 
         movieList.setDirectory (File::getSpecialLocation (File::userMoviesDirectory), true, true);
-        directoryThread.startThread (1);
+        directoryThread.startThread (Thread::Priority::background);
 
         fileTree.setTitle ("Files");
         fileTree.addListener (this);

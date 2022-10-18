@@ -164,8 +164,9 @@ public:
         @param threadStackSize  the size of the stack of each thread. If this value
                                 is zero then the default stack size of the OS will
                                 be used.
+        @param priority         the desired priority of each thread in the pool.
     */
-    ThreadPool (int numberOfThreads, size_t threadStackSize = 0);
+    ThreadPool (int numberOfThreads, size_t threadStackSize = 0, Thread::Priority priority = Thread::Priority::normal);
 
     /** Creates a thread pool with one thread per CPU core.
         Once you've created a pool, you can give it some jobs by calling addJob().
@@ -309,13 +310,6 @@ public:
     */
     StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
 
-    /** Changes the priority of all the threads.
-        This will call Thread::setPriority() for each thread in the pool.
-        May return false if for some reason the priority can't be changed.
-    */
-    bool setThreadPriorities (int newPriority);
-
-
 private:
     //==============================================================================
     Array<ThreadPoolJob*> jobs;
@@ -330,7 +324,6 @@ private:
     bool runNextJob (ThreadPoolThread&);
     ThreadPoolJob* pickNextJobToRun();
     void addToDeleteList (OwnedArray<ThreadPoolJob>&, ThreadPoolJob*) const;
-    void createThreads (int numThreads, size_t threadStackSize = 0);
     void stopThreads();
 
     // Note that this method has changed, and no longer has a parameter to indicate

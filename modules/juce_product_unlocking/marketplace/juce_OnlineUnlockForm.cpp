@@ -58,7 +58,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
             cancelButton->addListener (this);
         }
 
-        startThread (4);
+        startThread (Priority::normal);
     }
 
     ~OverlayComp() override
