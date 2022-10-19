@@ -1650,15 +1650,11 @@ int TextEditor::getCharIndexForPoint (const Point<int> point) const
 
 void TextEditor::insertTextAtCaret (const String& t)
 {
-    String newText (inputFilter != nullptr ? inputFilter->filterNewText (*this, t) : t);
-
-    if (isMultiLine())
-        newText = newText.replace ("\r\n", "\n");
-    else
-        newText = newText.replaceCharacters ("\r\n", "  ");
-
-    const int insertIndex = selection.getStart();
-    const int newCaretPos = insertIndex + newText.length();
+    const auto filtered = inputFilter != nullptr ? inputFilter->filterNewText (*this, t) : t;
+    const auto newText = isMultiLine() ? filtered.replace ("\r\n", "\n")
+                                       : filtered.replaceCharacters ("\r\n", "  ");
+    const auto insertIndex = selection.getStart();
+    const auto newCaretPos = insertIndex + newText.length();
 
     remove (selection, getUndoManager(),
             newText.isNotEmpty() ? newCaretPos - 1 : newCaretPos);
@@ -2268,24 +2264,24 @@ void TextEditor::handleCommandMessage (const int commandId)
     case TextEditorDefs::textChangeMessageId:
         listeners.callChecked (checker, [this] (Listener& l) { l.textEditorTextChanged (*this); });
 
-        if (! checker.shouldBailOut() && onTextChange != nullptr)
-            onTextChange();
+        if (! checker.shouldBailOut())
+            NullCheckedInvocation::invoke (onTextChange);
 
         break;
 
     case TextEditorDefs::returnKeyMessageId:
         listeners.callChecked (checker, [this] (Listener& l) { l.textEditorReturnKeyPressed (*this); });
 
-        if (! checker.shouldBailOut() && onReturnKey != nullptr)
-            onReturnKey();
+        if (! checker.shouldBailOut())
+            NullCheckedInvocation::invoke (onReturnKey);
 
         break;
 
     case TextEditorDefs::escapeKeyMessageId:
         listeners.callChecked (checker, [this] (Listener& l) { l.textEditorEscapeKeyPressed (*this); });
 
-        if (! checker.shouldBailOut() && onEscapeKey != nullptr)
-            onEscapeKey();
+        if (! checker.shouldBailOut())
+            NullCheckedInvocation::invoke (onEscapeKey);
 
         break;
 
@@ -2293,8 +2289,8 @@ void TextEditor::handleCommandMessage (const int commandId)
         updateValueFromText();
         listeners.callChecked (checker, [this] (Listener& l) { l.textEditorFocusLost (*this); });
 
-        if (! checker.shouldBailOut() && onFocusLost != nullptr)
-            onFocusLost();
+        if (! checker.shouldBailOut())
+            NullCheckedInvocation::invoke (onFocusLost);
 
         break;
 
