@@ -58,10 +58,14 @@ public:
     using Ref = std::unique_ptr<ManagedAudioBufferList, Deleter>;
 
     //==============================================================================
-    static auto create (std::size_t numBuffers)
+    static Ref create (std::size_t numBuffers)
     {
-        std::unique_ptr<std::byte[]> storage (new std::byte[storageSizeForNumBuffers (numBuffers)]);
-        return Ref { new (storage.release()) ManagedAudioBufferList (numBuffers) };
+        static_assert (alignof (ManagedAudioBufferList) <= alignof (std::max_align_t));
+
+        if (std::unique_ptr<std::byte[]> storage { new std::byte[storageSizeForNumBuffers (numBuffers)] })
+            return Ref { new (storage.release()) ManagedAudioBufferList (numBuffers) };
+
+        return nullptr;
     }
 
     //==============================================================================
@@ -2100,26 +2104,27 @@ public:
                                                                                                  kAudioObjectPropertyScopeWildcard,
                                                                                                  juceAudioObjectPropertyElementMain });
 
-        for (auto audioDevice : audioDevices)
+        for (const auto audioDevice : audioDevices)
         {
-            if (auto name = audioObjectGetProperties<char> (audioDevice, { kAudioDevicePropertyDeviceName,
-                                                                           kAudioObjectPropertyScopeWildcard,
-                                                                           juceAudioObjectPropertyElementMain }); ! name.empty())
+            if (const auto optionalName = audioObjectGetProperty<CFStringRef> (audioDevice, { kAudioDevicePropertyDeviceNameCFString,
+                                                                                              kAudioObjectPropertyScopeWildcard,
+                                                                                              juceAudioObjectPropertyElementMain }))
             {
-                auto nameString = String::fromUTF8 (name.data(), (int) strlen (name.data()));
-                auto numIns  = getNumChannels (audioDevice, true);
-                auto numOuts = getNumChannels (audioDevice, false);
-
-                if (numIns > 0)
+                if (const CFUniquePtr<CFStringRef> name { *optionalName })
                 {
-                    inputDeviceNames.add (nameString);
-                    inputIds.add (audioDevice);
-                }
+                    const auto nameString = String::fromCFString (name.get());
 
-                if (numOuts > 0)
-                {
-                    outputDeviceNames.add (nameString);
-                    outputIds.add (audioDevice);
+                    if (const auto numIns  = getNumChannels (audioDevice, true); numIns > 0)
+                    {
+                        inputDeviceNames.add (nameString);
+                        inputIds.add (audioDevice);
+                    }
+
+                    if (const auto numOuts = getNumChannels (audioDevice, false); numOuts > 0)
+                    {
+                        outputDeviceNames.add (nameString);
+                        outputIds.add (audioDevice);
+                    }
                 }
             }
         }
