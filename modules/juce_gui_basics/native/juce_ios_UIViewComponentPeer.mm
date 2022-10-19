@@ -1851,6 +1851,8 @@ BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const Str
 //==============================================================================
 void UIViewComponentPeer::displayLinkCallback()
 {
+    vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
+
     if (deferredRepaints.isEmpty())
         return;
 
