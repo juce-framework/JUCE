@@ -2025,8 +2025,10 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
                 sendSuperclassMessage<void> (self, @selector (keyUp:), ev);
         });
 
-        addMethod (@selector (insertText:), [] (id self, SEL, id aString)
+        addMethod (@selector (insertText:replacementRange:), [] (id self, SEL, id aString, [[maybe_unused]] NSRange replacementRange)
         {
+            jassert (std::tuple (replacementRange.location, replacementRange.length) == std::tuple (NSNotFound, 0));
+
             // This commits multi-byte text when return is pressed, or after every keypress for western keyboards
             if (auto* owner = getOwner (self))
             {
@@ -2047,8 +2049,10 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 
         addMethod (@selector (doCommandBySelector:), [] (id, SEL, SEL) {});
 
-        addMethod (@selector (setMarkedText:selectedRange:), [] (id self, SEL, id aString, NSRange)
+        addMethod (@selector (setMarkedText:selectedRange:replacementRange:), [] (id self, SEL, id aString, NSRange, [[maybe_unused]] NSRange replacementRange)
         {
+            jassert (std::tuple (replacementRange.location, replacementRange.length) == std::tuple (NSNotFound, 0));
+
             if (auto* owner = getOwner (self))
             {
                 owner->stringBeingComposed = nsStringToJuce ([aString isKindOfClass: [NSAttributedString class]]
@@ -2087,21 +2091,20 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
             return owner != nullptr && owner->stringBeingComposed.isNotEmpty();
         });
 
-        addMethod (@selector (conversationIdentifier), [] (id self, SEL)
+        addMethod (@selector (attributedSubstringForProposedRange:actualRange:), [] (id self, SEL, NSRange theRange, NSRangePointer actualRange) -> NSAttributedString*
         {
-            return (long) (pointer_sized_int) self;
-        });
+            jassert (theRange.location != NSNotFound);
 
-        addMethod (@selector (attributedSubstringFromRange:), [] (id self, SEL, NSRange theRange) -> NSAttributedString*
-        {
             if (auto* owner = getOwner (self))
             {
                 if (auto* target = owner->findCurrentTextInputTarget())
                 {
-                    Range<int> r ((int) theRange.location,
-                                  (int) (theRange.location + theRange.length));
+                    const auto clamped = Range<int> { 0, target->getTotalNumChars() }.constrainRange (nsRangeToJuce (theRange));
 
-                    return [[[NSAttributedString alloc] initWithString: juceStringToNS (target->getTextInRange (r))] autorelease];
+                    if (actualRange != nullptr)
+                        *actualRange = juceRangeToNS (clamped);
+
+                    return [[[NSAttributedString alloc] initWithString: juceStringToNS (target->getTextInRange (clamped))] autorelease];
                 }
             }
 
@@ -2134,11 +2137,30 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
             return NSMakeRange (NSNotFound, 0);
         });
 
-        addMethod (@selector (firstRectForCharacterRange:), [] (id self, SEL, NSRange)
+        addMethod (@selector (firstRectForCharacterRange:actualRange:), [] (id self, SEL, NSRange range, NSRangePointer actualRange)
         {
             if (auto* owner = getOwner (self))
-                if (auto* comp = dynamic_cast<Component*> (owner->findCurrentTextInputTarget()))
-                    return flippedScreenRect (makeNSRect (comp->getScreenBounds()));
+            {
+                if (auto* target = owner->findCurrentTextInputTarget())
+                {
+                    if (auto* comp = dynamic_cast<Component*> (target))
+                    {
+                        // When composing, 'range' seems to be relative to the marked (selected) range
+                        const auto codePointRange = range.length == 0 ? Range<int>::emptyRange (target->getCaretPosition())
+                                                                      : nsRangeToJuce (range) + target->getHighlightedRegion().getStart();
+                        const auto clamped = Range<int> { 0, target->getTotalNumChars() }.constrainRange (codePointRange);
+
+                        if (actualRange != nullptr)
+                            *actualRange = juceRangeToNS (clamped);
+
+                        const auto rect = codePointRange.isEmpty() ? target->getCaretRectangleForCharIndex (codePointRange.getStart())
+                                                                   : target->getTextBounds (codePointRange).getRectangle (0);
+                        const auto areaOnDesktop = comp->localAreaToGlobal (rect);
+
+                        return flippedScreenRect (makeNSRect (ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop)));
+                    }
+                }
+            }
 
             return NSZeroRect;
         });
@@ -2201,7 +2223,7 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
             return sendSuperclassMessage<BOOL> (self, s, event);
         });
 
-        addProtocol (@protocol (NSTextInput));
+        addProtocol (@protocol (NSTextInputClient));
 
         registerClass();
     }
