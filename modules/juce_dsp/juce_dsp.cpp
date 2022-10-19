@@ -79,13 +79,13 @@
 #include "widgets/juce_Chorus.cpp"
 
 #if JUCE_USE_SIMD
- #if defined(__i386__) || defined(__amd64__) || defined(_M_X64) || defined(_X86_) || defined(_M_IX86)
+ #if JUCE_INTEL
   #ifdef __AVX2__
    #include "native/juce_avx_SIMDNativeOps.cpp"
   #else
    #include "native/juce_sse_SIMDNativeOps.cpp"
   #endif
- #elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__)
+ #elif JUCE_ARM
   #include "native/juce_neon_SIMDNativeOps.cpp"
  #else
   #error "SIMD register support not implemented for this platform"

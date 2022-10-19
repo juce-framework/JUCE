@@ -74,7 +74,9 @@
   #include <immintrin.h>
  #endif
 
-#elif defined (__ARM_NEON__) || defined (__ARM_NEON) || defined (__arm64__) || defined (__aarch64__)
+// it's ok to check for _M_ARM below as this is only defined on Windows for Arm 32-bit
+// which has a minimum requirement of armv7, which supports neon.
+#elif defined (__ARM_NEON__) || defined (__ARM_NEON) || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM) || defined (_M_ARM64)
 
  #ifndef JUCE_USE_SIMD
   #define JUCE_USE_SIMD 1
@@ -227,7 +229,7 @@ namespace juce
   #else
    #include "native/juce_sse_SIMDNativeOps.h"
   #endif
- #elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__)
+ #elif JUCE_ARM
   #include "native/juce_neon_SIMDNativeOps.h"
  #else
   #error "SIMD register support not implemented for this platform"

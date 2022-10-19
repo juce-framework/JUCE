@@ -171,7 +171,7 @@ public:
               multiProcessorCompilationValue (config, Ids::multiProcessorCompilation,  getUndoManager(), true),
               intermediatesPathValue         (config, Ids::intermediatesPath,          getUndoManager()),
               characterSetValue              (config, Ids::characterSet,               getUndoManager()),
-              architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), get64BitArchName()),
+              architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), getIntel64BitArchName()),
               fastMathValue                  (config, Ids::fastMath,                   getUndoManager()),
               debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), isDebug() ? "ProgramDatabase" : "None"),
               pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
@@ -201,8 +201,10 @@ public:
         String getUnityPluginBinaryLocationString() const { return unityPluginBinaryLocation.get(); }
         String getIntermediatesPathString() const         { return intermediatesPathValue.get(); }
         String getCharacterSetString() const              { return characterSetValue.get(); }
-        String get64BitArchName() const                   { return "x64"; }
-        String get32BitArchName() const                   { return "Win32"; }
+        String getIntel64BitArchName() const              { return "x64"; }
+        String getIntel32BitArchName() const              { return "Win32"; }
+        String getArm64BitArchName() const                { return "ARM64"; }
+        String getArm32BitArchName() const                { return "ARM"; }
         String getArchitectureString() const              { return architectureTypeValue.get(); }
         String getDebugInformationFormatString() const    { return debugInformationFormatValue.get(); }
 
@@ -211,14 +213,13 @@ public:
         bool shouldLinkIncremental() const                { return enableIncrementalLinkingValue.get(); }
         bool isUsingRuntimeLibDLL() const                 { return useRuntimeLibDLLValue.get(); }
         bool shouldUseMultiProcessorCompilation() const   { return multiProcessorCompilationValue.get(); }
-        bool is64Bit() const                              { return getArchitectureString() == get64BitArchName(); }
         bool isFastMathEnabled() const                    { return fastMathValue.get(); }
         bool isPluginBinaryCopyStepEnabled() const        { return pluginBinaryCopyStepValue.get(); }
 
         //==============================================================================
         String createMSVCConfigName() const
         {
-            return getName() + "|" + (is64Bit() ? "x64" : "Win32");
+            return getName() + "|" + getArchitectureString();
         }
 
         String getOutputFilename (const String& suffix,
@@ -245,10 +246,9 @@ public:
                 addVisualStudioPluginInstallPathProperties (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
-                                                    { get32BitArchName(), get64BitArchName() },
-                                                    { get32BitArchName(), get64BitArchName() }),
-                       "Whether to use a 32-bit or 64-bit architecture.");
-
+                                                    { getIntel32BitArchName(), getIntel64BitArchName(), getArm32BitArchName(), getArm64BitArchName() },
+                                                    { getIntel32BitArchName(), getIntel64BitArchName(), getArm32BitArchName(), getArm64BitArchName() }),
+                       "Which Windows architecture to use.");
 
             props.add (new ChoicePropertyComponentWithEnablement (debugInformationFormatValue,
                                                                   isDebug() ? isDebugValue : generateDebugSymbolsValue,
@@ -384,13 +384,26 @@ public:
 
         void setPluginBinaryCopyLocationDefaults()
         {
-            vstBinaryLocation.setDefault  ((is64Bit() ? "%ProgramW6432%" : "%programfiles(x86)%") + String ("\\Steinberg\\Vstplugins"));
+            const auto [programsFolderPath, commonsFolderPath] = [&]() -> std::tuple<String, String>
+            {
+                static const std::map<String, std::tuple<String, String>> options
+                {
+                    { "Win32", { "%programfiles(x86)%", "%CommonProgramFiles(x86)%" } },
+                    { "x64",   { "%ProgramW6432%",      "%CommonProgramW6432%"      } },
+                    { "ARM",   { "%programfiles(arm)%", "%CommonProgramFiles(arm)%" } },
+                    { "ARM64", { "%ProgramW6432%",      "%CommonProgramW6432%"      } }
+                };
 
-            auto prefix = is64Bit() ? "%CommonProgramW6432%"
-                                    : "%CommonProgramFiles(x86)%";
+                if (const auto iter = options.find (getArchitectureString()); iter != options.cend())
+                    return iter->second;
 
-            vst3BinaryLocation.setDefault (prefix + String ("\\VST3"));
-            aaxBinaryLocation.setDefault  (prefix + String ("\\Avid\\Audio\\Plug-Ins"));
+                jassertfalse;
+                return { "%programfiles%", "%CommonProgramFiles%" };
+            }();
+
+            vstBinaryLocation.setDefault  (programsFolderPath + String ("\\Steinberg\\Vstplugins"));
+            vst3BinaryLocation.setDefault (commonsFolderPath + String ("\\VST3"));
+            aaxBinaryLocation.setDefault  (commonsFolderPath + String ("\\Avid\\Audio\\Plug-Ins"));
             lv2BinaryLocation.setDefault  ("%APPDATA%\\LV2");
         }
 
@@ -434,8 +447,7 @@ public:
                     auto* e = configsGroup->createNewChildElement ("ProjectConfiguration");
                     e->setAttribute ("Include", config.createMSVCConfigName());
                     e->createNewChildElement ("Configuration")->addTextElement (config.getName());
-                    e->createNewChildElement ("Platform")->addTextElement (config.is64Bit() ? config.get64BitArchName()
-                                                                                            : config.get32BitArchName());
+                    e->createNewChildElement ("Platform")->addTextElement (config.getArchitectureString());
                 }
             }
 
@@ -662,7 +674,7 @@ public:
                     link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (pdbFilename);
                     link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp || type == LV2TurtleProgram ? "Console" : "Windows");
 
-                    if (! config.is64Bit())
+                    if (config.getArchitectureString() == "Win32")
                         link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
                     if (isUsingEditAndContinue)
@@ -727,7 +739,7 @@ public:
                                                                build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
                 }
 
-                if (getTargetFileType() == staticLibrary && ! config.is64Bit())
+                if (getTargetFileType() == staticLibrary && config.getArchitectureString() == "Win32")
                 {
                     auto* lib = group->createNewChildElement ("Lib");
                     lib->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
@@ -1207,7 +1219,7 @@ public:
                 auto outputFilename = config.getOutputFilename (".aaxplugin", true, type);
                 auto bundleDir      = getOwner().getOutDirFile (config, outputFilename);
                 auto bundleContents = bundleDir + "\\Contents";
-                auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
+                auto archDir        = bundleContents + String ("\\") + config.getArchitectureString();
                 auto executablePath = archDir + String ("\\") + outputFilename;
 
                 auto pkgScript = String ("copy /Y ") + getOutputFilePath (config).quoted() + String (" ") + executablePath.quoted() + String ("\r\ncall ")
@@ -1285,7 +1297,7 @@ public:
 
                 auto bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false, type));
                 auto bundleContents = bundleDir + "\\Contents";
-                auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
+                auto archDir        = bundleContents + String ("\\") + config.getArchitectureString();
 
                 for (auto& folder : StringArray { bundleDir, bundleContents, archDir })
                     script += String ("if not exist \"") + folder + String ("\" mkdir \"") + folder + String ("\"\r\n");
