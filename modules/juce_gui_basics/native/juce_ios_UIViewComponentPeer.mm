@@ -1926,7 +1926,7 @@ void Desktop::allowedOrientationsChanged()
     {
         UIApplication* sharedApplication = [UIApplication sharedApplication];
 
-        const NSUniquePtr<UIWindowSceneGeometryPreferences> preferences { [UIWindowSceneGeometryPreferencesIOS alloc] };
+        const NSUniquePtr<UIWindowSceneGeometryPreferencesIOS> preferences { [UIWindowSceneGeometryPreferencesIOS alloc] };
         [preferences.get() initWithInterfaceOrientations: Orientations::getSupportedOrientations()];
 
         for (UIScene* scene in [sharedApplication connectedScenes])
