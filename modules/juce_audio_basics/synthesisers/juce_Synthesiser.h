@@ -627,6 +627,8 @@ private:
     bool subBlockSubdivisionIsStrict = false;
     bool shouldStealNotes = true;
     BigInteger sustainPedalsDown;
+    mutable CriticalSection stealLock;
+    mutable Array<SynthesiserVoice*> usableVoicesToStealArray;
 
     template <typename floatType>
     void processNextBlock (AudioBuffer<floatType>&, const MidiBuffer&, int startSample, int numSamples);
