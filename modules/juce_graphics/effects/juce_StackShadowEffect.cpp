@@ -279,7 +279,7 @@ void StackShadow::drawOuterShadowForPath (Graphics& g, const Path& path) const
                                              area.getCentreX(),
                                              area.getCentreY());
 
-            g2.fillPath (path, t.followedBy (s));
+            g2.fillPath (path, s.followedBy (t));
         }
 
         applyStackBlur (renderedPath, blur);
@@ -313,7 +313,7 @@ void StackShadow::drawInnerShadowForPath (Graphics& g, const Path& path) const
                                              area.getCentreX(),
                                              area.getCentreY());
 
-            g2.strokePath (path, PathStrokeType (static_cast<float> (2 * spread + 1)), t.followedBy(s));
+            g2.strokePath (path, PathStrokeType (static_cast<float> (2 * spread + 1)), s.followedBy(t));
         }
 
         applyStackBlur (renderedPath, blur);
