@@ -1326,9 +1326,19 @@ private:
     At the top of the audio callback, RenderSequenceExchange::updateAudioThreadState will
     attempt to install the most-recently-baked graph, if there's one waiting.
 */
-class RenderSequenceExchange
+class RenderSequenceExchange : private Timer
 {
 public:
+    RenderSequenceExchange()
+    {
+        startTimer (500);
+    }
+
+    ~RenderSequenceExchange() override
+    {
+        stopTimer();
+    }
+
     void set (std::unique_ptr<RenderSequence>&& next)
     {
         const SpinLock::ScopedLockType lock (mutex);
@@ -1353,6 +1363,14 @@ public:
     RenderSequence* getAudioThreadState() const { return audioThreadState.get(); }
 
 private:
+    void timerCallback() override
+    {
+        const SpinLock::ScopedLockType lock (mutex);
+
+        if (! isNew)
+            mainThreadState.reset();
+    }
+
     SpinLock mutex;
     std::unique_ptr<RenderSequence> mainThreadState, audioThreadState;
     bool isNew = false;
