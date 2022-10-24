@@ -25,8 +25,6 @@
 
 #if JUCE_LINUX || JUCE_BSD
 
-#include <thread>
-
 namespace juce
 {
 
@@ -34,15 +32,15 @@ namespace juce
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
 /** @internal */
-class MessageThread
+class MessageThread : public Thread
 {
 public:
-    MessageThread()
+    MessageThread() : Thread ("JUCE Plugin Message Thread")
     {
         start();
     }
 
-    ~MessageThread()
+    ~MessageThread() override
     {
         MessageManager::getInstance()->stopDispatchLoop();
         stop();
@@ -50,51 +48,37 @@ public:
 
     void start()
     {
-        if (isRunning())
-            stop();
+        startThread (Priority::high);
 
-        shouldExit = false;
-
-        thread = std::thread { [this]
-        {
-            Thread::setCurrentThreadPriority (7);
-            Thread::setCurrentThreadName ("JUCE Plugin Message Thread");
-
-            MessageManager::getInstance()->setCurrentThreadAsMessageThread();
-            XWindowSystem::getInstance();
-
-            threadInitialised.signal();
-
-            for (;;)
-            {
-                if (! dispatchNextMessageOnSystemQueue (true))
-                    Thread::sleep (1);
-
-                if (shouldExit)
-                    break;
-            }
-        } };
-
-        threadInitialised.wait();
+        // Wait for setCurrentThreadAsMessageThread() and getInstance to be executed
+        // before leaving this method
+        threadInitialised.wait (10000);
     }
 
     void stop()
     {
-        if (! isRunning())
-            return;
-
-        shouldExit = true;
-        thread.join();
+        signalThreadShouldExit();
+        stopThread (-1);
     }
 
-    bool isRunning() const noexcept  { return thread.joinable(); }
+    bool isRunning() const noexcept  { return isThreadRunning(); }
+
+    void run() override
+    {
+        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+        XWindowSystem::getInstance();
+
+        threadInitialised.signal();
+
+        while (! threadShouldExit())
+        {
+            if (! dispatchNextMessageOnSystemQueue (true))
+                Thread::sleep (1);
+        }
+    }
 
 private:
     WaitableEvent threadInitialised;
-    std::thread thread;
-
-    std::atomic<bool> shouldExit { false };
-
     JUCE_DECLARE_NON_MOVEABLE (MessageThread)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageThread)
 };

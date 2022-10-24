@@ -185,11 +185,3 @@
   #include "native/juce_android_WebBrowserComponent.cpp"
  #endif
 #endif
-
-//==============================================================================
-#if ! JUCE_WINDOWS && JUCE_WEB_BROWSER
- juce::WebBrowserComponent::WebBrowserComponent (ConstructWithoutPimpl) {}
- juce::WindowsWebView2WebBrowserComponent::WindowsWebView2WebBrowserComponent (bool unloadWhenHidden,
-                                                                               const WebView2Preferences&)
-     : WebBrowserComponent (unloadWhenHidden) {}
-#endif

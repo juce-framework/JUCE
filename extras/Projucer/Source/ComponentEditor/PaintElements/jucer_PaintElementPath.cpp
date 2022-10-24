@@ -1433,9 +1433,9 @@ PathPoint PathPoint::withChangedPointType (const Path::Iterator::PathElementType
             p.pos [numPoints - 1] = p.pos [oldNumPoints - 1];
             p.pos [numPoints - 1].getRectangleDouble (x, y, w, h, parentArea, owner->getDocument()->getComponentLayout());
 
-            const int index = owner->points.indexOf (this);
+            const int index = owner->indexOfPoint (this);
 
-            if (PathPoint* lastPoint = owner->points [index - 1])
+            if (PathPoint* lastPoint = owner->getPoint (index - 1))
             {
                 lastPoint->pos [lastPoint->getNumPoints() - 1]
                             .getRectangleDouble (lastX, lastY, w, h, parentArea, owner->getDocument()->getComponentLayout());
@@ -1486,7 +1486,7 @@ void PathPoint::getEditableProperties (Array<PropertyComponent*>& props, bool mu
     if (multipleSelected)
         return;
 
-    auto index = owner->points.indexOf (this);
+    auto index = owner->indexOfPoint (this);
     jassert (index >= 0);
 
     switch (type)
@@ -1537,7 +1537,7 @@ void PathPoint::getEditableProperties (Array<PropertyComponent*>& props, bool mu
 
 void PathPoint::deleteFromPath()
 {
-    owner->deletePoint (owner->points.indexOf (this), true);
+    owner->deletePoint (owner->indexOfPoint (this), true);
 }
 
 //==============================================================================
@@ -1554,7 +1554,7 @@ PathPointComponent::PathPointComponent (PaintElementPath* const path_,
     setSize (11, 11);
     setRepaintsOnMouseActivity (true);
 
-    selected = routine->getSelectedPoints().isSelected (path_->points [index]);
+    selected = routine->getSelectedPoints().isSelected (path_->getPoint (index));
     routine->getSelectedPoints().addChangeListener (this);
 }
 
@@ -1614,7 +1614,7 @@ void PathPointComponent::mouseDown (const MouseEvent& e)
     dragX = getX() + getWidth() / 2;
     dragY = getY() + getHeight() / 2;
 
-    mouseDownSelectStatus = routine->getSelectedPoints().addToSelectionOnMouseDown (path->points [index], e.mods);
+    mouseDownSelectStatus = routine->getSelectedPoints().addToSelectionOnMouseDown (path->getPoint (index), e.mods);
 
     owner->getDocument()->beginTransaction();
 }
@@ -1646,7 +1646,7 @@ void PathPointComponent::mouseDrag (const MouseEvent& e)
 
 void PathPointComponent::mouseUp (const MouseEvent& e)
 {
-    routine->getSelectedPoints().addToSelectionOnMouseUp (path->points [index],
+    routine->getSelectedPoints().addToSelectionOnMouseUp (path->getPoint (index),
                                                           e.mods, dragging,
                                                           mouseDownSelectStatus);
 }
@@ -1655,7 +1655,7 @@ void PathPointComponent::changeListenerCallback (ChangeBroadcaster* source)
 {
     ElementSiblingComponent::changeListenerCallback (source);
 
-    const bool nowSelected = routine->getSelectedPoints().isSelected (path->points [index]);
+    const bool nowSelected = routine->getSelectedPoints().isSelected (path->getPoint (index));
 
     if (nowSelected != selected)
     {

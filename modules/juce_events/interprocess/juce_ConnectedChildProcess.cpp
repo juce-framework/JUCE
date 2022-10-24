@@ -51,7 +51,7 @@ struct ChildProcessPingThread  : public Thread,
         pingReceived();
     }
 
-    void startPinging()                     { startThread (4); }
+    void startPinging()                     { startThread (Priority::low); }
 
     void pingReceived() noexcept            { countdown = timeoutMs / 1000 + 1; }
     void triggerConnectionLostMessage()     { triggerAsyncUpdate(); }

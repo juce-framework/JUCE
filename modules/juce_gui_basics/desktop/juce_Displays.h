@@ -93,6 +93,12 @@ public:
             pixels per inch, divide this by the Display::scale value.
         */
         double dpi;
+
+        /** The vertical refresh rate of the display if applicable.
+
+            Currently this is only used on Linux for display rate repainting.
+        */
+        std::optional<double> verticalFrequencyHz;
     };
 
     //==============================================================================

@@ -41,7 +41,7 @@ NetworkServiceDiscovery::Advertiser::Advertiser (const String& serviceTypeUID,
     message.setAttribute ("address", String());
     message.setAttribute ("port", connectionPort);
 
-    startThread (2);
+    startThread (Priority::background);
 }
 
 NetworkServiceDiscovery::Advertiser::~Advertiser()
@@ -92,7 +92,7 @@ NetworkServiceDiscovery::AvailableServiceList::AvailableServiceList (const Strin
    #endif
 
     socket.bindToPort (broadcastPort);
-    startThread (2);
+    startThread (Priority::background);
 }
 
 NetworkServiceDiscovery::AvailableServiceList::~AvailableServiceList()

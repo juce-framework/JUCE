@@ -69,9 +69,9 @@ struct SIMDNativeOps<uint32_t>
     //==============================================================================
     static forcedinline vSIMDType expand (uint32_t s) noexcept                                  { return vdupq_n_u32 (s); }
     static forcedinline vSIMDType load (const uint32_t* a) noexcept                             { return vld1q_u32 (a); }
-    static forcedinline void store (vSIMDType value, uint32_t* a) noexcept                      { vst1q_u32 (a, value); }
-    static forcedinline uint32_t get (vSIMDType v, size_t i) noexcept                           { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, uint32_t s) noexcept              { v[i] = s; return v; }
+    static forcedinline void      store (vSIMDType value, uint32_t* a) noexcept                 { vst1q_u32 (a, value); }
+    static forcedinline uint32_t  get (vSIMDType v, size_t i) noexcept                          { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, uint32_t s) noexcept              { return fb::set (v, i, s); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                       { return vaddq_u32 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                       { return vsubq_u32 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                       { return vmulq_u32 (a, b); }
@@ -115,9 +115,9 @@ struct SIMDNativeOps<int32_t>
     //==============================================================================
     static forcedinline vSIMDType expand (int32_t s) noexcept                                   { return vdupq_n_s32 (s); }
     static forcedinline vSIMDType load (const int32_t* a) noexcept                              { return vld1q_s32 (a); }
-    static forcedinline void store (vSIMDType value, int32_t* a) noexcept                       { vst1q_s32 (a, value); }
-    static forcedinline int32_t get (vSIMDType v, size_t i) noexcept                            { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, int32_t s) noexcept               { v[i] = s; return v; }
+    static forcedinline void      store (vSIMDType value, int32_t* a) noexcept                  { vst1q_s32 (a, value); }
+    static forcedinline int32_t   get (vSIMDType v, size_t i) noexcept                          { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, int32_t s) noexcept               { return fb::set (v, i, s); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                       { return vaddq_s32 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                       { return vsubq_s32 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                       { return vmulq_s32 (a, b); }
@@ -162,9 +162,9 @@ struct SIMDNativeOps<int8_t>
     //==============================================================================
     static forcedinline vSIMDType expand (int8_t s) noexcept                                   { return vdupq_n_s8 (s); }
     static forcedinline vSIMDType load (const int8_t* a) noexcept                              { return vld1q_s8 (a); }
-    static forcedinline void store (vSIMDType value, int8_t* a) noexcept                       { vst1q_s8 (a, value); }
-    static forcedinline int8_t get (vSIMDType v, size_t i) noexcept                            { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, int8_t s) noexcept               { v[i] = s; return v; }
+    static forcedinline void      store (vSIMDType value, int8_t* a) noexcept                  { vst1q_s8 (a, value); }
+    static forcedinline int8_t    get (vSIMDType v, size_t i) noexcept                         { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, int8_t s) noexcept               { return fb::set (v, i, s); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return vaddq_s8 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return vsubq_s8 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                      { return vmulq_s8 (a, b); }
@@ -181,7 +181,7 @@ struct SIMDNativeOps<int8_t>
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept       { return (vSIMDType) vcgeq_s8 (a, b); }
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<int32_t>::sum ((SIMDNativeOps<int32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_s8 (a, b, c); }
-    static forcedinline int8_t sum (vSIMDType a) noexcept                                      { return fb::sum (a); }
+    static forcedinline int8_t    sum (vSIMDType a) noexcept                                   { return fb::sum (a); }
     static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
@@ -203,9 +203,9 @@ struct SIMDNativeOps<uint8_t>
     //==============================================================================
     static forcedinline vSIMDType expand (uint8_t s) noexcept                                  { return vdupq_n_u8 (s); }
     static forcedinline vSIMDType load (const uint8_t* a) noexcept                             { return vld1q_u8 (a); }
-    static forcedinline void store (vSIMDType value, uint8_t* a) noexcept                      { vst1q_u8 (a, value); }
-    static forcedinline uint8_t get (vSIMDType v, size_t i) noexcept                           { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, uint8_t s) noexcept              { v[i] = s; return v; }
+    static forcedinline void      store (vSIMDType value, uint8_t* a) noexcept                 { vst1q_u8 (a, value); }
+    static forcedinline uint8_t   get (vSIMDType v, size_t i) noexcept                         { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, uint8_t s) noexcept              { return fb::set (v, i, s); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return vaddq_u8 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return vsubq_u8 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                      { return vmulq_u8 (a, b); }
@@ -222,7 +222,7 @@ struct SIMDNativeOps<uint8_t>
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept       { return (vSIMDType) vcgeq_u8 (a, b); }
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<uint32_t>::sum ((SIMDNativeOps<uint32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_u8 (a, b, c); }
-    static forcedinline uint8_t sum (vSIMDType a) noexcept                                     { return fb::sum (a); }
+    static forcedinline uint8_t   sum (vSIMDType a) noexcept                                   { return fb::sum (a); }
     static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
@@ -244,9 +244,9 @@ struct SIMDNativeOps<int16_t>
     //==============================================================================
     static forcedinline vSIMDType expand (int16_t s) noexcept                                  { return vdupq_n_s16 (s); }
     static forcedinline vSIMDType load (const int16_t* a) noexcept                             { return vld1q_s16 (a); }
-    static forcedinline void store (vSIMDType value, int16_t* a) noexcept                      { vst1q_s16 (a, value); }
-    static forcedinline int16_t get (vSIMDType v, size_t i) noexcept                           { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, int16_t s) noexcept              { v[i] = s; return v; }
+    static forcedinline void      store (vSIMDType value, int16_t* a) noexcept                 { vst1q_s16 (a, value); }
+    static forcedinline int16_t   get (vSIMDType v, size_t i) noexcept                         { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, int16_t s) noexcept              { return fb::set (v, i, s); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return vaddq_s16 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return vsubq_s16 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                      { return vmulq_s16 (a, b); }
@@ -263,7 +263,7 @@ struct SIMDNativeOps<int16_t>
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept       { return (vSIMDType) vcgeq_s16 (a, b); }
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<int32_t>::sum ((SIMDNativeOps<int32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_s16 (a, b, c); }
-    static forcedinline int16_t sum (vSIMDType a) noexcept                                     { return fb::sum (a); }
+    static forcedinline int16_t   sum (vSIMDType a) noexcept                                   { return fb::sum (a); }
     static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
@@ -286,9 +286,9 @@ struct SIMDNativeOps<uint16_t>
     //==============================================================================
     static forcedinline vSIMDType expand (uint16_t s) noexcept                                 { return vdupq_n_u16 (s); }
     static forcedinline vSIMDType load (const uint16_t* a) noexcept                            { return vld1q_u16 (a); }
-    static forcedinline void store (vSIMDType value, uint16_t* a) noexcept                     { vst1q_u16 (a, value); }
-    static forcedinline uint16_t get (vSIMDType v, size_t i) noexcept                          { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, uint16_t s) noexcept             { v[i] = s; return v; }
+    static forcedinline void      store (vSIMDType value, uint16_t* a) noexcept                { vst1q_u16 (a, value); }
+    static forcedinline uint16_t  get (vSIMDType v, size_t i) noexcept                         { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, uint16_t s) noexcept             { return fb::set (v, i, s); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return vaddq_u16 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return vsubq_u16 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                      { return vmulq_u16 (a, b); }
@@ -305,7 +305,7 @@ struct SIMDNativeOps<uint16_t>
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept       { return (vSIMDType) vcgeq_u16 (a, b); }
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<uint32_t>::sum ((SIMDNativeOps<uint32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_u16 (a, b, c); }
-    static forcedinline uint16_t sum (vSIMDType a) noexcept                                    { return fb::sum (a); }
+    static forcedinline uint16_t  sum (vSIMDType a) noexcept                                   { return fb::sum (a); }
     static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
@@ -327,9 +327,9 @@ struct SIMDNativeOps<int64_t>
     //==============================================================================
     static forcedinline vSIMDType expand (int64_t s) noexcept                                  { return vdupq_n_s64 (s); }
     static forcedinline vSIMDType load (const int64_t* a) noexcept                             { return vld1q_s64 (a); }
-    static forcedinline void store (vSIMDType value, int64_t* a) noexcept                      { vst1q_s64 (a, value); }
-    static forcedinline int64_t get (vSIMDType v, size_t i) noexcept                           { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, int64_t s) noexcept              { v[i] = s; return v; }
+    static forcedinline void      store (vSIMDType value, int64_t* a) noexcept                 { vst1q_s64 (a, value); }
+    static forcedinline int64_t   get (vSIMDType v, size_t i) noexcept                         { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, int64_t s) noexcept              { return fb::set (v, i, s); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return vaddq_s64 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return vsubq_s64 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                      { return fb::mul (a, b); }
@@ -346,7 +346,7 @@ struct SIMDNativeOps<int64_t>
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept       { return fb::greaterThanOrEqual (a, b); }
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<int32_t>::sum ((SIMDNativeOps<int32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return fb::multiplyAdd (a, b, c); }
-    static forcedinline int64_t sum (vSIMDType a) noexcept                                     { return fb::sum (a); }
+    static forcedinline int64_t   sum (vSIMDType a) noexcept                                   { return fb::sum (a); }
     static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return a; }
 };
 
@@ -369,9 +369,9 @@ struct SIMDNativeOps<uint64_t>
     //==============================================================================
     static forcedinline vSIMDType expand (uint64_t s) noexcept                                  { return vdupq_n_u64 (s); }
     static forcedinline vSIMDType load (const uint64_t* a) noexcept                             { return vld1q_u64 (a); }
-    static forcedinline void store (vSIMDType value, uint64_t* a) noexcept                      { vst1q_u64 (a, value); }
-    static forcedinline uint64_t get (vSIMDType v, size_t i) noexcept                           { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, uint64_t s) noexcept              { v[i] = s; return v; }
+    static forcedinline void      store (vSIMDType value, uint64_t* a) noexcept                 { vst1q_u64 (a, value); }
+    static forcedinline uint64_t  get (vSIMDType v, size_t i) noexcept                          { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, uint64_t s) noexcept              { return fb::set (v, i, s); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                       { return vaddq_u64 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                       { return vsubq_u64 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                       { return fb::mul (a, b); }
@@ -388,7 +388,7 @@ struct SIMDNativeOps<uint64_t>
     static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept        { return fb::greaterThanOrEqual (a, b); }
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                  { return (SIMDNativeOps<uint32_t>::sum ((SIMDNativeOps<uint32_t>::vSIMDType) notEqual (a, b)) == 0); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept  { return fb::multiplyAdd (a, b, c); }
-    static forcedinline uint64_t sum (vSIMDType a) noexcept                                     { return fb::sum (a); }
+    static forcedinline uint64_t  sum (vSIMDType a) noexcept                                    { return fb::sum (a); }
     static forcedinline vSIMDType truncate (vSIMDType a) noexcept                               { return a; }
 };
 
@@ -413,9 +413,9 @@ struct SIMDNativeOps<float>
     //==============================================================================
     static forcedinline vSIMDType expand (float s) noexcept                                    { return vdupq_n_f32 (s); }
     static forcedinline vSIMDType load (const float* a) noexcept                               { return vld1q_f32 (a); }
-    static forcedinline float get (vSIMDType v, size_t i) noexcept                             { return v[i]; }
-    static forcedinline vSIMDType set (vSIMDType v, size_t i, float s) noexcept                { v[i] = s; return v; }
-    static forcedinline void store (vSIMDType value, float* a) noexcept                        { vst1q_f32 (a, value); }
+    static forcedinline float     get (vSIMDType v, size_t i) noexcept                         { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, float s) noexcept                { return fb::set (v, i, s); }
+    static forcedinline void      store (vSIMDType value, float* a) noexcept                   { vst1q_f32 (a, value); }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return vaddq_f32 (a, b); }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return vsubq_f32 (a, b); }
     static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                      { return vmulq_f32 (a, b); }
@@ -459,6 +459,47 @@ struct SIMDNativeOps<float>
 
     @tags{DSP}
 */
+#if JUCE_64BIT
+template <>
+struct SIMDNativeOps<double>
+{
+    //==============================================================================
+    using vSIMDType = float64x2_t;
+    using vMaskType = uint64x2_t;
+    using fb = SIMDFallbackOps<double, vSIMDType>;
+
+    //==============================================================================
+    DECLARE_NEON_SIMD_CONST (int64_t, kAllBitsSet);
+    DECLARE_NEON_SIMD_CONST (double, kOne);
+
+    //==============================================================================
+    static forcedinline vSIMDType expand (double s) noexcept                                   { return vdupq_n_f64 (s); }
+    static forcedinline vSIMDType load (const double* a) noexcept                              { return vld1q_f64 (a); }
+    static forcedinline double    get (vSIMDType v, size_t i) noexcept                         { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, double s) noexcept               { return fb::set (v, i, s); }
+    static forcedinline void      store (vSIMDType value, double* a) noexcept                  { vst1q_f64 (a, value); }
+    static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return vaddq_f64 (a, b); }
+    static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return vsubq_f64 (a, b); }
+    static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                      { return vmulq_f64 (a, b); }
+    static forcedinline vSIMDType bit_and (vSIMDType a, vSIMDType b) noexcept                  { return (vSIMDType) vandq_u64 ((vMaskType) a, (vMaskType) b); }
+    static forcedinline vSIMDType bit_or  (vSIMDType a, vSIMDType b) noexcept                  { return (vSIMDType) vorrq_u64 ((vMaskType) a, (vMaskType) b); }
+    static forcedinline vSIMDType bit_xor (vSIMDType a, vSIMDType b) noexcept                  { return (vSIMDType) veorq_u64 ((vMaskType) a, (vMaskType) b); }
+    static forcedinline vSIMDType bit_notand (vSIMDType a, vSIMDType b) noexcept               { return (vSIMDType) vbicq_u64 ((vMaskType) b, (vMaskType) a); }
+    static forcedinline vSIMDType bit_not (vSIMDType a) noexcept                               { return bit_notand (a, vld1q_f64 ((double*) kAllBitsSet)); }
+    static forcedinline vSIMDType min (vSIMDType a, vSIMDType b) noexcept                      { return vminq_f64 (a, b); }
+    static forcedinline vSIMDType max (vSIMDType a, vSIMDType b) noexcept                      { return vmaxq_f64 (a, b); }
+    static forcedinline vSIMDType equal (vSIMDType a, vSIMDType b) noexcept                    { return (vSIMDType) vceqq_f64 (a, b); }
+    static forcedinline vSIMDType notEqual (vSIMDType a, vSIMDType b) noexcept                 { return bit_not (equal (a, b)); }
+    static forcedinline vSIMDType greaterThan (vSIMDType a, vSIMDType b) noexcept              { return (vSIMDType) vcgtq_f64 (a, b); }
+    static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept       { return (vSIMDType) vcgeq_f64 (a, b); }
+    static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return (SIMDNativeOps<uint32_t>::sum ((SIMDNativeOps<uint32_t>::vSIMDType) notEqual (a, b)) == 0); }
+    static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return vmlaq_f64 (a, b, c); }
+    static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept                 { return fb::cmplxmul (a, b); }
+    static forcedinline double    sum (vSIMDType a) noexcept                                   { return fb::sum (a); }
+    static forcedinline vSIMDType oddevensum (vSIMDType a) noexcept                            { return a; }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return vcvtq_f64_s64 (vcvtq_s64_f64 (a)); }
+};
+#else
 template <>
 struct SIMDNativeOps<double>
 {
@@ -468,8 +509,8 @@ struct SIMDNativeOps<double>
 
     static forcedinline vSIMDType expand (double s) noexcept                                   { return {{s, s}}; }
     static forcedinline vSIMDType load (const double* a) noexcept                              { return {{a[0], a[1]}}; }
-    static forcedinline void store (vSIMDType v, double* a) noexcept                           { a[0] = v.v[0]; a[1] = v.v[1]; }
-    static forcedinline double get (vSIMDType v, size_t i) noexcept                            { return v.v[i]; }
+    static forcedinline void      store (vSIMDType v, double* a) noexcept                      { a[0] = v.v[0]; a[1] = v.v[1]; }
+    static forcedinline double    get (vSIMDType v, size_t i) noexcept                         { return v.v[i]; }
     static forcedinline vSIMDType set (vSIMDType v, size_t i, double s) noexcept               { v.v[i] = s; return v; }
     static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                      { return {{a.v[0] + b.v[0], a.v[1] + b.v[1]}}; }
     static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                      { return {{a.v[0] - b.v[0], a.v[1] - b.v[1]}}; }
@@ -488,12 +529,12 @@ struct SIMDNativeOps<double>
     static forcedinline bool      allEqual (vSIMDType a, vSIMDType b) noexcept                 { return fb::allEqual (a, b); }
     static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept { return fb::multiplyAdd (a, b, c); }
     static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept                 { return fb::cmplxmul (a, b); }
-    static forcedinline double sum (vSIMDType a) noexcept                                      { return fb::sum (a); }
+    static forcedinline double    sum (vSIMDType a) noexcept                                   { return fb::sum (a); }
     static forcedinline vSIMDType oddevensum (vSIMDType a) noexcept                            { return a; }
     static forcedinline vSIMDType truncate (vSIMDType a) noexcept                              { return fb::truncate (a); }
 };
-
-#endif
+#endif // JUCE_64BIT
+#endif // #ifndef DOXYGEN
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 

@@ -108,6 +108,11 @@ public:
     bool areMouseEventsAllowed() const noexcept                 { return mouseEventsAllowed; }
 
     //==============================================================================
+    /** Set an instance of IDispatch where dispatch events should be delivered to
+    */
+    void setEventHandler (void* eventHandler);
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
 

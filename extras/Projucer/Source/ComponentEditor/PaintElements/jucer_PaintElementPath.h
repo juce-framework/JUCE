@@ -70,21 +70,21 @@ public:
     //==============================================================================
     void setInitialBounds (int parentWidth, int parentHeight) override;
     Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const override;
-    void setCurrentBounds (const Rectangle<int>& b, const Rectangle<int>& parentArea, const bool undoable) override;
+    void setCurrentBounds (const Rectangle<int>& b, const Rectangle<int>& parentArea, bool undoable) override;
 
     //==============================================================================
     bool getPoint (int index, int pointNumber, double& x, double& y, const Rectangle<int>& parentArea) const;
-    void movePoint (int index, int pointNumber, double newX, double newY, const Rectangle<int>& parentArea, const bool undoable);
+    void movePoint (int index, int pointNumber, double newX, double newY, const Rectangle<int>& parentArea, bool undoable);
 
     RelativePositionedRectangle getPoint (int index, int pointNumber) const;
-    void setPoint (int index, int pointNumber, const RelativePositionedRectangle& newPoint, const bool undoable);
+    void setPoint (int index, int pointNumber, const RelativePositionedRectangle& newPoint, bool undoable);
 
     int getNumPoints() const noexcept                                    { return points.size(); }
     PathPoint* getPoint (int index) const noexcept                       { return points [index]; }
-    int indexOfPoint (PathPoint* const p) const noexcept                 { return points.indexOf (p); }
+    int indexOfPoint (const PathPoint* p) const noexcept                 { return points.indexOf (p); }
 
-    PathPoint* addPoint (int pointIndexToAddItAfter, const bool undoable);
-    void deletePoint (int pointIndex, const bool undoable);
+    PathPoint* addPoint (int pointIndexToAddItAfter, bool undoable);
+    void deletePoint (int pointIndex, bool undoable);
 
     void pointListChanged();
 
@@ -92,10 +92,10 @@ public:
 
     //==============================================================================
     bool isSubpathClosed (int pointIndex) const;
-    void setSubpathClosed (int pointIndex, const bool closed, const bool undoable);
+    void setSubpathClosed (int pointIndex, bool closed, bool undoable);
 
     bool isNonZeroWinding() const noexcept                               { return nonZeroWinding; }
-    void setNonZeroWinding (const bool nonZero, const bool undoable);
+    void setNonZeroWinding (bool nonZero, bool undoable);
 
     //==============================================================================
     void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected) override;
@@ -125,8 +125,6 @@ public:
     void changed() override;
 
 private:
-    friend class PathPoint;
-    friend class PathPointComponent;
     OwnedArray<PathPoint> points;
     bool nonZeroWinding;
     mutable Path path;

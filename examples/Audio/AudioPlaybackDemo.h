@@ -325,7 +325,7 @@ public:
         // audio setup
         formatManager.registerBasicFormats();
 
-        thread.startThread (3);
+        thread.startThread (Thread::Priority::normal);
 
        #ifndef JUCE_DEMO_RUNNER
         RuntimePermissions::request (RuntimePermissions::recordAudio,

@@ -1430,34 +1430,44 @@ void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, cons
 intptr_t JUCE_CALLTYPE FloatVectorOperations::getFpStatusRegister() noexcept
 {
     intptr_t fpsr = 0;
-  #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
+ #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
     fpsr = static_cast<intptr_t> (_mm_getcsr());
-  #elif defined(__arm64__) || defined(__aarch64__) || JUCE_USE_ARM_NEON
-   #if defined(__arm64__) || defined(__aarch64__)
+ #elif (JUCE_64BIT && JUCE_ARM) || JUCE_USE_ARM_NEON
+  #if _MSC_VER
+    // _control87 returns static values for x86 bits that don't exist on arm
+    // to emulate x86 behaviour. We are only ever interested in de-normal bits
+    // so mask out only those.
+    fpsr = (intptr_t) (_control87 (0, 0) & _MCW_DN);
+  #else
+   #if JUCE_64BIT
     asm volatile("mrs %0, fpcr"
                  : "=r"(fpsr));
    #elif JUCE_USE_ARM_NEON
     asm volatile("vmrs %0, fpscr"
                  : "=r"(fpsr));
    #endif
-  #else
-   #if ! (defined(JUCE_INTEL) || defined(JUCE_ARM))
-    jassertfalse; // No support for getting the floating point status register for your platform
-   #endif
   #endif
+ #else
+  #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
+    jassertfalse; // No support for getting the floating point status register for your platform
+  #endif
+ #endif
 
     return fpsr;
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister (intptr_t fpsr) noexcept
 {
-  #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
+ #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
     // the volatile keyword here is needed to workaround a bug in AppleClang 13.0
     // which aggressively optimises away the variable otherwise
     volatile auto fpsr_w = static_cast<uint32_t> (fpsr);
     _mm_setcsr (fpsr_w);
-  #elif defined(__arm64__) || defined(__aarch64__) || JUCE_USE_ARM_NEON
-   #if defined(__arm64__) || defined(__aarch64__)
+ #elif (JUCE_64BIT && JUCE_ARM) || JUCE_USE_ARM_NEON
+  #if _MSC_VER
+    _control87 ((unsigned int) fpsr, _MCW_DN);
+  #else
+   #if JUCE_64BIT
     asm volatile("msr fpcr, %0"
                  :
                  : "ri"(fpsr));
@@ -1466,17 +1476,18 @@ void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister (intptr_t fpsr) no
                  :
                  : "ri"(fpsr));
    #endif
-  #else
-   #if ! (defined(JUCE_INTEL) || defined(JUCE_ARM))
-    jassertfalse; // No support for getting the floating point status register for your platform
-   #endif
-    ignoreUnused (fpsr);
   #endif
+ #else
+  #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
+    jassertfalse; // No support for getting the floating point status register for your platform
+  #endif
+    ignoreUnused (fpsr);
+ #endif
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnable) noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined(__arm64__) || defined(__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || (JUCE_64BIT && JUCE_ARM))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = _MM_FLUSH_ZERO_MASK;
    #else /*JUCE_USE_ARM_NEON*/
@@ -1484,7 +1495,7 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
    #endif
     setFpStatusRegister ((getFpStatusRegister() & (~mask)) | (shouldEnable ? mask : 0));
   #else
-   #if ! (defined(JUCE_INTEL) || defined(JUCE_ARM))
+   #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
     jassertfalse; // No support for flush to zero mode on your platform
    #endif
     ignoreUnused (shouldEnable);
@@ -1493,7 +1504,7 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
 
 void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool shouldDisable) noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined(__arm64__) || defined(__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || (JUCE_64BIT && JUCE_ARM))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
@@ -1504,7 +1515,7 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool
   #else
     ignoreUnused (shouldDisable);
 
-   #if ! (defined(JUCE_INTEL) || defined(JUCE_ARM))
+   #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
     jassertfalse; // No support for disable denormals mode on your platform
    #endif
   #endif
@@ -1512,7 +1523,7 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool
 
 bool JUCE_CALLTYPE FloatVectorOperations::areDenormalsDisabled() noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined(__arm64__) || defined(__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || (JUCE_64BIT && JUCE_ARM))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
@@ -1527,7 +1538,7 @@ bool JUCE_CALLTYPE FloatVectorOperations::areDenormalsDisabled() noexcept
 
 ScopedNoDenormals::ScopedNoDenormals() noexcept
 {
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined(__arm64__) || defined(__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || (JUCE_64BIT && JUCE_ARM))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
@@ -1541,7 +1552,7 @@ ScopedNoDenormals::ScopedNoDenormals() noexcept
 
 ScopedNoDenormals::~ScopedNoDenormals() noexcept
 {
-   #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined(__arm64__) || defined(__aarch64__))
+   #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || (JUCE_64BIT && JUCE_ARM))
     FloatVectorOperations::setFpStatusRegister (fpsr);
    #endif
 }

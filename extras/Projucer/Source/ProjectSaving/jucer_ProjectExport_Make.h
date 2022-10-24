@@ -646,7 +646,7 @@ private:
         for (auto& recommended : config.getRecommendedCompilerWarningFlags().common)
             result.add (recommended);
 
-        auto extra = replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim();
+        auto extra = replacePreprocessorTokens (config, config.getAllCompilerFlagsString()).trim();
 
         if (extra.isNotEmpty())
             result.add (extra);
@@ -717,7 +717,7 @@ private:
         if (config.isLinkTimeOptimisationEnabled())
             result.add ("-flto");
 
-        auto extraFlags = getExtraLinkerFlagsString().trim();
+        const auto extraFlags = config.getAllLinkerFlagsString().trim();
 
         if (extraFlags.isNotEmpty())
             result.add (replacePreprocessorTokens (config, extraFlags));

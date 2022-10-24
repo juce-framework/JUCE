@@ -253,7 +253,7 @@ public:
             if (inputDevice != nullptr)
                 env->CallVoidMethod (inputDevice, AudioRecord.startRecording);
 
-            startThread (8);
+            startThread (Priority::high);
         }
         else
         {

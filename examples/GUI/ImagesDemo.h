@@ -57,7 +57,7 @@ public:
     {
         setOpaque (true);
         imageList.setDirectory (File::getSpecialLocation (File::userPicturesDirectory), true, true);
-        directoryThread.startThread (1);
+        directoryThread.startThread (Thread::Priority::background);
 
         fileTree.setTitle ("Files");
         fileTree.addListener (this);

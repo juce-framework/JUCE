@@ -2565,6 +2565,22 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                                         d.isMain = (mainDisplay == screens->outputs[j]) && (i == 0);
                                         d.dpi = DisplayHelpers::getDisplayDPI (display, 0);
 
+                                        d.verticalFrequencyHz = [&]() -> std::optional<double>
+                                        {
+                                            if (crtc->mode != None)
+                                            {
+                                                if (auto it = std::find_if (screens->modes,
+                                                                            screens->modes + screens->nmode,
+                                                                            [&crtc] (const auto& m) { return m.id == crtc->mode; });
+                                                    it != screens->modes + screens->nmode)
+                                                {
+                                                    return (double) it->dotClock / ((double) it->hTotal * (double) it->vTotal);
+                                                }
+                                            }
+
+                                            return {};
+                                        }();
+
                                         // The raspberry pi returns a zero sized display, so we need to guard for divide-by-zero
                                         if (output->mm_width > 0 && output->mm_height > 0)
                                             d.dpi = ((static_cast<double> (crtc->width)  * 25.4 * 0.5) / static_cast<double> (output->mm_width))
@@ -3128,6 +3144,12 @@ XWindowSystem::VisualAndDepth XWindowSystem::DisplayVisuals::getBestVisualForWin
 
     if (visual24Bit != nullptr)
         return { visual24Bit, 24 };
+
+    if (visual32Bit != nullptr)
+        return { visual32Bit, 32 };
+
+    // No visual available!
+    jassert (visual16Bit != nullptr);
 
     return { visual16Bit, 16 };
 }

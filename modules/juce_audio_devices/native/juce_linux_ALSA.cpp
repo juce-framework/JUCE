@@ -618,7 +618,7 @@ public:
         if (outputDevice != nullptr && JUCE_ALSA_FAILED (snd_pcm_prepare (outputDevice->handle)))
             return;
 
-        startThread (9);
+        startThread (Priority::high);
 
         int count = 1000;
 

@@ -116,9 +116,6 @@ public:
     */
     bool wasObjectDeleted() const noexcept                      { return holder != nullptr && holder->get() == nullptr; }
 
-    bool operator== (ObjectType* object) const noexcept         { return get() == object; }
-    bool operator!= (ObjectType* object) const noexcept         { return get() != object; }
-
     //==============================================================================
     /** This class is used internally by the WeakReference class - don't use it directly
         in your code!

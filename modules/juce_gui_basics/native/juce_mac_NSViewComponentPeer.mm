@@ -1024,6 +1024,12 @@ public:
         return areAnyWindowsInLiveResize();
     }
 
+    void onVBlank()
+    {
+        vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
+        setNeedsDisplayRectangles();
+    }
+
     void setNeedsDisplayRectangles()
     {
         if (deferredRepaints.isEmpty())
@@ -1643,7 +1649,7 @@ private:
                 if (auto* peerView = owner.view)
                     if (auto* peerWindow = [peerView window])
                         if (display == ScopedDisplayLink::getDisplayIdForScreen ([peerWindow screen]))
-                            owner.setNeedsDisplayRectangles();
+                            owner.onVBlank();
         }
 
         NSViewComponentPeer& owner;
