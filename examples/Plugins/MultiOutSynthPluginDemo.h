@@ -156,7 +156,7 @@ public:
             && 1 <= outputs.size()
             && std::all_of (outputs.begin(), outputs.end(), [] (const auto& bus)
                {
-                   return bus == AudioChannelSet::stereo();
+                   return bus.isDisabled() || bus == AudioChannelSet::stereo();
                });
     }
 
