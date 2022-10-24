@@ -318,6 +318,7 @@ struct CADisplayLinkDeleter
 - (void) viewWillTransitionToSize: (CGSize) size withTransitionCoordinator: (id<UIViewControllerTransitionCoordinator>) coordinator;
 - (BOOL) prefersStatusBarHidden;
 - (UIStatusBarStyle) preferredStatusBarStyle;
+- (UIRectEdge) preferredScreenEdgesDeferringSystemGestures;
 
 - (void) viewDidLoad;
 - (void) viewWillAppear: (BOOL) animated;
@@ -600,6 +601,11 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
    #endif
 
     return UIStatusBarStyleDefault;
+}
+
+- (UIRectEdge) preferredScreenEdgesDeferringSystemGestures
+{
+    return UIRectEdgeAll;
 }
 
 - (void) viewDidLoad
