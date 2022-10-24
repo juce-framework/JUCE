@@ -834,6 +834,22 @@ endfunction()
 
 # ==================================================================================================
 
+function(_juce_add_lv2_manifest_helper_target)
+    if(TARGET juce_lv2_helper)
+        return()
+    endif()
+
+    get_target_property(module_path juce::juce_audio_plugin_client INTERFACE_JUCE_MODULE_PATH)
+    set(source "${module_path}/juce_audio_plugin_client/LV2/juce_LV2TurtleDumpProgram.cpp")
+    add_executable(juce_lv2_helper "${source}")
+    add_executable(juce::juce_lv2_helper ALIAS juce_lv2_helper)
+    target_compile_features(juce_lv2_helper PRIVATE cxx_std_14)
+    set_target_properties(juce_lv2_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
+    target_link_libraries(juce_lv2_helper PRIVATE ${CMAKE_DL_LIBS})
+endfunction()
+
+# ==================================================================================================
+
 function(_juce_set_plugin_target_properties shared_code_target kind)
     set(target_name ${shared_code_target}_${kind})
 
@@ -974,7 +990,7 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
         _juce_add_lv2_manifest_helper_target()
 
         add_custom_command(TARGET ${target_name} POST_BUILD
-            COMMAND juce::juce_lv2_helper "$<TARGET_FILE:${target_name}>"
+            COMMAND juce_lv2_helper "$<TARGET_FILE:${target_name}>"
             VERBATIM)
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_LV2_COPY_DIR)
@@ -1714,21 +1730,6 @@ function(_juce_initialise_target target)
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
     _juce_fixup_module_source_groups()
-endfunction()
-
-# ==================================================================================================
-
-function(_juce_add_lv2_manifest_helper_target)
-    if(TARGET juce_lv2_helper)
-        return()
-    endif()
-
-    get_target_property(module_path juce::juce_audio_plugin_client INTERFACE_JUCE_MODULE_PATH)
-    add_executable(juce_lv2_helper "${module_path}/juce_audio_plugin_client/LV2/juce_LV2TurtleDumpProgram.cpp")
-    add_executable(juce::juce_lv2_helper ALIAS juce_lv2_helper)
-    target_compile_features(juce_lv2_helper PRIVATE cxx_std_17)
-    set_target_properties(juce_lv2_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
-    target_link_libraries(juce_lv2_helper PRIVATE ${CMAKE_DL_LIBS})
 endfunction()
 
 # ==================================================================================================
