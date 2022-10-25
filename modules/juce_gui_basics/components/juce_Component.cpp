@@ -1769,12 +1769,21 @@ void Component::enterModalState (bool shouldTakeKeyboardFocus,
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
+    SafePointer safeReference { this };
+
     if (! isCurrentlyModal (false))
     {
         // While this component is in modal state it may block other components from receiving
         // mouseExit events. To keep mouseEnter and mouseExit calls balanced on these components,
         // we must manually force the mouse to "leave" blocked components.
         ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*this, &Component::internalMouseExit);
+
+        if (safeReference == nullptr)
+        {
+            // If you hit this assertion, the mouse-exit event above has caused the modal component to be deleted.
+            jassertfalse;
+            return;
+        }
 
         auto& mcm = *ModalComponentManager::getInstance();
         mcm.startModal (this, deleteWhenDismissed);
