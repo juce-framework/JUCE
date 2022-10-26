@@ -912,7 +912,7 @@ public:
 
                     if (projectItem.shouldBeCompiled())
                     {
-                        auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+                        auto extraCompilerFlags = getOwner().getCompilerFlagsForProjectItem (projectItem);
 
                         if (shouldAddBigobjFlag (path))
                         {

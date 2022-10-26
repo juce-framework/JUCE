@@ -761,7 +761,7 @@ private:
 
             if (projectItem.shouldBeCompiled())
             {
-                auto extraCompilerFlags = compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+                auto extraCompilerFlags = getCompilerFlagsForProjectItem (projectItem);
 
                 if (extraCompilerFlags.isNotEmpty())
                 {

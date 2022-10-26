@@ -319,7 +319,6 @@ public:
 
     void addNewConfigurationFromExisting (const BuildConfiguration& configToCopy);
     void addNewConfiguration (bool isDebugConfig);
-    bool hasConfigurationNamed (const String& name) const;
     String getUniqueConfigName (String name) const;
 
     String getExternalLibraryFlags (const BuildConfiguration& config) const;
@@ -361,6 +360,8 @@ public:
 
     int getNumConfigurations() const;
     BuildConfiguration::Ptr getConfiguration (int index) const;
+    std::optional<ValueTree> getConfigurationWithName (const String& nameToFind) const;
+    BuildConfiguration::Ptr getBuildConfigurationWithName (const String& nameToFind) const;
 
     ValueTree getConfigurations() const;
     virtual void createDefaultConfigs();
@@ -400,6 +401,8 @@ public:
 
         return false;
     }
+
+    String getCompilerFlagsForProjectItem (const Project::Item& projectItem) const;
 
 protected:
     //==============================================================================

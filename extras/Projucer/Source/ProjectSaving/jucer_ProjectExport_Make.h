@@ -933,7 +933,7 @@ private:
                 if (shouldFileBeCompiledByDefault (f))
                 {
                     auto scheme = projectItem.getCompilerFlagSchemeString();
-                    auto flags = compilerFlagSchemesMap[scheme].get().toString();
+                    auto flags = getCompilerFlagsForProjectItem (projectItem);
 
                     if (scheme.isNotEmpty() && flags.isNotEmpty())
                         results.emplace_back (f, scheme);

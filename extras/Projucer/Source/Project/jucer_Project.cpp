@@ -1723,7 +1723,8 @@ Value Project::Item::getShouldSkipPCHValue()                { return state.getPr
 bool Project::Item::shouldSkipPCH() const                   { return isModuleCode() || state [Ids::skipPCH]; }
 
 Value Project::Item::getCompilerFlagSchemeValue()           { return state.getPropertyAsValue (Ids::compilerFlagScheme, getUndoManager()); }
-String Project::Item::getCompilerFlagSchemeString() const   { return state [Ids::compilerFlagScheme]; }
+
+String Project::Item::getCompilerFlagSchemeString() const   { return state[Ids::compilerFlagScheme]; }
 
 void Project::Item::setCompilerFlagScheme (const String& scheme)
 {
