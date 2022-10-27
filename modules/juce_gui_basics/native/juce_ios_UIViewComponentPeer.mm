@@ -1308,6 +1308,11 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     return UITextAutocorrectionTypeNo;
 }
 
+- (UITextSpellCheckingType) spellCheckingType
+{
+    return UITextSpellCheckingTypeNo;
+}
+
 - (BOOL) canBecomeFirstResponder
 {
     return YES;
