@@ -110,7 +110,10 @@ public:
     void writeInto (AudioBuffer<float>& buffer)
     {
         if (loopRange.getLength() == 0)
+        {
             buffer.clear();
+            return;
+        }
 
         const auto numChannelsToCopy = std::min (inputBuffer->getNumChannels(), buffer.getNumChannels());
 
@@ -140,36 +143,15 @@ private:
     int64 pos;
 };
 
-class OptionalRange
-{
-public:
-    using Type = Range<int64>;
-
-    OptionalRange() : valid (false) {}
-    explicit OptionalRange (Type valueIn) : valid (true), value (std::move (valueIn)) {}
-
-    explicit operator bool() const noexcept { return valid; }
-
-    const auto& operator*() const
-    {
-        jassert (valid);
-        return value;
-    }
-
-private:
-    bool valid;
-    Type value;
-};
-
 //==============================================================================
 // Returns the modified sample range in the output buffer.
-inline OptionalRange readPlaybackRangeIntoBuffer (Range<double> playbackRange,
-                                                  const ARAPlaybackRegion* playbackRegion,
-                                                  AudioBuffer<float>& buffer,
-                                                  const std::function<AudioFormatReader* (ARA::PlugIn::AudioSource*)>& getReader)
+inline std::optional<Range<int64>> readPlaybackRangeIntoBuffer (Range<double> playbackRange,
+                                                                const ARAPlaybackRegion* playbackRegion,
+                                                                AudioBuffer<float>& buffer,
+                                                                const std::function<AudioFormatReader* (ARA::PlugIn::AudioSource*)>& getReader)
 {
-    const auto rangeInAudioModificationTime = playbackRange.movedToStartAt (playbackRange.getStart()
-                                                                            - playbackRegion->getStartInAudioModificationTime());
+    const auto rangeInAudioModificationTime = playbackRange - playbackRegion->getStartInPlaybackTime()
+                                                            + playbackRegion->getStartInAudioModificationTime();
 
     const auto audioSource = playbackRegion->getAudioModification()->getAudioSource();
     const auto audioModificationSampleRate = audioSource->getSampleRate();
@@ -181,7 +163,9 @@ inline OptionalRange readPlaybackRangeIntoBuffer (Range<double> playbackRange,
 
     const auto inputOffset = jlimit ((int64_t) 0, audioSource->getSampleCount(), sampleRangeInAudioModification.getStart());
 
-    const auto outputOffset = -std::min (sampleRangeInAudioModification.getStart(), (int64_t) 0);
+    // With the output offset it can always be said of the output buffer, that the zeroth element
+    // corresponds to beginning of the playbackRange.
+    const auto outputOffset = std::max (-sampleRangeInAudioModification.getStart(), (int64_t) 0);
 
     /* TODO: Handle different AudioSource and playback sample rates.
 
@@ -203,12 +187,12 @@ inline OptionalRange readPlaybackRangeIntoBuffer (Range<double> playbackRange,
     }();
 
     if (readLength == 0)
-        return OptionalRange { {} };
+        return Range<int64>();
 
     auto* reader = getReader (audioSource);
 
     if (reader != nullptr && reader->read (&buffer, (int) outputOffset, (int) readLength, inputOffset, true, true))
-        return OptionalRange { { outputOffset, readLength } };
+        return Range<int64>::withStartAndLength (outputOffset, readLength);
 
     return {};
 }
