@@ -71,7 +71,7 @@ namespace juce
 		/*Multiply and divide in method to avoid using * and / operators (* is used for dot product) */
 		void multiply(Vector3D other) const noexcept { x *= other.x;  y *= other.y, z *= other.z; }
 		Vector3D multiplied(Vector3D other) const noexcept { return { x * other.x, y * other.y, z * other.z }; }
-		void divide(Vector3D other) const noexcept { x /= other.x; y /= other.y; z /= other.z };
+		void divide(Vector3D other) const noexcept { x /= other.x; y /= other.y; z /= other.z; };
 		Vector3D divided(Vector3D other) const noexcept { return { x / other.x, y / other.y, z / other.z }; }
 
 		/** Returns the dot-product of these two vectors. */
