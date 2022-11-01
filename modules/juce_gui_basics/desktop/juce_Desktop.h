@@ -259,14 +259,17 @@ public:
     */
     Component* findComponentAt (Point<int> screenPosition) const;
 
-    /** The Desktop object has a ComponentAnimator instance which can be used for performing
+    /** The ComponentAnimator has been superseded, it is now recommended you use the Animator
+        class in the juce_animation module.
+
+        The Desktop object has a ComponentAnimator instance which can be used for performing
         your animations.
 
         Having a single shared ComponentAnimator object makes it more efficient when multiple
         components are being moved around simultaneously. It's also more convenient than having
         to manage your own instance of one.
 
-        @see ComponentAnimator
+        @see Animator, ComponentAnimator
     */
     ComponentAnimator& getAnimator() noexcept                       { return animator; }
 

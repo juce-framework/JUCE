@@ -37,6 +37,9 @@ namespace juce
 
 //==============================================================================
 /**
+    This class has been superseded, it is now recommended you use the Animator
+    class in the juce_animation module.
+
     Animates a set of components, moving them to a new position and/or fading their
     alpha levels.
 
@@ -54,7 +57,7 @@ namespace juce
     The class is a ChangeBroadcaster and sends a notification when any components
     start or finish being animated.
 
-    @see Desktop::getAnimator
+    @see Animator, Desktop::getAnimator
 
     @tags{GUI}
 */

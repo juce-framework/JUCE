@@ -273,6 +273,7 @@ StringArray getJUCEModules() noexcept
     static StringArray juceModuleIds =
     {
         "juce_analytics",
+        "juce_animation",
         "juce_audio_basics",
         "juce_audio_devices",
         "juce_audio_formats",
