@@ -3213,7 +3213,7 @@ private:
                 xcodeTarget = getTargetOfType (project.getTargetTypeFromFilePath (projectItem.getFile(), false));
 
             return addFile (FileOptions().withRelativePath (path)
-                                         .withCompilerFlags (compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get())
+                                         .withCompilerFlags (getCompilerFlagsForProjectItem (projectItem))
                                          .withCompilationEnabled (projectItem.shouldBeCompiled())
                                          .withAddToBinaryResourcesEnabled (projectItem.shouldBeAddedToBinaryResources())
                                          .withAddToXcodeResourcesEnabled (projectItem.shouldBeAddedToXcodeResources())

@@ -64,7 +64,7 @@ of the target you wish to build.
 
 #### Deployment Targets
 
-- __macOS__: macOS 10.7
+- __macOS__: macOS 10.9
 - __Windows__: Windows Vista
 - __Linux__: Mainstream Linux distributions
 - __iOS__: iOS 9.0

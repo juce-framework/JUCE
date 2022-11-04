@@ -1157,7 +1157,7 @@ private:
 
         // Get error message if init() failed, or if it's a buggy Denon driver,
         // which returns true from init() even when it fails.
-        if ((! initOk) || getName().containsIgnoreCase ("denon dj"))
+        if ((! initOk) || getName().containsIgnoreCase ("denon dj asio"))
             driverError = getLastDriverError();
 
         if ((! initOk) && driverError.isEmpty())

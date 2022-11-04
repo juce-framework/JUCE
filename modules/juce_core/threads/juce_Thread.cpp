@@ -302,7 +302,7 @@ void Thread::notify() const
 //==============================================================================
 struct LambdaThread  : public Thread
 {
-    LambdaThread (std::function<void()> f) : Thread ("anonymous"), fn (f) {}
+    LambdaThread (std::function<void()>&& f) : Thread ("anonymous"), fn (std::move (f)) {}
 
     void run() override
     {
@@ -315,11 +315,23 @@ struct LambdaThread  : public Thread
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LambdaThread)
 };
 
-void Thread::launch (std::function<void()> functionToRun)
+bool Thread::launch (std::function<void()> functionToRun)
 {
-    auto anon = new LambdaThread (functionToRun);
+    return launch (Priority::normal, std::move (functionToRun));
+}
+
+bool Thread::launch (Priority priority, std::function<void()> functionToRun)
+{
+    auto anon = std::make_unique<LambdaThread> (std::move (functionToRun));
     anon->deleteOnThreadEnd = true;
-    anon->startThread();
+
+    if (anon->startThread (priority))
+    {
+        anon.release();
+        return true;
+    }
+
+    return false;
 }
 
 //==============================================================================

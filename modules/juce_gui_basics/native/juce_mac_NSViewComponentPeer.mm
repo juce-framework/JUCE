@@ -1324,9 +1324,9 @@ public:
         if (auto keyCode = getKeyCodeFromEvent (ev))
         {
             if (isKeyDown)
-                keysCurrentlyDown.addIfNotAlreadyThere (keyCode);
+                keysCurrentlyDown.insert (keyCode);
             else
-                keysCurrentlyDown.removeFirstMatchingValue (keyCode);
+                keysCurrentlyDown.erase (keyCode);
         }
     }
 
@@ -1590,7 +1590,7 @@ public:
    #else
     bool usingCoreGraphics = false;
    #endif
-    bool isZooming = false, isFirstLiveResize = false, textWasInserted = false;
+    bool textWasInserted = false, isFirstLiveResize = false;
     bool isStretchingTop = false, isStretchingLeft = false, isStretchingBottom = false, isStretchingRight = false;
     bool windowRepresentsFile = false;
     bool isAlwaysOnTop = false, wasAlwaysOnTop = false;
@@ -1601,7 +1601,7 @@ public:
     uint32 lastRepaintTime;
 
     static ComponentPeer* currentlyFocusedPeer;
-    static Array<int> keysCurrentlyDown;
+    static std::set<int> keysCurrentlyDown;
     static int insideToFrontCall;
 
     static const SEL dismissModalsSelector;
@@ -2007,15 +2007,14 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
         {
             if (auto* owner = getOwner (self))
             {
-                auto* target = owner->findCurrentTextInputTarget();
                 owner->textWasInserted = false;
 
-                if (target != nullptr)
+                if (auto* target = owner->findCurrentTextInputTarget())
                     [(NSView*) self interpretKeyEvents: [NSArray arrayWithObject: ev]];
                 else
                     owner->stringBeingComposed.clear();
 
-                if (! (owner->textWasInserted || owner->redirectKeyDown (ev)))
+                if (! (owner->textWasInserted || owner->stringBeingComposed.isNotEmpty() || owner->redirectKeyDown (ev)))
                     sendSuperclassMessage<void> (self, @selector (keyDown:), ev);
             }
         });
@@ -2367,7 +2366,7 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
         {
             auto* owner = getOwner (self);
 
-            if (owner == nullptr || owner->isZooming)
+            if (owner == nullptr)
                 return proposedFrameSize;
 
             NSRect frameRect = flippedScreenRect ([(NSWindow*) self frame]);
@@ -2556,20 +2555,25 @@ NSWindow* NSViewComponentPeer::createWindowInstance()
 
 //==============================================================================
 ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = nullptr;
-Array<int> NSViewComponentPeer::keysCurrentlyDown;
+std::set<int> NSViewComponentPeer::keysCurrentlyDown;
 
 //==============================================================================
 bool KeyPress::isKeyCurrentlyDown (int keyCode)
 {
-    if (NSViewComponentPeer::keysCurrentlyDown.contains (keyCode))
+    const auto isDown = [] (int k)
+    {
+        return NSViewComponentPeer::keysCurrentlyDown.find (k) != NSViewComponentPeer::keysCurrentlyDown.cend();
+    };
+
+    if (isDown (keyCode))
         return true;
 
     if (keyCode >= 'A' && keyCode <= 'Z'
-         && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toLowerCase ((juce_wchar) keyCode)))
+         && isDown ((int) CharacterFunctions::toLowerCase ((juce_wchar) keyCode)))
         return true;
 
     if (keyCode >= 'a' && keyCode <= 'z'
-         && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toUpperCase ((juce_wchar) keyCode)))
+         && isDown ((int) CharacterFunctions::toUpperCase ((juce_wchar) keyCode)))
         return true;
 
     return false;

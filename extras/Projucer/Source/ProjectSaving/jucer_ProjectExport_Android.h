@@ -1402,7 +1402,7 @@ private:
             }
             else
             {
-                auto extraFlags = compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+                auto extraFlags = getCompilerFlagsForProjectItem (projectItem);
 
                 if (extraFlags.isNotEmpty())
                     extraCompilerFlags.add ({ file, extraFlags });

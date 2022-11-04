@@ -50,19 +50,19 @@ public:
     enum class Priority
     {
         /** The highest possible priority that isn't a dedicated realtime thread. */
-        highest,
+        highest     = 2,
 
         /** Makes use of performance cores and higher clocks. */
-        high,
+        high        = 1,
 
         /** The OS default. It will balance out across all cores. */
-        normal,
+        normal      = 0,
 
         /** Uses efficiency cores when possible. */
-        low,
+        low         = -1,
 
         /** Restricted to efficiency cores on platforms that have them. */
-        background
+        background  = -2
     };
 
     //==============================================================================
@@ -187,7 +187,7 @@ public:
     bool stopThread (int timeOutMilliseconds);
 
     //==============================================================================
-    /** Invokes a lambda or function on its own thread.
+    /** Invokes a lambda or function on its own thread with the default priority.
 
         This will spin up a Thread object which calls the function and then exits.
         Bear in mind that starting and stopping a thread can be a fairly heavyweight
@@ -197,8 +197,33 @@ public:
         Also note that using an anonymous thread makes it very difficult to interrupt
         the function when you need to stop it, e.g. when your app quits. So it's up to
         you to deal with situations where the function may fail to stop in time.
+
+        @param functionToRun  The lambda to be called from the new Thread.
+
+        @returns    true if the thread started successfully, or false if it failed.
+
+        @see launch.
     */
-    static void launch (std::function<void()> functionToRun);
+    static bool launch (std::function<void()> functionToRun);
+
+    //==============================================================================
+    /** Invokes a lambda or function on its own thread with a custom priority.
+
+        This will spin up a Thread object which calls the function and then exits.
+        Bear in mind that starting and stopping a thread can be a fairly heavyweight
+        operation, so you might prefer to use a ThreadPool if you're kicking off a lot
+        of short background tasks.
+
+        Also note that using an anonymous thread makes it very difficult to interrupt
+        the function when you need to stop it, e.g. when your app quits. So it's up to
+        you to deal with situations where the function may fail to stop in time.
+
+        @param priority       The priority the thread is started with.
+        @param functionToRun  The lambda to be called from the new Thread.
+
+        @returns    true if the thread started successfully, or false if it failed.
+    */
+    static bool launch (Priority priority, std::function<void()> functionToRun);
 
     //==============================================================================
     /** Returns true if the thread is currently active */

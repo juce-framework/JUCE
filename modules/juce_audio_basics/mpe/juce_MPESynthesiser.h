@@ -304,6 +304,8 @@ private:
     //==============================================================================
     std::atomic<bool> shouldStealVoices { false };
     uint32 lastNoteOnCounter = 0;
+    mutable CriticalSection stealLock;
+    mutable Array<MPESynthesiserVoice*> usableVoicesToStealArray;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESynthesiser)
 };

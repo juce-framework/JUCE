@@ -91,13 +91,6 @@ static bool contextHasTextureNpotFeature()
     return stringTokens.contains ("GL_ARB_texture_non_power_of_two");
 }
 
-template <typename Fn> struct ScopeGuard : Fn
-{
-    ~ScopeGuard() { Fn::operator()(); }
-};
-
-template <typename Fn> ScopeGuard (Fn) -> ScopeGuard<Fn>;
-
 //==============================================================================
 class OpenGLContext::CachedImage  : public CachedComponentImage
 {
