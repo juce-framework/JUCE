@@ -123,7 +123,12 @@ public:
     template <typename EventMethod, typename... Params>
     static void sendMouseEvent (HierarchyChecker& checker, EventMethod&& eventMethod, Params&&... params)
     {
-        if (auto* list = checker.nearestNonNullParent()->mouseListeners.get())
+        auto* parent = checker.nearestNonNullParent();
+
+        if (parent == nullptr)
+            return;
+
+        if (auto* list = parent->mouseListeners.get())
         {
             for (int i = list->listeners.size(); --i >= 0;)
             {
