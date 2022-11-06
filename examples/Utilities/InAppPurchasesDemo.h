@@ -192,7 +192,7 @@ private:
     {
         purchaseInProgress = false;
 
-        for (const auto productId : info.purchase.productIds)
+        for (const auto& productId : info.purchase.productIds)
         {
             auto idx = findVoiceIndexFromIdentifier (productId);
 
@@ -218,9 +218,9 @@ private:
     {
         if (success)
         {
-            for (auto& info : infos)
+            for (const auto& info : infos)
             {
-                for (const auto productId : info.purchase.productIds)
+                for (const auto& productId : info.purchase.productIds)
                 {
                     auto idx = findVoiceIndexFromIdentifier (productId);
 
@@ -241,7 +241,7 @@ private:
             havePricesBeenFetched = true;
             StringArray identifiers;
 
-            for (auto& voiceProduct : voiceProducts)
+            for (const auto& voiceProduct : voiceProducts)
                 identifiers.add (voiceProduct.identifier);
 
             InAppPurchases::getInstance()->getProductsInformation (identifiers);

@@ -47,6 +47,11 @@ public:
     */
     void setFramesPerSecond (int framesPerSecond);
 
+    /** You can use this function to synchronise animation updates with the current display's vblank
+        events. When this mode is enabled the value passed to setFramesPerSecond() is ignored.
+    */
+    void setSynchroniseToVBlank (bool syncToVBlank);
+
     /** Called periodically, at the frequency specified by setFramesPerSecond().
         This is a the best place to do things like advancing animation parameters,
         checking the mouse position, etc.
@@ -66,8 +71,13 @@ public:
 
 private:
     //==============================================================================
-    Time lastUpdateTime;
-    int totalUpdates;
+    void updateSync();
+
+    Time lastUpdateTime = Time::getCurrentTime();
+    int totalUpdates = 0;
+    int framesPerSecond = 60;
+    bool useVBlank = false;
+    VBlankAttachment vBlankAttachment;
 
     void timerCallback() override;
 

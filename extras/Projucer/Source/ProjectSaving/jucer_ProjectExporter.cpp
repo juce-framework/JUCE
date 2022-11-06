@@ -507,6 +507,14 @@ String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildC
                                                  sourceString);
 }
 
+String ProjectExporter::getCompilerFlagsForProjectItem (const Project::Item& projectItem) const
+{
+    if (auto buildConfigurationForFile = getBuildConfigurationWithName (projectItem.getCompilerFlagSchemeString()))
+        return buildConfigurationForFile->getAllCompilerFlagsString();
+
+    return {};
+}
+
 void ProjectExporter::copyMainGroupFromProject()
 {
     jassert (itemGroups.size() == 0);
@@ -761,14 +769,26 @@ ProjectExporter::BuildConfiguration::Ptr ProjectExporter::getConfiguration (int 
     return createBuildConfig (getConfigurations().getChild (index));
 }
 
-bool ProjectExporter::hasConfigurationNamed (const String& nameToFind) const
+std::optional<ValueTree> ProjectExporter::getConfigurationWithName (const String& nameToFind) const
 {
     auto configs = getConfigurations();
     for (int i = configs.getNumChildren(); --i >= 0;)
-        if (configs.getChild(i) [Ids::name].toString() == nameToFind)
-            return true;
+    {
+        auto config = configs.getChild (i);
 
-    return false;
+        if (config[Ids::name].toString() == nameToFind)
+            return config;
+    }
+
+    return {};
+}
+
+ProjectExporter::BuildConfiguration::Ptr ProjectExporter::getBuildConfigurationWithName (const String& nameToFind) const
+{
+    if (auto config = getConfigurationWithName (nameToFind))
+        return createBuildConfig (*config);
+
+    return nullptr;
 }
 
 String ProjectExporter::getUniqueConfigName (String nm) const
@@ -780,7 +800,7 @@ String ProjectExporter::getUniqueConfigName (String nm) const
     nameRoot = nameRoot.trim();
 
     int suffix = 2;
-    while (hasConfigurationNamed (name))
+    while (getConfigurationWithName (name).has_value())
         nm = nameRoot + " " + String (suffix++);
 
     return nm;

@@ -278,6 +278,7 @@ namespace juce
 #include "windows/juce_NativeMessageBox.h"
 #include "windows/juce_ThreadWithProgressWindow.h"
 #include "windows/juce_TooltipWindow.h"
+#include "windows/juce_VBlankAttachement.h"
 #include "layout/juce_MultiDocumentPanel.h"
 #include "layout/juce_SidePanel.h"
 #include "filebrowser/juce_FileBrowserListener.h"

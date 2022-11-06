@@ -44,7 +44,7 @@ void LatestVersionCheckerAndUpdater::checkForNewVersion (bool background)
     if (! isThreadRunning())
     {
         backgroundCheck = background;
-        startThread (3);
+        startThread (Priority::low);
     }
 }
 
@@ -373,7 +373,7 @@ public:
         : ThreadWithProgressWindow ("Downloading New Version", true, true),
           asset (a), targetFolder (t), completionCallback (std::move (cb))
     {
-        launchThread (3);
+        launchThread (Priority::low);
     }
 
 private:

@@ -20,7 +20,7 @@ jobs:
                   return json.loads(response.read().decode('utf-8'))
           prCommits = jsonRequest('https://api.github.com/repos/juce-framework/JUCE/pulls/${{ github.event.number }}/commits')
           authors = map(lambda commit: [commit['author']['login'], commit['committer']['login']], prCommits)
-          uniqueAuthors = list(set(itertools.chain.from_iterable(authors)))
+          uniqueAuthors = [name for name in list(set(itertools.chain.from_iterable(authors))) if name != 'web-flow']
           print(f'\nPR authors: {", ".join(uniqueAuthors)}')
           claResult = jsonRequest('https://cla.juce.com/check', {'logins': uniqueAuthors})
           unsignedLogins = claResult['unsigned']

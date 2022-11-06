@@ -52,7 +52,9 @@ class Win32WebView   : public InternalWebViewType,
                        public ActiveXControlComponent
 {
 public:
-    Win32WebView (WebBrowserComponent& owner)
+    Win32WebView (WebBrowserComponent& parent, const String& userAgentToUse)
+        : owner (parent),
+          userAgent (userAgentToUse)
     {
         owner.addAndMakeVisible (this);
     }
@@ -60,7 +62,10 @@ public:
     ~Win32WebView() override
     {
         if (connectionPoint != nullptr)
+        {
             connectionPoint->Unadvise (adviseCookie);
+            connectionPoint->Release();
+        }
 
         if (browser != nullptr)
             browser->Release();
@@ -75,6 +80,7 @@ public:
 
         auto iidWebBrowser2              = __uuidof (IWebBrowser2);
         auto iidConnectionPointContainer = __uuidof (IConnectionPointContainer);
+        auto iidOleControl               = __uuidof (IOleControl);
 
         browser = (IWebBrowser2*) queryInterface (&iidWebBrowser2);
 
@@ -84,13 +90,19 @@ public:
 
             if (connectionPoint != nullptr)
             {
-                if (auto* owner = dynamic_cast<WebBrowserComponent*> (Component::getParentComponent()))
-                {
-                    auto handler = new EventHandler (*owner);
-                    connectionPoint->Advise (handler, &adviseCookie);
-                    handler->Release();
-                }
+                auto handler = new EventHandler (*this);
+                connectionPoint->Advise (handler, &adviseCookie);
+                setEventHandler (handler);
+                handler->Release();
             }
+
+            connectionPointContainer->Release();
+        }
+
+        if (auto oleControl = (IOleControl*) queryInterface (&iidOleControl))
+        {
+            oleControl->OnAmbientPropertyChange (/*DISPID_AMBIENT_USERAGENT*/-5513);
+            oleControl->Release();
         }
 
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -101,7 +113,7 @@ public:
         return browser != nullptr;
     }
 
-    void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData) override
+    void goToURL (const String& url, const StringArray* requestedHeaders, const MemoryBlock* postData) override
     {
         if (browser != nullptr)
         {
@@ -111,10 +123,18 @@ public:
             VariantInit (&postDataVar);
             VariantInit (&headersVar);
 
-            if (headers != nullptr)
+            StringArray headers;
+
+            if (userAgent.isNotEmpty())
+                headers.add("User-Agent: " + userAgent);
+
+            if (requestedHeaders != nullptr)
+                headers.addArray (*requestedHeaders);
+
+            if (headers.size() > 0)
             {
                 V_VT (&headersVar) = VT_BSTR;
-                V_BSTR (&headersVar) = SysAllocString ((const OLECHAR*) headers->joinIntoString ("\r\n").toWideCharPointer());
+                V_BSTR (&headersVar) = SysAllocString ((const OLECHAR*) headers.joinIntoString ("\r\n").toWideCharPointer());
             }
 
             if (postData != nullptr && postData->getSize() > 0)
@@ -220,41 +240,51 @@ public:
     }
 
 private:
+    WebBrowserComponent& owner;
     IWebBrowser2* browser = nullptr;
     IConnectionPoint* connectionPoint = nullptr;
     DWORD adviseCookie = 0;
+    String userAgent;
 
     //==============================================================================
     struct EventHandler  : public ComBaseClassHelper<IDispatch>,
                            public ComponentMovementWatcher
     {
-        EventHandler (WebBrowserComponent& w)  : ComponentMovementWatcher (&w), owner (w) {}
+        EventHandler (Win32WebView& w)  : ComponentMovementWatcher (&w.owner), owner (w) {}
 
         JUCE_COMRESULT GetTypeInfoCount (UINT*) override                                 { return E_NOTIMPL; }
         JUCE_COMRESULT GetTypeInfo (UINT, LCID, ITypeInfo**) override                    { return E_NOTIMPL; }
         JUCE_COMRESULT GetIDsOfNames (REFIID, LPOLESTR*, UINT, LCID, DISPID*) override   { return E_NOTIMPL; }
 
         JUCE_COMRESULT Invoke (DISPID dispIdMember, REFIID /*riid*/, LCID /*lcid*/, WORD /*wFlags*/, DISPPARAMS* pDispParams,
-                               VARIANT* /*pVarResult*/, EXCEPINFO* /*pExcepInfo*/, UINT* /*puArgErr*/) override
+                               VARIANT* pVarResult, EXCEPINFO* /*pExcepInfo*/, UINT* /*puArgErr*/) override
         {
+
+            if (dispIdMember == /*DISPID_AMBIENT_USERAGENT*/-5513)
+            {
+                V_VT( pVarResult ) = VT_BSTR;
+                V_BSTR( pVarResult ) = SysAllocString ((const OLECHAR*) String(owner.userAgent).toWideCharPointer());;
+                return S_OK;
+            }
+
             if (dispIdMember == DISPID_BEFORENAVIGATE2)
             {
                 *pDispParams->rgvarg->pboolVal
-                    = owner.pageAboutToLoad (getStringFromVariant (pDispParams->rgvarg[5].pvarVal)) ? VARIANT_FALSE
+                    = owner.owner.pageAboutToLoad (getStringFromVariant (pDispParams->rgvarg[5].pvarVal)) ? VARIANT_FALSE
                                                                                                     : VARIANT_TRUE;
                 return S_OK;
             }
 
             if (dispIdMember == 273 /*DISPID_NEWWINDOW3*/)
             {
-                owner.newWindowAttemptingToLoad (pDispParams->rgvarg[0].bstrVal);
+                owner.owner.newWindowAttemptingToLoad (pDispParams->rgvarg[0].bstrVal);
                 *pDispParams->rgvarg[3].pboolVal = VARIANT_TRUE;
                 return S_OK;
             }
 
             if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
-                owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
+                owner.owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
                 return S_OK;
             }
 
@@ -275,7 +305,7 @@ private:
                     String message (messageBuffer, size);
                     LocalFree (messageBuffer);
 
-                    if (! owner.pageLoadHadNetworkError (message))
+                    if (! owner.owner.pageLoadHadNetworkError (message))
                         *pDispParams->rgvarg[0].pboolVal = VARIANT_TRUE;
                 }
 
@@ -284,7 +314,7 @@ private:
 
             if (dispIdMember == 263 /*DISPID_WINDOWCLOSING*/)
             {
-                owner.windowCloseRequest();
+                owner.owner.windowCloseRequest();
 
                 // setting this bool tells the browser to ignore the event - we'll handle it.
                 if (pDispParams->cArgs > 0 && pDispParams->rgvarg[0].vt == (VT_BYREF | VT_BOOL))
@@ -304,7 +334,7 @@ private:
         using ComponentMovementWatcher::componentMovedOrResized;
 
     private:
-        WebBrowserComponent& owner;
+        Win32WebView& owner;
 
         static String getStringFromVariant (VARIANT* v)
         {
@@ -328,12 +358,15 @@ class WebView2  : public InternalWebViewType,
                   public ComponentMovementWatcher
 {
 public:
-    WebView2 (WebBrowserComponent& o, const WebView2Preferences& prefs)
+    WebView2 (WebBrowserComponent& o, const WebBrowserComponent::Options& prefs)
          : ComponentMovementWatcher (&o),
            owner (o),
-           preferences (prefs)
+           preferences (prefs.getWinWebView2BackendOptions()),
+           userAgent (prefs.getUserAgent())
     {
-        if (! createWebViewEnvironment())
+        if (auto handle = createWebViewHandle (preferences))
+            webViewHandle = std::move (*handle);
+        else
             throw std::runtime_error ("Failed to create the CoreWebView2Environemnt");
 
         owner.addAndMakeVisible (this);
@@ -343,16 +376,13 @@ public:
     {
         removeEventHandlers();
         closeWebView();
-
-        if (webView2LoaderHandle != nullptr)
-            ::FreeLibrary (webView2LoaderHandle);
     }
 
     void createBrowser() override
     {
         if (webView == nullptr)
         {
-            jassert (webViewEnvironment != nullptr);
+            jassert (webViewHandle.environment != nullptr);
             createWebView();
         }
     }
@@ -430,6 +460,56 @@ public:
 
         componentPeerChanged();
         owner.visibilityChanged();
+    }
+
+    //==============================================================================
+    struct WebViewHandle
+    {
+        using LibraryRef = std::unique_ptr<typename std::pointer_traits<HMODULE>::element_type, decltype(&::FreeLibrary)>;
+        LibraryRef loaderHandle {nullptr, &::FreeLibrary};
+        ComSmartPtr<ICoreWebView2Environment> environment;
+    };
+
+    static std::optional<WebViewHandle> createWebViewHandle(const WebBrowserComponent::Options::WinWebView2& options)
+    {
+        using CreateWebViewEnvironmentWithOptionsFunc = HRESULT (*) (PCWSTR, PCWSTR,
+                                                                     ICoreWebView2EnvironmentOptions*,
+                                                                     ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler*);
+
+        auto dllPath = options.getDLLLocation().getFullPathName();
+
+        if (dllPath.isEmpty())
+            dllPath = "WebView2Loader.dll";
+
+        WebViewHandle result;
+
+        result.loaderHandle = WebViewHandle::LibraryRef (LoadLibraryA (dllPath.toUTF8()), &::FreeLibrary);
+
+        if (result.loaderHandle == nullptr)
+            return {};
+
+        auto* createWebViewEnvironmentWithOptions = (CreateWebViewEnvironmentWithOptionsFunc) GetProcAddress (result.loaderHandle.get(),
+                                                                                                              "CreateCoreWebView2EnvironmentWithOptions");
+        if (createWebViewEnvironmentWithOptions == nullptr)
+            return {};
+
+        auto webViewOptions = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
+        const auto userDataFolder = options.getUserDataFolder().getFullPathName();
+
+        auto hr = createWebViewEnvironmentWithOptions (nullptr,
+                                                       userDataFolder.isNotEmpty() ? userDataFolder.toWideCharPointer() : nullptr,
+                                                       webViewOptions.Get(),
+            Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
+                [&result] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
+                {
+                    result.environment = env;
+                    return S_OK;
+                }).Get());
+
+        if (! SUCCEEDED (hr))
+            return {};
+
+        return result;
     }
 
 private:
@@ -613,50 +693,17 @@ private:
         {
             settings->put_IsStatusBarEnabled (! preferences.getIsStatusBarDisabled());
             settings->put_IsBuiltInErrorPageEnabled (! preferences.getIsBuiltInErrorPageDisabled());
+
+            if (userAgent.isNotEmpty())
+            {
+                ComSmartPtr<ICoreWebView2Settings2> settings2;
+
+                settings.QueryInterface (settings2);
+
+                if (settings2 != nullptr)
+                    settings2->put_UserAgent (userAgent.toWideCharPointer());
+            }
         }
-    }
-
-    bool createWebViewEnvironment()
-    {
-        using CreateWebViewEnvironmentWithOptionsFunc = HRESULT (*) (PCWSTR, PCWSTR,
-                                                                     ICoreWebView2EnvironmentOptions*,
-                                                                     ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler*);
-
-        auto dllPath = preferences.getDLLLocation().getFullPathName();
-
-        if (dllPath.isEmpty())
-            dllPath = "WebView2Loader.dll";
-
-        webView2LoaderHandle = LoadLibraryA (dllPath.toUTF8());
-
-        if (webView2LoaderHandle == nullptr)
-            return false;
-
-        auto* createWebViewEnvironmentWithOptions = (CreateWebViewEnvironmentWithOptionsFunc) GetProcAddress (webView2LoaderHandle,
-                                                                                                              "CreateCoreWebView2EnvironmentWithOptions");
-        if (createWebViewEnvironmentWithOptions == nullptr)
-        {
-            // failed to load WebView2Loader.dll
-            jassertfalse;
-            return false;
-        }
-
-        auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
-        const auto userDataFolder = preferences.getUserDataFolder().getFullPathName();
-
-        auto hr = createWebViewEnvironmentWithOptions (nullptr,
-                                                       userDataFolder.isNotEmpty() ? userDataFolder.toWideCharPointer() : nullptr,
-                                                       options.Get(),
-            Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
-                [weakThis = WeakReference<WebView2> { this }] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
-                {
-                    if (weakThis != nullptr)
-                        weakThis->webViewEnvironment = env;
-
-                    return S_OK;
-                }).Get());
-
-        return SUCCEEDED (hr);
     }
 
     void createWebView()
@@ -667,7 +714,7 @@ private:
 
             WeakReference<WebView2> weakThis (this);
 
-            webViewEnvironment->CreateCoreWebView2Controller ((HWND) peer->getNativeHandle(),
+            webViewHandle.environment->CreateCoreWebView2Controller ((HWND) peer->getNativeHandle(),
                 Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler> (
                     [weakThis = WeakReference<WebView2> { this }] (HRESULT, ICoreWebView2Controller* controller) -> HRESULT
                     {
@@ -706,7 +753,7 @@ private:
             webView = nullptr;
         }
 
-        webViewEnvironment = nullptr;
+        webViewHandle.environment = nullptr;
     }
 
     //==============================================================================
@@ -732,11 +779,10 @@ private:
 
     //==============================================================================
     WebBrowserComponent& owner;
-    WebView2Preferences preferences;
+    WebBrowserComponent::Options::WinWebView2 preferences;
+    String userAgent;
 
-    HMODULE webView2LoaderHandle = nullptr;
-
-    ComSmartPtr<ICoreWebView2Environment> webViewEnvironment;
+    WebViewHandle webViewHandle;
     ComSmartPtr<ICoreWebView2Controller> webViewController;
     ComSmartPtr<ICoreWebView2> webView;
 
@@ -769,8 +815,8 @@ class WebBrowserComponent::Pimpl
 {
 public:
     Pimpl (WebBrowserComponent& owner,
-           const WebView2Preferences& preferences,
-           bool useWebView2)
+           const Options& preferences,
+           bool useWebView2, const String& userAgent)
     {
         if (useWebView2)
         {
@@ -786,7 +832,7 @@ public:
         ignoreUnused (preferences);
 
         if (internal == nullptr)
-            internal.reset (new Win32WebView (owner));
+            internal.reset (new Win32WebView (owner, userAgent));
     }
 
     InternalWebViewType& getInternalWebView()
@@ -799,28 +845,16 @@ private:
 };
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
-    : browser (new Pimpl (*this, {}, false)),
-      unloadPageWhenHidden (unloadWhenHidden)
-{
-    setOpaque (true);
-}
-
-WebBrowserComponent::WebBrowserComponent (ConstructWithoutPimpl args)
-    : unloadPageWhenHidden (args.unloadWhenHidden)
+WebBrowserComponent::WebBrowserComponent (const Options& options)
+    : browser (new Pimpl (*this, options,
+                          options.getBackend() == Options::Backend::webview2, options.getUserAgent())),
+      unloadPageWhenHidden (! options.keepsPageLoadedWhenBrowserIsHidden())
 {
     setOpaque (true);
 }
 
 WebBrowserComponent::~WebBrowserComponent()
 {
-}
-
-WindowsWebView2WebBrowserComponent::WindowsWebView2WebBrowserComponent (bool unloadWhenHidden,
-                                                                        const WebView2Preferences& preferences)
-    : WebBrowserComponent (ConstructWithoutPimpl { unloadWhenHidden })
-{
-    browser = std::make_unique<Pimpl> (*this, preferences, true);
 }
 
 //==============================================================================
@@ -975,6 +1009,23 @@ void WebBrowserComponent::clearCookies()
 
         FindCloseUrlCache (urlCacheHandle);
     }
+}
+
+//==============================================================================
+bool WebBrowserComponent::areOptionsSupported (const Options& options)
+{
+    if (options.getBackend() == Options::Backend::defaultBackend || options.getBackend() == Options::Backend::ie)
+        return true;
+
+   #if JUCE_USE_WIN_WEBVIEW2
+    if (options.getBackend() != Options::Backend::webview2)
+        return false;
+
+    if (auto webView = WebView2::createWebViewHandle (options.getWinWebView2BackendOptions()))
+        return true;
+   #endif
+
+    return false;
 }
 
 } // namespace juce

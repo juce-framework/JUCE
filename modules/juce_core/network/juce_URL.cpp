@@ -178,7 +178,15 @@ URL::URL (File localFile)
 
 void URL::init()
 {
-    auto i = url.indexOfChar ('?');
+    auto i = url.indexOfChar ('#');
+
+    if (i >= 0)
+    {
+        anchor = removeEscapeChars (url.substring (i + 1));
+        url = url.upToFirstOccurrenceOf ("#", false, false);
+    }
+
+    i = url.indexOfChar ('?');
 
     if (i >= 0)
     {
@@ -346,8 +354,21 @@ String URL::getSubPath (bool includeGetParameters) const
 
 String URL::getQueryString() const
 {
+    String result;
+
     if (parameterNames.size() > 0)
-        return "?" + URLHelpers::getMangledParameters (*this);
+        result += "?" + URLHelpers::getMangledParameters (*this);
+
+    if (anchor.isNotEmpty())
+        result += getAnchorString();
+
+    return result;
+}
+
+String URL::getAnchorString() const
+{
+    if (anchor.isNotEmpty())
+        return "#" + URL::addEscapeChars (anchor, true);
 
     return {};
 }
@@ -858,6 +879,14 @@ URL URL::withParameters (const StringPairArray& parametersToAdd) const
         u.addParameter (parametersToAdd.getAllKeys()[i],
                         parametersToAdd.getAllValues()[i]);
 
+    return u;
+}
+
+URL URL::withAnchor (const String& anchorToAdd) const
+{
+    auto u = *this;
+
+    u.anchor = anchorToAdd;
     return u;
 }
 

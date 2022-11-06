@@ -87,7 +87,7 @@ void MidiOutput::clearAllPendingMessages()
 
 void MidiOutput::startBackgroundThread()
 {
-    startThread (9);
+    startThread (Priority::high);
 }
 
 void MidiOutput::stopBackgroundThread()

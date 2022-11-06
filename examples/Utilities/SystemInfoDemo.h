@@ -135,6 +135,7 @@ static String getAllSystemInfo()
       << "Host name:        " << SystemStats::getComputerName()        << newLine
       << "Device type:      " << SystemStats::getDeviceDescription()   << newLine
       << "Manufacturer:     " << SystemStats::getDeviceManufacturer()  << newLine
+      << "Device ID:        " << SystemStats::getUniqueDeviceID()      << newLine
       << "User logon name:  " << SystemStats::getLogonName()           << newLine
       << "Full user name:   " << SystemStats::getFullUserName()        << newLine
       << "User region:      " << SystemStats::getUserRegion()          << newLine

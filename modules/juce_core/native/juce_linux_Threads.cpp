@@ -28,26 +28,48 @@ namespace juce
     live in juce_posix_SharedCode.h!
 */
 
-//==============================================================================
-JUCE_API void JUCE_CALLTYPE Process::setPriority (const ProcessPriority prior)
+bool Thread::createNativeThread (Priority)
 {
-    auto policy = (prior <= NormalPriority) ? SCHED_OTHER : SCHED_RR;
-    auto minp = sched_get_priority_min (policy);
-    auto maxp = sched_get_priority_max (policy);
+    PosixThreadAttribute attr { threadStackSize };
+    PosixSchedulerPriority::getNativeSchedulerAndPriority (realtimeOptions, {}).apply (attr);
 
-    struct sched_param param;
-
-    switch (prior)
+    threadId = threadHandle = makeThreadHandle (attr, this, [] (void* userData) -> void*
     {
-        case LowPriority:
-        case NormalPriority:    param.sched_priority = 0; break;
-        case HighPriority:      param.sched_priority = minp + (maxp - minp) / 4; break;
-        case RealtimePriority:  param.sched_priority = minp + (3 * (maxp - minp) / 4); break;
-        default:                jassertfalse; break;
-    }
+        auto* myself = static_cast<Thread*> (userData);
 
-    pthread_setschedparam (pthread_self(), policy, &param);
+        juce_threadEntryPoint (myself);
+
+        return nullptr;
+    });
+
+    return threadId != nullptr;
 }
+
+void Thread::killThread()
+{
+    if (threadHandle != nullptr)
+        pthread_cancel ((pthread_t) threadHandle.load());
+}
+
+// Until we implement Nice awareness, these don't do anything on Linux.
+Thread::Priority Thread::getPriority() const
+{
+    jassert (Thread::getCurrentThreadId() == getThreadId());
+
+    return priority;
+}
+
+bool Thread::setPriority (Priority newPriority)
+{
+    jassert (Thread::getCurrentThreadId() == getThreadId());
+
+    // Return true to make it compatible with other platforms.
+    priority = newPriority;
+    return true;
+}
+
+//==============================================================================
+JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority) {}
 
 static bool swapUserAndEffectiveUser()
 {

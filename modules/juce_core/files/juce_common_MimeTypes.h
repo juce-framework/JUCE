@@ -32,6 +32,9 @@ namespace MimeTypeTable
 {
 
 /*  @internal */
+void registerCustomMimeTypeForFileExtension (const String& mimeType, const String& fileExtension);
+
+/*  @internal */
 StringArray getMimeTypesForFileExtension (const String& fileExtension);
 
 /*  @internal */

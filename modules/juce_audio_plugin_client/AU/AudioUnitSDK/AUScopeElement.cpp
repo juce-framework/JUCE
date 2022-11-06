@@ -386,8 +386,12 @@ std::vector<AudioUnitElement> AUScope::RestoreElementNames(CFDictionaryRef inNam
 			if ((elName != nullptr) && (CFGetTypeID(elName) == CFStringGetTypeID())) {
 				AUElement* const element = GetElement(intKey);
 				if (element != nullptr) {
-					element->SetName(elName);
-					restoredElements.push_back(intKey);
+					auto* const currentName = element->GetName().get();
+
+					if (currentName == nullptr || CFStringCompare(elName, currentName, 0) != kCFCompareEqualTo) {
+						element->SetName(elName);
+						restoredElements.push_back(intKey);
+					}
 				}
 			}
 		}

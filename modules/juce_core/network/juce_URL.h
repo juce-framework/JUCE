@@ -100,6 +100,11 @@ public:
     */
     String getQueryString() const;
 
+    /** If any anchor is set, returns URL-encoded anchor, including the "#"
+        prefix.
+    */
+    String getAnchorString() const;
+
     /** Returns the scheme of the URL.
 
         e.g. for "http://www.xyz.com/foobar", this will return "http" (it won't
@@ -187,7 +192,7 @@ public:
         @see getParameterNames, getParameterValues
     */
     [[nodiscard]] URL withParameter (const String& parameterName,
-                                      const String& parameterValue) const;
+                                     const String& parameterValue) const;
 
     /** Returns a copy of this URL, with a set of GET or POST parameters added.
 
@@ -196,6 +201,10 @@ public:
         @see withParameter
     */
     [[nodiscard]] URL withParameters (const StringPairArray& parametersToAdd) const;
+
+    /** Returns a copy of this URL, with an anchor added to the end of the URL.
+    */
+    [[nodiscard]] URL withAnchor (const String& anchor) const;
 
     /** Returns a copy of this URL, with a file-upload type parameter added to it.
 
@@ -723,6 +732,7 @@ private:
     String url;
     MemoryBlock postData;
     StringArray parameterNames, parameterValues;
+    String anchor;
 
     ReferenceCountedArray<Upload> filesToUpload;
 

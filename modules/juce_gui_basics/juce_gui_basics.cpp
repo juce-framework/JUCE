@@ -263,6 +263,7 @@ namespace juce
 #include "windows/juce_ThreadWithProgressWindow.cpp"
 #include "windows/juce_TooltipWindow.cpp"
 #include "windows/juce_TopLevelWindow.cpp"
+#include "windows/juce_VBlankAttachement.cpp"
 #include "commands/juce_ApplicationCommandInfo.cpp"
 #include "commands/juce_ApplicationCommandManager.cpp"
 #include "commands/juce_ApplicationCommandTarget.cpp"

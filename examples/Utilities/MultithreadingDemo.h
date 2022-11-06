@@ -148,9 +148,7 @@ public:
         : BouncingBall (containerComp),
           Thread ("JUCE Demo Thread")
     {
-        // give the threads a random priority, so some will move more
-        // smoothly than others..
-        startThread (Random::getSystemRandom().nextInt (3) + 3);
+        startThread();
     }
 
     ~DemoThread() override

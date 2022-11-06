@@ -851,98 +851,131 @@ void InterProcessLock::exit()
         pimpl.reset();
 }
 
-//==============================================================================
-#if JUCE_ANDROID
-extern JavaVM* androidJNIJavaVM;
-#endif
-
-static void* threadEntryProc (void* userData)
+class PosixThreadAttribute
 {
-    auto* myself = static_cast<Thread*> (userData);
-
-    JUCE_AUTORELEASEPOOL
+public:
+    explicit PosixThreadAttribute (size_t stackSize)
     {
-        juce_threadEntryPoint (myself);
+        if (valid)
+            pthread_attr_setstacksize (&attr, stackSize);
     }
 
-   #if JUCE_ANDROID
-    if (androidJNIJavaVM != nullptr)
+    ~PosixThreadAttribute()
     {
-        void* env = nullptr;
-        androidJNIJavaVM->GetEnv(&env, JNI_VERSION_1_2);
-
-        // only detach if we have actually been attached
-        if (env != nullptr)
-            androidJNIJavaVM->DetachCurrentThread();
+        if (valid)
+            pthread_attr_destroy (&attr);
     }
-   #endif
 
-    return nullptr;
-}
+    auto* get() { return valid ? &attr : nullptr; }
 
-#if JUCE_ANDROID && JUCE_MODULE_AVAILABLE_juce_audio_devices && (JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE)
- #define JUCE_ANDROID_REALTIME_THREAD_AVAILABLE 1
-#endif
-
-#if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
-extern pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr);
-#endif
-
-void Thread::launchThread()
-{
-   #if JUCE_ANDROID
-    if (isAndroidRealtimeThread)
-    {
-       #if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
-        threadHandle = (void*) juce_createRealtimeAudioThread (threadEntryProc, this);
-        threadId = (ThreadID) threadHandle.get();
-
-        return;
-       #else
-        jassertfalse;
-       #endif
-    }
-   #endif
-
-    threadHandle = {};
-    pthread_t handle = {};
+private:
     pthread_attr_t attr;
-    pthread_attr_t* attrPtr = nullptr;
+    bool valid { pthread_attr_init (&attr) == 0 };
+};
 
-    if (pthread_attr_init (&attr) == 0)
+class PosixSchedulerPriority
+{
+public:
+    static PosixSchedulerPriority findCurrentSchedulerAndPriority()
     {
-        attrPtr = &attr;
-        pthread_attr_setstacksize (attrPtr, threadStackSize);
+        int scheduler{};
+        sched_param param{};
+        pthread_getschedparam (pthread_self(), &scheduler, &param);
+        return { scheduler, param.sched_priority };
     }
 
-
-    if (pthread_create (&handle, attrPtr, threadEntryProc, this) == 0)
+    static PosixSchedulerPriority getNativeSchedulerAndPriority (const Optional<Thread::RealtimeOptions>& rt,
+                                                                 [[maybe_unused]] Thread::Priority prio)
     {
-        pthread_detach (handle);
-        threadHandle = (void*) handle;
-        threadId = (ThreadID) threadHandle.get();
+        const auto isRealtime = rt.hasValue();
+
+        const auto priority = [&]
+        {
+            if (isRealtime)
+            {
+                const auto min = jmax (0, sched_get_priority_min (SCHED_RR));
+                const auto max = jmax (1, sched_get_priority_max (SCHED_RR));
+
+                return jmap (rt->priority, 0, 10, min, max);
+            }
+
+            // We only use this helper if we're on an old macos/ios platform that might
+            // still respect legacy pthread priorities for SCHED_OTHER.
+            #if JUCE_MAC || JUCE_IOS
+             const auto min = jmax (0, sched_get_priority_min (SCHED_OTHER));
+             const auto max = jmax (0, sched_get_priority_max (SCHED_OTHER));
+
+             const auto p = [prio]
+             {
+                 switch (prio)
+                 {
+                     case Thread::Priority::highest:    return 4;
+                     case Thread::Priority::high:       return 3;
+                     case Thread::Priority::normal:     return 2;
+                     case Thread::Priority::low:        return 1;
+                     case Thread::Priority::background: return 0;
+                 }
+
+                 return 3;
+             }();
+
+             if (min != 0 && max != 0)
+                 return jmap (p, 0, 4, min, max);
+            #endif
+
+            return 0;
+        }();
+
+        #if JUCE_MAC || JUCE_IOS
+         const auto scheduler = SCHED_OTHER;
+        #elif JUCE_LINUX || JUCE_BSD
+         const auto backgroundSched = prio == Thread::Priority::background ? SCHED_IDLE
+                                                                           : SCHED_OTHER;
+         const auto scheduler = isRealtime ? SCHED_RR : backgroundSched;
+        #else
+         const auto scheduler = 0;
+        #endif
+
+         return { scheduler, priority };
     }
 
-    if (attrPtr != nullptr)
-        pthread_attr_destroy (attrPtr);
+    void apply ([[maybe_unused]] PosixThreadAttribute& attr) const
+    {
+        #if JUCE_LINUX || JUCE_BSD
+         const struct sched_param param { getPriority() };
+
+         pthread_attr_setinheritsched (attr.get(), PTHREAD_EXPLICIT_SCHED);
+         pthread_attr_setschedpolicy (attr.get(), getScheduler());
+         pthread_attr_setschedparam (attr.get(), &param);
+        #endif
+    }
+
+    constexpr int getScheduler() const { return scheduler; }
+    constexpr int  getPriority() const { return priority; }
+
+private:
+    constexpr PosixSchedulerPriority (int schedulerIn, int priorityIn)
+        : scheduler (schedulerIn), priority (priorityIn) {}
+
+    int scheduler;
+    int priority;
+};
+
+static void* makeThreadHandle (PosixThreadAttribute& attr, Thread* userData, void* (*threadEntryProc) (void*))
+{
+    pthread_t handle = {};
+
+    if (pthread_create (&handle, attr.get(), threadEntryProc, userData) != 0)
+        return nullptr;
+
+    pthread_detach (handle);
+    return (void*) handle;
 }
 
 void Thread::closeThreadHandle()
 {
     threadId = {};
-    threadHandle = {};
-}
-
-void Thread::killThread()
-{
-    if (threadHandle.get() != nullptr)
-    {
-       #if JUCE_ANDROID
-        jassertfalse; // pthread_cancel not available!
-       #else
-        pthread_cancel ((pthread_t) threadHandle.get());
-       #endif
-    }
+    threadHandle = nullptr;
 }
 
 void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
@@ -961,41 +994,6 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
      prctl (PR_SET_NAME, name.toRawUTF8(), 0, 0, 0);
     #endif
    #endif
-}
-
-bool Thread::setThreadPriority (void* handle, int priority)
-{
-    constexpr auto maxInputPriority = 10;
-
-   #if JUCE_LINUX || JUCE_BSD
-    constexpr auto lowestRrPriority = 8;
-   #else
-    constexpr auto lowestRrPriority = 0;
-   #endif
-
-    struct sched_param param;
-    int policy;
-
-    if (handle == nullptr)
-        handle = (void*) pthread_self();
-
-    if (pthread_getschedparam ((pthread_t) handle, &policy, &param) != 0)
-        return false;
-
-    policy = priority < lowestRrPriority ? SCHED_OTHER : SCHED_RR;
-
-    const auto minPriority = sched_get_priority_min (policy);
-    const auto maxPriority = sched_get_priority_max (policy);
-
-    param.sched_priority = [&]
-    {
-        if (policy == SCHED_OTHER)
-            return 0;
-
-        return jmap (priority, lowestRrPriority, maxInputPriority, minPriority, maxPriority);
-    }();
-
-    return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
 
 Thread::ThreadID JUCE_CALLTYPE Thread::getCurrentThreadId()
@@ -1261,146 +1259,5 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
 }
 
 #endif
-
-//==============================================================================
-struct HighResolutionTimer::Pimpl
-{
-    explicit Pimpl (HighResolutionTimer& t)
-        : owner (t)
-    {}
-
-    ~Pimpl()
-    {
-        jassert (periodMs == 0);
-        stop();
-    }
-
-    void start (int newPeriod)
-    {
-        if (periodMs == newPeriod)
-            return;
-
-        if (thread.get_id() == std::this_thread::get_id())
-        {
-            periodMs = newPeriod;
-            return;
-        }
-
-        stop();
-
-        periodMs = newPeriod;
-
-        thread = std::thread ([this, newPeriod]
-        {
-            setThisThreadToRealtime ((uint64) newPeriod);
-
-            auto lastPeriod = periodMs.load();
-            Clock clock (lastPeriod);
-
-            std::unique_lock<std::mutex> unique_lock (timerMutex);
-
-            while (periodMs != 0)
-            {
-                clock.next();
-                while (periodMs != 0 && clock.wait (stopCond, unique_lock));
-
-                if (periodMs == 0)
-                    break;
-
-                owner.hiResTimerCallback();
-
-                auto nextPeriod = periodMs.load();
-
-                if (lastPeriod != nextPeriod)
-                {
-                    lastPeriod = nextPeriod;
-                    clock = Clock (lastPeriod);
-                }
-            }
-
-            periodMs = 0;
-        });
-    }
-
-    void stop()
-    {
-        periodMs = 0;
-
-        const auto thread_id = thread.get_id();
-
-        if (thread_id == std::thread::id() || thread_id == std::this_thread::get_id())
-            return;
-
-        {
-            std::unique_lock<std::mutex> unique_lock (timerMutex);
-            stopCond.notify_one();
-        }
-
-        thread.join();
-    }
-
-    HighResolutionTimer& owner;
-    std::atomic<int> periodMs { 0 };
-
-private:
-    std::thread thread;
-    std::condition_variable stopCond;
-    std::mutex timerMutex;
-
-    class Clock
-    {
-    public:
-        explicit Clock (std::chrono::steady_clock::rep millis) noexcept
-            : time (std::chrono::steady_clock::now()),
-              delta (std::chrono::milliseconds (millis))
-        {}
-
-        bool wait (std::condition_variable& cond, std::unique_lock<std::mutex>& lock) noexcept
-        {
-            return cond.wait_until (lock, time) != std::cv_status::timeout;
-        }
-
-        void next() noexcept
-        {
-            time += delta;
-        }
-
-    private:
-        std::chrono::time_point<std::chrono::steady_clock> time;
-        std::chrono::steady_clock::duration delta;
-    };
-
-    static bool setThisThreadToRealtime (uint64 periodMs)
-    {
-        const auto thread = pthread_self();
-
-       #if JUCE_MAC || JUCE_IOS
-        mach_timebase_info_data_t timebase;
-        mach_timebase_info (&timebase);
-
-        const auto ticksPerMs = ((double) timebase.denom * 1000000.0) / (double) timebase.numer;
-        const auto periodTicks = (uint32_t) jmin ((double) std::numeric_limits<uint32_t>::max(), periodMs * ticksPerMs);
-
-        thread_time_constraint_policy_data_t policy;
-        policy.period      = periodTicks;
-        policy.computation = jmin ((uint32_t) 50000, policy.period);
-        policy.constraint  = policy.period;
-        policy.preemptible = true;
-
-        return thread_policy_set (pthread_mach_thread_np (thread),
-                                  THREAD_TIME_CONSTRAINT_POLICY,
-                                  (thread_policy_t) &policy,
-                                  THREAD_TIME_CONSTRAINT_POLICY_COUNT) == KERN_SUCCESS;
-
-       #else
-        ignoreUnused (periodMs);
-        struct sched_param param;
-        param.sched_priority = sched_get_priority_max (SCHED_RR);
-        return pthread_setschedparam (thread, SCHED_RR, &param) == 0;
-       #endif
-    }
-
-    JUCE_DECLARE_NON_COPYABLE (Pimpl)
-};
 
 } // namespace juce

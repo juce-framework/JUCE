@@ -46,6 +46,136 @@ class JUCE_API  WebBrowserComponent  : public Component
 {
 public:
     //==============================================================================
+    class JUCE_API Options
+    {
+    public:
+        //==============================================================================
+        enum class Backend
+        {
+            /**
+                Default web browser backend. WebKit will be used on macOS, gtk-webkit2 on Linux and internet
+                explorer on Windows. On Windows, the default may change to webview2 in the fututre.
+            */
+            defaultBackend,
+
+            /**
+                Use Internet Explorer as the backend on Windows. By default, IE will use an ancient version
+                of IE. To change this behaviour, you either need to add the following html element into your page's
+                head section:
+
+                <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+                or you need to change windows registry values for your application.  More infromation on the latter
+                can be found here:
+
+                https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/ee330730(v=vs.85)?redirectedfrom=MSDN#browser-emulation
+            */
+            ie,
+
+            /**
+                Use the chromium based  WebView2 engine on Windows
+            */
+            webview2
+        };
+
+        /**
+            Use a particular backend to create the WebViewBrowserComponent. JUCE will silently
+            fallback to the default backend if the selected backend is not supported. To check
+            if a specific backend is supported on your platform or not, use
+            WebBrowserComponent::areOptionsSupported.
+        */
+        [[nodiscard]] Options withBackend (Backend backend) const              { return withMember (*this, &Options::browserBackend, backend); }
+
+        //==============================================================================
+        /**
+            Tell JUCE to keep the web page alive when the WebBrowserComponent is not visible.
+            By default, JUCE will replace the current page with a blank page - this can be
+            handy to stop the browser using resources in the background when it's not
+            actually being used.
+        */
+        [[nodiscard]] Options withKeepPageLoadedWhenBrowserIsHidden () const   { return withMember (*this, &Options::keepPageLoadedWhenBrowserIsHidden, true); }
+
+        /**
+            Use a specific user agent string when requesting web pages.
+        */
+        [[nodiscard]] Options withUserAgent (String ua) const                  { return withMember (*this, &Options::userAgent, std::move (ua)); }
+
+        //==============================================================================
+        /** Options specific to the WebView2 backend. These options will be ignored
+            if another backend is used.
+        */
+        class WinWebView2
+        {
+        public:
+            //==============================================================================
+            /** Sets a custom location for the WebView2Loader.dll that is not a part of the
+                standard system DLL search paths.
+            */
+            [[nodiscard]] WinWebView2 withDLLLocation (const File& location) const   { return withMember (*this, &WinWebView2::dllLocation, location); }
+
+            /** Sets a non-default location for storing user data for the browser instance. */
+            [[nodiscard]] WinWebView2 withUserDataFolder (const File& folder) const  { return withMember (*this, &WinWebView2::userDataFolder, folder); }
+
+            /** If this is set, the status bar usually displayed in the lower-left of the webview
+                will be disabled.
+            */
+            [[nodiscard]] WinWebView2 withStatusBarDisabled() const                  { return withMember (*this, &WinWebView2::disableStatusBar, true); }
+
+            /** If this is set, a blank page will be displayed on error instead of the default
+                built-in error page.
+            */
+            [[nodiscard]] WinWebView2 withBuiltInErrorPageDisabled() const           { return withMember (*this, &WinWebView2::disableBuiltInErrorPage, true); }
+
+            /** Sets the background colour that WebView2 renders underneath all web content.
+
+                This colour must either be fully opaque or transparent. On Windows 7 this
+                colour must be opaque.
+            */
+            [[nodiscard]] WinWebView2 withBackgroundColour (const Colour& colour) const
+            {
+                // the background colour must be either fully opaque or transparent!
+                jassert (colour.isOpaque() || colour.isTransparent());
+
+                return withMember (*this, &WinWebView2::backgroundColour, colour);
+            }
+
+            //==============================================================================
+            File getDLLLocation() const                          { return dllLocation; }
+            File getUserDataFolder() const                       { return userDataFolder; }
+            bool getIsStatusBarDisabled() const noexcept         { return disableStatusBar; }
+            bool getIsBuiltInErrorPageDisabled() const noexcept  { return disableBuiltInErrorPage; }
+            Colour getBackgroundColour() const                   { return backgroundColour; }
+
+        private:
+            //==============================================================================
+            File dllLocation, userDataFolder;
+            bool disableStatusBar = false, disableBuiltInErrorPage = false;
+            Colour backgroundColour;
+        };
+
+        [[nodiscard]] Options withWinWebView2Options (const WinWebView2& winWebView2Options) const
+        {
+            return withMember (*this, &Options::winWebView2, winWebView2Options);
+        }
+
+        //==============================================================================
+        Backend getBackend() const noexcept                       { return browserBackend; }
+        bool keepsPageLoadedWhenBrowserIsHidden() const noexcept  { return keepPageLoadedWhenBrowserIsHidden; }
+        String getUserAgent() const                               { return userAgent; }
+        WinWebView2 getWinWebView2BackendOptions() const          { return winWebView2; }
+
+    private:
+        //==============================================================================
+        Backend browserBackend = Backend::defaultBackend;
+        bool keepPageLoadedWhenBrowserIsHidden = false;
+        String userAgent;
+        WinWebView2 winWebView2;
+    };
+
+    //==============================================================================
+    /** Creates a WebBrowserComponent with default options*/
+    WebBrowserComponent() : WebBrowserComponent (Options {}) {}
+
     /** Creates a WebBrowserComponent.
 
         Once it's created and visible, send the browser to a URL using goToURL().
@@ -56,10 +186,14 @@ public:
                             the browser using resources in the background when it's not
                             actually being used.
     */
-    explicit WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true);
+    explicit WebBrowserComponent (const Options& options);
 
     /** Destructor. */
     ~WebBrowserComponent() override;
+
+    //==============================================================================
+    /** Check if the specified options are supported on this platform. */
+    static bool areOptionsSupported (const Options& options);
 
     //==============================================================================
     /** Sends the browser to a particular URL.
@@ -141,17 +275,6 @@ public:
     /** @internal */
     class Pimpl;
 
-protected:
-    friend class WindowsWebView2WebBrowserComponent;
-
-    /** @internal */
-    struct ConstructWithoutPimpl
-    {
-        explicit ConstructWithoutPimpl (bool unloadOnHide) : unloadWhenHidden (unloadOnHide) {}
-        const bool unloadWhenHidden;
-    };
-    explicit WebBrowserComponent (ConstructWithoutPimpl);
-
 private:
     //==============================================================================
     std::unique_ptr<Pimpl> browser;
@@ -165,123 +288,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserComponent)
 };
-
-//==============================================================================
-/** Class used to create a set of preferences to pass to the WindowsWebView2WebBrowserComponent
-    wrapper constructor to modify aspects of its behaviour and settings.
-
-    You can chain together a series of calls to this class's methods to create a set of whatever
-    preferences you want to specify.
-
-    @tags{GUI}
-*/
-class JUCE_API  WebView2Preferences
-{
-public:
-    //==============================================================================
-    /** Sets a custom location for the WebView2Loader.dll that is not a part of the
-        standard system DLL search paths.
-    */
-    [[nodiscard]] WebView2Preferences withDLLLocation (const File& location) const   { return with (&WebView2Preferences::dllLocation, location); }
-
-    /** Sets a non-default location for storing user data for the browser instance. */
-    WebView2Preferences withUserDataFolder (const File& folder) const  { return with (&WebView2Preferences::userDataFolder, folder); }
-
-    /** If this is set, the status bar usually displayed in the lower-left of the webview
-        will be disabled.
-    */
-    [[nodiscard]] WebView2Preferences withStatusBarDisabled() const                  { return with (&WebView2Preferences::disableStatusBar, true); }
-
-    /** If this is set, a blank page will be displayed on error instead of the default
-        built-in error page.
-    */
-    [[nodiscard]] WebView2Preferences withBuiltInErrorPageDisabled() const           { return with (&WebView2Preferences::disableBuiltInErrorPage, true); }
-
-    /** Sets the background colour that WebView2 renders underneath all web content.
-
-        This colour must either be fully opaque or transparent. On Windows 7 this
-        colour must be opaque.
-    */
-    [[nodiscard]] WebView2Preferences withBackgroundColour (const Colour& colour) const
-    {
-        // the background colour must be either fully opaque or transparent!
-        jassert (colour.isOpaque() || colour.isTransparent());
-
-        return with (&WebView2Preferences::backgroundColour, colour);
-    }
-
-    //==============================================================================
-    File getDLLLocation() const                          { return dllLocation; }
-    File getUserDataFolder() const                       { return userDataFolder; }
-    bool getIsStatusBarDisabled() const noexcept         { return disableStatusBar; }
-    bool getIsBuiltInErrorPageDisabled() const noexcept  { return disableBuiltInErrorPage; }
-    Colour getBackgroundColour() const                   { return backgroundColour; }
-
-private:
-    //==============================================================================
-    template <typename Member, typename Item>
-    WebView2Preferences with (Member&& member, Item&& item) const
-    {
-        auto options = *this;
-        options.*member = std::forward<Item> (item);
-
-        return options;
-    }
-
-    File dllLocation, userDataFolder;
-    bool disableStatusBar = false, disableBuiltInErrorPage = false;
-    Colour backgroundColour = Colours::white;
-};
-
-/**
-    If you have enabled the JUCE_USE_WIN_WEBVIEW2 flag then this wrapper will attempt to
-    use the Microsoft Edge (Chromium) WebView2 control instead of IE on Windows. It will
-    behave the same as WebBrowserComponent on all other platforms and will fall back to
-    IE on Windows if the WebView2 requirements are not met.
-
-    This requires Microsoft Edge (minimum version 82.0.488.0) to be installed at runtime.
-
-    Currently this also requires that WebView2Loader.dll, which can be found in the
-    Microsoft.Web.WebView package, is installed at runtime. As this is not a standard
-    system DLL, we can't rely on it being found via the normal system DLL search paths.
-    Therefore in order to use WebView2 you need to ensure that WebView2Loader.dll is
-    installed either to a location covered by the Windows DLL system search paths or
-    to the folder specified in the WebView2Preferences.
-
-    @tags{GUI}
-*/
-class WindowsWebView2WebBrowserComponent  : public WebBrowserComponent
-{
-public:
-    //==============================================================================
-    /** Creates a WebBrowserComponent that is compatible with the WebView2 control
-        on Windows.
-
-        @param unloadPageWhenBrowserIsHidden  if this is true, then when the browser
-                               component is taken offscreen, it'll clear the current page
-                               and replace it with a blank page - this can be handy to stop
-                               the browser using resources in the background when it's not
-                               actually being used.
-        @param preferences     a set of preferences used to control aspects of the webview's
-                               behaviour.
-
-        @see WebView2Preferences
-    */
-    WindowsWebView2WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true,
-                                        const WebView2Preferences& preferences = {});
-
-    // This constructor has been deprecated. Use the new constructor that takes a
-    // WebView2Preferences instead.
-    explicit WindowsWebView2WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true,
-                                                 const File& dllLocation = {},
-                                                 const File& userDataFolder = {})
-                                  : WindowsWebView2WebBrowserComponent (unloadPageWhenBrowserIsHidden,
-                                                                        WebView2Preferences().withDLLLocation (dllLocation)
-                                                                                             .withUserDataFolder (userDataFolder))
-    {
-    }
-};
-
 #endif
 
 } // namespace juce

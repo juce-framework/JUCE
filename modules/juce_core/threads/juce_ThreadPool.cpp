@@ -33,11 +33,14 @@ struct ThreadPool::ThreadPoolThread  : public Thread
     void run() override
     {
         while (! threadShouldExit())
+        {
             if (! pool.runNextJob (*this))
                 wait (500);
+        }
     }
 
     std::atomic<ThreadPoolJob*> currentJob { nullptr };
+
     ThreadPool& pool;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread)
@@ -90,31 +93,25 @@ ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 }
 
 //==============================================================================
-ThreadPool::ThreadPool (int numThreads, size_t threadStackSize)
+ThreadPool::ThreadPool (int numThreads, size_t threadStackSize, Thread::Priority priority)
 {
     jassert (numThreads > 0); // not much point having a pool without any threads!
 
-    createThreads (numThreads, threadStackSize);
+    for (int i = jmax (1, numThreads); --i >= 0;)
+        threads.add (new ThreadPoolThread (*this, threadStackSize));
+
+    for (auto* t : threads)
+        t->startThread (priority);
 }
 
-ThreadPool::ThreadPool()
+ThreadPool::ThreadPool() : ThreadPool (SystemStats::getNumCpus(), 0, Thread::Priority::normal)
 {
-    createThreads (SystemStats::getNumCpus());
 }
 
 ThreadPool::~ThreadPool()
 {
     removeAllJobs (true, 5000);
     stopThreads();
-}
-
-void ThreadPool::createThreads (int numThreads, size_t threadStackSize)
-{
-    for (int i = jmax (1, numThreads); --i >= 0;)
-        threads.add (new ThreadPoolThread (*this, threadStackSize));
-
-    for (auto* t : threads)
-        t->startThread();
 }
 
 void ThreadPool::stopThreads()
@@ -328,17 +325,6 @@ StringArray ThreadPool::getNamesOfAllJobs (bool onlyReturnActiveJobs) const
             s.add (job->getJobName());
 
     return s;
-}
-
-bool ThreadPool::setThreadPriorities (int newPriority)
-{
-    bool ok = true;
-
-    for (auto* t : threads)
-        if (! t->setPriority (newPriority))
-            ok = false;
-
-    return ok;
 }
 
 ThreadPoolJob* ThreadPool::pickNextJobToRun()

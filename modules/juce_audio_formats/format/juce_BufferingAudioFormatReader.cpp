@@ -254,7 +254,7 @@ public:
     void runTest() override
     {
         TimeSliceThread timeSlice ("TestBackgroundThread");
-        timeSlice.startThread (5);
+        timeSlice.startThread (Thread::Priority::normal);
 
         beginTest ("Timeout");
         {

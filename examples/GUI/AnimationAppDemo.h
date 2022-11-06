@@ -59,7 +59,7 @@ public:
     AnimationAppDemo()
     {
         setSize (800, 600);
-        setFramesPerSecond (60);
+        setSynchroniseToVBlank (true);
     }
 
     void update() override

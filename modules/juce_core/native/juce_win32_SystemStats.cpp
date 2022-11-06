@@ -23,11 +23,6 @@
 namespace juce
 {
 
-#if JUCE_MSVC && ! defined (__INTEL_COMPILER)
- #pragma intrinsic (__cpuid)
- #pragma intrinsic (__rdtsc)
-#endif
-
 void Logger::outputDebugString (const String& text)
 {
     OutputDebugString ((text + "\n").toWideCharPointer());
@@ -39,9 +34,50 @@ void Logger::outputDebugString (const String& text)
  JUCE_API void  juceDLL_free (void* block)    { std::free (block); }
 #endif
 
-//==============================================================================
+static int findNumberOfPhysicalCores() noexcept
+{
+   #if JUCE_MINGW
+    // Not implemented in MinGW
+    jassertfalse;
 
-#if JUCE_MINGW || JUCE_CLANG
+    return 1;
+   #else
+
+    DWORD bufferSize = 0;
+    GetLogicalProcessorInformation (nullptr, &bufferSize);
+
+    const auto numBuffers = (size_t) (bufferSize / sizeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
+
+    if (numBuffers == 0)
+    {
+        jassertfalse;
+        return 0;
+    };
+
+    HeapBlock<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> buffer (numBuffers);
+
+    if (! GetLogicalProcessorInformation (buffer, &bufferSize))
+    {
+        jassertfalse;
+        return 0;
+    }
+
+    return (int) std::count_if (buffer.get(), buffer.get() + numBuffers, [] (const auto& info)
+    {
+        return info.Relationship == RelationProcessorCore;
+    });
+
+   #endif // JUCE_MINGW
+}
+
+//==============================================================================
+#if JUCE_INTEL
+ #if JUCE_MSVC && ! defined (__INTEL_COMPILER)
+  #pragma intrinsic (__cpuid)
+  #pragma intrinsic (__rdtsc)
+ #endif
+
+ #if JUCE_MINGW || JUCE_CLANG
 static void callCPUID (int result[4], uint32 type)
 {
   uint32 la = (uint32) result[0], lb = (uint32) result[1],
@@ -59,12 +95,12 @@ static void callCPUID (int result[4], uint32 type)
   result[0] = (int) la; result[1] = (int) lb;
   result[2] = (int) lc; result[3] = (int) ld;
 }
-#else
+ #else
 static void callCPUID (int result[4], int infoType)
 {
     __cpuid (result, infoType);
 }
-#endif
+ #endif
 
 String SystemStats::getCpuVendor()
 {
@@ -103,34 +139,6 @@ String SystemStats::getCpuModel()
     return String (name).trim();
 }
 
-static int findNumberOfPhysicalCores() noexcept
-{
-   #if JUCE_MINGW
-    // Not implemented in MinGW
-    jassertfalse;
-
-    return 1;
-   #else
-
-    int numPhysicalCores = 0;
-    DWORD bufferSize = 0;
-    GetLogicalProcessorInformation (nullptr, &bufferSize);
-
-    if (auto numBuffers = (size_t) (bufferSize / sizeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION)))
-    {
-        HeapBlock<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> buffer (numBuffers);
-
-        if (GetLogicalProcessorInformation (buffer, &bufferSize))
-            for (size_t i = 0; i < numBuffers; ++i)
-                if (buffer[i].Relationship == RelationProcessorCore)
-                    ++numPhysicalCores;
-    }
-
-    return numPhysicalCores;
-   #endif // JUCE_MINGW
-}
-
-//==============================================================================
 void CPUInformation::initialise() noexcept
 {
     int info[4] = { 0 };
@@ -176,6 +184,49 @@ void CPUInformation::initialise() noexcept
     if (numPhysicalCPUs <= 0)
         numPhysicalCPUs = numLogicalCPUs;
 }
+#elif JUCE_ARM
+String SystemStats::getCpuVendor()
+{
+    static const auto cpuVendor = []
+    {
+        static constexpr auto* path = "HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\\VendorIdentifier";
+        auto vendor = RegistryKeyWrapper::getValue (path, {}, 0).trim();
+
+        return vendor.isEmpty() ? String ("Unknown Vendor") : vendor;
+    }();
+
+    return cpuVendor;
+}
+
+String SystemStats::getCpuModel()
+{
+    static const auto cpuModel = []
+    {
+        static constexpr auto* path = "HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\\ProcessorNameString";
+        auto model = RegistryKeyWrapper::getValue (path, {}, 0).trim();
+
+        return model.isEmpty() ? String ("Unknown Model") : model;
+    }();
+
+    return cpuModel;
+}
+
+void CPUInformation::initialise() noexcept
+{
+    // Windows for arm requires at least armv7 which has neon support
+    hasNeon = true;
+
+    SYSTEM_INFO systemInfo;
+    GetNativeSystemInfo (&systemInfo);
+    numLogicalCPUs  = (int) systemInfo.dwNumberOfProcessors;
+    numPhysicalCPUs = findNumberOfPhysicalCores();
+
+    if (numPhysicalCPUs <= 0)
+        numPhysicalCPUs = numLogicalCPUs;
+}
+#else
+ #error Unknown CPU architecture type
+#endif
 
 #if JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
 struct DebugFlagsInitialiser
@@ -442,11 +493,21 @@ double Time::getMillisecondCounterHiRes() noexcept       { return hiResCounterHa
 //==============================================================================
 static int64 juce_getClockCycleCounter() noexcept
 {
-   #if JUCE_MSVC
+ #if JUCE_MSVC
+  #if JUCE_INTEL
     // MS intrinsics version...
     return (int64) __rdtsc();
-
-   #elif JUCE_GCC || JUCE_CLANG
+  #elif JUCE_ARM
+   #if defined (_M_ARM)
+    return __rdpmccntr64();
+   #elif defined (_M_ARM64)
+    return _ReadStatusReg (ARM64_PMCCNTR_EL0);
+   #else
+    #error Unknown arm architecture
+   #endif
+  #endif
+ #elif JUCE_GCC || JUCE_CLANG
+  #if JUCE_INTEL
     // GNU inline asm version...
     unsigned int hi = 0, lo = 0;
 
@@ -462,9 +523,15 @@ static int64 juce_getClockCycleCounter() noexcept
          : "cc", "eax", "ebx", "ecx", "edx", "memory");
 
     return (int64) ((((uint64) hi) << 32) | lo);
-   #else
-    #error "unknown compiler?"
-   #endif
+  #elif JUCE_ARM
+    int64 retval;
+
+    __asm__ __volatile__ ("mrs %0, cntvct_el0" : "=r"(retval));
+    return retval;
+  #endif
+ #else
+  #error "unknown compiler?"
+ #endif
 }
 
 int SystemStats::getCpuSpeedInMegahertz()

@@ -64,7 +64,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     }
 
     // The thread must be started before the DirectoryContentsList attempts to scan any file
-    thread.startThread (4);
+    thread.startThread (Thread::Priority::low);
 
     fileList.reset (new DirectoryContentsList (this, thread));
     fileList->setDirectory (currentRoot, true, true);

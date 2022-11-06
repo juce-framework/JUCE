@@ -281,12 +281,14 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
                   sampleCount (sampleCountIn),
                   seconds ((double) sampleCountIn / sampleRateIn)
             {
-                processor.setPlayHead (this);
+                if (useThisPlayhead)
+                    processor.setPlayHead (this);
             }
 
             ~PlayHead() override
             {
-                processor.setPlayHead (nullptr);
+                if (useThisPlayhead)
+                    processor.setPlayHead (nullptr);
             }
 
         private:
@@ -303,6 +305,7 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
             Optional<uint64_t> hostTimeNs;
             uint64_t sampleCount;
             double seconds;
+            bool useThisPlayhead = processor.getPlayHead() == nullptr;
         };
 
         PlayHead playHead { *processor,

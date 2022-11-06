@@ -344,35 +344,78 @@ LocalRef<jobject> getMainActivity() noexcept
 }
 
 //==============================================================================
-// sets the process to 0=low priority, 1=normal, 2=high, 3=realtime
-JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority prior)
+#if JUCE_ANDROID && JUCE_MODULE_AVAILABLE_juce_audio_devices && (JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE)
+ #define JUCE_ANDROID_REALTIME_THREAD_AVAILABLE 1
+#endif
+
+#if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
+pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr);
+#endif
+
+extern JavaVM* androidJNIJavaVM;
+
+bool Thread::createNativeThread (Priority)
 {
-    // TODO
+    if (isRealtime())
+    {
+       #if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
+        threadHandle = (void*) juce_createRealtimeAudioThread (threadEntryProc, this);
+        threadId = (ThreadID) threadHandle.get();
+        return threadId != nullptr;
+       #else
+        jassertfalse;
+       #endif
+    }
 
-    struct sched_param param;
-    int policy, maxp, minp;
+    PosixThreadAttribute attr { threadStackSize };
+    threadId = threadHandle = makeThreadHandle (attr, this, [] (void* userData) -> void*
+    {
+        auto* myself = static_cast<Thread*> (userData);
 
-    const int p = (int) prior;
+        juce_threadEntryPoint (myself);
 
-    if (p <= 1)
-        policy = SCHED_OTHER;
-    else
-        policy = SCHED_RR;
+        if (androidJNIJavaVM != nullptr)
+        {
+            void* env = nullptr;
+            androidJNIJavaVM->GetEnv (&env, JNI_VERSION_1_2);
 
-    minp = sched_get_priority_min (policy);
-    maxp = sched_get_priority_max (policy);
+            // only detach if we have actually been attached
+            if (env != nullptr)
+                androidJNIJavaVM->DetachCurrentThread();
+        }
 
-    if (p < 2)
-        param.sched_priority = 0;
-    else if (p == 2 )
-        // Set to middle of lower realtime priority range
-        param.sched_priority = minp + (maxp - minp) / 4;
-    else
-        // Set to middle of higher realtime priority range
-        param.sched_priority = minp + (3 * (maxp - minp) / 4);
+        return nullptr;
+    });
 
-    pthread_setschedparam (pthread_self(), policy, &param);
+    return threadId != nullptr;
 }
+
+void Thread::killThread()
+{
+    if (threadHandle != nullptr)
+        jassertfalse; // pthread_cancel not available!
+}
+
+Thread::Priority Thread::getPriority() const
+{
+    jassert (Thread::getCurrentThreadId() == getThreadId());
+
+    const auto native = getpriority (PRIO_PROCESS, (id_t) gettid());
+    return ThreadPriorities::getJucePriority (native);
+}
+
+bool Thread::setPriority (Priority)
+{
+    jassert (Thread::getCurrentThreadId() == getThreadId());
+
+    if (isRealtime())
+        return false;
+
+    return setpriority (PRIO_PROCESS, (id_t) gettid(), ThreadPriorities::getNativePriority (priority)) == 0;
+}
+
+//==============================================================================
+JUCE_API void JUCE_CALLTYPE Process::setPriority (ProcessPriority) {}
 
 JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
 {

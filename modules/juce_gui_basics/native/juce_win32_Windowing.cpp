@@ -1388,10 +1388,7 @@ static HMONITOR getMonitorFromOutput (ComSmartPtr<IDXGIOutput> output)
         : desc.Monitor;
 }
 
-struct VBlankListener
-{
-    virtual void onVBlank() = 0;
-};
+using VBlankListener = ComponentPeer::VBlankListener;
 
 //==============================================================================
 class VSyncThread : private Thread,
@@ -1406,7 +1403,7 @@ public:
           monitor (mon)
     {
         listeners.push_back (listener);
-        startThread (10);
+        startThread (Priority::highest);
     }
 
     ~VSyncThread() override
@@ -2076,6 +2073,7 @@ public:
     //==============================================================================
     void onVBlank() override
     {
+        vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
         dispatchDeferredRepaints();
     }
 

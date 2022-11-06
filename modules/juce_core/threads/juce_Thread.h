@@ -28,8 +28,8 @@ namespace juce
     Encapsulates a thread.
 
     Subclasses derive from Thread and implement the run() method, in which they
-    do their business. The thread can then be started with the startThread() method
-    and controlled with various other methods.
+    do their business. The thread can then be started with the startThread() or
+    startRealtimeThread() methods and controlled with various other methods.
 
     This class also contains some thread-related static methods, such
     as sleep(), yield(), getCurrentThreadId() etc.
@@ -42,6 +42,46 @@ namespace juce
 class JUCE_API  Thread
 {
 public:
+    //==============================================================================
+    /** The different runtime priorities of non-realtime threads.
+
+        @see startThread
+    */
+    enum class Priority
+    {
+        /** The highest possible priority that isn't a dedicated realtime thread. */
+        highest     = 2,
+
+        /** Makes use of performance cores and higher clocks. */
+        high        = 1,
+
+        /** The OS default. It will balance out across all cores. */
+        normal      = 0,
+
+        /** Uses efficiency cores when possible. */
+        low         = -1,
+
+        /** Restricted to efficiency cores on platforms that have them. */
+        background  = -2
+    };
+
+    //==============================================================================
+    /** A selection of options available when creating realtime threads.
+
+        @see startRealtimeThread
+    */
+    struct RealtimeOptions
+    {
+        /** Linux only: A value with a range of 0-10, where 10 is the highest priority. */
+        int priority = 5;
+
+        /* iOS/macOS only: A millisecond value representing the estimated time between each
+                           'Thread::run' call. Your thread may be penalised if you frequently
+                           overrun this.
+        */
+        uint32_t workDurationMs = 0;
+    };
+
     //==============================================================================
     /**
         Creates a thread.
@@ -78,23 +118,51 @@ public:
     virtual void run() = 0;
 
     //==============================================================================
-    /** Starts the thread running.
+    /** Attempts to start a new thread with default ('Priority::normal') priority.
 
         This will cause the thread's run() method to be called by a new thread.
         If this thread is already running, startThread() won't do anything.
 
+        If a thread cannot be created with the requested priority, this will return false
+        and Thread::run() will not be called. An exception to this is the Android platform,
+        which always starts a thread and attempts to upgrade the thread after creation.
+
+        @returns    true if the thread started successfully. false if it was unsuccesful.
+
         @see stopThread
     */
-    void startThread();
+    bool startThread();
 
-    /** Starts the thread with a given priority.
+    /** Attempts to start a new thread with a given priority.
 
-        Launches the thread with a given priority, where 0 = lowest, 10 = highest.
-        If the thread is already running, its priority will be changed.
+        This will cause the thread's run() method to be called by a new thread.
+        If this thread is already running, startThread() won't do anything.
 
-        @see startThread, setPriority, realtimeAudioPriority
+        If a thread cannot be created with the requested priority, this will return false
+        and Thread::run() will not be called. An exception to this is the Android platform,
+        which always starts a thread and attempts to upgrade the thread after creation.
+
+        @param newPriority    Priority the thread should be assigned. This parameter is ignored
+                              on Linux.
+
+        @returns    true if the thread started successfully, false if it was unsuccesful.
+
+        @see startThread, setPriority, startRealtimeThread
     */
-    void startThread (int priority);
+    bool startThread (Priority newPriority);
+
+    /** Starts the thread with realtime performance characteristics on platforms
+        that support it.
+
+        You cannot change the options of a running realtime thread, nor switch
+        a non-realtime thread to a realtime thread. To make these changes you must
+        first stop the thread and then restart with different options.
+
+        @param options    Realtime options the thread should be created with.
+
+        @see startThread, RealtimeOptions
+    */
+    bool startRealtimeThread (const RealtimeOptions& options);
 
     /** Attempts to stop the thread running.
 
@@ -119,7 +187,7 @@ public:
     bool stopThread (int timeOutMilliseconds);
 
     //==============================================================================
-    /** Invokes a lambda or function on its own thread.
+    /** Invokes a lambda or function on its own thread with the default priority.
 
         This will spin up a Thread object which calls the function and then exits.
         Bear in mind that starting and stopping a thread can be a fairly heavyweight
@@ -129,8 +197,33 @@ public:
         Also note that using an anonymous thread makes it very difficult to interrupt
         the function when you need to stop it, e.g. when your app quits. So it's up to
         you to deal with situations where the function may fail to stop in time.
+
+        @param functionToRun  The lambda to be called from the new Thread.
+
+        @returns    true if the thread started successfully, or false if it failed.
+
+        @see launch.
     */
-    static void launch (std::function<void()> functionToRun);
+    static bool launch (std::function<void()> functionToRun);
+
+    //==============================================================================
+    /** Invokes a lambda or function on its own thread with a custom priority.
+
+        This will spin up a Thread object which calls the function and then exits.
+        Bear in mind that starting and stopping a thread can be a fairly heavyweight
+        operation, so you might prefer to use a ThreadPool if you're kicking off a lot
+        of short background tasks.
+
+        Also note that using an anonymous thread makes it very difficult to interrupt
+        the function when you need to stop it, e.g. when your app quits. So it's up to
+        you to deal with situations where the function may fail to stop in time.
+
+        @param priority       The priority the thread is started with.
+        @param functionToRun  The lambda to be called from the new Thread.
+
+        @returns    true if the thread started successfully, or false if it failed.
+    */
+    static bool launch (Priority priority, std::function<void()> functionToRun);
 
     //==============================================================================
     /** Returns true if the thread is currently active */
@@ -198,50 +291,8 @@ public:
     /** Removes a listener added with addListener. */
     void removeListener (Listener*);
 
-    //==============================================================================
-    /** Special realtime audio thread priority
-
-        This priority will create a high-priority thread which is best suited
-        for realtime audio processing.
-
-        Currently, this priority is identical to priority 9, except when building
-        for Android with OpenSL/Oboe support.
-
-        In this case, JUCE will ask OpenSL/Oboe to construct a super high priority thread
-        specifically for realtime audio processing.
-
-        Note that this priority can only be set **before** the thread has
-        started. Switching to this priority, or from this priority to a different
-        priority, is not supported under Android and will assert.
-
-        For best performance this thread should yield at regular intervals
-        and not call any blocking APIs.
-
-        @see startThread, setPriority, sleep, WaitableEvent
-     */
-    enum
-    {
-        realtimeAudioPriority = -1
-    };
-
-    /** Changes the thread's priority.
-
-        May return false if for some reason the priority can't be changed.
-
-        @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
-                            of 5 is normal.
-        @see realtimeAudioPriority
-    */
-    bool setPriority (int priority);
-
-    /** Changes the priority of the caller thread.
-
-        Similar to setPriority(), but this static method acts on the caller thread.
-        May return false if for some reason the priority can't be changed.
-
-        @see setPriority
-    */
-    static bool setCurrentThreadPriority (int priority);
+    /** Returns true if this Thread represents a realtime thread. */
+    bool isRealtime() const;
 
     //==============================================================================
     /** Sets the affinity mask for the thread.
@@ -380,34 +431,58 @@ public:
     static void initialiseJUCE (void* jniEnv, void* jContext);
    #endif
 
+protected:
+    //==============================================================================
+    /** Returns the current priority of this thread.
+
+        This can only be called from the target thread. Doing so from another thread
+        will cause an assert.
+
+        @see setPriority
+    */
+    Priority getPriority() const;
+
+    /** Attempts to set the priority for this thread. Returns true if the new priority
+        was set successfully, false if not.
+
+        This can only be called from the target thread. Doing so from another thread
+        will cause an assert.
+
+        @param newPriority The new priority to be applied to the thread. Note: This
+                           has no effect on Linux platforms, subsequent calls to
+                           'getPriority' will return this value.
+
+        @see Priority
+    */
+    bool setPriority (Priority newPriority);
+
 private:
     //==============================================================================
     const String threadName;
-    Atomic<void*> threadHandle { nullptr };
-    Atomic<ThreadID> threadId = {};
+    std::atomic<void*> threadHandle { nullptr };
+    std::atomic<ThreadID> threadId { nullptr };
+    Optional<RealtimeOptions> realtimeOptions = {};
     CriticalSection startStopLock;
     WaitableEvent startSuspensionEvent, defaultEvent;
-    int threadPriority = 5;
     size_t threadStackSize;
     uint32 affinityMask = 0;
     bool deleteOnThreadEnd = false;
-    Atomic<int32> shouldExit { 0 };
+    std::atomic<bool> shouldExit { false };
     ListenerList<Listener, Array<Listener*, CriticalSection>> listeners;
 
-   #if JUCE_ANDROID
-    bool isAndroidRealtimeThread = false;
+   #if JUCE_ANDROID || JUCE_LINUX || JUCE_BSD
+    std::atomic<Priority> priority;
    #endif
 
    #ifndef DOXYGEN
     friend void JUCE_API juce_threadEntryPoint (void*);
    #endif
 
-    void launchThread();
+    bool startThreadInternal (Priority);
+    bool createNativeThread (Priority);
     void closeThreadHandle();
     void killThread();
     void threadEntryPoint();
-    static bool setThreadPriority (void*, int);
-    static int getAdjustedPriority (int);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thread)
 };
