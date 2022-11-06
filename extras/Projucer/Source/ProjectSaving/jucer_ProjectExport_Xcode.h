@@ -32,8 +32,7 @@ constexpr auto* macOSArch_Default        = "default";
 constexpr auto* macOSArch_Native         = "Native";
 constexpr auto* macOSArch_32BitUniversal = "32BitUniversal";
 constexpr auto* macOSArch_64BitUniversal = "64BitUniversal";
-constexpr auto* macOSArch_64Bit          = "64Bit";
-constexpr auto* macOSArch_64BitIntel     = "64BitIntel";
+constexpr auto* macOSArch_64Bit          = "64BitIntel";
 
 //==============================================================================
 class XcodeProjectExporter  : public ProjectExporter
@@ -1478,7 +1477,6 @@ public:
             s.set ("PRODUCT_BUNDLE_IDENTIFIER", getBundleIdentifier());
 
             auto arch = (! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? macOSArch_64Bit
-                        : type == Target::AAXPlugIn                            ? macOSArch_64BitIntel
                                                                                : config.getMacOSArchitectureString();
 
             const auto archString = [&]() -> const char*
@@ -1487,7 +1485,6 @@ public:
                 if (arch == macOSArch_32BitUniversal)   return "\"$(ARCHS_STANDARD_32_BIT)\"";
                 if (arch == macOSArch_64BitUniversal)   return "\"$(ARCHS_STANDARD_32_64_BIT)\"";
                 if (arch == macOSArch_64Bit)            return "\"$(ARCHS_STANDARD_64_BIT)\"";
-                if (arch == macOSArch_64BitIntel)       return "\"x86_64\"";
 
                 return nullptr;
             }();
