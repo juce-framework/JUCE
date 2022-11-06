@@ -900,7 +900,7 @@ public:
     void handleAppResumedCallback()
     {
         if (isKioskModeComponent())
-            setNavBarsHidden (navBarsHidden);
+            setNavBarsHidden (navBarsHidden, true);
     }
 
     //==============================================================================
@@ -1346,9 +1346,9 @@ private:
         return (shouldBeFullScreen && isKioskModeComponent());
     }
 
-    void setNavBarsHidden (bool hidden)
+    void setNavBarsHidden (bool hidden, bool force)
     {
-        if (navBarsHidden != hidden)
+        if (navBarsHidden != hidden || force)
         {
             navBarsHidden = hidden;
 
