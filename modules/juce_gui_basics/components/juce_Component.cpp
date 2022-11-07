@@ -39,51 +39,6 @@ static Component* findFirstEnabledAncestor (Component* in)
 
 Component* Component::currentlyFocusedComponent = nullptr;
 
-//==============================================================================
-class HierarchyChecker
-{
-public:
-    HierarchyChecker (Component* comp, const MouseEvent& originalEvent)
-        : me (originalEvent)
-    {
-        for (; comp != nullptr; comp = comp->getParentComponent())
-            hierarchy.emplace_back (comp);
-    }
-
-    Component* nearestNonNullParent() const
-    {
-        for (auto& comp : hierarchy)
-            if (comp != nullptr)
-                return comp;
-
-        return nullptr;
-    }
-
-    bool shouldBailOut() const
-    {
-        return nearestNonNullParent() == nullptr;
-    }
-
-    MouseEvent eventWithNearestParent() const
-    {
-        auto* comp = nearestNonNullParent();
-        return { me.source,
-                 me.position.toFloat(),
-                 me.mods,
-                 me.pressure, me.orientation, me.rotation,
-                 me.tiltX, me.tiltY,
-                 comp, comp,
-                 me.eventTime,
-                 me.mouseDownPosition.toFloat(),
-                 me.mouseDownTime,
-                 me.getNumberOfClicks(),
-                 me.mouseWasDraggedSinceMouseDown() };
-    }
-
-private:
-    std::vector<Component::SafePointer<Component>> hierarchy;
-    const MouseEvent me;
-};
 
 //==============================================================================
 class Component::MouseListenerList
@@ -120,14 +75,51 @@ public:
         }
     }
 
-    template <typename EventMethod, typename... Params>
-    static void sendMouseEvent (HierarchyChecker& checker, EventMethod&& eventMethod, Params&&... params)
+    // g++ 4.8 cannot deduce the parameter pack inside the function pointer when it has more than one element
+   #if defined(__GNUC__) && __GNUC__ < 5 && ! defined(__clang__)
+    template <typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                void (MouseListener::*eventMethod) (const MouseEvent&),
+                                Params... params)
     {
-        if (auto* list = checker.nearestNonNullParent()->mouseListeners.get())
+        sendMouseEvent <decltype (eventMethod), Params...> (comp, checker, eventMethod, params...);
+    }
+
+    template <typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                void (MouseListener::*eventMethod) (const MouseEvent&, const MouseWheelDetails&),
+                                Params... params)
+    {
+        sendMouseEvent <decltype (eventMethod), Params...> (comp, checker, eventMethod, params...);
+    }
+
+    template <typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                void (MouseListener::*eventMethod) (const MouseEvent&, float),
+                                Params... params)
+    {
+        sendMouseEvent <decltype (eventMethod), Params...> (comp, checker, eventMethod, params...);
+    }
+
+    template <typename EventMethod, typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                EventMethod eventMethod,
+                                Params... params)
+   #else
+    template <typename... Params>
+    static void sendMouseEvent (Component& comp, Component::BailOutChecker& checker,
+                                void (MouseListener::*eventMethod) (Params...),
+                                Params... params)
+   #endif
+    {
+        if (checker.shouldBailOut())
+            return;
+
+        if (auto* list = comp.mouseListeners.get())
         {
             for (int i = list->listeners.size(); --i >= 0;)
             {
-                (list->listeners.getUnchecked (i)->*eventMethod) (checker.eventWithNearestParent(), params...);
+                (list->listeners.getUnchecked(i)->*eventMethod) (params...);
 
                 if (checker.shouldBailOut())
                     return;
@@ -136,22 +128,19 @@ public:
             }
         }
 
-        for (Component* p = checker.nearestNonNullParent()->parentComponent; p != nullptr; p = p->parentComponent)
+        for (Component* p = comp.parentComponent; p != nullptr; p = p->parentComponent)
         {
             if (auto* list = p->mouseListeners.get())
             {
                 if (list->numDeepMouseListeners > 0)
                 {
-                    const auto shouldBailOut = [&checker, safePointer = WeakReference { p }]
-                    {
-                        return checker.shouldBailOut() || safePointer == nullptr;
-                    };
+                    BailOutChecker2 checker2 (checker, p);
 
                     for (int i = list->numDeepMouseListeners; --i >= 0;)
                     {
-                        (list->listeners.getUnchecked(i)->*eventMethod) (checker.eventWithNearestParent(), params...);
+                        (list->listeners.getUnchecked(i)->*eventMethod) (params...);
 
-                        if (shouldBailOut())
+                        if (checker2.shouldBailOut())
                             return;
 
                         i = jmin (i, list->numDeepMouseListeners);
@@ -164,6 +153,25 @@ public:
 private:
     Array<MouseListener*> listeners;
     int numDeepMouseListeners = 0;
+
+    struct BailOutChecker2
+    {
+        BailOutChecker2 (Component::BailOutChecker& boc, Component* comp)
+            : checker (boc), safePointer (comp)
+        {
+        }
+
+        bool shouldBailOut() const noexcept
+        {
+            return checker.shouldBailOut() || safePointer == nullptr;
+        }
+
+    private:
+        Component::BailOutChecker& checker;
+        const WeakReference<Component> safePointer;
+
+        JUCE_DECLARE_NON_COPYABLE (BailOutChecker2)
+    };
 
     JUCE_DECLARE_NON_COPYABLE (MouseListenerList)
 };
@@ -2414,6 +2422,8 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
+    BailOutChecker checker (this);
+
     const auto me = makeMouseEvent (source,
                                     PointerState().withPosition (relativePos),
                                     source.getCurrentModifiers(),
@@ -2424,8 +2434,6 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
                                     time,
                                     0,
                                     false);
-
-    HierarchyChecker checker (this, me);
     mouseEnter (me);
 
     flags.cachedMouseInsideComponent = true;
@@ -2434,7 +2442,8 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
         return;
 
     Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseEnter (me); });
-    MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseEnter);
+
+    MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseEnter, me);
 }
 
 void Component::internalMouseExit (MouseInputSource source, Point<float> relativePos, Time time)
@@ -2451,6 +2460,8 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
 
     flags.cachedMouseInsideComponent = false;
 
+    BailOutChecker checker (this);
+
     const auto me = makeMouseEvent (source,
                                     PointerState().withPosition (relativePos),
                                     source.getCurrentModifiers(),
@@ -2462,14 +2473,14 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
                                     0,
                                     false);
 
-    HierarchyChecker checker (this, me);
     mouseExit (me);
 
     if (checker.shouldBailOut())
         return;
 
     Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseExit (me); });
-    MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseExit);
+
+    MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseExit, me);
 }
 
 #ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
@@ -2488,19 +2499,7 @@ void Component::internalMouseDown (MouseInputSource source, const PointerState& 
 #endif
 
     auto& desktop = Desktop::getInstance();
-
-    const auto me = makeMouseEvent (source,
-                                    relativePointerState,
-                                    source.getCurrentModifiers(),
-                                    this,
-                                    this,
-                                    time,
-                                    relativePointerState.position,
-                                    time,
-                                    source.getNumberOfMultipleClicks(),
-                                    false);
-
-    HierarchyChecker checker (this, me);
+    BailOutChecker checker (this);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2515,7 +2514,18 @@ void Component::internalMouseDown (MouseInputSource source, const PointerState& 
         if (isCurrentlyBlockedByAnotherModalComponent())
         {
             // allow blocked mouse-events to go to global listeners..
-            desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (checker.eventWithNearestParent()); });
+            const auto me = makeMouseEvent (source,
+                                            relativePointerState,
+                                            source.getCurrentModifiers(),
+                                            this,
+                                            this,
+                                            time,
+                                            relativePointerState.position,
+                                            time,
+                                            source.getNumberOfMultipleClicks(),
+                                            false);
+
+            desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (me); });
             return;
         }
     }
@@ -2544,14 +2554,24 @@ void Component::internalMouseDown (MouseInputSource source, const PointerState& 
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
+    const auto me = makeMouseEvent (source,
+                                    relativePointerState,
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePointerState.position,
+                                    time,
+                                    source.getNumberOfMultipleClicks(),
+                                    false);
     mouseDown (me);
 
     if (checker.shouldBailOut())
         return;
 
-    desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (checker.eventWithNearestParent()); });
+    desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (me); });
 
-    MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseDown);
+    MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseDown, me);
 }
 
 void Component::internalMouseUp (MouseInputSource source, const PointerState& relativePointerState, Time time, const ModifierKeys oldModifiers)
@@ -2567,6 +2587,11 @@ void Component::internalMouseUp (MouseInputSource source, const PointerState& re
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())
         return;
 
+    BailOutChecker checker (this);
+
+    if (flags.repaintOnMouseActivityFlag)
+        repaint();
+
     const auto me = makeMouseEvent (source,
                                     relativePointerState,
                                     oldModifiers,
@@ -2577,21 +2602,15 @@ void Component::internalMouseUp (MouseInputSource source, const PointerState& re
                                     source.getLastMouseDownTime(),
                                     source.getNumberOfMultipleClicks(),
                                     source.isLongPressOrDrag());
-
-    HierarchyChecker checker (this, me);
-
-    if (flags.repaintOnMouseActivityFlag)
-        repaint();
-
     mouseUp (me);
 
     if (checker.shouldBailOut())
         return;
 
     auto& desktop = Desktop::getInstance();
-    desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseUp (checker.eventWithNearestParent()); });
+    desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseUp (me); });
 
-    MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseUp);
+    MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseUp, me);
 
     if (checker.shouldBailOut())
         return;
@@ -2599,13 +2618,13 @@ void Component::internalMouseUp (MouseInputSource source, const PointerState& re
     // check for double-click
     if (me.getNumberOfClicks() >= 2)
     {
-        mouseDoubleClick (checker.eventWithNearestParent());
+        mouseDoubleClick (me);
 
         if (checker.shouldBailOut())
             return;
 
-        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseDoubleClick (checker.eventWithNearestParent()); });
-        MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseDoubleClick);
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseDoubleClick (me); });
+        MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseDoubleClick, me);
     }
 }
 
@@ -2613,6 +2632,8 @@ void Component::internalMouseDrag (MouseInputSource source, const PointerState& 
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {
+        BailOutChecker checker (this);
+
         const auto me = makeMouseEvent (source,
                                         relativePointerState,
                                         source.getCurrentModifiers(),
@@ -2623,16 +2644,14 @@ void Component::internalMouseDrag (MouseInputSource source, const PointerState& 
                                         source.getLastMouseDownTime(),
                                         source.getNumberOfMultipleClicks(),
                                         source.isLongPressOrDrag());
-
-        HierarchyChecker checker (this, me);
-
         mouseDrag (me);
 
         if (checker.shouldBailOut())
             return;
 
-        Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDrag (checker.eventWithNearestParent()); });
-        MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseDrag);
+        Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDrag (me); });
+
+        MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseDrag, me);
     }
 }
 
@@ -2647,6 +2666,8 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
     }
     else
     {
+        BailOutChecker checker (this);
+
         const auto me = makeMouseEvent (source,
                                         PointerState().withPosition (relativePos),
                                         source.getCurrentModifiers(),
@@ -2657,16 +2678,14 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
                                         time,
                                         0,
                                         false);
-
-        HierarchyChecker checker (this, me);
-
         mouseMove (me);
 
         if (checker.shouldBailOut())
             return;
 
-        desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseMove (checker.eventWithNearestParent()); });
-        MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseMove);
+        desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseMove (me); });
+
+        MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseMove, me);
     }
 }
 
@@ -2674,6 +2693,7 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
                                     Time time, const MouseWheelDetails& wheel)
 {
     auto& desktop = Desktop::getInstance();
+    BailOutChecker checker (this);
 
     const auto me = makeMouseEvent (source,
                                     PointerState().withPosition (relativePos),
@@ -2685,8 +2705,6 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
                                     time,
                                     0,
                                     false);
-
-    HierarchyChecker checker (this, me);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2700,10 +2718,10 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
         if (checker.shouldBailOut())
             return;
 
-        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseWheelMove (checker.eventWithNearestParent(), wheel); });
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseWheelMove (me, wheel); });
 
         if (! checker.shouldBailOut())
-            MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseWheelMove, wheel);
+            MouseListenerList::template sendMouseEvent<const MouseEvent&, const MouseWheelDetails&> (*this, checker, &MouseListener::mouseWheelMove, me, wheel);
     }
 }
 
@@ -2711,6 +2729,7 @@ void Component::internalMagnifyGesture (MouseInputSource source, Point<float> re
                                         Time time, float amount)
 {
     auto& desktop = Desktop::getInstance();
+    BailOutChecker checker (this);
 
     const auto me = makeMouseEvent (source,
                                     PointerState().withPosition (relativePos),
@@ -2722,8 +2741,6 @@ void Component::internalMagnifyGesture (MouseInputSource source, Point<float> re
                                     time,
                                     0,
                                     false);
-
-    HierarchyChecker checker (this, me);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2737,10 +2754,10 @@ void Component::internalMagnifyGesture (MouseInputSource source, Point<float> re
         if (checker.shouldBailOut())
             return;
 
-        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseMagnify (checker.eventWithNearestParent(), amount); });
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseMagnify (me, amount); });
 
         if (! checker.shouldBailOut())
-            MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseMagnify, amount);
+            MouseListenerList::template sendMouseEvent<const MouseEvent&, float> (*this, checker, &MouseListener::mouseMagnify, me, amount);
     }
 }
 
