@@ -1681,11 +1681,9 @@ public:
             s.set ("GCC_VERSION", gccVersion);
             s.set ("CLANG_LINK_OBJC_RUNTIME", "NO");
 
-            auto codeSigningIdentity = owner.getCodeSigningIdentity (config);
-            s.set (owner.iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
-                   codeSigningIdentity.quoted());
+            owner.addCodeSigningIdentity (config, s);
 
-            if (codeSigningIdentity.isNotEmpty())
+            if (owner.getCodeSigningIdentity (config).isNotEmpty())
             {
                 s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
 
@@ -2533,6 +2531,13 @@ private:
         return config.getCodeSignIdentityString();
     }
 
+    void addCodeSigningIdentity (const XcodeBuildConfiguration& config, StringPairArray& result) const
+    {
+        if (const auto codeSigningIdentity = getCodeSigningIdentity (config); codeSigningIdentity.isNotEmpty())
+            result.set (iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
+                        codeSigningIdentity.quoted());
+    }
+
     StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const
     {
         StringPairArray s;
@@ -2583,8 +2588,7 @@ private:
                 s.set ("ONLY_ACTIVE_ARCH", "YES");
         }
 
-        s.set (iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
-               getCodeSigningIdentity (config).quoted());
+        addCodeSigningIdentity (config, s);
 
         if (iOS)
         {
