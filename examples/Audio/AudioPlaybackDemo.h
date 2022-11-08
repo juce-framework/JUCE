@@ -48,22 +48,6 @@
 
 #include "../Assets/DemoUtilities.h"
 
-inline std::unique_ptr<InputSource> makeInputSource (const URL& url)
-{
-   #if JUCE_ANDROID
-    if (auto doc = AndroidDocument::fromDocument (url))
-        return std::make_unique<AndroidDocumentInputSource> (doc);
-   #endif
-
-   #if ! JUCE_IOS
-    if (url.isLocalFile())
-        return std::make_unique<FileInputSource> (url.getLocalFile());
-   #endif
-
-    return std::make_unique<URLInputSource> (url);
-}
-
-//==============================================================================
 class DemoThumbnailComp  : public Component,
                            public ChangeListener,
                            public FileDragAndDropTarget,
