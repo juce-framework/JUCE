@@ -81,10 +81,6 @@ void Thread::threadEntryPoint()
     const CurrentThreadHolder::Ptr currentThreadHolder (getCurrentThreadHolder());
     currentThreadHolder->value = this;
 
-   #if JUCE_ANDROID
-    setPriority (priority);
-   #endif
-
     if (threadName.isNotEmpty())
         setCurrentThreadName (threadName);
 
@@ -130,10 +126,10 @@ bool Thread::startThreadInternal (Priority threadPriority)
     shouldExit = false;
 
     // 'priority' is essentially useless on Linux as only realtime
-    // has any options but we need to set this here to satsify
+    // has any options but we need to set this here to satisfy
     // later queries, otherwise we get inconsistent results across
     // platforms.
-   #if JUCE_LINUX || JUCE_BSD
+   #if JUCE_ANDROID || JUCE_LINUX || JUCE_BSD
     priority = threadPriority;
    #endif
 
