@@ -807,10 +807,10 @@ protected:
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
               macOSBaseSDK                 (config, Ids::macOSBaseSDK,                 getUndoManager()),
-              macOSDeploymentTarget        (config, Ids::macOSDeploymentTarget,        getUndoManager(), "10.11"),
+              macOSDeploymentTarget        (config, Ids::macOSDeploymentTarget,        getUndoManager(), "10.13"),
               macOSArchitecture            (config, Ids::osxArchitecture,              getUndoManager(), macOSArch_Default),
               iosBaseSDK                   (config, Ids::iosBaseSDK,                   getUndoManager()),
-              iosDeploymentTarget          (config, Ids::iosDeploymentTarget,          getUndoManager(), "9.3"),
+              iosDeploymentTarget          (config, Ids::iosDeploymentTarget,          getUndoManager(), "11.0"),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, getUndoManager()),
               codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager()),
@@ -859,7 +859,7 @@ protected:
                            "The version of the macOS SDK to link against." + sdkInfoString + "10.11.");
 
                 props.add (new TextPropertyComponent (macOSDeploymentTarget, "macOS Deployment Target", 8, false),
-                           "The minimum version of macOS to target." + sdkInfoString + "10.7.");
+                           "The minimum version of macOS to target." + sdkInfoString + "10.9.");
 
                 props.add (new ChoicePropertyComponent (macOSArchitecture, "macOS Architecture",
                                                         { "Native architecture of build machine", "Standard 32-bit",        "Standard 32/64-bit",     "Standard 64-bit" },
