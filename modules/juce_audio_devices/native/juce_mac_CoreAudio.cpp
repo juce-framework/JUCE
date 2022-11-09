@@ -622,12 +622,9 @@ public:
 
         stop (false);
 
-        const auto activeIns  = BigInteger().setRange (0, jmin (ins .getHighestBit() + 1, getNumChannelNames (inStream)),  true);
-        const auto activeOuts = BigInteger().setRange (0, jmin (outs.getHighestBit() + 1, getNumChannelNames (outStream)), true);
-
         if (! setNominalSampleRate (newSampleRate))
         {
-            updateDetailsFromDevice (activeIns, activeOuts);
+            updateDetailsFromDevice (ins, outs);
             error = "Couldn't change sample rate";
         }
         else
@@ -637,7 +634,7 @@ public:
                                                       juceAudioObjectPropertyElementMain },
                                           static_cast<UInt32> (bufferSizeSamples), err2log()))
             {
-                updateDetailsFromDevice (activeIns, activeOuts);
+                updateDetailsFromDevice (ins, outs);
                 error = "Couldn't change buffer size";
             }
             else
@@ -646,7 +643,7 @@ public:
                 // correctly report their new settings until some random time in the future, so
                 // after calling updateDetailsFromDevice, we need to manually bodge these values
                 // to make sure we're using the correct numbers..
-                updateDetailsFromDevice (activeIns, activeOuts);
+                updateDetailsFromDevice (ins, outs);
                 sampleRate = newSampleRate;
                 bufferSize = bufferSizeSamples;
 
@@ -837,13 +834,13 @@ public:
     //==============================================================================
     struct Stream
     {
-        Stream (bool isInput, CoreAudioInternal& parent, const BigInteger& active)
+        Stream (bool isInput, CoreAudioInternal& parent, const BigInteger& activeRequested)
             : input (isInput),
               latency (getLatencyFromDevice (isInput, parent)),
               bitDepth (getBitDepthFromDevice (isInput, parent)),
-              activeChans (active),
               chanNames (getChannelNames (isInput, parent)),
-              channelInfo (getChannelInfos (isInput, parent, active)),
+              activeChans (BigInteger().setRange (0, jmin (activeRequested.getHighestBit() + 1, chanNames.size()), true)),
+              channelInfo (getChannelInfos (isInput, parent, activeChans)),
               channels (static_cast<int> (channelInfo.size()))
         {}
 
@@ -984,8 +981,8 @@ public:
         const bool input;
         const int latency;
         const int bitDepth;
-        const BigInteger activeChans;
         const StringArray chanNames;
+        const BigInteger activeChans;
         const Array<CallbackDetailsForChannel> channelInfo;
         const int channels = 0;
         Float64 previousSampleTime;
