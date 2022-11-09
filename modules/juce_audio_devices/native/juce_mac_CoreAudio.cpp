@@ -460,8 +460,8 @@ public:
         auto newBufferSizes = getBufferSizesFromDevice();
         auto newSampleRates = getSampleRatesFromDevice();
 
-        std::unique_ptr<Stream> newInput  (inStream  != nullptr ? new Stream (true,  *this, activeIns)  : nullptr);
-        std::unique_ptr<Stream> newOutput (outStream != nullptr ? new Stream (false, *this, activeOuts) : nullptr);
+        auto newInput  = rawToUniquePtr (inStream  != nullptr ? new Stream (true,  *this, activeIns)  : nullptr);
+        auto newOutput = rawToUniquePtr (outStream != nullptr ? new Stream (false, *this, activeOuts) : nullptr);
 
         auto newBitDepth = jmax (getBitDepth (newInput), getBitDepth (newOutput));
 
@@ -616,8 +616,9 @@ public:
     //==============================================================================
     String reopen (const BigInteger& ins, const BigInteger& outs, double newSampleRate, int bufferSizeSamples)
     {
-        String error;
         callbacksAllowed = false;
+        const ScopeGuard scope { [&] { callbacksAllowed = true; } };
+
         stopTimer();
 
         stop (false);
@@ -625,37 +626,33 @@ public:
         if (! setNominalSampleRate (newSampleRate))
         {
             updateDetailsFromDevice (ins, outs);
-            error = "Couldn't change sample rate";
+            return "Couldn't change sample rate";
         }
-        else
+
+        if (! audioObjectSetProperty (deviceID, { kAudioDevicePropertyBufferFrameSize,
+                                                  kAudioObjectPropertyScopeGlobal,
+                                                  juceAudioObjectPropertyElementMain },
+                                      static_cast<UInt32> (bufferSizeSamples), err2log()))
         {
-            if (! audioObjectSetProperty (deviceID, { kAudioDevicePropertyBufferFrameSize,
-                                                      kAudioObjectPropertyScopeGlobal,
-                                                      juceAudioObjectPropertyElementMain },
-                                          static_cast<UInt32> (bufferSizeSamples), err2log()))
-            {
-                updateDetailsFromDevice (ins, outs);
-                error = "Couldn't change buffer size";
-            }
-            else
-            {
-                // Annoyingly, after changing the rate and buffer size, some devices fail to
-                // correctly report their new settings until some random time in the future, so
-                // after calling updateDetailsFromDevice, we need to manually bodge these values
-                // to make sure we're using the correct numbers..
-                updateDetailsFromDevice (ins, outs);
-                sampleRate = newSampleRate;
-                bufferSize = bufferSizeSamples;
-
-                if (sampleRates.size() == 0)
-                    error = "Device has no available sample-rates";
-                else if (bufferSizes.size() == 0)
-                    error = "Device has no available buffer-sizes";
-            }
+            updateDetailsFromDevice (ins, outs);
+            return "Couldn't change buffer size";
         }
 
-        callbacksAllowed = true;
-        return error;
+        // Annoyingly, after changing the rate and buffer size, some devices fail to
+        // correctly report their new settings until some random time in the future, so
+        // after calling updateDetailsFromDevice, we need to manually bodge these values
+        // to make sure we're using the correct numbers..
+        updateDetailsFromDevice (ins, outs);
+        sampleRate = newSampleRate;
+        bufferSize = bufferSizeSamples;
+
+        if (sampleRates.size() == 0)
+            return "Device has no available sample-rates";
+
+        if (bufferSizes.size() == 0)
+            return "Device has no available buffer-sizes";
+
+        return {};
     }
 
     bool start (AudioIODeviceCallback* callbackToNotify)
