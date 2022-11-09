@@ -5,12 +5,12 @@ in JUCE there are some steps you need to take to enable all ARA related function
 
 ## External dependencies
 
-- ARA SDK 2.1.0
+- ARA SDK 2.2.0
 
 You can download the ARA SDK from Celemony's Github. The command below will recursively clone the
 right version into the `ARA_SDK` directory
 
-    git clone --recursive --branch releases/2.1.0 https://github.com/Celemony/ARA_SDK
+    git clone --recursive --branch releases/2.2.0 https://github.com/Celemony/ARA_SDK
 
 ## Enabling ARA features in JUCE
 
