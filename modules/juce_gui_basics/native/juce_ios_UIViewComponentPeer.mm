@@ -454,6 +454,8 @@ public:
             target->setHighlightedRegion (getMarkedTextRange());
 
         target->insertTextAtCaret (text);
+        target->setTemporaryUnderlining ({ Range<int>::withStartAndLength (startOfMarkedTextInTextInputTarget,
+                                                                           text.length()) });
         stringBeingComposed = text;
     }
 
@@ -1179,6 +1181,8 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
             redirectKeyPresses ('\t');
         else
             owner->replaceMarkedRangeWithText (target, nsStringToJuce (text));
+
+        target->setTemporaryUnderlining ({});
     }
 
     owner->stringBeingComposed.clear();
@@ -1260,6 +1264,7 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
         return;
 
     owner->replaceMarkedRangeWithText (target, owner->stringBeingComposed);
+    target->setTemporaryUnderlining ({});
     owner->stringBeingComposed.clear();
     owner->startOfMarkedTextInTextInputTarget = 0;
 }

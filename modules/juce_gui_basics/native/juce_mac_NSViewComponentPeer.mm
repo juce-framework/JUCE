@@ -2121,6 +2121,7 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
                         }());
 
                         target->insertTextAtCaret (newText);
+                        target->setTemporaryUnderlining ({});
                     }
                 }
                 else
@@ -2206,6 +2207,7 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 
                     target->setHighlightedRegion (initialHighlight);
                     target->insertTextAtCaret (marked);
+                    target->setTemporaryUnderlining ({ Range<int>::withStartAndLength (initialHighlight.getStart(), marked.length()) });
                     target->setHighlightedRegion (finalHighlight + owner->startOfMarkedTextInTextInputTarget);
                 }
             }
@@ -2218,7 +2220,10 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
                 if (owner->stringBeingComposed.isNotEmpty())
                 {
                     if (auto* target = owner->findCurrentTextInputTarget())
+                    {
                         target->insertTextAtCaret (owner->stringBeingComposed);
+                        target->setTemporaryUnderlining ({});
+                    }
 
                     owner->stringBeingComposed.clear();
                 }
