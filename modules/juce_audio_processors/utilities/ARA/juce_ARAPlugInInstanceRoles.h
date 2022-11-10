@@ -204,7 +204,7 @@ private:
 };
 
 //==============================================================================
-/** Base class for a renderer fulfilling the ARAEditorView role as described in the ARA SDK.
+/** Base class for fulfilling the ARAEditorView role as described in the ARA SDK.
 
     Instances of this class are constructed by the DocumentController. If you are subclassing
     ARAEditorView, make sure to call the base class implementation of overridden functions.
@@ -244,7 +244,7 @@ public:
         /** Called when the editor view's selection changes.
             @param viewSelection The current selection state
         */
-        virtual void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection)
+        virtual void onNewSelection (const ARAViewSelection& viewSelection)
         {
             ignoreUnused (viewSelection);
         }
