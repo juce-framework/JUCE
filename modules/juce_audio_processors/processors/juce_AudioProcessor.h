@@ -418,7 +418,7 @@ public:
             @param set           The AudioChannelSet which is to be probed.
             @param currentLayout If non-null, pretend that the current layout of the AudioProcessor is
                                  currentLayout. On exit, currentLayout will be modified to
-                                 to represent the buses layouts of the AudioProcessor as if the layout
+                                 represent the buses layouts of the AudioProcessor as if the layout
                                  of the receiver had been successfully changed. This is useful as changing
                                  the layout of the receiver may change the bus layout of other buses.
 
