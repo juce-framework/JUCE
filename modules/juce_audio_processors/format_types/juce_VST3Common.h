@@ -811,6 +811,19 @@ public:
         }
     }
 
+    void setHostActive (int numIns, int numOuts)
+    {
+        struct Pair
+        {
+            int numChannelsToActivate;
+            std::vector<DynamicChannelMapping>& map;
+        };
+
+        for (auto& pair : { Pair { numIns, inputMap }, Pair { numOuts, outputMap } })
+            for (auto i = 0, iMax = jmin (pair.numChannelsToActivate, (int) pair.map.size()); i < iMax; ++i)
+                pair.map[(size_t) i].setHostActive (true);
+    }
+
     void prepare (int blockSize)
     {
         const auto findNumChannelsWhenAllBusesEnabled = [] (const auto& map)
