@@ -3352,6 +3352,7 @@ public:
                 return kResultFalse;
 
             bufferMapper.updateFromProcessor (*pluginInstance);
+            bufferMapper.setHostActive (numIns, numOuts);
             return kResultTrue;
         }
 
@@ -3369,7 +3370,10 @@ public:
         }();
 
         if (pluginInstance->setBusesLayoutWithoutEnabling (nextBest))
+        {
             bufferMapper.updateFromProcessor (*pluginInstance);
+            bufferMapper.setHostActive (numIns, numOuts);
+        }
 
         return kResultFalse;
     }
