@@ -113,11 +113,13 @@ public:
         the user has responded).
     */
     static void request (PermissionID permission, Callback callback);
+    static void request (const juce::String& permission, Callback callback);
 
     /** Returns whether a runtime request is required to obtain the permission
         on the current platform.
     */
     static bool isRequired (PermissionID permission);
+    static bool isRequired (const juce::String& permission);
 
     /** Returns true if the app has been already granted this permission, either
         via a previous runtime request or otherwise, or no permission is necessary.
@@ -126,6 +128,7 @@ public:
         the permission can not be obtained at all at runtime.
     */
     static bool isGranted (PermissionID permission);
+    static bool isGranted (const juce::String& permission);
 };
 
 } // namespace juce
