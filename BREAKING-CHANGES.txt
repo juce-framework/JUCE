@@ -6,6 +6,23 @@ Develop
 
 Change
 ------
+The ARA SDK expected by JUCE has been updated to version 2.2.0.
+
+Possible Issues
+---------------
+Builds using earlier versions of the ARA SDK will fail to compile.
+
+Workaround
+----------
+The ARA SDK configured in JUCE must be updated to version 2.2.0.
+
+Rationale
+---------
+Version 2.2.0 is the latest official release of the ARA SDK.
+
+
+Change
+------
 The Thread::startThread (int) and Thread::setPriority (int) methods have been
 removed. A new Thread priority API has been introduced.
 
