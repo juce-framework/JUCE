@@ -3472,6 +3472,8 @@ public:
         if ((processSetup.symbolicSampleSize == Vst::kSample64) != pluginInstance->isUsingDoublePrecision())
             return kResultFalse;
 
+        const ScopedLock sl (pluginInstance->getCallbackLock());
+
         if (data.processContext != nullptr)
         {
             processContext = *data.processContext;
@@ -3594,47 +3596,43 @@ private:
         jassert ((int) buffer.getNumChannels() == jmax (pluginInstance->getTotalNumInputChannels(),
                                                         pluginInstance->getTotalNumOutputChannels()));
 
+        pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
+
+       #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
+        const int numMidiEventsComingIn = midiBuffer.getNumEvents();
+       #endif
+
+        if (pluginInstance->isSuspended())
         {
-            const ScopedLock sl (pluginInstance->getCallbackLock());
-
-            pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
-
-           #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
-            const int numMidiEventsComingIn = midiBuffer.getNumEvents();
-           #endif
-
-            if (pluginInstance->isSuspended())
-            {
-                buffer.clear();
-            }
-            else
-            {
-                // processBlockBypassed should only ever be called if the AudioProcessor doesn't
-                // return a valid parameter from getBypassParameter
-                if (pluginInstance->getBypassParameter() == nullptr && comPluginInstance->getBypassParameter()->getValue() >= 0.5f)
-                    pluginInstance->processBlockBypassed (buffer, midiBuffer);
-                else
-                    pluginInstance->processBlock (buffer, midiBuffer);
-            }
-
-           #if JUCE_DEBUG && (! JucePlugin_ProducesMidiOutput)
-            /*  This assertion is caused when you've added some events to the
-                midiMessages array in your processBlock() method, which usually means
-                that you're trying to send them somewhere. But in this case they're
-                getting thrown away.
-
-                If your plugin does want to send MIDI messages, you'll need to set
-                the JucePlugin_ProducesMidiOutput macro to 1 in your
-                JucePluginCharacteristics.h file.
-
-                If you don't want to produce any MIDI output, then you should clear the
-                midiMessages array at the end of your processBlock() method, to
-                indicate that you don't want any of the events to be passed through
-                to the output.
-            */
-            jassert (midiBuffer.getNumEvents() <= numMidiEventsComingIn);
-           #endif
+            buffer.clear();
         }
+        else
+        {
+            // processBlockBypassed should only ever be called if the AudioProcessor doesn't
+            // return a valid parameter from getBypassParameter
+            if (pluginInstance->getBypassParameter() == nullptr && comPluginInstance->getBypassParameter()->getValue() >= 0.5f)
+                pluginInstance->processBlockBypassed (buffer, midiBuffer);
+            else
+                pluginInstance->processBlock (buffer, midiBuffer);
+        }
+
+       #if JUCE_DEBUG && (! JucePlugin_ProducesMidiOutput)
+        /*  This assertion is caused when you've added some events to the
+            midiMessages array in your processBlock() method, which usually means
+            that you're trying to send them somewhere. But in this case they're
+            getting thrown away.
+
+            If your plugin does want to send MIDI messages, you'll need to set
+            the JucePlugin_ProducesMidiOutput macro to 1 in your
+            JucePluginCharacteristics.h file.
+
+            If you don't want to produce any MIDI output, then you should clear the
+            midiMessages array at the end of your processBlock() method, to
+            indicate that you don't want any of the events to be passed through
+            to the output.
+        */
+        jassert (midiBuffer.getNumEvents() <= numMidiEventsComingIn);
+       #endif
     }
 
     //==============================================================================
