@@ -1771,10 +1771,13 @@ private:
 
             if (callback != nullptr)
             {
+                const auto numActiveOutputChannels = outputWrapper.getActiveChannels().countNumberOfSetBits();
+                jassert (numActiveOutputChannels <= scratchBuffer.getNumChannels());
+
                 callback->audioDeviceIOCallbackWithContext (channels,
                                                             numChannels,
                                                             scratchBuffer.getArrayOfWritePointers(),
-                                                            scratchBuffer.getNumChannels(),
+                                                            numActiveOutputChannels,
                                                             n,
                                                             context);
             }
