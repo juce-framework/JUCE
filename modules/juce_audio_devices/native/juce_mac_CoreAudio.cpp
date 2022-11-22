@@ -836,7 +836,12 @@ public:
               latency (getLatencyFromDevice (isInput, parent)),
               bitDepth (getBitDepthFromDevice (isInput, parent)),
               chanNames (getChannelNames (isInput, parent)),
-              activeChans (BigInteger().setRange (0, jmin (activeRequested.getHighestBit() + 1, chanNames.size()), true)),
+              activeChans ([&activeRequested, clearFrom = chanNames.size()]
+                           {
+                               auto result = activeRequested;
+                               result.setRange (clearFrom, result.getHighestBit() + 1 - clearFrom, false);
+                               return result;
+                           }()),
               channelInfo (getChannelInfos (isInput, parent, activeChans)),
               channels (static_cast<int> (channelInfo.size()))
         {}
