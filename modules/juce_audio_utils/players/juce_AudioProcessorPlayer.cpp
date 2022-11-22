@@ -98,7 +98,7 @@ static void initialiseIoBuffers (ChannelInfo<const float> ins,
 
         for (auto i = processorOuts; i < processorIns; ++i)
         {
-            channels[totalNumChans] = tempBuffer.getWritePointer (i - outs.numChannels);
+            channels[totalNumChans] = tempBuffer.getWritePointer (i - processorOuts);
             prepareInputChannel (i);
             ++totalNumChans;
         }
