@@ -63,7 +63,7 @@ function(_juce_create_atomic_target target_name)
 
     try_compile(compile_result "${test_bindir}" "${test_file_name}"
         OUTPUT_VARIABLE test_build_output_0
-        CXX_STANDARD 14
+        CXX_STANDARD 17
         CXX_STANDARD_REQUIRED TRUE
         CXX_EXTENSIONS FALSE)
 
@@ -71,7 +71,7 @@ function(_juce_create_atomic_target target_name)
         try_compile(compile_result "${test_bindir}" "${test_file_name}"
             OUTPUT_VARIABLE test_build_output_1
             LINK_LIBRARIES atomic
-            CXX_STANDARD 14
+            CXX_STANDARD 17
             CXX_STANDARD_REQUIRED TRUE
             CXX_EXTENSIONS FALSE)
 
@@ -81,7 +81,7 @@ function(_juce_create_atomic_target target_name)
             try_compile(compile_result "${test_bindir}" "${test_file_name}"
                     OUTPUT_VARIABLE test_build_output_2
                     LINK_LIBRARIES atomic
-                    CXX_STANDARD 14
+                    CXX_STANDARD 17
                     CXX_STANDARD_REQUIRED TRUE
                     CXX_EXTENSIONS FALSE)
 

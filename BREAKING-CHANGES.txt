@@ -6,6 +6,27 @@ Develop
 
 Change
 ------
+The default macOS and iOS deployment targets set by the Projucer have been
+increased to macOS 10.13 and iOS 11 respectively.
+
+Possible Issues
+---------------
+Projects using the Projucer's default minimum deployment target will have their
+minimum deployment target increased.
+
+Workaround
+----------
+If you need a lower minimum deployment target then you must set this in the
+Projucer's Xcode build configuration settings.
+
+Rationale
+---------
+Xcode 14 no longer supports deployment targets lower than macOS 10.13 and iOS
+11.
+
+
+Change
+------
 The ARA SDK expected by JUCE has been updated to version 2.2.0.
 
 Possible Issues
@@ -49,6 +70,7 @@ significant changes are that we cannot mix operations using the new and old
 interfaces, and that changing a priority using the new interface can only be
 done on the currently running thread.
 
+
 Change
 ------
 The constructor of WebBrowserComponent now requires passing in an instance of
@@ -84,6 +106,7 @@ such a parameter. Furthermore, using an option to specify the preferred
 browser backend is more intuitive then requiring the user to derive from a
 special class, especially if additional browser backends are added in the
 future.
+
 
 Change
 ------

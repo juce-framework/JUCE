@@ -12,9 +12,9 @@
                applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" cppLibType="libc++"
-                       recommendedWarnings="LLVM" macOSDeploymentTarget="10.12"/>
+                       recommendedWarnings="LLVM"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" cppLibType="libc++"
-                       linkTimeOptimisation="0" recommendedWarnings="LLVM" macOSDeploymentTarget="10.12"/>
+                       linkTimeOptimisation="0" recommendedWarnings="LLVM"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
