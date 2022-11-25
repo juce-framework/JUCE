@@ -1398,7 +1398,10 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
    #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
     if (@available (iOS 13, *))
-        metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<UIView>> (view, comp.isOpaque());
+    {
+        metalRenderer = CoreGraphicsMetalLayerRenderer<UIView>::create (view, comp.isOpaque());
+        jassert (metalRenderer != nullptr);
+    }
    #endif
 
     if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
