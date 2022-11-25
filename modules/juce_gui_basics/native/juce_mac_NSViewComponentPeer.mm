@@ -151,7 +151,7 @@ public:
       #if USE_COREGRAPHICS_RENDERING
        #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         if (@available (macOS 10.14, *))
-            metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<NSView>> (view, getComponent().isOpaque());
+            metalRenderer = CoreGraphicsMetalLayerRenderer<NSView>::create (view, getComponent().isOpaque());
        #endif
         if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         {
