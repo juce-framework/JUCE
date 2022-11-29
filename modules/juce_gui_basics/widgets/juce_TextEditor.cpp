@@ -2306,6 +2306,11 @@ void TextEditor::setTemporaryUnderlining (const Array<Range<int>>& newUnderlined
     repaint();
 }
 
+TextInputTarget::VirtualKeyboardType TextEditor::getKeyboardType()
+{
+    return passwordCharacter != 0 ? passwordKeyboard : keyboardType;
+}
+
 //==============================================================================
 UndoManager* TextEditor::getUndoManager() noexcept
 {

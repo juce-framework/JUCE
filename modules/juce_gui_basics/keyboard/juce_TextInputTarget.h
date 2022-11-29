@@ -108,7 +108,8 @@ public:
         decimalKeyboard,
         urlKeyboard,
         emailAddressKeyboard,
-        phoneNumberKeyboard
+        phoneNumberKeyboard,
+        passwordKeyboard
     };
 
     /** Returns the target's preference for the type of keyboard that would be most appropriate.

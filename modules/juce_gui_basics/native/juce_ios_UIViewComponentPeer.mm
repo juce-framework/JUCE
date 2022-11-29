@@ -456,9 +456,10 @@ public:
             case TextInputTarget::urlKeyboard:           return UIKeyboardTypeURL;
             case TextInputTarget::emailAddressKeyboard:  return UIKeyboardTypeEmailAddress;
             case TextInputTarget::phoneNumberKeyboard:   return UIKeyboardTypePhonePad;
-            default:                                     jassertfalse; break;
+            case TextInputTarget::passwordKeyboard:      return UIKeyboardTypeASCIICapable;
         }
 
+        jassertfalse;
         return UIKeyboardTypeDefault;
     }
 
@@ -1816,6 +1817,10 @@ void UIViewComponentPeer::grabFocus()
 
 void UIViewComponentPeer::textInputRequired (Point<int>, TextInputTarget&)
 {
+    // We need to restart the text input session so that the keyboard can change types if necessary.
+    if ([hiddenTextInput.get() isFirstResponder])
+        [hiddenTextInput.get() resignFirstResponder];
+
     [hiddenTextInput.get() becomeFirstResponder];
 }
 

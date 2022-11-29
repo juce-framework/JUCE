@@ -742,7 +742,7 @@ public:
     /** @internal */
     void setTemporaryUnderlining (const Array<Range<int>>&) override;
     /** @internal */
-    VirtualKeyboardType getKeyboardType() override    { return keyboardType; }
+    VirtualKeyboardType getKeyboardType() override;
 
 protected:
     //==============================================================================
