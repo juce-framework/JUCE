@@ -26,7 +26,6 @@
 namespace juce
 {
 
-//==============================================================================
 /**
     An abstract base class which can be implemented by components that function as
     text editors.

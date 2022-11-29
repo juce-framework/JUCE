@@ -182,7 +182,6 @@ bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textChar
                                      textCharacter));
 }
 
-
 bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
 {
     bool keyWasUsed = false;
@@ -607,7 +606,7 @@ void ComponentPeer::forceDisplayUpdate()
     Desktop::getInstance().displays->refresh();
 }
 
-void ComponentPeer::globalFocusChanged (Component*)
+void ComponentPeer::globalFocusChanged ([[maybe_unused]] Component* comp)
 {
     refreshTextInputTarget();
 }

@@ -342,15 +342,6 @@ namespace detail
     {
         return joinCompileTimeStr (v, makeCompileTimeStr (others...));
     }
-
-    template <typename Functor, typename Return, typename... Args>
-    static constexpr auto toFnPtr (Functor functor, Return (Functor::*) (Args...) const)
-    {
-        return static_cast<Return (*) (Args...)> (functor);
-    }
-
-    template <typename Functor>
-    static constexpr auto toFnPtr (Functor functor) { return toFnPtr (functor, &Functor::operator()); }
 } // namespace detail
 
 //==============================================================================
@@ -396,7 +387,7 @@ struct ObjCClass
     }
 
     template <typename Fn>
-    void addMethod (SEL selector, Fn callbackFn) { addMethod (selector, detail::toFnPtr (callbackFn)); }
+    void addMethod (SEL selector, Fn callbackFn) { addMethod (selector, toFnPtr (callbackFn)); }
 
     template <typename Result, typename... Args>
     void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
