@@ -3,6 +3,15 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 7.0.3
+  - Added a unique machine ID
+  - Added new threading classes
+  - Improved the performance of multiple OpenGL contexts
+  - Refactored AudioProcessorGraph
+  - Improved AudioDeviceManager sample rate handling 
+  - Fixed Studio One drawing performance
+  - Updated the FLAC library
+
 Version 7.0.2
   - Fixed accessibility table navigation
   - Fixed Android file access on older APIs
