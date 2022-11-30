@@ -130,11 +130,16 @@ public:
 
         if (auto* list = parent->mouseListeners.get())
         {
+            const auto shouldBailOut = [&checker, safePointer = WeakReference { parent }]
+            {
+                return checker.shouldBailOut() || safePointer == nullptr;
+            };
+
             for (int i = list->listeners.size(); --i >= 0;)
             {
                 (list->listeners.getUnchecked (i)->*eventMethod) (checker.eventWithNearestParent(), params...);
 
-                if (checker.shouldBailOut())
+                if (shouldBailOut())
                     return;
 
                 i = jmin (i, list->listeners.size());
