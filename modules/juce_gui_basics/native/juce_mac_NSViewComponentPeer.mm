@@ -411,12 +411,12 @@ public:
         if (forceFullScreen)
             return NSWindowCollectionBehaviorFullScreenPrimary;
 
-        // Some SDK versions don't define NSWindowCollectionBehaviorFullScreenNone
-        constexpr auto fullScreenNone = (NSUInteger) (1 << 9);
+        // Some SDK versions don't define NSWindowCollectionBehaviorFullScreenAuxiliary
+        constexpr auto fullScreenAux = (NSUInteger) (1 << 8);
 
         return (getStyleFlags() & (windowHasMaximiseButton | windowIsResizable)) == (windowHasMaximiseButton | windowIsResizable)
              ? NSWindowCollectionBehaviorFullScreenPrimary
-             : fullScreenNone;
+             : fullScreenAux;
     }
 
     void setCollectionBehaviour (bool forceFullScreen) const
