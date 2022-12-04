@@ -246,9 +246,11 @@ public:
 
     //==============================================================================
     // Android Surface Callbacks:
-    void surfaceChanged (LocalRef<jobject> holder, int format, int width, int height) override
+    void surfaceChanged ([[maybe_unused]] LocalRef<jobject> holder,
+                         [[maybe_unused]] int format,
+                         [[maybe_unused]] int width,
+                         [[maybe_unused]] int height) override
     {
-        ignoreUnused (holder, format, width, height);
     }
 
     void surfaceCreated (LocalRef<jobject>) override;

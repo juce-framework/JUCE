@@ -670,10 +670,9 @@ void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int e
     updateScrollBars();
 }
 
-void CodeEditorComponent::retokenise (int startIndex, int endIndex)
+void CodeEditorComponent::retokenise (int startIndex, [[maybe_unused]] int endIndex)
 {
     const CodeDocument::Position affectedTextStart (document, startIndex);
-    juce::ignoreUnused (endIndex); // Leave room for more efficient impl in future.
 
     clearCachedIterators (affectedTextStart.getLineNumber());
 

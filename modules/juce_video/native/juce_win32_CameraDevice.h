@@ -479,7 +479,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                     auto context = []
                     {
                         IBindCtx* ptr = nullptr;
-                        ignoreUnused (CreateBindCtx (0, &ptr));
+                        [[maybe_unused]] const auto result = CreateBindCtx (0, &ptr);
                         return ContextPtr (ptr);
                     }();
 

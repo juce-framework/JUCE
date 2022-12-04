@@ -220,6 +220,7 @@ private:
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
 #include "utilities/juce_PluginHostType.cpp"
 #include "utilities/juce_NativeScaleFactorNotifier.cpp"
+#include "utilities/juce_VSTCallbackHandler.cpp"
 #include "utilities/ARA/juce_ARA_utils.cpp"
 
 #include "format_types/juce_LV2PluginFormat.cpp"

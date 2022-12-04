@@ -261,12 +261,10 @@ public:
                   "and only a single subscription can be upgraded/downgraded. Use the updated purchaseProduct method "
                   "which takes a single String argument.")]]
     void purchaseProduct (const String& productIdentifier,
-                          bool isSubscription,
+                          [[maybe_unused]] bool isSubscription,
                           const StringArray& upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers = {},
                           bool creditForUnusedSubscription = true)
     {
-
-        ignoreUnused (isSubscription);
         purchaseProduct (productIdentifier,
                          upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers[0],
                          creditForUnusedSubscription);

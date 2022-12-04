@@ -391,8 +391,8 @@ struct ObjCClass
     template <typename Type>
     void addIvar (const char* name)
     {
-        BOOL b = class_addIvar (cls, name, sizeof (Type), (uint8_t) rint (log2 (sizeof (Type))), @encode (Type));
-        jassert (b); ignoreUnused (b);
+        [[maybe_unused]] BOOL b = class_addIvar (cls, name, sizeof (Type), (uint8_t) rint (log2 (sizeof (Type))), @encode (Type));
+        jassert (b);
     }
 
     template <typename Fn>
@@ -408,8 +408,8 @@ struct ObjCClass
 
     void addProtocol (Protocol* protocol)
     {
-        BOOL b = class_addProtocol (cls, protocol);
-        jassert (b); ignoreUnused (b);
+        [[maybe_unused]] BOOL b = class_addProtocol (cls, protocol);
+        jassert (b);
     }
 
     template <typename ReturnType, typename... Params>

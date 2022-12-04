@@ -163,24 +163,22 @@ static bool checkPeerIsValid (OpenGLContext* context)
     {
         if (auto* comp = context->getTargetComponent())
         {
-            if (auto* peer = comp->getPeer())
+            if (auto* peer [[maybe_unused]] = comp->getPeer())
             {
                #if JUCE_MAC || JUCE_IOS
                 if (auto* nsView = (JUCE_IOS_MAC_VIEW*) peer->getNativeHandle())
                 {
-                    if (auto nsWindow = [nsView window])
+                    if ([[maybe_unused]] auto nsWindow = [nsView window])
                     {
                        #if JUCE_MAC
                         return ([nsWindow isVisible]
                                   && (! [nsWindow hidesOnDeactivate] || [NSApp isActive]));
                        #else
-                        ignoreUnused (nsWindow);
                         return true;
                        #endif
                     }
                 }
                #else
-                ignoreUnused (peer);
                 return true;
                #endif
             }

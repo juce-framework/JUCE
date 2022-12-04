@@ -815,8 +815,9 @@ class WebBrowserComponent::Pimpl
 {
 public:
     Pimpl (WebBrowserComponent& owner,
-           const Options& preferences,
-           bool useWebView2, const String& userAgent)
+           [[maybe_unused]] const Options& preferences,
+           bool useWebView2,
+           const String& userAgent)
     {
         if (useWebView2)
         {
@@ -828,8 +829,6 @@ public:
             catch (const std::runtime_error&) {}
            #endif
         }
-
-        ignoreUnused (preferences);
 
         if (internal == nullptr)
             internal.reset (new Win32WebView (owner, userAgent));

@@ -1278,10 +1278,8 @@ private:
                                                   LV2_Options_Option* options,
                                                   LV2_Worker_Schedule* schedule,
                                                   LV2_Resize_Port_Resize* resize,
-                                                  LV2_Log_Log* log)
+                                                  [[maybe_unused]] LV2_Log_Log* log)
     {
-        ignoreUnused (log);
-
         return { LV2_Feature { LV2_STATE__loadDefaultState,         nullptr },
                  LV2_Feature { LV2_BUF_SIZE__boundedBlockLength,    nullptr },
                  LV2_Feature { LV2_URID__map,                       map },
@@ -2873,11 +2871,10 @@ private:
 
         ports.forEachPort ([&] (const PortHeader& header)
         {
-            const auto emplaced = result.emplace (header.symbol, header.index);
+            [[maybe_unused]] const auto emplaced = result.emplace (header.symbol, header.index);
 
             // This will complain if there are duplicate port symbols.
             jassert (emplaced.second);
-            ignoreUnused (emplaced);
         });
 
         return result;
@@ -4884,10 +4881,8 @@ private:
                                                              : freeWheelingPort->info.min;
     }
 
-    void pushMessage (MessageHeader header, uint32_t size, const void* data)
+    void pushMessage (MessageHeader header, [[maybe_unused]] uint32_t size, const void* data)
     {
-        ignoreUnused (size);
-
         if (header.protocol == 0 || header.protocol == instance->urids.mLV2_UI__floatProtocol)
         {
             const auto value = readUnaligned<float> (data);

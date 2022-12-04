@@ -478,4 +478,9 @@ void MidiKeyboardComponent::handleNoteOff (MidiKeyboardState*, int /*midiChannel
     noPendingUpdates.store (false);
 }
 
+//==============================================================================
+bool MidiKeyboardComponent::mouseDownOnKey    ([[maybe_unused]] int midiNoteNumber, [[maybe_unused]] const MouseEvent& e)  { return true; }
+bool MidiKeyboardComponent::mouseDraggedToKey ([[maybe_unused]] int midiNoteNumber, [[maybe_unused]] const MouseEvent& e)  { return true; }
+void MidiKeyboardComponent::mouseUpOnKey      ([[maybe_unused]] int midiNoteNumber, [[maybe_unused]] const MouseEvent& e)  {}
+
 } // namespace juce

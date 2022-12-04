@@ -288,7 +288,7 @@ void MessageManager::broadcastMessage (const String& value)
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation()
 {
-    ignoreUnused (OleInitialize (nullptr));
+    [[maybe_unused]] const auto result = OleInitialize (nullptr);
     InternalMessageQueue::getInstance();
 }
 

@@ -853,6 +853,14 @@ void MPEInstrument::releaseAllNotes()
     notes.clear();
 }
 
+//==============================================================================
+void MPEInstrument::Listener::noteAdded ([[maybe_unused]] MPENote newNote)                 {}
+void MPEInstrument::Listener::notePressureChanged  ([[maybe_unused]] MPENote changedNote)  {}
+void MPEInstrument::Listener::notePitchbendChanged ([[maybe_unused]] MPENote changedNote)  {}
+void MPEInstrument::Listener::noteTimbreChanged    ([[maybe_unused]] MPENote changedNote)  {}
+void MPEInstrument::Listener::noteKeyStateChanged  ([[maybe_unused]] MPENote changedNote)  {}
+void MPEInstrument::Listener::noteReleased ([[maybe_unused]] MPENote finishedNote)         {}
+void MPEInstrument::Listener::zoneLayoutChanged()                                          {}
 
 //==============================================================================
 //==============================================================================

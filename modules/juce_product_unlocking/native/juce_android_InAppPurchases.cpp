@@ -685,31 +685,27 @@ struct InAppPurchases::Pimpl
     }
 
     //==============================================================================
-    void startDownloads (const Array<Download*>& downloads)
+    void startDownloads ([[maybe_unused]] const Array<Download*>& downloads)
     {
         // Not available on this platform.
-        ignoreUnused (downloads);
         jassertfalse;
     }
 
-    void pauseDownloads (const Array<Download*>& downloads)
+    void pauseDownloads ([[maybe_unused]] const Array<Download*>& downloads)
     {
         // Not available on this platform.
-        ignoreUnused (downloads);
         jassertfalse;
     }
 
-    void resumeDownloads (const Array<Download*>& downloads)
+    void resumeDownloads ([[maybe_unused]] const Array<Download*>& downloads)
     {
         // Not available on this platform.
-        ignoreUnused (downloads);
         jassertfalse;
     }
 
-    void cancelDownloads (const Array<Download*>& downloads)
+    void cancelDownloads ([[maybe_unused]] const Array<Download*>& downloads)
     {
         // Not available on this platform.
-        ignoreUnused (downloads);
         jassertfalse;
     }
 

@@ -158,10 +158,8 @@ private:
             return std::make_unique<LowLevelGraphicsSoftwareRenderer> (Image (this));
         }
 
-        void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+        void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, [[maybe_unused]] Image::BitmapData::ReadWriteMode mode) override
         {
-            ignoreUnused (mode);
-
             const auto offset = (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
             bitmap.data = imageData + offset;
             bitmap.size = (size_t) (lineStride * height) - offset;
@@ -568,7 +566,6 @@ static UnityAudioEffectDefinition getEffectDefinition()
     result.setPosition = [] (UnityAudioEffectState* state, unsigned int pos)
     {
         ignoreUnused (state, pos);
-
         return 0;
     };
 

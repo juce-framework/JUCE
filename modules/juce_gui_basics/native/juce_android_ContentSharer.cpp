@@ -184,10 +184,8 @@ public:
         env->CallVoidMethod (fileObserver, JuceContentProviderFileObserver.startWatching);
     }
 
-    void onFileEvent (int event, const LocalRef<jstring>& path)
+    void onFileEvent (int event, [[maybe_unused]] const LocalRef<jstring>& path)
     {
-        ignoreUnused (path);
-
         if (event == open)
         {
             ++numOpenedHandles;
@@ -513,10 +511,8 @@ public:
 
     //==============================================================================
     jobject openFile (const LocalRef<jobject>& contentProvider,
-                      const LocalRef<jobject>& uri, const LocalRef<jstring>& mode)
+                      const LocalRef<jobject>& uri, [[maybe_unused]] const LocalRef<jstring>& mode)
     {
-        ignoreUnused (mode);
-
         WeakReference<ContentSharerNativeImpl> weakRef (this);
 
         if (weakRef == nullptr)

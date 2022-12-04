@@ -938,15 +938,13 @@ namespace
        #if JUCE_USE_VDSP_FRAMEWORK
         vDSP_vabs ((float*) src, 1, dest, 1, (vDSP_Length) num);
        #else
-        FloatVectorHelpers::signMask32 signMask;
+        [[maybe_unused]] FloatVectorHelpers::signMask32 signMask;
         signMask.i = 0x7fffffffUL;
         JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = std::abs (src[i]),
                                       Mode::bit_and (s, mask),
                                       JUCE_LOAD_SRC,
                                       JUCE_INCREMENT_SRC_DEST,
                                       const Mode::ParallelType mask = Mode::load1 (signMask.f);)
-
-        ignoreUnused (signMask);
        #endif
     }
 
@@ -956,7 +954,7 @@ namespace
        #if JUCE_USE_VDSP_FRAMEWORK
         vDSP_vabsD ((double*) src, 1, dest, 1, (vDSP_Length) num);
        #else
-        FloatVectorHelpers::signMask64 signMask;
+        [[maybe_unused]] FloatVectorHelpers::signMask64 signMask;
         signMask.i = 0x7fffffffffffffffULL;
 
         JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = std::abs (src[i]),
@@ -964,8 +962,6 @@ namespace
                                       JUCE_LOAD_SRC,
                                       JUCE_INCREMENT_SRC_DEST,
                                       const Mode::ParallelType mask = Mode::load1 (signMask.d);)
-
-        ignoreUnused (signMask);
        #endif
     }
 
@@ -1456,7 +1452,7 @@ intptr_t JUCE_CALLTYPE FloatVectorOperations::getFpStatusRegister() noexcept
     return fpsr;
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister (intptr_t fpsr) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister ([[maybe_unused]] intptr_t fpsr) noexcept
 {
  #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
     // the volatile keyword here is needed to workaround a bug in AppleClang 13.0
@@ -1481,11 +1477,10 @@ void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister (intptr_t fpsr) no
   #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
     jassertfalse; // No support for getting the floating point status register for your platform
   #endif
-    ignoreUnused (fpsr);
  #endif
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnable) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode ([[maybe_unused]] bool shouldEnable) noexcept
 {
   #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || (JUCE_64BIT && JUCE_ARM))
    #if JUCE_USE_SSE_INTRINSICS
@@ -1498,11 +1493,10 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
    #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
     jassertfalse; // No support for flush to zero mode on your platform
    #endif
-    ignoreUnused (shouldEnable);
   #endif
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool shouldDisable) noexcept
+void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport ([[maybe_unused]] bool shouldDisable) noexcept
 {
   #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || (JUCE_64BIT && JUCE_ARM))
    #if JUCE_USE_SSE_INTRINSICS
@@ -1513,7 +1507,6 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool
 
     setFpStatusRegister ((getFpStatusRegister() & (~mask)) | (shouldDisable ? mask : 0));
   #else
-    ignoreUnused (shouldDisable);
 
    #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
     jassertfalse; // No support for disable denormals mode on your platform

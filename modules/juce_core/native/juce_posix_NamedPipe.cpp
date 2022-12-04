@@ -254,8 +254,7 @@ void NamedPipe::close()
             pimpl->stopReadOperation = true;
 
             const char buffer[] { 0 };
-            const auto done = ::write (pimpl->pipeIn.get(), buffer, numElementsInArray (buffer));
-            ignoreUnused (done);
+            [[maybe_unused]] const auto done = ::write (pimpl->pipeIn.get(), buffer, numElementsInArray (buffer));
         }
     }
 

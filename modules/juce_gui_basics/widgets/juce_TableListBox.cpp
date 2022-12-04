@@ -725,9 +725,8 @@ void TableListBoxModel::listWasScrolled()                               {}
 String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return {}; }
 var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return {}; }
 
-Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
+Component* TableListBoxModel::refreshComponentForCell (int, int, bool, [[maybe_unused]] Component* existingComponentToUpdate)
 {
-    ignoreUnused (existingComponentToUpdate);
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code that recycles the components
     return nullptr;
 }

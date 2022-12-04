@@ -361,10 +361,8 @@ namespace X11ErrorHandling
         return 0;
     }
 
-    static int errorHandler (::Display* display, XErrorEvent* event)
+    static int errorHandler ([[maybe_unused]] ::Display* display, [[maybe_unused]] XErrorEvent* event)
     {
-        ignoreUnused (display, event);
-
        #if JUCE_DEBUG_XERRORS
         char errorStr[64]   = { 0 };
         char requestStr[64] = { 0 };
