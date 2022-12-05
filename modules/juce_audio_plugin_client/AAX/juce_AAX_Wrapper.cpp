@@ -880,7 +880,7 @@ namespace AAXClasses
 
                 case JUCEAlgorithmIDs::preparedFlag:
                 {
-                    const_cast<JuceAAX_Processor*>(this)->preparePlugin();
+                    const_cast<JuceAAX_Processor*> (this)->preparePlugin();
 
                     auto numObjects = dataSize / sizeof (uint32_t);
                     auto* objects = static_cast<uint32_t*> (data);
@@ -1237,7 +1237,7 @@ namespace AAXClasses
             if (idx < mainNumIns)
                 return inputs[inputLayoutMap[idx]];
 
-            return (sidechain != -1 ? inputs[sidechain] : sideChainBuffer.getData());
+            return (sidechain != -1 ? inputs[sidechain] : sideChainBuffer.data());
         }
 
         void process (const float* const* inputs, float* const* outputs, const int sideChainBufferIdx,
@@ -1524,19 +1524,15 @@ namespace AAXClasses
                 if (lastBufferSize != bufferSize)
                 {
                     lastBufferSize = bufferSize;
-                    pluginInstance->setRateAndBufferSizeDetails (sampleRate, bufferSize);
+                    pluginInstance->setRateAndBufferSizeDetails (sampleRate, lastBufferSize);
 
+                    // we only call prepareToPlay here if the new buffer size is larger than
+                    // the one used last time prepareToPlay was called.
+                    // currently, this should never actually happen, because as of Pro Tools 12,
+                    // the maximum possible value is 1024, and we call prepareToPlay with that
+                    // value during initialisation.
                     if (bufferSize > maxBufferSize)
-                    {
-                        // we only call prepareToPlay here if the new buffer size is larger than
-                        // the one used last time prepareToPlay was called.
-                        // currently, this should never actually happen, because as of Pro Tools 12,
-                        // the maximum possible value is 1024, and we call prepareToPlay with that
-                        // value during initialisation.
-                        pluginInstance->prepareToPlay (sampleRate, bufferSize);
-                        maxBufferSize = bufferSize;
-                        sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
-                    }
+                        prepareProcessorWithSampleRateAndBufferSize (sampleRate, bufferSize);
                 }
 
                 if (bypass && pluginInstance->getBypassParameter() == nullptr)
@@ -1801,14 +1797,10 @@ namespace AAXClasses
                     audioProcessor.releaseResources();
                 }
 
-                audioProcessor.setRateAndBufferSizeDetails (sampleRate, lastBufferSize);
-                audioProcessor.prepareToPlay (sampleRate, lastBufferSize);
-                maxBufferSize = lastBufferSize;
+                prepareProcessorWithSampleRateAndBufferSize (sampleRate, lastBufferSize);
 
                 midiBuffer.ensureSize (2048);
                 midiBuffer.clear();
-
-                sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
             }
 
             check (Controller()->SetSignalLatency (audioProcessor.getLatencySamples()));
@@ -1870,6 +1862,16 @@ namespace AAXClasses
             }
         }
 
+        void prepareProcessorWithSampleRateAndBufferSize (double sr, int bs)
+        {
+            maxBufferSize = jmax (maxBufferSize, bs);
+
+            auto& audioProcessor = getPluginInstance();
+            audioProcessor.setRateAndBufferSizeDetails (sr, maxBufferSize);
+            audioProcessor.prepareToPlay (sr, maxBufferSize);
+            sideChainBuffer.resize (static_cast<size_t> (maxBufferSize));
+        }
+
         //==============================================================================
         void updateSidechainState()
         {
@@ -1877,7 +1879,7 @@ namespace AAXClasses
                 return;
 
             auto& audioProcessor = getPluginInstance();
-            bool sidechainActual = audioProcessor.getChannelCountOfBus (true, 1) > 0;
+            const auto sidechainActual = audioProcessor.getChannelCountOfBus (true, 1) > 0;
 
             if (hasSidechain && canDisableSidechain && sidechainDesired != sidechainActual)
             {
@@ -1893,7 +1895,7 @@ namespace AAXClasses
                     bus->setCurrentLayout (lastSideChainState ? AudioChannelSet::mono()
                                                               : AudioChannelSet::disabled());
 
-                audioProcessor.prepareToPlay (audioProcessor.getSampleRate(), audioProcessor.getBlockSize());
+                prepareProcessorWithSampleRateAndBufferSize (audioProcessor.getSampleRate(), maxBufferSize);
                 isPrepared = true;
             }
 
@@ -2094,17 +2096,19 @@ namespace AAXClasses
 
         std::unique_ptr<AudioProcessor> pluginInstance;
 
+        static constexpr auto maxSamplesPerBlock = 1 << AAX_eAudioBufferLength_Max;
+
         bool isPrepared = false;
         MidiBuffer midiBuffer;
         Array<float*> channelList;
         int32_t juceChunkIndex = 0, numSetDirtyCalls = 0;
         AAX_CSampleRate sampleRate = 0;
-        int lastBufferSize = 1024, maxBufferSize = 1024;
+        int lastBufferSize = maxSamplesPerBlock, maxBufferSize = maxSamplesPerBlock;
         bool hasSidechain = false, canDisableSidechain = false, lastSideChainState = false;
 
         std::atomic<bool> processingSidechainChange, sidechainDesired;
 
-        HeapBlock<float> sideChainBuffer;
+        std::vector<float> sideChainBuffer;
         Array<int> inputLayoutMap, outputLayoutMap;
 
         Array<String> aaxParamIDs;
