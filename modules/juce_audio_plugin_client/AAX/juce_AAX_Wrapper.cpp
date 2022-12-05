@@ -71,11 +71,19 @@ static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE require
 #include <AAX_IFeatureInfo.h>
 #include <AAX_UIDs.h>
 
-#ifdef AAX_SDK_2p3p1_REVISION
- #if AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p1_REVISION
-  #include <AAX_Exception.h>
-  #include <AAX_Assert.h>
- #endif
+#if defined (AAX_SDK_2p3p1_REVISION) && AAX_SDK_2p3p1_REVISION <= AAX_SDK_CURRENT_REVISION
+ #include <AAX_Exception.h>
+ #include <AAX_Assert.h>
+#endif
+
+#if defined (AAX_SDK_2p4p0_REVISION) && AAX_SDK_2p4p0_REVISION <= AAX_SDK_CURRENT_REVISION
+ #define JUCE_AAX_HAS_TRANSPORT_NOTIFICATION 1
+#else
+ #define JUCE_AAX_HAS_TRANSPORT_NOTIFICATION 0
+#endif
+
+#if JUCE_AAX_HAS_TRANSPORT_NOTIFICATION
+ #include <AAX_TransportTypes.h>
 #endif
 
 JUCE_END_IGNORE_WARNINGS_MSVC
@@ -1065,6 +1073,8 @@ namespace AAXClasses
                 return transport.IsTransportPlaying (&isPlaying) == AAX_SUCCESS && isPlaying;
             }());
 
+            info.setIsRecording (recordingState.get());
+
             info.setTimeInSamples ([&]
             {
                 int64_t timeInSamples = 0;
@@ -1225,6 +1235,16 @@ namespace AAXClasses
                     updateSidechainState();
                     break;
                 }
+
+               #if JUCE_AAX_HAS_TRANSPORT_NOTIFICATION
+                case AAX_eNotificationEvent_TransportStateChanged:
+                    if (data != nullptr)
+                    {
+                        const auto& info = *static_cast<const AAX_TransportStateInfo_V1*> (data);
+                        recordingState.set (info.mIsRecording);
+                    }
+                    break;
+               #endif
             }
 
             return AAX_CEffectParameters::NotificationReceived (type, data, size);
@@ -2106,6 +2126,41 @@ namespace AAXClasses
         int lastBufferSize = maxSamplesPerBlock, maxBufferSize = maxSamplesPerBlock;
         bool hasSidechain = false, canDisableSidechain = false, lastSideChainState = false;
 
+        /*  Pro Tools 2021 sends TransportStateChanged on the main thread, but we read
+            the recording state on the audio thread.
+            I'm not sure whether Pro Tools ensures that these calls are mutually
+            exclusive, so to ensure there are no data races, we store the recording
+            state in an atomic int and convert it to/from an Optional<bool> as necessary.
+        */
+        class RecordingState
+        {
+        public:
+            void set (const Optional<bool> newState)
+            {
+                state.store (newState.hasValue() ? (flagValid | (*newState ? flagActive : 0))
+                                                 : 0,
+                             std::memory_order_relaxed);
+            }
+
+            Optional<bool> get() const
+            {
+                const auto loaded = state.load (std::memory_order_relaxed);
+                return ((loaded & flagValid) != 0) ? makeOptional ((loaded & flagActive) != 0)
+                                                   : nullopt;
+            }
+
+        private:
+            enum RecordingFlags
+            {
+                flagValid  = 1 << 0,
+                flagActive = 1 << 1
+            };
+
+            std::atomic<int> state { 0 };
+        };
+
+        RecordingState recordingState;
+
         std::atomic<bool> processingSidechainChange, sidechainDesired;
 
         std::vector<float> sideChainBuffer;
@@ -2330,6 +2385,10 @@ namespace AAXClasses
 
        #if JucePlugin_AAXDisableSaveRestore
         properties->AddProperty (AAX_eProperty_SupportsSaveRestore, false);
+       #endif
+
+       #if JUCE_AAX_HAS_TRANSPORT_NOTIFICATION
+        properties->AddProperty (AAX_eProperty_ObservesTransportState, true);
        #endif
 
         if (fullLayout.getChannelSet (true, 1) == AudioChannelSet::mono())
