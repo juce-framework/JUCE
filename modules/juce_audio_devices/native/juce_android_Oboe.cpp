@@ -1410,20 +1410,22 @@ private:
 };
 
 //==============================================================================
-pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr);
-pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
+RealtimeThreadFactory getAndroidRealtimeThreadFactory()
 {
-    auto thread = std::make_unique<OboeRealtimeThread>();
+    return [] (void* (*entry) (void*), void* userPtr) -> pthread_t
+    {
+        auto thread = std::make_unique<OboeRealtimeThread>();
 
-    if (! thread->isOk())
-        return {};
+        if (! thread->isOk())
+            return {};
 
-    auto threadID = thread->startThread (entry, userPtr);
+        auto threadID = thread->startThread (entry, userPtr);
 
-    // the thread will de-allocate itself
-    thread.release();
+        // the thread will de-allocate itself
+        thread.release();
 
-    return threadID;
+        return threadID;
+    };
 }
 
 } // namespace juce
