@@ -328,6 +328,7 @@ namespace juce
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
+ #include "native/x11/juce_linux_ScopedWindowAssociation.h"
  #include "native/juce_linux_Windowing.cpp"
  #include "native/x11/juce_linux_XWindowSystem.cpp"
 

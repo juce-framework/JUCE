@@ -26,8 +26,6 @@
 namespace juce
 {
 
-extern XContext windowHandleXContext;
-
 struct XFreeDeleter
 {
     void operator() (void* ptr) const
@@ -45,84 +43,13 @@ std::unique_ptr<Data, XFreeDeleter> makeXFreePtr (Data* raw) { return std::uniqu
 void juce_LinuxAddRepaintListener (ComponentPeer*, Component* dummy);
 void juce_LinuxRemoveRepaintListener (ComponentPeer*, Component* dummy);
 
-/*  Attaches a peer to a given window, so that it can be retrieved with XFindContext on
-    the windowHandleXContext.
-*/
-class ScopedPeerAssociation
-{
-public:
-    static ScopedPeerAssociation make (ComponentPeer* peerIn, Window windowIn)
-    {
-        if (peerIn == nullptr)
-            return { nullptr, windowIn };
-
-        const auto display = XWindowSystem::getInstance()->getDisplay();
-
-        if (X11Symbols::getInstance()->xSaveContext (display,
-                                                     static_cast<XID> (windowIn),
-                                                     windowHandleXContext,
-                                                     unalignedPointerCast<XPointer> (peerIn)) != 0)
-        {
-            jassertfalse;
-            return { nullptr, windowIn };
-        }
-
-        return { peerIn, windowIn };
-    }
-
-    ScopedPeerAssociation (const ScopedPeerAssociation&) = delete;
-    ScopedPeerAssociation& operator= (const ScopedPeerAssociation&) = delete;
-
-    ScopedPeerAssociation (ScopedPeerAssociation&& other) noexcept
-        : peer (std::exchange (other.peer, nullptr)), window (other.window) {}
-
-    ScopedPeerAssociation& operator= (ScopedPeerAssociation&& other) noexcept
-    {
-        ScopedPeerAssociation { std::move (other) }.swap (*this);
-        return *this;
-    }
-
-    ~ScopedPeerAssociation() noexcept
-    {
-        if (peer == nullptr)
-            return;
-
-        const auto display = XWindowSystem::getInstance()->getDisplay();
-        XPointer ptr{};
-
-        if (X11Symbols::getInstance()->xFindContext (display, window, windowHandleXContext, &ptr) != 0)
-        {
-            jassertfalse;
-            return;
-        }
-
-        jassert (unalignedPointerCast<XPointer> (peer) == ptr);
-
-        if (X11Symbols::getInstance()->xDeleteContext (display, window, windowHandleXContext) != 0)
-            jassertfalse;
-    }
-
-private:
-    ScopedPeerAssociation (ComponentPeer* componentPeer, Window embeddedWindow)
-        : peer (componentPeer), window (static_cast<XID> (embeddedWindow)) {}
-
-    void swap (ScopedPeerAssociation& other) noexcept
-    {
-        std::swap (other.peer, peer);
-        std::swap (other.window, window);
-    }
-
-    ComponentPeer* peer = nullptr;
-    XID window{};
-};
-
 class PeerListener : private ComponentMovementWatcher
 {
 public:
     PeerListener (Component& comp, Window embeddedWindow)
         : ComponentMovementWatcher (&comp),
           window (embeddedWindow),
-          association (ScopedPeerAssociation::make (comp.getPeer(), window)) {}
+          association (comp.getPeer(), window) {}
 
 private:
     using ComponentMovementWatcher::componentMovedOrResized,
@@ -135,14 +62,14 @@ private:
     {
         // This should not be rewritten as a ternary expression or similar.
         // The old association must be destroyed before the new one is created.
-        association = ScopedPeerAssociation::make (nullptr, window);
+        association = {};
 
         if (auto* comp = getComponent())
-            association = ScopedPeerAssociation::make (comp->getPeer(), window);
+            association = ScopedWindowAssociation (comp->getPeer(), window);
     }
 
     Window window{};
-    ScopedPeerAssociation association;
+    ScopedWindowAssociation association;
 };
 
 //==============================================================================

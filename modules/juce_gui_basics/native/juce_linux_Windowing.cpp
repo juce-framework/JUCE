@@ -392,6 +392,15 @@ public:
         }
     }
 
+    bool setWindowAssociation (::Window windowIn)
+    {
+        clearWindowAssociation();
+        association = { this, windowIn };
+        return association.isValid();
+    }
+
+    void clearWindowAssociation() { association = {}; }
+
     //==============================================================================
     static bool isActiveApplication;
     bool focused = false;
@@ -591,6 +600,7 @@ private:
     bool fullScreen = false, isAlwaysOnTop = false;
     double currentScaleFactor = 1.0;
     Array<Component*> glRepaintListeners;
+    ScopedWindowAssociation association;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer)
