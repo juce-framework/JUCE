@@ -1057,14 +1057,16 @@ namespace AAXClasses
                 return transport.GetCurrentTempo (&bpm) == AAX_SUCCESS ? makeOptional (bpm) : nullopt;
             }());
 
-            info.setTimeSignature ([&]
+            const auto signature = [&]
             {
                 int32_t num = 4, den = 4;
 
                 return transport.GetCurrentMeter (&num, &den) == AAX_SUCCESS
-                       ? makeOptional (TimeSignature { (int) num, (int) den })
-                       : nullopt;
-            }());
+                     ? makeOptional (TimeSignature { (int) num, (int) den })
+                     : nullopt;
+            }();
+
+            info.setTimeSignature (signature);
 
             info.setIsPlaying ([&]
             {
@@ -1075,27 +1077,29 @@ namespace AAXClasses
 
             info.setIsRecording (recordingState.get());
 
-            info.setTimeInSamples ([&]
+            const auto optionalTimeInSamples = [&info, &transport]
             {
                 int64_t timeInSamples = 0;
-
                 return ((! info.getIsPlaying() && transport.GetTimelineSelectionStartPosition (&timeInSamples) == AAX_SUCCESS)
-                        || transport.GetCurrentNativeSampleLocation (&timeInSamples) == AAX_SUCCESS)
-                            ? makeOptional (timeInSamples)
-                            : nullopt;
-            }());
+                                                    || transport.GetCurrentNativeSampleLocation (&timeInSamples) == AAX_SUCCESS)
+                                                 ? makeOptional (timeInSamples)
+                                                 : nullopt;
+            }();
 
-            info.setTimeInSeconds ((float) info.getTimeInSamples().orFallback (0) / sampleRate);
+            info.setTimeInSamples (optionalTimeInSamples);
+            info.setTimeInSeconds ((float) optionalTimeInSamples.orFallback (0) / sampleRate);
 
-            info.setPpqPosition ([&]
+            const auto tickPosition = [&]
             {
                 int64_t ticks = 0;
 
-                return ((info.getIsPlaying() && transport.GetCustomTickPosition (&ticks, info.getTimeInSamples().orFallback (0))) == AAX_SUCCESS)
-                        || transport.GetCurrentTickPosition (&ticks) == AAX_SUCCESS
-                            ? makeOptional (ticks / 960000.0)
-                            : nullopt;
-            }());
+                return ((info.getIsPlaying() && transport.GetCustomTickPosition (&ticks, optionalTimeInSamples.orFallback (0))) == AAX_SUCCESS)
+                       || transport.GetCurrentTickPosition (&ticks) == AAX_SUCCESS
+                     ? makeOptional (ticks)
+                     : nullopt;
+            }();
+
+            info.setPpqPosition (tickPosition.hasValue() ? makeOptional (static_cast<double> (*tickPosition) / 960'000.0) : nullopt);
 
             bool isLooping = false;
             int64_t loopStartTick = 0, loopEndTick = 0;
@@ -1151,6 +1155,28 @@ namespace AAXClasses
 
             const auto effectiveRate = info.getFrameRate().hasValue() ? info.getFrameRate()->getEffectiveRate() : 0.0;
             info.setEditOriginTime (makeOptional (effectiveRate != 0.0 ? offset / effectiveRate : offset));
+
+            {
+                int32_t bars{}, beats{};
+                int64_t displayTicks{};
+
+                if (optionalTimeInSamples.hasValue()
+                    && transport.GetBarBeatPosition (&bars, &beats, &displayTicks, *optionalTimeInSamples) == AAX_SUCCESS)
+                {
+                    info.setBarCount (bars);
+
+                    if (signature.hasValue())
+                    {
+                        const auto ticksSinceBar = static_cast<int64_t> (((beats - 1) * 4 * 960'000) / signature->denominator) + displayTicks;
+
+                        if (tickPosition.hasValue() && ticksSinceBar <= tickPosition)
+                        {
+                            const auto barStartInTicks = static_cast<double> (*tickPosition - ticksSinceBar);
+                            info.setPpqPositionOfLastBarStart (barStartInTicks / 960'000.0);
+                        }
+                    }
+                }
+            }
 
             return info;
         }
@@ -2135,6 +2161,7 @@ namespace AAXClasses
         class RecordingState
         {
         public:
+            /*  This uses Optional rather than std::optional for consistency with get() */
             void set (const Optional<bool> newState)
             {
                 state.store (newState.hasValue() ? (flagValid | (*newState ? flagActive : 0))
@@ -2142,6 +2169,9 @@ namespace AAXClasses
                              std::memory_order_relaxed);
             }
 
+            /*  PositionInfo::setIsRecording takes an Optional<bool>, so we use that type rather
+                than std::optional to avoid having to convert.
+            */
             Optional<bool> get() const
             {
                 const auto loaded = state.load (std::memory_order_relaxed);
