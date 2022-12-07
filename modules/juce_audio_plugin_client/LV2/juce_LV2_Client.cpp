@@ -124,7 +124,14 @@ public:
     */
     static String getIri (const AudioProcessorParameter& param)
     {
-        return URL::addEscapeChars (LegacyAudioParameter::getParamID (&param, false), true);
+        const auto urlSanitised = URL::addEscapeChars (LegacyAudioParameter::getParamID (&param, false), true);
+        const auto ttlSanitised = lv2_shared::sanitiseStringAsTtlName (urlSanitised);
+
+        // If this is hit, the parameter ID could not be represented directly in the plugin ttl.
+        // We'll replace offending characters with '_'.
+        jassert (urlSanitised == ttlSanitised);
+
+        return ttlSanitised;
     }
 
     void setValueFromHost (LV2_URID urid, float value) noexcept
@@ -216,6 +223,11 @@ private:
             const auto urid = mapFeature.map (mapFeature.handle, uri.toRawUTF8());
             result.push_back (urid);
         }
+
+        // If this is hit, some parameters have duplicate IDs.
+        // This may be because the IDs resolve to the same string when removing characters that
+        // are invalid in a TTL name.
+        jassert (std::set<LV2_URID> (result.begin(), result.end()).size() == result.size());
 
         return result;
     }();
