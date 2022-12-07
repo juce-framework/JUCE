@@ -580,13 +580,13 @@ private:
     {
         if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (bounds))
         {
-            if (display->verticalFrequencyHz)
-            {
-                const auto newIntFrequencyHz = roundToInt (*display->verticalFrequencyHz);
+            // Some systems fail to set an explicit refresh rate, or ask for a refresh rate of 0
+            // (observed on Raspbian Bullseye over VNC). In these situations, use a fallback value.
+            const auto newIntFrequencyHz = roundToInt (display->verticalFrequencyHz.value_or (0.0));
+            const auto frequencyToUse = newIntFrequencyHz != 0 ? newIntFrequencyHz : 100;
 
-                if (vBlankManager.getTimerInterval() != newIntFrequencyHz)
-                    vBlankManager.startTimerHz (newIntFrequencyHz);
-            }
+            if (vBlankManager.getTimerInterval() != frequencyToUse)
+                vBlankManager.startTimerHz (frequencyToUse);
         }
     }
 
