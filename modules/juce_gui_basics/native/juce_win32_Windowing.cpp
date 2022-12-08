@@ -499,6 +499,31 @@ static double getGlobalDPI()
 }
 
 //==============================================================================
+class ScopedSuspendResumeNotificationRegistration
+{
+public:
+    ScopedSuspendResumeNotificationRegistration() = default;
+
+    explicit ScopedSuspendResumeNotificationRegistration (HWND window)
+        : handle (SystemStats::getOperatingSystemType() >= SystemStats::Windows8_0
+                      ? RegisterSuspendResumeNotification (window, DEVICE_NOTIFY_WINDOW_HANDLE)
+                      : nullptr)
+    {}
+
+private:
+    struct Destructor
+    {
+        void operator() (HPOWERNOTIFY ptr) const
+        {
+            if (ptr != nullptr)
+                UnregisterSuspendResumeNotification (ptr);
+        }
+    };
+
+    std::unique_ptr<std::remove_pointer_t<HPOWERNOTIFY>, Destructor> handle;
+};
+
+//==============================================================================
 class ScopedThreadDPIAwarenessSetter::NativeImpl
 {
 public:
@@ -1659,10 +1684,14 @@ public:
 
         if (updateCurrentMonitor())
             VBlankDispatcher::getInstance()->updateDisplay (*this, currentMonitor);
+
+        suspendResumeRegistration = ScopedSuspendResumeNotificationRegistration { hwnd };
     }
 
     ~HWNDComponentPeer() override
     {
+        suspendResumeRegistration = {};
+
         VBlankDispatcher::getInstance()->removeListener (*this);
 
         // do this first to avoid messages arriving for this window before it's destroyed
@@ -4595,6 +4624,7 @@ private:
     bool shouldIgnoreModalDismiss = false;
 
     RectangleList<int> deferredRepaints;
+    ScopedSuspendResumeNotificationRegistration suspendResumeRegistration;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)
