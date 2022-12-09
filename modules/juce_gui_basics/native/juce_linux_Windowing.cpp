@@ -51,6 +51,7 @@ public:
             ++numAlwaysOnTopPeers;
 
         repainter = std::make_unique<LinuxRepaintManager> (*this);
+        updateVBlankTimer();
 
         windowH = instance->createWindow (parentToAddTo, this);
         parentWindow = parentToAddTo;
@@ -571,13 +572,10 @@ private:
     {
         if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (bounds))
         {
-            if (display->verticalFrequencyHz)
-            {
-                const auto newIntFrequencyHz = roundToInt (*display->verticalFrequencyHz);
+            const auto newIntFrequencyHz = display->verticalFrequencyHz ? roundToInt (*display->verticalFrequencyHz) : 100;
 
-                if (vBlankManager.getTimerInterval() != newIntFrequencyHz)
-                    vBlankManager.startTimerHz (newIntFrequencyHz);
-            }
+            if (vBlankManager.getTimerInterval() != newIntFrequencyHz)
+                vBlankManager.startTimerHz (newIntFrequencyHz);
         }
     }
 
