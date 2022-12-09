@@ -1172,7 +1172,6 @@ public:
             }
 
             defines = mergePreprocessorDefs (defines, getOwner().getAllPreprocessorDefs (config, type));
-            addExtraPreprocessorDefines (defines);
 
             if (getTargetFileType() == staticLibrary || getTargetFileType() == sharedLibraryOrDLL)
                 defines.set("_LIB", "");
@@ -1350,15 +1349,6 @@ public:
             auto extraPreBuild = getExtraPreBuildSteps (config);
 
             return preBuild + String (preBuild.isNotEmpty() && extraPreBuild.isNotEmpty() ? "\r\n" : "") + extraPreBuild;
-        }
-
-        void addExtraPreprocessorDefines (StringPairArray& defines) const
-        {
-            if (type == AAXPlugIn)
-            {
-                auto aaxLibsFolder = build_tools::RelativePath (owner.getAAXPathString(), build_tools::RelativePath::projectFolder).getChildFile ("Libs");
-                defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
-            }
         }
 
         String getBinaryNameWithSuffix (const MSVCBuildConfiguration& config) const

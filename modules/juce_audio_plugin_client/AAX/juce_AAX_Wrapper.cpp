@@ -26,7 +26,7 @@
 #include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
-#if JucePlugin_Build_AAX && (JUCE_INCLUDED_AAX_IN_MM || defined (_WIN32) || defined (_WIN64))
+#if JucePlugin_Build_AAX && (JUCE_MAC || JUCE_WINDOWS)
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
@@ -48,7 +48,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
 
 #include <AAX_Version.h>
 
-static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE requires AAX SDK version 2.3.0 or higher");
+static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p4p0_REVISION, "JUCE requires AAX SDK version 2.4.0 or higher");
+
+#define INITACFIDS
 
 #include <AAX_Exports.cpp>
 #include <AAX_ICollection.h>
@@ -70,48 +72,14 @@ static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE require
 #include <AAX_IDescriptionHost.h>
 #include <AAX_IFeatureInfo.h>
 #include <AAX_UIDs.h>
-
-#if defined (AAX_SDK_2p3p1_REVISION) && AAX_SDK_2p3p1_REVISION <= AAX_SDK_CURRENT_REVISION
- #include <AAX_Exception.h>
- #include <AAX_Assert.h>
-#endif
-
-#if defined (AAX_SDK_2p4p0_REVISION) && AAX_SDK_2p4p0_REVISION <= AAX_SDK_CURRENT_REVISION
- #define JUCE_AAX_HAS_TRANSPORT_NOTIFICATION 1
-#else
- #define JUCE_AAX_HAS_TRANSPORT_NOTIFICATION 0
-#endif
-
-#if JUCE_AAX_HAS_TRANSPORT_NOTIFICATION
- #include <AAX_TransportTypes.h>
-#endif
+#include <AAX_Exception.h>
+#include <AAX_Assert.h>
+#include <AAX_TransportTypes.h>
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
-
-#if JUCE_WINDOWS
- #ifndef JucePlugin_AAXLibs_path
-  #error "You need to define the JucePlugin_AAXLibs_path macro. (This is best done via the Projucer)"
- #endif
-
- #if JUCE_64BIT
-  #define JUCE_AAX_LIB "AAXLibrary_x64"
- #else
-  #define JUCE_AAX_LIB "AAXLibrary"
- #endif
-
- #if JUCE_DEBUG
-  #define JUCE_AAX_LIB_PATH   "\\Debug\\"
-  #define JUCE_AAX_LIB_SUFFIX "_D"
- #else
-  #define JUCE_AAX_LIB_PATH   "\\Release\\"
-  #define JUCE_AAX_LIB_SUFFIX ""
- #endif
-
- #pragma comment(lib, JucePlugin_AAXLibs_path JUCE_AAX_LIB_PATH JUCE_AAX_LIB JUCE_AAX_LIB_SUFFIX ".lib")
-#endif
 
 #undef check
 
@@ -1260,7 +1228,6 @@ namespace AAXClasses
                     break;
                 }
 
-               #if JUCE_AAX_HAS_TRANSPORT_NOTIFICATION
                 case AAX_eNotificationEvent_TransportStateChanged:
                     if (data != nullptr)
                     {
@@ -1268,7 +1235,6 @@ namespace AAXClasses
                         recordingState.set (info.mIsRecording);
                     }
                     break;
-               #endif
             }
 
             return AAX_CEffectParameters::NotificationReceived (type, data, size);
@@ -2415,9 +2381,7 @@ namespace AAXClasses
         properties->AddProperty (AAX_eProperty_SupportsSaveRestore, false);
        #endif
 
-       #if JUCE_AAX_HAS_TRANSPORT_NOTIFICATION
         properties->AddProperty (AAX_eProperty_ObservesTransportState, true);
-       #endif
 
         if (fullLayout.getChannelSet (true, 1) == AudioChannelSet::mono())
         {

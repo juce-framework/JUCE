@@ -6,6 +6,32 @@ develop
 
 Change
 ------
+The minimum supported AAX library version has been bumped to 2.4.0 and the
+library is now built automatically while building an AAX plugin. The
+JucePlugin_AAXLibs_path preprocessor definition is no longer defined in AAX
+plugin builds.
+
+Possible Issues
+---------------
+Projects that use the JucePlugin_AAXLibs_path definition may no longer build
+correctly. Projects that reference an AAX library version earlier than 2.4.0
+will fail to build.
+
+Workaround
+----------
+You must download an AAX library distribution with a version of at least 2.4.0.
+Use the definition JucePlugin_Build_AAX to check whether the AAX format is
+enabled at build time.
+
+Rationale
+---------
+The JUCE framework now requires features only present in version 2.4.0 of the
+AAX library. The build change removes steps from the build process, and ensures
+that the same compiler flags are used across the entire project.
+
+
+Change
+------
 The implementation of ColourGradient::createLookupTable has been updated to use
 non-premultiplied colours.
 
