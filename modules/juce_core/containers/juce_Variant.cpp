@@ -493,18 +493,6 @@ struct var::Instance
     static constexpr VariantType attributesObject         { VariantType::ObjectTag{} };
 };
 
-constexpr var::VariantType var::Instance::attributesVoid;
-constexpr var::VariantType var::Instance::attributesUndefined;
-constexpr var::VariantType var::Instance::attributesInt;
-constexpr var::VariantType var::Instance::attributesInt64;
-constexpr var::VariantType var::Instance::attributesBool;
-constexpr var::VariantType var::Instance::attributesDouble;
-constexpr var::VariantType var::Instance::attributesMethod;
-constexpr var::VariantType var::Instance::attributesArray;
-constexpr var::VariantType var::Instance::attributesString;
-constexpr var::VariantType var::Instance::attributesBinary;
-constexpr var::VariantType var::Instance::attributesObject;
-
 //==============================================================================
 var::var() noexcept : type (&Instance::attributesVoid) {}
 var::var (const VariantType& t) noexcept  : type (&t) {}

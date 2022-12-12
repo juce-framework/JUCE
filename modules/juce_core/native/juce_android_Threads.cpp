@@ -354,6 +354,13 @@ pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 
 extern JavaVM* androidJNIJavaVM;
 
+static auto setPriorityOfThisThread (Thread::Priority p)
+{
+    return setpriority (PRIO_PROCESS,
+                        (id_t) gettid(),
+                        ThreadPriorities::getNativePriority (p)) == 0;
+}
+
 bool Thread::createNativeThread (Priority)
 {
     if (isRealtime())
@@ -371,6 +378,8 @@ bool Thread::createNativeThread (Priority)
     threadId = threadHandle = makeThreadHandle (attr, this, [] (void* userData) -> void*
     {
         auto* myself = static_cast<Thread*> (userData);
+
+        setPriorityOfThisThread (myself->priority);
 
         juce_threadEntryPoint (myself);
 
@@ -404,14 +413,15 @@ Thread::Priority Thread::getPriority() const
     return ThreadPriorities::getJucePriority (native);
 }
 
-bool Thread::setPriority (Priority)
+bool Thread::setPriority (Priority priorityIn)
 {
     jassert (Thread::getCurrentThreadId() == getThreadId());
 
     if (isRealtime())
         return false;
 
-    return setpriority (PRIO_PROCESS, (id_t) gettid(), ThreadPriorities::getNativePriority (priority)) == 0;
+    const auto priorityToUse = priority = priorityIn;
+    return setPriorityOfThisThread (priorityToUse) == 0;
 }
 
 //==============================================================================

@@ -327,7 +327,7 @@ static const uint8 javaMidiByteCode[] =
  STATICMETHOD (getAndroidMidiDeviceManager, "getAndroidMidiDeviceManager", "(Landroid/content/Context;)Lcom/rmsl/juce/JuceMidiSupport$MidiDeviceManager;") \
  STATICMETHOD (getAndroidBluetoothManager,  "getAndroidBluetoothManager",  "(Landroid/content/Context;)Lcom/rmsl/juce/JuceMidiSupport$BluetoothManager;")
 
-DECLARE_JNI_CLASS_WITH_BYTECODE (JuceMidiSupport, "com/rmsl/juce/JuceMidiSupport", 23, javaMidiByteCode, sizeof (javaMidiByteCode))
+DECLARE_JNI_CLASS_WITH_BYTECODE (JuceMidiSupport, "com/rmsl/juce/JuceMidiSupport", 23, javaMidiByteCode)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \

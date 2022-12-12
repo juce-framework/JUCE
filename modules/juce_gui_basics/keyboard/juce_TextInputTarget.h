@@ -26,7 +26,6 @@
 namespace juce
 {
 
-//==============================================================================
 /**
     An abstract base class which can be implemented by components that function as
     text editors.
@@ -108,7 +107,8 @@ public:
         decimalKeyboard,
         urlKeyboard,
         emailAddressKeyboard,
-        phoneNumberKeyboard
+        phoneNumberKeyboard,
+        passwordKeyboard
     };
 
     /** Returns the target's preference for the type of keyboard that would be most appropriate.

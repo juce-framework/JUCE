@@ -1549,8 +1549,6 @@ struct JuceFirebaseInstanceIdService
             instance->pimpl->notifyListenersTokenRefreshed (juceString (static_cast<jstring> (token)));
     }
 };
-
-JuceFirebaseInstanceIdService::InstanceIdService_Class JuceFirebaseInstanceIdService::InstanceIdService;
 #endif
 
 #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
@@ -1592,8 +1590,6 @@ struct JuceFirebaseMessagingService
                                                                               LocalRef<jstring> (static_cast<jstring> (error)));
     }
 };
-
-JuceFirebaseMessagingService::MessagingService_Class  JuceFirebaseMessagingService::MessagingService;
 #endif
 
 //==============================================================================

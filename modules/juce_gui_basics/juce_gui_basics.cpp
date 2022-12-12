@@ -336,6 +336,28 @@ namespace juce
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID
+
+namespace juce
+{
+static jobject makeAndroidRect (Rectangle<int> r)
+{
+    return getEnv()->NewObject (AndroidRect,
+                                AndroidRect.constructor,
+                                r.getX(),
+                                r.getY(),
+                                r.getRight(),
+                                r.getBottom());
+}
+
+static jobject makeAndroidPoint (Point<int> p)
+{
+    return getEnv()->NewObject (AndroidPoint,
+                                AndroidPoint.create,
+                                p.getX(),
+                                p.getY());
+}
+} // namespace juce
+
  #include "juce_core/files/juce_common_MimeTypes.h"
  #include "native/accessibility/juce_android_Accessibility.cpp"
  #include "native/juce_android_Windowing.cpp"

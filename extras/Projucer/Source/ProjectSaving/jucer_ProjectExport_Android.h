@@ -71,6 +71,19 @@ public:
         createOtherExporterProperties (props);
     }
 
+    void updateDeprecatedSettings() override
+    {
+        const auto needsExternalRead = getSettingString (Ids::androidExternalReadNeeded);
+        settings.removeProperty (Ids::androidExternalReadNeeded, nullptr);
+
+        if (needsExternalRead.isEmpty())
+            return;
+
+        androidReadMediaAudioPermission .setValue (needsExternalRead, nullptr);
+        androidReadMediaImagesPermission.setValue (needsExternalRead, nullptr);
+        androidReadMediaVideoPermission .setValue (needsExternalRead, nullptr);
+    }
+
     static String getDisplayName()        { return "Android"; }
     static String getValueTreeTypeName()  { return "ANDROIDSTUDIO"; }
     static String getTargetFolderName()   { return "Android"; }
@@ -94,7 +107,8 @@ public:
                                  androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
                                  androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
                                  androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
-                                 androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
+                                 androidBluetoothNeeded, androidReadMediaAudioPermission, androidReadMediaImagesPermission,
+                                 androidReadMediaVideoPermission, androidExternalWritePermission,
                                  androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
                                  androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
                                  androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
@@ -124,7 +138,9 @@ public:
           androidMicNeeded                     (settings, Ids::microphonePermissionNeeded,           getUndoManager(), false),
           androidCameraNeeded                  (settings, Ids::cameraPermissionNeeded,               getUndoManager(), false),
           androidBluetoothNeeded               (settings, Ids::androidBluetoothNeeded,               getUndoManager(), true),
-          androidExternalReadPermission        (settings, Ids::androidExternalReadNeeded,            getUndoManager(), true),
+          androidReadMediaAudioPermission      (settings, Ids::androidReadMediaAudioPermission,      getUndoManager(), true),
+          androidReadMediaImagesPermission     (settings, Ids::androidReadMediaImagesPermission,     getUndoManager(), true),
+          androidReadMediaVideoPermission      (settings, Ids::androidReadMediaVideoPermission,      getUndoManager(), true),
           androidExternalWritePermission       (settings, Ids::androidExternalWriteNeeded,           getUndoManager(), true),
           androidInAppBillingPermission        (settings, Ids::androidInAppBilling,                  getUndoManager(), false),
           androidVibratePermission             (settings, Ids::androidVibratePermissionNeeded,       getUndoManager(), false),
@@ -1103,8 +1119,14 @@ private:
         props.add (new ChoicePropertyComponent (androidBluetoothNeeded, "Bluetooth Permissions Required"),
                    "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
 
-        props.add (new ChoicePropertyComponent (androidExternalReadPermission, "Read From External Storage"),
-                   "If enabled, this will set the android.permission.READ_EXTERNAL_STORAGE flag in the manifest.");
+        props.add (new ChoicePropertyComponent (androidReadMediaAudioPermission, "Read Audio From External Storage"),
+                   "If enabled, this will set the android.permission.READ_MEDIA_AUDIO and android.permission.READ_EXTERNAL_STORAGE flags in the manifest.");
+
+        props.add (new ChoicePropertyComponent (androidReadMediaImagesPermission, "Read Images From External Storage"),
+                   "If enabled, this will set the android.permission.READ_MEDIA_IMAGES and android.permission.READ_EXTERNAL_STORAGE flags in the manifest.");
+
+        props.add (new ChoicePropertyComponent (androidReadMediaVideoPermission, "Read Video From External Storage"),
+                   "If enabled, this will set the android.permission.READ_MEDIA_VIDEO and android.permission.READ_EXTERNAL_STORAGE flags in the manifest.");
 
         props.add (new ChoicePropertyComponent (androidExternalWritePermission, "Write to External Storage"),
                    "If enabled, this will set the android.permission.WRITE_EXTERNAL_STORAGE flag in the manifest.");
@@ -1680,6 +1702,15 @@ private:
             // This permission only has an effect on SDK version 28 and lower
             if (permission == "android.permission.WRITE_EXTERNAL_STORAGE")
                 usesPermission->setAttribute ("android:maxSdkVersion", "28");
+
+            // https://developer.android.com/training/data-storage/shared/documents-files
+            // If the SDK version is <= 28, READ_EXTERNAL_STORAGE is required to access any
+            // media file, including files created by the current app.
+            // If the SDK version is <= 32, READ_EXTERNAL_STORAGE is required to access other
+            // apps' media files.
+            // This permission has no effect on later Android versions.
+            if (permission == "android.permission.READ_EXTERNAL_STORAGE")
+                usesPermission->setAttribute ("android:maxSdkVersion", "32");
         }
     }
 
@@ -1736,7 +1767,7 @@ private:
         setAttributeIfNotPresent (*act, "android:name", getActivityClassString());
 
         if (! act->hasAttribute ("android:configChanges"))
-            act->setAttribute ("android:configChanges", "keyboardHidden|orientation|screenSize");
+            act->setAttribute ("android:configChanges", "keyboard|keyboardHidden|orientation|screenSize|navigation");
 
         if (androidScreenOrientation.get() == "landscape")
         {
@@ -1845,7 +1876,18 @@ private:
             s.add ("android.permission.ACCESS_COARSE_LOCATION");
         }
 
-        if (androidExternalReadPermission.get())
+        if (androidReadMediaAudioPermission.get())
+            s.add ("android.permission.READ_MEDIA_AUDIO");
+
+        if (androidReadMediaImagesPermission.get())
+            s.add ("android.permission.READ_MEDIA_IMAGES");
+
+        if (androidReadMediaVideoPermission.get())
+            s.add ("android.permission.READ_MEDIA_VIDEO");
+
+        if (   androidReadMediaAudioPermission.get()
+            || androidReadMediaImagesPermission.get()
+            || androidReadMediaVideoPermission.get())
             s.add ("android.permission.READ_EXTERNAL_STORAGE");
 
         if (androidExternalWritePermission.get())

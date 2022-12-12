@@ -143,7 +143,7 @@ inline StringArray javaListOfStringToJuceStringArray (const LocalRef<jobject>& j
 }
 
 //==============================================================================
-constexpr unsigned char juceBillingClientCompiled[]
+constexpr uint8 juceBillingClientCompiled[]
 {
     0x1f, 0x8b, 0x08, 0x08, 0xa4, 0x53, 0xd0, 0x62, 0x04, 0x03, 0x63, 0x6c,
     0x61, 0x73, 0x73, 0x65, 0x73, 0x2e, 0x64, 0x65, 0x78, 0x00, 0x9d, 0x5a,
@@ -720,41 +720,16 @@ private:
       METHOD (queryPurchases,                "queryPurchases",              "()V")                                                                        \
       METHOD (consumePurchase,               "consumePurchase",             "(Ljava/lang/String;Ljava/lang/String;)V")                                    \
                                                                                                                                                           \
-      CALLBACK (productDetailsQueryCallback, "productDetailsQueryCallback", "(JLjava/util/List;)V")                                                       \
-      CALLBACK (purchasesListQueryCallback,  "purchasesListQueryCallback",  "(JLjava/util/List;)V")                                                       \
-      CALLBACK (purchaseCompletedCallback,   "purchaseCompletedCallback",   "(JLcom/android/billingclient/api/Purchase;I)V")                              \
-      CALLBACK (purchaseConsumedCallback,    "purchaseConsumedCallback",    "(JLjava/lang/String;I)V")
+      CALLBACK (generatedCallback<&Pimpl::updateProductDetails>, "productDetailsQueryCallback", "(JLjava/util/List;)V")                                                       \
+      CALLBACK (generatedCallback<&Pimpl::updatePurchasesList>,  "purchasesListQueryCallback",  "(JLjava/util/List;)V")                                                       \
+      CALLBACK (generatedCallback<&Pimpl::purchaseCompleted>,    "purchaseCompletedCallback",   "(JLcom/android/billingclient/api/Purchase;I)V")                              \
+      CALLBACK (generatedCallback<&Pimpl::purchaseConsumed>,     "purchaseConsumedCallback",    "(JLjava/lang/String;I)V")
 
     DECLARE_JNI_CLASS_WITH_BYTECODE (JuceBillingClient,
                                      "com/rmsl/juce/JuceBillingClient",
                                      16,
-                                     juceBillingClientCompiled,
-                                     numElementsInArray (juceBillingClientCompiled))
+                                     juceBillingClientCompiled)
     #undef JNI_CLASS_MEMBERS
-
-    static void JNICALL productDetailsQueryCallback (JNIEnv*, jobject, jlong host, jobject productDetailsList)
-    {
-        if (auto* myself = reinterpret_cast<Pimpl*> (host))
-            myself->updateProductDetails (productDetailsList);
-    }
-
-    static void JNICALL purchasesListQueryCallback (JNIEnv*, jobject, jlong host, jobject purchasesList)
-    {
-        if (auto* myself = reinterpret_cast<Pimpl*> (host))
-            myself->updatePurchasesList (purchasesList);
-    }
-
-    static void JNICALL purchaseCompletedCallback (JNIEnv*, jobject, jlong host, jobject purchase, int responseCode)
-    {
-        if (auto* myself = reinterpret_cast<Pimpl*> (host))
-            myself->purchaseCompleted (purchase, responseCode);
-    }
-
-    static void JNICALL purchaseConsumedCallback (JNIEnv*, jobject, jlong host, jstring productIdentifier, int responseCode)
-    {
-        if (auto* myself = reinterpret_cast<Pimpl*> (host))
-            myself->purchaseConsumed (productIdentifier, responseCode);
-    }
 
     //==============================================================================
     bool isReady() const
@@ -1094,8 +1069,5 @@ void juce_handleOnResume()
         InAppPurchases::getInstance()->restoreProductsBoughtList (false);
     });
 }
-
-
-InAppPurchases::Pimpl::JuceBillingClient_Class InAppPurchases::Pimpl::JuceBillingClient;
 
 } // namespace juce

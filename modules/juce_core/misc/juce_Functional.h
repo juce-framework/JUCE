@@ -113,4 +113,19 @@ Object withMember (Object copy, Member OtherObject::* member, Other&& value)
 template <typename Fn> struct ScopeGuard : Fn { ~ScopeGuard() { Fn::operator()(); } };
 template <typename Fn> ScopeGuard (Fn) -> ScopeGuard<Fn>;
 
+#ifndef DOXYGEN
+namespace detail
+{
+template <typename Functor, typename Return, typename... Args>
+static constexpr auto toFnPtr (Functor functor, Return (Functor::*) (Args...) const)
+{
+    return static_cast<Return (*) (Args...)> (functor);
+}
+} // namespace detail
+#endif
+
+/** Converts a captureless lambda to its equivalent function pointer type. */
+template <typename Functor>
+static constexpr auto toFnPtr (Functor functor) { return detail::toFnPtr (functor, &Functor::operator()); }
+
 } // namespace juce
