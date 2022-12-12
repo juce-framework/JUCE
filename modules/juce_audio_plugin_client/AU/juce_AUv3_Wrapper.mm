@@ -79,7 +79,7 @@ using namespace juce;
 struct AudioProcessorHolder  : public ReferenceCountedObject
 {
     AudioProcessorHolder() = default;
-    explicit AudioProcessorHolder (AudioProcessor* p) : processor (p) {}
+    explicit AudioProcessorHolder (std::unique_ptr<AudioProcessor> p) : processor (std::move (p)) {}
     AudioProcessor& operator*() noexcept        { return *processor; }
     AudioProcessor* operator->() noexcept       { return processor.get(); }
     AudioProcessor* get() noexcept              { return processor.get(); }
@@ -1746,9 +1746,9 @@ public:
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        if (AudioProcessor* p = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))
+        if (auto p = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))
         {
-            processorHolder = new AudioProcessorHolder (p);
+            processorHolder = new AudioProcessorHolder (std::move (p));
             auto& processor = getAudioProcessor();
 
             if (processor.hasEditor())

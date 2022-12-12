@@ -721,7 +721,7 @@ public:
 
     static std::unique_ptr<AudioProcessor> createProcessorInstance()
     {
-        auto result = rawToUniquePtr (createPluginFilterOfType (AudioProcessor::wrapperType_LV2));
+        auto result = createPluginFilterOfType (AudioProcessor::wrapperType_LV2);
 
        #if defined (JucePlugin_PreferredChannelConfigurations)
         constexpr short channelConfigurations[][2] { JucePlugin_PreferredChannelConfigurations };

@@ -92,7 +92,7 @@ struct AudioProcessorHolder
         if (initialiseGUI)
             initialiseJuce_GUI();
 
-        juceFilter.reset (createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit));
+        juceFilter = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit);
 
         // audio units do not have a notion of enabled or un-enabled buses
         juceFilter->enableAllBuses();
