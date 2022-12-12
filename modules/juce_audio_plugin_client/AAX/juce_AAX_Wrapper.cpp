@@ -747,8 +747,6 @@ namespace AAXClasses
 
         static AAX_CEffectParameters* AAX_CALLBACK Create()
         {
-            PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
-
             if (PluginHostType::jucePlugInIsRunningInAudioSuiteFn == nullptr)
             {
                 PluginHostType::jucePlugInIsRunningInAudioSuiteFn = [] (AudioProcessor& processor)
@@ -2485,7 +2483,6 @@ namespace AAXClasses
 
     static void getPlugInDescription (AAX_IEffectDescriptor& descriptor, [[maybe_unused]] const AAX_IFeatureInfo* featureInfo)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
         std::unique_ptr<AudioProcessor> plugin (createPluginFilterOfType (AudioProcessor::wrapperType_AAX));
         auto numInputBuses  = plugin->getBusCount (true);
         auto numOutputBuses = plugin->getBusCount (false);

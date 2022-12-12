@@ -721,7 +721,7 @@ public:
 
     static std::unique_ptr<AudioProcessor> createProcessorInstance()
     {
-        std::unique_ptr<AudioProcessor> result { createPluginFilterOfType (AudioProcessor::wrapperType_LV2) };
+        auto result = rawToUniquePtr (createPluginFilterOfType (AudioProcessor::wrapperType_LV2));
 
        #if defined (JucePlugin_PreferredChannelConfigurations)
         constexpr short channelConfigurations[][2] { JucePlugin_PreferredChannelConfigurations };
@@ -1356,8 +1356,6 @@ private:
 //==============================================================================
 LV2_SYMBOL_EXPORT const LV2_Descriptor* lv2_descriptor (uint32_t index)
 {
-    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_LV2;
-
     if (index != 0)
         return nullptr;
 

@@ -671,11 +671,7 @@ UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API UnityGetAudioEffectDefinitions (U
         juce::initialiseJuce_GUI();
 
     static std::once_flag flag;
-    std::call_once (flag, []
-    {
-        juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Unity;
-        juce::juce_createUnityPeerFn = juce::createUnityPeer;
-    });
+    std::call_once (flag, [] { juce::juce_createUnityPeerFn = juce::createUnityPeer; });
 
     static auto definition = juce::getEffectDefinition();
     static UnityAudioEffectDefinition* definitions[] { &definition };
