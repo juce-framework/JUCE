@@ -61,6 +61,8 @@ public:
             xSettings->addListener (this);
 
         getNativeRealtimeModifiers = []() -> ModifierKeys { return XWindowSystem::getInstance()->getNativeRealtimeModifiers(); };
+
+        updateVBlankTimer();
     }
 
     ~LinuxComponentPeer() override
