@@ -218,7 +218,7 @@ public:
             }
             else if (type == LV2PlugIn)
             {
-                s.add ("JUCE_LV2DIR := " + targetName + ".lv2");
+                s.add ("JUCE_LV2DIR := " + escapeQuotesAndSpaces (targetName) + ".lv2");
                 targetName = "$(JUCE_LV2DIR)/" + targetName + ".so";
             }
             else if (type == LV2TurtleProgram)
@@ -399,7 +399,7 @@ public:
             }
             else if (type == LV2PlugIn)
             {
-                out << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER) $(abspath $(JUCE_LV2_FULL_PATH))" << newLine
+                out << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER) $(JUCE_LV2_FULL_PATH)" << newLine
                     << "\t-$(V_AT)[ ! \"$(JUCE_LV2DESTDIR)\" ] || (mkdir -p $(JUCE_LV2DESTDIR) && cp -R $(JUCE_COPYCMD_LV2_PLUGIN))" << newLine;
             }
 
