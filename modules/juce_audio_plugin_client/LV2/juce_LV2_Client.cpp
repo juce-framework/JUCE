@@ -813,7 +813,11 @@ struct RecallFeature
     {
         const ScopedJuceInitialiser_GUI scope;
         const auto processor = LV2PluginInstance::createProcessorInstance();
-        const File absolutePath { CharPointer_UTF8 { libraryPath } };
+
+        const String pathString { CharPointer_UTF8 { libraryPath } };
+
+        const auto absolutePath = File::isAbsolutePath (pathString) ? File (pathString)
+                                                                    : File::getCurrentWorkingDirectory().getChildFile (pathString);
 
         const auto writers = { writeManifestTtl, writeDspTtl, writeUiTtl };
 
