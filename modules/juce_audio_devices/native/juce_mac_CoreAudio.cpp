@@ -1695,6 +1695,7 @@ private:
     CriticalSection closeLock;
     int targetLatency = 0;
     std::atomic<int> xruns { -1 };
+    std::atomic<uint64_t> lastValidReadPosition { invalidSampleTime };
 
     BigInteger inputChannelsRequested, outputChannelsRequested;
     double sampleRateRequested = 44100;
@@ -1792,8 +1793,9 @@ private:
         }
 
         auto currentWritePos = writePos.load();
+        const auto nextWritePos = currentWritePos + static_cast<std::uint64_t> (n);
 
-        writePos.compare_exchange_strong (currentWritePos, currentWritePos + static_cast<std::uint64_t> (n));
+        writePos.compare_exchange_strong (currentWritePos, nextWritePos);
 
         if (currentWritePos == invalidSampleTime)
             return;
@@ -1817,6 +1819,11 @@ private:
                                          scratchBuffer.getReadPointer (args.channel, args.inputPos),
                                          args.nItems);
         });
+
+        {
+            auto invalid = invalidSampleTime;
+            lastValidReadPosition.compare_exchange_strong (invalid, nextWritePos);
+        }
     }
 
     void outputAudioCallback (float* const* channels, int numChannels, int n) noexcept
@@ -1839,16 +1846,29 @@ private:
             }
         }
 
-        accessFifo (currentReadPos, numChannels, n, [&] (const auto& args)
+        // If there was an xrun, we want to output zeros until we're sure that there's some valid
+        // input for us to read.
+        const auto longN = static_cast<uint64_t> (n);
+        const auto nextReadPos = currentReadPos + longN;
+        const auto validReadPos = lastValidReadPosition.load();
+        const auto sanitisedValidReadPos = validReadPos != invalidSampleTime ? validReadPos : nextReadPos;
+        const auto numZerosToWrite = sanitisedValidReadPos <= currentReadPos
+                                   ? 0
+                                   : jmin (longN, sanitisedValidReadPos - currentReadPos);
+
+        for (auto i = 0; i < numChannels; ++i)
+            std::fill (channels[i], channels[i] + numZerosToWrite, 0.0f);
+
+        accessFifo (currentReadPos + numZerosToWrite, numChannels, static_cast<int> (longN - numZerosToWrite), [&] (const auto& args)
         {
-            FloatVectorOperations::copy (channels[args.channel] + args.inputPos,
+            FloatVectorOperations::copy (channels[args.channel] + args.inputPos + numZerosToWrite,
                                          fifo.getReadPointer (args.channel, args.fifoPos),
                                          args.nItems);
         });
 
         // use compare exchange here as we need to avoid the case
         // where we overwrite readPos being equal to invalidSampleTime
-        readPos.compare_exchange_strong (currentReadPos, currentReadPos + static_cast<std::uint64_t> (n));
+        readPos.compare_exchange_strong (currentReadPos, nextReadPos);
     }
 
     void xrun() noexcept
@@ -1987,7 +2007,7 @@ private:
             auto copy = invalidSampleTime;
 
             if (sampleTime.compare_exchange_strong (copy, callbackSampleTime) && (! input))
-                owner.fifo.clear();
+                owner.lastValidReadPosition = invalidSampleTime;
         }
 
         bool isInput() const { return input; }
