@@ -1605,8 +1605,7 @@ public:
             }
         }
 
-        open (inputChannelsRequested, outputChannelsRequested,
-              newSampleRate, newBufferSize);
+        open (inputChannelsRequested, outputChannelsRequested, newSampleRate, newBufferSize);
 
         start (cb);
     }
@@ -1914,7 +1913,8 @@ private:
     struct DeviceWrapper  : public AudioIODeviceCallback
     {
         DeviceWrapper (AudioIODeviceCombiner& cd, std::unique_ptr<CoreAudioIODevice> d, bool shouldBeInput)
-            : owner (cd), device (std::move (d)),
+            : owner (cd),
+              device (std::move (d)),
               input (shouldBeInput)
         {
             device->setAsyncRestarter (&owner);
@@ -1974,7 +1974,7 @@ private:
 
         std::uint64_t nsToSampleTime (std::uint64_t ns) const noexcept
         {
-            return static_cast<std::uint64_t> (std::round (static_cast<double> (ns) * owner.currentSampleRate * 1e-9));
+            return static_cast<std::uint64_t> (std::round (static_cast<double> (ns) * device->getCurrentSampleRate() * 1e-9));
         }
 
         void updateSampleTimeFromContext (const AudioIODeviceCallbackContext& context) noexcept
