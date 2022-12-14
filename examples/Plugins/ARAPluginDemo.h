@@ -1930,9 +1930,10 @@ public:
             selectMusicalContext (musicalContext);
     }
 
-    void willDestroyMusicalContext (ARAMusicalContext*) override
+    void willDestroyMusicalContext (ARAMusicalContext* musicalContext) override
     {
-        selectMusicalContext (nullptr);
+        if (selectedMusicalContext == musicalContext)
+            selectMusicalContext (nullptr);
     }
 
     void didReorderRegionSequencesInDocument (ARADocument*) override
@@ -1979,9 +1980,6 @@ public:
         if (auto* newSelectedMusicalContext = getNewSelectedMusicalContext())
             if (newSelectedMusicalContext != selectedMusicalContext)
                 selectMusicalContext (newSelectedMusicalContext);
-
-        // If no context is used yet and the selection does not yield a new one, the DocumentView
-        // uses the first musical context in the document.
 
         if (const auto timeRange = viewSelection.getTimeRange())
             overlay.setSelectedTimeRange (*timeRange);
