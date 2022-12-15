@@ -344,13 +344,10 @@ LocalRef<jobject> getMainActivity() noexcept
 }
 
 //==============================================================================
-#if JUCE_ANDROID && JUCE_MODULE_AVAILABLE_juce_audio_devices && (JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE)
- #define JUCE_ANDROID_REALTIME_THREAD_AVAILABLE 1
-#endif
-
-#if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
-pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr);
-#endif
+using RealtimeThreadFactory = pthread_t (*) (void* (*entry) (void*), void* userPtr);
+// This is defined in the juce_audio_devices module, with different definitions depending on
+// whether OpenSL/Oboe are enabled.
+RealtimeThreadFactory getAndroidRealtimeThreadFactory();
 
 extern JavaVM* androidJNIJavaVM;
 
@@ -363,19 +360,7 @@ static auto setPriorityOfThisThread (Thread::Priority p)
 
 bool Thread::createNativeThread (Priority)
 {
-    if (isRealtime())
-    {
-       #if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
-        threadHandle = (void*) juce_createRealtimeAudioThread (threadEntryProc, this);
-        threadId = (ThreadID) threadHandle.get();
-        return threadId != nullptr;
-       #else
-        jassertfalse;
-       #endif
-    }
-
-    PosixThreadAttribute attr { threadStackSize };
-    threadId = threadHandle = makeThreadHandle (attr, this, [] (void* userData) -> void*
+    const auto threadEntryProc = [] (void* userData) -> void*
     {
         auto* myself = static_cast<Thread*> (userData);
 
@@ -394,7 +379,24 @@ bool Thread::createNativeThread (Priority)
         }
 
         return nullptr;
-    });
+    };
+
+    if (isRealtime())
+    {
+        if (const auto factory = getAndroidRealtimeThreadFactory())
+        {
+            threadHandle = (void*) factory (threadEntryProc, this);
+            threadId = (ThreadID) threadHandle.load();
+            return threadId != nullptr;
+        }
+        else
+        {
+            jassertfalse;
+        }
+    }
+
+    PosixThreadAttribute attr { threadStackSize };
+    threadId = threadHandle = makeThreadHandle (attr, this, threadEntryProc);
 
     return threadId != nullptr;
 }
