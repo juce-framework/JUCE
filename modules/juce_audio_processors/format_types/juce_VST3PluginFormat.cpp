@@ -2438,7 +2438,7 @@ public:
 
         auto configureParameters = [this]
         {
-            refreshParameterList();
+            initialiseParameterList();
             synchroniseStates();
             syncProgramNames();
         };
@@ -3275,7 +3275,7 @@ private:
         }
     }
 
-    void refreshParameterList() override
+    void initialiseParameterList()
     {
         AudioProcessorParameterGroup newParameterTree;
 

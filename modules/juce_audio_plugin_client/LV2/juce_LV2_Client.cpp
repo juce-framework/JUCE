@@ -505,8 +505,12 @@ public:
 
     void run (uint32_t numSteps)
     {
+        // If this is hit, the host is trying to process more samples than it told us to prepare
+        jassert (static_cast<int> (numSteps) <= processor->getBlockSize());
+
         midi.clear();
         playHead.invalidate();
+        audio.setSize (audio.getNumChannels(), static_cast<int> (numSteps), true, false, true);
 
         ports.forEachInputEvent ([&] (const LV2_Atom_Event* event)
         {
@@ -536,7 +540,7 @@ public:
         processor->setNonRealtime (ports.isFreeWheeling());
 
         for (auto i = 0, end = processor->getTotalNumInputChannels(); i < end; ++i)
-            audio.copyFrom (i, 0, ports.getBufferForAudioInput (i), (int) numSteps);
+            audio.copyFrom (i, 0, ports.getBufferForAudioInput (i), audio.getNumSamples());
 
         jassert (countNaNs (audio) == 0);
 

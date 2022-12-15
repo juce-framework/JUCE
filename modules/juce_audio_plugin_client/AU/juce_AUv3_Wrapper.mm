@@ -603,16 +603,21 @@ public:
     //==============================================================================
     void audioProcessorChanged ([[maybe_unused]] AudioProcessor* processor, const ChangeDetails& details) override
     {
-        if (! details.programChanged)
-            return;
-
+        if (details.programChanged)
         {
-            ScopedKeyChange scope (au, @"allParameterValues");
-            addPresets();
+            {
+                ScopedKeyChange scope (au, @"allParameterValues");
+                addPresets();
+            }
+
+            {
+                ScopedKeyChange scope (au, @"currentPreset");
+            }
         }
 
+        if (details.latencyChanged)
         {
-            ScopedKeyChange scope (au, @"currentPreset");
+            ScopedKeyChange scope (au, @"latency");
         }
     }
 
