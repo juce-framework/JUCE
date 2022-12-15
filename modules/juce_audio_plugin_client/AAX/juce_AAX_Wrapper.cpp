@@ -68,7 +68,6 @@ static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE require
 #include <AAX_CEffectGUI.h>
 #include <AAX_IViewContainer.h>
 #include <AAX_ITransport.h>
-#include <AAX_TransportTypes.h>
 #include <AAX_IMIDINode.h>
 #include <AAX_UtilsNative.h>
 #include <AAX_Enums.h>
@@ -1474,9 +1473,6 @@ namespace AAXClasses
             const auto effectiveRate = info.getFrameRate().hasValue() ? info.getFrameRate()->getEffectiveRate() : 0.0;
             info.setEditOriginTime (makeOptional (effectiveRate != 0.0 ? offset / effectiveRate : offset));
 
-            if (lastTransportState.hasValue())
-                info.setIsRecording (lastTransportState->mIsRecording);
-
             return info;
         }
 
@@ -1549,13 +1545,6 @@ namespace AAXClasses
                         props.name = String::fromUTF8 (static_cast<const AAX_IString*> (data)->Get());
 
                         pluginInstance->updateTrackProperties (props);
-                    }
-                    break;
-
-                case AAX_eNotificationEvent_TransportStateChanged:
-                    if (data != nullptr)
-                    {
-                        lastTransportState = makeOptional (*(static_cast<const AAX_TransportStateInfo_V1*>(data)));
                     }
                     break;
 
@@ -2522,7 +2511,6 @@ namespace AAXClasses
         HashMap<int32, AudioProcessorParameter*> paramMap;
         LegacyAudioParametersWrapper juceParameters;
         std::unique_ptr<AudioProcessorParameter> ownedBypassParameter;
-        Optional<AAX_TransportStateInfo_V1> lastTransportState;
 
         Array<AudioProcessorParameter*> aaxMeters;
 
@@ -2885,12 +2873,6 @@ namespace AAXClasses
             descriptor.AddName (name.toRawUTF8());
 
         descriptor.AddCategory (JucePlugin_AAXCategory);
-
-        if (auto* properties = descriptor.NewPropertyMap())
-        {
-            properties->AddProperty (AAX_eProperty_ObservesTransportState, true);
-            descriptor.SetProperties (properties);
-        }
 
         const int numMeters = addAAXMeters (*plugin, descriptor);
 
