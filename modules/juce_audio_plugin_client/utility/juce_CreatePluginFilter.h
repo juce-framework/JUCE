@@ -30,6 +30,7 @@ namespace juce
 
 inline AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
 {
+    PluginHostType::jucePlugInClientCurrentWrapperType = type;
     AudioProcessor::setTypeOfNextNewPlugin (type);
     AudioProcessor* const pluginInstance = ::createPluginFilter();
     AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);

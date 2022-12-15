@@ -927,7 +927,6 @@ private:
 
     static JuceAudioUnitv3* create (AUAudioUnit* audioUnit, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
         return new JuceAudioUnitv3 (audioUnit, descr, options, error);
     }
 
@@ -1731,7 +1730,6 @@ public:
     JuceAUViewController (AUViewController<AUAudioUnitFactory>* p)
         : myself (p)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
         initialiseJuce_GUI();
     }
 

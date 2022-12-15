@@ -2193,8 +2193,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
-
         initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
@@ -2202,8 +2200,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* main_macho (Vst2::audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* main_macho (Vst2::audioMasterCallback audioMaster)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
-
         initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
@@ -2215,16 +2211,12 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
-
         return pluginEntryPoint (audioMaster);
     }
 
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* main_plugin (Vst2::audioMasterCallback audioMaster) asm ("main");
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* main_plugin (Vst2::audioMasterCallback audioMaster)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
-
         return VSTPluginMain (audioMaster);
     }
 
@@ -2238,16 +2230,12 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
 
     extern "C" __declspec (dllexport) Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
-
         return pluginEntryPoint (audioMaster);
     }
 
    #if ! defined (JUCE_64BIT) && JUCE_MSVC // (can't compile this on win64, but it's not needed anyway with VST2.4)
     extern "C" __declspec (dllexport) int main (Vst2::audioMasterCallback audioMaster)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
-
         return (int) pluginEntryPoint (audioMaster);
     }
    #endif
