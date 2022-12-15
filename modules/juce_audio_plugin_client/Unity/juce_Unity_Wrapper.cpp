@@ -292,7 +292,7 @@ class AudioProcessorUnityWrapper
 public:
     AudioProcessorUnityWrapper (bool isTemporary)
     {
-        pluginInstance.reset (createPluginFilterOfType (AudioProcessor::wrapperType_Unity));
+        pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_Unity);
 
         if (! isTemporary && pluginInstance->hasEditor())
         {

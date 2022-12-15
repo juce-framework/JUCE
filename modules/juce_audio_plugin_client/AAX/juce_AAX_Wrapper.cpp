@@ -2886,7 +2886,7 @@ namespace AAXClasses
     {
         auto aaxType = isEnhancedAudioSuite ? AudioProcessor::wrapperType_AudioSuite : AudioProcessor::wrapperType_AAX;
 
-        std::unique_ptr<AudioProcessor> plugin (createPluginFilterOfType (aaxType));
+        auto plugin = createPluginFilterOfType (aaxType);
         auto numInputBuses  = plugin->getBusCount (true);
         auto numOutputBuses = plugin->getBusCount (false);
 

@@ -2459,7 +2459,7 @@ class JuceVST3Component : public Vst::IComponent,
 {
 public:
     JuceVST3Component (Vst::IHostApplication* h)
-        : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3)),
+        : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3).release()),
           host (h)
     {
         inParameterChangedCallback = false;
