@@ -159,7 +159,8 @@ void SidePanel::paint (Graphics& g)
                                                                                 : shadowArea.getTopLeft()).toFloat(), false));
     g.fillRect (shadowArea);
 
-    g.excludeClipRegion (shadowArea);
+    g.reduceClipRegion (getLocalBounds().withTrimmedRight (shadowArea.getWidth())
+                                        .withX (isOnLeft ? 0 : shadowArea.getWidth()));
     g.fillAll (bgColour);
 }
 

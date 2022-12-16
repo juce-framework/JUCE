@@ -1970,13 +1970,13 @@ private:
         if (pluginHasSidechainsOrAuxs() || processor->isMidiEffect())
             return false;
 
-        auto inputLayout  = processor->getChannelLayoutOfBus (true,  0);
-        auto outputLayout = processor->getChannelLayoutOfBus (false,  0);
+        auto inputLayout  = processor->getChannelLayoutOfBus (true, 0);
+        auto outputLayout = processor->getChannelLayoutOfBus (false, 0);
 
-        auto speakerBaseSize = sizeof (Vst2::VstSpeakerArrangement) - (sizeof (Vst2::VstSpeakerProperties) * 8);
+        const auto speakerBaseSize = offsetof (Vst2::VstSpeakerArrangement, speakers);
 
-        cachedInArrangement .malloc (speakerBaseSize + (static_cast<std::size_t> (inputLayout. size()) * sizeof (Vst2::VstSpeakerArrangement)), 1);
-        cachedOutArrangement.malloc (speakerBaseSize + (static_cast<std::size_t> (outputLayout.size()) * sizeof (Vst2::VstSpeakerArrangement)), 1);
+        cachedInArrangement .malloc (speakerBaseSize + (static_cast<std::size_t> (inputLayout. size()) * sizeof (Vst2::VstSpeakerProperties)), 1);
+        cachedOutArrangement.malloc (speakerBaseSize + (static_cast<std::size_t> (outputLayout.size()) * sizeof (Vst2::VstSpeakerProperties)), 1);
 
         *pluginInput  = cachedInArrangement. getData();
         *pluginOutput = cachedOutArrangement.getData();

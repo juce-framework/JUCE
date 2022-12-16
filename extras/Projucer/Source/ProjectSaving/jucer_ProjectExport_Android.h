@@ -73,15 +73,8 @@ public:
 
     void updateDeprecatedSettings() override
     {
-        const auto needsExternalRead = getSettingString (Ids::androidExternalReadNeeded);
-        settings.removeProperty (Ids::androidExternalReadNeeded, nullptr);
-
-        if (needsExternalRead.isEmpty())
-            return;
-
-        androidReadMediaAudioPermission .setValue (needsExternalRead, nullptr);
-        androidReadMediaImagesPermission.setValue (needsExternalRead, nullptr);
-        androidReadMediaVideoPermission .setValue (needsExternalRead, nullptr);
+        updateExternalReadPermission();
+        updateBluetoothPermission();
     }
 
     static String getDisplayName()        { return "Android"; }
@@ -107,7 +100,8 @@ public:
                                  androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
                                  androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
                                  androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
-                                 androidBluetoothNeeded, androidReadMediaAudioPermission, androidReadMediaImagesPermission,
+                                 androidBluetoothScanNeeded, androidBluetoothAdvertiseNeeded, androidBluetoothConnectNeeded,
+                                 androidReadMediaAudioPermission, androidReadMediaImagesPermission,
                                  androidReadMediaVideoPermission, androidExternalWritePermission,
                                  androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
                                  androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
@@ -137,7 +131,9 @@ public:
           androidInternetNeeded                (settings, Ids::androidInternetNeeded,                getUndoManager(), true),
           androidMicNeeded                     (settings, Ids::microphonePermissionNeeded,           getUndoManager(), false),
           androidCameraNeeded                  (settings, Ids::cameraPermissionNeeded,               getUndoManager(), false),
-          androidBluetoothNeeded               (settings, Ids::androidBluetoothNeeded,               getUndoManager(), true),
+          androidBluetoothScanNeeded           (settings, Ids::androidBluetoothScanNeeded,           getUndoManager(), false),
+          androidBluetoothAdvertiseNeeded      (settings, Ids::androidBluetoothAdvertiseNeeded,      getUndoManager(), false),
+          androidBluetoothConnectNeeded        (settings, Ids::androidBluetoothConnectNeeded,        getUndoManager(), false),
           androidReadMediaAudioPermission      (settings, Ids::androidReadMediaAudioPermission,      getUndoManager(), true),
           androidReadMediaImagesPermission     (settings, Ids::androidReadMediaImagesPermission,     getUndoManager(), true),
           androidReadMediaVideoPermission      (settings, Ids::androidReadMediaVideoPermission,      getUndoManager(), true),
@@ -358,6 +354,32 @@ protected:
     }
 
 private:
+    void updateExternalReadPermission()
+    {
+        const auto needsExternalRead = getSettingString (Ids::androidExternalReadNeeded);
+        settings.removeProperty (Ids::androidExternalReadNeeded, nullptr);
+
+        if (needsExternalRead.isEmpty())
+            return;
+
+        androidReadMediaAudioPermission .setValue (needsExternalRead, nullptr);
+        androidReadMediaImagesPermission.setValue (needsExternalRead, nullptr);
+        androidReadMediaVideoPermission .setValue (needsExternalRead, nullptr);
+    }
+
+    void updateBluetoothPermission()
+    {
+        const auto needsBluetooth = getSettingString (Ids::androidBluetoothNeeded);
+        settings.removeProperty (Ids::androidBluetoothNeeded, nullptr);
+
+        if (needsBluetooth.isEmpty())
+            return;
+
+        androidBluetoothScanNeeded     .setValue (needsBluetooth, nullptr);
+        androidBluetoothAdvertiseNeeded.setValue (needsBluetooth, nullptr);
+        androidBluetoothConnectNeeded  .setValue (needsBluetooth, nullptr);
+    }
+
     void writeCmakeFile (const File& file) const
     {
         build_tools::writeStreamToFile (file, [&] (MemoryOutputStream& mo)
@@ -1116,8 +1138,14 @@ private:
         props.add (new ChoicePropertyComponent (androidCameraNeeded, "Camera Required"),
                    "If enabled, this will set the android.permission.CAMERA flag in the manifest.");
 
-        props.add (new ChoicePropertyComponent (androidBluetoothNeeded, "Bluetooth Permissions Required"),
-                   "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
+        props.add (new ChoicePropertyComponent (androidBluetoothScanNeeded, "Bluetooth Scan Required"),
+                   "If enabled, this will set the android.permission.BLUETOOTH_SCAN, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest. This is required for Bluetooth MIDI on Android.");
+
+        props.add (new ChoicePropertyComponent (androidBluetoothAdvertiseNeeded, "Bluetooth Advertise Required"),
+                   "If enabled, this will set the android.permission.BLUETOOTH_ADVERTISE, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest.");
+
+        props.add (new ChoicePropertyComponent (androidBluetoothConnectNeeded, "Bluetooth Connect Required"),
+                   "If enabled, this will set the android.permission.BLUETOOTH_CONNECT, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest.");
 
         props.add (new ChoicePropertyComponent (androidReadMediaAudioPermission, "Read Audio From External Storage"),
                    "If enabled, this will set the android.permission.READ_MEDIA_AUDIO and android.permission.READ_EXTERNAL_STORAGE flags in the manifest.");
@@ -1711,6 +1739,13 @@ private:
             // This permission has no effect on later Android versions.
             if (permission == "android.permission.READ_EXTERNAL_STORAGE")
                 usesPermission->setAttribute ("android:maxSdkVersion", "32");
+
+            // These permissions are obsoleted by new more fine-grained permissions in API level 31
+            if (permission == "android.permission.BLUETOOTH"
+                || permission == "android.permission.BLUETOOTH_ADMIN")
+            {
+                usesPermission->setAttribute ("android:maxSdkVersion", "30");
+            }
         }
     }
 
@@ -1868,7 +1903,18 @@ private:
         if (androidCameraNeeded.get())
             s.add ("android.permission.CAMERA");
 
-        if (androidBluetoothNeeded.get())
+        if (androidBluetoothScanNeeded.get())
+            s.add ("android.permission.BLUETOOTH_SCAN");
+
+        if (androidBluetoothAdvertiseNeeded.get())
+            s.add ("android.permission.BLUETOOTH_ADVERTISE");
+
+        if (androidBluetoothConnectNeeded.get())
+            s.add ("android.permission.BLUETOOTH_CONNECT");
+
+        if (   androidBluetoothScanNeeded.get()
+            || androidBluetoothAdvertiseNeeded.get()
+            || androidBluetoothConnectNeeded.get())
         {
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
@@ -1888,7 +1934,9 @@ private:
         if (   androidReadMediaAudioPermission.get()
             || androidReadMediaImagesPermission.get()
             || androidReadMediaVideoPermission.get())
+        {
             s.add ("android.permission.READ_EXTERNAL_STORAGE");
+        }
 
         if (androidExternalWritePermission.get())
             s.add ("android.permission.WRITE_EXTERNAL_STORAGE");

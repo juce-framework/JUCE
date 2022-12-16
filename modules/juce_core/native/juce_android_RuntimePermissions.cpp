@@ -34,7 +34,14 @@ static StringArray jucePermissionToAndroidPermissions (RuntimePermissions::Permi
     switch (permission)
     {
         case RuntimePermissions::recordAudio:           return { "android.permission.RECORD_AUDIO" };
-        case RuntimePermissions::bluetoothMidi:         return { "android.permission.ACCESS_FINE_LOCATION" };
+        case RuntimePermissions::bluetoothMidi:
+        {
+            if (getAndroidSDKVersion() < 31)
+                return { "android.permission.ACCESS_FINE_LOCATION" };
+
+            return { "android.permission.BLUETOOTH_SCAN" };
+        }
+
         case RuntimePermissions::writeExternalStorage:  return { "android.permission.WRITE_EXTERNAL_STORAGE" };
         case RuntimePermissions::camera:                return { "android.permission.CAMERA" };
 
@@ -76,6 +83,7 @@ static RuntimePermissions::PermissionID androidPermissionToJucePermission (const
         { "android.permission.READ_MEDIA_AUDIO",        RuntimePermissions::readMediaAudio },
         { "android.permission.READ_MEDIA_IMAGES",       RuntimePermissions::readMediaImages },
         { "android.permission.READ_MEDIA_VIDEO",        RuntimePermissions::readMediaVideo },
+        { "android.permission.BLUETOOTH_SCAN",          RuntimePermissions::bluetoothMidi },
     };
 
     const auto iter = map.find (permission);
