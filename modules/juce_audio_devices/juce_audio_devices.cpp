@@ -226,7 +226,10 @@ namespace juce
   #endif
  #else
 // No audio library, so no way to create realtime threads.
-  RealtimeThreadFactory getAndroidRealtimeThreadFactory() { return nullptr; }
+  namespace juce
+  {
+      RealtimeThreadFactory getAndroidRealtimeThreadFactory() { return nullptr; }
+  }
  #endif
 
 #endif
