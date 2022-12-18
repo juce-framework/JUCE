@@ -1168,7 +1168,10 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
     static void dispatchAudioUnitPropertyChange (void* data, AudioUnit unit, AudioUnitPropertyID propertyID,
                                                  AudioUnitScope scope, AudioUnitElement element)
     {
-        static_cast<Pimpl*> (data)->handleAudioUnitPropertyChange (unit, propertyID, scope, element);
+        if (auto* pimpl = static_cast<Pimpl*> (data))
+        {
+            pimpl->handleAudioUnitPropertyChange (unit, propertyID, scope, element);
+        }
     }
 
     static double getTimestampForMIDI()
