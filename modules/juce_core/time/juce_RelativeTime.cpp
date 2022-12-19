@@ -86,7 +86,7 @@ String RelativeTime::getApproximateDescription() const
     if (weeks > 8)    return describeMonths ((weeks * 12) / 52);
     if (weeks > 1)    return describeWeeks (weeks);
 
-    auto days = (int) inWeeks();
+    auto days = (int) inDays();
 
     if (days > 1)
         return describeDays (days);
