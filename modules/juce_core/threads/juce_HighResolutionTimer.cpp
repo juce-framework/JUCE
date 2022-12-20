@@ -45,6 +45,8 @@ public:
             nextTickTime = steady_clock::now() + milliseconds (periodMillis);
         }
 
+        waitEvent.notify_one();
+
         if (! isThreadRunning())
             startThread (Thread::Priority::high);
     }
