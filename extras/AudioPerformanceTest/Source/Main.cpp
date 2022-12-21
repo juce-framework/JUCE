@@ -62,7 +62,7 @@ public:
             : DocumentWindow (name, Colours::lightgrey, DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
-            setContentOwned (createMainContentComponent(), true);
+            setContentOwned (new MainContentComponent(), true);
             setResizable (false, false);
 
            #if JUCE_IOS || JUCE_ANDROID
