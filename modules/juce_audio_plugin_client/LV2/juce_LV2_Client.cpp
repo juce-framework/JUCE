@@ -867,7 +867,7 @@ private:
             #define JUCE_LV2_UI_KIND "CocoaUI"
            #elif JUCE_WINDOWS
             #define JUCE_LV2_UI_KIND "WindowsUI"
-           #elif JUCE_LINUX
+           #elif JUCE_LINUX || JUCE_BSD
             #define JUCE_LV2_UI_KIND "X11UI"
            #else
             #error "LV2 UI is unsupported on this platform"
