@@ -349,6 +349,10 @@ using RealtimeThreadFactory = pthread_t (*) (void* (*entry) (void*), void* userP
 // whether OpenSL/Oboe are enabled.
 RealtimeThreadFactory getAndroidRealtimeThreadFactory();
 
+#if ! JUCE_MODULE_AVAILABLE_juce_audio_devices
+RealtimeThreadFactory getAndroidRealtimeThreadFactory() { return nullptr; }
+#endif
+
 extern JavaVM* androidJNIJavaVM;
 
 static auto setPriorityOfThisThread (Thread::Priority p)
