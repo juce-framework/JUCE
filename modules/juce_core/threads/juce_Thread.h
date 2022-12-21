@@ -75,9 +75,9 @@ public:
         /** Linux only: A value with a range of 0-10, where 10 is the highest priority. */
         int priority = 5;
 
-        /* iOS/macOS only: A millisecond value representing the estimated time between each
-                           'Thread::run' call. Your thread may be penalised if you frequently
-                           overrun this.
+        /** iOS/macOS only: A millisecond value representing the estimated time between each
+                            'Thread::run' call. Your thread may be penalised if you frequently
+                            overrun this.
         */
         uint32_t workDurationMs = 0;
     };
