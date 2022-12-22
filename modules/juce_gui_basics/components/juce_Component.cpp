@@ -2573,6 +2573,8 @@ void Component::internalMouseUp (MouseInputSource source, const PointerState& re
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
+    WeakReference<Component> weak (this);
+
     mouseUp (me);
 
     if (checker.shouldBailOut())
@@ -2589,7 +2591,8 @@ void Component::internalMouseUp (MouseInputSource source, const PointerState& re
     // check for double-click
     if (me.getNumberOfClicks() >= 2)
     {
-        mouseDoubleClick (checker.eventWithNearestParent());
+        if (! weak.wasObjectDeleted())
+            mouseDoubleClick (checker.eventWithNearestParent());
 
         if (checker.shouldBailOut())
             return;
