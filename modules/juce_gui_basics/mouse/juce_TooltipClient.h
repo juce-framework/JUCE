@@ -58,6 +58,7 @@ public:
     as a base class and calling setTooltip().
 
     Many of the JUCE widgets already use this as a base class to implement their
+    tooltips. See the TooltipWindow docs for more information about implementing
     tooltips.
 
     @see TooltipClient, TooltipWindow
