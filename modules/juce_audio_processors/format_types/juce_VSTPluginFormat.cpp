@@ -3028,10 +3028,8 @@ public:
     }
 
     //==============================================================================
-    void mouseDown (const MouseEvent& e) override
+    void mouseDown ([[maybe_unused]] const MouseEvent& e) override
     {
-        ignoreUnused (e);
-
        #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
         toFront (true);
        #endif

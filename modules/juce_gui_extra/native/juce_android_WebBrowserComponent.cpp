@@ -29,7 +29,7 @@ namespace juce
 //==============================================================================
 // This byte-code is generated from native/java/com/rmsl/juce/JuceWebView.java with min sdk version 16
 // See juce_core/native/java/README.txt on how to generate this byte-code.
-static const unsigned char JuceWebView16ByteCode[] =
+static const uint8 JuceWebView16ByteCode[] =
 {31,139,8,8,150,114,161,94,0,3,74,117,99,101,87,101,98,86,105,101,119,49,54,66,121,116,101,67,111,100,101,46,100,101,120,0,125,
 150,93,108,20,85,20,199,207,124,236,78,119,218,110,183,5,74,191,40,109,69,168,72,89,176,162,165,11,88,40,159,101,81,161,88,226,
 106,34,211,221,107,59,101,118,102,153,153,109,27,67,16,161,137,134,240,96,4,222,72,140,9,18,35,62,18,195,131,15,4,53,250,226,155,
@@ -81,7 +81,7 @@ static const unsigned char JuceWebView16ByteCode[] =
 //==============================================================================
 // This byte-code is generated from native/javacore/app/com/rmsl/juce/JuceWebView21.java with min sdk version 21
 // See juce_core/native/java/README.txt on how to generate this byte-code.
-static const unsigned char JuceWebView21ByteCode[] =
+static const uint8 JuceWebView21ByteCode[] =
 {31,139,8,8,45,103,161,94,0,3,74,117,99,101,87,101,98,86,105,101,119,50,49,46,100,101,120,0,141,151,93,140,27,87,21,199,207,
 204,216,30,219,99,59,182,55,251,145,143,221,110,210,173,178,105,154,186,155,164,52,169,211,106,241,38,219,221,48,41,52,155,108,
 138,43,85,154,181,47,235,73,188,51,206,204,120,119,65,162,132,80,148,138,34,148,168,20,181,125,129,135,16,129,4,18,168,125,136,
@@ -479,82 +479,62 @@ private:
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
      METHOD (constructor, "<init>",      "(J)V") \
      METHOD (hostDeleted, "hostDeleted", "()V") \
-     CALLBACK (webViewReceivedHttpError, "webViewReceivedHttpError", "(JLandroid/webkit/WebView;Landroid/webkit/WebResourceRequest;Landroid/webkit/WebResourceResponse;)V") \
-     CALLBACK (webViewPageLoadStarted, "webViewPageLoadStarted", "(JLandroid/webkit/WebView;Ljava/lang/String;)Z") \
-     CALLBACK (webViewPageLoadFinished, "webViewPageLoadFinished", "(JLandroid/webkit/WebView;Ljava/lang/String;)V") \
-     CALLBACK (webViewReceivedSslError, "webViewReceivedSslError", "(JLandroid/webkit/WebView;Landroid/webkit/SslErrorHandler;Landroid/net/http/SslError;)V") \
+     CALLBACK (generatedCallback<&Pimpl::webViewReceivedHttpError>, "webViewReceivedHttpError", "(JLandroid/webkit/WebView;Landroid/webkit/WebResourceRequest;Landroid/webkit/WebResourceResponse;)V") \
+     CALLBACK (generatedCallback<&Pimpl::webViewPageLoadStarted>,   "webViewPageLoadStarted",   "(JLandroid/webkit/WebView;Ljava/lang/String;)Z") \
+     CALLBACK (generatedCallback<&Pimpl::webViewPageLoadFinished>,  "webViewPageLoadFinished",  "(JLandroid/webkit/WebView;Ljava/lang/String;)V") \
+     CALLBACK (generatedCallback<&Pimpl::webViewReceivedSslError>,  "webViewReceivedSslError",  "(JLandroid/webkit/WebView;Landroid/webkit/SslErrorHandler;Landroid/net/http/SslError;)V") \
 
-     DECLARE_JNI_CLASS_WITH_BYTECODE (JuceWebViewClient21, "com/rmsl/juce/JuceWebView21$Client", 21, JuceWebView21ByteCode, sizeof (JuceWebView21ByteCode))
+     DECLARE_JNI_CLASS_WITH_BYTECODE (JuceWebViewClient21, "com/rmsl/juce/JuceWebView21$Client", 21, JuceWebView21ByteCode)
     #undef JNI_CLASS_MEMBERS
 
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
      METHOD (constructor, "<init>",      "(J)V") \
      METHOD (hostDeleted, "hostDeleted", "()V") \
-     CALLBACK (webViewPageLoadStarted, "webViewPageLoadStarted", "(JLandroid/webkit/WebView;Ljava/lang/String;)Z") \
-     CALLBACK (webViewPageLoadFinished, "webViewPageLoadFinished", "(JLandroid/webkit/WebView;Ljava/lang/String;)V") \
-     CALLBACK (webViewReceivedSslError, "webViewReceivedSslError", "(JLandroid/webkit/WebView;Landroid/webkit/SslErrorHandler;Landroid/net/http/SslError;)V") \
+     CALLBACK (generatedCallback<&Pimpl::webViewPageLoadStarted>,   "webViewPageLoadStarted",   "(JLandroid/webkit/WebView;Ljava/lang/String;)Z") \
+     CALLBACK (generatedCallback<&Pimpl::webViewPageLoadFinished>,  "webViewPageLoadFinished",  "(JLandroid/webkit/WebView;Ljava/lang/String;)V") \
+     CALLBACK (generatedCallback<&Pimpl::webViewReceivedSslError>,  "webViewReceivedSslError",  "(JLandroid/webkit/WebView;Landroid/webkit/SslErrorHandler;Landroid/net/http/SslError;)V") \
 
-     DECLARE_JNI_CLASS_WITH_BYTECODE (JuceWebViewClient16, "com/rmsl/juce/JuceWebView$Client", 16, JuceWebView16ByteCode, sizeof (JuceWebView16ByteCode))
+     DECLARE_JNI_CLASS_WITH_BYTECODE (JuceWebViewClient16, "com/rmsl/juce/JuceWebView$Client", 16, JuceWebView16ByteCode)
     #undef JNI_CLASS_MEMBERS
 
-    static jboolean JNICALL webViewPageLoadStarted (JNIEnv*, jobject /*activity*/, jlong host, jobject /*webView*/, jstring url)
+    static jboolean webViewPageLoadStarted (JNIEnv*, Pimpl& t, jstring url)
     {
-        if (auto* myself = reinterpret_cast<WebBrowserComponent::Pimpl*> (host))
-            return myself->handlePageAboutToLoad (juceString (url));
-
-        return 0;
+        return t.handlePageAboutToLoad (juceString (url));
     }
 
-    static void JNICALL webViewPageLoadFinished (JNIEnv*, jobject /*activity*/, jlong host, jobject /*webView*/, jstring url)
+    static void webViewPageLoadFinished (JNIEnv*, Pimpl& t, jstring url)
     {
-        if (auto* myself = reinterpret_cast<WebBrowserComponent::Pimpl*> (host))
-            myself->owner.pageFinishedLoading (juceString (url));
+        t.owner.pageFinishedLoading (juceString (url));
     }
 
-    static void JNICALL webViewReceivedHttpError (JNIEnv*, jobject /*activity*/, jlong host, jobject /*webView*/, jobject /*request*/, jobject errorResponse)
+    static void webViewReceivedSslError (JNIEnv* env, Pimpl& t, jobject sslError)
     {
-        if (auto* myself = reinterpret_cast<WebBrowserComponent::Pimpl*> (host))
-            myself->webReceivedHttpError (errorResponse);
-    }
-
-    static void JNICALL webViewReceivedSslError (JNIEnv*, jobject /*activity*/, jlong host, jobject /*webView*/, jobject /*sslErrorHandler*/, jobject sslError)
-    {
-        auto* env = getEnv();
-
-        if (auto* myself = reinterpret_cast<WebBrowserComponent::Pimpl*> (host))
-        {
-            auto errorString = LocalRef<jstring> ((jstring) env->CallObjectMethod (sslError, SslError.toString));
-
-            myself->owner.pageLoadHadNetworkError (juceString (errorString));
-        }
+        const auto errorString = LocalRef<jstring> ((jstring) env->CallObjectMethod (sslError, SslError.toString));
+        t.owner.pageLoadHadNetworkError (juceString (errorString));
     }
 
     //==============================================================================
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
       METHOD (constructor, "<init>",      "(J)V") \
-      CALLBACK (webViewCloseWindowRequest,  "webViewCloseWindowRequest",  "(JLandroid/webkit/WebView;)V") \
-      CALLBACK (webViewCreateWindowRequest, "webViewCreateWindowRequest", "(JLandroid/webkit/WebView;)V") \
+      CALLBACK (generatedCallback<&Pimpl::webViewCloseWindowRequest>,   "webViewCloseWindowRequest",    "(JLandroid/webkit/WebView;)V") \
+      CALLBACK (generatedCallback<&Pimpl::webViewCreateWindowRequest>,  "webViewCreateWindowRequest",   "(JLandroid/webkit/WebView;)V") \
 
     DECLARE_JNI_CLASS (JuceWebChromeClient, "com/rmsl/juce/JuceWebView$ChromeClient")
     #undef JNI_CLASS_MEMBERS
 
-    static void JNICALL webViewCloseWindowRequest (JNIEnv*, jobject /*activity*/, jlong host, jobject /*webView*/)
+    static void webViewCloseWindowRequest (JNIEnv*, Pimpl& t, jobject)
     {
-        if (auto* myself = reinterpret_cast<WebBrowserComponent::Pimpl*> (host))
-            myself->owner.windowCloseRequest();
+        t.owner.windowCloseRequest();
     }
 
-    static void JNICALL webViewCreateWindowRequest (JNIEnv*, jobject /*activity*/, jlong host, jobject /*webView*/)
+    static void webViewCreateWindowRequest (JNIEnv*, Pimpl& t, jobject)
     {
-        if (auto* myself = reinterpret_cast<WebBrowserComponent::Pimpl*> (host))
-            myself->owner.newWindowAttemptingToLoad ({});
+        t.owner.newWindowAttemptingToLoad ({});
     }
 
     //==============================================================================
-    void webReceivedHttpError (jobject errorResponse)
+    static void webViewReceivedHttpError (JNIEnv* env, Pimpl& t, jobject errorResponse)
     {
-        auto* env = getEnv();
-
         LocalRef<jclass> responseClass (env->FindClass ("android/webkit/WebResourceResponse"));
 
         if (responseClass != nullptr)
@@ -565,14 +545,14 @@ private:
             {
                 auto errorString = LocalRef<jstring> ((jstring) env->CallObjectMethod (errorResponse, method));
 
-                owner.pageLoadHadNetworkError (juceString (errorString));
+                t.owner.pageLoadHadNetworkError (juceString (errorString));
                 return;
             }
         }
 
         // Should never get here!
         jassertfalse;
-        owner.pageLoadHadNetworkError ({});
+        t.owner.pageLoadHadNetworkError ({});
     }
 
     //==============================================================================
@@ -596,9 +576,7 @@ WebBrowserComponent::WebBrowserComponent (const Options& options)
     addAndMakeVisible (browser.get());
 }
 
-WebBrowserComponent::~WebBrowserComponent()
-{
-}
+WebBrowserComponent::~WebBrowserComponent() = default;
 
 //==============================================================================
 void WebBrowserComponent::goToURL (const String& url,
@@ -728,7 +706,4 @@ bool WebBrowserComponent::areOptionsSupported (const Options& options)
     return (options.getBackend() == Options::Backend::defaultBackend);
 }
 
-WebBrowserComponent::Pimpl::JuceWebViewClient16_Class   WebBrowserComponent::Pimpl::JuceWebViewClient16;
-WebBrowserComponent::Pimpl::JuceWebViewClient21_Class   WebBrowserComponent::Pimpl::JuceWebViewClient21;
-WebBrowserComponent::Pimpl::JuceWebChromeClient_Class WebBrowserComponent::Pimpl::JuceWebChromeClient;
 } // namespace juce

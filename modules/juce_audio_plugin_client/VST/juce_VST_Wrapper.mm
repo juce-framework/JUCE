@@ -80,7 +80,7 @@ void initialiseMacVST()
 }
 
 JUCE_API void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, bool isNSView);
-void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, bool isNSView)
+void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, [[maybe_unused]] bool isNSView)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -161,7 +161,6 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
         }
        #endif
 
-        ignoreUnused (isNSView);
         NSView* parentView = [(NSView*) parentWindowOrView retain];
 
        #if JucePlugin_EditorRequiresKeyboardFocus
@@ -183,7 +182,7 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
 }
 
 JUCE_API void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSView);
-void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSView)
+void detachComponentFromWindowRefVST (Component* comp, void* window, [[maybe_unused]] bool isNSView)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -232,14 +231,13 @@ void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSVi
         }
        #endif
 
-        ignoreUnused (isNSView);
         comp->removeFromDesktop();
         [(id) window release];
     }
 }
 
 JUCE_API void setNativeHostWindowSizeVST (void* window, Component* component, int newWidth, int newHeight, bool isNSView);
-void setNativeHostWindowSizeVST (void* window, Component* component, int newWidth, int newHeight, bool isNSView)
+void setNativeHostWindowSizeVST (void* window, Component* component, int newWidth, int newHeight, [[maybe_unused]] bool isNSView)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -260,8 +258,6 @@ void setNativeHostWindowSizeVST (void* window, Component* component, int newWidt
         }
        #endif
 
-        ignoreUnused (isNSView);
-
         if (NSView* hostView = (NSView*) window)
         {
             const int dx = newWidth  - component->getWidth();
@@ -277,10 +273,10 @@ void setNativeHostWindowSizeVST (void* window, Component* component, int newWidt
 }
 
 JUCE_API void checkWindowVisibilityVST (void* window, Component* comp, bool isNSView);
-void checkWindowVisibilityVST (void* window, Component* comp, bool isNSView)
+void checkWindowVisibilityVST ([[maybe_unused]] void* window,
+                               [[maybe_unused]] Component* comp,
+                               [[maybe_unused]] bool isNSView)
 {
-    ignoreUnused (window, comp, isNSView);
-
    #if ! JUCE_64BIT
     if (! isNSView)
         comp->setVisible ([((NSWindow*) window) isVisible]);
@@ -288,7 +284,7 @@ void checkWindowVisibilityVST (void* window, Component* comp, bool isNSView)
 }
 
 JUCE_API bool forwardCurrentKeyEventToHostVST (Component* comp, bool isNSView);
-bool forwardCurrentKeyEventToHostVST (Component* comp, bool isNSView)
+bool forwardCurrentKeyEventToHostVST ([[maybe_unused]] Component* comp, [[maybe_unused]] bool isNSView)
 {
    #if ! JUCE_64BIT
     if (! isNSView)
@@ -300,7 +296,6 @@ bool forwardCurrentKeyEventToHostVST (Component* comp, bool isNSView)
     }
    #endif
 
-    ignoreUnused (comp, isNSView);
     return false;
 }
 

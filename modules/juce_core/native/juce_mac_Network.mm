@@ -58,14 +58,12 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 }
 
 //==============================================================================
-bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailAddress,
-                                                      const String& emailSubject,
-                                                      const String& bodyText,
-                                                      const StringArray& filesToAttach)
+bool JUCE_CALLTYPE Process::openEmailWithAttachments ([[maybe_unused]] const String& targetEmailAddress,
+                                                      [[maybe_unused]] const String& emailSubject,
+                                                      [[maybe_unused]] const String& bodyText,
+                                                      [[maybe_unused]] const StringArray& filesToAttach)
 {
   #if JUCE_IOS
-    ignoreUnused (targetEmailAddress, emailSubject, bodyText, filesToAttach);
-
     //xxx probably need to use MFMailComposeViewController
     jassertfalse;
     return false;
@@ -282,9 +280,9 @@ public:
         return newRequest;
     }
 
-    void didFailWithError (NSError* error)
+    void didFailWithError ([[maybe_unused]] NSError* error)
     {
-        DBG (nsStringToJuce ([error description])); ignoreUnused (error);
+        DBG (nsStringToJuce ([error description]));
         nsUrlErrorCode = [error code];
         hasFailed = true;
         initialised = true;
@@ -951,10 +949,8 @@ public:
         connection.reset();
     }
 
-    bool connect (WebInputStream::Listener* webInputListener, int numRetries = 0)
+    bool connect (WebInputStream::Listener* webInputListener, [[maybe_unused]] int numRetries = 0)
     {
-        ignoreUnused (numRetries);
-
         {
             const ScopedLock lock (createConnectionLock);
 

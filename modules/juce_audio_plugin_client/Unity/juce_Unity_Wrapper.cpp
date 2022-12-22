@@ -158,10 +158,8 @@ private:
             return std::make_unique<LowLevelGraphicsSoftwareRenderer> (Image (this));
         }
 
-        void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+        void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, [[maybe_unused]] Image::BitmapData::ReadWriteMode mode) override
         {
-            ignoreUnused (mode);
-
             const auto offset = (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
             bitmap.data = imageData + offset;
             bitmap.size = (size_t) (lineStride * height) - offset;
@@ -294,7 +292,7 @@ class AudioProcessorUnityWrapper
 public:
     AudioProcessorUnityWrapper (bool isTemporary)
     {
-        pluginInstance.reset (createPluginFilterOfType (AudioProcessor::wrapperType_Unity));
+        pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_Unity);
 
         if (! isTemporary && pluginInstance->hasEditor())
         {
@@ -568,7 +566,6 @@ static UnityAudioEffectDefinition getEffectDefinition()
     result.setPosition = [] (UnityAudioEffectState* state, unsigned int pos)
     {
         ignoreUnused (state, pos);
-
         return 0;
     };
 
@@ -674,11 +671,7 @@ UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API UnityGetAudioEffectDefinitions (U
         juce::initialiseJuce_GUI();
 
     static std::once_flag flag;
-    std::call_once (flag, []
-    {
-        juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Unity;
-        juce::juce_createUnityPeerFn = juce::createUnityPeer;
-    });
+    std::call_once (flag, [] { juce::juce_createUnityPeerFn = juce::createUnityPeer; });
 
     static auto definition = juce::getEffectDefinition();
     static UnityAudioEffectDefinition* definitions[] { &definition };

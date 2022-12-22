@@ -279,10 +279,9 @@ private:
                  && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: juceStringToNS (f.getFullPathName())];
     }
 
-    void panelSelectionDidChange (id sender)
+    void panelSelectionDidChange ([[maybe_unused]] id sender)
     {
         jassert (sender == panel);
-        ignoreUnused (sender);
 
         // NB: would need to extend FilePreviewComponent to handle the full list rather than just the first one
         if (preview != nullptr)

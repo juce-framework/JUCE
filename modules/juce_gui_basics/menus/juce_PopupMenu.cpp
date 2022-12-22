@@ -324,12 +324,16 @@ private:
 //==============================================================================
 struct MenuWindow  : public Component
 {
-    MenuWindow (const PopupMenu& menu, MenuWindow* parentWindow,
-                Options opts, bool alignToRectangle, bool shouldDismissOnMouseUp,
-                ApplicationCommandManager** manager, float parentScaleFactor = 1.0f)
+    MenuWindow (const PopupMenu& menu,
+                MenuWindow* parentWindow,
+                Options opts,
+                bool alignToRectangle,
+                bool shouldDismissOnMouseUp,
+                ApplicationCommandManager** manager,
+                float parentScaleFactor = 1.0f)
         : Component ("menu"),
           parent (parentWindow),
-          options (opts.withParentComponent (getLookAndFeel().getParentComponentForMenuOptions (opts))),
+          options (opts.withParentComponent (findLookAndFeel (menu, parentWindow)->getParentComponentForMenuOptions (opts))),
           managerOfChosenCommand (manager),
           componentAttachedTo (options.getTargetComponent()),
           dismissOnMouseUp (shouldDismissOnMouseUp),
@@ -343,8 +347,7 @@ struct MenuWindow  : public Component
         setAlwaysOnTop (true);
         setFocusContainerType (FocusContainerType::focusContainer);
 
-        setLookAndFeel (parent != nullptr ? &(parent->getLookAndFeel())
-                                          : menu.lookAndFeel.get());
+        setLookAndFeel (findLookAndFeel (menu, parentWindow));
 
         auto& lf = getLookAndFeel();
 
@@ -1291,6 +1294,17 @@ struct MenuWindow  : public Component
                                                        }));
     }
 
+    LookAndFeel* findLookAndFeel (const PopupMenu& menu, MenuWindow* parentWindow) const
+    {
+        if (parentWindow != nullptr)
+            return &(parentWindow->getLookAndFeel());
+
+        if (auto* lnf = menu.lookAndFeel.get())
+            return lnf;
+
+        return &getLookAndFeel();
+    }
+
     //==============================================================================
     MenuWindow* parent;
     const Options options;
@@ -2098,7 +2112,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
 
 int PopupMenu::showWithOptionalCallback (const Options& options,
                                          ModalComponentManager::Callback* userCallback,
-                                         bool canBeModal)
+                                         [[maybe_unused]] bool canBeModal)
 {
     std::unique_ptr<ModalComponentManager::Callback> userCallbackDeleter (userCallback);
     std::unique_ptr<PopupMenuCompletionCallback> callback (new PopupMenuCompletionCallback());
@@ -2120,7 +2134,6 @@ int PopupMenu::showWithOptionalCallback (const Options& options,
         if (userCallback == nullptr && canBeModal)
             return window->runModalLoop();
        #else
-        ignoreUnused (canBeModal);
         jassert (! (userCallback == nullptr && canBeModal));
        #endif
     }

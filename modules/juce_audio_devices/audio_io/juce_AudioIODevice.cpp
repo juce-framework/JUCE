@@ -23,6 +23,14 @@
 namespace juce
 {
 
+void AudioIODeviceCallback::audioDeviceIOCallbackWithContext ([[maybe_unused]] const float* const* inputChannelData,
+                                                              [[maybe_unused]] int numInputChannels,
+                                                              [[maybe_unused]] float* const* outputChannelData,
+                                                              [[maybe_unused]] int numOutputChannels,
+                                                              [[maybe_unused]] int numSamples,
+                                                              [[maybe_unused]] const AudioIODeviceCallbackContext& context) {}
+
+//==============================================================================
 AudioIODevice::AudioIODevice (const String& deviceName, const String& deviceTypeName)
     : name (deviceName), typeName (deviceTypeName)
 {

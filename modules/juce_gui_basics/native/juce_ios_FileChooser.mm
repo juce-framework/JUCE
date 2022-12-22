@@ -137,8 +137,7 @@ public:
         {
             if (err != nil)
             {
-                auto desc = [err localizedDescription];
-                ignoreUnused (desc);
+                [[maybe_unused]] auto desc = [err localizedDescription];
                 jassertfalse;
                 return;
             }
@@ -168,8 +167,7 @@ public:
                 }
                 else
                 {
-                    auto desc = [error localizedDescription];
-                    ignoreUnused (desc);
+                    [[maybe_unused]] auto desc = [error localizedDescription];
                     jassertfalse;
                 }
 
@@ -414,11 +412,13 @@ std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser
     return self;
 }
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-implementations")
 - (void) documentPicker: (UIDocumentPickerViewController*) controller didPickDocumentAtURL: (NSURL*) url
 {
     if (owner != nullptr)
         owner->didPickDocumentAtURL (url);
 }
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 - (void) documentPicker: (UIDocumentPickerViewController*) controller didPickDocumentsAtURLs: (NSArray<NSURL*>*) urls
 {

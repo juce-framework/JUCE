@@ -334,8 +334,8 @@ public:
             bool smallCalled = false;
             bool largeCalled = false;
 
-            SmallFn small = [&smallCalled, a = std::array<char, 8>{}] { smallCalled = true; juce::ignoreUnused (a); };
-            LargeFn large = [&largeCalled, a = std::array<char, 8>{}] { largeCalled = true; juce::ignoreUnused (a); };
+            SmallFn small = [&smallCalled, a = std::array<char, 8>{}] { smallCalled = true; ignoreUnused (a); };
+            LargeFn large = [&largeCalled, a = std::array<char, 8>{}] { largeCalled = true; ignoreUnused (a); };
 
             large = std::move (small);
 

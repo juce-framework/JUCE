@@ -148,6 +148,8 @@ public:
             context.nativeContext = nativeContext.get();
         else
             nativeContext.reset();
+
+        refreshDisplayLinkConnection();
     }
 
     ~CachedImage() override
@@ -332,7 +334,15 @@ public:
 
         const auto stateToUse = state.fetch_and (StateFlags::persistent);
 
-        if (! isFlagSet (stateToUse, StateFlags::pendingRender) && ! context.continuousRepaint)
+       #if JUCE_MAC
+        // On macOS, we use a display link callback to trigger repaints, rather than
+        // letting them run at full throttle
+        const auto noAutomaticRepaint = true;
+       #else
+        const auto noAutomaticRepaint = ! context.continuousRepaint;
+       #endif
+
+        if (! isFlagSet (stateToUse, StateFlags::pendingRender) && noAutomaticRepaint)
             return RenderStatus::noWork;
 
         const auto isUpdating = isFlagSet (stateToUse, StateFlags::paintComponents);
@@ -916,6 +926,30 @@ public:
         } };
     };
 
+    void refreshDisplayLinkConnection()
+    {
+       #if JUCE_MAC
+        if (context.continuousRepaint)
+        {
+            connection.emplace (sharedDisplayLinks->registerFactory ([this] (CGDirectDisplayID display)
+            {
+                return [this, display]
+                {
+                    if (auto* view = nativeContext->getNSView())
+                        if (auto* window = [view window])
+                            if (auto* screen = [window screen])
+                                if (display == ScopedDisplayLink::getDisplayIdForScreen (screen))
+                                    triggerRepaint();
+                };
+            }));
+        }
+        else
+        {
+            connection.reset();
+        }
+       #endif
+    }
+
     //==============================================================================
     friend class NativeContext;
     std::unique_ptr<NativeContext> nativeContext;
@@ -1008,6 +1042,10 @@ public:
     // Note: the NSViewComponentPeer also has a SharedResourcePointer<PerScreenDisplayLinks> to
     // avoid unnecessarily duplicating display-link threads.
     SharedResourcePointer<PerScreenDisplayLinks> sharedDisplayLinks;
+
+    // On macOS, rather than letting swapBuffers block as appropriate, we use a display link
+    // callback to mark the view as needing to repaint.
+    std::optional<PerScreenDisplayLinks::Connection> connection;
    #endif
 
     enum StateFlags
@@ -1217,13 +1255,16 @@ void OpenGLContext::setContinuousRepainting (bool shouldContinuouslyRepaint) noe
 {
     continuousRepaint = shouldContinuouslyRepaint;
 
-    #if JUCE_MAC
-     if (auto* component = getTargetComponent())
-     {
-         detach();
-         attachment.reset (new Attachment (*this, *component));
-     }
-    #endif
+   #if JUCE_MAC
+    if (auto* component = getTargetComponent())
+    {
+        detach();
+        attachment.reset (new Attachment (*this, *component));
+    }
+
+    if (auto* cachedImage = getCachedImage())
+        cachedImage->refreshDisplayLinkConnection();
+   #endif
 
     triggerRepaint();
 }

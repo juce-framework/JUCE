@@ -344,33 +344,31 @@ LocalRef<jobject> getMainActivity() noexcept
 }
 
 //==============================================================================
-#if JUCE_ANDROID && JUCE_MODULE_AVAILABLE_juce_audio_devices && (JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE)
- #define JUCE_ANDROID_REALTIME_THREAD_AVAILABLE 1
-#endif
+using RealtimeThreadFactory = pthread_t (*) (void* (*entry) (void*), void* userPtr);
+// This is defined in the juce_audio_devices module, with different definitions depending on
+// whether OpenSL/Oboe are enabled.
+RealtimeThreadFactory getAndroidRealtimeThreadFactory();
 
-#if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
-pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr);
+#if ! JUCE_MODULE_AVAILABLE_juce_audio_devices
+RealtimeThreadFactory getAndroidRealtimeThreadFactory() { return nullptr; }
 #endif
 
 extern JavaVM* androidJNIJavaVM;
 
+static auto setPriorityOfThisThread (Thread::Priority p)
+{
+    return setpriority (PRIO_PROCESS,
+                        (id_t) gettid(),
+                        ThreadPriorities::getNativePriority (p)) == 0;
+}
+
 bool Thread::createNativeThread (Priority)
 {
-    if (isRealtime())
-    {
-       #if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
-        threadHandle = (void*) juce_createRealtimeAudioThread (threadEntryProc, this);
-        threadId = (ThreadID) threadHandle.get();
-        return threadId != nullptr;
-       #else
-        jassertfalse;
-       #endif
-    }
-
-    PosixThreadAttribute attr { threadStackSize };
-    threadId = threadHandle = makeThreadHandle (attr, this, [] (void* userData) -> void*
+    const auto threadEntryProc = [] (void* userData) -> void*
     {
         auto* myself = static_cast<Thread*> (userData);
+
+        setPriorityOfThisThread (myself->priority);
 
         juce_threadEntryPoint (myself);
 
@@ -385,7 +383,24 @@ bool Thread::createNativeThread (Priority)
         }
 
         return nullptr;
-    });
+    };
+
+    if (isRealtime())
+    {
+        if (const auto factory = getAndroidRealtimeThreadFactory())
+        {
+            threadHandle = (void*) factory (threadEntryProc, this);
+            threadId = (ThreadID) threadHandle.load();
+            return threadId != nullptr;
+        }
+        else
+        {
+            jassertfalse;
+        }
+    }
+
+    PosixThreadAttribute attr { threadStackSize };
+    threadId = threadHandle = makeThreadHandle (attr, this, threadEntryProc);
 
     return threadId != nullptr;
 }
@@ -404,14 +419,15 @@ Thread::Priority Thread::getPriority() const
     return ThreadPriorities::getJucePriority (native);
 }
 
-bool Thread::setPriority (Priority)
+bool Thread::setPriority (Priority priorityIn)
 {
     jassert (Thread::getCurrentThreadId() == getThreadId());
 
     if (isRealtime())
         return false;
 
-    return setpriority (PRIO_PROCESS, (id_t) gettid(), ThreadPriorities::getNativePriority (priority)) == 0;
+    const auto priorityToUse = priority = priorityIn;
+    return setPriorityOfThisThread (priorityToUse) == 0;
 }
 
 //==============================================================================

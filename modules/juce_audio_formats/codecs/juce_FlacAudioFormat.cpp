@@ -496,8 +496,7 @@ public:
         packUint32 ((FLAC__uint32) info.total_samples, buffer + 14, 4);
         memcpy (buffer + 18, info.md5sum, 16);
 
-        const bool seekOk = output->setPosition (streamStartPos + 4);
-        ignoreUnused (seekOk);
+        [[maybe_unused]] const bool seekOk = output->setPosition (streamStartPos + 4);
 
         // if this fails, you've given it an output stream that can't seek! It needs
         // to be able to seek back to write the header

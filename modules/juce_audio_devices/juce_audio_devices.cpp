@@ -188,7 +188,13 @@
 //==============================================================================
 #elif JUCE_ANDROID
 
- #include "native/juce_android_Audio.cpp"
+namespace juce
+{
+    using RealtimeThreadFactory = pthread_t (*) (void* (*) (void*), void*);
+    RealtimeThreadFactory getAndroidRealtimeThreadFactory();
+} // namespace juce
+
+#include "native/juce_android_Audio.cpp"
 
  #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
  #include "native/juce_android_Midi.cpp"
@@ -218,6 +224,12 @@
 
    #include "native/juce_android_Oboe.cpp"
   #endif
+ #else
+// No audio library, so no way to create realtime threads.
+  namespace juce
+  {
+      RealtimeThreadFactory getAndroidRealtimeThreadFactory() { return nullptr; }
+  }
  #endif
 
 #endif

@@ -163,24 +163,22 @@ static bool checkPeerIsValid (OpenGLContext* context)
     {
         if (auto* comp = context->getTargetComponent())
         {
-            if (auto* peer = comp->getPeer())
+            if (auto* peer [[maybe_unused]] = comp->getPeer())
             {
                #if JUCE_MAC || JUCE_IOS
                 if (auto* nsView = (JUCE_IOS_MAC_VIEW*) peer->getNativeHandle())
                 {
-                    if (auto nsWindow = [nsView window])
+                    if ([[maybe_unused]] auto nsWindow = [nsView window])
                     {
                        #if JUCE_MAC
                         return ([nsWindow isVisible]
                                   && (! [nsWindow hidesOnDeactivate] || [NSApp isActive]));
                        #else
-                        ignoreUnused (nsWindow);
                         return true;
                        #endif
                     }
                 }
                #else
-                ignoreUnused (peer);
                 return true;
                #endif
             }
@@ -293,6 +291,7 @@ JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB)
 #undef JUCE_IMPL_WGL_EXTENSION_FUNCTION
 
 #elif JUCE_LINUX || JUCE_BSD
+ #include <juce_gui_basics/native/x11/juce_linux_ScopedWindowAssociation.h>
  #include "native/juce_OpenGL_linux_X11.h"
 
 #elif JUCE_ANDROID

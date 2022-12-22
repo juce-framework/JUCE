@@ -615,6 +615,55 @@ static inline std::vector<ParsedGroup> findStableBusOrder (const String& mainGro
     return result;
 }
 
+/*  See https://www.w3.org/TeamSubmission/turtle/#sec-grammar-grammar
+*/
+static inline bool isNameStartChar (juce_wchar input)
+{
+    return ('A' <= input && input <= 'Z')
+        || input == '_'
+        || ('a' <= input && input <= 'z')
+        || (0x000c0 <= input && input <= 0x000d6)
+        || (0x000d8 <= input && input <= 0x000f6)
+        || (0x000f8 <= input && input <= 0x000ff)
+        || (0x00370 <= input && input <= 0x0037d)
+        || (0x0037f <= input && input <= 0x01fff)
+        || (0x0200c <= input && input <= 0x0200d)
+        || (0x02070 <= input && input <= 0x0218f)
+        || (0x02c00 <= input && input <= 0x02fef)
+        || (0x03001 <= input && input <= 0x0d7ff)
+        || (0x0f900 <= input && input <= 0x0fdcf)
+        || (0x0fdf0 <= input && input <= 0x0fffd)
+        || (0x10000 <= input && input <= 0xeffff);
+}
+
+static inline bool isNameChar (juce_wchar input)
+{
+    return isNameStartChar (input)
+        || input == '-'
+        || ('0' <= input && input <= '9')
+        || input == 0x000b7
+        || (0x00300 <= input && input <= 0x0036f)
+        || (0x0203f <= input && input <= 0x02040);
+}
+
+static inline String sanitiseStringAsTtlName (const String& input)
+{
+    if (input.isEmpty())
+        return {};
+
+    std::vector<juce_wchar> sanitised;
+    sanitised.reserve (static_cast<size_t> (input.length()));
+
+    sanitised.push_back (isNameStartChar (input[0]) ? input[0] : '_');
+
+    std::for_each (std::begin (input) + 1, std::end (input), [&] (juce_wchar x)
+    {
+        sanitised.push_back (isNameChar (x) ? x : '_');
+    });
+
+    return String (CharPointer_UTF32 { sanitised.data() }, sanitised.size());
+}
+
 }
 }
 

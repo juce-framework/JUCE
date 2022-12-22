@@ -225,7 +225,7 @@ public:
 
     Array<Displays::Display> findDisplays (float masterScale) const;
 
-    ::Window createKeyProxy (::Window) const;
+    ::Window createKeyProxy (::Window);
     void deleteKeyProxy (::Window) const;
 
     bool externalDragFileInit (LinuxComponentPeer*, const StringArray& files, bool canMove, std::function<void()>&& callback) const;

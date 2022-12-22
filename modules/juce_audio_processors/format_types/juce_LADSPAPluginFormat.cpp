@@ -384,10 +384,8 @@ public:
     void getCurrentProgramStateInformation (MemoryBlock& destData) override               { getStateInformation (destData); }
     void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override   { setStateInformation (data, sizeInBytes); }
 
-    void setStateInformation (const void* data, int sizeInBytes) override
+    void setStateInformation (const void* data, [[maybe_unused]] int sizeInBytes) override
     {
-        ignoreUnused (sizeInBytes);
-
         auto* p = static_cast<const float*> (data);
 
         for (int i = 0; i < getParameters().size(); ++i)

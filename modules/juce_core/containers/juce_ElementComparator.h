@@ -123,16 +123,13 @@ static void sortArray (ElementComparator& comparator,
     @param lastElement      the index of the last element in the range (this is non-inclusive)
 */
 template <class ElementType, class ElementComparator>
-static int findInsertIndexInSortedArray (ElementComparator& comparator,
+static int findInsertIndexInSortedArray ([[maybe_unused]] ElementComparator& comparator,
                                          ElementType* const array,
                                          const ElementType newElement,
                                          int firstElement,
                                          int lastElement)
 {
     jassert (firstElement <= lastElement);
-
-    ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
-                               // avoids getting warning messages about the parameter being unused
 
     while (firstElement < lastElement)
     {

@@ -563,31 +563,7 @@ public:
         @see addSorted, sort
     */
     template <class ElementComparator>
-    int indexOfSorted (ElementComparator& comparator,
-                       const ObjectClass* objectToLookFor) const noexcept
-    {
-        ignoreUnused (comparator);
-        const ScopedLockType lock (getLock());
-        int s = 0, e = values.size();
-
-        while (s < e)
-        {
-            if (comparator.compareElements (objectToLookFor, values[s]) == 0)
-                return s;
-
-            auto halfway = (s + e) / 2;
-
-            if (halfway == s)
-                break;
-
-            if (comparator.compareElements (objectToLookFor, values[halfway]) >= 0)
-                s = halfway;
-            else
-                e = halfway;
-        }
-
-        return -1;
-    }
+    int indexOfSorted (ElementComparator& comparator, const ObjectClass* objectToLookFor) const noexcept;
 
     //==============================================================================
     /** Removes an object from the array.
@@ -828,16 +804,7 @@ public:
         @see sortArray
     */
     template <class ElementComparator>
-    void sort (ElementComparator& comparator,
-               bool retainOrderOfEquivalentItems = false) noexcept
-    {
-        // If you pass in an object with a static compareElements() method, this
-        // avoids getting warning messages about the parameter being unused
-        ignoreUnused (comparator);
-
-        const ScopedLockType lock (getLock());
-        sortArray (comparator, values.begin(), 0, values.size() - 1, retainOrderOfEquivalentItems);
-    }
+    void sort (ElementComparator& comparator, bool retainOrderOfEquivalentItems = false) noexcept;
 
     //==============================================================================
     /** Reduces the amount of storage being used by the array.
@@ -903,5 +870,44 @@ private:
             ContainerDeletePolicy<ObjectClass>::destroy (o);
     }
 };
+
+//==============================================================================
+template <class ObjectClass, class TypeOfCriticalSectionToUse>
+template <class ElementComparator>
+int ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>::indexOfSorted (
+    [[maybe_unused]] ElementComparator& comparator,
+    const ObjectClass* objectToLookFor) const noexcept
+{
+    const ScopedLockType lock (getLock());
+    int s = 0, e = values.size();
+
+    while (s < e)
+    {
+        if (comparator.compareElements (objectToLookFor, values[s]) == 0)
+            return s;
+
+        auto halfway = (s + e) / 2;
+
+        if (halfway == s)
+            break;
+
+        if (comparator.compareElements (objectToLookFor, values[halfway]) >= 0)
+            s = halfway;
+        else
+            e = halfway;
+    }
+
+    return -1;
+}
+
+template <class ObjectClass, class TypeOfCriticalSectionToUse>
+template <class ElementComparator>
+void ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>::sort (
+    [[maybe_unused]] ElementComparator& comparator,
+    bool retainOrderOfEquivalentItems) noexcept
+{
+    const ScopedLockType lock (getLock());
+    sortArray (comparator, values.begin(), 0, values.size() - 1, retainOrderOfEquivalentItems);
+}
 
 } // namespace juce

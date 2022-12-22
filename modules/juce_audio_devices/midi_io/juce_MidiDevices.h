@@ -225,10 +225,7 @@ public:
     virtual void handlePartialSysexMessage (MidiInput* source,
                                             const uint8* messageData,
                                             int numBytesSoFar,
-                                            double timestamp)
-    {
-        ignoreUnused (source, messageData, numBytesSoFar, timestamp);
-    }
+                                            double timestamp);
 };
 
 //==============================================================================

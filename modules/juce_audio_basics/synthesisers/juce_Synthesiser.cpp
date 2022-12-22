@@ -482,15 +482,14 @@ void Synthesiser::handleSostenutoPedal (int midiChannel, bool isDown)
     }
 }
 
-void Synthesiser::handleSoftPedal (int midiChannel, bool /*isDown*/)
+void Synthesiser::handleSoftPedal ([[maybe_unused]] int midiChannel, bool /*isDown*/)
 {
-    ignoreUnused (midiChannel);
     jassert (midiChannel > 0 && midiChannel <= 16);
 }
 
-void Synthesiser::handleProgramChange (int midiChannel, int programNumber)
+void Synthesiser::handleProgramChange ([[maybe_unused]] int midiChannel,
+                                       [[maybe_unused]] int programNumber)
 {
-    ignoreUnused (midiChannel, programNumber);
     jassert (midiChannel > 0 && midiChannel <= 16);
 }
 

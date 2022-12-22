@@ -30,10 +30,6 @@ juce_add_gui_app(Projucer
 
 juce_generate_juce_header(Projucer)
 
-# This is to work around a bug with how cmake computes language standard flags with
-# target_compile_features
-set_target_properties(Projucer PROPERTIES CXX_STANDARD 11)
-
 target_sources(Projucer PRIVATE
     Source/Application/jucer_AutoUpdater.cpp
     Source/Application/jucer_CommandLine.cpp

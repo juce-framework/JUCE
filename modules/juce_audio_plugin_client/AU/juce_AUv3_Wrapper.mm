@@ -79,7 +79,7 @@ using namespace juce;
 struct AudioProcessorHolder  : public ReferenceCountedObject
 {
     AudioProcessorHolder() = default;
-    explicit AudioProcessorHolder (AudioProcessor* p) : processor (p) {}
+    explicit AudioProcessorHolder (std::unique_ptr<AudioProcessor> p) : processor (std::move (p)) {}
     AudioProcessor& operator*() noexcept        { return *processor; }
     AudioProcessor* operator->() noexcept       { return processor.get(); }
     AudioProcessor* get() noexcept              { return processor.get(); }
@@ -359,11 +359,9 @@ public:
 
         AudioProcessor& processor = getAudioProcessor();
 
-        if (AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))
+        if ([[maybe_unused]] AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))
         {
           #ifdef JucePlugin_PreferredChannelConfigurations
-            ignoreUnused (bus);
-
             short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
 
             if (! AudioUnitHelpers::isLayoutSupported (processor, isInput, busIdx, newNumChannels, configs))
@@ -603,20 +601,23 @@ public:
     };
 
     //==============================================================================
-    void audioProcessorChanged (AudioProcessor* processor, const ChangeDetails& details) override
+    void audioProcessorChanged ([[maybe_unused]] AudioProcessor* processor, const ChangeDetails& details) override
     {
-        ignoreUnused (processor);
-
-        if (! details.programChanged)
-            return;
-
+        if (details.programChanged)
         {
-            ScopedKeyChange scope (au, @"allParameterValues");
-            addPresets();
+            {
+                ScopedKeyChange scope (au, @"allParameterValues");
+                addPresets();
+            }
+
+            {
+                ScopedKeyChange scope (au, @"currentPreset");
+            }
         }
 
+        if (details.latencyChanged)
         {
-            ScopedKeyChange scope (au, @"currentPreset");
+            ScopedKeyChange scope (au, @"latency");
         }
     }
 
@@ -926,7 +927,6 @@ private:
 
     static JuceAudioUnitv3* create (AUAudioUnit* audioUnit, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
         return new JuceAudioUnitv3 (audioUnit, descr, options, error);
     }
 
@@ -1109,10 +1109,9 @@ private:
     }
 
     // When parameters are discrete we need to use integer values.
-    float getMaximumParameterValue (AudioProcessorParameter* juceParam) const
+    float getMaximumParameterValue ([[maybe_unused]] AudioProcessorParameter* juceParam) const
     {
        #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-        ignoreUnused (juceParam);
         return 1.0f;
        #else
         return juceParam->isDiscrete() ? (float) (juceParam->getNumSteps() - 1) : 1.0f;
@@ -1355,10 +1354,8 @@ private:
     }
 
     //==============================================================================
-    void processEvents (const AURenderEvent *__nullable realtimeEventListHead, int numParams, AUEventSampleTime startTime)
+    void processEvents (const AURenderEvent *__nullable realtimeEventListHead, [[maybe_unused]] int numParams, AUEventSampleTime startTime)
     {
-        ignoreUnused (numParams);
-
         for (const AURenderEvent* event = realtimeEventListHead; event != nullptr; event = event->head.next)
         {
             switch (event->head.eventType)
@@ -1733,7 +1730,6 @@ public:
     JuceAUViewController (AUViewController<AUAudioUnitFactory>* p)
         : myself (p)
     {
-        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
         initialiseJuce_GUI();
     }
 
@@ -1750,9 +1746,9 @@ public:
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        if (AudioProcessor* p = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))
+        if (auto p = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))
         {
-            processorHolder = new AudioProcessorHolder (p);
+            processorHolder = new AudioProcessorHolder (std::move (p));
             auto& processor = getAudioProcessor();
 
             if (processor.hasEditor())

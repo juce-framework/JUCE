@@ -555,10 +555,9 @@ public:
             break;
         case WEBKIT_POLICY_DECISION_TYPE_RESPONSE:
             {
-                auto* response = (WebKitNavigationPolicyDecision*) decision;
+                [[maybe_unused]] auto* response = (WebKitNavigationPolicyDecision*) decision;
 
                 // for now just always allow response requests
-                ignoreUnused (response);
                 WebKitSymbols::getInstance()->juce_webkit_policy_decision_use (decision);
                 return true;
             }
@@ -642,9 +641,8 @@ public:
 
         launchChild();
 
-        auto ret = pipe (threadControl);
+        [[maybe_unused]] auto ret = pipe (threadControl);
 
-        ignoreUnused (ret);
         jassert (ret == 0);
 
         CommandReceiver::setBlocking (inChannel,        true);
@@ -772,11 +770,11 @@ private:
     {
         int inPipe[2], outPipe[2];
 
-        auto ret = pipe (inPipe);
-        ignoreUnused (ret); jassert (ret == 0);
+        [[maybe_unused]] auto ret = pipe (inPipe);
+        jassert (ret == 0);
 
         ret = pipe (outPipe);
-        ignoreUnused (ret); jassert (ret == 0);
+        jassert (ret == 0);
 
         auto pid = fork();
         if (pid == 0)

@@ -1075,14 +1075,15 @@ public:
     }
 
     //==============================================================================
-    tresult PLUGIN_API getMidiControllerAssignment (Steinberg::int32 /*busIndex*/, Steinberg::int16 channel,
-                                                    Vst::CtrlNumber midiControllerNumber, Vst::ParamID& resultID) override
+    tresult PLUGIN_API getMidiControllerAssignment ([[maybe_unused]] Steinberg::int32 busIndex,
+                                                    [[maybe_unused]] Steinberg::int16 channel,
+                                                    [[maybe_unused]] Vst::CtrlNumber midiControllerNumber,
+                                                    [[maybe_unused]] Vst::ParamID& resultID) override
     {
        #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
         resultID = midiControllerToParameter[channel][midiControllerNumber];
         return kResultTrue; // Returning false makes some hosts stop asking for further MIDI Controller Assignments
        #else
-        ignoreUnused (channel, midiControllerNumber, resultID);
         return kResultFalse;
        #endif
     }
@@ -1991,7 +1992,7 @@ private:
             return kResultFalse;
         }
 
-        tresult PLUGIN_API setContentScaleFactor (const Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
+        tresult PLUGIN_API setContentScaleFactor ([[maybe_unused]] const Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
             const auto scaleToApply = [&]
@@ -2016,7 +2017,6 @@ private:
 
             return kResultTrue;
            #else
-            ignoreUnused (factor);
             return kResultFalse;
            #endif
         }
@@ -2420,16 +2420,15 @@ class JuceVST3Component : public Vst::IComponent,
 {
 public:
     JuceVST3Component (Vst::IHostApplication* h)
-        : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3)),
+        : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3).release()),
           host (h)
     {
         inParameterChangedCallback = false;
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
-        const int numConfigs = numElementsInArray (configs);
+        [[maybe_unused]] const int numConfigs = numElementsInArray (configs);
 
-        ignoreUnused (numConfigs);
         jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
 
         pluginInstance->setPlayConfigDetails (configs[0][0], configs[0][1], 44100.0, 1024);
@@ -2552,26 +2551,31 @@ public:
     //==============================================================================
     tresult PLUGIN_API setActive (TBool state) override
     {
-        active = (state != 0);
+        const auto willBeActive = (state != 0);
 
-        if (! state)
+        active = false;
+        // Some hosts may call setBusArrangements in response to calls made during prepareToPlay
+        // or releaseResources. Specifically, Wavelab 11.1 calls setBusArrangements in the same
+        // call stack when the AudioProcessor calls setLatencySamples inside prepareToPlay.
+        // In order for setBusArrangements to return successfully, the plugin must not be activated
+        // until after prepareToPlay has completely finished.
+        const ScopeGuard scope { [&] { active = willBeActive; } };
+
+        if (willBeActive)
         {
-            getPluginInstance().releaseResources();
+            const auto sampleRate = processSetup.sampleRate > 0.0
+                                  ? processSetup.sampleRate
+                                  : getPluginInstance().getSampleRate();
+
+            const auto bufferSize = processSetup.maxSamplesPerBlock > 0
+                                  ? (int) processSetup.maxSamplesPerBlock
+                                  : getPluginInstance().getBlockSize();
+
+            preparePlugin (sampleRate, bufferSize, CallPrepareToPlay::yes);
         }
         else
         {
-            auto sampleRate = getPluginInstance().getSampleRate();
-            auto bufferSize = getPluginInstance().getBlockSize();
-
-            sampleRate = processSetup.sampleRate > 0.0
-                            ? processSetup.sampleRate
-                            : sampleRate;
-
-            bufferSize = processSetup.maxSamplesPerBlock > 0
-                            ? (int) processSetup.maxSamplesPerBlock
-                            : bufferSize;
-
-            preparePlugin (sampleRate, bufferSize, CallPrepareToPlay::yes);
+            getPluginInstance().releaseResources();
         }
 
         return kResultOk;
@@ -4164,8 +4168,6 @@ using namespace juce;
 // The VST3 plugin entry point.
 extern "C" SMTG_EXPORT_SYMBOL IPluginFactory* PLUGIN_API GetPluginFactory()
 {
-    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST3;
-
    #if (JUCE_MSVC || (JUCE_WINDOWS && JUCE_CLANG)) && JUCE_32BIT
     // Cunning trick to force this function to be exported. Life's too short to
     // faff around creating .def files for this kind of thing.

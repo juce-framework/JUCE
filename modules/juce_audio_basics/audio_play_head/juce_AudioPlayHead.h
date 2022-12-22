@@ -578,16 +578,16 @@ public:
     virtual Optional<PositionInfo> getPosition() const = 0;
 
     /** Returns true if this object can control the transport. */
-    virtual bool canControlTransport()                         { return false; }
+    virtual bool canControlTransport();
 
     /** Starts or stops the audio. */
-    virtual void transportPlay (bool shouldStartPlaying)       { ignoreUnused (shouldStartPlaying); }
+    virtual void transportPlay (bool shouldStartPlaying);
 
     /** Starts or stops recording the audio. */
-    virtual void transportRecord (bool shouldStartRecording)   { ignoreUnused (shouldStartRecording); }
+    virtual void transportRecord (bool shouldStartRecording);
 
     /** Rewinds the audio. */
-    virtual void transportRewind()                             {}
+    virtual void transportRewind();
 };
 
 } // namespace juce

@@ -135,6 +135,7 @@
 #include "misc/juce_SystemTrayIconComponent.cpp"
 #include "misc/juce_LiveConstantEditor.cpp"
 #include "misc/juce_AnimatedAppComponent.cpp"
+#include "misc/juce_WebBrowserComponent.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -167,6 +168,7 @@
 #elif JUCE_LINUX || JUCE_BSD
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
+ #include <juce_gui_basics/native/x11/juce_linux_ScopedWindowAssociation.h>
  #include "native/juce_linux_XEmbedComponent.cpp"
 
  #if JUCE_WEB_BROWSER

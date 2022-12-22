@@ -150,15 +150,13 @@ JUCE_IMPLEMENT_SINGLETON (ContentSharer)
 ContentSharer::ContentSharer() {}
 ContentSharer::~ContentSharer() { clearSingletonInstance(); }
 
-void ContentSharer::shareFiles (const Array<URL>& files,
+void ContentSharer::shareFiles ([[maybe_unused]] const Array<URL>& files,
                                 std::function<void (bool, const String&)> callbackToUse)
 {
   #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
     pimpl->shareFiles (files);
   #else
-    ignoreUnused (files);
-
     // Content sharing is not available on this platform!
     jassertfalse;
 
@@ -188,15 +186,13 @@ void ContentSharer::startNewShare (std::function<void (bool, const String&)> cal
 }
 #endif
 
-void ContentSharer::shareText (const String& text,
+void ContentSharer::shareText ([[maybe_unused]] const String& text,
                                std::function<void (bool, const String&)> callbackToUse)
 {
   #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
     pimpl->shareText (text);
   #else
-    ignoreUnused (text);
-
     // Content sharing is not available on this platform!
     jassertfalse;
 
@@ -205,16 +201,14 @@ void ContentSharer::shareText (const String& text,
   #endif
 }
 
-void ContentSharer::shareImages (const Array<Image>& images,
+void ContentSharer::shareImages ([[maybe_unused]] const Array<Image>& images,
                                  std::function<void (bool, const String&)> callbackToUse,
-                                 ImageFileFormat* imageFileFormatToUse)
+                                 [[maybe_unused]] ImageFileFormat* imageFileFormatToUse)
 {
   #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
     prepareImagesThread.reset (new PrepareImagesThread (*this, images, imageFileFormatToUse));
   #else
-    ignoreUnused (images, imageFileFormatToUse);
-
     // Content sharing is not available on this platform!
     jassertfalse;
 
@@ -238,15 +232,13 @@ void ContentSharer::filesToSharePrepared()
 }
 #endif
 
-void ContentSharer::shareData (const MemoryBlock& mb,
+void ContentSharer::shareData ([[maybe_unused]] const MemoryBlock& mb,
                                std::function<void (bool, const String&)> callbackToUse)
 {
   #if JUCE_CONTENT_SHARING
     startNewShare (callbackToUse);
     prepareDataThread.reset (new PrepareDataThread (*this, mb));
   #else
-    ignoreUnused (mb);
-
     if (callbackToUse)
         callbackToUse (false, "Content sharing not available on this platform!");
   #endif

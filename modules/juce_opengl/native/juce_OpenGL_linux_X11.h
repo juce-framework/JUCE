@@ -26,8 +26,6 @@
 namespace juce
 {
 
-extern XContext windowHandleXContext;
-
 struct XFreeDeleter
 {
     void operator() (void* ptr) const
@@ -44,6 +42,35 @@ std::unique_ptr<Data, XFreeDeleter> makeXFreePtr (Data* raw) { return std::uniqu
 // Defined juce_linux_Windowing.cpp
 void juce_LinuxAddRepaintListener (ComponentPeer*, Component* dummy);
 void juce_LinuxRemoveRepaintListener (ComponentPeer*, Component* dummy);
+
+class PeerListener : private ComponentMovementWatcher
+{
+public:
+    PeerListener (Component& comp, Window embeddedWindow)
+        : ComponentMovementWatcher (&comp),
+          window (embeddedWindow),
+          association (comp.getPeer(), window) {}
+
+private:
+    using ComponentMovementWatcher::componentMovedOrResized,
+          ComponentMovementWatcher::componentVisibilityChanged;
+
+    void componentMovedOrResized (bool, bool) override {}
+    void componentVisibilityChanged() override {}
+
+    void componentPeerChanged() override
+    {
+        // This should not be rewritten as a ternary expression or similar.
+        // The old association must be destroyed before the new one is created.
+        association = {};
+
+        if (auto* comp = getComponent())
+            association = ScopedWindowAssociation (comp->getPeer(), window);
+    }
+
+    Window window{};
+    ScopedWindowAssociation association;
+};
 
 //==============================================================================
 class OpenGLContext::NativeContext
@@ -114,7 +141,7 @@ public:
                                                                    CWBorderPixel | CWColormap | CWEventMask,
                                                                    &swa);
 
-        X11Symbols::getInstance()->xSaveContext (display, (XID) embeddedWindow, windowHandleXContext, (XPointer) peer);
+        peerListener.emplace (component, embeddedWindow);
 
         X11Symbols::getInstance()->xMapWindow (display, embeddedWindow);
         X11Symbols::getInstance()->xFreeColormap (display, colourMap);
@@ -321,6 +348,8 @@ private:
     Component& component;
     GLXContext renderContext = {};
     Window embeddedWindow = {};
+
+    std::optional<PeerListener> peerListener;
 
     int swapFrames = 1;
     Rectangle<int> bounds;

@@ -61,6 +61,8 @@ public:
             xSettings->addListener (this);
 
         getNativeRealtimeModifiers = []() -> ModifierKeys { return XWindowSystem::getInstance()->getNativeRealtimeModifiers(); };
+
+        updateVBlankTimer();
     }
 
     ~LinuxComponentPeer() override
@@ -392,6 +394,15 @@ public:
         }
     }
 
+    bool setWindowAssociation (::Window windowIn)
+    {
+        clearWindowAssociation();
+        association = { this, windowIn };
+        return association.isValid();
+    }
+
+    void clearWindowAssociation() { association = {}; }
+
     //==============================================================================
     static bool isActiveApplication;
     bool focused = false;
@@ -571,13 +582,13 @@ private:
     {
         if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (bounds))
         {
-            if (display->verticalFrequencyHz)
-            {
-                const auto newIntFrequencyHz = roundToInt (*display->verticalFrequencyHz);
+            // Some systems fail to set an explicit refresh rate, or ask for a refresh rate of 0
+            // (observed on Raspbian Bullseye over VNC). In these situations, use a fallback value.
+            const auto newIntFrequencyHz = roundToInt (display->verticalFrequencyHz.value_or (0.0));
+            const auto frequencyToUse = newIntFrequencyHz != 0 ? newIntFrequencyHz : 100;
 
-                if (vBlankManager.getTimerInterval() != newIntFrequencyHz)
-                    vBlankManager.startTimerHz (newIntFrequencyHz);
-            }
+            if (vBlankManager.getTimerInterval() != frequencyToUse)
+                vBlankManager.startTimerHz (frequencyToUse);
         }
     }
 
@@ -591,6 +602,7 @@ private:
     bool fullScreen = false, isAlwaysOnTop = false;
     double currentScaleFactor = 1.0;
     Array<Component*> glRepaintListeners;
+    ScopedWindowAssociation association;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer)

@@ -94,7 +94,7 @@ public:
 
         If it's not possible to merge the two actions, the method should return a nullptr.
     */
-    virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { ignoreUnused (nextAction); return nullptr; }
+    virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction);
 };
 
 } // namespace juce

@@ -460,8 +460,8 @@ public:
         auto newBufferSizes = getBufferSizesFromDevice();
         auto newSampleRates = getSampleRatesFromDevice();
 
-        std::unique_ptr<Stream> newInput  (inStream  != nullptr ? new Stream (true,  *this, activeIns)  : nullptr);
-        std::unique_ptr<Stream> newOutput (outStream != nullptr ? new Stream (false, *this, activeOuts) : nullptr);
+        auto newInput  = rawToUniquePtr (inStream  != nullptr ? new Stream (true,  *this, activeIns)  : nullptr);
+        auto newOutput = rawToUniquePtr (outStream != nullptr ? new Stream (false, *this, activeOuts) : nullptr);
 
         auto newBitDepth = jmax (getBitDepth (newInput), getBitDepth (newOutput));
 
@@ -616,49 +616,43 @@ public:
     //==============================================================================
     String reopen (const BigInteger& ins, const BigInteger& outs, double newSampleRate, int bufferSizeSamples)
     {
-        String error;
         callbacksAllowed = false;
+        const ScopeGuard scope { [&] { callbacksAllowed = true; } };
+
         stopTimer();
 
         stop (false);
 
-        const auto activeIns  = BigInteger().setRange (0, jmin (ins .getHighestBit() + 1, getNumChannelNames (inStream)),  true);
-        const auto activeOuts = BigInteger().setRange (0, jmin (outs.getHighestBit() + 1, getNumChannelNames (outStream)), true);
-
         if (! setNominalSampleRate (newSampleRate))
         {
-            updateDetailsFromDevice (activeIns, activeOuts);
-            error = "Couldn't change sample rate";
+            updateDetailsFromDevice (ins, outs);
+            return "Couldn't change sample rate";
         }
-        else
+
+        if (! audioObjectSetProperty (deviceID, { kAudioDevicePropertyBufferFrameSize,
+                                                  kAudioObjectPropertyScopeGlobal,
+                                                  juceAudioObjectPropertyElementMain },
+                                      static_cast<UInt32> (bufferSizeSamples), err2log()))
         {
-            if (! audioObjectSetProperty (deviceID, { kAudioDevicePropertyBufferFrameSize,
-                                                      kAudioObjectPropertyScopeGlobal,
-                                                      juceAudioObjectPropertyElementMain },
-                                          static_cast<UInt32> (bufferSizeSamples), err2log()))
-            {
-                updateDetailsFromDevice (activeIns, activeOuts);
-                error = "Couldn't change buffer size";
-            }
-            else
-            {
-                // Annoyingly, after changing the rate and buffer size, some devices fail to
-                // correctly report their new settings until some random time in the future, so
-                // after calling updateDetailsFromDevice, we need to manually bodge these values
-                // to make sure we're using the correct numbers..
-                updateDetailsFromDevice (activeIns, activeOuts);
-                sampleRate = newSampleRate;
-                bufferSize = bufferSizeSamples;
-
-                if (sampleRates.size() == 0)
-                    error = "Device has no available sample-rates";
-                else if (bufferSizes.size() == 0)
-                    error = "Device has no available buffer-sizes";
-            }
+            updateDetailsFromDevice (ins, outs);
+            return "Couldn't change buffer size";
         }
 
-        callbacksAllowed = true;
-        return error;
+        // Annoyingly, after changing the rate and buffer size, some devices fail to
+        // correctly report their new settings until some random time in the future, so
+        // after calling updateDetailsFromDevice, we need to manually bodge these values
+        // to make sure we're using the correct numbers..
+        updateDetailsFromDevice (ins, outs);
+        sampleRate = newSampleRate;
+        bufferSize = bufferSizeSamples;
+
+        if (sampleRates.size() == 0)
+            return "Device has no available sample-rates";
+
+        if (bufferSizes.size() == 0)
+            return "Device has no available buffer-sizes";
+
+        return {};
     }
 
     bool start (AudioIODeviceCallback* callbackToNotify)
@@ -837,13 +831,18 @@ public:
     //==============================================================================
     struct Stream
     {
-        Stream (bool isInput, CoreAudioInternal& parent, const BigInteger& active)
+        Stream (bool isInput, CoreAudioInternal& parent, const BigInteger& activeRequested)
             : input (isInput),
               latency (getLatencyFromDevice (isInput, parent)),
               bitDepth (getBitDepthFromDevice (isInput, parent)),
-              activeChans (active),
               chanNames (getChannelNames (isInput, parent)),
-              channelInfo (getChannelInfos (isInput, parent, active)),
+              activeChans ([&activeRequested, clearFrom = chanNames.size()]
+                           {
+                               auto result = activeRequested;
+                               result.setRange (clearFrom, result.getHighestBit() + 1 - clearFrom, false);
+                               return result;
+                           }()),
+              channelInfo (getChannelInfos (isInput, parent, activeChans)),
               channels (static_cast<int> (channelInfo.size()))
         {}
 
@@ -984,8 +983,8 @@ public:
         const bool input;
         const int latency;
         const int bitDepth;
-        const BigInteger activeChans;
         const StringArray chanNames;
+        const BigInteger activeChans;
         const Array<CallbackDetailsForChannel> channelInfo;
         const int channels = 0;
         Float64 previousSampleTime;
@@ -1606,8 +1605,7 @@ public:
             }
         }
 
-        open (inputChannelsRequested, outputChannelsRequested,
-              newSampleRate, newBufferSize);
+        open (inputChannelsRequested, outputChannelsRequested, newSampleRate, newBufferSize);
 
         start (cb);
     }
@@ -1697,6 +1695,7 @@ private:
     CriticalSection closeLock;
     int targetLatency = 0;
     std::atomic<int> xruns { -1 };
+    std::atomic<uint64_t> lastValidReadPosition { invalidSampleTime };
 
     BigInteger inputChannelsRequested, outputChannelsRequested;
     double sampleRateRequested = 44100;
@@ -1777,10 +1776,13 @@ private:
 
             if (callback != nullptr)
             {
+                const auto numActiveOutputChannels = outputWrapper.getActiveChannels().countNumberOfSetBits();
+                jassert (numActiveOutputChannels <= scratchBuffer.getNumChannels());
+
                 callback->audioDeviceIOCallbackWithContext (channels,
                                                             numChannels,
                                                             scratchBuffer.getArrayOfWritePointers(),
-                                                            scratchBuffer.getNumChannels(),
+                                                            numActiveOutputChannels,
                                                             n,
                                                             context);
             }
@@ -1791,8 +1793,9 @@ private:
         }
 
         auto currentWritePos = writePos.load();
+        const auto nextWritePos = currentWritePos + static_cast<std::uint64_t> (n);
 
-        writePos.compare_exchange_strong (currentWritePos, currentWritePos + static_cast<std::uint64_t> (n));
+        writePos.compare_exchange_strong (currentWritePos, nextWritePos);
 
         if (currentWritePos == invalidSampleTime)
             return;
@@ -1816,6 +1819,11 @@ private:
                                          scratchBuffer.getReadPointer (args.channel, args.inputPos),
                                          args.nItems);
         });
+
+        {
+            auto invalid = invalidSampleTime;
+            lastValidReadPosition.compare_exchange_strong (invalid, nextWritePos);
+        }
     }
 
     void outputAudioCallback (float* const* channels, int numChannels, int n) noexcept
@@ -1838,16 +1846,29 @@ private:
             }
         }
 
-        accessFifo (currentReadPos, numChannels, n, [&] (const auto& args)
+        // If there was an xrun, we want to output zeros until we're sure that there's some valid
+        // input for us to read.
+        const auto longN = static_cast<uint64_t> (n);
+        const auto nextReadPos = currentReadPos + longN;
+        const auto validReadPos = lastValidReadPosition.load();
+        const auto sanitisedValidReadPos = validReadPos != invalidSampleTime ? validReadPos : nextReadPos;
+        const auto numZerosToWrite = sanitisedValidReadPos <= currentReadPos
+                                   ? 0
+                                   : jmin (longN, sanitisedValidReadPos - currentReadPos);
+
+        for (auto i = 0; i < numChannels; ++i)
+            std::fill (channels[i], channels[i] + numZerosToWrite, 0.0f);
+
+        accessFifo (currentReadPos + numZerosToWrite, numChannels, static_cast<int> (longN - numZerosToWrite), [&] (const auto& args)
         {
-            FloatVectorOperations::copy (channels[args.channel] + args.inputPos,
+            FloatVectorOperations::copy (channels[args.channel] + args.inputPos + numZerosToWrite,
                                          fifo.getReadPointer (args.channel, args.fifoPos),
                                          args.nItems);
         });
 
         // use compare exchange here as we need to avoid the case
         // where we overwrite readPos being equal to invalidSampleTime
-        readPos.compare_exchange_strong (currentReadPos, currentReadPos + static_cast<std::uint64_t> (n));
+        readPos.compare_exchange_strong (currentReadPos, nextReadPos);
     }
 
     void xrun() noexcept
@@ -1912,7 +1933,8 @@ private:
     struct DeviceWrapper  : public AudioIODeviceCallback
     {
         DeviceWrapper (AudioIODeviceCombiner& cd, std::unique_ptr<CoreAudioIODevice> d, bool shouldBeInput)
-            : owner (cd), device (std::move (d)),
+            : owner (cd),
+              device (std::move (d)),
               input (shouldBeInput)
         {
             device->setAsyncRestarter (&owner);
@@ -1972,7 +1994,7 @@ private:
 
         std::uint64_t nsToSampleTime (std::uint64_t ns) const noexcept
         {
-            return static_cast<std::uint64_t> (std::round (static_cast<double> (ns) * owner.currentSampleRate * 1e-9));
+            return static_cast<std::uint64_t> (std::round (static_cast<double> (ns) * device->getCurrentSampleRate() * 1e-9));
         }
 
         void updateSampleTimeFromContext (const AudioIODeviceCallbackContext& context) noexcept
@@ -1985,7 +2007,7 @@ private:
             auto copy = invalidSampleTime;
 
             if (sampleTime.compare_exchange_strong (copy, callbackSampleTime) && (! input))
-                owner.fifo.clear();
+                owner.lastValidReadPosition = invalidSampleTime;
         }
 
         bool isInput() const { return input; }

@@ -314,7 +314,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     if (major == 5 && minor == 0)      return Win2000;
 
     jassertfalse;
-    return UnknownOS;
+    return Windows;
 }
 
 String SystemStats::getOperatingSystemName()
@@ -457,8 +457,7 @@ public:
        #endif
 
        #if JUCE_WIN32_TIMER_PERIOD > 0
-        auto res = timeBeginPeriod (JUCE_WIN32_TIMER_PERIOD);
-        ignoreUnused (res);
+        [[maybe_unused]] auto res = timeBeginPeriod (JUCE_WIN32_TIMER_PERIOD);
         jassert (res == TIMERR_NOERROR);
        #endif
 

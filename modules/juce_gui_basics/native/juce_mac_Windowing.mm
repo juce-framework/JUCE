@@ -446,13 +446,43 @@ Point<float> MouseInputSource::getCurrentRawMousePosition()
     }
 }
 
+static ComponentPeer* findPeerContainingPoint (Point<float> globalPos)
+{
+    for (int i = 0; i < juce::ComponentPeer::getNumPeers(); ++i)
+    {
+        auto* peer = juce::ComponentPeer::getPeer (i);
+
+        if (peer->contains (peer->globalToLocal (globalPos).toInt(), false))
+            return peer;
+    }
+
+    return nullptr;
+}
+
 void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
+    const auto oldPosition = Desktop::getInstance().getMainMouseSource().getRawScreenPosition();
+
     // this rubbish needs to be done around the warp call, to avoid causing a
     // bizarre glitch..
     CGAssociateMouseAndMouseCursorPosition (false);
     CGWarpMouseCursorPosition (convertToCGPoint (newPosition));
     CGAssociateMouseAndMouseCursorPosition (true);
+
+    // Mouse enter and exit events seem to be always generated as a consequence of programmatically
+    // moving the mouse. However, when the mouse stays within the same peer no mouse move event is
+    // generated, and we lose track of the correct Component under the mouse. Hence, we need to
+    // generate this missing event here.
+    if (auto* peer = findPeerContainingPoint (newPosition); peer != nullptr
+                                                            && peer == findPeerContainingPoint (oldPosition))
+    {
+        peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse,
+                                peer->globalToLocal (newPosition),
+                                ModifierKeys::currentModifiers,
+                                0.0f,
+                                0.0f,
+                                Time::currentTimeMillis());
+    }
 }
 
 double Desktop::getDefaultMasterScale()
@@ -534,11 +564,11 @@ public:
     {
         PMAssertion()  : assertionID (kIOPMNullAssertionID)
         {
-            IOReturn res = IOPMAssertionCreateWithName (kIOPMAssertionTypePreventUserIdleDisplaySleep,
-                                                        kIOPMAssertionLevelOn,
-                                                        CFSTR ("JUCE Playback"),
-                                                        &assertionID);
-            jassert (res == kIOReturnSuccess); ignoreUnused (res);
+            [[maybe_unused]] IOReturn res = IOPMAssertionCreateWithName (kIOPMAssertionTypePreventUserIdleDisplaySleep,
+                                                                         kIOPMAssertionLevelOn,
+                                                                         CFSTR ("JUCE Playback"),
+                                                                         &assertionID);
+            jassert (res == kIOReturnSuccess);
         }
 
         ~PMAssertion()
@@ -750,10 +780,9 @@ void Process::setDockIconVisible (bool isVisible)
 {
     ProcessSerialNumber psn { 0, kCurrentProcess };
 
-    OSStatus err = TransformProcessType (&psn, isVisible ? kProcessTransformToForegroundApplication
-                                                         : kProcessTransformToUIElementApplication);
+    [[maybe_unused]] OSStatus err = TransformProcessType (&psn, isVisible ? kProcessTransformToForegroundApplication
+                                                                          : kProcessTransformToUIElementApplication);
     jassert (err == 0);
-    ignoreUnused (err);
 }
 
 } // namespace juce

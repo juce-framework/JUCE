@@ -151,7 +151,7 @@ public:
       #if USE_COREGRAPHICS_RENDERING
        #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         if (@available (macOS 10.14, *))
-            metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<NSView>> (view, getComponent().isOpaque());
+            metalRenderer = CoreGraphicsMetalLayerRenderer<NSView>::create (view, getComponent().isOpaque());
        #endif
         if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         {
@@ -411,12 +411,12 @@ public:
         if (forceFullScreen)
             return NSWindowCollectionBehaviorFullScreenPrimary;
 
-        // Some SDK versions don't define NSWindowCollectionBehaviorFullScreenNone
-        constexpr auto fullScreenNone = (NSUInteger) (1 << 9);
+        // Some SDK versions don't define NSWindowCollectionBehaviorFullScreenAuxiliary
+        constexpr auto fullScreenAux = (NSUInteger) (1 << 8);
 
         return (getStyleFlags() & (windowHasMaximiseButton | windowIsResizable)) == (windowHasMaximiseButton | windowIsResizable)
              ? NSWindowCollectionBehaviorFullScreenPrimary
-             : fullScreenNone;
+             : fullScreenAux;
     }
 
     void setCollectionBehaviour (bool forceFullScreen) const
@@ -641,7 +641,7 @@ public:
         return usingCoreGraphics ? 1 : 0;
     }
 
-    void setCurrentRenderingEngine (int index) override
+    void setCurrentRenderingEngine ([[maybe_unused]] int index) override
     {
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics != (index > 0))
@@ -649,8 +649,6 @@ public:
             usingCoreGraphics = index > 0;
             [view setNeedsDisplay: true];
         }
-       #else
-        ignoreUnused (index);
        #endif
     }
 
@@ -805,10 +803,8 @@ public:
             {
                 bool used = false;
 
-                for (auto u = unicode.getCharPointer(); ! u.isEmpty();)
+                for (auto textCharacter : unicode)
                 {
-                    auto textCharacter = u.getAndAdvance();
-
                     switch (keyCode)
                     {
                         case NSLeftArrowFunctionKey:
@@ -830,8 +826,8 @@ public:
                             break;
                     }
 
-                    used = handleKeyUpOrDown (true) || used;
-                    used = handleKeyPress (keyCode, textCharacter) || used;
+                    used |= handleKeyUpOrDown (true);
+                    used |= handleKeyPress (keyCode, textCharacter);
                 }
 
                 return used;
@@ -1557,9 +1553,8 @@ public:
     void closeInputMethodContext() override
     {
         stringBeingComposed.clear();
-        const auto* inputContext = [NSTextInputContext currentInputContext];
 
-        if (inputContext != nil)
+        if (const auto* inputContext = [view inputContext])
             [inputContext discardMarkedText];
     }
 
@@ -1580,6 +1575,39 @@ public:
             [window setDocumentEdited: b];
     }
 
+    bool sendEventToInputContextOrComponent (NSEvent* ev)
+    {
+        // We assume that the event will be handled by the IME.
+        // Occasionally, the inputContext may be sent key events like cmd+Q, which it will turn
+        // into a noop: call and forward to doCommandBySelector:.
+        // In this case, the event will be extracted from keyEventBeingHandled and passed to the
+        // focused component, and viewCannotHandleEvent will be set depending on whether the event
+        // was handled by the component.
+        // If the event was *not* handled by the component, and was also not consumed completely by
+        // the IME, it's important to return the event to the system for further handling, so that
+        // the main menu works as expected.
+        viewCannotHandleEvent = false;
+        keyEventBeingHandled.reset ([ev retain]);
+        const WeakReference ref { this };
+        // redirectKeyDown may delete this peer!
+        const ScopeGuard scope { [&ref] { if (ref != nullptr) ref->keyEventBeingHandled = nullptr; } };
+
+        const auto handled = [&]() -> bool
+        {
+            if (auto* target = findCurrentTextInputTarget())
+                if (const auto* inputContext = [view inputContext])
+                    return [inputContext handleEvent: ev] && ! viewCannotHandleEvent;
+
+            return false;
+        }();
+
+        if (handled)
+            return true;
+
+        stringBeingComposed.clear();
+        return redirectKeyDown (ev);
+    }
+
     //==============================================================================
     NSWindow* window = nil;
     NSView* view = nil;
@@ -1590,11 +1618,13 @@ public:
    #else
     bool usingCoreGraphics = false;
    #endif
-    bool textWasInserted = false, isFirstLiveResize = false;
+    NSUniquePtr<NSEvent> keyEventBeingHandled;
+    bool isFirstLiveResize = false, viewCannotHandleEvent = false;
     bool isStretchingTop = false, isStretchingLeft = false, isStretchingBottom = false, isStretchingRight = false;
     bool windowRepresentsFile = false;
     bool isAlwaysOnTop = false, wasAlwaysOnTop = false;
     String stringBeingComposed;
+    int startOfMarkedTextInTextInputTarget = 0;
 
     Rectangle<float> lastSizeBeforeZoom;
     RectangleList<float> deferredRepaints;
@@ -2005,18 +2035,16 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 
         addMethod (@selector (keyDown:), [] (id self, SEL, NSEvent* ev)
         {
-            if (auto* owner = getOwner (self))
+            const auto handled = [&]
             {
-                owner->textWasInserted = false;
+                if (auto* owner = getOwner (self))
+                    return owner->sendEventToInputContextOrComponent (ev);
 
-                if (auto* target = owner->findCurrentTextInputTarget())
-                    [(NSView*) self interpretKeyEvents: [NSArray arrayWithObject: ev]];
-                else
-                    owner->stringBeingComposed.clear();
+                return false;
+            }();
 
-                if (! (owner->textWasInserted || owner->stringBeingComposed.isNotEmpty() || owner->redirectKeyDown (ev)))
-                    sendSuperclassMessage<void> (self, @selector (keyDown:), ev);
-            }
+            if (! handled)
+                sendSuperclassMessage<void> (self, @selector (keyDown:), ev);
         });
 
         addMethod (@selector (keyUp:), [] (id self, SEL, NSEvent* ev)
@@ -2027,41 +2055,160 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
                 sendSuperclassMessage<void> (self, @selector (keyUp:), ev);
         });
 
-        addMethod (@selector (insertText:), [] (id self, SEL, id aString)
+        // See "The Path of Key Events" on this page:
+        // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/EventOverview/EventArchitecture/EventArchitecture.html
+        // Normally, 'special' key presses (cursor keys, shortcuts, return, delete etc.) will be
+        // sent down the view hierarchy to this function before any of the other keyboard handling
+        // functions.
+        // If any object returns YES from performKeyEquivalent, then the event is consumed.
+        // If no object handles the key equivalent, then the event will be sent to the main menu.
+        // If the menu is also unable to respond to the event, then the event will be sent
+        // to keyDown:/keyUp: via sendEvent:, but this time the event will be sent to the first
+        // responder and propagated back up the responder chain.
+        // This architecture presents some issues in JUCE apps, which always expect the focused
+        // Component to be sent all key presses *including* special keys.
+        // There are also some slightly pathological cases that JUCE needs to support, for example
+        // the situation where one of the cursor keys is bound to a main menu item. By default,
+        // macOS would send the cursor event to performKeyEquivalent on each NSResponder, then send
+        // the event to the main menu if no responder handled it. This would mean that the focused
+        // Component would never see the event, which would break widgets like the TextEditor, which
+        // expect to take precedence over menu items when they have focus.
+        // Another layer of subtlety is that some IMEs require cursor key input. When long-pressing
+        // the 'e' key to bring up the accent menu, the popup menu should receive cursor events
+        // before the focused component.
+        // To fulfil all of these requirements, we handle special keys ('key equivalents') like any
+        // other key event, and send these events firstly to the NSTextInputContext (if there's an
+        // active TextInputTarget), and then on to the focused Component in the case that the
+        // input handler is unable to use the keypress. If the event still hasn't been used, then
+        // it will be sent to the superclass's performKeyEquivalent: function, which will give the
+        // OS a chance to handle events like cmd+Q, cmd+`, cmd+H etc.
+        addMethod (@selector (performKeyEquivalent:), [] (id self, SEL s, NSEvent* ev) -> BOOL
         {
-            // This commits multi-byte text when return is pressed, or after every keypress for western keyboards
+            if (auto* owner = getOwner (self))
+                return owner->sendEventToInputContextOrComponent (ev);
+
+            return sendSuperclassMessage<BOOL> (self, s, ev);
+        });
+
+        addMethod (@selector (insertText:replacementRange:), [] (id self, SEL, id aString, NSRange replacementRange)
+        {
+            // This commits multi-byte text when using an IME, or after every keypress for western keyboards
             if (auto* owner = getOwner (self))
             {
-                NSString* newText = [aString isKindOfClass: [NSAttributedString class]] ? [aString string] : aString;
-
-                if ([newText length] > 0)
+                if (auto* target = owner->findCurrentTextInputTarget())
                 {
-                    if (auto* target = owner->findCurrentTextInputTarget())
+                    const auto newText = nsStringToJuce ([aString isKindOfClass: [NSAttributedString class]] ? [aString string] : aString);
+
+                    if (newText.isNotEmpty())
                     {
-                        target->insertTextAtCaret (nsStringToJuce (newText));
-                        owner->textWasInserted = true;
+                        target->setHighlightedRegion ([&]
+                        {
+                            // To test this, try long-pressing 'e' to bring up the accent popup,
+                            // then select one of the accented options.
+                            if (replacementRange.location != NSNotFound)
+                                return nsRangeToJuce (replacementRange);
+
+                            // To test this, try entering the characters 'a b <esc>' with the 2-Set
+                            // Korean IME. The input client should receive three calls to setMarkedText:
+                            // followed by a call to insertText:
+                            // The final call to insertText should overwrite the currently-marked
+                            // text, and reset the composition string.
+                            if (owner->stringBeingComposed.isNotEmpty())
+                                return Range<int>::withStartAndLength (owner->startOfMarkedTextInTextInputTarget,
+                                                                       owner->stringBeingComposed.length());
+
+                            return target->getHighlightedRegion();
+                        }());
+
+                        target->insertTextAtCaret (newText);
+                        target->setTemporaryUnderlining ({});
                     }
                 }
+                else
+                    jassertfalse; // The system should not attempt to insert text when there is no active TextInputTarget
 
                 owner->stringBeingComposed.clear();
             }
         });
 
-        addMethod (@selector (doCommandBySelector:), [] (id, SEL, SEL) {});
+        addMethod (@selector (doCommandBySelector:), [] (id self, SEL, SEL sel)
+        {
+            const auto handled = [&]
+            {
+                // 'Special' keys, like backspace, return, tab, and escape, are converted to commands by the system.
+                // Components still expect to receive these events as key presses, so we send the currently-processed
+                // key event (if any).
+                if (auto* owner = getOwner (self))
+                {
+                    owner->viewCannotHandleEvent = [&]
+                    {
+                        if (auto* e = owner->keyEventBeingHandled.get())
+                        {
+                            if ([e type] != NSEventTypeKeyDown && [e type] != NSEventTypeKeyUp)
+                                return true;
 
-        addMethod (@selector (setMarkedText:selectedRange:), [] (id self, SEL, id aString, NSRange)
+                            return ! ([e type] == NSEventTypeKeyDown ? owner->redirectKeyDown (e)
+                                                                     : owner->redirectKeyUp (e));
+                        }
+
+                        return true;
+                    }();
+
+                    return ! owner->viewCannotHandleEvent;
+                }
+
+                return false;
+            }();
+
+            if (! handled)
+                sendSuperclassMessage<void> (self, @selector (doCommandBySelector:), sel);
+        });
+
+        addMethod (@selector (setMarkedText:selectedRange:replacementRange:), [] (id self,
+                                                                                  SEL,
+                                                                                  id aString,
+                                                                                  const NSRange selectedRange,
+                                                                                  const NSRange replacementRange)
         {
             if (auto* owner = getOwner (self))
             {
-                owner->stringBeingComposed = nsStringToJuce ([aString isKindOfClass: [NSAttributedString class]]
-                                                             ? [aString string] : aString);
-
                 if (auto* target = owner->findCurrentTextInputTarget())
                 {
-                    auto currentHighlight = target->getHighlightedRegion();
-                    target->insertTextAtCaret (owner->stringBeingComposed);
-                    target->setHighlightedRegion (currentHighlight.withLength (owner->stringBeingComposed.length()));
-                    owner->textWasInserted = true;
+                    const auto toInsert = nsStringToJuce ([aString isKindOfClass: [NSAttributedString class]] ? [aString string] : aString);
+                    const auto [initialHighlight, marked, finalHighlight] = [&]
+                    {
+                        if (owner->stringBeingComposed.isNotEmpty())
+                        {
+                            const auto toReplace = Range<int>::withStartAndLength (owner->startOfMarkedTextInTextInputTarget,
+                                                                                   owner->stringBeingComposed.length());
+
+                            return replacementRange.location != NSNotFound
+                                 // There's a composition underway, so replacementRange is relative to the marked text,
+                                 // and selectedRange is relative to the inserted string.
+                                 ? std::tuple (toReplace,
+                                               owner->stringBeingComposed.replaceSection (static_cast<int> (replacementRange.location),
+                                                                                          static_cast<int> (replacementRange.length),
+                                                                                          toInsert),
+                                               nsRangeToJuce (selectedRange) + static_cast<int> (replacementRange.location))
+                                 // The replacementRange is invalid, so replace all the marked text.
+                                 : std::tuple (toReplace, toInsert, nsRangeToJuce (selectedRange));
+                        }
+
+                        if (replacementRange.location != NSNotFound)
+                            // There's no string composition in progress, so replacementRange is relative to the start
+                            // of the document.
+                            return std::tuple (nsRangeToJuce (replacementRange), toInsert, nsRangeToJuce (selectedRange));
+
+                        return std::tuple (target->getHighlightedRegion(), toInsert, nsRangeToJuce (selectedRange));
+                    }();
+
+                    owner->stringBeingComposed = marked;
+                    owner->startOfMarkedTextInTextInputTarget = initialHighlight.getStart();
+
+                    target->setHighlightedRegion (initialHighlight);
+                    target->insertTextAtCaret (marked);
+                    target->setTemporaryUnderlining ({ Range<int>::withStartAndLength (initialHighlight.getStart(), marked.length()) });
+                    target->setHighlightedRegion (finalHighlight + owner->startOfMarkedTextInTextInputTarget);
                 }
             }
         });
@@ -2075,7 +2222,7 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
                     if (auto* target = owner->findCurrentTextInputTarget())
                     {
                         target->insertTextAtCaret (owner->stringBeingComposed);
-                        owner->textWasInserted = true;
+                        target->setTemporaryUnderlining ({});
                     }
 
                     owner->stringBeingComposed.clear();
@@ -2089,21 +2236,20 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
             return owner != nullptr && owner->stringBeingComposed.isNotEmpty();
         });
 
-        addMethod (@selector (conversationIdentifier), [] (id self, SEL)
+        addMethod (@selector (attributedSubstringForProposedRange:actualRange:), [] (id self, SEL, NSRange theRange, NSRangePointer actualRange) -> NSAttributedString*
         {
-            return (long) (pointer_sized_int) self;
-        });
+            jassert (theRange.location != NSNotFound);
 
-        addMethod (@selector (attributedSubstringFromRange:), [] (id self, SEL, NSRange theRange) -> NSAttributedString*
-        {
             if (auto* owner = getOwner (self))
             {
                 if (auto* target = owner->findCurrentTextInputTarget())
                 {
-                    Range<int> r ((int) theRange.location,
-                                  (int) (theRange.location + theRange.length));
+                    const auto clamped = Range<int> { 0, target->getTotalNumChars() }.constrainRange (nsRangeToJuce (theRange));
 
-                    return [[[NSAttributedString alloc] initWithString: juceStringToNS (target->getTextInRange (r))] autorelease];
+                    if (actualRange != nullptr)
+                        *actualRange = juceRangeToNS (clamped);
+
+                    return [[[NSAttributedString alloc] initWithString: juceStringToNS (target->getTextInRange (clamped))] autorelease];
                 }
             }
 
@@ -2114,7 +2260,8 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
         {
             if (auto* owner = getOwner (self))
                 if (owner->stringBeingComposed.isNotEmpty())
-                    return NSMakeRange (0, (NSUInteger) owner->stringBeingComposed.length());
+                    return NSMakeRange (static_cast<NSUInteger> (owner->startOfMarkedTextInTextInputTarget),
+                                        static_cast<NSUInteger> (owner->stringBeingComposed.length()));
 
             return NSMakeRange (NSNotFound, 0);
         });
@@ -2125,22 +2272,40 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
             {
                 if (auto* target = owner->findCurrentTextInputTarget())
                 {
-                    auto highlight = target->getHighlightedRegion();
+                    const auto highlight = target->getHighlightedRegion();
 
-                    if (! highlight.isEmpty())
-                        return NSMakeRange ((NSUInteger) highlight.getStart(),
-                                            (NSUInteger) highlight.getLength());
+                    // The accent-selector popup does not show if the selectedRange location is NSNotFound!
+                    return NSMakeRange ((NSUInteger) highlight.getStart(),
+                                        (NSUInteger) highlight.getLength());
                 }
             }
 
             return NSMakeRange (NSNotFound, 0);
         });
 
-        addMethod (@selector (firstRectForCharacterRange:), [] (id self, SEL, NSRange)
+        addMethod (@selector (firstRectForCharacterRange:actualRange:), [] (id self, SEL, NSRange range, NSRangePointer actualRange)
         {
             if (auto* owner = getOwner (self))
-                if (auto* comp = dynamic_cast<Component*> (owner->findCurrentTextInputTarget()))
-                    return flippedScreenRect (makeNSRect (comp->getScreenBounds()));
+            {
+                if (auto* target = owner->findCurrentTextInputTarget())
+                {
+                    if (auto* comp = dynamic_cast<Component*> (target))
+                    {
+                        const auto codePointRange = range.location == NSNotFound ? Range<int>::emptyRange (target->getCaretPosition())
+                                                                                 : nsRangeToJuce (range);
+                        const auto clamped = Range<int> { 0, target->getTotalNumChars() }.constrainRange (codePointRange);
+
+                        if (actualRange != nullptr)
+                            *actualRange = juceRangeToNS (clamped);
+
+                        const auto rect = codePointRange.isEmpty() ? target->getCaretRectangleForCharIndex (codePointRange.getStart())
+                                                                   : target->getTextBounds (codePointRange).getRectangle (0);
+                        const auto areaOnDesktop = comp->localAreaToGlobal (rect);
+
+                        return flippedScreenRect (makeNSRect (ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop)));
+                    }
+                }
+            }
 
             return NSZeroRect;
         });
@@ -2192,47 +2357,12 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 
         addMethod (@selector (isFlipped), [] (id, SEL) { return true; });
 
-        addMethod (@selector (performKeyEquivalent:), [] (id self, SEL s, NSEvent* event)
-        {
-            // We try passing shortcut keys to the currently focused component first.
-            // If the component doesn't want the event, we'll fall back to the superclass
-            // implementation, which will pass the event to the main menu.
-            if (tryPassingKeyEventToPeer (event))
-                return YES;
-
-            return sendSuperclassMessage<BOOL> (self, s, event);
-        });
-
-        addProtocol (@protocol (NSTextInput));
+        addProtocol (@protocol (NSTextInputClient));
 
         registerClass();
     }
 
 private:
-    static void updateTrackingAreas (id self, SEL)
-    {
-        sendSuperclassMessage<void> (self, @selector (updateTrackingAreas));
-
-        resetTrackingArea (static_cast<NSView*> (self));
-    }
-
-    static bool tryPassingKeyEventToPeer (NSEvent* e)
-    {
-        if ([e type] != NSEventTypeKeyDown && [e type] != NSEventTypeKeyUp)
-            return false;
-
-        if (auto* focused = Component::getCurrentlyFocusedComponent())
-        {
-            if (auto* peer = dynamic_cast<NSViewComponentPeer*> (focused->getPeer()))
-            {
-                return [e type] == NSEventTypeKeyDown ? peer->redirectKeyDown (e)
-                                                      : peer->redirectKeyUp (e);
-            }
-        }
-
-        return false;
-    }
-
     template <typename Func, typename... Args>
     static void callOnOwner (id self, Func&& func, Args&&... args)
     {
@@ -2475,29 +2605,6 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
                 return [getAccessibleChild (self) accessibilitySubrole];
 
             return nil;
-        });
-
-        // Key events will be processed by the peer's component.
-        // If the component is unable to use the event, it will be re-sent
-        // to performKeyEquivalent.
-        // performKeyEquivalent will send the event to the view's superclass,
-        // which will try passing the event to the main menu.
-        // If the event still hasn't been processed, it will be passed to the
-        // next responder in the chain, which will be the NSWindow for a peer
-        // that is on the desktop.
-        // If the NSWindow still doesn't handle the event, the Apple docs imply
-        // that the event should be sent to the NSApp for processing, but this
-        // doesn't seem to happen for keyDown events.
-        // Instead, the NSWindow attempts to process the event, fails, and
-        // triggers an annoying NSBeep.
-        // Overriding keyDown to "handle" the event seems to suppress the beep.
-        addMethod (@selector (keyDown:), [] (id, SEL, NSEvent* ev)
-        {
-            ignoreUnused (ev);
-
-           #if JUCE_DEBUG_UNHANDLED_KEYPRESSES
-            DBG ("unhandled key down event with keycode: " << [ev keyCode]);
-           #endif
         });
 
         addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:), [] (id self, SEL, id /*window*/, NSEvent*, NSPoint, NSPasteboard*)

@@ -1453,8 +1453,7 @@ public:
         if (lastNodeID < idToUse)
             lastNodeID = idToUse;
 
-        if (auto* ioProc = dynamic_cast<AudioGraphIOProcessor*> (added->getProcessor()))
-            ioProc->setParentGraph (owner);
+        setParentGraph (added->getProcessor());
 
         topologyChanged (updateKind);
         return added;
@@ -1606,6 +1605,12 @@ public:
     auto* getAudioThreadState() const { return renderSequenceExchange.getAudioThreadState(); }
 
 private:
+    void setParentGraph (AudioProcessor* p) const
+    {
+        if (auto* ioProc = dynamic_cast<AudioGraphIOProcessor*> (p))
+            ioProc->setParentGraph (owner);
+    }
+
     void topologyChanged (UpdateKind updateKind)
     {
         owner->sendChangeMessage();
@@ -1620,6 +1625,9 @@ private:
     {
         if (const auto newSettings = nodeStates.applySettings (nodes))
         {
+            for (const auto node : nodes.getNodes())
+                setParentGraph (node->getProcessor());
+
             auto sequence = std::make_unique<RenderSequence> (*newSettings, nodes, connections);
             owner->setLatencySamples (sequence->getLatencySamples());
             renderSequenceExchange.set (std::move (sequence));
