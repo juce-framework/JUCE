@@ -87,7 +87,7 @@ if __name__ == "__main__":
         juce_modules = args.subdirs.split(",")
     else:
         juce_modules = []
-        for item in os.listdir(args.source_dir):
+        for item in sorted(os.listdir(args.source_dir)):
             if os.path.isdir(os.path.join(args.source_dir, item)):
                 juce_modules.append(item)
 
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
         # Create a list of the directories in the module that we can use as
         # subgroups and create the Doxygen group hierarchy string.
-        dir_contents = os.listdir(module_path)
+        dir_contents = sorted(os.listdir(module_path))
         # Ignore "native" folders as these are excluded by doxygen.
         try:
             dir_contents.remove("native")
