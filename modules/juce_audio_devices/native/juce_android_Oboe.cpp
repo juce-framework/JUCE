@@ -1251,7 +1251,12 @@ public:
             case 22:  return "USB headset";
             case 23:  return "hearing aid";
             case 24:  return "built-in speaker safe";
-            case 25:  return {};
+            case 25:  return "remote submix";
+            case 26:  return "BLE headset";
+            case 27:  return "BLE speaker";
+            case 28:  return "echo reference";
+            case 29:  return "HDMI eARC";
+            case 30:  return "BLE broadcast";
             default:  jassertfalse; return {}; // type not supported yet, needs to be added!
         }
     }

@@ -1012,32 +1012,32 @@ private:
         return responseCode == 0;
     }
 
-    void purchaseCompleted (jobject purchase, int responseCode)
+    static void purchaseCompleted (JNIEnv*, Pimpl& t, jobject purchase, int responseCode)
     {
-        notifyListenersAboutPurchase (buildPurchase (LocalRef<jobject> { purchase }),
-                                      wasSuccessful (responseCode),
-                                      getStatusDescriptionFromResponseCode (responseCode));
+        t.notifyListenersAboutPurchase (buildPurchase (LocalRef<jobject> { purchase }),
+                                        wasSuccessful (responseCode),
+                                        getStatusDescriptionFromResponseCode (responseCode));
     }
 
-    void purchaseConsumed (jstring productIdentifier, int responseCode)
+    static void purchaseConsumed (JNIEnv*, Pimpl& t, jstring productIdentifier, int responseCode)
     {
-        notifyListenersAboutConsume (juceString (LocalRef<jstring> { productIdentifier }),
-                                     wasSuccessful (responseCode),
-                                     getStatusDescriptionFromResponseCode (responseCode));
+        t.notifyListenersAboutConsume (juceString (LocalRef<jstring> { productIdentifier }),
+                                       wasSuccessful (responseCode),
+                                       getStatusDescriptionFromResponseCode (responseCode));
     }
 
-    void updateProductDetails (jobject productDetailsList)
+    static void updateProductDetails (JNIEnv*, Pimpl& t, jobject productDetailsList)
     {
-        jassert (! productDetailsQueryCallbackQueue.empty());
-        productDetailsQueryCallbackQueue.front() (LocalRef<jobject> { productDetailsList });
-        productDetailsQueryCallbackQueue.pop();
+        jassert (! t.productDetailsQueryCallbackQueue.empty());
+        t.productDetailsQueryCallbackQueue.front() (LocalRef<jobject> { productDetailsList });
+        t.productDetailsQueryCallbackQueue.pop();
     }
 
-    void updatePurchasesList (jobject purchasesList)
+    static void updatePurchasesList (JNIEnv*, Pimpl& t, jobject purchasesList)
     {
-        jassert (! purchasesListQueryCallbackQueue.empty());
-        purchasesListQueryCallbackQueue.front() (LocalRef<jobject> { purchasesList });
-        purchasesListQueryCallbackQueue.pop();
+        jassert (! t.purchasesListQueryCallbackQueue.empty());
+        t.purchasesListQueryCallbackQueue.front() (LocalRef<jobject> { purchasesList });
+        t.purchasesListQueryCallbackQueue.pop();
     }
 
     //==============================================================================
