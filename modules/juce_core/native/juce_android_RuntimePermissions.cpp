@@ -39,7 +39,8 @@ static StringArray jucePermissionToAndroidPermissions (RuntimePermissions::Permi
             if (getAndroidSDKVersion() < 31)
                 return { "android.permission.ACCESS_FINE_LOCATION" };
 
-            return { "android.permission.BLUETOOTH_SCAN" };
+            return { "android.permission.BLUETOOTH_SCAN",
+                     "android.permission.BLUETOOTH_CONNECT" };
         }
 
         case RuntimePermissions::writeExternalStorage:  return { "android.permission.WRITE_EXTERNAL_STORAGE" };

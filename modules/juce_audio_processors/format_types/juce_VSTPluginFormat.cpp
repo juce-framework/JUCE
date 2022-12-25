@@ -3440,7 +3440,7 @@ AudioProcessorEditor* VSTPluginInstance::createEditor()
    #endif
 }
 
-bool VSTPluginInstance::updateSizeFromEditor (int w, int h)
+bool VSTPluginInstance::updateSizeFromEditor ([[maybe_unused]] int w, [[maybe_unused]] int h)
 {
    #if ! JUCE_IOS && ! JUCE_ANDROID
     if (auto* editor = dynamic_cast<VSTPluginWindow*> (getActiveEditor()))

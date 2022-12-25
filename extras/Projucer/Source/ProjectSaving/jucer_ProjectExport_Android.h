@@ -1145,7 +1145,7 @@ private:
                    "If enabled, this will set the android.permission.BLUETOOTH_ADVERTISE, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest.");
 
         props.add (new ChoicePropertyComponent (androidBluetoothConnectNeeded, "Bluetooth Connect Required"),
-                   "If enabled, this will set the android.permission.BLUETOOTH_CONNECT, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest.");
+                   "If enabled, this will set the android.permission.BLUETOOTH_CONNECT, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest. This is required for Bluetooth MIDI on Android.");
 
         props.add (new ChoicePropertyComponent (androidReadMediaAudioPermission, "Read Audio From External Storage"),
                    "If enabled, this will set the android.permission.READ_MEDIA_AUDIO and android.permission.READ_EXTERNAL_STORAGE flags in the manifest.");
