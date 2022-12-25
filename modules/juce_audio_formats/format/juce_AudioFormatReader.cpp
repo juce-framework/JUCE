@@ -292,10 +292,11 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
     const int bufferSize = 4096;
     HeapBlock<int> tempSpace (bufferSize * (int) numChannels + 64);
 
-	int* tempBuffer[(int) numChannels + 1];
-	for (int ch{ 0 }; ch < (int) numChannels; ch++)
-		tempBuffer[ch] = tempSpace.get() + (bufferSize * ch);
-	tempBuffer[(int) numChannels] = nullptr;
+    std::vector<int*> tempBuffer;
+    tempBuffer.reserve(numChannels + 1);
+    for (int ch{ 0 }; ch < (int) numChannels; ch++)
+        tempBuffer[ch] = tempSpace.get() + (bufferSize * ch);
+    tempBuffer[(int) numChannels] = nullptr;
 
     int consecutive = 0;
     int64 firstMatchPos = -1;
@@ -318,7 +319,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
         if (bufferStart >= lengthInSamples)
             break;
 
-        read (tempBuffer, (int) numChannels, bufferStart, numThisTime, false);
+        read (&tempBuffer[0], (int) numChannels, bufferStart, numThisTime, false);
         auto num = numThisTime;
 
         while (--num >= 0)
@@ -331,27 +332,27 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
 
             if (usesFloatingPointData)
             {
-	            for (int ch{ 0 }; ch < (int) numChannels; ch++)
-	            {
-		            const float smpl = std::abs(((float*) tempBuffer[ch])[index]);
-		            if (smpl >= magnitudeRangeMinimum && smpl <= magnitudeRangeMaximum)
-		            {
-			            matches = true;
-			            break;
-		            }
-	            }
+                for (int ch{ 0 }; ch < (int) numChannels; ch++)
+                {
+                    const float smpl = std::abs(((float*) tempBuffer[ch])[index]);
+                    if (smpl >= magnitudeRangeMinimum && smpl <= magnitudeRangeMaximum)
+                    {
+                        matches = true;
+                        break;
+                    }
+                }
             }
             else
             {
-	            for (int ch{ 0 }; ch < (int) numChannels; ch++)
-	            {
-		            const int smpl = std::abs(tempBuffer[ch][index]);
-		            if (smpl >= magnitudeRangeMinimum && smpl <= magnitudeRangeMaximum)
-		            {
-			            matches = true;
-			            break;
-		            }
-	            }
+                for (int ch{ 0 }; ch < (int) numChannels; ch++)
+                {
+                    const int smpl = std::abs(tempBuffer[ch][index]);
+                    if (smpl >= intMagnitudeRangeMinimum && smpl <= intMagnitudeRangeMaximum)
+                    {
+                        matches = true;
+                        break;
+                    }
+                }
             }
 
             if (matches)
