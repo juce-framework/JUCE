@@ -25,11 +25,11 @@
 
 #pragma once
 
-
 //==============================================================================
-// The GCC extensions define linux somewhere in the headers, so undef it here...
-#if JUCE_GCC
- #undef linux
+// GCC extensions and LLVM define 'linux' as a macro somewhere in their headers,
+// so undef it here...
+#if JUCE_GCC || (JUCE_CLANG && LINUX)
+#undef linux
 #endif
 
 struct TargetOS
