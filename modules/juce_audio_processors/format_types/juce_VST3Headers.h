@@ -75,6 +75,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-dtor",
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
 
 #include "pslextensions/ipslviewembedding.h"
+#include "pslextensions/ipslcontextinfo.h"
 #include "pslextensions/ipslgainreduction.h"
 
 /*  These files come with the Steinberg VST3 SDK - to get them, you'll need to
@@ -192,6 +193,8 @@ namespace Steinberg
 namespace Presonus
 {
     DEF_CLASS_IID (IPlugInViewEmbedding)
+    DEF_CLASS_IID (IContextInfoHandler)
+    DEF_CLASS_IID (IContextInfoProvider)
     DEF_CLASS_IID (IGainReductionInfo)
 }
 
