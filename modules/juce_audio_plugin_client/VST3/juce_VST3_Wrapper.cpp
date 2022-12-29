@@ -1025,7 +1025,7 @@ public:
                 uint8 g = (channelColour >> 8) & 0x000000FF;
                 uint8 b = (channelColour >> 16) & 0x000000FF;
                 uint8 a = (channelColour >> 24) & 0x000000FF;
-                trackProperties.colour = Colour (r, b, g, a);
+                trackProperties.colour = Colour (r, g, b, a);
                 hasUsableContextInfoChange = true;
             }
 
