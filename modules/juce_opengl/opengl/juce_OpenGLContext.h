@@ -314,10 +314,6 @@ public:
     /** Returns the amount of GPU memory that the internal cache for Images is allowed to use. */
     size_t getImageCacheSize() const noexcept;
 
-#if JUCE_MAC
-    void* getNSColourSpace() const noexcept;
-#endif
-
     //==============================================================================
    #ifndef DOXYGEN
     class NativeContext;

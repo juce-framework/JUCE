@@ -205,11 +205,6 @@ public:
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             updateViewportSize();
-#if JUCE_MAC
-            auto* lastColourSpace = nativeContext->getNSColourSpace();
-            if (lastColourSpace != nativeContext->updateColourSpace())
-                invalidateAll();
-#endif
         }
         else
         {
@@ -1410,13 +1405,6 @@ void* OpenGLContext::getRawContext() const noexcept
 {
     return nativeContext != nullptr ? nativeContext->getRawContext() : nullptr;
 }
-
-#if JUCE_MAC
-void* OpenGLContext::getNSColourSpace() const noexcept
-{
-    return nativeContext->getNSColourSpace();
-}
-#endif
 
 OpenGLContext::CachedImage* OpenGLContext::getCachedImage() const noexcept
 {

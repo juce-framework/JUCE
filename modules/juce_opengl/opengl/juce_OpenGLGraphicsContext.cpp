@@ -65,6 +65,7 @@ struct CachedImageList  : public ReferenceCountedObject,
     {
         auto pixelData = image.getPixelData();
         auto* c = findCachedImage (pixelData);
+
         if (c == nullptr)
         {
             if (auto fb = OpenGLImageType::getFrameBufferFrom (image))
@@ -90,14 +91,6 @@ struct CachedImageList  : public ReferenceCountedObject,
                 removeOldestItem();
         }
 
-#if JUCE_MAC
-        if (context.getNSColourSpace() != c->colourSpacePointer)
-        {
-            c->colourSpacePointer = context.getNSColourSpace();
-            c->textureNeedsReloading = true;
-        }
-#endif
-
         return c->getTextureInfo();
     }
 
@@ -117,15 +110,6 @@ struct CachedImageList  : public ReferenceCountedObject,
                 pixelData->listeners.remove (&owner);
         }
 
-        Image imageFromPixelData (ImagePixelData* im)
-        {
-#if JUCE_MAC
-            if (colourSpacePointer != nullptr)
-                return juce_returnImageWithNativeColourSpace (Image (*pixelData), colourSpacePointer);
-#endif
-            return Image (*im);
-        }
-
         TextureInfo getTextureInfo()
         {
             if (pixelData == nullptr)
@@ -136,7 +120,7 @@ struct CachedImageList  : public ReferenceCountedObject,
             if (textureNeedsReloading)
             {
                 textureNeedsReloading = false;
-                texture.loadImage (imageFromPixelData (pixelData));
+                texture.loadImage (Image (*pixelData));
             }
 
             t.textureID = texture.getTextureID();
@@ -152,9 +136,6 @@ struct CachedImageList  : public ReferenceCountedObject,
         CachedImageList& owner;
         ImagePixelData* pixelData;
         OpenGLTexture texture;
-#if JUCE_MAC
-        void* colourSpacePointer = nullptr;
-#endif
         Time lastUsed;
         const size_t imageSize;
         bool textureNeedsReloading = true;
@@ -1745,12 +1726,6 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
     template <typename IteratorType>
     void fillWithSolidColour (IteratorType& iter, PixelARGB colour, bool replaceContents) const
     {
-        auto nativeColour = colour;
-#if JUCE_MAC
-        nativeColour = juce_convertColourToDisplayColourSpace (
-                           Colour (colour.getUnpremultiplied()), state->target.context.getNSColourSpace())
-                           .getPixelARGB();
-#endif
         if (! isUsingCustomShader)
         {
             state->activeTextures.disableTextures (state->shaderQuadQueue);
@@ -1758,21 +1733,14 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
             state->setShader (state->currentShader.programs->solidColourProgram);
         }
 
-        state->shaderQuadQueue.add (iter, nativeColour);
+        state->shaderQuadQueue.add (iter, colour);
     }
 
     template <typename IteratorType>
     void fillWithGradient (IteratorType& iter, ColourGradient& gradient, const AffineTransform& trans, bool /*isIdentity*/) const
     {
-        auto nativeFillTypeColour = fillType.colour;
-        auto nativeGradient = gradient;
-#if JUCE_MAC
-        nativeFillTypeColour =
-            juce_convertColourToDisplayColourSpace (fillType.colour, state->target.context.getNSColourSpace());
-        juce_convertColourGradientToDisplayColourSpace (nativeGradient, state->target.context.getNSColourSpace());
-#endif
-        state->setShaderForGradientFill (nativeGradient, trans, 0, nullptr);
-        state->shaderQuadQueue.add (iter, nativeFillTypeColour.getPixelARGB());
+        state->setShaderForGradientFill (gradient, trans, 0, nullptr);
+        state->shaderQuadQueue.add (iter, fillType.colour.getPixelARGB());
     }
 
     void fillRectWithCustomShader (OpenGLRendering::ShaderPrograms::ShaderBase& shader, Rectangle<int> area)

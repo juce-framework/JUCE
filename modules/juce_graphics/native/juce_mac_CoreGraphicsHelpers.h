@@ -102,15 +102,6 @@ CGContextRef juce_getImageContext (const Image&);
 #endif
 
 #if JUCE_MAC
- Colour juce_convertColourToDisplayColourSpace (const Colour& colour,
-                                                void* rawNSScreenPointer);
-
- void juce_convertColourGradientToDisplayColourSpace (ColourGradient& gradient,
-                                                      void* rawNSScreenPointer);
-
- Image juce_returnImageWithNativeColourSpace (const Image& src,
-                                              void* rawNSScreenPointer);
-
  NSImage* imageToNSImage (const ScaledImage& image);
 #endif
 

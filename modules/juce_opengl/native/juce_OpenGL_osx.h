@@ -63,8 +63,6 @@ public:
         [format release];
 
         viewAttachment = NSViewComponent::attachViewToComponent (component, view);
-
-        updateColourSpace();
     }
 
     ~NativeContext()
@@ -74,7 +72,6 @@ public:
         [renderContext setView: nil];
         [view setOpenGLContext: nil];
         [view release];
-        [colourSpace release];
     }
 
     static std::vector<NSOpenGLPixelFormatAttribute> createAttribs (OpenGLVersion version,
@@ -263,17 +260,7 @@ public:
         return NSOpenGLCPSwapInterval;
     }
 
-    void* getNSColourSpace() { return colourSpace; }
-
-    void* updateColourSpace()
-    {
-        [colourSpace release];
-        colourSpace = [[[[view window] screen] colorSpace] retain];
-        return colourSpace;
-    }
-
     Component& owner;
-    NSColorSpace* colourSpace = nil;
     NSOpenGLContext* renderContext = nil;
     NSOpenGLView* view = nil;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
