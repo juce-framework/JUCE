@@ -937,7 +937,7 @@ public:
             {
                 for (int i = 0; i < numRects; ++i)
                 {
-                    auto rect = rects[i];
+                    NSRect rect = rects[i];
                     CGContextSaveGState (cg);
                     CGContextClipToRect (cg, CGRectMake (rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
                     renderRect (cg, rect, displayScale);
