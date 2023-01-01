@@ -1017,7 +1017,7 @@ public:
             bool hasUsableContextInfoChange = false;
             AudioProcessor::TrackProperties trackProperties;
             FUnknownPtr<Presonus::IContextInfoProvider> contextInfoProvider (componentHandler);
-            int32 channelColour = 0;
+            Steinberg::int32 channelColour = 0;
             if (contextInfoProvider->getContextInfoValue (channelColour, Presonus::ContextInfo::kColor) == kResultTrue)
             {
                 // PreSonus uses RGBA
