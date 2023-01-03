@@ -1122,6 +1122,12 @@ public:
             double outCurrentSampleInTimeLine = 0, outCycleStartBeat = 0, outCycleEndBeat = 0;
             Boolean playing = false, looping = false, playchanged;
 
+            const auto setTimeInSamples = [&] (auto timeInSamples)
+            {
+                info.setTimeInSamples ((int64) (timeInSamples + 0.5));
+                info.setTimeInSeconds (*info.getTimeInSamples() / audioUnit.getSampleRate());
+            };
+
             if (audioUnit.CallHostTransportState (&playing,
                                                   &playchanged,
                                                   &outCurrentSampleInTimeLine,
@@ -1130,15 +1136,14 @@ public:
                                                   &outCycleEndBeat) == noErr)
             {
                 info.setIsPlaying (playing);
-                info.setTimeInSamples ((int64) (outCurrentSampleInTimeLine + 0.5));
-                info.setTimeInSeconds (*info.getTimeInSamples() / audioUnit.getSampleRate());
                 info.setIsLooping (looping);
                 info.setLoopPoints (LoopPoints { outCycleStartBeat, outCycleEndBeat });
+                setTimeInSamples (outCurrentSampleInTimeLine);
             }
             else
             {
-                // If the host doesn't support this callback, then use the sample time from lastTimeStamp:
-                outCurrentSampleInTimeLine = audioUnit.lastTimeStamp.mSampleTime;
+                // If the host doesn't support this callback, then use the sample time from lastTimeStamp
+                setTimeInSamples (audioUnit.lastTimeStamp.mSampleTime);
             }
 
             info.setHostTimeNs ((audioUnit.lastTimeStamp.mFlags & kAudioTimeStampHostTimeValid) != 0
