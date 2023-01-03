@@ -102,6 +102,8 @@ class ParameterComponent : public Component,
 {
 public:
     using ParameterListener::ParameterListener;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterComponent)
 };
 
 //==============================================================================

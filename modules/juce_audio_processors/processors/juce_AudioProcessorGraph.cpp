@@ -1405,7 +1405,7 @@ bool AudioProcessorGraph::Connection::operator< (const Connection& other) const 
 }
 
 //==============================================================================
-class AudioProcessorGraph::Pimpl : private AsyncUpdater
+class AudioProcessorGraph::Pimpl : public AsyncUpdater
 {
 public:
     explicit Pimpl (AudioProcessorGraph& o) : owner (&o) {}
