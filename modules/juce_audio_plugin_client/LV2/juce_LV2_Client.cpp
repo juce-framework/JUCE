@@ -840,14 +840,27 @@ private:
         return JucePlugin_LV2URI + String (uriSeparator) + "preset" + String (index + 1);
     }
 
-    static std::ofstream openStream (const File& libraryPath, StringRef name)
+    static FileOutputStream openStream (const File& libraryPath, StringRef name)
     {
-        return std::ofstream { libraryPath.getSiblingFile (name + ".ttl").getFullPathName().toRawUTF8() };
+        return FileOutputStream { libraryPath.getSiblingFile (name + ".ttl") };
+    }
+
+    static Result prepareStream (FileOutputStream& stream)
+    {
+        if (const auto result = stream.getStatus(); ! result)
+            return result;
+
+        stream.setPosition (0);
+        stream.truncate();
+        return Result::ok();
     }
 
     static Result writeManifestTtl (AudioProcessor& proc, const File& libraryPath)
     {
         auto os = openStream (libraryPath, "manifest");
+
+        if (const auto result = prepareStream (os); ! result)
+            return result;
 
         os << "@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .\n"
               "@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .\n"
@@ -979,6 +992,9 @@ private:
     static Result writeDspTtl (AudioProcessor& proc, const File& libraryPath)
     {
         auto os = openStream (libraryPath, "dsp");
+
+        if (const auto result = prepareStream (os); ! result)
+            return result;
 
         os << "@prefix atom:  <http://lv2plug.in/ns/ext/atom#> .\n"
               "@prefix bufs:  <http://lv2plug.in/ns/ext/buf-size#> .\n"
@@ -1316,6 +1332,9 @@ private:
             return Result::ok();
 
         auto os = openStream (libraryPath, "ui");
+
+        if (const auto result = prepareStream (os); ! result)
+            return result;
 
         const auto editorInstance = rawToUniquePtr (proc.createEditor());
         const auto resizeFeatureString = editorInstance->isResizable() ? "ui:resize" : "ui:noUserResize";
