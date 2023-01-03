@@ -296,7 +296,6 @@ struct TranslationHelpers
 
             const StringArray& originalKeys (originalStrings.getAllKeys());
             const StringArray& originalValues (originalStrings.getAllValues());
-            int numRemoved = 0;
 
             for (int i = preStrings.size(); --i >= 0;)
             {
@@ -304,7 +303,6 @@ struct TranslationHelpers
                 {
                     preStrings.remove (i);
                     postStrings.remove (i);
-                    ++numRemoved;
                 }
             }
 
