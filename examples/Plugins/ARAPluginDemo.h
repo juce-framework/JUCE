@@ -1692,7 +1692,7 @@ private:
                     const auto end = chordsReader.end();
                     auto it = begin;
 
-                    while (it->position <= quarterPosition && it != end)
+                    while (it != end && it->position <= quarterPosition)
                         ++it;
 
                     if (it != begin)
