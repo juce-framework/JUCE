@@ -535,22 +535,26 @@ class ScopedNotificationCenterObserver
 public:
     ScopedNotificationCenterObserver() = default;
 
-    ScopedNotificationCenterObserver (id observerIn, SEL selector, NSNotificationName nameIn, id objectIn)
-        : observer (observerIn), name (nameIn), object (objectIn)
+    ScopedNotificationCenterObserver (id observerIn,
+                                      SEL selector,
+                                      NSNotificationName nameIn,
+                                      id objectIn,
+                                      Class klassIn = [NSNotificationCenter class])
+        : observer (observerIn), name (nameIn), object (objectIn), klass (klassIn)
     {
-        [[NSNotificationCenter defaultCenter] addObserver: observer
-                                                 selector: selector
-                                                     name: name
-                                                   object: object];
+        [[klass defaultCenter] addObserver: observer
+                                  selector: selector
+                                      name: name
+                                    object: object];
     }
 
     ~ScopedNotificationCenterObserver()
     {
         if (observer != nullptr && name != nullptr)
         {
-            [[NSNotificationCenter defaultCenter] removeObserver: observer
-                                                            name: name
-                                                          object: object];
+            [[klass defaultCenter] removeObserver: observer
+                                             name: name
+                                           object: object];
         }
     }
 
@@ -561,8 +565,7 @@ public:
 
     ScopedNotificationCenterObserver& operator= (ScopedNotificationCenterObserver&& other) noexcept
     {
-        auto moved = std::move (other);
-        swap (moved);
+        ScopedNotificationCenterObserver (std::move (other)).swap (*this);
         return *this;
     }
 
@@ -575,11 +578,13 @@ private:
         std::swap (other.observer, observer);
         std::swap (other.name, name);
         std::swap (other.object, object);
+        std::swap (other.klass, klass);
     }
 
     id observer = nullptr;
     NSNotificationName name = nullptr;
     id object = nullptr;
+    Class klass = nullptr;
 };
 
 } // namespace juce
