@@ -1711,6 +1711,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("exp",       Math_exp);              setMethod ("pow",       Math_pow);
             setMethod ("sqr",       Math_sqr);              setMethod ("sqrt",      Math_sqrt);
             setMethod ("ceil",      Math_ceil);             setMethod ("floor",     Math_floor);
+            setMethod ("hypot",     Math_hypot);
 
             setProperty ("PI",      MathConstants<double>::pi);
             setProperty ("E",       MathConstants<double>::euler);
@@ -1749,6 +1750,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         static var Math_sqrt      (Args a) { return std::sqrt  (getDouble (a, 0)); }
         static var Math_ceil      (Args a) { return std::ceil  (getDouble (a, 0)); }
         static var Math_floor     (Args a) { return std::floor (getDouble (a, 0)); }
+        static var Math_hypot     (Args a) { return std::hypot (getDouble (a, 0), getDouble (a, 1)); }
 
         // We can't use the std namespace equivalents of these functions without breaking
         // compatibility with older versions of OS X.
