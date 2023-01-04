@@ -45,7 +45,9 @@ public:
           title (titleToUse),
           filtersString (filtersToUse.replaceCharacter (',', ';')),
           selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
-          isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
+          // When dealing with directories, it is not possible to 'Save' them. However, one can 'Open' a directory in order to save into it.
+          // If the 'saveMode' and 'canSelectDirectories' flags are both present, create an FileOpenDialog instead of an FileSaveDialog.
+          isSave             ((flags & FileBrowserComponent::saveMode)               != 0 && ! selectsDirectories),
           warnAboutOverwrite ((flags & FileBrowserComponent::warnAboutOverwriting)   != 0),
           selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0)
     {
@@ -249,7 +251,7 @@ private:
             JUCE_COMRESULT OnShareViolation (IFileDialog* d, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*) override  { return updateHwnd (d); }
             JUCE_COMRESULT OnOverwrite (IFileDialog* d, IShellItem*, FDE_OVERWRITE_RESPONSE*) override            { return updateHwnd (d); }
 
-            /** Workaround for a bug in Vista+, OpenFileDialog will truncate the initialFile text.
+            /*  Workaround for a bug in Vista+, OpenFileDialog will truncate the initialFile text.
                 Moving the caret along the full length of the text and back will reveal the full string.
             */
             void focusWorkaround()
