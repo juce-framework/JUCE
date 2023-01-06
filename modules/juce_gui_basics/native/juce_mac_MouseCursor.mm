@@ -140,22 +140,10 @@ private:
                     break;
                 }
 
-                case UpDownResizeCursor:
-                case TopEdgeResizeCursor:
-                case BottomEdgeResizeCursor:
-                    if (NSCursor* m = fromHIServices ("resizenorthsouth"))
-                        return m;
-
-                    c = [NSCursor resizeUpDownCursor];
-                    break;
-
-                case LeftRightResizeCursor:
-                    if (NSCursor* m = fromHIServices ("resizeeastwest"))
-                        return m;
-
-                    c = [NSCursor resizeLeftRightCursor];
-                    break;
-
+                case UpDownResizeCursor:     c = [NSCursor resizeUpDownCursor]; break;
+                case TopEdgeResizeCursor:    c = [NSCursor resizeUpCursor]; break;
+                case BottomEdgeResizeCursor: c = [NSCursor resizeDownCursor]; break;
+                case LeftRightResizeCursor:  c = [NSCursor resizeLeftRightCursor]; break;
                 case TopLeftCornerResizeCursor:
                 case BottomRightCornerResizeCursor:
                     return fromHIServices ("resizenorthwestsoutheast");
