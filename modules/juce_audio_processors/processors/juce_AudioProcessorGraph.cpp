@@ -498,6 +498,8 @@ struct GraphRenderSequence
         currentAudioInputBuffer = nullptr;
     }
 
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
+
     void addClearChannelOp (int index)
     {
         renderOps.push_back ([=] (const Context& c)    { FloatVectorOperations::clear (c.audioBuffers[index], c.numSamples); });
@@ -512,6 +514,8 @@ struct GraphRenderSequence
     {
         renderOps.push_back ([=] (const Context& c)    { FloatVectorOperations::add (c.audioBuffers[dstIndex], c.audioBuffers[srcIndex], c.numSamples); });
     }
+
+    JUCE_END_IGNORE_WARNINGS_MSVC
 
     void addClearMidiBufferOp (int index)
     {
@@ -1405,7 +1409,7 @@ bool AudioProcessorGraph::Connection::operator< (const Connection& other) const 
 }
 
 //==============================================================================
-class AudioProcessorGraph::Pimpl : private AsyncUpdater
+class AudioProcessorGraph::Pimpl : public AsyncUpdater
 {
 public:
     explicit Pimpl (AudioProcessorGraph& o) : owner (&o) {}

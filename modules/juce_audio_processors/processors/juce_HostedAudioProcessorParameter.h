@@ -32,7 +32,7 @@ namespace juce
 
     @tags{Audio}
 */
-struct HostedAudioProcessorParameter : public AudioProcessorParameter
+struct JUCE_API  HostedAudioProcessorParameter : public AudioProcessorParameter
 {
     using AudioProcessorParameter::AudioProcessorParameter;
 

@@ -126,7 +126,7 @@ public:
     decltype (auto) operator* ()       { return opt.operator* (); }
     decltype (auto) operator* () const { return opt.operator* (); }
 
-    operator bool() const noexcept { return opt.has_value(); }
+    explicit operator bool() const noexcept { return opt.has_value(); }
     bool hasValue() const noexcept { return opt.has_value(); }
 
     template <typename U>

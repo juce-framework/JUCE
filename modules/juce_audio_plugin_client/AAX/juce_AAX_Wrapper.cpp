@@ -1394,7 +1394,7 @@ namespace AAXClasses
                 return transport.IsTransportPlaying (&isPlaying) == AAX_SUCCESS && isPlaying;
             }());
 
-            info.setIsRecording (recordingState.get());
+            info.setIsRecording (recordingState.get().orFallback (false));
 
             const auto optionalTimeInSamples = [&info, &transport]
             {

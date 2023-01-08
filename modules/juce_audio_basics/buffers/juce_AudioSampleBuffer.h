@@ -558,7 +558,11 @@ public:
         if (! isClear)
         {
             for (int i = 0; i < numChannels; ++i)
+            {
+                JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
                 FloatVectorOperations::clear (channels[i], size);
+                JUCE_END_IGNORE_WARNINGS_MSVC
+            }
 
             isClear = true;
         }
@@ -799,6 +803,8 @@ public:
             auto* d = channels[destChannel] + destStartSample;
             auto* s = source.channels[sourceChannel] + sourceStartSample;
 
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
+
             if (isClear)
             {
                 isClear = false;
@@ -815,6 +821,8 @@ public:
                 else
                     FloatVectorOperations::add (d, s, numSamples);
             }
+
+            JUCE_END_IGNORE_WARNINGS_MSVC
         }
     }
 
