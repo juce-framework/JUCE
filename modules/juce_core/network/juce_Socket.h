@@ -328,12 +328,16 @@ public:
         @returns  true if it succeeds
     */
     bool joinMulticast (const String& multicastIPAddress);
+  
+    bool joinMulticast (const String& multicastIPAddress, const String& localIPAddress);
 
     /** Leave a multicast group.
 
         @returns  true if it succeeds
     */
     bool leaveMulticast (const String& multicastIPAddress);
+  
+    bool leaveMulticast (const String& multicastIPAddress, const String& localIPAddress);
 
     /** Enables or disables multicast loopback.
 
