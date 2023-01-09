@@ -501,12 +501,29 @@ static double getGlobalDPI()
 //==============================================================================
 class ScopedSuspendResumeNotificationRegistration
 {
+    static auto& getFunctions()
+    {
+        struct Functions
+        {
+            using Register = HPOWERNOTIFY (WINAPI*) (HANDLE, DWORD);
+            using Unregister = BOOL (WINAPI*) (HPOWERNOTIFY);
+
+            Register registerNotification = (Register) getUser32Function ("RegisterSuspendResumeNotification");
+            Unregister unregisterNotification = (Unregister) getUser32Function ("UnregisterSuspendResumeNotification");
+
+            bool isValid() const { return registerNotification != nullptr && unregisterNotification != nullptr; }
+        };
+
+        static Functions functions;
+        return functions;
+    }
+
 public:
     ScopedSuspendResumeNotificationRegistration() = default;
 
     explicit ScopedSuspendResumeNotificationRegistration (HWND window)
-        : handle (SystemStats::getOperatingSystemType() >= SystemStats::Windows8_0
-                      ? RegisterSuspendResumeNotification (window, DEVICE_NOTIFY_WINDOW_HANDLE)
+        : handle (getFunctions().isValid()
+                      ? getFunctions().registerNotification (window, DEVICE_NOTIFY_WINDOW_HANDLE)
                       : nullptr)
     {}
 
@@ -516,7 +533,7 @@ private:
         void operator() (HPOWERNOTIFY ptr) const
         {
             if (ptr != nullptr)
-                UnregisterSuspendResumeNotification (ptr);
+                getFunctions().unregisterNotification (ptr);
         }
     };
 
