@@ -755,6 +755,14 @@ bool DatagramSocket::joinMulticast (const String& multicastIPAddress)
 
     return SocketHelpers::multicast (handle, multicastIPAddress, lastBindAddress, true);
 }
+ 
+bool DatagramSocket::joinMulticast (const String& multicastIPAddress, const String& localIPAddress)
+{
+    if (handle < 0 || ! isBound)
+        return false;
+
+    return SocketHelpers::multicast (handle, multicastIPAddress, localIPAddress, true);
+}
 
 bool DatagramSocket::leaveMulticast (const String& multicastIPAddress)
 {
@@ -762,6 +770,14 @@ bool DatagramSocket::leaveMulticast (const String& multicastIPAddress)
         return false;
 
     return SocketHelpers::multicast (handle, multicastIPAddress, lastBindAddress, false);
+}
+  
+bool DatagramSocket::leaveMulticast (const String& multicastIPAddress, const String& localIPAddress)
+{
+    if (handle < 0 || ! isBound)
+        return false;
+
+    return SocketHelpers::multicast (handle, multicastIPAddress, localIPAddress, false);
 }
 
 bool DatagramSocket::setMulticastLoopbackEnabled (bool enable)
