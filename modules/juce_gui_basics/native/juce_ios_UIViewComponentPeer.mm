@@ -77,7 +77,6 @@ class UIViewComponentPeer;
 
 namespace iOSGlobals
 {
-#if JUCE_HAS_IOS_HARDWARE_KEYBOARD_SUPPORT
 class KeysCurrentlyDown
 {
 public:
@@ -95,7 +94,6 @@ private:
     std::set<int> down;
 };
 static KeysCurrentlyDown keysCurrentlyDown;
-#endif
 static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
 } // namespace iOSGlobals
 
@@ -797,13 +795,19 @@ static std::optional<int> getKeyCodeForSpecialCharacterString (StringRef charact
 {
     static const auto map = [&]
     {
-        std::map<String, int> result { { nsStringToJuce (UIKeyInputUpArrow),       KeyPress::upKey },
-                                       { nsStringToJuce (UIKeyInputDownArrow),     KeyPress::downKey },
-                                       { nsStringToJuce (UIKeyInputLeftArrow),     KeyPress::leftKey },
-                                       { nsStringToJuce (UIKeyInputRightArrow),    KeyPress::rightKey },
-                                       { nsStringToJuce (UIKeyInputEscape),        KeyPress::escapeKey },
-                                       { nsStringToJuce (UIKeyInputPageUp),        KeyPress::pageUpKey },
-                                       { nsStringToJuce (UIKeyInputPageDown),      KeyPress::pageDownKey } };
+        std::map<String, int> result
+        {
+            { nsStringToJuce (UIKeyInputUpArrow),       KeyPress::upKey },
+            { nsStringToJuce (UIKeyInputDownArrow),     KeyPress::downKey },
+            { nsStringToJuce (UIKeyInputLeftArrow),     KeyPress::leftKey },
+            { nsStringToJuce (UIKeyInputRightArrow),    KeyPress::rightKey },
+            { nsStringToJuce (UIKeyInputEscape),        KeyPress::escapeKey },
+           #if JUCE_HAS_IOS_HARDWARE_KEYBOARD_SUPPORT
+            // These symbols are available on iOS 8, but only declared in the headers for iOS 13.4+
+            { nsStringToJuce (UIKeyInputPageUp),        KeyPress::pageUpKey },
+            { nsStringToJuce (UIKeyInputPageDown),      KeyPress::pageDownKey },
+           #endif
+        };
 
        #if JUCE_HAS_IOS_HARDWARE_KEYBOARD_SUPPORT
         if (@available (iOS 13.4, *))
@@ -839,7 +843,6 @@ static std::optional<int> getKeyCodeForSpecialCharacterString (StringRef charact
     return iter != map.cend() ? std::make_optional (iter->second) : std::nullopt;
 }
 
-#if JUCE_HAS_IOS_HARDWARE_KEYBOARD_SUPPORT
 static int getKeyCodeForCharacters (StringRef unmodified)
 {
     return getKeyCodeForSpecialCharacterString (unmodified).value_or (unmodified[0]);
@@ -850,6 +853,7 @@ static int getKeyCodeForCharacters (NSString* characters)
     return getKeyCodeForCharacters (nsStringToJuce (characters));
 }
 
+#if JUCE_HAS_IOS_HARDWARE_KEYBOARD_SUPPORT
 static void updateModifiers (const UIKeyModifierFlags flags)
 {
     const auto convert = [&flags] (UIKeyModifierFlags f, int result) { return (flags & f) != 0 ? result : 0; };
@@ -1920,10 +1924,12 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEv
     if (event == nullptr)
         return;
 
+   #if JUCE_HAS_IOS_HARDWARE_KEYBOARD_SUPPORT
     if (@available (iOS 13.4, *))
     {
         updateModifiers ([event modifierFlags]);
     }
+   #endif
 
     NSArray* touches = [[event touchesForView: view] allObjects];
 
