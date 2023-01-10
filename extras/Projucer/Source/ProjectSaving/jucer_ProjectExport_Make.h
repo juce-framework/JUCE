@@ -948,20 +948,20 @@ private:
 
     void writeCompilerFlagSchemes (OutputStream& out, const std::vector<std::pair<File, String>>& filesToCompile) const
     {
-        StringArray schemesToWrite;
+        std::set<String> schemesToWrite;
 
-        for (auto& f : filesToCompile)
-            if (f.second.isNotEmpty())
-                schemesToWrite.addIfNotAlreadyThere (f.second);
+        for (const auto& pair : filesToCompile)
+            if (pair.second.isNotEmpty())
+                schemesToWrite.insert (pair.second);
 
-        if (! schemesToWrite.isEmpty())
-        {
-            for (auto& s : schemesToWrite)
-                out << getCompilerFlagSchemeVariableName (s) << " := "
-                    << compilerFlagSchemesMap[s].get().toString() << newLine;
+        if (schemesToWrite.empty())
+            return;
 
-            out << newLine;
-        }
+        for (const auto& s : schemesToWrite)
+            if (const auto flags = getCompilerFlagsForFileCompilerFlagScheme (s); flags.isNotEmpty())
+                out << getCompilerFlagSchemeVariableName (s) << " := " << flags << newLine;
+
+        out << newLine;
     }
 
     void writeMakefile (OutputStream& out) const

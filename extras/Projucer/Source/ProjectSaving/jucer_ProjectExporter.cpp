@@ -245,7 +245,11 @@ void ProjectExporter::updateCompilerFlagValues()
     compilerFlagSchemesMap.clear();
 
     for (auto& scheme : project.getCompilerFlagSchemes())
-        compilerFlagSchemesMap.set (scheme, { settings, scheme, getUndoManager() });
+    {
+        compilerFlagSchemesMap.emplace (std::piecewise_construct,
+                                        std::forward_as_tuple (scheme),
+                                        std::forward_as_tuple (settings, scheme, getUndoManager()));
+    }
 }
 
 //==============================================================================
@@ -285,9 +289,11 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
                "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
 
-    for (HashMap<String, ValueTreePropertyWithDefault>::Iterator i (compilerFlagSchemesMap); i.next();)
-        props.add (new TextPropertyComponent (compilerFlagSchemesMap.getReference (i.getKey()), "Compiler Flags for " + i.getKey().quoted(), 8192, false),
+    for (const auto& [key, property] : compilerFlagSchemesMap)
+    {
+        props.add (new TextPropertyComponent (property, "Compiler Flags for " + key.quoted(), 8192, false),
                    "The exporter-specific compiler flags that will be added to files using this scheme.");
+    }
 
     props.add (new TextPropertyComponent (extraLinkerFlagsValue, "Extra Linker Flags", 8192, true),
                "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "
@@ -507,12 +513,17 @@ String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildC
                                                  sourceString);
 }
 
-String ProjectExporter::getCompilerFlagsForProjectItem (const Project::Item& projectItem) const
+String ProjectExporter::getCompilerFlagsForFileCompilerFlagScheme (StringRef schemeName) const
 {
-    if (auto buildConfigurationForFile = getBuildConfigurationWithName (projectItem.getCompilerFlagSchemeString()))
-        return buildConfigurationForFile->getAllCompilerFlagsString();
+    if (const auto iter = compilerFlagSchemesMap.find (schemeName); iter != compilerFlagSchemesMap.cend())
+        return iter->second.get().toString();
 
     return {};
+}
+
+String ProjectExporter::getCompilerFlagsForProjectItem (const Project::Item& item) const
+{
+    return getCompilerFlagsForFileCompilerFlagScheme (item.getCompilerFlagSchemeString());
 }
 
 void ProjectExporter::copyMainGroupFromProject()
@@ -769,43 +780,6 @@ ProjectExporter::BuildConfiguration::Ptr ProjectExporter::getConfiguration (int 
     return createBuildConfig (getConfigurations().getChild (index));
 }
 
-std::optional<ValueTree> ProjectExporter::getConfigurationWithName (const String& nameToFind) const
-{
-    auto configs = getConfigurations();
-    for (int i = configs.getNumChildren(); --i >= 0;)
-    {
-        auto config = configs.getChild (i);
-
-        if (config[Ids::name].toString() == nameToFind)
-            return config;
-    }
-
-    return {};
-}
-
-ProjectExporter::BuildConfiguration::Ptr ProjectExporter::getBuildConfigurationWithName (const String& nameToFind) const
-{
-    if (auto config = getConfigurationWithName (nameToFind))
-        return createBuildConfig (*config);
-
-    return nullptr;
-}
-
-String ProjectExporter::getUniqueConfigName (String nm) const
-{
-    auto nameRoot = nm;
-    while (CharacterFunctions::isDigit (nameRoot.getLastCharacter()))
-        nameRoot = nameRoot.dropLastCharacters (1);
-
-    nameRoot = nameRoot.trim();
-
-    int suffix = 2;
-    while (getConfigurationWithName (name).has_value())
-        nm = nameRoot + " " + String (suffix++);
-
-    return nm;
-}
-
 void ProjectExporter::addNewConfigurationFromExisting (const BuildConfiguration& configToCopy)
 {
     auto configs = getConfigurations();
@@ -1051,28 +1025,6 @@ StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() co
 {
     return mergePreprocessorDefs (project.getPreprocessorDefs(),
                                   parsePreprocessorDefs (getBuildConfigPreprocessorDefsString()));
-}
-
-StringPairArray ProjectExporter::BuildConfiguration::getUniquePreprocessorDefs() const
-{
-    auto perConfigurationDefs = parsePreprocessorDefs (getBuildConfigPreprocessorDefsString());
-    auto globalDefs = project.getPreprocessorDefs();
-
-    for (int i = 0; i < globalDefs.size(); ++i)
-    {
-        auto globalKey = globalDefs.getAllKeys()[i];
-
-        int idx = perConfigurationDefs.getAllKeys().indexOf (globalKey);
-        if (idx >= 0)
-        {
-            auto globalValue = globalDefs.getAllValues()[i];
-
-            if (globalValue == perConfigurationDefs.getAllValues()[idx])
-                perConfigurationDefs.remove (idx);
-        }
-    }
-
-    return perConfigurationDefs;
 }
 
 StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
