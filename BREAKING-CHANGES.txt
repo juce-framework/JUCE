@@ -1,6 +1,32 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+Projucer-generated MSVC projects now build VST3s as bundles, rather than as
+single DLL files.
+
+Possible Issues
+---------------
+Build workflows that expect the VST3 to be a single DLL may break.
+
+Workaround
+----------
+Any post-build scripts that expect to copy or move the built VST3 should be
+updated so that the entire bundle directory is copied/moved. The DLL itself
+can still be located and extracted from within the generated bundle if
+necessary.
+
+Rationale
+---------
+Distributing VST3s as single files was deprecated in VST3 v3.6.10. JUCE's CMake
+scripts already produce VST3s as bundles, so this change increases consistency
+between the two build systems.
+
+
 Version 7.0.3
 =============
 
