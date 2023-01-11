@@ -94,7 +94,6 @@ static int warnOnFailureIfImplemented (int result) noexcept
  #define warnOnFailureIfImplemented(x) x
 #endif
 
-enum class Direction { input, output };
 enum class MediaKind { audio, event };
 
 static Vst::MediaType toVstType (MediaKind x) { return x == MediaKind::audio ? Vst::kAudio : Vst::kEvent; }

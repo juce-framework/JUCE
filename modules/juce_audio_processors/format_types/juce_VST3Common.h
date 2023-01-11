@@ -613,7 +613,9 @@ static int countValidBuses (Steinberg::Vst::AudioBusBuffers* buffers, int32 num)
     }));
 }
 
-template <typename FloatType, typename Iterator>
+enum class Direction { input, output };
+
+template <Direction direction, typename FloatType, typename Iterator>
 static bool validateLayouts (Iterator first, Iterator last, const std::vector<DynamicChannelMapping>& map)
 {
     if ((size_t) std::distance (first, last) > map.size())
@@ -623,12 +625,24 @@ static bool validateLayouts (Iterator first, Iterator last, const std::vector<Dy
 
     for (auto it = first; it != last; ++it, ++mapIterator)
     {
-        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, *it);
-        const auto anyChannelIsNull = std::any_of (busPtr, busPtr + it->numChannels, [] (auto* ptr) { return ptr == nullptr; });
+        auto& bus = *it;
+        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
+        const auto expectedChannels = static_cast<int> (mapIterator->size());
+        const auto actualChannels = static_cast<int> (bus.numChannels);
+        const auto limit = jmin (expectedChannels, actualChannels);
+        const auto anyChannelIsNull = std::any_of (busPtr, busPtr + limit, [] (auto* ptr) { return ptr == nullptr; });
+        constexpr auto isInput = direction == Direction::input;
+
+        const auto channelCountIsUsable = isInput ? expectedChannels <= actualChannels
+                                                  : actualChannels <= expectedChannels;
 
         // Null channels are allowed if the bus is inactive
-        if (mapIterator->isHostActive() && (anyChannelIsNull || (int) mapIterator->size() != it->numChannels))
+        if (mapIterator->isHostActive() && (anyChannelIsNull || ! channelCountIsUsable))
             return false;
+
+        // If this is hit, the destination bus has fewer channels than the source bus.
+        // As a result, some channels will 'go missing', and channel layouts may be invalid.
+        jassert (actualChannels == expectedChannels);
     }
 
     // If the host didn't provide the full complement of buses, it must be because the other
@@ -669,7 +683,7 @@ public:
         // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
         const auto vstInputs = countValidBuses<FloatType> (data.inputs, data.numInputs);
 
-        if (! validateLayouts<FloatType> (data.inputs, data.inputs + vstInputs, inputMap))
+        if (! validateLayouts<Direction::input, FloatType> (data.inputs, data.inputs + vstInputs, inputMap))
             return getBlankBuffer (usedChannels, (int) data.numSamples);
 
         setUpInputChannels (data, (size_t) vstInputs, scratchBuffer, inputMap,  channels);
@@ -702,7 +716,12 @@ private:
 
             if (mapping.isHostActive() && busIndex < vstInputs)
             {
-                auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.inputs[busIndex]);
+                auto& bus = data.inputs[busIndex];
+
+                // Every JUCE channel must have a VST3 channel counterpart
+                jassert (mapping.size() <= static_cast<size_t> (bus.numChannels));
+
+                auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
 
                 for (size_t channelIndex = 0; channelIndex < mapping.size(); ++channelIndex)
                 {
@@ -921,7 +940,7 @@ public:
         // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
         const auto vstOutputs = (size_t) countValidBuses<FloatType> (data.outputs, data.numOutputs);
 
-        if (validateLayouts<FloatType> (data.outputs, data.outputs + vstOutputs, *outputMap))
+        if (validateLayouts<Direction::output, FloatType> (data.outputs, data.outputs + vstOutputs, *outputMap))
             copyToHostOutputBuses (vstOutputs);
         else
             clearHostOutputBuses (vstOutputs);
@@ -940,9 +959,12 @@ private:
             {
                 auto& bus = data.outputs[i];
 
+                // Every VST3 channel must have a JUCE channel counterpart
+                jassert (static_cast<size_t> (bus.numChannels) <= mapping.size());
+
                 if (mapping.isClientActive())
                 {
-                    for (size_t j = 0; j < mapping.size(); ++j)
+                    for (size_t j = 0; j < static_cast<size_t> (bus.numChannels); ++j)
                     {
                         auto* hostChannel = getAudioBusPointer (detail::Tag<FloatType>{}, bus)[j];
                         const auto juceChannel = juceBusOffset + (size_t) mapping.getJuceChannelForVst3Channel ((int) j);
@@ -951,7 +973,7 @@ private:
                 }
                 else
                 {
-                    for (size_t j = 0; j < mapping.size(); ++j)
+                    for (size_t j = 0; j < static_cast<size_t> (bus.numChannels); ++j)
                     {
                         auto* hostChannel = getAudioBusPointer (detail::Tag<FloatType>{}, bus)[j];
                         FloatVectorOperations::clear (hostChannel, (size_t) data.numSamples);
