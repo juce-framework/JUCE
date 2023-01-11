@@ -350,12 +350,12 @@ private:
 
     struct SafeSavePanel : SafeModalPanel<NSSavePanel>
     {
-        SafeSavePanel() : SafeModalPanel ("SaveSavePanel_") {}
+        SafeSavePanel() : SafeModalPanel ("SafeSavePanel_") {}
     };
 
     struct SafeOpenPanel : SafeModalPanel<NSOpenPanel>
     {
-        SafeOpenPanel() : SafeModalPanel ("SaveOpenPanel_") {}
+        SafeOpenPanel() : SafeModalPanel ("SafeOpenPanel_") {}
     };
 
     //==============================================================================
