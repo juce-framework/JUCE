@@ -309,29 +309,37 @@ public:
     */
     struct BusesLayout
     {
+    private:
+        template <typename This>
+        static auto& getBuses (This& t, bool isInput) { return isInput ? t.inputBuses : t.outputBuses; }
+
+    public:
         /** An array containing the list of input buses that this processor supports. */
         Array<AudioChannelSet> inputBuses;
 
         /** An array containing the list of output buses that this processor supports. */
         Array<AudioChannelSet> outputBuses;
 
+        auto& getBuses (bool isInput) const { return getBuses (*this, isInput); }
+        auto& getBuses (bool isInput)       { return getBuses (*this, isInput); }
+
         /** Get the number of channels of a particular bus */
         int getNumChannels (bool isInput, int busIndex) const noexcept
         {
-            auto& bus = (isInput ? inputBuses : outputBuses);
+            auto& bus = getBuses (isInput);
             return isPositiveAndBelow (busIndex, bus.size()) ? bus.getReference (busIndex).size() : 0;
         }
 
         /** Get the channel set of a particular bus */
         AudioChannelSet& getChannelSet (bool isInput, int busIndex) noexcept
         {
-            return (isInput ? inputBuses : outputBuses).getReference (busIndex);
+            return getBuses (isInput).getReference (busIndex);
         }
 
         /** Get the channel set of a particular bus */
         AudioChannelSet getChannelSet (bool isInput, int busIndex) const noexcept
         {
-            return (isInput ? inputBuses : outputBuses)[busIndex];
+            return getBuses (isInput)[busIndex];
         }
 
         /** Get the input channel layout on the main bus. */
