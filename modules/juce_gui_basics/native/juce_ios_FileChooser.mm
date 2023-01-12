@@ -194,8 +194,10 @@ private:
     {
         delegate.reset ([[FileChooserDelegateClass alloc] initWithOwner: this]);
 
-        String firstFileExtension;
-        auto utTypeArray = createNSArrayFromStringArray (getUTTypesForWildcards (owner.filters, firstFileExtension));
+        const auto validExtensions = getValidExtensionsForWildcards (owner.filters);
+        const auto utTypeArray = (flags & FileBrowserComponent::canSelectDirectories) != 0
+                               ? @[@"public.folder"]
+                               : createNSArrayFromStringArray (getUTTypesForExtensions (validExtensions));
 
         if ((flags & FileBrowserComponent::saveMode) != 0)
         {
@@ -207,8 +209,10 @@ private:
 
             if (! currentFileOrDirectory.existsAsFile())
             {
-                auto filename = getFilename (currentFileOrDirectory, firstFileExtension);
-                auto tmpDirectory = File::createTempFile ("JUCE-filepath");
+                const auto extension = validExtensions.isEmpty() ? String()
+                                                                 : validExtensions.getReference (0);
+                const auto filename = getFilename (currentFileOrDirectory, extension);
+                const auto tmpDirectory = File::createTempFile ("JUCE-filepath");
 
                 if (tmpDirectory.createDirectory().wasOk())
                 {
@@ -294,36 +298,45 @@ private:
     }
 
     //==============================================================================
-    static StringArray getUTTypesForWildcards (const String& filterWildcards, String& firstExtension)
+    static StringArray getValidExtensionsForWildcards (const String& filterWildcards)
     {
-        auto filters = StringArray::fromTokens (filterWildcards, ";", "");
+        const auto filters = StringArray::fromTokens (filterWildcards, ";", "");
+
+        if (filters.contains ("*") || filters.isEmpty())
+            return {};
+
         StringArray result;
 
-        firstExtension = {};
-
-        if (! filters.contains ("*") && filters.size() > 0)
+        for (const auto& filter : filters)
         {
-            for (auto filter : filters)
-            {
-                if (filter.isEmpty())
-                    continue;
+            if (filter.isEmpty())
+                continue;
 
-                // iOS only supports file extension wild cards
-                jassert (filter.upToLastOccurrenceOf (".", true, false) == "*.");
+            // iOS only supports file extension wild cards
+            jassert (filter.upToLastOccurrenceOf (".", true, false) == "*.");
 
-                auto fileExtension = filter.fromLastOccurrenceOf (".", false, false);
-                CFUniquePtr<CFStringRef> fileExtensionCF (fileExtension.toCFString());
-
-                if (firstExtension.isEmpty())
-                    firstExtension = fileExtension;
-
-                if (auto tag = CFUniquePtr<CFStringRef> (UTTypeCreatePreferredIdentifierForTag (kUTTagClassFilenameExtension, fileExtensionCF.get(), nullptr)))
-                    result.add (String::fromCFString (tag.get()));
-            }
+            result.add (filter.fromLastOccurrenceOf (".", false, false));
         }
-        else
+
+        return result;
+    }
+
+    static StringArray getUTTypesForExtensions (const StringArray& extensions)
+    {
+        if (extensions.isEmpty())
+            return { "public.data" };
+
+        StringArray result;
+
+        for (const auto& extension : extensions)
         {
-            result.add ("public.data");
+            if (extension.isEmpty())
+                continue;
+
+            CFUniquePtr<CFStringRef> fileExtensionCF (extension.toCFString());
+
+            if (const auto tag = CFUniquePtr<CFStringRef> (UTTypeCreatePreferredIdentifierForTag (kUTTagClassFilenameExtension, fileExtensionCF.get(), nullptr)))
+                result.add (String::fromCFString (tag.get()));
         }
 
         return result;
