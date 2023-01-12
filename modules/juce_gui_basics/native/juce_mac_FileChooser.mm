@@ -66,12 +66,20 @@ public:
         setBounds (0, 0, 0, 0);
         setOpaque (true);
 
-        static DelegateClass delegateClass;
-        static SafeSavePanel safeSavePanel;
-        static SafeOpenPanel safeOpenPanel;
+        panel = [&]
+        {
+            if (SystemStats::isAppSandboxEnabled())
+                return isSave ? [[NSSavePanel alloc] init]
+                              : [[NSOpenPanel alloc] init];
 
-        panel = isSave ? [safeSavePanel.createInstance() init]
-                       : [safeOpenPanel.createInstance() init];
+            static SafeSavePanel safeSavePanel;
+            static SafeOpenPanel safeOpenPanel;
+
+            return isSave ? [safeSavePanel.createInstance() init]
+                          : [safeOpenPanel.createInstance() init];
+        }();
+
+        static DelegateClass delegateClass;
 
         delegate = [delegateClass.createInstance() init];
         object_setInstanceVariable (delegate, "cppObject", this);
@@ -350,12 +358,12 @@ private:
 
     struct SafeSavePanel : SafeModalPanel<NSSavePanel>
     {
-        SafeSavePanel() : SafeModalPanel ("SaveSavePanel_") {}
+        SafeSavePanel() : SafeModalPanel ("SafeSavePanel_") {}
     };
 
     struct SafeOpenPanel : SafeModalPanel<NSOpenPanel>
     {
-        SafeOpenPanel() : SafeModalPanel ("SaveOpenPanel_") {}
+        SafeOpenPanel() : SafeModalPanel ("SafeOpenPanel_") {}
     };
 
     //==============================================================================
