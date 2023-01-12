@@ -120,6 +120,11 @@ static String getDisplayInfo()
     return displayDesc;
 }
 
+static String boolString (bool b)
+{
+    return b ? "yes" : "no";
+}
+
 static String getAllSystemInfo()
 {
     String systemInfo;
@@ -150,30 +155,36 @@ static String getAllSystemInfo()
       << "CPU vendor:              " << SystemStats::getCpuVendor() << newLine
       << "CPU model:               " << SystemStats::getCpuModel()  << newLine
       << "CPU speed:               " << SystemStats::getCpuSpeedInMegahertz() << " MHz" << newLine
-      << "CPU has MMX:             " << (SystemStats::hasMMX()             ? "yes" : "no") << newLine
-      << "CPU has FMA3:            " << (SystemStats::hasFMA3()            ? "yes" : "no") << newLine
-      << "CPU has FMA4:            " << (SystemStats::hasFMA4()            ? "yes" : "no") << newLine
-      << "CPU has SSE:             " << (SystemStats::hasSSE()             ? "yes" : "no") << newLine
-      << "CPU has SSE2:            " << (SystemStats::hasSSE2()            ? "yes" : "no") << newLine
-      << "CPU has SSE3:            " << (SystemStats::hasSSE3()            ? "yes" : "no") << newLine
-      << "CPU has SSSE3:           " << (SystemStats::hasSSSE3()           ? "yes" : "no") << newLine
-      << "CPU has SSE4.1:          " << (SystemStats::hasSSE41()           ? "yes" : "no") << newLine
-      << "CPU has SSE4.2:          " << (SystemStats::hasSSE42()           ? "yes" : "no") << newLine
-      << "CPU has 3DNOW:           " << (SystemStats::has3DNow()           ? "yes" : "no") << newLine
-      << "CPU has AVX:             " << (SystemStats::hasAVX()             ? "yes" : "no") << newLine
-      << "CPU has AVX2:            " << (SystemStats::hasAVX2()            ? "yes" : "no") << newLine
-      << "CPU has AVX512F:         " << (SystemStats::hasAVX512F()         ? "yes" : "no") << newLine
-      << "CPU has AVX512BW:        " << (SystemStats::hasAVX512BW()        ? "yes" : "no") << newLine
-      << "CPU has AVX512CD:        " << (SystemStats::hasAVX512CD()        ? "yes" : "no") << newLine
-      << "CPU has AVX512DQ:        " << (SystemStats::hasAVX512DQ()        ? "yes" : "no") << newLine
-      << "CPU has AVX512ER:        " << (SystemStats::hasAVX512ER()        ? "yes" : "no") << newLine
-      << "CPU has AVX512IFMA:      " << (SystemStats::hasAVX512IFMA()      ? "yes" : "no") << newLine
-      << "CPU has AVX512PF:        " << (SystemStats::hasAVX512PF()        ? "yes" : "no") << newLine
-      << "CPU has AVX512VBMI:      " << (SystemStats::hasAVX512VBMI()      ? "yes" : "no") << newLine
-      << "CPU has AVX512VL:        " << (SystemStats::hasAVX512VL()        ? "yes" : "no") << newLine
-      << "CPU has AVX512VPOPCNTDQ: " << (SystemStats::hasAVX512VPOPCNTDQ() ? "yes" : "no") << newLine
-      << "CPU has Neon:            " << (SystemStats::hasNeon()            ? "yes" : "no") << newLine
+      << "CPU has MMX:             " << boolString (SystemStats::hasMMX()             ) << newLine
+      << "CPU has FMA3:            " << boolString (SystemStats::hasFMA3()            ) << newLine
+      << "CPU has FMA4:            " << boolString (SystemStats::hasFMA4()            ) << newLine
+      << "CPU has SSE:             " << boolString (SystemStats::hasSSE()             ) << newLine
+      << "CPU has SSE2:            " << boolString (SystemStats::hasSSE2()            ) << newLine
+      << "CPU has SSE3:            " << boolString (SystemStats::hasSSE3()            ) << newLine
+      << "CPU has SSSE3:           " << boolString (SystemStats::hasSSSE3()           ) << newLine
+      << "CPU has SSE4.1:          " << boolString (SystemStats::hasSSE41()           ) << newLine
+      << "CPU has SSE4.2:          " << boolString (SystemStats::hasSSE42()           ) << newLine
+      << "CPU has 3DNOW:           " << boolString (SystemStats::has3DNow()           ) << newLine
+      << "CPU has AVX:             " << boolString (SystemStats::hasAVX()             ) << newLine
+      << "CPU has AVX2:            " << boolString (SystemStats::hasAVX2()            ) << newLine
+      << "CPU has AVX512F:         " << boolString (SystemStats::hasAVX512F()         ) << newLine
+      << "CPU has AVX512BW:        " << boolString (SystemStats::hasAVX512BW()        ) << newLine
+      << "CPU has AVX512CD:        " << boolString (SystemStats::hasAVX512CD()        ) << newLine
+      << "CPU has AVX512DQ:        " << boolString (SystemStats::hasAVX512DQ()        ) << newLine
+      << "CPU has AVX512ER:        " << boolString (SystemStats::hasAVX512ER()        ) << newLine
+      << "CPU has AVX512IFMA:      " << boolString (SystemStats::hasAVX512IFMA()      ) << newLine
+      << "CPU has AVX512PF:        " << boolString (SystemStats::hasAVX512PF()        ) << newLine
+      << "CPU has AVX512VBMI:      " << boolString (SystemStats::hasAVX512VBMI()      ) << newLine
+      << "CPU has AVX512VL:        " << boolString (SystemStats::hasAVX512VL()        ) << newLine
+      << "CPU has AVX512VPOPCNTDQ: " << boolString (SystemStats::hasAVX512VPOPCNTDQ() ) << newLine
+      << "CPU has Neon:            " << boolString (SystemStats::hasNeon()            ) << newLine
       << newLine;
+
+   #if JUCE_MAC
+    systemInfo
+      << "Application sandbox enabled: " << boolString (SystemStats::isAppSandboxEnabled()) << newLine
+      << newLine;
+   #endif
 
     systemInfo
       << "Current working directory:  " << File::getCurrentWorkingDirectory().getFullPathName() << newLine
