@@ -1489,6 +1489,15 @@ public:
                           time,
                           {},
                           index);
+
+        handleMouseEvent (MouseInputSource::InputSourceType::touch,
+                          MouseInputSource::offscreenMousePos,
+                          ModifierKeys::currentModifiers.withoutMouseButtons(),
+                          MouseInputSource::defaultPressure,
+                          MouseInputSource::defaultOrientation,
+                          time,
+                          {},
+                          index);
     }
 
     void handleAccessibilityHoverCallback (int command, Point<float> sysPos, int64)
