@@ -1035,8 +1035,14 @@ public:
 };
 
 //==============================================================================
-struct DSoundDeviceList
+class DSoundDeviceList
 {
+    auto tie() const
+    {
+        return std::tie (outputDeviceNames, inputDeviceNames, outputGuids, inputGuids);
+    }
+
+public:
     StringArray outputDeviceNames, inputDeviceNames;
     Array<GUID> outputGuids, inputGuids;
 
@@ -1054,13 +1060,8 @@ struct DSoundDeviceList
         }
     }
 
-    bool operator!= (const DSoundDeviceList& other) const noexcept
-    {
-        return outputDeviceNames != other.outputDeviceNames
-            || inputDeviceNames != other.inputDeviceNames
-            || outputGuids != other.outputGuids
-            || inputGuids != other.inputGuids;
-    }
+    bool operator== (const DSoundDeviceList& other) const noexcept { return tie() == other.tie(); }
+    bool operator!= (const DSoundDeviceList& other) const noexcept { return tie() != other.tie(); }
 
 private:
     static BOOL enumProc (LPGUID lpGUID, String desc, StringArray& names, Array<GUID>& guids)
@@ -1213,13 +1214,11 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 }
 
 //==============================================================================
-class DSoundAudioIODeviceType  : public AudioIODeviceType,
-                                 private DeviceChangeDetector
+class DSoundAudioIODeviceType  : public AudioIODeviceType
 {
 public:
     DSoundAudioIODeviceType()
-        : AudioIODeviceType ("DirectSound"),
-          DeviceChangeDetector (L"DirectSound")
+        : AudioIODeviceType ("DirectSound")
     {
         initialiseDSoundFunctions();
     }
@@ -1274,19 +1273,17 @@ public:
     }
 
 private:
+    DeviceChangeDetector detector { L"DirectSound", [this] { systemDeviceChanged(); } };
     DSoundDeviceList deviceList;
     bool hasScanned = false;
 
-    void systemDeviceChanged() override
+    void systemDeviceChanged()
     {
         DSoundDeviceList newList;
         newList.scan();
 
-        if (newList != deviceList)
-        {
-            deviceList = newList;
+        if (std::exchange (deviceList, newList) != newList)
             callDeviceChangeListeners();
-        }
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DSoundAudioIODeviceType)

@@ -299,25 +299,24 @@ void MessageManager::doPlatformSpecificShutdown()
 }
 
 //==============================================================================
-struct MountedVolumeListChangeDetector::Pimpl   : private DeviceChangeDetector
+struct MountedVolumeListChangeDetector::Pimpl
 {
-    Pimpl (MountedVolumeListChangeDetector& d) : DeviceChangeDetector (L"MountedVolumeList"), owner (d)
+    explicit Pimpl (MountedVolumeListChangeDetector& d)
+        : owner (d)
     {
         File::findFileSystemRoots (lastVolumeList);
     }
 
-    void systemDeviceChanged() override
+    void systemDeviceChanged()
     {
         Array<File> newList;
         File::findFileSystemRoots (newList);
 
-        if (lastVolumeList != newList)
-        {
-            lastVolumeList = newList;
+        if (std::exchange (lastVolumeList, newList) != newList)
             owner.mountedVolumeListChanged();
-        }
     }
 
+    DeviceChangeDetector detector { L"MountedVolumeList", [this] { systemDeviceChanged(); } };
     MountedVolumeListChangeDetector& owner;
     Array<File> lastVolumeList;
 };

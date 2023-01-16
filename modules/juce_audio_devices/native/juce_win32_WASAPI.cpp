@@ -1694,13 +1694,11 @@ private:
 
 
 //==============================================================================
-class WASAPIAudioIODeviceType  : public AudioIODeviceType,
-                                 private DeviceChangeDetector
+class WASAPIAudioIODeviceType  : public AudioIODeviceType
 {
 public:
-    WASAPIAudioIODeviceType (WASAPIDeviceMode mode)
+    explicit WASAPIAudioIODeviceType (WASAPIDeviceMode mode)
         : AudioIODeviceType (getDeviceTypename (mode)),
-          DeviceChangeDetector (L"Windows Audio"),
           deviceMode (mode)
     {
     }
@@ -1715,22 +1713,15 @@ public:
     void scanForDevices() override
     {
         hasScanned = true;
-
-        outputDeviceNames.clear();
-        inputDeviceNames.clear();
-        outputDeviceIds.clear();
-        inputDeviceIds.clear();
-
-        scan (outputDeviceNames, inputDeviceNames,
-              outputDeviceIds, inputDeviceIds);
+        devices = scan();
     }
 
     StringArray getDeviceNames (bool wantInputNames) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        return wantInputNames ? inputDeviceNames
-                              : outputDeviceNames;
+        return wantInputNames ? devices.inputDeviceNames
+                              : devices.outputDeviceNames;
     }
 
     int getDefaultDeviceIndex (bool /*forInput*/) const override
@@ -1744,8 +1735,8 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         if (auto d = dynamic_cast<WASAPIAudioIODevice*> (device))
-            return asInput ? inputDeviceIds.indexOf (d->inputDeviceId)
-                           : outputDeviceIds.indexOf (d->outputDeviceId);
+            return asInput ? devices.inputDeviceIds .indexOf (d->inputDeviceId)
+                           : devices.outputDeviceIds.indexOf (d->outputDeviceId);
 
         return -1;
     }
@@ -1759,16 +1750,16 @@ public:
 
         std::unique_ptr<WASAPIAudioIODevice> device;
 
-        auto outputIndex = outputDeviceNames.indexOf (outputDeviceName);
-        auto inputIndex = inputDeviceNames.indexOf (inputDeviceName);
+        auto outputIndex = devices.outputDeviceNames.indexOf (outputDeviceName);
+        auto inputIndex  = devices.inputDeviceNames .indexOf (inputDeviceName);
 
         if (outputIndex >= 0 || inputIndex >= 0)
         {
             device.reset (new WASAPIAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
                                                                                  : inputDeviceName,
                                                    getTypeName(),
-                                                   outputDeviceIds [outputIndex],
-                                                   inputDeviceIds [inputIndex],
+                                                   devices.outputDeviceIds[outputIndex],
+                                                   devices.inputDeviceIds [inputIndex],
                                                    deviceMode));
 
             if (! device->initialise())
@@ -1779,10 +1770,24 @@ public:
     }
 
     //==============================================================================
-    StringArray outputDeviceNames, outputDeviceIds;
-    StringArray inputDeviceNames, inputDeviceIds;
+    struct Devices
+    {
+        StringArray outputDeviceNames, outputDeviceIds;
+        StringArray inputDeviceNames, inputDeviceIds;
+
+        auto tie() const
+        {
+            return std::tie (outputDeviceNames, outputDeviceIds, inputDeviceNames, inputDeviceIds);
+        }
+
+        bool operator== (const Devices& other) const { return tie() == other.tie(); }
+        bool operator!= (const Devices& other) const { return tie() != other.tie(); }
+    };
+
+    Devices devices;
 
 private:
+    DeviceChangeDetector deviceChangeDetector { L"Windows Audio", [this] { systemDeviceChanged(); } };
     WASAPIDeviceMode deviceMode;
     bool hasScanned = false;
     ComSmartPtr<IMMDeviceEnumerator> enumerator;
@@ -1791,7 +1796,7 @@ private:
     class ChangeNotificationClient : public ComBaseClassHelper<IMMNotificationClient>
     {
     public:
-        ChangeNotificationClient (WASAPIAudioIODeviceType* d)
+        explicit ChangeNotificationClient (WASAPIAudioIODeviceType* d)
             : ComBaseClassHelper (0), device (d) {}
 
         JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             { return notify(); }
@@ -1806,7 +1811,7 @@ private:
         HRESULT notify()
         {
             if (device != nullptr)
-                device->triggerAsyncDeviceChangeCallback();
+                device->deviceChangeDetector.triggerAsyncDeviceChangeCallback();
 
             return S_OK;
         }
@@ -1840,15 +1845,12 @@ private:
     }
 
     //==============================================================================
-    void scan (StringArray& outDeviceNames,
-               StringArray& inDeviceNames,
-               StringArray& outDeviceIds,
-               StringArray& inDeviceIds)
+    Devices scan()
     {
         if (enumerator == nullptr)
         {
             if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
-                return;
+                return {};
 
             notifyClient = new ChangeNotificationClient (this);
             enumerator->RegisterEndpointNotificationCallback (notifyClient);
@@ -1862,7 +1864,9 @@ private:
 
         if (! (check (enumerator->EnumAudioEndpoints (eAll, DEVICE_STATE_ACTIVE, deviceCollection.resetAndGetPointerAddress()))
                 && check (deviceCollection->GetCount (&numDevices))))
-            return;
+            return {};
+
+        Devices result;
 
         for (UINT32 i = 0; i < numDevices; ++i)
         {
@@ -1902,40 +1906,33 @@ private:
             if (flow == eRender)
             {
                 const int index = (deviceId == defaultRenderer) ? 0 : -1;
-                outDeviceIds.insert (index, deviceId);
-                outDeviceNames.insert (index, name);
+                result.outputDeviceIds.insert (index, deviceId);
+                result.outputDeviceNames.insert (index, name);
             }
             else if (flow == eCapture)
             {
                 const int index = (deviceId == defaultCapture) ? 0 : -1;
-                inDeviceIds.insert (index, deviceId);
-                inDeviceNames.insert (index, name);
+                result.inputDeviceIds.insert (index, deviceId);
+                result.inputDeviceNames.insert (index, name);
             }
         }
 
-        inDeviceNames.appendNumbersToDuplicates (false, false);
-        outDeviceNames.appendNumbersToDuplicates (false, false);
+        result.inputDeviceNames .appendNumbersToDuplicates (false, false);
+        result.outputDeviceNames.appendNumbersToDuplicates (false, false);
+
+        return result;
     }
 
     //==============================================================================
-    void systemDeviceChanged() override
+    void systemDeviceChanged()
     {
-        StringArray newOutNames, newInNames, newOutIds, newInIds;
-        scan (newOutNames, newInNames, newOutIds, newInIds);
+        const auto newDevices = scan();
 
-        if (newOutNames != outputDeviceNames
-             || newInNames != inputDeviceNames
-             || newOutIds != outputDeviceIds
-             || newInIds != inputDeviceIds)
+        if (std::exchange (devices, newDevices) != newDevices)
         {
             hasScanned = true;
-            outputDeviceNames = newOutNames;
-            inputDeviceNames = newInNames;
-            outputDeviceIds = newOutIds;
-            inputDeviceIds = newInIds;
+            callDeviceChangeListeners();
         }
-
-        callDeviceChangeListeners();
     }
 
     //==============================================================================
