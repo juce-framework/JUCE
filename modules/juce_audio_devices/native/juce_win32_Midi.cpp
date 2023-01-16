@@ -103,7 +103,7 @@ struct MidiServiceType
 struct Win32MidiService  : public MidiServiceType,
                            private Timer
 {
-    Win32MidiService() {}
+    Win32MidiService() = default;
 
     Array<MidiDeviceInfo> getAvailableDevices (bool isInput) override
     {
@@ -1871,6 +1871,10 @@ struct MidiService :  public DeletedAtShutdown
 
 private:
     std::unique_ptr<MidiServiceType> internal;
+    DeviceChangeDetector detector { L"JuceMidiDeviceDetector_", []
+    {
+        MidiDeviceListConnectionBroadcaster::get().notify();
+    } };
 };
 
 JUCE_IMPLEMENT_SINGLETON (MidiService)
@@ -2011,6 +2015,12 @@ MidiOutput::~MidiOutput()
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
     internal->sendMessageNow (message);
+}
+
+MidiDeviceListConnection MidiDeviceListConnection::make (std::function<void()> cb)
+{
+    auto& broadcaster = MidiDeviceListConnectionBroadcaster::get();
+    return { &broadcaster, broadcaster.add (std::move (cb)) };
 }
 
 } // namespace juce

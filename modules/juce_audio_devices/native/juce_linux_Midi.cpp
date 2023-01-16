@@ -29,35 +29,20 @@ namespace juce
 class AlsaClient  : public ReferenceCountedObject
 {
 public:
-    AlsaClient()
-    {
-        jassert (instance == nullptr);
-
-        snd_seq_open (&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
-
-        if (handle != nullptr)
-        {
-            snd_seq_nonblock (handle, SND_SEQ_NONBLOCK);
-            snd_seq_set_client_name (handle, getAlsaMidiName().toRawUTF8());
-            clientId = snd_seq_client_id (handle);
-
-            // It's good idea to pre-allocate a good number of elements
-            ports.ensureStorageAllocated (32);
-        }
-    }
-
     ~AlsaClient()
     {
+        inputThread.reset();
+
         jassert (instance != nullptr);
         instance = nullptr;
 
         jassert (activeCallbacks.get() == 0);
 
-        if (inputThread)
-            inputThread->stopThread (3000);
-
         if (handle != nullptr)
+        {
+            snd_seq_delete_simple_port (handle, announcementsIn);
             snd_seq_close (handle);
+        }
     }
 
     static String getAlsaMidiName()
@@ -123,15 +108,7 @@ public:
 
         void enableCallback (bool enable)
         {
-            const auto oldValue = callbackEnabled.exchange (enable);
-
-            if (oldValue != enable)
-            {
-                if (enable)
-                    client.registerCallback();
-                else
-                    client.unregisterCallback();
-            }
+            callbackEnabled = enable;
         }
 
         bool sendMessageNow (const MidiMessage& message)
@@ -238,23 +215,6 @@ public:
         return instance;
     }
 
-    void registerCallback()
-    {
-        if (inputThread == nullptr)
-            inputThread.reset (new MidiInputThread (*this));
-
-        if (++activeCallbacks == 1)
-            inputThread->startThread();
-    }
-
-    void unregisterCallback()
-    {
-        jassert (activeCallbacks.get() > 0);
-
-        if (--activeCallbacks == 0 && inputThread->isThreadRunning())
-            inputThread->signalThreadShouldExit();
-    }
-
     void handleIncomingMidiMessage (snd_seq_event* event, const MidiMessage& message)
     {
         const ScopedLock sl (callbackLock);
@@ -294,8 +254,34 @@ public:
     }
 
 private:
+    AlsaClient()
+    {
+        jassert (instance == nullptr);
+
+        snd_seq_open (&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
+
+        if (handle != nullptr)
+        {
+            snd_seq_nonblock (handle, SND_SEQ_NONBLOCK);
+            snd_seq_set_client_name (handle, getAlsaMidiName().toRawUTF8());
+            clientId = snd_seq_client_id (handle);
+
+            // It's good idea to pre-allocate a good number of elements
+            ports.ensureStorageAllocated (32);
+
+            announcementsIn = snd_seq_create_simple_port (handle,
+                                                          TRANS ("announcements").toRawUTF8(),
+                                                          SND_SEQ_PORT_CAP_WRITE,
+                                                          SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
+            snd_seq_connect_from (handle, announcementsIn, SND_SEQ_CLIENT_SYSTEM, SND_SEQ_PORT_SYSTEM_ANNOUNCE);
+
+            inputThread.emplace (*this);
+        }
+    }
+
     snd_seq_t* handle = nullptr;
     int clientId = 0;
+    int announcementsIn = 0;
     OwnedArray<Port> ports;
     Atomic<int> activeCallbacks;
     CriticalSection callbackLock;
@@ -303,17 +289,52 @@ private:
     static AlsaClient* instance;
 
     //==============================================================================
-    class MidiInputThread   : public Thread
+    class SequencerThread
     {
     public:
-        MidiInputThread (AlsaClient& c)
-            : Thread ("JUCE MIDI Input"), client (c)
+        explicit SequencerThread (AlsaClient& c)
+            : client (c)
         {
-            jassert (client.get() != nullptr);
         }
 
-        void run() override
+        ~SequencerThread() noexcept
         {
+            shouldStop = true;
+            thread.join();
+        }
+
+    private:
+        // If we directly call MidiDeviceListConnectionBroadcaster::get() from the background thread,
+        // there's a possibility that we'll deadlock in the following scenario:
+        // - The main thread calls MidiDeviceListConnectionBroadcaster::get() for the first time
+        //   (e.g. to register a listener). The static MidiDeviceListConnectionBroadcaster singleton
+        //   begins construction. During the constructor, an AlsaClient is created to iterate midi
+        //   ins/outs.
+        // - The AlsaClient starts a new SequencerThread. If connections are updated, the
+        //   SequencerThread may call MidiDeviceListConnectionBroadcaster::get().notify()
+        //   while the MidiDeviceListConnectionBroadcaster singleton is still being created.
+        // - The SequencerThread blocks until the MidiDeviceListConnectionBroadcaster has been
+        //   created on the main thread, but the MidiDeviceListConnectionBroadcaster's constructor
+        //   can't complete until the AlsaClient's destructor has run, which in turn requires the
+        //   SequencerThread to join.
+        class UpdateNotifier : private AsyncUpdater
+        {
+        public:
+            ~UpdateNotifier() override { cancelPendingUpdate(); }
+            using AsyncUpdater::triggerAsyncUpdate;
+
+        private:
+            void handleAsyncUpdate() override { MidiDeviceListConnectionBroadcaster::get().notify(); }
+        };
+
+        AlsaClient& client;
+        MidiDataConcatenator concatenator { 2048 };
+        std::atomic<bool> shouldStop { false };
+        UpdateNotifier notifier;
+        std::thread thread { [this]
+        {
+            Thread::setCurrentThreadName ("JUCE MIDI Input");
+
             auto seqHandle = client.get();
 
             const int maxEventSize = 16 * 1024;
@@ -321,17 +342,20 @@ private:
 
             if (snd_midi_event_new (maxEventSize, &midiParser) >= 0)
             {
-                auto numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
-                HeapBlock<pollfd> pfd (numPfds);
-                snd_seq_poll_descriptors (seqHandle, pfd, (unsigned int) numPfds, POLLIN);
+                const ScopeGuard freeMidiEvent { [&] { snd_midi_event_free (midiParser); } };
 
-                HeapBlock<uint8> buffer (maxEventSize);
+                const auto numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
+                std::vector<pollfd> pfd (static_cast<size_t> (numPfds));
+                snd_seq_poll_descriptors (seqHandle, pfd.data(), (unsigned int) numPfds, POLLIN);
 
-                while (! threadShouldExit())
+                std::vector<uint8> buffer (maxEventSize);
+
+                while (! shouldStop)
                 {
-                    if (poll (pfd, (nfds_t) numPfds, 100) > 0) // there was a "500" here which is a bit long when we exit the program and have to wait for a timeout on this poll call
+                    // This timeout shouldn't be too long, so that the program can exit in a timely manner
+                    if (poll (pfd.data(), (nfds_t) numPfds, 100) > 0)
                     {
-                        if (threadShouldExit())
+                        if (shouldStop)
                             break;
 
                         do
@@ -340,33 +364,51 @@ private:
 
                             if (snd_seq_event_input (seqHandle, &inputEvent) >= 0)
                             {
+                                const ScopeGuard freeInputEvent { [&] { snd_seq_free_event (inputEvent); } };
+
+                                constexpr int systemEvents[]
+                                {
+                                    SND_SEQ_EVENT_CLIENT_CHANGE,
+                                    SND_SEQ_EVENT_CLIENT_START,
+                                    SND_SEQ_EVENT_CLIENT_EXIT,
+                                    SND_SEQ_EVENT_PORT_CHANGE,
+                                    SND_SEQ_EVENT_PORT_START,
+                                    SND_SEQ_EVENT_PORT_EXIT,
+                                    SND_SEQ_EVENT_PORT_SUBSCRIBED,
+                                    SND_SEQ_EVENT_PORT_UNSUBSCRIBED,
+                                };
+
+                                const auto foundEvent = std::find (std::begin (systemEvents),
+                                                                   std::end   (systemEvents),
+                                                                   inputEvent->type);
+
+                                if (foundEvent != std::end (systemEvents))
+                                {
+                                    notifier.triggerAsyncUpdate();
+                                    continue;
+                                }
+
                                 // xxx what about SYSEXes that are too big for the buffer?
-                                auto numBytes = snd_midi_event_decode (midiParser, buffer,
-                                                                       maxEventSize, inputEvent);
+                                const auto numBytes = snd_midi_event_decode (midiParser,
+                                                                             buffer.data(),
+                                                                             maxEventSize,
+                                                                             inputEvent);
 
                                 snd_midi_event_reset_decode (midiParser);
 
-                                concatenator.pushMidiData (buffer, (int) numBytes,
+                                concatenator.pushMidiData (buffer.data(), (int) numBytes,
                                                            Time::getMillisecondCounter() * 0.001,
                                                            inputEvent, client);
-
-                                snd_seq_free_event (inputEvent);
                             }
                         }
                         while (snd_seq_event_input_pending (seqHandle, 0) > 0);
                     }
                 }
-
-                snd_midi_event_free (midiParser);
             }
-        }
-
-    private:
-        AlsaClient& client;
-        MidiDataConcatenator concatenator { 2048 };
+        } };
     };
 
-    std::unique_ptr<MidiInputThread> inputThread;
+    std::optional<SequencerThread> inputThread;
 };
 
 AlsaClient* AlsaClient::instance = nullptr;
@@ -659,6 +701,18 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
     internal->ptr->sendMessageNow (message);
 }
 
+MidiDeviceListConnection MidiDeviceListConnection::make (std::function<void()> cb)
+{
+    auto& broadcaster = MidiDeviceListConnectionBroadcaster::get();
+    // We capture the AlsaClient instance here to ensure that it remains alive for at least as long
+    // as the MidiDeviceListConnection. This is necessary because system change messages will only
+    // be processed when the AlsaClient's SequencerThread is running.
+    return { &broadcaster, broadcaster.add ([fn = std::move (cb), client = AlsaClient::getInstance()]
+                                            {
+                                                NullCheckedInvocation::invoke (fn);
+                                            }) };
+}
+
 //==============================================================================
 #else
 
@@ -692,6 +746,12 @@ std::unique_ptr<MidiOutput> MidiOutput::createNewDevice (const String&)         
 StringArray MidiOutput::getDevices()                                                      { return {}; }
 int MidiOutput::getDefaultDeviceIndex()                                                   { return 0;}
 std::unique_ptr<MidiOutput> MidiOutput::openDevice (int)                                  { return {}; }
+
+MidiDeviceListConnection MidiDeviceListConnection::make (std::function<void()> cb)
+{
+    auto& broadcaster = MidiDeviceListConnectionBroadcaster::get();
+    return { &broadcaster, broadcaster.add (std::move (cb)) };
+}
 
 #endif
 
