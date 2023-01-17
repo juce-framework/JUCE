@@ -1740,9 +1740,14 @@ private:
             if (permission == "android.permission.READ_EXTERNAL_STORAGE")
                 usesPermission->setAttribute ("android:maxSdkVersion", "32");
 
+            if (permission == "android.permission.BLUETOOTH_SCAN")
+                usesPermission->setAttribute ("android:usesPermissionFlags", "neverForLocation");
+
             // These permissions are obsoleted by new more fine-grained permissions in API level 31
             if (permission == "android.permission.BLUETOOTH"
-                || permission == "android.permission.BLUETOOTH_ADMIN")
+                || permission == "android.permission.BLUETOOTH_ADMIN"
+                || permission == "android.permission.ACCESS_FINE_LOCATION"
+                || permission == "android.permission.ACCESS_COARSE_LOCATION")
             {
                 usesPermission->setAttribute ("android:maxSdkVersion", "30");
             }
