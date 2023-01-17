@@ -42,6 +42,7 @@
 		4E6DC4778D583C48C3CCD4DC /* jucer_ResourceFile.cpp */ = {isa = PBXBuildFile; fileRef = E13A54A6D3A1895EACE53E51; };
 		4FAAB649E846BA2764C02ACE /* jucer_PaintElementImage.cpp */ = {isa = PBXBuildFile; fileRef = 72ED72174F9DBD0ABD8AFCED; };
 		537ABF1DB09DDBD1542A2B0C /* jucer_ComponentLayoutEditor.cpp */ = {isa = PBXBuildFile; fileRef = EF25A29A2194FC107B40F65F; };
+		54C391DB9AC4AFABD2EFFD7E /* Security.framework */ = {isa = PBXBuildFile; fileRef = 4E410AEB132B44674291105A; };
 		5DD883699B85E4C492CAD065 /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = DB9C8E35DF815B803CB4A9CF; };
 		638C7247B6DBA67EFE46E124 /* jucer_PIPGenerator.cpp */ = {isa = PBXBuildFile; fileRef = 191330B20DAC08B890656EA0; };
 		63D97E01F2C4C91037CB65BD /* jucer_TestComponent.cpp */ = {isa = PBXBuildFile; fileRef = 24EB4C2412821B8019D6F754; };
@@ -167,6 +168,7 @@
 		4AE72953E3B3DF06D3B9BA86 /* jucer_PaintElementPath.cpp */ /* jucer_PaintElementPath.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_PaintElementPath.cpp; path = ../../Source/ComponentEditor/PaintElements/jucer_PaintElementPath.cpp; sourceTree = SOURCE_ROOT; };
 		4D5F0CA8D1273144681A1D48 /* jucer_JucerTreeViewBase.cpp */ /* jucer_JucerTreeViewBase.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_JucerTreeViewBase.cpp; path = ../../Source/Utility/UI/jucer_JucerTreeViewBase.cpp; sourceTree = SOURCE_ROOT; };
 		4D698BF12BCD6B0896BCDF17 /* jucer_AutoUpdater.h */ /* jucer_AutoUpdater.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AutoUpdater.h; path = ../../Source/Application/jucer_AutoUpdater.h; sourceTree = SOURCE_ROOT; };
+		4E410AEB132B44674291105A /* Security.framework */ /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		4E671236FDBD5AD4699740C6 /* jucer_JucerCommandIDs.h */ /* jucer_JucerCommandIDs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_JucerCommandIDs.h; path = ../../Source/ComponentEditor/UI/jucer_JucerCommandIDs.h; sourceTree = SOURCE_ROOT; };
 		4ECF029E3A69BF42FED1503D /* jucer_PIPAudioProcessorTemplate.h */ /* jucer_PIPAudioProcessorTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_PIPAudioProcessorTemplate.h; path = ../../Source/BinaryData/Templates/jucer_PIPAudioProcessorTemplate.h; sourceTree = SOURCE_ROOT; };
 		4F687965FBE86EAFDB3ACFEC /* BinaryData.h */ /* BinaryData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../JuceLibraryCode/BinaryData.h; sourceTree = SOURCE_ROOT; };
@@ -401,6 +403,7 @@
 				CDEF9FF2D119476D707305DF,
 				96EC6315E1B3F1A109F84BAF,
 				11D42F7EC6E6539D79A7F4B1,
+				54C391DB9AC4AFABD2EFFD7E,
 				B980464FA2761CCD64B1FAD6,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -452,6 +455,7 @@
 				431D30038CBF67F80E8B3A13,
 				9F01BA9942D038EA8B5289A8,
 				E5D6C36496F5BC84D7213BE8,
+				4E410AEB132B44674291105A,
 				CF6C8BD0DA3D8CD4E99EBADA,
 			);
 			name = Frameworks;
