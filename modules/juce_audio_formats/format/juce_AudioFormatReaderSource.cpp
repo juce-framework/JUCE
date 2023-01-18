@@ -81,8 +81,14 @@ void AudioFormatReaderSource::getNextAudioBlock (const AudioSourceChannelInfo& i
         }
         else
         {
-            reader->read (info.buffer, info.startSample,
-                          info.numSamples, start, true, true);
+            const auto samplesToRead = jlimit (int64{},
+                                               (int64) info.numSamples,
+                                               reader->lengthInSamples - start);
+
+            reader->read (info.buffer, info.startSample, (int) samplesToRead, start, true, true);
+            info.buffer->clear ((int) (info.startSample + samplesToRead),
+                                (int) (info.numSamples - samplesToRead));
+
             nextPlayPos += info.numSamples;
         }
     }
