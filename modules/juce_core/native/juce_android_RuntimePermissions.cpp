@@ -43,7 +43,11 @@ static StringArray jucePermissionToAndroidPermissions (RuntimePermissions::Permi
                      "android.permission.BLUETOOTH_CONNECT" };
         }
 
-        case RuntimePermissions::writeExternalStorage:  return { "android.permission.WRITE_EXTERNAL_STORAGE" };
+        // WRITE_EXTERNAL_STORAGE has no effect on SDK 29+
+        case RuntimePermissions::writeExternalStorage:
+            return getAndroidSDKVersion() < 29 ? StringArray { "android.permission.WRITE_EXTERNAL_STORAGE" }
+                                               : StringArray{};
+
         case RuntimePermissions::camera:                return { "android.permission.CAMERA" };
 
         case RuntimePermissions::readExternalStorage:
