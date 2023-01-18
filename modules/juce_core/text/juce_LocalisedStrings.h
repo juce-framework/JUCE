@@ -50,14 +50,14 @@ namespace juce
     "goodbye" = "au revoir"
     @endcode
 
-    If the strings need to contain a quote character, they can use `\"` instead, and
+    If the strings need to contain a quote character, they can use \" instead, and
     if the first non-whitespace character on a line isn't a quote, then it's ignored,
     (you can use this to add comments).
 
     Note that this is a singleton class, so don't create or destroy the object directly.
     There's also a TRANS(text) macro defined to make it easy to use the this.
 
-    E.g. @code
+    @code
     printSomething (TRANS("hello"));
     @endcode
 
