@@ -836,6 +836,16 @@ private:
 };
 
 //==============================================================================
+struct SequenceAndLatency
+{
+    using RenderSequenceVariant = std::variant<GraphRenderSequence<float>,
+                                               GraphRenderSequence<double>>;
+
+    RenderSequenceVariant sequence;
+    int latencySamples = 0;
+};
+
+//==============================================================================
 class RenderSequenceBuilder
 {
 public:
@@ -846,19 +856,12 @@ public:
 
     static constexpr auto midiChannelIndex = AudioProcessorGraph::midiChannelIndex;
 
-    template <typename RenderSequence>
-    static auto build (const Nodes& n, const Connections& c)
+    template <typename FloatType>
+    static SequenceAndLatency build (const Nodes& n, const Connections& c)
     {
-        RenderSequence sequence;
+        GraphRenderSequence<FloatType> sequence;
         const RenderSequenceBuilder builder (n, c, sequence);
-
-        struct SequenceAndLatency
-        {
-            RenderSequence sequence;
-            int latencySamples = 0;
-        };
-
-        return SequenceAndLatency { std::move (sequence), builder.totalLatency };
+        return { std::move (sequence), builder.totalLatency };
     }
 
 private:
@@ -1307,8 +1310,7 @@ private:
             if (output.isMIDI())
             {
                 if (inputChannelOfIndexToIgnore != midiChannelIndex
-                    && c.isConnected ({ { output.nodeID, midiChannelIndex },
-                                        { node->nodeID,  midiChannelIndex } }))
+                    && c.isConnected ({ output, { node->nodeID, midiChannelIndex } }))
                     return true;
             }
             else
@@ -1356,37 +1358,49 @@ class RenderSequence
 public:
     using AudioGraphIOProcessor = AudioProcessorGraph::AudioGraphIOProcessor;
 
-    RenderSequence (PrepareSettings s, const Nodes& n, const Connections& c)
-        : RenderSequence (s,
-                          RenderSequenceBuilder::build<GraphRenderSequence<float>>  (n, c),
-                          RenderSequenceBuilder::build<GraphRenderSequence<double>> (n, c))
+    RenderSequence (const PrepareSettings s, const Nodes& n, const Connections& c)
+        : RenderSequence (s, s.precision == AudioProcessor::ProcessingPrecision::singlePrecision
+                                ? RenderSequenceBuilder::build<float>  (n, c)
+                                : RenderSequenceBuilder::build<double> (n, c))
     {
     }
 
-    void process (AudioBuffer<float>& audio, MidiBuffer& midi, AudioPlayHead* playHead)
+    template <typename FloatType>
+    void process (AudioBuffer<FloatType>& audio, MidiBuffer& midi, AudioPlayHead* playHead)
     {
-        renderSequenceF.perform (audio, midi, playHead);
+        if (auto* s = std::get_if<GraphRenderSequence<FloatType>> (&sequence.sequence))
+            s->perform (audio, midi, playHead);
+        else
+            jassertfalse; // Not prepared for this audio format!
     }
 
-    void process (AudioBuffer<double>& audio, MidiBuffer& midi, AudioPlayHead* playHead)
+    template <typename FloatType>
+    void processIO (AudioGraphIOProcessor& io, AudioBuffer<FloatType>& audio, MidiBuffer& midi)
     {
-        renderSequenceD.perform (audio, midi, playHead);
+        if (auto* s = std::get_if<GraphRenderSequence<FloatType>> (&sequence.sequence))
+            processIOBlock (io, *s, audio, midi);
+        else
+            jassertfalse; // Not prepared for this audio format!
     }
 
-    void processIO (AudioGraphIOProcessor& io, AudioBuffer<float>& audio, MidiBuffer& midi)
-    {
-        processIOBlock (io, renderSequenceF, audio, midi);
-    }
-
-    void processIO (AudioGraphIOProcessor& io, AudioBuffer<double>& audio, MidiBuffer& midi)
-    {
-        processIOBlock (io, renderSequenceD, audio, midi);
-    }
-
-    int getLatencySamples() const { return latencySamples; }
+    int getLatencySamples() const { return sequence.latencySamples; }
     PrepareSettings getSettings() const { return settings; }
 
 private:
+    template <typename This, typename Callback>
+    static decltype (auto) visitRenderSequence (This& t, Callback&& callback)
+    {
+        if (auto* sequence = std::get_if<GraphRenderSequence<float>>  (&t.sequence.sequence)) return callback (*sequence);
+        if (auto* sequence = std::get_if<GraphRenderSequence<double>> (&t.sequence.sequence)) return callback (*sequence);
+        jassertfalse;
+    }
+
+    RenderSequence (const PrepareSettings s, SequenceAndLatency&& built)
+        : settings (s), sequence (std::move (built))
+    {
+        visitRenderSequence (*this, [&] (auto& seq) { seq.prepareBuffers (settings.blockSize); });
+    }
+
     template <typename FloatType, typename SequenceType>
     static void processIOBlock (AudioGraphIOProcessor& io,
                                 SequenceType& sequence,
@@ -1428,23 +1442,8 @@ private:
         }
     }
 
-    template <typename Float, typename Double>
-    RenderSequence (PrepareSettings s, Float f, Double d)
-        : settings (s),
-          renderSequenceF (std::move (f.sequence)),
-          renderSequenceD (std::move (d.sequence)),
-          latencySamples (f.latencySamples)
-    {
-        jassert (f.latencySamples == d.latencySamples);
-
-        renderSequenceF.prepareBuffers (settings.blockSize);
-        renderSequenceD.prepareBuffers (settings.blockSize);
-    }
-
     PrepareSettings settings;
-    GraphRenderSequence<float>  renderSequenceF;
-    GraphRenderSequence<double> renderSequenceD;
-    int latencySamples = 0;
+    SequenceAndLatency sequence;
 };
 
 //==============================================================================
