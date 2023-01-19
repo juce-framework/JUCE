@@ -139,6 +139,15 @@ public:
     using Connection     = AudioProcessorGraph::Connection;
     using NodeAndChannel = AudioProcessorGraph::NodeAndChannel;
 
+private:
+    static auto equalRange (const std::set<NodeAndChannel>& pins, const NodeID node)
+    {
+        return std::equal_range (pins.cbegin(), pins.cend(), node, ImplicitNode::compare);
+    }
+
+    using Map = std::map<NodeAndChannel, std::set<NodeAndChannel>>;
+
+public:
     static constexpr auto midiChannelIndex = AudioProcessorGraph::midiChannelIndex;
 
     bool addConnection (const Nodes& n, const Connection& c)
@@ -179,7 +188,7 @@ public:
 
         for (auto& pair : sourcesForDestination)
         {
-            const auto range = std::equal_range (pair.second.cbegin(), pair.second.cend(), n, ImplicitNode::compare);
+            const auto range = equalRange (pair.second, n);
             result |= range.first != range.second;
             pair.second.erase (range.first, range.second);
         }
@@ -231,8 +240,8 @@ public:
 
         return std::any_of (matchingDestinations.first, matchingDestinations.second, [srcID] (const auto& pair)
         {
-            const auto iter = std::lower_bound (pair.second.cbegin(), pair.second.cend(), srcID, ImplicitNode::compare);
-            return iter != pair.second.cend() && iter->nodeID == srcID;
+            const auto [begin, end] = equalRange (pair.second, srcID);
+            return begin != end;
         });
     }
 
@@ -276,9 +285,44 @@ public:
     bool operator== (const Connections& other) const { return sourcesForDestination == other.sourcesForDestination; }
     bool operator!= (const Connections& other) const { return sourcesForDestination != other.sourcesForDestination; }
 
-private:
-    using Map = std::map<NodeAndChannel, std::set<NodeAndChannel>>;
+    class DestinationsForSources
+    {
+    public:
+        explicit DestinationsForSources (Map m) : map (std::move (m)) {}
 
+        bool isSourceConnectedToDestinationNodeIgnoringChannel (const NodeAndChannel& source, NodeID dest, int channel) const
+        {
+            if (const auto destIter = map.find (source); destIter != map.cend())
+            {
+                const auto [begin, end] = equalRange (destIter->second, dest);
+                return std::any_of (begin, end, [&] (const NodeAndChannel& nodeAndChannel)
+                {
+                    return nodeAndChannel != NodeAndChannel { dest, channel };
+                });
+            }
+
+            return false;
+        }
+
+    private:
+        Map map;
+    };
+
+    /*  Reverses the graph, to allow fast lookup by source.
+        This is expensive, don't call this more than necessary!
+    */
+    auto getDestinationsForSources() const
+    {
+        Map destinationsForSources;
+
+        for (const auto& [destination, sources] : sourcesForDestination)
+            for (const auto& source : sources)
+                destinationsForSources[source].insert (destination);
+
+        return DestinationsForSources (std::move (destinationsForSources));
+    }
+
+private:
     struct SearchState
     {
         std::set<NodeID> visited;
@@ -428,6 +472,20 @@ public:
         }
 
         return current;
+    }
+
+    /*  Call from the main thread to indicate that a node has been removed from the graph.
+    */
+    void removeNode (const NodeID n)
+    {
+        preparedNodes.erase (n);
+    }
+
+    /*  Call from the main thread to indicate that all nodes have been removed from the graph.
+    */
+    void clear()
+    {
+        preparedNodes.clear();
     }
 
 private:
@@ -964,6 +1022,7 @@ private:
     //==============================================================================
     template <typename RenderSequence>
     int findBufferForInputAudioChannel (const Connections& c,
+                                        const Connections::DestinationsForSources& reversed,
                                         RenderSequence& sequence,
                                         Node& node,
                                         const int inputChan,
@@ -1001,7 +1060,7 @@ private:
                 jassert (bufIndex >= 0);
             }
 
-            if (inputChan < numOuts && isBufferNeededLater (c, ourRenderingIndex, inputChan, src))
+            if (inputChan < numOuts && isBufferNeededLater (reversed, ourRenderingIndex, inputChan, src))
             {
                 // can't mess up this channel because it's needed later by another node,
                 // so we need to use a copy of it..
@@ -1028,7 +1087,7 @@ private:
             {
                 auto sourceBufIndex = getBufferContaining (src);
 
-                if (sourceBufIndex >= 0 && ! isBufferNeededLater (c, ourRenderingIndex, inputChan, src))
+                if (sourceBufIndex >= 0 && ! isBufferNeededLater (reversed, ourRenderingIndex, inputChan, src))
                 {
                     // we've found one of our input chans that can be re-used..
                     reusableInputIndex = i;
@@ -1082,7 +1141,7 @@ private:
 
                         if (nodeDelay < maxLatency)
                         {
-                            if (! isBufferNeededLater (c, ourRenderingIndex, inputChan, src))
+                            if (! isBufferNeededLater (reversed, ourRenderingIndex, inputChan, src))
                             {
                                 sequence.addDelayChannelOp (srcIndex, maxLatency - nodeDelay);
                             }
@@ -1108,6 +1167,7 @@ private:
 
     template <typename RenderSequence>
     int findBufferForInputMidiChannel (const Connections& c,
+                                       const Connections::DestinationsForSources& reversed,
                                        RenderSequence& sequence,
                                        Node& node,
                                        int ourRenderingIndex)
@@ -1134,7 +1194,7 @@ private:
 
             if (midiBufferToUse >= 0)
             {
-                if (isBufferNeededLater (c, ourRenderingIndex, midiChannelIndex, src))
+                if (isBufferNeededLater (reversed, ourRenderingIndex, midiChannelIndex, src))
                 {
                     // can't mess up this channel because it's needed later by another node, so we
                     // need to use a copy of it..
@@ -1163,7 +1223,7 @@ private:
                 auto sourceBufIndex = getBufferContaining (src);
 
                 if (sourceBufIndex >= 0
-                    && ! isBufferNeededLater (c, ourRenderingIndex, midiChannelIndex, src))
+                    && ! isBufferNeededLater (reversed, ourRenderingIndex, midiChannelIndex, src))
                 {
                     // we've found one of our input buffers that can be re-used..
                     reusableInputIndex = i;
@@ -1212,6 +1272,7 @@ private:
 
     template <typename RenderSequence>
     void createRenderingOpsForNode (const Connections& c,
+                                    const Connections::DestinationsForSources& reversed,
                                     RenderSequence& sequence,
                                     Node& node,
                                     const int ourRenderingIndex)
@@ -1228,6 +1289,7 @@ private:
         {
             // get a list of all the inputs to this node
             auto index = findBufferForInputAudioChannel (c,
+                                                         reversed,
                                                          sequence,
                                                          node,
                                                          inputChan,
@@ -1250,7 +1312,7 @@ private:
             audioBuffers.getReference (index).channel = { node.nodeID, outputChan };
         }
 
-        auto midiBufferToUse = findBufferForInputMidiChannel (c, sequence, node, ourRenderingIndex);
+        auto midiBufferToUse = findBufferForInputMidiChannel (c, reversed, sequence, node, ourRenderingIndex);
 
         if (processor.producesMidi())
             midiBuffers.getReference (midiBufferToUse).channel = { node.nodeID, midiChannelIndex };
@@ -1289,7 +1351,7 @@ private:
         return -1;
     }
 
-    void markAnyUnusedBuffersAsFree (const Connections& c,
+    void markAnyUnusedBuffersAsFree (const Connections::DestinationsForSources& c,
                                      Array<AssignedBuffer>& buffers,
                                      const int stepIndex)
     {
@@ -1298,33 +1360,25 @@ private:
                 b.setFree();
     }
 
-    bool isBufferNeededLater (const Connections& c,
-                              int stepIndexToSearchFrom,
-                              int inputChannelOfIndexToIgnore,
-                              NodeAndChannel output) const
+    bool isBufferNeededLater (const Connections::DestinationsForSources& c,
+                              const int stepIndexToSearchFrom,
+                              const int inputChannelOfIndexToIgnore,
+                              const NodeAndChannel output) const
     {
-        while (stepIndexToSearchFrom < orderedNodes.size())
+        if (orderedNodes.size() <= stepIndexToSearchFrom)
+            return false;
+
+        if (c.isSourceConnectedToDestinationNodeIgnoringChannel (output,
+                                                                 orderedNodes.getUnchecked (stepIndexToSearchFrom)->nodeID,
+                                                                 inputChannelOfIndexToIgnore))
         {
-            auto* node = orderedNodes.getUnchecked (stepIndexToSearchFrom);
-
-            if (output.isMIDI())
-            {
-                if (inputChannelOfIndexToIgnore != midiChannelIndex
-                    && c.isConnected ({ output, { node->nodeID, midiChannelIndex } }))
-                    return true;
-            }
-            else
-            {
-                for (int i = 0; i < node->getProcessor()->getTotalNumInputChannels(); ++i)
-                    if (i != inputChannelOfIndexToIgnore && c.isConnected ({ output, { node->nodeID, i } }))
-                        return true;
-            }
-
-            inputChannelOfIndexToIgnore = -1;
-            ++stepIndexToSearchFrom;
+            return true;
         }
 
-        return false;
+        return std::any_of (orderedNodes.begin() + stepIndexToSearchFrom + 1, orderedNodes.end(), [&] (const auto* node)
+        {
+            return c.isSourceConnectedToDestinationNodeIgnoringChannel (output, node->nodeID, -1);
+        });
     }
 
     template <typename RenderSequence>
@@ -1334,11 +1388,13 @@ private:
         audioBuffers.add (AssignedBuffer::createReadOnlyEmpty()); // first buffer is read-only zeros
         midiBuffers .add (AssignedBuffer::createReadOnlyEmpty());
 
+        const auto reversed = c.getDestinationsForSources();
+
         for (int i = 0; i < orderedNodes.size(); ++i)
         {
-            createRenderingOpsForNode (c, sequence, *orderedNodes.getUnchecked (i), i);
-            markAnyUnusedBuffersAsFree (c, audioBuffers, i);
-            markAnyUnusedBuffersAsFree (c, midiBuffers, i);
+            createRenderingOpsForNode (c, reversed, sequence, *orderedNodes.getUnchecked (i), i);
+            markAnyUnusedBuffersAsFree (reversed, audioBuffers, i);
+            markAnyUnusedBuffersAsFree (reversed, midiBuffers, i);
         }
 
         sequence.numBuffersNeeded = audioBuffers.size();
@@ -1388,7 +1444,7 @@ public:
 
 private:
     template <typename This, typename Callback>
-    static decltype (auto) visitRenderSequence (This& t, Callback&& callback)
+    static void visitRenderSequence (This& t, Callback&& callback)
     {
         if (auto* sequence = std::get_if<GraphRenderSequence<float>>  (&t.sequence.sequence)) return callback (*sequence);
         if (auto* sequence = std::get_if<GraphRenderSequence<double>> (&t.sequence.sequence)) return callback (*sequence);
@@ -1447,7 +1503,7 @@ private:
 };
 
 //==============================================================================
-/** Holds information about a particular graph configuration, without sharing ownership of any
+/*  Holds information about a particular graph configuration, without sharing ownership of any
     graph nodes. Can be checked for equality with other RenderSequenceSignature instances to see
     whether two graph configurations match.
 */
@@ -1508,7 +1564,7 @@ public:
         isNew = true;
     }
 
-    /** Call from the audio thread only. */
+    /*  Call from the audio thread only. */
     void updateAudioThreadState()
     {
         const SpinLock::ScopedTryLockType lock (mutex);
@@ -1521,7 +1577,7 @@ public:
         }
     }
 
-    /** Call from the audio thread only. */
+    /*  Call from the audio thread only. */
     RenderSequence* getAudioThreadState() const { return audioThreadState.get(); }
 
 private:
@@ -1587,6 +1643,7 @@ public:
 
         nodes = Nodes{};
         connections = Connections{};
+        nodeStates.clear();
         topologyChanged (updateKind);
     }
 
@@ -1625,6 +1682,7 @@ public:
     {
         connections.disconnectNode (nodeID);
         auto result = nodes.removeNode (nodeID);
+        nodeStates.removeNode (nodeID);
         topologyChanged (updateKind);
         return result;
     }
