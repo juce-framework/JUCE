@@ -351,14 +351,14 @@ public:
     /*  Called from prepareToPlay and releaseResources with the PrepareSettings that should be
         used next time the graph is rebuilt.
     */
-    void setState (Optional<PrepareSettings> newSettings)
+    void setState (std::optional<PrepareSettings> newSettings)
     {
         const std::lock_guard<std::mutex> lock (mutex);
         next = newSettings;
     }
 
     /*  Call from the audio thread only. */
-    Optional<PrepareSettings> getLastRequestedSettings() const { return next; }
+    std::optional<PrepareSettings> getLastRequestedSettings() const { return next; }
 
     /*  Call from the main thread only!
 
@@ -375,7 +375,7 @@ public:
 
         Returns the settings that were applied to the nodes.
     */
-    Optional<PrepareSettings> applySettings (const Nodes& n)
+    std::optional<PrepareSettings> applySettings (const Nodes& n)
     {
         const auto settingsChanged = [this]
         {
@@ -411,7 +411,7 @@ public:
             preparedNodes.clear();
         }
 
-        if (current.hasValue())
+        if (current.has_value())
         {
             for (const auto& node : n.getNodes())
             {
@@ -433,7 +433,7 @@ public:
 private:
     std::mutex mutex;
     std::set<NodeID> preparedNodes;
-    Optional<PrepareSettings> current, next;
+    std::optional<PrepareSettings> current, next;
 };
 
 //==============================================================================
@@ -1448,6 +1448,40 @@ private:
 };
 
 //==============================================================================
+/** Holds information about a particular graph configuration, without sharing ownership of any
+    graph nodes. Can be checked for equality with other RenderSequenceSignature instances to see
+    whether two graph configurations match.
+*/
+class RenderSequenceSignature
+{
+    auto tie() const { return std::tie (settings, connections, nodes); }
+
+public:
+    RenderSequenceSignature (const PrepareSettings s, const Nodes& n, const Connections& c)
+        : settings (s), connections (c), nodes (getNodeIDs (n)) {}
+
+    bool operator== (const RenderSequenceSignature& other) const { return tie() == other.tie(); }
+    bool operator!= (const RenderSequenceSignature& other) const { return tie() != other.tie(); }
+
+private:
+    static std::vector<AudioProcessorGraph::NodeID> getNodeIDs (const Nodes& n)
+    {
+        const auto& nodeRefs = n.getNodes();
+        std::vector<AudioProcessorGraph::NodeID> result;
+        result.reserve ((size_t) nodeRefs.size());
+
+        for (const auto& node : nodeRefs)
+            result.push_back (node->nodeID);
+
+        return result;
+    }
+
+    PrepareSettings settings;
+    Connections connections;
+    std::vector<AudioProcessorGraph::NodeID> nodes;
+};
+
+//==============================================================================
 /*  Facilitates wait-free render-sequence updates.
 
     Topology updates always happen on the main thread (or synchronised with the main thread).
@@ -1687,6 +1721,14 @@ public:
         topologyChanged (UpdateKind::sync);
     }
 
+    void rebuild()
+    {
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            handleAsyncUpdate();
+        else
+            triggerAsyncUpdate();
+    }
+
     void reset()
     {
         for (auto* n : getNodes())
@@ -1757,15 +1799,22 @@ private:
             for (const auto node : nodes.getNodes())
                 setParentGraph (node->getProcessor());
 
-            auto sequence = std::make_unique<RenderSequence> (*newSettings, nodes, connections);
-            owner->setLatencySamples (sequence->getLatencySamples());
-            renderSequenceExchange.set (std::move (sequence));
+            const RenderSequenceSignature newSignature (*newSettings, nodes, connections);
+
+            if (std::exchange (lastBuiltSequence, newSignature) != newSignature)
+            {
+                auto sequence = std::make_unique<RenderSequence> (*newSettings, nodes, connections);
+                owner->setLatencySamples (sequence->getLatencySamples());
+                renderSequenceExchange.set (std::move (sequence));
+            }
         }
         else
         {
+            lastBuiltSequence.reset();
             renderSequenceExchange.set (nullptr);
         }
     }
+
 
     AudioProcessorGraph* owner = nullptr;
     Nodes nodes;
@@ -1773,6 +1822,7 @@ private:
     NodeStates nodeStates;
     RenderSequenceExchange renderSequenceExchange;
     NodeID lastNodeID;
+    std::optional<RenderSequenceSignature> lastBuiltSequence;
 };
 
 //==============================================================================
@@ -1799,6 +1849,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::getNodeForId (NodeID x) const   
 bool AudioProcessorGraph::disconnectNode (NodeID nodeID, UpdateKind updateKind)                             { return pimpl->disconnectNode (nodeID, updateKind); }
 void AudioProcessorGraph::releaseResources()                                                                { return pimpl->releaseResources(); }
 bool AudioProcessorGraph::removeIllegalConnections (UpdateKind updateKind)                                  { return pimpl->removeIllegalConnections (updateKind); }
+void AudioProcessorGraph::rebuild()                                                                         { return pimpl->rebuild(); }
 void AudioProcessorGraph::reset()                                                                           { return pimpl->reset(); }
 bool AudioProcessorGraph::canConnect (const Connection& c) const                                            { return pimpl->canConnect (c); }
 bool AudioProcessorGraph::isConnected (const Connection& c) const noexcept                                  { return pimpl->isConnected (c); }
