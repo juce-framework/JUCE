@@ -214,7 +214,10 @@ public:
                 if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                 {
                     isDragging = true;
-                    owner.startDragAndDrop (e, rowsToDrag, dragDescription, true);
+                    // MY CHANGE
+//                    owner.startDragAndDrop (e, rowsToDrag, dragDescription, true); // OLD
+                    owner.startDragAndDrop (e, rowsToDrag, dragDescription, false); // MY CHANGE!
+                    // END OF MY CHANGE
                 }
             }
         }
