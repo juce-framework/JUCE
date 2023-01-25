@@ -2166,6 +2166,36 @@ public:
                 expect (graph.isAnInputTo (*nodes[nodes.size() - 1], *node));
             }
         }
+
+        beginTest ("large render sequence can be built");
+        {
+            AudioProcessorGraph graph;
+
+            std::vector<AudioProcessorGraph::NodeID> nodeIDs;
+
+            constexpr auto numNodes = 1000;
+            constexpr auto numChannels = 100;
+
+            for (auto i = 0; i < numNodes; ++i)
+            {
+                nodeIDs.push_back (graph.addNode (BasicProcessor::make (BasicProcessor::getMultichannelProperties (numChannels),
+                                                                        MidiIn::yes,
+                                                                        MidiOut::yes))->nodeID);
+            }
+
+            for (auto it = nodeIDs.begin(); it != std::prev (nodeIDs.end()); ++it)
+                for (auto channel = 0; channel < numChannels; ++channel)
+                    expect (graph.addConnection ({ { it[0], channel }, { it[1], channel } }));
+
+            const auto b = std::chrono::steady_clock::now();
+            graph.prepareToPlay (44100.0, 512);
+            const auto e = std::chrono::steady_clock::now();
+            const auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (e - b).count();
+
+            // No test here, but older versions of the graph would take forever to complete building
+            // this graph, so we just want to make sure that we finish the test without timing out.
+            logMessage ("render sequence built in " + String (duration) + " ms");
+        }
     }
 
 private:
@@ -2210,8 +2240,14 @@ private:
 
         static BusesProperties getStereoProperties()
         {
-            return BusesProperties().withInput ("in", AudioChannelSet::stereo())
+            return BusesProperties().withInput  ("in",  AudioChannelSet::stereo())
                                     .withOutput ("out", AudioChannelSet::stereo());
+        }
+
+        static BusesProperties getMultichannelProperties (int numChannels)
+        {
+            return BusesProperties().withInput  ("in",  AudioChannelSet::discreteChannels (numChannels))
+                                    .withOutput ("out", AudioChannelSet::discreteChannels (numChannels));
         }
 
     private:
