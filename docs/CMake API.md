@@ -266,7 +266,7 @@ attributes directly to these creation functions, rather than adding them later.
 `BUNDLE_ID`
 - An identifier string in the form "com.yourcompany.productname" which should uniquely identify
   this target. Mainly used for macOS builds. If not specified, a default will be generated using
-  the target's `COMPANY_NAME` and `PRODUCT_NAME`.
+  the target's `COMPANY_NAME` and the name of the CMake target.
 
 `MICROPHONE_PERMISSION_ENABLED`
 - May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.

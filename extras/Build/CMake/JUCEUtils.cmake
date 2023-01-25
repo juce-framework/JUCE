@@ -1297,6 +1297,12 @@ function(_juce_set_fallback_properties target)
     get_target_property(real_company_name ${target} JUCE_COMPANY_NAME)
     _juce_set_property_if_not_set(${target} BUNDLE_ID "com.${real_company_name}.${target}")
 
+    get_target_property(applied_bundle_id ${target} JUCE_BUNDLE_ID)
+
+    if("${applied_bundle_id}" MATCHES ".* .*")
+        message(WARNING "Target ${target} has JUCE_BUNDLE_ID '${applied_bundle_id}', which contains spaces. Use the BUNDLE_ID option to specify a valid ID.")
+    endif()
+
     _juce_set_property_if_not_set(${target} VERSION ${PROJECT_VERSION})
 
     get_target_property(final_version ${target} JUCE_VERSION)
