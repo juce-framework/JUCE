@@ -1105,7 +1105,7 @@ public:
                                .toWindowsStyle());
         }
 
-        String getConfigTargetPath (const MSVCBuildConfiguration& config) const
+        String getConfigTargetPath (const BuildConfiguration& config) const
         {
             const auto result = getSolutionTargetPath (config) + "\\" + getName();
 
@@ -1147,6 +1147,7 @@ public:
 
             if (fileType == pluginBundle)
             {
+                if (type == VST3PlugIn)  return ".vst3";
                 if (type == AAXPlugIn)   return ".aaxdll";
 
                 return ".dll";
@@ -1208,47 +1209,27 @@ public:
 
         String getExtraPostBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            const auto copyBuildOutputIntoBundle = [&] (const StringArray& segments)
-            {
-                return "copy /Y "
-                     + getOutputFilePath (config).quoted()
-                     + " "
-                     + getOwner().getOutDirFile (config, segments.joinIntoString ("\\")).quoted();
-            };
-
-            const auto copyBundleToInstallDirectory = [&] (const StringArray& segments, const String& directory)
-            {
-                const auto copyStep = "\r\nxcopy /E /H /K /R /Y /I "
-                                    + getOwner().getOutDirFile (config, segments[0]).quoted()
-                                    + " "
-                                    + (directory + "\\" + segments[0] + "\\").quoted();
-
-                return config.isPluginBinaryCopyStepEnabled() ? copyStep : "";
-            };
-
             if (type == AAXPlugIn)
             {
-                const build_tools::RelativePath aaxSDK (owner.getAAXPathString(), build_tools::RelativePath::projectFolder);
-                const build_tools::RelativePath aaxLibsFolder = aaxSDK.getChildFile ("Libs");
-                const build_tools::RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
-                const build_tools::RelativePath iconFilePath  = getAAXIconFile();
+                build_tools::RelativePath aaxSDK (owner.getAAXPathString(), build_tools::RelativePath::projectFolder);
+                build_tools::RelativePath aaxLibsFolder = aaxSDK.getChildFile ("Libs");
+                build_tools::RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
+                build_tools::RelativePath iconFilePath  = getAAXIconFile();
 
-                const auto segments = getAaxBundleStructure (config);
+                auto outputFilename = config.getOutputFilename (".aaxplugin", true, type);
+                auto bundleDir      = getOwner().getOutDirFile (config, outputFilename);
+                auto bundleContents = bundleDir + "\\Contents";
+                auto archDir        = bundleContents + String ("\\") + config.getArchitectureString();
+                auto executablePath = archDir + String ("\\") + outputFilename;
 
-                const auto pkgScript = copyBuildOutputIntoBundle (segments);
+                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config).quoted() + String (" ") + executablePath.quoted() + String ("\r\ncall ")
+                                     + createRebasedPath (bundleScript) + String (" ") + archDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
 
-                const auto archDir = StringArray (segments.strings.data(), segments.size() - 1).joinIntoString ("\\");
-                const auto rebasedArchDir = getOwner().getOutDirFile (config, archDir);
-                const auto fixScript = "\r\ncall "
-                                     + createRebasedPath (bundleScript)
-                                     + " "
-                                     + rebasedArchDir.quoted()
-                                     + String (" ")
-                                     + createRebasedPath (iconFilePath);
+                if (config.isPluginBinaryCopyStepEnabled())
+                    return pkgScript + "\r\n" + "xcopy " + bundleDir.quoted() + " "
+                               + String (config.getAAXBinaryLocationString() + "\\" + outputFilename + "\\").quoted() + " /E /H /K /R /Y";
 
-                const auto copyScript = copyBundleToInstallDirectory (segments, config.getAAXBinaryLocationString());
-
-                return pkgScript + fixScript + copyScript;
+                return pkgScript;
             }
 
             if (type == UnityPlugIn)
@@ -1285,53 +1266,44 @@ public:
                                   + "\\"
                                   + writerTarget->getBinaryNameWithSuffix (config);
 
-                const auto copyStep = "xcopy /E /H /I /K /R /Y \"$(OutDir)\" \""
-                                    + config.getLV2BinaryLocationString()
-                                    + '\\'
-                                    + config.getTargetBinaryNameString()
-                                    + ".lv2\"\r\n";
+                const auto copyScript = [&]() -> String
+                {
+                    if (! config.isPluginBinaryCopyStepEnabled())
+                        return "";
 
-                return writer.quoted()
-                     + " \"$(OutDir)$(TargetFileName)\"\r\n"
-                     + (config.isPluginBinaryCopyStepEnabled() ? copyStep : "");
+                    return "xcopy /E /H /I /K /R /Y \"$(OutDir)\" \"" + config.getLV2BinaryLocationString()
+                         + '\\' + config.getTargetBinaryNameString() + ".lv2\"\r\n";
+                }();
+
+                return writer.quoted() + " \"$(OutDir)$(TargetFileName)\"\r\n" + copyScript;
             }
 
-            if (type == VST3PlugIn)
+            if (config.isPluginBinaryCopyStepEnabled())
             {
-                const auto segments = getVst3BundleStructure (config);
-                const auto pkgScript = copyBuildOutputIntoBundle (segments);
-                const auto copyScript = copyBundleToInstallDirectory (segments, config.getVST3BinaryLocationString());
+                auto copyScript = String ("copy /Y \"$(OutDir)$(TargetFileName)\"") + String (" \"$COPYDIR$\\$(TargetFileName)\"");
 
-                return pkgScript + copyScript;
+                if (type == VSTPlugIn)     return copyScript.replace ("$COPYDIR$", config.getVSTBinaryLocationString());
+                if (type == VST3PlugIn)    return copyScript.replace ("$COPYDIR$", config.getVST3BinaryLocationString());
             }
-
-            if (type == VSTPlugIn && config.isPluginBinaryCopyStepEnabled())
-                return "copy /Y \"$(OutDir)$(TargetFileName)\" \"" + config.getVSTBinaryLocationString() + "\\$(TargetFileName)\"";
 
             return {};
         }
 
         String getExtraPreBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            const auto createBundleStructure = [&] (const StringArray& segments)
+            if (type == AAXPlugIn)
             {
-                auto directory = getOwner().getOutDirFile (config, "");
                 String script;
 
-                std::for_each (segments.begin(), std::prev (segments.end()), [&] (const auto& s)
-                {
-                    directory += (directory.isEmpty() ? "" : "\\") + s;
-                    script += "if not exist \"" + directory + "\" mkdir \"" + directory + "\"\r\n";
-                });
+                auto bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false, type));
+                auto bundleContents = bundleDir + "\\Contents";
+                auto archDir        = bundleContents + String ("\\") + config.getArchitectureString();
+
+                for (auto& folder : StringArray { bundleDir, bundleContents, archDir })
+                    script += String ("if not exist \"") + folder + String ("\" mkdir \"") + folder + String ("\"\r\n");
 
                 return script;
-            };
-
-            if (type == AAXPlugIn)
-                return createBundleStructure (getAaxBundleStructure (config));
-
-            if (type == VST3PlugIn)
-                return createBundleStructure (getVst3BundleStructure (config));
+            }
 
             return {};
         }
@@ -1371,7 +1343,7 @@ public:
             return getOwner().getOutDirFile (config, getBinaryNameWithSuffix (config));
         }
 
-        StringArray getLibrarySearchPaths (const MSVCBuildConfiguration& config) const
+        StringArray getLibrarySearchPaths (const BuildConfiguration& config) const
         {
             auto librarySearchPaths = config.getLibrarySearchPaths();
 
@@ -1438,26 +1410,6 @@ public:
         }
 
     protected:
-        StringArray getAaxBundleStructure (const MSVCBuildConfiguration& config) const
-        {
-            const auto dllName = config.getOutputFilename (".aaxplugin", false, type);
-            return { dllName, "Contents", config.getArchitectureString(), dllName };
-        }
-
-        StringArray getVst3BundleStructure (const MSVCBuildConfiguration& config) const
-        {
-            static const std::map<String, String> suffixes
-            {
-                { "Win32", "x86" },
-                { "x64",   "x86_64" },
-            };
-
-            const auto iter = suffixes.find (config.getArchitectureString());
-
-            const auto dllName = config.getOutputFilename (".vst3", false, type);
-            return { dllName, "Contents", iter != suffixes.cend() ? iter->second + "-win" : "win", dllName };
-        }
-
         const MSVCProjectExporterBase& owner;
         String projectGuid;
     };

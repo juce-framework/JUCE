@@ -225,9 +225,9 @@ private:
 
             if (archFlag.startsWith (prefix))
                 return archFlag.substring (prefix.length());
-            if (archFlag == "-m64")
+            else if (archFlag == "-m64")
                 return "x86_64";
-            if (archFlag == "-m32")
+            else if (archFlag == "-m32")
                 return "i386";
 
             jassertfalse;
