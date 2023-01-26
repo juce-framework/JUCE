@@ -3285,7 +3285,7 @@ public:
         auto numOutputBuses = pluginInstance->getBusCount (false);
 
         if (numIns > numInputBuses || numOuts > numOutputBuses)
-            return false;
+            return kResultFalse;
 
         // see the following documentation to understand the correct way to react to this callback
         // https://steinbergmedia.github.io/vst3_doc/vstinterfaces/classSteinberg_1_1Vst_1_1IAudioProcessor.html#ad3bc7bac3fd3b194122669be2a1ecc42
