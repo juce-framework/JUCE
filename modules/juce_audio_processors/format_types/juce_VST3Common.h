@@ -485,7 +485,6 @@ inline std::optional<AudioChannelSet> getChannelSetForSpeakerArrangement (Steinb
         return AudioChannelSet::channelSetWithChannels (*order);
 
     // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
-    jassertfalse;
     return {};
 }
 
