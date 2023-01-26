@@ -829,7 +829,7 @@ private:
             int result = 0;
 
             while (result == 0 || (result < 0 && errno == EINTR))
-                result = poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), 0);
+                result = poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), 10);
 
             if (result < 0)
                 break;
