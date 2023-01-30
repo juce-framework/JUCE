@@ -912,7 +912,7 @@ public:
             if (numSamples > 0)
             {
                 isClear = false;
-                const auto increment = (endGain - startGain) / numSamples;
+                const auto increment = (endGain - startGain) / (Type) numSamples;
                 auto* d = channels[destChannel] + destStartSample;
 
                 while (--numSamples >= 0)
@@ -1084,7 +1084,7 @@ public:
             if (numSamples > 0)
             {
                 isClear = false;
-                const auto increment = (endGain - startGain) / numSamples;
+                const auto increment = (endGain - startGain) / (Type) numSamples;
                 auto* d = channels[destChannel] + destStartSample;
 
                 while (--numSamples >= 0)
