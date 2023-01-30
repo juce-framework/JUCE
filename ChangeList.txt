@@ -3,6 +3,11 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 7.0.5
+  - Fixed Windows 7 compatibility
+  - Fixed dark mode notifications on macOS
+  - Improved the performance of AudioProcessorGraph
+
 Version 7.0.4
   - Improved Metal device handling
   - Adopted more C++17 features

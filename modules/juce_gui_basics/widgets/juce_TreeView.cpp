@@ -647,7 +647,7 @@ private:
             auto* i = owner.rootItemVisible ? owner.rootItem
                                             : owner.rootItem->subItems.getFirst();
 
-            while (i != nullptr && i->y < visibleTop)
+            while (i != nullptr && i->y + i->getItemHeight() < visibleTop)
                 i = getNextVisibleItem (i, true);
 
             return i;

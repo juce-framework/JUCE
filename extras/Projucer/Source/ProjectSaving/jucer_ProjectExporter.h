@@ -248,7 +248,6 @@ public:
 
         String getBuildConfigPreprocessorDefsString() const    { return ppDefinesValue.get(); }
         StringPairArray getAllPreprocessorDefs() const;        // includes inherited definitions
-        StringPairArray getUniquePreprocessorDefs() const;     // returns pre-processor definitions that are not already in the project pre-processor defs
 
         String getHeaderSearchPathString() const               { return headerSearchPathValue.get(); }
         StringArray getHeaderSearchPaths() const;
@@ -319,7 +318,6 @@ public:
 
     void addNewConfigurationFromExisting (const BuildConfiguration& configToCopy);
     void addNewConfiguration (bool isDebugConfig);
-    String getUniqueConfigName (String name) const;
 
     String getExternalLibraryFlags (const BuildConfiguration& config) const;
 
@@ -360,8 +358,6 @@ public:
 
     int getNumConfigurations() const;
     BuildConfiguration::Ptr getConfiguration (int index) const;
-    std::optional<ValueTree> getConfigurationWithName (const String& nameToFind) const;
-    BuildConfiguration::Ptr getBuildConfigurationWithName (const String& nameToFind) const;
 
     ValueTree getConfigurations() const;
     virtual void createDefaultConfigs();
@@ -402,7 +398,8 @@ public:
         return false;
     }
 
-    String getCompilerFlagsForProjectItem (const Project::Item& projectItem) const;
+    String getCompilerFlagsForFileCompilerFlagScheme (StringRef) const;
+    String getCompilerFlagsForProjectItem (const Project::Item&) const;
 
 protected:
     //==============================================================================
@@ -419,7 +416,6 @@ protected:
                                  userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
 
     Value projectCompilerFlagSchemesValue;
-    HashMap<String, ValueTreePropertyWithDefault> compilerFlagSchemesMap;
 
     mutable Array<Project::Item> itemGroups;
     Project::Item* modulesGroup = nullptr;
@@ -456,6 +452,9 @@ protected:
     }
 
 private:
+    //==============================================================================
+    std::map<String, ValueTreePropertyWithDefault> compilerFlagSchemesMap;
+
     //==============================================================================
     void valueChanged (Value&) override   { updateCompilerFlagValues(); }
     void updateCompilerFlagValues();

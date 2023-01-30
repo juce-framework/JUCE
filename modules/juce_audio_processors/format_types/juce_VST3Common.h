@@ -197,7 +197,7 @@ static inline Steinberg::Vst::SpeakerArrangement getArrangementForBus (Steinberg
     return arrangement;
 }
 
-static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, AudioChannelSet::ChannelType type) noexcept
+static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannelSet& set, AudioChannelSet::ChannelType type) noexcept
 {
     switch (type)
     {
@@ -280,11 +280,10 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
             break;
     }
 
-    auto channelIndex = static_cast<Steinberg::Vst::Speaker> (type) - (static_cast<Steinberg::Vst::Speaker> (AudioChannelSet::discreteChannel0) + 6ull);
-    return (1ull << (channelIndex + 33ull /* last speaker in vst layout + 1 */));
+    return {};
 }
 
-static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArrangement arr, Steinberg::Vst::Speaker type) noexcept
+static std::optional<AudioChannelSet::ChannelType> getChannelType (Steinberg::Vst::SpeakerArrangement arr, Steinberg::Vst::Speaker type) noexcept
 {
     switch (type)
     {
@@ -340,12 +339,7 @@ static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArran
         case Steinberg::Vst::kSpeakerBrr:   return AudioChannelSet::bottomRearRight;
     }
 
-    auto channelType = BigInteger (static_cast<int64> (type)).findNextSetBit (0);
-
-    // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
-    jassert (channelType >= 33);
-
-    return static_cast<AudioChannelSet::ChannelType> (static_cast<int> (AudioChannelSet::discreteChannel0) + 6 + (channelType - 33));
+    return {};
 }
 
 namespace detail
@@ -423,7 +417,7 @@ inline bool isLayoutTableValid()
     });
 }
 
-static Array<AudioChannelSet::ChannelType> getSpeakerOrder (Steinberg::Vst::SpeakerArrangement arr)
+static std::optional<Array<AudioChannelSet::ChannelType>> getSpeakerOrder (Steinberg::Vst::SpeakerArrangement arr)
 {
     using namespace Steinberg::Vst;
     using namespace Steinberg::Vst::SpeakerArr;
@@ -445,12 +439,16 @@ static Array<AudioChannelSet::ChannelType> getSpeakerOrder (Steinberg::Vst::Spea
     result.ensureStorageAllocated (channels);
 
     for (auto i = 0; i < channels; ++i)
-        result.add (getChannelType (arr, getSpeaker (arr, i)));
+        if (const auto t = getChannelType (arr, getSpeaker (arr, i)))
+            result.add (*t);
 
-    return result;
+    if (getChannelCount (arr) == result.size())
+        return result;
+
+    return {};
 }
 
-static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
+static std::optional<Steinberg::Vst::SpeakerArrangement> getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
@@ -470,21 +468,24 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
     Steinberg::Vst::SpeakerArrangement result = 0;
 
     for (const auto& type : channels.getChannelTypes())
-        result |= getSpeakerType (channels, type);
+        if (const auto t = getSpeakerType (channels, type))
+            result |= *t;
 
-    return result;
+    if (getChannelCount (result) == channels.size())
+        return result;
+
+    return {};
 }
 
-inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
+inline std::optional<AudioChannelSet> getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    const auto result = AudioChannelSet::channelSetWithChannels (getSpeakerOrder (arr));
+    if (const auto order = getSpeakerOrder (arr))
+        return AudioChannelSet::channelSetWithChannels (*order);
 
     // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
-    jassert (result.size() == getChannelCount (arr));
-
-    return result;
+    return {};
 }
 
 //==============================================================================
@@ -522,7 +523,21 @@ private:
     */
     static std::vector<int> makeChannelIndices (const AudioChannelSet& juceArrangement)
     {
-        const auto order = getSpeakerOrder (getVst3SpeakerArrangement (juceArrangement));
+        const auto order = [&]
+        {
+            const auto fallback = juceArrangement.getChannelTypes();
+            const auto vst3Arrangement = getVst3SpeakerArrangement (juceArrangement);
+
+            if (! vst3Arrangement.has_value())
+                return fallback;
+
+            const auto reordered = getSpeakerOrder (*vst3Arrangement);
+
+            if (! reordered.has_value() || AudioChannelSet::channelSetWithChannels (*reordered) != juceArrangement)
+                return fallback;
+
+            return *reordered;
+        }();
 
         std::vector<int> result;
 
@@ -613,7 +628,9 @@ static int countValidBuses (Steinberg::Vst::AudioBusBuffers* buffers, int32 num)
     }));
 }
 
-template <typename FloatType, typename Iterator>
+enum class Direction { input, output };
+
+template <Direction direction, typename FloatType, typename Iterator>
 static bool validateLayouts (Iterator first, Iterator last, const std::vector<DynamicChannelMapping>& map)
 {
     if ((size_t) std::distance (first, last) > map.size())
@@ -623,12 +640,24 @@ static bool validateLayouts (Iterator first, Iterator last, const std::vector<Dy
 
     for (auto it = first; it != last; ++it, ++mapIterator)
     {
-        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, *it);
-        const auto anyChannelIsNull = std::any_of (busPtr, busPtr + it->numChannels, [] (auto* ptr) { return ptr == nullptr; });
+        auto& bus = *it;
+        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
+        const auto expectedJuceChannels = (int) mapIterator->size();
+        const auto actualVstChannels = (int) bus.numChannels;
+        const auto limit = jmin (expectedJuceChannels, actualVstChannels);
+        const auto anyChannelIsNull = std::any_of (busPtr, busPtr + limit, [] (auto* ptr) { return ptr == nullptr; });
+        constexpr auto isInput = direction == Direction::input;
+
+        const auto channelCountIsUsable = isInput ? expectedJuceChannels <= actualVstChannels
+                                                  : actualVstChannels <= expectedJuceChannels;
 
         // Null channels are allowed if the bus is inactive
-        if (mapIterator->isHostActive() && (anyChannelIsNull || (int) mapIterator->size() != it->numChannels))
+        if (mapIterator->isHostActive() && (anyChannelIsNull || ! channelCountIsUsable))
             return false;
+
+        // If this is hit, the destination bus has fewer channels than the source bus.
+        // As a result, some channels will 'go missing', and channel layouts may be invalid.
+        jassert (actualVstChannels == expectedJuceChannels);
     }
 
     // If the host didn't provide the full complement of buses, it must be because the other
@@ -669,7 +698,7 @@ public:
         // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
         const auto vstInputs = countValidBuses<FloatType> (data.inputs, data.numInputs);
 
-        if (! validateLayouts<FloatType> (data.inputs, data.inputs + vstInputs, inputMap))
+        if (! validateLayouts<Direction::input, FloatType> (data.inputs, data.inputs + vstInputs, inputMap))
             return getBlankBuffer (usedChannels, (int) data.numSamples);
 
         setUpInputChannels (data, (size_t) vstInputs, scratchBuffer, inputMap,  channels);
@@ -702,7 +731,12 @@ private:
 
             if (mapping.isHostActive() && busIndex < vstInputs)
             {
-                auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.inputs[busIndex]);
+                auto& bus = data.inputs[busIndex];
+
+                // Every JUCE channel must have a VST3 channel counterpart
+                jassert (mapping.size() <= static_cast<size_t> (bus.numChannels));
+
+                auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
 
                 for (size_t channelIndex = 0; channelIndex < mapping.size(); ++channelIndex)
                 {
@@ -934,7 +968,7 @@ public:
         // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
         const auto vstOutputs = (size_t) countValidBuses<FloatType> (data.outputs, data.numOutputs);
 
-        if (validateLayouts<FloatType> (data.outputs, data.outputs + vstOutputs, *outputMap))
+        if (validateLayouts<Direction::output, FloatType> (data.outputs, data.outputs + vstOutputs, *outputMap))
             copyToHostOutputBuses (vstOutputs);
         else
             clearHostOutputBuses (vstOutputs);
@@ -953,9 +987,12 @@ private:
             {
                 auto& bus = data.outputs[i];
 
+                // Every VST3 channel must have a JUCE channel counterpart
+                jassert (static_cast<size_t> (bus.numChannels) <= mapping.size());
+
                 if (mapping.isClientActive())
                 {
-                    for (size_t j = 0; j < mapping.size(); ++j)
+                    for (size_t j = 0; j < static_cast<size_t> (bus.numChannels); ++j)
                     {
                         auto* hostChannel = getAudioBusPointer (detail::Tag<FloatType>{}, bus)[j];
                         const auto juceChannel = juceBusOffset + (size_t) mapping.getJuceChannelForVst3Channel ((int) j);
@@ -964,7 +1001,7 @@ private:
                 }
                 else
                 {
-                    for (size_t j = 0; j < mapping.size(); ++j)
+                    for (size_t j = 0; j < static_cast<size_t> (bus.numChannels); ++j)
                     {
                         auto* hostChannel = getAudioBusPointer (detail::Tag<FloatType>{}, bus)[j];
                         FloatVectorOperations::clear (hostChannel, (size_t) data.numSamples);

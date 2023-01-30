@@ -579,9 +579,10 @@ namespace CoreMidiHelpers
        #endif
     }
 
-    static void globalSystemChangeCallback (const MIDINotification*, void*)
+    static void globalSystemChangeCallback (const MIDINotification* notification, void*)
     {
-        // TODO.. Should pass-on this notification..
+        if (notification != nullptr && notification->messageID == kMIDIMsgSetupChanged)
+            MidiDeviceListConnectionBroadcaster::get().notify();
     }
 
     static String getGlobalMidiClientName()
@@ -594,9 +595,7 @@ namespace CoreMidiHelpers
 
     static MIDIClientRef getGlobalMidiClient()
     {
-        static MIDIClientRef globalMidiClient = 0;
-
-        if (globalMidiClient == 0)
+        static const auto globalMidiClient = [&]
         {
             // Since OSX 10.6, the MIDIClientCreate function will only work
             // correctly when called from the message thread!
@@ -605,8 +604,10 @@ namespace CoreMidiHelpers
             enableSimulatorMidiSession();
 
             CFUniquePtr<CFStringRef> name (getGlobalMidiClientName().toCFString());
-            CHECK_ERROR (MIDIClientCreate (name.get(), &globalSystemChangeCallback, nullptr, &globalMidiClient));
-        }
+            MIDIClientRef result{};
+            CHECK_ERROR (MIDIClientCreate (name.get(), globalSystemChangeCallback, nullptr, &result));
+            return result;
+        }();
 
         return globalMidiClient;
     }
@@ -1298,6 +1299,12 @@ MidiOutput::~MidiOutput()
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
     internal->send (message);
+}
+
+MidiDeviceListConnection MidiDeviceListConnection::make (std::function<void()> cb)
+{
+    auto& broadcaster = MidiDeviceListConnectionBroadcaster::get();
+    return { &broadcaster, broadcaster.add (std::move (cb)) };
 }
 
 #undef CHECK_ERROR

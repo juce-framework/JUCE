@@ -371,4 +371,38 @@ String SystemStats::getUniqueDeviceID()
     return deviceId;
 }
 
+#if JUCE_MAC
+bool SystemStats::isAppSandboxEnabled()
+{
+    static const auto result = [&]
+    {
+        SecCodeRef ref = nullptr;
+
+        if (const auto err = SecCodeCopySelf (kSecCSDefaultFlags, &ref); err != noErr)
+            return false;
+
+        const CFUniquePtr<SecCodeRef> managedRef (ref);
+        CFDictionaryRef infoDict = nullptr;
+
+        if (const auto err = SecCodeCopySigningInformation (managedRef.get(), kSecCSDynamicInformation, &infoDict); err != noErr)
+            return false;
+
+        const CFUniquePtr<CFDictionaryRef> managedInfoDict (infoDict);
+        const void* entitlementsDict = nullptr;
+
+        if (! CFDictionaryGetValueIfPresent (managedInfoDict.get(), kSecCodeInfoEntitlementsDict, &entitlementsDict))
+            return false;
+
+        const void* flag = nullptr;
+
+        if (! CFDictionaryGetValueIfPresent (static_cast<CFDictionaryRef> (entitlementsDict), @"com.apple.security.app-sandbox", &flag))
+            return false;
+
+        return static_cast<bool> (CFBooleanGetValue (static_cast<CFBooleanRef> (flag)));
+    }();
+
+    return result;
+}
+#endif
+
 } // namespace juce

@@ -228,7 +228,7 @@ public:
     /** A function type for use in setApplicationCrashHandler().
         When called, its void* argument will contain platform-specific data about the crash.
     */
-    using CrashHandlerFunction = void(*)(void*);
+    using CrashHandlerFunction = void (*) (void*);
 
     /** Sets up a global callback function that will be called if the application
         executes some kind of illegal instruction.
@@ -242,6 +242,10 @@ public:
         This function will always return false on windows, linux and android.
     */
     static bool isRunningInAppExtensionSandbox() noexcept;
+
+   #if JUCE_MAC
+    static bool isAppSandboxEnabled();
+   #endif
 
     //==============================================================================
    #ifndef DOXYGEN

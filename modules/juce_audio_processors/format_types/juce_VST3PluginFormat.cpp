@@ -107,7 +107,6 @@ static int warnOnFailureIfImplemented (int result) noexcept
  #define warnOnFailureIfImplemented(x) x
 #endif
 
-enum class Direction { input, output };
 enum class MediaKind { audio, event };
 
 static Vst::MediaType toVstType (MediaKind x) { return x == MediaKind::audio ? Vst::kAudio : Vst::kEvent; }
@@ -2511,34 +2510,33 @@ public:
         return module != nullptr ? module->getName() : String();
     }
 
-    void repopulateArrangements (Array<Vst::SpeakerArrangement>& inputArrangements, Array<Vst::SpeakerArrangement>& outputArrangements) const
+    std::vector<Vst::SpeakerArrangement> getActualArrangements (bool isInput) const
     {
-        inputArrangements.clearQuick();
-        outputArrangements.clearQuick();
+        std::vector<Vst::SpeakerArrangement> result;
 
-        auto numInputAudioBuses  = getBusCount (true);
-        auto numOutputAudioBuses = getBusCount (false);
+        const auto numBuses = getBusCount (isInput);
 
-        for (int i = 0; i < numInputAudioBuses; ++i)
-            inputArrangements.add (getArrangementForBus (processor, true, i));
+        for (auto i = 0; i < numBuses; ++i)
+            result.push_back (getArrangementForBus (processor, isInput, i));
 
-        for (int i = 0; i < numOutputAudioBuses; ++i)
-            outputArrangements.add (getArrangementForBus (processor, false, i));
+        return result;
     }
 
-    void processorLayoutsToArrangements (Array<Vst::SpeakerArrangement>& inputArrangements, Array<Vst::SpeakerArrangement>& outputArrangements)
+    std::optional<std::vector<Vst::SpeakerArrangement>> busLayoutsToArrangements (bool isInput) const
     {
-        inputArrangements.clearQuick();
-        outputArrangements.clearQuick();
+        std::vector<Vst::SpeakerArrangement> result;
 
-        auto numInputBuses  = getBusCount (true);
-        auto numOutputBuses = getBusCount (false);
+        const auto numBuses = getBusCount (isInput);
 
-        for (int i = 0; i < numInputBuses; ++i)
-            inputArrangements.add (getVst3SpeakerArrangement (getBus (true, i)->getLastEnabledLayout()));
+        for (auto i = 0; i < numBuses; ++i)
+        {
+            if (const auto arr = getVst3SpeakerArrangement (getBus (isInput, i)->getLastEnabledLayout()))
+                result.push_back (*arr);
+            else
+                return {};
+        }
 
-        for (int i = 0; i < numOutputBuses; ++i)
-            outputArrangements.add (getVst3SpeakerArrangement (getBus (false, i)->getLastEnabledLayout()));
+        return result;
     }
 
     void prepareToPlay (double newSampleRate, int estimatedSamplesPerBlock) override
@@ -2573,21 +2571,21 @@ public:
 
         holder->initialise();
 
-        Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements;
-        processorLayoutsToArrangements (inputArrangements, outputArrangements);
+        auto inArrangements  = busLayoutsToArrangements (true) .value_or (std::vector<SpeakerArrangement>{});
+        auto outArrangements = busLayoutsToArrangements (false).value_or (std::vector<SpeakerArrangement>{});
 
         // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
         SpeakerArrangement nullArrangement = {};
-        auto* inputArrangementData  = inputArrangements.isEmpty()  ? &nullArrangement : inputArrangements.getRawDataPointer();
-        auto* outputArrangementData = outputArrangements.isEmpty() ? &nullArrangement : outputArrangements.getRawDataPointer();
+        auto* inData  = inArrangements .empty() ? &nullArrangement : inArrangements .data();
+        auto* outData = outArrangements.empty() ? &nullArrangement : outArrangements.data();
 
-        warnOnFailure (processor->setBusArrangements (inputArrangementData,  inputArrangements.size(),
-                                                      outputArrangementData, outputArrangements.size()));
+        warnOnFailure (processor->setBusArrangements (inData,  static_cast<int32> (inArrangements .size()),
+                                                      outData, static_cast<int32> (outArrangements.size())));
 
-        Array<Vst::SpeakerArrangement> actualInArr, actualOutArr;
-        repopulateArrangements (actualInArr, actualOutArr);
+        const auto inArrActual  = getActualArrangements (true);
+        const auto outArrActual = getActualArrangements (false);
 
-        jassert (actualInArr == inputArrangements && actualOutArr == outputArrangements);
+        jassert (inArrActual == inArrangements && outArrActual == outArrangements);
 
         // Needed for having the same sample rate in processBlock(); some plugins need this!
         setRateAndBufferSizeDetails (newSampleRate, estimatedSamplesPerBlock);
@@ -2789,34 +2787,49 @@ public:
             }
         }
 
-        Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements;
-
-        for (int i = 0; i < layouts.inputBuses.size(); ++i)
+        const auto getPotentialArrangements = [&] (bool isInput) -> std::optional<std::vector<Vst::SpeakerArrangement>>
         {
-            const auto& requested = layouts.getChannelSet (true, i);
-            inputArrangements.add (getVst3SpeakerArrangement (requested.isDisabled() ? getBus (true, i)->getLastEnabledLayout() : requested));
+            std::vector<Vst::SpeakerArrangement> result;
+
+            for (int i = 0; i < layouts.getBuses (isInput).size(); ++i)
+            {
+                const auto& requested = layouts.getChannelSet (isInput, i);
+
+                if (const auto arr = getVst3SpeakerArrangement (requested.isDisabled() ? getBus (true, i)->getLastEnabledLayout() : requested))
+                    result.push_back (*arr);
+                else
+                    return {};
+            }
+
+            return result;
+        };
+
+        auto inArrangements  = getPotentialArrangements (true);
+        auto outArrangements = getPotentialArrangements (false);
+
+        if (! inArrangements.has_value() || ! outArrangements.has_value())
+        {
+            // This bus layout can't be represented as a VST3 speaker arrangement
+            return false;
         }
 
-        for (int i = 0; i < layouts.outputBuses.size(); ++i)
-        {
-            const auto& requested = layouts.getChannelSet (false, i);
-            outputArrangements.add (getVst3SpeakerArrangement (requested.isDisabled() ? getBus (false, i)->getLastEnabledLayout() : requested));
-        }
+        auto& inputArrangements  = *inArrangements;
+        auto& outputArrangements = *outArrangements;
 
         // Some plug-ins will crash if you pass a nullptr to setBusArrangements!
         Vst::SpeakerArrangement nullArrangement = {};
-        auto* inputArrangementData  = inputArrangements.isEmpty()  ? &nullArrangement : inputArrangements.getRawDataPointer();
-        auto* outputArrangementData = outputArrangements.isEmpty() ? &nullArrangement : outputArrangements.getRawDataPointer();
+        auto* inputArrangementData  = inputArrangements .empty() ? &nullArrangement : inputArrangements .data();
+        auto* outputArrangementData = outputArrangements.empty() ? &nullArrangement : outputArrangements.data();
 
-        if (processor->setBusArrangements (inputArrangementData, inputArrangements.size(),
-                                           outputArrangementData, outputArrangements.size()) != kResultTrue)
+        if (processor->setBusArrangements (inputArrangementData,  static_cast<int32> (inputArrangements .size()),
+                                           outputArrangementData, static_cast<int32> (outputArrangements.size())) != kResultTrue)
             return false;
 
         // check if the layout matches the request
-        Array<Vst::SpeakerArrangement> actualIn, actualOut;
-        repopulateArrangements (actualIn, actualOut);
+        const auto inArrActual  = getActualArrangements (true);
+        const auto outArrActual = getActualArrangements (false);
 
-        return (actualIn == inputArrangements && actualOut == outputArrangements);
+        return (inArrActual == inputArrangements && outArrActual == outputArrangements);
     }
 
     bool canApplyBusesLayout (const BusesLayout& layouts) const override
@@ -3445,7 +3458,8 @@ private:
 
                 Vst::SpeakerArrangement arr;
                 if (processor != nullptr && processor->getBusArrangement (dir, i, arr) == kResultOk)
-                    layout = getChannelSetForSpeakerArrangement (arr);
+                    if (const auto set = getChannelSetForSpeakerArrangement (arr))
+                        layout = *set;
 
                 busProperties.addBus (isInput, toString (info.name), layout,
                                       (info.flags & Vst::BusInfo::kDefaultActive) != 0);

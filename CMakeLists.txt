@@ -23,7 +23,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(JUCE VERSION 7.0.4 LANGUAGES C CXX)
+project(JUCE VERSION 7.0.5 LANGUAGES C CXX)
 
 include(CMakeDependentOption)
 
@@ -164,7 +164,10 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
 
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${JUCE_SOURCE_DIR}")
     _juce_add_lv2_manifest_helper_target()
-    install(TARGETS juce_lv2_helper EXPORT LV2_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
-    install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
+
+    if(TARGET juce_lv2_helper)
+        install(TARGETS juce_lv2_helper EXPORT LV2_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
+        install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
+    endif()
 endif()
 

@@ -835,7 +835,7 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_add_lv2_manifest_helper_target)
-    if(TARGET juce_lv2_helper)
+    if(TARGET juce_lv2_helper OR (CMAKE_SYSTEM_NAME STREQUAL "iOS") OR (CMAKE_SYSTEM_NAME STREQUAL "Android"))
         return()
     endif()
 
@@ -846,6 +846,9 @@ function(_juce_add_lv2_manifest_helper_target)
     target_compile_features(juce_lv2_helper PRIVATE cxx_std_17)
     set_target_properties(juce_lv2_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
     target_link_libraries(juce_lv2_helper PRIVATE ${CMAKE_DL_LIBS})
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    target_link_libraries(juce_lv2_helper PRIVATE Threads::Threads)
 endfunction()
 
 # ==================================================================================================
@@ -1293,6 +1296,12 @@ function(_juce_set_fallback_properties target)
 
     get_target_property(real_company_name ${target} JUCE_COMPANY_NAME)
     _juce_set_property_if_not_set(${target} BUNDLE_ID "com.${real_company_name}.${target}")
+
+    get_target_property(applied_bundle_id ${target} JUCE_BUNDLE_ID)
+
+    if("${applied_bundle_id}" MATCHES ".* .*")
+        message(WARNING "Target ${target} has JUCE_BUNDLE_ID '${applied_bundle_id}', which contains spaces. Use the BUNDLE_ID option to specify a valid ID.")
+    endif()
 
     _juce_set_property_if_not_set(${target} VERSION ${PROJECT_VERSION})
 
