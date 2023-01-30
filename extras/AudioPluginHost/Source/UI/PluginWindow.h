@@ -284,32 +284,17 @@ private:
     //==============================================================================
     struct ProgramAudioProcessorEditor  : public AudioProcessorEditor
     {
-        ProgramAudioProcessorEditor (AudioProcessor& p)  : AudioProcessorEditor (p)
+        explicit ProgramAudioProcessorEditor (AudioProcessor& p)
+            : AudioProcessorEditor (p)
         {
             setOpaque (true);
 
-            addAndMakeVisible (panel);
+            addAndMakeVisible (listBox);
+            listBox.updateContent();
 
-            Array<PropertyComponent*> programs;
+            const auto rowHeight = listBox.getRowHeight();
 
-            auto numPrograms = p.getNumPrograms();
-            int totalHeight = 0;
-
-            for (int i = 0; i < numPrograms; ++i)
-            {
-                auto name = p.getProgramName (i).trim();
-
-                if (name.isEmpty())
-                    name = "Unnamed";
-
-                auto pc = new PropertyComp (name, p);
-                programs.add (pc);
-                totalHeight += pc->getPreferredHeight();
-            }
-
-            panel.addProperties (programs);
-
-            setSize (400, jlimit (25, 400, totalHeight));
+            setSize (400, jlimit (rowHeight, 400, p.getNumPrograms() * rowHeight));
         }
 
         void paint (Graphics& g) override
@@ -319,33 +304,58 @@ private:
 
         void resized() override
         {
-            panel.setBounds (getLocalBounds());
+            listBox.setBounds (getLocalBounds());
         }
 
     private:
-        struct PropertyComp  : public PropertyComponent,
-                               private AudioProcessorListener
+        class Model : public ListBoxModel
         {
-            PropertyComp (const String& name, AudioProcessor& p)  : PropertyComponent (name), owner (p)
+        public:
+            Model (Component& o, AudioProcessor& p)
+                : owner (o), proc (p) {}
+
+            int getNumRows() override
             {
-                owner.addListener (this);
+                return proc.getNumPrograms();
             }
 
-            ~PropertyComp() override
+            void paintListBoxItem (int rowNumber,
+                                   Graphics& g,
+                                   int width,
+                                   int height,
+                                   bool rowIsSelected) override
             {
-                owner.removeListener (this);
+                const auto textColour = owner.findColour (ListBox::textColourId);
+
+                if (rowIsSelected)
+                {
+                    const auto defaultColour = owner.findColour (ListBox::backgroundColourId);
+                    const auto c = rowIsSelected ? defaultColour.interpolatedWith (textColour, 0.5f)
+                                                 : defaultColour;
+
+                    g.fillAll (c);
+                }
+
+                g.setColour (textColour);
+                g.drawText (proc.getProgramName (rowNumber),
+                            Rectangle<int> { width, height }.reduced (2),
+                            Justification::left,
+                            true);
             }
 
-            void refresh() override {}
-            void audioProcessorChanged (AudioProcessor*, const ChangeDetails&) override {}
-            void audioProcessorParameterChanged (AudioProcessor*, int, float) override {}
+            void selectedRowsChanged (int row) override
+            {
+                if (0 <= row)
+                    proc.setCurrentProgram (row);
+            }
 
-            AudioProcessor& owner;
-
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyComp)
+        private:
+            Component& owner;
+            AudioProcessor& proc;
         };
 
-        PropertyPanel panel;
+        Model model { *this, *getAudioProcessor() };
+        ListBox listBox { "Programs", &model };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgramAudioProcessorEditor)
     };

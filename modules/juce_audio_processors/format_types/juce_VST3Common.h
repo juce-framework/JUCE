@@ -1274,7 +1274,7 @@ private:
 
         const auto controlEvent = toVst3ControlEvent (msg);
 
-        if (! controlEvent.hasValue())
+        if (! controlEvent.has_value())
             return false;
 
         const auto controlParamID = midiMapping->getMapping (createSafeChannel (msg.getChannel()),
@@ -1574,7 +1574,7 @@ private:
         Steinberg::Vst::ParamValue paramValue;
     };
 
-    static Optional<Vst3MidiControlEvent> toVst3ControlEvent (const MidiMessage& msg)
+    static std::optional<Vst3MidiControlEvent> toVst3ControlEvent (const MidiMessage& msg)
     {
         if (msg.isController())
             return Vst3MidiControlEvent { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0 };

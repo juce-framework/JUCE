@@ -444,8 +444,6 @@ struct GraphRenderSequence
 
     struct Context
     {
-        FloatType* const* audioBuffers;
-        MidiBuffer* midiBuffers;
         AudioPlayHead* audioPlayHead;
         int numSamples;
     };
@@ -484,10 +482,10 @@ struct GraphRenderSequence
         currentMidiOutputBuffer.clear();
 
         {
-            const Context context { renderingBuffer.getArrayOfWritePointers(), midiBuffers.begin(), audioPlayHead, numSamples };
+            const Context context { audioPlayHead, numSamples };
 
             for (const auto& op : renderOps)
-                op (context);
+                op->process (context);
         }
 
         for (int i = 0; i < buffer.getNumChannels(); ++i)
@@ -502,39 +500,189 @@ struct GraphRenderSequence
 
     void addClearChannelOp (int index)
     {
-        renderOps.push_back ([=] (const Context& c)    { FloatVectorOperations::clear (c.audioBuffers[index], c.numSamples); });
+        struct ClearOp : public RenderOp
+        {
+            explicit ClearOp (int indexIn) : index (indexIn) {}
+
+            void prepare (FloatType* const* renderBuffer, MidiBuffer*) override
+            {
+                channelBuffer = renderBuffer[index];
+            }
+
+            void process (const Context& c) override
+            {
+                FloatVectorOperations::clear (channelBuffer, c.numSamples);
+            }
+
+            FloatType* channelBuffer = nullptr;
+            int index = 0;
+        };
+
+        renderOps.push_back (std::make_unique<ClearOp> (index));
     }
 
     void addCopyChannelOp (int srcIndex, int dstIndex)
     {
-        renderOps.push_back ([=] (const Context& c)    { FloatVectorOperations::copy (c.audioBuffers[dstIndex], c.audioBuffers[srcIndex], c.numSamples); });
+        struct CopyOp : public RenderOp
+        {
+            explicit CopyOp (int fromIn, int toIn) : from (fromIn), to (toIn) {}
+
+            void prepare (FloatType* const* renderBuffer, MidiBuffer*) override
+            {
+                fromBuffer = renderBuffer[from];
+                toBuffer = renderBuffer[to];
+            }
+
+            void process (const Context& c) override
+            {
+                FloatVectorOperations::copy (toBuffer, fromBuffer, c.numSamples);
+            }
+
+            FloatType* fromBuffer = nullptr;
+            FloatType* toBuffer = nullptr;
+            int from = 0, to = 0;
+        };
+
+        renderOps.push_back (std::make_unique<CopyOp> (srcIndex, dstIndex));
     }
 
     void addAddChannelOp (int srcIndex, int dstIndex)
     {
-        renderOps.push_back ([=] (const Context& c)    { FloatVectorOperations::add (c.audioBuffers[dstIndex], c.audioBuffers[srcIndex], c.numSamples); });
+        struct AddOp : public RenderOp
+        {
+            explicit AddOp (int fromIn, int toIn) : from (fromIn), to (toIn) {}
+
+            void prepare (FloatType* const* renderBuffer, MidiBuffer*) override
+            {
+                fromBuffer = renderBuffer[from];
+                toBuffer = renderBuffer[to];
+            }
+
+            void process (const Context& c) override
+            {
+                FloatVectorOperations::add (toBuffer, fromBuffer, c.numSamples);
+            }
+
+            FloatType* fromBuffer = nullptr;
+            FloatType* toBuffer = nullptr;
+            int from = 0, to = 0;
+        };
+
+        renderOps.push_back (std::make_unique<AddOp> (srcIndex, dstIndex));
     }
 
     JUCE_END_IGNORE_WARNINGS_MSVC
 
     void addClearMidiBufferOp (int index)
     {
-        renderOps.push_back ([=] (const Context& c)    { c.midiBuffers[index].clear(); });
+        struct ClearOp : public RenderOp
+        {
+            explicit ClearOp (int indexIn) : index (indexIn) {}
+
+            void prepare (FloatType* const*, MidiBuffer* buffers) override
+            {
+                channelBuffer = buffers + index;
+            }
+
+            void process (const Context&) override
+            {
+                channelBuffer->clear();
+            }
+
+            MidiBuffer* channelBuffer = nullptr;
+            int index = 0;
+        };
+
+        renderOps.push_back (std::make_unique<ClearOp> (index));
     }
 
     void addCopyMidiBufferOp (int srcIndex, int dstIndex)
     {
-        renderOps.push_back ([=] (const Context& c)    { c.midiBuffers[dstIndex] = c.midiBuffers[srcIndex]; });
+        struct CopyOp : public RenderOp
+        {
+            explicit CopyOp (int fromIn, int toIn) : from (fromIn), to (toIn) {}
+
+            void prepare (FloatType* const*, MidiBuffer* buffers) override
+            {
+                fromBuffer = buffers + from;
+                toBuffer = buffers + to;
+            }
+
+            void process (const Context&) override
+            {
+                *toBuffer = *fromBuffer;
+            }
+
+            MidiBuffer* fromBuffer = nullptr;
+            MidiBuffer* toBuffer = nullptr;
+            int from = 0, to = 0;
+        };
+
+        renderOps.push_back (std::make_unique<CopyOp> (srcIndex, dstIndex));
     }
 
     void addAddMidiBufferOp (int srcIndex, int dstIndex)
     {
-        renderOps.push_back ([=] (const Context& c)    { c.midiBuffers[dstIndex].addEvents (c.midiBuffers[srcIndex], 0, c.numSamples, 0); });
+        struct AddOp : public RenderOp
+        {
+            explicit AddOp (int fromIn, int toIn) : from (fromIn), to (toIn) {}
+
+            void prepare (FloatType* const*, MidiBuffer* buffers) override
+            {
+                fromBuffer = buffers + from;
+                toBuffer = buffers + to;
+            }
+
+            void process (const Context& c) override
+            {
+                toBuffer->addEvents (*fromBuffer, 0, c.numSamples, 0);
+            }
+
+            MidiBuffer* fromBuffer = nullptr;
+            MidiBuffer* toBuffer = nullptr;
+            int from = 0, to = 0;
+        };
+
+        renderOps.push_back (std::make_unique<AddOp> (srcIndex, dstIndex));
     }
 
     void addDelayChannelOp (int chan, int delaySize)
     {
-        renderOps.push_back (DelayChannelOp { chan, delaySize });
+        struct DelayChannelOp : public RenderOp
+        {
+            DelayChannelOp (int chan, int delaySize)
+                : buffer ((size_t) (delaySize + 1), (FloatType) 0),
+                  channel (chan),
+                  writeIndex (delaySize)
+            {
+            }
+
+            void prepare (FloatType* const* renderBuffer, MidiBuffer*) override
+            {
+                channelBuffer = renderBuffer[channel];
+            }
+
+            void process (const Context& c) override
+            {
+                auto* data = channelBuffer;
+
+                for (int i = c.numSamples; --i >= 0;)
+                {
+                    buffer[(size_t) writeIndex] = *data;
+                    *data++ = buffer[(size_t) readIndex];
+
+                    if (++readIndex  >= (int) buffer.size()) readIndex = 0;
+                    if (++writeIndex >= (int) buffer.size()) writeIndex = 0;
+                }
+            }
+
+            std::vector<FloatType> buffer;
+            FloatType* channelBuffer = nullptr;
+            const int channel;
+            int readIndex = 0, writeIndex;
+        };
+
+        renderOps.push_back (std::make_unique<DelayChannelOp> (chan, delaySize));
     }
 
     void addProcessOp (const Node::Ptr& node,
@@ -542,7 +690,7 @@ struct GraphRenderSequence
                        int totalNumChans,
                        int midiBuffer)
     {
-        renderOps.push_back (ProcessOp { node, audioChannelsUsed, totalNumChans, midiBuffer });
+        renderOps.push_back (std::make_unique<ProcessOp> (node, audioChannelsUsed, totalNumChans, midiBuffer));
     }
 
     void prepareBuffers (int blockSize)
@@ -565,16 +713,9 @@ struct GraphRenderSequence
 
         for (auto&& m : midiBuffers)
             m.ensureSize (defaultMIDIBufferSize);
-    }
 
-    void releaseBuffers()
-    {
-        renderingBuffer.setSize (1, 1);
-        currentAudioOutputBuffer.setSize (1, 1);
-        currentAudioInputBuffer = nullptr;
-        currentMidiInputBuffer = nullptr;
-        currentMidiOutputBuffer.clear();
-        midiBuffers.clear();
+        for (const auto& op : renderOps)
+            op->prepare (renderingBuffer.getArrayOfWritePointers(), midiBuffers.data());
     }
 
     int numBuffersNeeded = 0, numMidiBuffersNeeded = 0;
@@ -590,59 +731,40 @@ struct GraphRenderSequence
 
 private:
     //==============================================================================
-    std::vector<std::function<void (const Context&)>> renderOps;
-
-    //==============================================================================
-    struct DelayChannelOp
+    struct RenderOp
     {
-        DelayChannelOp (int chan, int delaySize)
-            : buffer ((size_t) (delaySize + 1), (FloatType) 0),
-              channel (chan),
-              writeIndex (delaySize)
-        {
-        }
-
-        void operator() (const Context& c)
-        {
-            auto* data = c.audioBuffers[channel];
-
-            for (int i = c.numSamples; --i >= 0;)
-            {
-                buffer[(size_t) writeIndex] = *data;
-                *data++ = buffer[(size_t) readIndex];
-
-                if (++readIndex  >= (int) buffer.size()) readIndex = 0;
-                if (++writeIndex >= (int) buffer.size()) writeIndex = 0;
-            }
-        }
-
-        std::vector<FloatType> buffer;
-        const int channel;
-        int readIndex = 0, writeIndex;
+        virtual ~RenderOp() = default;
+        virtual void prepare (FloatType* const*, MidiBuffer*) = 0;
+        virtual void process (const Context&) = 0;
     };
 
-    //==============================================================================
-    struct ProcessOp
+    struct ProcessOp : public RenderOp
     {
         ProcessOp (const Node::Ptr& n,
                    const Array<int>& audioChannelsUsed,
-                   int totalNumChans, int midiBuffer)
+                   int totalNumChans,
+                   int midiBufferIndex)
             : node (n),
               processor (*n->getProcessor()),
               audioChannelsToUse (audioChannelsUsed),
               audioChannels ((size_t) jmax (1, totalNumChans), nullptr),
-              midiBufferToUse (midiBuffer)
+              midiBufferToUse (midiBufferIndex)
         {
             while (audioChannelsToUse.size() < (int) audioChannels.size())
                 audioChannelsToUse.add (0);
         }
 
-        void operator() (const Context& c)
+        void prepare (FloatType* const* renderBuffer, MidiBuffer* buffers) override
+        {
+            for (size_t i = 0; i < audioChannels.size(); ++i)
+                audioChannels[i] = renderBuffer[audioChannelsToUse.getUnchecked ((int) i)];
+
+            midiBuffer = buffers + midiBufferToUse;
+        }
+
+        void process (const Context& c) override
         {
             processor.setPlayHead (c.audioPlayHead);
-
-            for (size_t i = 0; i < audioChannels.size(); ++i)
-                audioChannels[i] = c.audioBuffers[audioChannelsToUse.getUnchecked ((int) i)];
 
             auto numAudioChannels = [this]
             {
@@ -660,7 +782,7 @@ private:
             if (processor.isSuspended())
                 buffer.clear();
             else
-                callProcess (buffer, c.midiBuffers[midiBufferToUse]);
+                callProcess (buffer, *midiBuffer);
         }
 
         void callProcess (AudioBuffer<float>& buffer, MidiBuffer& midi)
@@ -702,12 +824,15 @@ private:
 
         const Node::Ptr node;
         AudioProcessor& processor;
+        MidiBuffer* midiBuffer = nullptr;
 
         Array<int> audioChannelsToUse;
         std::vector<FloatType*> audioChannels;
         AudioBuffer<float> tempBufferFloat, tempBufferDouble;
         const int midiBufferToUse;
     };
+
+    std::vector<std::unique_ptr<RenderOp>> renderOps;
 };
 
 //==============================================================================
