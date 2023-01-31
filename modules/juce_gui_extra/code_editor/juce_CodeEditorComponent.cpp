@@ -508,7 +508,7 @@ bool CodeEditorComponent::isTextInputActive() const
 
 void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int>>&)
 {
-    jassertfalse; // TODO Windows IME not yet supported for this comp..
+    // TODO IME composition ranges not yet supported for this component
 }
 
 void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
