@@ -835,7 +835,7 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_add_lv2_manifest_helper_target)
-    if(TARGET juce_lv2_helper)
+    if(TARGET juce_lv2_helper OR (CMAKE_SYSTEM_NAME STREQUAL "iOS") OR (CMAKE_SYSTEM_NAME STREQUAL "Android"))
         return()
     endif()
 
@@ -846,6 +846,9 @@ function(_juce_add_lv2_manifest_helper_target)
     target_compile_features(juce_lv2_helper PRIVATE cxx_std_17)
     set_target_properties(juce_lv2_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
     target_link_libraries(juce_lv2_helper PRIVATE ${CMAKE_DL_LIBS})
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    target_link_libraries(juce_lv2_helper PRIVATE Threads::Threads)
 endfunction()
 
 # ==================================================================================================

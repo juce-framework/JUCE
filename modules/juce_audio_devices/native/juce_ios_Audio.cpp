@@ -701,12 +701,13 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     Image getIcon (int size)
     {
+       #if TARGET_OS_MACCATALYST
         if (@available (macCatalyst 14.0, *))
+       #endif
         {
             if (interAppAudioConnected)
             {
-                UIImage* hostUIImage = AudioOutputUnitGetHostIcon (audioUnit, size);
-                if (hostUIImage != nullptr)
+                if (UIImage* hostUIImage = AudioOutputUnitGetHostIcon (audioUnit, size))
                     return juce_createImageFromUIImage (hostUIImage);
             }
         }

@@ -501,12 +501,33 @@ static double getGlobalDPI()
 //==============================================================================
 class ScopedSuspendResumeNotificationRegistration
 {
+    static auto& getFunctions()
+    {
+        struct Functions
+        {
+            using Register = HPOWERNOTIFY (WINAPI*) (HANDLE, DWORD);
+            using Unregister = BOOL (WINAPI*) (HPOWERNOTIFY);
+
+            Register registerNotification = (Register) getUser32Function ("RegisterSuspendResumeNotification");
+            Unregister unregisterNotification = (Unregister) getUser32Function ("UnregisterSuspendResumeNotification");
+
+            bool isValid() const { return registerNotification != nullptr && unregisterNotification != nullptr; }
+
+            Functions() = default;
+            JUCE_DECLARE_NON_COPYABLE (Functions)
+            JUCE_DECLARE_NON_MOVEABLE (Functions)
+        };
+
+        static const Functions functions;
+        return functions;
+    }
+
 public:
     ScopedSuspendResumeNotificationRegistration() = default;
 
     explicit ScopedSuspendResumeNotificationRegistration (HWND window)
-        : handle (SystemStats::getOperatingSystemType() >= SystemStats::Windows8_0
-                      ? RegisterSuspendResumeNotification (window, DEVICE_NOTIFY_WINDOW_HANDLE)
+        : handle (getFunctions().isValid()
+                      ? getFunctions().registerNotification (window, DEVICE_NOTIFY_WINDOW_HANDLE)
                       : nullptr)
     {}
 
@@ -516,7 +537,7 @@ private:
         void operator() (HPOWERNOTIFY ptr) const
         {
             if (ptr != nullptr)
-                UnregisterSuspendResumeNotification (ptr);
+                getFunctions().unregisterNotification (ptr);
         }
     };
 
@@ -527,24 +548,47 @@ private:
 class ScopedThreadDPIAwarenessSetter::NativeImpl
 {
 public:
+    static auto& getFunctions()
+    {
+        struct Functions
+        {
+            SetThreadDPIAwarenessContextFunc setThreadAwareness             = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+            GetWindowDPIAwarenessContextFunc getWindowAwareness             = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
+            GetThreadDPIAwarenessContextFunc getThreadAwareness             = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+            GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+
+            bool isLoaded() const noexcept
+            {
+                return setThreadAwareness != nullptr
+                    && getWindowAwareness != nullptr
+                    && getThreadAwareness != nullptr
+                    && getAwarenessFromContext != nullptr;
+            }
+
+            Functions() = default;
+            JUCE_DECLARE_NON_COPYABLE (Functions)
+            JUCE_DECLARE_NON_MOVEABLE (Functions)
+        };
+
+        static const Functions functions;
+        return functions;
+    }
+
     explicit NativeImpl (HWND nativeWindow [[maybe_unused]])
     {
        #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (auto* functionSingleton = FunctionSingleton::getInstance())
+        if (const auto& functions = getFunctions(); functions.isLoaded())
         {
-            if (! functionSingleton->isLoaded())
-                return;
-
-            auto dpiAwareWindow = (functionSingleton->getAwarenessFromContext (functionSingleton->getWindowAwareness (nativeWindow))
+            auto dpiAwareWindow = (functions.getAwarenessFromContext (functions.getWindowAwareness (nativeWindow))
                                    == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
 
-            auto dpiAwareThread = (functionSingleton->getAwarenessFromContext (functionSingleton->getThreadAwareness())
+            auto dpiAwareThread = (functions.getAwarenessFromContext (functions.getThreadAwareness())
                                    == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
 
             if (dpiAwareWindow && ! dpiAwareThread)
-                oldContext = functionSingleton->setThreadAwareness (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+                oldContext = functions.setThreadAwareness (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
             else if (! dpiAwareWindow && dpiAwareThread)
-                oldContext = functionSingleton->setThreadAwareness (DPI_AWARENESS_CONTEXT_UNAWARE);
+                oldContext = functions.setThreadAwareness (DPI_AWARENESS_CONTEXT_UNAWARE);
         }
        #endif
     }
@@ -552,43 +596,15 @@ public:
     ~NativeImpl()
     {
         if (oldContext != nullptr)
-            if (auto* functionSingleton = FunctionSingleton::getInstance())
-                functionSingleton->setThreadAwareness (oldContext);
+            getFunctions().setThreadAwareness (oldContext);
     }
 
 private:
-    struct FunctionSingleton  : public DeletedAtShutdown
-    {
-        FunctionSingleton() = default;
-        ~FunctionSingleton() override { clearSingletonInstance(); }
-
-        SetThreadDPIAwarenessContextFunc setThreadAwareness             = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-        GetWindowDPIAwarenessContextFunc getWindowAwareness             = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-        GetThreadDPIAwarenessContextFunc getThreadAwareness             = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-        GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-
-        bool isLoaded() const noexcept
-        {
-            return setThreadAwareness != nullptr
-                && getWindowAwareness != nullptr
-                && getThreadAwareness != nullptr
-                && getAwarenessFromContext != nullptr;
-        }
-
-        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (FunctionSingleton)
-
-        JUCE_DECLARE_NON_COPYABLE (FunctionSingleton)
-        JUCE_DECLARE_NON_MOVEABLE (FunctionSingleton)
-    };
-
     DPI_AWARENESS_CONTEXT oldContext = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeImpl)
     JUCE_DECLARE_NON_MOVEABLE (NativeImpl)
 };
-
-
-JUCE_IMPLEMENT_SINGLETON (ScopedThreadDPIAwarenessSetter::NativeImpl::FunctionSingleton)
 
 ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (void* nativeWindow)
 {
@@ -597,17 +613,31 @@ ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (void* nativeWind
 
 ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter() = default;
 
+static auto& getScopedDPIAwarenessDisablerFunctions()
+{
+    struct Functions
+    {
+        GetThreadDPIAwarenessContextFunc localGetThreadDpiAwarenessContext = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+        GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDpiAwarenessContextFunc = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+        SetThreadDPIAwarenessContextFunc localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+
+        Functions() = default;
+        JUCE_DECLARE_NON_COPYABLE (Functions)
+        JUCE_DECLARE_NON_MOVEABLE (Functions)
+    };
+
+    static const Functions functions;
+    return functions;
+}
+
 ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
 {
-    static auto localGetThreadDpiAwarenessContext            = (GetThreadDPIAwarenessContextFunc)        getUser32Function ("GetThreadDpiAwarenessContext");
-    static auto localGetAwarenessFromDpiAwarenessContextFunc = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+    const auto& functions = getScopedDPIAwarenessDisablerFunctions();
 
-    if (! isPerMonitorDPIAwareThread (localGetThreadDpiAwarenessContext, localGetAwarenessFromDpiAwarenessContextFunc))
+    if (! isPerMonitorDPIAwareThread (functions.localGetThreadDpiAwarenessContext, functions.localGetAwarenessFromDpiAwarenessContextFunc))
         return;
 
-    static auto localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-
-    if (localSetThreadDPIAwarenessContext != nullptr)
+    if (auto* localSetThreadDPIAwarenessContext = functions.localSetThreadDPIAwarenessContext)
     {
         previousContext = localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
 
@@ -621,9 +651,7 @@ ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
 {
     if (previousContext != nullptr)
     {
-        static auto localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-
-        if (localSetThreadDPIAwarenessContext != nullptr)
+        if (auto* localSetThreadDPIAwarenessContext = getScopedDPIAwarenessDisablerFunctions().localSetThreadDPIAwarenessContext)
             localSetThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
 
        #if JUCE_DEBUG
@@ -685,17 +713,7 @@ JUCE_API double getScaleFactorForWindow (HWND h)
 {
     // NB. Using a local function here because we need to call this method from the plug-in wrappers
     // which don't load the DPI-awareness functions on startup
-    static GetDPIForWindowFunc localGetDPIForWindow = nullptr;
-
-    static bool hasChecked = false;
-
-    if (! hasChecked)
-    {
-        hasChecked = true;
-
-        if (localGetDPIForWindow == nullptr)
-            localGetDPIForWindow = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
-    }
+    static auto localGetDPIForWindow = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
 
     if (localGetDPIForWindow != nullptr)
         return (double) localGetDPIForWindow (h) / USER_DEFAULT_SCREEN_DPI;
@@ -2739,7 +2757,9 @@ private:
     {
         using ChangeWindowMessageFilterExFunc = BOOL (WINAPI*) (HWND, UINT, DWORD, PVOID);
 
-        if (auto changeMessageFilter = (ChangeWindowMessageFilterExFunc) getUser32Function ("ChangeWindowMessageFilterEx"))
+        static auto changeMessageFilter = (ChangeWindowMessageFilterExFunc) getUser32Function ("ChangeWindowMessageFilterEx");
+
+        if (changeMessageFilter != nullptr)
         {
             changeMessageFilter (hwnd, WM_DROPFILES, 1 /*MSGFLT_ALLOW*/, nullptr);
             changeMessageFilter (hwnd, WM_COPYDATA, 1 /*MSGFLT_ALLOW*/, nullptr);

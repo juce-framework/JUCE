@@ -27,8 +27,7 @@
 
 
 //==============================================================================
-// The GCC extensions define linux somewhere in the headers, so undef it here...
-#if JUCE_GCC
+#ifdef linux
  #undef linux
 #endif
 

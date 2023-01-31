@@ -2211,6 +2211,7 @@ public:
         void setValue (float newValue) override
         {
             pluginInstance.cachedParamValues.set (vstParamIndex, newValue);
+            pluginInstance.parameterDispatcher.push (vstParamIndex, newValue);
         }
 
         /*  If we're syncing the editor to the processor, the processor won't need to
@@ -2678,11 +2679,6 @@ public:
         cachedParamValues.ifSet ([&] (Steinberg::int32 index, float value)
         {
             inputParameterChanges->set (cachedParamValues.getParamID (index), value);
-        });
-
-        inputParameterChanges->forEach ([&] (Steinberg::int32 index, float value)
-        {
-            parameterDispatcher.push (index, value);
         });
 
         processor->process (data);
