@@ -1018,7 +1018,9 @@ public:
             AudioProcessor::TrackProperties trackProperties;
             FUnknownPtr<Presonus::IContextInfoProvider> contextInfoProvider (componentHandler);
             Steinberg::int32 channelColour = 0;
-            if (contextInfoProvider->getContextInfoValue (channelColour, Presonus::ContextInfo::kColor) == kResultTrue)
+            if (! PluginHostType().isAbletonLive()
+                && contextInfoProvider->getContextInfoValue (channelColour, Presonus::ContextInfo::kColor)
+                       == kResultTrue)
             {
                 // PreSonus uses RGBA
                 uint8 r = (channelColour) &0x000000FF;
