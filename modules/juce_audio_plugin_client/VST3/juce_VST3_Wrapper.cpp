@@ -2551,6 +2551,8 @@ public:
     //==============================================================================
     tresult PLUGIN_API setActive (TBool state) override
     {
+        const FLStudioDIYSpecificationEnforcementLock lock (flStudioDIYSpecificationEnforcementMutex);
+
         const auto willBeActive = (state != 0);
 
         active = false;
@@ -3140,6 +3142,8 @@ public:
                                     Steinberg::int32 index,
                                     TBool state) override
     {
+        const FLStudioDIYSpecificationEnforcementLock lock (flStudioDIYSpecificationEnforcementMutex);
+
         // The host is misbehaving! The plugin must be deactivated before setting new arrangements.
         jassert (! active);
 
@@ -3274,6 +3278,8 @@ public:
     tresult PLUGIN_API setBusArrangements (Vst::SpeakerArrangement* inputs, Steinberg::int32 numIns,
                                            Vst::SpeakerArrangement* outputs, Steinberg::int32 numOuts) override
     {
+        const FLStudioDIYSpecificationEnforcementLock lock (flStudioDIYSpecificationEnforcementMutex);
+
         if (active)
         {
             // The host is misbehaving! The plugin must be deactivated before setting new arrangements.
@@ -3501,6 +3507,8 @@ public:
 
     tresult PLUGIN_API process (Vst::ProcessData& data) override
     {
+        const FLStudioDIYSpecificationEnforcementLock lock (flStudioDIYSpecificationEnforcementMutex);
+
         if (pluginInstance == nullptr)
             return kResultFalse;
 
@@ -3573,6 +3581,24 @@ public:
     }
 
 private:
+    /*  FL's Patcher implements the VST3 specification incorrectly, calls process() before/during
+        setActive().
+    */
+    class [[nodiscard]] FLStudioDIYSpecificationEnforcementLock
+    {
+    public:
+        explicit FLStudioDIYSpecificationEnforcementLock (CriticalSection& mutex)
+        {
+            static const auto lockRequired = PluginHostType().isFruityLoops();
+
+            if (lockRequired)
+                lock.emplace (mutex);
+        }
+
+    private:
+        std::optional<ScopedLock> lock;
+    };
+
     InterfaceResultWithDeferredAddRef queryInterfaceInternal (const TUID targetIID)
     {
         const auto result = testForMultiple (*this,
@@ -3790,6 +3816,7 @@ private:
    #endif
 
     static const char* kJucePrivateDataIdentifier;
+    CriticalSection flStudioDIYSpecificationEnforcementMutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3Component)
 };
