@@ -549,15 +549,20 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
         CGContextDrawTiledImage (context.get(), imageRect, image.get());
       #else
         // There's a bug in CGContextDrawTiledImage that makes it incredibly slow
-        // if it's doing a transformation - it's quicker to just draw lots of images manually
-        if (&CGContextDrawTiledImage != nullptr && transform.isOnlyTranslation())
+        // if it's doing a transformation - it's quicker to just draw lots of images manually,
+        // but we might not be able to draw the images ourselves if the clipping region is not
+        // finite
+        const auto doCustomTiling = [&]
         {
-            CGContextDrawTiledImage (context.get(), imageRect, image.get());
-        }
-        else
-        {
-            // Fallback to manually doing a tiled fill
-            auto clip = CGRectIntegral (CGContextGetClipBoundingBox (context.get()));
+            if (transform.isOnlyTranslation())
+                return false;
+
+            const auto bound = CGContextGetClipBoundingBox (context.get());
+
+            if (CGRectIsNull (bound))
+                return false;
+
+            const auto clip = CGRectIntegral (bound);
 
             int x = 0, y = 0;
             while (x > clip.origin.x)   x -= iw;
@@ -573,7 +578,12 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
 
                 y += ih;
             }
-        }
+
+            return true;
+        };
+
+        if (! doCustomTiling())
+            CGContextDrawTiledImage (context.get(), imageRect, image.get());
       #endif
     }
     else
