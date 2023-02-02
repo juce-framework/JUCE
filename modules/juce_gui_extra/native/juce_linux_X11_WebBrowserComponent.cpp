@@ -854,8 +854,6 @@ private:
         else if (cmd == "windowCloseRequest")        owner.windowCloseRequest();
         else if (cmd == "newWindowAttemptingToLoad") owner.newWindowAttemptingToLoad (url);
         else if (cmd == "pageLoadHadNetworkError")   handlePageLoadHadNetworkError (params);
-
-        threadBlocker.signal();
     }
 
     void handlePageAboutToLoad (const String& url, const var& inputParams)
@@ -883,35 +881,18 @@ private:
 
     void handleCommand (const String& cmd, const var& params) override
     {
-        threadBlocker.reset();
+        MessageManager::callAsync ([liveness = std::weak_ptr<int> (livenessProbe), this, cmd, params]()
+                                   {
+                                       if (liveness.lock() == nullptr)
+                                           return;
 
-        (new HandleOnMessageThread (this, cmd, params))->post();
-
-        // wait until the command has executed on the message thread
-        // this ensures that Pimpl can never be deleted while the
-        // message has not been executed yet
-        threadBlocker.wait (-1);
+                                       handleCommandOnMessageThread (cmd, params);
+                                   });
     }
 
     void receiverHadError() override {}
 
     //==============================================================================
-    struct HandleOnMessageThread : public CallbackMessage
-    {
-        HandleOnMessageThread (Pimpl* pimpl, const String& cmdToUse, const var& params)
-            : owner (pimpl), cmdToSend (cmdToUse), paramsToSend (params)
-        {}
-
-        void messageCallback() override
-        {
-            owner->handleCommandOnMessageThread (cmdToSend, paramsToSend);
-        }
-
-        Pimpl* owner = nullptr;
-        String cmdToSend;
-        var paramsToSend;
-    };
-
     bool webKitIsAvailable = false;
 
     WebBrowserComponent& owner;
@@ -920,7 +901,7 @@ private:
     int childProcess = 0, inChannel = 0, outChannel = 0;
     int threadControl[2];
     std::unique_ptr<XEmbedComponent> xembed;
-    WaitableEvent threadBlocker;
+    std::shared_ptr<int> livenessProbe = std::make_shared<int> (0);
     std::vector<pollfd> pfds;
 };
 
