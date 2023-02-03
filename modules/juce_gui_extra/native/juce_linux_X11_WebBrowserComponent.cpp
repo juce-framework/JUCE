@@ -23,6 +23,10 @@
   ==============================================================================
 */
 
+#if JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS
+ #include "juce_LinuxSubprocessHelperBinaryData.h"
+#endif
+
 namespace juce
 {
 
@@ -215,7 +219,7 @@ private:
 JUCE_IMPLEMENT_SINGLETON (WebKitSymbols)
 
 //==============================================================================
-extern int juce_gtkWebkitMain (int argc, const char* argv[]);
+extern "C" int juce_gtkWebkitMain (int argc, const char* const* argv);
 
 class CommandReceiver
 {
@@ -776,34 +780,68 @@ private:
         ret = pipe (outPipe);
         jassert (ret == 0);
 
+        std::vector<String> arguments;
+
+       #if JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS
+        if (! JUCEApplicationBase::isStandaloneApp())
+        {
+            subprocessFile.emplace ("_juce_linux_subprocess");
+
+            const auto externalSubprocessAvailable = subprocessFile->getFile().replaceWithData (LinuxSubprocessHelperBinaryData::juce_linux_subprocess_helper,
+                                                                                                LinuxSubprocessHelperBinaryData::juce_linux_subprocess_helperSize)
+                                                     && subprocessFile->getFile().setExecutePermission (true);
+
+            ignoreUnused (externalSubprocessAvailable);
+            jassert (externalSubprocessAvailable);
+
+            /*  The external subprocess will load the .so specified as its first argument and execute
+                the function specified by the second. The remaining arguments will be passed on to
+                the function.
+            */
+            arguments.emplace_back (subprocessFile->getFile().getFullPathName());
+            arguments.emplace_back (File::getSpecialLocation (File::currentExecutableFile).getFullPathName());
+            arguments.emplace_back ("juce_gtkWebkitMain");
+        }
+       #endif
+
+        arguments.emplace_back (File::getSpecialLocation (File::currentExecutableFile).getFullPathName());
+        arguments.emplace_back ("--juce-gtkwebkitfork-child");
+        arguments.emplace_back (outPipe[0]);
+        arguments.emplace_back (inPipe [1]);
+
+        if (userAgent.isNotEmpty())
+            arguments.emplace_back (userAgent);
+
+        std::vector<const char*> argv (arguments.size() + 1, nullptr);
+        std::transform (arguments.begin(), arguments.end(), argv.begin(), [] (const auto& arg)
+        {
+            return arg.toRawUTF8();
+        });
+
         auto pid = fork();
+
         if (pid == 0)
         {
             close (inPipe[0]);
             close (outPipe[1]);
 
-            StringArray arguments;
-
-            arguments.add (File::getSpecialLocation (File::currentExecutableFile).getFullPathName());
-            arguments.add ("--juce-gtkwebkitfork-child");
-            arguments.add (String (outPipe[0]));
-            arguments.add (String (inPipe [1]));
-
-            if (userAgent.isNotEmpty())
-                arguments.add (userAgent);
-
-            std::vector<const char*> argv;
-            argv.reserve (static_cast<std::size_t> (arguments.size() + 1));
-
-            for (const auto& arg : arguments)
-                argv.push_back (arg.toRawUTF8());
-
-            argv.push_back (nullptr);
-
             if (JUCEApplicationBase::isStandaloneApp())
+            {
                 execv (arguments[0].toRawUTF8(), (char**) argv.data());
+            }
             else
-                juce_gtkWebkitMain (arguments.size(), (const char**) argv.data());
+            {
+               #if JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS
+                execv (arguments[0].toRawUTF8(), (char**) argv.data());
+               #else
+                // After a fork in a multithreaded program, the child can only safely call
+                // async-signal-safe functions until it calls execv, but if we reached this point
+                // then execv won't be called at all! The following call is unsafe, and is very
+                // likely to lead to unexpected behaviour.
+                jassertfalse;
+                juce_gtkWebkitMain ((int) arguments.size(), argv.data());
+               #endif
+            }
 
             exit (0);
         }
@@ -881,12 +919,10 @@ private:
 
     void handleCommand (const String& cmd, const var& params) override
     {
-        MessageManager::callAsync ([liveness = std::weak_ptr<int> (livenessProbe), this, cmd, params]()
+        MessageManager::callAsync ([liveness = std::weak_ptr (livenessProbe), this, cmd, params]
                                    {
-                                       if (liveness.lock() == nullptr)
-                                           return;
-
-                                       handleCommandOnMessageThread (cmd, params);
+                                       if (liveness.lock() != nullptr)
+                                           handleCommandOnMessageThread (cmd, params);
                                    });
     }
 
@@ -903,6 +939,7 @@ private:
     std::unique_ptr<XEmbedComponent> xembed;
     std::shared_ptr<int> livenessProbe = std::make_shared<int> (0);
     std::vector<pollfd> pfds;
+    std::optional<TemporaryFile> subprocessFile;
 };
 
 //==============================================================================
@@ -1015,7 +1052,7 @@ bool WebBrowserComponent::areOptionsSupported (const Options& options)
     return (options.getBackend() == Options::Backend::defaultBackend);
 }
 
-int juce_gtkWebkitMain (int argc, const char* argv[])
+extern "C" __attribute__ ((visibility ("default"))) int juce_gtkWebkitMain (int argc, const char* const* argv)
 {
     if (argc < 4)
         return -1;
