@@ -764,6 +764,21 @@ This function sets the `CMAKE_<LANG>_FLAGS_<MODE>` to empty in the current direc
 allowing alternative optimisation/debug flags to be supplied without conflicting with the
 CMake-supplied defaults.
 
+#### `juce_link_with_embedded_linux_subprocess`
+
+    juce_link_with_embedded_linux_subprocess(<target>)
+
+This function links the provided target with an interface library that generates a barebones 
+standalone executable file and embeds it as a binary resource. This binary resource is only used
+by the `juce_gui_extra` module and only when its `JUCE_WEB_BROWSER` capability is enabled. This
+executable will then be deployed into a temporary file only when the code is running in a
+non-standalone format, and will be used to host a WebKit view. This technique is used by audio
+plugins on Linux.
+
+This function is automatically called if necessary for all targets created by one of the JUCE target
+creation functions i.e. `juce_add_gui_app`, `juce_add_console_app` and `juce_add_gui_app`. You don't
+need to call this function manually in these cases.
+
 ### Targets
 
 #### `juce::juce_recommended_warning_flags`
