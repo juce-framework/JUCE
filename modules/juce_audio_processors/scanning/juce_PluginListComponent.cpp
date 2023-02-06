@@ -472,9 +472,9 @@ private:
     {
         for (int i = 0; i < pathList.getPath().getNumPaths(); ++i)
         {
-            auto f = pathList.getPath()[i];
+            auto f = pathList.getPath().getRawString (i);
 
-            if (isStupidPath (f))
+            if (File::isAbsolutePath (f) && isStupidPath (File (f)))
             {
                 AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
                                               TRANS("Plugin Scanning"),
@@ -483,7 +483,7 @@ private:
                                                     "attempting to load unsuitable files.")
                                                 + newLine
                                                 + TRANS ("Are you sure you want to scan the folder \"XYZ\"?")
-                                                   .replace ("XYZ", f.getFullPathName()),
+                                                   .replace ("XYZ", f),
                                               TRANS ("Scan"),
                                               String(),
                                               nullptr,

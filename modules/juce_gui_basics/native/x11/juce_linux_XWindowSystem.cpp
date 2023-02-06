@@ -641,8 +641,8 @@ enum
 
                                  if (X11Symbols::getInstance()->xShmAttach (display, &segmentInfo) != 0)
                                  {
-                                     X11Symbols::getInstance()->xSync (display, False);
                                      X11Symbols::getInstance()->xShmDetach (display, &segmentInfo);
+                                     X11Symbols::getInstance()->xSync (display, False);
 
                                      isAvailable = true;
                                  }

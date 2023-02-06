@@ -34,7 +34,7 @@ class JUCE_API  VBlankAttachment final  : public ComponentPeer::VBlankListener,
 {
 public:
     /** Default constructor for creating an empty object. */
-    VBlankAttachment() {}
+    VBlankAttachment() = default;
 
     /** Constructor. Creates an attachment that will call the passed in function at every vertical
         blank event of the display that the passed in Component is currently visible on.
@@ -49,7 +49,7 @@ public:
     ~VBlankAttachment() override;
 
     /** Returns true for a default constructed object. */
-    bool isEmpty() { return owner == nullptr; }
+    bool isEmpty() const { return owner == nullptr; }
 
     //==============================================================================
     void onVBlank() override;

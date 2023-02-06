@@ -325,7 +325,10 @@ private:
         WrappedIterator (const ListenerList& listToIterate, WrappedIterator*& listHeadIn)
             : it (listToIterate), listHead (listHeadIn), next (listHead)
         {
+            // GCC 12.2 with O1 and above gets confused here
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdangling-pointer")
             listHead = this;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         ~WrappedIterator()
