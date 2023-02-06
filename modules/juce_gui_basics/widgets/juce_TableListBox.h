@@ -326,6 +326,8 @@ public:
     void tableColumnDraggingChanged (TableHeaderComponent*, int) override;
     /** @internal */
     void resized() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -337,7 +339,6 @@ private:
     int columnIdNowBeingDragged = 0;
     bool autoSizeOptionsShown = true;
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void updateColumnComponents() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableListBox)
