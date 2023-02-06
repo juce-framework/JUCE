@@ -558,7 +558,7 @@ public:
         {
             ++insideToFrontCall;
 
-            if (makeActiveWindow)
+            if (makeActiveWindow && ! inBecomeKeyWindow)
                 [window makeKeyAndOrderFront: nil];
             else
                 [window orderFront: nil];
@@ -1541,7 +1541,9 @@ public:
     {
         if (window != nil)
         {
-            [window makeKeyWindow];
+            if (! inBecomeKeyWindow)
+                [window makeKeyWindow];
+
             [window makeFirstResponder: view];
 
             viewFocusGain();
@@ -1622,7 +1624,7 @@ public:
     bool isFirstLiveResize = false, viewCannotHandleEvent = false;
     bool isStretchingTop = false, isStretchingLeft = false, isStretchingBottom = false, isStretchingRight = false;
     bool windowRepresentsFile = false;
-    bool isAlwaysOnTop = false, wasAlwaysOnTop = false;
+    bool isAlwaysOnTop = false, wasAlwaysOnTop = false, inBecomeKeyWindow = false;
     String stringBeingComposed;
     int startOfMarkedTextInTextInputTarget = 0;
 
@@ -2453,6 +2455,10 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
 
             if (auto* owner = getOwner (self))
             {
+                jassert (! owner->inBecomeKeyWindow);
+
+                const ScopedValueSetter scope { owner->inBecomeKeyWindow, true };
+
                 if (owner->canBecomeKeyWindow())
                 {
                     owner->becomeKeyWindow();
