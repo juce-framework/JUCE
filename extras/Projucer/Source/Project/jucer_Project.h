@@ -339,11 +339,11 @@ public:
     String getLV2URI() const        { return pluginLV2URIValue.get(); }
 
     //==============================================================================
-    bool isAUPluginHost();
-    bool isVSTPluginHost();
-    bool isVST3PluginHost();
-    bool isLV2PluginHost();
-    bool isARAPluginHost();
+    bool isAUPluginHost()   const;
+    bool isVSTPluginHost()  const;
+    bool isVST3PluginHost() const;
+    bool isLV2PluginHost()  const;
+    bool isARAPluginHost()  const;
 
     //==============================================================================
     bool shouldBuildTargetType (build_tools::ProjectType::Target::Type targetType) const noexcept;
@@ -494,7 +494,10 @@ public:
     bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
-    EnabledModulesList& getEnabledModules();
+    void createEnabledModulesList();
+
+          EnabledModulesList& getEnabledModules();
+    const EnabledModulesList& getEnabledModules() const;
 
     AvailableModulesList& getExporterPathsModulesList()  { return exporterPathsModulesList; }
     void rescanExporterPathModules (bool async = false);
@@ -546,6 +549,10 @@ private:
     void valueTreeChildAdded (ValueTree&, ValueTree&) override;
     void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override;
     void valueTreeChildOrderChanged (ValueTree&, int, int) override;
+
+    //==============================================================================
+    template <typename This>
+    static auto& getEnabledModulesImpl (This&);
 
     //==============================================================================
     struct ProjectFileModificationPoller  : private Timer
