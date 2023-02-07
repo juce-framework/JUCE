@@ -270,6 +270,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content APP_GROUP_IDS                        ${target} JUCE_APP_GROUP_IDS)
     _juce_append_target_property(file_content IS_PLUGIN                            ${target} JUCE_IS_PLUGIN)
     _juce_append_target_property(file_content ICLOUD_PERMISSIONS_ENABLED           ${target} JUCE_ICLOUD_PERMISSIONS_ENABLED)
+    _juce_append_target_property(file_content IS_AU_PLUGIN_HOST                    ${target} JUCE_PLUGINHOST_AU)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         _juce_append_record(file_content IS_IOS 1)
