@@ -1139,7 +1139,7 @@ struct StateHelpers
 
                 JUCE_CHECK_OPENGL_ERROR;
                 PixelARGB lookup[gradientTextureSize];
-                gradient.createLookupTable (lookup, gradientTextureSize);
+                gradient.createLookupTable (lookup);
                 gradientTextures.getUnchecked (activeGradientIndex)->loadARGB (lookup, gradientTextureSize, 1);
             }
 
