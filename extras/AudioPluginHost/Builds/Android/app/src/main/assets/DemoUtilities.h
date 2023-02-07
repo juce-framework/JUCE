@@ -244,10 +244,8 @@ struct SlowerBouncingNumber  : public BouncingNumber
 
 inline std::unique_ptr<InputSource> makeInputSource (const URL& url)
 {
-   #if JUCE_ANDROID
-    if (auto doc = AndroidDocument::fromDocument (url))
+    if (const auto doc = AndroidDocument::fromDocument (url))
         return std::make_unique<AndroidDocumentInputSource> (doc);
-   #endif
 
    #if ! JUCE_IOS
     if (url.isLocalFile())
@@ -255,6 +253,19 @@ inline std::unique_ptr<InputSource> makeInputSource (const URL& url)
    #endif
 
     return std::make_unique<URLInputSource> (url);
+}
+
+inline std::unique_ptr<OutputStream> makeOutputStream (const URL& url)
+{
+    if (const auto doc = AndroidDocument::fromDocument (url))
+        return doc.createOutputStream();
+
+   #if ! JUCE_IOS
+    if (url.isLocalFile())
+        return url.getLocalFile().createOutputStream();
+   #endif
+
+    return url.createOutputStream();
 }
 
 #endif   // PIP_DEMO_UTILITIES_INCLUDED
