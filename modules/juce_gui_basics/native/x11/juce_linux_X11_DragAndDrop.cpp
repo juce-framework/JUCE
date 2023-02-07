@@ -543,7 +543,7 @@ private:
                                                    false,
                                                    AnyPropertyType);
 
-        if (prop.success && prop.data != None && prop.actualFormat == 32 && prop.numItems == 1)
+        if (prop.success && prop.data != nullptr && prop.actualFormat == 32 && prop.numItems == 1)
             return jmin ((int) prop.data[0], (int) XWindowSystemUtilities::Atoms::DndVersion);
 
         return -1;

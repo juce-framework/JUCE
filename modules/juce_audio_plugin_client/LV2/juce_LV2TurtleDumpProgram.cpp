@@ -39,7 +39,7 @@
  #include <tchar.h>
  HMODULE dlopen (const TCHAR* filename, int) { return LoadLibrary (filename); }
  FARPROC dlsym (HMODULE handle, const char* name) { return GetProcAddress (handle, name); }
- void printError()
+ static void printError()
  {
      constexpr DWORD numElements = 256;
      TCHAR messageBuffer[numElements]{};
@@ -76,7 +76,7 @@
      LPWSTR* argv = CommandLineToArgvW (GetCommandLineW(), &argc);
  };
 
- std::vector<char> toUTF8 (const TCHAR* str)
+ static std::vector<char> toUTF8 (const TCHAR* str)
  {
      const auto numBytes = WideCharToMultiByte (CP_UTF8, 0, str, -1, nullptr, 0, nullptr, nullptr);
      std::vector<char> result (numBytes);
@@ -86,7 +86,7 @@
 
 #else
  #include <dlfcn.h>
- void printError() { printf ("%s\n", dlerror()); }
+ static void printError() { printf ("%s\n", dlerror()); }
  class ArgList
  {
  public:
@@ -106,7 +106,7 @@
      const char** argv = nullptr;
  };
 
- std::vector<char> toUTF8 (const char* str) { return std::vector<char> (str, str + std::strlen (str) + 1); }
+ static std::vector<char> toUTF8 (const char* str) { return std::vector<char> (str, str + std::strlen (str) + 1); }
 #endif
 
 // Replicating part of the LV2 header here so that we don't have to set up any

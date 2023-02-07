@@ -367,7 +367,7 @@ public:
         if (auto handle = createWebViewHandle (preferences))
             webViewHandle = std::move (*handle);
         else
-            throw std::runtime_error ("Failed to create the CoreWebView2Environemnt");
+            throw std::runtime_error ("Failed to create the CoreWebView2Environment");
 
         owner.addAndMakeVisible (this);
     }

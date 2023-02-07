@@ -34,7 +34,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
         {
             if (i->ifa_addr->sa_family == AF_LINK)
             {
-                struct sockaddr_dl* sdl = (struct sockaddr_dl*) i->ifa_addr;
+                auto sdl = unalignedPointerCast<struct sockaddr_dl*> (i->ifa_addr);
                 MACAddress ma ((const uint8*) (sdl->sdl_data + sdl->sdl_nlen));
 
                 if (! ma.isNull())

@@ -151,7 +151,9 @@
      If you don't have the ALSA library and don't want to build JUCE with audio support,
      just set the JUCE_ALSA flag to 0.
   */
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-length-array")
   #include <alsa/asoundlib.h>
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
   #include "native/juce_linux_ALSA.cpp"
  #endif
 

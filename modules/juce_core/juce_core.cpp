@@ -41,7 +41,7 @@
 #include <locale>
 #include <thread>
 
-#if ! JUCE_ANDROID
+#if ! (JUCE_ANDROID || JUCE_BSD)
  #include <sys/timeb.h>
  #include <cwctype>
 #endif

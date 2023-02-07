@@ -1899,11 +1899,15 @@ function(juce_add_pip header)
                 list(APPEND extra_formats VST)
             endif()
 
+            if(NOT (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
+                list(APPEND extra_formats VST3)
+            endif()
+
             # Standalone plugins might want to access the mic
             list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
 
             juce_add_plugin(${JUCE_PIP_NAME}
-                FORMATS AU AUv3 LV2 Standalone Unity VST3 ${extra_formats}
+                FORMATS AU AUv3 LV2 Standalone Unity ${extra_formats}
                 ${extra_target_args})
         endif()
     elseif(pip_kind STREQUAL "Component")
