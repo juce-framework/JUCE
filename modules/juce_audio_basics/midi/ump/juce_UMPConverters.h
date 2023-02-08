@@ -35,7 +35,7 @@ namespace universal_midi_packets
     struct ToUMP1Converter
     {
         template <typename Fn>
-        void convert (const MidiMessage& m, Fn&& fn)
+        void convert (const BytestreamMidiView& m, Fn&& fn)
         {
             Conversion::toMidi1 (m, std::forward<Fn> (fn));
         }
@@ -56,7 +56,7 @@ namespace universal_midi_packets
     struct ToUMP2Converter
     {
         template <typename Fn>
-        void convert (const MidiMessage& m, Fn&& fn)
+        void convert (const BytestreamMidiView& m, Fn&& fn)
         {
             Conversion::toMidi1 (m, [&] (const View& v)
             {
@@ -98,7 +98,7 @@ namespace universal_midi_packets
         }
 
         template <typename Fn>
-        void convert (const MidiMessage& m, Fn&& fn)
+        void convert (const BytestreamMidiView& m, Fn&& fn)
         {
             switch (mode)
             {
