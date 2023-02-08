@@ -2192,8 +2192,14 @@ void Desktop::allowedOrientationsChanged()
         {
             if ([scene isKindOfClass: [UIWindowScene class]])
             {
-                [static_cast<UIWindowScene*> (scene) requestGeometryUpdateWithPreferences: preferences.get()
-                                                                             errorHandler: ^([[maybe_unused]] NSError* error)
+                auto* windowScene = static_cast<UIWindowScene*> (scene);
+
+                for (UIWindow* window in [windowScene windows])
+                    if (auto* vc = [window rootViewController])
+                        [vc setNeedsUpdateOfSupportedInterfaceOrientations];
+
+                [windowScene requestGeometryUpdateWithPreferences: preferences.get()
+                                                     errorHandler: ^([[maybe_unused]] NSError* error)
                  {
                     // Failed to set the new set of supported orientations.
                     // You may have hit this assertion because you're trying to restrict the supported orientations
