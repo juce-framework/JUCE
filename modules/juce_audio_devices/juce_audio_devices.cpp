@@ -50,6 +50,7 @@
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
+ #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
  #include <juce_audio_basics/midi/ump/juce_UMP.h>
  #include "midi_io/ump/juce_UMPBytestreamInputHandler.h"
  #include "midi_io/ump/juce_UMPU32InputHandler.h"

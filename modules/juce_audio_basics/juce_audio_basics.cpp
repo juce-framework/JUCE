@@ -88,6 +88,7 @@
 #include "sources/juce_PositionableAudioSource.cpp"
 #include "synthesisers/juce_Synthesiser.cpp"
 #include "audio_play_head/juce_AudioPlayHead.cpp"
+#include "midi/juce_MidiDataConcatenator.h"
 
 #include "midi/ump/juce_UMP.h"
 #include "midi/ump/juce_UMPUtils.cpp"

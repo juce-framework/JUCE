@@ -32,11 +32,6 @@
  #error AUv3 needs Deployment Target OS X 10.11 or higher to compile
 #endif
 
-#if (JUCE_IOS && defined (__IPHONE_15_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_15_0) \
-   || (JUCE_MAC && defined (MAC_OS_VERSION_12_0) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_VERSION_12_0)
- #define JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED 1
-#endif
-
 #ifndef __OBJC2__
  #error AUv3 needs Objective-C 2 support (compile with 64-bit)
 #endif
@@ -55,10 +50,6 @@
 #include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
-
-#if JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED
- #include <juce_audio_basics/midi/ump/juce_UMP.h>
-#endif
 
 #define JUCE_VIEWCONTROLLER_OBJC_NAME(x) JUCE_JOIN_MACRO (x, FactoryAUv3)
 
@@ -1434,7 +1425,7 @@ private:
                 }
                 break;
 
-               #if JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED
+               #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
                 case AURenderEventMIDIEventList:
                 {
                     const auto& list = event->MIDIEventsList.eventList;
@@ -1445,7 +1436,10 @@ private:
                         converter.dispatch (reinterpret_cast<const uint32_t*> (packet->words),
                                             reinterpret_cast<const uint32_t*> (packet->words + packet->wordCount),
                                             static_cast<int> (packet->timeStamp - (MIDITimeStamp) startTime),
-                                            [this] (const MidiMessage& message) { midiMessages.addEvent (message, int (message.getTimeStamp())); });
+                                            [this] (const ump::BytestreamMidiView& message)
+                                            {
+                                                midiMessages.addEvent (message.getMessage(), (int) message.timestamp);
+                                            });
 
                         packet = MIDIEventPacketNext (packet);
                     }
@@ -1774,7 +1768,7 @@ private:
     MidiBuffer midiMessages;
     AUMIDIOutputEventBlock midiOutputEventBlock = nullptr;
 
-   #if JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED
+   #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
     ump::ToBytestreamDispatcher converter { 2048 };
    #endif
 

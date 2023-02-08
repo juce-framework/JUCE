@@ -388,7 +388,19 @@ public:
                     outWritable = true;
                     return noErr;
 
-               #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
+               #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+                case kAudioUnitProperty_AudioUnitMIDIProtocol:
+                    outDataSize = sizeof (SInt32);
+                    outWritable = false;
+                    return noErr;
+
+                case kAudioUnitProperty_HostMIDIProtocol:
+                    outDataSize = sizeof (SInt32);
+                    outWritable = true;
+                    return noErr;
+               #endif
+
+              #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
                     outDataSize = sizeof (CFArrayRef);
                     outWritable = false;
@@ -398,7 +410,14 @@ public:
                     outDataSize = sizeof (AUMIDIOutputCallbackStruct);
                     outWritable = true;
                     return noErr;
+
+               #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+                case kAudioUnitProperty_MIDIOutputEventListCallback:
+                    outDataSize = sizeof (AUMIDIEventListBlock);
+                    outWritable = true;
+                    return noErr;
                #endif
+              #endif
 
                 case kAudioUnitProperty_ParameterStringFromValue:
                      outDataSize = sizeof (AudioUnitParameterStringFromValue);
@@ -542,6 +561,15 @@ public:
 
                     break;
 
+               #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+                case kAudioUnitProperty_AudioUnitMIDIProtocol:
+                {
+                    // This will become configurable in the future
+                    *static_cast<SInt32*> (outData) = kMIDIProtocol_1_0;
+                    return noErr;
+                }
+               #endif
+
                #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
                 {
@@ -620,7 +648,7 @@ public:
         {
             switch (inID)
             {
-               #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
+              #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallback:
                     if (inDataSize < sizeof (AUMIDIOutputCallbackStruct))
                         return kAudioUnitErr_InvalidPropertyValue;
@@ -629,6 +657,28 @@ public:
                         midiCallback = *callbackStruct;
 
                     return noErr;
+
+               #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+                case kAudioUnitProperty_MIDIOutputEventListCallback:
+                {
+                    if (inDataSize != sizeof (AUMIDIEventListBlock))
+                        return kAudioUnitErr_InvalidPropertyValue;
+
+                    midiEventListBlock = ScopedMIDIEventListBlock::copy (*static_cast<const AUMIDIEventListBlock*> (inData));
+                    return noErr;
+                }
+               #endif
+              #endif
+
+               #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+                case kAudioUnitProperty_HostMIDIProtocol:
+                {
+                    if (inDataSize != sizeof (SInt32))
+                        return kAudioUnitErr_InvalidPropertyValue;
+
+                    hostProtocol = *static_cast<const SInt32*> (inData);
+                    return noErr;
+                }
                #endif
 
                 case kAudioUnitProperty_BypassEffect:
@@ -1380,8 +1430,7 @@ public:
 
         // process midi output
       #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-        if (! midiEvents.isEmpty() && midiCallback.midiOutputCallback != nullptr)
-            pushMidiOutput (nFrames);
+        pushMidiOutput (nFrames);
       #endif
 
         midiEvents.clear();
@@ -1423,6 +1472,30 @@ public:
         return kAudioUnitErr_PropertyNotInUse;
        #endif
     }
+
+   #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+    OSStatus MIDIEventList (UInt32 inOffsetSampleFrame, const struct MIDIEventList* list) override
+    {
+        const ScopedLock sl (incomingMidiLock);
+
+        auto* packet = &list->packet[0];
+
+        for (uint32_t i = 0; i < list->numPackets; ++i)
+        {
+            toBytestreamDispatcher.dispatch (reinterpret_cast<const uint32_t*> (packet->words),
+                                             reinterpret_cast<const uint32_t*> (packet->words + packet->wordCount),
+                                             static_cast<double> (packet->timeStamp + inOffsetSampleFrame),
+                                             [this] (const ump::BytestreamMidiView& message)
+                                             {
+                                                 incomingEvents.addEvent (message.getMessage(), (int) message.timestamp);
+                                             });
+
+            packet = MIDIEventPacketNext (packet);
+        }
+
+        return noErr;
+    }
+   #endif
 
     //==============================================================================
     ComponentResult GetPresets (CFArrayRef* outData) const override
@@ -1846,6 +1919,58 @@ private:
     mutable Array<AUPreset> presetsArray;
     CriticalSection incomingMidiLock;
     AUMIDIOutputCallbackStruct midiCallback;
+
+   #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+    class ScopedMIDIEventListBlock
+    {
+    public:
+        ScopedMIDIEventListBlock() = default;
+
+        ScopedMIDIEventListBlock (ScopedMIDIEventListBlock&& other) noexcept
+            : midiEventListBlock (std::exchange (other.midiEventListBlock, nil)) {}
+
+        ScopedMIDIEventListBlock& operator= (ScopedMIDIEventListBlock&& other) noexcept
+        {
+            ScopedMIDIEventListBlock { std::move (other) }.swap (*this);
+            return *this;
+        }
+
+        ~ScopedMIDIEventListBlock()
+        {
+            if (midiEventListBlock != nil)
+                [midiEventListBlock release];
+        }
+
+        static ScopedMIDIEventListBlock copy (AUMIDIEventListBlock b)
+        {
+            return ScopedMIDIEventListBlock { b };
+        }
+
+        explicit operator bool() const { return midiEventListBlock != nil; }
+
+        void operator() (AUEventSampleTime eventSampleTime, uint8_t cable, const struct MIDIEventList * eventList) const
+        {
+            jassert (midiEventListBlock != nil);
+            midiEventListBlock (eventSampleTime, cable, eventList);
+        }
+
+    private:
+        void swap (ScopedMIDIEventListBlock& other) noexcept
+        {
+            std::swap (other.midiEventListBlock, midiEventListBlock);
+        }
+
+        explicit ScopedMIDIEventListBlock (AUMIDIEventListBlock b) : midiEventListBlock ([b copy]) {}
+
+        AUMIDIEventListBlock midiEventListBlock = nil;
+    };
+
+    ScopedMIDIEventListBlock midiEventListBlock;
+    std::optional<SInt32> hostProtocol;
+    ump::ToUMP1Converter toUmp1Converter;
+    ump::ToBytestreamDispatcher toBytestreamDispatcher { 2048 };
+   #endif
+
     AudioTimeStamp lastTimeStamp;
     int totalInChannels, totalOutChannels;
     HeapBlock<bool> pulledSucceeded;
@@ -1952,54 +2077,117 @@ private:
 
     void pushMidiOutput ([[maybe_unused]] UInt32 nFrames) noexcept
     {
-        MIDIPacket* end = nullptr;
+        if (midiEvents.isEmpty())
+            return;
 
-        const auto init = [&]
+       #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+        if (@available (macOS 12.0, iOS 15.0, *))
         {
-            end = MIDIPacketListInit (packetList);
-        };
-
-        const auto send = [&]
-        {
-            midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
-        };
-
-        const auto add = [&] (const MidiMessageMetadata& metadata)
-        {
-            end = MIDIPacketListAdd (packetList,
-                                     packetListBytes,
-                                     end,
-                                     static_cast<MIDITimeStamp> (metadata.samplePosition),
-                                     static_cast<ByteCount> (metadata.numBytes),
-                                     metadata.data);
-        };
-
-        init();
-
-        for (const auto metadata : midiEvents)
-        {
-            jassert (isPositiveAndBelow (metadata.samplePosition, nFrames));
-
-            add (metadata);
-
-            if (end == nullptr)
+            if (midiEventListBlock)
             {
-                send();
+                struct MIDIEventList stackList = {};
+                MIDIEventPacket* end = nullptr;
+
+                const auto init = [&]
+                {
+                    end = MIDIEventListInit (&stackList, kMIDIProtocol_1_0);
+                };
+
+                const auto send = [&]
+                {
+                    midiEventListBlock (static_cast<int64_t> (lastTimeStamp.mSampleTime), 0, &stackList);
+                };
+
+                const auto add = [&] (const ump::View& view, int timeStamp)
+                {
+                    static_assert (sizeof (uint32_t) == sizeof (UInt32)
+                                   && alignof (uint32_t) == alignof (UInt32),
+                                   "If this fails, the cast below will be broken too!");
+                    using List = struct MIDIEventList;
+                    end = MIDIEventListAdd (&stackList,
+                                            sizeof (List::packet),
+                                            end,
+                                            (MIDITimeStamp) timeStamp,
+                                            view.size(),
+                                            reinterpret_cast<const UInt32*> (view.data()));
+                };
+
                 init();
+
+                for (const auto metadata : midiEvents)
+                {
+                    toUmp1Converter.convert (ump::BytestreamMidiView (metadata), [&] (const ump::View& view)
+                    {
+                        add (view, metadata.samplePosition);
+
+                        if (end != nullptr)
+                            return;
+
+                        send();
+                        init();
+                        add (view, metadata.samplePosition);
+                    });
+
+                }
+
+                send();
+
+                return;
+            }
+        }
+       #endif
+
+        if (midiCallback.midiOutputCallback)
+        {
+            MIDIPacket* end = nullptr;
+
+            const auto init = [&]
+            {
+                end = MIDIPacketListInit (packetList);
+            };
+
+            const auto send = [&]
+            {
+                midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
+            };
+
+            const auto add = [&] (const MidiMessageMetadata& metadata)
+            {
+                end = MIDIPacketListAdd (packetList,
+                                         packetListBytes,
+                                         end,
+                                         static_cast<MIDITimeStamp> (metadata.samplePosition),
+                                         static_cast<ByteCount> (metadata.numBytes),
+                                         metadata.data);
+            };
+
+            init();
+
+            for (const auto metadata : midiEvents)
+            {
+                jassert (isPositiveAndBelow (metadata.samplePosition, nFrames));
+
                 add (metadata);
 
                 if (end == nullptr)
                 {
-                    // If this is hit, the size of this midi packet exceeds the maximum size of
-                    // a MIDIPacketList. Large SysEx messages should be broken up into smaller
-                    // chunks.
-                    jassertfalse;
+                    send();
                     init();
+                    add (metadata);
+
+                    if (end == nullptr)
+                    {
+                        // If this is hit, the size of this midi packet exceeds the maximum size of
+                        // a MIDIPacketList. Large SysEx messages should be broken up into smaller
+                        // chunks.
+                        jassertfalse;
+                        init();
+                    }
                 }
             }
-        }
 
-        send();
+            send();
+        }
     }
 
     void GetAudioBufferList (bool isInput, int busIdx, AudioBufferList*& bufferList, bool& interleaved, int& numChannels)
