@@ -261,7 +261,7 @@ namespace AAXClasses
         return AAX_eStemFormat_INT32_MAX;
     }
 
-    static AudioChannelSet channelSetFromStemFormat (AAX_EStemFormat format, bool ignoreLayout) noexcept
+    static inline AudioChannelSet channelSetFromStemFormat (AAX_EStemFormat format, bool ignoreLayout) noexcept
     {
         if (! ignoreLayout)
         {
@@ -2421,7 +2421,7 @@ namespace AAXClasses
         check (desc.AddProcessProc_Native (algorithmProcessCallback, properties));
     }
 
-    static bool hostSupportsStemFormat (AAX_EStemFormat stemFormat, const AAX_IFeatureInfo* featureInfo)
+    static inline bool hostSupportsStemFormat (AAX_EStemFormat stemFormat, const AAX_IFeatureInfo* featureInfo)
     {
         if (featureInfo != nullptr)
         {
