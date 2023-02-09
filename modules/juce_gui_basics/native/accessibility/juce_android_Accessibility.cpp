@@ -59,7 +59,7 @@ namespace juce
  METHOD (setCollectionInfo, "setCollectionInfo", "(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionInfo;)V") \
  METHOD (setCollectionItemInfo, "setCollectionItemInfo", "(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo;)V")
 
- DECLARE_JNI_CLASS (AndroidAccessibilityNodeInfo19, "android/view/accessibility/AccessibilityNodeInfo")
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidAccessibilityNodeInfo19, "android/view/accessibility/AccessibilityNodeInfo", 19)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
