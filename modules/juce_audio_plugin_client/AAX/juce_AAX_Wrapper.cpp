@@ -1076,14 +1076,35 @@ namespace AAXClasses
                 info.setLoopPoints (LoopPoints { (double) loopStartTick / 960000.0, (double) loopEndTick / 960000.0 });
             }
 
-            AAX_EFrameRate frameRate;
-            int32_t offset;
+            struct RateAndOffset
+            {
+                AAX_EFrameRate frameRate{};
+                int64_t offset{};
+            };
 
-            if (transport.GetTimeCodeInfo (&frameRate, &offset) == AAX_SUCCESS)
+            const auto timeCodeIfAvailable = [&]() -> std::optional<RateAndOffset>
+            {
+                RateAndOffset result{};
+
+                if (transport.GetHDTimeCodeInfo (&result.frameRate, &result.offset) == AAX_SUCCESS)
+                    return result;
+
+                int32_t offset32{};
+
+                if (transport.GetTimeCodeInfo (&result.frameRate, &offset32) == AAX_SUCCESS)
+                {
+                    result.offset = offset32;
+                    return result;
+                }
+
+                return {};
+            }();
+
+            if (timeCodeIfAvailable.has_value())
             {
                 info.setFrameRate ([&]() -> Optional<FrameRate>
                 {
-                    switch ((JUCE_AAX_EFrameRate) frameRate)
+                    switch ((JUCE_AAX_EFrameRate) timeCodeIfAvailable->frameRate)
                     {
                         case JUCE_AAX_eFrameRate_24Frame:         return FrameRate().withBaseRate (24);
                         case JUCE_AAX_eFrameRate_23976:           return FrameRate().withBaseRate (24).withPullDown();
@@ -1119,6 +1140,7 @@ namespace AAXClasses
                 }());
             }
 
+            const auto offset = timeCodeIfAvailable.has_value() ? timeCodeIfAvailable->offset : int64_t{};
             const auto effectiveRate = info.getFrameRate().hasValue() ? info.getFrameRate()->getEffectiveRate() : 0.0;
             info.setEditOriginTime (makeOptional (effectiveRate != 0.0 ? offset / effectiveRate : offset));
 
