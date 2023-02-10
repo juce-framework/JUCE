@@ -295,7 +295,26 @@ public:
 
             for (auto& [path, flags] : filesToCompile)
             {
-                out << "$(JUCE_OBJDIR)/" << escapeQuotesAndSpaces (owner.getObjectFileFor (path)) << ": " << escapeQuotesAndSpaces (path.toUnixStyle()) << newLine
+                const auto additionalTargetDependencies = [&path = path, this]
+                {
+                    if (   owner.linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper()
+                        && path.getFileName().contains ("include_juce_gui_extra.cpp"))
+                    {
+                        return owner.linuxSubprocessHelperProperties
+                            .getLinuxSubprocessHelperBinaryDataSource()
+                            .toUnixStyle();
+                    }
+
+                    return String{};
+                }();
+
+                const auto prependedWithSpaceIfNotEmpty = [] (auto s)
+                {
+                    return s.isEmpty() ? s : " " + s;
+                };
+
+                out << "$(JUCE_OBJDIR)/" << escapeQuotesAndSpaces (owner.getObjectFileFor (path)) << ": " << escapeQuotesAndSpaces (path.toUnixStyle())
+                    << prependedWithSpaceIfNotEmpty (additionalTargetDependencies)                                                                      << newLine
                     << "\t-$(V_AT)mkdir -p $(@D)"                                                                                                       << newLine
                     << "\t@echo \"Compiling " << path.getFileName() << "\""                                                                             << newLine
                     << (path.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
@@ -530,11 +549,15 @@ public:
             build_tools::overwriteFileIfDifferentOrThrow (helperDir.getChildFile ("arch_detection.cpp"),
                                                           BinaryData::juce_runtime_arch_detection_cpp);
         }
+
+        linuxSubprocessHelperProperties.deployLinuxSubprocessHelperSourceFilesIfNecessary();
     }
 
     //==============================================================================
     void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) override
     {
+        linuxSubprocessHelperProperties.addToExtraSearchPathsIfNecessary();
+
         callForAllSupportedTargets ([this] (build_tools::ProjectType::Target::Type targetType)
                                     {
                                         targets.insert (targetType == build_tools::ProjectType::Target::AggregateTarget ? 0 : -1,
@@ -886,7 +909,21 @@ private:
 
         out << newLine;
 
-        out << "  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)" << newLine
+        const auto preBuildDirectory = [&]() -> String
+        {
+            if (linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())
+            {
+                using LSHP = LinuxSubprocessHelperProperties;
+                const auto dataSource = linuxSubprocessHelperProperties.getLinuxSubprocessHelperBinaryDataSource();
+
+                if (auto preBuildDir = LSHP::getParentDirectoryRelativeToBuildTargetFolder (dataSource))
+                    return " " + *preBuildDir;
+            }
+
+            return "";
+        }();
+
+        out << "  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)" << preBuildDirectory << newLine
             << "endif" << newLine
             << newLine;
     }
@@ -960,6 +997,94 @@ private:
         for (const auto& s : schemesToWrite)
             if (const auto flags = getCompilerFlagsForFileCompilerFlagScheme (s); flags.isNotEmpty())
                 out << getCompilerFlagSchemeVariableName (s) << " := " << flags << newLine;
+
+        out << newLine;
+    }
+
+    /*  These targets are responsible for building the juce_linux_subprocess_helper, the
+        juce_simple_binary_builder, and then using the binary builder to create embeddable .h and .cpp
+        files from the linux subprocess helper.
+    */
+    void writeSubprocessHelperTargets (OutputStream& out) const
+    {
+        using LSHP = LinuxSubprocessHelperProperties;
+
+        const auto ensureDirs = [] (auto& outStream, std::vector<String> dirs)
+        {
+            for (const auto& dir : dirs)
+                outStream << "\t-$(V_AT)mkdir -p " << dir << newLine;
+        };
+
+        const auto makeTarget = [&ensureDirs] (auto& outStream, String input, String output)
+        {
+            const auto isObjectTarget = output.endsWith (".o");
+            const auto isSourceInput  = input.endsWith (".cpp");
+
+            const auto targetOutput = isObjectTarget ? "$(JUCE_OBJDIR)/" + output : output;
+
+            outStream << (isObjectTarget ? "$(JUCE_OBJDIR)/" : "") << output << ": " << input << newLine;
+
+            const auto createBuildTargetRelative = [] (auto path)
+            {
+                return build_tools::RelativePath { path, build_tools::RelativePath::buildTargetFolder };
+            };
+
+            if (isObjectTarget)
+                ensureDirs (outStream, { "$(JUCE_OBJDIR)" });
+            else if (auto outputParentFolder = LSHP::getParentDirectoryRelativeToBuildTargetFolder (createBuildTargetRelative (output)))
+                ensureDirs (outStream, { *outputParentFolder });
+
+            outStream << (isObjectTarget ? "\t@echo \"Compiling " : "\t@echo \"Linking ")
+                      << (isObjectTarget ? input : output) << "\"" << newLine
+                      << "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) -o " << targetOutput.quoted()
+                      << " " << (isSourceInput ? "-c \"$<\"" : input.quoted());
+
+            if (! isObjectTarget)
+                outStream << " $(JUCE_LDFLAGS)";
+
+            outStream << " $(TARGET_ARCH)" << newLine << newLine;
+
+            return targetOutput;
+        };
+
+        const auto subprocessHelperSource = linuxSubprocessHelperProperties.getLinuxSubprocessHelperSource();
+
+        const auto subprocessHelperObj = makeTarget (out,
+                                                     subprocessHelperSource.toUnixStyle(),
+                                                     getObjectFileFor (subprocessHelperSource));
+
+        const auto subprocessHelperPath = makeTarget (out,
+                                                      subprocessHelperObj,
+                                                      "$(JUCE_BINDIR)/" + LSHP::getBinaryNameFromSource (subprocessHelperSource));
+
+        const auto binaryBuilderSource = linuxSubprocessHelperProperties.getSimpleBinaryBuilderSource();
+
+        const auto binaryBuilderObj = makeTarget (out,
+                                                 binaryBuilderSource.toUnixStyle(),
+                                                 getObjectFileFor (binaryBuilderSource));
+
+        const auto binaryBuilderPath = makeTarget (out,
+                                                   binaryBuilderObj,
+                                                   "$(JUCE_BINDIR)/" + LSHP::getBinaryNameFromSource (binaryBuilderSource));
+
+        const auto binaryDataSource = linuxSubprocessHelperProperties.getLinuxSubprocessHelperBinaryDataSource();
+        jassert (binaryDataSource.getRoot() == build_tools::RelativePath::buildTargetFolder);
+
+        out << binaryDataSource.toUnixStyle() << ": " << subprocessHelperPath
+                                              << " " << binaryBuilderPath
+                                              << newLine;
+
+        const auto binarySourceDir = [&]() -> String
+        {
+            if (const auto p = LSHP::getParentDirectoryRelativeToBuildTargetFolder (binaryDataSource))
+                return *p;
+
+            return ".";
+        }();
+
+        out << "\t$(V_AT)" << binaryBuilderPath.quoted() << " " << subprocessHelperPath.quoted()
+            << " " << binarySourceDir.quoted() << " " << binaryDataSource.getFileNameWithoutExtension().quoted()
+            << " LinuxSubprocessHelperBinaryData" << newLine;
 
         out << newLine;
     }
@@ -1039,6 +1164,14 @@ private:
                 }
             }
 
+            if ((      targetType == MakefileTarget::SharedCodeTarget
+                    || targetType == MakefileTarget::StaticLibrary
+                    || targetType == MakefileTarget::DynamicLibrary)
+                && linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())
+            {
+                targetFiles.emplace_back (linuxSubprocessHelperProperties.getLinuxSubprocessHelperBinaryDataSource(), "");
+            }
+
             if (targetType == MakefileTarget::LV2TurtleProgram)
             {
                 targetFiles.emplace_back (getLV2TurtleDumpProgramSource().rebased (projectFolder,
@@ -1066,6 +1199,9 @@ private:
             << "\t-@if [ -z \"$(V_AT)\" ]; then echo \"Checking if we need to link libexecinfo\"; fi" << newLine
             << "\t$(V_AT)printf \"int main() { return 0; }\" | $(CXX) -x c++ -o $(@D)/execinfo.x -lexecinfo - >/dev/null 2>&1 && printf -- \"-lexecinfo\" > \"$@\" || touch \"$@\"" << newLine
             << newLine;
+
+        if (linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())
+            writeSubprocessHelperTargets (out);
 
         out << "clean:"                           << newLine
             << "\t@echo Cleaning " << projectName << newLine

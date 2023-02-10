@@ -32,6 +32,37 @@
 
 class ProjectSaver;
 
+class LinuxSubprocessHelperProperties
+{
+public:
+    explicit LinuxSubprocessHelperProperties (ProjectExporter& projectExporter);
+
+    bool shouldUseLinuxSubprocessHelper() const;
+
+    void deployLinuxSubprocessHelperSourceFilesIfNecessary() const;
+
+    build_tools::RelativePath getLinuxSubprocessHelperSource() const;
+
+    void setCompileDefinitionIfNecessary (StringPairArray& defs) const;
+
+    build_tools::RelativePath getSimpleBinaryBuilderSource() const;
+
+    build_tools::RelativePath getLinuxSubprocessHelperBinaryDataSource() const;
+
+    void addToExtraSearchPathsIfNecessary() const;
+
+    static std::optional<String> getParentDirectoryRelativeToBuildTargetFolder (build_tools::RelativePath rp);
+
+    static String makeSnakeCase (const String& s);
+
+    static String getBinaryNameFromSource (const build_tools::RelativePath& rp);
+
+    static constexpr const char* useLinuxSubprocessHelperCompileDefinition = "JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS";
+
+private:
+    ProjectExporter& owner;
+};
+
 //==============================================================================
 class ProjectExporter  : private Value::Listener
 {
@@ -164,6 +195,8 @@ public:
     void updateOldModulePaths();
 
     build_tools::RelativePath rebaseFromProjectFolderToBuildTarget (const build_tools::RelativePath& path) const;
+    build_tools::RelativePath rebaseFromBuildTargetToProjectFolder (const build_tools::RelativePath& path) const;
+    File resolveRelativePath (const build_tools::RelativePath&) const;
     void addToExtraSearchPaths (const build_tools::RelativePath& pathFromProjectFolder, int index = -1);
     void addToModuleLibPaths   (const build_tools::RelativePath& pathFromProjectFolder);
 
@@ -218,6 +251,9 @@ public:
     //==============================================================================
     StringArray extraSearchPaths;
     StringArray moduleLibSearchPaths;
+
+    //==============================================================================
+    const LinuxSubprocessHelperProperties linuxSubprocessHelperProperties { *this };
 
     //==============================================================================
     class BuildConfiguration  : public ReferenceCountedObject
