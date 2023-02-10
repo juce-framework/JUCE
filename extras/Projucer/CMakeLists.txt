@@ -147,6 +147,7 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/gradle/gradle-wrapper.jar
     Source/BinaryData/gradle/gradlew
     Source/BinaryData/gradle/gradlew.bat
+    Source/BinaryData/juce_SimpleBinaryBuilder.cpp
 
     ../Build/CMake/JuceLV2Defines.h.in
     ../Build/CMake/LaunchScreen.storyboard
@@ -156,7 +157,8 @@ juce_add_binary_data(ProjucerData SOURCES
     ../Build/CMake/PIPConsole.cpp.in
     ../Build/CMake/RecentFilesMenuTemplate.nib
     ../Build/CMake/UnityPluginGUIScript.cs.in
-    ../Build/CMake/juce_runtime_arch_detection.cpp)
+    ../Build/CMake/juce_runtime_arch_detection.cpp
+    ../Build/CMake/juce_LinuxSubprocessHelper.cpp)
 
 target_link_libraries(Projucer PRIVATE
     ProjucerData
