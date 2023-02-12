@@ -166,7 +166,7 @@ private:
         void operator() (LPWSTR ptr) const noexcept { CoTaskMemFree (ptr); }
     };
 
-    bool showDialog (IFileDialog& dialog, bool async)
+    bool showDialog (IFileDialog& dialog)
     {
         FILEOPENDIALOGOPTIONS flags = {};
 
@@ -285,7 +285,7 @@ private:
 
             Events events { *this };
             ScopedAdvise scope { dialog, events };
-            return dialog.Show (async ? nullptr : static_cast<HWND> (owner->getWindowHandle())) == S_OK;
+            return dialog.Show (GetActiveWindow()) == S_OK;
         }();
 
         ScopedLock lock (deletingDialog);
@@ -295,7 +295,7 @@ private:
     }
 
     //==============================================================================
-    Array<URL> openDialogVistaAndUp (bool async)
+    Array<URL> openDialogVistaAndUp()
     {
         const auto getUrl = [] (IShellItem& item)
         {
@@ -320,7 +320,7 @@ private:
             if (dialog == nullptr)
                 return {};
 
-            showDialog (*dialog, async);
+            showDialog (*dialog);
 
             const auto item = [&]
             {
@@ -350,7 +350,7 @@ private:
         if (dialog == nullptr)
             return {};
 
-        showDialog (*dialog, async);
+        showDialog (*dialog);
 
         const auto items = [&]
         {
@@ -391,7 +391,7 @@ private:
         if (selectsDirectories)
         {
             BROWSEINFO bi = {};
-            bi.hwndOwner = (HWND) (async ? nullptr : owner->getWindowHandle());
+            bi.hwndOwner = GetActiveWindow();
             bi.pszDisplayName = files;
             bi.lpszTitle = title.toWideCharPointer();
             bi.lParam = (LPARAM) this;
@@ -441,7 +441,7 @@ private:
                 startingFile.getFullPathName().copyToUTF16 (files, charsAvailableForResult * sizeof (WCHAR));
             }
 
-            of.hwndOwner = (HWND) (async ? nullptr : owner->getWindowHandle());
+            of.hwndOwner = GetActiveWindow();
             of.lpstrFilter = filters.getData();
             of.nFilterIndex = 1;
             of.lpstrFile = files;
@@ -502,7 +502,7 @@ private:
         if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista
             && customComponent == nullptr)
         {
-            return openDialogVistaAndUp (async);
+            return openDialogVistaAndUp();
         }
 
         return openDialogPreVista (async);

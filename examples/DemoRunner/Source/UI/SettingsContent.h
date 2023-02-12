@@ -236,12 +236,12 @@ private:
             audioSettings.setBounds (bounds);
         }
 
-    private:
         std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
         {
             return createIgnoredAccessibilityHandler (*this);
         }
 
+    private:
         GraphicsSettingsGroup graphicsSettings;
         AudioSettingsGroup audioSettings;
     };

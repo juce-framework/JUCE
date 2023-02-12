@@ -103,6 +103,7 @@ Project::Project (const File& f)
 
     setFile (f);
 
+    createEnabledModulesList();
     initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
@@ -677,6 +678,7 @@ Result Project::loadDocument (const File& file)
     projectRoot = newTree;
     projectRoot.addListener (this);
 
+    createEnabledModulesList();
     initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
@@ -2324,27 +2326,27 @@ int Project::getARATransformationFlags() const noexcept
 }
 
 //==============================================================================
-bool Project::isAUPluginHost()
+bool Project::isAUPluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU", false);
 }
 
-bool Project::isVSTPluginHost()
+bool Project::isVSTPluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false);
 }
 
-bool Project::isVST3PluginHost()
+bool Project::isVST3PluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
 }
 
-bool Project::isLV2PluginHost()
+bool Project::isLV2PluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_LV2", false);
 }
 
-bool Project::isARAPluginHost()
+bool Project::isARAPluginHost() const
 {
     return (isVST3PluginHost() || isAUPluginHost()) && isConfigFlagEnabled ("JUCE_PLUGINHOST_ARA", false);
 }
@@ -2505,12 +2507,21 @@ Array<var> Project::getDefaultARATransformationFlags() const noexcept
 }
 
 //==============================================================================
-EnabledModulesList& Project::getEnabledModules()
+template <typename This>
+auto& Project::getEnabledModulesImpl (This& t)
 {
-    if (enabledModulesList == nullptr)
-        enabledModulesList.reset (new EnabledModulesList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
+    // This won't work until you've loaded a project!
+    jassert (t.enabledModulesList != nullptr);
 
-    return *enabledModulesList;
+    return *t.enabledModulesList;
+}
+
+      EnabledModulesList& Project::getEnabledModules()            { return getEnabledModulesImpl (*this); }
+const EnabledModulesList& Project::getEnabledModules() const      { return getEnabledModulesImpl (*this); }
+
+void Project::createEnabledModulesList()
+{
+    enabledModulesList = std::make_unique<EnabledModulesList> (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr));
 }
 
 static StringArray getModulePathsFromExporters (Project& project, bool onlyThisOS)

@@ -197,6 +197,8 @@ public:
     void resized() override;
     /** @internal */
     void lookAndFeelChanged() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 protected:
     //==============================================================================
@@ -217,7 +219,6 @@ private:
     int tabDepth = 30, outlineThickness = 1, edgeIndent = 0;
 
     struct ButtonBar;
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent)

@@ -333,6 +333,7 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
 
     updateField ("IS_IOS",                          result.isiOS);
     updateField ("IS_PLUGIN",                       result.isAudioPluginProject);
+    updateField ("IS_AU_PLUGIN_HOST",               result.isAUPluginHost);
     updateField ("ICLOUD_PERMISSIONS_ENABLED",      result.isiCloudPermissionsEnabled);
     updateField ("PUSH_NOTIFICATIONS_ENABLED",      result.isPushNotificationsEnabled);
     updateField ("APP_GROUPS_ENABLED",              result.isAppGroupsEnabled);

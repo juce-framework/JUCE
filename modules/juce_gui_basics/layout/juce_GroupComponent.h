@@ -98,10 +98,10 @@ public:
     void enablementChanged() override;
     /** @internal */
     void colourChanged() override;
-
-private:
+    /** @internal */
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
+private:
     String text;
     Justification justification;
 

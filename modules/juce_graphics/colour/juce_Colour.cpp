@@ -291,11 +291,16 @@ Colour::Colour (PixelAlpha alpha) noexcept
 }
 
 //==============================================================================
-const PixelARGB Colour::getPixelARGB() const noexcept
+PixelARGB Colour::getPixelARGB() const noexcept
 {
     PixelARGB p (argb);
     p.premultiply();
     return p;
+}
+
+PixelARGB Colour::getNonPremultipliedPixelARGB() const noexcept
+{
+    return argb;
 }
 
 uint32 Colour::getARGB() const noexcept

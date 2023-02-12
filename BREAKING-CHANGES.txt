@@ -6,6 +6,31 @@ develop
 
 Change
 ------
+The implementation of ColourGradient::createLookupTable has been updated to use
+non-premultiplied colours.
+
+Possible Issues
+---------------
+Programs that draw transparent gradients using the OpenGL or software
+renderers, or that use lookup tables generated from transparent gradients for
+other purposes, may now produce different results.
+
+Workaround
+----------
+For gradients to render the same as they did previously, transparent colour
+stops should be un-premultiplied. For colours with an alpha component of 0, it
+may be necessary to specify appropriate RGB components.
+
+Rationale
+---------
+Previously, transparent gradients rendered using CoreGraphics looked different
+to the same gradients drawn using OpenGL or the software renderer. This change
+updates the OpenGL and software renderers, so that they produce the same
+results as CoreGraphics.
+
+
+Change
+------
 Projucer-generated MSVC projects now build VST3s as bundles, rather than as
 single DLL files.
 

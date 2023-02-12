@@ -481,6 +481,9 @@ public:
     static constexpr auto WarningIcon  = MessageBoxIconType::WarningIcon;
     static constexpr auto InfoIcon     = MessageBoxIconType::InfoIcon;
 
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
 protected:
     //==============================================================================
     /** @internal */
@@ -521,7 +524,6 @@ private:
     bool escapeKeyCancels = true;
     float desktopScale = 1.0f;
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void exitAlert (Button* button);
     void updateLayout (bool onlyIncreaseSize);
 

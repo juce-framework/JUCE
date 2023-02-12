@@ -400,6 +400,8 @@ public:
     bool perform (const InvocationInfo&) override;
     /** @internal */
     void lookAndFeelChanged() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -454,7 +456,6 @@ private:
     int getGutterSize() const noexcept;
 
     //==============================================================================
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void insertText (const String&);
     virtual void updateCaretPosition();
     void updateScrollBars();

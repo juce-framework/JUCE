@@ -185,6 +185,17 @@ public:
     */
     void createLookupTable (PixelARGB* resultLookupTable, int numEntries) const noexcept;
 
+    /** Creates a set of interpolated premultiplied ARGB values.
+        This will fill an array of a user-specified size with the gradient, interpolating to fit.
+        When calling this, the ColourGradient must have at least 2 colour stops specified.
+    */
+    template <size_t NumEntries>
+    void createLookupTable (PixelARGB (&resultLookupTable)[NumEntries]) const noexcept
+    {
+        static_assert (NumEntries != 0);
+        createLookupTable (resultLookupTable, NumEntries);
+    }
+
     /** Returns true if all colours are opaque. */
     bool isOpaque() const noexcept;
 

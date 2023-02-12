@@ -36,6 +36,7 @@ namespace build_tools
         bool isiOS                          = false;
         bool isAudioPluginProject           = false;
         bool shouldEnableIAA                = false;
+        bool isAUPluginHost                 = false;
         bool isiCloudPermissionsEnabled     = false;
         bool isPushNotificationsEnabled     = false;
         bool isAppGroupsEnabled             = false;
