@@ -768,10 +768,11 @@ void Path::addPath (const Path& other,
                     const AffineTransform& transformToApply)
 {
     const auto* d = other.data.begin();
+    const auto size = other.data.size();
 
-    for (int i = 0; i < other.data.size();)
+    for (int i = 0; i < size;)
     {
-        auto type = d[i++];
+        const auto type = d[i++];
 
         if (isMarker (type, closeSubPathMarker))
         {
