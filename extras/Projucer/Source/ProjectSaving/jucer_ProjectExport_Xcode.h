@@ -612,11 +612,12 @@ public:
 
             props.add (new ChoicePropertyComponent (iosAppGroupsValue, "App Groups Capability"),
                        "Enable this to grant your app the capability to share resources between apps using the same app group ID.");
-
-            props.add (new ChoicePropertyComponent (iCloudPermissionsValue, "iCloud Permissions"),
-                       "Enable this to grant your app the capability to use native file load/save browser windows on iOS.");
-
         }
+
+
+        props.add (new ChoicePropertyComponent (iCloudPermissionsValue, "iCloud Permissions"),
+                  iOS ? "Enable this to grant your app the capability to use native file load/save browser windows on iOS." :
+                  "Enable this to grant your app the capability to use iCloud Document Storage");
 
         props.add (new ChoicePropertyComponent (networkingMulticastValue, "Networking Multicast Capability"),
                    "Your app must have this entitlement to send or receive IP multicast or broadcast. "
@@ -1323,7 +1324,7 @@ public:
             capabilities["Sandbox"]               = type == Target::AudioUnitv3PlugIn || owner.isAppSandboxEnabled();
             capabilities["HardenedRuntime"]       = owner.isHardenedRuntimeEnabled();
 
-            if (owner.iOS && owner.isiCloudPermissionsEnabled())
+            if (owner.isiCloudPermissionsEnabled())
                 capabilities["com.apple.iCloud"] = true;
 
             StringArray capabilitiesStrings;

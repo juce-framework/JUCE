@@ -51,24 +51,23 @@ namespace build_tools
         {
             if ((isAudioPluginProject && shouldEnableIAA) || isAUPluginHost)
                 entitlements.set ("inter-app-audio", "<true/>");
+        }
+        if (isiCloudPermissionsEnabled)
+        {
+            entitlements.set ("com.apple.developer.icloud-container-identifiers",
+                              "<array>\n"
+                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                              "    </array>");
 
-            if (isiCloudPermissionsEnabled)
-            {
-                entitlements.set ("com.apple.developer.icloud-container-identifiers",
-                                  "<array>\n"
-                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                                  "    </array>");
+            entitlements.set ("com.apple.developer.icloud-services",
+                              "<array>\n"
+                              "        <string>CloudDocuments</string>\n"
+                              "    </array>");
 
-                entitlements.set ("com.apple.developer.icloud-services",
-                                  "<array>\n"
-                                  "        <string>CloudDocuments</string>\n"
-                                  "    </array>");
-
-                entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
-                                  "<array>\n"
-                                  "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                                  "    </array>");
-            }
+            entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
+                              "<array>\n"
+                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                              "    </array>");
         }
 
         if (isPushNotificationsEnabled)
