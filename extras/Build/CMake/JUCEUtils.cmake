@@ -2007,12 +2007,7 @@ function(juce_set_aax_sdk_path path)
         message(FATAL_ERROR "Could not find AAX SDK at the specified path: ${path}")
     endif()
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        add_library(juce_aax_sdk STATIC IMPORTED GLOBAL)
-        set_target_properties(juce_aax_sdk PROPERTIES
-            IMPORTED_LOCATION_DEBUG "${path}/Libs/Debug/libAAXLibrary_libcpp.a"
-            IMPORTED_LOCATION "${path}/Libs/Release/libAAXLibrary_libcpp.a")
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") OR (CMAKE_SYSTEM_NAME STREQUAL "Windows"))
         add_library(juce_aax_sdk INTERFACE IMPORTED GLOBAL)
     else()
         return()
@@ -2022,7 +2017,6 @@ function(juce_set_aax_sdk_path path)
         "${path}"
         "${path}/Interfaces"
         "${path}/Interfaces/ACF")
-    target_compile_definitions(juce_aax_sdk INTERFACE JucePlugin_AAXLibs_path="${path}/Libs")
     set_target_properties(juce_aax_sdk PROPERTIES INTERFACE_JUCE_AAX_DEFAULT_ICON "${path}/Utilities/PlugIn.ico")
 endfunction()
 
