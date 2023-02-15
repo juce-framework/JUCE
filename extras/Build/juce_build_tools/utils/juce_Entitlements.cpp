@@ -54,20 +54,21 @@ namespace build_tools
         }
         if (isiCloudPermissionsEnabled)
         {
+
             entitlements.set ("com.apple.developer.icloud-container-identifiers",
                               "<array>\n"
-                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                              "    </array>");
+                              "\t\t<string>iCloud." + projectBundlerIdentifierString.trim() + "</string>\n"
+                              "\t</array>");
 
             entitlements.set ("com.apple.developer.icloud-services",
                               "<array>\n"
-                              "        <string>CloudDocuments</string>\n"
-                              "    </array>");
+                              "\t\t<string>CloudDocuments</string>\n"
+                              "\t</array>");
 
             entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
                               "<array>\n"
-                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
-                              "    </array>");
+                              "\t\t<string>iCloud." + projectBundlerIdentifierString.trim() + "</string>\n"
+                              "\t</array>");
         }
 
         if (isPushNotificationsEnabled)

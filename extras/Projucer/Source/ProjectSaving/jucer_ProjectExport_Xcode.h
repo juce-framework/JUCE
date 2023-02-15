@@ -242,7 +242,7 @@ public:
 
     String getDevelopmentTeamIDString() const               { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const                      { return iosAppGroupsIDValue.get(); }
-
+    String getProjectBundlerIdentifierString() const        { return project.getBundleIdentifierString(); }
     String getBuildNumber() const
     {
         const auto buildNumberString = buildNumber.get().toString();
@@ -3146,6 +3146,7 @@ private:
         options.isAppSandboxInhertianceEnabled  = isAppSandboxInhertianceEnabled();
         options.isNetworkingMulticastEnabled    = isNetworkingMulticastEnabled();
         options.appGroupIdString                = getAppGroupIdString();
+        options.projectBundlerIdentifierString  = getProjectBundlerIdentifierString();
         options.hardenedRuntimeOptions          = getHardenedRuntimeOptions();
         options.appSandboxOptions               = getAppSandboxOptions();
         options.appSandboxTemporaryPaths        = getAppSandboxTemporaryPaths();

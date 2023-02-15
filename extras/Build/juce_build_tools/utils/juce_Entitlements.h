@@ -46,7 +46,7 @@ namespace build_tools
         bool isNetworkingMulticastEnabled   = false;
 
         String appGroupIdString;
-
+        String projectBundlerIdentifierString;
         StringArray hardenedRuntimeOptions;
         StringArray appSandboxOptions;
 
