@@ -153,7 +153,7 @@ int SystemStats::getMemorySizeInMegabytes()
     int64 memory = 0;
     auto memorySize = sizeof (memory);
     auto result = sysctl (mib, numElementsInArray (mib), &memory, &memorySize, nullptr, 0);
-    return result == 0 ? (int) (memory / 1e6) : 0;
+    return result == 0 ? (int) (memory / (int64) 1e6) : 0;
    #else
     struct sysinfo sysi;
 

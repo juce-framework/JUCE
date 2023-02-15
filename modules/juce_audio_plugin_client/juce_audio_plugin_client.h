@@ -37,7 +37,7 @@
   vendor:             juce
   version:            7.0.5
   name:               JUCE audio plugin wrapper classes
-  description:        Classes for building VST, VST3, AU, AUv3 and AAX plugins.
+  description:        Classes for building VST, VST3, AU, AUv3, LV2 and AAX plugins.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
   minimumCppStandard: 17

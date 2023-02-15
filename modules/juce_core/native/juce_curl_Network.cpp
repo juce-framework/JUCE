@@ -371,11 +371,18 @@ public:
             if (symbols->curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &responseCode) == CURLE_OK)
                 statusCode = static_cast<int> (responseCode);
 
-            // get content length size
+           #if LIBCURL_VERSION_MAJOR < 7 || (LIBCURL_VERSION_MAJOR == 7 && LIBCURL_VERSION_MINOR < 55)
             double curlLength;
             if (symbols->curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &curlLength) == CURLE_OK)
+            {
+           #else
+            curl_off_t curlLength;
+            if (symbols->curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &curlLength) == CURLE_OK)
+            {
+           #endif
                 contentLength = static_cast<int64> (curlLength);
-        }
+            }
+       }
 
         return true;
     }

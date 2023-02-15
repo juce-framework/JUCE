@@ -924,9 +924,9 @@ public:
             return 0;
         }();
 
-        #if JUCE_MAC || JUCE_IOS
+        #if JUCE_MAC || JUCE_IOS || JUCE_BSD
          const auto scheduler = SCHED_OTHER;
-        #elif JUCE_LINUX || JUCE_BSD
+        #elif JUCE_LINUX
          const auto backgroundSched = prio == Thread::Priority::background ? SCHED_IDLE
                                                                            : SCHED_OTHER;
          const auto scheduler = isRealtime ? SCHED_RR : backgroundSched;
@@ -1020,8 +1020,16 @@ void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask ([[maybe_unused]] uint32
     CPU_ZERO (&affinity);
 
     for (int i = 0; i < 32; ++i)
+    {
         if ((affinityMask & (uint32) (1 << i)) != 0)
+        {
+            // GCC 12 on FreeBSD complains about CPU_SET irrespective of
+            // the type of the first argument
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsign-conversion")
             CPU_SET ((size_t) i, &affinity);
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        }
+    }
 
    #if (! JUCE_ANDROID) && ((! (JUCE_LINUX || JUCE_BSD)) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004))
     pthread_setaffinity_np (pthread_self(), sizeof (cpu_set_t), &affinity);

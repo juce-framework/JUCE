@@ -181,7 +181,7 @@ String SystemStats::getStackBacktrace()
     auto frames = backtrace (stack, numElementsInArray (stack));
     char** frameStrings = backtrace_symbols (stack, frames);
 
-    for (int i = 0; i < frames; ++i)
+    for (auto i = (decltype (frames)) 0; i < frames; ++i)
     {
         Dl_info info;
         if (dladdr (stack[i], &info))

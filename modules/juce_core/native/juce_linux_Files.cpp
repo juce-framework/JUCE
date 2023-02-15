@@ -20,10 +20,6 @@
   ==============================================================================
 */
 
-#if JUCE_BSD
-extern char** environ;
-#endif
-
 namespace juce
 {
 
@@ -229,7 +225,7 @@ bool Process::openDocument (const String& fileName, const String& parameters)
         setsid();
 
         // Child process
-        execve (argv[0], (char**) argv, environ);
+        execv (argv[0], (char**) argv);
         exit (0);
     }
 
