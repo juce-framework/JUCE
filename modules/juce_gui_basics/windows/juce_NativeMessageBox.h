@@ -257,6 +257,26 @@ public:
                                            ModalComponentManager::Callback* callback);
                                           #endif
 
+    /** Shows a dialog box using the specified options.
+
+        The box will be displayed and placed into a modal state, but this method will return
+        immediately, and the callback will be invoked later when the user dismisses the box.
+
+        @param options   the options to use when creating the dialog.
+        @param callback  if this is non-null, the callback will receive a call to its
+                         modalStateFinished() when the box is dismissed with the index of the
+                         button that was clicked as its argument.
+                         The callback object will be owned and deleted by the system, so make sure
+                         that it works safely and doesn't keep any references to objects that might
+                         be deleted before it gets called.
+        @returns         a ScopedMessageBox instance. The message box will remain visible for no
+                         longer than the ScopedMessageBox remains alive.
+
+        @see MessageBoxOptions
+    */
+    [[nodiscard]] static ScopedMessageBox showScopedAsync (const MessageBoxOptions& options,
+                                                           std::function<void (int)> callback);
+
 private:
     NativeMessageBox() = delete;
     JUCE_DECLARE_NON_COPYABLE (NativeMessageBox)

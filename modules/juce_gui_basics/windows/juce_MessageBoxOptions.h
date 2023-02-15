@@ -124,6 +124,50 @@ public:
     */
     Component* getAssociatedComponent() const noexcept       { return associatedComponent; }
 
+    /** Creates options suitable for a message box with a single button.
+
+        If no button text is supplied, "OK" will be used.
+    */
+    static MessageBoxOptions makeOptionsOk (MessageBoxIconType iconType,
+                                            const String& title,
+                                            const String& message,
+                                            const String& buttonText = String(),
+                                            Component* associatedComponent = nullptr);
+
+    /** Creates options suitable for a message box with two buttons.
+
+        If no button text is supplied, "OK" and "Cancel" will be used.
+    */
+    static MessageBoxOptions makeOptionsOkCancel (MessageBoxIconType iconType,
+                                                  const String& title,
+                                                  const String& message,
+                                                  const String& button1Text = String(),
+                                                  const String& button2Text = String(),
+                                                  Component* associatedComponent = nullptr);
+
+    /** Creates options suitable for a message box with two buttons.
+
+        If no button text is supplied, "Yes" and "No" will be used.
+    */
+    static MessageBoxOptions makeOptionsYesNo (MessageBoxIconType iconType,
+                                               const String& title,
+                                               const String& message,
+                                               const String& button1Text = String(),
+                                               const String& button2Text = String(),
+                                               Component* associatedComponent = nullptr);
+
+    /** Creates options suitable for a message box with three buttons.
+     *
+        If no button text is supplied, "Yes", "No", and "Cancel" will be used.
+    */
+    static MessageBoxOptions makeOptionsYesNoCancel (MessageBoxIconType iconType,
+                                                     const String& title,
+                                                     const String& message,
+                                                     const String& button1Text = String(),
+                                                     const String& button2Text = String(),
+                                                     const String& button3Text = String(),
+                                                     Component* associatedComponent = nullptr);
+
 private:
     //==============================================================================
     template <typename Member, typename Item>
