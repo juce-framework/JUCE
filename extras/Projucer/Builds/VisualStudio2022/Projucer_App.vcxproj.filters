@@ -388,6 +388,12 @@
     <ClCompile Include="..\..\..\Build\CMake\juce_runtime_arch_detection.cpp">
       <Filter>Projucer\BinaryData</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Build\CMake\juce_LinuxSubprocessHelper.cpp">
+      <Filter>Projucer\BinaryData</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\juce_SimpleBinaryBuilder.cpp">
+      <Filter>Projucer\BinaryData</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.cpp">
       <Filter>Projucer\CodeEditor</Filter>
     </ClCompile>
@@ -2485,6 +2491,9 @@
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_SortedSet.h">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Span.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_SparseSet.h">
