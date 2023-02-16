@@ -168,7 +168,7 @@ public:
                     if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                     {
                         isDragging = true;
-                        owner.startDragAndDrop (e, rowsToDrag, dragDescription, true);
+                        owner.startDragAndDrop (e, rowsToDrag, dragDescription, m->mayDragToExternalWindows());
                     }
                 }
             }
