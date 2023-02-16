@@ -94,7 +94,16 @@ static std::unique_ptr<ScopedMessageBoxInterface> createAlertWindowImpl (const M
                 return nullptr;
             }
 
+            if (auto* parent = options.getParentComponent())
+            {
+                parent->addAndMakeVisible (alert);
+
+                if (options.getAssociatedComponent() == nullptr)
+                    alert->setCentrePosition (parent->getLocalBounds().getCentre());
+            }
+
             alert->setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+
             return alert;
         }
 

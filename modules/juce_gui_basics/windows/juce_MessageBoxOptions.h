@@ -87,6 +87,13 @@ public:
     /** The component that the dialog box should be associated with. */
     [[nodiscard]] MessageBoxOptions withAssociatedComponent (Component* component) const  { return with (*this, &MessageBoxOptions::associatedComponent, component); }
 
+    /** The component that will contain the message box (e.g. the AudioProcessorEditor in a plugin).
+
+        This will only affect JUCE AlertWindows. It won't affect the drawing of native message boxes.
+        This is mainly intended for use in AU plugins, where opening additional windows can be problematic.
+    */
+    [[nodiscard]] MessageBoxOptions withParentComponent (Component* component) const      { return with (*this, &MessageBoxOptions::parentComponent, component); }
+
     //==============================================================================
     /** Returns the icon type of the dialog box.
 
@@ -123,6 +130,12 @@ public:
         @see withAssociatedComponent
     */
     Component* getAssociatedComponent() const noexcept       { return associatedComponent; }
+
+    /** Returns the component that will be used as the parent of the dialog box.
+
+        @see withParentComponent
+    */
+    Component* getParentComponent() const noexcept           { return parentComponent; }
 
     /** Creates options suitable for a message box with a single button.
 
@@ -182,6 +195,7 @@ private:
     String title, message;
     StringArray buttons;
     WeakReference<Component> associatedComponent;
+    WeakReference<Component> parentComponent;
 };
 
 } // namespace juce
