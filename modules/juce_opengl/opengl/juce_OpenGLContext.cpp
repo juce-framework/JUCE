@@ -637,7 +637,7 @@ public:
         if (getOpenGLVersion() >= Version { 4, 3 } && glDebugMessageCallback != nullptr)
         {
             glEnable (GL_DEBUG_OUTPUT);
-            glDebugMessageCallback ([] (GLenum type, GLenum, GLuint, GLenum severity, GLsizei, const GLchar* message, const void*)
+            glDebugMessageCallback ([] (GLenum, GLenum type, GLuint, GLenum severity, GLsizei, const GLchar* message, const void*)
             {
                 // This may reiterate issues that are also flagged by JUCE_CHECK_OPENGL_ERROR.
                 // The advantage of this callback is that it will catch *all* errors, even if we
