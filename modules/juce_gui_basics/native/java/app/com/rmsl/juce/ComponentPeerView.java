@@ -712,7 +712,17 @@ public final class ComponentPeerView extends ViewGroup
             cached = null;
             target = null;
 
-            super.closeConnection();
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            {
+                super.closeConnection();
+            }
+            else
+            {
+                finishComposingText();
+
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                    setImeConsumesInput (false);
+            }
         }
 
         private ComponentPeerView view;
