@@ -221,7 +221,7 @@ public:
 
         // The macOS OpenGL programming guide says that numFramesPerSwap
         // can only be 0 or 1.
-        jassert (isPositiveAndBelow (numFramesPerSwap, 2));
+        jassert (isPositiveAndBelow (numFramesPerSwap.load(), 2));
 
         [renderContext setValues: (const GLint*) &numFramesPerSwap
                     forParameter: getSwapIntervalParameter()];
@@ -266,8 +266,9 @@ public:
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
     double lastSwapTime = 0;
     std::atomic<int> minSwapTimeMs { 0 };
-    int underrunCounter = 0, numFramesPerSwap = 0;
-    double videoRefreshPeriodS = 1.0 / 60.0;
+    int underrunCounter = 0;
+    std::atomic<int> numFramesPerSwap = 0;
+    std::atomic<double> videoRefreshPeriodS = 1.0 / 60.0;
 
     //==============================================================================
     struct MouseForwardingNSOpenGLViewClass  : public ObjCClass<NSOpenGLView>
