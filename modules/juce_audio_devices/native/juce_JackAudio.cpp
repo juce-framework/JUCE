@@ -50,7 +50,7 @@ static void* juce_loadJackFunction (const char* const name)
 }
 
 #define JUCE_DECL_JACK_FUNCTION(return_type, fn_name, argument_types, arguments)  \
-  return_type fn_name argument_types                                              \
+  static return_type fn_name argument_types                                       \
   {                                                                               \
       using ReturnType = return_type;                                             \
       typedef return_type (*fn_type) argument_types;                              \
@@ -60,7 +60,7 @@ static void* juce_loadJackFunction (const char* const name)
   }
 
 #define JUCE_DECL_VOID_JACK_FUNCTION(fn_name, argument_types, arguments)          \
-  void fn_name argument_types                                                     \
+  static void fn_name argument_types                                              \
   {                                                                               \
       typedef void (*fn_type) argument_types;                                     \
       static fn_type fn = (fn_type) juce_loadJackFunction (#fn_name);             \
