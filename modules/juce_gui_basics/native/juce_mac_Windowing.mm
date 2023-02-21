@@ -266,25 +266,9 @@ static NSView* getNSViewForDragEvent (Component* sourceComp)
     return nil;
 }
 
-struct NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
+class NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
 {
-    NSDraggingSourceHelper() : ObjCClass<NSObject<NSDraggingSource>> ("JUCENSDraggingSourceHelper_")
-    {
-        addIvar<std::function<void()>*> ("callback");
-        addIvar<String*> ("text");
-        addIvar<NSDragOperation*> ("operation");
-
-        addMethod (@selector (dealloc), dealloc);
-        addMethod (@selector (pasteboard:item:provideDataForType:), provideDataForType);
-
-        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), sourceOperationMaskForDraggingContext);
-        addMethod (@selector (draggingSession:endedAtPoint:operation:), draggingSessionEnded);
-
-        addProtocol (@protocol (NSPasteboardItemDataProvider));
-
-        registerClass();
-    }
-
+public:
     static void setText (id self, const String& text)
     {
         object_setInstanceVariable (self, "text", new String (text));
@@ -300,43 +284,59 @@ struct NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
         object_setInstanceVariable (self, "operation", new NSDragOperation (op));
     }
 
+    static NSDraggingSourceHelper& get()
+    {
+        static NSDraggingSourceHelper draggingSourceHelper;
+        return draggingSourceHelper;
+    }
+
 private:
-    static void dealloc (id self, SEL)
+    NSDraggingSourceHelper()
+        : ObjCClass ("JUCENSDraggingSourceHelper_")
     {
-        delete getIvar<String*> (self, "text");
-        delete getIvar<std::function<void()>*> (self, "callback");
-        delete getIvar<NSDragOperation*> (self, "operation");
+        addIvar<std::function<void()>*> ("callback");
+        addIvar<String*> ("text");
+        addIvar<NSDragOperation*> ("operation");
 
-        sendSuperclassMessage<void> (self, @selector (dealloc));
-    }
+        addMethod (@selector (dealloc), [] (id self, SEL)
+        {
+            delete getIvar<String*> (self, "text");
+            delete getIvar<std::function<void()>*> (self, "callback");
+            delete getIvar<NSDragOperation*> (self, "operation");
 
-    static void provideDataForType (id self, SEL, NSPasteboard* sender, NSPasteboardItem*, NSString* type)
-    {
-        if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
-            if (auto* text = getIvar<String*> (self, "text"))
-                [sender setData: [juceStringToNS (*text) dataUsingEncoding: NSUTF8StringEncoding]
-                        forType: NSPasteboardTypeString];
-    }
+            sendSuperclassMessage<void> (self, @selector (dealloc));
+        });
 
-    static NSDragOperation sourceOperationMaskForDraggingContext (id self, SEL, NSDraggingSession*, NSDraggingContext)
-    {
-        return *getIvar<NSDragOperation*> (self, "operation");
-    }
+        addMethod (@selector (pasteboard:item:provideDataForType:), [] (id self, SEL, NSPasteboard* sender, NSPasteboardItem*, NSString* type)
+        {
+            if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
+                if (auto* text = getIvar<String*> (self, "text"))
+                    [sender setData: [juceStringToNS (*text) dataUsingEncoding: NSUTF8StringEncoding]
+                            forType: NSPasteboardTypeString];
+        });
 
-    static void draggingSessionEnded (id self, SEL, NSDraggingSession*, NSPoint p, NSDragOperation)
-    {
-        // Our view doesn't receive a mouse up when the drag ends so we need to generate one here and send it...
-        if (auto* view = getNSViewForDragEvent (nullptr))
-            if (auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, CGPointMake (p.x, p.y), kCGMouseButtonLeft))
-                if (id e = [NSEvent eventWithCGEvent: cgEvent])
-                    [view mouseUp: e];
+        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), [] (id self, SEL, NSDraggingSession*, NSDraggingContext)
+        {
+            return *getIvar<NSDragOperation*> (self, "operation");
+        });
 
-        if (auto* cb = getIvar<std::function<void()>*> (self, "callback"))
-            cb->operator()();
+        addMethod (@selector (draggingSession:endedAtPoint:operation:), [] (id self, SEL, NSDraggingSession*, NSPoint p, NSDragOperation)
+        {
+            // Our view doesn't receive a mouse up when the drag ends so we need to generate one here and send it...
+            if (auto* view = getNSViewForDragEvent (nullptr))
+                if (auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, CGPointMake (p.x, p.y), kCGMouseButtonLeft))
+                    if (id e = [NSEvent eventWithCGEvent: cgEvent])
+                        [view mouseUp: e];
+
+            if (auto* cb = getIvar<std::function<void()>*> (self, "callback"))
+                cb->operator()();
+        });
+
+        addProtocol (@protocol (NSPasteboardItemDataProvider));
+
+        registerClass();
     }
 };
-
-static NSDraggingSourceHelper draggingSourceHelper;
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Component* sourceComponent,
                                                           std::function<void()> callback)
@@ -350,7 +350,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
         {
             if (auto event = [[view window] currentEvent])
             {
-                id helper = [draggingSourceHelper.createInstance() init];
+                id helper = [NSDraggingSourceHelper::get().createInstance() init];
                 NSDraggingSourceHelper::setText (helper, text);
                 NSDraggingSourceHelper::setDragOperation (helper, NSDragOperationCopy);
 
@@ -413,7 +413,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                     [dragItem release];
                 }
 
-                auto helper = [draggingSourceHelper.createInstance() autorelease];
+                auto helper = [NSDraggingSourceHelper::get().createInstance() autorelease];
 
                 if (callback != nullptr)
                     NSDraggingSourceHelper::setCompletionCallback (helper, callback);
