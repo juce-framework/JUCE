@@ -288,36 +288,36 @@ private:
             PhotoOutputDelegateClass::setOwner (delegate.get(), &p);
 
             [imageOutput capturePhotoWithSettings: [AVCapturePhotoSettings photoSettings]
-                                         delegate: id<AVCapturePhotoCaptureDelegate> (delegate.get())];
+                                         delegate: delegate.get()];
         }
 
     private:
-        class PhotoOutputDelegateClass : public ObjCClass<NSObject>
+        class PhotoOutputDelegateClass : public ObjCClass<NSObject<AVCapturePhotoCaptureDelegate>>
         {
         public:
-            PhotoOutputDelegateClass() : ObjCClass<NSObject> ("PhotoOutputDelegateClass_")
+            PhotoOutputDelegateClass()
+                : ObjCClass ("PhotoOutputDelegateClass_")
             {
-                addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:), didFinishProcessingPhoto);
+                addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:), [] (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* photo, NSError* error)
+                {
+                    if (error != nil)
+                    {
+                        [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
+
+                        JUCE_CAMERA_LOG ("Still picture capture failed, error: " + errorString);
+                        jassertfalse;
+
+                        return;
+                    }
+
+                    auto* imageData = [photo fileDataRepresentation];
+                    auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
+
+                    getOwner (self).imageCaptureFinished (image);
+                });
+
                 addIvar<Pimpl*> ("owner");
                 registerClass();
-            }
-
-            static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* photo, NSError* error)
-            {
-                if (error != nil)
-                {
-                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-
-                    JUCE_CAMERA_LOG ("Still picture capture failed, error: " + errorString);
-                    jassertfalse;
-
-                    return;
-                }
-
-                auto* imageData = [photo fileDataRepresentation];
-                auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
-
-                getOwner (self).imageCaptureFinished (image);
             }
 
             static Pimpl& getOwner (id self) { return *getIvar<Pimpl*> (self, "owner"); }
@@ -325,7 +325,7 @@ private:
         };
 
         AVCapturePhotoOutput* imageOutput = nil;
-        std::unique_ptr<NSObject, NSObjectDeleter> delegate;
+        NSUniquePtr<NSObject<AVCapturePhotoCaptureDelegate>> delegate;
     };
    #endif
 
