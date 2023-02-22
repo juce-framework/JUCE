@@ -110,19 +110,20 @@ public:
                     return;
 
                 SafePointer<TemplateComponent> safeThis { this };
-                NewProjectWizard::createNewProject (projectTemplate,
-                                                    dir.getChildFile (projectNameValue.get().toString()),
-                                                    projectNameValue.get(),
-                                                    modulesValue.get(),
-                                                    exportersValue.get(),
-                                                    fileOptionsValue.get(),
-                                                    modulePathValue.getCurrentValue(),
-                                                    modulePathValue.getWrappedValueTreePropertyWithDefault().isUsingDefault(),
-                                                    [safeThis, dir] (std::unique_ptr<Project> project)
+                messageBox = NewProjectWizard::createNewProject (projectTemplate,
+                                                                 dir.getChildFile (projectNameValue.get().toString()),
+                                                                 projectNameValue.get(),
+                                                                 modulesValue.get(),
+                                                                 exportersValue.get(),
+                                                                 fileOptionsValue.get(),
+                                                                 modulePathValue.getCurrentValue(),
+                                                                 modulePathValue.getWrappedValueTreePropertyWithDefault().isUsingDefault(),
+                                                                 [safeThis, dir] (ScopedMessageBox mb, std::unique_ptr<Project> project)
                 {
                     if (safeThis == nullptr)
                         return;
 
+                    safeThis->messageBox = std::move (mb);
                     safeThis->projectCreatedCallback (std::move (project));
                     getAppSettings().lastWizardFolder = dir;
                 });
@@ -248,6 +249,8 @@ private:
 
         return builder.components;
     }
+
+    ScopedMessageBox messageBox;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemplateComponent)

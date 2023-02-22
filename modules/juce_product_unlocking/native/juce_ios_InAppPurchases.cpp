@@ -111,7 +111,13 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         int64 getContentLength()   const override  { return download.contentLength; }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.downloadState); }
       #else
-        int64 getContentLength()   const override  { return download.expectedContentLength; }
+        int64 getContentLength()   const override
+        {
+            if (@available (macOS 10.15, *))
+                return download.expectedContentLength;
+
+            return download.contentLength.longLongValue;
+        }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.state); }
       #endif
 

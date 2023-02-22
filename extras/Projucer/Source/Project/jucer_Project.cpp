@@ -462,7 +462,8 @@ void Project::removeDefunctExporters()
             warningMessage << "\n"
                            << TRANS ("These exporters have been removed from the project. If you save the project they will be also erased from the .jucer file.");
 
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
     }
 }

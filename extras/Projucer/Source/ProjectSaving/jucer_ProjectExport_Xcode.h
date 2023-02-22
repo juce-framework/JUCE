@@ -771,10 +771,16 @@ public:
                                            "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
                                            "Click 'Update' to remove the script (otherwise your plug-in may not compile correctly).";
 
-            if (AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
-                                              "Project settings: " + project.getDocumentTitle(),
-                                              alertWindowText, "Update", "Cancel", nullptr, nullptr))
-                postbuildCommandValue.resetToDefault();
+            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
+                                                                   "Project settings: " + project.getDocumentTitle(),
+                                                                   alertWindowText,
+                                                                   "Update",
+                                                                   "Cancel");
+            messageBox = AlertWindow::showScopedAsync (options, [this] (int result)
+            {
+                if (result != 0)
+                    postbuildCommandValue.resetToDefault();
+            });
         }
     }
 
@@ -3637,6 +3643,7 @@ private:
                                  iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                                  networkingMulticastValue, iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                                  exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue, buildNumber;
+    ScopedMessageBox messageBox;
 
     struct SandboxFileAccessProperty
     {

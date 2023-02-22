@@ -122,10 +122,11 @@ private:
 
         if (postStrings.size() != preStrings.size())
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              TRANS("Error"),
-                                              TRANS("The pre- and post-translation text doesn't match!\n\n"
-                                                    "Perhaps it got mangled by the translator?"));
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             TRANS ("Error"),
+                                                             TRANS ("The pre- and post-translation text doesn't match!\n\n"
+                                                                    "Perhaps it got mangled by the translator?"));
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
             return;
         }
 
@@ -136,10 +137,16 @@ private:
     void scanProject()
     {
         if (Project* project = ProjucerApplication::getApp().mainWindowList.getFrontmostProject())
+        {
             setPreTranslationText (TranslationHelpers::getPreTranslationText (*project));
+        }
         else
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Translation Tool",
-                                              "This will only work when you have a project open!");
+        {
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "Translation Tool",
+                                                             "This will only work when you have a project open!");
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
+        }
     }
 
     void scanFolder()
@@ -195,4 +202,5 @@ private:
                loadTranslationButton { "Load existing translation file..."};
 
     std::unique_ptr<FileChooser> chooser;
+    ScopedMessageBox messageBox;
 };

@@ -147,6 +147,7 @@ private:
     int lastViewedTab = 0;
 
     std::unique_ptr<WizardHolder> wizardHolder;
+    ScopedMessageBox messageBox;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)

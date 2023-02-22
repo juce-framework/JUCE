@@ -100,9 +100,10 @@ void PluginGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instan
 {
     if (instance == nullptr)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          TRANS("Couldn't create plugin"),
-                                          error);
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         TRANS ("Couldn't create plugin"),
+                                                         error);
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
     else
     {

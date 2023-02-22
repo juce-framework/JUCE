@@ -110,6 +110,7 @@ private:
     AudioPluginFormatManager& formatManager;
     KnownPluginList& knownPlugins;
     OwnedArray<PluginWindow> activePluginWindows;
+    ScopedMessageBox messageBox;
 
     NodeID lastUID;
     NodeID getNextUID() noexcept;

@@ -143,6 +143,7 @@ private:
     ValueTree state;
 
     std::unique_ptr<FileChooser> chooser;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModulesList)
 };

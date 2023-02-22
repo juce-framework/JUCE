@@ -195,7 +195,13 @@ private:
             addAndMakeVisible (textButton);
 
             shapeButton.setShape (getJUCELogoPath(), false, true, false);
-            shapeButton.onClick = [] { AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon, "Alert", "This is an AlertWindow"); };
+            shapeButton.onClick = [this]
+            {
+                auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                                 "Alert",
+                                                                 "This is an AlertWindow");
+                messageBox = AlertWindow::showScopedAsync (options, nullptr);
+            };
             shapeButton.setHasFocusOutline (true);
             addAndMakeVisible (shapeButton);
         }
@@ -250,6 +256,7 @@ private:
                                   Colours::darkorange,
                                   Colours::darkorange.brighter (0.5f),
                                   Colours::darkorange.brighter (0.75f) };
+        ScopedMessageBox messageBox;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonsComponent)

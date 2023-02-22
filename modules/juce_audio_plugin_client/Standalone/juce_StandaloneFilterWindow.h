@@ -209,9 +209,12 @@ public:
             processor->getStateInformation (data);
 
             if (! fc.getResult().replaceWithData (data.getData(), data.getSize()))
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  TRANS("Error whilst saving"),
-                                                  TRANS("Couldn't write to the specified file!"));
+            {
+                auto opts = MessageBoxOptions::makeOptionsOk (AlertWindow::WarningIcon,
+                                                              TRANS ("Error whilst saving"),
+                                                              TRANS ("Couldn't write to the specified file!"));
+                messageBox = AlertWindow::showScopedAsync (opts, nullptr);
+            }
         });
     }
 
@@ -234,11 +237,16 @@ public:
             MemoryBlock data;
 
             if (fc.getResult().loadFileAsData (data))
+            {
                 processor->setStateInformation (data.getData(), (int) data.getSize());
+            }
             else
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                  TRANS("Error whilst loading"),
-                                                  TRANS("Couldn't read from the specified file!"));
+            {
+                auto opts = MessageBoxOptions::makeOptionsOk (AlertWindow::WarningIcon,
+                                                              TRANS ("Error whilst loading"),
+                                                              TRANS ("Couldn't read from the specified file!"));
+                messageBox = AlertWindow::showScopedAsync (opts, nullptr);
+            }
         });
     }
 
@@ -417,6 +425,7 @@ public:
     Array<MidiDeviceInfo> lastMidiDevices;
 
     std::unique_ptr<FileChooser> stateFileChooser;
+    ScopedMessageBox messageBox;
 
 private:
     /*  This class can be used to ensure that audio callbacks use buffers with a

@@ -57,6 +57,7 @@ private:
     std::unique_ptr<DownloadAndInstallThread> installer;
     std::unique_ptr<Component> dialogWindow;
     std::unique_ptr<FileChooser> chooser;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (LatestVersionCheckerAndUpdater)
 };

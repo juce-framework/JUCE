@@ -687,19 +687,24 @@ void EnabledModulesList::addModuleOfferingToCopy (const File& f, bool isFromUser
 
     if (! m.isValid())
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
-                                          "Add Module", "This wasn't a valid module folder!");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                         "Add Module",
+                                                         "This wasn't a valid module folder!");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
         return;
     }
 
     if (isModuleEnabled (m.getID()))
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
-                                          "Add Module", "The project already contains this module!");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                         "Add Module",
+                                                         "The project already contains this module!");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
         return;
     }
 
-    addModule (m.getModuleFolder(), areMostModulesCopiedLocally(),
+    addModule (m.getModuleFolder(),
+               areMostModulesCopiedLocally(),
                isFromUserSpecifiedFolder ? false : areMostModulesUsingGlobalPath());
 }
 

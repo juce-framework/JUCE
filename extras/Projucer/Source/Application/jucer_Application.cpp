@@ -1098,13 +1098,14 @@ void ProjucerApplication::createNewProjectFromClipboard()
     tempFile.create();
     tempFile.appendText (SystemClipboard::getTextFromClipboard());
 
-    auto cleanup = [tempFile] (String errorString)
+    auto cleanup = [parent = WeakReference { this }, tempFile] (String errorString)
     {
-        if (errorString.isNotEmpty())
-        {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Error", errorString);
-            tempFile.deleteFile();
-        }
+        if (parent == nullptr || errorString.isEmpty())
+            return;
+
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, "Error", errorString);
+        parent->messageBox = AlertWindow::showScopedAsync (options, nullptr);
+        tempFile.deleteFile();
     };
 
     if (! isPIPFile (tempFile))
@@ -1113,7 +1114,7 @@ void ProjucerApplication::createNewProjectFromClipboard()
         return;
     }
 
-    openFile (tempFile, [parent = WeakReference<ProjucerApplication> { this }, cleanup] (bool openedSuccessfully)
+    openFile (tempFile, [parent = WeakReference { this }, cleanup] (bool openedSuccessfully)
     {
         if (parent == nullptr)
             return;

@@ -32,8 +32,8 @@ namespace NewProjectWizard
 {
     File getLastWizardFolder();
 
-    void createNewProject (const NewProjectTemplates::ProjectTemplate& projectTemplate,
-                           const File& targetFolder, const String& name, var modules, var exporters, var fileOptions,
-                           const String& modulePath, bool useGlobalModulePath,
-                           std::function<void (std::unique_ptr<Project>)> callback);
+    ScopedMessageBox createNewProject (const NewProjectTemplates::ProjectTemplate& projectTemplate,
+                                       const File& targetFolder, const String& name, var modules, var exporters, var fileOptions,
+                                       const String& modulePath, bool useGlobalModulePath,
+                                       std::function<void (ScopedMessageBox, std::unique_ptr<Project>)> callback);
 }
