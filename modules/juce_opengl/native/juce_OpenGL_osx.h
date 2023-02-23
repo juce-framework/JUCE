@@ -172,7 +172,7 @@ public:
         auto now = Time::getMillisecondCounterHiRes();
         [renderContext flushBuffer];
 
-        if (minSwapTimeMs > 0)
+        if (const auto minSwapTime = minSwapTimeMs.get(); minSwapTime > 0)
         {
             // When our window is entirely occluded by other windows, flushBuffer
             // fails to wait for the swap interval, so the render loop spins at full
@@ -182,11 +182,11 @@ public:
             auto swapTime = Time::getMillisecondCounterHiRes() - now;
             auto frameTime = (int) (now - lastSwapTime);
 
-            if (swapTime < 0.5 && frameTime < minSwapTimeMs - 3)
+            if (swapTime < 0.5 && frameTime < minSwapTime - 3)
             {
                 if (underrunCounter > 3)
                 {
-                    Thread::sleep (2 * (minSwapTimeMs - frameTime));
+                    Thread::sleep (2 * (minSwapTime - frameTime));
                     now = Time::getMillisecondCounterHiRes();
                 }
                 else
@@ -217,16 +217,14 @@ public:
 
     bool setSwapInterval (int numFramesPerSwapIn)
     {
-        numFramesPerSwap = numFramesPerSwapIn;
-
         // The macOS OpenGL programming guide says that numFramesPerSwap
         // can only be 0 or 1.
-        jassert (isPositiveAndBelow (numFramesPerSwap, 2));
+        jassert (isPositiveAndBelow (numFramesPerSwapIn, 2));
 
-        [renderContext setValues: (const GLint*) &numFramesPerSwap
+        [renderContext setValues: (const GLint*) &numFramesPerSwapIn
                     forParameter: getSwapIntervalParameter()];
 
-        updateMinSwapTime();
+        minSwapTimeMs.setFramesPerSwap (numFramesPerSwapIn);
 
         return true;
     }
@@ -243,13 +241,7 @@ public:
     void setNominalVideoRefreshPeriodS (double periodS)
     {
         jassert (periodS > 0.0);
-        videoRefreshPeriodS = periodS;
-        updateMinSwapTime();
-    }
-
-    void updateMinSwapTime()
-    {
-        minSwapTimeMs = static_cast<int> (numFramesPerSwap * 1000 * videoRefreshPeriodS);
+        minSwapTimeMs.setVideoRefreshPeriodS (periodS);
     }
 
     static NSOpenGLContextParameter getSwapIntervalParameter()
@@ -260,14 +252,47 @@ public:
         return NSOpenGLCPSwapInterval;
     }
 
+    class MinSwapTimeMs
+    {
+    public:
+        int get() const
+        {
+            return minSwapTimeMs;
+        }
+
+        void setFramesPerSwap (int n)
+        {
+            const std::scoped_lock lock { mutex };
+            numFramesPerSwap = n;
+            updateMinSwapTime();
+        }
+
+        void setVideoRefreshPeriodS (double n)
+        {
+            const std::scoped_lock lock { mutex };
+            videoRefreshPeriodS = n;
+            updateMinSwapTime();
+        }
+
+    private:
+        void updateMinSwapTime()
+        {
+            minSwapTimeMs = static_cast<int> (numFramesPerSwap * 1000 * videoRefreshPeriodS);
+        }
+
+        std::mutex mutex;
+        std::atomic<int> minSwapTimeMs { 0 };
+        int numFramesPerSwap = 0;
+        double videoRefreshPeriodS = 1.0 / 60.0;
+    };
+
     Component& owner;
     NSOpenGLContext* renderContext = nil;
     NSOpenGLView* view = nil;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
     double lastSwapTime = 0;
-    std::atomic<int> minSwapTimeMs { 0 };
-    int underrunCounter = 0, numFramesPerSwap = 0;
-    double videoRefreshPeriodS = 1.0 / 60.0;
+    int underrunCounter = 0;
+    MinSwapTimeMs minSwapTimeMs;
 
     //==============================================================================
     struct MouseForwardingNSOpenGLViewClass  : public ObjCClass<NSOpenGLView>
