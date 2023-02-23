@@ -2743,7 +2743,7 @@ public:
             {
                 const auto& requested = layouts.getChannelSet (isInput, i);
 
-                if (const auto arr = getVst3SpeakerArrangement (requested.isDisabled() ? getBus (true, i)->getLastEnabledLayout() : requested))
+                if (const auto arr = getVst3SpeakerArrangement (requested.isDisabled() ? getBus (isInput, i)->getLastEnabledLayout() : requested))
                     result.push_back (*arr);
                 else
                     return {};
