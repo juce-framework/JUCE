@@ -500,8 +500,17 @@ struct GraphRenderSequence
 {
     using Node = AudioProcessorGraph::Node;
 
+    struct GlobalIO
+    {
+        AudioBuffer<FloatType>& audioIn;
+        AudioBuffer<FloatType>& audioOut;
+        MidiBuffer& midiIn;
+        MidiBuffer& midiOut;
+    };
+
     struct Context
     {
+        GlobalIO globalIO;
         AudioPlayHead* audioPlayHead;
         int numSamples;
     };
@@ -540,7 +549,12 @@ struct GraphRenderSequence
         currentMidiOutputBuffer.clear();
 
         {
-            const Context context { audioPlayHead, numSamples };
+            const Context context { { *currentAudioInputBuffer,
+                                      currentAudioOutputBuffer,
+                                      *currentMidiInputBuffer,
+                                      currentMidiOutputBuffer },
+                                    audioPlayHead,
+                                    numSamples };
 
             for (const auto& op : renderOps)
                 op->process (context);
@@ -748,7 +762,30 @@ struct GraphRenderSequence
                        int totalNumChans,
                        int midiBuffer)
     {
-        renderOps.push_back (std::make_unique<ProcessOp> (node, audioChannelsUsed, totalNumChans, midiBuffer));
+        auto op = [&]() -> std::unique_ptr<NodeOp>
+        {
+            if (auto* ioNode = dynamic_cast<const AudioProcessorGraph::AudioGraphIOProcessor*> (node->getProcessor()))
+            {
+                switch (ioNode->getType())
+                {
+                    case AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode:
+                        return std::make_unique<AudioInOp> (node, audioChannelsUsed, totalNumChans, midiBuffer);
+
+                    case AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode:
+                        return std::make_unique<AudioOutOp> (node, audioChannelsUsed, totalNumChans, midiBuffer);
+
+                    case AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode:
+                        return std::make_unique<MidiInOp> (node, audioChannelsUsed, totalNumChans, midiBuffer);
+
+                    case AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode:
+                        return std::make_unique<MidiOutOp> (node, audioChannelsUsed, totalNumChans, midiBuffer);
+                }
+            }
+
+            return std::make_unique<ProcessOp> (node, audioChannelsUsed, totalNumChans, midiBuffer);
+        }();
+
+        renderOps.push_back (std::move (op));
     }
 
     void prepareBuffers (int blockSize)
@@ -796,12 +833,12 @@ private:
         virtual void process (const Context&) = 0;
     };
 
-    struct ProcessOp : public RenderOp
+    struct NodeOp : public RenderOp
     {
-        ProcessOp (const Node::Ptr& n,
-                   const Array<int>& audioChannelsUsed,
-                   int totalNumChans,
-                   int midiBufferIndex)
+        NodeOp (const Node::Ptr& n,
+                const Array<int>& audioChannelsUsed,
+                int totalNumChans,
+                int midiBufferIndex)
             : node (n),
               processor (*n->getProcessor()),
               audioChannelsToUse (audioChannelsUsed),
@@ -812,7 +849,7 @@ private:
                 audioChannelsToUse.add (0);
         }
 
-        void prepare (FloatType* const* renderBuffer, MidiBuffer* buffers) override
+        void prepare (FloatType* const* renderBuffer, MidiBuffer* buffers) final
         {
             for (size_t i = 0; i < audioChannels.size(); ++i)
                 audioChannels[i] = renderBuffer[audioChannelsToUse.getUnchecked ((int) i)];
@@ -820,7 +857,7 @@ private:
             midiBuffer = buffers + midiBufferToUse;
         }
 
-        void process (const Context& c) override
+        void process (const Context& c) final
         {
             processor.setPlayHead (c.audioPlayHead);
 
@@ -835,50 +872,18 @@ private:
 
             AudioBuffer<FloatType> buffer { audioChannels.data(), numAudioChannels, c.numSamples };
 
-            const ScopedLock lock (processor.getCallbackLock());
-
             if (processor.isSuspended())
+            {
                 buffer.clear();
-            else
-                callProcess (buffer, *midiBuffer);
-        }
-
-        void callProcess (AudioBuffer<float>& buffer, MidiBuffer& midi)
-        {
-            if (processor.isUsingDoublePrecision())
-            {
-                tempBufferDouble.makeCopyOf (buffer, true);
-                process (*node, tempBufferDouble, midi);
-                buffer.makeCopyOf (tempBufferDouble, true);
             }
             else
             {
-                process (*node, buffer, midi);
+                const auto bypass = node->isBypassed() && processor.getBypassParameter() == nullptr;
+                processWithBuffer (c.globalIO, bypass, buffer, *midiBuffer);
             }
         }
 
-        void callProcess (AudioBuffer<double>& buffer, MidiBuffer& midi)
-        {
-            if (processor.isUsingDoublePrecision())
-            {
-                process (*node, buffer, midi);
-            }
-            else
-            {
-                tempBufferFloat.makeCopyOf (buffer, true);
-                process (*node, tempBufferFloat, midi);
-                buffer.makeCopyOf (tempBufferFloat, true);
-            }
-        }
-
-        template <typename Value>
-        static void process (const Node& node, AudioBuffer<Value>& audio, MidiBuffer& midi)
-        {
-            if (node.isBypassed() && node.getProcessor()->getBypassParameter() == nullptr)
-                node.getProcessor()->processBlockBypassed (audio, midi);
-            else
-                node.getProcessor()->processBlock (audio, midi);
-        }
+        virtual void processWithBuffer (const GlobalIO&, bool bypass, AudioBuffer<FloatType>& audio, MidiBuffer& midi) = 0;
 
         const Node::Ptr node;
         AudioProcessor& processor;
@@ -886,8 +891,106 @@ private:
 
         Array<int> audioChannelsToUse;
         std::vector<FloatType*> audioChannels;
-        AudioBuffer<float> tempBufferFloat, tempBufferDouble;
         const int midiBufferToUse;
+    };
+
+    struct ProcessOp : public NodeOp
+    {
+        using NodeOp::NodeOp;
+
+        void processWithBuffer (const GlobalIO&, bool bypass, AudioBuffer<FloatType>& audio, MidiBuffer& midi) final
+        {
+            callProcess (bypass, audio, midi);
+        }
+
+        void callProcess (bool bypass, AudioBuffer<float>& buffer, MidiBuffer& midi)
+        {
+            if (this->processor.isUsingDoublePrecision())
+            {
+                tempBufferDouble.makeCopyOf (buffer, true);
+                processImpl (bypass, this->processor, tempBufferDouble, midi);
+                buffer.makeCopyOf (tempBufferDouble, true);
+            }
+            else
+            {
+                processImpl (bypass, this->processor, buffer, midi);
+            }
+        }
+
+        void callProcess (bool bypass, AudioBuffer<double>& buffer, MidiBuffer& midi)
+        {
+            if (this->processor.isUsingDoublePrecision())
+            {
+                processImpl (bypass, this->processor, buffer, midi);
+            }
+            else
+            {
+                tempBufferFloat.makeCopyOf (buffer, true);
+                processImpl (bypass, this->processor, tempBufferFloat, midi);
+                buffer.makeCopyOf (tempBufferFloat, true);
+            }
+        }
+
+        template <typename Value>
+        static void processImpl (bool bypass, AudioProcessor& p, AudioBuffer<Value>& audio, MidiBuffer& midi)
+        {
+            if (bypass)
+                p.processBlockBypassed (audio, midi);
+            else
+                p.processBlock (audio, midi);
+        }
+
+        AudioBuffer<float> tempBufferFloat, tempBufferDouble;
+    };
+
+    struct MidiInOp : public NodeOp
+    {
+        using NodeOp::NodeOp;
+
+        void processWithBuffer (const GlobalIO& g, bool bypass, AudioBuffer<FloatType>& audio, MidiBuffer& midi) final
+        {
+            if (! bypass)
+                midi.addEvents (g.midiIn, 0, audio.getNumSamples(), 0);
+        }
+    };
+
+    struct MidiOutOp : public NodeOp
+    {
+        using NodeOp::NodeOp;
+
+        void processWithBuffer (const GlobalIO& g, bool bypass, AudioBuffer<FloatType>& audio, MidiBuffer& midi) final
+        {
+            if (! bypass)
+                g.midiOut.addEvents (midi, 0, audio.getNumSamples(), 0);
+        }
+    };
+
+    struct AudioInOp : public NodeOp
+    {
+        using NodeOp::NodeOp;
+
+        void processWithBuffer (const GlobalIO& g, bool bypass, AudioBuffer<FloatType>& audio, MidiBuffer&) final
+        {
+            if (bypass)
+                return;
+
+            for (int i = jmin (g.audioIn.getNumChannels(), audio.getNumChannels()); --i >= 0;)
+                audio.copyFrom (i, 0, g.audioIn, i, 0, audio.getNumSamples());
+        }
+    };
+
+    struct AudioOutOp : public NodeOp
+    {
+        using NodeOp::NodeOp;
+
+        void processWithBuffer (const GlobalIO& g, bool bypass, AudioBuffer<FloatType>& audio, MidiBuffer&) final
+        {
+            if (bypass)
+                return;
+
+            for (int i = jmin (g.audioOut.getNumChannels(), audio.getNumChannels()); --i >= 0;)
+                g.audioOut.addFrom (i, 0, audio, i, 0, audio.getNumSamples());
+        }
     };
 
     std::vector<std::unique_ptr<RenderOp>> renderOps;
@@ -1430,15 +1533,6 @@ public:
             jassertfalse; // Not prepared for this audio format!
     }
 
-    template <typename FloatType>
-    void processIO (AudioGraphIOProcessor& io, AudioBuffer<FloatType>& audio, MidiBuffer& midi)
-    {
-        if (auto* s = std::get_if<GraphRenderSequence<FloatType>> (&sequence.sequence))
-            processIOBlock (io, *s, audio, midi);
-        else
-            jassertfalse; // Not prepared for this audio format!
-    }
-
     int getLatencySamples() const { return sequence.latencySamples; }
     PrepareSettings getSettings() const { return settings; }
 
@@ -1455,47 +1549,6 @@ private:
         : settings (s), sequence (std::move (built))
     {
         visitRenderSequence (*this, [&] (auto& seq) { seq.prepareBuffers (settings.blockSize); });
-    }
-
-    template <typename FloatType, typename SequenceType>
-    static void processIOBlock (AudioGraphIOProcessor& io,
-                                SequenceType& sequence,
-                                AudioBuffer<FloatType>& buffer,
-                                MidiBuffer& midiMessages)
-    {
-        switch (io.getType())
-        {
-            case AudioGraphIOProcessor::audioOutputNode:
-            {
-                auto&& currentAudioOutputBuffer = sequence.currentAudioOutputBuffer;
-
-                for (int i = jmin (currentAudioOutputBuffer.getNumChannels(), buffer.getNumChannels()); --i >= 0;)
-                    currentAudioOutputBuffer.addFrom (i, 0, buffer, i, 0, buffer.getNumSamples());
-
-                break;
-            }
-
-            case AudioGraphIOProcessor::audioInputNode:
-            {
-                auto* currentInputBuffer = sequence.currentAudioInputBuffer;
-
-                for (int i = jmin (currentInputBuffer->getNumChannels(), buffer.getNumChannels()); --i >= 0;)
-                    buffer.copyFrom (i, 0, *currentInputBuffer, i, 0, buffer.getNumSamples());
-
-                break;
-            }
-
-            case AudioGraphIOProcessor::midiOutputNode:
-                sequence.currentMidiOutputBuffer.addEvents (midiMessages, 0, buffer.getNumSamples(), 0);
-                break;
-
-            case AudioGraphIOProcessor::midiInputNode:
-                midiMessages.addEvents (*sequence.currentMidiInputBuffer, 0, buffer.getNumSamples(), 0);
-                break;
-
-            default:
-                break;
-        }
     }
 
     PrepareSettings settings;
@@ -2000,20 +2053,16 @@ bool AudioProcessorGraph::AudioGraphIOProcessor::supportsDoublePrecisionProcessi
     return true;
 }
 
-void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioBuffer<float>&, MidiBuffer&)
 {
-    jassert (graph != nullptr);
-
-    if (auto* state = graph->pimpl->getAudioThreadState())
-        state->processIO (*this, buffer, midiMessages);
+    // The graph should never call this!
+    jassertfalse;
 }
 
-void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
+void AudioProcessorGraph::AudioGraphIOProcessor::processBlock (AudioBuffer<double>&, MidiBuffer&)
 {
-    jassert (graph != nullptr);
-
-    if (auto* state = graph->pimpl->getAudioThreadState())
-        state->processIO (*this, buffer, midiMessages);
+    // The graph should never call this!
+    jassertfalse;
 }
 
 double AudioProcessorGraph::AudioGraphIOProcessor::getTailLengthSeconds() const
@@ -2051,15 +2100,15 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorG
 {
     graph = newGraph;
 
-    if (graph != nullptr)
-    {
-        setPlayConfigDetails (type == audioOutputNode ? graph->getTotalNumOutputChannels() : 0,
-                              type == audioInputNode  ? graph->getTotalNumInputChannels()  : 0,
-                              getSampleRate(),
-                              getBlockSize());
+    if (graph == nullptr)
+        return;
 
-        updateHostDisplay();
-    }
+    setPlayConfigDetails (type == audioOutputNode ? newGraph->getTotalNumOutputChannels() : 0,
+                          type == audioInputNode  ? newGraph->getTotalNumInputChannels()  : 0,
+                          getSampleRate(),
+                          getBlockSize());
+
+    updateHostDisplay();
 }
 
 //==============================================================================
