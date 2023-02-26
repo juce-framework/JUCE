@@ -3039,7 +3039,7 @@ public:
     Optional<PositionInfo> getPosition() const override
     {
         PositionInfo info;
-        info.setTimeInSamples (jmax ((juce::int64) 0, processContext.projectTimeSamples));
+        info.setTimeInSamples (processContext.projectTimeSamples);
         info.setTimeInSeconds (static_cast<double> (*info.getTimeInSamples()) / processContext.sampleRate);
         info.setIsRecording ((processContext.state & Vst::ProcessContext::kRecording) != 0);
         info.setIsPlaying ((processContext.state & Vst::ProcessContext::kPlaying) != 0);
@@ -3080,7 +3080,7 @@ public:
                             : nullopt);
 
         info.setContinuousTimeInSamples ((processContext.state & Vst::ProcessContext::kContTimeValid) != 0
-                                         ? makeOptional (jmax ((juce::int64) 0, processContext.continousTimeSamples))
+                                         ? makeOptional (processContext.continousTimeSamples)
                                          : nullopt);
 
         return info;
