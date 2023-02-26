@@ -23,17 +23,12 @@
   ==============================================================================
 */
 
-#pragma once
-
-#include "jucer_NewProjectTemplates.h"
-
-//==============================================================================
-namespace NewProjectWizard
+namespace juce
 {
-    File getLastWizardFolder();
 
-    ScopedMessageBox createNewProject (const NewProjectTemplates::ProjectTemplate& projectTemplate,
-                                       const File& targetFolder, const String& name, var modules, var exporters, var fileOptions,
-                                       const String& modulePath, bool useGlobalModulePath,
-                                       std::function<void (ScopedMessageBox, std::unique_ptr<Project>)> callback);
+std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (const MessageBoxOptions& options)
+{
+    return createAlertWindowImpl (options);
 }
+
+} // namespace juce

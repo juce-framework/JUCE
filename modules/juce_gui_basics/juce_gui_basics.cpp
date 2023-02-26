@@ -254,7 +254,10 @@ namespace juce
 #include "widgets/juce_Toolbar.cpp"
 #include "widgets/juce_ToolbarItemPalette.cpp"
 #include "widgets/juce_TreeView.cpp"
+#include "windows/juce_MessageBoxOptions.cpp"
+#include "windows/juce_ScopedMessageBox.cpp"
 #include "windows/juce_AlertWindow.cpp"
+#include "windows/juce_NativeMessageBox.cpp"
 #include "windows/juce_CallOutBox.cpp"
 #include "windows/juce_ComponentPeer.cpp"
 #include "windows/juce_DialogWindow.cpp"
@@ -293,6 +296,7 @@ namespace juce
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_Windowing.mm"
+  #include "native/juce_ios_NativeMessageBox.mm"
   #include "native/juce_ios_FileChooser.mm"
 
   #if JUCE_CONTENT_SHARING
@@ -304,6 +308,7 @@ namespace juce
   #include "native/juce_mac_PerScreenDisplayLinks.h"
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
+  #include "native/juce_mac_NativeMessageBox.mm"
   #include "native/juce_mac_MainMenu.mm"
   #include "native/juce_mac_FileChooser.mm"
  #endif
@@ -319,6 +324,7 @@ namespace juce
  #include "native/accessibility/juce_win32_AccessibilityElement.cpp"
  #include "native/accessibility/juce_win32_Accessibility.cpp"
  #include "native/juce_win32_Windowing.cpp"
+ #include "native/juce_win32_NativeMessageBox.cpp"
  #include "native/juce_win32_DragAndDrop.cpp"
  #include "native/juce_win32_FileChooser.cpp"
 
@@ -330,6 +336,7 @@ namespace juce
 
  #include "native/x11/juce_linux_ScopedWindowAssociation.h"
  #include "native/juce_linux_Windowing.cpp"
+ #include "native/juce_linux_NativeMessageBox.cpp"
  #include "native/x11/juce_linux_XWindowSystem.cpp"
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -362,6 +369,7 @@ static jobject makeAndroidPoint (Point<int> p)
  #include "juce_core/files/juce_common_MimeTypes.h"
  #include "native/accessibility/juce_android_Accessibility.cpp"
  #include "native/juce_android_Windowing.cpp"
+ #include "native/juce_android_NativeMessageBox.cpp"
  #include "native/juce_android_FileChooser.cpp"
 
  #if JUCE_CONTENT_SHARING

@@ -252,8 +252,10 @@ private:
         }
         else
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Camera open failed",
-                                              "Camera open failed, reason: " + error);
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "Camera open failed",
+                                                             "Camera open failed, reason: " + error);
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
 
         snapshotButton   .setEnabled (cameraDevice.get() != nullptr && ! contentSharingPending);
@@ -365,9 +367,10 @@ private:
 
     void errorOccurred (const String& error)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
-                                          "Camera Device Error",
-                                          "An error has occurred: " + error + " Camera will be closed.");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                         "Camera Device Error",
+                                                         "An error has occurred: " + error + " Camera will be closed.");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
         cameraDevice.reset();
 
@@ -378,14 +381,17 @@ private:
 
     void sharingFinished (bool success, bool isCapture)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
-                                          isCapture ? "Image sharing result" : "Video sharing result",
-                                          success ? "Success!" : "Failed!");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                         isCapture ? "Image sharing result" : "Video sharing result",
+                                                         success ? "Success!" : "Failed!");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
         contentSharingPending = false;
         snapshotButton   .setEnabled (true);
         recordMovieButton.setEnabled (true);
     }
+
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDemo)
 };

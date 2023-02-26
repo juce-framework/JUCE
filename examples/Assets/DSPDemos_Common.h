@@ -596,13 +596,17 @@ private:
                                               const auto u = fc.getURLResult();
 
                                               if (! audioFileReader.loadURL (u))
-                                                  NativeMessageBox::showAsync (MessageBoxOptions()
-                                                                                 .withIconType (MessageBoxIconType::WarningIcon)
-                                                                                 .withTitle ("Error loading file")
-                                                                                 .withMessage ("Unable to load audio file"),
-                                                                               nullptr);
+                                              {
+                                                  auto options = MessageBoxOptions().withIconType (MessageBoxIconType::WarningIcon)
+                                                                                    .withTitle ("Error loading file")
+                                                                                    .withMessage ("Unable to load audio file")
+                                                                                    .withButton ("OK");
+                                                  messageBox = NativeMessageBox::showScopedAsync (options, nullptr);
+                                              }
                                               else
+                                              {
                                                   thumbnailComp.setCurrentURL (u);
+                                              }
                                           }
 
                                           fileChooser = nullptr;
@@ -629,6 +633,7 @@ private:
 
         AudioFileReaderComponent& audioFileReader;
         std::unique_ptr<FileChooser> fileChooser;
+        ScopedMessageBox messageBox;
     };
 
     //==============================================================================

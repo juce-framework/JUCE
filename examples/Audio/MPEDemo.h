@@ -279,13 +279,14 @@ private:
         return legacyStartChannel.getText().getIntValue() <= legacyEndChannel.getText().getIntValue();
     }
 
-    void handleInvalidLegacyModeParameters() const
+    void handleInvalidLegacyModeParameters()
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "Invalid legacy mode channel layout",
-                                          "Cannot set legacy mode start/end channel:\n"
-                                          "The end channel must not be less than the start channel!",
-                                          "Got it");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "Invalid legacy mode channel layout",
+                                                         "Cannot set legacy mode start/end channel:\n"
+                                                         "The end channel must not be less than the start channel!",
+                                                         "Got it");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
 
     Range<int> getLegacyModeChannelRange() const
@@ -337,6 +338,8 @@ private:
 
     ComboBox numberOfVoices;
     Label numberOfVoicesLabel { {}, "Number of synth voices"};
+
+    ScopedMessageBox messageBox;
 
     static constexpr int defaultMemberChannels       = 15,
                          defaultMasterPitchbendRange = 2,

@@ -32,219 +32,6 @@ void LookAndFeel::playAlertSound()
 }
 
 //==============================================================================
-class OSXMessageBox  : private AsyncUpdater
-{
-public:
-    OSXMessageBox (const MessageBoxOptions& opts,
-                   std::unique_ptr<ModalComponentManager::Callback>&& c)
-        : options (opts), callback (std::move (c))
-    {
-    }
-
-    int getResult() const
-    {
-        return convertResult ([getAlert() runModal]);
-    }
-
-    using AsyncUpdater::triggerAsyncUpdate;
-
-private:
-    static int convertResult (NSModalResponse response)
-    {
-        switch (response)
-        {
-            case NSAlertFirstButtonReturn:   return 0;
-            case NSAlertSecondButtonReturn:  return 1;
-            case NSAlertThirdButtonReturn:   return 2;
-            default:                         break;
-        }
-
-        jassertfalse;
-        return 0;
-    }
-
-    void handleAsyncUpdate() override
-    {
-        if (auto* comp = options.getAssociatedComponent())
-        {
-            if (auto* peer = comp->getPeer())
-            {
-                if (auto* view = static_cast<NSView*> (peer->getNativeHandle()))
-                {
-                    if (auto* window = [view window])
-                    {
-                        if (@available (macOS 10.9, *))
-                        {
-                            [getAlert() beginSheetModalForWindow: window completionHandler: ^(NSModalResponse result)
-                            {
-                                handleModalFinished (result);
-                            }];
-
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        handleModalFinished ([getAlert() runModal]);
-    }
-
-    void handleModalFinished (NSModalResponse result)
-    {
-        if (callback != nullptr)
-            callback->modalStateFinished (convertResult (result));
-
-        delete this;
-    }
-
-    static void addButton (NSAlert* alert, const String& button)
-    {
-        if (! button.isEmpty())
-            [alert addButtonWithTitle: juceStringToNS (button)];
-    }
-
-    NSAlert* getAlert() const
-    {
-        NSAlert* alert = [[[NSAlert alloc] init] autorelease];
-
-        [alert setMessageText:     juceStringToNS (options.getTitle())];
-        [alert setInformativeText: juceStringToNS (options.getMessage())];
-
-        [alert setAlertStyle: options.getIconType() == MessageBoxIconType::WarningIcon ? NSAlertStyleCritical
-                                                                                       : NSAlertStyleInformational];
-
-        const auto button1Text = options.getButtonText (0);
-
-        addButton (alert, button1Text.isEmpty() ? "OK" : button1Text);
-        addButton (alert, options.getButtonText (1));
-        addButton (alert, options.getButtonText (2));
-
-        return alert;
-    }
-
-    MessageBoxOptions options;
-    std::unique_ptr<ModalComponentManager::Callback> callback;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXMessageBox)
-};
-
-static int showDialog (const MessageBoxOptions& options,
-                       ModalComponentManager::Callback* callbackIn,
-                       AlertWindowMappings::MapFn mapFn)
-{
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    if (callbackIn == nullptr)
-    {
-        jassert (mapFn != nullptr);
-
-        OSXMessageBox messageBox (options, nullptr);
-        return mapFn (messageBox.getResult());
-    }
-   #endif
-
-    auto messageBox = std::make_unique<OSXMessageBox> (options,
-                                                       AlertWindowMappings::getWrappedCallback (callbackIn, mapFn));
-
-    messageBox->triggerAsyncUpdate();
-    messageBox.release();
-
-    return 0;
-}
-
-#if JUCE_MODAL_LOOPS_PERMITTED
-void JUCE_CALLTYPE NativeMessageBox::showMessageBox (MessageBoxIconType iconType,
-                                                     const String& title, const String& message,
-                                                     Component* associatedComponent)
-{
-    showDialog (MessageBoxOptions()
-                 .withIconType (iconType)
-                 .withTitle (title)
-                 .withMessage (message)
-                 .withButton (TRANS("OK"))
-                 .withAssociatedComponent (associatedComponent),
-                nullptr, AlertWindowMappings::messageBox);
-}
-
-int JUCE_CALLTYPE NativeMessageBox::show (const MessageBoxOptions& options)
-{
-    return showDialog (options, nullptr, AlertWindowMappings::noMapping);
-}
-#endif
-
-void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (MessageBoxIconType iconType,
-                                                          const String& title, const String& message,
-                                                          Component* associatedComponent,
-                                                          ModalComponentManager::Callback* callback)
-{
-    showDialog (MessageBoxOptions()
-                  .withIconType (iconType)
-                  .withTitle (title)
-                  .withMessage (message)
-                  .withButton (TRANS("OK"))
-                  .withAssociatedComponent (associatedComponent),
-                callback, AlertWindowMappings::messageBox);
-}
-
-bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType iconType,
-                                                      const String& title, const String& message,
-                                                      Component* associatedComponent,
-                                                      ModalComponentManager::Callback* callback)
-{
-    return showDialog (MessageBoxOptions()
-                         .withIconType (iconType)
-                         .withTitle (title)
-                         .withMessage (message)
-                         .withButton (TRANS("OK"))
-                         .withButton (TRANS("Cancel"))
-                         .withAssociatedComponent (associatedComponent),
-                       callback, AlertWindowMappings::okCancel) != 0;
-}
-
-int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType iconType,
-                                                        const String& title, const String& message,
-                                                        Component* associatedComponent,
-                                                        ModalComponentManager::Callback* callback)
-{
-    return showDialog (MessageBoxOptions()
-                         .withIconType (iconType)
-                         .withTitle (title)
-                         .withMessage (message)
-                         .withButton (TRANS("Yes"))
-                         .withButton (TRANS("No"))
-                         .withButton (TRANS("Cancel"))
-                         .withAssociatedComponent (associatedComponent),
-                       callback, AlertWindowMappings::yesNoCancel);
-}
-
-int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType iconType,
-                                                  const String& title, const String& message,
-                                                  Component* associatedComponent,
-                                                  ModalComponentManager::Callback* callback)
-{
-    return showDialog (MessageBoxOptions()
-                         .withIconType (iconType)
-                         .withTitle (title)
-                         .withMessage (message)
-                         .withButton (TRANS("Yes"))
-                         .withButton (TRANS("No"))
-                         .withAssociatedComponent (associatedComponent),
-                       callback, AlertWindowMappings::okCancel);
-}
-
-void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
-                                                ModalComponentManager::Callback* callback)
-{
-    showDialog (options, callback, AlertWindowMappings::noMapping);
-}
-
-void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
-                                                std::function<void (int)> callback)
-{
-    showAsync (options, ModalCallbackFunction::create (callback));
-}
-
-//==============================================================================
 static NSRect getDragRect (NSView* view, NSEvent* event)
 {
     auto eventPos = [event locationInWindow];
@@ -266,25 +53,9 @@ static NSView* getNSViewForDragEvent (Component* sourceComp)
     return nil;
 }
 
-struct NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
+class NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
 {
-    NSDraggingSourceHelper() : ObjCClass<NSObject<NSDraggingSource>> ("JUCENSDraggingSourceHelper_")
-    {
-        addIvar<std::function<void()>*> ("callback");
-        addIvar<String*> ("text");
-        addIvar<NSDragOperation*> ("operation");
-
-        addMethod (@selector (dealloc), dealloc);
-        addMethod (@selector (pasteboard:item:provideDataForType:), provideDataForType);
-
-        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), sourceOperationMaskForDraggingContext);
-        addMethod (@selector (draggingSession:endedAtPoint:operation:), draggingSessionEnded);
-
-        addProtocol (@protocol (NSPasteboardItemDataProvider));
-
-        registerClass();
-    }
-
+public:
     static void setText (id self, const String& text)
     {
         object_setInstanceVariable (self, "text", new String (text));
@@ -300,43 +71,59 @@ struct NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
         object_setInstanceVariable (self, "operation", new NSDragOperation (op));
     }
 
+    static NSDraggingSourceHelper& get()
+    {
+        static NSDraggingSourceHelper draggingSourceHelper;
+        return draggingSourceHelper;
+    }
+
 private:
-    static void dealloc (id self, SEL)
+    NSDraggingSourceHelper()
+        : ObjCClass ("JUCENSDraggingSourceHelper_")
     {
-        delete getIvar<String*> (self, "text");
-        delete getIvar<std::function<void()>*> (self, "callback");
-        delete getIvar<NSDragOperation*> (self, "operation");
+        addIvar<std::function<void()>*> ("callback");
+        addIvar<String*> ("text");
+        addIvar<NSDragOperation*> ("operation");
 
-        sendSuperclassMessage<void> (self, @selector (dealloc));
-    }
+        addMethod (@selector (dealloc), [] (id self, SEL)
+        {
+            delete getIvar<String*> (self, "text");
+            delete getIvar<std::function<void()>*> (self, "callback");
+            delete getIvar<NSDragOperation*> (self, "operation");
 
-    static void provideDataForType (id self, SEL, NSPasteboard* sender, NSPasteboardItem*, NSString* type)
-    {
-        if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
-            if (auto* text = getIvar<String*> (self, "text"))
-                [sender setData: [juceStringToNS (*text) dataUsingEncoding: NSUTF8StringEncoding]
-                        forType: NSPasteboardTypeString];
-    }
+            sendSuperclassMessage<void> (self, @selector (dealloc));
+        });
 
-    static NSDragOperation sourceOperationMaskForDraggingContext (id self, SEL, NSDraggingSession*, NSDraggingContext)
-    {
-        return *getIvar<NSDragOperation*> (self, "operation");
-    }
+        addMethod (@selector (pasteboard:item:provideDataForType:), [] (id self, SEL, NSPasteboard* sender, NSPasteboardItem*, NSString* type)
+        {
+            if ([type compare: NSPasteboardTypeString] == NSOrderedSame)
+                if (auto* text = getIvar<String*> (self, "text"))
+                    [sender setData: [juceStringToNS (*text) dataUsingEncoding: NSUTF8StringEncoding]
+                            forType: NSPasteboardTypeString];
+        });
 
-    static void draggingSessionEnded (id self, SEL, NSDraggingSession*, NSPoint p, NSDragOperation)
-    {
-        // Our view doesn't receive a mouse up when the drag ends so we need to generate one here and send it...
-        if (auto* view = getNSViewForDragEvent (nullptr))
-            if (auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, CGPointMake (p.x, p.y), kCGMouseButtonLeft))
-                if (id e = [NSEvent eventWithCGEvent: cgEvent])
-                    [view mouseUp: e];
+        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), [] (id self, SEL, NSDraggingSession*, NSDraggingContext)
+        {
+            return *getIvar<NSDragOperation*> (self, "operation");
+        });
 
-        if (auto* cb = getIvar<std::function<void()>*> (self, "callback"))
-            cb->operator()();
+        addMethod (@selector (draggingSession:endedAtPoint:operation:), [] (id self, SEL, NSDraggingSession*, NSPoint p, NSDragOperation)
+        {
+            // Our view doesn't receive a mouse up when the drag ends so we need to generate one here and send it...
+            if (auto* view = getNSViewForDragEvent (nullptr))
+                if (auto* cgEvent = CGEventCreateMouseEvent (nullptr, kCGEventLeftMouseUp, CGPointMake (p.x, p.y), kCGMouseButtonLeft))
+                    if (id e = [NSEvent eventWithCGEvent: cgEvent])
+                        [view mouseUp: e];
+
+            if (auto* cb = getIvar<std::function<void()>*> (self, "callback"))
+                cb->operator()();
+        });
+
+        addProtocol (@protocol (NSPasteboardItemDataProvider));
+
+        registerClass();
     }
 };
-
-static NSDraggingSourceHelper draggingSourceHelper;
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Component* sourceComponent,
                                                           std::function<void()> callback)
@@ -350,7 +137,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
         {
             if (auto event = [[view window] currentEvent])
             {
-                id helper = [draggingSourceHelper.createInstance() init];
+                id helper = [NSDraggingSourceHelper::get().createInstance() init];
                 NSDraggingSourceHelper::setText (helper, text);
                 NSDraggingSourceHelper::setDragOperation (helper, NSDragOperationCopy);
 
@@ -413,7 +200,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                     [dragItem release];
                 }
 
-                auto helper = [draggingSourceHelper.createInstance() autorelease];
+                auto helper = [NSDraggingSourceHelper::get().createInstance() autorelease];
 
                 if (callback != nullptr)
                     NSDraggingSourceHelper::setCompletionCallback (helper, callback);

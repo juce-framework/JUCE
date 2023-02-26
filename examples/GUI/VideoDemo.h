@@ -134,11 +134,14 @@ private:
         }
         else
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              "Couldn't load the file!",
-                                              result.getErrorMessage());
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "Couldn't load the file!",
+                                                             result.getErrorMessage());
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
     }
+
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MovieComponentWithFileBrowser)
 };

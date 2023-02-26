@@ -56,4 +56,5 @@ private:
     JucerDocument& document;
     std::unique_ptr<TableListBox> listBox;
     TextButton addButton, reloadAllButton, delButton;
+    ScopedMessageBox messageBox;
 };

@@ -462,9 +462,10 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
 
     if (generatorResult != Result::ok())
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "PIP Error.",
-                                          generatorResult.getErrorMessage());
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "PIP Error.",
+                                                         generatorResult.getErrorMessage());
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
         if (callback != nullptr)
             callback (false);
@@ -474,9 +475,10 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
 
     if (! generator->createMainCpp())
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "PIP Error.",
-                                          "Failed to create Main.cpp.");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "PIP Error.",
+                                                         "Failed to create Main.cpp.");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
         if (callback != nullptr)
             callback (false);
@@ -491,9 +493,10 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
 
         if (! openedSuccessfully)
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              "PIP Error.",
-                                              "Failed to open .jucer file.");
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "PIP Error.",
+                                                             "Failed to open .jucer file.");
+            parent->messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
             if (callback != nullptr)
                 callback (false);

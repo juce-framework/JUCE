@@ -401,9 +401,11 @@ public:
         }
 
         if (error.isNotEmpty())
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              TRANS("Error when trying to open audio device!"),
-                                              error);
+            messageBox = AlertWindow::showScopedAsync (MessageBoxOptions().withIconType (MessageBoxIconType::WarningIcon)
+                                                                          .withTitle (TRANS ("Error when trying to open audio device!"))
+                                                                          .withMessage (error)
+                                                                          .withButton (TRANS ("OK")),
+                                                       nullptr);
     }
 
     bool showDeviceControlPanel()
@@ -966,6 +968,7 @@ public:
 
 private:
     std::unique_ptr<ChannelSelectorListBox> inputChanList, outputChanList;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSettingsPanel)
 };

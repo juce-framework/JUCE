@@ -104,6 +104,8 @@ private:
     std::unique_ptr<Component> blurOverlayComponent;
     bool loginFormOpen = false;
 
+    ScopedMessageBox messageBox;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
 };
 

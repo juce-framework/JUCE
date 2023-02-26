@@ -269,6 +269,7 @@ namespace juce
 #include "widgets/juce_TreeView.h"
 #include "windows/juce_TopLevelWindow.h"
 #include "windows/juce_MessageBoxOptions.h"
+#include "windows/juce_ScopedMessageBox.h"
 #include "windows/juce_AlertWindow.h"
 #include "windows/juce_CallOutBox.h"
 #include "windows/juce_ComponentPeer.h"

@@ -176,15 +176,14 @@ void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Docume
         return;
     }
 
-    AlertWindow::showYesNoCancelBox (MessageBoxIconType::QuestionIcon,
-                                     TRANS("Closing document..."),
-                                     TRANS("Do you want to save the changes to \"")
-                                         + doc->getName() + "\"?",
-                                     TRANS("Save"),
-                                     TRANS("Discard changes"),
-                                     TRANS("Cancel"),
-                                     nullptr,
-                                     ModalCallbackFunction::create ([parent = WeakReference<OpenDocumentManager> { this }, doc, callback] (int r)
+    auto options = MessageBoxOptions::makeOptionsYesNoCancel (MessageBoxIconType::QuestionIcon,
+                                                              TRANS ("Closing document..."),
+                                                              TRANS ("Do you want to save the changes to \"")
+                                                                  + doc->getName() + "\"?",
+                                                              TRANS ("Save"),
+                                                              TRANS ("Discard changes"),
+                                                              TRANS ("Cancel"));
+    messageBox = AlertWindow::showScopedAsync (options, [parent = WeakReference<OpenDocumentManager> { this }, doc, callback] (int r)
     {
         if (parent == nullptr)
             return;
@@ -204,7 +203,7 @@ void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Docume
 
         if (callback != nullptr)
             callback (r == 2 ? FileBasedDocument::savedOk : FileBasedDocument::userCancelledSave);
-    }));
+    });
 }
 
 bool OpenDocumentManager::closeDocumentWithoutSaving (Document* doc)
