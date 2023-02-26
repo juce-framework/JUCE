@@ -37,7 +37,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
 #include <ARA_Library/Utilities/ARAPitchInterpretation.cpp>
-#include <ARA_Library/Utilities/ARAChannelArrangement.cpp>
+#include <ARA_Library/Utilities/ARAChannelFormat.cpp>
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
