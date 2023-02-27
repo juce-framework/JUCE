@@ -389,7 +389,7 @@ private:
             mo << "# Automatically generated CMakeLists, created by the Projucer" << newLine
                << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
                << newLine
-               << "cmake_minimum_required(VERSION 3.4.1)" << newLine
+               << "cmake_minimum_required(VERSION 3.22)" << newLine
                << newLine
                << "project(juce_jni_project)" << newLine
                << newLine;
@@ -682,10 +682,13 @@ private:
 
         mo << "android {"                                                                    << newLine;
         mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
+        // CMake 3.22 will fail to build Android projects that set ANDROID_ARM_MODE unless NDK 24+ is used
+        mo << "    ndkVersion \"25.2.9519653\""                                              << newLine;
         mo << "    namespace " << project.getBundleIdentifierString().toLowerCase().quoted() << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
         mo << "            path \"CMakeLists.txt\""                                          << newLine;
+        mo << "            version \"3.22.1\""                                               << newLine;
         mo << "        }"                                                                    << newLine;
         mo << "    }"                                                                        << newLine;
 
