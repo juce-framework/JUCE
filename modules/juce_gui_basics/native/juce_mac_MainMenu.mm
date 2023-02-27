@@ -506,12 +506,15 @@ private:
     {
         if (isPositiveAndBelow (menuItemIndex, (int) [parentMenu numberOfItems]))
         {
-            auto menuItem = [parentMenu itemAtIndex:menuItemIndex];
+            if (auto menuItem = [parentMenu itemAtIndex:menuItemIndex])
+            {
+                if (auto submenu = [menuItem submenu])
+                    removeItemRecursive (submenu);
 
-            if (auto submenu = [menuItem submenu])
-                removeItemRecursive (submenu);
-
-            [parentMenu removeItem:menuItem];
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
+                [parentMenu removeItem: menuItem];
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            }
         }
         else
             jassertfalse;
