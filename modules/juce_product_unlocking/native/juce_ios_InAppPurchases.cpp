@@ -374,11 +374,25 @@ struct InAppPurchases::Pimpl
     //==============================================================================
     void processReceiptRefreshResponseWithSubscriptionsSharedSecret (const String& secret)
     {
-        auto receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
+        const auto succeeded = [&]
+        {
+            auto receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
 
-        if (auto receiptData = [NSData dataWithContentsOfURL: receiptURL])
+            if (receiptURL == nullptr)
+                return false;
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
+            auto receiptData = [NSData dataWithContentsOfURL: receiptURL];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            if (receiptData == nullptr)
+                return false;
+
             fetchReceiptDetailsFromAppStore (receiptData, secret);
-        else
+            return true;
+        }();
+
+        if (! succeeded)
             owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed")); });
     }
 
@@ -410,7 +424,10 @@ struct InAppPurchases::Pimpl
         if (nsurl == nullptr)
             return;
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
         const auto storeRequest = [NSMutableURLRequest requestWithURL: nsurl];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
         [storeRequest setHTTPMethod: @"POST"];
         [storeRequest setHTTPBody: requestData];
 
@@ -611,7 +628,7 @@ private:
             addMethod (@selector (productsRequest:didReceiveResponse:), [] (id self, SEL, SKProductsRequest* request, SKProductsResponse* response)
             {
                 auto& t = getThis (self);
-                
+
                 for (auto i = 0; i < t.pendingProductInfoRequests.size(); ++i)
                 {
                     auto& pendingRequest = *t.pendingProductInfoRequests[i];
@@ -634,7 +651,7 @@ private:
             addMethod (@selector (requestDidFinish:), [] (id self, SEL, SKRequest* request)
             {
                 auto& t = getThis (self);
-                
+
                 if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
                 {
                     for (auto i = 0; i < t.pendingReceiptRefreshRequests.size(); ++i)
@@ -654,7 +671,7 @@ private:
             addMethod (@selector (request:didFailWithError:), [] (id self, SEL, SKRequest* request, NSError* error)
             {
                 auto& t = getThis (self);
-                
+
                 if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
                 {
                     for (auto i = 0; i < t.pendingReceiptRefreshRequests.size(); ++i)
@@ -675,7 +692,7 @@ private:
             addMethod (@selector (paymentQueue:updatedTransactions:), [] (id self, SEL, SKPaymentQueue*, NSArray<SKPaymentTransaction*>* transactions)
             {
                 auto& t = getThis (self);
-                
+
                 for (SKPaymentTransaction* transaction in transactions)
                 {
                     switch (transaction.transactionState)
@@ -706,7 +723,7 @@ private:
             addMethod (@selector (paymentQueue:updatedDownloads:), [] (id self, SEL, SKPaymentQueue*, NSArray<SKDownload*>* downloads)
             {
                 auto& t = getThis (self);
-                
+
                 for (SKDownload* download in downloads)
                 {
                     if (auto* pendingDownload = t.getPendingDownloadFor (download))

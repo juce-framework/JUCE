@@ -686,7 +686,12 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
         activeSessions.set (uniqueIdentifier, this);
         auto nsUrl = [NSURL URLWithString: juceStringToNS (urlToUse.toString (true))];
+
+        jassert (nsUrl != nullptr);
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL: nsUrl];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         if (options.usePost)
             [request setHTTPMethod: @"POST"];

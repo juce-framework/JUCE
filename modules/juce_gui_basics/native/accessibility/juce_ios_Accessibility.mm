@@ -533,7 +533,17 @@ private:
                 {
                     const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
                     const auto signature = [NSMethodSignature signatureWithObjCTypes: s.data()];
+
+                    if (signature == nullptr)
+                    {
+                        jassertfalse;
+                        return {};
+                    }
+
+                    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
                     const auto invocation = [NSInvocation invocationWithMethodSignature: signature];
+                    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
                     invocation.selector = HasSelector::sel();
 
                     // Indices 0 and 1 are 'id self' and 'SEL _cmd' respectively
