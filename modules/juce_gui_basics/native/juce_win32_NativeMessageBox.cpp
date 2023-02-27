@@ -214,8 +214,10 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                 LoadLibraryA (comctl);
                 const auto comctlModule = GetModuleHandleA (comctl);
 
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
                 if (comctlModule != nullptr)
                     return (TaskDialogIndirectFunc) GetProcAddress (comctlModule, "TaskDialogIndirect");
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 return nullptr;
             }();
