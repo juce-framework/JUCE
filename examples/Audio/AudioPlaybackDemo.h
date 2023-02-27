@@ -415,9 +415,14 @@ private:
     //==============================================================================
     void showAudioResource (URL resource)
     {
-        if (loadURLIntoTransport (resource))
-            currentAudioFile = std::move (resource);
+        if (! loadURLIntoTransport (resource))
+        {
+            // Failed to load the audio file!
+            jassertfalse;
+            return;
+        }
 
+        currentAudioFile = std::move (resource);
         zoomSlider.setValue (0, dontSendNotification);
         thumbnail->setURL (currentAudioFile);
     }
@@ -492,7 +497,7 @@ private:
 
             if (FileChooser::isPlatformDialogAvailable())
             {
-                fileChooser = std::make_unique<FileChooser> ("Select an audio file...", File(), "*.wav;*.mp3;*.aif");
+                fileChooser = std::make_unique<FileChooser> ("Select an audio file...", File(), "*.wav;*.flac;*.aif");
 
                 fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
                                           [this] (const FileChooser& fc) mutable

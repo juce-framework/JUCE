@@ -206,6 +206,7 @@ private:
         { "fdf",      "application/vnd.fdf" },
         { "fif",      "application/fractals" },
         { "fif",      "image/fif" },
+        { "flac",     "audio/flac" },
         { "fli",      "video/fli" },
         { "fli",      "video/x-fli" },
         { "flo",      "image/florian" },
