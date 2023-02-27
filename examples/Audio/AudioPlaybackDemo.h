@@ -312,12 +312,7 @@ public:
         thread.startThread (Thread::Priority::normal);
 
        #ifndef JUCE_DEMO_RUNNER
-        RuntimePermissions::request (RuntimePermissions::recordAudio,
-                                     [this] (bool granted)
-                                     {
-                                         int numInputChannels = granted ? 2 : 0;
-                                         audioDeviceManager.initialise (numInputChannels, 2, nullptr, true, {}, nullptr);
-                                     });
+        audioDeviceManager.initialise (0, 2, nullptr, true, {}, nullptr);
        #endif
 
         audioDeviceManager.addAudioCallback (&audioSourcePlayer);
