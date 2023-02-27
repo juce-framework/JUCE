@@ -26,74 +26,13 @@
 namespace juce
 {
 
-struct SKDelegateAndPaymentObserver
-{
-    SKDelegateAndPaymentObserver()  : delegate ([getClass().createInstance() init])
-    {
-        Class::setThis (delegate.get(), this);
-    }
-
-    virtual ~SKDelegateAndPaymentObserver() {}
-
-    virtual void didReceiveResponse (SKProductsRequest*, SKProductsResponse*) = 0;
-    virtual void requestDidFinish (SKRequest*) = 0;
-    virtual void requestDidFailWithError (SKRequest*, NSError*) = 0;
-    virtual void updatedTransactions (SKPaymentQueue*, NSArray<SKPaymentTransaction*>*) = 0;
-    virtual void restoreCompletedTransactionsFailedWithError (SKPaymentQueue*, NSError*) = 0;
-    virtual void restoreCompletedTransactionsFinished (SKPaymentQueue*) = 0;
-    virtual void updatedDownloads (SKPaymentQueue*, NSArray<SKDownload*>*) = 0;
-
-protected:
-    std::unique_ptr<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>, NSObjectDeleter> delegate;
-
-private:
-    struct Class   : public ObjCClass<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>>
-    {
-        //==============================================================================
-        Class()  : ObjCClass<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>> ("SKDelegateAndPaymentObserverBase_")
-        {
-            addIvar<SKDelegateAndPaymentObserver*> ("self");
-
-            addMethod (@selector (productsRequest:didReceiveResponse:),                       didReceiveResponse);
-            addMethod (@selector (requestDidFinish:),                                         requestDidFinish);
-            addMethod (@selector (request:didFailWithError:),                                 requestDidFailWithError);
-            addMethod (@selector (paymentQueue:updatedTransactions:),                         updatedTransactions);
-            addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), restoreCompletedTransactionsFailedWithError);
-            addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:),         restoreCompletedTransactionsFinished);
-            addMethod (@selector (paymentQueue:updatedDownloads:),                            updatedDownloads);
-
-            registerClass();
-        }
-
-        //==============================================================================
-        static SKDelegateAndPaymentObserver& getThis (id self)           { return *getIvar<SKDelegateAndPaymentObserver*> (self, "self"); }
-        static void setThis (id self, SKDelegateAndPaymentObserver* s)   { object_setInstanceVariable (self, "self", s); }
-
-        //==============================================================================
-        static void didReceiveResponse (id self, SEL, SKProductsRequest* request, SKProductsResponse* response)      { getThis (self).didReceiveResponse (request, response); }
-        static void requestDidFinish (id self, SEL, SKRequest* request)                                              { getThis (self).requestDidFinish (request); }
-        static void requestDidFailWithError (id self, SEL, SKRequest* request, NSError* err)                         { getThis (self).requestDidFailWithError (request, err); }
-        static void updatedTransactions (id self, SEL, SKPaymentQueue* queue, NSArray<SKPaymentTransaction*>* trans) { getThis (self).updatedTransactions (queue, trans); }
-        static void restoreCompletedTransactionsFailedWithError (id self, SEL, SKPaymentQueue* q, NSError* err)      { getThis (self).restoreCompletedTransactionsFailedWithError (q, err); }
-        static void restoreCompletedTransactionsFinished (id self, SEL, SKPaymentQueue* queue)                       { getThis (self).restoreCompletedTransactionsFinished (queue); }
-        static void updatedDownloads (id self, SEL, SKPaymentQueue* queue, NSArray<SKDownload*>* downloads)          { getThis (self).updatedDownloads (queue, downloads); }
-    };
-
-    //==============================================================================
-    static Class& getClass()
-    {
-        static Class c;
-        return c;
-    }
-};
-
 //==============================================================================
-struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
+struct InAppPurchases::Pimpl
 {
     /** AppStore implementation of hosted content download. */
     struct DownloadImpl  : public Download
     {
-        DownloadImpl (SKDownload* downloadToUse)
+        explicit DownloadImpl (SKDownload* downloadToUse)
             : download (downloadToUse)
         {
             [download retain];
@@ -184,8 +123,17 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     };
 
     //==============================================================================
-    Pimpl (InAppPurchases& p) : owner (p)  { [[SKPaymentQueue defaultQueue] addTransactionObserver:    delegate.get()]; }
-    ~Pimpl() noexcept override             { [[SKPaymentQueue defaultQueue] removeTransactionObserver: delegate.get()]; }
+    explicit Pimpl (InAppPurchases& p)
+        : owner (p)
+    {
+        Class::setThis (delegate.get(), this);
+        [[SKPaymentQueue defaultQueue] addTransactionObserver: delegate.get()];
+    }
+
+    ~Pimpl()
+    {
+        [[SKPaymentQueue defaultQueue] removeTransactionObserver: delegate.get()];
+    }
 
     //==============================================================================
     bool isInAppPurchasesSupported() const     { return true; }
@@ -257,119 +205,6 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     void cancelDownloads (const Array<Download*>& downloads)
     {
         [[SKPaymentQueue defaultQueue] cancelDownloads: downloadsToSKDownloads (removeInvalidDownloads (downloads))];
-    }
-
-    //==============================================================================
-    void didReceiveResponse (SKProductsRequest* request, SKProductsResponse* response) override
-    {
-        for (auto i = 0; i < pendingProductInfoRequests.size(); ++i)
-        {
-            auto& pendingRequest = *pendingProductInfoRequests[i];
-
-            if (pendingRequest.request.get() == request)
-            {
-                if      (pendingRequest.type == PendingProductInfoRequest::Type::query)    notifyProductsInfoReceived (response.products);
-                else if (pendingRequest.type == PendingProductInfoRequest::Type::purchase) startPurchase (response.products);
-                else break;
-
-                pendingProductInfoRequests.remove (i);
-                return;
-            }
-        }
-
-        // Unknown request received!
-        jassertfalse;
-    }
-
-    void requestDidFinish (SKRequest* request) override
-    {
-        if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
-        {
-            for (auto i = 0; i < pendingReceiptRefreshRequests.size(); ++i)
-            {
-                auto& pendingRequest = *pendingReceiptRefreshRequests[i];
-
-                if (pendingRequest.request.get() == receiptRefreshRequest)
-                {
-                    processReceiptRefreshResponseWithSubscriptionsSharedSecret (pendingRequest.subscriptionsSharedSecret);
-                    pendingReceiptRefreshRequests.remove (i);
-                    return;
-                }
-            }
-        }
-    }
-
-    void requestDidFailWithError (SKRequest* request, NSError* error) override
-    {
-        if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
-        {
-            for (auto i = 0; i < pendingReceiptRefreshRequests.size(); ++i)
-            {
-                auto& pendingRequest = *pendingReceiptRefreshRequests[i];
-
-                if (pendingRequest.request.get() == receiptRefreshRequest)
-                {
-                    auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String();
-                    owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails); });
-                    pendingReceiptRefreshRequests.remove (i);
-                    return;
-                }
-            }
-        }
-    }
-
-    void updatedTransactions (SKPaymentQueue*, NSArray<SKPaymentTransaction*>* transactions) override
-    {
-        for (SKPaymentTransaction* transaction in transactions)
-        {
-            switch (transaction.transactionState)
-            {
-                case SKPaymentTransactionStatePurchasing: break;
-                case SKPaymentTransactionStateDeferred:   break;
-                case SKPaymentTransactionStateFailed:     processTransactionFinish (transaction, false); break;
-                case SKPaymentTransactionStatePurchased:  processTransactionFinish (transaction, true);  break;
-                case SKPaymentTransactionStateRestored:   processTransactionFinish (transaction, true);  break;
-                default:                                  jassertfalse; break;  // Unexpected transaction state
-            }
-        }
-    }
-
-    void restoreCompletedTransactionsFailedWithError (SKPaymentQueue*, NSError* error) override
-    {
-        owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, nsStringToJuce (error.localizedDescription)); });
-    }
-
-    void restoreCompletedTransactionsFinished (SKPaymentQueue*) override
-    {
-        owner.listeners.call ([this] (Listener& l) { l.purchasesListRestored (restoredPurchases, true, NEEDS_TRANS ("Success")); });
-        restoredPurchases.clear();
-    }
-
-    void updatedDownloads (SKPaymentQueue*, NSArray<SKDownload*>* downloads) override
-    {
-        for (SKDownload* download in downloads)
-        {
-            if (auto* pendingDownload = getPendingDownloadFor (download))
-            {
-              #if JUCE_IOS
-                switch (download.downloadState)
-              #else
-                switch (download.state)
-              #endif
-                {
-                    case SKDownloadStateWaiting: break;
-                    case SKDownloadStatePaused:  owner.listeners.call ([&] (Listener& l) { l.productDownloadPaused (*pendingDownload); }); break;
-                    case SKDownloadStateActive:  owner.listeners.call ([&] (Listener& l) { l.productDownloadProgressUpdate (*pendingDownload,
-                                                                                                                            download.progress,
-                                                                                                                            RelativeTime (download.timeRemaining)); }); break;
-                    case SKDownloadStateFinished:
-                    case SKDownloadStateFailed:
-                    case SKDownloadStateCancelled: processDownloadFinish (pendingDownload, download); break;
-
-                    default:  jassertfalse; break;  // Unexpected download state
-                }
-            }
-        }
     }
 
     //==============================================================================
@@ -626,40 +461,41 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
                     for (id inAppPurchaseData in inAppPurchases)
                     {
-                        if (auto* purchaseData = getAs<NSDictionary> (inAppPurchaseData))
-                        {
-                            // Ignore products that were cancelled.
-                            if (purchaseData[@"cancellation_date"] != nil)
-                                continue;
+                        auto* purchaseData = getAs<NSDictionary> (inAppPurchaseData);
 
-                            if (auto transactionId = getAs<NSString> (purchaseData[@"original_transaction_id"]))
-                            {
-                                if (auto productId = getAs<NSString> (purchaseData[@"product_id"]))
-                                {
-                                    auto purchaseTime = getPurchaseDateMs (purchaseData[@"purchase_date_ms"]);
-
-                                    if (purchaseTime > 0)
-                                    {
-                                        purchases.add ({ { nsStringToJuce (transactionId),
-                                                           nsStringToJuce (productId),
-                                                           nsStringToJuce (bundleId),
-                                                           Time (purchaseTime).toString (true, true, true, true),
-                                                           {} }, {} });
-                                    }
-                                    else
-                                    {
-                                        return sendReceiptFetchFailAsync();
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
+                        if (purchaseData == nullptr)
                             return sendReceiptFetchFailAsync();
+
+                        // Ignore products that were cancelled.
+                        if (purchaseData[@"cancellation_date"] != nil)
+                            continue;
+
+                        if (auto transactionId = getAs<NSString> (purchaseData[@"original_transaction_id"]))
+                        {
+                            if (auto productId = getAs<NSString> (purchaseData[@"product_id"]))
+                            {
+                                auto purchaseTime = getPurchaseDateMs (purchaseData[@"purchase_date_ms"]);
+
+                                if (purchaseTime <= 0)
+                                    return sendReceiptFetchFailAsync();
+
+                                purchases.add ({ { nsStringToJuce (transactionId),
+                                                   nsStringToJuce (productId),
+                                                   nsStringToJuce (bundleId),
+                                                   Time (purchaseTime).toString (true, true, true, true),
+                                                   {} }, {} });
+                            }
                         }
                     }
 
-                    MessageManager::callAsync ([this, purchases] { owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored (purchases, true, NEEDS_TRANS ("Success")); }); });
+                    MessageManager::callAsync ([this, purchases]
+                    {
+                        owner.listeners.call ([&] (Listener& l)
+                        {
+                            l.purchasesListRestored (purchases, true, NEEDS_TRANS ("Success"));
+                        });
+                    });
+
                     return;
                 }
             }
@@ -681,14 +517,13 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     static int64 getPurchaseDateMs (id date)
     {
         if (auto dateAsNumber = getAs<NSNumber> (date))
-        {
             return [dateAsNumber longLongValue];
-        }
-        else if (auto dateAsString = getAs<NSString> (date))
+
+        if (auto dateAsString = getAs<NSString> (date))
         {
             auto formatter = [[NSNumberFormatter alloc] init];
             [formatter setNumberStyle: NSNumberFormatterDecimalStyle];
-            dateAsNumber = [formatter numberFromString: dateAsString];
+            auto dateAsNumber = [formatter numberFromString: dateAsString];
             [formatter release];
             return [dateAsNumber longLongValue];
         }
@@ -724,7 +559,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             case SKPaymentTransactionStateFailed:     return NEEDS_TRANS ("Failure");
             case SKPaymentTransactionStateRestored:   return NEEDS_TRANS ("Restored");
             case SKPaymentTransactionStateDeferred:   return NEEDS_TRANS ("Deferred");
-            default:                                  jassertfalse; return NEEDS_TRANS ("Unknown status");
+            default:                    jassertfalse; return NEEDS_TRANS ("Unknown status");
         }
 
     }
@@ -739,7 +574,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             case SKDownloadStateFinished:   return Download::Status::finished;
             case SKDownloadStateFailed:     return Download::Status::failed;
             case SKDownloadStateCancelled:  return Download::Status::cancelled;
-            default:                        jassertfalse; return Download::Status::waiting;
+            default:          jassertfalse; return Download::Status::waiting;
         }
     }
 
@@ -763,8 +598,171 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         return (ObjCType*) o;
     }
 
+
+private:
+    struct Class : public ObjCClass<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>>
+    {
+        //==============================================================================
+        Class()
+            : ObjCClass ("SKDelegateAndPaymentObserverBase_")
+        {
+            addIvar<Pimpl*> ("self");
+
+            addMethod (@selector (productsRequest:didReceiveResponse:), [] (id self, SEL, SKProductsRequest* request, SKProductsResponse* response)
+            {
+                auto& t = getThis (self);
+                
+                for (auto i = 0; i < t.pendingProductInfoRequests.size(); ++i)
+                {
+                    auto& pendingRequest = *t.pendingProductInfoRequests[i];
+
+                    if (pendingRequest.request.get() == request)
+                    {
+                        if      (pendingRequest.type == PendingProductInfoRequest::Type::query)    t.notifyProductsInfoReceived (response.products);
+                        else if (pendingRequest.type == PendingProductInfoRequest::Type::purchase) t.startPurchase (response.products);
+                        else break;
+
+                        t.pendingProductInfoRequests.remove (i);
+                        return;
+                    }
+                }
+
+                // Unknown request received!
+                jassertfalse;
+            });
+
+            addMethod (@selector (requestDidFinish:), [] (id self, SEL, SKRequest* request)
+            {
+                auto& t = getThis (self);
+                
+                if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
+                {
+                    for (auto i = 0; i < t.pendingReceiptRefreshRequests.size(); ++i)
+                    {
+                        auto& pendingRequest = *t.pendingReceiptRefreshRequests[i];
+
+                        if (pendingRequest.request.get() == receiptRefreshRequest)
+                        {
+                            t.processReceiptRefreshResponseWithSubscriptionsSharedSecret (pendingRequest.subscriptionsSharedSecret);
+                            t.pendingReceiptRefreshRequests.remove (i);
+                            return;
+                        }
+                    }
+                }
+            });
+
+            addMethod (@selector (request:didFailWithError:), [] (id self, SEL, SKRequest* request, NSError* error)
+            {
+                auto& t = getThis (self);
+                
+                if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
+                {
+                    for (auto i = 0; i < t.pendingReceiptRefreshRequests.size(); ++i)
+                    {
+                        auto& pendingRequest = *t.pendingReceiptRefreshRequests[i];
+
+                        if (pendingRequest.request.get() == receiptRefreshRequest)
+                        {
+                            auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String();
+                            t.owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails); });
+                            t.pendingReceiptRefreshRequests.remove (i);
+                            return;
+                        }
+                    }
+                }
+            });
+
+            addMethod (@selector (paymentQueue:updatedTransactions:), [] (id self, SEL, SKPaymentQueue*, NSArray<SKPaymentTransaction*>* transactions)
+            {
+                auto& t = getThis (self);
+                
+                for (SKPaymentTransaction* transaction in transactions)
+                {
+                    switch (transaction.transactionState)
+                    {
+                        case SKPaymentTransactionStatePurchasing: break;
+                        case SKPaymentTransactionStateDeferred:   break;
+                        case SKPaymentTransactionStateFailed:     t.processTransactionFinish (transaction, false); break;
+                        case SKPaymentTransactionStatePurchased:  t.processTransactionFinish (transaction, true);  break;
+                        case SKPaymentTransactionStateRestored:   t.processTransactionFinish (transaction, true);  break;
+                        default:                                  jassertfalse; break;  // Unexpected transaction state
+                    }
+                }
+            });
+
+            addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), [] (id self, SEL, SKPaymentQueue*, NSError* error)
+            {
+                auto& t = getThis (self);
+                t.owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, nsStringToJuce (error.localizedDescription)); });
+            });
+
+            addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:), [] (id self, SEL, SKPaymentQueue*)
+            {
+                auto& t = getThis (self);
+                t.owner.listeners.call ([&t] (Listener& l) { l.purchasesListRestored (t.restoredPurchases, true, NEEDS_TRANS ("Success")); });
+                t.restoredPurchases.clear();
+            });
+
+            addMethod (@selector (paymentQueue:updatedDownloads:), [] (id self, SEL, SKPaymentQueue*, NSArray<SKDownload*>* downloads)
+            {
+                auto& t = getThis (self);
+                
+                for (SKDownload* download in downloads)
+                {
+                    if (auto* pendingDownload = t.getPendingDownloadFor (download))
+                    {
+                       #if JUCE_IOS
+                        switch (download.downloadState)
+                       #else
+                        switch (download.state)
+                       #endif
+                        {
+                            case SKDownloadStateWaiting:
+                                break;
+                            case SKDownloadStatePaused:
+                                t.owner.listeners.call ([&] (Listener& l) { l.productDownloadPaused (*pendingDownload); });
+                                break;
+                            case SKDownloadStateActive:
+                                t.owner.listeners.call ([&] (Listener& l)
+                                                        {
+                                                            l.productDownloadProgressUpdate (*pendingDownload,
+                                                                                             download.progress,
+                                                                                             RelativeTime (download.timeRemaining));
+                                                        });
+                                break;
+                            case SKDownloadStateFinished:
+                            case SKDownloadStateFailed:
+                            case SKDownloadStateCancelled:
+                                t.processDownloadFinish (pendingDownload, download);
+                                break;
+
+                            default:
+                                // Unexpected download state
+                                jassertfalse;
+                                break;
+                        }
+                    }
+                }
+            });
+
+            registerClass();
+        }
+
+        //==============================================================================
+        static Pimpl& getThis (id self)           { return *getIvar<Pimpl*> (self, "self"); }
+        static void setThis (id self, Pimpl* s)   { object_setInstanceVariable (self, "self", s); }
+
+        static Class& get()
+        {
+            static Class c;
+            return c;
+        }
+    };
+
     //==============================================================================
     InAppPurchases& owner;
+
+    std::unique_ptr<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>, NSObjectDeleter> delegate { [Class::get().createInstance() init] };
 
     OwnedArray<PendingProductInfoRequest> pendingProductInfoRequests;
     OwnedArray<PendingReceiptRefreshRequest> pendingReceiptRefreshRequests;
