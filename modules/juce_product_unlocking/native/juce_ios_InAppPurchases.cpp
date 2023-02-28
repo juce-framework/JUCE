@@ -73,14 +73,14 @@ struct InAppPurchases::Pimpl
         };
 
         Type type;
-        std::unique_ptr<SKProductsRequest, NSObjectDeleter> request;
+        NSUniquePtr<SKProductsRequest> request;
     };
 
     /** Represents a pending request started from [SKReceiptRefreshRequest start]. */
     struct PendingReceiptRefreshRequest
     {
         String subscriptionsSharedSecret;
-        std::unique_ptr<SKReceiptRefreshRequest, NSObjectDeleter> request;
+        NSUniquePtr<SKReceiptRefreshRequest> request;
     };
 
     /** Represents a transaction with pending downloads. Only after all downloads
@@ -142,8 +142,8 @@ struct InAppPurchases::Pimpl
     {
         auto productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers: [NSSet setWithArray: createNSArrayFromStringArray (productIdentifiers)]];
 
-        pendingProductInfoRequests.add (new PendingProductInfoRequest { PendingProductInfoRequest::Type::query,
-                                                                        std::unique_ptr<SKProductsRequest, NSObjectDeleter> (productsRequest) });
+        pendingProductInfoRequests.emplace_back (new PendingProductInfoRequest { PendingProductInfoRequest::Type::query,
+                                                                                 NSUniquePtr<SKProductsRequest> (productsRequest) });
 
         productsRequest.delegate = delegate.get();
         [productsRequest start];
@@ -160,8 +160,8 @@ struct InAppPurchases::Pimpl
         auto productIdentifiers = [NSArray arrayWithObject: juceStringToNS (productIdentifier)];
         auto productsRequest    = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithArray:productIdentifiers]];
 
-        pendingProductInfoRequests.add (new PendingProductInfoRequest { PendingProductInfoRequest::Type::purchase,
-                                                                        std::unique_ptr<SKProductsRequest, NSObjectDeleter> (productsRequest) });
+        pendingProductInfoRequests.emplace_back (new PendingProductInfoRequest { PendingProductInfoRequest::Type::purchase,
+                                                                                 NSUniquePtr<SKProductsRequest> (productsRequest) });
 
         productsRequest.delegate = delegate.get();
         [productsRequest start];
@@ -177,8 +177,8 @@ struct InAppPurchases::Pimpl
         {
             auto receiptRequest = [[SKReceiptRefreshRequest alloc] init];
 
-            pendingReceiptRefreshRequests.add (new PendingReceiptRefreshRequest { subscriptionsSharedSecret,
-                                                                                  std::unique_ptr<SKReceiptRefreshRequest, NSObjectDeleter> ([receiptRequest retain]) });
+            pendingReceiptRefreshRequests.emplace_back (new PendingReceiptRefreshRequest { subscriptionsSharedSecret,
+                                                                                           NSUniquePtr<SKReceiptRefreshRequest> ([receiptRequest retain]) });
             receiptRequest.delegate = delegate.get();
             [receiptRequest start];
         }
@@ -615,8 +615,23 @@ struct InAppPurchases::Pimpl
         return (ObjCType*) o;
     }
 
-
 private:
+    auto findPendingProductInfoRequest (SKRequest* r) const
+    {
+        const auto request = getAs<SKProductsRequest> (r);
+        return std::find_if (pendingProductInfoRequests.begin(),
+                             pendingProductInfoRequests.end(),
+                             [&] (const auto& pending) { return pending->request.get() == request; });
+    }
+
+    auto findPendingReceiptRefreshRequest (SKRequest* r) const
+    {
+        const auto request = getAs<SKReceiptRefreshRequest> (r);
+        return std::find_if (pendingReceiptRefreshRequests.begin(),
+                             pendingReceiptRefreshRequests.end(),
+                             [&] (const auto& pending) { return pending->request.get() == request; });
+    }
+
     struct Class : public ObjCClass<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>>
     {
         //==============================================================================
@@ -629,42 +644,40 @@ private:
             {
                 auto& t = getThis (self);
 
-                for (auto i = 0; i < t.pendingProductInfoRequests.size(); ++i)
+                if (const auto iter = t.findPendingProductInfoRequest (request); iter != t.pendingProductInfoRequests.end())
                 {
-                    auto& pendingRequest = *t.pendingProductInfoRequests[i];
-
-                    if (pendingRequest.request.get() == request)
+                    switch (iter->get()->type)
                     {
-                        if      (pendingRequest.type == PendingProductInfoRequest::Type::query)    t.notifyProductsInfoReceived (response.products);
-                        else if (pendingRequest.type == PendingProductInfoRequest::Type::purchase) t.startPurchase (response.products);
-                        else break;
-
-                        t.pendingProductInfoRequests.remove (i);
-                        return;
+                        case PendingProductInfoRequest::Type::query:
+                            t.notifyProductsInfoReceived (response.products);
+                            break;
+                        case PendingProductInfoRequest::Type::purchase:
+                            t.startPurchase (response.products);
+                            break;
                     }
-                }
 
-                // Unknown request received!
-                jassertfalse;
+                    t.pendingProductInfoRequests.erase (iter);
+                }
+                else
+                {
+                    // Unknown request received!
+                    jassertfalse;
+                }
             });
 
             addMethod (@selector (requestDidFinish:), [] (id self, SEL, SKRequest* request)
             {
                 auto& t = getThis (self);
 
-                if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
+                if (const auto iter = t.findPendingReceiptRefreshRequest (request); iter != t.pendingReceiptRefreshRequests.end())
                 {
-                    for (auto i = 0; i < t.pendingReceiptRefreshRequests.size(); ++i)
-                    {
-                        auto& pendingRequest = *t.pendingReceiptRefreshRequests[i];
+                    t.processReceiptRefreshResponseWithSubscriptionsSharedSecret (iter->get()->subscriptionsSharedSecret);
+                    t.pendingReceiptRefreshRequests.erase (iter);
+                }
 
-                        if (pendingRequest.request.get() == receiptRefreshRequest)
-                        {
-                            t.processReceiptRefreshResponseWithSubscriptionsSharedSecret (pendingRequest.subscriptionsSharedSecret);
-                            t.pendingReceiptRefreshRequests.remove (i);
-                            return;
-                        }
-                    }
+                if (const auto iter = t.findPendingProductInfoRequest (request); iter != t.pendingProductInfoRequests.end())
+                {
+                    t.pendingProductInfoRequests.erase (iter);
                 }
             });
 
@@ -672,20 +685,49 @@ private:
             {
                 auto& t = getThis (self);
 
-                if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
+                const auto errorDetails = [&]
                 {
-                    for (auto i = 0; i < t.pendingReceiptRefreshRequests.size(); ++i)
-                    {
-                        auto& pendingRequest = *t.pendingReceiptRefreshRequests[i];
+                    if (error == nil)
+                        return String();
 
-                        if (pendingRequest.request.get() == receiptRefreshRequest)
-                        {
-                            auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String();
-                            t.owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails); });
-                            t.pendingReceiptRefreshRequests.remove (i);
-                            return;
-                        }
+                    const auto description = nsStringToJuce ([error localizedDescription]);
+
+                    if (description.isEmpty())
+                        return String();
+
+                    return ": " + description;
+                }();
+
+                if (const auto iter = t.findPendingReceiptRefreshRequest (request); iter != t.pendingReceiptRefreshRequests.end())
+                {
+                    t.owner.listeners.call ([&] (Listener& l)
+                    {
+                        l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails);
+                    });
+                    t.pendingReceiptRefreshRequests.erase (iter);
+                    return;
+                }
+
+                if (const auto iter = t.findPendingProductInfoRequest (request); iter != t.pendingProductInfoRequests.end())
+                {
+                    switch (iter->get()->type)
+                    {
+                        case PendingProductInfoRequest::Type::query:
+                            t.owner.listeners.call ([&] (Listener& l)
+                            {
+                                l.purchasesListRestored ({}, false, NEEDS_TRANS ("Product query failed") + errorDetails);
+                            });
+                            break;
+                        case PendingProductInfoRequest::Type::purchase:
+                            t.owner.listeners.call ([&] (Listener& l)
+                            {
+                                l.productPurchaseFinished ({}, false, NEEDS_TRANS ("Purchase request failed") + errorDetails);
+                            });
+                            break;
                     }
+
+                    t.pendingProductInfoRequests.erase (iter);
+                    return;
                 }
             });
 
@@ -779,10 +821,10 @@ private:
     //==============================================================================
     InAppPurchases& owner;
 
-    std::unique_ptr<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>, NSObjectDeleter> delegate { [Class::get().createInstance() init] };
+    NSUniquePtr<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>> delegate { [Class::get().createInstance() init] };
 
-    OwnedArray<PendingProductInfoRequest> pendingProductInfoRequests;
-    OwnedArray<PendingReceiptRefreshRequest> pendingReceiptRefreshRequests;
+    std::vector<std::unique_ptr<PendingProductInfoRequest>> pendingProductInfoRequests;
+    std::vector<std::unique_ptr<PendingReceiptRefreshRequest>> pendingReceiptRefreshRequests;
 
     OwnedArray<PendingDownloadsTransaction> pendingDownloadsTransactions;
     Array<Listener::PurchaseInfo> restoredPurchases;
