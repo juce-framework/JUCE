@@ -438,7 +438,7 @@ function(juce_add_binary_data target)
         COMMAND juce::juceaide binarydata "${JUCE_ARG_NAMESPACE}" "${JUCE_ARG_HEADER_NAME}"
             ${juce_binary_data_folder} "${input_file_list}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        DEPENDS "${input_file_list}"
+        DEPENDS "${input_file_list}" ${JUCE_ARG_SOURCES}
         VERBATIM)
 
     target_sources(${target} PRIVATE "${binary_file_names}")
