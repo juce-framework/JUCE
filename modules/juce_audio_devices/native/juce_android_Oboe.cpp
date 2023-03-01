@@ -797,8 +797,9 @@ private:
                 jassert (stream->getDirection() == oboe::Direction::Output && stream == outputStream->getNativeStream());
 
                 // Read input from Oboe
-                inputStreamSampleBuffer.clear();
-                inputStreamNativeBuffer.calloc (static_cast<size_t> (numInputChannels * bufferSize));
+                const auto expandedBufferSize = jmax (inputStreamNativeBuffer.size(),
+                                                      static_cast<size_t> (numInputChannels * jmax (bufferSize, numFrames)));
+                inputStreamNativeBuffer.resize (expandedBufferSize);
 
                 if (inputStream != nullptr)
                 {
@@ -811,17 +812,17 @@ private:
                         return oboe::DataCallbackResult::Continue;
                     }
 
-                    auto result = inputStream->getNativeStream()->read (inputStreamNativeBuffer.getData(), numFrames, 0);
+                    auto result = inputStream->getNativeStream()->read (inputStreamNativeBuffer.data(), numFrames, 0);
 
                     if (result)
                     {
                         auto referringDirectlyToOboeData = OboeAudioIODeviceBufferHelpers<SampleType>
-                                                             ::referAudioBufferDirectlyToOboeIfPossible (inputStreamNativeBuffer.get(),
+                                                             ::referAudioBufferDirectlyToOboeIfPossible (inputStreamNativeBuffer.data(),
                                                                                                          inputStreamSampleBuffer,
                                                                                                          result.value());
 
                         if (! referringDirectlyToOboeData)
-                            OboeAudioIODeviceBufferHelpers<SampleType>::convertFromOboe (inputStreamNativeBuffer.get(), inputStreamSampleBuffer, result.value());
+                            OboeAudioIODeviceBufferHelpers<SampleType>::convertFromOboe (inputStreamNativeBuffer.data(), inputStreamSampleBuffer, result.value());
                     }
                     else
                     {
@@ -970,7 +971,7 @@ private:
             }
         }
 
-        HeapBlock<SampleType> inputStreamNativeBuffer;
+        std::vector<SampleType> inputStreamNativeBuffer;
         AudioBuffer<float> inputStreamSampleBuffer,
                            outputStreamSampleBuffer;
         Atomic<int> audioCallbackGuard { 0 },
