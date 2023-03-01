@@ -751,8 +751,6 @@ private:
 
         void start() override
         {
-            audioCallbackGuard.set (0);
-
             if (inputStream != nullptr)
                 inputStream->start();
 
@@ -764,13 +762,10 @@ private:
 
         void stop() override
         {
-            while (! audioCallbackGuard.compareAndSetBool (1, 0))
-                Thread::sleep (1);
+            const SpinLock::ScopedLockType lock { audioCallbackMutex };
 
             inputStream  = nullptr;
             outputStream = nullptr;
-
-            audioCallbackGuard.set (0);
         }
 
         int getOutputLatencyInSamples() override    { return outputLatency; }
@@ -788,7 +783,9 @@ private:
 
         oboe::DataCallbackResult onAudioReady (oboe::AudioStream* stream, void* audioData, int32_t numFrames) override
         {
-            if (audioCallbackGuard.compareAndSetBool (1, 0))
+            const SpinLock::ScopedTryLockType lock { audioCallbackMutex };
+
+            if (lock.isLocked())
             {
                 if (stream == nullptr)
                     return oboe::DataCallbackResult::Stop;
@@ -854,8 +851,6 @@ private:
 
                 if (isOutputLatencyDetectionSupported)
                     outputLatency = getLatencyFor (*outputStream);
-
-                audioCallbackGuard.set (0);
             }
 
             return oboe::DataCallbackResult::Continue;
@@ -945,13 +940,14 @@ private:
 
             if (error == oboe::Result::ErrorDisconnected)
             {
-                if (streamRestartGuard.compareAndSetBool (1, 0))
+                const SpinLock::ScopedTryLockType streamRestartLock { streamRestartMutex };
+
+                if (streamRestartLock.isLocked())
                 {
                     // Close, recreate, and start the stream, not much use in current one.
                     // Use default device id, to let the OS pick the best ID (since our was disconnected).
 
-                    while (! audioCallbackGuard.compareAndSetBool (1, 0))
-                        Thread::sleep (1);
+                    const SpinLock::ScopedLockType audioCallbackLock { audioCallbackMutex };
 
                     outputStream = nullptr;
                     outputStream.reset (new OboeStream (oboe::kUnspecified,
@@ -964,9 +960,6 @@ private:
                                                         this));
 
                     outputStream->start();
-
-                    audioCallbackGuard.set (0);
-                    streamRestartGuard.set (0);
                 }
             }
         }
@@ -974,8 +967,7 @@ private:
         std::vector<SampleType> inputStreamNativeBuffer;
         AudioBuffer<float> inputStreamSampleBuffer,
                            outputStreamSampleBuffer;
-        Atomic<int> audioCallbackGuard { 0 },
-                    streamRestartGuard { 0 };
+        SpinLock audioCallbackMutex, streamRestartMutex;
 
         bool isInputLatencyDetectionSupported = false;
         int inputLatency = -1;
