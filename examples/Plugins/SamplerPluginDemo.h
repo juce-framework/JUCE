@@ -208,7 +208,7 @@ class MPESamplerSound final
 public:
     void setSample (std::unique_ptr<Sample> value)
     {
-        sample = move (value);
+        sample = std::move (value);
         setLoopPointsInSeconds (loopPoints);
     }
 
@@ -995,7 +995,7 @@ public:
     void setSampleReader (std::unique_ptr<AudioFormatReaderFactory> readerFactory,
                           UndoManager* undoManager)
     {
-        sampleReader.setValue (move (readerFactory), undoManager);
+        sampleReader.setValue (std::move (readerFactory), undoManager);
         setLoopPointsSeconds (Range<double> (0, getSampleLengthSeconds()).constrainRange (loopPointsSeconds),
                               undoManager);
     }
@@ -1862,7 +1862,7 @@ public:
                     UndoManager& undoManager)
         : dataModel (model),
           waveformView (model, visibleRange),
-          playbackOverlay (visibleRange, move (provider)),
+          playbackOverlay (visibleRange, std::move (provider)),
           loopPoints (dataModel, visibleRange, undoManager),
           ruler (visibleRange)
     {
@@ -1918,7 +1918,7 @@ public:
                      PlaybackPositionOverlay::Provider provider,
                      UndoManager& um)
         : dataModel (model),
-          waveformEditor (dataModel, move (provider), um),
+          waveformEditor (dataModel, std::move (provider), um),
           undoManager (um)
     {
         dataModel.addListener (*this);
@@ -2125,7 +2125,7 @@ public:
         auto sample = std::unique_ptr<Sample> (new Sample (*reader, 10.0));
         auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
         sound->setLoopPointsInSeconds ({lengthInSeconds * 0.1, lengthInSeconds * 0.9 });
-        sound->setSample (move (sample));
+        sound->setSample (std::move (sample));
 
         // Start with the max number of voices
         for (auto i = 0; i != maxVoices; ++i)
@@ -2218,7 +2218,7 @@ public:
 
             void operator() (SamplerAudioProcessor& proc)
             {
-                proc.readerFactory = move (readerFactory);
+                proc.readerFactory = std::move (readerFactory);
                 auto sound = proc.samplerSound;
                 sound->setSample (std::move (sample));
                 auto numberOfVoices = proc.synthesiser.getNumVoices();
@@ -2247,15 +2247,15 @@ public:
 
         if (fact == nullptr)
         {
-            commands.push (SetSampleCommand (move (fact),
+            commands.push (SetSampleCommand (std::move (fact),
                                              nullptr,
-                                             move (newSamplerVoices)));
+                                             std::move (newSamplerVoices)));
         }
         else if (auto reader = fact->make (formatManager))
         {
-            commands.push (SetSampleCommand (move (fact),
+            commands.push (SetSampleCommand (std::move (fact),
                                              std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
-                                             move (newSamplerVoices)));
+                                             std::move (newSamplerVoices)));
         }
     }
 
@@ -2352,7 +2352,7 @@ public:
         for (auto i = 0; i != numberOfVoices; ++i)
             newSamplerVoices.emplace_back (new MPESamplerVoice (loadedSamplerSound));
 
-        commands.push (SetNumVoicesCommand (move (newSamplerVoices)));
+        commands.push (SetNumVoicesCommand (std::move (newSamplerVoices)));
     }
 
     // These accessors are just for an 'overview' and won't give the exact
@@ -2411,7 +2411,8 @@ private:
             mpeSettings.setVoiceStealingEnabled (state.voiceStealingEnabled,      nullptr);
             mpeSettings.setMPEZoneLayout        (state.mpeZoneLayout,             nullptr);
 
-            dataModel.setSampleReader (move (state.readerFactory),    nullptr);
+            dataModel.setSampleReader (std::move (state.readerFactory), nullptr);
+
             dataModel.setLoopPointsSeconds  (state.loopPointsSeconds, nullptr);
             dataModel.setCentreFrequencyHz  (state.centreFrequencyHz, nullptr);
             dataModel.setLoopMode           (state.loopMode,          nullptr);
