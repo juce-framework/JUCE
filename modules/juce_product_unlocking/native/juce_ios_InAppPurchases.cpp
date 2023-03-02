@@ -462,7 +462,7 @@ struct InAppPurchases::Pimpl
                                                                     }
                                                                 }
 
-                                                                sendReceiptFetchFail();
+                                                                sendReceiptFetchFailAsync();
                                                             }] resume];
     }
 
