@@ -504,29 +504,59 @@ auto createObjCBlockImpl (Class* object, Fn func, Signature<Result (Params...)>)
 }
 } // namespace detail
 
+/*  Creates an Obj-C block automatically from a member function. */
 template <typename Class, typename MemberFunc>
 auto CreateObjCBlock (Class* object, MemberFunc fn)
 {
     return detail::createObjCBlockImpl (object, fn, detail::getSignature (fn));
 }
 
+/*  Automatically copies and releases a block, a bit like a smart pointer for an Obj-C block.
+
+    This is helpful to automatically manage the lifetime of blocks, e.g. if you need to keep a block
+    around to be used later. This is the case in the AudioUnit API, where the host may provide a
+    musicalContextBlock that can be called by the plugin during rendering. Copying blocks isn't
+    realtime-safe, so the plugin must cache the block before rendering.
+
+    If you're just creating blocks to pass them directly to an Obj-C API, you probably won't need to
+    use this type.
+*/
 template <typename BlockType>
 class ObjCBlock
 {
 public:
-    ObjCBlock()  { block = nullptr; }
-    template <typename R, class C, typename... P>
-    ObjCBlock (C* _this, R (C::*fn)(P...))  : block (CreateObjCBlock (_this, fn)) {}
-    ObjCBlock (BlockType b) : block ([b copy]) {}
-    ObjCBlock& operator= (const BlockType& other) { if (block != nullptr) { [block release]; } block = [other copy]; return *this; }
-    bool operator== (const void* ptr) const  { return ((const void*) block == ptr); }
-    bool operator!= (const void* ptr) const  { return ((const void*) block != ptr); }
-    ~ObjCBlock() { if (block != nullptr) [block release]; }
+    ObjCBlock() = default;
+
+    ObjCBlock (BlockType b)
+        : block ([b copy]) {}
+
+    ObjCBlock (const ObjCBlock& other)
+        : block (other.block != nullptr ? [other.block copy] : nullptr) {}
+
+    ObjCBlock& operator= (const BlockType& other)
+    {
+        ObjCBlock { other }.swap (*this);
+        return *this;
+    }
+
+    ~ObjCBlock() noexcept
+    {
+        if (block != nullptr)
+            [block release];
+    }
+
+    bool operator== (BlockType ptr) const  { return block == ptr; }
+    bool operator!= (BlockType ptr) const  { return block != ptr; }
 
     operator BlockType() const { return block; }
 
+    void swap (ObjCBlock& other) noexcept
+    {
+        std::swap (other.block, block);
+    }
+
 private:
-    BlockType block;
+    BlockType block = nullptr;
 };
 
 //==============================================================================

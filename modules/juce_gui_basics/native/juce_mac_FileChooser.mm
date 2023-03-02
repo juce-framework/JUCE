@@ -189,7 +189,11 @@ public:
                 if (ref == nullptr)
                     return;
 
-                [ref->panel beginWithCompletionHandler: CreateObjCBlock (ref.getComponent(), &Native::finished)];
+                [ref->panel beginWithCompletionHandler: ^(NSInteger result)
+                                                        {
+                                                            if (auto* ptr = ref.getComponent())
+                                                                ptr->finished (result);
+                                                        }];
 
                 if (ref->preview != nullptr)
                     ref->preview->toFront (true);
