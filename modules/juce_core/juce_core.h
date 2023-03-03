@@ -229,6 +229,11 @@ namespace juce
 
     extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
     extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
+
+    namespace detail
+    {
+        class QuickJSWrapper;
+    }
 }
 
 #include "misc/juce_EnumHelpers.h"

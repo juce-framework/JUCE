@@ -32,1902 +32,1237 @@
   ==============================================================================
 */
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-with-dtor",
+                                     "-Wunused-but-set-variable",
+                                     "-Wdeprecated")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011 6246 6255 6262 6297 6308 6323 6340 6385 6386 28182)
+ #include "choc/javascript/choc_javascript_QuickJS.h"
+ #include "choc/javascript/choc_javascript.h"
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
 namespace juce
 {
 
-#define JUCE_JS_OPERATORS(X) \
-    X(semicolon,     ";")        X(dot,          ".")       X(comma,        ",") \
-    X(openParen,     "(")        X(closeParen,   ")")       X(openBrace,    "{")    X(closeBrace, "}") \
-    X(openBracket,   "[")        X(closeBracket, "]")       X(colon,        ":")    X(question,   "?") \
-    X(typeEquals,    "===")      X(equals,       "==")      X(assign,       "=") \
-    X(typeNotEquals, "!==")      X(notEquals,    "!=")      X(logicalNot,   "!") \
-    X(plusEquals,    "+=")       X(plusplus,     "++")      X(plus,         "+") \
-    X(minusEquals,   "-=")       X(minusminus,   "--")      X(minus,        "-") \
-    X(timesEquals,   "*=")       X(times,        "*")       X(divideEquals, "/=")   X(divide,     "/") \
-    X(moduloEquals,  "%=")       X(modulo,       "%")       X(xorEquals,    "^=")   X(bitwiseXor, "^") \
-    X(andEquals,     "&=")       X(logicalAnd,   "&&")      X(bitwiseAnd,   "&") \
-    X(orEquals,      "|=")       X(logicalOr,    "||")      X(bitwiseOr,    "|") \
-    X(leftShiftEquals,    "<<=") X(lessThanOrEqual,  "<=")  X(leftShift,    "<<")   X(lessThan,   "<") \
-    X(rightShiftUnsigned, ">>>") X(rightShiftEquals, ">>=") X(rightShift,   ">>")   X(greaterThanOrEqual, ">=")  X(greaterThan,  ">")
-
-#define JUCE_JS_KEYWORDS(X) \
-    X(var,      "var")      X(if_,     "if")     X(else_,  "else")   X(do_,       "do")       X(null_,     "null") \
-    X(while_,   "while")    X(for_,    "for")    X(break_, "break")  X(continue_, "continue") X(undefined, "undefined") \
-    X(function, "function") X(return_, "return") X(true_,  "true")   X(false_,    "false")    X(new_,      "new") \
-    X(typeof_,  "typeof")
-
-namespace TokenTypes
-{
-    #define JUCE_DECLARE_JS_TOKEN(name, str)  static const char* const name = str;
-    JUCE_JS_KEYWORDS  (JUCE_DECLARE_JS_TOKEN)
-    JUCE_JS_OPERATORS (JUCE_DECLARE_JS_TOKEN)
-    JUCE_DECLARE_JS_TOKEN (eof,        "$eof")
-    JUCE_DECLARE_JS_TOKEN (literal,    "$literal")
-    JUCE_DECLARE_JS_TOKEN (identifier, "$identifier")
-}
-
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
-
 //==============================================================================
-struct JavascriptEngine::RootObject final : public DynamicObject
+// On Linux int64 and int64_t don't resolve to the same type and don't have C style casts between
+// each other, hence we need a two-step conversion.
+template <typename T>
+static int64_t fromJuceInt64 (const T& convertible) { return (int64_t) (int64) convertible; }
+
+template <typename T>
+static int64_t toJuceInt64   (const T& convertible) { return (int64) (int64_t) convertible; }
+
+template<>
+struct VariantConverter<choc::value::Value>
 {
-    RootObject()
+    static choc::value::Value fromVar (const var& variant)
     {
-        setMethod ("exec",       exec);
-        setMethod ("eval",       eval);
-        setMethod ("trace",      trace);
-        setMethod ("charToInt",  charToInt);
-        setMethod ("parseInt",   IntegerClass::parseInt);
-        setMethod ("typeof",     typeof_internal);
-        setMethod ("parseFloat", parseFloat);
-    }
+        if (variant.isInt())
+            return choc::value::Value { (int) variant };
 
-    Time timeout;
+        if (variant.isInt64())
+            return choc::value::Value { fromJuceInt64 (variant) };
 
-    using Args = const var::NativeFunctionArgs&;
-    using TokenType = const char*;
+        if (variant.isDouble())
+            return choc::value::Value { (double) variant };
 
-    void execute (const String& code)
-    {
-        ExpressionTreeBuilder tb (code);
-        std::unique_ptr<BlockStatement> (tb.parseStatementList())->perform (Scope ({}, *this, *this), nullptr);
-    }
+        if (variant.isInt())
+            return choc::value::Value { (int) variant };
 
-    var evaluate (const String& code)
-    {
-        ExpressionTreeBuilder tb (code);
-        return ExpPtr (tb.parseExpression())->getResult (Scope ({}, *this, *this));
-    }
+        if (variant.isBool())
+            return choc::value::Value { (bool) variant };
 
-    //==============================================================================
-    static bool areTypeEqual (const var& a, const var& b)
-    {
-        return a.hasSameTypeAs (b) && isFunction (a) == isFunction (b)
-                && (((a.isUndefined() || a.isVoid()) && (b.isUndefined() || b.isVoid())) || a == b);
-    }
+        if (variant.isString())
+            return choc::value::Value { variant.toString().toStdString() };
 
-    static String getTokenName (TokenType t)                  { return t[0] == '$' ? String (t + 1) : ("'" + String (t) + "'"); }
-    static bool isFunction (const var& v) noexcept            { return dynamic_cast<FunctionObject*> (v.getObject()) != nullptr; }
-    static bool isNumeric (const var& v) noexcept             { return v.isInt() || v.isDouble() || v.isInt64() || v.isBool(); }
-    static bool isNumericOrUndefined (const var& v) noexcept  { return isNumeric (v) || v.isUndefined(); }
-    static int64 getOctalValue (const String& s)              { BigInteger b; b.parseString (s.initialSectionContainingOnly ("01234567"), 8); return b.toInt64(); }
-    static Identifier getPrototypeIdentifier()                { static const Identifier i ("prototype"); return i; }
-    static var* getPropertyPointer (DynamicObject& o, const Identifier& i) noexcept   { return o.getProperties().getVarPointer (i); }
-
-    //==============================================================================
-    struct CodeLocation
-    {
-        CodeLocation (const String& code) noexcept        : program (code), location (program.getCharPointer()) {}
-        CodeLocation (const CodeLocation& other) noexcept : program (other.program), location (other.location) {}
-
-        void throwError (const String& message) const
+        if (variant.isArray())
         {
-            int col = 1, line = 1;
+            choc::value::Value value { choc::value::Type::createEmptyArray() };
+            const auto& array = *variant.getArray();
 
-            for (auto i = program.getCharPointer(); i < location && ! i.isEmpty(); ++i)
-            {
-                ++col;
-                if (*i == '\n')  { col = 1; ++line; }
-            }
+            for (int i = 0; i < array.size(); ++i)
+                value.addArrayElement (fromVar (array[i]));
 
-            throw "Line " + String (line) + ", column " + String (col) + " : " + message;
+            return value;
         }
 
-        String program;
-        String::CharPointerType location;
-    };
-
-    //==============================================================================
-    struct Scope
-    {
-        Scope (const Scope* p, ReferenceCountedObjectPtr<RootObject> rt, DynamicObject::Ptr scp) noexcept
-            : parent (p), root (std::move (rt)),
-              scope (std::move (scp)) {}
-
-        const Scope* const parent;
-        ReferenceCountedObjectPtr<RootObject> root;
-        DynamicObject::Ptr scope;
-
-        var findFunctionCall (const CodeLocation& location, const var& targetObject, const Identifier& functionName) const
+        if (variant.isObject())
         {
-            if (auto* o = targetObject.getDynamicObject())
+            if (auto* dynamicObject = dynamic_cast<DynamicObject*> (variant.getObject()))
             {
-                if (auto* prop = getPropertyPointer (*o, functionName))
-                    return *prop;
+                choc::value::Value value { choc::value::Type::createObject ("") };
 
-                for (auto* p = o->getProperty (getPrototypeIdentifier()).getDynamicObject(); p != nullptr;
-                     p = p->getProperty (getPrototypeIdentifier()).getDynamicObject())
-                {
-                    if (auto* prop = getPropertyPointer (*p, functionName))
-                        return *prop;
-                }
+                for (const auto& [name, prop] : dynamicObject->getProperties())
+                    value.setMember (name.toString().toRawUTF8(), fromVar (prop));
 
-                // if there's a class with an overridden DynamicObject::hasMethod, this avoids an error
-                if (o->hasMethod (functionName))
-                    return {};
+                return value;
             }
+        }
 
-            if (targetObject.isString())
-                if (auto* m = findRootClassProperty (StringClass::getClassName(), functionName))
-                    return *m;
-
-            if (targetObject.isArray())
-                if (auto* m = findRootClassProperty (ArrayClass::getClassName(), functionName))
-                    return *m;
-
-            if (auto* m = findRootClassProperty (ObjectClass::getClassName(), functionName))
-                return *m;
-
-            location.throwError ("Unknown function '" + functionName.toString() + "'");
+        if (variant.isUndefined())
             return {};
-        }
 
-        var* findRootClassProperty (const Identifier& className, const Identifier& propName) const
-        {
-            if (auto* cls = root->getProperty (className).getDynamicObject())
-                return getPropertyPointer (*cls, propName);
-
-            return nullptr;
-        }
-
-        var findSymbolInParentScopes (const Identifier& name) const
-        {
-            if (auto v = getPropertyPointer (*scope, name))
-                return *v;
-
-            return parent != nullptr ? parent->findSymbolInParentScopes (name)
-                                     : var::undefined();
-        }
-
-        bool findAndInvokeMethod (const Identifier& function, const var::NativeFunctionArgs& args, var& result) const
-        {
-            auto* target = args.thisObject.getDynamicObject();
-
-            if (target == nullptr || target == scope.get())
-            {
-                if (auto* m = getPropertyPointer (*scope, function))
-                {
-                    if (auto fo = dynamic_cast<FunctionObject*> (m->getObject()))
-                    {
-                        result = fo->invoke (*this, args);
-                        return true;
-                    }
-                }
-            }
-
-            const auto& props = scope->getProperties();
-
-            for (int i = 0; i < props.size(); ++i)
-                if (auto* o = props.getValueAt (i).getDynamicObject())
-                    if (Scope (this, *root, *o).findAndInvokeMethod (function, args, result))
-                        return true;
-
-            return false;
-        }
-
-        bool invokeMethod (const var& m, const var::NativeFunctionArgs& args, var& result) const
-        {
-            if (isFunction (m))
-            {
-                auto* target = args.thisObject.getDynamicObject();
-
-                if (target == nullptr || target == scope.get())
-                {
-                    if (auto fo = dynamic_cast<FunctionObject*> (m.getObject()))
-                    {
-                        result = fo->invoke (*this, args);
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        void checkTimeOut (const CodeLocation& location) const
-        {
-            if (Time::getCurrentTime() > root->timeout)
-                location.throwError (root->timeout == Time() ? "Interrupted" : "Execution timed-out");
-        }
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Scope)
-    };
-
-    //==============================================================================
-    struct Statement
-    {
-        Statement (const CodeLocation& l) noexcept : location (l) {}
-        virtual ~Statement() = default;
-
-        enum ResultCode  { ok = 0, returnWasHit, breakWasHit, continueWasHit };
-        virtual ResultCode perform (const Scope&, var*) const  { return ok; }
-
-        CodeLocation location;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Statement)
-    };
-
-    struct Expression  : public Statement
-    {
-        Expression (const CodeLocation& l) noexcept : Statement (l) {}
-
-        virtual var getResult (const Scope&) const            { return var::undefined(); }
-        virtual void assign (const Scope&, const var&) const  { location.throwError ("Cannot assign to this expression!"); }
-
-        ResultCode perform (const Scope& s, var*) const override  { getResult (s); return ok; }
-    };
-
-    using ExpPtr = std::unique_ptr<Expression>;
-
-    struct BlockStatement final : public Statement
-    {
-        BlockStatement (const CodeLocation& l) noexcept : Statement (l) {}
-
-        ResultCode perform (const Scope& s, var* returnedValue) const override
-        {
-            for (auto* statement : statements)
-                if (auto r = statement->perform (s, returnedValue))
-                    return r;
-
-            return ok;
-        }
-
-        OwnedArray<Statement> statements;
-    };
-
-    struct IfStatement final : public Statement
-    {
-        IfStatement (const CodeLocation& l) noexcept : Statement (l) {}
-
-        ResultCode perform (const Scope& s, var* returnedValue) const override
-        {
-            return (condition->getResult (s) ? trueBranch : falseBranch)->perform (s, returnedValue);
-        }
-
-        ExpPtr condition;
-        std::unique_ptr<Statement> trueBranch, falseBranch;
-    };
-
-    struct VarStatement final : public Statement
-    {
-        VarStatement (const CodeLocation& l) noexcept : Statement (l) {}
-
-        ResultCode perform (const Scope& s, var*) const override
-        {
-            s.scope->setProperty (name, initialiser->getResult (s));
-            return ok;
-        }
-
-        Identifier name;
-        ExpPtr initialiser;
-    };
-
-    struct LoopStatement final : public Statement
-    {
-        LoopStatement (const CodeLocation& l, bool isDo) noexcept : Statement (l), isDoLoop (isDo) {}
-
-        ResultCode perform (const Scope& s, var* returnedValue) const override
-        {
-            initialiser->perform (s, nullptr);
-
-            while (isDoLoop || condition->getResult (s))
-            {
-                s.checkTimeOut (location);
-                auto r = body->perform (s, returnedValue);
-
-                if (r == returnWasHit)   return r;
-                if (r == breakWasHit)    break;
-
-                iterator->perform (s, nullptr);
-
-                if (isDoLoop && r != continueWasHit && ! condition->getResult (s))
-                    break;
-            }
-
-            return ok;
-        }
-
-        std::unique_ptr<Statement> initialiser, iterator, body;
-        ExpPtr condition;
-        bool isDoLoop;
-    };
-
-    struct ReturnStatement final : public Statement
-    {
-        ReturnStatement (const CodeLocation& l, Expression* v) noexcept : Statement (l), returnValue (v) {}
-
-        ResultCode perform (const Scope& s, var* ret) const override
-        {
-            if (ret != nullptr)  *ret = returnValue->getResult (s);
-            return returnWasHit;
-        }
-
-        ExpPtr returnValue;
-    };
-
-    struct BreakStatement final : public Statement
-    {
-        BreakStatement (const CodeLocation& l) noexcept : Statement (l) {}
-        ResultCode perform (const Scope&, var*) const override  { return breakWasHit; }
-    };
-
-    struct ContinueStatement final : public Statement
-    {
-        ContinueStatement (const CodeLocation& l) noexcept : Statement (l) {}
-        ResultCode perform (const Scope&, var*) const override  { return continueWasHit; }
-    };
-
-    struct LiteralValue final : public Expression
-    {
-        LiteralValue (const CodeLocation& l, const var& v) noexcept : Expression (l), value (v) {}
-        var getResult (const Scope&) const override   { return value; }
-        var value;
-    };
-
-    struct UnqualifiedName final : public Expression
-    {
-        UnqualifiedName (const CodeLocation& l, const Identifier& n) noexcept : Expression (l), name (n) {}
-
-        var getResult (const Scope& s) const override  { return s.findSymbolInParentScopes (name); }
-
-        void assign (const Scope& s, const var& newValue) const override
-        {
-            if (auto* v = getPropertyPointer (*s.scope, name))
-                *v = newValue;
-            else
-                s.root->setProperty (name, newValue);
-        }
-
-        Identifier name;
-    };
-
-    struct DotOperator final : public Expression
-    {
-        DotOperator (const CodeLocation& l, ExpPtr& p, const Identifier& c) noexcept : Expression (l), parent (p.release()), child (c) {}
-
-        var getResult (const Scope& s) const override
-        {
-            auto p = parent->getResult (s);
-            static const Identifier lengthID ("length");
-
-            if (child == lengthID)
-            {
-                if (auto* array = p.getArray())   return array->size();
-                if (p.isString())                 return p.toString().length();
-            }
-
-            if (auto* o = p.getDynamicObject())
-                if (auto* v = getPropertyPointer (*o, child))
-                    return *v;
-
-            return var::undefined();
-        }
-
-        void assign (const Scope& s, const var& newValue) const override
-        {
-            if (auto* o = parent->getResult (s).getDynamicObject())
-                o->setProperty (child, newValue);
-            else
-                Expression::assign (s, newValue);
-        }
-
-        ExpPtr parent;
-        Identifier child;
-    };
-
-    struct ArraySubscript final : public Expression
-    {
-        ArraySubscript (const CodeLocation& l) noexcept : Expression (l) {}
-
-        var getResult (const Scope& s) const override
-        {
-            auto arrayVar = object->getResult (s); // must stay alive for the scope of this method
-            auto key = index->getResult (s);
-
-            if (const auto* array = arrayVar.getArray())
-                if (key.isInt() || key.isInt64() || key.isDouble())
-                    return (*array) [static_cast<int> (key)];
-
-            if (auto* o = arrayVar.getDynamicObject())
-                if (key.isString())
-                    if (auto* v = getPropertyPointer (*o, Identifier (key)))
-                        return *v;
-
-            return var::undefined();
-        }
-
-        void assign (const Scope& s, const var& newValue) const override
-        {
-            auto arrayVar = object->getResult (s); // must stay alive for the scope of this method
-            auto key = index->getResult (s);
-
-            if (auto* array = arrayVar.getArray())
-            {
-                if (key.isInt() || key.isInt64() || key.isDouble())
-                {
-                    const int i = key;
-                    while (array->size() < i)
-                        array->add (var::undefined());
-
-                    array->set (i, newValue);
-                    return;
-                }
-            }
-
-            if (auto* o = arrayVar.getDynamicObject())
-            {
-                if (key.isString())
-                {
-                    o->setProperty (Identifier (key), newValue);
-                    return;
-                }
-            }
-
-            Expression::assign (s, newValue);
-        }
-
-        ExpPtr object, index;
-    };
-
-    struct BinaryOperatorBase : public Expression
-    {
-        BinaryOperatorBase (const CodeLocation& l, ExpPtr& a, ExpPtr& b, TokenType op) noexcept
-            : Expression (l), lhs (a.release()), rhs (b.release()), operation (op) {}
-
-        ExpPtr lhs, rhs;
-        TokenType operation;
-    };
-
-    struct BinaryOperator : public BinaryOperatorBase
-    {
-        BinaryOperator (const CodeLocation& l, ExpPtr& a, ExpPtr& b, TokenType op) noexcept
-            : BinaryOperatorBase (l, a, b, op) {}
-
-        virtual var getWithUndefinedArg() const                           { return var::undefined(); }
-        virtual var getWithDoubles (double, double) const                 { return throwError ("Double"); }
-        virtual var getWithInts (int64, int64) const                      { return throwError ("Integer"); }
-        virtual var getWithArrayOrObject (const var& a, const var&) const { return throwError (a.isArray() ? "Array" : "Object"); }
-        virtual var getWithStrings (const String&, const String&) const   { return throwError ("String"); }
-
-        var getResult (const Scope& s) const override
-        {
-            var a (lhs->getResult (s)), b (rhs->getResult (s));
-
-            if ((a.isUndefined() || a.isVoid()) && (b.isUndefined() || b.isVoid()))
-                return getWithUndefinedArg();
-
-            if (isNumericOrUndefined (a) && isNumericOrUndefined (b))
-                return (a.isDouble() || b.isDouble()) ? getWithDoubles (a, b) : getWithInts (a, b);
-
-            if (a.isArray() || a.isObject())
-                return getWithArrayOrObject (a, b);
-
-            return getWithStrings (a.toString(), b.toString());
-        }
-
-        var throwError (const char* typeName) const
-            { location.throwError (getTokenName (operation) + " is not allowed on the " + typeName + " type"); return {}; }
-    };
-
-    struct EqualsOp final : public BinaryOperator
-    {
-        EqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::equals) {}
-        var getWithUndefinedArg() const override                               { return true; }
-        var getWithDoubles (double a, double b) const override                 { return exactlyEqual (a, b); }
-        var getWithInts (int64 a, int64 b) const override                      { return a == b; }
-        var getWithStrings (const String& a, const String& b) const override   { return a == b; }
-        var getWithArrayOrObject (const var& a, const var& b) const override   { return a == b; }
-    };
-
-    struct NotEqualsOp final : public BinaryOperator
-    {
-        NotEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::notEquals) {}
-        var getWithUndefinedArg() const override                               { return false; }
-        var getWithDoubles (double a, double b) const override                 { return ! exactlyEqual (a, b); }
-        var getWithInts (int64 a, int64 b) const override                      { return a != b; }
-        var getWithStrings (const String& a, const String& b) const override   { return a != b; }
-        var getWithArrayOrObject (const var& a, const var& b) const override   { return a != b; }
-    };
-
-    struct LessThanOp final : public BinaryOperator
-    {
-        LessThanOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::lessThan) {}
-        var getWithDoubles (double a, double b) const override                 { return a < b; }
-        var getWithInts (int64 a, int64 b) const override                      { return a < b; }
-        var getWithStrings (const String& a, const String& b) const override   { return a < b; }
-    };
-
-    struct LessThanOrEqualOp final : public BinaryOperator
-    {
-        LessThanOrEqualOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::lessThanOrEqual) {}
-        var getWithDoubles (double a, double b) const override                 { return a <= b; }
-        var getWithInts (int64 a, int64 b) const override                      { return a <= b; }
-        var getWithStrings (const String& a, const String& b) const override   { return a <= b; }
-    };
-
-    struct GreaterThanOp final : public BinaryOperator
-    {
-        GreaterThanOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::greaterThan) {}
-        var getWithDoubles (double a, double b) const override                 { return a > b; }
-        var getWithInts (int64 a, int64 b) const override                      { return a > b; }
-        var getWithStrings (const String& a, const String& b) const override   { return a > b; }
-    };
-
-    struct GreaterThanOrEqualOp final : public BinaryOperator
-    {
-        GreaterThanOrEqualOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::greaterThanOrEqual) {}
-        var getWithDoubles (double a, double b) const override                 { return a >= b; }
-        var getWithInts (int64 a, int64 b) const override                      { return a >= b; }
-        var getWithStrings (const String& a, const String& b) const override   { return a >= b; }
-    };
-
-    struct AdditionOp final : public BinaryOperator
-    {
-        AdditionOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::plus) {}
-        var getWithDoubles (double a, double b) const override                 { return a + b; }
-        var getWithInts (int64 a, int64 b) const override                      { return a + b; }
-        var getWithStrings (const String& a, const String& b) const override   { return a + b; }
-    };
-
-    struct SubtractionOp final : public BinaryOperator
-    {
-        SubtractionOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::minus) {}
-        var getWithDoubles (double a, double b) const override { return a - b; }
-        var getWithInts (int64 a, int64 b) const override      { return a - b; }
-    };
-
-    struct MultiplyOp final : public BinaryOperator
-    {
-        MultiplyOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::times) {}
-        var getWithDoubles (double a, double b) const override { return a * b; }
-        var getWithInts (int64 a, int64 b) const override      { return a * b; }
-    };
-
-    struct DivideOp final : public BinaryOperator
-    {
-        DivideOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
-        var getWithDoubles (double a, double b) const override  { return exactlyEqual (b, 0.0) ? std::numeric_limits<double>::infinity() : a / b; }
-        var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var ((double) a / (double) b) : var (std::numeric_limits<double>::infinity()); }
-    };
-
-    struct ModuloOp final : public BinaryOperator
-    {
-        ModuloOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::modulo) {}
-        var getWithDoubles (double a, double b) const override  { return exactlyEqual (b, 0.0) ? std::numeric_limits<double>::infinity() : fmod (a, b); }
-        var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var (a % b) : var (std::numeric_limits<double>::infinity()); }
-    };
-
-    struct BitwiseOrOp final : public BinaryOperator
-    {
-        BitwiseOrOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseOr) {}
-        var getWithInts (int64 a, int64 b) const override   { return a | b; }
-    };
-
-    struct BitwiseAndOp final : public BinaryOperator
-    {
-        BitwiseAndOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseAnd) {}
-        var getWithInts (int64 a, int64 b) const override   { return a & b; }
-    };
-
-    struct BitwiseXorOp final : public BinaryOperator
-    {
-        BitwiseXorOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseXor) {}
-        var getWithInts (int64 a, int64 b) const override   { return a ^ b; }
-    };
-
-    struct LeftShiftOp final : public BinaryOperator
-    {
-        LeftShiftOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::leftShift) {}
-        var getWithInts (int64 a, int64 b) const override   { return ((int) a) << (int) b; }
-    };
-
-    struct RightShiftOp final : public BinaryOperator
-    {
-        RightShiftOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::rightShift) {}
-        var getWithInts (int64 a, int64 b) const override   { return ((int) a) >> (int) b; }
-    };
-
-    struct RightShiftUnsignedOp final : public BinaryOperator
-    {
-        RightShiftUnsignedOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::rightShiftUnsigned) {}
-        var getWithInts (int64 a, int64 b) const override   { return (int) (((uint32) a) >> (int) b); }
-    };
-
-    struct LogicalAndOp final : public BinaryOperatorBase
-    {
-        LogicalAndOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::logicalAnd) {}
-        var getResult (const Scope& s) const override       { return lhs->getResult (s) && rhs->getResult (s); }
-    };
-
-    struct LogicalOrOp final : public BinaryOperatorBase
-    {
-        LogicalOrOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::logicalOr) {}
-        var getResult (const Scope& s) const override       { return lhs->getResult (s) || rhs->getResult (s); }
-    };
-
-    struct TypeEqualsOp final : public BinaryOperatorBase
-    {
-        TypeEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::typeEquals) {}
-        var getResult (const Scope& s) const override       { return areTypeEqual (lhs->getResult (s), rhs->getResult (s)); }
-    };
-
-    struct TypeNotEqualsOp final : public BinaryOperatorBase
-    {
-        TypeNotEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::typeNotEquals) {}
-        var getResult (const Scope& s) const override       { return ! areTypeEqual (lhs->getResult (s), rhs->getResult (s)); }
-    };
-
-    struct ConditionalOp final : public Expression
-    {
-        ConditionalOp (const CodeLocation& l) noexcept : Expression (l) {}
-
-        var getResult (const Scope& s) const override              { return (condition->getResult (s) ? trueBranch : falseBranch)->getResult (s); }
-        void assign (const Scope& s, const var& v) const override  { (condition->getResult (s) ? trueBranch : falseBranch)->assign (s, v); }
-
-        ExpPtr condition, trueBranch, falseBranch;
-    };
-
-    struct Assignment final : public Expression
-    {
-        Assignment (const CodeLocation& l, ExpPtr& dest, ExpPtr& source) noexcept : Expression (l), target (dest.release()), newValue (source.release()) {}
-
-        var getResult (const Scope& s) const override
-        {
-            auto value = newValue->getResult (s);
-            target->assign (s, value);
-            return value;
-        }
-
-        ExpPtr target, newValue;
-    };
-
-    struct SelfAssignment : public Expression
-    {
-        SelfAssignment (const CodeLocation& l, Expression* dest, Expression* source) noexcept
-            : Expression (l), target (dest), newValue (source) {}
-
-        var getResult (const Scope& s) const override
-        {
-            auto value = newValue->getResult (s);
-            target->assign (s, value);
-            return value;
-        }
-
-        Expression* target; // Careful! this pointer aliases a sub-term of newValue!
-        ExpPtr newValue;
-        TokenType op;
-    };
-
-    struct PostAssignment final : public SelfAssignment
-    {
-        PostAssignment (const CodeLocation& l, Expression* dest, Expression* source) noexcept : SelfAssignment (l, dest, source) {}
-
-        var getResult (const Scope& s) const override
-        {
-            auto oldValue = target->getResult (s);
-            target->assign (s, newValue->getResult (s));
-            return oldValue;
-        }
-    };
-
-    struct FunctionCall : public Expression
-    {
-        FunctionCall (const CodeLocation& l) noexcept : Expression (l) {}
-
-        var getResult (const Scope& s) const override
-        {
-            if (auto* dot = dynamic_cast<DotOperator*> (object.get()))
-            {
-                auto thisObject = dot->parent->getResult (s);
-                return invokeFunction (s, s.findFunctionCall (location, thisObject, dot->child), thisObject);
-            }
-
-            auto function = object->getResult (s);
-            return invokeFunction (s, function, var (s.scope.get()));
-        }
-
-        var invokeFunction (const Scope& s, const var& function, const var& thisObject) const
-        {
-            s.checkTimeOut (location);
-            Array<var> argVars;
-
-            for (auto* a : arguments)
-                argVars.add (a->getResult (s));
-
-            const var::NativeFunctionArgs args (thisObject, argVars.begin(), argVars.size());
-
-            if (var::NativeFunction nativeFunction = function.getNativeFunction())
-                return nativeFunction (args);
-
-            if (auto* fo = dynamic_cast<FunctionObject*> (function.getObject()))
-                return fo->invoke (s, args);
-
-            if (auto* dot = dynamic_cast<DotOperator*> (object.get()))
-                if (auto* o = thisObject.getDynamicObject())
-                    if (o->hasMethod (dot->child)) // allow an overridden DynamicObject::invokeMethod to accept a method call.
-                        return o->invokeMethod (dot->child, args);
-
-            location.throwError ("This expression is not a function!"); return {};
-        }
-
-        ExpPtr object;
-        OwnedArray<Expression> arguments;
-    };
-
-    struct NewOperator final : public FunctionCall
-    {
-        NewOperator (const CodeLocation& l) noexcept : FunctionCall (l) {}
-
-        var getResult (const Scope& s) const override
-        {
-            var classOrFunc = object->getResult (s);
-            const bool isFunc = isFunction (classOrFunc);
-
-            if (! (isFunc || classOrFunc.getDynamicObject() != nullptr))
-                return var::undefined();
-
-            DynamicObject::Ptr newObject (new DynamicObject());
-
-            if (isFunc)
-                invokeFunction (s, classOrFunc, newObject.get());
-            else
-                newObject->setProperty (getPrototypeIdentifier(), classOrFunc);
-
-            return newObject.get();
-        }
-    };
-
-    struct ObjectDeclaration final : public Expression
-    {
-        ObjectDeclaration (const CodeLocation& l) noexcept : Expression (l) {}
-
-        var getResult (const Scope& s) const override
-        {
-            DynamicObject::Ptr newObject (new DynamicObject());
-
-            for (int i = 0; i < names.size(); ++i)
-                newObject->setProperty (names.getUnchecked (i), initialisers.getUnchecked (i)->getResult (s));
-
-            return newObject.get();
-        }
-
-        Array<Identifier> names;
-        OwnedArray<Expression> initialisers;
-    };
-
-    struct ArrayDeclaration final : public Expression
-    {
-        ArrayDeclaration (const CodeLocation& l) noexcept : Expression (l) {}
-
-        var getResult (const Scope& s) const override
-        {
-            Array<var> a;
-
-            for (int i = 0; i < values.size(); ++i)
-                a.add (values.getUnchecked (i)->getResult (s));
-
-            // std::move() needed here for older compilers
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wredundant-move")
-            return std::move (a);
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }
-
-        OwnedArray<Expression> values;
-    };
-
-    //==============================================================================
-    struct FunctionObject final : public DynamicObject
-    {
-        FunctionObject() noexcept {}
-
-        FunctionObject (const FunctionObject& other)  : DynamicObject(), functionCode (other.functionCode)
-        {
-            ExpressionTreeBuilder tb (functionCode);
-            tb.parseFunctionParamsAndBody (*this);
-        }
-
-        std::unique_ptr<DynamicObject> clone() const override    { return std::make_unique<FunctionObject> (*this); }
-
-        void writeAsJSON (OutputStream& out, const JSON::FormatOptions&) override
-        {
-            out << "function " << functionCode;
-        }
-
-        var invoke (const Scope& s, const var::NativeFunctionArgs& args) const
-        {
-            DynamicObject::Ptr functionRoot (new DynamicObject());
-
-            static const Identifier thisIdent ("this");
-            functionRoot->setProperty (thisIdent, args.thisObject);
-
-            for (int i = 0; i < parameters.size(); ++i)
-                functionRoot->setProperty (parameters.getReference (i),
-                                           i < args.numArguments ? args.arguments[i] : var::undefined());
-
-            var result;
-            body->perform (Scope (&s, s.root, functionRoot), &result);
-            return result;
-        }
-
-        String functionCode;
-        Array<Identifier> parameters;
-        std::unique_ptr<Statement> body;
-    };
-
-    //==============================================================================
-    struct TokenIterator
-    {
-        TokenIterator (const String& code) : location (code), p (code.getCharPointer()) { skip(); }
-
-        void skip()
-        {
-            skipWhitespaceAndComments();
-            location.location = p;
-            currentType = matchNextToken();
-        }
-
-        void match (TokenType expected)
-        {
-            if (currentType != expected)
-                location.throwError ("Found " + getTokenName (currentType) + " when expecting " + getTokenName (expected));
-
-            skip();
-        }
-
-        bool matchIf (TokenType expected)                                 { if (currentType == expected)  { skip(); return true; } return false; }
-        bool matchesAny (TokenType t1, TokenType t2) const                { return currentType == t1 || currentType == t2; }
-        bool matchesAny (TokenType t1, TokenType t2, TokenType t3) const  { return matchesAny (t1, t2) || currentType == t3; }
-
-        CodeLocation location;
-        TokenType currentType;
-        var currentValue;
-
-    private:
-        String::CharPointerType p;
-
-        static bool isIdentifierStart (juce_wchar c) noexcept   { return CharacterFunctions::isLetter (c)        || c == '_'; }
-        static bool isIdentifierBody  (juce_wchar c) noexcept   { return CharacterFunctions::isLetterOrDigit (c) || c == '_'; }
-
-        TokenType matchNextToken()
-        {
-            if (isIdentifierStart (*p))
-            {
-                auto end = p;
-                while (isIdentifierBody (*++end)) {}
-
-                auto len = (size_t) (end - p);
-                #define JUCE_JS_COMPARE_KEYWORD(name, str) if (len == sizeof (str) - 1 && matchToken (TokenTypes::name, len)) return TokenTypes::name;
-                JUCE_JS_KEYWORDS (JUCE_JS_COMPARE_KEYWORD)
-
-                currentValue = String (p, end); p = end;
-                return TokenTypes::identifier;
-            }
-
-            if (p.isDigit())
-            {
-                if (parseHexLiteral() || parseFloatLiteral() || parseOctalLiteral() || parseDecimalLiteral())
-                    return TokenTypes::literal;
-
-                location.throwError ("Syntax error in numeric constant");
-            }
-
-            if (parseStringLiteral (*p) || (*p == '.' && parseFloatLiteral()))
-                return TokenTypes::literal;
-
-            #define JUCE_JS_COMPARE_OPERATOR(name, str) if (matchToken (TokenTypes::name, sizeof (str) - 1)) return TokenTypes::name;
-            JUCE_JS_OPERATORS (JUCE_JS_COMPARE_OPERATOR)
-
-            if (! p.isEmpty())
-                location.throwError ("Unexpected character '" + String::charToString (*p) + "' in source");
-
-            return TokenTypes::eof;
-        }
-
-        bool matchToken (TokenType name, size_t len) noexcept
-        {
-            if (p.compareUpTo (CharPointer_ASCII (name), (int) len) != 0) return false;
-            p += (int) len;  return true;
-        }
-
-        void skipWhitespaceAndComments()
-        {
-            for (;;)
-            {
-                p.incrementToEndOfWhitespace();
-
-                if (*p == '/')
-                {
-                    auto c2 = p[1];
-
-                    if (c2 == '/')  { p = CharacterFunctions::find (p, (juce_wchar) '\n'); continue; }
-
-                    if (c2 == '*')
-                    {
-                        location.location = p;
-                        p = CharacterFunctions::find (p + 2, CharPointer_ASCII ("*/"));
-                        if (p.isEmpty()) location.throwError ("Unterminated '/*' comment");
-                        p += 2; continue;
-                    }
-                }
-
-                break;
-            }
-        }
-
-        bool parseStringLiteral (juce_wchar quoteType)
-        {
-            if (quoteType != '"' && quoteType != '\'')
-                return false;
-
-            auto r = JSON::parseQuotedString (p, currentValue);
-            if (r.failed()) location.throwError (r.getErrorMessage());
-            return true;
-        }
-
-        bool parseHexLiteral()
-        {
-            if (*p != '0' || (p[1] != 'x' && p[1] != 'X')) return false;
-
-            auto t = ++p;
-            int64 v = CharacterFunctions::getHexDigitValue (*++t);
-            if (v < 0) return false;
-
-            for (;;)
-            {
-                auto digit = CharacterFunctions::getHexDigitValue (*++t);
-                if (digit < 0) break;
-                v = v * 16 + digit;
-            }
-
-            currentValue = v; p = t;
-            return true;
-        }
-
-        bool parseFloatLiteral()
-        {
-            int numDigits = 0;
-            auto t = p;
-            while (t.isDigit())  { ++t; ++numDigits; }
-
-            const bool hasPoint = (*t == '.');
-
-            if (hasPoint)
-                while ((++t).isDigit())  ++numDigits;
-
-            if (numDigits == 0)
-                return false;
-
-            auto c = *t;
-            const bool hasExponent = (c == 'e' || c == 'E');
-
-            if (hasExponent)
-            {
-                c = *++t;
-                if (c == '+' || c == '-')  ++t;
-                if (! t.isDigit()) return false;
-                while ((++t).isDigit()) {}
-            }
-
-            if (! (hasExponent || hasPoint)) return false;
-
-            currentValue = CharacterFunctions::getDoubleValue (p);  p = t;
-            return true;
-        }
-
-        bool parseOctalLiteral()
-        {
-            auto t = p;
-            int64 v = *t - '0';
-            if (v != 0) return false;  // first digit of octal must be 0
-
-            for (;;)
-            {
-                auto digit = (int) (*++t - '0');
-                if (isPositiveAndBelow (digit, 8))        v = v * 8 + digit;
-                else if (isPositiveAndBelow (digit, 10))  location.throwError ("Decimal digit in octal constant");
-                else break;
-            }
-
-            currentValue = v;  p = t;
-            return true;
-        }
-
-        bool parseDecimalLiteral()
-        {
-            int64 v = 0;
-
-            for (;; ++p)
-            {
-                auto digit = (int) (*p - '0');
-                if (isPositiveAndBelow (digit, 10))  v = v * 10 + digit;
-                else break;
-            }
-
-            currentValue = v;
-            return true;
-        }
-    };
-
-    //==============================================================================
-    struct ExpressionTreeBuilder final : private TokenIterator
-    {
-        ExpressionTreeBuilder (const String code)  : TokenIterator (code) {}
-
-        BlockStatement* parseStatementList()
-        {
-            std::unique_ptr<BlockStatement> b (new BlockStatement (location));
-
-            while (currentType != TokenTypes::closeBrace && currentType != TokenTypes::eof)
-                b->statements.add (parseStatement());
-
-            return b.release();
-        }
-
-        void parseFunctionParamsAndBody (FunctionObject& fo)
-        {
-            match (TokenTypes::openParen);
-
-            while (currentType != TokenTypes::closeParen)
-            {
-                auto paramName = currentValue.toString();
-                match (TokenTypes::identifier);
-                fo.parameters.add (paramName);
-
-                if (currentType != TokenTypes::closeParen)
-                    match (TokenTypes::comma);
-            }
-
-            match (TokenTypes::closeParen);
-            fo.body.reset (parseBlock());
-        }
-
-        Expression* parseExpression()
-        {
-            ExpPtr lhs (parseLogicOperator());
-
-            if (matchIf (TokenTypes::question))          return parseTernaryOperator (lhs);
-            if (matchIf (TokenTypes::assign))            { ExpPtr rhs (parseExpression()); return new Assignment (location, lhs, rhs); }
-            if (matchIf (TokenTypes::plusEquals))        return parseInPlaceOpExpression<AdditionOp> (lhs);
-            if (matchIf (TokenTypes::minusEquals))       return parseInPlaceOpExpression<SubtractionOp> (lhs);
-            if (matchIf (TokenTypes::timesEquals))       return parseInPlaceOpExpression<MultiplyOp> (lhs);
-            if (matchIf (TokenTypes::divideEquals))      return parseInPlaceOpExpression<DivideOp> (lhs);
-            if (matchIf (TokenTypes::moduloEquals))      return parseInPlaceOpExpression<ModuloOp> (lhs);
-            if (matchIf (TokenTypes::leftShiftEquals))   return parseInPlaceOpExpression<LeftShiftOp> (lhs);
-            if (matchIf (TokenTypes::rightShiftEquals))  return parseInPlaceOpExpression<RightShiftOp> (lhs);
-
-            return lhs.release();
-        }
-
-    private:
-        void throwError (const String& err) const  { location.throwError (err); }
-
-        template <typename OpType>
-        Expression* parseInPlaceOpExpression (ExpPtr& lhs)
-        {
-            ExpPtr rhs (parseExpression());
-            Expression* bareLHS = lhs.get(); // careful - bare pointer is deliberately aliased
-            return new SelfAssignment (location, bareLHS, new OpType (location, lhs, rhs));
-        }
-
-        BlockStatement* parseBlock()
-        {
-            match (TokenTypes::openBrace);
-            std::unique_ptr<BlockStatement> b (parseStatementList());
-            match (TokenTypes::closeBrace);
-            return b.release();
-        }
-
-        Statement* parseStatement()
-        {
-            if (currentType == TokenTypes::openBrace)   return parseBlock();
-            if (matchIf (TokenTypes::var))              return parseVar();
-            if (matchIf (TokenTypes::if_))              return parseIf();
-            if (matchIf (TokenTypes::while_))           return parseDoOrWhileLoop (false);
-            if (matchIf (TokenTypes::do_))              return parseDoOrWhileLoop (true);
-            if (matchIf (TokenTypes::for_))             return parseForLoop();
-            if (matchIf (TokenTypes::return_))          return parseReturn();
-            if (matchIf (TokenTypes::break_))           return new BreakStatement (location);
-            if (matchIf (TokenTypes::continue_))        return new ContinueStatement (location);
-            if (matchIf (TokenTypes::function))         return parseFunction();
-            if (matchIf (TokenTypes::semicolon))        return new Statement (location);
-            if (matchIf (TokenTypes::plusplus))         return parsePreIncDec<AdditionOp>();
-            if (matchIf (TokenTypes::minusminus))       return parsePreIncDec<SubtractionOp>();
-
-            if (matchesAny (TokenTypes::openParen, TokenTypes::openBracket))
-                return matchEndOfStatement (parseFactor());
-
-            if (matchesAny (TokenTypes::identifier, TokenTypes::literal, TokenTypes::minus))
-                return matchEndOfStatement (parseExpression());
-
-            throwError ("Found " + getTokenName (currentType) + " when expecting a statement");
-            return nullptr;
-        }
-
-        Expression* matchEndOfStatement (Expression* ex)  { ExpPtr e (ex); if (currentType != TokenTypes::eof) match (TokenTypes::semicolon); return e.release(); }
-        Expression* matchCloseParen (Expression* ex)      { ExpPtr e (ex); match (TokenTypes::closeParen); return e.release(); }
-
-        Statement* parseIf()
-        {
-            std::unique_ptr<IfStatement> s (new IfStatement (location));
-            match (TokenTypes::openParen);
-            s->condition.reset (parseExpression());
-            match (TokenTypes::closeParen);
-            s->trueBranch.reset (parseStatement());
-            s->falseBranch.reset (matchIf (TokenTypes::else_) ? parseStatement() : new Statement (location));
-            return s.release();
-        }
-
-        Statement* parseReturn()
-        {
-            if (matchIf (TokenTypes::semicolon))
-                return new ReturnStatement (location, new Expression (location));
-
-            auto* r = new ReturnStatement (location, parseExpression());
-            matchIf (TokenTypes::semicolon);
-            return r;
-        }
-
-        Statement* parseVar()
-        {
-            std::unique_ptr<VarStatement> s (new VarStatement (location));
-            s->name = parseIdentifier();
-            s->initialiser.reset (matchIf (TokenTypes::assign) ? parseExpression() : new Expression (location));
-
-            if (matchIf (TokenTypes::comma))
-            {
-                std::unique_ptr<BlockStatement> block (new BlockStatement (location));
-                block->statements.add (std::move (s));
-                block->statements.add (parseVar());
-                return block.release();
-            }
-
-            match (TokenTypes::semicolon);
-            return s.release();
-        }
-
-        Statement* parseFunction()
-        {
-            Identifier name;
-            auto fn = parseFunctionDefinition (name);
-
-            if (name.isNull())
-                throwError ("Functions defined at statement-level must have a name");
-
-            ExpPtr nm (new UnqualifiedName (location, name)), value (new LiteralValue (location, fn));
-            return new Assignment (location, nm, value);
-        }
-
-        Statement* parseForLoop()
-        {
-            std::unique_ptr<LoopStatement> s (new LoopStatement (location, false));
-            match (TokenTypes::openParen);
-            s->initialiser.reset (parseStatement());
-
-            if (matchIf (TokenTypes::semicolon))
-                s->condition.reset (new LiteralValue (location, true));
-            else
-            {
-                s->condition.reset (parseExpression());
-                match (TokenTypes::semicolon);
-            }
-
-            if (matchIf (TokenTypes::closeParen))
-                s->iterator.reset (new Statement (location));
-            else
-            {
-                s->iterator.reset (parseExpression());
-                match (TokenTypes::closeParen);
-            }
-
-            s->body.reset (parseStatement());
-            return s.release();
-        }
-
-        Statement* parseDoOrWhileLoop (bool isDoLoop)
-        {
-            std::unique_ptr<LoopStatement> s (new LoopStatement (location, isDoLoop));
-            s->initialiser.reset (new Statement (location));
-            s->iterator.reset (new Statement (location));
-
-            if (isDoLoop)
-            {
-                s->body.reset (parseBlock());
-                match (TokenTypes::while_);
-            }
-
-            match (TokenTypes::openParen);
-            s->condition.reset (parseExpression());
-            match (TokenTypes::closeParen);
-
-            if (! isDoLoop)
-                s->body.reset (parseStatement());
-
-            return s.release();
-        }
-
-        Identifier parseIdentifier()
-        {
-            Identifier i;
-            if (currentType == TokenTypes::identifier)
-                i = currentValue.toString();
-
-            match (TokenTypes::identifier);
-            return i;
-        }
-
-        var parseFunctionDefinition (Identifier& functionName)
-        {
-            auto functionStart = location.location;
-
-            if (currentType == TokenTypes::identifier)
-                functionName = parseIdentifier();
-
-            std::unique_ptr<FunctionObject> fo (new FunctionObject());
-            parseFunctionParamsAndBody (*fo);
-            fo->functionCode = String (functionStart, location.location);
-            return var (fo.release());
-        }
-
-        Expression* parseFunctionCall (FunctionCall* call, ExpPtr& function)
-        {
-            std::unique_ptr<FunctionCall> s (call);
-            s->object = std::move (function);
-            match (TokenTypes::openParen);
-
-            while (currentType != TokenTypes::closeParen)
-            {
-                s->arguments.add (parseExpression());
-                if (currentType != TokenTypes::closeParen)
-                    match (TokenTypes::comma);
-            }
-
-            return matchCloseParen (s.release());
-        }
-
-        Expression* parseSuffixes (Expression* e)
-        {
-            ExpPtr input (e);
-
-            if (matchIf (TokenTypes::dot))
-                return parseSuffixes (new DotOperator (location, input, parseIdentifier()));
-
-            if (currentType == TokenTypes::openParen)
-                return parseSuffixes (parseFunctionCall (new FunctionCall (location), input));
-
-            if (matchIf (TokenTypes::openBracket))
-            {
-                std::unique_ptr<ArraySubscript> s (new ArraySubscript (location));
-                s->object = std::move (input);
-                s->index.reset (parseExpression());
-                match (TokenTypes::closeBracket);
-                return parseSuffixes (s.release());
-            }
-
-            if (matchIf (TokenTypes::plusplus))   return parsePostIncDec<AdditionOp> (input);
-            if (matchIf (TokenTypes::minusminus)) return parsePostIncDec<SubtractionOp> (input);
-
-            return input.release();
-        }
-
-        Expression* parseFactor()
-        {
-            if (currentType == TokenTypes::identifier)  return parseSuffixes (new UnqualifiedName (location, parseIdentifier()));
-            if (matchIf (TokenTypes::openParen))        return parseSuffixes (matchCloseParen (parseExpression()));
-            if (matchIf (TokenTypes::true_))            return parseSuffixes (new LiteralValue (location, (int) 1));
-            if (matchIf (TokenTypes::false_))           return parseSuffixes (new LiteralValue (location, (int) 0));
-            if (matchIf (TokenTypes::null_))            return parseSuffixes (new LiteralValue (location, var()));
-            if (matchIf (TokenTypes::undefined))        return parseSuffixes (new Expression (location));
-
-            if (currentType == TokenTypes::literal)
-            {
-                var v (currentValue); skip();
-                return parseSuffixes (new LiteralValue (location, v));
-            }
-
-            if (matchIf (TokenTypes::openBrace))
-            {
-                std::unique_ptr<ObjectDeclaration> e (new ObjectDeclaration (location));
-
-                while (currentType != TokenTypes::closeBrace)
-                {
-                    auto memberName = currentValue.toString();
-                    match ((currentType == TokenTypes::literal && currentValue.isString())
-                             ? TokenTypes::literal : TokenTypes::identifier);
-                    match (TokenTypes::colon);
-
-                    e->names.add (memberName);
-                    e->initialisers.add (parseExpression());
-
-                    if (currentType != TokenTypes::closeBrace)
-                        match (TokenTypes::comma);
-                }
-
-                match (TokenTypes::closeBrace);
-                return parseSuffixes (e.release());
-            }
-
-            if (matchIf (TokenTypes::openBracket))
-            {
-                std::unique_ptr<ArrayDeclaration> e (new ArrayDeclaration (location));
-
-                while (currentType != TokenTypes::closeBracket)
-                {
-                    e->values.add (parseExpression());
-
-                    if (currentType != TokenTypes::closeBracket)
-                        match (TokenTypes::comma);
-                }
-
-                match (TokenTypes::closeBracket);
-                return parseSuffixes (e.release());
-            }
-
-            if (matchIf (TokenTypes::function))
-            {
-                Identifier name;
-                var fn = parseFunctionDefinition (name);
-
-                if (name.isValid())
-                    throwError ("Inline functions definitions cannot have a name");
-
-                return new LiteralValue (location, fn);
-            }
-
-            if (matchIf (TokenTypes::new_))
-            {
-                ExpPtr name (new UnqualifiedName (location, parseIdentifier()));
-
-                while (matchIf (TokenTypes::dot))
-                    name.reset (new DotOperator (location, name, parseIdentifier()));
-
-                return parseFunctionCall (new NewOperator (location), name);
-            }
-
-            throwError ("Found " + getTokenName (currentType) + " when expecting an expression");
-            return nullptr;
-        }
-
-        template <typename OpType>
-        Expression* parsePreIncDec()
-        {
-            Expression* e = parseFactor(); // careful - bare pointer is deliberately aliased
-            ExpPtr lhs (e), one (new LiteralValue (location, (int) 1));
-            return new SelfAssignment (location, e, new OpType (location, lhs, one));
-        }
-
-        template <typename OpType>
-        Expression* parsePostIncDec (ExpPtr& lhs)
-        {
-            Expression* e = lhs.release(); // careful - bare pointer is deliberately aliased
-            ExpPtr lhs2 (e), one (new LiteralValue (location, (int) 1));
-            return new PostAssignment (location, e, new OpType (location, lhs2, one));
-        }
-
-        Expression* parseTypeof()
-        {
-            std::unique_ptr<FunctionCall> f (new FunctionCall (location));
-            f->object.reset (new UnqualifiedName (location, "typeof"));
-            f->arguments.add (parseUnary());
-            return f.release();
-        }
-
-        Expression* parseUnary()
-        {
-            if (matchIf (TokenTypes::minus))       { ExpPtr a (new LiteralValue (location, (int) 0)), b (parseUnary()); return new SubtractionOp   (location, a, b); }
-            if (matchIf (TokenTypes::logicalNot))  { ExpPtr a (new LiteralValue (location, (int) 0)), b (parseUnary()); return new EqualsOp        (location, a, b); }
-            if (matchIf (TokenTypes::plusplus))    return parsePreIncDec<AdditionOp>();
-            if (matchIf (TokenTypes::minusminus))  return parsePreIncDec<SubtractionOp>();
-            if (matchIf (TokenTypes::typeof_))     return parseTypeof();
-
-            return parseFactor();
-        }
-
-        Expression* parseMultiplyDivide()
-        {
-            ExpPtr a (parseUnary());
-
-            for (;;)
-            {
-                if (matchIf (TokenTypes::times))        { ExpPtr b (parseUnary()); a.reset (new MultiplyOp (location, a, b)); }
-                else if (matchIf (TokenTypes::divide))  { ExpPtr b (parseUnary()); a.reset (new DivideOp   (location, a, b)); }
-                else if (matchIf (TokenTypes::modulo))  { ExpPtr b (parseUnary()); a.reset (new ModuloOp   (location, a, b)); }
-                else break;
-            }
-
-            return a.release();
-        }
-
-        Expression* parseAdditionSubtraction()
-        {
-            ExpPtr a (parseMultiplyDivide());
-
-            for (;;)
-            {
-                if (matchIf (TokenTypes::plus))            { ExpPtr b (parseMultiplyDivide()); a.reset (new AdditionOp    (location, a, b)); }
-                else if (matchIf (TokenTypes::minus))      { ExpPtr b (parseMultiplyDivide()); a.reset (new SubtractionOp (location, a, b)); }
-                else break;
-            }
-
-            return a.release();
-        }
-
-        Expression* parseShiftOperator()
-        {
-            ExpPtr a (parseAdditionSubtraction());
-
-            for (;;)
-            {
-                if (matchIf (TokenTypes::leftShift))                { ExpPtr b (parseExpression()); a.reset (new LeftShiftOp          (location, a, b)); }
-                else if (matchIf (TokenTypes::rightShift))          { ExpPtr b (parseExpression()); a.reset (new RightShiftOp         (location, a, b)); }
-                else if (matchIf (TokenTypes::rightShiftUnsigned))  { ExpPtr b (parseExpression()); a.reset (new RightShiftUnsignedOp (location, a, b)); }
-                else break;
-            }
-
-            return a.release();
-        }
-
-        Expression* parseComparator()
-        {
-            ExpPtr a (parseShiftOperator());
-
-            for (;;)
-            {
-                if (matchIf (TokenTypes::equals))                  { ExpPtr b (parseShiftOperator()); a.reset (new EqualsOp             (location, a, b)); }
-                else if (matchIf (TokenTypes::notEquals))          { ExpPtr b (parseShiftOperator()); a.reset (new NotEqualsOp          (location, a, b)); }
-                else if (matchIf (TokenTypes::typeEquals))         { ExpPtr b (parseShiftOperator()); a.reset (new TypeEqualsOp         (location, a, b)); }
-                else if (matchIf (TokenTypes::typeNotEquals))      { ExpPtr b (parseShiftOperator()); a.reset (new TypeNotEqualsOp      (location, a, b)); }
-                else if (matchIf (TokenTypes::lessThan))           { ExpPtr b (parseShiftOperator()); a.reset (new LessThanOp           (location, a, b)); }
-                else if (matchIf (TokenTypes::lessThanOrEqual))    { ExpPtr b (parseShiftOperator()); a.reset (new LessThanOrEqualOp    (location, a, b)); }
-                else if (matchIf (TokenTypes::greaterThan))        { ExpPtr b (parseShiftOperator()); a.reset (new GreaterThanOp        (location, a, b)); }
-                else if (matchIf (TokenTypes::greaterThanOrEqual)) { ExpPtr b (parseShiftOperator()); a.reset (new GreaterThanOrEqualOp (location, a, b)); }
-                else break;
-            }
-
-            return a.release();
-        }
-
-        Expression* parseLogicOperator()
-        {
-            ExpPtr a (parseComparator());
-
-            for (;;)
-            {
-                if (matchIf (TokenTypes::logicalAnd))       { ExpPtr b (parseComparator()); a.reset (new LogicalAndOp (location, a, b)); }
-                else if (matchIf (TokenTypes::logicalOr))   { ExpPtr b (parseComparator()); a.reset (new LogicalOrOp  (location, a, b)); }
-                else if (matchIf (TokenTypes::bitwiseAnd))  { ExpPtr b (parseComparator()); a.reset (new BitwiseAndOp (location, a, b)); }
-                else if (matchIf (TokenTypes::bitwiseOr))   { ExpPtr b (parseComparator()); a.reset (new BitwiseOrOp  (location, a, b)); }
-                else if (matchIf (TokenTypes::bitwiseXor))  { ExpPtr b (parseComparator()); a.reset (new BitwiseXorOp (location, a, b)); }
-                else break;
-            }
-
-            return a.release();
-        }
-
-        Expression* parseTernaryOperator (ExpPtr& condition)
-        {
-            std::unique_ptr<ConditionalOp> e (new ConditionalOp (location));
-            e->condition = std::move (condition);
-            e->trueBranch.reset (parseExpression());
-            match (TokenTypes::colon);
-            e->falseBranch.reset (parseExpression());
-            return e.release();
-        }
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExpressionTreeBuilder)
-    };
-
-    //==============================================================================
-    static var get (Args a, int index) noexcept            { return index < a.numArguments ? a.arguments[index] : var(); }
-    static bool isInt (Args a, int index) noexcept         { return get (a, index).isInt() || get (a, index).isInt64(); }
-    static int getInt (Args a, int index) noexcept         { return get (a, index); }
-    static double getDouble (Args a, int index) noexcept   { return get (a, index); }
-    static String getString (Args a, int index) noexcept   { return get (a, index).toString(); }
-
-    //==============================================================================
-    struct ObjectClass final : public DynamicObject
-    {
-        ObjectClass()
-        {
-            setMethod ("dump",  dump);
-            setMethod ("clone", cloneFn);
-        }
-
-        static Identifier getClassName()            { static const Identifier i ("Object"); return i; }
-        static var dump  ([[maybe_unused]] Args a)  { DBG (JSON::toString (a.thisObject)); return var::undefined(); }
-        static var cloneFn (Args a)                 { return a.thisObject.clone(); }
-    };
-
-    //==============================================================================
-    struct ArrayClass final : public DynamicObject
-    {
-        ArrayClass()
-        {
-            setMethod ("contains", contains);
-            setMethod ("remove",   remove);
-            setMethod ("join",     join);
-            setMethod ("push",     push);
-            setMethod ("splice",   splice);
-            setMethod ("indexOf",  indexOf);
-        }
-
-        static Identifier getClassName()   { static const Identifier i ("Array"); return i; }
-
-        static var contains (Args a)
-        {
-            if (auto* array = a.thisObject.getArray())
-                return array->contains (get (a, 0));
-
-            return false;
-        }
-
-        static var remove (Args a)
-        {
-            if (auto* array = a.thisObject.getArray())
-                array->removeAllInstancesOf (get (a, 0));
-
-            return var::undefined();
-        }
-
-        static var join (Args a)
-        {
-            StringArray strings;
-
-            if (auto* array = a.thisObject.getArray())
-                for (auto& v : *array)
-                    strings.add (v.toString());
-
-            return strings.joinIntoString (getString (a, 0));
-        }
-
-        static var push (Args a)
-        {
-            if (auto* array = a.thisObject.getArray())
-            {
-                for (int i = 0; i < a.numArguments; ++i)
-                    array->add (a.arguments[i]);
-
-                return array->size();
-            }
-
-            return var::undefined();
-        }
-
-        static var splice (Args a)
-        {
-            if (auto* array = a.thisObject.getArray())
-            {
-                auto arraySize = array->size();
-                int start = get (a, 0);
-
-                if (start < 0)
-                    start = jmax (0, arraySize + start);
-                else if (start > arraySize)
-                    start = arraySize;
-
-                const int num = a.numArguments > 1 ? jlimit (0, arraySize - start, getInt (a, 1))
-                                                   : arraySize - start;
-
-                Array<var> itemsRemoved;
-                itemsRemoved.ensureStorageAllocated (num);
-
-                for (int i = 0; i < num; ++i)
-                    itemsRemoved.add (array->getReference (start + i));
-
-                array->removeRange (start, num);
-
-                for (int i = 2; i < a.numArguments; ++i)
-                    array->insert (start++, get (a, i));
-
-                // std::move() needed here for older compilers
-                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wredundant-move")
-                return std::move (itemsRemoved);
-                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-            }
-
-            return var::undefined();
-        }
-
-        static var indexOf (Args a)
-        {
-            if (auto* array = a.thisObject.getArray())
-            {
-                auto target = get (a, 0);
-
-                for (int i = (a.numArguments > 1 ? getInt (a, 1) : 0); i < array->size(); ++i)
-                    if (array->getReference (i) == target)
-                        return i;
-            }
-
-            return -1;
-        }
-    };
-
-    //==============================================================================
-    struct StringClass final : public DynamicObject
-    {
-        StringClass()
-        {
-            setMethod ("substring",     substring);
-            setMethod ("indexOf",       indexOf);
-            setMethod ("charAt",        charAt);
-            setMethod ("charCodeAt",    charCodeAt);
-            setMethod ("fromCharCode",  fromCharCode);
-            setMethod ("split",         split);
-        }
-
-        static Identifier getClassName()  { static const Identifier i ("String"); return i; }
-
-        static var fromCharCode (Args a)  { return String::charToString (static_cast<juce_wchar> (getInt (a, 0))); }
-        static var substring (Args a)     { return a.thisObject.toString().substring (getInt (a, 0), getInt (a, 1)); }
-        static var indexOf (Args a)       { return a.thisObject.toString().indexOf (getString (a, 0)); }
-        static var charCodeAt (Args a)    { return (int) a.thisObject.toString() [getInt (a, 0)]; }
-        static var charAt (Args a)        { int p = getInt (a, 0); return a.thisObject.toString().substring (p, p + 1); }
-
-        static var split (Args a)
-        {
-            auto str = a.thisObject.toString();
-            auto sep = getString (a, 0);
-            StringArray strings;
-
-            if (sep.isNotEmpty())
-                strings.addTokens (str, sep.substring (0, 1), {});
-            else // special-case for empty separator: split all chars separately
-                for (auto pos = str.getCharPointer(); ! pos.isEmpty(); ++pos)
-                    strings.add (String::charToString (*pos));
-
-            var array;
-
-            for (auto& s : strings)
-                array.append (s);
-
-            return array;
-        }
-    };
-
-    //==============================================================================
-    struct MathClass final : public DynamicObject
-    {
-        MathClass()
-        {
-            setMethod ("abs",       Math_abs);              setMethod ("round",     Math_round);
-            setMethod ("random",    Math_random);           setMethod ("randInt",   Math_randInt);
-            setMethod ("min",       Math_min);              setMethod ("max",       Math_max);
-            setMethod ("range",     Math_range);            setMethod ("sign",      Math_sign);
-            setMethod ("toDegrees", Math_toDegrees);        setMethod ("toRadians", Math_toRadians);
-            setMethod ("sin",       Math_sin);              setMethod ("asin",      Math_asin);
-            setMethod ("sinh",      Math_sinh);             setMethod ("asinh",     Math_asinh);
-            setMethod ("cos",       Math_cos);              setMethod ("acos",      Math_acos);
-            setMethod ("cosh",      Math_cosh);             setMethod ("acosh",     Math_acosh);
-            setMethod ("tan",       Math_tan);              setMethod ("atan",      Math_atan);
-            setMethod ("tanh",      Math_tanh);             setMethod ("atanh",     Math_atanh);
-            setMethod ("log",       Math_log);              setMethod ("log10",     Math_log10);
-            setMethod ("exp",       Math_exp);              setMethod ("pow",       Math_pow);
-            setMethod ("sqr",       Math_sqr);              setMethod ("sqrt",      Math_sqrt);
-            setMethod ("ceil",      Math_ceil);             setMethod ("floor",     Math_floor);
-            setMethod ("hypot",     Math_hypot);
-
-            setProperty ("PI",      MathConstants<double>::pi);
-            setProperty ("E",       MathConstants<double>::euler);
-            setProperty ("SQRT2",   MathConstants<double>::sqrt2);
-            setProperty ("SQRT1_2", std::sqrt (0.5));
-            setProperty ("LN2",     std::log (2.0));
-            setProperty ("LN10",    std::log (10.0));
-            setProperty ("LOG2E",   std::log (MathConstants<double>::euler) / std::log (2.0));
-            setProperty ("LOG10E",  std::log (MathConstants<double>::euler) / std::log (10.0));
-        }
-
-        static var Math_random    (Args)   { return Random::getSystemRandom().nextDouble(); }
-        static var Math_randInt   (Args a) { return Random::getSystemRandom().nextInt (Range<int> (getInt (a, 0), getInt (a, 1))); }
-        static var Math_abs       (Args a) { return isInt (a, 0) ? var (std::abs   (getInt (a, 0))) : var (std::abs   (getDouble (a, 0))); }
-        static var Math_round     (Args a) { return isInt (a, 0) ? var (roundToInt (getInt (a, 0))) : var (roundToInt (getDouble (a, 0))); }
-        static var Math_sign      (Args a) { return isInt (a, 0) ? var (sign       (getInt (a, 0))) : var (sign       (getDouble (a, 0))); }
-        static var Math_range     (Args a) { return isInt (a, 0) ? var (jlimit (getInt (a, 1), getInt (a, 2), getInt (a, 0))) : var (jlimit (getDouble (a, 1), getDouble (a, 2), getDouble (a, 0))); }
-        static var Math_min       (Args a) { return (isInt (a, 0) && isInt (a, 1)) ? var (jmin (getInt (a, 0), getInt (a, 1))) : var (jmin (getDouble (a, 0), getDouble (a, 1))); }
-        static var Math_max       (Args a) { return (isInt (a, 0) && isInt (a, 1)) ? var (jmax (getInt (a, 0), getInt (a, 1))) : var (jmax (getDouble (a, 0), getDouble (a, 1))); }
-        static var Math_toDegrees (Args a) { return radiansToDegrees (getDouble (a, 0)); }
-        static var Math_toRadians (Args a) { return degreesToRadians (getDouble (a, 0)); }
-        static var Math_sin       (Args a) { return std::sin   (getDouble (a, 0)); }
-        static var Math_asin      (Args a) { return std::asin  (getDouble (a, 0)); }
-        static var Math_cos       (Args a) { return std::cos   (getDouble (a, 0)); }
-        static var Math_acos      (Args a) { return std::acos  (getDouble (a, 0)); }
-        static var Math_sinh      (Args a) { return std::sinh  (getDouble (a, 0)); }
-        static var Math_cosh      (Args a) { return std::cosh  (getDouble (a, 0)); }
-        static var Math_tan       (Args a) { return std::tan   (getDouble (a, 0)); }
-        static var Math_tanh      (Args a) { return std::tanh  (getDouble (a, 0)); }
-        static var Math_atan      (Args a) { return std::atan  (getDouble (a, 0)); }
-        static var Math_log       (Args a) { return std::log   (getDouble (a, 0)); }
-        static var Math_log10     (Args a) { return std::log10 (getDouble (a, 0)); }
-        static var Math_exp       (Args a) { return std::exp   (getDouble (a, 0)); }
-        static var Math_pow       (Args a) { return std::pow   (getDouble (a, 0), getDouble (a, 1)); }
-        static var Math_sqr       (Args a) { return square (getDouble (a, 0)); }
-        static var Math_sqrt      (Args a) { return std::sqrt  (getDouble (a, 0)); }
-        static var Math_ceil      (Args a) { return std::ceil  (getDouble (a, 0)); }
-        static var Math_floor     (Args a) { return std::floor (getDouble (a, 0)); }
-        static var Math_hypot     (Args a) { return std::hypot (getDouble (a, 0), getDouble (a, 1)); }
-
-        // We can't use the std namespace equivalents of these functions without breaking
-        // compatibility with older versions of OS X.
-        static var Math_asinh     (Args a) { return asinh (getDouble (a, 0)); }
-        static var Math_acosh     (Args a) { return acosh (getDouble (a, 0)); }
-        static var Math_atanh     (Args a) { return atanh (getDouble (a, 0)); }
-
-        static Identifier getClassName()   { static const Identifier i ("Math"); return i; }
-        template <typename Type> static Type sign (Type n) noexcept  { return n > 0 ? (Type) 1 : (n < 0 ? (Type) -1 : 0); }
-    };
-
-    //==============================================================================
-    struct JSONClass final : public DynamicObject
-    {
-        JSONClass()                        { setMethod ("stringify", stringify); }
-        static Identifier getClassName()   { static const Identifier i ("JSON"); return i; }
-        static var stringify (Args a)      { return JSON::toString (get (a, 0)); }
-    };
-
-    //==============================================================================
-    struct IntegerClass final : public DynamicObject
-    {
-        IntegerClass()                     { setMethod ("parseInt",  parseInt); }
-        static Identifier getClassName()   { static const Identifier i ("Integer"); return i; }
-
-        static var parseInt (Args a)
-        {
-            auto s = getString (a, 0).trim();
-
-            return s[0] == '0' ? (s[1] == 'x' ? s.substring (2).getHexValue64() : getOctalValue (s))
-                               : s.getLargeIntValue();
-        }
-    };
-
-    //==============================================================================
-    static var trace (Args a)        { Logger::outputDebugString (JSON::toString (a.thisObject)); return var::undefined(); }
-    static var charToInt (Args a)    { return (int) (getString (a, 0)[0]); }
-    static var parseFloat (Args a)   { return getDouble (a, 0); }
-
-    static var typeof_internal (Args a)
-    {
-        var v (get (a, 0));
-
-        if (v.isVoid())                      return "void";
-        if (v.isString())                    return "string";
-        if (isNumeric (v))                   return "number";
-        if (isFunction (v) || v.isMethod())  return "function";
-        if (v.isObject())                    return "object";
-
-        return "undefined";
+        jassertfalse;
+        return {};
     }
 
-    static var exec (Args a)
+    static var toVar (const choc::value::Value& value)
     {
-        if (auto* root = dynamic_cast<RootObject*> (a.thisObject.getObject()))
-            root->execute (getString (a, 0));
+        if (value.isVoid())
+            return {};
 
-        return var::undefined();
-    }
+        if (value.isInt32())
+            return { value.getInt32() };
 
-    static var eval (Args a)
-    {
-        if (auto* root = dynamic_cast<RootObject*> (a.thisObject.getObject()))
-            return root->evaluate (getString (a, 0));
+        if (value.isInt64())
+            return { (int64) value.getInt64() };
 
-        return var::undefined();
+        if (value.isFloat32())
+            return { value.getFloat32() };
+
+        if (value.isFloat64())
+            return { value.getFloat64() };
+
+        if (value.isBool())
+            return { value.getBool() };
+
+        if (value.isString())
+        {
+            const auto tmp = value.toString();
+            return { String { CharPointer_UTF8 { tmp.c_str() } } };
+        }
+
+        if (value.isVector() || value.isArray())
+        {
+            var variant;
+
+            for (uint32_t i = 0; i < value.size(); ++i)
+            {
+                jassert (i < (uint32_t) std::numeric_limits<int>::max());
+                variant.insert ((int) i, toVar (choc::value::Value { value[i] }));
+            }
+
+            return variant;
+        }
+
+        if (value.isObject())
+        {
+            auto dynamicObject = std::make_unique<DynamicObject>();
+
+            for (uint32_t i = 0; i < value.size(); ++i)
+            {
+                const auto& [name, type] = value.getObjectMemberAt (i);
+                dynamicObject->setProperty (name, toVar (choc::value::Value { type }));
+            }
+
+            return { dynamicObject.release() };
+        }
+
+        jassertfalse;
+        return {};
     }
 };
 
 //==============================================================================
-JavascriptEngine::JavascriptEngine()  : maximumExecutionTime (15.0), root (new RootObject())
+namespace qjs = choc::javascript::quickjs;
+
+static choc::value::Value quickJSToChoc (const qjs::QuickJSContext::ValuePtr& ptr, Result* result = nullptr)
 {
-    registerNativeObject (RootObject::ObjectClass  ::getClassName(),  new RootObject::ObjectClass());
-    registerNativeObject (RootObject::ArrayClass   ::getClassName(),  new RootObject::ArrayClass());
-    registerNativeObject (RootObject::StringClass  ::getClassName(),  new RootObject::StringClass());
-    registerNativeObject (RootObject::MathClass    ::getClassName(),  new RootObject::MathClass());
-    registerNativeObject (RootObject::JSONClass    ::getClassName(),  new RootObject::JSONClass());
-    registerNativeObject (RootObject::IntegerClass ::getClassName(),  new RootObject::IntegerClass());
+    if (result != nullptr)
+        *result = Result::ok();
+
+    try
+    {
+        return ptr.toChocValue();
+    }
+    catch (const choc::javascript::Error& error)
+    {
+        if (result != nullptr)
+            *result = Result::fail (error.what());
+    }
+
+    return {};
 }
 
-JavascriptEngine::~JavascriptEngine() {}
+/* Does not release the passed in JSValue. */
+static choc::value::Value quickJSToChoc (qjs::JSValue value, qjs::JSContext* ctx, Result* result = nullptr)
+{
+    qjs::QuickJSContext::ValuePtr valuePtr { value, ctx };
+    ScopeGuard releaseJSValue { [&] { valuePtr.release(); } };
 
-void JavascriptEngine::prepareTimeout() const noexcept   { root->timeout = Time::getCurrentTime() + maximumExecutionTime; }
-void JavascriptEngine::stop() noexcept                   { root->timeout = {}; }
+    return quickJSToChoc (valuePtr, result);
+}
+
+/*  Returns a new JSValue object with a reference count of 1. This can be passed into most QuickJS
+    functions such as JS_SetPropertyStr(), which take ownership of this value and will decrement
+    its reference count. When used without passing to QuickJS use ValuePtr to wrap, ensuring
+    cleanup when the ValuePtr goes out of scope.
+*/
+static qjs::JSValue chocToQuickJS (choc::value::Value value, qjs::JSContext* ctx)
+{
+    auto* context = static_cast<qjs::QuickJSContext*> (qjs::JS_GetContextOpaque (ctx));
+    return context->valueToJS (value).release();
+}
+
+static var quickJSToJuce (qjs::JSValueConst value, qjs::JSContext* ctx)
+{
+    return VariantConverter<choc::value::Value>::toVar (quickJSToChoc (value, ctx));
+}
+
+static std::vector<var> quickJSToJuce (Span<qjs::JSValueConst> args, qjs::JSContext* ctx)
+{
+    std::vector<var> argList;
+
+    for (const auto& arg : args)
+        argList.push_back (quickJSToJuce (arg, ctx));
+
+    return argList;
+}
+
+/*  See chocToQuickJS() for a discussion about ownership of the returned value. */
+static qjs::JSValue juceToQuickJs (var variant, qjs::JSContext* ctx)
+{
+    return chocToQuickJS (VariantConverter<choc::value::Value>::fromVar (variant), ctx);
+}
+
+//==============================================================================
+class detail::QuickJSWrapper
+{
+public:
+    qjs::JSContext* getQuickJSContext() const
+    {
+        return static_cast<qjs::QuickJSContext*> (context.getPimpl())->context;
+    }
+
+    qjs::JSRuntime* getQuickJSRuntime() const
+    {
+        return static_cast<qjs::QuickJSContext*> (context.getPimpl())->runtime;
+    }
+
+    choc::javascript::Context& getContext()
+    {
+        return context;
+    }
+
+    /*  Returning a value > 0 will interrupt the QuickJS engine.
+    */
+    void setInterruptHandler (std::function<int()> interruptHandlerIn)
+    {
+        interruptHandler = std::move (interruptHandlerIn);
+        qjs::JS_SetInterruptHandler (getQuickJSRuntime(), handleInterrupt, (void*) this);
+    }
+
+private:
+    static int handleInterrupt (qjs::JSRuntime*, void* opaque)
+    {
+        auto& self = *static_cast<QuickJSWrapper*> (opaque);
+
+        if (self.interruptHandler != nullptr)
+            return self.interruptHandler();
+
+        return 0;
+    }
+
+    choc::javascript::Context context = choc::javascript::createQuickJSContext();
+    std::function<int()> interruptHandler;
+};
+
+using SetterFn = qjs::JSValue (*) (qjs::JSContext* ctx,
+                                   qjs::JSValueConst thisVal,
+                                   qjs::JSValueConst val,
+                                   int magic);
+using GetterFn = qjs::JSValue (*) (qjs::JSContext* ctx, qjs::JSValueConst thisVal, int magic);
+
+// A replacement for the JS_CGETSET_MAGIC_DEF macro in QuickJS
+static qjs::JSCFunctionListEntry makeFunctionListEntry (const char* name,
+                                                        GetterFn getter,
+                                                        SetterFn setter,
+                                                        int16_t magic)
+{
+    qjs::JSCFunctionListEntry e { name, JS_PROP_CONFIGURABLE, qjs::JS_DEF_CGETSET_MAGIC, magic, {} };
+    e.u.getset.get.getter_magic = getter;
+    e.u.getset.set.setter_magic = setter;
+    return e;
+}
+
+// A replacement for the JS_UNDEFINED macro in QuickJS
+static qjs::JSValue makeUndefined()
+{
+   #if defined(JS_NAN_BOXING) // Differentiates between 32 and 64 bit builds
+    return (((uint64_t)(qjs::JS_TAG_UNDEFINED) << 32) | (uint32_t)(0));
+   #else
+    return qjs::JSValue (static_cast<int32_t> (0), qjs::JS_TAG_UNDEFINED);
+   #endif
+}
+
+static qjs::JSClassID createClassId()
+{
+    // A passed in value of 0 asks QuickJS to allocate us a new unique ID. QuickJS uses global
+    // variables for the bookkeeping, so it's safe to use this function to initialise globals.
+    qjs::JSClassID newId = 0;
+    return qjs::JS_NewClassID (&newId);
+}
+
+//==============================================================================
+/*  Attached as an opaque pointer to the corresponding JS object. Its lifetime is managed by the
+    QuickJS engine, which calls the finalise function when the corresponding JSValue is deleted.
+*/
+struct DynamicObjectWrapper
+{
+    DynamicObjectWrapper (detail::QuickJSWrapper& engineIn, DynamicObject* objectIn)
+        : engine (engineIn), object (objectIn)
+    {
+        getDynamicObjects().insert (this);
+    }
+
+    int16_t getOrdinal (const Identifier& identifier)
+    {
+        if (const auto& it = ordinals.find (identifier); it != ordinals.end())
+            return it->second;
+
+        identifiers.emplace_back (identifier);
+        const auto newSize = identifiers.size() - 1;
+        jassert (newSize <= (size_t) std::numeric_limits<int16_t>::max());
+        const auto newOrdinal = (int16_t) newSize;
+        ordinals[identifier] = newOrdinal;
+        return newOrdinal;
+    }
+
+    auto getIdentifier (int ordinal) const
+    {
+        jassert ((size_t) ordinal < identifiers.size());
+        return identifiers[(size_t) ordinal];
+    }
+
+    NamedValueSet& getProperties() const
+    {
+        return object->getProperties();
+    }
+
+    static void finaliser (qjs::JSRuntime*, qjs::JSValue val)
+    {
+        auto* wrapper = static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque (val, getClassId()));
+        wrapper->finalise();
+    }
+
+    void finalise()
+    {
+        getDynamicObjects().erase (this);
+        delete this;
+    }
+
+    static void createClass (qjs::JSRuntime* runtime)
+    {
+        qjs::JSClassDef classDef {};
+        classDef.class_name = "juce_DynamicObject";
+        classDef.finalizer  = finaliser;
+        qjs::JS_NewClass (runtime, getClassId(), &classDef);
+    }
+
+    //==============================================================================
+    static choc::javascript::quickjs::JSValue callDispatcher (qjs::JSContext* ctx,
+                                                              qjs::JSValueConst thisValue,
+                                                              int numArgs,
+                                                              qjs::JSValueConst* args,
+                                                              int ordinal)
+    {
+        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisValue, getClassId()));
+        const auto argList = quickJSToJuce (Span { args, (size_t) numArgs }, ctx);
+        const auto identifier = self.getIdentifier (ordinal);
+        auto result = self.object->invokeMethod (identifier,
+                                                 { self.object.get(), argList.data(), (int) argList.size() });
+        return juceToQuickJs (result, ctx);
+    }
+
+    static qjs::JSValue setDispatcher (qjs::JSContext* ctx,
+                                       qjs::JSValueConst thisVal,
+                                       qjs::JSValueConst val,
+                                       int ordinal)
+    {
+        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisVal, getClassId()));
+        self.object->setProperty (self.getIdentifier (ordinal), quickJSToJuce (val, ctx));
+
+        // In case there is a problem we could return e.g. `JS_EXCEPTION` or
+        // `JS_ThrowRangeError(ctx, "invalid precision");` here.
+        return makeUndefined();
+    }
+
+    static qjs::JSValue getDispatcher (qjs::JSContext* ctx, qjs::JSValueConst thisVal, int ordinal)
+    {
+        auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisVal, getClassId()));
+        return juceToQuickJs (self.object->getProperty (self.getIdentifier (ordinal)), ctx);
+    }
+
+    static qjs::JSClassID getClassId()
+    {
+        static qjs::JSClassID classId = createClassId();
+        return classId;
+    }
+
+    static std::set<void*>& getDynamicObjects()
+    {
+        // Used to check if an opaque ptr attached to a JSValue is a DynamicObjectWrapper
+        static std::set<void*> dynamicObjects;
+        return dynamicObjects;
+    }
+
+    //==============================================================================
+    detail::QuickJSWrapper& engine;
+    DynamicObject::Ptr object;
+    std::map<Identifier, int16_t> ordinals;
+    std::vector<Identifier> identifiers;
+};
+
+//==============================================================================
+class JavascriptEngine::Impl
+{
+public:
+    using ValuePtr = qjs::QuickJSContext::ValuePtr;
+
+    //==============================================================================
+    Impl()
+    {
+        DynamicObjectWrapper::createClass (engine.getQuickJSRuntime());
+    }
+
+    void registerNativeObject (const Identifier& name,
+                               DynamicObject* dynamicObject,
+                               std::optional<qjs::JSValue> parent = std::nullopt)
+    {
+        auto wrapper  = std::make_unique<DynamicObjectWrapper> (engine, dynamicObject);
+        auto* ctx     = engine.getQuickJSContext();
+        auto jsObject = JS_NewObjectClass (ctx, (int) DynamicObjectWrapper::getClassId());
+        qjs::JS_SetOpaque (jsObject, (void*) wrapper.get());
+
+        std::vector<qjs::JSCFunctionListEntry> propertyFunctionList;
+
+        for (const auto& [identifier, prop] : wrapper->getProperties())
+        {
+            auto* jsIdentifier = identifier.toString().toRawUTF8();
+
+            if (prop.isMethod())
+            {
+                qjs::JS_SetPropertyStr (ctx,
+                                        jsObject,
+                                        jsIdentifier,
+                                        JS_NewCFunctionMagic (ctx,
+                                                              DynamicObjectWrapper::callDispatcher,
+                                                              jsIdentifier,
+                                                              0,
+                                                              qjs::JS_CFUNC_generic_magic,
+                                                              wrapper->getOrdinal (identifier)));
+            }
+            else if (prop.isObject())
+            {
+                if (auto* embeddedObject = prop.getDynamicObject())
+                    registerNativeObject (identifier, embeddedObject, jsObject);
+            }
+            else
+            {
+                const auto entry = makeFunctionListEntry (jsIdentifier,
+                                                          DynamicObjectWrapper::getDispatcher,
+                                                          DynamicObjectWrapper::setDispatcher,
+                                                          wrapper->getOrdinal (identifier));
+                propertyFunctionList.push_back (entry);
+            }
+        }
+
+        if (! propertyFunctionList.empty())
+        {
+            qjs::JS_SetPropertyFunctionList (ctx,
+                                             jsObject,
+                                             propertyFunctionList.data(),
+                                             (int) propertyFunctionList.size());
+        }
+
+        const auto jsObjectName = name.toString().toRawUTF8();
+
+        if (parent.has_value())
+        {
+            qjs::JS_SetPropertyStr (ctx, *parent, jsObjectName, jsObject);
+        }
+        else
+        {
+            auto globalObject = ValuePtr { qjs::JS_GetGlobalObject (ctx), ctx };
+            qjs::JS_SetPropertyStr (ctx, globalObject.get(), jsObjectName, jsObject);
+        }
+
+        wrapper.release();
+    }
+
+    var evaluate (const String& code, Result* errorMessage, RelativeTime maxExecTime)
+    {
+        shouldStop = false;
+
+        engine.setInterruptHandler ([this, maxExecTime, started = Time::getMillisecondCounterHiRes()]()
+                                    {
+                                        if (shouldStop)
+                                            return 1;
+
+                                        const auto elapsed = RelativeTime::milliseconds ((int64) (Time::getMillisecondCounterHiRes() - started));
+                                        return elapsed > maxExecTime ? 1 : 0;
+                                    });
+
+        if (errorMessage != nullptr)
+            *errorMessage = Result::ok();
+
+        try
+        {
+            auto result = engine.getContext().evaluate (code.toStdString());
+            return VariantConverter<choc::value::Value>::toVar (result);
+        }
+        catch (const choc::javascript::Error& error)
+        {
+            if (errorMessage != nullptr)
+                *errorMessage = Result::fail (error.what());
+        }
+
+        return var::undefined();
+    }
+
+    Result execute (const String& code, RelativeTime maxExecTime)
+    {
+        auto result = Result::ok();
+        evaluate (code, &result, maxExecTime);
+        return result;
+    }
+
+    var callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* errorMessage)
+    {
+        std::vector<choc::value::Value> argList;
+        argList.reserve ((size_t) args.numArguments);
+
+        for (int i = 0; i < args.numArguments; ++i)
+            argList.emplace_back (VariantConverter<choc::value::Value>::fromVar (args.arguments[i]));
+
+        if (errorMessage != nullptr)
+            *errorMessage = Result::ok();
+
+        try
+        {
+            auto& ctx = engine.getContext();
+            return VariantConverter<choc::value::Value>::toVar (ctx.invokeWithArgList (function.toString().toRawUTF8(),
+                                                                                       argList));
+        }
+        catch (const choc::javascript::Error& error)
+        {
+            if (errorMessage != nullptr)
+                *errorMessage = Result::fail (error.what());
+        }
+
+        return var::undefined();
+    }
+
+    void stop() noexcept
+    {
+        shouldStop = true;
+    }
+
+    JSObject getRootObject() const
+    {
+        return JSObject { &engine };
+    }
+
+    const detail::QuickJSWrapper& getEngine() const
+    {
+        return engine;
+    }
+
+private:
+    //==============================================================================
+    detail::QuickJSWrapper engine;
+    std::atomic<bool> shouldStop = false;
+};
+
+//==============================================================================
+JavascriptEngine::JavascriptEngine() : impl (std::make_unique<Impl>())
+{
+}
+
+JavascriptEngine::~JavascriptEngine() = default;
 
 void JavascriptEngine::registerNativeObject (const Identifier& name, DynamicObject* object)
 {
-    root->setProperty (name, object);
+    impl->registerNativeObject (name, object);
 }
 
-Result JavascriptEngine::execute (const String& code)
+Result JavascriptEngine::execute (const String& javascriptCode)
 {
-    try
-    {
-        prepareTimeout();
-        root->execute (code);
-    }
-    catch (String& error)
-    {
-        return Result::fail (error);
-    }
-
-    return Result::ok();
+    return impl->execute (javascriptCode, maximumExecutionTime);
 }
 
-var JavascriptEngine::evaluate (const String& code, Result* result)
+var JavascriptEngine::evaluate (const String& javascriptCode, Result* errorMessage)
 {
-    try
+    return impl->evaluate (javascriptCode, errorMessage, maximumExecutionTime);
+}
+
+var JavascriptEngine::callFunction (const Identifier& function,
+                                    const var::NativeFunctionArgs& args,
+                                    Result* errorMessage)
+{
+    return impl->callFunction (function, args, errorMessage);
+}
+
+void JavascriptEngine::stop() noexcept
+{
+    impl->stop();
+}
+
+JSObject JavascriptEngine::getRootObject() const
+{
+    return impl->getRootObject();
+}
+
+NamedValueSet JavascriptEngine::getRootObjectProperties() const
+{
+    return getRootObject().getProperties();
+}
+
+//==============================================================================
+static bool hasProperty (qjs::JSContext* ctx, qjs::JSValueConst object, const char* name)
+{
+    qjs::JSAtom atom = JS_NewAtom (ctx, name);
+    ScopeGuard freeAtom { [&] { qjs::JS_FreeAtom (ctx, atom); } };
+
+    return JS_HasProperty (ctx, object, atom) > 0;
+}
+
+static qjs::JSValue getOrCreateProperty (qjs::JSContext* ctx, qjs::JSValueConst object, const char* name)
+{
+    if (! hasProperty (ctx, object, name))
+        qjs::JS_SetPropertyStr (ctx, object, name, JS_NewObject (ctx));
+
+    return qjs::JS_GetPropertyStr (ctx, object, name);
+}
+
+static uint32_t toUint32 (int64 value)
+{
+    jassert (0 <= value && value <= (int64) std::numeric_limits<uint32_t>::max());
+    return (uint32_t) value;
+}
+
+//==============================================================================
+struct JSFunctionArguments
+{
+    explicit JSFunctionArguments (qjs::JSContext* contextIn) : context (contextIn)
     {
-        prepareTimeout();
-        if (result != nullptr) *result = Result::ok();
-        return root->evaluate (code);
     }
-    catch (String& error)
+
+    ~JSFunctionArguments()
     {
-        if (result != nullptr) *result = Result::fail (error);
+        for (const auto& value : values)
+            qjs::JS_FreeValue (context, value);
     }
+
+    void add (const var& arg)
+    {
+        values.push_back (juceToQuickJs (arg, context));
+    }
+
+    qjs::JSValue* getArguments()
+    {
+        return values.data();
+    }
+
+    int getSize() const
+    {
+        return (int) values.size();
+    }
+
+private:
+    qjs::JSContext* context;
+    std::vector<qjs::JSValue> values;
+
+    JUCE_DECLARE_NON_COPYABLE (JSFunctionArguments)
+    JUCE_DECLARE_NON_MOVEABLE (JSFunctionArguments)
+};
+
+//==============================================================================
+class JSObject::Impl
+{
+public:
+    using ValuePtr = qjs::QuickJSContext::ValuePtr;
+
+    explicit Impl (const detail::QuickJSWrapper* engineIn)
+        : Impl (engineIn,
+                { qjs::JS_GetGlobalObject (engineIn->getQuickJSContext()), engineIn->getQuickJSContext() })
+    {
+    }
+
+    Impl (const Impl& other)
+        : Impl (other.engine,
+                { qjs::JS_DupValue (other.engine->getQuickJSContext(), other.valuePtr.get()),
+                  other.engine->getQuickJSContext() })
+    {
+    }
+
+    std::unique_ptr<Impl> getChild (const Identifier& prop) const
+    {
+        return rawToUniquePtr (new Impl (engine, { getOrCreateProperty (engine->getQuickJSContext(),
+                                                                        valuePtr.get(),
+                                                                        prop.toString().toRawUTF8()),
+                                                   engine->getQuickJSContext() }));
+    }
+
+    std::unique_ptr<Impl> getChild (int64 index) const
+    {
+        jassert (isArray());
+        return rawToUniquePtr (new Impl (engine, valuePtr[toUint32 (index)]));
+    }
+
+    bool hasProperty (const Identifier& name) const
+    {
+        return juce::hasProperty (engine->getQuickJSContext(), valuePtr.get(), name.toString().toRawUTF8());
+    }
+
+    void setProperty (const Identifier& name, const var& value) const
+    {
+        auto* ctx = engine->getQuickJSContext();
+
+        qjs::JS_SetPropertyStr (ctx, valuePtr.get(), name.toString().toRawUTF8(), juceToQuickJs (value, ctx));
+    }
+
+    void setProperty (int64 index, const var& value) const
+    {
+        auto* ctx = engine->getQuickJSContext();
+
+        qjs::JS_SetPropertyInt64 (ctx, valuePtr.get(), index, juceToQuickJs (value, ctx));
+    }
+
+    var get() const
+    {
+        if (auto* opaque = qjs::JS_GetOpaque (valuePtr.get(), DynamicObjectWrapper::getClassId()))
+            if (DynamicObjectWrapper::getDynamicObjects().count (opaque) != 0)
+                return { static_cast<DynamicObjectWrapper*> (opaque)->object.get() };
+
+        return quickJSToJuce (valuePtr.get(), engine->getQuickJSContext());
+    }
+
+    var invokeMethod (const Identifier& methodName, Span<const var> args, Result* result) const
+    {
+        if (! hasProperty (methodName))
+        {
+            jassertfalse;
+            return {};
+        }
+
+        auto* ctx = engine->getQuickJSContext();
+        const auto methodAtom = JS_NewAtom (ctx, methodName.toString().toRawUTF8());
+        ScopeGuard scope { [&] { qjs::JS_FreeAtom (ctx, methodAtom); } };
+
+        JSFunctionArguments arguments { ctx };
+
+        for (const auto& arg : args)
+            arguments.add (arg);
+
+        ValuePtr returnVal { qjs::JS_Invoke (ctx,
+                                             valuePtr.get(),
+                                             methodAtom,
+                                             arguments.getSize(),
+                                             arguments.getArguments()),
+                             ctx };
+
+        return VariantConverter<choc::value::Value>::toVar (quickJSToChoc (returnVal, result));
+    }
+
+    NamedValueSet getProperties() const
+    {
+        NamedValueSet result;
+
+        auto* ctx = engine->getQuickJSContext();
+        auto names = ValuePtr { qjs::JS_GetOwnPropertyNames2 (ctx,
+                                                              valuePtr.get(),
+                                                              qjs::JS_GPN_ENUM_ONLY | qjs::JS_GPN_STRING_MASK,
+                                                              qjs::JS_ITERATOR_KIND_KEY),
+                                ctx };
+
+
+        if (const auto propertyNames = quickJSToChoc (names); propertyNames.isArray())
+        {
+            for (const auto& name : propertyNames)
+            {
+                if (name.isString())
+                {
+                    const Identifier prop { name.toString() };
+                    result.set (prop, getChild (prop)->get());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    bool isArray() const
+    {
+        return qjs::JS_IsArray (engine->getQuickJSContext(), valuePtr.get());
+    }
+
+    int64 getSize() const
+    {
+        if (! isArray())
+        {
+            jassertfalse;
+            return 0;
+        }
+
+        auto lengthProp = valuePtr["length"];
+        uint32_t length = 0;
+        qjs::JS_ToUint32 (engine->getQuickJSContext(), &length, lengthProp.get());
+        return (int64) length;
+    }
+
+private:
+    Impl (const detail::QuickJSWrapper* e, ValuePtr&& ptr)
+        : engine (e), valuePtr (std::move (ptr))
+    {
+    }
+
+    const detail::QuickJSWrapper* engine = nullptr;
+    ValuePtr valuePtr;
+};
+
+JSObject::JSObject (const detail::QuickJSWrapper* engine)
+    : impl (new Impl (engine))
+{
+}
+
+JSObject::JSObject (std::unique_ptr<Impl> implIn)
+    : impl (std::move (implIn))
+{
+}
+
+JSObject::JSObject (const JSObject& other)
+    : impl (new Impl (*other.impl))
+{
+}
+
+JSObject::~JSObject() = default;
+
+JSObject::JSObject (JSObject&&) noexcept = default;
+
+JSObject& JSObject::operator= (const JSObject& other)
+{
+    JSObject { other }.swap (*this);
+    return *this;
+}
+
+JSObject& JSObject::operator= (JSObject&& other) noexcept = default;
+
+JSObject JSObject::getChild (const Identifier& name) const
+{
+    return JSObject { impl->getChild (name) };
+}
+
+JSObject JSObject::operator[] (const Identifier& name) const
+{
+    return getChild (name);
+}
+
+bool JSObject::isArray() const
+{
+    return impl->isArray();
+}
+
+int64 JSObject::getSize() const
+{
+    return impl->getSize();
+}
+
+JSObject JSObject::getChild (int64 index) const
+{
+    jassert (isArray());
+    return JSObject { impl->getChild (index) };
+}
+
+JSObject JSObject::operator[] (int64 index) const
+{
+    return getChild (index);
+}
+
+bool JSObject::hasProperty (const Identifier& name) const
+{
+    return impl->hasProperty (name);
+}
+
+var JSObject::get() const
+{
+    return impl->get();
+}
+
+void JSObject::setProperty (const Identifier& name, const var& value) const
+{
+    impl->setProperty (name, value);
+}
+
+void JSObject::setProperty (int64 index, const var& value) const
+{
+    impl->setProperty (index, value);
+}
+
+var JSObject::invokeMethod (const Identifier& methodName,
+                            Span<const var> args,
+                            Result* result) const
+{
+    return impl->invokeMethod (methodName, args, result);
+}
+
+NamedValueSet JSObject::getProperties() const
+{
+    return impl->getProperties();
+}
+
+void JSObject::swap (JSObject& other) noexcept
+{
+    std::swap (impl, other.impl);
+}
+
+//==============================================================================
+JSCursor::JSCursor (JSObject rootIn) : root (std::move (rootIn))
+{
+}
+
+var JSCursor::get() const
+{
+    if (const auto resolved = getFullResolution())
+        return resolved->get();
 
     return var::undefined();
 }
 
-var JavascriptEngine::callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* result)
+void JSCursor::set (const var& value) const
 {
-    auto returnVal = var::undefined();
+    const auto resolved = getPartialResolution();
 
-    try
+    if (! resolved.has_value())
     {
-        prepareTimeout();
-        if (result != nullptr) *result = Result::ok();
-        RootObject::Scope ({}, *root, *root).findAndInvokeMethod (function, args, returnVal);
-    }
-    catch (String& error)
-    {
-        if (result != nullptr) *result = Result::fail (error);
+        jassertfalse;  // Can't resolve an Object to change along the path stored in the cursor
+        return;
     }
 
-    return returnVal;
+    const auto& [object, property] = *resolved;
+
+    if (! property.has_value())
+    {
+        jassertfalse;  // Can't set the value of the root Object
+        return;
+    }
+
+    if (auto* prop = std::get_if<Identifier> (&(*property)))
+    {
+        object.setProperty (*prop, value);
+        return;
+    }
+
+    if (auto* prop = std::get_if<int64> (&(*property)))
+    {
+        object.setProperty (*prop, value);
+        return;
+    }
 }
 
-var JavascriptEngine::callFunctionObject (DynamicObject* objectScope, const var& functionObject,
-                                          const var::NativeFunctionArgs& args, Result* result)
+JSCursor JSCursor::getChild (const Identifier& name) const
 {
-    auto returnVal = var::undefined();
-
-    try
-    {
-        prepareTimeout();
-        if (result != nullptr) *result = Result::ok();
-        RootObject::Scope rootScope ({}, *root, *root);
-        RootObject::Scope (&rootScope, *root, DynamicObject::Ptr (objectScope))
-            .invokeMethod (functionObject, args, returnVal);
-    }
-    catch (String& error)
-    {
-        if (result != nullptr) *result = Result::fail (error);
-    }
-
-    return returnVal;
+    auto copy = *this;
+    copy.path.emplace_back (name);
+    return copy;
 }
 
-const NamedValueSet& JavascriptEngine::getRootObjectProperties() const noexcept
+JSCursor JSCursor::operator[] (const Identifier& name) const
 {
-    return root->getProperties();
+    return getChild (name);
 }
 
-JUCE_END_IGNORE_WARNINGS_MSVC
+JSCursor JSCursor::getChild (int64 index) const
+{
+    auto copy = *this;
+    copy.path.emplace_back (index);
+    return copy;
+}
+
+JSCursor JSCursor::operator[] (int64 index) const
+{
+    return getChild (index);
+}
+
+JSObject JSCursor::getOrCreateObject() const
+{
+    const auto resolved = getPartialResolution();
+    jassert (resolved.has_value());
+
+    const auto& [object, property] = *resolved;
+
+    if (! property.has_value())
+        return object;
+
+    auto* integerValue = std::get_if<int64> (&(*property));
+
+    jassert   (integerValue == nullptr
+            || (object.isArray() && (*integerValue) < object.getSize()));
+
+    if (integerValue != nullptr)
+        return object[*integerValue];
+
+    auto* prop = std::get_if<Identifier> (&(*property));
+    jassert(prop != nullptr);
+    return object[*prop];
+}
+
+bool JSCursor::isValid() const
+{
+    return getPartialResolution().has_value();
+}
+
+bool JSCursor::isArray() const
+{
+    if (auto resolved = getFullResolution())
+        return resolved->isArray();
+
+    return false;
+}
+
+var JSCursor::invoke (Span<const var> args, Result* result) const
+{
+    const auto resolved = getPartialResolution();
+
+    if (! resolved.has_value())
+    {
+        jassertfalse;
+        return {};
+    }
+
+    const auto& [object, property] = *resolved;
+    if (! property.has_value())
+    {
+        jassertfalse;
+        return {};
+    }
+
+    return object.invokeMethod (*std::get_if<Identifier> (&(*property)), args, result);
+}
+
+std::optional<JSObject> JSCursor::resolve (JSObject object, Property property)
+{
+    if (auto* index = std::get_if<int64> (&property))
+    {
+        if (! object.isArray())
+            return std::nullopt;
+
+        if (! (*index < object.getSize()))
+            return std::nullopt;
+
+        return object[*index];
+    }
+
+    if (auto* key = std::get_if<Identifier> (&property))
+    {
+        if (! object.hasProperty (*key))
+            return std::nullopt;
+
+        return object[*key];
+    }
+
+    jassertfalse;
+    return std::nullopt;
+}
+
+std::optional<JSCursor::PartialResolution> JSCursor::getPartialResolution() const
+{
+    auto object = root;
+
+    for (int i = 0, iEnd = (int) path.size() - 1; i < iEnd; ++i)
+    {
+        const auto& property = path[(size_t) i];
+        auto objectOpt = resolve (object, property);
+
+        if (! objectOpt.has_value())
+            return std::nullopt;
+
+        object = *objectOpt;
+    }
+
+    return std::make_optional<PartialResolution> (std::move (object),
+                                                  path.empty() ? std::nullopt
+                                                               : std::make_optional (path.back()));
+}
+
+std::optional<JSObject> JSCursor::getFullResolution() const
+{
+    if (auto partiallyResolved = getPartialResolution())
+    {
+        if (! partiallyResolved->second.has_value())
+            return partiallyResolved->first;
+
+        return resolve (partiallyResolved->first, *(partiallyResolved->second));
+    }
+
+    return std::nullopt;
+}
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+static constexpr const char javascriptTestSource[] = R"x(
+var testObject = new Object();
+testObject.value = 9;
+testObject.add = function(a, b)
+                 {
+                     return a + b;
+                 };
+var array = [1.1, 1.9, -1.25, -1.9];
+)x";
+
+static constexpr const char accessNewObject[] = R"x(
+var ref = newObject;
+)x";
+
+static constexpr const char createAccumulator[] = R"x(
+class CommunicationsObject
+{
+    constructor()
+    {
+        this.value = 0;
+    }
+}
+
+class DataAccumulator
+{
+    constructor()
+    {
+        this.commObject = new CommunicationsObject();
+        this.sum = 0;
+    }
+
+    getCommObject()
+    {
+        return this.commObject;
+    }
+
+    accumulate()
+    {
+        this.sum += this.commObject.value;
+        this.commObject.value = 0;
+        return this.sum;
+    }
+}
+
+var accumulator = new DataAccumulator();
+var commObject = accumulator.getCommObject();
+)x";
+
+static constexpr const char replaceObjectAtCommHandleLocation[] = R"x(
+var commObject = new CommunicationsObject();
+)x";
+
+
+class JavascriptTests  : public UnitTest
+{
+public:
+    JavascriptTests() : UnitTest ("Javascript", UnitTestCategories::gui)
+    {
+    }
+
+    void runTest() override
+    {
+        JavascriptEngine engine;
+        engine.maximumExecutionTime = RelativeTime::seconds (5);
+
+        engine.evaluate (javascriptTestSource);
+
+        beginTest ("JSCursor::invokeMethod");
+        {
+            JSCursor root { engine.getRootObject() };
+            const auto result = root["testObject"]["add"] (Span { std::initializer_list<var> { 5, 2 } });
+            expect (result.isDouble());
+            expect (exactlyEqual ((double) result, 7.0));
+        }
+
+        beginTest ("JSCursor Array access");
+        {
+            JSCursor root { engine.getRootObject() };
+            expect (root["array"].isArray());
+            expectEquals ((double) root["array"][2].get(), -1.25);
+        }
+
+        beginTest ("JSObjectCursor references");
+        {
+            auto rootObject = engine.getRootObject();
+            rootObject["child"]["value"];
+
+            JSCursor root { rootObject };
+            auto child = root["child"];
+            auto value = child["value"];
+            value.set (9);
+
+            auto directReference = value;
+            directReference.set (10);
+            expectEquals ((double) value.get(), 10.0);
+
+            auto indirectReference = child["value"];
+            indirectReference.set (11);
+            expectEquals ((double) value.get(), 11.0);
+
+            auto indirectReference2 = root["child"]["value"];
+            indirectReference2.set (12);
+            expectEquals ((double) value.get(), 12.0);
+        }
+
+        //==============================================================================
+        beginTest ("The object referenced by the cursor should be accessible from Javascript");
+        {
+            auto rooObject = engine.getRootObject();
+            auto newObject = rooObject["newObject"];
+
+            auto result = Result::ok();
+            engine.evaluate (accessNewObject, &result);
+            expect (result.wasOk(), "Failed to access newObject: " + result.getErrorMessage());
+        }
+
+        beginTest ("The object referenced by the cursor shouldn't disappear/change");
+        {
+            engine.execute (createAccumulator);
+            JSCursor rootCursor { engine.getRootObject() };
+            auto commObjectCursor = rootCursor["commObject"];
+            commObjectCursor["value"].set (5);
+            auto accumulatorCursor = rootCursor["accumulator"];
+
+            // The Accumulator and our cursor refer to the same object, through which they can
+            // communicate.
+            expectEquals ((int) accumulatorCursor["accumulate"]({}), 5);
+
+            // A cursor contains an owning reference to the Object passed into its constructor. We
+            // can bind a cursor to the Object at the current location by reseating it. Without this
+            // step the test would fail.
+            commObjectCursor = JSCursor { commObjectCursor.getOrCreateObject() };
+
+            // This changes the object under the previous location.
+            engine.execute (replaceObjectAtCommHandleLocation);
+            commObjectCursor["value"].set (2);
+
+            expectEquals ((int) accumulatorCursor["accumulate"]({}), 7,
+                          "We aren't referring to the Accumulator's object anymore");
+        }
+
+        beginTest ("A JSCursor instance can be used to retrieve whatever value is at a given location");
+        {
+            engine.execute ("var path = new Object();"
+                            "path.to  = new Object();"
+                            "path.to.location = 5;");
+
+            auto cursor = JSCursor { engine.getRootObject() }["path"]["to"]["location"];
+
+            expectEquals ((int) cursor.get(), 5);
+
+            engine.execute ("path.to = new Object();"
+                            "path.to.location = 6;");
+
+            expectEquals ((int) cursor.get(), 6);
+        }
+    }
+};
+
+static JavascriptTests javascriptTests;
+
+#endif
 
 } // namespace juce

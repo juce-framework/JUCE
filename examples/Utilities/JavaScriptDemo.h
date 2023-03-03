@@ -52,6 +52,28 @@
 
 #include "../Assets/DemoUtilities.h"
 
+static constexpr const char javascriptSource[] = R"x(/*
+    Javascript! In this simple demo, the native
+    code provides an object called 'Demo' which
+    has a method 'print' that writes to the
+    console below...
+*/
+
+Demo.print ("Hello World in JUCE + Javascript!");
+Demo.print ("");
+
+function factorial (n)
+{
+    var total = 1;
+    while (n > 0)
+        total = total * n--;
+    return total;
+}
+
+for (var i = 1; i < 10; ++i)
+    Demo.print ("Factorial of " + i + " = " + factorial (i));
+)x";
+
 //==============================================================================
 class JavaScriptDemo final : public Component,
                              private CodeDocument::Listener,
@@ -75,28 +97,7 @@ public:
 
         codeDocument.addListener (this);
 
-        editor->loadContent (
-            "/*\n"
-            "    Javascript! In this simple demo, the native\n"
-            "    code provides an object called \'Demo\' which\n"
-            "    has a method \'print\' that writes to the\n"
-            "    console below...\n"
-            "*/\n"
-            "\n"
-            "Demo.print (\"Hello World in JUCE + Javascript!\");\n"
-            "Demo.print (\"\");\n"
-            "\n"
-            "function factorial (n)\n"
-            "{\n"
-            "    var total = 1;\n"
-            "    while (n > 0)\n"
-            "        total = total * n--;\n"
-            "    return total;\n"
-            "}\n"
-            "\n"
-            "for (var i = 1; i < 10; ++i)\n"
-            "    Demo.print (\"Factorial of \" + i \n"
-            "                   + \" = \" + factorial (i));\n");
+        editor->loadContent (javascriptSource);
 
         setSize (600, 750);
     }

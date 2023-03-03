@@ -2932,6 +2932,17 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_RangedDirectoryIterator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_TemporaryFile.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_WildcardFileFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\containers\choc_Value.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\javascript\choc_javascript.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\javascript\choc_javascript_QuickJS.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\math\choc_MathHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\platform\choc_Assert.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\platform\choc_DisableAllWarnings.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\platform\choc_ReenableAllWarnings.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\text\choc_FloatToString.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\text\choc_JSON.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\text\choc_StringUtilities.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\choc\text\choc_UTF8.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_Javascript.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSON.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSONSerialisation.h"/>

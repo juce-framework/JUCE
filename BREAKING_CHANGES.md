@@ -4,6 +4,77 @@
 
 ## Change
 
+The JavascriptEngine::callFunctionObject() function has been removed.
+
+**Possible Issues**
+
+Projects that used the removed function will fail to compile.
+
+**Workaround**
+
+Use the JSObjectCursor::invokeMethod() function to call functions beyond the
+root scope.
+
+**Rationale**
+
+The JavascriptEngine's underlying implementation has been changed, and the
+DynamicObject type is no longer used for the internal implementation of the
+engine. The JSObjectCursor class provides a way to navigate the Javascript
+object graph without depending on the type of the engine's internal
+implementation.
+
+
+## Change
+
+The JavascriptEngine::getRootObjectProperties() function returns its result by
+value instead of const reference.
+
+**Possible Issues**
+
+Projects that captured the returned value by reference and depended on it being
+valid for more than the current function's scope may stop working correctly.
+
+**Workaround**
+
+If the return value is used beyond the calling function's scope it must be
+stored in a value.
+
+**Rationale**
+
+The JavascriptEngine's underlying implementation has been changed, and the
+NamedValueSet type is no longer used in its internal representation. Hence a new
+NamedValueSet object is created during the getRootObjectProperties() function
+call.
+
+
+## Change
+
+JavascriptEngine::evaluate() will now return a void variant if the passed in
+code successfully evaluates to void, and only return an undefined variant if
+an error occurred during evaluation. The previous implementation would return
+var::undefined() in both cases.
+
+**Possible Issues**
+
+Projects that depended on the returned value of JavascriptEngine::evaluate() to
+be undefined even during successful evaluation may fail to work correctly.
+
+**Workaround**
+
+Code paths that depend on an undefined variant to be returned should be checked
+if they aren't used exclusively to determine evaluation failure. In failed
+cases the JavascriptEngine::evaluate() function will continue to return
+var::undefined().
+
+**Rationale**
+
+When a Javascript expression successfully evaluates to void, and when it fails
+evaluation due to timeout or syntax errors are distinctly different situations
+and this should be reflected on the value returned.
+
+
+## Change
+
 The `WebBrowserComponent::pageAboutToLoad()` function on Android now only
 receives callbacks for entire page navigation events, as opposed to every
 resource fetch operation. Returning `false` from the function now prevents
@@ -33,6 +104,7 @@ Prior to this change there was no way to reject a page load operation without
 any visible effect, like there was on the other platforms. The fine grained per
 resource control was not possible on other platforms. This change makes the
 Android implementation more consistent with the other platforms.
+
 
 ## Change
 
