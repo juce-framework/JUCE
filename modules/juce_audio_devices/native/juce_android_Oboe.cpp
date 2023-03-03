@@ -478,7 +478,7 @@ private:
                 auto nextState = oboe::StreamState::Started;
                 int64 timeoutNanos = 1000 * oboe::kNanosPerMillisecond;
 
-                auto startResult = stream->requestStart();
+                [[maybe_unused]] auto startResult = stream->requestStart();
                 JUCE_OBOE_LOG ("Requested Oboe stream start with result: " + getOboeString (startResult));
 
                 startResult = stream->waitForStateChange (expectedState, &nextState, timeoutNanos);
