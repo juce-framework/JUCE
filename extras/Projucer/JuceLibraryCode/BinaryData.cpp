@@ -8611,7 +8611,7 @@ static const unsigned char temp_binary_data_67[] =
 "            return false;\r\n"
 "\r\n"
 "        return *s.rbegin() == c;\r\n"
-"    };\r\n"
+"    }\r\n"
 "\r\n"
 "    static std::string appendedPaths (const std::string& first, const std::string& second)\r\n"
 "    {\r\n"
@@ -9013,7 +9013,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x7c03d519:  numBytes = 3005; return juce_runtime_arch_detection_cpp;
         case 0x295b6f43:  numBytes = 1212; return juce_LinuxSubprocessHelper_cpp;
-        case 0xef269d3a:  numBytes = 12183; return juce_SimpleBinaryBuilder_cpp;
+        case 0xef269d3a:  numBytes = 12182; return juce_SimpleBinaryBuilder_cpp;
         default: break;
     }
 
