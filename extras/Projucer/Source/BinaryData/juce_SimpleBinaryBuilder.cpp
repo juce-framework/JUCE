@@ -53,7 +53,7 @@ struct FileHelpers
             return false;
 
         return *s.rbegin() == c;
-    };
+    }
 
     static std::string appendedPaths (const std::string& first, const std::string& second)
     {
