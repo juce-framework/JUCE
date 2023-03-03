@@ -127,7 +127,6 @@ namespace juce
     class Component;
     class LookAndFeel;
     class MouseInputSource;
-    class MouseInputSourceInternal;
     class ComponentPeer;
     class MouseEvent;
     struct MouseWheelDetails;
@@ -161,7 +160,6 @@ namespace juce
     class Displays;
     class AccessibilityHandler;
     class KeyboardFocusTraverser;
-    class PointerState;
 
     class FlexBox;
     class Grid;
@@ -170,7 +168,19 @@ namespace juce
    #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
     Image createSnapshotOfNativeWindow (void* nativeWindowHandle);
    #endif
-}
+
+    namespace detail
+    {
+        struct ComponentHelpers;
+        class MouseInputSourceImpl;
+        class MouseInputSourceList;
+        class PointerState;
+        class ScopedMessageBoxImpl;
+        class ToolbarItemDragAndDropOverlayComponent;
+        class TopLevelWindowManager;
+    } // namespace detail
+
+} // namespace juce
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"

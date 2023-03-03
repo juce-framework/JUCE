@@ -825,7 +825,7 @@ static void mainMenuTrackingChanged (bool isTracking)
     }
 }
 
-void juce_initialiseMacMainMenu()
+static void initialiseMacMainMenu()
 {
     menuTrackingChangedCallback = mainMenuTrackingChanged;
 
@@ -837,7 +837,7 @@ void juce_initialiseMacMainMenu()
 NSMenu* createNSMenu (const PopupMenu&, const String&, int, int, bool);
 NSMenu* createNSMenu (const PopupMenu& menu, const String& name, int topLevelMenuId, int topLevelIndex, bool addDelegate)
 {
-    juce_initialiseMacMainMenu();
+    initialiseMacMainMenu();
 
     if (auto* mm = JuceMainMenuHandler::instance)
         return mm->createMenu (menu, name, topLevelMenuId, topLevelIndex, addDelegate);

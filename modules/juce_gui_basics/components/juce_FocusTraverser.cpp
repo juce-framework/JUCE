@@ -26,111 +26,25 @@
 namespace juce
 {
 
-namespace FocusHelpers
-{
-    static int getOrder (const Component* c)
-    {
-        auto order = c->getExplicitFocusOrder();
-        return order > 0 ? order : std::numeric_limits<int>::max();
-    }
-
-    template <typename FocusContainerFn>
-    static void findAllComponents (Component* parent,
-                                   std::vector<Component*>& components,
-                                   FocusContainerFn isFocusContainer)
-    {
-        if (parent == nullptr || parent->getNumChildComponents() == 0)
-            return;
-
-        std::vector<Component*> localComponents;
-
-        for (auto* c : parent->getChildren())
-            if (c->isVisible() && c->isEnabled())
-                localComponents.push_back (c);
-
-        const auto compareComponents = [&] (const Component* a, const Component* b)
-        {
-            const auto getComponentOrderAttributes = [] (const Component* c)
-            {
-                return std::make_tuple (getOrder (c),
-                                        c->isAlwaysOnTop() ? 0 : 1,
-                                        c->getY(),
-                                        c->getX());
-            };
-
-            return getComponentOrderAttributes (a) < getComponentOrderAttributes (b);
-        };
-
-        // This will sort so that they are ordered in terms of explicit focus,
-        // always on top, left-to-right, and then top-to-bottom.
-        std::stable_sort (localComponents.begin(), localComponents.end(), compareComponents);
-
-        for (auto* c : localComponents)
-        {
-            components.push_back (c);
-
-            if (! (c->*isFocusContainer)())
-                findAllComponents (c, components, isFocusContainer);
-        }
-    }
-
-    enum class NavigationDirection { forwards, backwards };
-
-    template <typename FocusContainerFn>
-    static Component* navigateFocus (Component* current,
-                                     Component* focusContainer,
-                                     NavigationDirection direction,
-                                     FocusContainerFn isFocusContainer)
-    {
-        if (focusContainer != nullptr)
-        {
-            std::vector<Component*> components;
-            findAllComponents (focusContainer, components, isFocusContainer);
-
-            const auto iter = std::find (components.cbegin(), components.cend(), current);
-
-            if (iter == components.cend())
-                return nullptr;
-
-            switch (direction)
-            {
-                case NavigationDirection::forwards:
-                    if (iter != std::prev (components.cend()))
-                        return *std::next (iter);
-
-                    break;
-
-                case NavigationDirection::backwards:
-                    if (iter != components.cbegin())
-                        return *std::prev (iter);
-
-                    break;
-            }
-        }
-
-        return nullptr;
-    }
-}
-
 //==============================================================================
 Component* FocusTraverser::getNextComponent (Component* current)
 {
     jassert (current != nullptr);
 
-    return FocusHelpers::navigateFocus (current,
-                                        current->findFocusContainer(),
-                                        FocusHelpers::NavigationDirection::forwards,
-                                        &Component::isFocusContainer);
+    return detail::FocusHelpers::navigateFocus (current,
+                                                current->findFocusContainer(),
+                                                detail::FocusHelpers::NavigationDirection::forwards,
+                                                &Component::isFocusContainer);
 }
 
 Component* FocusTraverser::getPreviousComponent (Component* current)
 {
     jassert (current != nullptr);
 
-    return FocusHelpers::navigateFocus (current,
-                                        current->findFocusContainer(),
-                                        FocusHelpers::NavigationDirection::backwards,
-                                        &Component::isFocusContainer);
+    return detail::FocusHelpers::navigateFocus (current,
+                                                current->findFocusContainer(),
+                                                detail::FocusHelpers::NavigationDirection::backwards,
+                                                &Component::isFocusContainer);
 }
 
 Component* FocusTraverser::getDefaultComponent (Component* parentComponent)
@@ -138,9 +52,9 @@ Component* FocusTraverser::getDefaultComponent (Component* parentComponent)
     if (parentComponent != nullptr)
     {
         std::vector<Component*> components;
-        FocusHelpers::findAllComponents (parentComponent,
-                                         components,
-                                         &Component::isFocusContainer);
+        detail::FocusHelpers::findAllComponents (parentComponent,
+                                                 components,
+                                                 &Component::isFocusContainer);
 
         if (! components.empty())
             return components.front();
@@ -152,9 +66,9 @@ Component* FocusTraverser::getDefaultComponent (Component* parentComponent)
 std::vector<Component*> FocusTraverser::getAllComponents (Component* parentComponent)
 {
     std::vector<Component*> components;
-    FocusHelpers::findAllComponents (parentComponent,
-                                     components,
-                                     &Component::isFocusContainer);
+    detail::FocusHelpers::findAllComponents (parentComponent,
+                                             components,
+                                             &Component::isFocusContainer);
 
     return components;
 }

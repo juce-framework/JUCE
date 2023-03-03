@@ -27,7 +27,7 @@ namespace juce
 {
     void sendAccessibilityAutomationEvent (const AccessibilityHandler&, EVENTID);
     void sendAccessibilityPropertyChangedEvent (const AccessibilityHandler&, PROPERTYID, VARIANT);
-}
+} // namespace juce
 
 #include "juce_win32_UIAProviderBase.h"
 #include "juce_win32_UIAExpandCollapseProvider.h"

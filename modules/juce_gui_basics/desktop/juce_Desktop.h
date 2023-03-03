@@ -410,12 +410,12 @@ private:
 
     friend class Component;
     friend class ComponentPeer;
-    friend class MouseInputSourceInternal;
+    friend class detail::MouseInputSourceImpl;
     friend class DeletedAtShutdown;
-    friend class TopLevelWindowManager;
+    friend class detail::TopLevelWindowManager;
     friend class Displays;
 
-    std::unique_ptr<MouseInputSource::SourceList> mouseSources;
+    std::unique_ptr<detail::MouseInputSourceList> mouseSources;
 
     ListenerList<MouseListener> mouseListeners;
     ListenerList<FocusChangeListener> focusListeners;

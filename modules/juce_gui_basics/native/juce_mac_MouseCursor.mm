@@ -35,7 +35,7 @@ public:
     PlatformSpecificHandle (const MouseCursor::StandardCursorType type)
         : cursorHandle (createCursor (type)) {}
 
-    PlatformSpecificHandle (const CustomMouseCursorInfo& info)
+    PlatformSpecificHandle (const detail::CustomMouseCursorInfo& info)
         : cursorHandle (createCursor (info)) {}
 
     ~PlatformSpecificHandle()
@@ -109,7 +109,7 @@ private:
             return fromNSImage (resultImage, NSMakePoint (hotspotX, hotspotY));
         }
     }
-    static NSCursor* createCursor (const CustomMouseCursorInfo& info)
+    static NSCursor* createCursor (const detail::CustomMouseCursorInfo& info)
     {
         return fromNSImage (imageToNSImage (info.image),
                             NSMakePoint (info.hotspot.x, info.hotspot.y));
@@ -187,7 +187,7 @@ class MouseCursor::PlatformSpecificHandle
 {
 public:
     PlatformSpecificHandle (const MouseCursor::StandardCursorType)      {}
-    PlatformSpecificHandle (const CustomMouseCursorInfo&)               {}
+    PlatformSpecificHandle (const detail::CustomMouseCursorInfo&)       {}
 
     static void showInWindow (PlatformSpecificHandle*, ComponentPeer*)  {}
 };

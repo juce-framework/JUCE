@@ -30,97 +30,6 @@ ToolbarItemFactory::ToolbarItemFactory() {}
 ToolbarItemFactory::~ToolbarItemFactory() {}
 
 //==============================================================================
-class ToolbarItemComponent::ItemDragAndDropOverlayComponent    : public Component
-{
-public:
-    ItemDragAndDropOverlayComponent()
-        : isDragging (false)
-    {
-        setAlwaysOnTop (true);
-        setRepaintsOnMouseActivity (true);
-        setMouseCursor (MouseCursor::DraggingHandCursor);
-    }
-
-    void paint (Graphics& g) override
-    {
-        if (ToolbarItemComponent* const tc = getToolbarItemComponent())
-        {
-            if (isMouseOverOrDragging()
-                  && tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar)
-            {
-                g.setColour (findColour (Toolbar::editingModeOutlineColourId, true));
-                g.drawRect (getLocalBounds(), jmin (2, (getWidth() - 1) / 2,
-                                                       (getHeight() - 1) / 2));
-            }
-        }
-    }
-
-    void mouseDown (const MouseEvent& e) override
-    {
-        isDragging = false;
-
-        if (ToolbarItemComponent* const tc = getToolbarItemComponent())
-        {
-            tc->dragOffsetX = e.x;
-            tc->dragOffsetY = e.y;
-        }
-    }
-
-    void mouseDrag (const MouseEvent& e) override
-    {
-        if (e.mouseWasDraggedSinceMouseDown() && ! isDragging)
-        {
-            isDragging = true;
-
-            if (DragAndDropContainer* const dnd = DragAndDropContainer::findParentDragContainerFor (this))
-            {
-                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), ScaledImage(), true, nullptr, &e.source);
-
-                if (ToolbarItemComponent* const tc = getToolbarItemComponent())
-                {
-                    tc->isBeingDragged = true;
-
-                    if (tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar)
-                        tc->setVisible (false);
-                }
-            }
-        }
-    }
-
-    void mouseUp (const MouseEvent&) override
-    {
-        isDragging = false;
-
-        if (ToolbarItemComponent* const tc = getToolbarItemComponent())
-        {
-            tc->isBeingDragged = false;
-
-            if (Toolbar* const tb = tc->getToolbar())
-                tb->updateAllItemPositions (true);
-            else if (tc->getEditingMode() == ToolbarItemComponent::editableOnToolbar)
-                delete tc;
-        }
-    }
-
-    void parentSizeChanged() override
-    {
-        setBounds (0, 0, getParentWidth(), getParentHeight());
-    }
-
-private:
-    //==============================================================================
-    bool isDragging;
-
-    ToolbarItemComponent* getToolbarItemComponent() const noexcept
-    {
-        return dynamic_cast<ToolbarItemComponent*> (getParentComponent());
-    }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemDragAndDropOverlayComponent)
-};
-
-
-//==============================================================================
 ToolbarItemComponent::ToolbarItemComponent (const int itemId_,
                                             const String& labelText,
                                             const bool isBeingUsedAsAButton_)
@@ -230,7 +139,7 @@ void ToolbarItemComponent::setEditingMode (const ToolbarEditingMode newMode)
         }
         else if (overlayComp == nullptr)
         {
-            overlayComp.reset (new ItemDragAndDropOverlayComponent());
+            overlayComp.reset (new detail::ToolbarItemDragAndDropOverlayComponent());
             addAndMakeVisible (overlayComp.get());
             overlayComp->parentSizeChanged();
         }
@@ -249,7 +158,7 @@ std::unique_ptr<AccessibilityHandler> ToolbarItemComponent::createAccessibilityH
     if (! shouldItemBeAccessible)
         return createIgnoredAccessibilityHandler (*this);
 
-    return std::make_unique<ButtonAccessibilityHandler> (*this, AccessibilityRole::button);
+    return std::make_unique<detail::ButtonAccessibilityHandler> (*this, AccessibilityRole::button);
 }
 
 } // namespace juce

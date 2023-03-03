@@ -153,12 +153,12 @@ void sendAccessibilityPropertyChangedEvent (const AccessibilityHandler& handler,
     });
 }
 
-void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, InternalAccessibilityEvent eventType)
+void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler, Event eventType)
 {
     using namespace ComTypes::Constants;
 
-    if (eventType == InternalAccessibilityEvent::elementCreated
-        || eventType == InternalAccessibilityEvent::elementDestroyed)
+    if (eventType == Event::elementCreated
+        || eventType == Event::elementDestroyed)
     {
         if (auto* parent = handler.getParent())
             sendAccessibilityAutomationEvent (*parent, UIA_LayoutInvalidatedEventId);
@@ -166,8 +166,8 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
         return;
     }
 
-    if (eventType == InternalAccessibilityEvent::windowOpened
-        || eventType == InternalAccessibilityEvent::windowClosed)
+    if (eventType == Event::windowOpened
+        || eventType == Event::windowClosed)
     {
         if (auto* peer = handler.getComponent().getPeer())
             if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) == 0)
@@ -178,12 +178,12 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::focusChanged:           return UIA_AutomationFocusChangedEventId;
-            case InternalAccessibilityEvent::windowOpened:           return UIA_Window_WindowOpenedEventId;
-            case InternalAccessibilityEvent::windowClosed:           return UIA_Window_WindowClosedEventId;
-            case InternalAccessibilityEvent::elementCreated:
-            case InternalAccessibilityEvent::elementDestroyed:
-            case InternalAccessibilityEvent::elementMovedOrResized:  break;
+            case Event::focusChanged:           return UIA_AutomationFocusChangedEventId;
+            case Event::windowOpened:           return UIA_Window_WindowOpenedEventId;
+            case Event::windowClosed:           return UIA_Window_WindowClosedEventId;
+            case Event::elementCreated:
+            case Event::elementDestroyed:
+            case Event::elementMovedOrResized:  break;
         }
 
         return {};

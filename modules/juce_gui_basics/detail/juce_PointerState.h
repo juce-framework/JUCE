@@ -23,10 +23,8 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::detail
 {
-
-#ifndef DOXYGEN
 
 class PointerState
 {
@@ -103,7 +101,4 @@ inline auto makeMouseEvent (MouseInputSource source,
                        mouseWasDragged);
 }
 
-
-#endif
-
-} // namespace juce
+} // namespace juce::detail

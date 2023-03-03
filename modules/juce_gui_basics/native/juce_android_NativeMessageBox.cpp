@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::detail
 {
 
 std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (const MessageBoxOptions& options)
@@ -112,4 +112,4 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
     return std::make_unique<AndroidMessageBox> (options);
 }
 
-} // namespace juce
+} // namespace juce::detail

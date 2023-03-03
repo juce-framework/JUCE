@@ -35,90 +35,9 @@ static juce_wchar getDefaultPasswordChar() noexcept
    #endif
 }
 
-static std::unique_ptr<ScopedMessageBoxInterface> createAlertWindowImpl (const MessageBoxOptions& opts)
-{
-    class AlertWindowImpl : public ScopedMessageBoxInterface
-    {
-    public:
-        explicit AlertWindowImpl (const MessageBoxOptions& opts) : options (opts) {}
-
-        void runAsync (std::function<void (int)> recipient) override
-        {
-            if (auto* comp = setUpAlert())
-                comp->enterModalState (true, ModalCallbackFunction::create (std::move (recipient)), true);
-            else
-                NullCheckedInvocation::invoke (recipient, 0);
-        }
-
-        int runSync() override
-        {
-           #if JUCE_MODAL_LOOPS_PERMITTED
-            if (auto comp = rawToUniquePtr (setUpAlert()))
-                return comp->runModalLoop();
-           #endif
-
-            jassertfalse;
-            return 0;
-        }
-
-        void close() override
-        {
-            if (alert != nullptr)
-                if (alert->isCurrentlyModal())
-                    alert->exitModalState();
-
-            alert = nullptr;
-        }
-
-    private:
-        Component* setUpAlert()
-        {
-            auto* component = options.getAssociatedComponent();
-
-            auto& lf = component != nullptr ? component->getLookAndFeel()
-                                            : LookAndFeel::getDefaultLookAndFeel();
-
-            alert = lf.createAlertWindow (options.getTitle(),
-                                          options.getMessage(),
-                                          options.getButtonText (0),
-                                          options.getButtonText (1),
-                                          options.getButtonText (2),
-                                          options.getIconType(),
-                                          options.getNumButtons(),
-                                          component);
-
-            if (alert == nullptr)
-            {
-                // You have to return an alert box!
-                jassertfalse;
-                return nullptr;
-            }
-
-            if (auto* parent = options.getParentComponent())
-            {
-                parent->addAndMakeVisible (alert);
-
-                if (options.getAssociatedComponent() == nullptr)
-                    alert->setCentrePosition (parent->getLocalBounds().getCentre());
-            }
-
-            alert->setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
-
-            return alert;
-        }
-
-        const MessageBoxOptions options;
-        Component::SafePointer<AlertWindow> alert;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindowImpl)
-    };
-
-    return std::make_unique<AlertWindowImpl> (opts);
-}
-
 static int showAlertWindowUnmanaged (const MessageBoxOptions& opts, ModalComponentManager::Callback* cb)
 {
-    return ScopedMessageBox::Pimpl::showUnmanaged (createAlertWindowImpl (opts), cb);
+    return detail::ScopedMessageBoxImpl::showUnmanaged (detail::AlertWindowHelpers::create (opts), cb);
 }
 
 //==============================================================================
@@ -131,7 +50,7 @@ AlertWindow::AlertWindow (const String& title,
      associatedComponent (comp),
      desktopScale (comp != nullptr ? Component::getApproximateScaleFactorForComponent (comp) : 1.0f)
 {
-    setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+    setAlwaysOnTop (detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows());
 
     accessibleMessageLabel.setColour (Label::textColourId,       Colours::transparentBlack);
     accessibleMessageLabel.setColour (Label::backgroundColourId, Colours::transparentBlack);
@@ -774,7 +693,7 @@ ScopedMessageBox AlertWindow::showScopedAsync (const MessageBoxOptions& options,
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
         return NativeMessageBox::showScopedAsync (options, std::move (callback));
 
-    return ScopedMessageBox::Pimpl::show (createAlertWindowImpl (options), std::move (callback));
+    return detail::ScopedMessageBoxImpl::show (detail::AlertWindowHelpers::create (options), std::move (callback));
 }
 
 //==============================================================================

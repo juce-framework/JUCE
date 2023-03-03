@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::detail
 {
 
 #if JUCE_MSVC
@@ -175,7 +175,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
         {
             // this window can get lost behind JUCE windows which are set to be alwaysOnTop
             // so if there are any set it to be topmost
-            const auto topmostFlag = juce_areThereAnyAlwaysOnTopWindows() ? MB_TOPMOST : 0;
+            const auto topmostFlag = detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows() ? MB_TOPMOST : 0;
 
             const auto iconFlags = [&]() -> decltype (topmostFlag)
             {
@@ -345,4 +345,4 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
     return std::make_unique<PreVistaMessageBox> (options, (UINT) extraFlags);
 }
 
-} // namespace juce
+} // namespace juce::detail

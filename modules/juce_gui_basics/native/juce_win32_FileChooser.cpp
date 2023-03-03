@@ -793,7 +793,7 @@ public:
                    0, 0);
 
         setOpaque (true);
-        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+        setAlwaysOnTop (detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows());
         addToDesktop (0);
     }
 

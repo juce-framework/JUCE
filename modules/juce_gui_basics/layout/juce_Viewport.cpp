@@ -26,21 +26,6 @@
 namespace juce
 {
 
-static bool viewportWouldScrollOnEvent (const Viewport* vp, const MouseInputSource& src) noexcept
-{
-    if (vp != nullptr)
-    {
-        switch (vp->getScrollOnDragMode())
-        {
-            case Viewport::ScrollOnDragMode::all:           return true;
-            case Viewport::ScrollOnDragMode::nonHover:      return ! src.canHover();
-            case Viewport::ScrollOnDragMode::never:         return false;
-        }
-    }
-
-    return false;
-}
-
 using ViewportDragPosition = AnimatedPosition<AnimatedPositionBehaviours::ContinuousWithMomentum>;
 
 struct Viewport::DragToScrollListener   : private MouseListener,
@@ -75,7 +60,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
 
     void mouseDown (const MouseEvent& e) override
     {
-        if (! isGlobalMouseListener && viewportWouldScrollOnEvent (&viewport, e.source))
+        if (! isGlobalMouseListener && detail::ViewportHelpers::wouldScrollOnEvent (&viewport, e.source))
         {
             offsetX.setPosition (offsetX.getPosition());
             offsetY.setPosition (offsetY.getPosition());
@@ -98,7 +83,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         {
             auto totalOffset = e.getEventRelativeTo (&viewport).getOffsetFromDragStart().toFloat();
 
-            if (! isDragging && totalOffset.getDistanceFromOrigin() > 8.0f && viewportWouldScrollOnEvent (&viewport, e.source))
+            if (! isDragging && totalOffset.getDistanceFromOrigin() > 8.0f && detail::ViewportHelpers::wouldScrollOnEvent (&viewport, e.source))
             {
                 isDragging = true;
 

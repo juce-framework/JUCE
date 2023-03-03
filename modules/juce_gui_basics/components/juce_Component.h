@@ -2535,7 +2535,7 @@ private:
 
     //==============================================================================
     friend class ComponentPeer;
-    friend class MouseInputSourceInternal;
+    friend class detail::MouseInputSourceImpl;
 
    #ifndef DOXYGEN
     static Component* currentlyFocusedComponent;
@@ -2604,9 +2604,9 @@ private:
     //==============================================================================
     void internalMouseEnter (MouseInputSource, Point<float>, Time);
     void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, const PointerState&, Time);
-    void internalMouseUp    (MouseInputSource, const PointerState&, Time, const ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource, const PointerState&, Time);
+    void internalMouseDown  (MouseInputSource, const detail::PointerState&, Time);
+    void internalMouseUp    (MouseInputSource, const detail::PointerState&, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, const detail::PointerState&, Time);
     void internalMouseMove  (MouseInputSource, Point<float>, Time);
     void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
@@ -2635,8 +2635,7 @@ private:
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
 
-    struct ComponentHelpers;
-    friend struct ComponentHelpers;
+    friend struct detail::ComponentHelpers;
 
     /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.

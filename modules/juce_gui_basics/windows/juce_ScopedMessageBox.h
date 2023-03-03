@@ -55,13 +55,11 @@ public:
     */
     void close();
 
-    /** @internal */
-    class Pimpl;
-
 private:
-    explicit ScopedMessageBox (std::shared_ptr<Pimpl>);
+    friend detail::ScopedMessageBoxImpl;
+    explicit ScopedMessageBox (std::shared_ptr<detail::ScopedMessageBoxImpl>);
 
-    std::shared_ptr<Pimpl> pimpl;
+    std::shared_ptr<detail::ScopedMessageBoxImpl> impl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedMessageBox)
 };

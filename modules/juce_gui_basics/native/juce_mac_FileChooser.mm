@@ -179,7 +179,7 @@ public:
     {
         if (panel != nil)
         {
-            setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+            setAlwaysOnTop (detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows());
             addToDesktop (0);
 
             enterModalState (true);
@@ -415,4 +415,4 @@ bool FileChooser::isPlatformDialogAvailable()
    #endif
 }
 
-}
+} // namespace juce

@@ -92,7 +92,7 @@ public:
         setResizable (options.resizable, options.useBottomRightCornerResizer);
 
         setUsingNativeTitleBar (options.useNativeTitleBar);
-        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+        setAlwaysOnTop (detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows());
     }
 
     void closeButtonPressed() override

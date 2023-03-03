@@ -165,7 +165,7 @@ bool FileChooser::browseForDirectory()
 
 bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp)
 {
-    FocusRestorer focusRestorer;
+    detail::FocusRestorer focusRestorer;
 
     pimpl = createPimpl (flags, previewComp);
     pimpl->runModally();

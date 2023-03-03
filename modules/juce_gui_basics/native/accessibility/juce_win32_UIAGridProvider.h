@@ -136,7 +136,7 @@ private:
     {
         return withCheckedComArgs (pRetVal, *this, [&]() -> HRESULT
         {
-            if (auto* tableHandler = getEnclosingHandlerWithInterface (&getHandler(), &AccessibilityHandler::getTableInterface))
+            if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (&getHandler(), &AccessibilityHandler::getTableInterface))
                 if (auto* tableInterface = tableHandler->getTableInterface())
                     return callback (*tableInterface);
 

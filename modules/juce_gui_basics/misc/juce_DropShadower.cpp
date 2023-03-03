@@ -136,7 +136,7 @@ private:
             if (! component.wasObjectDeleted() && isWindows && component->isOnDesktop())
             {
                 startTimerHz (5);
-                return ! isWindowOnCurrentVirtualDesktop (component->getWindowHandle());
+                return ! detail::WindowingHelpers::isWindowOnCurrentVirtualDesktop (component->getWindowHandle());
             }
 
             stopTimer();

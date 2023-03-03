@@ -406,4 +406,4 @@ private:
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-}
+} // namespace juce
