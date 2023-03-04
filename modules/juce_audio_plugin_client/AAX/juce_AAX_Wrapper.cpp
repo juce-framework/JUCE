@@ -817,7 +817,7 @@ namespace AAXClasses
                 if (GetSideChainInputNum() > 0)
                 {
                     // Pro Tools Output buffer excludes side-chain...
-                    outputChannelList.add(getAAXProcessor().sideChainBuffer.getData());
+                    outputChannelList.add(getAAXProcessor().sideChainBuffer.data());
                 }
 
                 // GetSideChainInputNum would produce 0 when Side-Chain isn't connected (tested with PT 12.8).
@@ -2073,7 +2073,7 @@ namespace AAXClasses
                 // no algorithm or multiple instances.
                 maxBufferSize = 65536;
                 isPrepared = true;
-                sideChainBuffer.calloc (static_cast<size_t> (maxBufferSize));
+                sideChainBuffer.resize (static_cast<size_t> (maxBufferSize));
                 hasSidechain = audioProcessor.getBusCount(true) > 1;
                 return AAX_SUCCESS;
             }
