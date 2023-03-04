@@ -934,7 +934,7 @@ namespace AAXClasses
                 return AAX_SUCCESS;
             }
 
-            bool readSamples (int** destSamples,
+            bool readSamples (int* const* destSamples,
                                       int numDestChannels,
                                       int startOffsetInDestBuffer,
                                       int64 startSampleInFile,
