@@ -1086,7 +1086,7 @@ struct StateHelpers
         GLuint currentTextureID[numTextures];
         int texturesEnabled = 0, currentActiveTexture = -1;
         const OpenGLContext& context;
-        const bool needsToEnableTexture = contextRequiresTexture2DEnableDisable();
+        const bool needsToEnableTexture = ! context.isCoreProfile();
 
         ActiveTextures& operator= (const ActiveTextures&);
     };
@@ -1784,7 +1784,10 @@ struct NonShaderContext   : public LowLevelGraphicsSoftwareRenderer
 
        #if ! JUCE_ANDROID
         target.context.extensions.glActiveTexture (GL_TEXTURE0);
-        glEnable (GL_TEXTURE_2D);
+
+        if (! target.context.isCoreProfile())
+            glEnable (GL_TEXTURE_2D);
+
         clearGLError();
        #endif
 
