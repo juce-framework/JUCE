@@ -537,7 +537,7 @@ public:
 
     void drawComponentBuffer()
     {
-        if (contextRequiresTexture2DEnableDisable())
+        if (! isCoreProfile())
             glEnable (GL_TEXTURE_2D);
 
        #if JUCE_WINDOWS
@@ -644,6 +644,7 @@ public:
         if (getOpenGLVersion() >= Version { 4, 3 } && glDebugMessageCallback != nullptr)
         {
             glEnable (GL_DEBUG_OUTPUT);
+            glEnable (GL_DEBUG_OUTPUT_SYNCHRONOUS);
             glDebugMessageCallback ([] (GLenum, GLenum type, GLuint, GLenum severity, GLsizei, const GLchar* message, const void*)
             {
                 // This may reiterate issues that are also flagged by JUCE_CHECK_OPENGL_ERROR.
@@ -674,6 +675,24 @@ public:
         return InitResult::success;
     }
 
+    bool isCoreProfile() const
+    {
+       #if JUCE_OPENGL_ES
+        return true;
+       #else
+        clearGLError();
+        GLint mask = 0;
+        glGetIntegerv (GL_CONTEXT_PROFILE_MASK, &mask);
+
+        // The context isn't aware of the profile mask, so it pre-dates the core profile
+        if (glGetError() == GL_INVALID_ENUM)
+            return false;
+
+        // Also assumes a compatibility profile if the mask is completely empty for some reason
+        return (mask & (GLint) GL_CONTEXT_CORE_PROFILE_BIT) != 0;
+       #endif
+    }
+
     /*  Returns true if the context requires a non-zero vertex array object (VAO) to be bound.
 
         If the context is a compatibility context, we can just pretend that VAOs don't exist,
@@ -686,16 +705,7 @@ public:
        #if JUCE_OPENGL_ES
         return false;
        #else
-        clearGLError();
-        GLint mask = 0;
-        glGetIntegerv (GL_CONTEXT_PROFILE_MASK, &mask);
-
-        // The context isn't aware of the profile mask, so it pre-dates the core profile
-        if (glGetError() == GL_INVALID_ENUM)
-            return false;
-
-        // Also assumes a compatibility profile if the mask is completely empty for some reason
-        return (mask & (GLint) GL_CONTEXT_CORE_PROFILE_BIT) != 0;
+        return isCoreProfile();
        #endif
     }
 
@@ -1441,6 +1451,12 @@ int OpenGLContext::getSwapInterval() const
 void* OpenGLContext::getRawContext() const noexcept
 {
     return nativeContext != nullptr ? nativeContext->getRawContext() : nullptr;
+}
+
+bool OpenGLContext::isCoreProfile() const
+{
+    auto* c = getCachedImage();
+    return c != nullptr && c->isCoreProfile();
 }
 
 OpenGLContext::CachedImage* OpenGLContext::getCachedImage() const noexcept
