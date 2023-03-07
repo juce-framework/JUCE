@@ -26,15 +26,6 @@
 namespace juce
 {
 
-template <typename This>
-auto* getPrimaryDisplayImpl (This& t)
-{
-    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
-
-    const auto iter = std::find_if (t.displays.begin(), t.displays.end(), [] (auto& d) { return d.isMain; });
-    return iter != t.displays.end() ? std::addressof (*iter) : nullptr;
-}
-
 Displays::Displays (Desktop& desktop)
 {
     init (desktop);
@@ -171,7 +162,10 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
 
 const Displays::Display* Displays::getPrimaryDisplay() const noexcept
 {
-    return getPrimaryDisplayImpl (*this);
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+    const auto iter = std::find_if (displays.begin(), displays.end(), [] (auto& d) { return d.isMain; });
+    return iter != displays.end() ? iter : nullptr;
 }
 
 RectangleList<int> Displays::getRectangleList (bool userAreasOnly) const

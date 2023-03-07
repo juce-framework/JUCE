@@ -700,7 +700,7 @@ void Displays::findDisplays (float masterScale)
                         if (value == nullptr)
                             return {};
 
-                        auto* display = getPrimaryDisplayImpl (Desktop::getInstance().getDisplays());
+                        auto* display = Desktop::getInstance().getDisplays().getPrimaryDisplay();
 
                         if (display == nullptr)
                             return {};
