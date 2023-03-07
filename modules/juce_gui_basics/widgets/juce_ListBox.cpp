@@ -31,19 +31,19 @@ static AccessibilityActions getListRowAccessibilityActions (RowComponentType& ro
 {
     auto onFocus = [&rowComponent]
     {
-        rowComponent.owner.scrollToEnsureRowIsOnscreen (rowComponent.row);
-        rowComponent.owner.selectRow (rowComponent.row);
+        rowComponent.getOwner().scrollToEnsureRowIsOnscreen (rowComponent.getRow());
+        rowComponent.getOwner().selectRow (rowComponent.getRow());
     };
 
     auto onPress = [&rowComponent, onFocus]
     {
         onFocus();
-        rowComponent.owner.keyPressed (KeyPress (KeyPress::returnKey));
+        rowComponent.getOwner().keyPressed (KeyPress (KeyPress::returnKey));
     };
 
     auto onToggle = [&rowComponent]
     {
-        rowComponent.owner.flipRowSelection (rowComponent.row);
+        rowComponent.getOwner().flipRowSelection (rowComponent.getRow());
     };
 
     return AccessibilityActions().addAction (AccessibilityActionType::focus,  std::move (onFocus))
@@ -64,37 +64,109 @@ void ListBox::checkModelPtrIsValid() const
    #endif
 }
 
-class ListBox::RowComponent  : public Component,
-                               public TooltipClient
+//==============================================================================
+/*  The ListBox and TableListBox rows both have similar mouse behaviours, which are implemented here. */
+template <typename Base>
+class ComponentWithListRowMouseBehaviours : public Component
+{
+    auto& getOwner() const { return asBase().getOwner(); }
+
+public:
+    void updateRowAndSelection (const int newRow, const bool nowSelected)
+    {
+        const auto rowChanged       = std::exchange (row,      newRow)      != newRow;
+        const auto selectionChanged = std::exchange (selected, nowSelected) != nowSelected;
+
+        if (rowChanged || selectionChanged)
+            repaint();
+    }
+
+    void mouseDown (const MouseEvent& e) override
+    {
+        isDragging = false;
+        isDraggingToScroll = false;
+        selectRowOnMouseUp = false;
+
+        if (! asBase().isEnabled())
+            return;
+
+        const auto select = getOwner().getRowSelectedOnMouseDown()
+                            && ! selected
+                            && ! viewportWouldScrollOnEvent (getOwner().getViewport(), e.source) ;
+        if (select)
+            asBase().performSelection (e, false);
+        else
+            selectRowOnMouseUp = true;
+    }
+
+    void mouseUp (const MouseEvent& e) override
+    {
+        if (asBase().isEnabled() && selectRowOnMouseUp && ! (isDragging || isDraggingToScroll))
+            asBase().performSelection (e, true);
+    }
+
+    void mouseDrag (const MouseEvent& e) override
+    {
+        if (auto* m = getOwner().getModel())
+        {
+            if (asBase().isEnabled() && e.mouseWasDraggedSinceMouseDown() && ! isDragging)
+            {
+                SparseSet<int> rowsToDrag;
+
+                if (getOwner().getRowSelectedOnMouseDown() || getOwner().isRowSelected (row))
+                    rowsToDrag = getOwner().getSelectedRows();
+                else
+                    rowsToDrag.addRange (Range<int>::withStartAndLength (row, 1));
+
+                if (! rowsToDrag.isEmpty())
+                {
+                    auto dragDescription = m->getDragSourceDescription (rowsToDrag);
+
+                    if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
+                    {
+                        isDragging = true;
+                        getOwner().startDragAndDrop (e, rowsToDrag, dragDescription, m->mayDragToExternalWindows());
+                    }
+                }
+            }
+        }
+
+        if (! isDraggingToScroll)
+            if (auto* vp = getOwner().getViewport())
+                isDraggingToScroll = vp->isCurrentlyScrollingOnDrag();
+    }
+
+    int getRow()            const { return row; }
+    bool isSelected()       const { return selected; }
+
+private:
+    const Base& asBase()    const { return *static_cast<const Base*> (this); }
+          Base& asBase()          { return *static_cast<      Base*> (this); }
+
+    int row = -1;
+    bool selected = false, isDragging = false, isDraggingToScroll = false, selectRowOnMouseUp = false;
+};
+
+//==============================================================================
+class ListBox::RowComponent  : public TooltipClient,
+                               public ComponentWithListRowMouseBehaviours<RowComponent>
 {
 public:
-    RowComponent (ListBox& lb) : owner (lb) {}
+    explicit RowComponent (ListBox& lb) : owner (lb) {}
 
     void paint (Graphics& g) override
     {
         if (auto* m = owner.getModel())
-            m->paintListBoxItem (row, g, getWidth(), getHeight(), isSelected);
+            m->paintListBoxItem (getRow(), g, getWidth(), getHeight(), isSelected());
     }
 
     void update (const int newRow, const bool nowSelected)
     {
-        const auto rowHasChanged = (row != newRow);
-        const auto selectionHasChanged = (isSelected != nowSelected);
-
-        if (rowHasChanged || selectionHasChanged)
-        {
-            repaint();
-
-            if (rowHasChanged)
-                row = newRow;
-
-            if (selectionHasChanged)
-                isSelected = nowSelected;
-        }
+        updateRowAndSelection (newRow, nowSelected);
 
         if (auto* m = owner.getModel())
         {
-            setMouseCursor (m->getMouseCursorForRow (row));
+            setMouseCursor (m->getMouseCursorForRow (getRow()));
 
             customComponent.reset (m->refreshComponentForRow (newRow, nowSelected, customComponent.release()));
 
@@ -114,69 +186,17 @@ public:
 
     void performSelection (const MouseEvent& e, bool isMouseUp)
     {
-        owner.selectRowsBasedOnModifierKeys (row, e.mods, isMouseUp);
+        owner.selectRowsBasedOnModifierKeys (getRow(), e.mods, isMouseUp);
 
         if (auto* m = owner.getModel())
-            m->listBoxItemClicked (row, e);
-    }
-
-    void mouseDown (const MouseEvent& e) override
-    {
-        isDragging = false;
-        isDraggingToScroll = false;
-        selectRowOnMouseUp = false;
-
-        if (isEnabled())
-        {
-            if (owner.selectOnMouseDown && ! isSelected && ! viewportWouldScrollOnEvent (owner.getViewport(), e.source))
-                performSelection (e, false);
-            else
-                selectRowOnMouseUp = true;
-        }
-    }
-
-    void mouseUp (const MouseEvent& e) override
-    {
-        if (isEnabled() && selectRowOnMouseUp && ! (isDragging || isDraggingToScroll))
-            performSelection (e, true);
+            m->listBoxItemClicked (getRow(), e);
     }
 
     void mouseDoubleClick (const MouseEvent& e) override
     {
         if (isEnabled())
             if (auto* m = owner.getModel())
-                m->listBoxItemDoubleClicked (row, e);
-    }
-
-    void mouseDrag (const MouseEvent& e) override
-    {
-        if (auto* m = owner.getModel())
-        {
-            if (isEnabled() && e.mouseWasDraggedSinceMouseDown() && ! isDragging)
-            {
-                SparseSet<int> rowsToDrag;
-
-                if (owner.selectOnMouseDown || owner.isRowSelected (row))
-                    rowsToDrag = owner.getSelectedRows();
-                else
-                    rowsToDrag.addRange (Range<int>::withStartAndLength (row, 1));
-
-                if (rowsToDrag.size() > 0)
-                {
-                    auto dragDescription = m->getDragSourceDescription (rowsToDrag);
-
-                    if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
-                    {
-                        isDragging = true;
-                        owner.startDragAndDrop (e, rowsToDrag, dragDescription, m->mayDragToExternalWindows());
-                    }
-                }
-            }
-        }
-
-        if (! isDraggingToScroll)
-            if (auto* vp = owner.getViewport())
-                isDraggingToScroll = vp->isCurrentlyScrollingOnDrag();
+                m->listBoxItemDoubleClicked (getRow(), e);
     }
 
     void resized() override
@@ -188,11 +208,21 @@ public:
     String getTooltip() override
     {
         if (auto* m = owner.getModel())
-            return m->getTooltipForRow (row);
+            return m->getTooltipForRow (getRow());
 
         return {};
     }
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return std::make_unique<RowAccessibilityHandler> (*this);
+    }
+
+    ListBox& getOwner() const { return owner; }
+
+    Component* getCustomComponent() const { return customComponent.get(); }
+
+private:
     //==============================================================================
     class RowAccessibilityHandler  : public AccessibilityHandler
     {
@@ -209,7 +239,7 @@ public:
         String getTitle() const override
         {
             if (auto* m = rowComponent.owner.getModel())
-                return m->getNameForRow (rowComponent.row);
+                return m->getNameForRow (rowComponent.getRow());
 
             return {};
         }
@@ -219,7 +249,7 @@ public:
         AccessibleState getCurrentState() const override
         {
             if (auto* m = rowComponent.owner.getModel())
-                if (rowComponent.row >= m->getNumRows())
+                if (rowComponent.getRow() >= m->getNumRows())
                     return AccessibleState().withIgnored();
 
             auto state = AccessibilityHandler::getCurrentState().withAccessibleOffscreen();
@@ -229,7 +259,7 @@ public:
             else
                 state = state.withSelectable();
 
-            if (rowComponent.isSelected)
+            if (rowComponent.isSelected())
                 state = state.withSelected();
 
             return state;
@@ -255,16 +285,9 @@ public:
         RowComponent& rowComponent;
     };
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
-    {
-        return std::make_unique<RowAccessibilityHandler> (*this);
-    }
-
     //==============================================================================
     ListBox& owner;
     std::unique_ptr<Component> customComponent;
-    int row = -1;
-    bool isSelected = false, isDragging = false, isDraggingToScroll = false, selectRowOnMouseUp = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComponent)
 };
@@ -835,7 +858,7 @@ int ListBox::getInsertionIndexForPosition (const int x, const int y) const noexc
 Component* ListBox::getComponentForRowNumber (const int row) const noexcept
 {
     if (auto* listRowComp = viewport->getComponentForRowIfOnscreen (row))
-        return listRowComp->customComponent.get();
+        return listRowComp->getCustomComponent();
 
     return nullptr;
 }
