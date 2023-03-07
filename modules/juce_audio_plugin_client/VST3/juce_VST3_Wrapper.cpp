@@ -792,16 +792,6 @@ public:
 
             updateParameterInfo();
 
-            info.stepCount = (Steinberg::int32) 0;
-
-           #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-            if (param.isDiscrete())
-           #endif
-            {
-                const int numSteps = param.getNumSteps();
-                info.stepCount = (Steinberg::int32) (numSteps > 0 && numSteps < 0x7fffffff ? numSteps - 1 : 0);
-            }
-
             info.defaultNormalizedValue = param.getDefaultValue();
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
 
@@ -831,6 +821,19 @@ public:
             auto anyUpdated = updateParamIfChanged (info.title,      param.getName (128));
             anyUpdated     |= updateParamIfChanged (info.shortTitle, param.getName (8));
             anyUpdated     |= updateParamIfChanged (info.units,      param.getLabel());
+
+            auto prevStepCount = info.stepCount;
+            info.stepCount = (Steinberg::int32) 0;
+
+           #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+            if (param.isDiscrete())
+           #endif
+            {
+                const int numSteps = param.getNumSteps();
+                info.stepCount = (Steinberg::int32) (numSteps > 0 && numSteps < 0x7fffffff ? numSteps - 1 : 0);
+            }
+
+            anyUpdated |= (prevStepCount != info.stepCount);
 
             return anyUpdated;
         }
