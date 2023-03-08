@@ -100,7 +100,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #define JUCE_VSTINTERFACE_H_INCLUDED 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
-#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
 
 using namespace juce;
 
@@ -123,7 +123,7 @@ namespace juce
 {
  #if JUCE_MAC
   extern JUCE_API void initialiseMacVST();
-  extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parent, bool isNSView);
+  extern JUCE_API void* attachComponentToWindowRefVST (Component*, int, void* parent, bool isNSView);
   extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* window, bool isNSView);
   extern JUCE_API void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
   extern JUCE_API void checkWindowVisibilityVST (void* window, Component*, bool isNSView);
@@ -1003,8 +1003,10 @@ public:
         {
             setVisible (false);
 
+            const auto desktopFlags = detail::PluginUtilities::getDesktopFlags (getEditorComp());
+
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
-            addToDesktop (0, args.ptr);
+            addToDesktop (desktopFlags, args.ptr);
             hostWindow = (HostWindowType) args.ptr;
 
             #if JUCE_LINUX || JUCE_BSD
@@ -1021,7 +1023,7 @@ public:
              startTimer (500);
             #endif
            #elif JUCE_MAC
-            hostWindow = attachComponentToWindowRefVST (this, args.ptr, wrapper.useNSView);
+            hostWindow = attachComponentToWindowRefVST (this, desktopflags, args.ptr, wrapper.useNSView);
            #endif
 
             setVisible (true);

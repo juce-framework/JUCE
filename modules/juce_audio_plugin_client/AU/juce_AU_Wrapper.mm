@@ -58,7 +58,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
-#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
 
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
 #include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
@@ -1600,7 +1600,7 @@ public:
                                                        object: nil];
             activeUIs.add (view);
 
-            editorCompHolder->addToDesktop (0, (void*) view);
+            editorCompHolder->addToDesktop (detail::PluginUtilities::getDesktopFlags (editor), view);
             editorCompHolder->setVisible (view);
 
             return view;

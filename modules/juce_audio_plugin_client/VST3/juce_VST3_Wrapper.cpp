@@ -46,7 +46,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 
 #include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
 #include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
-#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
 #include <juce_audio_plugin_client/utility/juce_WindowsHooks.h>
 #include <juce_audio_plugin_client/utility/juce_LinuxMessageThread.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
@@ -108,14 +108,14 @@ using namespace Steinberg;
 
 //==============================================================================
 #if JUCE_MAC
- extern void initialiseMacVST();
+ void initialiseMacVST();
 
  #if ! JUCE_64BIT
-  extern void updateEditorCompBoundsVST (Component*);
+  void updateEditorCompBoundsVST (Component*);
  #endif
 
- extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
- extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
+ JUCE_API void* attachComponentToWindowRefVST (Component*, int desktopFlags, void* parentWindowOrView, bool isNSView);
+ JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
 #endif
 
 #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -1783,6 +1783,8 @@ private:
 
             createContentWrapperComponentIfNeeded();
 
+            const auto desktopFlags = detail::PluginUtilities::getDesktopFlags (component->pluginEditor.get());
+
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             // If the plugin was last opened at a particular scale, try to reapply that scale here.
             // Note that we do this during attach(), rather than in JuceVST3Editor(). During the
@@ -1798,7 +1800,7 @@ private:
             #endif
 
             component->setOpaque (true);
-            component->addToDesktop (0, (void*) systemWindow);
+            component->addToDesktop (desktopFlags, systemWindow);
             component->setVisible (true);
 
             #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -1807,7 +1809,7 @@ private:
 
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
-            macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
+            macHostWindow = juce::attachComponentToWindowRefVST (component.get(), desktopFlags, parent, isNSView);
            #endif
 
             component->resizeHostWindow();

@@ -39,6 +39,7 @@
 
 #include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 #include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
 #include <juce_audio_plugin_client/utility/juce_LinuxMessageThread.h>
 
 #include <juce_audio_processors/utilities/juce_FlagCache.h>
@@ -1534,7 +1535,7 @@ public:
         setOpaque (true);
         setVisible (false);
         removeFromDesktop();
-        addToDesktop (0, parent);
+        addToDesktop (detail::PluginUtilities::getDesktopFlags (editor.get()), parent);
         editor->addComponentListener (this);
 
         *widget = getWindowHandle();

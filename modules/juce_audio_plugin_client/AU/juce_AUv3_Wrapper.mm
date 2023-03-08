@@ -39,7 +39,7 @@
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
 #include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
-#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
 
 #import <CoreAudioKit/CoreAudioKit.h>
 #import <AudioToolbox/AudioToolbox.h>
@@ -1834,7 +1834,7 @@ public:
                     editor->setVisible (true);
                    #endif
 
-                    editor->addToDesktop (0, view);
+                    detail::PluginUtilities::addToDesktop (*editor, view);
 
                    #if JUCE_IOS
                     if (JUCE_IOS_MAC_VIEW* peerView = [[[myself view] subviews] objectAtIndex: 0])

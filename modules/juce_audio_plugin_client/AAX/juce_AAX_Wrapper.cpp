@@ -29,7 +29,7 @@
 #if JucePlugin_Build_AAX && (JUCE_MAC || JUCE_WINDOWS)
 
 #include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
-#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
 #include <juce_audio_plugin_client/utility/juce_WindowsHooks.h>
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
@@ -454,7 +454,7 @@ namespace AAXClasses
                #endif
                 {
                     component->setVisible (true);
-                    component->addToDesktop (0, nativeViewToAttachTo);
+                    component->addToDesktop (detail::PluginUtilities::getDesktopFlags (component->pluginEditor.get()), nativeViewToAttachTo);
 
                     if (ModifierKeyReceiver* modReceiver = dynamic_cast<ModifierKeyReceiver*> (component->getPeer()))
                         modReceiver->setModifierKeyProvider (this);

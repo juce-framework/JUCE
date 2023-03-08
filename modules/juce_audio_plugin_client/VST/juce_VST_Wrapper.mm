@@ -79,8 +79,8 @@ void initialiseMacVST()
    #endif
 }
 
-JUCE_API void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, bool isNSView);
-void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, [[maybe_unused]] bool isNSView)
+JUCE_API void* attachComponentToWindowRefVST (Component* comp, int, void* parentWindowOrView, bool isNSView);
+void* attachComponentToWindowRefVST (Component* comp, int desktopFlags, void* parentWindowOrView, [[maybe_unused]] bool isNSView)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -138,11 +138,13 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
 
             updateEditorCompBoundsVST (comp);
 
-           #if ! JucePlugin_EditorRequiresKeyboardFocus
-            comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
-           #else
-            comp->addToDesktop (ComponentPeer::windowIsTemporary);
-           #endif
+            const auto defaultFlags =
+                   #if ! JucePlugin_EditorRequiresKeyboardFocus
+                    ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses;
+                   #else
+                    ComponentPeer::windowIsTemporary;
+                   #endif
+            comp->addToDesktop (desktopFlags | defaultFlags);
 
             comp->setVisible (true);
             comp->toFront (false);
@@ -163,11 +165,13 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
 
         NSView* parentView = [(NSView*) parentWindowOrView retain];
 
-       #if JucePlugin_EditorRequiresKeyboardFocus
-        comp->addToDesktop (0, parentView);
-       #else
-        comp->addToDesktop (ComponentPeer::windowIgnoresKeyPresses, parentView);
-       #endif
+        const auto defaultFlags =
+               #if JucePlugin_EditorRequiresKeyboardFocus
+                0;
+               #else
+                ComponentPeer::windowIgnoresKeyPresses;
+               #endif
+        comp->addToDesktop (desktopFlags | defaultFlags, parentView);
 
         // (this workaround is because Wavelab provides a zero-size parent view..)
         if ([parentView frame].size.height == 0)

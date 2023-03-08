@@ -27,7 +27,7 @@
 
 #if JucePlugin_Build_Unity
 
-#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
 #if JUCE_WINDOWS
@@ -298,7 +298,7 @@ public:
         {
             pluginInstanceEditor.reset (pluginInstance->createEditorIfNeeded());
             pluginInstanceEditor->setVisible (true);
-            pluginInstanceEditor->addToDesktop (0);
+            detail::PluginUtilities::addToDesktop (*pluginInstanceEditor, nullptr);
         }
 
         juceParameters.update (*pluginInstance, false);
