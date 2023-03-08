@@ -81,10 +81,16 @@ struct FileHelpers
 
     static bool isDirectory (const std::string& path)
     {
-        struct stat64 info;
+       #if defined (__FreeBSD__) || defined (__OpenBSD__)
+        #define JUCE_STAT stat
+       #else
+        #define JUCE_STAT stat64
+       #endif
+
+        struct JUCE_STAT info;
 
         return    ! path.empty()
-               && stat64 (path.c_str(), &info) == 0
+               && JUCE_STAT (path.c_str(), &info) == 0
                && ((info.st_mode & S_IFDIR) != 0);
     }
 
