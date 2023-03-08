@@ -31,43 +31,12 @@ namespace juce::detail
 // This function is in juce_win32_Windowing.cpp
 bool offerKeyMessageToJUCEWindow (MSG&);
 
-static HHOOK mouseWheelHook = nullptr, keyboardHook = nullptr;
-static int numHookUsers = 0;
-
-struct WindowsHooks
+class WindowsHooks
 {
-    WindowsHooks()
-    {
-        if (numHookUsers++ == 0)
-        {
-            mouseWheelHook = SetWindowsHookEx (WH_MOUSE, mouseWheelHookCallback,
-                                               (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
-                                               GetCurrentThreadId());
+public:
+    WindowsHooks() = default;
 
-            keyboardHook = SetWindowsHookEx (WH_GETMESSAGE, keyboardHookCallback,
-                                             (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
-                                             GetCurrentThreadId());
-        }
-    }
-
-    ~WindowsHooks()
-    {
-        if (--numHookUsers == 0)
-        {
-            if (mouseWheelHook != nullptr)
-            {
-                UnhookWindowsHookEx (mouseWheelHook);
-                mouseWheelHook = nullptr;
-            }
-
-            if (keyboardHook != nullptr)
-            {
-                UnhookWindowsHookEx (keyboardHook);
-                keyboardHook = nullptr;
-            }
-        }
-    }
-
+private:
     static LRESULT CALLBACK mouseWheelHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
     {
         if (nCode >= 0 && wParam == WM_MOUSEWHEEL)
@@ -83,7 +52,7 @@ struct WindowsHooks
                                         hs.mouseData & 0xffff0000, (hs.pt.x & 0xffff) | (hs.pt.y << 16));
         }
 
-        return CallNextHookEx (mouseWheelHook, nCode, wParam, lParam);
+        return CallNextHookEx (getSingleton()->mouseWheelHook, nCode, wParam, lParam);
     }
 
     static LRESULT CALLBACK keyboardHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
@@ -98,8 +67,46 @@ struct WindowsHooks
             return 1;
         }
 
-        return CallNextHookEx (keyboardHook, nCode, wParam, lParam);
+        return CallNextHookEx (getSingleton()->keyboardHook, nCode, wParam, lParam);
     }
+
+    class Hooks
+    {
+    public:
+        Hooks() = default;
+
+        ~Hooks()
+        {
+            if (mouseWheelHook != nullptr)
+                UnhookWindowsHookEx (mouseWheelHook);
+
+            if (keyboardHook != nullptr)
+                UnhookWindowsHookEx (keyboardHook);
+        }
+
+        HHOOK mouseWheelHook = SetWindowsHookEx (WH_MOUSE,
+                                                 mouseWheelHookCallback,
+                                                 (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                                 GetCurrentThreadId());
+        HHOOK keyboardHook = SetWindowsHookEx (WH_GETMESSAGE,
+                                               keyboardHookCallback,
+                                               (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                               GetCurrentThreadId());
+    };
+
+    static std::shared_ptr<const Hooks> getSingleton()
+    {
+        static std::weak_ptr<const Hooks> weak;
+
+        if (auto locked = weak.lock())
+            return locked;
+
+        auto strong = std::make_shared<Hooks>();
+        weak = strong;
+        return strong;
+    }
+
+    std::shared_ptr<const Hooks> hooks = getSingleton();
 };
 
 } // namespace juce::detail
