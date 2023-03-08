@@ -196,7 +196,7 @@ public:
     void mouseDrag (const MouseEvent& e) override
     {
         if (isEnabled()
-             && owner.getModel() != nullptr
+             && auto* m = owner.getModel()
              && e.mouseWasDraggedSinceMouseDown()
              && ! isDragging)
         {
@@ -209,12 +209,12 @@ public:
 
             if (rowsToDrag.size() > 0)
             {
-                auto dragDescription = owner.getModel()->getDragSourceDescription (rowsToDrag);
+                auto dragDescription = m->getDragSourceDescription (rowsToDrag);
 
                 if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                 {
                     isDragging = true;
-                    owner.startDragAndDrop (e, rowsToDrag, dragDescription, true);
+                    owner.startDragAndDrop (e, rowsToDrag, dragDescription, m->mayDragToExternalWindows());
                 }
             }
         }
