@@ -1214,7 +1214,23 @@ int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mai
             AudioChannelSet::create7point1point2(),
             AudioChannelSet::ambisonic (1),
             AudioChannelSet::ambisonic (2),
-            AudioChannelSet::ambisonic (3)
+            AudioChannelSet::ambisonic (3),
+            AudioChannelSet::create5point0point2(),
+            AudioChannelSet::create5point1point2(),
+            AudioChannelSet::create5point0point4(),
+            AudioChannelSet::create5point1point4(),
+            AudioChannelSet::create7point0point4(),
+            AudioChannelSet::create7point1point4(),
+            AudioChannelSet::create7point0point6(),
+            AudioChannelSet::create7point1point6(),
+            AudioChannelSet::create9point0point4(),
+            AudioChannelSet::create9point1point4(),
+            AudioChannelSet::create9point0point6(),
+            AudioChannelSet::create9point1point6(),
+            AudioChannelSet::ambisonic (4),
+            AudioChannelSet::ambisonic (5),
+            AudioChannelSet::ambisonic (6),
+            AudioChannelSet::ambisonic (7)
         };
 
         const auto index = (int) std::distance (std::begin (sets), std::find (std::begin (sets), std::end (sets), set));
