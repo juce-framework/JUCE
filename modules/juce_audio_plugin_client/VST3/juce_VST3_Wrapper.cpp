@@ -49,6 +49,8 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
 #include <juce_audio_plugin_client/utility/juce_WindowsHooks.h>
 #include <juce_audio_plugin_client/utility/juce_LinuxMessageThread.h>
+#include <juce_audio_plugin_client/utility/juce_VSTWindowUtilities.h>
+
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/utilities/juce_FlagCache.h>
 #include <juce_audio_processors/format_types/juce_VST3Common.h>
@@ -107,17 +109,6 @@ namespace juce
 using namespace Steinberg;
 
 //==============================================================================
-#if JUCE_MAC
- void initialiseMacVST();
-
- #if ! JUCE_64BIT
-  void updateEditorCompBoundsVST (Component*);
- #endif
-
- JUCE_API void* attachComponentToWindowRefVST (Component*, int desktopFlags, void* parentWindowOrView, bool isNSView);
- JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
-#endif
-
 #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
  double getScaleFactorForWindow (HWND);
 #endif
@@ -1809,7 +1800,7 @@ private:
 
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
-            macHostWindow = juce::attachComponentToWindowRefVST (component.get(), desktopFlags, parent, isNSView);
+            macHostWindow = detail::VSTWindowUtilities::attachComponentToWindowRefVST (component.get(), desktopFlags, parent, isNSView);
            #endif
 
             component->resizeHostWindow();
@@ -1831,7 +1822,7 @@ private:
                #elif JUCE_MAC
                 if (macHostWindow != nullptr)
                 {
-                    juce::detachComponentFromWindowRefVST (component.get(), macHostWindow, isNSView);
+                    detail::VSTWindowUtilities::detachComponentFromWindowRefVST (component.get(), macHostWindow, isNSView);
                     macHostWindow = nullptr;
                 }
                #endif
@@ -3865,7 +3856,7 @@ bool initModule();
 bool initModule()
 {
    #if JUCE_MAC
-    initialiseMacVST();
+    detail::VSTWindowUtilities::initialiseMacVST();
    #endif
 
     return true;

@@ -23,4 +23,6 @@
   ==============================================================================
 */
 
-#include "VST/juce_VST_Wrapper.mm"
+#if JucePlugin_Build_VST || JucePlugin_Build_VST3
+ #include "utility/juce_VSTWindowUtilities.mm"
+#endif
