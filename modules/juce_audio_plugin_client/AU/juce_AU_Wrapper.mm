@@ -25,7 +25,7 @@
 
 #include <juce_core/system/juce_TargetPlatform.h>
 #include <juce_core/system/juce_CompilerWarnings.h>
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
 
 #if JucePlugin_Build_AU
 
@@ -45,7 +45,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wshorten-64-to-32",
                                      "-Wformat-pedantic",
                                      "-Wdeprecated-anon-enum-enum-conversion")
 
-#include "../utility/juce_IncludeSystemHeaders.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
 
 #include <AudioUnit/AUCocoaUIView.h>
 #include <AudioUnit/AudioUnit.h>
@@ -58,7 +58,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
-#include "../utility/juce_IncludeModuleHeaders.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
 
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
 #include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>

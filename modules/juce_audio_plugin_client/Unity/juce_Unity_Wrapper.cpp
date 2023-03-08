@@ -27,11 +27,11 @@
 
 #if JucePlugin_Build_Unity
 
-#include "../utility/juce_IncludeModuleHeaders.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
 #if JUCE_WINDOWS
- #include "../utility/juce_IncludeSystemHeaders.h"
+ #include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
 #endif
 
 #include "juce_UnityPluginInterface.h"

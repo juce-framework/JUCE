@@ -25,13 +25,13 @@
 
 #include <juce_core/system/juce_CompilerWarnings.h>
 #include <juce_core/system/juce_TargetPlatform.h>
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
 
 #if JucePlugin_Build_VST
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996 4100)
 
-#include "../utility/juce_IncludeSystemHeaders.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
 #include <juce_core/juce_core.h>
 
 #if JucePlugin_VersionCode < 0x010000   // Major < 0
@@ -100,12 +100,12 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #define JUCE_VSTINTERFACE_H_INCLUDED 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
-#include "../utility/juce_IncludeModuleHeaders.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
 
 using namespace juce;
 
-#include "../utility/juce_WindowsHooks.h"
-#include "../utility/juce_LinuxMessageThread.h"
+#include <juce_audio_plugin_client/utility/juce_WindowsHooks.h>
+#include <juce_audio_plugin_client/utility/juce_LinuxMessageThread.h>
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_VSTCommon.h>

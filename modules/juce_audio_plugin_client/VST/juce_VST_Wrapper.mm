@@ -27,12 +27,12 @@
 
 #if JUCE_MAC
 
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
 
 #if JucePlugin_Build_VST || JucePlugin_Build_VST3
 
-#include "../utility/juce_IncludeSystemHeaders.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
 
 //==============================================================================
 namespace juce

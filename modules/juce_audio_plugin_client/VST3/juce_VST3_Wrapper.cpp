@@ -44,11 +44,11 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
-#include "../utility/juce_CheckSettingMacros.h"
-#include "../utility/juce_IncludeSystemHeaders.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_WindowsHooks.h"
-#include "../utility/juce_LinuxMessageThread.h"
+#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_WindowsHooks.h>
+#include <juce_audio_plugin_client/utility/juce_LinuxMessageThread.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/utilities/juce_FlagCache.h>
 #include <juce_audio_processors/format_types/juce_VST3Common.h>
@@ -78,7 +78,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #endif
 
 #if JUCE_LINUX || JUCE_BSD
- #include "juce_events/native/juce_linux_EventLoopInternal.h"
+ #include <juce_events/native/juce_linux_EventLoopInternal.h>
  #include <unordered_map>
 #endif
 

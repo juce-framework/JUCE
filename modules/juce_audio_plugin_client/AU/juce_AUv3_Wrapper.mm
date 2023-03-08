@@ -24,7 +24,7 @@
 */
 
 #include <juce_core/system/juce_TargetPlatform.h>
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
 
 #if JucePlugin_Build_AUv3
 
@@ -38,8 +38,8 @@
 
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
-#include "../utility/juce_IncludeSystemHeaders.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
 
 #import <CoreAudioKit/CoreAudioKit.h>
 #import <AudioToolbox/AudioToolbox.h>

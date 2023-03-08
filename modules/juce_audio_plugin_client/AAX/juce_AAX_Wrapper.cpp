@@ -24,13 +24,13 @@
 */
 
 #include <juce_core/system/juce_TargetPlatform.h>
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
 
 #if JucePlugin_Build_AAX && (JUCE_MAC || JUCE_WINDOWS)
 
-#include "../utility/juce_IncludeSystemHeaders.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_WindowsHooks.h"
+#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/utility/juce_WindowsHooks.h>
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
