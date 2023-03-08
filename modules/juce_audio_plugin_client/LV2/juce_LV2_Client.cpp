@@ -38,9 +38,9 @@
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
 #include <juce_audio_plugin_client/juce_audio_plugin_client.h>
-#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
-#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
-#include <juce_audio_plugin_client/utility/juce_LinuxMessageThread.h>
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
+#include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
 
 #include <juce_audio_processors/utilities/juce_FlagCache.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>

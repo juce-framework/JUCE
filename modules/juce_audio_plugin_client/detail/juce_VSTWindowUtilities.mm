@@ -29,9 +29,9 @@
 
 #if JUCE_MAC
 
-#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
-#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
-#include <juce_audio_plugin_client/utility/juce_VSTWindowUtilities.h>
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_VSTWindowUtilities.h>
 
 namespace juce::detail
 {

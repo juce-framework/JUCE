@@ -24,12 +24,12 @@
 */
 
 #include <juce_core/system/juce_TargetPlatform.h>
-#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
 
 #if JucePlugin_Enable_ARA
 
-#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
-#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter", "-Wgnu-zero-variadic-macro-arguments", "-Wmissing-prototypes")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)

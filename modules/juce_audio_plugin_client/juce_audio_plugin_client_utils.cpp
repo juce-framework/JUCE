@@ -23,4 +23,4 @@
   ==============================================================================
 */
 
-#include "utility/juce_PluginUtilities.cpp"
+#include "detail/juce_PluginUtilities.cpp"

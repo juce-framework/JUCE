@@ -44,12 +44,12 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
-#include <juce_audio_plugin_client/utility/juce_CheckSettingMacros.h>
-#include <juce_audio_plugin_client/utility/juce_IncludeSystemHeaders.h>
-#include <juce_audio_plugin_client/utility/juce_PluginUtilities.h>
-#include <juce_audio_plugin_client/utility/juce_WindowsHooks.h>
-#include <juce_audio_plugin_client/utility/juce_LinuxMessageThread.h>
-#include <juce_audio_plugin_client/utility/juce_VSTWindowUtilities.h>
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
+#include <juce_audio_plugin_client/detail/juce_WindowsHooks.h>
+#include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
+#include <juce_audio_plugin_client/detail/juce_VSTWindowUtilities.h>
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/utilities/juce_FlagCache.h>

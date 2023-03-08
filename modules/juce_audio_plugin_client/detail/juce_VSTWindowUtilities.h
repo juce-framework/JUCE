@@ -27,7 +27,7 @@
 
 #if JUCE_MAC
 
-#include <juce_audio_plugin_client/utility/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
 
 namespace juce::detail
 {
