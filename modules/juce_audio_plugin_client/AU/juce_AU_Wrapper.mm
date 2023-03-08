@@ -1629,7 +1629,7 @@ public:
 
         bool keyPressed (const KeyPress&) override
         {
-            if (getHostType().isAbletonLive())
+            if (detail::PluginUtilities::getHostType().isAbletonLive())
             {
                 static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
                 NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];
@@ -2575,7 +2575,7 @@ private:
 
     static int maxChannelsToProbeFor()
     {
-        return (getHostType().isLogic() ? 8 : 64);
+        return (detail::PluginUtilities::getHostType().isLogic() ? 8 : 64);
     }
 
     //==============================================================================

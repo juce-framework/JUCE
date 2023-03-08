@@ -50,6 +50,32 @@ struct PluginUtilities
     {
         editor.addToDesktop (getDesktopFlags (editor), parent);
     }
+
+    static const PluginHostType& getHostType()
+    {
+        static PluginHostType hostType;
+        return hostType;
+    }
+
+   #ifndef JUCE_VST3_CAN_REPLACE_VST2
+    #define JUCE_VST3_CAN_REPLACE_VST2 1
+   #endif
+
+   #if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
+    #define VST3_REPLACEMENT_AVAILABLE 1
+
+    static void getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16]);
+
+   #else
+     #define VST3_REPLACEMENT_AVAILABLE 0
+   #endif
+
+   #if JucePlugin_Build_VST
+     static bool handleManufacturerSpecificVST2Opcode (int32 index,
+                                                       pointer_sized_int value,
+                                                       void* ptr,
+                                                       float);
+   #endif
 };
 
 } // namespace juce::detail

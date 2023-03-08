@@ -25,11 +25,11 @@
 
 #if JUCE_WINDOWS
 
-namespace juce
+namespace juce::detail
 {
 
 // This function is in juce_win32_Windowing.cpp
-extern bool offerKeyMessageToJUCEWindow (MSG&);
+bool offerKeyMessageToJUCEWindow (MSG&);
 
 static HHOOK mouseWheelHook = nullptr, keyboardHook = nullptr;
 static int numHookUsers = 0;
@@ -102,6 +102,6 @@ struct WindowsHooks
     }
 };
 
-} // namespace juce
+} // namespace juce::detail
 
 #endif

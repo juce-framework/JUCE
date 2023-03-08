@@ -25,7 +25,7 @@
 
 #if JUCE_LINUX || JUCE_BSD
 
-namespace juce
+namespace juce::detail
 {
 
 // Implemented in juce_linux_Messaging.cpp
@@ -112,6 +112,6 @@ private:
     SharedResourcePointer<MessageThread> messageThread;
 };
 
-} // namespace juce
+} // namespace juce::detail
 
 #endif

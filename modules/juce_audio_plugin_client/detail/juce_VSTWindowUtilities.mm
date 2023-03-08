@@ -36,7 +36,27 @@
 namespace juce::detail
 {
 
-#if ! JUCE_64BIT
+#if JUCE_32BIT
+class EventReposter  : private CallbackMessage
+{
+public:
+    EventReposter() : e ([[NSApp currentEvent] retain])  {}
+    ~EventReposter() override  { [e release]; }
+
+    static void repostCurrentNSEvent()
+    {
+        (new EventReposter())->post();
+    }
+
+private:
+    void messageCallback() override
+    {
+        [NSApp postEvent: e atStart: YES];
+    }
+
+    NSEvent* e;
+};
+
 void VSTWindowUtilities::updateEditorCompBoundsVST (Component* comp)
 {
     HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
@@ -302,7 +322,7 @@ bool VSTWindowUtilities::forwardCurrentKeyEventToHostVST ([[maybe_unused]] Compo
     {
         NSWindow* win = [(NSView*) comp->getWindowHandle() window];
         [[win parentWindow] makeKeyWindow];
-        repostCurrentNSEvent();
+        EventReposter::repostCurrentNSEvent();
         return true;
     }
    #endif

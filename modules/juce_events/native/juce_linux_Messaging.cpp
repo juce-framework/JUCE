@@ -327,6 +327,8 @@ void MessageManager::broadcastMessage (const String&)
     // TODO
 }
 
+namespace detail
+{
 // this function expects that it will NEVER be called simultaneously for two concurrent threads
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 {
@@ -349,6 +351,7 @@ bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 
     return true;
 }
+} // namespace detail
 
 //==============================================================================
 void LinuxEventLoop::registerFdCallback (int fd, std::function<void (int)> readCallback, short eventMask)

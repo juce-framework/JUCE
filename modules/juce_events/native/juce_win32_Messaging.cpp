@@ -25,9 +25,14 @@ namespace juce
 
 extern HWND juce_messageWindowHandle;
 
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
- bool juce_isRunningInUnity();
-#endif
+namespace detail
+{
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
+    bool isRunningInUnity();
+   #else
+    constexpr bool isRunningInUnity() { return false; }
+   #endif
+} // namespace detail
 
 #if JUCE_MODULE_AVAILABLE_juce_gui_extra
  LRESULT juce_offerEventToActiveXControl (::MSG&);
@@ -94,13 +99,11 @@ public:
         if (! shouldTriggerMessageQueueDispatch)
             return;
 
-       #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
-        if (juce_isRunningInUnity())
+        if (detail::isRunningInUnity())
         {
             SendNotifyMessage (juce_messageWindowHandle, customMessageID, 0, 0);
             return;
         }
-        #endif
 
         PostMessage (juce_messageWindowHandle, customMessageID, 0, 0);
     }
@@ -260,6 +263,9 @@ JUCE_IMPLEMENT_SINGLETON (InternalMessageQueue)
 const TCHAR InternalMessageQueue::messageWindowName[] = _T("JUCEWindow");
 
 //==============================================================================
+namespace detail
+{
+
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 {
     if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
@@ -267,6 +273,8 @@ bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 
     return false;
 }
+
+} // namespace detail
 
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
