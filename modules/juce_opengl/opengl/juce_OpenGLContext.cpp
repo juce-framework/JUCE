@@ -937,11 +937,8 @@ public:
             {
                 return [this, display]
                 {
-                    if (auto* view = nativeContext->getNSView())
-                        if (auto* window = [view window])
-                            if (auto* screen = [window screen])
-                                if (display == ScopedDisplayLink::getDisplayIdForScreen (screen))
-                                    triggerRepaint();
+                    if (display == lastDisplay)
+                        triggerRepaint();
                 };
             }));
         }
