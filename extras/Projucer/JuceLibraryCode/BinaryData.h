@@ -210,7 +210,7 @@ namespace BinaryData
     const int            juce_LinuxSubprocessHelper_cppSize = 1212;
 
     extern const char*   juce_SimpleBinaryBuilder_cpp;
-    const int            juce_SimpleBinaryBuilder_cppSize = 12182;
+    const int            juce_SimpleBinaryBuilder_cppSize = 12344;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
     const int namedResourceListSize = 68;

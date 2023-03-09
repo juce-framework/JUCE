@@ -8639,10 +8639,16 @@ static const unsigned char temp_binary_data_67[] =
 "\r\n"
 "    static bool isDirectory (const std::string& path)\r\n"
 "    {\r\n"
-"        struct stat64 info;\r\n"
+"       #if defined (__FreeBSD__) || defined (__OpenBSD__)\r\n"
+"        #define JUCE_STAT stat\r\n"
+"       #else\r\n"
+"        #define JUCE_STAT stat64\r\n"
+"       #endif\r\n"
+"\r\n"
+"        struct JUCE_STAT info;\r\n"
 "\r\n"
 "        return    ! path.empty()\r\n"
-"               && stat64 (path.c_str(), &info) == 0\r\n"
+"               && JUCE_STAT (path.c_str(), &info) == 0\r\n"
 "               && ((info.st_mode & S_IFDIR) != 0);\r\n"
 "    }\r\n"
 "\r\n"
@@ -9013,7 +9019,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x7c03d519:  numBytes = 3005; return juce_runtime_arch_detection_cpp;
         case 0x295b6f43:  numBytes = 1212; return juce_LinuxSubprocessHelper_cpp;
-        case 0xef269d3a:  numBytes = 12182; return juce_SimpleBinaryBuilder_cpp;
+        case 0xef269d3a:  numBytes = 12344; return juce_SimpleBinaryBuilder_cpp;
         default: break;
     }
 
