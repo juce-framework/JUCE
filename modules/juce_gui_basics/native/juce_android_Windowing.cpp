@@ -1825,6 +1825,29 @@ public:
     };
 
 private:
+    void appStyleChanged() override
+    {
+        if (getAndroidSDKVersion() < 30)
+            return;
+    
+        constexpr auto APPEARANCE_LIGHT_STATUS_BARS = 0x00000008;
+        constexpr auto APPEARANCE_LIGHT_NAVIGATION_BARS = 0x00000010;
+    
+        LocalRef<jobject> activity (getMainActivity());
+
+        if (activity != nullptr)
+        {
+            auto* env = getEnv();
+            
+            LocalRef<jobject> mainWindow (env->CallObjectMethod (activity.get(), AndroidActivity.getWindow));
+            LocalRef<jobject> controller (env->CallObjectMethod (mainWindow.get(), AndroidWindow.getInsetsController));
+
+            env->CallVoidMethod (controller.get(), AndroidWindowInsetsController.setSystemBarsAppearance, style == Style::light ? APPEARANCE_LIGHT_STATUS_BARS : 0, APPEARANCE_LIGHT_STATUS_BARS);
+
+            env->CallVoidMethod (controller.get(), AndroidWindowInsetsController.setSystemBarsAppearance, style == Style::light ? APPEARANCE_LIGHT_NAVIGATION_BARS : 0, APPEARANCE_LIGHT_NAVIGATION_BARS);
+        }
+    }         
+
     template <auto Member>
     static void mouseCallbackWrapper (JNIEnv*, AndroidComponentPeer& t, jint i, jfloat x, jfloat y, jlong time) { return (t.*Member) (i, Point<float> { x, y }, time); }
 
