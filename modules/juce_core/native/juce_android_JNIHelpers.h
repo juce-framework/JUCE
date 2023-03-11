@@ -590,9 +590,16 @@ DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
  METHOD (getDecorView, "getDecorView",       "()Landroid/view/View;") \
  METHOD (setFlags,     "setFlags",           "(II)V") \
  METHOD (clearFlags,   "clearFlags",         "(I)V") \
- METHOD (getInsetsController, "getInsetsController", "()Landroid/view/WindowInsetsController;")
+ METHOD (setStatusBarColor, "setStatusBarColor", "(I)V") \
+ METHOD (setNavigationBarColor, "setNavigationBarColor", "(I)V")
 
 DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getInsetsController, "getInsetsController", "()Landroid/view/WindowInsetsController;")
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindow30, "android/view/Window", 30)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \ 

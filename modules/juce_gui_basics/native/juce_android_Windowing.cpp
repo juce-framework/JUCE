@@ -1832,6 +1832,9 @@ private:
     
         constexpr auto APPEARANCE_LIGHT_STATUS_BARS = 0x00000008;
         constexpr auto APPEARANCE_LIGHT_NAVIGATION_BARS = 0x00000010;
+        
+        constexpr auto WHITE = 0xffffffff;
+        constexpr auto BLACK = 0xff000000;
     
         LocalRef<jobject> activity (getMainActivity());
 
@@ -1840,11 +1843,15 @@ private:
             auto* env = getEnv();
             
             LocalRef<jobject> mainWindow (env->CallObjectMethod (activity.get(), AndroidActivity.getWindow));
-            LocalRef<jobject> controller (env->CallObjectMethod (mainWindow.get(), AndroidWindow.getInsetsController));
+            LocalRef<jobject> controller (env->CallObjectMethod (mainWindow.get(), AndroidWindow30.getInsetsController));
 
             env->CallVoidMethod (controller.get(), AndroidWindowInsetsController.setSystemBarsAppearance, style == Style::light ? APPEARANCE_LIGHT_STATUS_BARS : 0, APPEARANCE_LIGHT_STATUS_BARS);
 
             env->CallVoidMethod (controller.get(), AndroidWindowInsetsController.setSystemBarsAppearance, style == Style::light ? APPEARANCE_LIGHT_NAVIGATION_BARS : 0, APPEARANCE_LIGHT_NAVIGATION_BARS);
+            
+            env->CallVoidMethod (mainWindow.get(), AndroidWindow.setStatusBarColor, style == Style::light ? WHITE : BLACK);
+            
+            env->CallVoidMethod (mainWindow.get(), AndroidWindow.setNavigationBarColor, style == Style::light ? WHITE : BLACK);
         }
     }         
 
