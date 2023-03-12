@@ -160,6 +160,7 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/copyDir.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp"
+              "${JUCE_CMAKE_UTILS_DIR}/juce_LinuxSubprocessHelper.cpp"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${JUCE_SOURCE_DIR}")
@@ -170,4 +171,3 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${JUCE_SOURCE_DIR}")
         install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
     endif()
 endif()
-

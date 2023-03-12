@@ -29,11 +29,11 @@ namespace juce
 static const Identifier tableColumnProperty { "_tableColumnId" };
 static const Identifier tableAccessiblePlaceholderProperty { "_accessiblePlaceholder" };
 
-class TableListBox::RowComp   : public Component,
-                                public TooltipClient
+class TableListBox::RowComp   : public TooltipClient,
+                                public ComponentWithListRowMouseBehaviours<RowComp>
 {
 public:
-    RowComp (TableListBox& tlb) noexcept
+    explicit RowComp (TableListBox& tlb)
         : owner (tlb)
     {
         setFocusContainerType (FocusContainerType::focusContainer);
@@ -43,7 +43,7 @@ public:
     {
         if (auto* tableModel = owner.getModel())
         {
-            tableModel->paintRowBackground (g, row, getWidth(), getHeight(), isSelected);
+            tableModel->paintRowBackground (g, getRow(), getWidth(), getHeight(), isSelected());
 
             auto& headerComp = owner.getHeader();
             const auto numColumns = jmin ((int) columnComponents.size(), headerComp.getNumColumns (true));
@@ -65,8 +65,8 @@ public:
                         if (g.reduceClipRegion (columnRect))
                         {
                             g.setOrigin (columnRect.getX(), 0);
-                            tableModel->paintCell (g, row, headerComp.getColumnIdOfIndex (i, true),
-                                                   columnRect.getWidth(), columnRect.getHeight(), isSelected);
+                            tableModel->paintCell (g, getRow(), headerComp.getColumnIdOfIndex (i, true),
+                                                   columnRect.getWidth(), columnRect.getHeight(), isSelected());
                         }
                     }
                 }
@@ -78,16 +78,11 @@ public:
     {
         jassert (newRow >= 0);
 
-        if (newRow != row || isNowSelected != isSelected)
-        {
-            row = newRow;
-            isSelected = isNowSelected;
-            repaint();
-        }
+        updateRowAndSelection (newRow, isNowSelected);
 
         auto* tableModel = owner.getModel();
 
-        if (tableModel != nullptr && row < owner.getNumRows())
+        if (tableModel != nullptr && getRow() < owner.getNumRows())
         {
             const ComponentDeleter deleter { columnForComponent };
             const auto numColumns = owner.getHeader().getNumColumns (true);
@@ -110,9 +105,9 @@ public:
                                    : std::unique_ptr<Component, ComponentDeleter> { nullptr, deleter };
 
                 columnForComponent.erase (compToRefresh.get());
-                std::unique_ptr<Component, ComponentDeleter> newCustomComp { tableModel->refreshComponentForCell (row,
+                std::unique_ptr<Component, ComponentDeleter> newCustomComp { tableModel->refreshComponentForCell (getRow(),
                                                                                                                   columnId,
-                                                                                                                  isSelected,
+                                                                                                                  isSelected(),
                                                                                                                   compToRefresh.release()),
                                                                              deleter };
 
@@ -169,78 +164,27 @@ public:
         }
     }
 
-    void mouseDown (const MouseEvent& e) override
+    void performSelection (const MouseEvent& e, bool isMouseUp)
     {
-        isDragging = false;
-        selectRowOnMouseUp = false;
+        owner.selectRowsBasedOnModifierKeys (getRow(), e.mods, isMouseUp);
 
-        if (isEnabled())
-        {
-            if (! isSelected)
-            {
-                owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
-
-                auto columnId = owner.getHeader().getColumnIdAtX (e.x);
-
-                if (columnId != 0)
-                    if (auto* m = owner.getModel())
-                        m->cellClicked (row, columnId, e);
-            }
-            else
-            {
-                selectRowOnMouseUp = true;
-            }
-        }
-    }
-
-    void mouseDrag (const MouseEvent& e) override
-    {
-        if (isEnabled()
-             && owner.getModel() != nullptr
-             && e.mouseWasDraggedSinceMouseDown()
-             && ! isDragging)
-        {
-            SparseSet<int> rowsToDrag;
-
-            if (owner.selectOnMouseDown || owner.isRowSelected (row))
-                rowsToDrag = owner.getSelectedRows();
-            else
-                rowsToDrag.addRange (Range<int>::withStartAndLength (row, 1));
-
-            if (rowsToDrag.size() > 0)
-            {
-                auto dragDescription = owner.getModel()->getDragSourceDescription (rowsToDrag);
-
-                if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
-                {
-                    isDragging = true;
-                    owner.startDragAndDrop (e, rowsToDrag, dragDescription, true);
-                }
-            }
-        }
-    }
-
-    void mouseUp (const MouseEvent& e) override
-    {
-        if (selectRowOnMouseUp && e.mouseWasClicked() && isEnabled())
-        {
-            owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
-
-            auto columnId = owner.getHeader().getColumnIdAtX (e.x);
-
-            if (columnId != 0)
-                if (TableListBoxModel* m = owner.getModel())
-                    m->cellClicked (row, columnId, e);
-        }
-    }
-
-    void mouseDoubleClick (const MouseEvent& e) override
-    {
         auto columnId = owner.getHeader().getColumnIdAtX (e.x);
 
         if (columnId != 0)
             if (auto* m = owner.getModel())
-                m->cellDoubleClicked (row, columnId, e);
+                m->cellClicked (getRow(), columnId, e);
+    }
+
+    void mouseDoubleClick (const MouseEvent& e) override
+    {
+        if (! isEnabled())
+            return;
+
+        const auto columnId = owner.getHeader().getColumnIdAtX (e.x);
+
+        if (columnId != 0)
+            if (auto* m = owner.getModel())
+                m->cellDoubleClicked (getRow(), columnId, e);
     }
 
     String getTooltip() override
@@ -249,7 +193,7 @@ public:
 
         if (columnId != 0)
             if (auto* m = owner.getModel())
-                return m->getCellTooltip (row, columnId);
+                return m->getCellTooltip (getRow(), columnId);
 
         return {};
     }
@@ -275,6 +219,9 @@ public:
         return std::make_unique<RowAccessibilityHandler> (*this);
     }
 
+    ListBox& getOwner() const { return owner; }
+
+private:
     //==============================================================================
     class RowAccessibilityHandler  : public AccessibilityHandler
     {
@@ -291,7 +238,7 @@ public:
         String getTitle() const override
         {
             if (auto* m = rowComponent.owner.ListBox::model)
-                return m->getNameForRow (rowComponent.row);
+                return m->getNameForRow (rowComponent.getRow());
 
             return {};
         }
@@ -301,7 +248,7 @@ public:
         AccessibleState getCurrentState() const override
         {
             if (auto* m = rowComponent.owner.getModel())
-                if (rowComponent.row >= m->getNumRows())
+                if (rowComponent.getRow() >= m->getNumRows())
                     return AccessibleState().withIgnored();
 
             auto state = AccessibilityHandler::getCurrentState();
@@ -311,7 +258,7 @@ public:
             else
                 state = state.withSelectable();
 
-            if (rowComponent.isSelected)
+            if (rowComponent.isSelected())
                 return state.withSelected();
 
             return state;
@@ -360,8 +307,6 @@ public:
     TableListBox& owner;
     std::map<const Component*, int> columnForComponent;
     std::vector<std::unique_ptr<Component, ComponentDeleter>> columnComponents;
-    int row = -1;
-    bool isSelected = false, isDragging = false, selectRowOnMouseUp = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComp)
 };

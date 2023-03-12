@@ -478,7 +478,7 @@ private:
                 auto nextState = oboe::StreamState::Started;
                 int64 timeoutNanos = 1000 * oboe::kNanosPerMillisecond;
 
-                auto startResult = stream->requestStart();
+                [[maybe_unused]] auto startResult = stream->requestStart();
                 JUCE_OBOE_LOG ("Requested Oboe stream start with result: " + getOboeString (startResult));
 
                 startResult = stream->waitForStateChange (expectedState, &nextState, timeoutNanos);
@@ -751,8 +751,6 @@ private:
 
         void start() override
         {
-            audioCallbackGuard.set (0);
-
             if (inputStream != nullptr)
                 inputStream->start();
 
@@ -764,13 +762,10 @@ private:
 
         void stop() override
         {
-            while (! audioCallbackGuard.compareAndSetBool (1, 0))
-                Thread::sleep (1);
+            const SpinLock::ScopedLockType lock { audioCallbackMutex };
 
             inputStream  = nullptr;
             outputStream = nullptr;
-
-            audioCallbackGuard.set (0);
         }
 
         int getOutputLatencyInSamples() override    { return outputLatency; }
@@ -788,7 +783,9 @@ private:
 
         oboe::DataCallbackResult onAudioReady (oboe::AudioStream* stream, void* audioData, int32_t numFrames) override
         {
-            if (audioCallbackGuard.compareAndSetBool (1, 0))
+            const SpinLock::ScopedTryLockType lock { audioCallbackMutex };
+
+            if (lock.isLocked())
             {
                 if (stream == nullptr)
                     return oboe::DataCallbackResult::Stop;
@@ -797,8 +794,9 @@ private:
                 jassert (stream->getDirection() == oboe::Direction::Output && stream == outputStream->getNativeStream());
 
                 // Read input from Oboe
-                inputStreamSampleBuffer.clear();
-                inputStreamNativeBuffer.calloc (static_cast<size_t> (numInputChannels * bufferSize));
+                const auto expandedBufferSize = jmax (inputStreamNativeBuffer.size(),
+                                                      static_cast<size_t> (numInputChannels * jmax (bufferSize, numFrames)));
+                inputStreamNativeBuffer.resize (expandedBufferSize);
 
                 if (inputStream != nullptr)
                 {
@@ -811,17 +809,17 @@ private:
                         return oboe::DataCallbackResult::Continue;
                     }
 
-                    auto result = inputStream->getNativeStream()->read (inputStreamNativeBuffer.getData(), numFrames, 0);
+                    auto result = inputStream->getNativeStream()->read (inputStreamNativeBuffer.data(), numFrames, 0);
 
                     if (result)
                     {
                         auto referringDirectlyToOboeData = OboeAudioIODeviceBufferHelpers<SampleType>
-                                                             ::referAudioBufferDirectlyToOboeIfPossible (inputStreamNativeBuffer.get(),
+                                                             ::referAudioBufferDirectlyToOboeIfPossible (inputStreamNativeBuffer.data(),
                                                                                                          inputStreamSampleBuffer,
                                                                                                          result.value());
 
                         if (! referringDirectlyToOboeData)
-                            OboeAudioIODeviceBufferHelpers<SampleType>::convertFromOboe (inputStreamNativeBuffer.get(), inputStreamSampleBuffer, result.value());
+                            OboeAudioIODeviceBufferHelpers<SampleType>::convertFromOboe (inputStreamNativeBuffer.data(), inputStreamSampleBuffer, result.value());
                     }
                     else
                     {
@@ -853,8 +851,6 @@ private:
 
                 if (isOutputLatencyDetectionSupported)
                     outputLatency = getLatencyFor (*outputStream);
-
-                audioCallbackGuard.set (0);
             }
 
             return oboe::DataCallbackResult::Continue;
@@ -944,13 +940,14 @@ private:
 
             if (error == oboe::Result::ErrorDisconnected)
             {
-                if (streamRestartGuard.compareAndSetBool (1, 0))
+                const SpinLock::ScopedTryLockType streamRestartLock { streamRestartMutex };
+
+                if (streamRestartLock.isLocked())
                 {
                     // Close, recreate, and start the stream, not much use in current one.
                     // Use default device id, to let the OS pick the best ID (since our was disconnected).
 
-                    while (! audioCallbackGuard.compareAndSetBool (1, 0))
-                        Thread::sleep (1);
+                    const SpinLock::ScopedLockType audioCallbackLock { audioCallbackMutex };
 
                     outputStream = nullptr;
                     outputStream.reset (new OboeStream (oboe::kUnspecified,
@@ -963,18 +960,14 @@ private:
                                                         this));
 
                     outputStream->start();
-
-                    audioCallbackGuard.set (0);
-                    streamRestartGuard.set (0);
                 }
             }
         }
 
-        HeapBlock<SampleType> inputStreamNativeBuffer;
+        std::vector<SampleType> inputStreamNativeBuffer;
         AudioBuffer<float> inputStreamSampleBuffer,
                            outputStreamSampleBuffer;
-        Atomic<int> audioCallbackGuard { 0 },
-                    streamRestartGuard { 0 };
+        SpinLock audioCallbackMutex, streamRestartMutex;
 
         bool isInputLatencyDetectionSupported = false;
         int inputLatency = -1;

@@ -186,12 +186,22 @@ public:
     {
         renderThread->remove (this);
 
-        if ((state.fetch_and (~StateFlags::initialised) & StateFlags::initialised) != 0)
-        {
-            context.makeActive();
-            shutdownOnThread();
-            OpenGLContext::deactivateCurrentContext();
-        }
+        if ((state.fetch_and (~StateFlags::initialised) & StateFlags::initialised) == 0)
+            return;
+
+        ScopedContextActivator activator;
+        activator.activate (context);
+
+        if (context.renderer != nullptr)
+            context.renderer->openGLContextClosing();
+
+        if (vertexArrayObject != 0)
+            context.extensions.glDeleteVertexArrays (1, &vertexArrayObject);
+
+        associatedObjectNames.clear();
+        associatedObjects.clear();
+        cachedImageFrameBuffer.release();
+        nativeContext->shutdownOnRenderThread();
     }
 
     void resume()
@@ -375,11 +385,11 @@ public:
             abortScope = true;
         }
 
-        if (! contextActivator.activate (context))
-            return RenderStatus::noWork;
-
         {
             NativeContext::Locker locker (*nativeContext);
+
+            if (! contextActivator.activate (context))
+                return RenderStatus::noWork;
 
             JUCE_CHECK_OPENGL_ERROR
 
@@ -416,7 +426,7 @@ public:
             }
         }
 
-        nativeContext->swapBuffers();
+        bufferSwapper.swap();
         return RenderStatus::nominal;
     }
 
@@ -520,9 +530,6 @@ public:
                 paintOwner (*g);
                 JUCE_CHECK_OPENGL_ERROR
             }
-
-            if (! context.isActive())
-                context.makeActive();
         }
 
         JUCE_CHECK_OPENGL_ERROR
@@ -530,7 +537,7 @@ public:
 
     void drawComponentBuffer()
     {
-        if (contextRequiresTexture2DEnableDisable())
+        if (! isCoreProfile())
             glEnable (GL_TEXTURE_2D);
 
        #if JUCE_WINDOWS
@@ -633,6 +640,7 @@ public:
         if (getOpenGLVersion() >= Version { 4, 3 } && glDebugMessageCallback != nullptr)
         {
             glEnable (GL_DEBUG_OUTPUT);
+            glEnable (GL_DEBUG_OUTPUT_SYNCHRONOUS);
             glDebugMessageCallback ([] (GLenum, GLenum type, GLuint, GLenum severity, GLsizei, const GLchar* message, const void*)
             {
                 // This may reiterate issues that are also flagged by JUCE_CHECK_OPENGL_ERROR.
@@ -663,18 +671,22 @@ public:
         return InitResult::success;
     }
 
-    void shutdownOnThread()
+    bool isCoreProfile() const
     {
-        if (context.renderer != nullptr)
-            context.renderer->openGLContextClosing();
+       #if JUCE_OPENGL_ES
+        return true;
+       #else
+        clearGLError();
+        GLint mask = 0;
+        glGetIntegerv (GL_CONTEXT_PROFILE_MASK, &mask);
 
-        if (vertexArrayObject != 0)
-            context.extensions.glDeleteVertexArrays (1, &vertexArrayObject);
+        // The context isn't aware of the profile mask, so it pre-dates the core profile
+        if (glGetError() == GL_INVALID_ENUM)
+            return false;
 
-        associatedObjectNames.clear();
-        associatedObjects.clear();
-        cachedImageFrameBuffer.release();
-        nativeContext->shutdownOnRenderThread();
+        // Also assumes a compatibility profile if the mask is completely empty for some reason
+        return (mask & (GLint) GL_CONTEXT_CORE_PROFILE_BIT) != 0;
+       #endif
     }
 
     /*  Returns true if the context requires a non-zero vertex array object (VAO) to be bound.
@@ -689,16 +701,7 @@ public:
        #if JUCE_OPENGL_ES
         return false;
        #else
-        clearGLError();
-        GLint mask = 0;
-        glGetIntegerv (GL_CONTEXT_PROFILE_MASK, &mask);
-
-        // The context isn't aware of the profile mask, so it pre-dates the core profile
-        if (glGetError() == GL_INVALID_ENUM)
-            return false;
-
-        // Also assumes a compatibility profile if the mask is completely empty for some reason
-        return (mask & (GLint) GL_CONTEXT_CORE_PROFILE_BIT) != 0;
+        return isCoreProfile();
        #endif
     }
 
@@ -836,7 +839,6 @@ public:
                     case RenderStatus::nominal: result = RenderStatus::nominal; break;
                     case RenderStatus::messageThreadAborted: return RenderStatus::messageThreadAborted;
                 }
-
             }
 
             return result;
@@ -947,6 +949,49 @@ public:
     }
 
     //==============================================================================
+    class BufferSwapper : private AsyncUpdater
+    {
+    public:
+        explicit BufferSwapper (CachedImage& img)
+            : image (img) {}
+
+        ~BufferSwapper() override
+        {
+            cancelPendingUpdate();
+        }
+
+        void swap()
+        {
+            static const auto swapBuffersOnMainThread = []
+            {
+                const auto os = SystemStats::getOperatingSystemType();
+
+                if ((os & SystemStats::MacOSX) != 0)
+                    return (os != SystemStats::MacOSX && os < SystemStats::MacOSX_10_14);
+
+                return false;
+            }();
+
+            if (swapBuffersOnMainThread && ! MessageManager::getInstance()->isThisTheMessageThread())
+                triggerAsyncUpdate();
+            else
+                image.nativeContext->swapBuffers();
+        }
+
+    private:
+        void handleAsyncUpdate() override
+        {
+            ScopedContextActivator activator;
+            activator.activate (image.context);
+
+            NativeContext::Locker locker (*image.nativeContext);
+            image.nativeContext->swapBuffers();
+        }
+
+        CachedImage& image;
+    };
+
+    //==============================================================================
     friend class NativeContext;
     std::unique_ptr<NativeContext> nativeContext;
 
@@ -973,6 +1018,7 @@ public:
    #endif
     bool textureNpotSupported = false;
     std::chrono::steady_clock::time_point lastMMLockReleaseTime{};
+    BufferSwapper bufferSwapper { *this };
 
    #if JUCE_MAC
     NSView* getCurrentView() const
@@ -1050,9 +1096,6 @@ public:
         paintComponents         = 1 << 1,
         pendingDestruction      = 1 << 2,
         initialised             = 1 << 3,
-
-        // Flags that may change state after each frame
-        transient               = pendingRender | paintComponents,
 
         // Flags that should retain their state after each frame
         persistent              = initialised | pendingDestruction
@@ -1404,6 +1447,12 @@ int OpenGLContext::getSwapInterval() const
 void* OpenGLContext::getRawContext() const noexcept
 {
     return nativeContext != nullptr ? nativeContext->getRawContext() : nullptr;
+}
+
+bool OpenGLContext::isCoreProfile() const
+{
+    auto* c = getCachedImage();
+    return c != nullptr && c->isCoreProfile();
 }
 
 OpenGLContext::CachedImage* OpenGLContext::getCachedImage() const noexcept

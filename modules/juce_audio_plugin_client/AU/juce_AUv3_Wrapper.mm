@@ -1354,14 +1354,17 @@ private:
             jassertfalse;
         }
 
-        [paramTree.get() setImplementorValueObserver: paramObserver];
-        [paramTree.get() setImplementorValueProvider: paramProvider];
-        [paramTree.get() setImplementorStringFromValueCallback: stringFromValueProvider];
-        [paramTree.get() setImplementorValueFromStringCallback: valueFromStringProvider];
+        [paramTree.get() setImplementorValueObserver: ^(AUParameter* param, AUValue value) { this->valueChangedFromHost (param, value); }];
+        [paramTree.get() setImplementorValueProvider: ^(AUParameter* param) { return this->getValue (param); }];
+        [paramTree.get() setImplementorStringFromValueCallback: ^(AUParameter* param, const AUValue* value) { return this->stringFromValue (param, value); }];
+        [paramTree.get() setImplementorValueFromStringCallback: ^(AUParameter* param, NSString* str) { return this->valueFromString (param, str); }];
 
         if (getAudioProcessor().hasEditor())
         {
-            editorObserverToken = ObserverPtr ([paramTree.get() tokenByAddingParameterObserver: editorParamObserver],
+            editorObserverToken = ObserverPtr ([paramTree.get() tokenByAddingParameterObserver: ^(AUParameterAddress, AUValue)
+                                                {
+                                                    // this will have already been handled by valueChangedFromHost
+                                                }],
                                                ObserverDestructor { paramTree.get() });
         }
     }
@@ -1630,11 +1633,6 @@ private:
         return 0;
     }
 
-    void valueChangedForObserver (AUParameterAddress, AUValue)
-    {
-        // this will have already been handled by valueChangedFromHost
-    }
-
     NSString* stringFromValue (AUParameter* param, const AUValue* value)
     {
         String text;
@@ -1738,11 +1736,6 @@ private:
     CoreAudioTimeConversions timeConversions;
     std::unique_ptr<AUAudioUnitBusArray, NSObjectDeleter> inputBusses, outputBusses;
 
-    ObjCBlock<AUImplementorValueObserver> paramObserver = CreateObjCBlock (this, &JuceAudioUnitv3::valueChangedFromHost);
-    ObjCBlock<AUImplementorValueProvider> paramProvider = CreateObjCBlock (this, &JuceAudioUnitv3::getValue);
-    ObjCBlock<AUImplementorStringFromValueCallback> stringFromValueProvider = CreateObjCBlock (this, &JuceAudioUnitv3::stringFromValue);
-    ObjCBlock<AUImplementorValueFromStringCallback> valueFromStringProvider = CreateObjCBlock (this, &JuceAudioUnitv3::valueFromString);
-
    #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
     std::map<AUParameterAddress, int> indexForAddress;
    #endif
@@ -1752,7 +1745,6 @@ private:
     // to avoid recursion on parameter changes, we need to add an
     // editor observer to do the parameter changes
     std::unique_ptr<AUParameterTree, NSObjectDeleter> paramTree;
-    ObjCBlock<AUParameterObserver> editorParamObserver = CreateObjCBlock (this, &JuceAudioUnitv3::valueChangedForObserver);
     ObserverPtr editorObserverToken;
 
     std::unique_ptr<NSMutableArray<NSNumber*>, NSObjectDeleter> channelCapabilities;

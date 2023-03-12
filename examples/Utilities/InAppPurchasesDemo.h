@@ -190,7 +190,7 @@ private:
         guiUpdater.triggerAsyncUpdate();
     }
 
-    void productPurchaseFinished (const PurchaseInfo& info, bool success, const String&) override
+    void productPurchaseFinished (const PurchaseInfo& info, bool success, const String& error) override
     {
         purchaseInProgress = false;
 
@@ -211,6 +211,12 @@ private:
                 for (auto& voiceProduct : voiceProducts)
                     voiceProduct.purchaseInProgress = false;
             }
+        }
+
+        if (! success)
+        {
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, "Purchase failed", error);
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
 
         guiUpdater.triggerAsyncUpdate();

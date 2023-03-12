@@ -153,9 +153,11 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
                 NSImage* image = [[NSWorkspace sharedWorkspace] iconForFile: nsEmptyString()];
                 [dragItem setDraggingFrame: getDragRect (view, event) contents: image];
 
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
                 if (auto session = [view beginDraggingSessionWithItems: [NSArray arrayWithObject: dragItem]
                                                                  event: event
                                                                 source: helper])
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
                 {
                     session.animatesToStartingPositionsOnCancelOrFail = YES;
                     session.draggingFormation = NSDraggingFormationNone;
@@ -208,9 +210,11 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
                 NSDraggingSourceHelper::setDragOperation (helper, canMoveFiles ? NSDragOperationMove
                                                                                : NSDragOperationCopy);
 
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
                 return [view beginDraggingSessionWithItems: dragItems
                                                      event: event
                                                     source: helper] != nullptr;
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             }
         }
     }
