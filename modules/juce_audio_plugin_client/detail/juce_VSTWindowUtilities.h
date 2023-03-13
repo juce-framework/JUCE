@@ -36,37 +36,17 @@ struct VSTWindowUtilities
 {
     VSTWindowUtilities() = delete;
 
-   #if ! JUCE_64BIT
-    static void updateEditorCompBoundsVST (Component* comp);
-
-    static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user);
-
-    static bool shouldManuallyCloseHostWindow();
-   #endif
-
     static void* attachComponentToWindowRefVST (Component* comp,
                                                 int desktopFlags,
-                                                void* parentWindowOrView,
-                                                bool isNSView);
+                                                void* parentWindowOrView);
 
     static void detachComponentFromWindowRefVST (Component* comp,
-                                                void* window,
-                                                bool isNSView);
-
-    static void initialiseMacVST();
+                                                void* window);
 
     static void setNativeHostWindowSizeVST (void* window,
                                             Component* component,
                                             int newWidth,
-                                            int newHeight,
-                                            bool isNSView);
-
-    static void checkWindowVisibilityVST (void* window,
-                                          Component* comp,
-                                          bool isNSView);
-
-    static bool forwardCurrentKeyEventToHostVST (Component* comp,
-                                                 bool isNSView);
+                                            int newHeight);
 };
 
 } // namespace juce::detail

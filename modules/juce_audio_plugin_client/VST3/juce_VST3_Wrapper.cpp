@@ -1799,8 +1799,7 @@ private:
             #endif
 
            #else
-            isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
-            macHostWindow = detail::VSTWindowUtilities::attachComponentToWindowRefVST (component.get(), desktopFlags, parent, isNSView);
+            macHostWindow = detail::VSTWindowUtilities::attachComponentToWindowRefVST (component.get(), desktopFlags, parent);
            #endif
 
             component->resizeHostWindow();
@@ -1822,7 +1821,7 @@ private:
                #elif JUCE_MAC
                 if (macHostWindow != nullptr)
                 {
-                    detail::VSTWindowUtilities::detachComponentFromWindowRefVST (component.get(), macHostWindow, isNSView);
+                    detail::VSTWindowUtilities::detachComponentFromWindowRefVST (component.get(), macHostWindow);
                     macHostWindow = nullptr;
                 }
                #endif
@@ -2288,7 +2287,6 @@ private:
 
        #if JUCE_MAC
         void* macHostWindow = nullptr;
-        bool isNSView = false;
 
         // On macOS Cubase 10 resizes the host window after calling onSize() resulting in the peer
         // bounds being a step behind the plug-in. Calling updateBounds() asynchronously seems to fix things...
@@ -3852,10 +3850,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 bool initModule();
 bool initModule()
 {
-   #if JUCE_MAC
-    detail::VSTWindowUtilities::initialiseMacVST();
-   #endif
-
     return true;
 }
 
