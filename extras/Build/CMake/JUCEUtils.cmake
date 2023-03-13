@@ -1211,7 +1211,7 @@ endfunction()
 function(_juce_configure_plugin_targets target)
     _juce_set_output_name(${target} $<TARGET_PROPERTY:${target},JUCE_PRODUCT_NAME>_SharedCode)
 
-    target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client_utils)
+    target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client)
 
     get_target_property(enabled_formats ${target} JUCE_FORMATS)
 

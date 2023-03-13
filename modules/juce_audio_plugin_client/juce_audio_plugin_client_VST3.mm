@@ -23,6 +23,4 @@
   ==============================================================================
 */
 
-#if JucePlugin_Build_VST || JucePlugin_Build_VST3
- #include "detail/juce_VSTWindowUtilities.mm"
-#endif
+#include "juce_audio_plugin_client_VST3.cpp"

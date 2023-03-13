@@ -86,18 +86,18 @@ enum MIDICVStatus : unsigned int
 
 #endif
 
-#include "AU/AudioUnitSDK/AUBase.cpp"
-#include "AU/AudioUnitSDK/AUBuffer.cpp"
-#include "AU/AudioUnitSDK/AUBufferAllocator.cpp"
-#include "AU/AudioUnitSDK/AUEffectBase.cpp"
-#include "AU/AudioUnitSDK/AUInputElement.cpp"
-#include "AU/AudioUnitSDK/AUMIDIBase.cpp"
-#include "AU/AudioUnitSDK/AUMIDIEffectBase.cpp"
-#include "AU/AudioUnitSDK/AUOutputElement.cpp"
-#include "AU/AudioUnitSDK/AUPlugInDispatch.cpp"
-#include "AU/AudioUnitSDK/AUScopeElement.cpp"
-#include "AU/AudioUnitSDK/ComponentBase.cpp"
-#include "AU/AudioUnitSDK/MusicDeviceBase.cpp"
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBuffer.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBufferAllocator.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUEffectBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUInputElement.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUMIDIBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUMIDIEffectBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUOutputElement.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUPlugInDispatch.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUScopeElement.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/ComponentBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/MusicDeviceBase.cpp>
 
 #undef verify
 #undef verify_noerr
