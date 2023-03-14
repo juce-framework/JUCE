@@ -581,19 +581,20 @@ private:
 
     String getDefaultFileExtension (const String& filename) const
     {
-        auto extension = filename.fromLastOccurrenceOf (".", false, false);
+        const auto extension = filename.contains (".") ? filename.fromLastOccurrenceOf (".", false, false)
+                                                       : String();
 
-        if (extension.isEmpty())
-        {
-            auto tokens = StringArray::fromTokens (filtersString, ";,", "\"'");
-            tokens.trim();
-            tokens.removeEmptyStrings();
+        if (! extension.isEmpty())
+            return extension;
 
-            if (tokens.size() == 1 && tokens[0].removeCharacters ("*.").isNotEmpty())
-                extension = tokens[0].fromFirstOccurrenceOf (".", false, false);
-        }
+        auto tokens = StringArray::fromTokens (filtersString, ";,", "\"'");
+        tokens.trim();
+        tokens.removeEmptyStrings();
 
-        return extension;
+        if (tokens.size() == 1 && tokens[0].removeCharacters ("*.").isNotEmpty())
+            return tokens[0].fromFirstOccurrenceOf (".", false, false);
+
+        return {};
     }
 
     //==============================================================================
