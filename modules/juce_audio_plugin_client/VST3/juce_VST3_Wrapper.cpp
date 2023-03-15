@@ -48,11 +48,13 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
-#include "../utility/juce_CheckSettingMacros.h"
-#include "../utility/juce_IncludeSystemHeaders.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_WindowsHooks.h"
-#include "../utility/juce_LinuxMessageThread.h"
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
+#include <juce_audio_plugin_client/detail/juce_WindowsHooks.h>
+#include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
+#include <juce_audio_plugin_client/detail/juce_VSTWindowUtilities.h>
+
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/utilities/juce_FlagCache.h>
 #include <juce_audio_processors/format_types/juce_VST3Common.h>
@@ -82,7 +84,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #endif
 
 #if JUCE_LINUX || JUCE_BSD
- #include "juce_events/native/juce_linux_EventLoopInternal.h"
+ #include <juce_events/native/juce_linux_EventLoopInternal.h>
  #include <unordered_map>
 #endif
 
@@ -111,17 +113,6 @@ namespace juce
 using namespace Steinberg;
 
 //==============================================================================
-#if JUCE_MAC
- extern void initialiseMacVST();
-
- #if ! JUCE_64BIT
-  extern void updateEditorCompBoundsVST (Component*);
- #endif
-
- extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parentWindowOrView, bool isNSView);
- extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* nsWindow, bool isNSView);
-#endif
-
 #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
  double getScaleFactorForWindow (HWND);
 #endif
@@ -1868,6 +1859,8 @@ private:
 
             createContentWrapperComponentIfNeeded();
 
+            const auto desktopFlags = detail::PluginUtilities::getDesktopFlags (component->pluginEditor.get());
+
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             // If the plugin was last opened at a particular scale, try to reapply that scale here.
             // Note that we do this during attach(), rather than in JuceVST3Editor(). During the
@@ -1883,7 +1876,7 @@ private:
             #endif
 
             component->setOpaque (true);
-            component->addToDesktop (0, (void*) systemWindow);
+            component->addToDesktop (desktopFlags, systemWindow);
             component->setVisible (true);
 
             #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
@@ -1892,7 +1885,7 @@ private:
 
            #else
             isNSView = (strcmp (type, kPlatformTypeNSView) == 0);
-            macHostWindow = juce::attachComponentToWindowRefVST (component.get(), parent, isNSView);
+            macHostWindow = detail::VSTWindowUtilities::attachComponentToWindowRefVST (component.get(), desktopFlags, parent, isNSView);
            #endif
 
             component->resizeHostWindow();
@@ -1914,7 +1907,7 @@ private:
                #elif JUCE_MAC
                 if (macHostWindow != nullptr)
                 {
-                    juce::detachComponentFromWindowRefVST (component.get(), macHostWindow, isNSView);
+                    detail::VSTWindowUtilities::detachComponentFromWindowRefVST (component.get(), macHostWindow, isNSView);
                     macHostWindow = nullptr;
                 }
                #endif
@@ -3956,7 +3949,7 @@ bool initModule();
 bool initModule()
 {
    #if JUCE_MAC
-    initialiseMacVST();
+    detail::VSTWindowUtilities::initialiseMacVST();
    #endif
 
     return true;

@@ -25,13 +25,13 @@
 
 #include <juce_core/system/juce_CompilerWarnings.h>
 #include <juce_core/system/juce_TargetPlatform.h>
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
 
 #if JucePlugin_Build_VST
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996 4100)
 
-#include "../utility/juce_IncludeSystemHeaders.h"
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
 #include <juce_core/juce_core.h>
 
 #if JucePlugin_VersionCode < 0x010000   // Major < 0
@@ -100,12 +100,13 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #define JUCE_VSTINTERFACE_H_INCLUDED 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
 
-#include "../utility/juce_IncludeModuleHeaders.h"
+#include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
 
 using namespace juce;
 
-#include "../utility/juce_WindowsHooks.h"
-#include "../utility/juce_LinuxMessageThread.h"
+#include <juce_audio_plugin_client/detail/juce_WindowsHooks.h>
+#include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
+#include <juce_audio_plugin_client/detail/juce_VSTWindowUtilities.h>
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_VSTCommon.h>
@@ -121,25 +122,12 @@ static bool recursionCheck = false;
 
 namespace juce
 {
- #if JUCE_MAC
-  extern JUCE_API void initialiseMacVST();
-  extern JUCE_API void* attachComponentToWindowRefVST (Component*, void* parent, bool isNSView);
-  extern JUCE_API void detachComponentFromWindowRefVST (Component*, void* window, bool isNSView);
-  extern JUCE_API void setNativeHostWindowSizeVST (void* window, Component*, int newWidth, int newHeight, bool isNSView);
-  extern JUCE_API void checkWindowVisibilityVST (void* window, Component*, bool isNSView);
-  extern JUCE_API bool forwardCurrentKeyEventToHostVST (Component*, bool isNSView);
- #if ! JUCE_64BIT
-  extern JUCE_API void updateEditorCompBoundsVST (Component*);
- #endif
+ #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+  JUCE_API double getScaleFactorForWindow (HWND);
  #endif
 
-#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-  extern JUCE_API double getScaleFactorForWindow (HWND);
-#endif
-
-  extern JUCE_API bool handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
+  JUCE_API bool handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
 }
-
 
 //==============================================================================
 #if JUCE_WINDOWS
@@ -1003,8 +991,10 @@ public:
         {
             setVisible (false);
 
+            const auto desktopFlags = detail::PluginUtilities::getDesktopFlags (getEditorComp());
+
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
-            addToDesktop (0, args.ptr);
+            addToDesktop (desktopFlags, args.ptr);
             hostWindow = (HostWindowType) args.ptr;
 
             #if JUCE_LINUX || JUCE_BSD
@@ -1021,7 +1011,7 @@ public:
              startTimer (500);
             #endif
            #elif JUCE_MAC
-            hostWindow = attachComponentToWindowRefVST (this, args.ptr, wrapper.useNSView);
+            hostWindow = detail::VSTWindowUtilities::attachComponentToWindowRefVST (this, desktopFlags, args.ptr, wrapper.useNSView);
            #endif
 
             setVisible (true);
@@ -1031,7 +1021,7 @@ public:
         {
            #if JUCE_MAC
             if (hostWindow != nullptr)
-                detachComponentFromWindowRefVST (this, hostWindow, wrapper.useNSView);
+                detail::VSTWindowUtilities::detachComponentFromWindowRefVST (this, hostWindow, wrapper.useNSView);
            #endif
 
             hostWindow = {};
@@ -1041,7 +1031,7 @@ public:
         {
            #if JUCE_MAC
             if (hostWindow != nullptr)
-                checkWindowVisibilityVST (hostWindow, this, wrapper.useNSView);
+                detail::VSTWindowUtilities::checkWindowVisibilityVST (hostWindow, this, wrapper.useNSView);
            #endif
         }
 
@@ -1130,7 +1120,7 @@ public:
                 const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
 
                #if JUCE_MAC
-                setNativeHostWindowSizeVST (hostWindow, this, newWidth, newHeight, wrapper.useNSView);
+                detail::VSTWindowUtilities::setNativeHostWindowSizeVST (hostWindow, this, newWidth, newHeight, wrapper.useNSView);
                #elif JUCE_LINUX || JUCE_BSD
                 // (Currently, all linux hosts support sizeWindow, so this should never need to happen)
                 setSize (newWidth, newHeight);
@@ -1241,7 +1231,7 @@ public:
         {
             // If we have an unused keypress, move the key-focus to a host window
             // and re-inject the event..
-            return forwardCurrentKeyEventToHostVST (this, wrapper.useNSView);
+            return detail::VSTWindowUtilities::forwardCurrentKeyEventToHostVST (this, wrapper.useNSView);
         }
        #endif
 
@@ -2193,14 +2183,14 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster)
     {
-        initialiseMacVST();
+        detail::VSTWindowUtilities::initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
 
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* main_macho (Vst2::audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* main_macho (Vst2::audioMasterCallback audioMaster)
     {
-        initialiseMacVST();
+        detail::VSTWindowUtilities::initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
 

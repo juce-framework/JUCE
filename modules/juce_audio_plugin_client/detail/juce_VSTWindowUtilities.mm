@@ -23,24 +23,21 @@
   ==============================================================================
 */
 
+#pragma once
+
 #include <juce_core/system/juce_TargetPlatform.h>
 
 #if JUCE_MAC
 
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_VSTWindowUtilities.h>
 
-#if JucePlugin_Build_VST || JucePlugin_Build_VST3
-
-#include "../utility/juce_IncludeSystemHeaders.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
-
-//==============================================================================
-namespace juce
+namespace juce::detail
 {
 
 #if ! JUCE_64BIT
-JUCE_API void updateEditorCompBoundsVST (Component*);
-void updateEditorCompBoundsVST (Component* comp)
+void VSTWindowUtilities::updateEditorCompBoundsVST (Component* comp)
 {
     HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
                             comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
@@ -58,29 +55,24 @@ void updateEditorCompBoundsVST (Component* comp)
                               (int) (windowPos.top + r.origin.y));
 }
 
-static pascal OSStatus viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user)
+pascal OSStatus VSTWindowUtilities::viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user)
 {
     updateEditorCompBoundsVST ((Component*) user);
     return noErr;
 }
 
-static bool shouldManuallyCloseHostWindow()
+bool VSTWindowUtilities::shouldManuallyCloseHostWindow()
 {
-    return getHostType().isCubase7orLater() || getHostType().isRenoise() || ((SystemStats::getOperatingSystemType() & 0xff) >= 12);
+    return getHostType().isCubase7orLater()
+        || getHostType().isRenoise()
+        || ((SystemStats::getOperatingSystemType() & 0xff) >= 12);
 }
 #endif
 
-//==============================================================================
-JUCE_API void initialiseMacVST();
-void initialiseMacVST()
-{
-   #if ! JUCE_64BIT
-    NSApplicationLoad();
-   #endif
-}
-
-JUCE_API void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, bool isNSView);
-void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, [[maybe_unused]] bool isNSView)
+void* VSTWindowUtilities::attachComponentToWindowRefVST (Component* comp,
+                                                         int desktopFlags,
+                                                         void* parentWindowOrView,
+                                                         [[maybe_unused]] bool isNSView)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -133,16 +125,23 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
 
             EventHandlerRef ref;
             const EventTypeSpec kControlBoundsChangedEvent = { kEventClassControl, kEventControlBoundsChanged };
-            InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
+            InstallEventHandler (GetControlEventTarget (dummyView),
+                                 NewEventHandlerUPP (viewBoundsChangedEvent),
+                                 1,
+                                 &kControlBoundsChangedEvent,
+                                 (void*) comp,
+                                 &ref);
             comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 
             updateEditorCompBoundsVST (comp);
 
-           #if ! JucePlugin_EditorRequiresKeyboardFocus
-            comp->addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
-           #else
-            comp->addToDesktop (ComponentPeer::windowIsTemporary);
-           #endif
+            const auto defaultFlags =
+                   #if ! JucePlugin_EditorRequiresKeyboardFocus
+                    ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses;
+                   #else
+                    ComponentPeer::windowIsTemporary;
+                   #endif
+            comp->addToDesktop (desktopFlags | defaultFlags);
 
             comp->setVisible (true);
             comp->toFront (false);
@@ -163,11 +162,13 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
 
         NSView* parentView = [(NSView*) parentWindowOrView retain];
 
-       #if JucePlugin_EditorRequiresKeyboardFocus
-        comp->addToDesktop (0, parentView);
-       #else
-        comp->addToDesktop (ComponentPeer::windowIgnoresKeyPresses, parentView);
-       #endif
+        const auto defaultFlags =
+               #if JucePlugin_EditorRequiresKeyboardFocus
+                0;
+               #else
+                ComponentPeer::windowIgnoresKeyPresses;
+               #endif
+        comp->addToDesktop (desktopFlags | defaultFlags, parentView);
 
         // (this workaround is because Wavelab provides a zero-size parent view..)
         if ([parentView frame].size.height == 0)
@@ -181,8 +182,9 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
     }
 }
 
-JUCE_API void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSView);
-void detachComponentFromWindowRefVST (Component* comp, void* window, [[maybe_unused]] bool isNSView)
+void VSTWindowUtilities::detachComponentFromWindowRefVST (Component* comp,
+                                                          void* window,
+                                                          [[maybe_unused]] bool isNSView)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -236,8 +238,18 @@ void detachComponentFromWindowRefVST (Component* comp, void* window, [[maybe_unu
     }
 }
 
-JUCE_API void setNativeHostWindowSizeVST (void* window, Component* component, int newWidth, int newHeight, bool isNSView);
-void setNativeHostWindowSizeVST (void* window, Component* component, int newWidth, int newHeight, [[maybe_unused]] bool isNSView)
+void VSTWindowUtilities::initialiseMacVST()
+{
+   #if ! JUCE_64BIT
+    NSApplicationLoad();
+   #endif
+}
+
+void VSTWindowUtilities::setNativeHostWindowSizeVST (void* window,
+                                                     Component* component,
+                                                     int newWidth,
+                                                     int newHeight,
+                                                     [[maybe_unused]] bool isNSView)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -272,10 +284,9 @@ void setNativeHostWindowSizeVST (void* window, Component* component, int newWidt
     }
 }
 
-JUCE_API void checkWindowVisibilityVST (void* window, Component* comp, bool isNSView);
-void checkWindowVisibilityVST ([[maybe_unused]] void* window,
-                               [[maybe_unused]] Component* comp,
-                               [[maybe_unused]] bool isNSView)
+void VSTWindowUtilities::checkWindowVisibilityVST ([[maybe_unused]] void* window,
+                                                   [[maybe_unused]] Component* comp,
+                                                   [[maybe_unused]] bool isNSView)
 {
    #if ! JUCE_64BIT
     if (! isNSView)
@@ -283,8 +294,8 @@ void checkWindowVisibilityVST ([[maybe_unused]] void* window,
    #endif
 }
 
-JUCE_API bool forwardCurrentKeyEventToHostVST (Component* comp, bool isNSView);
-bool forwardCurrentKeyEventToHostVST ([[maybe_unused]] Component* comp, [[maybe_unused]] bool isNSView)
+bool VSTWindowUtilities::forwardCurrentKeyEventToHostVST ([[maybe_unused]] Component* comp,
+                                                          [[maybe_unused]] bool isNSView)
 {
    #if ! JUCE_64BIT
     if (! isNSView)
@@ -299,7 +310,6 @@ bool forwardCurrentKeyEventToHostVST ([[maybe_unused]] Component* comp, [[maybe_
     return false;
 }
 
-} // (juce namespace)
+} // namespace juce::detail
 
-#endif
 #endif

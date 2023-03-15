@@ -24,11 +24,11 @@
 */
 
 #include <juce_core/system/juce_TargetPlatform.h>
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
 
-#include "../utility/juce_IncludeSystemHeaders.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_WindowsHooks.h"
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_WindowsHooks.h>
 
 #include <juce_audio_devices/juce_audio_devices.h>
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -39,7 +39,7 @@
 // set it then by default we'll just create a simple one as below.
 #if ! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP
 
-#include "juce_StandaloneFilterWindow.h"
+#include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
 
 namespace juce
 {

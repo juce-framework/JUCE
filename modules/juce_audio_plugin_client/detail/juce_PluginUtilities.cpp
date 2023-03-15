@@ -28,8 +28,8 @@
 #endif
 
 #include <juce_core/system/juce_TargetPlatform.h>
-#include "../utility/juce_CheckSettingMacros.h"
-#include "juce_IncludeModuleHeaders.h"
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
 
 namespace juce
 {

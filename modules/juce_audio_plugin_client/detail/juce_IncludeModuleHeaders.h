@@ -23,6 +23,23 @@
   ==============================================================================
 */
 
-#if JucePlugin_Build_VST || JucePlugin_Build_VST3
- #include "detail/juce_VSTWindowUtilities.mm"
-#endif
+#pragma once
+
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
+
+namespace juce
+{
+    #define Component juce::Component
+
+   #if JUCE_MAC
+    #define Point juce::Point
+    void repostCurrentNSEvent();
+   #endif
+
+    //==============================================================================
+    inline const PluginHostType& getHostType()
+    {
+        static PluginHostType hostType;
+        return hostType;
+    }
+}

@@ -23,22 +23,33 @@
   ==============================================================================
 */
 
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
-#include "juce_CreatePluginFilter.h"
+#pragma once
 
-namespace juce
+#include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
+
+namespace juce::detail
 {
-    #define Component juce::Component
 
-   #if JUCE_MAC
-    #define Point juce::Point
-    void repostCurrentNSEvent();
-   #endif
+struct PluginUtilities
+{
+    PluginUtilities() = delete;
 
-    //==============================================================================
-    inline const PluginHostType& getHostType()
+    static int getDesktopFlags (const AudioProcessorEditor& editor)
     {
-        static PluginHostType hostType;
-        return hostType;
+        return editor.wantsLayerBackedView()
+             ? 0
+             : ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering;
     }
-}
+
+    static int getDesktopFlags (const AudioProcessorEditor* editor)
+    {
+        return editor != nullptr ? getDesktopFlags (*editor) : 0;
+    }
+
+    static void addToDesktop (AudioProcessorEditor& editor, void* parent)
+    {
+        editor.addToDesktop (getDesktopFlags (editor), parent);
+    }
+};
+
+} // namespace juce::detail

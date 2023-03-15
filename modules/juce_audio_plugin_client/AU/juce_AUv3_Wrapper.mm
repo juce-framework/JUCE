@@ -24,7 +24,7 @@
 */
 
 #include <juce_core/system/juce_TargetPlatform.h>
-#include "../utility/juce_CheckSettingMacros.h"
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
 
 #if JucePlugin_Build_AUv3
 
@@ -38,8 +38,8 @@
 
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
-#include "../utility/juce_IncludeSystemHeaders.h"
-#include "../utility/juce_IncludeModuleHeaders.h"
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
 
 #import <CoreAudioKit/CoreAudioKit.h>
 #import <AudioToolbox/AudioToolbox.h>
@@ -1834,7 +1834,7 @@ public:
                     editor->setVisible (true);
                    #endif
 
-                    editor->addToDesktop (0, view);
+                    detail::PluginUtilities::addToDesktop (*editor, view);
 
                    #if JUCE_IOS
                     if (JUCE_IOS_MAC_VIEW* peerView = [[[myself view] subviews] objectAtIndex: 0])
