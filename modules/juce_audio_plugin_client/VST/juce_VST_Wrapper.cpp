@@ -125,8 +125,6 @@ namespace juce
  #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
   JUCE_API double getScaleFactorForWindow (HWND);
  #endif
-
-  JUCE_API bool handleManufacturerSpecificVST2Opcode (int32, pointer_sized_int, void*, float);
 }
 
 //==============================================================================
@@ -357,7 +355,7 @@ public:
             processor->setNonRealtime (isProcessLevelOffline());
 
            #if JUCE_WINDOWS
-            if (getHostType().isWavelab())
+            if (detail::PluginUtilities::getHostType().isWavelab())
             {
                 int priority = GetThreadPriority (GetCurrentThread());
 
@@ -552,7 +550,7 @@ public:
                     hostCallback (&vstEffect, Vst2::audioMasterWantMidi, 0, 1, nullptr, 0);
             }
 
-            if (getHostType().isAbletonLive()
+            if (detail::PluginUtilities::getHostType().isAbletonLive()
                  && hostCallback != nullptr
                  && processor->getTailLengthSeconds() == std::numeric_limits<double>::infinity())
             {
@@ -963,7 +961,7 @@ public:
             setSize (editorBounds.getWidth(), editorBounds.getHeight());
 
            #if JUCE_WINDOWS
-            if (! getHostType().isReceptor())
+            if (! detail::PluginUtilities::getHostType().isReceptor())
                 addMouseListener (this, true);
            #endif
 
@@ -1105,7 +1103,7 @@ public:
             {
                 auto status = host (wrapper.getAEffect(), Vst2::audioMasterCanDo, 0, 0, const_cast<char*> ("sizeWindow"), 0);
 
-                if (status == (pointer_sized_int) 1 || getHostType().isAbletonLive())
+                if (status == (pointer_sized_int) 1 || detail::PluginUtilities::getHostType().isAbletonLive())
                 {
                     const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
 
@@ -1280,7 +1278,7 @@ public:
 
         //==============================================================================
        #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<HostDrivenEventLoop> hostEventLoop;
+        SharedResourcePointer<detail::HostDrivenEventLoop> hostEventLoop;
        #endif
 
         //==============================================================================
@@ -1294,7 +1292,7 @@ public:
         ::Display* display = XWindowSystem::getInstance()->getDisplay();
        #elif JUCE_WINDOWS
         using HostWindowType = HWND;
-        WindowsHooks hooks;
+        detail::WindowsHooks hooks;
        #else
         using HostWindowType = void*;
        #endif
@@ -1396,7 +1394,7 @@ private:
     // Workarounds for hosts which attempt to open editor windows on a non-GUI thread.. (Grrrr...)
     static void checkWhetherMessageThreadIsCorrect()
     {
-        auto host = getHostType();
+        auto host = detail::PluginUtilities::getHostType();
 
         if (host.isWavelab() || host.isCubaseBridged() || host.isPremiere())
         {
@@ -1592,7 +1590,7 @@ private:
     {
         checkWhetherMessageThreadIsCorrect();
        #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+        SharedResourcePointer<detail::HostDrivenEventLoop> hostDrivenEventLoop;
        #else
         const MessageManagerLock mmLock;
        #endif
@@ -1612,7 +1610,7 @@ private:
     {
         checkWhetherMessageThreadIsCorrect();
        #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+        SharedResourcePointer<detail::HostDrivenEventLoop> hostDrivenEventLoop;
        #else
         const MessageManagerLock mmLock;
        #endif
@@ -1637,7 +1635,7 @@ private:
         checkWhetherMessageThreadIsCorrect();
 
        #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+        SharedResourcePointer<detail::HostDrivenEventLoop> hostDrivenEventLoop;
        #else
         const MessageManagerLock mmLock;
        #endif
@@ -1840,7 +1838,7 @@ private:
 
     pointer_sized_int handleManufacturerSpecific (VstOpCodeArguments args)
     {
-        if (handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
+        if (detail::PluginUtilities::handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
             return 1;
 
         if (args.index == (int32) ByteOrder::bigEndianInt ("PreS")
@@ -2004,7 +2002,7 @@ private:
     {
         checkWhetherMessageThreadIsCorrect();
        #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+        SharedResourcePointer<detail::HostDrivenEventLoop> hostDrivenEventLoop;
        #else
         const MessageManagerLock mmLock;
        #endif
@@ -2072,7 +2070,7 @@ private:
     pointer_sized_int handleEditIdle()
     {
        #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+        SharedResourcePointer<detail::HostDrivenEventLoop> hostDrivenEventLoop;
         hostDrivenEventLoop->processPendingEvents();
        #endif
 
@@ -2083,7 +2081,7 @@ private:
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
    #if JUCE_LINUX || JUCE_BSD
-    SharedResourcePointer<MessageThread> messageThread;
+    SharedResourcePointer<detail::MessageThread> messageThread;
    #endif
 
     Vst2::audioMasterCallback hostCallback;
@@ -2139,7 +2137,7 @@ namespace
             ScopedJuceInitialiser_GUI libraryInitialiser;
 
            #if JUCE_LINUX || JUCE_BSD
-            SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+            SharedResourcePointer<detail::HostDrivenEventLoop> hostDrivenEventLoop;
            #endif
 
             try

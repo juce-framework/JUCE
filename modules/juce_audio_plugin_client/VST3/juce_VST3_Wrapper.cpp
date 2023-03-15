@@ -312,7 +312,7 @@ private:
             attachedEventLoop = AttachedEventLoop (*hostRunLoops.begin(), this);
     }
 
-    SharedResourcePointer<MessageThread> messageThread;
+    SharedResourcePointer<detail::MessageThread> messageThread;
 
     std::atomic<int> refCount { 1 };
 
@@ -1320,8 +1320,8 @@ public:
                                       && name != nullptr
                                       && std::strcmp (name, Vst::ViewType::kEditor) == 0
                                       && (pluginInstance->getActiveEditor() == nullptr
-                                          || getHostType().isAdobeAudition()
-                                          || getHostType().isPremiere());
+                                          || detail::PluginUtilities::getHostType().isAdobeAudition()
+                                          || detail::PluginUtilities::getHostType().isPremiere());
 
             if (mayCreateEditor)
                 return new JuceVST3Editor (*this, *audioProcessor);
@@ -1811,7 +1811,7 @@ private:
             createContentWrapperComponentIfNeeded();
 
            #if JUCE_MAC
-            if (getHostType().type == PluginHostType::SteinbergCubase10)
+            if (detail::PluginUtilities::getHostType().type == PluginHostType::SteinbergCubase10)
                 cubase10Workaround.reset (new Cubase10WindowResizeWorkaround (*this));
            #endif
         }
@@ -1892,7 +1892,7 @@ private:
             attachedToParent();
 
             // Life's too short to faff around with wave lab
-            if (getHostType().isWavelab())
+            if (detail::PluginUtilities::getHostType().isWavelab())
                 startTimer (200);
 
             return kResultTrue;
@@ -1955,7 +1955,7 @@ private:
         tresult PLUGIN_API getSize (ViewRect* size) override
         {
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            if (getHostType().isAbletonLive() && systemWindow == nullptr)
+            if (detail::PluginUtilities::getHostType().isAbletonLive() && systemWindow == nullptr)
                 return kResultFalse;
            #endif
 
@@ -2021,7 +2021,7 @@ private:
                         {
                             bool adjustWidth = (width / height > aspectRatio);
 
-                            if (getHostType().type == PluginHostType::SteinbergCubase9)
+                            if (detail::PluginUtilities::getHostType().type == PluginHostType::SteinbergCubase9)
                             {
                                 auto currentEditorBounds = editor->getBounds().toFloat();
 
@@ -2077,7 +2077,7 @@ private:
             {
                #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
                 // Cubase 10 only sends integer scale factors, so correct this for fractional scales
-                if (getHostType().type != PluginHostType::SteinbergCubase10)
+                if (detail::PluginUtilities::getHostType().type != PluginHostType::SteinbergCubase10)
                     return factor;
 
                 const auto hostWindowScale = (Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getScaleFactorForWindow (static_cast<HWND> (systemWindow));
@@ -2222,7 +2222,7 @@ private:
                     resizeHostWindow();
 
                    #if JUCE_LINUX || JUCE_BSD
-                    if (getHostType().isBitwigStudio())
+                    if (detail::PluginUtilities::getHostType().isBitwigStudio())
                         repaint();
                    #endif
 
@@ -2271,7 +2271,7 @@ private:
                             owner.plugFrame->resizeView (&owner, &newSize);
                         }
 
-                        auto host = getHostType();
+                        auto host = detail::PluginUtilities::getHostType();
 
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper() || owner.owner->blueCatPatchwork)
@@ -2346,7 +2346,7 @@ private:
         ScopedJuceInitialiser_GUI libraryInitialiser;
 
        #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<MessageThread> messageThread;
+        SharedResourcePointer<detail::MessageThread> messageThread;
         SharedResourcePointer<EventHandler> eventHandler;
        #endif
 
@@ -2427,7 +2427,7 @@ private:
         StoredScaleFactor scaleFactor;
 
         #if JUCE_WINDOWS
-         WindowsHooks hooks;
+         detail::WindowsHooks hooks;
         #endif
 
        #endif
@@ -2530,7 +2530,7 @@ public:
 
         // Constructing the underlying static object involves dynamic allocation.
         // This call ensures that the construction won't happen on the audio thread.
-        getHostType();
+        detail::PluginUtilities::getHostType();
     }
 
     ~JuceVST3Component() override
@@ -2893,7 +2893,7 @@ public:
             block.setSize (static_cast<size_t> (len));
 
             // Adobe Audition CS6 hack to avoid trying to use corrupted streams:
-            if (getHostType().isAdobeAudition())
+            if (detail::PluginUtilities::getHostType().isAdobeAudition())
                 if (block.getSize() >= 5 && memcmp (block.getData(), "VC2!E", 5) == 0)
                     return false;
 
@@ -2917,7 +2917,7 @@ public:
                 Steinberg::int32 bytesRead = 0;
                 auto status = state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
 
-                if (bytesRead <= 0 || (status != kResultTrue && ! getHostType().isWavelab()))
+                if (bytesRead <= 0 || (status != kResultTrue && ! detail::PluginUtilities::getHostType().isWavelab()))
                     break;
 
                 allData.write (buffer, static_cast<size_t> (bytesRead));
@@ -2946,7 +2946,7 @@ public:
 
         if (state->seek (0, IBStream::kIBSeekSet, nullptr) == kResultTrue)
         {
-            if (! getHostType().isFruityLoops() && readFromMemoryStream (state))
+            if (! detail::PluginUtilities::getHostType().isFruityLoops() && readFromMemoryStream (state))
                 return kResultTrue;
 
             if (readFromUnknownStream (state))
@@ -3626,7 +3626,7 @@ public:
             MidiEventList::toMidiBuffer (midiBuffer, *data.inputEvents);
        #endif
 
-        if (getHostType().isWavelab())
+        if (detail::PluginUtilities::getHostType().isWavelab())
         {
             const int numInputChans  = (data.inputs  != nullptr && data.inputs[0].channelBuffers32 != nullptr)  ? (int) data.inputs[0].numChannels  : 0;
             const int numOutputChans = (data.outputs != nullptr && data.outputs[0].channelBuffers32 != nullptr) ? (int) data.outputs[0].numChannels : 0;
@@ -3841,7 +3841,7 @@ private:
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
    #if JUCE_LINUX || JUCE_BSD
-    SharedResourcePointer<MessageThread> messageThread;
+    SharedResourcePointer<detail::MessageThread> messageThread;
    #endif
 
     std::atomic<int> refCount { 1 };
@@ -3917,13 +3917,10 @@ DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_Manufa
 DEF_CLASS_IID (JuceAudioProcessor)
 
 #if JUCE_VST3_CAN_REPLACE_VST2
- // Defined in PluginUtilities.cpp
- void getUUIDForVST2ID (bool, uint8[16]);
-
  static FUID getFUIDForVST2ID (bool forControllerUID)
  {
      TUID uuid;
-     getUUIDForVST2ID (forControllerUID, (uint8*) uuid);
+     detail::PluginUtilities::getUUIDForVST2ID (forControllerUID, (uint8*) uuid);
      return FUID (uuid);
  }
  const Steinberg::FUID JuceVST3Component     ::iid (getFUIDForVST2ID (false));
@@ -4176,7 +4173,7 @@ struct JucePluginFactory  : public IPluginFactory3
         ScopedJuceInitialiser_GUI libraryInitialiser;
 
        #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<MessageThread> messageThread;
+        SharedResourcePointer<detail::MessageThread> messageThread;
        #endif
 
         *obj = nullptr;

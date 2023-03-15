@@ -459,27 +459,6 @@ void MessageManager::broadcastMessage (const String& message)
                                                                  userInfo: info];
 }
 
-// Special function used by some plugin classes to re-post carbon events
-void repostCurrentNSEvent();
-void repostCurrentNSEvent()
-{
-    struct EventReposter  : public CallbackMessage
-    {
-        EventReposter() : e ([[NSApp currentEvent] retain])  {}
-        ~EventReposter() override  { [e release]; }
-
-        void messageCallback() override
-        {
-            [NSApp postEvent: e atStart: YES];
-        }
-
-        NSEvent* e;
-    };
-
-    (new EventReposter())->post();
-}
-
-
 //==============================================================================
 #if JUCE_MAC
 struct MountedVolumeListChangeDetector::Pimpl

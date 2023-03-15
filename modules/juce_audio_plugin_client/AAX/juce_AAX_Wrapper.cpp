@@ -695,7 +695,7 @@ namespace AAXClasses
             JuceAAX_GUI& owner;
 
            #if JUCE_WINDOWS
-            WindowsHooks hooks;
+            detail::WindowsHooks hooks;
            #endif
             juce::Rectangle<int> lastValidSize;
 

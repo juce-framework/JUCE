@@ -777,7 +777,7 @@ private:
     ScopedJuceInitialiser_GUI scopedJuceInitialiser;
 
    #if JUCE_LINUX || JUCE_BSD
-    SharedResourcePointer<MessageThread> messageThread;
+    SharedResourcePointer<detail::MessageThread> messageThread;
    #endif
 
     std::unique_ptr<AudioProcessor> processor = createProcessorInstance();
@@ -1677,7 +1677,7 @@ private:
     }
 
    #if JUCE_LINUX || JUCE_BSD
-    SharedResourcePointer<HostDrivenEventLoop> messageThread;
+    SharedResourcePointer<detail::HostDrivenEventLoop> messageThread;
    #endif
 
     LV2UI_Write_Function writeFunction;
@@ -1710,7 +1710,7 @@ LV2_SYMBOL_EXPORT const LV2UI_Descriptor* lv2ui_descriptor (uint32_t index)
             const LV2_Feature* const* features) -> LV2UI_Handle
         {
            #if JUCE_LINUX || JUCE_BSD
-            SharedResourcePointer<HostDrivenEventLoop> messageThread;
+            SharedResourcePointer<detail::HostDrivenEventLoop> messageThread;
            #endif
 
             auto* plugin = findMatchingFeatureData<LV2PluginInstance*> (features, LV2_INSTANCE_ACCESS_URI);
@@ -1750,7 +1750,7 @@ LV2_SYMBOL_EXPORT const LV2UI_Descriptor* lv2ui_descriptor (uint32_t index)
         [] (LV2UI_Handle ui)
         {
            #if JUCE_LINUX || JUCE_BSD
-            SharedResourcePointer<HostDrivenEventLoop> messageThread;
+            SharedResourcePointer<detail::HostDrivenEventLoop> messageThread;
            #endif
 
             JUCE_AUTORELEASEPOOL

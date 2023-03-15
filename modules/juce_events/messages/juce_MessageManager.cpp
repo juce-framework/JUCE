@@ -82,7 +82,10 @@ bool MessageManager::MessageBase::post()
 //==============================================================================
 #if ! (JUCE_MAC || JUCE_IOS || JUCE_ANDROID)
 // implemented in platform-specific code (juce_linux_Messaging.cpp and juce_win32_Messaging.cpp)
+namespace detail
+{
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
+} // namespace detail
 
 class MessageManager::QuitMessage   : public MessageManager::MessageBase
 {
@@ -106,7 +109,7 @@ void MessageManager::runDispatchLoop()
     {
         JUCE_TRY
         {
-            if (! dispatchNextMessageOnSystemQueue (false))
+            if (! detail::dispatchNextMessageOnSystemQueue (false))
                 Thread::sleep (1);
         }
         JUCE_CATCH_EXCEPTION
@@ -130,7 +133,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     {
         JUCE_TRY
         {
-            if (! dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0))
+            if (! detail::dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0))
                 Thread::sleep (1);
         }
         JUCE_CATCH_EXCEPTION

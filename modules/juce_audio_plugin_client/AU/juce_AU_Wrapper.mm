@@ -1198,9 +1198,9 @@ public:
             }
 
            #if JucePlugin_Enable_ARA
-            if (getHostType().isLogic() && ! dynamic_cast<AudioProcessorARAExtension*>(audioUnit.juceFilter.get())->isBoundToARA())
+            if (detail::PluginUtilities::getHostType().isLogic() && ! dynamic_cast<AudioProcessorARAExtension*>(audioUnit.juceFilter.get())->isBoundToARA())
            #else
-            if (getHostType().isLogic())
+            if (detail::PluginUtilities::getHostType().isLogic())
            #endif
             {
                 // Use the sample time from lastTimeStamp to work around bug in Logic Pro 10.1
@@ -1640,7 +1640,7 @@ public:
 
         bool keyPressed (const KeyPress&) override
         {
-            if (getHostType().isAbletonLive())
+            if (detail::PluginUtilities::getHostType().isAbletonLive())
             {
                 static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
                 NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];
@@ -2586,7 +2586,7 @@ private:
 
     static int maxChannelsToProbeFor()
     {
-        return (getHostType().isLogic() ? 8 : 64);
+        return (detail::PluginUtilities::getHostType().isLogic() ? 8 : 64);
     }
 
     //==============================================================================
