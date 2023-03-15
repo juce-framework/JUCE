@@ -24,4 +24,4 @@
 */
 
 #define JUCE_INCLUDED_AAX_IN_MM 1
-#include "AAX/juce_AAX_Wrapper.cpp"
+#include "juce_audio_plugin_client_AAX.cpp"

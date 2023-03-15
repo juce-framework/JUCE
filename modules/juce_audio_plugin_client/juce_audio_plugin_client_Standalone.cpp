@@ -24,11 +24,20 @@
 */
 
 #include <juce_core/system/juce_TargetPlatform.h>
+
+#if JucePlugin_Build_Standalone
+
+#if ! JUCE_MODULE_AVAILABLE_juce_audio_utils
+ #error To compile AudioUnitv3 and/or Standalone plug-ins, you need to add the juce_audio_utils and juce_audio_devices modules!
+#endif
+
+#include <juce_core/system/juce_TargetPlatform.h>
 #include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
 
 #include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
 #include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
 #include <juce_audio_plugin_client/detail/juce_WindowsHooks.h>
+#include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
 
 #include <juce_audio_devices/juce_audio_devices.h>
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -165,6 +174,23 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+#endif
+
+#endif
+
+#if JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP
+ extern juce::JUCEApplicationBase* juce_CreateApplication();
+
+ #if JUCE_IOS
+  extern void* juce_GetIOSCustomDelegateClass();
+ #endif
+
+#else
+ JUCE_CREATE_APPLICATION_DEFINE(juce::StandaloneFilterApp)
+#endif
+
+#if ! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_ENTRYPOINT
+ JUCE_MAIN_FUNCTION_DEFINITION
 #endif
 
 #endif

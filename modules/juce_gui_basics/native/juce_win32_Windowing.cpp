@@ -50,7 +50,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
 #endif
 
 void juce_repeatLastProcessPriority();
-bool juce_isRunningInWine();
 
 using CheckEventBlockedByModalComps = bool (*) (const MSG&);
 extern CheckEventBlockedByModalComps isEventBlockedByModalComps;

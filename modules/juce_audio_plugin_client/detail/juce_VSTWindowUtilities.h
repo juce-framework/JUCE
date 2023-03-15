@@ -38,15 +38,59 @@ struct VSTWindowUtilities
 
     static void* attachComponentToWindowRefVST (Component* comp,
                                                 int desktopFlags,
-                                                void* parentWindowOrView);
+                                                void* parentWindowOrView)
+    {
+        JUCE_AUTORELEASEPOOL
+        {
+            NSView* parentView = [(NSView*) parentWindowOrView retain];
+
+            const auto defaultFlags = JucePlugin_EditorRequiresKeyboardFocus
+                                    ? 0
+                                    : ComponentPeer::windowIgnoresKeyPresses;
+            comp->addToDesktop (desktopFlags | defaultFlags, parentView);
+
+            // (this workaround is because Wavelab provides a zero-size parent view..)
+            if ([parentView frame].size.height == 0)
+                [((NSView*) comp->getWindowHandle()) setFrameOrigin: NSZeroPoint];
+
+            comp->setVisible (true);
+            comp->toFront (false);
+
+            [[parentView window] setAcceptsMouseMovedEvents: YES];
+            return parentView;
+        }
+    }
 
     static void detachComponentFromWindowRefVST (Component* comp,
-                                                void* window);
+                                                void* window)
+    {
+        JUCE_AUTORELEASEPOOL
+        {
+            comp->removeFromDesktop();
+            [(id) window release];
+        }
+    }
 
     static void setNativeHostWindowSizeVST (void* window,
                                             Component* component,
                                             int newWidth,
-                                            int newHeight);
+                                            int newHeight)
+    {
+        JUCE_AUTORELEASEPOOL
+        {
+            if (NSView* hostView = (NSView*) window)
+            {
+                const int dx = newWidth  - component->getWidth();
+                const int dy = newHeight - component->getHeight();
+
+                NSRect r = [hostView frame];
+                r.size.width += dx;
+                r.size.height += dy;
+                r.origin.y -= dy;
+                [hostView setFrame: r];
+            }
+        }
+    }
 };
 
 } // namespace juce::detail

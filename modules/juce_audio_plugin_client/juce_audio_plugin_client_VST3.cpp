@@ -27,7 +27,7 @@
 #include <juce_core/system/juce_CompilerWarnings.h>
 
 //==============================================================================
-#if JucePlugin_Build_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
+#if JucePlugin_Build_VST3
 
 JUCE_BEGIN_NO_SANITIZE ("vptr")
 

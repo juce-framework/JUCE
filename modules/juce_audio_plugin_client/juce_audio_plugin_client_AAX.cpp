@@ -26,7 +26,7 @@
 #include <juce_core/system/juce_TargetPlatform.h>
 #include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
 
-#if JucePlugin_Build_AAX && (JUCE_MAC || JUCE_WINDOWS)
+#if JucePlugin_Build_AAX
 
 #include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
 #include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
@@ -92,7 +92,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
 
 #undef check
 
-#include "juce_AAX_Modifier_Injector.h"
+#include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
 
 using namespace juce;
 
