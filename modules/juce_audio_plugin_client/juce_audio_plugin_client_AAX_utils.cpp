@@ -25,7 +25,7 @@
 
 #include <juce_core/system/juce_TargetPlatform.h>
 
-#if JucePlugin_Build_AAX && (JUCE_MAC || JUCE_WINDOWS)
+#if JucePlugin_Build_AAX
 
 #include <AAX_Version.h>
 

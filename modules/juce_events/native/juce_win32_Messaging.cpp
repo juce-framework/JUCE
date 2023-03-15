@@ -27,7 +27,7 @@ extern HWND juce_messageWindowHandle;
 
 namespace detail
 {
-   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     bool isRunningInUnity();
    #else
     constexpr bool isRunningInUnity() { return false; }

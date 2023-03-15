@@ -34,7 +34,7 @@
  #include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
 #endif
 
-#include "juce_UnityPluginInterface.h"
+#include <juce_audio_plugin_client/Unity/juce_UnityPluginInterface.h>
 
 //==============================================================================
 namespace juce
