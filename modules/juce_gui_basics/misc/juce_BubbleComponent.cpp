@@ -31,8 +31,8 @@ BubbleComponent::BubbleComponent()
 {
     setInterceptsMouseClicks (false, false);
 
-    shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.35f), 5, Point<int>()));
-    setComponentEffect (&shadow);
+    effect.reset (getLookAndFeel().getBubbleEffect (*this));
+    setComponentEffect (effect.get());
 }
 
 BubbleComponent::~BubbleComponent() {}

@@ -870,6 +870,13 @@ void LookAndFeel_V2::drawBubble (Graphics& g, BubbleComponent& comp,
     g.strokePath (p, PathStrokeType (1.0f));
 }
 
+ImageEffectFilter* LookAndFeel_V2::getBubbleEffect (BubbleComponent& comp)
+{
+    auto fx = new DropShadowEffect();
+    fx->setShadowProperties (DropShadow (Colours::black.withAlpha (0.35f), 5, Point<int>()));
+
+    return fx;
+}
 
 //==============================================================================
 Font LookAndFeel_V2::getPopupMenuFont()

@@ -150,6 +150,7 @@ public:
 
     //==============================================================================
     void drawBubble (Graphics&, BubbleComponent&, const Point<float>& tip, const Rectangle<float>& body) override;
+    ImageEffectFilter* getBubbleEffect (BubbleComponent&) override;
 
     void drawLasso (Graphics&, Component&) override;
 

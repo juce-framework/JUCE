@@ -154,6 +154,8 @@ public:
         virtual void drawBubble (Graphics&, BubbleComponent&,
                                  const Point<float>& positionOfTip,
                                  const Rectangle<float>& body) = 0;
+
+        virtual ImageEffectFilter* getBubbleEffect (BubbleComponent&) = 0;                                 
     };
 
     //==============================================================================
@@ -178,7 +180,7 @@ private:
     Rectangle<int> content;
     Point<int> arrowTip;
     int allowablePlacements;
-    DropShadowEffect shadow;
+    std::unique_ptr<ImageEffectFilter> effect;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BubbleComponent)
 };
