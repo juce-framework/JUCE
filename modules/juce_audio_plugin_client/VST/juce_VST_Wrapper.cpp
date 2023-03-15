@@ -795,9 +795,6 @@ public:
                 chunkMemoryTime = 0;
             }
         }
-
-        if (editorComp != nullptr)
-            editorComp->checkVisibility();
     }
 
     void setHasEditorFlag (bool shouldSetHasEditor)
@@ -1009,7 +1006,7 @@ public:
              startTimer (500);
             #endif
            #elif JUCE_MAC
-            hostWindow = detail::VSTWindowUtilities::attachComponentToWindowRefVST (this, desktopFlags, args.ptr, wrapper.useNSView);
+            hostWindow = detail::VSTWindowUtilities::attachComponentToWindowRefVST (this, desktopFlags, args.ptr);
            #endif
 
             setVisible (true);
@@ -1019,18 +1016,10 @@ public:
         {
            #if JUCE_MAC
             if (hostWindow != nullptr)
-                detail::VSTWindowUtilities::detachComponentFromWindowRefVST (this, hostWindow, wrapper.useNSView);
+                detail::VSTWindowUtilities::detachComponentFromWindowRefVST (this, hostWindow);
            #endif
 
             hostWindow = {};
-        }
-
-        void checkVisibility()
-        {
-           #if JUCE_MAC
-            if (hostWindow != nullptr)
-                detail::VSTWindowUtilities::checkWindowVisibilityVST (hostWindow, this, wrapper.useNSView);
-           #endif
         }
 
         AudioProcessorEditor* getEditorComp() const noexcept
@@ -1056,11 +1045,6 @@ public:
 
                 updateWindowSize();
             }
-
-           #if JUCE_MAC && ! JUCE_64BIT
-            if (! wrapper.useNSView)
-                updateEditorCompBoundsVST (this);
-           #endif
         }
 
         void parentSizeChanged() override
@@ -1118,7 +1102,7 @@ public:
                 const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
 
                #if JUCE_MAC
-                detail::VSTWindowUtilities::setNativeHostWindowSizeVST (hostWindow, this, newWidth, newHeight, wrapper.useNSView);
+                detail::VSTWindowUtilities::setNativeHostWindowSizeVST (hostWindow, this, newWidth, newHeight);
                #elif JUCE_LINUX || JUCE_BSD
                 // (Currently, all linux hosts support sizeWindow, so this should never need to happen)
                 setSize (newWidth, newHeight);
@@ -1222,15 +1206,6 @@ public:
              checkHostWindowScaleFactor();
          }
         #endif
-       #endif
-
-       #if JUCE_MAC
-        bool keyPressed (const KeyPress&) override
-        {
-            // If we have an unused keypress, move the key-focus to a host window
-            // and re-inject the event..
-            return detail::VSTWindowUtilities::forwardCurrentKeyEventToHostVST (this, wrapper.useNSView);
-        }
        #endif
 
     private:
@@ -1900,7 +1875,6 @@ private:
        #if JUCE_MAC
         if (matches ("hasCockosViewAsConfig"))
         {
-            useNSView = true;
             return (int32) 0xbeef0000;
         }
        #endif
@@ -2104,14 +2078,6 @@ private:
     bool isProcessing = false, isBypassed = false, hasShutdown = false;
     bool firstProcessCallback = true, shouldDeleteEditor = false;
 
-  #if JUCE_MAC
-   #if JUCE_64BIT
-    bool useNSView = true;
-   #else
-    bool useNSView = false;
-   #endif
-  #endif
-
     VstTempBuffers<float> floatTempBuffers;
     VstTempBuffers<double> doubleTempBuffers;
     int maxNumInChannels = 0, maxNumOutChannels = 0;
@@ -2181,14 +2147,12 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster)
     {
-        detail::VSTWindowUtilities::initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
 
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* main_macho (Vst2::audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* main_macho (Vst2::audioMasterCallback audioMaster)
     {
-        detail::VSTWindowUtilities::initialiseMacVST();
         return pluginEntryPoint (audioMaster);
     }
 

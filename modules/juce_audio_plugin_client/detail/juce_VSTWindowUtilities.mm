@@ -36,158 +36,17 @@
 namespace juce::detail
 {
 
-#if JUCE_32BIT
-class EventReposter  : private CallbackMessage
-{
-public:
-    EventReposter() : e ([[NSApp currentEvent] retain])  {}
-    ~EventReposter() override  { [e release]; }
-
-    static void repostCurrentNSEvent()
-    {
-        (new EventReposter())->post();
-    }
-
-private:
-    void messageCallback() override
-    {
-        [NSApp postEvent: e atStart: YES];
-    }
-
-    NSEvent* e;
-};
-
-void VSTWindowUtilities::updateEditorCompBoundsVST (Component* comp)
-{
-    HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-                            comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
-
-    HIRect r;
-    HIViewGetFrame (dummyView, &r);
-    HIViewRef root;
-    HIViewFindByID (HIViewGetRoot (HIViewGetWindow (dummyView)), kHIViewWindowContentID, &root);
-    HIViewConvertRect (&r, HIViewGetSuperview (dummyView), root);
-
-    Rect windowPos;
-    GetWindowBounds (HIViewGetWindow (dummyView), kWindowContentRgn, &windowPos);
-
-    comp->setTopLeftPosition ((int) (windowPos.left + r.origin.x),
-                              (int) (windowPos.top + r.origin.y));
-}
-
-pascal OSStatus VSTWindowUtilities::viewBoundsChangedEvent (EventHandlerCallRef, EventRef, void* user)
-{
-    updateEditorCompBoundsVST ((Component*) user);
-    return noErr;
-}
-
-bool VSTWindowUtilities::shouldManuallyCloseHostWindow()
-{
-    return getHostType().isCubase7orLater()
-        || getHostType().isRenoise()
-        || ((SystemStats::getOperatingSystemType() & 0xff) >= 12);
-}
-#endif
-
 void* VSTWindowUtilities::attachComponentToWindowRefVST (Component* comp,
                                                          int desktopFlags,
-                                                         void* parentWindowOrView,
-                                                         [[maybe_unused]] bool isNSView)
+                                                         void* parentWindowOrView)
 {
     JUCE_AUTORELEASEPOOL
     {
-       #if ! JUCE_64BIT
-        if (! isNSView)
-        {
-            NSWindow* hostWindow = [[NSWindow alloc] initWithWindowRef: parentWindowOrView];
-
-            if (shouldManuallyCloseHostWindow())
-            {
-                [hostWindow setReleasedWhenClosed: NO];
-            }
-            else
-            {
-                [hostWindow retain];
-                [hostWindow setReleasedWhenClosed: YES];
-            }
-
-            [hostWindow setCanHide: YES];
-
-            HIViewRef parentView = 0;
-
-            WindowAttributes attributes;
-            GetWindowAttributes ((WindowRef) parentWindowOrView, &attributes);
-
-            if ((attributes & kWindowCompositingAttribute) != 0)
-            {
-                HIViewRef root = HIViewGetRoot ((WindowRef) parentWindowOrView);
-                HIViewFindByID (root, kHIViewWindowContentID, &parentView);
-
-                if (parentView == 0)
-                    parentView = root;
-            }
-            else
-            {
-                GetRootControl ((WindowRef) parentWindowOrView, (ControlRef*) &parentView);
-
-                if (parentView == 0)
-                    CreateRootControl ((WindowRef) parentWindowOrView, (ControlRef*) &parentView);
-            }
-
-            // It seems that the only way to successfully position our overlaid window is by putting a dummy
-            // HIView into the host's carbon window, and then catching events to see when it gets repositioned
-            HIViewRef dummyView = 0;
-            HIImageViewCreate (0, &dummyView);
-            HIRect r = { {0, 0}, { (float) comp->getWidth(), (float) comp->getHeight()} };
-            HIViewSetFrame (dummyView, &r);
-            HIViewAddSubview (parentView, dummyView);
-            comp->getProperties().set ("dummyViewRef", String::toHexString ((pointer_sized_int) (void*) dummyView));
-
-            EventHandlerRef ref;
-            const EventTypeSpec kControlBoundsChangedEvent = { kEventClassControl, kEventControlBoundsChanged };
-            InstallEventHandler (GetControlEventTarget (dummyView),
-                                 NewEventHandlerUPP (viewBoundsChangedEvent),
-                                 1,
-                                 &kControlBoundsChangedEvent,
-                                 (void*) comp,
-                                 &ref);
-            comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
-
-            updateEditorCompBoundsVST (comp);
-
-            const auto defaultFlags =
-                   #if ! JucePlugin_EditorRequiresKeyboardFocus
-                    ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses;
-                   #else
-                    ComponentPeer::windowIsTemporary;
-                   #endif
-            comp->addToDesktop (desktopFlags | defaultFlags);
-
-            comp->setVisible (true);
-            comp->toFront (false);
-
-            NSView* pluginView = (NSView*) comp->getWindowHandle();
-            NSWindow* pluginWindow = [pluginView window];
-            [pluginWindow setExcludedFromWindowsMenu: YES];
-            [pluginWindow setCanHide: YES];
-
-            [hostWindow addChildWindow: pluginWindow
-                               ordered: NSWindowAbove];
-            [hostWindow orderFront: nil];
-            [pluginWindow orderFront: nil];
-
-            return hostWindow;
-        }
-       #endif
-
         NSView* parentView = [(NSView*) parentWindowOrView retain];
 
-        const auto defaultFlags =
-               #if JucePlugin_EditorRequiresKeyboardFocus
-                0;
-               #else
-                ComponentPeer::windowIgnoresKeyPresses;
-               #endif
+        const auto defaultFlags = JucePlugin_EditorRequiresKeyboardFocus
+                                ? 0
+                                : ComponentPeer::windowIgnoresKeyPresses;
         comp->addToDesktop (desktopFlags | defaultFlags, parentView);
 
         // (this workaround is because Wavelab provides a zero-size parent view..)
@@ -202,94 +61,22 @@ void* VSTWindowUtilities::attachComponentToWindowRefVST (Component* comp,
     }
 }
 
-void VSTWindowUtilities::detachComponentFromWindowRefVST (Component* comp,
-                                                          void* window,
-                                                          [[maybe_unused]] bool isNSView)
+void VSTWindowUtilities::detachComponentFromWindowRefVST (Component* comp, void* window)
 {
     JUCE_AUTORELEASEPOOL
     {
-       #if ! JUCE_64BIT
-        if (! isNSView)
-        {
-            EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
-                                        comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
-            RemoveEventHandler (ref);
-
-            CFUniquePtr<HIViewRef> dummyView ((HIViewRef) (void*) (pointer_sized_int)
-                                                comp->getProperties() ["dummyViewRef"].toString().getHexValue64());
-
-            if (HIViewIsValid (dummyView.get()))
-                dummyView = nullptr;
-
-            NSWindow* hostWindow = (NSWindow*) window;
-            NSView* pluginView = (NSView*) comp->getWindowHandle();
-            NSWindow* pluginWindow = [pluginView window];
-
-            [pluginView retain];
-            [hostWindow removeChildWindow: pluginWindow];
-            [pluginWindow close];
-            comp->removeFromDesktop();
-            [pluginView release];
-
-            if (shouldManuallyCloseHostWindow())
-                [hostWindow close];
-            else
-                [hostWindow release];
-
-           #if JUCE_MODAL_LOOPS_PERMITTED
-            static bool needToRunMessageLoop = ! getHostType().isReaper();
-
-            // The event loop needs to be run between closing the window and deleting the plugin,
-            // presumably to let the cocoa objects get tidied up. Leaving out this line causes crashes
-            // in Live when you delete the plugin with its window open.
-            // (Doing it this way rather than using a single longer timeout means that we can guarantee
-            // how many messages will be dispatched, which seems to be vital in Reaper)
-            if (needToRunMessageLoop)
-                for (int i = 20; --i >= 0;)
-                    MessageManager::getInstance()->runDispatchLoopUntil (1);
-           #endif
-
-            return;
-        }
-       #endif
-
         comp->removeFromDesktop();
         [(id) window release];
     }
 }
 
-void VSTWindowUtilities::initialiseMacVST()
-{
-   #if ! JUCE_64BIT
-    NSApplicationLoad();
-   #endif
-}
-
 void VSTWindowUtilities::setNativeHostWindowSizeVST (void* window,
                                                      Component* component,
                                                      int newWidth,
-                                                     int newHeight,
-                                                     [[maybe_unused]] bool isNSView)
+                                                     int newHeight)
 {
     JUCE_AUTORELEASEPOOL
     {
-       #if ! JUCE_64BIT
-        if (! isNSView)
-        {
-            if (HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-                                         component->getProperties() ["dummyViewRef"].toString().getHexValue64())
-            {
-                HIRect frameRect;
-                HIViewGetFrame (dummyView, &frameRect);
-                frameRect.size.width = newWidth;
-                frameRect.size.height = newHeight;
-                HIViewSetFrame (dummyView, &frameRect);
-            }
-
-            return;
-        }
-       #endif
-
         if (NSView* hostView = (NSView*) window)
         {
             const int dx = newWidth  - component->getWidth();
@@ -302,32 +89,6 @@ void VSTWindowUtilities::setNativeHostWindowSizeVST (void* window,
             [hostView setFrame: r];
         }
     }
-}
-
-void VSTWindowUtilities::checkWindowVisibilityVST ([[maybe_unused]] void* window,
-                                                   [[maybe_unused]] Component* comp,
-                                                   [[maybe_unused]] bool isNSView)
-{
-   #if ! JUCE_64BIT
-    if (! isNSView)
-        comp->setVisible ([((NSWindow*) window) isVisible]);
-   #endif
-}
-
-bool VSTWindowUtilities::forwardCurrentKeyEventToHostVST ([[maybe_unused]] Component* comp,
-                                                          [[maybe_unused]] bool isNSView)
-{
-   #if ! JUCE_64BIT
-    if (! isNSView)
-    {
-        NSWindow* win = [(NSView*) comp->getWindowHandle() window];
-        [[win parentWindow] makeKeyWindow];
-        EventReposter::repostCurrentNSEvent();
-        return true;
-    }
-   #endif
-
-    return false;
 }
 
 } // namespace juce::detail
