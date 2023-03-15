@@ -86,13 +86,6 @@ enum MIDICVStatus : unsigned int
 
 #endif
 
-#ifndef verify
- #define verify __Verify
-#endif
-#ifndef verify_noerr
- #define verify_noerr __Verify_noErr
-#endif
-
 #include "AU/AudioUnitSDK/AUBase.cpp"
 #include "AU/AudioUnitSDK/AUBuffer.cpp"
 #include "AU/AudioUnitSDK/AUBufferAllocator.cpp"
