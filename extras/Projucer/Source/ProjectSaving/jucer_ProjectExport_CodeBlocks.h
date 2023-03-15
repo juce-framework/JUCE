@@ -939,10 +939,12 @@ private:
     void addCompileUnits (XmlElement& xml) const
     {
         if (linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())
+        {
             for (const auto& helperTarget : helperTargets)
                 helperTarget.addCompileUnits (xml);
 
-        addSubprocessHelperBinarySourceCompileUnit (xml);
+            addSubprocessHelperBinarySourceCompileUnit (xml);
+        }
 
         for (int i = 0; i < getAllGroups().size(); ++i)
             addCompileUnits (getAllGroups().getReference(i), xml);
