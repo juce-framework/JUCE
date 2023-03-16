@@ -34,14 +34,14 @@ enum class ResultCodeMappingMode
                     // are N buttons then button X will return ((X + 1) % N).
 };
 
-static std::unique_ptr<ScopedMessageBoxInterface> makeNativeMessageBoxWithMappedResult (const MessageBoxOptions& opts,
-                                                                                        ResultCodeMappingMode mode)
+static std::unique_ptr<detail::ScopedMessageBoxInterface> makeNativeMessageBoxWithMappedResult (const MessageBoxOptions& opts,
+                                                                                                ResultCodeMappingMode mode)
 {
-    class Adapter : public ScopedMessageBoxInterface
+    class Adapter : public detail::ScopedMessageBoxInterface
     {
     public:
         explicit Adapter (const MessageBoxOptions& options)
-            : inner (ScopedMessageBoxInterface::create (options)),
+            : inner (detail::ScopedMessageBoxInterface::create (options)),
               numButtons (options.getNumButtons()) {}
 
         void runAsync (std::function<void (int)> fn) override
@@ -65,11 +65,11 @@ static std::unique_ptr<ScopedMessageBoxInterface> makeNativeMessageBoxWithMapped
     private:
         static int map (int button, int numButtons) { return (button + 1) % numButtons; }
 
-        std::unique_ptr<ScopedMessageBoxInterface> inner;
+        std::unique_ptr<detail::ScopedMessageBoxInterface> inner;
         int numButtons = 0;
     };
 
-    return mode == ResultCodeMappingMode::plainIndex ? ScopedMessageBoxInterface::create (opts)
+    return mode == ResultCodeMappingMode::plainIndex ? detail::ScopedMessageBoxInterface::create (opts)
                                                      : std::make_unique<Adapter> (opts);
 }
 
@@ -78,7 +78,7 @@ static int showNativeBoxUnmanaged (const MessageBoxOptions& opts,
                                    ResultCodeMappingMode mode)
 {
     auto implementation = makeNativeMessageBoxWithMappedResult (opts, mode);
-    return ScopedMessageBox::Pimpl::showUnmanaged (std::move (implementation), cb);
+    return detail::ScopedMessageBoxImpl::showUnmanaged (std::move (implementation), cb);
 }
 
 #if JUCE_MODAL_LOOPS_PERMITTED
@@ -152,7 +152,7 @@ void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options
 ScopedMessageBox NativeMessageBox::showScopedAsync (const MessageBoxOptions& options, std::function<void (int)> callback)
 {
     auto implementation = makeNativeMessageBoxWithMappedResult (options, ResultCodeMappingMode::alertWindow);
-    return ScopedMessageBox::Pimpl::show (std::move (implementation), std::move (callback));
+    return detail::ScopedMessageBoxImpl::show (std::move (implementation), std::move (callback));
 }
 
 } // namespace juce

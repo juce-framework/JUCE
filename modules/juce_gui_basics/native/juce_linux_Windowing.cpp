@@ -28,7 +28,7 @@ namespace juce
 
 //==============================================================================
 static int numAlwaysOnTopPeers = 0;
-bool juce_areThereAnyAlwaysOnTopWindows()  { return numAlwaysOnTopPeers > 0; }
+bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()  { return numAlwaysOnTopPeers > 0; }
 
 //==============================================================================
 class LinuxComponentPeer  : public ComponentPeer,
@@ -217,7 +217,7 @@ public:
                                         : Desktop::getInstance().getDisplays().getDisplayForRect (bounds)->userArea;
 
             if (! r.isEmpty())
-                setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
+                setBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
 
             component.repaint();
         }
@@ -468,7 +468,7 @@ private:
                         // This issue only occurs right after peer creation, when the image is
                         // null. Updating when only the width or height is changed would lead to
                         // incorrect behaviour.
-                        peer.forceSetBounds (ScalingHelpers::scaledScreenPosToUnscaled (peer.component,
+                        peer.forceSetBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (peer.component,
                                                                                         peer.component.getBoundsInParent()),
                                              peer.isFullScreen());
                     }
@@ -716,7 +716,7 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const  { return upr
 void Desktop::allowedOrientationsChanged()                          {}
 
 //==============================================================================
-bool MouseInputSource::SourceList::addSource()
+bool detail::MouseInputSourceList::addSource()
 {
     if (sources.isEmpty())
     {
@@ -727,7 +727,7 @@ bool MouseInputSource::SourceList::addSource()
     return false;
 }
 
-bool MouseInputSource::SourceList::canUseTouch()
+bool detail::MouseInputSourceList::canUseTouch() const
 {
     return false;
 }
@@ -749,7 +749,7 @@ public:
     explicit PlatformSpecificHandle (const MouseCursor::StandardCursorType type)
         : cursorHandle (makeHandle (type)) {}
 
-    explicit PlatformSpecificHandle (const CustomMouseCursorInfo& info)
+    explicit PlatformSpecificHandle (const detail::CustomMouseCursorInfo& info)
         : cursorHandle (makeHandle (info)) {}
 
     ~PlatformSpecificHandle()
@@ -767,7 +767,7 @@ public:
     }
 
 private:
-    static Cursor makeHandle (const CustomMouseCursorInfo& info)
+    static Cursor makeHandle (const detail::CustomMouseCursorInfo& info)
     {
         const auto image = info.image.getImage();
         return XWindowSystem::getInstance()->createCustomMouseCursorInfo (image.rescaled ((int) (image.getWidth()  / info.image.getScale()),
@@ -852,7 +852,7 @@ void LookAndFeel::playAlertSound()
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File&)
+Image detail::WindowingHelpers::createIconForFile (const File&)
 {
     return {};
 }

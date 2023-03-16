@@ -183,7 +183,7 @@ protected:
             auto title = handler->getTitle();
 
             if (title.isEmpty() && handler->getComponent().isOnDesktop())
-                title = getAccessibleApplicationOrPluginName();
+                title = detail::AccessibilityHelpers::getApplicationOrPluginName();
 
             NSString* nsString = juceStringToNS (title);
 
@@ -214,7 +214,7 @@ protected:
 
     static NSInteger getAccessibilityRowCount (id self, SEL)
     {
-        if (auto* tableHandler = getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+        if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
             if (auto* tableInterface = tableHandler->getTableInterface())
                 return tableInterface->getNumRows();
 
@@ -223,7 +223,7 @@ protected:
 
     static NSInteger getAccessibilityColumnCount (id self, SEL)
     {
-        if (auto* tableHandler = getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+        if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
             if (auto* tableInterface = tableHandler->getTableInterface())
                 return tableInterface->getNumColumns();
 
@@ -240,7 +240,7 @@ protected:
         if (handler == nullptr)
             return notFound;
 
-        auto* tableHandler = getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface);
+        auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface);
 
         if (tableHandler == nullptr)
             return notFound;
@@ -271,4 +271,4 @@ protected:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AccessibleObjCClass)
 };
 
-}
+} // namespace juce

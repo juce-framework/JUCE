@@ -92,7 +92,7 @@ public:
 
         const auto select = getOwner().getRowSelectedOnMouseDown()
                             && ! selected
-                            && ! viewportWouldScrollOnEvent (getOwner().getViewport(), e.source) ;
+                            && ! detail::ViewportHelpers::wouldScrollOnEvent (getOwner().getViewport(), e.source) ;
         if (select)
             asBase().performSelection (e, false);
         else

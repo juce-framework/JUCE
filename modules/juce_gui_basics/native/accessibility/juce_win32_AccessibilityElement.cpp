@@ -58,7 +58,7 @@ public:
 
     JUCE_COMCALL ScrollIntoView() override
     {
-        if (auto* handler = getEnclosingHandlerWithInterface (&getHandler(), &AccessibilityHandler::getTableInterface))
+        if (auto* handler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (&getHandler(), &AccessibilityHandler::getTableInterface))
         {
             if (auto* tableInterface = handler->getTableInterface())
             {
@@ -194,7 +194,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
             const auto isListOrTableCell = [] (auto& handler)
             {
-                if (auto* tableHandler = getEnclosingHandlerWithInterface (&handler, &AccessibilityHandler::getTableInterface))
+                if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (&handler, &AccessibilityHandler::getTableInterface))
                 {
                     if (auto* tableInterface = tableHandler->getTableInterface())
                     {
@@ -627,7 +627,7 @@ String AccessibilityNativeHandle::getElementName() const
     auto name = accessibilityHandler.getTitle();
 
     if (name.isEmpty() && isFragmentRoot())
-        return getAccessibleApplicationOrPluginName();
+        return detail::AccessibilityHelpers::getApplicationOrPluginName();
 
     return name;
 }

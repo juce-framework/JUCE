@@ -27,7 +27,7 @@ namespace juce
 {
 
 Desktop::Desktop()
-    : mouseSources (new MouseInputSource::SourceList()),
+    : mouseSources (new detail::MouseInputSourceList()),
       masterScaleFactor ((float) getDefaultMasterScale()),
       nativeDarkModeChangeDetectorImpl (createNativeDarkModeChangeDetectorImpl())
 {

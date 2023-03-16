@@ -142,18 +142,6 @@ static jmethodID nodeInfoSetTextSelection                = nullptr;
 static jmethodID nodeInfoSetLiveRegion                   = nullptr;
 static jmethodID accessibilityEventSetContentChangeTypes = nullptr;
 
-template <typename MemberFn>
-static AccessibilityHandler* getEnclosingHandlerWithInterface (AccessibilityHandler* handler, MemberFn fn)
-{
-    if (handler == nullptr)
-        return nullptr;
-
-    if ((handler->*fn)() != nullptr)
-        return handler;
-
-    return getEnclosingHandlerWithInterface (handler->getParent(), fn);
-}
-
 static void loadSDKDependentMethods()
 {
     static bool hasChecked = false;
@@ -233,6 +221,24 @@ static jobject getSourceView (const AccessibilityHandler& handler)
         return (jobject) peer->getNativeHandle();
 
     return nullptr;
+}
+
+static jobject makeAndroidRect (Rectangle<int> r)
+{
+    return getEnv()->NewObject (AndroidRect,
+                                AndroidRect.constructor,
+                                r.getX(),
+                                r.getY(),
+                                r.getRight(),
+                                r.getBottom());
+}
+
+static jobject makeAndroidPoint (Point<int> p)
+{
+    return getEnv()->NewObject (AndroidPoint,
+                                AndroidPoint.create,
+                                p.getX(),
+                                p.getY());
 }
 
 //==============================================================================
@@ -477,7 +483,7 @@ public:
                 env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionInfo, collectionInfo.get());
             }
 
-            if (auto* enclosingTableHandler = getEnclosingHandlerWithInterface (&accessibilityHandler, &AccessibilityHandler::getTableInterface))
+            if (auto* enclosingTableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (&accessibilityHandler, &AccessibilityHandler::getTableInterface))
             {
                 auto* interface = enclosingTableHandler->getTableInterface();
                 jassert (interface != nullptr);
@@ -926,12 +932,12 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
     return nativeImpl.get();
 }
 
-void notifyAccessibilityEventInternal (const AccessibilityHandler& handler,
-                                       InternalAccessibilityEvent eventType)
+void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler,
+                                                             Event eventType)
 {
-    if (eventType == InternalAccessibilityEvent::elementCreated
-        || eventType == InternalAccessibilityEvent::elementDestroyed
-        || eventType == InternalAccessibilityEvent::elementMovedOrResized)
+    if (eventType == Event::elementCreated
+        || eventType == Event::elementDestroyed
+        || eventType == Event::elementMovedOrResized)
     {
         if (auto* parent = handler.getParent())
             AccessibilityNativeHandle::sendAccessibilityEventImpl (*parent, TYPE_WINDOW_CONTENT_CHANGED, CONTENT_CHANGE_TYPE_SUBTREE);
@@ -943,15 +949,15 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler,
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::focusChanged:
+            case Event::focusChanged:
                 return handler.hasFocus (false) ? TYPE_VIEW_ACCESSIBILITY_FOCUSED
                                                 : TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED;
 
-            case InternalAccessibilityEvent::elementCreated:
-            case InternalAccessibilityEvent::elementDestroyed:
-            case InternalAccessibilityEvent::elementMovedOrResized:
-            case InternalAccessibilityEvent::windowOpened:
-            case InternalAccessibilityEvent::windowClosed:
+            case Event::elementCreated:
+            case Event::elementDestroyed:
+            case Event::elementMovedOrResized:
+            case Event::windowOpened:
+            case Event::windowClosed:
                 break;
         }
 

@@ -75,7 +75,7 @@ public:
     MouseCursor::StandardCursorType getType() const noexcept    { return standardType; }
 
 private:
-    CustomMouseCursorInfo info;
+    detail::CustomMouseCursorInfo info;
     PlatformSpecificHandle handle;
     const MouseCursor::StandardCursorType standardType;
     const bool standard;

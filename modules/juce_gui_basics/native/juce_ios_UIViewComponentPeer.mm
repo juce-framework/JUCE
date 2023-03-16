@@ -1317,7 +1317,7 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
         if (auto* comp = dynamic_cast<Component*> (target))
         {
             const auto areaOnDesktop = comp->localAreaToGlobal (target->getCaretRectangle());
-            return convertToCGRect (ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
+            return convertToCGRect (detail::ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
         }
     }
 
@@ -1337,7 +1337,7 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
     {
         if (auto* comp = dynamic_cast<Component*> (target))
         {
-            const auto pointOnDesktop = ScalingHelpers::unscaledScreenPosToScaled (convertToPointFloat (point));
+            const auto pointOnDesktop = detail::ScalingHelpers::unscaledScreenPosToScaled (convertToPointFloat (point));
             return target->getCharIndexForPoint (comp->getLocalPoint (nullptr, pointOnDesktop).roundToInt());
         }
     }
@@ -1464,7 +1464,7 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
             if (! list.isEmpty())
             {
                 const auto areaOnDesktop = comp->localAreaToGlobal (list.getRectangle (0));
-                return convertToCGRect (ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
+                return convertToCGRect (detail::ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
             }
         }
     }
@@ -1485,7 +1485,7 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
             for (const auto& rect : list)
             {
                 const auto areaOnDesktop = comp->localAreaToGlobal (rect);
-                const auto nativeArea = convertToCGRect (ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
+                const auto nativeArea = convertToCGRect (detail::ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
 
                 [result addObject: [JuceUITextSelectionRect withRect: nativeArea]];
             }
@@ -1812,7 +1812,7 @@ void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 
         // (can't call the component's setBounds method because that'll reset our fullscreen flag)
         if (! r.isEmpty())
-            setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
+            setBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
 
         component.repaint();
     }
@@ -1855,7 +1855,7 @@ void UIViewComponentPeer::updateScreenBounds()
 
 bool UIViewComponentPeer::contains (Point<int> localPos, bool trueIfInAChildWindow) const
 {
-    if (! ScalingHelpers::scaledScreenPosToUnscaled (component, component.getLocalBounds()).contains (localPos))
+    if (! detail::ScalingHelpers::scaledScreenPosToUnscaled (component, component.getLocalBounds()).contains (localPos))
         return false;
 
     UIView* v = [view hitTest: convertToCGPoint (localPos)

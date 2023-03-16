@@ -78,4 +78,4 @@ enum class AccessibilityEvent
     rowSelectionChanged
 };
 
-}
+} // namespace juce

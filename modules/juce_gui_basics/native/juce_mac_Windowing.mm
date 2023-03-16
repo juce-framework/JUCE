@@ -465,7 +465,7 @@ void Displays::findDisplays (const float masterScale)
 }
 
 //==============================================================================
-bool juce_areThereAnyAlwaysOnTopWindows()
+bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()
 {
     for (NSWindow* window in [NSApp windows])
         if ([window level] > NSNormalWindowLevel)
@@ -498,7 +498,7 @@ static void releaseImageAfterDrawing()
     [NSGraphicsContext restoreGraphicsState];
 }
 
-Image juce_createIconForFile (const File& file)
+Image detail::WindowingHelpers::createIconForFile (const File& file)
 {
     JUCE_AUTORELEASEPOOL
     {

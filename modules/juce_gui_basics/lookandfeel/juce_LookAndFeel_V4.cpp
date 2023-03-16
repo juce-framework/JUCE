@@ -1133,8 +1133,8 @@ void LookAndFeel_V4::drawTooltip (Graphics& g, const String& text, int width, in
     g.setColour (findColour (TooltipWindow::outlineColourId));
     g.drawRoundedRectangle (bounds.toFloat().reduced (0.5f, 0.5f), cornerSize, 1.0f);
 
-    LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId))
-                       .draw (g, { static_cast<float> (width), static_cast<float> (height) });
+    detail::LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId))
+        .draw (g, { static_cast<float> (width), static_cast<float> (height) });
 }
 
 //==============================================================================

@@ -2265,13 +2265,13 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return upright;
 }
 
-bool MouseInputSource::SourceList::addSource()
+bool detail::MouseInputSourceList::addSource()
 {
     addSource (sources.size(), MouseInputSource::InputSourceType::touch);
     return true;
 }
 
-bool MouseInputSource::SourceList::canUseTouch()
+bool detail::MouseInputSourceList::canUseTouch() const
 {
     return true;
 }
@@ -2447,7 +2447,7 @@ void Desktop::allowedOrientationsChanged()
 }
 
 //==============================================================================
-bool juce_areThereAnyAlwaysOnTopWindows()
+bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()
 {
     return false;
 }
@@ -2622,9 +2622,9 @@ void Displays::findDisplays (float masterScale)
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File& /*file*/)
+Image detail::WindowingHelpers::createIconForFile (const File& /*file*/)
 {
-    return Image();
+    return {};
 }
 
 //==============================================================================
@@ -2632,7 +2632,7 @@ class MouseCursor::PlatformSpecificHandle
 {
 public:
     PlatformSpecificHandle (const MouseCursor::StandardCursorType)      {}
-    PlatformSpecificHandle (const CustomMouseCursorInfo&)               {}
+    PlatformSpecificHandle (const detail::CustomMouseCursorInfo&)       {}
 
     static void showInWindow (PlatformSpecificHandle*, ComponentPeer*)  {}
 };

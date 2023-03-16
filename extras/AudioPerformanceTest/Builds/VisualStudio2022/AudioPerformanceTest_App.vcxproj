@@ -1828,6 +1828,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\desktop\juce_Displays.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\detail\juce_AccessibilityHelpers.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\drawables\juce_Drawable.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2023,6 +2026,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_Accessibility.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_AccessibilityTextHelpers_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2066,6 +2072,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_linux_Windowing.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_ScopedDPIAwarenessDisabler.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_win32_DragAndDrop.cpp">
@@ -3035,6 +3044,24 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_ModalComponentManager.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\desktop\juce_Desktop.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\desktop\juce_Displays.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_AccessibilityHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_AlertWindowHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ButtonAccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ComponentHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_CustomMouseCursorInfo.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_FocusHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_FocusRestorer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_LookAndFeelHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_MouseInputSourceImpl.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_MouseInputSourceList.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_PointerState.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ScalingHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ScopedMessageBoxImpl.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ScopedMessageBoxInterface.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ToolbarItemDragAndDropOverlayComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_TopLevelWindowManager.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_ViewportHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\detail\juce_WindowingHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\drawables\juce_Drawable.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\drawables\juce_DrawableComposite.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\drawables\juce_DrawableImage.h"/>
@@ -3110,7 +3137,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInactivityDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseInputSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_PointerState.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TextDragAndDropTarget.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h"/>

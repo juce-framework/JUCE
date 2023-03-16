@@ -1947,7 +1947,7 @@ public:
                     ShowWindow (hwnd, SW_SHOWNORMAL);
 
                 if (! boundsCopy.isEmpty())
-                    setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, boundsCopy), false);
+                    setBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, boundsCopy), false);
             }
             else
             {
@@ -2255,7 +2255,7 @@ public:
         {
             const auto originalPos = pointFromPOINT ({ mousePos.x, mousePos.y });
             const auto logicalPos = convertPhysicalScreenPointToLogical (originalPos, peer.hwnd);
-            return ScalingHelpers::screenPosToLocalPos (peer.component, logicalPos.toFloat());
+            return detail::ScalingHelpers::screenPosToLocalPos (peer.component, logicalPos.toFloat());
         }
 
         struct DroppedData
@@ -3656,7 +3656,7 @@ private:
 
     Rectangle<int> getCurrentScaledBounds() const
     {
-        return ScalingHelpers::unscaledScreenPosToScaled (component, windowBorder.addedTo (ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBounds())));
+        return detail::ScalingHelpers::unscaledScreenPosToScaled (component, windowBorder.addedTo (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBounds())));
     }
 
     LRESULT handleSizeConstraining (RECT& r, const WPARAM wParam)
@@ -3664,7 +3664,7 @@ private:
         if (isConstrainedNativeWindow())
         {
             const auto logicalBounds = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (r).toFloat(), hwnd);
-            auto pos = ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds).toNearestInt();
+            auto pos = detail::ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds).toNearestInt();
 
             const auto original = getCurrentScaledBounds();
 
@@ -3675,7 +3675,7 @@ private:
                                       wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
                                       wParam == WMSZ_RIGHT  || wParam == WMSZ_TOPRIGHT   || wParam == WMSZ_BOTTOMRIGHT);
 
-            r = RECTFromRectangle (convertLogicalScreenRectangleToPhysical (ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()).toNearestInt(), hwnd));
+            r = RECTFromRectangle (convertLogicalScreenRectangleToPhysical (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()).toNearestInt(), hwnd));
         }
 
         return TRUE;
@@ -3690,7 +3690,7 @@ private:
                  && ! Component::isMouseButtonDownAnywhere())
             {
                 const auto logicalBounds = convertPhysicalScreenRectangleToLogical (rectangleFromRECT ({ wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy }).toFloat(), hwnd);
-                auto pos = ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds).toNearestInt();
+                auto pos = detail::ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds).toNearestInt();
 
                 const auto original = getCurrentScaledBounds();
 
@@ -3701,7 +3701,7 @@ private:
                                           pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
                                           pos.getX() == original.getX() && pos.getRight()  != original.getRight());
 
-                auto physicalBounds = convertLogicalScreenRectangleToPhysical (ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()), hwnd);
+                auto physicalBounds = convertLogicalScreenRectangleToPhysical (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()), hwnd);
 
                 auto getNewPositionIfNotRoundingError = [] (int posIn, float newPos)
                 {
@@ -3905,7 +3905,7 @@ private:
         forceDisplayUpdate();
 
         if (fullScreen && ! isMinimised())
-            setWindowPos (hwnd, ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays()
+            setWindowPos (hwnd, detail::ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays()
                                                                                               .getDisplayForRect (component.getScreenBounds())->userArea),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
 
@@ -4152,7 +4152,7 @@ private:
                 else
                     Desktop::getInstance().setKioskModeComponent (nullptr); // turn kiosk mode off if we lose focus
 
-                juce_checkCurrentlyFocusedTopLevelWindow();
+                detail::TopLevelWindowManager::checkCurrentlyFocusedTopLevelWindow();
                 modifiersAtLastCallback = -1;
                 return 0;
 
@@ -4749,7 +4749,7 @@ static DWORD getProcess (HWND hwnd)
 /*  Returns true if the viewComponent is embedded into a window
     owned by the foreground process.
 */
-bool isEmbeddedInForegroundProcess (Component* c)
+bool detail::WindowingHelpers::isEmbeddedInForegroundProcess (Component* c)
 {
     if (c == nullptr)
         return false;
@@ -4801,7 +4801,7 @@ static BOOL CALLBACK enumAlwaysOnTopWindows (HWND hwnd, LPARAM lParam)
     return TRUE;
 }
 
-bool juce_areThereAnyAlwaysOnTopWindows()
+bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()
 {
     bool anyAlwaysOnTopFound = false;
     EnumWindows (&enumAlwaysOnTopWindows, (LPARAM) &anyAlwaysOnTopFound);
@@ -4809,7 +4809,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-bool MouseInputSource::SourceList::addSource()
+bool detail::MouseInputSourceList::addSource()
 {
     auto numSources = sources.size();
 
@@ -4823,7 +4823,7 @@ bool MouseInputSource::SourceList::addSource()
     return false;
 }
 
-bool MouseInputSource::SourceList::canUseTouch()
+bool detail::MouseInputSourceList::canUseTouch() const
 {
     return canUseMultiTouch();
 }
@@ -5119,7 +5119,7 @@ static auto extractFileHICON (const File& file)
                                                             &iconNum) };
 }
 
-Image juce_createIconForFile (const File& file)
+Image detail::WindowingHelpers::createIconForFile (const File& file)
 {
     if (const auto icon = extractFileHICON (file))
         return IconConverters::createImageFromHICON (icon.get());
@@ -5134,7 +5134,7 @@ public:
     explicit PlatformSpecificHandle (const MouseCursor::StandardCursorType type)
         : impl (makeHandle (type)) {}
 
-    explicit PlatformSpecificHandle (const CustomMouseCursorInfo& info)
+    explicit PlatformSpecificHandle (const detail::CustomMouseCursorInfo& info)
         : impl (makeHandle (info)) {}
 
     static void showInWindow (PlatformSpecificHandle* handle, ComponentPeer* peer)
@@ -5170,7 +5170,7 @@ private:
     class ImageImpl : public Impl
     {
     public:
-        explicit ImageImpl (const CustomMouseCursorInfo& infoIn) : info (infoIn) {}
+        explicit ImageImpl (const detail::CustomMouseCursorInfo& infoIn) : info (infoIn) {}
 
         HCURSOR getCursor (ComponentPeer& peer) override
         {
@@ -5208,7 +5208,7 @@ private:
 
         using CursorPtr = std::unique_ptr<std::remove_pointer_t<HCURSOR>, CursorDestructor>;
 
-        const CustomMouseCursorInfo info;
+        const detail::CustomMouseCursorInfo info;
         std::map<int, CursorPtr> cursorsBySize;
     };
 
@@ -5255,7 +5255,7 @@ private:
 
     static constexpr auto unityCursorSize = 32;
 
-    static std::unique_ptr<Impl> makeHandle (const CustomMouseCursorInfo& info)
+    static std::unique_ptr<Impl> makeHandle (const detail::CustomMouseCursorInfo& info)
     {
         return std::make_unique<ImageImpl> (info);
     }
@@ -5331,4 +5331,56 @@ private:
 //==============================================================================
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+//==============================================================================
+JUCE_COMCLASS (JuceIVirtualDesktopManager, "a5cd92ff-29be-454c-8d04-d82879fb3f1b") : public IUnknown
+{
+public:
+    virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(
+         __RPC__in HWND topLevelWindow,
+         __RPC__out BOOL * onCurrentDesktop) = 0;
+
+    virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(
+         __RPC__in HWND topLevelWindow,
+         __RPC__out GUID * desktopId) = 0;
+
+    virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(
+         __RPC__in HWND topLevelWindow,
+         __RPC__in REFGUID desktopId) = 0;
+};
+
+JUCE_COMCLASS (JuceVirtualDesktopManager, "aa509086-5ca9-4c25-8f95-589d3c07b48a");
+
 } // namespace juce
+
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::JuceIVirtualDesktopManager, 0xa5cd92ff, 0x29be, 0x454c, 0x8d, 0x04, 0xd8, 0x28, 0x79, 0xfb, 0x3f, 0x1b)
+__CRT_UUID_DECL (juce::JuceVirtualDesktopManager,  0xaa509086, 0x5ca9, 0x4c25, 0x8f, 0x95, 0x58, 0x9d, 0x3c, 0x07, 0xb4, 0x8a)
+#endif
+
+bool juce::detail::WindowingHelpers::isWindowOnCurrentVirtualDesktop (void* x)
+{
+    if (x == nullptr)
+        return false;
+
+    static auto* desktopManager = []
+    {
+        JuceIVirtualDesktopManager* result = nullptr;
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
+        if (SUCCEEDED (CoCreateInstance (__uuidof (JuceVirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
+            return result;
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return static_cast<JuceIVirtualDesktopManager*> (nullptr);
+    }();
+
+    BOOL current = false;
+
+    if (auto* dm = desktopManager)
+        if (SUCCEEDED (dm->IsWindowOnCurrentVirtualDesktop (static_cast<HWND> (x), &current)))
+            return current != false;
+
+    return true;
+}

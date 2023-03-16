@@ -123,7 +123,7 @@ void HyperlinkButton::paintButton (Graphics& g,
 
 std::unique_ptr<AccessibilityHandler> HyperlinkButton::createAccessibilityHandler()
 {
-    return std::make_unique<ButtonAccessibilityHandler> (*this, AccessibilityRole::hyperlink);
+    return std::make_unique<detail::ButtonAccessibilityHandler> (*this, AccessibilityRole::hyperlink);
 }
 
 } // namespace juce

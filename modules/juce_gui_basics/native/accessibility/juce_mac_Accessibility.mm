@@ -499,7 +499,7 @@ private:
             {
                 if (auto* handler = getHandler (self))
                 {
-                    if (auto* tableHandler = getEnclosingHandlerWithInterface (handler, &AccessibilityHandler::getTableInterface))
+                    if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (handler, &AccessibilityHandler::getTableInterface))
                     {
                         if (auto* tableInterface = tableHandler->getTableInterface())
                         {
@@ -863,18 +863,18 @@ static NSAccessibilityNotificationName layoutChangedNotification()
     return layoutChangedString;
 }
 
-void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, InternalAccessibilityEvent eventType)
+void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler, Event eventType)
 {
     auto notification = [eventType]
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::elementCreated:         return NSAccessibilityCreatedNotification;
-            case InternalAccessibilityEvent::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
-            case InternalAccessibilityEvent::elementMovedOrResized:  return layoutChangedNotification();
-            case InternalAccessibilityEvent::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
-            case InternalAccessibilityEvent::windowOpened:           return NSAccessibilityWindowCreatedNotification;
-            case InternalAccessibilityEvent::windowClosed:           break;
+            case Event::elementCreated:         return NSAccessibilityCreatedNotification;
+            case Event::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
+            case Event::elementMovedOrResized:  return layoutChangedNotification();
+            case Event::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
+            case Event::windowOpened:           return NSAccessibilityWindowCreatedNotification;
+            case Event::windowClosed:           break;
         }
 
         return NSAccessibilityNotificationName{};

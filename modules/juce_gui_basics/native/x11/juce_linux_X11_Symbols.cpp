@@ -237,4 +237,4 @@ bool X11Symbols::loadAllSymbols()
 //==============================================================================
 JUCE_IMPLEMENT_SINGLETON (X11Symbols)
 
-}
+} // namespace juce

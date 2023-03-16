@@ -26,9 +26,6 @@
 namespace juce
 {
 
-Image juce_createIconForFile (const File& file);
-
-
 //==============================================================================
 FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
     : ListBox ({}, this),
@@ -217,7 +214,7 @@ private:
 
             if (im.isNull() && ! onlyUpdateIfCached)
             {
-                im = juce_createIconForFile (file);
+                im = detail::WindowingHelpers::createIconForFile (file);
 
                 if (im.isValid())
                     ImageCache::addImageToCache (im, hashCode);

@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::detail
 {
 
 std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (const MessageBoxOptions& options)
@@ -35,7 +35,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
     {
     public:
         explicit MessageBox (const MessageBoxOptions& options)
-            : inner (createAlertWindowImpl (options)),
+            : inner (detail::AlertWindowHelpers::create (options)),
               numButtons (options.getNumButtons()) {}
 
         void runAsync (std::function<void (int)> fn) override
@@ -66,4 +66,4 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
     return std::make_unique<MessageBox> (options);
 }
 
-} // namespace juce
+} // namespace juce::detail
