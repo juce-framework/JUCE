@@ -138,8 +138,10 @@ struct AppDelegateClass   : public ObjCClass<NSObject>
                 NSUserNotification* userNotification = notification.userInfo[NSApplicationLaunchUserNotificationKey];
                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
                 if (userNotification != nil && userNotification.userInfo != nil)
-                    didReceiveRemoteNotification (self, nil, [NSApplication sharedApplication], userNotification.userInfo);
+                    [self application: [NSApplication sharedApplication] didReceiveRemoteNotification: userNotification.userInfo];
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             }
         });
 
