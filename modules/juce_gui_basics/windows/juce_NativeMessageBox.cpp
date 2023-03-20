@@ -78,7 +78,7 @@ static int showNativeBoxUnmanaged (const MessageBoxOptions& opts,
                                    ResultCodeMappingMode mode)
 {
     auto implementation = makeNativeMessageBoxWithMappedResult (opts, mode);
-    return detail::ScopedMessageBoxImpl::showUnmanaged (std::move (implementation), cb);
+    return detail::ConcreteScopedMessageBoxImpl::showUnmanaged (std::move (implementation), cb);
 }
 
 #if JUCE_MODAL_LOOPS_PERMITTED
@@ -152,7 +152,7 @@ void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options
 ScopedMessageBox NativeMessageBox::showScopedAsync (const MessageBoxOptions& options, std::function<void (int)> callback)
 {
     auto implementation = makeNativeMessageBoxWithMappedResult (options, ResultCodeMappingMode::alertWindow);
-    return detail::ScopedMessageBoxImpl::show (std::move (implementation), std::move (callback));
+    return detail::ConcreteScopedMessageBoxImpl::show (std::move (implementation), std::move (callback));
 }
 
 } // namespace juce

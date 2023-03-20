@@ -39,8 +39,9 @@ namespace juce
  #define JUCE_DEPRECATION_IGNORED 1
 #endif
 
+//==============================================================================
 class FileChooser::Native  : public FileChooser::Pimpl,
-                             public Component,
+                             public detail::NativeModalWrapperComponent,
                              public AsyncUpdater,
                              public std::enable_shared_from_this<Native>
 {
@@ -54,11 +55,6 @@ public:
         */
         [result->controller.get() setParent: result.get()];
         return result;
-    }
-
-    ~Native() override
-    {
-        exitModalState (0);
     }
 
     void launch() override
@@ -88,24 +84,6 @@ public:
        #else
         jassertfalse;
        #endif
-    }
-
-    void parentHierarchyChanged() override
-    {
-        auto* newPeer = dynamic_cast<UIViewComponentPeer*> (getPeer());
-
-        if (peer != newPeer)
-        {
-            peer = newPeer;
-
-            if (peer != nullptr)
-            {
-                if (auto* parentController = peer->controller)
-                    [parentController showViewController: controller.get() sender: parentController];
-
-                peer->toFront (false);
-            }
-        }
     }
 
     void handleAsyncUpdate() override
@@ -189,6 +167,8 @@ public:
     }
 
 private:
+    UIViewController* getViewController() const override { return controller.get(); }
+
     Native (FileChooser& fileChooser, int flags)
         : owner (fileChooser)
     {
@@ -241,40 +221,9 @@ private:
                 [controller.get() setAllowsMultipleSelection: (flags & FileBrowserComponent::canSelectMultipleItems) != 0];
         }
 
-
         [controller.get() setDelegate: delegate.get()];
-        [controller.get() setModalTransitionStyle: UIModalTransitionStyleCrossDissolve];
 
-        setOpaque (false);
-
-        if (fileChooser.parent != nullptr)
-        {
-            [controller.get() setModalPresentationStyle: UIModalPresentationFullScreen];
-
-            auto chooserBounds = fileChooser.parent->getBounds();
-            setBounds (chooserBounds);
-
-            setAlwaysOnTop (true);
-            fileChooser.parent->addAndMakeVisible (this);
-        }
-        else
-        {
-            if (SystemStats::isRunningInAppExtensionSandbox())
-            {
-                // Opening a native top-level window in an AUv3 is not allowed (sandboxing). You need to specify a
-                // parent component (for example your editor) to parent the native file chooser window. To do this
-                // specify a parent component in the FileChooser's constructor!
-                jassertfalse;
-                return;
-            }
-
-            auto chooserBounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
-            setBounds (chooserBounds);
-
-            setAlwaysOnTop (true);
-            setVisible (true);
-            addToDesktop (0);
-        }
+        displayNativeWindowModally (fileChooser.parent);
     }
 
     void passResultsToInitiator (Array<URL> urls)
@@ -363,7 +312,6 @@ private:
     FileChooser& owner;
     NSUniquePtr<NSObject<UIDocumentPickerDelegate>> delegate;
     NSUniquePtr<FileChooserControllerClass> controller;
-    UIViewComponentPeer* peer = nullptr;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Native)

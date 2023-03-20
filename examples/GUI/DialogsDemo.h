@@ -462,7 +462,7 @@ private:
         }
         else if (type == shareText)
         {
-            ContentSharer::getInstance()->shareText ("I love JUCE!", [ptr = Component::SafePointer (this)] (bool success, const String& error)
+            messageBox = ContentSharer::shareTextScoped ("I love JUCE!", [ptr = Component::SafePointer (this)] (bool success, const String& error)
             {
                 if (ptr == nullptr)
                     return;
@@ -489,7 +489,7 @@ private:
                 Array<URL> urls;
                 urls.add (URL (fileToSave));
 
-                ContentSharer::getInstance()->shareFiles (urls, [ptr = Component::SafePointer (this)] (bool success, const String& error)
+                messageBox = ContentSharer::shareFilesScoped (urls, [ptr = Component::SafePointer (this)] (bool success, const String& error)
                 {
                     if (ptr == nullptr)
                         return;
@@ -519,7 +519,7 @@ private:
 
             Array<Image> images { myImage, myImage2 };
 
-            ContentSharer::getInstance()->shareImages (images, [ptr = Component::SafePointer (this)] (bool success, const String& error)
+            messageBox = ContentSharer::shareImagesScoped (images, nullptr, [ptr = Component::SafePointer (this)] (bool success, const String& error)
             {
                 if (ptr == nullptr)
                     return;

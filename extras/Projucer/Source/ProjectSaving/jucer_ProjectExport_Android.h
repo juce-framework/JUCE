@@ -1675,6 +1675,10 @@ private:
 
         if (! isLibrary())
         {
+            auto* receiver = getOrCreateChildWithName (application, "receiver");
+            setAttributeIfNotPresent (*receiver, "android:name", "com.rmsl.juce.Receiver");
+            setAttributeIfNotPresent (*receiver, "android:exported", "false");
+
             auto* app = createApplicationElement (*manifest);
 
             auto* act = createActivityElement (*app);

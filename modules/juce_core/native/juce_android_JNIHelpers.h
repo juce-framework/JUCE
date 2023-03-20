@@ -262,7 +262,8 @@ template <typename T, size_t N> constexpr auto numBytes (const T (&) [N]) { retu
  METHOD (getApplicationInfo,                   "getApplicationInfo",              "()Landroid/content/pm/ApplicationInfo;") \
  METHOD (checkCallingOrSelfPermission,         "checkCallingOrSelfPermission",    "(Ljava/lang/String;)I") \
  METHOD (checkCallingOrSelfUriPermission,      "checkCallingOrSelfUriPermission", "(Landroid/net/Uri;I)I") \
- METHOD (getCacheDir,                          "getCacheDir",                     "()Ljava/io/File;")
+ METHOD (getCacheDir,                          "getCacheDir",                     "()Ljava/io/File;") \
+ METHOD (registerReceiver,                     "registerReceiver",                "(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;") \
 
 DECLARE_JNI_CLASS (AndroidContext, "android/content/Context")
 #undef JNI_CLASS_MEMBERS
@@ -418,6 +419,7 @@ DECLARE_JNI_CLASS (AndroidHandlerThread, "android/os/HandlerThread")
   METHOD (putExtraStrings,                "putExtra",       "(Ljava/lang/String;[Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (putExtraParcelable,             "putExtra",       "(Ljava/lang/String;Landroid/os/Parcelable;)Landroid/content/Intent;") \
   METHOD (putExtraBool,                   "putExtra",       "(Ljava/lang/String;Z)Landroid/content/Intent;") \
+  METHOD (putExtraInt,                    "putExtra",       "(Ljava/lang/String;I)Landroid/content/Intent;") \
   METHOD (putParcelableArrayListExtra,    "putParcelableArrayListExtra", "(Ljava/lang/String;Ljava/util/ArrayList;)Landroid/content/Intent;") \
   METHOD (setAction,                      "setAction",      "(Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (setFlags,                       "setFlags",       "(I)Landroid/content/Intent;") \
@@ -425,6 +427,12 @@ DECLARE_JNI_CLASS (AndroidHandlerThread, "android/os/HandlerThread")
   METHOD (setType,                        "setType",        "(Ljava/lang/String;)Landroid/content/Intent;") \
 
 DECLARE_JNI_CLASS (AndroidIntent, "android/content/Intent")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  STATICMETHOD (createChooser, "createChooser", "(Landroid/content/Intent;Ljava/lang/CharSequence;Landroid/content/IntentSender;)Landroid/content/Intent;") \
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidIntent22, "android/content/Intent", 22)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -490,7 +498,8 @@ DECLARE_JNI_CLASS (AndroidPaint, "android/graphics/Paint")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   STATICMETHOD (getActivity, "getActivity", "(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;") \
-  METHOD (getIntentSender, "getIntentSender", "()Landroid/content/IntentSender;")
+  STATICMETHOD (getBroadcast, "getBroadcast", "(Landroid/content/Context;ILandroid/content/Intent;I)Landroid/app/PendingIntent;") \
+  METHOD (getIntentSender, "getIntentSender", "()Landroid/content/IntentSender;") \
 
 DECLARE_JNI_CLASS (AndroidPendingIntent, "android/app/PendingIntent")
 #undef JNI_CLASS_MEMBERS
@@ -1026,10 +1035,37 @@ private:
 
 //==============================================================================
 // Allows you to start an activity without requiring to have an activity
-void startAndroidActivityForResult (const LocalRef<jobject>& intent, int requestCode,
-                                    std::function<void (int, int, LocalRef<jobject>)> && callback);
+void startAndroidActivityForResult (const LocalRef<jobject>& intent,
+                                    int requestCode,
+                                    std::function<void (int, int, LocalRef<jobject>)>&& callback);
 
-//==============================================================================
+class ActivityLauncher   : public FragmentOverlay
+{
+public:
+    ActivityLauncher (const LocalRef<jobject>& intentToUse, int requestCodeToUse)
+        : intent (intentToUse), requestCode (requestCodeToUse)
+    {}
+
+    void onStart() override
+    {
+        if (! std::exchange (activityHasStarted, true))
+            getEnv()->CallVoidMethod (getNativeHandle(), AndroidFragment.startActivityForResult, intent.get(), requestCode);
+    }
+
+    void onActivityResult (int activityRequestCode, int resultCode, LocalRef<jobject> data) override
+    {
+        NullCheckedInvocation::invoke (callback, activityRequestCode, resultCode, std::move (data));
+    }
+
+    std::function<void (int, int, LocalRef<jobject>)> callback;
+
+private:
+    GlobalRef intent;
+    int requestCode;
+    bool activityHasStarted = false;
+};
+
+    //==============================================================================
 bool androidHasSystemFeature (const String& property);
 String audioManagerGetProperty (const String& property);
 

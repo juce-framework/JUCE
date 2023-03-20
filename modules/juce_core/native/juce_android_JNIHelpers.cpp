@@ -94,8 +94,8 @@ struct SystemJavaClassComparator
 
         if ((! isSysClassA) && (! isSysClassB))
         {
-            return DefaultElementComparator<bool>::compareElements (first != nullptr  ? first->byteCode  != nullptr : false,
-                                                                    second != nullptr ? second->byteCode != nullptr : false);
+            return DefaultElementComparator<bool>::compareElements (first  != nullptr && first->byteCode  != nullptr,
+                                                                    second != nullptr && second->byteCode != nullptr);
         }
 
         return DefaultElementComparator<bool>::compareElements (isSystemClass (first),
@@ -631,43 +631,17 @@ jobject FragmentOverlay::getNativeHandle()
 }
 
 //==============================================================================
-class ActivityLauncher   : public FragmentOverlay
+void startAndroidActivityForResult (const LocalRef<jobject>& intent,
+                                    int requestCode,
+                                    std::function<void (int, int, LocalRef<jobject>)>&& callback)
 {
-public:
-    ActivityLauncher (const LocalRef<jobject>& intentToUse,
-                      int requestCodeToUse,
-                      std::function<void (int, int, LocalRef<jobject>)> && callbackToUse)
-        : intent (intentToUse), requestCode (requestCodeToUse), callback (std::move (callbackToUse))
-    {}
-
-    void onStart() override
+    auto* launcher = new ActivityLauncher (intent, requestCode);
+    launcher->callback = [launcher, c = std::move (callback)] (auto&&... args)
     {
-        if (! std::exchange (activityHasStarted, true))
-            getEnv()->CallVoidMethod (getNativeHandle(), AndroidFragment.startActivityForResult,
-                                      intent.get(), requestCode);
-    }
-
-    void onActivityResult (int activityRequestCode, int resultCode, LocalRef<jobject> data) override
-    {
-        if (callback)
-            callback (activityRequestCode, resultCode, std::move (data));
-
-        getEnv()->CallVoidMethod (getNativeHandle(), JuceFragmentOverlay.close);
-        delete this;
-    }
-
-private:
-    GlobalRef intent;
-    int requestCode;
-    std::function<void (int, int, LocalRef<jobject>)> callback;
-    bool activityHasStarted = false;
-};
-
-void startAndroidActivityForResult (const LocalRef<jobject>& intent, int requestCode,
-                                    std::function<void (int, int, LocalRef<jobject>)> && callback)
-{
-    auto* activityLauncher = new ActivityLauncher (intent, requestCode, std::move (callback));
-    activityLauncher->open();
+        NullCheckedInvocation::invoke (c, args...);
+        delete launcher;
+    };
+    launcher->open();
 }
 
 //==============================================================================
