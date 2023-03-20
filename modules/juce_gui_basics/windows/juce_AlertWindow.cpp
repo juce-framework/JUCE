@@ -150,16 +150,24 @@ int AlertWindow::getNumButtons() const
     return buttons.size();
 }
 
+Button* AlertWindow::getButton (int index) const
+{
+    return buttons[index];
+}
+
+Button* AlertWindow::getButton (const String& buttonName) const
+{
+    for (auto* button : buttons)
+        if (buttonName == button->getName())
+            return button;
+
+    return nullptr;
+}
+
 void AlertWindow::triggerButtonClick (const String& buttonName)
 {
-    for (auto* b : buttons)
-    {
-        if (buttonName == b->getName())
-        {
-            b->triggerClick();
-            break;
-        }
-    }
+    if (auto* button = getButton (buttonName))
+        button->triggerClick();
 }
 
 void AlertWindow::setEscapeKeyCancels (bool shouldEscapeKeyCancel)

@@ -92,6 +92,22 @@ public:
     /** Returns the number of buttons that the window currently has. */
     int getNumButtons() const;
 
+    /** Returns a Button that was added to the AlertWindow.
+
+        @param index   the index of the button in order that it was added with the addButton() method.
+        @returns the Button component, or nullptr if the index is out of bounds.
+
+        @see getNumButtons
+    */
+    Button* getButton (int index) const;
+
+    /** Returns a Button that was added to the AlertWindow.
+
+        @param buttonName   the name that was passed into the addButton() method
+        @returns the Button component, or nullptr if none was found for the given name.
+    */
+    Button* getButton (const String& buttonName) const;
+
     /** Invokes a click of one of the buttons. */
     void triggerButtonClick (const String& buttonName);
 
