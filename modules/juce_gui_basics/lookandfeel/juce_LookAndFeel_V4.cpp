@@ -956,6 +956,8 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
         g.setColour (slider.findColour (Slider::trackColourId));
         g.fillRect (slider.isHorizontal() ? Rectangle<float> (static_cast<float> (x), (float) y + 0.5f, sliderPos - (float) x, (float) height - 1.0f)
                                           : Rectangle<float> ((float) x + 0.5f, sliderPos, (float) width - 1.0f, (float) y + ((float) height - sliderPos)));
+
+        drawLinearSliderOutline (g, x, y, width, height, style, slider);
     }
     else
     {
@@ -1038,6 +1040,9 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
                              trackWidth * 2.0f, pointerColour, 3);
             }
         }
+
+        if (slider.isBar())
+            drawLinearSliderOutline (g, x, y, width, height, style, slider);
     }
 }
 

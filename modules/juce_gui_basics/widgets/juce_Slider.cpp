@@ -1242,12 +1242,6 @@ public:
                                      getLinearSliderPos (lastValueMax),
                                      style, owner);
             }
-
-            if ((style == LinearBar || style == LinearBarVertical) && valueBox == nullptr)
-            {
-                g.setColour (owner.findColour (Slider::textBoxOutlineColourId));
-                g.drawRect (0, 0, owner.getWidth(), owner.getHeight(), 1);
-            }
         }
     }
 

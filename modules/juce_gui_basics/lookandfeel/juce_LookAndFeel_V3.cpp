@@ -420,6 +420,8 @@ void LookAndFeel_V3::drawLinearSlider (Graphics& g, int x, int y, int width, int
             g.fillRect (fx, sliderPos, fw, 1.0f);
         else
             g.fillRect (sliderPos, fy, 1.0f, fh);
+
+        drawLinearSliderOutline (g, x, y, width, height, style, slider);
     }
     else
     {
