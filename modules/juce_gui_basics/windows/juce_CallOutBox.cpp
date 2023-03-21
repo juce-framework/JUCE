@@ -99,7 +99,6 @@ int CallOutBox::getBorderSize() const noexcept
 void CallOutBox::lookAndFeelChanged()
 {
     resized();
-    repaint();
 }
 
 void CallOutBox::paint (Graphics& g)

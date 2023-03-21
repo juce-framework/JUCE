@@ -402,8 +402,6 @@ void ComboBox::parentHierarchyChanged()
 
 void ComboBox::lookAndFeelChanged()
 {
-    repaint();
-
     {
         std::unique_ptr<Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
         jassert (newLabel != nullptr);
