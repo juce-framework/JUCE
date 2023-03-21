@@ -645,7 +645,7 @@ namespace
     {
         args.checkMinNumArguments (3);
         auto source = args[1].resolveAsExistingFile();
-        auto target = args[2].resolveAsExistingFile();
+        auto target = args[2].resolveAsFile();
 
         MemoryOutputStream literal;
         size_t dataSize = 0;
