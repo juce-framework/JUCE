@@ -2234,6 +2234,8 @@ public:
         method, which your component can override if it needs to do something when
         colours are altered.
 
+        Note repaint() is not automatically called when a colour is changed.
+
         For more details about colour IDs, see the comments for findColour().
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour

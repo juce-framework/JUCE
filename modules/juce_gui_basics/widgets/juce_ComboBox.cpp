@@ -392,7 +392,14 @@ void ComboBox::enablementChanged()
 
 void ComboBox::colourChanged()
 {
-    lookAndFeelChanged();
+    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
+    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
+
+    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
+    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
+    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
+    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+    repaint();
 }
 
 void ComboBox::parentHierarchyChanged()
@@ -431,14 +438,7 @@ void ComboBox::lookAndFeelChanged()
     label->addMouseListener (this, false);
     label->setAccessible (labelEditableState == labelIsEditable);
 
-    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
-    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
-
-    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
-    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
-    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-
+    colourChanged();
     resized();
 }
 

@@ -59,6 +59,7 @@ void ProgressBar::lookAndFeelChanged()
 void ProgressBar::colourChanged()
 {
     lookAndFeelChanged();
+    repaint();
 }
 
 void ProgressBar::paint (Graphics& g)
