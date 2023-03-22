@@ -736,15 +736,13 @@ int32 AudioChannelSet::getWaveChannelMask() const noexcept
 }
 
 //==============================================================================
-int JUCE_CALLTYPE AudioChannelSet::getAmbisonicOrderForNumChannels (int numChannels)
+int AudioChannelSet::getAmbisonicOrderForNumChannels (int numChannels, int maxOrderToCheck)
 {
-    auto sqrtMinusOne   = std::sqrt (static_cast<float> (numChannels)) - 1.0f;
-    auto ambisonicOrder = jmax (0, static_cast<int> (std::floor (sqrtMinusOne)));
+    for (auto i = 0; i <= maxOrderToCheck; ++i)
+        if (numChannels == square (i + 1))
+            return i;
 
-    if (ambisonicOrder > 7)
-        return -1;
-
-    return (static_cast<float> (ambisonicOrder) == sqrtMinusOne ? ambisonicOrder : -1);
+    return -1;
 }
 
 

@@ -576,6 +576,12 @@ public:
     int32 getWaveChannelMask() const noexcept;
 
     //==============================================================================
+    /** Returns the ambisonic order that includes exactly numChannels, or -1 if no
+        supported ambisonic order contains exactly numChannels.
+    */
+    static int getAmbisonicOrderForNumChannels (int numChannels, int maxOrderToCheck = 7);
+
+    //==============================================================================
     bool operator== (const AudioChannelSet&) const noexcept;
     bool operator!= (const AudioChannelSet&) const noexcept;
     bool operator<  (const AudioChannelSet&) const noexcept;
@@ -588,8 +594,6 @@ private:
     explicit AudioChannelSet (uint32);
     explicit AudioChannelSet (const std::initializer_list<ChannelType>&);
 
-    //==============================================================================
-    static int JUCE_CALLTYPE getAmbisonicOrderForNumChannels (int);
 };
 
 } // namespace juce

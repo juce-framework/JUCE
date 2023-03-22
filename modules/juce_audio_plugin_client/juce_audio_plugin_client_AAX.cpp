@@ -306,12 +306,10 @@ namespace AAXClasses
                 default:  break;
             }
 
-            // check for ambisonics support
-            auto sqrtMinusOne   = std::sqrt (static_cast<float> (numChannels)) - 1.0f;
-            auto ambisonicOrder = jmax (0, static_cast<int> (std::floor (sqrtMinusOne)));
+            const auto maybeAmbisonicOrder = AudioChannelSet::getAmbisonicOrderForNumChannels (numChannels);
 
-            if (static_cast<float> (ambisonicOrder) == sqrtMinusOne)
-                return stemFormatForAmbisonicOrder (ambisonicOrder);
+            if (maybeAmbisonicOrder != -1)
+                return stemFormatForAmbisonicOrder (maybeAmbisonicOrder);
 
             return AAX_eStemFormat_INT32_MAX;
         }
