@@ -150,6 +150,7 @@ public:
 
     //==============================================================================
     void drawBubble (Graphics&, BubbleComponent&, const Point<float>& tip, const Rectangle<float>& body) override;
+    void setComponentEffectForBubbleComponent (BubbleComponent& bubbleComponent) override;
 
     void drawLasso (Graphics&, Component&) override;
 
@@ -412,6 +413,7 @@ public:
 private:
     //==============================================================================
     std::unique_ptr<Drawable> folderImage, documentImage;
+    DropShadowEffect bubbleShadow;
 
     void drawShinyButtonShape (Graphics&,
                                float x, float y, float w, float h, float maxCornerSize,

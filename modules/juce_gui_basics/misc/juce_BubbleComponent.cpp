@@ -30,14 +30,17 @@ BubbleComponent::BubbleComponent()
   : allowablePlacements (above | below | left | right)
 {
     setInterceptsMouseClicks (false, false);
-
-    shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.35f), 5, Point<int>()));
-    setComponentEffect (&shadow);
+    lookAndFeelChanged();
 }
 
 BubbleComponent::~BubbleComponent() {}
 
 //==============================================================================
+void BubbleComponent::lookAndFeelChanged()
+{
+    getLookAndFeel().setComponentEffectForBubbleComponent (*this);
+}
+
 void BubbleComponent::paint (Graphics& g)
 {
     getLookAndFeel().drawBubble (g, *this, arrowTip.toFloat(), content.toFloat());
