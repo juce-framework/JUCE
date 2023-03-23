@@ -51,7 +51,6 @@ static void resetTrackingArea (NSView* view)
 
     const auto options = NSTrackingMouseEnteredAndExited
                          | NSTrackingMouseMoved
-                         | NSTrackingEnabledDuringMouseDrag
                          | NSTrackingActiveAlways
                          | NSTrackingInVisibleRect;
 
@@ -1777,7 +1776,8 @@ private:
             if (! [[view trackingAreas] containsObject: area])
                 return;
 
-        sendMouseEvent (ev);
+        if ([NSEvent pressedMouseButtons] == 0)
+            sendMouseEvent (ev);
     }
 
     static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
