@@ -145,7 +145,7 @@ struct SliderHandler  : public ComponentTypeHandler
         if (needsSliderListener (component))
             r << memberVariableName << "->addListener (this);\n";
 
-        if (s->getSkewFactor() != 1.0)
+        if (! approximatelyEqual (s->getSkewFactor(), 1.0))
             r << memberVariableName << "->setSkewFactor (" << s->getSkewFactor() << ");\n";
 
         r << '\n';

@@ -552,7 +552,7 @@ public:
 
             if (detail::PluginUtilities::getHostType().isAbletonLive()
                  && hostCallback != nullptr
-                 && processor->getTailLengthSeconds() == std::numeric_limits<double>::infinity())
+                 && std::isinf (processor->getTailLengthSeconds()))
             {
                 AbletonLiveHostSpecific hostCmd;
 
@@ -645,7 +645,7 @@ public:
             }());
 
             const auto effectiveRate = info.getFrameRate().hasValue() ? info.getFrameRate()->getEffectiveRate() : 0.0;
-            info.setEditOriginTime (effectiveRate != 0.0 ? makeOptional (ti->smpteOffset / (80.0 * effectiveRate)) : nullopt);
+            info.setEditOriginTime (! approximatelyEqual (effectiveRate, 0.0) ? makeOptional (ti->smpteOffset / (80.0 * effectiveRate)) : nullopt);
         }
 
         info.setIsRecording ((ti->flags & Vst2::kVstTransportRecording) != 0);
@@ -1395,7 +1395,7 @@ private:
 
     void setValueAndNotifyIfChanged (AudioProcessorParameter& param, float newValue)
     {
-        if (param.getValue() == newValue)
+        if (approximatelyEqual (param.getValue(), newValue))
             return;
 
         inParameterChangedCallback = true;
@@ -1896,7 +1896,7 @@ private:
 
             auto tailSeconds = processor->getTailLengthSeconds();
 
-            if (tailSeconds == std::numeric_limits<double>::infinity())
+            if (std::isinf (tailSeconds))
                 result = std::numeric_limits<int32>::max();
             else
                 result = static_cast<int32> (tailSeconds * sampleRate);

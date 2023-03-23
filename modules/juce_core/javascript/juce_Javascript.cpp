@@ -520,7 +520,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     {
         EqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::equals) {}
         var getWithUndefinedArg() const override                               { return true; }
-        var getWithDoubles (double a, double b) const override                 { return a == b; }
+        var getWithDoubles (double a, double b) const override                 { return exactlyEqual (a, b); }
         var getWithInts (int64 a, int64 b) const override                      { return a == b; }
         var getWithStrings (const String& a, const String& b) const override   { return a == b; }
         var getWithArrayOrObject (const var& a, const var& b) const override   { return a == b; }
@@ -530,7 +530,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     {
         NotEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::notEquals) {}
         var getWithUndefinedArg() const override                               { return false; }
-        var getWithDoubles (double a, double b) const override                 { return a != b; }
+        var getWithDoubles (double a, double b) const override                 { return ! exactlyEqual (a, b); }
         var getWithInts (int64 a, int64 b) const override                      { return a != b; }
         var getWithStrings (const String& a, const String& b) const override   { return a != b; }
         var getWithArrayOrObject (const var& a, const var& b) const override   { return a != b; }
@@ -593,14 +593,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct DivideOp  : public BinaryOperator
     {
         DivideOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
-        var getWithDoubles (double a, double b) const override  { return b != 0 ? a / b : std::numeric_limits<double>::infinity(); }
+        var getWithDoubles (double a, double b) const override  { return exactlyEqual (b, 0.0) ? std::numeric_limits<double>::infinity() : a / b; }
         var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var ((double) a / (double) b) : var (std::numeric_limits<double>::infinity()); }
     };
 
     struct ModuloOp  : public BinaryOperator
     {
         ModuloOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::modulo) {}
-        var getWithDoubles (double a, double b) const override  { return b != 0 ? fmod (a, b) : std::numeric_limits<double>::infinity(); }
+        var getWithDoubles (double a, double b) const override  { return exactlyEqual (b, 0.0) ? std::numeric_limits<double>::infinity() : fmod (a, b); }
         var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var (a % b) : var (std::numeric_limits<double>::infinity()); }
     };
 

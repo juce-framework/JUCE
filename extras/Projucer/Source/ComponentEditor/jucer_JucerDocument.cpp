@@ -245,7 +245,7 @@ void JucerDocument::setSnappingGrid (const int numPixels, const bool active, con
 
 void JucerDocument::setComponentOverlayOpacity (const float alpha)
 {
-    if (alpha != componentOverlayOpacity)
+    if (! approximatelyEqual (alpha, componentOverlayOpacity))
     {
         componentOverlayOpacity = alpha;
         changed();

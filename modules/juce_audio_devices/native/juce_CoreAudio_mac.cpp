@@ -966,7 +966,7 @@ public:
                 jassert (timestamp == nullptr || (((timestamp->mFlags & kAudioTimeStampSampleTimeValid) != 0)
                                                && ((timestamp->mFlags & kAudioTimeStampHostTimeValid)   != 0)));
 
-                if (previousSampleTime == invalidSampleTime)
+                if (exactlyEqual (previousSampleTime, invalidSampleTime))
                     previousSampleTime = timestamp != nullptr ? timestamp->mSampleTime : 0.0;
 
                 if (timestamp != nullptr && std::fabs (previousSampleTime - timestamp->mSampleTime) >= 1.0)
@@ -1091,7 +1091,7 @@ private:
 
         if (! updateDetailsFromDevice())
             owner.stopInternal();
-        else if ((oldBufferSize != bufferSize || oldSampleRate != sampleRate) && owner.shouldRestartDevice())
+        else if ((oldBufferSize != bufferSize || ! approximatelyEqual (oldSampleRate, sampleRate)) && owner.shouldRestartDevice())
             owner.restart();
     }
 
@@ -1577,7 +1577,7 @@ public:
         {
             auto deviceSampleRate = d->getCurrentSampleRate();
 
-            if (deviceSampleRate != sampleRateRequested)
+            if (! approximatelyEqual (deviceSampleRate, sampleRateRequested))
             {
                 if (! getAvailableSampleRates().contains (deviceSampleRate))
                     return;
@@ -1912,7 +1912,7 @@ private:
 
         for (auto& d : getDeviceWrappers())
         {
-            if (d->getCurrentSampleRate() != currentSampleRate)
+            if (! approximatelyEqual (d->getCurrentSampleRate(), currentSampleRate))
             {
                 d->setCurrentSampleRate (currentSampleRate);
                 anySampleRateChanges = true;

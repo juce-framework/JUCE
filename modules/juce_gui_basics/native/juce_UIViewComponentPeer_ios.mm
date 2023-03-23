@@ -1766,8 +1766,11 @@ void UIViewComponentPeer::setBounds (const Rectangle<int>& newBounds, const bool
     {
         CGRect r = convertToCGRect (newBounds);
 
-        if (view.frame.size.width != r.size.width || view.frame.size.height != r.size.height)
+        if (! approximatelyEqual (view.frame.size.width, r.size.width)
+            || ! approximatelyEqual (view.frame.size.height, r.size.height))
+        {
             [view setNeedsDisplay];
+        }
 
         view.frame = r;
     }

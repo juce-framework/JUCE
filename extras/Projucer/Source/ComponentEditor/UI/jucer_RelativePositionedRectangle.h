@@ -420,10 +420,12 @@ public:
     /** Compares two objects. */
     bool operator== (const PositionedRectangle& other) const noexcept
     {
-        return x == other.x && y == other.y
-            && w == other.w && h == other.h
-            && xMode == other.xMode && yMode == other.yMode
-            && wMode == other.wMode && hMode == other.hMode;
+        const auto tie = [] (const PositionedRectangle& r)
+        {
+            return std::tie (r.x, r.y, r.xMode, r.yMode, r.wMode, r.hMode);
+        };
+
+        return tie (*this) == tie (other);
     }
 
     /** Compares two objects. */

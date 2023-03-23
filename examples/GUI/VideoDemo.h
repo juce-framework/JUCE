@@ -630,7 +630,7 @@ private:
         currentPositionLabel.setText (getPositionString (position, duration), sendNotification);
 
         if (! positionSliderDragging)
-            positionSlider.setValue (duration != 0 ? (position / duration) : 0.0, dontSendNotification);
+            positionSlider.setValue (approximatelyEqual (duration, 0.0) ? 0.0 : (position / duration), dontSendNotification);
     }
 
     void seekVideoToStart()

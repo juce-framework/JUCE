@@ -127,7 +127,7 @@ public:
             if (processor != nullptr)
             {
                 if (auto* bypassParam = processor->getBypassParameter())
-                    return (bypassParam->getValue() != 0.0f);
+                    return ! approximatelyEqual (bypassParam->getValue(), 0.0f);
             }
 
             return bypassed;

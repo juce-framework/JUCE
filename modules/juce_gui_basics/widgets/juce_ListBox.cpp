@@ -997,13 +997,13 @@ void ListBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whee
 {
     bool eventWasUsed = false;
 
-    if (wheel.deltaX != 0.0f && getHorizontalScrollBar().isVisible())
+    if (! approximatelyEqual (wheel.deltaX, 0.0f) && getHorizontalScrollBar().isVisible())
     {
         eventWasUsed = true;
         getHorizontalScrollBar().mouseWheelMove (e, wheel);
     }
 
-    if (wheel.deltaY != 0.0f && getVerticalScrollBar().isVisible())
+    if (! approximatelyEqual (wheel.deltaY, 0.0f) && getVerticalScrollBar().isVisible())
     {
         eventWasUsed = true;
         getVerticalScrollBar().mouseWheelMove (e, wheel);

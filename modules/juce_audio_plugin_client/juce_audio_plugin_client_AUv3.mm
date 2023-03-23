@@ -1350,7 +1350,7 @@ private:
 
     void setAudioProcessorParameter (AudioProcessorParameter* juceParam, float value)
     {
-        if (value != juceParam->getValue())
+        if (! approximatelyEqual (value, juceParam->getValue()))
         {
             juceParam->setValue (value);
 
@@ -1458,7 +1458,7 @@ private:
 
         const auto numProcessorBusesOut = AudioUnitHelpers::getBusCount (processor, false);
 
-        if (lastTimeStamp.mSampleTime != timestamp->mSampleTime)
+        if (! approximatelyEqual (lastTimeStamp.mSampleTime, timestamp->mSampleTime))
         {
             // process params and incoming midi (only once for a given timestamp)
             midiMessages.clear();

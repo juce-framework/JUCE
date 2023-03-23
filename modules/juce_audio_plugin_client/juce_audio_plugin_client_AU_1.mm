@@ -29,21 +29,22 @@
 
 #if JucePlugin_Build_AU
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wshorten-64-to-32",
-                                     "-Wunused-parameter",
-                                     "-Wdeprecated-declarations",
-                                     "-Wsign-conversion",
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-align",
                                      "-Wconversion",
-                                     "-Woverloaded-virtual",
+                                     "-Wdeprecated-anon-enum-enum-conversion",
+                                     "-Wdeprecated-declarations",
                                      "-Wextra-semi",
-                                     "-Wcast-align",
-                                     "-Wshadow",
-                                     "-Wswitch-enum",
-                                     "-Wzero-as-null-pointer-constant",
-                                     "-Wnullable-to-nonnull-conversion",
-                                     "-Wgnu-zero-variadic-macro-arguments",
+                                     "-Wfloat-equal",
                                      "-Wformat-pedantic",
-                                     "-Wdeprecated-anon-enum-enum-conversion")
+                                     "-Wgnu-zero-variadic-macro-arguments",
+                                     "-Wnullable-to-nonnull-conversion",
+                                     "-Woverloaded-virtual",
+                                     "-Wshadow",
+                                     "-Wshorten-64-to-32",
+                                     "-Wsign-conversion",
+                                     "-Wswitch-enum",
+                                     "-Wunused-parameter",
+                                     "-Wzero-as-null-pointer-constant")
 
 #include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
 
@@ -1066,7 +1067,7 @@ public:
             {
                 auto value = inValue / getMaximumParameterValue (param);
 
-                if (value != param->getValue())
+                if (! approximatelyEqual (value, param->getValue()))
                 {
                     inParameterChangedCallback = true;
                     param->setValueNotifyingHost (value);
@@ -1634,7 +1635,7 @@ public:
                 static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
                 NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];
 
-                if (lastEventTime != eventTime)
+                if (! approximatelyEqual (lastEventTime, eventTime))
                 {
                     lastEventTime = eventTime;
 

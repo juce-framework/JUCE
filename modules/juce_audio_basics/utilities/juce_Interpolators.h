@@ -73,7 +73,7 @@ private:
                     sign = (sincPosition < 0 ? -1 : 1);
                 }
 
-                if (sincPosition == 0.0f)
+                if (approximatelyEqual (sincPosition, 0.0f))
                     result += inputs[samplePosition];
                 else if (sincPosition < floatCrossings && sincPosition > -floatCrossings)
                     result += inputs[samplePosition] * windowedSinc (firstFrac, index);

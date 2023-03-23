@@ -339,7 +339,7 @@ public:
                      display: isPre10_11];
         }
 
-        if (oldViewSize.width != r.size.width || oldViewSize.height != r.size.height)
+        if (! CGSizeEqualToSize (oldViewSize, r.size))
             [view setNeedsDisplay: true];
     }
 

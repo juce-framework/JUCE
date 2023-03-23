@@ -353,7 +353,7 @@ void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
 {
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-    if (masterScaleFactor != newScaleFactor)
+    if (! approximatelyEqual (masterScaleFactor, newScaleFactor))
     {
         masterScaleFactor = newScaleFactor;
         displays->refresh();

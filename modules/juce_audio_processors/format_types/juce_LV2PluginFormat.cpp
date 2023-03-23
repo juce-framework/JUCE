@@ -3287,7 +3287,7 @@ private:
             {
                 if (auto* r = ref.getComponent())
                 {
-                    if (std::exchange (r->nativeScaleFactor, platformScale) == platformScale)
+                    if (approximatelyEqual (std::exchange (r->nativeScaleFactor, platformScale), platformScale))
                         return;
 
                     r->nativeScaleFactor = platformScale;

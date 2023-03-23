@@ -35,12 +35,12 @@ AffineTransform::AffineTransform (float m00, float m01, float m02,
 
 bool AffineTransform::operator== (const AffineTransform& other) const noexcept
 {
-    return mat00 == other.mat00
-        && mat01 == other.mat01
-        && mat02 == other.mat02
-        && mat10 == other.mat10
-        && mat11 == other.mat11
-        && mat12 == other.mat12;
+    const auto tie = [] (const AffineTransform& a)
+    {
+        return std::tie (a.mat00, a.mat01, a.mat02, a.mat10, a.mat11, a.mat12);
+    };
+
+    return tie (*this) == tie (other);
 }
 
 bool AffineTransform::operator!= (const AffineTransform& other) const noexcept
@@ -51,12 +51,7 @@ bool AffineTransform::operator!= (const AffineTransform& other) const noexcept
 //==============================================================================
 bool AffineTransform::isIdentity() const noexcept
 {
-    return mat01 == 0.0f
-        && mat02 == 0.0f
-        && mat10 == 0.0f
-        && mat12 == 0.0f
-        && mat00 == 1.0f
-        && mat11 == 1.0f;
+    return operator== (AffineTransform());
 }
 
 const AffineTransform AffineTransform::identity (1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
@@ -207,7 +202,7 @@ AffineTransform AffineTransform::inverted() const noexcept
 
 bool AffineTransform::isSingularity() const noexcept
 {
-    return (mat00 * mat11 - mat10 * mat01) == 0.0f;
+    return exactlyEqual (mat00 * mat11 - mat10 * mat01, 0.0f);
 }
 
 AffineTransform AffineTransform::fromTargetPoints (float x00, float y00,
@@ -229,10 +224,10 @@ AffineTransform AffineTransform::fromTargetPoints (float sx1, float sy1, float t
 
 bool AffineTransform::isOnlyTranslation() const noexcept
 {
-    return mat01 == 0.0f
-        && mat10 == 0.0f
-        && mat00 == 1.0f
-        && mat11 == 1.0f;
+    return exactlyEqual (mat01, 0.0f)
+        && exactlyEqual (mat10, 0.0f)
+        && exactlyEqual (mat00, 1.0f)
+        && exactlyEqual (mat11, 1.0f);
 }
 
 float AffineTransform::getDeterminant() const noexcept

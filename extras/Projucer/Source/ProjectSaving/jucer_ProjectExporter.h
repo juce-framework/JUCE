@@ -320,10 +320,25 @@ public:
             static CompilerWarningFlags getRecommendedForGCCAndLLVM()
             {
                 CompilerWarningFlags result;
-                result.common = { "-Wall", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter",
-                                  "-Wswitch-enum", "-Wsign-conversion", "-Wsign-compare",
-                                  "-Wunreachable-code", "-Wcast-align", "-Wno-ignored-qualifiers" };
-                result.cpp = { "-Woverloaded-virtual", "-Wreorder", "-Wzero-as-null-pointer-constant" };
+                result.common = {
+                    "-Wall",
+                    "-Wcast-align",
+                    "-Wfloat-equal",
+                    "-Wno-ignored-qualifiers",
+                    "-Wsign-compare",
+                    "-Wsign-conversion",
+                    "-Wstrict-aliasing",
+                    "-Wswitch-enum",
+                    "-Wuninitialized",
+                    "-Wunreachable-code",
+                    "-Wunused-parameter"
+                };
+
+                result.cpp = {
+                    "-Woverloaded-virtual",
+                    "-Wreorder",
+                    "-Wzero-as-null-pointer-constant"
+                };
 
                 return result;
             }

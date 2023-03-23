@@ -2498,7 +2498,7 @@ public:
 
         // Avoid redundantly calling things like setActive, which can be a heavy-duty call for some plugins:
         if (isActive
-              && getSampleRate() == newSampleRate
+              && approximatelyEqual (getSampleRate(), newSampleRate)
               && getBlockSize() == estimatedSamplesPerBlock)
             return;
 
@@ -3432,7 +3432,7 @@ private:
         //   call was processBlockBypassed, otherwise do nothing
         if (processBlockBypassedCalled)
         {
-            if (bypassParam != nullptr && (bypassParam->getValue() == 0.0f || ! lastProcessBlockCallWasBypass))
+            if (bypassParam != nullptr && (approximatelyEqual (bypassParam->getValue(), 0.0f) || ! lastProcessBlockCallWasBypass))
                 bypassParam->setValue (1.0f);
         }
         else
@@ -3618,7 +3618,7 @@ tresult VST3HostContext::performEdit (Vst::ParamID paramID, Vst::ParamValue valu
         param->setValueNotifyingHost ((float) valueNormalised);
 
         // did the plug-in already update the parameter internally
-        if (plugin->editController->getParamNormalized (paramID) != (float) valueNormalised)
+        if (! approximatelyEqual (plugin->editController->getParamNormalized (paramID), valueNormalised))
             return plugin->editController->setParamNormalized (paramID, valueNormalised);
 
         return kResultTrue;

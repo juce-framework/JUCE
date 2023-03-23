@@ -938,7 +938,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
         {
             if (! firstHostTime)
             {
-                if ((time->mSampleTime - lastSampleTime) != lastNumFrames)
+                if (! approximatelyEqual ((time->mSampleTime - lastSampleTime), (double) lastNumFrames))
                     xrun++;
             }
             else
@@ -1159,7 +1159,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
                               &desc,
                               &dataSize);
 
-        if (desc.mSampleRate != 0 && desc.mSampleRate != sampleRate)
+        if (! approximatelyEqual (desc.mSampleRate, 0.0) && ! approximatelyEqual (desc.mSampleRate, sampleRate))
         {
             JUCE_IOS_AUDIO_LOG ("Stream format has changed: Sample rate " << desc.mSampleRate);
             triggerAsyncUpdate();

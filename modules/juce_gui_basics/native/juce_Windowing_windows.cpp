@@ -5075,7 +5075,7 @@ void Displays::findDisplays (float masterScale)
         d.isMain = monitor.isMain;
         d.dpi = monitor.dpi;
 
-        if (d.dpi == 0)
+        if (approximatelyEqual (d.dpi, 0.0))
         {
             d.dpi = globalDPI;
             d.scale = masterScale;

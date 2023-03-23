@@ -86,7 +86,7 @@ public:
     constexpr inline ValueType getEnd() const noexcept            { return end; }
 
     /** Returns true if the range has a length of zero. */
-    constexpr inline bool isEmpty() const noexcept                { return start == end; }
+    constexpr inline bool isEmpty() const noexcept                { return exactlyEqual (start, end); }
 
     //==============================================================================
     /** Changes the start position of the range, leaving the end position unchanged.
@@ -198,8 +198,13 @@ public:
         return Range (start - amountToSubtract, end - amountToSubtract);
     }
 
-    constexpr bool operator== (Range other) const noexcept     { return start == other.start && end == other.end; }
-    constexpr bool operator!= (Range other) const noexcept     { return start != other.start || end != other.end; }
+    constexpr bool operator== (Range other) const noexcept
+    {
+        const auto tie = [] (const Range& r) { return std::tie (r.start, r.end); };
+        return tie (*this) == tie (other);
+    }
+
+    constexpr bool operator!= (Range other) const noexcept     { return ! operator== (other); }
 
     //==============================================================================
     /** Returns true if the given position lies inside this range.

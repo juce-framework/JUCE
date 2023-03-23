@@ -156,7 +156,7 @@ public:
                 return value;
             }();
 
-            if (scaledValue != param->getValue())
+            if (! approximatelyEqual (scaledValue, param->getValue()))
             {
                 ScopedValueSetter<bool> scope (ignoreCallbacks, true);
                 param->setValueNotifyingHost (scaledValue);
@@ -326,7 +326,7 @@ public:
 
         info->setBpm (parser.parseNumericAtom<float> (atomBeatsPerMinute));
         info->setPpqPosition (parser.parseNumericAtom<double> (atomBeat));
-        info->setIsPlaying (parser.parseNumericAtom<float> (atomSpeed).orFallback (0.0f) != 0.0f);
+        info->setIsPlaying (! approximatelyEqual (parser.parseNumericAtom<float> (atomSpeed).orFallback (0.0f), 0.0f));
         info->setBarCount (parser.parseNumericAtom<int64_t> (atomBar));
 
         if (const auto parsed = parser.parseNumericAtom<int64_t> (atomFrame))

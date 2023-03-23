@@ -1062,7 +1062,7 @@ public:
 
         const auto newRefreshPeriod = sharedDisplayLinks->getNominalVideoRefreshPeriodSForScreen (display);
 
-        if (newRefreshPeriod != 0.0 && std::exchange (refreshPeriod, newRefreshPeriod) != newRefreshPeriod)
+        if (newRefreshPeriod != 0.0 && ! approximatelyEqual (std::exchange (refreshPeriod, newRefreshPeriod), newRefreshPeriod))
             nativeContext->setNominalVideoRefreshPeriodS (newRefreshPeriod);
 
         updateColourSpace();

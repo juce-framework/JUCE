@@ -686,11 +686,11 @@ public:
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-        if (gain != Type (1) && ! isClear)
+        if (! approximatelyEqual (gain, Type (1)) && ! isClear)
         {
             auto* d = channels[channel] + startSample;
 
-            if (gain == Type())
+            if (approximatelyEqual (gain, Type()))
                 FloatVectorOperations::clear (d, numSamples);
             else
                 FloatVectorOperations::multiply (d, gain, numSamples);
@@ -728,7 +728,7 @@ public:
     {
         if (! isClear)
         {
-            if (startGain == endGain)
+            if (approximatelyEqual (startGain, endGain))
             {
                 applyGain (channel, startSample, numSamples, startGain);
             }
@@ -798,7 +798,7 @@ public:
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));
         jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
-        if (gainToApplyToSource != 0 && numSamples > 0 && ! source.isClear)
+        if (! approximatelyEqual (gainToApplyToSource, (Type) 0) && numSamples > 0 && ! source.isClear)
         {
             auto* d = channels[destChannel] + destStartSample;
             auto* s = source.channels[sourceChannel] + sourceStartSample;
@@ -809,14 +809,14 @@ public:
             {
                 isClear = false;
 
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::copyWithMultiply (d, s, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::copy (d, s, numSamples);
             }
             else
             {
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::addWithMultiply (d, s, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::add (d, s, numSamples);

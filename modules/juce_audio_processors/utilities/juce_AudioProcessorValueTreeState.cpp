@@ -52,13 +52,11 @@ bool AudioProcessorValueTreeState::Parameter::isBoolean() const         { return
 
 void AudioProcessorValueTreeState::Parameter::valueChanged (float newValue)
 {
-    if (lastValue == newValue)
+    if (approximatelyEqual ((float) lastValue, newValue))
         return;
 
     lastValue = newValue;
-
-    if (onValueChanged != nullptr)
-        onValueChanged();
+    NullCheckedInvocation::invoke (onValueChanged);
 }
 
 //==============================================================================
@@ -93,10 +91,8 @@ public:
 
     void setDenormalisedValue (float value)
     {
-        if (value == unnormalisedValue)
-            return;
-
-        setNormalisedValue (normalise (value));
+        if (! approximatelyEqual (value, (float) unnormalisedValue))
+            setNormalisedValue (normalise (value));
     }
 
     float getDenormalisedValueForText (const String& text) const
@@ -119,9 +115,9 @@ public:
         if (! needsUpdate.compare_exchange_strong (needsUpdateTestValue, false))
             return false;
 
-        if (auto valueProperty = tree.getPropertyPointer (key))
+        if (auto* valueProperty = tree.getPropertyPointer (key))
         {
-            if ((float) *valueProperty != unnormalisedValue)
+            if (! approximatelyEqual ((float) *valueProperty, unnormalisedValue.load()))
             {
                 ScopedValueSetter<bool> svs (ignoreParameterChangedCallbacks, true);
                 tree.setProperty (key, unnormalisedValue.load(), um);
@@ -144,7 +140,7 @@ private:
     {
         const auto newValue = denormalise (parameter.getValue());
 
-        if (unnormalisedValue == newValue && ! listenersNeedCalling)
+        if (! listenersNeedCalling && approximatelyEqual ((float) unnormalisedValue, newValue))
             return;
 
         unnormalisedValue = newValue;

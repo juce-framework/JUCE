@@ -271,7 +271,7 @@ private:
             auto value1 = bufferData.getSample (channel, index1);
             auto value2 = bufferData.getSample (channel, index2);
 
-            auto output = delayFrac == 0 ? value1 : value2 + alpha * (value1 - v[(size_t) channel]);
+            auto output = approximatelyEqual (delayFrac, (SampleType) 0) ? value1 : value2 + alpha * (value1 - v[(size_t) channel]);
             v[(size_t) channel] = output;
 
             return output;

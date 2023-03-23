@@ -56,11 +56,12 @@
 #include <juce_graphics/juce_graphics.h>
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
-                                     "-Wshadow-field",
-                                     "-Wzero-as-null-pointer-constant",
-                                     "-Wsign-conversion",
                                      "-Wdeprecated",
-                                     "-Wmaybe-uninitialized")
+                                     "-Wfloat-equal",
+                                     "-Wmaybe-uninitialized",
+                                     "-Wshadow-field",
+                                     "-Wsign-conversion",
+                                     "-Wzero-as-null-pointer-constant")
 
 #include <climits>
 #include <cfloat>

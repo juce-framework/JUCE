@@ -501,8 +501,8 @@ private:
 
         if (numSamples == numSamplesCached
              && numChannelsCached == numChans
-             && startTime == cachedStart
-             && timePerPixel == cachedTimePerPixel
+             && approximatelyEqual (startTime, cachedStart)
+             && approximatelyEqual (timePerPixel, cachedTimePerPixel)
              && ! cacheNeedsRefilling)
         {
             return ! cacheNeedsRefilling;

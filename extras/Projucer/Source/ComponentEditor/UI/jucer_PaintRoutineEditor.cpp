@@ -184,7 +184,7 @@ void PaintRoutineEditor::refreshAllElements()
         repaint();
     }
 
-    if (componentOverlayOpacity != document.getComponentOverlayOpacity())
+    if (! approximatelyEqual (componentOverlayOpacity, document.getComponentOverlayOpacity()))
     {
         componentOverlay = Image();
         componentOverlayOpacity = document.getComponentOverlayOpacity();

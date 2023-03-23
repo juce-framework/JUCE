@@ -701,7 +701,7 @@ static thread_local bool inParameterChangedCallback = false;
 
 static void setValueAndNotifyIfChanged (AudioProcessorParameter& param, float newValue)
 {
-    if (param.getValue() == newValue)
+    if (approximatelyEqual (param.getValue(), newValue))
         return;
 
     const InParameterChangedCallbackSetter scopedSetter { inParameterChangedCallback };
@@ -830,7 +830,7 @@ public:
         {
             v = jlimit (0.0, 1.0, v);
 
-            if (v != valueNormalized)
+            if (! approximatelyEqual (v, valueNormalized))
             {
                 valueNormalized = v;
 
@@ -910,7 +910,7 @@ public:
             if (programValue != owner.getCurrentProgram())
                 owner.setCurrentProgram (programValue);
 
-            if (valueNormalized != v)
+            if (! approximatelyEqual (valueNormalized, v))
             {
                 valueNormalized = v;
                 changed();
@@ -1931,7 +1931,7 @@ private:
 
                         auto aspectRatio = (float) constrainer->getFixedAspectRatio();
 
-                        if (aspectRatio != 0.0)
+                        if (! approximatelyEqual (aspectRatio, 0.0f))
                         {
                             bool adjustWidth = (width / height > aspectRatio);
 
@@ -1939,9 +1939,9 @@ private:
                             {
                                 auto currentEditorBounds = editor->getBounds().toFloat();
 
-                                if (currentEditorBounds.getWidth() == width && currentEditorBounds.getHeight() != height)
+                                if (approximatelyEqual (currentEditorBounds.getWidth(), width) && ! approximatelyEqual (currentEditorBounds.getHeight(), height))
                                     adjustWidth = true;
-                                else if (currentEditorBounds.getHeight() == height && currentEditorBounds.getWidth() != width)
+                                else if (approximatelyEqual (currentEditorBounds.getHeight(), height) && ! approximatelyEqual (currentEditorBounds.getWidth(), width))
                                     adjustWidth = false;
                             }
 
@@ -2322,7 +2322,7 @@ private:
         {
             const auto previous = std::exchange (scaleFactor, newFactor).get();
 
-            if (previous == scaleFactor.get())
+            if (approximatelyEqual (previous, scaleFactor.get()))
                 return;
 
             if (owner != nullptr)
@@ -3422,7 +3422,7 @@ public:
         if (tailLengthSeconds <= 0.0 || processSetup.sampleRate <= 0.0)
             return Vst::kNoTail;
 
-        if (tailLengthSeconds == std::numeric_limits<double>::infinity())
+        if (std::isinf (tailLengthSeconds))
             return Vst::kInfiniteTail;
 
         return (Steinberg::uint32) roundToIntAccurate (tailLengthSeconds * processSetup.sampleRate);

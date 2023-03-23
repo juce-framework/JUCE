@@ -35,16 +35,17 @@
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4512 4996)
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
-                                     "-Wsign-conversion",
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
                                      "-Wextra-semi",
-                                     "-Wshift-sign-overflow",
-                                     "-Wpragma-pack",
-                                     "-Wzero-as-null-pointer-constant",
-                                     "-Winconsistent-missing-destructor-override",
+                                     "-Wfloat-equal",
                                      "-Wfour-char-constants",
+                                     "-Winconsistent-missing-destructor-override",
+                                     "-Wnon-virtual-dtor",
+                                     "-Wpragma-pack",
+                                     "-Wshift-sign-overflow",
+                                     "-Wsign-conversion",
                                      "-Wtautological-overlap-compare",
-                                     "-Wdeprecated-declarations")
+                                     "-Wzero-as-null-pointer-constant")
 
 #include <AAX_Version.h>
 
@@ -1004,7 +1005,7 @@ namespace AAXClasses
             {
                 auto newValue = static_cast<float> (value);
 
-                if (newValue != param->getValue())
+                if (! approximatelyEqual (newValue, param->getValue()))
                 {
                     param->setValue (newValue);
 

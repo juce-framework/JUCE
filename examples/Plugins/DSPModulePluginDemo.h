@@ -969,7 +969,7 @@ private:
     //==============================================================================
     static String getPanningTextForValue (float value)
     {
-        if (value == 0.5f)
+        if (approximatelyEqual (value, 0.5f))
             return "center";
 
         if (value < 0.5f)

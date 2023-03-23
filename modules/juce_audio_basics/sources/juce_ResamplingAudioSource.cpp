@@ -88,7 +88,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         localRatio = ratio;
     }
 
-    if (lastRatio != localRatio)
+    if (! approximatelyEqual (lastRatio, localRatio))
     {
         createLowPass (localRatio);
         lastRatio = localRatio;

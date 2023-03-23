@@ -148,7 +148,7 @@ struct Typeface::HintingParams
 
     void applyVerticalHintingTransform (float fontSize, Path& path)
     {
-        if (cachedSize != fontSize)
+        if (! approximatelyEqual (cachedSize, fontSize))
         {
             cachedSize = fontSize;
             cachedScale = Scaling (top, middle, bottom, fontSize);

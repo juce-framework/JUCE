@@ -49,7 +49,7 @@ public:
         destAlpha = finalAlpha;
 
         isMoving = (finalBounds != component->getBounds());
-        isChangingAlpha = (finalAlpha != component->getAlpha());
+        isChangingAlpha = ! approximatelyEqual (finalAlpha, component->getAlpha());
 
         left    = component->getX();
         top     = component->getY();
@@ -273,7 +273,7 @@ void ComponentAnimator::fadeOut (Component* component, int millisecondsToTake)
 
 void ComponentAnimator::fadeIn (Component* component, int millisecondsToTake)
 {
-    if (component != nullptr && ! (component->isVisible() && component->getAlpha() == 1.0f))
+    if (component != nullptr && ! (component->isVisible() && approximatelyEqual (component->getAlpha(), 1.0f)))
     {
         component->setAlpha (0.0f);
         component->setVisible (true);

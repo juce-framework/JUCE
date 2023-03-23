@@ -84,8 +84,16 @@ struct FlexBoxLayoutCalculation
 
     ItemWithState& getItem (int x, int y) const noexcept     { return *lineItems[y * numItems + x]; }
 
-    static bool isAuto (Coord value) noexcept                { return value == FlexItem::autoValue; }
-    static bool isAssigned (Coord value) noexcept            { return value != FlexItem::notAssigned; }
+    static bool isAuto (Coord value) noexcept
+    {
+        return exactlyEqual (value, static_cast<Coord> (FlexItem::autoValue));
+    }
+
+    static bool isAssigned (Coord value) noexcept
+    {
+        return ! exactlyEqual (value, static_cast<Coord> (FlexItem::notAssigned));
+    }
+
     static Coord getValueOrZeroIfAuto (Coord value) noexcept { return isAuto (value) ? Coord() : value; }
 
     //==============================================================================
@@ -604,12 +612,12 @@ private:
 
         if (positiveFlexibility)
         {
-            if (totalFlexGrow != 0.0)
+            if (! approximatelyEqual (totalFlexGrow, 0.0))
                 changeUnit = difference / totalFlexGrow;
         }
         else
         {
-            if (totalFlexShrink != 0.0)
+            if (! approximatelyEqual (totalFlexShrink, 0.0))
                 changeUnit = difference / totalFlexShrink;
         }
 

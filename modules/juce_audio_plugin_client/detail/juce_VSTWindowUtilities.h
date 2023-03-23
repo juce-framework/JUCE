@@ -50,7 +50,7 @@ struct VSTWindowUtilities
             comp->addToDesktop (desktopFlags | defaultFlags, parentView);
 
             // (this workaround is because Wavelab provides a zero-size parent view..)
-            if ([parentView frame].size.height == 0)
+            if (approximatelyEqual ([parentView frame].size.height, 0.0))
                 [((NSView*) comp->getWindowHandle()) setFrameOrigin: NSZeroPoint];
 
             comp->setVisible (true);

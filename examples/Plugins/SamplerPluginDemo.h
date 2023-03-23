@@ -291,7 +291,7 @@ public:
     {
         jassert (currentlyPlayingNote.keyState == MPENote::off);
 
-        if (allowTailOff && tailOff == 0.0)
+        if (allowTailOff && approximatelyEqual (tailOff, 0.0))
             tailOff = 1.0;
         else
             stopNote();
@@ -422,7 +422,7 @@ private:
 
     bool isTailingOff() const
     {
-        return tailOff != 0.0;
+        return ! approximatelyEqual (tailOff, 0.0);
     }
 
     void stopNote()

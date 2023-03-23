@@ -584,7 +584,7 @@ private:
         bool allMatch (int channel, float value) const
         {
             const auto& buf = buffers[(size_t) channel];
-            return std::all_of (buf.begin(), buf.end(), [&] (auto x) { return x == value; });
+            return std::all_of (buf.begin(), buf.end(), [&] (auto x) { return exactlyEqual (x, value); });
         }
 
         bool isClear (int channel) const
@@ -607,13 +607,13 @@ private:
 
     static bool channelStartsWithValue (Steinberg::Vst::AudioBusBuffers& bus, size_t index, float value)
     {
-        return bus.channelBuffers32[index][0] == value;
+        return exactlyEqual (bus.channelBuffers32[index][0], value);
     }
 
     static bool allMatch (const AudioBuffer<float>& buf, int index, float value)
     {
         const auto* ptr = buf.getReadPointer (index);
-        return std::all_of (ptr, ptr + buf.getNumSamples(), [&] (auto x) { return x == value; });
+        return std::all_of (ptr, ptr + buf.getNumSamples(), [&] (auto x) { return exactlyEqual (x, value); });
     }
 
     struct MultiBusBuffers

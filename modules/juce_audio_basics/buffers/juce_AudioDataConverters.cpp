@@ -599,7 +599,7 @@ public:
 
             for (int ch = 0; ch < numChannels; ++ch)
                 for (int i = 0; i < numSamples; ++i)
-                    expect (destBuffer.getSample (0, ch + (i * numChannels)) == sourceBuffer.getSample (ch, i));
+                    expectEquals (destBuffer.getSample (0, ch + (i * numChannels)), sourceBuffer.getSample (ch, i));
         }
 
         beginTest ("Deinterleaving");
@@ -620,7 +620,7 @@ public:
 
             for (int ch = 0; ch < numChannels; ++ch)
                 for (int i = 0; i < numSamples; ++i)
-                    expect (sourceBuffer.getSample (0, ch + (i * numChannels)) == destBuffer.getSample (ch, i));
+                    expectEquals (sourceBuffer.getSample (0, ch + (i * numChannels)), destBuffer.getSample (ch, i));
         }
     }
 };

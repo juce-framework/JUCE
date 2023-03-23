@@ -744,8 +744,8 @@ static CGGradientRef createGradient (const ColourGradient& g, CGColorSpaceRef co
         locations[i] = (CGFloat) g.getColourPosition (i);
 
         // There's a bug (?) in the way the CG renderer works where it seems
-        // to go wrong if you have two colour stops both at position 0..
-        jassert (i == 0 || locations[i] != 0);
+        // to go wrong if you have two colour stops both at position 0.
+        jassert (i == 0 || ! approximatelyEqual (locations[i], (CGFloat) 0.0));
     }
 
     return CGGradientCreateWithColorComponents (colourSpace, components, locations, (size_t) numColours);

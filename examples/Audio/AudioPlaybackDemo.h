@@ -188,7 +188,7 @@ public:
             if (canMoveTransport())
                 setRange ({ newStart, newStart + visibleRange.getLength() });
 
-            if (wheel.deltaY != 0.0f)
+            if (! approximatelyEqual (wheel.deltaY, 0.0f))
                 zoomSlider.setValue (zoomSlider.getValue() - wheel.deltaY);
 
             repaint();
