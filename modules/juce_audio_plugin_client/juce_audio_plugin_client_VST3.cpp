@@ -80,12 +80,12 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #endif
 
 #if JUCE_LINUX || JUCE_BSD
- #include <juce_events/native/juce_linux_EventLoopInternal.h>
+ #include <juce_events/native/juce_EventLoopInternal_linux.h>
  #include <unordered_map>
 #endif
 
 #if JUCE_MAC
- #include <juce_core/native/juce_mac_CFHelpers.h>
+ #include <juce_core/native/juce_CFHelpers_mac.h>
 #endif
 
 //==============================================================================

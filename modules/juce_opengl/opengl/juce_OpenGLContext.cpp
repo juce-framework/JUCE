@@ -24,7 +24,7 @@
 */
 
 #if JUCE_MAC
- #include <juce_gui_basics/native/juce_mac_PerScreenDisplayLinks.h>
+ #include <juce_gui_basics/native/juce_PerScreenDisplayLinks_mac.h>
 #endif
 
 namespace juce

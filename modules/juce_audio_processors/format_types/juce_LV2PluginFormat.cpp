@@ -28,7 +28,7 @@
 #include "juce_LV2Common.h"
 #include "juce_LV2Resources.h"
 
-#include <juce_gui_extra/native/juce_mac_NSViewFrameWatcher.h>
+#include <juce_gui_extra/native/juce_NSViewFrameWatcher_mac.h>
 
 #include <thread>
 

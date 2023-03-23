@@ -26,7 +26,7 @@
 namespace juce
 {
 
-// Implemented in juce_win32_Messaging.cpp
+// Implemented in juce_Messaging_windows.cpp
 namespace detail
 {
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);

@@ -20,7 +20,7 @@
   ==============================================================================
 */
 
-#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
+#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 
 namespace juce
 {

@@ -93,14 +93,14 @@
 #include "native/juce_ScopedLowPowerModeDisabler.h"
 
 #if JUCE_LINUX || JUCE_BSD
- #include "native/juce_linux_EventLoop.h"
+ #include "native/juce_EventLoop_linux.h"
 #endif
 
 #if JUCE_WINDOWS
  #if JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW
-  #include "native/juce_win32_HiddenMessageWindow.h"
+  #include "native/juce_HiddenMessageWindow_windows.h"
  #endif
  #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
-  #include "native/juce_win32_WinRTWrapper.h"
+  #include "native/juce_WinRTWrapper_windows.h"
  #endif
 #endif

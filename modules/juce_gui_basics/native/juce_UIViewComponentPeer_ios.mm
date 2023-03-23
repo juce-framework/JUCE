@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#include "juce_mac_CGMetalLayerRenderer.h"
+#include "juce_CGMetalLayerRenderer_mac.h"
 
 #if TARGET_OS_SIMULATOR && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
  #warning JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS uses parts of the Metal API that are currently unsupported in the simulator - falling back to JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS=0

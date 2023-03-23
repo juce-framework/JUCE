@@ -45,9 +45,9 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
-#include <juce_graphics/native/juce_mac_CoreGraphicsHelpers.h>
-#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
-#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
+#include <juce_graphics/native/juce_CoreGraphicsHelpers_mac.h>
+#include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
+#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 

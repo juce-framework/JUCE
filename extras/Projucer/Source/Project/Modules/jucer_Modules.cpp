@@ -266,11 +266,12 @@ void LibraryModule::findBrowseableFiles (const File& folder, Array<File>& filesF
 
 bool LibraryModule::CompileUnit::isNeededForExporter (ProjectExporter& exporter) const
 {
-    if ((hasSuffix (file, "_OSX")        && ! exporter.isOSX())
-     || (hasSuffix (file, "_iOS")        && ! exporter.isiOS())
-     || (hasSuffix (file, "_Windows")    && ! exporter.isWindows())
-     || (hasSuffix (file, "_Linux")      && ! exporter.isLinux())
-     || (hasSuffix (file, "_Android")    && ! exporter.isAndroid()))
+    if ((hasSuffix (file, "_osx")        && ! exporter.isOSX())
+     || (hasSuffix (file, "_mac")        && ! exporter.isOSX())
+     || (hasSuffix (file, "_ios")        && ! exporter.isiOS())
+     || (hasSuffix (file, "_windows")    && ! exporter.isWindows())
+     || (hasSuffix (file, "_linux")      && ! exporter.isLinux())
+     || (hasSuffix (file, "_android")    && ! exporter.isAndroid()))
         return false;
 
     auto targetType = Project::getTargetTypeFromFilePath (file, false);

@@ -60,8 +60,8 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #include <juce_audio_plugin_client/detail/juce_PluginUtilities.h>
 
-#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
-#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
+#include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
+#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 

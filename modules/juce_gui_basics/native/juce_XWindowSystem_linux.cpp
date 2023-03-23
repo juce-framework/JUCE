@@ -1352,7 +1352,7 @@ namespace ClipboardHelpers
     }
 
     //==============================================================================
-    // Called from the event loop in juce_linux_Messaging in response to SelectionRequest events
+    // Called from the event loop in juce_Messaging_linux in response to SelectionRequest events
     static void handleSelection (XSelectionRequestEvent& evt)
     {
         // the selection content is sent to the target window as a window property

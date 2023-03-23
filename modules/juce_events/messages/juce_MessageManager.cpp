@@ -81,7 +81,7 @@ bool MessageManager::MessageBase::post()
 
 //==============================================================================
 #if ! (JUCE_MAC || JUCE_IOS || JUCE_ANDROID)
-// implemented in platform-specific code (juce_linux_Messaging.cpp and juce_win32_Messaging.cpp)
+// implemented in platform-specific code (juce_Messaging_linux.cpp and juce_Messaging_windows.cpp)
 namespace detail
 {
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);

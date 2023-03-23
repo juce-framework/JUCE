@@ -25,8 +25,8 @@
 
 #if JUCE_MAC || JUCE_IOS
 
-#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
-#include <juce_core/native/juce_mac_CFHelpers.h>
+#include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
+#include <juce_core/native/juce_CFHelpers_mac.h>
 
 namespace juce
 {
