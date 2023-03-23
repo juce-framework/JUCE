@@ -282,6 +282,15 @@ protected:
                                                                                     ARA::ARAContentType type,
                                                                                     const ARA::ARAContentTimeRange* range);
 
+    /** Override to implement getPlaybackRegionHeadAndTailTime().
+
+        This function is called within
+        ARA::PlugIn::DocumentControllerDelegate::doGetPlaybackRegionHeadAndTailTime.
+    */
+    virtual void                        doGetPlaybackRegionHeadAndTailTime         (const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                                    ARA::ARATimeDuration* headTime,
+                                                                                    ARA::ARATimeDuration* tailTime);
+
     //==============================================================================
     // ARAAudioSource analysis
 
