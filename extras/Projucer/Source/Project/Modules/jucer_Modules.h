@@ -59,7 +59,6 @@ public:
 
         bool isNeededForExporter (ProjectExporter&) const;
         String getFilenameForProxyFile() const;
-        static bool hasSuffix (const File&, const char*);
     };
 
     Array<CompileUnit> getAllCompileUnits (build_tools::ProjectType::Target::Type forTarget =

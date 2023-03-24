@@ -155,24 +155,25 @@ function(_juce_get_metadata target key out_var)
 endfunction()
 
 # ==================================================================================================
-
 function(_juce_should_build_module_source filename output_var)
-    get_filename_component(trimmed_name "${filename}" NAME_WE)
+    get_filename_component(trimmed_filename "${filename}" NAME_WE)
+    string(TOLOWER "${trimmed_filename}" trimmed_filename_lowercase)
+
+    set(system_name_regex_for_suffix
+        "android\;Android"
+        "ios\;iOS"
+        "linux\;Linux|.*BSD"
+        "mac\;Darwin"
+        "osx\;Darwin"
+        "windows\;Windows")
 
     set(result TRUE)
 
-    set(pairs
-        "OSX\;Darwin"
-        "Windows\;Windows"
-        "Linux\;Linux"
-        "Android\;Android"
-        "iOS\;iOS")
-
-    foreach(pair IN LISTS pairs)
+    foreach(pair IN LISTS system_name_regex_for_suffix)
         list(GET pair 0 suffix)
-        list(GET pair 1 system_name)
+        list(GET pair 1 regex)
 
-        if((trimmed_name MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME STREQUAL "${system_name}"))
+        if((trimmed_filename_lowercase MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME MATCHES "${regex}"))
             set(result FALSE)
         endif()
     endforeach()
