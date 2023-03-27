@@ -81,6 +81,7 @@
  #endif
 
 #elif JUCE_WINDOWS
+ #include "native/juce_RunningInUnity.h"
  #include "native/juce_win32_Messaging.cpp"
  #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
   #include "native/juce_win32_WinRTWrapper.cpp"

@@ -30,13 +30,6 @@
 namespace juce::detail
 {
 
-bool isRunningInUnity();
-#if JucePlugin_Build_Unity
-bool isRunningInUnity()    { return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Unity; }
-#else
-bool isRunningInUnity()    { return false; }
-#endif
-
 struct PluginUtilities
 {
     PluginUtilities() = delete;

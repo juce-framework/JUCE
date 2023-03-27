@@ -25,15 +25,6 @@ namespace juce
 
 extern HWND juce_messageWindowHandle;
 
-namespace detail
-{
-   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-    bool isRunningInUnity();
-   #else
-    constexpr bool isRunningInUnity() { return false; }
-   #endif
-} // namespace detail
-
 #if JUCE_MODULE_AVAILABLE_juce_gui_extra
  LRESULT juce_offerEventToActiveXControl (::MSG&);
 #endif
@@ -99,7 +90,7 @@ public:
         if (! shouldTriggerMessageQueueDispatch)
             return;
 
-        if (detail::isRunningInUnity())
+        if (detail::RunningInUnity::state)
         {
             SendNotifyMessage (juce_messageWindowHandle, customMessageID, 0, 0);
             return;
