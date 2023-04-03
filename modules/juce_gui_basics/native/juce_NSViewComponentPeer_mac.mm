@@ -919,9 +919,9 @@ public:
 
        #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         // This was a workaround for a CGContext not having a way of finding whether a rectangle
-        // falls within its clip region. However Apple removed the capability of
+        // falls within its clip region. However, Apple removed the capability of
         // [view getRectsBeingDrawn: ...] sometime around 10.13, so on later versions of macOS
-        // numRects will always be 1 and you'll need to use a CoreGraphicsMetalLayerRenderer
+        // numRects will always be 1, and you'll need to use a CoreGraphicsMetalLayerRenderer
         // to avoid CoreGraphics consolidating disparate rects.
         if (usingCoreGraphics && metalRenderer == nullptr)
         {
@@ -1006,7 +1006,7 @@ public:
         // In 10.11 changes were made to the way the OS handles repaint regions, and it seems that it can
         // no longer be trusted to coalesce all the regions, or to even remember them all without losing
         // a few when there's a lot of activity.
-        // As a work around for this, we use a RectangleList to do our own coalescing of regions before
+        // As a workaround for this, we use a RectangleList to do our own coalescing of regions before
         // asynchronously asking the OS to repaint them.
         deferredRepaints.add (area.toFloat());
         const auto frameSize = view.frame.size;
@@ -1696,16 +1696,18 @@ public:
 
     std::optional<KeyEventAttributes> lastSeenKeyEvent;
 
-    static ComponentPeer* currentlyFocusedPeer;
-    static std::set<int> keysCurrentlyDown;
-    static int insideToFrontCall;
+    static inline ComponentPeer* currentlyFocusedPeer;
+    static inline std::set<int> keysCurrentlyDown;
+    static inline int insideToFrontCall;
 
-    static const SEL dismissModalsSelector;
-    static const SEL frameChangedSelector;
-    static const SEL asyncMouseDownSelector;
-    static const SEL asyncMouseUpSelector;
-    static const SEL becomeKeySelector;
-    static const SEL resignKeySelector;
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+    static inline const auto dismissModalsSelector  = @selector (dismissModals);
+    static inline const auto frameChangedSelector   = @selector (frameChanged:);
+    static inline const auto asyncMouseDownSelector = @selector (asyncMouseDown:);
+    static inline const auto asyncMouseUpSelector   = @selector (asyncMouseUp:);
+    static inline const auto becomeKeySelector      = @selector (becomeKey:);
+    static inline const auto resignKeySelector      = @selector (resignKey:);
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 private:
     JUCE_DECLARE_WEAK_REFERENCEABLE (NSViewComponentPeer)
@@ -1941,17 +1943,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };
-
-int NSViewComponentPeer::insideToFrontCall = 0;
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-const SEL NSViewComponentPeer::dismissModalsSelector  = @selector (dismissModals);
-const SEL NSViewComponentPeer::frameChangedSelector   = @selector (frameChanged:);
-const SEL NSViewComponentPeer::asyncMouseDownSelector = @selector (asyncMouseDown:);
-const SEL NSViewComponentPeer::asyncMouseUpSelector   = @selector (asyncMouseUp:);
-const SEL NSViewComponentPeer::becomeKeySelector      = @selector (becomeKey:);
-const SEL NSViewComponentPeer::resignKeySelector      = @selector (resignKey:);
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 template <typename Base>
@@ -2730,10 +2721,6 @@ NSWindow* NSViewComponentPeer::createWindowInstance()
     return cls.createInstance();
 }
 
-
-//==============================================================================
-ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = nullptr;
-std::set<int> NSViewComponentPeer::keysCurrentlyDown;
 
 //==============================================================================
 bool KeyPress::isKeyCurrentlyDown (int keyCode)
