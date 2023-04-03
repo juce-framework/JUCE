@@ -122,6 +122,8 @@
 #include "detail/juce_ToolbarItemDragAndDropOverlayComponent.h"
 #include "detail/juce_ScopedMessageBoxInterface.h"
 #include "detail/juce_ScopedMessageBoxImpl.h"
+#include "detail/juce_ScopedContentSharerInterface.h"
+#include "detail/juce_ScopedContentSharerImpl.h"
 #include "detail/juce_WindowingHelpers.h"
 #include "detail/juce_AlertWindowHelpers.h"
 #include "detail/juce_TopLevelWindowManager.h"
@@ -143,6 +145,7 @@
   #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_Windowing.mm"
   #include "native/juce_ios_NativeMessageBox.mm"
+  #include "native/juce_ios_NativeModalWrapperComponent.h"
   #include "native/juce_ios_FileChooser.mm"
 
   #if JUCE_CONTENT_SHARING

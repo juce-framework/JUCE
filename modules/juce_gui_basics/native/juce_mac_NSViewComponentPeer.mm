@@ -341,10 +341,7 @@ public:
         }
 
         if (oldViewSize.width != r.size.width || oldViewSize.height != r.size.height)
-        {
-            numFramesToSkipMetalRenderer = 5;
             [view setNeedsDisplay: true];
-        }
     }
 
     Rectangle<int> getBounds (const bool global) const
@@ -1013,6 +1010,8 @@ public:
         // As a work around for this, we use a RectangleList to do our own coalescing of regions before
         // asynchronously asking the OS to repaint them.
         deferredRepaints.add (area.toFloat());
+        const auto frameSize = view.frame.size;
+        boundsWhenRepaintsDeferred = { (float) frameSize.width, (float) frameSize.height };
     }
 
     static bool shouldThrottleRepaint()
@@ -1043,43 +1042,31 @@ public:
         if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
             return;
 
-        if (metalRenderer != nullptr)
+        const auto frameSize = view.frame.size;
+        const Rectangle currentBounds { (float) frameSize.width, (float) frameSize.height };
+
+        if (boundsWhenRepaintsDeferred != currentBounds)
         {
-            auto setDeferredRepaintsToWholeFrame = [this]
-            {
-                const auto frameSize = view.frame.size;
-                deferredRepaints = Rectangle<float> { (float) frameSize.width, (float) frameSize.height };
-            };
+            deferredRepaints = currentBounds;
 
-            // If we are resizing we need to fall back to synchronous drawing to avoid artefacts
-            if ([window inLiveResize] || numFramesToSkipMetalRenderer > 0)
-            {
-                if (metalRenderer->isAttachedToView (view))
-                {
-                    metalRenderer->detach();
-                    setDeferredRepaintsToWholeFrame();
-                }
-
-                if (numFramesToSkipMetalRenderer > 0)
-                    --numFramesToSkipMetalRenderer;
-            }
-            else
-            {
-                if (! metalRenderer->isAttachedToView (view))
-                {
-                    metalRenderer->attach (view, getComponent().isOpaque());
-                    setDeferredRepaintsToWholeFrame();
-                }
-            }
+            if (metalRenderer != nullptr && metalRenderer->isAttachedToView (view))
+                metalRenderer->detach();
+        }
+        else
+        {
+            if (metalRenderer != nullptr && ! metalRenderer->isAttachedToView (view))
+                metalRenderer->attach (view, getComponent().isOpaque());
         }
 
         auto dispatchRectangles = [this]
         {
-           if (metalRenderer != nullptr && metalRenderer->isAttachedToView (view))
-               return metalRenderer->drawRectangleList (view,
-                                                        (float) [[view window] backingScaleFactor],
-                                                        [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
-                                                        deferredRepaints);
+            if (metalRenderer != nullptr && metalRenderer->isAttachedToView (view))
+            {
+                return metalRenderer->drawRectangleList (view,
+                                                         (float) [[view window] backingScaleFactor],
+                                                         [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
+                                                         deferredRepaints);
+            }
 
             for (auto& i : deferredRepaints)
                 [view setNeedsDisplayInRect: makeNSRect (i)];
@@ -1704,6 +1691,7 @@ public:
     int startOfMarkedTextInTextInputTarget = 0;
 
     Rectangle<float> lastSizeBeforeZoom;
+    Rectangle<float> boundsWhenRepaintsDeferred;
     RectangleList<float> deferredRepaints;
     uint32 lastRepaintTime;
 
@@ -1946,7 +1934,6 @@ private:
     }
 
     //==============================================================================
-    int numFramesToSkipMetalRenderer = 0;
     std::unique_ptr<CoreGraphicsMetalLayerRenderer<NSView>> metalRenderer;
 
     std::vector<ScopedNotificationCenterObserver> scopedObservers;

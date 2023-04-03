@@ -28,7 +28,7 @@
 
 if(JUCE_BUILD_HELPER_TOOLS)
     # Build the tool for the current system
-    juce_add_console_app(juceaide)
+    juce_add_console_app(juceaide _NO_RESOURCERC)
 
     target_sources(juceaide PRIVATE Main.cpp)
 

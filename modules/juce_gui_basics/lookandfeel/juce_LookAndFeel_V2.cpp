@@ -206,6 +206,8 @@ LookAndFeel_V2::LookAndFeel_V2()
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
         setColour ((int) standardColours [i], Colour ((uint32) standardColours [i + 1]));
+
+    bubbleShadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.35f), 5, {}));
 }
 
 LookAndFeel_V2::~LookAndFeel_V2()  {}
@@ -839,6 +841,10 @@ void LookAndFeel_V2::drawBubble (Graphics& g, BubbleComponent& comp,
     g.strokePath (p, PathStrokeType (1.0f));
 }
 
+void LookAndFeel_V2::setComponentEffectForBubbleComponent (BubbleComponent& bubbleComponent)
+{
+    bubbleComponent.setComponentEffect (&bubbleShadow);
+}
 
 //==============================================================================
 Font LookAndFeel_V2::getPopupMenuFont()

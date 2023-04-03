@@ -371,7 +371,6 @@ void FileBrowserComponent::lookAndFeelChanged()
     filenameBox.applyColourToAllText (findColour (filenameBoxTextColourId));
 
     resized();
-    repaint();
 }
 
 //==============================================================================

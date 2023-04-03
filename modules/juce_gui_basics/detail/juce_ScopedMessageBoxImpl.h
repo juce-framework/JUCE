@@ -27,7 +27,16 @@ namespace juce::detail
 {
 
 //==============================================================================
-class ScopedMessageBoxImpl : private AsyncUpdater
+class ScopedMessageBoxImpl
+{
+public:
+    virtual ~ScopedMessageBoxImpl() = default;
+    virtual void close() = 0;
+};
+
+//==============================================================================
+class ConcreteScopedMessageBoxImpl : public ScopedMessageBoxImpl,
+                                     private AsyncUpdater
 {
 public:
     static ScopedMessageBox show (std::unique_ptr<ScopedMessageBoxInterface>&& native,
@@ -50,12 +59,12 @@ public:
         return 0;
     }
 
-    ~ScopedMessageBoxImpl() override
+    ~ConcreteScopedMessageBoxImpl() override
     {
         cancelPendingUpdate();
     }
 
-    void close()
+    void close() override
     {
         cancelPendingUpdate();
         nativeImplementation->close();
@@ -63,10 +72,10 @@ public:
     }
 
 private:
-    static std::shared_ptr<ScopedMessageBoxImpl> runAsync (std::unique_ptr<ScopedMessageBoxInterface>&& p,
-                                                           std::unique_ptr<ModalComponentManager::Callback>&& c)
+    static std::shared_ptr<ConcreteScopedMessageBoxImpl> runAsync (std::unique_ptr<ScopedMessageBoxInterface>&& p,
+                                                                   std::unique_ptr<ModalComponentManager::Callback>&& c)
     {
-        std::shared_ptr<ScopedMessageBoxImpl> result (new ScopedMessageBoxImpl (std::move (p), std::move (c)));
+        std::shared_ptr<ConcreteScopedMessageBoxImpl> result (new ConcreteScopedMessageBoxImpl (std::move (p), std::move (c)));
         result->self = result;
         result->triggerAsyncUpdate();
         return result;
@@ -78,16 +87,16 @@ private:
         return local != nullptr ? local->runSync() : 0;
     }
 
-    explicit ScopedMessageBoxImpl (std::unique_ptr<ScopedMessageBoxInterface>&& p)
-        : ScopedMessageBoxImpl (std::move (p), nullptr) {}
+    explicit ConcreteScopedMessageBoxImpl (std::unique_ptr<ScopedMessageBoxInterface>&& p)
+        : ConcreteScopedMessageBoxImpl (std::move (p), nullptr) {}
 
-    ScopedMessageBoxImpl (std::unique_ptr<ScopedMessageBoxInterface>&& p,
-                          std::unique_ptr<ModalComponentManager::Callback>&& c)
+    ConcreteScopedMessageBoxImpl (std::unique_ptr<ScopedMessageBoxInterface>&& p,
+                                  std::unique_ptr<ModalComponentManager::Callback>&& c)
         : callback (std::move (c)), nativeImplementation (std::move (p)) {}
 
     void handleAsyncUpdate() override
     {
-        nativeImplementation->runAsync ([weakRecipient = std::weak_ptr<ScopedMessageBoxImpl> (self)] (int result)
+        nativeImplementation->runAsync ([weakRecipient = std::weak_ptr<ConcreteScopedMessageBoxImpl> (self)] (int result)
                                         {
                                             const auto notifyRecipient = [result, weakRecipient]
                                             {
@@ -117,7 +126,7 @@ private:
         message box without a scoped lifetime, just create a Pimpl instance without using
         the ScopedMessageBox wrapper, and the Pimpl will destroy itself after it is dismissed.
     */
-    std::shared_ptr<ScopedMessageBoxImpl> self;
+    std::shared_ptr<ConcreteScopedMessageBoxImpl> self;
 };
 
 } // namespace juce::detail

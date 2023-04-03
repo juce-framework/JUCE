@@ -36,6 +36,8 @@
 
 #include <juce_audio_plugin_client/Unity/juce_UnityPluginInterface.h>
 
+#include <juce_events/native/juce_RunningInUnity.h>
+
 //==============================================================================
 namespace juce
 {
@@ -292,6 +294,7 @@ class AudioProcessorUnityWrapper
 public:
     AudioProcessorUnityWrapper (bool isTemporary)
     {
+        detail::RunningInUnity::state = true;
         pluginInstance = createPluginFilterOfType (AudioProcessor::wrapperType_Unity);
 
         if (! isTemporary && pluginInstance->hasEditor())

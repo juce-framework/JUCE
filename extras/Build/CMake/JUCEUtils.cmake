@@ -754,15 +754,15 @@ function(_juce_configure_bundle source_target dest_target)
     endif()
 endfunction()
 
-function(_juce_add_resources_rc source_target dest_target)
+function(_juce_add_resources_rc target)
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
         return()
     endif()
 
-    get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
-    set(input_info_file "$<TARGET_PROPERTY:${source_target},JUCE_INFO_FILE>")
+    get_target_property(juce_library_code ${target} JUCE_GENERATED_SOURCES_DIRECTORY)
+    set(input_info_file "$<TARGET_PROPERTY:${target},JUCE_INFO_FILE>")
 
-    get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
+    get_target_property(generated_icon ${target} JUCE_ICON_FILE)
     set(dependency)
 
     if(generated_icon)
@@ -776,7 +776,7 @@ function(_juce_add_resources_rc source_target dest_target)
         ${dependency}
         VERBATIM)
 
-    target_sources(${dest_target} PRIVATE "${resource_rc_file}")
+    target_sources(${target} PRIVATE "${resource_rc_file}")
 endfunction()
 
 function(_juce_configure_app_bundle source_target dest_target)
@@ -784,8 +784,6 @@ function(_juce_configure_app_bundle source_target dest_target)
         JUCE_TARGET_KIND_STRING "App"
         MACOSX_BUNDLE TRUE
         WIN32_EXECUTABLE TRUE)
-
-    _juce_add_resources_rc(${source_target} ${dest_target})
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(nib_path "${JUCE_CMAKE_UTILS_DIR}/RecentFilesMenuTemplate.nib")
@@ -1830,6 +1828,10 @@ endfunction()
 # ==================================================================================================
 
 function(juce_add_console_app target)
+    # The _NO_RESOURCERC option is private, and is only intended for use when building juceaide.
+    # We can't add a resources.rc to juceaide because we need juceaide to generate the resources.rc!
+    cmake_parse_arguments(JUCE_ARG "_NO_RESOURCERC" "" "" ${ARGN})
+
     add_executable(${target})
     target_compile_definitions(${target} PRIVATE JUCE_STANDALONE_APPLICATION=1)
 
@@ -1838,6 +1840,11 @@ function(juce_add_console_app target)
     endif()
 
     _juce_initialise_target(${target} ${ARGN})
+
+    if(NOT JUCE_ARG__NO_RESOURCERC)
+        _juce_write_configure_time_info(${target})
+        _juce_add_resources_rc(${target})
+    endif()
 endfunction()
 
 function(juce_add_gui_app target)
@@ -1853,12 +1860,14 @@ function(juce_add_gui_app target)
     set_target_properties(${target} PROPERTIES JUCE_TARGET_KIND_STRING "App")
     _juce_configure_bundle(${target} ${target})
     _juce_configure_app_bundle(${target} ${target})
+    _juce_add_resources_rc(${target})
 endfunction()
 
 function(juce_add_plugin target)
     add_library(${target} STATIC)
     set_target_properties(${target} PROPERTIES JUCE_IS_PLUGIN TRUE)
     _juce_initialise_target(${target} ${ARGN})
+    _juce_add_resources_rc(${target})
     _juce_configure_plugin_targets(${target})
 endfunction()
 

@@ -37,7 +37,7 @@ static juce_wchar getDefaultPasswordChar() noexcept
 
 static int showAlertWindowUnmanaged (const MessageBoxOptions& opts, ModalComponentManager::Callback* cb)
 {
-    return detail::ScopedMessageBoxImpl::showUnmanaged (detail::AlertWindowHelpers::create (opts), cb);
+    return detail::ConcreteScopedMessageBoxImpl::showUnmanaged (detail::AlertWindowHelpers::create (opts), cb);
 }
 
 //==============================================================================
@@ -693,7 +693,7 @@ ScopedMessageBox AlertWindow::showScopedAsync (const MessageBoxOptions& options,
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
         return NativeMessageBox::showScopedAsync (options, std::move (callback));
 
-    return detail::ScopedMessageBoxImpl::show (detail::AlertWindowHelpers::create (options), std::move (callback));
+    return detail::ConcreteScopedMessageBoxImpl::show (detail::AlertWindowHelpers::create (options), std::move (callback));
 }
 
 //==============================================================================

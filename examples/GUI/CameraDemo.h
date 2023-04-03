@@ -314,12 +314,11 @@ private:
 
                 SafePointer<CameraDemo> safeThis (this);
 
-                juce::ContentSharer::getInstance()->shareFiles ({url},
-                                                                [safeThis] (bool success, const String&) mutable
-                                                                {
-                                                                    if (safeThis)
-                                                                        safeThis->sharingFinished (success, false);
-                                                                });
+                messageBox = ContentSharer::shareFilesScoped ({ url }, [safeThis] (bool success, const String&)
+                {
+                    if (safeThis)
+                        safeThis->sharingFinished (success, false);
+                });
                #endif
             }
         }
@@ -355,12 +354,11 @@ private:
 
             SafePointer<CameraDemo> safeThis (this);
 
-            juce::ContentSharer::getInstance()->shareFiles ({url},
-                                                            [safeThis] (bool success, const String&) mutable
-                                                            {
-                                                                if (safeThis)
-                                                                    safeThis->sharingFinished (success, true);
-                                                            });
+            messageBox = ContentSharer::shareFilesScoped ({ url }, [safeThis] (bool success, const String&)
+            {
+                if (safeThis)
+                    safeThis->sharingFinished (success, true);
+            });
         }
        #endif
     }

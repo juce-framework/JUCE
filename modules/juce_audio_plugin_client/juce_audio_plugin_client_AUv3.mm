@@ -245,16 +245,8 @@ public:
 
         if (state.getSize() > 0)
         {
-            NSData* ourState = [[NSData alloc] initWithBytes: state.getData()
-                                                      length: state.getSize()];
-
-            NSString* nsKey = [[NSString alloc] initWithUTF8String: JUCE_STATE_DICTIONARY_KEY];
-
-            [retval setObject: ourState
-                       forKey: nsKey];
-
-            [nsKey    release];
-            [ourState release];
+            [retval setObject: [[NSData alloc] initWithBytes: state.getData() length: state.getSize()]
+                       forKey: @JUCE_STATE_DICTIONARY_KEY];
         }
 
         return [retval autorelease];
@@ -265,39 +257,26 @@ public:
         if (state == nullptr)
             return;
 
-        NSMutableDictionary<NSString*, id>* modifiedState = [[NSMutableDictionary<NSString*, id> alloc] init];
-        [modifiedState addEntriesFromDictionary: state];
+        NSObject* obj = [state objectForKey: @JUCE_STATE_DICTIONARY_KEY];
 
-        NSString* nsPresetKey = [[NSString alloc] initWithUTF8String: kAUPresetDataKey];
-        [modifiedState removeObjectForKey: nsPresetKey];
-        [nsPresetKey release];
+        if (obj == nullptr || ! [obj isKindOfClass: [NSData class]])
+            return;
 
-        ObjCMsgSendSuper<AUAudioUnit, void> (au, @selector (setFullState:), state);
+        auto* data = reinterpret_cast<NSData*> (obj);
+        const auto numBytes = static_cast<int> ([data length]);
 
-        NSString* nsKey = [[NSString alloc] initWithUTF8String: JUCE_STATE_DICTIONARY_KEY];
-        NSObject* obj = [modifiedState objectForKey: nsKey];
-        [nsKey release];
+        if (numBytes <= 0)
+            return;
 
-        if (obj != nullptr)
-        {
-            if ([obj isKindOfClass:[NSData class]])
-            {
-                NSData* data = reinterpret_cast<NSData*> (obj);
-                const int numBytes = static_cast<int> ([data length]);
-                const juce::uint8* const rawBytes = reinterpret_cast< const juce::uint8* const> ([data bytes]);
+        auto* rawBytes = reinterpret_cast<const juce::uint8* const> ([data bytes]);
 
-                if (numBytes > 0)
-                {
-                   #if JUCE_AU_WRAPPERS_SAVE_PROGRAM_STATES
-                    getAudioProcessor().setCurrentProgramStateInformation (rawBytes, numBytes);
-                   #else
-                    getAudioProcessor().setStateInformation (rawBytes, numBytes);
-                   #endif
-                }
-            }
-        }
+        ScopedKeyChange scope (au, @"allParameterValues");
 
-        [modifiedState release];
+       #if JUCE_AU_WRAPPERS_SAVE_PROGRAM_STATES
+        getAudioProcessor().setCurrentProgramStateInformation (rawBytes, numBytes);
+       #else
+        getAudioProcessor().setStateInformation (rawBytes, numBytes);
+       #endif
     }
 
     AUParameterTree* getParameterTree() const

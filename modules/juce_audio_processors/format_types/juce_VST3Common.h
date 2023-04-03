@@ -274,6 +274,34 @@ static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannel
         case AudioChannelSet::ambisonicACN33:
         case AudioChannelSet::ambisonicACN34:
         case AudioChannelSet::ambisonicACN35:
+        case AudioChannelSet::ambisonicACN36:
+        case AudioChannelSet::ambisonicACN37:
+        case AudioChannelSet::ambisonicACN38:
+        case AudioChannelSet::ambisonicACN39:
+        case AudioChannelSet::ambisonicACN40:
+        case AudioChannelSet::ambisonicACN41:
+        case AudioChannelSet::ambisonicACN42:
+        case AudioChannelSet::ambisonicACN43:
+        case AudioChannelSet::ambisonicACN44:
+        case AudioChannelSet::ambisonicACN45:
+        case AudioChannelSet::ambisonicACN46:
+        case AudioChannelSet::ambisonicACN47:
+        case AudioChannelSet::ambisonicACN48:
+        case AudioChannelSet::ambisonicACN49:
+        case AudioChannelSet::ambisonicACN50:
+        case AudioChannelSet::ambisonicACN51:
+        case AudioChannelSet::ambisonicACN52:
+        case AudioChannelSet::ambisonicACN53:
+        case AudioChannelSet::ambisonicACN54:
+        case AudioChannelSet::ambisonicACN55:
+        case AudioChannelSet::ambisonicACN56:
+        case AudioChannelSet::ambisonicACN57:
+        case AudioChannelSet::ambisonicACN58:
+        case AudioChannelSet::ambisonicACN59:
+        case AudioChannelSet::ambisonicACN60:
+        case AudioChannelSet::ambisonicACN61:
+        case AudioChannelSet::ambisonicACN62:
+        case AudioChannelSet::ambisonicACN63:
         case AudioChannelSet::wideLeft:
         case AudioChannelSet::wideRight:
         case AudioChannelSet::unknown:

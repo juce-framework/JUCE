@@ -26,80 +26,23 @@
 namespace juce
 {
 
-class ContentSharer::ContentSharerNativeImpl    : public ContentSharer::Pimpl,
-                                                  private Component
+class NativeScopedContentSharerInterface : public detail::ScopedContentSharerInterface,
+                                           public detail::NativeModalWrapperComponent
 {
 public:
-    ContentSharerNativeImpl (ContentSharer& cs)
-        : owner (cs)
+    NativeScopedContentSharerInterface (Component* parentIn, NSUniquePtr<NSArray> itemsIn)
+        : parent (parentIn), items (std::move (itemsIn)) {}
+
+    void runAsync (std::function<void (bool, const String&)> callback) override
     {
-        static PopoverDelegateClass cls;
-        popoverDelegate.reset ([cls.createInstance() init]);
-    }
-
-    ~ContentSharerNativeImpl() override
-    {
-        exitModalState (0);
-    }
-
-    void shareFiles (const Array<URL>& files) override
-    {
-        auto urls = [NSMutableArray arrayWithCapacity: (NSUInteger) files.size()];
-
-        for (const auto& f : files)
-        {
-            NSString* nativeFilePath = nil;
-
-            if (f.isLocalFile())
-            {
-                nativeFilePath = juceStringToNS (f.getLocalFile().getFullPathName());
-            }
-            else
-            {
-                auto filePath = f.toString (false);
-
-                auto* fileDirectory = filePath.contains ("/")
-                                    ? juceStringToNS (filePath.upToLastOccurrenceOf ("/", false, false))
-                                    : [NSString string];
-
-                auto fileName = juceStringToNS (filePath.fromLastOccurrenceOf ("/", false, false)
-                                                        .upToLastOccurrenceOf (".", false, false));
-
-                auto fileExt = juceStringToNS (filePath.fromLastOccurrenceOf (".", false, false));
-
-                if ([fileDirectory length] == NSUInteger (0))
-                    nativeFilePath = [[NSBundle mainBundle] pathForResource: fileName
-                                                                     ofType: fileExt];
-                else
-                    nativeFilePath = [[NSBundle mainBundle] pathForResource: fileName
-                                                                     ofType: fileExt
-                                                                inDirectory: fileDirectory];
-            }
-
-            if (nativeFilePath != nil)
-                [urls addObject: [NSURL fileURLWithPath: nativeFilePath]];
-        }
-
-        share (urls);
-    }
-
-    void shareText (const String& text) override
-    {
-        auto array = [NSArray arrayWithObject: juceStringToNS (text)];
-        share (array);
-    }
-
-private:
-    void share (NSArray* items)
-    {
-        if ([items count] == 0)
+        if ([items.get() count] == 0)
         {
             jassertfalse;
-            owner.sharingFinished (false, "No valid items found for sharing.");
+            NullCheckedInvocation::invoke (callback, false, "No valid items found for sharing.");
             return;
         }
 
-        controller.reset ([[UIActivityViewController alloc] initWithActivityItems: items
+        controller.reset ([[UIActivityViewController alloc] initWithActivityItems: items.get()
                                                             applicationActivities: nil]);
 
         controller.get().excludedActivityTypes = nil;
@@ -107,98 +50,76 @@ private:
         controller.get().completionWithItemsHandler = ^([[maybe_unused]] UIActivityType type, BOOL completed,
                                                         [[maybe_unused]] NSArray* returnedItems, NSError* error)
         {
-            succeeded = completed;
-
-            if (error != nil)
-                errorDescription = nsStringToJuce ([error localizedDescription]);
-
+            const auto errorDescription = error != nil ? nsStringToJuce ([error localizedDescription])
+                                                       : String();
             exitModalState (0);
+
+            NullCheckedInvocation::invoke (callback, completed && errorDescription.isEmpty(), errorDescription);
         };
 
-        controller.get().modalTransitionStyle = UIModalTransitionStyleCoverVertical;
+        displayNativeWindowModally (parent);
 
-        auto bounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
-        setBounds (bounds);
-
-        setAlwaysOnTop (true);
-        setVisible (true);
-        addToDesktop (0);
-
-        enterModalState (true,
-                         ModalCallbackFunction::create ([this] (int)
-                         {
-                             owner.sharingFinished (succeeded, errorDescription);
-                         }),
-                         false);
+        enterModalState (true, nullptr, false);
     }
 
-    static bool isIPad()
+    void close() override
     {
-        return [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad;
+        [controller.get() dismissViewControllerAnimated: YES completion: nil];
     }
 
-    //==============================================================================
-    void parentHierarchyChanged() override
-    {
-        auto* newPeer = dynamic_cast<UIViewComponentPeer*> (getPeer());
+private:
+    UIViewController* getViewController() const override { return controller.get(); }
 
-        if (peer != newPeer)
-        {
-            peer = newPeer;
-
-            if (isIPad())
-            {
-                controller.get().preferredContentSize = peer->view.frame.size;
-
-                auto screenBounds = [UIScreen mainScreen].bounds;
-
-                auto* popoverController = controller.get().popoverPresentationController;
-                popoverController.sourceView = peer->view;
-                popoverController.sourceRect = CGRectMake (0.f, screenBounds.size.height - 10.f, screenBounds.size.width, 10.f);
-                popoverController.canOverlapSourceViewRect = YES;
-                popoverController.delegate = popoverDelegate.get();
-            }
-
-            if (auto* parentController = peer->controller)
-                [parentController showViewController: controller.get() sender: parentController];
-        }
-    }
-
-    //==============================================================================
-    struct PopoverDelegateClass    : public ObjCClass<NSObject<UIPopoverPresentationControllerDelegate>>
-    {
-        PopoverDelegateClass()  : ObjCClass<NSObject<UIPopoverPresentationControllerDelegate>> ("PopoverDelegateClass_")
-        {
-            addMethod (@selector (popoverPresentationController:willRepositionPopoverToRect:inView:), willRepositionPopover);
-
-            registerClass();
-        }
-
-        //==============================================================================
-        static void willRepositionPopover (id, SEL, UIPopoverPresentationController*, CGRect* rect, UIView*)
-        {
-            auto screenBounds = [UIScreen mainScreen].bounds;
-
-            rect->origin.x = 0.f;
-            rect->origin.y = screenBounds.size.height - 10.f;
-            rect->size.width = screenBounds.size.width;
-            rect->size.height = 10.f;
-        }
-    };
-
-    ContentSharer& owner;
-    UIViewComponentPeer* peer = nullptr;
+    Component* parent = nullptr;
     NSUniquePtr<UIActivityViewController> controller;
-    NSUniquePtr<NSObject<UIPopoverPresentationControllerDelegate>> popoverDelegate;
-
-    bool succeeded = false;
-    String errorDescription;
+    NSUniquePtr<NSArray> items;
 };
 
-//==============================================================================
-ContentSharer::Pimpl* ContentSharer::createPimpl()
+auto detail::ScopedContentSharerInterface::shareFiles (const Array<URL>& files, Component* parent) -> std::unique_ptr<ScopedContentSharerInterface>
 {
-    return new ContentSharerNativeImpl (*this);
+    NSUniquePtr<NSMutableArray> urls ([[NSMutableArray arrayWithCapacity: (NSUInteger) files.size()] retain]);
+
+    for (const auto& f : files)
+    {
+        NSString* nativeFilePath = nil;
+
+        if (f.isLocalFile())
+        {
+            nativeFilePath = juceStringToNS (f.getLocalFile().getFullPathName());
+        }
+        else
+        {
+            auto filePath = f.toString (false);
+
+            auto* fileDirectory = filePath.contains ("/")
+                                ? juceStringToNS (filePath.upToLastOccurrenceOf ("/", false, false))
+                                : [NSString string];
+
+            auto fileName = juceStringToNS (filePath.fromLastOccurrenceOf ("/", false, false)
+                                            .upToLastOccurrenceOf (".", false, false));
+
+            auto fileExt = juceStringToNS (filePath.fromLastOccurrenceOf (".", false, false));
+
+            if ([fileDirectory length] == NSUInteger (0))
+                nativeFilePath = [[NSBundle mainBundle] pathForResource: fileName
+                                                                 ofType: fileExt];
+            else
+                nativeFilePath = [[NSBundle mainBundle] pathForResource: fileName
+                                                                 ofType: fileExt
+                                                            inDirectory: fileDirectory];
+        }
+
+        if (nativeFilePath != nil)
+            [urls.get() addObject: [NSURL fileURLWithPath: nativeFilePath]];
+    }
+
+    return std::make_unique<NativeScopedContentSharerInterface> (parent, std::move (urls));
+}
+
+auto detail::ScopedContentSharerInterface::shareText (const String& text, Component* parent) -> std::unique_ptr<ScopedContentSharerInterface>
+{
+    NSUniquePtr<NSArray> array ([[NSArray arrayWithObject: juceStringToNS (text)] retain]);
+    return std::make_unique<NativeScopedContentSharerInterface> (parent, std::move (array));
 }
 
 } // namespace juce

@@ -34,6 +34,9 @@ namespace juce
 class ScopedMessageBox
 {
 public:
+    /** @internal */
+    explicit ScopedMessageBox (std::shared_ptr<detail::ScopedMessageBoxImpl>);
+
     /** Constructor */
     ScopedMessageBox();
 
@@ -56,9 +59,6 @@ public:
     void close();
 
 private:
-    friend detail::ScopedMessageBoxImpl;
-    explicit ScopedMessageBox (std::shared_ptr<detail::ScopedMessageBoxImpl>);
-
     std::shared_ptr<detail::ScopedMessageBoxImpl> impl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedMessageBox)

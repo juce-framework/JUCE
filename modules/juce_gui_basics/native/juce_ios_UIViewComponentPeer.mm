@@ -446,14 +446,27 @@ public:
                                                stringBeingComposed.length());
     }
 
-    void replaceMarkedRangeWithText (TextInputTarget* target, const String& text)
+    enum class UnderlineRegion
+    {
+        none,
+        underCompositionRange
+    };
+
+    void replaceMarkedRangeWithText (TextInputTarget* target,
+                                     const String& text,
+                                     UnderlineRegion underline)
     {
         if (stringBeingComposed.isNotEmpty())
             target->setHighlightedRegion (getMarkedTextRange());
 
         target->insertTextAtCaret (text);
-        target->setTemporaryUnderlining ({ Range<int>::withStartAndLength (startOfMarkedTextInTextInputTarget,
-                                                                           text.length()) });
+
+        const auto underlineRanges = underline == UnderlineRegion::underCompositionRange
+                                   ? Array { Range<int>::withStartAndLength (startOfMarkedTextInTextInputTarget,
+                                                                             text.length()) }
+                                   : Array<Range<int>>{};
+        target->setTemporaryUnderlining (underlineRanges);
+
         stringBeingComposed = text;
     }
 
@@ -1167,6 +1180,8 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
         // a KeyPress and trust the current TextInputTarget to process it correctly.
         const auto redirectKeyPresses = [&] (juce_wchar codepoint)
         {
+            target->setTemporaryUnderlining ({});
+
             // Simulate a key down
             const auto code = getKeyCodeForCharacters (String::charToString (codepoint));
             iOSGlobals::keysCurrentlyDown.setDown (code, true);
@@ -1179,14 +1194,14 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
             owner->handleKeyUpOrDown (false);
         };
 
+        using UR = UIViewComponentPeer::UnderlineRegion;
+
         if ([text isEqual: @"\n"] || [text isEqual: @"\r"])
             redirectKeyPresses ('\r');
         else if ([text isEqual: @"\t"])
             redirectKeyPresses ('\t');
         else
-            owner->replaceMarkedRangeWithText (target, nsStringToJuce (text));
-
-        target->setTemporaryUnderlining ({});
+            owner->replaceMarkedRangeWithText (target, nsStringToJuce (text), UR::none);
     }
 
     owner->stringBeingComposed.clear();
@@ -1251,7 +1266,8 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
     if (owner->stringBeingComposed.isEmpty())
         owner->startOfMarkedTextInTextInputTarget = target->getHighlightedRegion().getStart();
 
-    owner->replaceMarkedRangeWithText (target, newMarkedText);
+    using UR = UIViewComponentPeer::UnderlineRegion;
+    owner->replaceMarkedRangeWithText (target, newMarkedText, UR::underCompositionRange);
 
     const auto newSelection = nsRangeToJuce (selectedRange) + owner->startOfMarkedTextInTextInputTarget;
     target->setHighlightedRegion (newSelection);
@@ -1267,8 +1283,8 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
     if (target == nullptr)
         return;
 
-    owner->replaceMarkedRangeWithText (target, owner->stringBeingComposed);
-    target->setTemporaryUnderlining ({});
+    using UR = UIViewComponentPeer::UnderlineRegion;
+    owner->replaceMarkedRangeWithText (target, owner->stringBeingComposed, UR::none);
     owner->stringBeingComposed.clear();
     owner->startOfMarkedTextInTextInputTarget = 0;
 }

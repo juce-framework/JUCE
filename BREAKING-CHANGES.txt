@@ -6,6 +6,32 @@ develop
 
 Change
 ------
+The signatures of the ContentSharer member functions have been updated. The
+ContentSharer class itself is no longer a singleton.
+
+Possible Issues
+---------------
+Projects that use the old signatures will not build until they are updated.
+
+Workaround
+----------
+Instead of calling content sharer functions through a singleton instance, e.g.
+    ContentSharer::getInstance()->shareText (...);
+call the static member functions directly:
+    ScopedMessageBox messageBox = ContentSharer::shareTextScoped (...);
+The new functions return a ScopedMessageBox instance. On iOS, the content
+sharer will only remain open for as long as the ScopedMessageBox remains alive.
+On Android, this functionality will be added as/when the native APIs allow.
+
+Rationale
+---------
+The new signatures are safer and easier to use. The ScopedMessageBox also
+allows content sharers to be dismissed programmatically, which wasn't
+previously possible.
+
+
+Change
+------
 The minimum supported AAX library version has been bumped to 2.4.0 and the
 library is now built automatically while building an AAX plugin. The
 JucePlugin_AAXLibs_path preprocessor definition is no longer defined in AAX

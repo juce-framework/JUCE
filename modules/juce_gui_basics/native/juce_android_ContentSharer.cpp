@@ -98,18 +98,11 @@ DECLARE_JNI_CLASS (ParcelFileDescriptor, "android/os/ParcelFileDescriptor")
 class AndroidContentSharerCursor
 {
 public:
-    class Owner
-    {
-    public:
-        virtual ~Owner() = default;
-
-        virtual void cursorClosed (const AndroidContentSharerCursor&) = 0;
-    };
-
-    AndroidContentSharerCursor (Owner& ownerToUse, JNIEnv* env,
+    AndroidContentSharerCursor (JNIEnv* env,
                                 const LocalRef<jobject>& contentProvider,
-                                const LocalRef<jobjectArray>& resultColumns)
-        : owner (ownerToUse),
+                                const LocalRef<jobjectArray>& resultColumns,
+                                std::function<void (AndroidContentSharerCursor&)> onCloseIn)
+        : onClose (std::move (onCloseIn)),
           cursor (GlobalRef (LocalRef<jobject> (env->NewObject (JuceContentProviderCursor,
                                                                 JuceContentProviderCursor.constructor,
                                                                 reinterpret_cast<jlong> (this),
@@ -119,12 +112,7 @@ public:
         jassert (contentProvider.get() != nullptr);
     }
 
-    jobject getNativeCursor() { return cursor.get(); }
-
-    static void cursorClosed (JNIEnv*, AndroidContentSharerCursor& t)
-    {
-        MessageManager::callAsync ([&t] { t.owner.cursorClosed (t); });
-    }
+    jobject getNativeCursor() const { return cursor.get(); }
 
     void addRow (LocalRef<jobjectArray>& values)
     {
@@ -134,7 +122,15 @@ public:
     }
 
 private:
-    Owner& owner;
+    static void cursorClosed (JNIEnv*, AndroidContentSharerCursor& t)
+    {
+        MessageManager::callAsync ([&t]
+                                   {
+                                       NullCheckedInvocation::invoke (t.onClose, t);
+                                   });
+    }
+
+    std::function<void (AndroidContentSharerCursor&)> onClose;
     GlobalRef cursor;
 
     //==============================================================================
@@ -151,23 +147,16 @@ private:
 class AndroidContentSharerFileObserver
 {
 public:
-    class Owner
-    {
-    public:
-        virtual ~Owner() {}
-
-        virtual void fileHandleClosed (const AndroidContentSharerFileObserver&) = 0;
-    };
-
-    AndroidContentSharerFileObserver (Owner& ownerToUse, JNIEnv* env,
+    AndroidContentSharerFileObserver (JNIEnv* env,
                                       const LocalRef<jobject>& contentProvider,
-                                      const String& filepathToUse)
-        : owner (ownerToUse),
+                                      const File& filepathToUse,
+                                      std::function<void()> onCloseIn)
+        : onClose (std::move (onCloseIn)),
           filepath (filepathToUse),
           fileObserver (GlobalRef (LocalRef<jobject> (env->NewObject (JuceContentProviderFileObserver,
                                                                       JuceContentProviderFileObserver.constructor,
                                                                       reinterpret_cast<jlong> (this),
-                                                                      javaString (filepath).get(),
+                                                                      javaString (filepath.getFullPathName()).get(),
                                                                       open | access | closeWrite | closeNoWrite))))
     {
         // the content provider must be created first
@@ -176,7 +165,7 @@ public:
         env->CallVoidMethod (fileObserver, JuceContentProviderFileObserver.startWatching);
     }
 
-    void onFileEvent (int event, [[maybe_unused]] const LocalRef<jstring>& path)
+    void onFileEvent (int event, const LocalRef<jstring>&)
     {
         if (event == open)
         {
@@ -193,10 +182,10 @@ public:
             // numOpenedHandles may get negative if we don't receive open handle event.
             if (fileWasRead && numOpenedHandles <= 0)
             {
-                MessageManager::callAsync ([this]
+                MessageManager::callAsync ([fileObserver = fileObserver, onClose = onClose]
                 {
                     getEnv()->CallVoidMethod (fileObserver, JuceContentProviderFileObserver.stopWatching);
-                    owner.fileHandleClosed (*this);
+                    NullCheckedInvocation::invoke (onClose);
                 });
             }
         }
@@ -208,11 +197,11 @@ private:
     static constexpr int closeWrite = 8;
     static constexpr int closeNoWrite = 16;
 
+    std::function<void()> onClose;
     bool fileWasRead = false;
     int numOpenedHandles = 0;
 
-    Owner& owner;
-    String filepath;
+    File filepath;
     GlobalRef fileObserver;
 
     //==============================================================================
@@ -232,294 +221,190 @@ private:
 };
 
 //==============================================================================
-class AndroidContentSharerPrepareFilesThread    : private Thread
+class ContentSharerGlobalImpl
 {
 public:
-    AndroidContentSharerPrepareFilesThread (AsyncUpdater& ownerToUse,
-                                            const Array<URL>& fileUrlsToUse,
-                                            const String& packageNameToUse,
-                                            const String& uriBaseToUse)
-        : Thread ("AndroidContentSharerPrepareFilesThread"),
-          owner (ownerToUse),
-          fileUrls (fileUrlsToUse),
-          resultFileUris (GlobalRef (LocalRef<jobject> (getEnv()->NewObject (JavaArrayList,
-                                                                             JavaArrayList.constructor,
-                                                                             fileUrls.size())))),
-          packageName (packageNameToUse),
-          uriBase (uriBaseToUse)
+    static ContentSharerGlobalImpl& getInstance()
     {
-        startThread();
+        static ContentSharerGlobalImpl result;
+        return result;
     }
 
-    ~AndroidContentSharerPrepareFilesThread() override
+    const String packageName = juceString (LocalRef<jstring> ((jstring) getEnv()->CallObjectMethod (getAppContext().get(),
+                                                                                                    AndroidContext.getPackageName)));
+    const String uriBase = "content://" + packageName + ".sharingcontentprovider/";
+
+    std::unique_ptr<ActivityLauncher> sharePreparedFiles (const std::map<String, File>& fileForUriIn,
+                                                          const StringArray& mimeTypes,
+                                                          std::function<void (bool)> callback)
     {
-        signalThreadShouldExit();
-        waitForThreadToExit (10000);
+        // This function should be called from the main thread, but must not race with singleton
+        // access from other threads.
+        const ScopedLock lock { mutex };
 
-        for (auto& f : temporaryFilesFromAssetFiles)
-            f.deleteFile();
-    }
-
-    jobject getResultFileUris()  { return resultFileUris.get(); }
-    const StringArray& getMimeTypes() const { return mimeTypes; }
-    const StringArray& getFilePaths() const { return filePaths; }
-
-private:
-    struct StreamCloser
-    {
-        StreamCloser (const LocalRef<jobject>& streamToUse)
-            : stream (GlobalRef (streamToUse))
-        {
-        }
-
-        ~StreamCloser()
-        {
-            if (stream.get() != nullptr)
-                getEnv()->CallVoidMethod (stream, JavaCloseable.close);
-        }
-
-        GlobalRef stream;
-    };
-
-    void run() override
-    {
-        auto* env = getEnv();
-
-        bool canSpecifyMimeTypes = true;
-
-        for (auto f : fileUrls)
-        {
-            auto scheme = f.getScheme();
-
-            // Only "file://" scheme or no scheme (for files in app bundle) are allowed!
-            jassert (scheme.isEmpty() || scheme == "file");
-
-            if (scheme.isEmpty())
-            {
-                // Raw resource names need to be all lower case
-                jassert (f.toString (true).toLowerCase() == f.toString (true));
-
-                // This will get us a file with file:// URI
-                f = copyAssetFileToTemporaryFile (env, f.toString (true));
-
-                if (f.isEmpty())
-                    continue;
-            }
-
-            if (threadShouldExit())
-                return;
-
-            auto filepath = URL::removeEscapeChars (f.toString (true).fromFirstOccurrenceOf ("file://", false, false));
-
-            filePaths.add (filepath);
-
-            auto filename = filepath.fromLastOccurrenceOf ("/", false, true);
-            auto fileExtension = filename.fromLastOccurrenceOf (".", false, true);
-            auto contentString = uriBase + String (filePaths.size() - 1) + "/" + filename;
-
-            auto uri = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidUri, AndroidUri.parse,
-                                                                       javaString (contentString).get()));
-
-            if (canSpecifyMimeTypes)
-                canSpecifyMimeTypes = fileExtension.isNotEmpty();
-
-            if (canSpecifyMimeTypes)
-                mimeTypes.addArray (MimeTypeTable::getMimeTypesForFileExtension (fileExtension));
-            else
-                mimeTypes.clear();
-
-            env->CallBooleanMethod (resultFileUris, JavaArrayList.add, uri.get());
-        }
-
-        owner.triggerAsyncUpdate();
-    }
-
-    URL copyAssetFileToTemporaryFile (JNIEnv* env, const String& filename)
-    {
-        auto resources = LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(), AndroidContext.getResources));
-        int fileId = env->CallIntMethod (resources, AndroidResources.getIdentifier, javaString (filename).get(),
-                                         javaString ("raw").get(), javaString (packageName).get());
-
-        // Raw resource not found. Please make sure that you include your file as a raw resource
-        // and that you specify just the file name, without an extension.
-        jassert (fileId != 0);
-
-        if (fileId == 0)
-            return {};
-
-        auto assetFd = LocalRef<jobject> (env->CallObjectMethod (resources,
-                                                                 AndroidResources.openRawResourceFd,
-                                                                 fileId));
-
-        auto inputStream = StreamCloser (LocalRef<jobject> (env->CallObjectMethod (assetFd,
-                                                                                   AssetFileDescriptor.createInputStream)));
-
-        if (jniCheckHasExceptionOccurredAndClear())
-        {
-            // Failed to open file stream for resource
-            jassertfalse;
-            return {};
-        }
-
-        auto tempFile = File::createTempFile ({});
-        tempFile.createDirectory();
-        tempFile = tempFile.getChildFile (filename);
-
-        auto outputStream = StreamCloser (LocalRef<jobject> (env->NewObject (JavaFileOutputStream,
-                                                                             JavaFileOutputStream.constructor,
-                                                                             javaString (tempFile.getFullPathName()).get())));
-
-        if (jniCheckHasExceptionOccurredAndClear())
-        {
-            // Failed to open file stream for temporary file
-            jassertfalse;
-            return {};
-        }
-
-        auto buffer = LocalRef<jbyteArray> (env->NewByteArray (1024));
-        int bytesRead = 0;
-
-        for (;;)
-        {
-            if (threadShouldExit())
-                return {};
-
-            bytesRead = env->CallIntMethod (inputStream.stream, JavaFileInputStream.read, buffer.get());
-
-            if (jniCheckHasExceptionOccurredAndClear())
-            {
-                // Failed to read from resource file.
-                jassertfalse;
-                return {};
-            }
-
-            if (bytesRead < 0)
-                break;
-
-            env->CallVoidMethod (outputStream.stream, JavaFileOutputStream.write, buffer.get(), 0, bytesRead);
-
-            if (jniCheckHasExceptionOccurredAndClear())
-            {
-                // Failed to write to temporary file.
-                jassertfalse;
-                return {};
-            }
-        }
-
-        temporaryFilesFromAssetFiles.add (tempFile);
-
-        return URL (tempFile);
-    }
-
-    AsyncUpdater& owner;
-    Array<URL> fileUrls;
-
-    GlobalRef resultFileUris;
-    String packageName;
-    String uriBase;
-
-    StringArray filePaths;
-    Array<File> temporaryFilesFromAssetFiles;
-    StringArray mimeTypes;
-};
-
-//==============================================================================
-class ContentSharer::ContentSharerNativeImpl  : public ContentSharer::Pimpl,
-                                                public AndroidContentSharerFileObserver::Owner,
-                                                public AndroidContentSharerCursor::Owner,
-                                                public AsyncUpdater,
-                                                private Timer
-{
-public:
-    ContentSharerNativeImpl (ContentSharer& cs)
-        : owner (cs),
-          packageName (juceString (LocalRef<jstring> ((jstring) getEnv()->CallObjectMethod (getAppContext().get(), AndroidContext.getPackageName)))),
-          uriBase ("content://" + packageName + ".sharingcontentprovider/")
-    {
-    }
-
-    ~ContentSharerNativeImpl() override
-    {
-        masterReference.clear();
-    }
-
-    void shareFiles (const Array<URL>& files) override
-    {
         if (! isContentSharingEnabled())
         {
             // You need to enable "Content Sharing" in Projucer's Android exporter.
             jassertfalse;
-            owner.sharingFinished (false, {});
-        }
-
-        prepareFilesThread.reset (new AndroidContentSharerPrepareFilesThread (*this, files, packageName, uriBase));
-    }
-
-    void shareText (const String& text) override
-    {
-        if (! isContentSharingEnabled())
-        {
-            // You need to enable "Content Sharing" in Projucer's Android exporter.
-            jassertfalse;
-            owner.sharingFinished (false, {});
+            NullCheckedInvocation::invoke (callback, false);
+            return {};
         }
 
         auto* env = getEnv();
 
-        auto intent = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructor));
-        env->CallObjectMethod (intent, AndroidIntent.setAction,
+        fileForUri.insert (fileForUriIn.begin(), fileForUriIn.end());
+
+        LocalRef<jobject> fileUris (env->NewObject (JavaArrayList, JavaArrayList.constructor, fileForUriIn.size()));
+
+        for (const auto& pair : fileForUriIn)
+        {
+            env->CallBooleanMethod (fileUris,
+                                    JavaArrayList.add,
+                                    env->CallStaticObjectMethod (AndroidUri,
+                                                                 AndroidUri.parse,
+                                                                 javaString (pair.first).get()));
+        }
+
+        LocalRef<jobject> intent (env->NewObject (AndroidIntent, AndroidIntent.constructor));
+        env->CallObjectMethod (intent,
+                               AndroidIntent.setAction,
+                               javaString ("android.intent.action.SEND_MULTIPLE").get());
+
+        env->CallObjectMethod (intent,
+                               AndroidIntent.setType,
+                               javaString (getCommonMimeType (mimeTypes)).get());
+
+        constexpr int grantReadPermission = 1;
+        env->CallObjectMethod (intent, AndroidIntent.setFlags, grantReadPermission);
+
+        env->CallObjectMethod (intent,
+                               AndroidIntent.putParcelableArrayListExtra,
+                               javaString ("android.intent.extra.STREAM").get(),
+                               fileUris.get());
+
+        return doIntent (intent, callback);
+    }
+
+    std::unique_ptr<ActivityLauncher> shareText (const String& text,
+                                                 std::function<void (bool)> callback)
+    {
+        // This function should be called from the main thread, but must not race with singleton
+        // access from other threads.
+        const ScopedLock lock { mutex };
+
+        if (! isContentSharingEnabled())
+        {
+            // You need to enable "Content Sharing" in Projucer's Android exporter.
+            jassertfalse;
+            NullCheckedInvocation::invoke (callback, false);
+            return {};
+        }
+
+        auto* env = getEnv();
+
+        LocalRef<jobject> intent (env->NewObject (AndroidIntent, AndroidIntent.constructor));
+        env->CallObjectMethod (intent,
+                               AndroidIntent.setAction,
                                javaString ("android.intent.action.SEND").get());
-        env->CallObjectMethod (intent, AndroidIntent.putExtra,
+        env->CallObjectMethod (intent,
+                               AndroidIntent.putExtra,
                                javaString ("android.intent.extra.TEXT").get(),
                                javaString (text).get());
         env->CallObjectMethod (intent, AndroidIntent.setType, javaString ("text/plain").get());
 
-        auto chooserIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidIntent, AndroidIntent.createChooser,
-                                                                             intent.get(), javaString ("Choose share target").get()));
-
-        startAndroidActivityForResult (chooserIntent, 1003,
-                                       [weakRef = WeakReference<ContentSharerNativeImpl> { this }] (int /*requestCode*/,
-                                                                                                    int resultCode,
-                                                                                                    LocalRef<jobject> /*intentData*/) mutable
-                                       {
-                                           if (weakRef != nullptr)
-                                               weakRef->sharingFinished (resultCode);
-                                       });
+        return doIntent (intent, callback);
     }
 
-    //==============================================================================
-    void cursorClosed (const AndroidContentSharerCursor& cursor) override
+    static void onBroadcastResultReceive (JNIEnv*, jobject, int requestCode)
     {
-        cursors.removeObject (&cursor);
+        getInstance().sharingFinished (requestCode, true);
     }
 
-    void fileHandleClosed (const AndroidContentSharerFileObserver&) override
+    static jobject JNICALL contentSharerQuery (JNIEnv*, jobject contentProvider, jobject uri, jobjectArray projection)
     {
-        decrementPendingFileCountAndNotifyOwnerIfReady();
+        return getInstance().query (LocalRef<jobject> (static_cast<jobject> (contentProvider)),
+                                    LocalRef<jobject> (static_cast<jobject> (uri)),
+                                    LocalRef<jobjectArray> (static_cast<jobjectArray> (projection)));
+    }
+
+    static jobject JNICALL contentSharerOpenFile (JNIEnv*, jobject contentProvider, jobject uri, jstring mode)
+    {
+        return getInstance().openFile (LocalRef<jobject> (static_cast<jobject> (contentProvider)),
+                                       LocalRef<jobject> (static_cast<jobject> (uri)),
+                                       LocalRef<jstring> (static_cast<jstring> (mode)));
+    }
+
+    static jobjectArray JNICALL contentSharerGetStreamTypes (JNIEnv*, jobject /*contentProvider*/, jobject uri, jstring mimeTypeFilter)
+    {
+        return getInstance().getStreamTypes (LocalRef<jobject> (static_cast<jobject> (uri)),
+                                             LocalRef<jstring> (static_cast<jstring> (mimeTypeFilter)));
+    }
+
+private:
+    ContentSharerGlobalImpl() = default;
+
+    LocalRef<jobject> makeChooser (const LocalRef<jobject>& intent, int request) const
+    {
+        auto* env = getEnv();
+
+        const auto text = javaString ("Choose share target");
+
+        if (getAndroidSDKVersion() < 22)
+            return LocalRef<jobject> (env->CallStaticObjectMethod (AndroidIntent,
+                                                                   AndroidIntent.createChooser,
+                                                                   intent.get(),
+                                                                   text.get()));
+
+        constexpr jint FLAG_UPDATE_CURRENT = 0x08000000;
+        constexpr jint FLAG_IMMUTABLE = 0x04000000;
+
+        const auto context = getAppContext();
+
+        auto* klass = env->FindClass ("com/rmsl/juce/Receiver");
+        const LocalRef<jobject> replyIntent (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), klass));
+        getEnv()->CallObjectMethod (replyIntent, AndroidIntent.putExtraInt, javaString ("com.rmsl.juce.JUCE_REQUEST_CODE").get(), request);
+
+        const auto flags = FLAG_UPDATE_CURRENT | (getAndroidSDKVersion() <= 23 ? 0 : FLAG_IMMUTABLE);
+        const LocalRef<jobject> pendingIntent (env->CallStaticObjectMethod (AndroidPendingIntent,
+                                                                            AndroidPendingIntent.getBroadcast,
+                                                                            context.get(),
+                                                                            request,
+                                                                            replyIntent.get(),
+                                                                            flags));
+
+        return LocalRef<jobject> (env->CallStaticObjectMethod (AndroidIntent22,
+                                                               AndroidIntent22.createChooser,
+                                                               intent.get(),
+                                                               text.get(),
+                                                               env->CallObjectMethod (pendingIntent,
+                                                                                      AndroidPendingIntent.getIntentSender)));
     }
 
     //==============================================================================
     jobject openFile (const LocalRef<jobject>& contentProvider,
-                      const LocalRef<jobject>& uri, [[maybe_unused]] const LocalRef<jstring>& mode)
+                      const LocalRef<jobject>& uri,
+                      [[maybe_unused]] const LocalRef<jstring>& mode)
     {
-        WeakReference<ContentSharerNativeImpl> weakRef (this);
-
-        if (weakRef == nullptr)
-            return nullptr;
+        // This function can be called from multiple threads.
+        const ScopedLock lock { mutex };
 
         auto* env = getEnv();
 
         auto uriElements = getContentUriElements (env, uri);
 
-        if (uriElements.filepath.isEmpty())
+        if (uriElements.file == File())
             return nullptr;
 
-        return getAssetFileDescriptor (env, contentProvider, uriElements.filepath);
+        return getAssetFileDescriptor (env, contentProvider, uriElements.file);
     }
 
-    jobject query (const LocalRef<jobject>& contentProvider, const LocalRef<jobject>& uri,
+    jobject query (const LocalRef<jobject>& contentProvider,
+                   const LocalRef<jobject>& uri,
                    const LocalRef<jobjectArray>& projection)
     {
+        // This function can be called from multiple threads.
+        const ScopedLock lock { mutex };
+
         StringArray requestedColumns = javaStringArrayToJuce (projection);
         StringArray supportedColumns = getSupportedColumns();
 
@@ -539,16 +424,29 @@ public:
 
         auto* env = getEnv();
 
-        auto cursor = cursors.add (new AndroidContentSharerCursor (*this, env, contentProvider,
-                                                                   resultJavaColumns));
+        const auto uriElements = getContentUriElements (env, uri);
 
-        auto uriElements = getContentUriElements (env, uri);
+        const auto callback = [info = uriElements.file] (auto& ref)
+        {
+            auto& pimplCursors = ContentSharerGlobalImpl::getInstance().cursors;
+            const auto iter = std::lower_bound (pimplCursors.begin(), pimplCursors.end(), &ref, [] (const auto& managed, const auto* ptr)
+            {
+                return managed.get() == ptr;
+            });
 
-        if (uriElements.filepath.isEmpty())
-            return cursor->getNativeCursor();
+            if (iter != pimplCursors.end() && iter->get() == &ref)
+                pimplCursors.erase (iter);
+        };
 
-        auto values = LocalRef<jobjectArray> (env->NewObjectArray ((jsize) resultColumns.size(),
-                                                                   JavaObject, nullptr));
+        auto [iter, inserted] = cursors.emplace (new AndroidContentSharerCursor (env,
+                                                                                 contentProvider,
+                                                                                 resultJavaColumns,
+                                                                                 callback));
+
+        if (uriElements.file == File())
+            return (*iter)->getNativeCursor();
+
+        LocalRef<jobjectArray> values (env->NewObjectArray ((jsize) resultColumns.size(), JavaObject, nullptr));
 
         for (int i = 0; i < resultColumns.size(); ++i)
         {
@@ -558,23 +456,25 @@ public:
             }
             else if (resultColumns.getReference (i) == "_size")
             {
-                auto javaFile = LocalRef<jobject> (env->NewObject (JavaFile, JavaFile.constructor,
-                                                                   javaString (uriElements.filepath).get()));
+                LocalRef<jobject> javaFile (env->NewObject (JavaFile,
+                                                            JavaFile.constructor,
+                                                            javaString (uriElements.file.getFullPathName()).get()));
 
                 jlong fileLength = env->CallLongMethod (javaFile, JavaFile.length);
 
-                env->SetObjectArrayElement (values, i, env->NewObject (JavaLong,
-                                                                       JavaLong.constructor,
-                                                                       fileLength));
+                env->SetObjectArrayElement (values, i, env->NewObject (JavaLong, JavaLong.constructor, fileLength));
             }
         }
 
-        cursor->addRow (values);
-        return cursor->getNativeCursor();
+        (*iter)->addRow (values);
+        return (*iter)->getNativeCursor();
     }
 
     jobjectArray getStreamTypes (const LocalRef<jobject>& uri, const LocalRef<jstring>& mimeTypeFilter)
     {
+        // This function can be called from multiple threads.
+        const ScopedLock lock { mutex };
+
         auto* env = getEnv();
 
         auto extension = getContentUriElements (env, uri).filename.fromLastOccurrenceOf (".", false, true);
@@ -582,24 +482,45 @@ public:
         if (extension.isEmpty())
             return nullptr;
 
-        return juceStringArrayToJava (filterMimeTypes (MimeTypeTable::getMimeTypesForFileExtension (extension),
-                                                       juceString (mimeTypeFilter.get())));
+        return juceStringArrayToJava (filterMimeTypes (MimeTypeTable::getMimeTypesForFileExtension (extension), juceString (mimeTypeFilter.get())));
     }
 
-    void sharingFinished (int resultCode)
+    std::unique_ptr<ActivityLauncher> doIntent (const LocalRef<jobject>& intent,
+                                                std::function<void (bool)> callback)
     {
-        sharingActivityDidFinish = true;
+        static std::atomic<int> lastRequest = 1003;
+        const auto requestCode = lastRequest++;
+        callbackForRequest.emplace (requestCode, callback);
+        const auto chooser = makeChooser (intent, requestCode);
 
-        succeeded = resultCode == -1;
-
-        // Give content sharer a chance to request file access.
-        if (nonAssetFilesPendingShare.get() == 0)
-            startTimer (2000);
-        else
-            notifyOwnerIfReady();
+        auto launcher = std::make_unique<ActivityLauncher> (chooser, requestCode);
+        launcher->callback = [] (int request, int resultCode, LocalRef<jobject>)
+        {
+            ContentSharerGlobalImpl::getInstance().sharingFinished (request, resultCode == -1);
+        };
+        launcher->open();
+        return launcher;
     }
 
-private:
+    void sharingFinished (int request, bool succeeded)
+    {
+        // This function should be called from the main thread, but must not race with singleton
+        // access from other threads.
+        const ScopedLock lock { mutex };
+
+        const auto iter = callbackForRequest.find (request);
+
+        if (iter == callbackForRequest.end())
+            return;
+
+        const ScopeGuard scope { [&] { callbackForRequest.erase (iter); } };
+
+        if (iter->second == nullptr)
+            return;
+
+        iter->second (succeeded);
+    }
+
     bool isContentSharingEnabled() const
     {
         auto* env = getEnv();
@@ -607,12 +528,12 @@ private:
         LocalRef<jobject> packageManager (env->CallObjectMethod (getAppContext().get(), AndroidContext.getPackageManager));
 
         constexpr int getProviders = 8;
-        auto packageInfo = LocalRef<jobject> (env->CallObjectMethod (packageManager,
-                                                                     AndroidPackageManager.getPackageInfo,
-                                                                     javaString (packageName).get(),
-                                                                     getProviders));
-        auto providers = LocalRef<jobjectArray> ((jobjectArray) env->GetObjectField (packageInfo,
-                                                                                     AndroidPackageInfo.providers));
+        LocalRef<jobject> packageInfo (env->CallObjectMethod (packageManager,
+                                                              AndroidPackageManager.getPackageInfo,
+                                                              javaString (packageName).get(),
+                                                              getProviders));
+        LocalRef<jobjectArray> providers  ((jobjectArray) env->GetObjectField (packageInfo,
+                                                                               AndroidPackageInfo.providers));
 
         if (providers == nullptr)
             return false;
@@ -622,9 +543,8 @@ private:
 
         for (int i = 0; i < numProviders; ++i)
         {
-            auto providerInfo = LocalRef<jobject> (env->GetObjectArrayElement (providers, i));
-            auto authority = LocalRef<jstring> ((jstring) env->GetObjectField (providerInfo,
-                                                                               AndroidProviderInfo.authority));
+            LocalRef<jobject> providerInfo (env->GetObjectArrayElement (providers, i));
+            LocalRef<jstring> authority ((jstring) env->GetObjectField (providerInfo, AndroidProviderInfo.authority));
 
             if (juceString (authority) == sharingContentProviderAuthority)
                 return true;
@@ -633,92 +553,23 @@ private:
         return false;
     }
 
-    void handleAsyncUpdate() override
-    {
-        jassert (prepareFilesThread != nullptr);
-
-        if (prepareFilesThread == nullptr)
-            return;
-
-        filesPrepared (prepareFilesThread->getResultFileUris(), prepareFilesThread->getMimeTypes());
-    }
-
-    void filesPrepared (jobject fileUris, const StringArray& mimeTypes)
-    {
-        auto* env = getEnv();
-
-        auto intent = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructor));
-        env->CallObjectMethod (intent, AndroidIntent.setAction,
-                               javaString ("android.intent.action.SEND_MULTIPLE").get());
-
-        env->CallObjectMethod (intent, AndroidIntent.setType,
-                               javaString (getCommonMimeType (mimeTypes)).get());
-
-        constexpr int grantReadPermission = 1;
-        env->CallObjectMethod (intent, AndroidIntent.setFlags, grantReadPermission);
-
-        env->CallObjectMethod (intent, AndroidIntent.putParcelableArrayListExtra,
-                               javaString ("android.intent.extra.STREAM").get(),
-                               fileUris);
-
-        auto chooserIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidIntent,
-                                                                             AndroidIntent.createChooser,
-                                                                             intent.get(),
-                                                                             javaString ("Choose share target").get()));
-
-        startAndroidActivityForResult (chooserIntent, 1003,
-                                       [weakRef = WeakReference<ContentSharerNativeImpl> { this }] (int /*requestCode*/,
-                                                                                                    int resultCode,
-                                                                                                    LocalRef<jobject> /*intentData*/) mutable
-                                       {
-                                           if (weakRef != nullptr)
-                                               weakRef->sharingFinished (resultCode);
-                                       });
-    }
-
-    void decrementPendingFileCountAndNotifyOwnerIfReady()
-    {
-        --nonAssetFilesPendingShare;
-
-        notifyOwnerIfReady();
-    }
-
-    void notifyOwnerIfReady()
-    {
-        if (sharingActivityDidFinish && nonAssetFilesPendingShare.get() == 0)
-            owner.sharingFinished (succeeded, {});
-    }
-
-    void timerCallback() override
-    {
-        stopTimer();
-
-        notifyOwnerIfReady();
-    }
-
     //==============================================================================
     struct ContentUriElements
     {
-        String index;
         String filename;
-        String filepath;
+        File file;
     };
 
     ContentUriElements getContentUriElements (JNIEnv* env, const LocalRef<jobject>& uri) const
     {
-        jassert (prepareFilesThread != nullptr);
+        const auto fullUri = juceString ((jstring) env->CallObjectMethod (uri.get(), AndroidUri.toString));
 
-        if (prepareFilesThread == nullptr)
-            return {};
+        const auto filename = fullUri.fromLastOccurrenceOf ("/", false, true);
 
-        auto fullUri = juceString ((jstring) env->CallObjectMethod (uri.get(), AndroidUri.toString));
+        const auto iter = fileForUri.find (fullUri);
+        const auto info = iter != fileForUri.end() ? iter->second : File{};
 
-        auto index = fullUri.fromFirstOccurrenceOf (uriBase, false, false)
-                             .upToFirstOccurrenceOf ("/", false, true);
-
-        auto filename = fullUri.fromLastOccurrenceOf ("/", false, true);
-
-        return { index, filename, prepareFilesThread->getFilePaths()[index.getIntValue()] };
+        return { filename, info };
     }
 
     static StringArray getSupportedColumns()
@@ -726,31 +577,32 @@ private:
         return StringArray ("_display_name", "_size");
     }
 
-    jobject getAssetFileDescriptor (JNIEnv* env, const LocalRef<jobject>& contentProvider,
-                                  const String& filepath)
+    jobject getAssetFileDescriptor (JNIEnv* env, const LocalRef<jobject>& contentProvider, const File& filepath)
     {
-        // This function can be called from multiple threads.
+        if (nonAssetFilePathsPendingShare.find (filepath) == nonAssetFilePathsPendingShare.end())
         {
-            const ScopedLock sl (nonAssetFileOpenLock);
-
-            if (! nonAssetFilePathsPendingShare.contains (filepath))
+            const auto onCloseCallback = [filepath]
             {
-                nonAssetFilePathsPendingShare.add (filepath);
-                ++nonAssetFilesPendingShare;
+                ContentSharerGlobalImpl::getInstance().nonAssetFilePathsPendingShare.erase (filepath);
+            };
 
-                nonAssetFileObservers.add (new AndroidContentSharerFileObserver (*this, env,
-                                                                                 contentProvider,
-                                                                                 filepath));
-            }
+            auto observer = rawToUniquePtr (new AndroidContentSharerFileObserver (env,
+                                                                                  contentProvider,
+                                                                                  filepath,
+                                                                                  onCloseCallback));
+
+            nonAssetFilePathsPendingShare.emplace (filepath, std::move (observer));
         }
 
-        auto javaFile = LocalRef<jobject> (env->NewObject (JavaFile, JavaFile.constructor,
-                                                           javaString (filepath).get()));
+        const LocalRef<jobject> javaFile (env->NewObject (JavaFile,
+                                                          JavaFile.constructor,
+                                                          javaString (filepath.getFullPathName()).get()));
 
         constexpr int modeReadOnly = 268435456;
-        auto parcelFileDescriptor = LocalRef<jobject> (env->CallStaticObjectMethod (ParcelFileDescriptor,
-                                                                                    ParcelFileDescriptor.open,
-                                                                                    javaFile.get(), modeReadOnly));
+        LocalRef<jobject> parcelFileDescriptor (env->CallStaticObjectMethod (ParcelFileDescriptor,
+                                                                             ParcelFileDescriptor.open,
+                                                                             javaFile.get(),
+                                                                             modeReadOnly));
 
         if (jniCheckHasExceptionOccurredAndClear())
         {
@@ -765,7 +617,8 @@ private:
         assetFileDescriptors.add (GlobalRef (LocalRef<jobject> (env->NewObject (AssetFileDescriptor,
                                                                                 AssetFileDescriptor.constructor,
                                                                                 parcelFileDescriptor.get(),
-                                                                                startOffset, unknownLength))));
+                                                                                startOffset,
+                                                                                unknownLength))));
 
         return assetFileDescriptors.getReference (assetFileDescriptors.size() - 1).get();
     }
@@ -786,7 +639,7 @@ private:
         return result;
     }
 
-    String getCommonMimeType (const StringArray& mimeTypes)
+    static String getCommonMimeType (const StringArray& mimeTypes)
     {
         if (mimeTypes.isEmpty())
             return "*/*";
@@ -812,72 +665,282 @@ private:
         return lookForCommonGroup ? commonMime + "*" : commonMime;
     }
 
-    ContentSharer& owner;
-    String packageName;
-    String uriBase;
-
-    std::unique_ptr<AndroidContentSharerPrepareFilesThread> prepareFilesThread;
-
-    bool succeeded = false;
-    String errorDescription;
-
-    bool sharingActivityDidFinish = false;
-
-    OwnedArray<AndroidContentSharerCursor> cursors;
-
+    CriticalSection mutex;
     Array<GlobalRef> assetFileDescriptors;
-
-    CriticalSection nonAssetFileOpenLock;
-    StringArray nonAssetFilePathsPendingShare;
-    Atomic<int> nonAssetFilesPendingShare { 0 };
-    OwnedArray<AndroidContentSharerFileObserver> nonAssetFileObservers;
-
-    WeakReference<ContentSharerNativeImpl>::Master masterReference;
-    friend class WeakReference<ContentSharerNativeImpl>;
-
-    //==============================================================================
-    #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-     CALLBACK (contentSharerQuery,          "contentSharerQuery",          "(Landroid/net/Uri;[Ljava/lang/String;)Landroid/database/Cursor;") \
-     CALLBACK (contentSharerOpenFile,       "contentSharerOpenFile",       "(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/res/AssetFileDescriptor;") \
-     CALLBACK (contentSharerGetStreamTypes, "contentSharerGetStreamTypes", "(Landroid/net/Uri;Ljava/lang/String;)[Ljava/lang/String;") \
-
-    DECLARE_JNI_CLASS_WITH_MIN_SDK (JuceSharingContentProvider, "com/rmsl/juce/JuceSharingContentProvider", 16)
-    #undef JNI_CLASS_MEMBERS
-
-    static jobject JNICALL contentSharerQuery (JNIEnv*, jobject contentProvider, jobject uri, jobjectArray projection)
-    {
-        if (auto *pimpl = (ContentSharer::ContentSharerNativeImpl *) ContentSharer::getInstance ()->pimpl.get ())
-            return pimpl->query (LocalRef<jobject> (static_cast<jobject> (contentProvider)),
-                                 LocalRef<jobject> (static_cast<jobject> (uri)),
-                                 LocalRef<jobjectArray> (static_cast<jobjectArray> (projection)));
-
-        return nullptr;
-    }
-
-    static jobject JNICALL contentSharerOpenFile (JNIEnv*, jobject contentProvider, jobject uri, jstring mode)
-    {
-        if (auto* pimpl = (ContentSharer::ContentSharerNativeImpl*) ContentSharer::getInstance()->pimpl.get())
-            return pimpl->openFile (LocalRef<jobject> (static_cast<jobject> (contentProvider)),
-                                    LocalRef<jobject> (static_cast<jobject> (uri)),
-                                    LocalRef<jstring> (static_cast<jstring> (mode)));
-
-        return nullptr;
-    }
-
-    static jobjectArray JNICALL contentSharerGetStreamTypes (JNIEnv*, jobject /*contentProvider*/, jobject uri, jstring mimeTypeFilter)
-    {
-        if (auto* pimpl = (ContentSharer::ContentSharerNativeImpl*) ContentSharer::getInstance()->pimpl.get())
-            return pimpl->getStreamTypes (LocalRef<jobject> (static_cast<jobject> (uri)),
-                                          LocalRef<jstring> (static_cast<jstring> (mimeTypeFilter)));
-
-        return nullptr;
-    }
+    std::map<File, std::unique_ptr<AndroidContentSharerFileObserver>> nonAssetFilePathsPendingShare;
+    std::set<std::unique_ptr<AndroidContentSharerCursor>> cursors;
+    std::map<String, File> fileForUri;
+    std::map<int, std::function<void (bool)>> callbackForRequest;
 };
 
-//==============================================================================
-ContentSharer::Pimpl* ContentSharer::createPimpl()
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+     CALLBACK (ContentSharerGlobalImpl::contentSharerQuery,          "contentSharerQuery",          "(Landroid/net/Uri;[Ljava/lang/String;)Landroid/database/Cursor;") \
+     CALLBACK (ContentSharerGlobalImpl::contentSharerOpenFile,       "contentSharerOpenFile",       "(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/res/AssetFileDescriptor;") \
+     CALLBACK (ContentSharerGlobalImpl::contentSharerGetStreamTypes, "contentSharerGetStreamTypes", "(Landroid/net/Uri;Ljava/lang/String;)[Ljava/lang/String;") \
+
+DECLARE_JNI_CLASS (JuceSharingContentProvider, "com/rmsl/juce/JuceSharingContentProvider")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+     CALLBACK (ContentSharerGlobalImpl::onBroadcastResultReceive, "onBroadcastResultNative", "(I)V")
+
+DECLARE_JNI_CLASS (AndroidReceiver, "com/rmsl/juce/Receiver")
+#undef JNI_CLASS_MEMBERS
+
+    //==============================================================================
+class AndroidContentSharerPrepareFilesTask : private AsyncUpdater
 {
-    return new ContentSharerNativeImpl (*this);
+public:
+    AndroidContentSharerPrepareFilesTask (const Array<URL>& fileUrls,
+                                          std::function<void (const std::map<String, File>&, const StringArray&)> onCompletionIn)
+        : onCompletion (std::move (onCompletionIn)),
+          task (std::async (std::launch::async, [this, fileUrls]
+          {
+              run (fileUrls);
+              triggerAsyncUpdate();
+          })) {}
+
+    ~AndroidContentSharerPrepareFilesTask() override
+    {
+        task.wait();
+        cancelPendingUpdate();
+    }
+
+private:
+    const String packageName = ContentSharerGlobalImpl::getInstance().packageName;
+    const String uriBase     = ContentSharerGlobalImpl::getInstance().uriBase;
+
+    struct StreamCloser
+    {
+        explicit StreamCloser (const LocalRef<jobject>& streamToUse)
+            : stream (GlobalRef (streamToUse))
+        {
+        }
+
+        ~StreamCloser()
+        {
+            if (stream.get() != nullptr)
+                getEnv()->CallVoidMethod (stream, JavaCloseable.close);
+        }
+
+        GlobalRef stream;
+    };
+
+    void handleAsyncUpdate() override
+    {
+        onCompletion (infoForUri, mimeTypes);
+    }
+
+    void run (const Array<URL>& fileUrls)
+    {
+        auto* env = getEnv();
+
+        StringArray filePaths;
+
+        for (const auto& f : fileUrls)
+        {
+            const auto scheme = f.getScheme();
+
+            // Only "file://" scheme or no scheme (for files in app bundle) are allowed!
+            jassert (scheme.isEmpty() || scheme == "file");
+
+            const auto fileToPrepare = [&]
+            {
+                if (! scheme.isEmpty())
+                    return f;
+
+                // Raw resource names need to be all lower case
+                jassert (f.toString (true).toLowerCase() == f.toString (true));
+
+                // This will get us a file with file:// URI
+                return copyAssetFileToTemporaryFile (env, f.toString (true));
+            }();
+
+            if (fileToPrepare.isEmpty())
+                continue;
+
+            const auto filepath = URL::removeEscapeChars (fileToPrepare.toString (true).fromFirstOccurrenceOf ("file://", false, false));
+
+            filePaths.add (filepath);
+        }
+
+        std::vector<String> extensions;
+
+        for (const auto& filepath : filePaths)
+        {
+            const auto filename = filepath.fromLastOccurrenceOf ("/", false, true);
+            extensions.push_back (filename.fromLastOccurrenceOf (".", false, true));
+        }
+
+        std::set<String> mimes;
+
+        if (std::none_of (extensions.begin(), extensions.end(), [] (const String& s) { return s.isEmpty(); }))
+            for (const auto& extension : extensions)
+                for (const auto& mime : MimeTypeTable::getMimeTypesForFileExtension (extension))
+                    mimes.insert (mime);
+
+        for (const auto& mime : mimes)
+            mimeTypes.add (mime);
+
+        for (auto it = filePaths.begin(); it != filePaths.end(); ++it)
+        {
+            const auto filename = it->fromLastOccurrenceOf ("/", false, true);
+            const auto contentString = uriBase + String (std::distance (filePaths.begin(), it)) + "/" + filename;
+            infoForUri.emplace (contentString, *it);
+        }
+    }
+
+    URL copyAssetFileToTemporaryFile (JNIEnv* env, const String& filename)
+    {
+        LocalRef<jobject> resources (env->CallObjectMethod (getAppContext().get(), AndroidContext.getResources));
+        int fileId = env->CallIntMethod (resources,
+                                         AndroidResources.getIdentifier,
+                                         javaString (filename).get(),
+                                         javaString ("raw").get(),
+                                         javaString (packageName).get());
+
+        // Raw resource not found. Please make sure that you include your file as a raw resource
+        // and that you specify just the file name, without an extension.
+        jassert (fileId != 0);
+
+        if (fileId == 0)
+            return {};
+
+        LocalRef<jobject> assetFd (env->CallObjectMethod (resources,
+                                                          AndroidResources.openRawResourceFd,
+                                                          fileId));
+
+        StreamCloser inputStream (LocalRef<jobject> (env->CallObjectMethod (assetFd, AssetFileDescriptor.createInputStream)));
+
+        if (jniCheckHasExceptionOccurredAndClear())
+        {
+            // Failed to open file stream for resource
+            jassertfalse;
+            return {};
+        }
+
+        auto tempFile = File::createTempFile ({});
+        tempFile.createDirectory();
+        tempFile = tempFile.getChildFile (filename);
+
+        StreamCloser outputStream  (LocalRef<jobject> (env->NewObject (JavaFileOutputStream,
+                                                                       JavaFileOutputStream.constructor,
+                                                                       javaString (tempFile.getFullPathName()).get())));
+
+        if (jniCheckHasExceptionOccurredAndClear())
+        {
+            // Failed to open file stream for temporary file
+            jassertfalse;
+            return {};
+        }
+
+        LocalRef<jbyteArray> buffer (env->NewByteArray (1024));
+        int bytesRead = 0;
+
+        for (;;)
+        {
+            bytesRead = env->CallIntMethod (inputStream.stream, JavaFileInputStream.read, buffer.get());
+
+            if (jniCheckHasExceptionOccurredAndClear())
+            {
+                // Failed to read from resource file.
+                jassertfalse;
+                return {};
+            }
+
+            if (bytesRead < 0)
+                break;
+
+            env->CallVoidMethod (outputStream.stream, JavaFileOutputStream.write, buffer.get(), 0, bytesRead);
+
+            if (jniCheckHasExceptionOccurredAndClear())
+            {
+                // Failed to write to temporary file.
+                jassertfalse;
+                return {};
+            }
+        }
+
+        return URL (tempFile);
+    }
+
+    std::map<String, File> infoForUri;
+    StringArray mimeTypes;
+    std::function<void (const std::map<String, File>&, const StringArray&)> onCompletion;
+    // This task is obtained from std::async(). Its destructor will block until the asynchronous
+    // task has completed; as a result, we can guarantee that the async task will have finished
+    // before the lifetimes of the other data members and base class end.
+    std::future<void> task;
+};
+
+auto detail::ScopedContentSharerInterface::shareFiles (const Array<URL>& urls, Component*) -> std::unique_ptr<ScopedContentSharerInterface>
+{
+    class NativeScopedContentSharerInterface : public detail::ScopedContentSharerInterface
+    {
+    public:
+        explicit NativeScopedContentSharerInterface (Array<URL> f)
+            : files (std::move (f)) {}
+
+        void runAsync (ContentSharer::Callback callback) override
+        {
+            // This lambda will only be called if the AndroidContentSharerPrepareFilesTask is still
+            // alive. We know that our lifetime will end after the
+            // AndroidContentSharerPrepareFilesTask, so there's no need to check that 'this' is
+            // still valid inside the lambda.
+            task.emplace (files, [this, callback] (const std::map<String, File>& infoForUri, const StringArray& mimeTypes)
+            {
+                launcher = ContentSharerGlobalImpl::getInstance().sharePreparedFiles (infoForUri, mimeTypes, [callback] (bool success)
+                {
+                    callback (success, {});
+                });
+            });
+        }
+
+        void close() override
+        {
+            // dismiss() doesn't close the sharesheet, and there doesn't seem to be any alternative
+            // Maybe this will work in the future...
+            launcher.reset();
+        }
+
+    private:
+        Array<URL> files;
+        std::optional<AndroidContentSharerPrepareFilesTask> task;
+        std::unique_ptr<ActivityLauncher> launcher;
+    };
+
+    return std::make_unique<NativeScopedContentSharerInterface> (std::move (urls));
+}
+
+auto detail::ScopedContentSharerInterface::shareText (const String& text, Component*) -> std::unique_ptr<ScopedContentSharerInterface>
+{
+    class NativeScopedContentSharerInterface : public detail::ScopedContentSharerInterface
+    {
+    public:
+        explicit NativeScopedContentSharerInterface (String t)
+            : text (std::move (t)) {}
+
+        void runAsync (ContentSharer::Callback callback) override
+        {
+            launcher = ContentSharerGlobalImpl::getInstance().shareText (text, [callback] (bool success)
+            {
+                callback (success, {});
+            });
+        }
+
+        void close() override
+        {
+            // dismiss() doesn't close the sharesheet, and there doesn't seem to be any alternative
+            // Maybe this will work in the future...
+            launcher.reset();
+        }
+
+    private:
+        String text;
+        std::unique_ptr<ActivityLauncher> launcher;
+    };
+
+    return std::make_unique<NativeScopedContentSharerInterface> (std::move (text));
 }
 
 } // namespace juce

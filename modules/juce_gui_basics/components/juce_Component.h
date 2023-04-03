@@ -1168,14 +1168,14 @@ public:
 
         Calling this method will also invoke the sendLookAndFeelChange() method.
 
-        @see getLookAndFeel, lookAndFeelChanged
+        @see getLookAndFeel, lookAndFeelChanged, sendLookAndFeelChange
     */
     void setLookAndFeel (LookAndFeel* newLookAndFeel);
 
     /** Called to let the component react to a change in the look-and-feel setting.
 
-        When the look-and-feel is changed for a component, this will be called in
-        all its child components, recursively.
+        When the look-and-feel is changed for a component, this method, repaint(), and
+        colourChanged() are called on the original component and all its children recursively.
 
         It can also be triggered manually by the sendLookAndFeelChange() method, in case
         an application uses a LookAndFeel class that might have changed internally.
@@ -1184,10 +1184,8 @@ public:
     */
     virtual void lookAndFeelChanged();
 
-    /** Calls the lookAndFeelChanged() method in this component and all its children.
-
-        This will recurse through the children and their children, calling lookAndFeelChanged()
-        on them all.
+    /** Calls the methods repaint(), lookAndFeelChanged(), and colourChanged() in this
+        component and all its children recursively.
 
         @see lookAndFeelChanged
     */
@@ -2243,6 +2241,8 @@ public:
         method, which your component can override if it needs to do something when
         colours are altered.
 
+        Note repaint() is not automatically called when a colour is changed.
+
         For more details about colour IDs, see the comments for findColour().
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
@@ -2264,8 +2264,11 @@ public:
     */
     void copyAllExplicitColoursTo (Component& target) const;
 
-    /** This method is called when a colour is changed by the setColour() method.
-        @see setColour, findColour
+    /** This method is called when a colour is changed by the setColour() method,
+        or when the look-and-feel is changed by the setLookAndFeel() or
+        sendLookAndFeelChanged() methods.
+
+        @see setColour, findColour, setLookAndFeel, sendLookAndFeelChanged
     */
     virtual void colourChanged();
 

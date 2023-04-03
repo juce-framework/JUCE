@@ -1677,6 +1677,10 @@ private:
         {
             auto* app = createApplicationElement (*manifest);
 
+            auto* receiver = getOrCreateChildWithName (*app, "receiver");
+            setAttributeIfNotPresent (*receiver, "android:name", "com.rmsl.juce.Receiver");
+            setAttributeIfNotPresent (*receiver, "android:exported", "false");
+
             auto* act = createActivityElement (*app);
             createIntentElement (*act);
 
