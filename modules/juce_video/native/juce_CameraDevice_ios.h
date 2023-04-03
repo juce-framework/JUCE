@@ -493,10 +493,12 @@ private:
             if (error != nil)
                 return nsStringToJuce (error.localizedDescription);
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
             if (! [captureSession.get() canAddInput: input])
                 return "Could not add input to camera session.";
 
             [captureSession.get() addInput: input];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             return {};
         }
 
