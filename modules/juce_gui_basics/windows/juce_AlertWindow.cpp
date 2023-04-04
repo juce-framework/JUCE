@@ -645,17 +645,7 @@ static int showMaybeAsync (const MessageBoxOptions& options,
                            ModalComponentManager::Callback* callbackIn)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-    {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        if (callbackIn == nullptr)
-            return NativeMessageBox::show (options);
-       #endif
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-        NativeMessageBox::showAsync (options, callbackIn);
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        return false;
-    }
+        return showNativeBoxUnmanaged (options, callbackIn, ResultCodeMappingMode::alertWindow);
 
     return showAlertWindowUnmanaged (options, callbackIn);
 }
