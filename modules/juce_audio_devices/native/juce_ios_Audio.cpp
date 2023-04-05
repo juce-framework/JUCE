@@ -551,15 +551,10 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
 
     bool setAudioPreprocessingEnabled (bool enable)
     {
-        auto session = [AVAudioSession sharedInstance];
+        const UInt32 one = 1;
+        AudioUnitSetProperty (audioUnit, kAUVoiceIOProperty_BypassVoiceProcessing, kAudioUnitScope_Input, 1, &one, sizeof (one));
 
-        NSString* mode = (enable ? AVAudioSessionModeDefault
-                                 : AVAudioSessionModeMeasurement);
-
-        JUCE_NSERROR_CHECK ([session setMode: mode
-                                       error: &error]);
-
-        return session.mode == mode;
+        return true;
     }
 
     //==============================================================================
