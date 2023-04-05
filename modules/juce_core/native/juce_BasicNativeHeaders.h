@@ -113,6 +113,12 @@
  #include <iphlpapi.h>
  #include <accctrl.h>
  #include <aclapi.h>
+
+ #undef SECURITY_WIN32
+ #define SECURITY_WIN32
+
+ #include <Security.h>
+
  #include <mapi.h>
  #include <float.h>
  #include <process.h>
@@ -152,6 +158,7 @@
   #pragma comment (lib, "version.lib")
   #pragma comment (lib, "shlwapi.lib")
   #pragma comment (lib, "winmm.lib")
+  #pragma comment (lib, "Secur32.lib")
 
   #ifdef _NATIVE_WCHAR_T_DEFINED
    #ifdef _DEBUG
