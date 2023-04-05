@@ -1135,6 +1135,7 @@ private:
 
             case kAudioDevicePropertyDeviceHasChanged:
             case kAudioObjectPropertyOwnedObjects:
+                intern->deviceDetailsChanged();
                 intern->deviceRequestedRestart();
                 break;
 
