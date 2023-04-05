@@ -29,42 +29,30 @@ namespace juce
 //==============================================================================
 class FileListTreeItem   : public TreeViewItem,
                            private TimeSliceClient,
-                           private AsyncUpdater,
-                           private ChangeListener
+                           private AsyncUpdater
 {
 public:
     FileListTreeItem (FileTreeComponent& treeComp,
-                      DirectoryContentsList* parentContents,
-                      int indexInContents,
                       const File& f,
                       TimeSliceThread& t)
         : file (f),
           owner (treeComp),
-          parentContentsList (parentContents),
-          indexInContentsList (indexInContents),
-          subContentsList (nullptr, false),
           thread (t)
     {
-        DirectoryContentsList::FileInfo fileInfo;
+    }
 
-        if (parentContents != nullptr
-             && parentContents->getFileInfo (indexInContents, fileInfo))
-        {
-            fileSize = File::descriptionOfSizeInBytes (fileInfo.fileSize);
-            modTime = fileInfo.modificationTime.formatted ("%d %b '%y %H:%M");
-            isDirectory = fileInfo.isDirectory;
-        }
-        else
-        {
-            isDirectory = true;
-        }
+    void update (const DirectoryContentsList::FileInfo& fileInfo)
+    {
+        fileSize = File::descriptionOfSizeInBytes (fileInfo.fileSize);
+        modTime = fileInfo.modificationTime.formatted ("%d %b '%y %H:%M");
+        isDirectory = fileInfo.isDirectory;
+        repaintItem();
     }
 
     ~FileListTreeItem() override
     {
         thread.removeTimeSliceClient (this);
         clearSubItems();
-        removeSubContentsList();
     }
 
     //==============================================================================
@@ -76,88 +64,7 @@ public:
 
     void itemOpennessChanged (bool isNowOpen) override
     {
-        if (isNowOpen)
-        {
-            clearSubItems();
-
-            isDirectory = file.isDirectory();
-
-            if (isDirectory)
-            {
-                if (subContentsList == nullptr && parentContentsList != nullptr)
-                {
-                    auto l = new DirectoryContentsList (parentContentsList->getFilter(), thread);
-
-                    l->setDirectory (file,
-                                     parentContentsList->isFindingDirectories(),
-                                     parentContentsList->isFindingFiles());
-
-                    setSubContentsList (l, true);
-                }
-
-                changeListenerCallback (nullptr);
-            }
-        }
-    }
-
-    void removeSubContentsList()
-    {
-        if (subContentsList != nullptr)
-        {
-            subContentsList->removeChangeListener (this);
-            subContentsList.reset();
-        }
-    }
-
-    void setSubContentsList (DirectoryContentsList* newList, const bool canDeleteList)
-    {
-        removeSubContentsList();
-
-        subContentsList = OptionalScopedPointer<DirectoryContentsList> (newList, canDeleteList);
-        newList->addChangeListener (this);
-    }
-
-    void selectFile (const File& target)
-    {
-        if (file == target)
-        {
-            setSelected (true, true);
-            return;
-        }
-
-        if (subContentsList != nullptr && subContentsList->isStillLoading())
-        {
-            pendingFileSelection.emplace (*this, target);
-            return;
-        }
-
-        pendingFileSelection.reset();
-
-        if (! target.isAChildOf (file))
-            return;
-
-        setOpen (true);
-
-        for (int i = 0; i < getNumSubItems(); ++i)
-            if (auto* f = dynamic_cast<FileListTreeItem*> (getSubItem (i)))
-                f->selectFile (target);
-    }
-
-    void changeListenerCallback (ChangeBroadcaster*) override
-    {
-        rebuildItemsFromContentList();
-    }
-
-    void rebuildItemsFromContentList()
-    {
-        clearSubItems();
-
-        if (isOpen() && subContentsList != nullptr)
-        {
-            for (int i = 0; i < subContentsList->getNumFiles(); ++i)
-                addSubItem (new FileListTreeItem (owner, subContentsList, i,
-                                                  subContentsList->getFile(i), thread));
-        }
+        NullCheckedInvocation::invoke (onOpennessChanged, file, isNowOpen);
     }
 
     void paintItem (Graphics& g, int width, int height) override
@@ -176,7 +83,7 @@ public:
                                                    file, file.getFileName(),
                                                    &icon, fileSize, modTime,
                                                    isDirectory, isSelected(),
-                                                   indexInContentsList, owner);
+                                                   getIndexInParent(), owner);
     }
 
     String getAccessibilityName() override
@@ -213,40 +120,11 @@ public:
     }
 
     const File file;
+    std::function<void (const File&, bool)> onOpennessChanged;
 
 private:
-    class PendingFileSelection   : private Timer
-    {
-    public:
-        PendingFileSelection (FileListTreeItem& item, const File& f)
-            : owner (item), fileToSelect (f)
-        {
-            startTimer (10);
-        }
-
-        ~PendingFileSelection() override
-        {
-            stopTimer();
-        }
-
-    private:
-        void timerCallback() override
-        {
-            // Take a copy of the file here, in case this PendingFileSelection
-            // object is destroyed during the call to selectFile.
-            owner.selectFile (File { fileToSelect });
-        }
-
-        FileListTreeItem& owner;
-        File fileToSelect;
-    };
-
-    Optional<PendingFileSelection> pendingFileSelection;
     FileTreeComponent& owner;
-    DirectoryContentsList* parentContentsList;
-    int indexInContentsList;
-    OptionalScopedPointer<DirectoryContentsList> subContentsList;
-    bool isDirectory;
+    bool isDirectory = false;
     TimeSliceThread& thread;
     CriticalSection iconUpdate;
     Image icon;
@@ -282,11 +160,297 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListTreeItem)
 };
 
+class DirectoryScanner  : private ChangeListener
+{
+public:
+    struct Listener
+    {
+        virtual ~Listener() = default;
+
+        virtual void rootChanged() = 0;
+        virtual void directoryChanged (const DirectoryContentsList&) = 0;
+    };
+
+    DirectoryScanner (DirectoryContentsList& rootIn, Listener& listenerIn)
+        : root (rootIn), listener (listenerIn)
+    {
+        root.addChangeListener (this);
+    }
+
+    ~DirectoryScanner() override
+    {
+        root.removeChangeListener (this);
+    }
+
+    void refresh()
+    {
+        root.refresh();
+    }
+
+    void open (const File& f)
+    {
+        auto& contentsList = [&]() -> auto&
+        {
+            if (auto it = contentsLists.find (f); it != contentsLists.end())
+                return it->second;
+
+            auto insertion = contentsLists.emplace (std::piecewise_construct,
+                                                   std::forward_as_tuple (f),
+                                                   std::forward_as_tuple (nullptr, root.getTimeSliceThread()));
+            return insertion.first->second;
+        }();
+
+        contentsList.addChangeListener (this);
+        contentsList.setDirectory (f, true, true);
+        contentsList.refresh();
+    }
+
+    void close (const File& f)
+    {
+        if (auto it = contentsLists.find (f); it != contentsLists.end())
+            contentsLists.erase (it);
+    }
+
+    File getRootDirectory() const
+    {
+        return root.getDirectory();
+    }
+
+    bool isStillLoading() const
+    {
+        return std::any_of (contentsLists.begin(),
+                            contentsLists.end(),
+                            [] (const auto& it)
+                            {
+                                return it.second.isStillLoading();
+                            });
+    }
+
+private:
+    void changeListenerCallback (ChangeBroadcaster* source) override
+    {
+        auto* sourceList = static_cast<DirectoryContentsList*> (source);
+
+        if (sourceList == &root)
+        {
+            if (std::exchange (lastDirectory, root.getDirectory()) != root.getDirectory())
+            {
+                contentsLists.clear();
+                listener.rootChanged();
+            }
+            else
+            {
+                for (auto& contentsList : contentsLists)
+                    contentsList.second.refresh();
+            }
+        }
+
+        listener.directoryChanged (*sourceList);
+    }
+
+    DirectoryContentsList& root;
+    Listener& listener;
+    File lastDirectory;
+    std::map<File, DirectoryContentsList> contentsLists;
+};
+
+class FileTreeComponent::Controller  : private DirectoryScanner::Listener
+{
+public:
+    explicit Controller (FileTreeComponent& ownerIn)
+        : owner (ownerIn),
+          scanner (owner.directoryContentsList, *this)
+    {
+        refresh();
+    }
+
+    ~Controller() override
+    {
+        owner.deleteRootItem();
+    }
+
+    void refresh()
+    {
+        scanner.refresh();
+    }
+
+    void selectFile (const File& target)
+    {
+        pendingFileSelection.emplace (target);
+        tryResolvePendingFileSelection();
+    }
+
+private:
+    template <typename ItemCallback>
+    static void forEachItemRecursive (TreeViewItem* item, ItemCallback&& cb)
+    {
+        if (item == nullptr)
+            return;
+
+        if (auto* fileListItem = dynamic_cast<FileListTreeItem*> (item))
+            cb (fileListItem);
+
+        for (int i = 0; i < item->getNumSubItems(); ++i)
+            forEachItemRecursive (item->getSubItem (i), cb);
+    }
+
+    //==============================================================================
+    void rootChanged() override
+    {
+        owner.deleteRootItem();
+        treeItemForFile.clear();
+        owner.setRootItem (createNewItem (scanner.getRootDirectory()).release());
+    }
+
+    void directoryChanged (const DirectoryContentsList& contentsList) override
+    {
+        auto* parentItem = [&]() -> FileListTreeItem*
+        {
+            if (auto it = treeItemForFile.find (contentsList.getDirectory()); it != treeItemForFile.end())
+                return it->second;
+
+            return nullptr;
+        }();
+
+        if (parentItem == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
+
+        for (int i = 0; i < contentsList.getNumFiles(); ++i)
+        {
+            auto file = contentsList.getFile (i);
+
+            DirectoryContentsList::FileInfo fileInfo;
+            contentsList.getFileInfo (i, fileInfo);
+
+            auto* item = [&]
+            {
+                if (auto it = treeItemForFile.find (file); it != treeItemForFile.end())
+                    return it->second;
+
+                auto* newItem = createNewItem (file).release();
+                parentItem->addSubItem (newItem);
+                return newItem;
+            }();
+
+            if (item->isOpen() && fileInfo.isDirectory)
+                scanner.open (item->file);
+
+            item->update (fileInfo);
+        }
+
+        if (contentsList.isStillLoading())
+            return;
+
+        std::set<File> allFiles;
+
+        for (int i = 0; i < contentsList.getNumFiles(); ++i)
+            allFiles.insert (contentsList.getFile (i));
+
+        for (int i = 0; i < parentItem->getNumSubItems();)
+        {
+            auto* fileItem = dynamic_cast<FileListTreeItem*> (parentItem->getSubItem (i));
+
+            if (fileItem != nullptr && allFiles.count (fileItem->file) == 0)
+            {
+                forEachItemRecursive (parentItem->getSubItem (i),
+                                      [this] (auto* item)
+                                      {
+                                          scanner.close (item->file);
+                                          treeItemForFile.erase (item->file);
+                                      });
+
+                parentItem->removeSubItem (i);
+            }
+            else
+            {
+                ++i;
+            }
+        }
+
+        struct Comparator
+        {
+            static int compareElements (TreeViewItem* first, TreeViewItem* second)
+            {
+                auto* item1 = dynamic_cast<FileListTreeItem*> (first);
+                auto* item2 = dynamic_cast<FileListTreeItem*> (second);
+
+                if (item1 == nullptr || item2 == nullptr)
+                    return 0;
+
+                if (item1->file < item2->file)
+                    return -1;
+
+                if (item1->file > item2->file)
+                    return 1;
+
+                return 0;
+            }
+        };
+
+        static Comparator comparator;
+        parentItem->sortSubItems (comparator);
+        tryResolvePendingFileSelection();
+    }
+
+    std::unique_ptr<FileListTreeItem> createNewItem (const File& file)
+    {
+        auto newItem = std::make_unique<FileListTreeItem> (owner,
+                                                           file,
+                                                           owner.directoryContentsList.getTimeSliceThread());
+
+        newItem->onOpennessChanged = [this, itemPtr = newItem.get()] (const auto& f, auto isOpen)
+        {
+            if (isOpen)
+            {
+                scanner.open (f);
+            }
+            else
+            {
+                forEachItemRecursive (itemPtr,
+                                      [this] (auto* item)
+                                      {
+                                          scanner.close (item->file);
+                                      });
+            }
+        };
+
+        treeItemForFile[file] = newItem.get();
+        return newItem;
+    }
+
+    void tryResolvePendingFileSelection()
+    {
+        if (! pendingFileSelection.has_value())
+            return;
+
+        if (auto item = treeItemForFile.find (*pendingFileSelection); item != treeItemForFile.end())
+        {
+            item->second->setSelected (true, true);
+            pendingFileSelection.reset();
+            return;
+        }
+
+        if (owner.directoryContentsList.isStillLoading() || scanner.isStillLoading())
+            return;
+
+        owner.clearSelectedItems();
+    }
+
+    FileTreeComponent& owner;
+    std::map<File, FileListTreeItem*> treeItemForFile;
+    DirectoryScanner scanner;
+    std::optional<File> pendingFileSelection;
+};
+
 //==============================================================================
 FileTreeComponent::FileTreeComponent (DirectoryContentsList& listToShow)
     : DirectoryContentsDisplayComponent (listToShow),
       itemHeight (22)
 {
+    controller = std::make_unique<Controller> (*this);
     setRootItemVisible (false);
     refresh();
 }
@@ -298,13 +462,7 @@ FileTreeComponent::~FileTreeComponent()
 
 void FileTreeComponent::refresh()
 {
-    deleteRootItem();
-
-    auto root = new FileListTreeItem (*this, nullptr, 0, directoryContentsList.getDirectory(),
-                                      directoryContentsList.getTimeSliceThread());
-
-    root->setSubContentsList (&directoryContentsList, false);
-    setRootItem (root);
+    controller->refresh();
 }
 
 //==============================================================================
@@ -333,8 +491,7 @@ void FileTreeComponent::setDragAndDropDescription (const String& description)
 
 void FileTreeComponent::setSelectedFile (const File& target)
 {
-    if (auto* t = dynamic_cast<FileListTreeItem*> (getRootItem()))
-        t->selectFile (target);
+    controller->selectFile (target);
 }
 
 void FileTreeComponent::setItemHeight (int newHeight)
