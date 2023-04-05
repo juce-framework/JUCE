@@ -124,38 +124,20 @@ private:
             switch (type)
             {
                 case NormalCursor:
-                case ParentCursor:          c = [NSCursor arrowCursor]; break;
-                case NoCursor:              return createCursor ({ ScaledImage (Image (Image::ARGB, 8, 8, true)), {} });
-                case DraggingHandCursor:    c = [NSCursor openHandCursor]; break;
-                case WaitCursor:            c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball
-                case IBeamCursor:           c = [NSCursor IBeamCursor]; break;
-                case PointingHandCursor:    c = [NSCursor pointingHandCursor]; break;
-                case LeftEdgeResizeCursor:  c = [NSCursor resizeLeftCursor]; break;
-                case RightEdgeResizeCursor: c = [NSCursor resizeRightCursor]; break;
-                case CrosshairCursor:       c = [NSCursor crosshairCursor]; break;
-
-                case CopyingCursor:
-                {
-                    c = [NSCursor dragCopyCursor];
-                    break;
-                }
-
-                case UpDownResizeCursor:
-                case TopEdgeResizeCursor:
-                case BottomEdgeResizeCursor:
-                    if (NSCursor* m = fromHIServices ("resizenorthsouth"))
-                        return m;
-
-                    c = [NSCursor resizeUpDownCursor];
-                    break;
-
-                case LeftRightResizeCursor:
-                    if (NSCursor* m = fromHIServices ("resizeeastwest"))
-                        return m;
-
-                    c = [NSCursor resizeLeftRightCursor];
-                    break;
-
+                case ParentCursor:           c = [NSCursor arrowCursor]; break;
+                case NoCursor:               return createCursor ({ ScaledImage (Image (Image::ARGB, 8, 8, true)), {} });
+                case DraggingHandCursor:     c = [NSCursor openHandCursor]; break;
+                case WaitCursor:             c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball
+                case IBeamCursor:            c = [NSCursor IBeamCursor]; break;
+                case PointingHandCursor:     c = [NSCursor pointingHandCursor]; break;
+                case LeftEdgeResizeCursor:   c = [NSCursor resizeLeftCursor]; break;
+                case RightEdgeResizeCursor:  c = [NSCursor resizeRightCursor]; break;
+                case CrosshairCursor:        c = [NSCursor crosshairCursor]; break;
+                case CopyingCursor:          c = [NSCursor dragCopyCursor]; break;
+                case UpDownResizeCursor:     c = [NSCursor resizeUpDownCursor]; break;
+                case TopEdgeResizeCursor:    c = [NSCursor resizeUpCursor]; break;
+                case BottomEdgeResizeCursor: c = [NSCursor resizeDownCursor]; break;
+                case LeftRightResizeCursor:  c = [NSCursor resizeLeftRightCursor]; break;
                 case TopLeftCornerResizeCursor:
                 case BottomRightCornerResizeCursor:
                     return fromHIServices ("resizenorthwestsoutheast");
