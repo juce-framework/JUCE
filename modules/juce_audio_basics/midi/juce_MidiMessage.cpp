@@ -134,7 +134,8 @@ MidiMessage::MidiMessage (const void* const d, const int dataSize, const double 
 {
     jassert (dataSize > 0);
     // this checks that the length matches the data..
-    jassert (dataSize > 3 || *(uint8*)d >= 0xf0 || getMessageLengthFromFirstByte (*(uint8*)d) == size);
+    auto lastByte = static_cast<const char*>(d)[dataSize-1];
+    jassert (dataSize > 3 || *(uint8*)d >= 0xf0 || (uint8)lastByte == 0xf7 || getMessageLengthFromFirstByte (*(uint8*)d) == size);
 
     memcpy (allocateSpace (dataSize), d, (size_t) dataSize);
 }
