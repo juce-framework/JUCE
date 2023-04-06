@@ -951,6 +951,8 @@ public:
         if (r.size.width < 1.0f || r.size.height < 1.0f)
             return;
 
+        deferredRepaints.subtract ({ convertToRectFloat (r) });
+
         auto cg = []
         {
             if (@available (macOS 10.10, *))
