@@ -258,19 +258,19 @@ public:
 
     /** Creates a set for a 9.0.4 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topRearLeft, topRearRight).
 
-        Is equivalent to: AAX_eStemFormat_9_0_4 (AAX).
+        Is equivalent to: k90_4 (VST3), AAX_eStemFormat_9_0_4 (AAX).
     */
     static AudioChannelSet JUCE_CALLTYPE create9point0point4();
 
     /** Creates a set for a 9.1.4 surround setup (left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topRearLeft, topRearRight).
 
-        Is equivalent to: AAX_eStemFormat_9_1_4 (AAX).
+        Is equivalent to: k91_4 (VST3), AAX_eStemFormat_9_1_4 (AAX).
     */
     static AudioChannelSet JUCE_CALLTYPE create9point1point4();
 
     /** Creates a set for a 9.0.6 surround setup (left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topSideLeft, topSideRight, topRearLeft, topRearRight).
 
-        Is equivalent to: AAX_eStemFormat_9_0_6 (AAX).
+        Is equivalent to: k90_6 (VST3), AAX_eStemFormat_9_0_6 (AAX).
     */
     static AudioChannelSet JUCE_CALLTYPE create9point0point6();
 
