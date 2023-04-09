@@ -30,15 +30,14 @@ namespace juce
 {
 
 //==============================================================================
-template <typename ViewType>
 class CoreGraphicsMetalLayerRenderer
 {
 public:
     //==============================================================================
-    static auto create (ViewType* view, bool isOpaque)
+    static auto create()
     {
         ObjCObjectHandle<id<MTLDevice>> device { MTLCreateSystemDefaultDevice() };
-        return rawToUniquePtr (device != nullptr ? new CoreGraphicsMetalLayerRenderer (device, view, isOpaque)
+        return rawToUniquePtr (device != nullptr ? new CoreGraphicsMetalLayerRenderer (device)
                                                  : nullptr);
     }
 
@@ -51,48 +50,15 @@ public:
         }
     }
 
-    void attach (ViewType* view, bool isOpaque)
-    {
-       #if JUCE_MAC
-        view.wantsLayer = YES;
-        view.layerContentsPlacement = NSViewLayerContentsPlacementTopLeft;
-        view.layer = [CAMetalLayer layer];
-       #endif
-
-        auto layer = (CAMetalLayer*) view.layer;
-
-        layer.device = device.get();
-        layer.framebufferOnly = NO;
-        layer.pixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
-        layer.opaque = isOpaque;
-        layer.allowsNextDrawableTimeout = NO;
-
-        attachedView = view;
-        doSynchronousRender = true;
-    }
-
-    void detach()
-    {
-       #if JUCE_MAC
-        attachedView.wantsLayer = NO;
-        attachedView.layer = nil;
-       #endif
-
-        attachedView = nullptr;
-    }
-
-    bool isAttachedToView (ViewType* view) const
-    {
-        return view == attachedView && attachedView != nullptr;
-    }
-
+    /*  Returns any regions that weren't redrawn, and which should be retried next frame. */
     template <typename Callback>
-    bool drawRectangleList (ViewType* view,
-                            float scaleFactor,
-                            Callback&& drawRectWithContext,
-                            const RectangleList<float>& dirtyRegions)
+    [[nodiscard]] RectangleList<float> drawRectangleList (CAMetalLayer* layer,
+                                                          float scaleFactor,
+                                                          Callback&& drawRectWithContext,
+                                                          RectangleList<float> dirtyRegions,
+                                                          const bool renderSync)
     {
-        auto layer = (CAMetalLayer*) view.layer;
+        layer.presentsWithTransaction = renderSync;
 
         if (memoryBlitCommandBuffer != nullptr)
         {
@@ -104,7 +70,7 @@ public:
                 case MTLCommandBufferStatusScheduled:
                     // If we haven't finished blitting the CPU texture to the GPU then
                     // report that we have been unable to draw anything.
-                    return false;
+                    return dirtyRegions;
                 case MTLCommandBufferStatusCompleted:
                 case MTLCommandBufferStatusError:
                     break;
@@ -112,14 +78,15 @@ public:
         }
 
         layer.contentsScale = scaleFactor;
-        const auto drawableSizeTansform = CGAffineTransformMakeScale (layer.contentsScale,
-                                                                      layer.contentsScale);
-        const auto transformedFrameSize = CGSizeApplyAffineTransform (view.frame.size, drawableSizeTansform);
+
+        const auto drawableSizeTransform = CGAffineTransformMakeScale (layer.contentsScale, layer.contentsScale);
+        const auto transformedFrameSize = CGSizeApplyAffineTransform (layer.bounds.size, drawableSizeTransform);
 
         if (resources == nullptr || ! CGSizeEqualToSize (layer.drawableSize, transformedFrameSize))
         {
             layer.drawableSize = transformedFrameSize;
             resources = std::make_unique<Resources> (device.get(), layer);
+            dirtyRegions = convertToRectFloat (layer.bounds);
         }
 
         auto gpuTexture = resources->getGpuTexture();
@@ -127,7 +94,7 @@ public:
         if (gpuTexture == nullptr)
         {
             jassertfalse;
-            return false;
+            return dirtyRegions;
         }
 
         auto cgContext = resources->getCGContext();
@@ -165,7 +132,7 @@ public:
             [blitCommandEncoder endEncoding];
         };
 
-        if (doSynchronousRender)
+        if (renderSync)
         {
             @autoreleasepool
             {
@@ -174,11 +141,10 @@ public:
                 id<CAMetalDrawable> drawable = [layer nextDrawable];
                 encodeBlit (commandBuffer, sharedTexture, drawable.texture);
 
-                [commandBuffer presentDrawable: drawable];
                 [commandBuffer commit];
+                [commandBuffer waitUntilScheduled];
+                [drawable present];
             }
-
-            doSynchronousRender = false;
         }
         else
         {
@@ -218,18 +184,16 @@ public:
             [memoryBlitCommandBuffer.get() commit];
         }
 
-        return true;
+        dirtyRegions.clear();
+        return dirtyRegions;
     }
 
 private:
     //==============================================================================
-    CoreGraphicsMetalLayerRenderer (ObjCObjectHandle<id<MTLDevice>> mtlDevice,
-                                    ViewType* view,
-                                    bool isOpaque)
+    explicit CoreGraphicsMetalLayerRenderer (ObjCObjectHandle<id<MTLDevice>> mtlDevice)
         : device (mtlDevice),
           commandQueue ([device.get() newCommandQueue])
     {
-        attach (view, isOpaque);
     }
 
     //==============================================================================
@@ -389,9 +353,6 @@ private:
     };
 
     //==============================================================================
-    ViewType* attachedView = nullptr;
-    bool doSynchronousRender = false;
-
     std::unique_ptr<Resources> resources;
 
     ObjCObjectHandle<id<MTLDevice>> device;

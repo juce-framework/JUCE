@@ -376,13 +376,13 @@ namespace juce
   #undef SIZEOF
   #undef KeyPress
 
-  #include "native/x11/juce_linux_XWindowSystem.h"
-  #include "native/x11/juce_linux_X11_Symbols.h"
+  #include "native/juce_XWindowSystem_linux.h"
+  #include "native/juce_XSymbols_linux.h"
  #endif
 #endif
 
 #if JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER && JUCE_WINDOWS
- #include "native/juce_win32_ScopedThreadDPIAwarenessSetter.h"
+ #include "native/juce_ScopedThreadDPIAwarenessSetter_windows.h"
 #endif
 
 #include "layout/juce_FlexItem.h"

@@ -932,6 +932,11 @@ public:
                                                  const Slider::SliderStyle style,
                                                  Slider&) = 0;
 
+        virtual void drawLinearSliderOutline (Graphics&,
+                                              int x, int y, int width, int height,
+                                              const Slider::SliderStyle,
+                                              Slider&) = 0;
+
         virtual void drawLinearSliderThumb (Graphics&,
                                             int x, int y, int width, int height,
                                             float sliderPos,

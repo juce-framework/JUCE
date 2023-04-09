@@ -404,7 +404,7 @@ public:
         auto endPtr = values.end();
 
         for (; e != endPtr; ++e)
-            if (elementToLookFor == *e)
+            if (exactlyEqual (elementToLookFor, *e))
                 return true;
 
         return false;

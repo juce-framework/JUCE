@@ -123,7 +123,7 @@ public:
         auto* e = begin();
 
         for (auto& o : other)
-            if (! (*e++ == o))
+            if (! exactlyEqual (*e++, o))
                 return false;
 
         return true;

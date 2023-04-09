@@ -153,7 +153,7 @@ void Synthesiser::setMinimumRenderingSubdivisionSize (int numSamples, bool shoul
 //==============================================================================
 void Synthesiser::setCurrentPlaybackSampleRate (const double newRate)
 {
-    if (sampleRate != newRate)
+    if (! approximatelyEqual (sampleRate, newRate))
     {
         const ScopedLock sl (lock);
         allNotesOff (0, false);
@@ -171,7 +171,7 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
                                     int numSamples)
 {
     // must set the sample rate before using this!
-    jassert (sampleRate != 0);
+    jassert (! exactlyEqual (sampleRate, 0.0));
     const int targetChannels = outputAudio.getNumChannels();
 
     auto midiIterator = midiData.findNextSamplePosition (startSample);

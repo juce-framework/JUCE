@@ -755,7 +755,7 @@ void Oversampling<SampleType>::updateDelayLine()
     auto latency = getUncompensatedLatency();
     fractionalDelay = static_cast<SampleType> (1.0) - (latency - std::floor (latency));
 
-    if (fractionalDelay == static_cast<SampleType> (1.0))
+    if (approximatelyEqual (fractionalDelay, static_cast<SampleType> (1.0)))
         fractionalDelay = static_cast<SampleType> (0.0);
     else if (fractionalDelay < static_cast<SampleType> (0.618))
         fractionalDelay += static_cast<SampleType> (1.0);

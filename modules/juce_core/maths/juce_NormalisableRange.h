@@ -128,7 +128,7 @@ public:
 
         auto proportion = clampTo0To1 ((v - start) / (end - start));
 
-        if (skew == static_cast<ValueType> (1))
+        if (exactlyEqual (skew, static_cast<ValueType> (1)))
             return proportion;
 
         if (! symmetricSkew)
@@ -154,7 +154,7 @@ public:
 
         if (! symmetricSkew)
         {
-            if (skew != static_cast<ValueType> (1) && proportion > ValueType())
+            if (! exactlyEqual (skew, static_cast<ValueType> (1)) && proportion > ValueType())
                 proportion = std::exp (std::log (proportion) / skew);
 
             return start + (end - start) * proportion;
@@ -162,7 +162,7 @@ public:
 
         auto distanceFromMiddle = static_cast<ValueType> (2) * proportion - static_cast<ValueType> (1);
 
-        if (skew != static_cast<ValueType> (1) && distanceFromMiddle != static_cast<ValueType> (0))
+        if (! exactlyEqual (skew, static_cast<ValueType> (1)) && ! exactlyEqual (distanceFromMiddle, static_cast<ValueType> (0)))
             distanceFromMiddle = std::exp (std::log (std::abs (distanceFromMiddle)) / skew)
                                  * (distanceFromMiddle < ValueType() ? static_cast<ValueType> (-1)
                                                                      : static_cast<ValueType> (1));
@@ -250,7 +250,7 @@ private:
 
         // If you hit this assertion then either your normalisation function is not working
         // correctly or your input is out of the expected bounds.
-        jassert (clampedValue == value);
+        jassert (exactlyEqual (clampedValue, value));
 
         return clampedValue;
     }

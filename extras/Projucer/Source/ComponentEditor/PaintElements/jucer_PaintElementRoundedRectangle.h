@@ -95,7 +95,7 @@ public:
 
     void setCornerSize (const double newSize, const bool undoable)
     {
-        if (newSize != cornerSize)
+        if (! approximatelyEqual (newSize, cornerSize))
         {
             if (undoable)
             {

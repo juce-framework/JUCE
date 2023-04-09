@@ -465,6 +465,9 @@ void LookAndFeel_V1::drawLinearSlider (Graphics& g,
                           fill, outline);
         }
     }
+
+    if (slider.isBar())
+        drawLinearSliderOutline (g, x, y, w, h, style, slider);
 }
 
 Button* LookAndFeel_V1::createSliderButton (Slider&, const bool isIncrement)

@@ -184,7 +184,7 @@ struct MemoryAudioSourceTests  : public UnitTest
             play (source, channelInfo);
 
             for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-                expect (bufferToFill.getSample (0, sample + buffer.getNumSamples()) == buffer.getSample (0, sample));
+                expectEquals (bufferToFill.getSample (0, sample + buffer.getNumSamples()), buffer.getSample (0, sample));
 
             expect (! isSilent (bufferToFill));
         }
@@ -219,7 +219,7 @@ struct MemoryAudioSourceTests  : public UnitTest
             for (int i = 0; i < 100; ++i)
             {
                 play (source, channelInfo);
-                expect (bufferToFill.getSample (0, 0) == buffer.getSample (0, (i * blockSize) % buffer.getNumSamples()));
+                expectEquals (bufferToFill.getSample (0, 0), buffer.getSample (0, (i * blockSize) % buffer.getNumSamples()));
             }
         }
     }

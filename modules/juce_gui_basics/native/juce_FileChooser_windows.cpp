@@ -26,7 +26,7 @@
 namespace juce
 {
 
-// Implemented in juce_win32_Messaging.cpp
+// Implemented in juce_Messaging_windows.cpp
 namespace detail
 {
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
@@ -45,7 +45,9 @@ public:
           title (titleToUse),
           filtersString (filtersToUse.replaceCharacter (',', ';')),
           selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
-          isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
+          // When dealing with directories, it is not possible to 'Save' them. However, one can 'Open' a directory in order to save into it.
+          // If the 'saveMode' and 'canSelectDirectories' flags are both present, create an FileOpenDialog instead of an FileSaveDialog.
+          isSave             ((flags & FileBrowserComponent::saveMode)               != 0 && ! selectsDirectories),
           warnAboutOverwrite ((flags & FileBrowserComponent::warnAboutOverwriting)   != 0),
           selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0)
     {
@@ -245,9 +247,41 @@ private:
             JUCE_COMRESULT OnFolderChanging (IFileDialog* d, IShellItem*) override                                { return updateHwnd (d); }
             JUCE_COMRESULT OnFileOk (IFileDialog* d) override                                                     { return updateHwnd (d); }
             JUCE_COMRESULT OnFolderChange (IFileDialog* d) override                                               { return updateHwnd (d); }
-            JUCE_COMRESULT OnSelectionChange (IFileDialog* d) override                                            { return updateHwnd (d); }
+            JUCE_COMRESULT OnSelectionChange (IFileDialog* d) override                                            { focusWorkaround(); return updateHwnd (d); }
             JUCE_COMRESULT OnShareViolation (IFileDialog* d, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*) override  { return updateHwnd (d); }
             JUCE_COMRESULT OnOverwrite (IFileDialog* d, IShellItem*, FDE_OVERWRITE_RESPONSE*) override            { return updateHwnd (d); }
+
+            /*  Workaround for a bug in Vista+, OpenFileDialog will truncate the initialFile text.
+                Moving the caret along the full length of the text and back will reveal the full string.
+            */
+            void focusWorkaround()
+            {
+                if (! defaultFileNameTextCaretMoved)
+                {
+                    auto makeKeyInput = [] (WORD vk, bool pressed)
+                    {
+                        INPUT i;
+
+                        ZeroMemory (&i, sizeof (INPUT));
+
+                        i.type = INPUT_KEYBOARD;
+                        i.ki.wVk = vk;
+                        i.ki.dwFlags = pressed ? 0 : KEYEVENTF_KEYUP;
+
+                        return i;
+                    };
+
+                    INPUT inputs[] = {
+                        makeKeyInput (VK_HOME, true),
+                        makeKeyInput (VK_HOME, false),
+                        makeKeyInput (VK_END,  true),
+                        makeKeyInput (VK_END,  false),
+                    };
+
+                    SendInput ((UINT) std::size (inputs), inputs, sizeof (INPUT));
+                    defaultFileNameTextCaretMoved = true;
+                }
+            }
 
             JUCE_COMRESULT updateHwnd (IFileDialog* d)
             {
@@ -266,6 +300,7 @@ private:
                 return S_OK;
             }
 
+            bool defaultFileNameTextCaretMoved = false;
             Win32NativeFileChooser& owner;
         };
 

@@ -28,7 +28,7 @@
 namespace juce::detail
 {
 
-// Implemented in juce_linux_Messaging.cpp
+// Implemented in juce_Messaging_linux.cpp
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
 /** @internal */

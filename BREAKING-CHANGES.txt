@@ -6,6 +6,38 @@ develop
 
 Change
 ------
+The k91_4 and k90_4 VST3 layouts are now mapped to the canonical JUCE 9.1.4 and
+9.0.4 AudioChannelSets. This has a different ChannelType layout than the
+AudioChannelSet previously used with such VST3 SpeakerArrangements.
+
+Possible Issues
+---------------
+VST3 plugins that were prepared to work with the k91_4 and k90_4
+SpeakerArrangements may now have incorrect channel mapping. The channels
+previously accessible through ChannelType::left and right are now accessible
+through ChannelType::wideLeft and wideRight, and channels previously accessible
+through ChannelType::leftCentre and rightCentre are now accessible through
+ChannelType::left and right.
+
+Workaround
+----------
+Code that accesses the channels that correspond to the VST3 Speakers kSpeakerL,
+kSpeakerR, kSpeakerLc and kSpeakerRc needs to be updated. These channels are now
+accessible respectively through ChannelTypes wideLeft, wideRight, left and
+right. Previously they were accessible respectively through left, right,
+leftCentre and rightCentre.
+
+Rationale
+---------
+This change allows developers to handle the 9.1.4 and 9.0.4 surround layouts
+with one codepath across all plugin formats. Previously the
+AudioChannelSet::create9point1point4() and create9point0point4() layouts would
+only be used in CoreAudio and AAX, but a different AudioChannelSet would be used
+in VST3 even though they were functionally equivalent.
+
+
+Change
+------
 The signatures of the ContentSharer member functions have been updated. The
 ContentSharer class itself is no longer a singleton.
 

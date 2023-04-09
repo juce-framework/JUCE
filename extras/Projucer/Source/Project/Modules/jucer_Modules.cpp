@@ -266,14 +266,20 @@ void LibraryModule::findBrowseableFiles (const File& folder, Array<File>& filesF
 
 bool LibraryModule::CompileUnit::isNeededForExporter (ProjectExporter& exporter) const
 {
-    if ((hasSuffix (file, "_OSX")        && ! exporter.isOSX())
-     || (hasSuffix (file, "_iOS")        && ! exporter.isiOS())
-     || (hasSuffix (file, "_Windows")    && ! exporter.isWindows())
-     || (hasSuffix (file, "_Linux")      && ! exporter.isLinux())
-     || (hasSuffix (file, "_Android")    && ! exporter.isAndroid()))
-        return false;
+    const auto trimmedFileNameLowercase = file.getFileNameWithoutExtension().toLowerCase();
 
-    auto targetType = Project::getTargetTypeFromFilePath (file, false);
+    const std::tuple<const char*, bool> shouldBuildForSuffix[] { { "_android", exporter.isAndroid() },
+                                                                 { "_ios",     exporter.isiOS() },
+                                                                 { "_linux",   exporter.isLinux() },
+                                                                 { "_mac",     exporter.isOSX() },
+                                                                 { "_osx",     exporter.isOSX() },
+                                                                 { "_windows", exporter.isWindows() } };
+
+    for (const auto& [suffix, shouldBuild] : shouldBuildForSuffix)
+        if (trimmedFileNameLowercase.endsWith (suffix))
+            return shouldBuild;
+
+    const auto targetType = Project::getTargetTypeFromFilePath (file, false);
 
     if (targetType != build_tools::ProjectType::Target::unspecified && ! exporter.shouldBuildTargetType (targetType))
         return false;
@@ -285,14 +291,6 @@ bool LibraryModule::CompileUnit::isNeededForExporter (ProjectExporter& exporter)
 String LibraryModule::CompileUnit::getFilenameForProxyFile() const
 {
     return "include_" + file.getFileName();
-}
-
-bool LibraryModule::CompileUnit::hasSuffix (const File& f, const char* suffix)
-{
-    auto fileWithoutSuffix = f.getFileNameWithoutExtension() + ".";
-
-    return fileWithoutSuffix.containsIgnoreCase (suffix + String ("."))
-             || fileWithoutSuffix.containsIgnoreCase (suffix + String ("_"));
 }
 
 Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (build_tools::ProjectType::Target::Type forTarget) const

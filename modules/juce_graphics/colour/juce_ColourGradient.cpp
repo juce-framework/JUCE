@@ -30,7 +30,7 @@ ColourGradient::ColourGradient() noexcept  : isRadial (false)
 {
    #if JUCE_DEBUG
     point1.setX (987654.0f);
-    #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED   jassert (point1.x != 987654.0f);
+    #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED jassert (! exactlyEqual (point1.x, 987654.0f));
    #else
     #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED
    #endif
@@ -174,7 +174,7 @@ void ColourGradient::setColour (int index, Colour newColour) noexcept
 
 Colour ColourGradient::getColourAtPosition (double position) const noexcept
 {
-    jassert (colours.getReference(0).position == 0.0); // the first colour specified has to go at position 0
+    jassert (approximatelyEqual (colours.getReference (0).position, 0.0)); // the first colour specified has to go at position 0
 
     if (position <= 0 || colours.size() <= 1)
         return colours.getReference(0).colour;
@@ -199,7 +199,7 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
     JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED // Trying to use this object without setting its coordinates?
     jassert (colours.size() >= 2);
     jassert (numEntries > 0);
-    jassert (colours.getReference(0).position == 0.0); // The first colour specified has to go at position 0
+    jassert (approximatelyEqual (colours.getReference(0).position, 0.0)); // The first colour specified has to go at position 0
 
     int index = 0;
 
@@ -258,12 +258,13 @@ bool ColourGradient::isInvisible() const noexcept
 
 bool ColourGradient::ColourPoint::operator== (ColourPoint other) const noexcept
 {
-    return position == other.position && colour == other.colour;
+    const auto tie = [] (const ColourPoint& p) { return std::tie (p.position, p.colour); };
+    return tie (*this) == tie (other);
 }
 
 bool ColourGradient::ColourPoint::operator!= (ColourPoint other) const noexcept
 {
-    return position != other.position || colour != other.colour;
+    return ! operator== (other);
 }
 
 } // namespace juce

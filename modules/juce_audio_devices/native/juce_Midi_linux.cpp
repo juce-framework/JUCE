@@ -26,15 +26,24 @@ namespace juce
 #if JUCE_ALSA
 
 //==============================================================================
-class AlsaClient  : public ReferenceCountedObject
+class AlsaClient
 {
+    auto lowerBound (int portId) const
+    {
+        const auto comparator = [] (const auto& port, const auto& id) { return port->getPortId() < id; };
+        return std::lower_bound (ports.begin(), ports.end(), portId, comparator);
+    }
+
+    auto findPortIterator (int portId) const
+    {
+        const auto iter = lowerBound (portId);
+        return (iter == ports.end() || (*iter)->getPortId() != portId) ? ports.end() : iter;
+    }
+
 public:
     ~AlsaClient()
     {
         inputThread.reset();
-
-        jassert (instance != nullptr);
-        instance = nullptr;
 
         jassert (activeCallbacks.get() == 0);
 
@@ -57,15 +66,12 @@ public:
         #endif
     }
 
-    using Ptr = ReferenceCountedObjectPtr<AlsaClient>;
-
     //==============================================================================
     // represents an input or output port of the supplied AlsaClient
     struct Port
     {
-        Port (AlsaClient& c, bool forInput) noexcept
-            : client (c), isInput (forInput)
-        {}
+        explicit Port (bool forInput) noexcept
+            : isInput (forInput) {}
 
         ~Port()
         {
@@ -76,21 +82,21 @@ public:
                 else
                     snd_midi_event_free (midiParser);
 
-                snd_seq_delete_simple_port (client.get(), portId);
+                snd_seq_delete_simple_port (client->get(), portId);
             }
         }
 
         void connectWith (int sourceClient, int sourcePort) const noexcept
         {
             if (isInput)
-                snd_seq_connect_from (client.get(), portId, sourceClient, sourcePort);
+                snd_seq_connect_from (client->get(), portId, sourceClient, sourcePort);
             else
-                snd_seq_connect_to (client.get(), portId, sourceClient, sourcePort);
+                snd_seq_connect_to (client->get(), portId, sourceClient, sourcePort);
         }
 
         bool isValid() const noexcept
         {
-            return client.get() != nullptr && portId >= 0;
+            return client->get() != nullptr && portId >= 0;
         }
 
         void setupInput (MidiInput* input, MidiInputCallback* cb)
@@ -126,7 +132,7 @@ public:
             auto numBytes = (long) message.getRawDataSize();
             auto* data = message.getRawData();
 
-            auto seqHandle = client.get();
+            auto seqHandle = client->get();
             bool success = true;
 
             while (numBytes > 0)
@@ -165,7 +171,7 @@ public:
 
         void createPort (const String& name, bool enableSubscription)
         {
-            if (auto seqHandle = client.get())
+            if (auto seqHandle = client->get())
             {
                 const unsigned int caps =
                     isInput ? (SND_SEQ_PORT_CAP_WRITE | (enableSubscription ? SND_SEQ_PORT_CAP_SUBS_WRITE : 0))
@@ -194,7 +200,7 @@ public:
         const String& getPortName() const   { return portName; }
 
     private:
-        AlsaClient& client;
+        const std::shared_ptr<AlsaClient> client = AlsaClient::getInstance();
 
         MidiInputCallback* callback = nullptr;
         snd_midi_event_t* midiParser = nullptr;
@@ -207,19 +213,23 @@ public:
         bool isInput = false;
     };
 
-    static Ptr getInstance()
+    static std::shared_ptr<AlsaClient> getInstance()
     {
-        if (instance == nullptr)
-            instance = new AlsaClient();
+        static std::weak_ptr<AlsaClient> ptr;
 
-        return instance;
+        if (auto locked = ptr.lock())
+            return locked;
+
+        std::shared_ptr<AlsaClient> result (new AlsaClient());
+        ptr = result;
+        return result;
     }
 
     void handleIncomingMidiMessage (snd_seq_event* event, const MidiMessage& message)
     {
         const ScopedLock sl (callbackLock);
 
-        if (auto* port = ports[event->dest.port])
+        if (auto* port = findPort (event->dest.port))
             port->handleIncomingMidiMessage (message);
     }
 
@@ -227,7 +237,7 @@ public:
     {
         const ScopedLock sl (callbackLock);
 
-        if (auto* port = ports[event->dest.port])
+        if (auto* port = findPort (event->dest.port))
             port->handlePartialSysexMessage (messageData, numBytesSoFar, timeStamp);
     }
 
@@ -238,10 +248,13 @@ public:
     {
         const ScopedLock sl (callbackLock);
 
-        auto port = new Port (*this, forInput);
+        auto port = new Port (forInput);
         port->createPort (name, enableSubscription);
-        ports.set (port->getPortId(), port);
-        incReferenceCount();
+
+        const auto iter = lowerBound (port->getPortId());
+        jassert (iter == ports.end() || port->getPortId() < (*iter)->getPortId());
+        ports.insert (iter, rawToUniquePtr (port));
+
         return port;
     }
 
@@ -249,15 +262,13 @@ public:
     {
         const ScopedLock sl (callbackLock);
 
-        ports.set (port->getPortId(), nullptr);
-        decReferenceCount();
+        if (const auto iter = findPortIterator (port->getPortId()); iter != ports.end())
+            ports.erase (iter);
     }
 
 private:
     AlsaClient()
     {
-        jassert (instance == nullptr);
-
         snd_seq_open (&handle, "default", SND_SEQ_OPEN_DUPLEX, 0);
 
         if (handle != nullptr)
@@ -267,7 +278,7 @@ private:
             clientId = snd_seq_client_id (handle);
 
             // It's good idea to pre-allocate a good number of elements
-            ports.ensureStorageAllocated (32);
+            ports.reserve (32);
 
             announcementsIn = snd_seq_create_simple_port (handle,
                                                           TRANS ("announcements").toRawUTF8(),
@@ -279,14 +290,20 @@ private:
         }
     }
 
+    Port* findPort (int portId)
+    {
+        if (const auto iter = findPortIterator (portId); iter != ports.end())
+            return iter->get();
+
+        return nullptr;
+    }
+
     snd_seq_t* handle = nullptr;
     int clientId = 0;
     int announcementsIn = 0;
-    OwnedArray<Port> ports;
+    std::vector<std::unique_ptr<Port>> ports;
     Atomic<int> activeCallbacks;
     CriticalSection callbackLock;
-
-    static AlsaClient* instance;
 
     //==============================================================================
     class SequencerThread
@@ -411,15 +428,13 @@ private:
     std::optional<SequencerThread> inputThread;
 };
 
-AlsaClient* AlsaClient::instance = nullptr;
-
 //==============================================================================
 static String getFormattedPortIdentifier (int clientId, int portId)
 {
     return String (clientId) + "-" + String (portId);
 }
 
-static AlsaClient::Port* iterateMidiClient (const AlsaClient::Ptr& client,
+static AlsaClient::Port* iterateMidiClient (AlsaClient& client,
                                             snd_seq_client_info_t* clientInfo,
                                             bool forInput,
                                             Array<MidiDeviceInfo>& devices,
@@ -427,7 +442,7 @@ static AlsaClient::Port* iterateMidiClient (const AlsaClient::Ptr& client,
 {
     AlsaClient::Port* port = nullptr;
 
-    auto seqHandle = client->get();
+    auto seqHandle = client.get();
     snd_seq_port_info_t* portInfo = nullptr;
 
     snd_seq_port_info_alloca (&portInfo);
@@ -454,7 +469,7 @@ static AlsaClient::Port* iterateMidiClient (const AlsaClient::Ptr& client,
             {
                 if (portID != -1)
                 {
-                    port = client->createPort (portName, forInput, false);
+                    port = client.createPort (portName, forInput, false);
                     jassert (port->isValid());
                     port->connectWith (sourceClient, portID);
                     break;
@@ -492,8 +507,11 @@ static AlsaClient::Port* iterateMidiDevices (bool forInput,
             {
                 if (snd_seq_query_next_client (seqHandle, clientInfo) == 0)
                 {
-                    port = iterateMidiClient (client, clientInfo, forInput,
-                                              devices, deviceIdentifierToOpen);
+                    port = iterateMidiClient (*client,
+                                              clientInfo,
+                                              forInput,
+                                              devices,
+                                              deviceIdentifierToOpen);
 
                     if (port != nullptr)
                         break;

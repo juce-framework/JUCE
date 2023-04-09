@@ -138,70 +138,70 @@
 #endif
 
 #if JUCE_MAC || JUCE_IOS
- #include "native/accessibility/juce_mac_AccessibilitySharedCode.mm"
+ #include "native/accessibility/juce_AccessibilitySharedCode_mac.mm"
 
  #if JUCE_IOS
-  #include "native/juce_ios_UIViewComponentPeer.mm"
-  #include "native/accessibility/juce_ios_Accessibility.mm"
-  #include "native/juce_ios_Windowing.mm"
-  #include "native/juce_ios_NativeMessageBox.mm"
-  #include "native/juce_ios_NativeModalWrapperComponent.h"
-  #include "native/juce_ios_FileChooser.mm"
+  #include "native/juce_UIViewComponentPeer_ios.mm"
+  #include "native/accessibility/juce_Accessibility_ios.mm"
+  #include "native/juce_Windowing_ios.mm"
+  #include "native/juce_NativeMessageBox_ios.mm"
+  #include "native/juce_NativeModalWrapperComponent_ios.h"
+  #include "native/juce_FileChooser_ios.mm"
 
   #if JUCE_CONTENT_SHARING
-   #include "native/juce_ios_ContentSharer.cpp"
+   #include "native/juce_ContentSharer_ios.cpp"
   #endif
 
  #else
-  #include "native/accessibility/juce_mac_Accessibility.mm"
-  #include "native/juce_mac_PerScreenDisplayLinks.h"
-  #include "native/juce_mac_NSViewComponentPeer.mm"
-  #include "native/juce_mac_Windowing.mm"
-  #include "native/juce_mac_NativeMessageBox.mm"
-  #include "native/juce_mac_MainMenu.mm"
-  #include "native/juce_mac_FileChooser.mm"
+  #include "native/accessibility/juce_Accessibility_mac.mm"
+  #include "native/juce_PerScreenDisplayLinks_mac.h"
+  #include "native/juce_NSViewComponentPeer_mac.mm"
+  #include "native/juce_Windowing_mac.mm"
+  #include "native/juce_NativeMessageBox_mac.mm"
+  #include "native/juce_MainMenu_mac.mm"
+  #include "native/juce_FileChooser_mac.mm"
  #endif
 
- #include "native/juce_mac_MouseCursor.mm"
+ #include "native/juce_MouseCursor_mac.mm"
 
 #elif JUCE_WINDOWS
- #include "native/accessibility/juce_win32_ComInterfaces.h"
- #include "native/accessibility/juce_win32_WindowsUIAWrapper.h"
- #include "native/accessibility/juce_win32_AccessibilityElement.h"
- #include "native/accessibility/juce_win32_UIAHelpers.h"
- #include "native/accessibility/juce_win32_UIAProviders.h"
- #include "native/accessibility/juce_win32_AccessibilityElement.cpp"
- #include "native/accessibility/juce_win32_Accessibility.cpp"
- #include "native/juce_win32_Windowing.cpp"
- #include "native/juce_win32_NativeMessageBox.cpp"
- #include "native/juce_win32_DragAndDrop.cpp"
- #include "native/juce_win32_FileChooser.cpp"
+ #include "native/accessibility/juce_ComInterfaces_windows.h"
+ #include "native/accessibility/juce_WindowsUIAWrapper_windows.h"
+ #include "native/accessibility/juce_AccessibilityElement_windows.h"
+ #include "native/accessibility/juce_UIAHelpers_windows.h"
+ #include "native/accessibility/juce_UIAProviders_windows.h"
+ #include "native/accessibility/juce_AccessibilityElement_windows.cpp"
+ #include "native/accessibility/juce_Accessibility_windows.cpp"
+ #include "native/juce_Windowing_windows.cpp"
+ #include "native/juce_NativeMessageBox_windows.cpp"
+ #include "native/juce_DragAndDrop_windows.cpp"
+ #include "native/juce_FileChooser_windows.cpp"
 
 #elif JUCE_LINUX || JUCE_BSD
- #include "native/x11/juce_linux_X11_Symbols.cpp"
- #include "native/x11/juce_linux_X11_DragAndDrop.cpp"
+ #include "native/juce_XSymbols_linux.cpp"
+ #include "native/juce_DragAndDrop_linux.cpp"
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
- #include "native/x11/juce_linux_ScopedWindowAssociation.h"
- #include "native/juce_linux_Windowing.cpp"
- #include "native/juce_linux_NativeMessageBox.cpp"
- #include "native/x11/juce_linux_XWindowSystem.cpp"
+ #include "native/juce_ScopedWindowAssociation_linux.h"
+ #include "native/juce_Windowing_linux.cpp"
+ #include "native/juce_NativeMessageBox_linux.cpp"
+ #include "native/juce_XWindowSystem_linux.cpp"
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
- #include "native/juce_linux_FileChooser.cpp"
+ #include "native/juce_FileChooser_linux.cpp"
 
 #elif JUCE_ANDROID
 
  #include "juce_core/files/juce_common_MimeTypes.h"
- #include "native/accessibility/juce_android_Accessibility.cpp"
- #include "native/juce_android_Windowing.cpp"
- #include "native/juce_android_NativeMessageBox.cpp"
- #include "native/juce_android_FileChooser.cpp"
+ #include "native/accessibility/juce_Accessibility_android.cpp"
+ #include "native/juce_Windowing_android.cpp"
+ #include "native/juce_NativeMessageBox_android.cpp"
+ #include "native/juce_FileChooser_android.cpp"
 
  #if JUCE_CONTENT_SHARING
-  #include "native/juce_android_ContentSharer.cpp"
+  #include "native/juce_ContentSharer_android.cpp"
  #endif
 
 #endif
@@ -331,13 +331,13 @@
 #include "widgets/juce_ToolbarItemComponent.cpp"
 #include "widgets/juce_ToolbarItemPalette.cpp"
 #include "widgets/juce_TreeView.cpp"
+#include "windows/juce_NativeMessageBox.cpp"
 #include "windows/juce_AlertWindow.cpp"
 #include "windows/juce_CallOutBox.cpp"
 #include "windows/juce_ComponentPeer.cpp"
 #include "windows/juce_DialogWindow.cpp"
 #include "windows/juce_DocumentWindow.cpp"
 #include "windows/juce_MessageBoxOptions.cpp"
-#include "windows/juce_NativeMessageBox.cpp"
 #include "windows/juce_ResizableWindow.cpp"
 #include "windows/juce_ScopedMessageBox.cpp"
 #include "windows/juce_ThreadWithProgressWindow.cpp"

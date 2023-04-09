@@ -86,6 +86,29 @@ using uint32    = unsigned int;
   using ssize_t = pointer_sized_int;
 #endif
 
+/** Returns true if the two numbers are approximately equal. This is useful for floating-point
+    and double comparisons.
+*/
+template <typename Type>
+bool approximatelyEqual (Type a, Type b) noexcept
+{
+    return std::abs (a - b) <= (std::numeric_limits<Type>::epsilon() * std::max (a, b))
+           || std::abs (a - b) < std::numeric_limits<Type>::min();
+}
+
+/** Equivalent to operator==, but suppresses float-equality warnings.
+
+    This allows code to be explicit about float-equality checks that are known to have the correct
+    semantics.
+*/
+template <typename Type>
+constexpr bool exactlyEqual (Type a, Type b)
+{
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfloat-equal")
+    return a == b;
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+}
+
 //==============================================================================
 // Some indispensable min/max functions
 
@@ -126,7 +149,7 @@ constexpr Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
 template <typename Type>
 Type jmap (Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targetRangeMin, Type targetRangeMax)
 {
-    jassert (sourceRangeMax != sourceRangeMin); // mapping from a range of zero will produce NaN!
+    jassert (! approximatelyEqual (sourceRangeMax, sourceRangeMin)); // mapping from a range of zero will produce NaN!
     return targetRangeMin + ((targetRangeMax - targetRangeMin) * (sourceValue - sourceRangeMin)) / (sourceRangeMax - sourceRangeMin);
 }
 
@@ -315,16 +338,6 @@ template <typename Type>
 bool isWithin (Type a, Type b, Type tolerance) noexcept
 {
     return std::abs (a - b) <= tolerance;
-}
-
-/** Returns true if the two numbers are approximately equal. This is useful for floating-point
-    and double comparisons.
-*/
-template <typename Type>
-bool approximatelyEqual (Type a, Type b) noexcept
-{
-    return std::abs (a - b) <= (std::numeric_limits<Type>::epsilon() * std::max (a, b))
-            || std::abs (a - b) < std::numeric_limits<Type>::min();
 }
 
 //==============================================================================

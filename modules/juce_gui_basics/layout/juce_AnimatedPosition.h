@@ -179,7 +179,7 @@ private:
     {
         newPosition = range.clipValue (newPosition);
 
-        if (position != newPosition)
+        if (! approximatelyEqual (position, newPosition))
         {
             position = newPosition;
             listeners.call ([this, newPosition] (Listener& l) { l.positionChanged (*this, newPosition); });

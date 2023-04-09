@@ -109,7 +109,7 @@ struct VideoComponent::Pimpl   : public Base
     }
 
     bool isOpen() const noexcept        { return playerController.getPlayer() != nil; }
-    bool isPlaying() const noexcept     { return getSpeed() != 0; }
+    bool isPlaying() const noexcept     { return ! approximatelyEqual (getSpeed(), 0.0); }
 
     void play() noexcept                { [playerController.getPlayer() play]; setSpeed (playSpeedMult); }
     void stop() noexcept                { [playerController.getPlayer() pause]; }
@@ -236,9 +236,9 @@ private:
                     auto oldRate = [[change objectForKey: NSKeyValueChangeOldKey] floatValue];
                     auto newRate = [[change objectForKey: NSKeyValueChangeNewKey] floatValue];
 
-                    if (oldRate == 0 && newRate != 0)
+                    if (approximatelyEqual (oldRate, 0.0f) && ! approximatelyEqual (newRate, 0.0f))
                         owner.playbackStarted();
-                    else if (oldRate != 0 && newRate == 0)
+                    else if (! approximatelyEqual (oldRate, 0.0f) && approximatelyEqual (newRate, 0.0f))
                         owner.playbackStopped();
                 }
                 else if ([keyPath isEqualToString: nsStringLiteral ("status")])
@@ -299,7 +299,9 @@ private:
             void loadAsync (URL url)
             {
                 auto nsUrl = [NSURL URLWithString: juceStringToNS (url.toString (true))];
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
                 asset.reset ([[AVURLAsset alloc] initWithURL: nsUrl options: nil]);
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 [asset.get() loadValuesAsynchronouslyForKeys: assetKeys.get()
                                            completionHandler: ^() { checkAllKeysReadyFor (asset.get(), url); }];

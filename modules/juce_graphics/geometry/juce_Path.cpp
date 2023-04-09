@@ -28,7 +28,7 @@ namespace juce
 
 // tests that some coordinates aren't NaNs
 #define JUCE_CHECK_COORDS_ARE_VALID(x, y) \
-    jassert (x == x && y == y);
+    jassert (! std::isnan (x) && ! std::isnan (y));
 
 //==============================================================================
 namespace PathHelpers
@@ -58,18 +58,13 @@ namespace PathHelpers
 }
 
 //==============================================================================
-const float Path::lineMarker           = 100001.0f;
-const float Path::moveMarker           = 100002.0f;
-const float Path::quadMarker           = 100003.0f;
-const float Path::cubicMarker          = 100004.0f;
-const float Path::closeSubPathMarker   = 100005.0f;
 
 const float Path::defaultToleranceForTesting = 1.0f;
 const float Path::defaultToleranceForMeasurement = 0.6f;
 
 static bool isMarker (float value, float marker) noexcept
 {
-    return value == marker;
+    return exactlyEqual (value, marker);
 }
 
 //==============================================================================

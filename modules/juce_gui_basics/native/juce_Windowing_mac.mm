@@ -432,7 +432,7 @@ static Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenB
 {
     Displays::Display d;
 
-    d.isMain = (mainScreenBottom == 0);
+    d.isMain = (approximatelyEqual (mainScreenBottom, 0.0));
 
     if (d.isMain)
         mainScreenBottom = [s frame].size.height;

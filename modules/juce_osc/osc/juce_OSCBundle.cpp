@@ -210,7 +210,7 @@ private:
         expect (e[0].getMessage().size() == 1);
         expect (e[0].getMessage().begin()->getInt32() == testInt);
         expect (e[1].getMessage().size() == 2);
-        expect (e[1].getMessage()[1].getFloat32() == testFloat);
+        expectEquals (e[1].getMessage()[1].getFloat32(), testFloat);
     }
 };
 
@@ -237,7 +237,7 @@ public:
             expect (element.isMessage());
             expect (element.getMessage().size() == 1);
             expect (element.getMessage()[0].getType() == OSCTypes::float32);
-            expect (element.getMessage()[0].getFloat32() == testFloat);
+            expectEquals (element.getMessage()[0].getFloat32(), testFloat);
         }
     }
 };

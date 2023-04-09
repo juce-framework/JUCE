@@ -31,47 +31,47 @@ struct ScalingHelpers
     template <typename PointOrRect>
     static PointOrRect unscaledScreenPosToScaled (float scale, PointOrRect pos) noexcept
     {
-        return scale != 1.0f ? pos / scale : pos;
+        return ! approximatelyEqual (scale, 1.0f) ? pos / scale : pos;
     }
 
     template <typename PointOrRect>
     static PointOrRect scaledScreenPosToUnscaled (float scale, PointOrRect pos) noexcept
     {
-        return scale != 1.0f ? pos * scale : pos;
+        return ! approximatelyEqual (scale, 1.0f) ? pos * scale : pos;
     }
 
     // For these, we need to avoid getSmallestIntegerContainer being used, which causes
     // judder when moving windows
     static Rectangle<int> unscaledScreenPosToScaled (float scale, Rectangle<int> pos) noexcept
     {
-        return scale != 1.0f ? Rectangle<int> (roundToInt ((float) pos.getX() / scale),
-                                               roundToInt ((float) pos.getY() / scale),
-                                               roundToInt ((float) pos.getWidth() / scale),
-                                               roundToInt ((float) pos.getHeight() / scale)) : pos;
+        return ! approximatelyEqual (scale, 1.0f) ? Rectangle<int> (roundToInt ((float) pos.getX() / scale),
+                                                                    roundToInt ((float) pos.getY() / scale),
+                                                                    roundToInt ((float) pos.getWidth() / scale),
+                                                                    roundToInt ((float) pos.getHeight() / scale)) : pos;
     }
 
     static Rectangle<int> scaledScreenPosToUnscaled (float scale, Rectangle<int> pos) noexcept
     {
-        return scale != 1.0f ? Rectangle<int> (roundToInt ((float) pos.getX() * scale),
-                                               roundToInt ((float) pos.getY() * scale),
-                                               roundToInt ((float) pos.getWidth() * scale),
-                                               roundToInt ((float) pos.getHeight() * scale)) : pos;
+        return ! approximatelyEqual (scale, 1.0f) ? Rectangle<int> (roundToInt ((float) pos.getX() * scale),
+                                                                    roundToInt ((float) pos.getY() * scale),
+                                                                    roundToInt ((float) pos.getWidth() * scale),
+                                                                    roundToInt ((float) pos.getHeight() * scale)) : pos;
     }
 
     static Rectangle<float> unscaledScreenPosToScaled (float scale, Rectangle<float> pos) noexcept
     {
-        return scale != 1.0f ? Rectangle<float> (pos.getX() / scale,
-                                                 pos.getY() / scale,
-                                                 pos.getWidth() / scale,
-                                                 pos.getHeight() / scale) : pos;
+        return ! approximatelyEqual (scale, 1.0f) ? Rectangle<float> (pos.getX() / scale,
+                                                                      pos.getY() / scale,
+                                                                      pos.getWidth() / scale,
+                                                                      pos.getHeight() / scale) : pos;
     }
 
     static Rectangle<float> scaledScreenPosToUnscaled (float scale, Rectangle<float> pos) noexcept
     {
-        return scale != 1.0f ? Rectangle<float> (pos.getX() * scale,
-                                                 pos.getY() * scale,
-                                                 pos.getWidth() * scale,
-                                                 pos.getHeight() * scale) : pos;
+        return ! approximatelyEqual (scale, 1.0f) ? Rectangle<float> (pos.getX() * scale,
+                                                                      pos.getY() * scale,
+                                                                      pos.getWidth() * scale,
+                                                                      pos.getHeight() * scale) : pos;
     }
 
     template <typename PointOrRect>

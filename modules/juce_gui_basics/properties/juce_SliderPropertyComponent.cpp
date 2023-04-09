@@ -42,7 +42,7 @@ SliderPropertyComponent::SliderPropertyComponent (const String& name,
 
     slider.onValueChange = [this]
     {
-        if (getValue() != slider.getValue())
+        if (! approximatelyEqual (getValue(), slider.getValue()))
             setValue (slider.getValue());
     };
 }

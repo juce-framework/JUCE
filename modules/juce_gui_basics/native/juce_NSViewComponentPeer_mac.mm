@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#include "juce_mac_CGMetalLayerRenderer.h"
+#include "juce_CGMetalLayerRenderer_mac.h"
 
 @interface NSEvent (DeviceDelta)
 - (float)deviceDeltaX;
@@ -51,7 +51,6 @@ static void resetTrackingArea (NSView* view)
 
     const auto options = NSTrackingMouseEnteredAndExited
                          | NSTrackingMouseMoved
-                         | NSTrackingEnabledDuringMouseDrag
                          | NSTrackingActiveAlways
                          | NSTrackingInVisibleRect;
 
@@ -123,7 +122,54 @@ static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
 constexpr int extendedKeyModifier = 0x30000;
 
 //==============================================================================
-class NSViewComponentPeer  : public ComponentPeer
+class JuceCALayerDelegate : public ObjCClass<NSObject<CALayerDelegate>>
+{
+public:
+    struct Callback
+    {
+        virtual ~Callback() = default;
+        virtual void displayLayer (CALayer*) = 0;
+    };
+
+    static NSObject<CALayerDelegate>* construct (Callback* owner)
+    {
+        static JuceCALayerDelegate cls;
+        auto* result = cls.createInstance();
+        setOwner (result, owner);
+        return result;
+    }
+
+private:
+    JuceCALayerDelegate()
+        : ObjCClass ("JuceCALayerDelegate_")
+    {
+        addIvar<Callback*> ("owner");
+
+        addMethod (@selector (displayLayer:), [] (id self, SEL, CALayer* layer)
+        {
+            if (auto* owner = getOwner (self))
+                owner->displayLayer (layer);
+        });
+
+        addProtocol (@protocol (CALayerDelegate));
+
+        registerClass();
+    }
+
+    static Callback* getOwner (id self)
+    {
+        return getIvar<Callback*> (self, "owner");
+    }
+
+    static void setOwner (id self, Callback* newOwner)
+    {
+        object_setInstanceVariable (self, "owner", newOwner);
+    }
+};
+
+//==============================================================================
+class NSViewComponentPeer  : public ComponentPeer,
+                             private JuceCALayerDelegate::Callback
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
@@ -149,18 +195,37 @@ public:
         [view setPostsFrameChangedNotifications: YES];
 
       #if USE_COREGRAPHICS_RENDERING
+        // Creating a metal renderer may fail on some systems.
+        // We need to try creating the renderer before first creating a backing layer
+        // so that we know whether to use a metal layer or the system default layer
+        // (setWantsLayer: YES will call through to makeBackingLayer, where we check
+        // whether metalRenderer is non-null).
+        // The system overwrites the layer delegate set during makeBackingLayer,
+        // so that must be set separately, after the layer has been created and
+        // configured.
        #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         if (@available (macOS 10.14, *))
-            metalRenderer = CoreGraphicsMetalLayerRenderer<NSView>::create (view, getComponent().isOpaque());
+        {
+            metalRenderer = CoreGraphicsMetalLayerRenderer::create();
+            layerDelegate.reset (JuceCALayerDelegate::construct (this));
+        }
        #endif
+
         if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         {
             if (@available (macOS 10.8, *))
             {
                 [view setWantsLayer: YES];
-                [[view layer] setDrawsAsynchronously: YES];
+                [view setLayerContentsRedrawPolicy: NSViewLayerContentsRedrawDuringViewResize];
+                [view layer].drawsAsynchronously = YES;
             }
         }
+
+       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        if (@available (macOS 10.14, *))
+            if (metalRenderer != nullptr)
+                view.layer.delegate = layerDelegate.get();
+       #endif
       #endif
 
         if (isSharedWindow)
@@ -340,7 +405,7 @@ public:
                      display: isPre10_11];
         }
 
-        if (oldViewSize.width != r.size.width || oldViewSize.height != r.size.height)
+        if (! CGSizeEqualToSize (oldViewSize, r.size))
             [view setNeedsDisplay: true];
     }
 
@@ -920,9 +985,9 @@ public:
 
        #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         // This was a workaround for a CGContext not having a way of finding whether a rectangle
-        // falls within its clip region. However Apple removed the capability of
+        // falls within its clip region. However, Apple removed the capability of
         // [view getRectsBeingDrawn: ...] sometime around 10.13, so on later versions of macOS
-        // numRects will always be 1 and you'll need to use a CoreGraphicsMetalLayerRenderer
+        // numRects will always be 1, and you'll need to use a CoreGraphicsMetalLayerRenderer
         // to avoid CoreGraphics consolidating disparate rects.
         if (usingCoreGraphics && metalRenderer == nullptr)
         {
@@ -1007,11 +1072,9 @@ public:
         // In 10.11 changes were made to the way the OS handles repaint regions, and it seems that it can
         // no longer be trusted to coalesce all the regions, or to even remember them all without losing
         // a few when there's a lot of activity.
-        // As a work around for this, we use a RectangleList to do our own coalescing of regions before
+        // As a workaround for this, we use a RectangleList to do our own coalescing of regions before
         // asynchronously asking the OS to repaint them.
         deferredRepaints.add (area.toFloat());
-        const auto frameSize = view.frame.size;
-        boundsWhenRepaintsDeferred = { (float) frameSize.width, (float) frameSize.height };
     }
 
     static bool shouldThrottleRepaint()
@@ -1045,40 +1108,10 @@ public:
         const auto frameSize = view.frame.size;
         const Rectangle currentBounds { (float) frameSize.width, (float) frameSize.height };
 
-        if (boundsWhenRepaintsDeferred != currentBounds)
-        {
-            deferredRepaints = currentBounds;
+        for (auto& i : deferredRepaints)
+            [view setNeedsDisplayInRect: makeNSRect (i)];
 
-            if (metalRenderer != nullptr && metalRenderer->isAttachedToView (view))
-                metalRenderer->detach();
-        }
-        else
-        {
-            if (metalRenderer != nullptr && ! metalRenderer->isAttachedToView (view))
-                metalRenderer->attach (view, getComponent().isOpaque());
-        }
-
-        auto dispatchRectangles = [this]
-        {
-            if (metalRenderer != nullptr && metalRenderer->isAttachedToView (view))
-            {
-                return metalRenderer->drawRectangleList (view,
-                                                         (float) [[view window] backingScaleFactor],
-                                                         [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
-                                                         deferredRepaints);
-            }
-
-            for (auto& i : deferredRepaints)
-                [view setNeedsDisplayInRect: makeNSRect (i)];
-
-            return true;
-        };
-
-        if (dispatchRectangles())
-        {
-            lastRepaintTime = Time::getMillisecondCounter();
-            deferredRepaints.clear();
-        }
+        lastRepaintTime = Time::getMillisecondCounter();
     }
 
     void performAnyPendingRepaintsNow() override
@@ -1691,22 +1724,28 @@ public:
     int startOfMarkedTextInTextInputTarget = 0;
 
     Rectangle<float> lastSizeBeforeZoom;
-    Rectangle<float> boundsWhenRepaintsDeferred;
     RectangleList<float> deferredRepaints;
     uint32 lastRepaintTime;
 
     std::optional<KeyEventAttributes> lastSeenKeyEvent;
 
-    static ComponentPeer* currentlyFocusedPeer;
-    static std::set<int> keysCurrentlyDown;
-    static int insideToFrontCall;
+    static inline ComponentPeer* currentlyFocusedPeer;
+    static inline std::set<int> keysCurrentlyDown;
+    static inline int insideToFrontCall;
 
-    static const SEL dismissModalsSelector;
-    static const SEL frameChangedSelector;
-    static const SEL asyncMouseDownSelector;
-    static const SEL asyncMouseUpSelector;
-    static const SEL becomeKeySelector;
-    static const SEL resignKeySelector;
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+    static inline const auto dismissModalsSelector  = @selector (dismissModals);
+    static inline const auto frameChangedSelector   = @selector (frameChanged:);
+    static inline const auto asyncMouseDownSelector = @selector (asyncMouseDown:);
+    static inline const auto asyncMouseUpSelector   = @selector (asyncMouseUp:);
+    static inline const auto becomeKeySelector      = @selector (becomeKey:);
+    static inline const auto resignKeySelector      = @selector (resignKey:);
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+   #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+    std::unique_ptr<CoreGraphicsMetalLayerRenderer> metalRenderer;
+    NSUniquePtr<NSObject<CALayerDelegate>> layerDelegate;
+   #endif
 
 private:
     JUCE_DECLARE_WEAK_REFERENCEABLE (NSViewComponentPeer)
@@ -1777,7 +1816,8 @@ private:
             if (! [[view trackingAreas] containsObject: area])
                 return;
 
-        sendMouseEvent (ev);
+        if ([NSEvent pressedMouseButtons] == 0)
+            sendMouseEvent (ev);
     }
 
     static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
@@ -1933,25 +1973,34 @@ private:
         }
     }
 
-    //==============================================================================
-    std::unique_ptr<CoreGraphicsMetalLayerRenderer<NSView>> metalRenderer;
+    void displayLayer ([[maybe_unused]] CALayer* layer) override
+    {
+       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        if (metalRenderer == nullptr)
+            return;
 
+        const auto scale = [this]
+        {
+            if (auto* viewWindow = [view window])
+                return (float) viewWindow.backingScaleFactor;
+
+            return 1.0f;
+        }();
+
+        deferredRepaints = metalRenderer->drawRectangleList (static_cast<CAMetalLayer*> (layer),
+                                                             scale,
+                                                             [this] (auto&&... args) { drawRectWithContext (args...); },
+                                                             std::move (deferredRepaints),
+                                                             [view inLiveResize]);
+       #endif
+    }
+
+    //==============================================================================
     std::vector<ScopedNotificationCenterObserver> scopedObservers;
     std::vector<ScopedNotificationCenterObserver> windowObservers;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };
-
-int NSViewComponentPeer::insideToFrontCall = 0;
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-const SEL NSViewComponentPeer::dismissModalsSelector  = @selector (dismissModals);
-const SEL NSViewComponentPeer::frameChangedSelector   = @selector (frameChanged:);
-const SEL NSViewComponentPeer::asyncMouseDownSelector = @selector (asyncMouseDown:);
-const SEL NSViewComponentPeer::asyncMouseUpSelector   = @selector (asyncMouseUp:);
-const SEL NSViewComponentPeer::becomeKeySelector      = @selector (becomeKey:);
-const SEL NSViewComponentPeer::resignKeySelector      = @selector (resignKey:);
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 template <typename Base>
@@ -1978,6 +2027,7 @@ struct NSViewComponentPeerWrapper  : public Base
     }
 };
 
+//==============================================================================
 struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 {
     JuceNSViewClass()  : NSViewComponentPeerWrapper ("JUCEView_")
@@ -2050,6 +2100,35 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
         addMethod (@selector (draggingExited:),                 draggingExited);
 
         addMethod (@selector (acceptsFirstMouse:), [] (id, SEL, NSEvent*) { return YES; });
+
+       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        addMethod (@selector (makeBackingLayer), [] (id self, SEL) -> CALayer*
+        {
+            if (auto* owner = getOwner (self))
+            {
+                if (owner->metalRenderer != nullptr)
+                {
+                    auto* layer = [CAMetalLayer layer];
+
+                    layer.device = MTLCreateSystemDefaultDevice();
+                    layer.framebufferOnly = NO;
+                    layer.pixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
+                    layer.opaque = getOwner (self)->getComponent().isOpaque();
+                    layer.autoresizingMask = kCALayerHeightSizable | kCALayerWidthSizable;
+                    layer.needsDisplayOnBoundsChange = YES;
+                    layer.drawsAsynchronously = YES;
+                    layer.delegate = owner->layerDelegate.get();
+
+                    if (@available (macOS 10.13, *))
+                        layer.allowsNextDrawableTimeout = NO;
+
+                    return layer;
+                }
+            }
+
+            return sendSuperclassMessage<CALayer*> (self, @selector (makeBackingLayer));
+        });
+       #endif
 
         addMethod (@selector (windowWillMiniaturize:), [] (id self, SEL, NSNotification*)
         {
@@ -2730,10 +2809,6 @@ NSWindow* NSViewComponentPeer::createWindowInstance()
     return cls.createInstance();
 }
 
-
-//==============================================================================
-ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = nullptr;
-std::set<int> NSViewComponentPeer::keysCurrentlyDown;
 
 //==============================================================================
 bool KeyPress::isKeyCurrentlyDown (int keyCode)

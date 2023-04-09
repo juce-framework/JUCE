@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#include "juce_mac_CGMetalLayerRenderer.h"
+#include "juce_CGMetalLayerRenderer_mac.h"
 
 #if TARGET_OS_SIMULATOR && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
  #warning JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS uses parts of the Metal API that are currently unsupported in the simulator - falling back to JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS=0
@@ -295,7 +295,7 @@ struct CADisplayLinkDeleter
 
 @end
 
-@interface JuceUIView : UIView
+@interface JuceUIView : UIView<CALayerDelegate>
 {
 @public
     UIViewComponentPeer* owner;
@@ -520,6 +520,12 @@ public:
         return UIKeyboardTypeDefault;
     }
 
+   #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+    std::unique_ptr<CoreGraphicsMetalLayerRenderer> metalRenderer;
+   #endif
+
+    RectangleList<float> deferredRepaints;
+
 private:
     void appStyleChanged() override
     {
@@ -544,9 +550,6 @@ private:
                 peer->repaint (rect);
         }
     };
-
-    std::unique_ptr<CoreGraphicsMetalLayerRenderer<UIView>> metalRenderer;
-    RectangleList<float> deferredRepaints;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
@@ -698,6 +701,26 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     [super initWithFrame: frame];
     owner = peer;
 
+   #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+    if (@available (iOS 13.0, *))
+    {
+        auto* layer = (CAMetalLayer*) [self layer];
+        layer.device = MTLCreateSystemDefaultDevice();
+        layer.framebufferOnly = NO;
+        layer.pixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
+
+        if (owner != nullptr)
+            layer.opaque = owner->getComponent().isOpaque();
+
+        layer.presentsWithTransaction = YES;
+        layer.needsDisplayOnBoundsChange = true;
+        layer.presentsWithTransaction = true;
+        layer.delegate = self;
+
+        layer.allowsNextDrawableTimeout = NO;
+    }
+   #endif
+
     displayLink.reset ([CADisplayLink displayLinkWithTarget: self
                                                    selector: @selector (displayLinkCallback:)]);
     [displayLink.get() addToRunLoop: [NSRunLoop mainRunLoop]
@@ -749,6 +772,41 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     if (owner != nullptr)
         owner->displayLinkCallback();
 }
+
+#if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+- (CALayer*) makeBackingLayer
+{
+    auto* layer = [CAMetalLayer layer];
+
+    layer.device = MTLCreateSystemDefaultDevice();
+    layer.framebufferOnly = NO;
+    layer.pixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
+
+    if (owner != nullptr)
+        layer.opaque = owner->getComponent().isOpaque();
+
+    layer.presentsWithTransaction = YES;
+    layer.needsDisplayOnBoundsChange = true;
+    layer.presentsWithTransaction = true;
+    layer.delegate = self;
+
+    layer.allowsNextDrawableTimeout = NO;
+
+    return layer;
+}
+
+- (void) displayLayer: (CALayer*) layer
+{
+    if (owner != nullptr)
+    {
+        owner->deferredRepaints = owner->metalRenderer->drawRectangleList (static_cast<CAMetalLayer*> (layer),
+                                                                           (float) [self contentScaleFactor],
+                                                                           [self] (auto&&... args) { owner->drawRectWithContext (args...); },
+                                                                           std::move (owner->deferredRepaints),
+                                                                           false);
+    }
+}
+#endif
 
 //==============================================================================
 - (void) drawRect: (CGRect) r
@@ -1680,7 +1738,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
    #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
     if (@available (iOS 13, *))
     {
-        metalRenderer = CoreGraphicsMetalLayerRenderer<UIView>::create (view, comp.isOpaque());
+        metalRenderer = CoreGraphicsMetalLayerRenderer::create();
         jassert (metalRenderer != nullptr);
     }
    #endif
@@ -1766,8 +1824,11 @@ void UIViewComponentPeer::setBounds (const Rectangle<int>& newBounds, const bool
     {
         CGRect r = convertToCGRect (newBounds);
 
-        if (view.frame.size.width != r.size.width || view.frame.size.height != r.size.height)
+        if (! approximatelyEqual (view.frame.size.width, r.size.width)
+            || ! approximatelyEqual (view.frame.size.height, r.size.height))
+        {
             [view setNeedsDisplay];
+        }
 
         view.frame = r;
     }
@@ -2135,22 +2196,8 @@ void UIViewComponentPeer::displayLinkCallback()
     if (deferredRepaints.isEmpty())
         return;
 
-    auto dispatchRectangles = [this] ()
-    {
-        if (metalRenderer != nullptr)
-            return metalRenderer->drawRectangleList (view,
-                                                     (float) view.contentScaleFactor,
-                                                     [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
-                                                     deferredRepaints);
-
-        for (const auto& r : deferredRepaints)
-            [view setNeedsDisplayInRect: convertToCGRect (r)];
-
-        return true;
-    };
-
-    if (dispatchRectangles())
-        deferredRepaints.clear();
+    for (const auto& r : deferredRepaints)
+        [view setNeedsDisplayInRect: convertToCGRect (r)];
 }
 
 //==============================================================================

@@ -754,29 +754,29 @@ function(_juce_configure_bundle source_target dest_target)
     endif()
 endfunction()
 
-function(_juce_add_resources_rc target)
+function(_juce_add_resources_rc source_target dest_target)
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
         return()
     endif()
 
-    get_target_property(juce_library_code ${target} JUCE_GENERATED_SOURCES_DIRECTORY)
-    set(input_info_file "$<TARGET_PROPERTY:${target},JUCE_INFO_FILE>")
+    get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
+    get_target_property(input_info_file ${source_target} JUCE_INFO_FILE)
 
-    get_target_property(generated_icon ${target} JUCE_ICON_FILE)
+    get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
     set(dependency)
 
     if(generated_icon)
         set(dependency DEPENDS "${generated_icon}")
     endif()
 
-    set(resource_rc_file "${juce_library_code}/resources.rc")
+    set(resource_rc_file "${juce_library_code}/${dest_target}_resources.rc")
 
     add_custom_command(OUTPUT "${resource_rc_file}"
         COMMAND juce::juceaide rcfile "${input_info_file}" "${resource_rc_file}"
         ${dependency}
         VERBATIM)
 
-    target_sources(${target} PRIVATE "${resource_rc_file}")
+    target_sources(${dest_target} PRIVATE "${resource_rc_file}")
 endfunction()
 
 function(_juce_configure_app_bundle source_target dest_target)
@@ -1173,6 +1173,7 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
     endif()
 
     _juce_set_plugin_target_properties(${shared_code_target} ${kind})
+    _juce_add_resources_rc(${shared_code_target} ${target_name})
 endfunction()
 
 # ==================================================================================================
@@ -1843,7 +1844,7 @@ function(juce_add_console_app target)
 
     if(NOT JUCE_ARG__NO_RESOURCERC)
         _juce_write_configure_time_info(${target})
-        _juce_add_resources_rc(${target})
+        _juce_add_resources_rc(${target} ${target})
     endif()
 endfunction()
 
@@ -1860,14 +1861,13 @@ function(juce_add_gui_app target)
     set_target_properties(${target} PROPERTIES JUCE_TARGET_KIND_STRING "App")
     _juce_configure_bundle(${target} ${target})
     _juce_configure_app_bundle(${target} ${target})
-    _juce_add_resources_rc(${target})
+    _juce_add_resources_rc(${target} ${target})
 endfunction()
 
 function(juce_add_plugin target)
     add_library(${target} STATIC)
     set_target_properties(${target} PROPERTIES JUCE_IS_PLUGIN TRUE)
     _juce_initialise_target(${target} ${ARGN})
-    _juce_add_resources_rc(${target})
     _juce_configure_plugin_targets(${target})
 endfunction()
 

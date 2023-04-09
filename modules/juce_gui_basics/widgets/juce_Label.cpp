@@ -389,7 +389,7 @@ void Label::colourChanged()
 
 void Label::setMinimumHorizontalScale (const float newScale)
 {
-    if (minimumHorizontalScale != newScale)
+    if (! approximatelyEqual (minimumHorizontalScale, newScale))
     {
         minimumHorizontalScale = newScale;
         repaint();

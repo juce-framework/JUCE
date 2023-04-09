@@ -62,7 +62,7 @@ struct Grid::SizeCalculation
             if (trackInfo.isFractional())
                 factorsSum += trackInfo.getSize();
 
-        jassert (factorsSum != 0.0f);
+        jassert (! approximatelyEqual (factorsSum, 0.0f));
         return totalRelative / factorsSum;
     }
 
@@ -945,11 +945,11 @@ struct Grid::BoxAlignment
         // align and justify
         auto r = area;
 
-        if (item.width     != (float) GridItem::notAssigned)  r.setWidth  (item.width);
-        if (item.height    != (float) GridItem::notAssigned)  r.setHeight (item.height);
-        if (item.maxWidth  != (float) GridItem::notAssigned)  r.setWidth  (jmin (item.maxWidth,  r.getWidth()));
+        if (! approximatelyEqual (item.width,     (float) GridItem::notAssigned))  r.setWidth  (item.width);
+        if (! approximatelyEqual (item.height,    (float) GridItem::notAssigned))  r.setHeight (item.height);
+        if (! approximatelyEqual (item.maxWidth,  (float) GridItem::notAssigned))  r.setWidth  (jmin (item.maxWidth,  r.getWidth()));
         if (item.minWidth  > 0.0f)                            r.setWidth  (jmax (item.minWidth,  r.getWidth()));
-        if (item.maxHeight != (float) GridItem::notAssigned)  r.setHeight (jmin (item.maxHeight, r.getHeight()));
+        if (! approximatelyEqual (item.maxHeight, (float) GridItem::notAssigned))  r.setHeight (jmin (item.maxHeight, r.getHeight()));
         if (item.minHeight > 0.0f)                            r.setHeight (jmax (item.minHeight, r.getHeight()));
 
         if (alignType == AlignItems::start && justifyType == JustifyItems::start)

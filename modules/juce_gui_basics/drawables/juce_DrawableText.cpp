@@ -108,7 +108,7 @@ void DrawableText::setBoundingBox (Parallelogram<float> newBounds)
 
 void DrawableText::setFontHeight (float newHeight)
 {
-    if (fontHeight != newHeight)
+    if (! approximatelyEqual (fontHeight, newHeight))
     {
         fontHeight = newHeight;
         refreshBounds();
@@ -117,7 +117,7 @@ void DrawableText::setFontHeight (float newHeight)
 
 void DrawableText::setFontHorizontalScale (float newScale)
 {
-    if (fontHScale != newScale)
+    if (! approximatelyEqual (fontHScale, newScale))
     {
         fontHScale = newScale;
         refreshBounds();

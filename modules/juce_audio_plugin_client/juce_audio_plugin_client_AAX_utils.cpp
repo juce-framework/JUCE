@@ -40,12 +40,13 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 #include <Libs/AAXLibrary/source/AAX_CAutoreleasePool.Win.cpp>
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter",
-                                     "-Wshift-sign-overflow",
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
                                      "-Wextra-semi",
-                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wfloat-equal",
                                      "-Winconsistent-missing-destructor-override",
-                                     "-Wdeprecated-declarations")
+                                     "-Wshift-sign-overflow",
+                                     "-Wunused-parameter",
+                                     "-Wzero-as-null-pointer-constant")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6001 6053 4996 5033 4068 4996)
 
 #include <Libs/AAXLibrary/source/AAX_CChunkDataParser.cpp>

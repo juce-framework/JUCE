@@ -266,7 +266,7 @@ void MidiMessageSequence::updateMatchedPairs() noexcept
 
 void MidiMessageSequence::addTimeToMessages (double delta) noexcept
 {
-    if (delta != 0)
+    if (! approximatelyEqual (delta, 0.0))
         for (auto* m : list)
             m->message.addToTimeStamp (delta);
 }
@@ -554,7 +554,7 @@ struct MidiMessageSequenceTest  : public UnitTest
             {
                 const auto isEqual = [this] (const ControlValue& cv, const MidiMessage& msg)
                 {
-                    return msg.getTimeStamp() == time
+                    return exactlyEqual (msg.getTimeStamp(), time)
                         && msg.isController()
                         && msg.getChannel() == channel
                         && msg.getControllerNumber() == cv.control

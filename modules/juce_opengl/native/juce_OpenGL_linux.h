@@ -39,7 +39,7 @@ template <typename Data>
 std::unique_ptr<Data, XFreeDeleter> makeXFreePtr (Data* raw) { return std::unique_ptr<Data, XFreeDeleter> (raw); }
 
 //==============================================================================
-// Defined juce_linux_Windowing.cpp
+// Defined in juce_Windowing_linux.cpp
 void juce_LinuxAddRepaintListener (ComponentPeer*, Component* dummy);
 void juce_LinuxRemoveRepaintListener (ComponentPeer*, Component* dummy);
 

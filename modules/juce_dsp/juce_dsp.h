@@ -220,17 +220,17 @@ namespace juce
 
 //==============================================================================
 #if JUCE_USE_SIMD
- #include "native/juce_fallback_SIMDNativeOps.h"
+ #include "native/juce_SIMDNativeOps_fallback.h"
 
  // include the correct native file for this build target CPU
  #if defined(__i386__) || defined(__amd64__) || defined(_M_X64) || defined(_X86_) || defined(_M_IX86)
   #ifdef __AVX2__
-   #include "native/juce_avx_SIMDNativeOps.h"
+   #include "native/juce_SIMDNativeOps_avx.h"
   #else
-   #include "native/juce_sse_SIMDNativeOps.h"
+   #include "native/juce_SIMDNativeOps_sse.h"
   #endif
  #elif JUCE_ARM
-  #include "native/juce_neon_SIMDNativeOps.h"
+  #include "native/juce_SIMDNativeOps_neon.h"
  #else
   #error "SIMD register support not implemented for this platform"
  #endif

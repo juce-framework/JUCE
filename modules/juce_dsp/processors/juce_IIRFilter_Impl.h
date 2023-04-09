@@ -39,8 +39,9 @@ Coefficients<NumericType>& Coefficients<NumericType>::assignImpl (const NumericT
     static_assert (Num % 2 == 0, "Must supply an even number of coefficients");
     const auto a0Index = Num / 2;
     const auto a0 = values[a0Index];
-    const auto a0Inv = a0 != NumericType() ? static_cast<NumericType> (1) / values[a0Index]
-                                           : NumericType();
+    const auto a0Inv = ! approximatelyEqual (a0, NumericType())
+                     ? static_cast<NumericType> (1) / values[a0Index]
+                     : NumericType();
 
     coefficients.clearQuick();
     coefficients.ensureStorageAllocated ((int) jmax ((size_t) 8, Num));

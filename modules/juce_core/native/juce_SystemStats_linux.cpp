@@ -204,7 +204,7 @@ String SystemStats::getUserLanguage()
 
     return {};
    #else
-    return getLocaleValue (_NL_IDENTIFICATION_LANGUAGE);
+    return getLocaleValue (_NL_ADDRESS_LANG_AB);
    #endif
 }
 
@@ -213,7 +213,7 @@ String SystemStats::getUserRegion()
    #if JUCE_BSD
     return {};
    #else
-    return getLocaleValue (_NL_IDENTIFICATION_TERRITORY);
+    return getLocaleValue (_NL_ADDRESS_COUNTRY_AB2);
    #endif
 }
 

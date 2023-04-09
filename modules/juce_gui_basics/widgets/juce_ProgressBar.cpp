@@ -97,7 +97,7 @@ void ProgressBar::timerCallback()
     const int timeSinceLastCallback = (int) (now - lastCallbackTime);
     lastCallbackTime = now;
 
-    if (currentValue != newProgress
+    if (! approximatelyEqual (currentValue, newProgress)
          || newProgress < 0 || newProgress >= 1.0
          || currentMessage != displayedMessage)
     {

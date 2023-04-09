@@ -150,16 +150,24 @@ int AlertWindow::getNumButtons() const
     return buttons.size();
 }
 
+Button* AlertWindow::getButton (int index) const
+{
+    return buttons[index];
+}
+
+Button* AlertWindow::getButton (const String& buttonName) const
+{
+    for (auto* button : buttons)
+        if (buttonName == button->getName())
+            return button;
+
+    return nullptr;
+}
+
 void AlertWindow::triggerButtonClick (const String& buttonName)
 {
-    for (auto* b : buttons)
-    {
-        if (buttonName == b->getName())
-        {
-            b->triggerClick();
-            break;
-        }
-    }
+    if (auto* button = getButton (buttonName))
+        button->triggerClick();
 }
 
 void AlertWindow::setEscapeKeyCancels (bool shouldEscapeKeyCancel)
@@ -637,17 +645,7 @@ static int showMaybeAsync (const MessageBoxOptions& options,
                            ModalComponentManager::Callback* callbackIn)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-    {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        if (callbackIn == nullptr)
-            return NativeMessageBox::show (options);
-       #endif
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-        NativeMessageBox::showAsync (options, callbackIn);
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        return false;
-    }
+        return showNativeBoxUnmanaged (options, callbackIn, ResultCodeMappingMode::alertWindow);
 
     return showAlertWindowUnmanaged (options, callbackIn);
 }

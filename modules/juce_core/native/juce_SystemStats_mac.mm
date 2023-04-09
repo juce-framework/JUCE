@@ -209,7 +209,7 @@ String SystemStats::getCpuVendor()
 
     return String (reinterpret_cast<const char*> (vendor), 12);
    #else
-    return {};
+    return "Apple";
    #endif
 }
 
@@ -226,17 +226,25 @@ String SystemStats::getCpuModel()
 
 int SystemStats::getCpuSpeedInMegahertz()
 {
+   #ifdef JUCE_INTEL
     uint64 speedHz = 0;
-    size_t speedSize = sizeof (speedHz);
+    size_t optSize = sizeof (speedHz);
     int mib[] = { CTL_HW, HW_CPU_FREQ };
-    sysctl (mib, 2, &speedHz, &speedSize, nullptr, 0);
-
-   #if JUCE_BIG_ENDIAN
-    if (speedSize == 4)
-        speedHz >>= 32;
-   #endif
+    sysctl (mib, 2, &speedHz, &optSize, nullptr, 0);
 
     return (int) (speedHz / 1000000);
+   #else
+    size_t hz = 0;
+    size_t optSize = sizeof (hz);
+    sysctlbyname ("hw.tbfrequency", &hz, &optSize, nullptr, 0);
+
+    struct clockinfo ci{};
+    optSize = sizeof (ci);
+    int mib[] = { CTL_KERN, KERN_CLOCKRATE };
+    sysctl (mib, 2, &ci, &optSize, nullptr, 0);
+
+    return (int) (double (hz * uint64_t (ci.hz)) / 1000000.0);
+   #endif
 }
 
 //==============================================================================

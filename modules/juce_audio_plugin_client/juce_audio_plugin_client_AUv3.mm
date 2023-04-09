@@ -45,9 +45,9 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
-#include <juce_graphics/native/juce_mac_CoreGraphicsHelpers.h>
-#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
-#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
+#include <juce_graphics/native/juce_CoreGraphicsHelpers_mac.h>
+#include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
+#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
@@ -1350,7 +1350,7 @@ private:
 
     void setAudioProcessorParameter (AudioProcessorParameter* juceParam, float value)
     {
-        if (value != juceParam->getValue())
+        if (! approximatelyEqual (value, juceParam->getValue()))
         {
             juceParam->setValue (value);
 
@@ -1458,7 +1458,7 @@ private:
 
         const auto numProcessorBusesOut = AudioUnitHelpers::getBusCount (processor, false);
 
-        if (lastTimeStamp.mSampleTime != timestamp->mSampleTime)
+        if (! approximatelyEqual (lastTimeStamp.mSampleTime, timestamp->mSampleTime))
         {
             // process params and incoming midi (only once for a given timestamp)
             midiMessages.clear();

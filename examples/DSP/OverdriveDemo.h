@@ -90,7 +90,7 @@ struct OverdriveDemoDSP
 
     void updateParameters()
     {
-        if (sampleRate != 0.0)
+        if (! approximatelyEqual (sampleRate, 0.0))
         {
             overdrive.get<0>().setGainDecibels (static_cast<float> (inGainParam.getCurrentValue()));
             overdrive.get<4>().setGainDecibels (static_cast<float> (outGainParam.getCurrentValue()));
