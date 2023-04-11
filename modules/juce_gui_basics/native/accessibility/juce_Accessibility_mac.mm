@@ -784,6 +784,9 @@ private:
                 for (auto* childHandler : children)
                     [accessibleChildren addObject: static_cast<id> (childHandler->getNativeImplementation())];
 
+                if (auto* nativeChild = AccessibilityHandler::getNativeChildForComponent (handler->getComponent()))
+                    [accessibleChildren addObject: static_cast<id> (nativeChild)];
+
                 return accessibleChildren;
             }
 
