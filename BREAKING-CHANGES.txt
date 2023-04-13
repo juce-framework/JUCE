@@ -6,6 +6,35 @@ develop
 
 Change
 ------
+The Grid layout algorithm has been slightly altered to provide more consistent
+behaviour. The new approach guarantees that dimensions specified using the
+absolute Px quantity will always be correctly rounded when applied to the
+integer dimensions of Components.
+
+Possible Issues
+---------------
+Components laid out using Grid can observe a size or position change of +/- 1px
+along each dimension compared with the result of the previous algorithm.
+
+Workaround
+----------
+If the Grid based graphical layout is sensitive to changes of +/- 1px, then the
+UI layout code may have to be adjusted to the new algorithm.
+
+Rationale
+---------
+The old Grid layout algorithm could exhibit surprising and difficult to control
+single pixel artifacts, where an item with a specified absolute size of
+e.g. 100px could end up with a layout size of 101px. The new approach
+guarantees that such items will have a layout size exactly as specified, and
+this new behaviour is also in line with CSS behaviour in browsers. The new
+approach makes necessary corrections easier as adding 1px to the size of an
+item with absolute dimensions is guaranteed to translate into an observable 1px
+increase in the layout size.
+
+
+Change
+------
 The k91_4 and k90_4 VST3 layouts are now mapped to the canonical JUCE 9.1.4 and
 9.0.4 AudioChannelSets. This has a different ChannelType layout than the
 AudioChannelSet previously used with such VST3 SpeakerArrangements.
