@@ -60,6 +60,7 @@
 #include "messages/juce_MessageManager.cpp"
 #include "broadcasters/juce_ActionBroadcaster.cpp"
 #include "broadcasters/juce_AsyncUpdater.cpp"
+#include "broadcasters/juce_LockingAsyncUpdater.cpp"
 #include "broadcasters/juce_ChangeBroadcaster.cpp"
 #include "timers/juce_MultiTimer.cpp"
 #include "timers/juce_Timer.cpp"

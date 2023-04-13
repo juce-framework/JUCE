@@ -82,6 +82,7 @@
 #include "broadcasters/juce_ActionBroadcaster.h"
 #include "broadcasters/juce_ActionListener.h"
 #include "broadcasters/juce_AsyncUpdater.h"
+#include "broadcasters/juce_LockingAsyncUpdater.h"
 #include "broadcasters/juce_ChangeListener.h"
 #include "broadcasters/juce_ChangeBroadcaster.h"
 #include "timers/juce_Timer.h"
