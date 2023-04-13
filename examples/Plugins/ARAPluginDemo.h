@@ -616,9 +616,9 @@ public:
                     const auto previewDimmed = previewedRegion->getAudioModification<ARADemoPluginAudioModification>()
                                                               ->isDimmed();
 
-                    if (lastPreviewTime != previewTime
-                        || lastPlaybackRegion != previewedRegion
-                        || lastPreviewDimmed != previewDimmed)
+                    if (! exactlyEqual (lastPreviewTime, previewTime)
+                        || ! exactlyEqual (lastPlaybackRegion, previewedRegion)
+                        || ! exactlyEqual (lastPreviewDimmed, previewDimmed))
                     {
                         Range<double> previewRangeInPlaybackTime { previewTime - 0.25, previewTime + 0.25 };
                         previewBuffer->clear();
@@ -1102,7 +1102,7 @@ public:
                     const auto quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
                     const int x = timeToViewScaling.getXForTime (tempoConverter.getTimeForQuarter (quarterPos));
                     const auto barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
-                    const int lineWidth = (quarterPos == barSignature.position) ? heavyLineWidth : lightLineWidth;
+                    const int lineWidth = (approximatelyEqual (quarterPos, barSignature.position)) ? heavyLineWidth : lightLineWidth;
                     const int beatsSinceBarStart = roundToInt( barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
                     const int lineHeight = (beatsSinceBarStart == 0) ? rulerHeight : rulerHeight / 2;
                     rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, 2 * rulerHeight - lineHeight, lineWidth, lineHeight));
