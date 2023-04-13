@@ -1677,16 +1677,10 @@ bool AudioProcessorGraph::Connection::operator< (const Connection& other) const 
 }
 
 //==============================================================================
-class AudioProcessorGraph::Pimpl : public AsyncUpdater
+class AudioProcessorGraph::Pimpl
 {
 public:
     explicit Pimpl (AudioProcessorGraph& o) : owner (&o) {}
-
-    ~Pimpl() override
-    {
-        cancelPendingUpdate();
-        clear (UpdateKind::sync);
-    }
 
     const auto& getNodes() const { return nodes.getNodes(); }
 
@@ -1840,7 +1834,7 @@ public:
         if (updateKind == UpdateKind::sync && MessageManager::getInstance()->isThisTheMessageThread())
             handleAsyncUpdate();
         else
-            triggerAsyncUpdate();
+            updater.triggerAsyncUpdate();
     }
 
     void reset()
@@ -1902,7 +1896,7 @@ private:
         rebuild (updateKind);
     }
 
-    void handleAsyncUpdate() override
+    void handleAsyncUpdate()
     {
         if (const auto newSettings = nodeStates.applySettings (nodes))
         {
@@ -1933,6 +1927,7 @@ private:
     RenderSequenceExchange renderSequenceExchange;
     NodeID lastNodeID;
     std::optional<RenderSequenceSignature> lastBuiltSequence;
+    LockingAsyncUpdater updater { [this] { handleAsyncUpdate(); } };
 };
 
 //==============================================================================
