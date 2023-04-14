@@ -31,7 +31,10 @@
 #include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
 #include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter", "-Wgnu-zero-variadic-macro-arguments", "-Wmissing-prototypes")
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter",
+                                     "-Wgnu-zero-variadic-macro-arguments",
+                                     "-Wmissing-prototypes",
+                                     "-Wfloat-equal")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
 
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
