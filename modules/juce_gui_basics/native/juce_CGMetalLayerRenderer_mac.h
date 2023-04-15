@@ -86,8 +86,12 @@ public:
         {
             layer.drawableSize = transformedFrameSize;
             resources = std::make_unique<Resources> (device.get(), layer);
-            dirtyRegions = convertToRectFloat (layer.bounds);
+            dirtyRegions.clear();
+            dirtyRegions.add (convertToRectFloat (layer.bounds));
         }
+
+        if (CGSizeEqualToSize (transformedFrameSize, CGSizeZero))
+            return dirtyRegions;
 
         auto gpuTexture = resources->getGpuTexture();
 
@@ -209,7 +213,8 @@ private:
         GpuTexturePool (id<MTLDevice> metalDevice, MTLTextureDescriptor* descriptor)
         {
             for (auto& t : textureCache)
-                t.reset ([metalDevice newTextureWithDescriptor: descriptor]);
+                t.reset ((descriptor.width != 0 && descriptor.height != 0) ? [metalDevice newTextureWithDescriptor: descriptor]
+                                                                           : nullptr);
         }
 
         id<MTLTexture> take() const
