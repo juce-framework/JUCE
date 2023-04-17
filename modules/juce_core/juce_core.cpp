@@ -209,6 +209,7 @@
  #include "native/juce_SystemStats_mac.mm"
  #include "native/juce_Threads_mac.mm"
  #include "native/juce_PlatformTimer_generic.cpp"
+ #include "native/juce_Process_mac.mm"
 
 //==============================================================================
 #elif JUCE_WINDOWS
