@@ -264,12 +264,17 @@ public:
     /** @internal */
     void visibilityChanged() override;
     /** @internal */
-    void focusGained (FocusChangeType) override;
+    void focusGainedWithDirection (FocusChangeType, FocusChangeDirection) override;
 
     /** @internal */
     class Pimpl;
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+    }
+
     //==============================================================================
     std::unique_ptr<Pimpl> browser;
     bool blankPageShown = false, unloadPageWhenHidden;

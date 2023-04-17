@@ -2182,7 +2182,7 @@ void Component::internalMouseDown (MouseInputSource source,
 
     if (! flags.dontFocusOnMouseClickFlag)
     {
-        grabKeyboardFocusInternal (focusChangedByMouseClick, true);
+        grabKeyboardFocusInternal (focusChangedByMouseClick, true, FocusChangeDirection::unknown);
 
         if (checker.shouldBailOut())
             return;
@@ -2435,17 +2435,20 @@ void Component::internalBroughtToFront()
 
 //==============================================================================
 void Component::focusGained (FocusChangeType)   {}
+void Component::focusGainedWithDirection (FocusChangeType, FocusChangeDirection) {}
 void Component::focusLost (FocusChangeType)     {}
 void Component::focusOfChildComponentChanged (FocusChangeType) {}
 
 void Component::internalKeyboardFocusGain (FocusChangeType cause)
 {
-    internalKeyboardFocusGain (cause, WeakReference<Component> (this));
+    internalKeyboardFocusGain (cause, WeakReference<Component> (this), FocusChangeDirection::unknown);
 }
 
 void Component::internalKeyboardFocusGain (FocusChangeType cause,
-                                           const WeakReference<Component>& safePointer)
+                                           const WeakReference<Component>& safePointer,
+                                           FocusChangeDirection direction)
 {
+    focusGainedWithDirection (cause, direction);
     focusGained (cause);
 
     if (safePointer == nullptr)
@@ -2585,7 +2588,7 @@ std::unique_ptr<ComponentTraverser> Component::createKeyboardFocusTraverser()
     return parentComponent->createKeyboardFocusTraverser();
 }
 
-void Component::takeKeyboardFocus (FocusChangeType cause)
+void Component::takeKeyboardFocus (FocusChangeType cause, FocusChangeDirection direction)
 {
     if (currentlyFocusedComponent == this)
         return;
@@ -2614,11 +2617,11 @@ void Component::takeKeyboardFocus (FocusChangeType cause)
             componentLosingFocus->internalKeyboardFocusLoss (cause);
 
         if (currentlyFocusedComponent == this)
-            internalKeyboardFocusGain (cause, safePointer);
+            internalKeyboardFocusGain (cause, safePointer, direction);
     }
 }
 
-void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryParent)
+void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryParent, FocusChangeDirection direction)
 {
     if (! isShowing())
         return;
@@ -2626,7 +2629,7 @@ void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryPar
     if (flags.wantsKeyboardFocusFlag
         && (isEnabled() || parentComponent == nullptr))
     {
-        takeKeyboardFocus (cause);
+        takeKeyboardFocus (cause, direction);
         return;
     }
 
@@ -2637,7 +2640,7 @@ void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryPar
     {
         if (auto* defaultComp = traverser->getDefaultComponent (this))
         {
-            defaultComp->grabKeyboardFocusInternal (cause, false);
+            defaultComp->grabKeyboardFocusInternal (cause, false, direction);
             return;
         }
     }
@@ -2645,7 +2648,7 @@ void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryPar
     // if no children want it and we're allowed to try our parent comp,
     // then pass up to parent, which will try our siblings.
     if (canTryParent && parentComponent != nullptr)
-        parentComponent->grabKeyboardFocusInternal (cause, true);
+        parentComponent->grabKeyboardFocusInternal (cause, true, direction);
 }
 
 void Component::grabKeyboardFocus()
@@ -2654,7 +2657,7 @@ void Component::grabKeyboardFocus()
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-    grabKeyboardFocusInternal (focusChangedDirectly, true);
+    grabKeyboardFocusInternal (focusChangedDirectly, true, FocusChangeDirection::unknown);
 
     // A component can only be focused when it's actually on the screen!
     // If this fails then you're probably trying to grab the focus before you've
@@ -2730,7 +2733,10 @@ void Component::moveKeyboardFocusToSibling (bool moveToNext)
                         return;
                 }
 
-                nextComp->grabKeyboardFocusInternal (focusChangedByTabKey, true);
+                nextComp->grabKeyboardFocusInternal (focusChangedByTabKey,
+                                                     true,
+                                                     moveToNext ? FocusChangeDirection::forward
+                                                                : FocusChangeDirection::backward);
                 return;
             }
         }

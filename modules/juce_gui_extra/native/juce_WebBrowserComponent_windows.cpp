@@ -351,11 +351,56 @@ private:
 
 #if JUCE_USE_WIN_WEBVIEW2
 
+#include <winuser.h>
+
 using namespace Microsoft::WRL;
+
+static std::vector<HWND> getDirectChildWindows (HWND hwnd)
+{
+    std::vector<HWND> result;
+
+    const auto getNextChildWindow = [hwnd, &result]
+    {
+        return FindWindowExA (hwnd, result.empty() ? nullptr : result.back(), nullptr, nullptr);
+    };
+
+    for (auto* next = getNextChildWindow(); next != nullptr; next = getNextChildWindow())
+        result.push_back (next);
+
+    return result;
+}
+
+static void forEachChildWindowRecursive (HWND hwnd, std::function<bool (HWND)> callback)
+{
+    // EnumChildWindows itself provides the recursion
+    EnumChildWindows (hwnd,
+                      [] (HWND hwnd, LPARAM lParam)
+                      {
+                          auto* callbackPtr = reinterpret_cast<std::function<bool (HWND)>*> (lParam);
+                          return (*callbackPtr) (hwnd) ? TRUE : FALSE;
+                      },
+                      reinterpret_cast<LPARAM> (&callback));
+}
+
+static bool anyChildWindow (HWND hwnd, std::function<bool (HWND)> predicate)
+{
+    auto result = false;
+
+    forEachChildWindowRecursive (hwnd,
+                                 [&predicate, &result] (auto* child)
+                                 {
+                                     result = predicate (child);
+                                     const auto keepGoing = ! result;
+                                     return keepGoing;
+                                 });
+
+    return result;
+}
 
 class WebView2  : public InternalWebViewType,
                   public Component,
-                  public ComponentMovementWatcher
+                  public ComponentMovementWatcher,
+                  private AsyncUpdater
 {
 public:
     WebView2 (WebBrowserComponent& o, const WebBrowserComponent::Options& prefs)
@@ -370,6 +415,26 @@ public:
             throw std::runtime_error ("Failed to create the CoreWebView2Environment");
 
         owner.addAndMakeVisible (this);
+    }
+
+    void focusGainedWithDirection (FocusChangeType, FocusChangeDirection direction) override
+    {
+        if (inMoveFocusRequested)
+            return;
+
+        const auto moveFocusReason = [&]
+        {
+            if (direction == FocusChangeDirection::backward)
+                return COREWEBVIEW2_MOVE_FOCUS_REASON_PREVIOUS;
+
+            if (direction == FocusChangeDirection::forward)
+                return COREWEBVIEW2_MOVE_FOCUS_REASON_NEXT;
+
+            return COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC;
+        }();
+
+        if (webViewController != nullptr)
+            webViewController->MoveFocus (moveFocusReason);
     }
 
     ~WebView2() override
@@ -389,7 +454,9 @@ public:
 
     bool hasBrowserBeenCreated() override
     {
-        return webView != nullptr || isCreating;
+        return    webView != nullptr
+               || webView2ConstructionHelper.webView2BeingCreated == this
+               || webView2ConstructionHelper.viewsWaitingForCreation.contains (this);
     }
 
     void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData) override
@@ -462,6 +529,11 @@ public:
         owner.visibilityChanged();
     }
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+    }
+
     //==============================================================================
     struct WebViewHandle
     {
@@ -470,7 +542,7 @@ public:
         ComSmartPtr<ICoreWebView2Environment> environment;
     };
 
-    static std::optional<WebViewHandle> createWebViewHandle(const WebBrowserComponent::Options::WinWebView2& options)
+    static std::optional<WebViewHandle> createWebViewHandle (const WebBrowserComponent::Options::WinWebView2& options)
     {
         using CreateWebViewEnvironmentWithOptionsFunc = HRESULT (*) (PCWSTR, PCWSTR,
                                                                      ICoreWebView2EnvironmentOptions*,
@@ -645,6 +717,45 @@ private:
                     return S_OK;
                 }).Get(), &webResourceRequestedToken);
         }
+
+        if (webViewController != nullptr)
+        {
+            webViewController->add_MoveFocusRequested (Callback<ICoreWebView2MoveFocusRequestedEventHandler> (
+                [this] (ICoreWebView2Controller*, ICoreWebView2MoveFocusRequestedEventArgs* args) -> HRESULT
+                {
+                    ScopedValueSetter scope { inMoveFocusRequested, true };
+
+                    auto* comp = [&]() -> Component*
+                    {
+                        auto* c = owner.getParentComponent();
+
+                        if (c == nullptr)
+                            return nullptr;
+
+                        const auto traverser = c->createFocusTraverser();
+
+                        if (COREWEBVIEW2_MOVE_FOCUS_REASON reason;
+                            args->get_Reason (&reason) == S_OK && reason == COREWEBVIEW2_MOVE_FOCUS_REASON_PREVIOUS)
+                        {
+                            // The previous Component to the embedded WebView2 Component is the
+                            // WebBrowserComponent. Here we want to skip that and jump to the
+                            // Component that comes before it.
+                            return traverser->getPreviousComponent (&owner);
+                        }
+
+                        // The Component that comes immediately after the WebBrowserComponent is the
+                        // embedded WebView2. We want to jump to the Component that comes after that.
+                        return traverser->getNextComponent (this);
+                    }();
+
+                    if (comp != nullptr)
+                        comp->getAccessibilityHandler()->grabFocus();
+                    else
+                        giveAwayKeyboardFocus();
+
+                    return S_OK;
+                }).Get(), &moveFocusRequestedToken);
+        }
     }
 
     void removeEventHandlers()
@@ -668,6 +779,12 @@ private:
                 webView->RemoveWebResourceRequestedFilter (L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT);
                 webView->remove_WebResourceRequested (webResourceRequestedToken);
             }
+        }
+
+        if (webViewController != nullptr)
+        {
+            if (moveFocusRequestedToken.value != 0)
+                webViewController->remove_MoveFocusRequested (moveFocusRequestedToken);
         }
     }
 
@@ -710,7 +827,18 @@ private:
     {
         if (auto* peer = getPeer())
         {
-            isCreating = true;
+            // We enforce the serial creation of WebView2 instances so that our HWND association
+            // logic can work. Multiple HWNDs can belong to the same browser process, so the only
+            // way to identify which belongs to which WebView2 is to associate them with each other
+            // in the order of creation.
+            if (webView2ConstructionHelper.webView2BeingCreated != nullptr)
+            {
+                webView2ConstructionHelper.viewsWaitingForCreation.insert (this);
+                return;
+            }
+
+            webView2ConstructionHelper.viewsWaitingForCreation.erase (this);
+            webView2ConstructionHelper.webView2BeingCreated = this;
 
             WeakReference<WebView2> weakThis (this);
 
@@ -720,7 +848,7 @@ private:
                     {
                         if (weakThis != nullptr)
                         {
-                            weakThis->isCreating = false;
+                            webView2ConstructionHelper.webView2BeingCreated = nullptr;
 
                             if (controller != nullptr)
                             {
@@ -729,6 +857,40 @@ private:
 
                                 if (weakThis->webView != nullptr)
                                 {
+                                    if (UINT32 browserProcessId;
+                                        weakThis->webView->get_BrowserProcessId (&browserProcessId) == S_OK)
+                                    {
+                                        auto* self = weakThis.get();
+                                        auto* webView2WindowHandle = static_cast<HWND> (self->getWindowHandle());
+
+                                        // There is no WebView2 API for getting the HWND hosting
+                                        // the WebView2 content. So we iterate over all child
+                                        // windows of the JUCE peer HWND, and try to figure out
+                                        // which one belongs to a WebView2. What we are looking for
+                                        // is a window that has a child window that belongs to the
+                                        // browserProcessId.
+                                        const auto directChildWindows = getDirectChildWindows (webView2WindowHandle);
+
+                                        for (auto* childWindow : directChildWindows)
+                                        {
+                                            if (! self->webView2ConstructionHelper.associatedWebViewNativeWindows.contains (childWindow))
+                                            {
+                                                if (anyChildWindow (childWindow,
+                                                                    [browserProcessId] (auto* childOfChild)
+                                                                    {
+                                                                        if (DWORD procId; GetWindowThreadProcessId (childOfChild, &procId) != 0)
+                                                                            return (UINT32) procId == browserProcessId;
+
+                                                                        return false;
+                                                                    }))
+                                                {
+                                                    webView2ConstructionHelper.associatedWebViewNativeWindows.insert (childWindow);
+                                                    AccessibilityHandler::setNativeChildForComponent (*self, childWindow);
+                                                }
+                                            }
+                                        }
+                                    }
+
                                     weakThis->addEventHandlers();
                                     weakThis->setWebViewPreferences();
                                     weakThis->componentMovedOrResized (true, true);
@@ -737,6 +899,9 @@ private:
                                         weakThis->webView->Navigate (weakThis->urlRequest.url.toWideCharPointer());
                                 }
                             }
+
+                            if (! weakThis->webView2ConstructionHelper.viewsWaitingForCreation.empty())
+                                (*weakThis->webView2ConstructionHelper.viewsWaitingForCreation.begin())->triggerAsyncUpdate();
                         }
 
                         return S_OK;
@@ -746,6 +911,11 @@ private:
 
     void closeWebView()
     {
+        if (auto* webViewNativeWindow = AccessibilityHandler::getNativeChildForComponent (*this))
+            webView2ConstructionHelper.associatedWebViewNativeWindows.erase (webViewNativeWindow);
+
+        AccessibilityHandler::setNativeChildForComponent (*this, nullptr);
+
         if (webViewController != nullptr)
         {
             webViewController->Close();
@@ -754,6 +924,12 @@ private:
         }
 
         webViewHandle.environment = nullptr;
+    }
+
+    //==============================================================================
+    void handleAsyncUpdate() override
+    {
+        createWebView();
     }
 
     //==============================================================================
@@ -790,7 +966,10 @@ private:
                            newWindowRequestedToken   { 0 },
                            windowCloseRequestedToken { 0 },
                            navigationCompletedToken  { 0 },
-                           webResourceRequestedToken { 0 };
+                           webResourceRequestedToken { 0 },
+                           moveFocusRequestedToken   { 0 };
+
+    bool inMoveFocusRequested = false;
 
     struct URLRequest
     {
@@ -801,7 +980,14 @@ private:
 
     URLRequest urlRequest;
 
-    bool isCreating = false;
+    struct WebView2ConstructionHelper
+    {
+        WebView2* webView2BeingCreated;
+        std::set<WebView2*> viewsWaitingForCreation;
+        std::set<void*> associatedWebViewNativeWindows;
+    };
+
+    inline static WebView2ConstructionHelper webView2ConstructionHelper;
 
     //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (WebView2)
@@ -969,9 +1155,16 @@ void WebBrowserComponent::visibilityChanged()
     checkWindowAssociation();
 }
 
-void WebBrowserComponent::focusGained (FocusChangeType)
+void WebBrowserComponent::focusGainedWithDirection (FocusChangeType type, FocusChangeDirection dir)
 {
-    browser->getInternalWebView().focusGained();
+    ignoreUnused (type, dir);
+
+   #if JUCE_USE_WIN_WEBVIEW2
+    if (auto* webView2 = dynamic_cast<WebView2*> (&browser->getInternalWebView()))
+        webView2->focusGainedWithDirection (type, dir);
+    else
+   #endif
+        browser->getInternalWebView().focusGained();
 }
 
 void WebBrowserComponent::clearCookies()

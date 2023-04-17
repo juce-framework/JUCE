@@ -166,9 +166,14 @@ JUCE_COMRESULT AccessibilityNativeHandle::get_HostRawElementProvider (IRawElemen
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
-        if (isFragmentRoot())
-            if (auto* wrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
+        if (auto* wrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
+        {
+            if (isFragmentRoot())
                 return wrapper->hostProviderFromHwnd ((HWND) accessibilityHandler.getComponent().getWindowHandle(), pRetVal);
+
+            if (auto* embeddedWindow = static_cast<HWND> (AccessibilityHandler::getNativeChildForComponent (accessibilityHandler.getComponent())))
+                return wrapper->hostProviderFromHwnd (embeddedWindow, pRetVal);
+        }
 
         return S_OK;
     });
@@ -180,6 +185,10 @@ JUCE_COMRESULT AccessibilityNativeHandle::get_ProviderOptions (ProviderOptions* 
         return E_INVALIDARG;
 
     *options = (ProviderOptions) (ProviderOptions_ServerSideProvider | ProviderOptions_UseComThreading);
+
+    if (AccessibilityHandler::getNativeChildForComponent (accessibilityHandler.getComponent()) != nullptr)
+        *options |= ProviderOptions_OverrideProvider;
+
     return S_OK;
 }
 
@@ -613,6 +622,18 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetFocus (ComTypes::IRawElementProvide
 
         if (auto* focusHandler = getFocusHandler())
             focusHandler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
+
+        return S_OK;
+    });
+}
+
+JUCE_COMRESULT AccessibilityNativeHandle::GetOverrideProviderForHwnd (HWND hwnd, IRawElementProviderSimple** pRetVal)
+{
+    return withCheckedComArgs (pRetVal, *this, [&]
+    {
+        if (auto* component = AccessibilityHandler::getComponentForNativeChild (hwnd))
+            if (auto* handler = component->getAccessibilityHandler())
+                handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
 
         return S_OK;
     });
