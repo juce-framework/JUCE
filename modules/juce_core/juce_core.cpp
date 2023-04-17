@@ -262,6 +262,7 @@
  #include "containers/juce_HashMap_test.cpp"
 
  #include "containers/juce_Optional_test.cpp"
+ #include "misc/juce_EnumHelpers_test.cpp"
 #endif
 
 //==============================================================================
