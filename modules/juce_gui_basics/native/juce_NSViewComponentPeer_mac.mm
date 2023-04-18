@@ -951,8 +951,6 @@ public:
         if (r.size.width < 1.0f || r.size.height < 1.0f)
             return;
 
-        deferredRepaints.subtract ({ convertToRectFloat (r) });
-
         auto cg = []
         {
             if (@available (macOS 10.10, *))
@@ -1114,6 +1112,11 @@ public:
             [view setNeedsDisplayInRect: makeNSRect (i)];
 
         lastRepaintTime = Time::getMillisecondCounter();
+
+       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        if (metalRenderer == nullptr)
+       #endif
+            deferredRepaints.clear();
     }
 
     void performAnyPendingRepaintsNow() override
