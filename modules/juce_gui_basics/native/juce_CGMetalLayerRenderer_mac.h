@@ -82,6 +82,9 @@ public:
         const auto drawableSizeTransform = CGAffineTransformMakeScale (layer.contentsScale, layer.contentsScale);
         const auto transformedFrameSize = CGSizeApplyAffineTransform (layer.bounds.size, drawableSizeTransform);
 
+        if (CGSizeEqualToSize (transformedFrameSize, CGSizeZero))
+            return dirtyRegions;
+
         if (resources == nullptr || ! CGSizeEqualToSize (layer.drawableSize, transformedFrameSize))
         {
             layer.drawableSize = transformedFrameSize;
@@ -89,9 +92,6 @@ public:
             dirtyRegions.clear();
             dirtyRegions.add (convertToRectFloat (layer.bounds));
         }
-
-        if (CGSizeEqualToSize (transformedFrameSize, CGSizeZero))
-            return dirtyRegions;
 
         auto gpuTexture = resources->getGpuTexture();
 
