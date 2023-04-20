@@ -438,7 +438,7 @@ void AudioProcessor::validateParameter (AudioProcessorParameter* param)
     */
    #if JucePlugin_Build_AU
     static std::once_flag flag;
-    if (wrapperType == wrapperType_Undefined || param->getVersionHint() != 0)
+    if (wrapperType != wrapperType_Undefined && param->getVersionHint() == 0)
         std::call_once (flag, [] { jassertfalse; });
    #endif
 }
