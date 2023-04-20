@@ -270,7 +270,7 @@ void ClassInfo::parseSubCategories (const std::string& str) noexcept
 	std::stringstream stream (str);
 	std::string item;
 	while (std::getline (stream, item, '|'))
-		data.subCategories.emplace_back (move (item));
+		data.subCategories.emplace_back (std::move (item));
 }
 
 //------------------------------------------------------------------------

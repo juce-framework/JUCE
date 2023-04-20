@@ -43,7 +43,7 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#if (__cplusplus >= 201707L)
+#if (__cplusplus >= 201703L)
 #if __has_include(<filesystem>)
 #define USE_EXPERIMENTAL_FS 0
 #elif __has_include(<experimental/filesystem>)
