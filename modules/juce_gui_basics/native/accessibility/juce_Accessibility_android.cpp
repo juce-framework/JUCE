@@ -269,12 +269,30 @@ public:
     {
         if (virtualViewId != HOST_VIEW_ID)
             virtualViewIdMap.erase (virtualViewId);
+
+        if (nativeChildViewId.has_value())
+            virtualViewIdMap.erase (*nativeChildViewId);
     }
 
     int getVirtualViewId() const noexcept  { return virtualViewId; }
 
-    void populateNodeInfo (jobject info)
+    jobject getNativeView (int viewId) const
     {
+        if (nativeChildViewId == viewId)
+            return static_cast<jobject> (AccessibilityHandler::getNativeChildForComponent (accessibilityHandler.getComponent()));
+
+        return nullptr;
+    }
+
+    void populateNodeInfo (jobject info, int infoVirtualViewId)
+    {
+        if (   AccessibilityHandler::getNativeChildForComponent (accessibilityHandler.getComponent()) != nullptr
+            && ! nativeChildViewId.has_value())
+        {
+            nativeChildViewId.emplace (getNextVirtualViewId());
+            virtualViewIdMap[*nativeChildViewId] = &accessibilityHandler;
+        }
+
         const ScopedValueSetter<bool> svs (inPopulateNodeInfo, true);
 
         const auto sourceView = getSourceView (accessibilityHandler);
@@ -292,6 +310,10 @@ public:
             for (auto* child : accessibilityHandler.getChildren())
                 env->CallVoidMethod (info, AndroidAccessibilityNodeInfo.addChild,
                                      sourceView, child->getNativeImplementation()->getVirtualViewId());
+
+            if (nativeChildViewId.has_value() && nativeChildViewId != infoVirtualViewId)
+                env->CallVoidMethod (info, AndroidAccessibilityNodeInfo.addChild,
+                                     sourceView, *nativeChildViewId);
 
             if (auto* parent = accessibilityHandler.getParent())
                 env->CallVoidMethod (info, AndroidAccessibilityNodeInfo.setVirtualParent,
@@ -807,14 +829,19 @@ public:
 private:
     static std::unordered_map<int, AccessibilityHandler*> virtualViewIdMap;
 
-    static int getVirtualViewIdForHandler (const AccessibilityHandler& handler)
+    static int getNextVirtualViewId()
     {
         static int counter = 0;
 
+        return counter++;
+    }
+
+    static int getVirtualViewIdForHandler (const AccessibilityHandler& handler)
+    {
         if (handler.getComponent().isOnDesktop())
             return HOST_VIEW_ID;
 
-        return counter++;
+        return getNextVirtualViewId();
     }
 
     LocalRef<jstring> getDescriptionString() const
@@ -908,6 +935,7 @@ private:
 
     AccessibilityHandler& accessibilityHandler;
     const int virtualViewId;
+    std::optional<int> nativeChildViewId;
     bool inPopulateNodeInfo = false;
 
     //==============================================================================
