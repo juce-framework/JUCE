@@ -978,7 +978,7 @@ public:
                 }
 
                 {
-                    int64 colour;
+                    Steinberg::int64 colour;
                     if (list->getInt (Vst::ChannelContext::kChannelColorKey, colour) == kResultTrue)
                         trackProperties.colour = Colour (Vst::ChannelContext::GetRed ((uint32) colour),  Vst::ChannelContext::GetGreen ((uint32) colour),
                                                          Vst::ChannelContext::GetBlue ((uint32) colour), Vst::ChannelContext::GetAlpha ((uint32) colour));
@@ -1415,7 +1415,7 @@ private:
 
         flags &= ~pluginShouldBeMarkedDirtyFlag;
 
-        if (auto* handler = componentHandler)
+        if (auto* handler = componentHandler.get())
             handler->restartComponent (flags);
     }
 
@@ -2945,7 +2945,7 @@ public:
     Optional<PositionInfo> getPosition() const override
     {
         PositionInfo info;
-        info.setTimeInSamples (jmax ((juce::int64) 0, processContext.projectTimeSamples));
+        info.setTimeInSamples (jmax ((Steinberg::int64) 0, processContext.projectTimeSamples));
         info.setTimeInSeconds (static_cast<double> (*info.getTimeInSamples()) / processContext.sampleRate);
         info.setIsRecording ((processContext.state & Vst::ProcessContext::kRecording) != 0);
         info.setIsPlaying ((processContext.state & Vst::ProcessContext::kPlaying) != 0);

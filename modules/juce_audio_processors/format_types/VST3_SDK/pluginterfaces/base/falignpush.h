@@ -26,6 +26,8 @@
 #elif defined __BORLANDC__
 	#pragma -a8
 #elif SMTG_OS_WINDOWS
+	//! @brief warning C4996: alignment changed after including header, may be due to missing #pragma pack(pop)
+	#pragma warning(disable : 4103)
 	#pragma pack(push)
 	#if SMTG_PLATFORM_64
 		#pragma pack(16)

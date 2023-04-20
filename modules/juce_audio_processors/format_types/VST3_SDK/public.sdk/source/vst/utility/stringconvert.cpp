@@ -2,9 +2,9 @@
 // Project     : VST SDK
 //
 // Category    : Helpers
-// Filename    : public.sdk/source/vst/vstcomponentbase.cpp
-// Created by  : Steinberg, 05/2005
-// Description : Base class for VST Component and Edit Controller
+// Filename    : public.sdk/source/vst/utility/stringconvert.cpp
+// Created by  : Steinberg, 11/2014
+// Description : c++11 unicode string convert functions
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -34,147 +34,115 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include "vstcomponentbase.h"
-#include "base/source/fstring.h"
-
-namespace Steinberg {
-namespace Vst {
+#include "stringconvert.h"
+#include <codecvt>
+#include <locale>
+#include <istream>
 
 //------------------------------------------------------------------------
-// ComponentBase Implementation
+namespace VST3 {
+namespace StringConvert {
+
 //------------------------------------------------------------------------
-ComponentBase::ComponentBase ()
+namespace {
+
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+#define USE_WCHAR_AS_UTF16TYPE
+using UTF16Type = wchar_t;
+#else
+using UTF16Type = char16_t;
+#endif
+
+using Converter = std::wstring_convert<std::codecvt_utf8_utf16<UTF16Type>, UTF16Type>;
+
+//------------------------------------------------------------------------
+Converter& converter ()
 {
+	static Converter conv;
+	return conv;
 }
 
 //------------------------------------------------------------------------
-ComponentBase::~ComponentBase ()
+} // anonymous
+
+//------------------------------------------------------------------------
+std::u16string convert (const std::string& utf8Str)
 {
+#if defined(USE_WCHAR_AS_UTF16TYPE)
+	auto wstr = converter ().from_bytes (utf8Str);
+	return {wstr.data (), wstr.data () + wstr.size ()};
+#else
+	return converter ().from_bytes (utf8Str);
+#endif
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API ComponentBase::initialize (FUnknown* context)
+bool convert (const std::string& utf8Str, Steinberg::Vst::String128 str)
 {
-	// check if already initialized
-	if (hostContext)
-		return kResultFalse;
-
-	hostContext = context;
-
-	return kResultOk;
+	return convert (utf8Str, str, 128);
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API ComponentBase::terminate ()
+bool convert (const std::string& utf8Str, Steinberg::Vst::TChar* str, uint32_t maxCharacters)
 {
-	// release host interfaces
-	hostContext = nullptr;
-
-	// in case host did not disconnect us,
-	// release peer now
-	if (peerConnection)
+	auto ucs2 = convert (utf8Str);
+	if (ucs2.length () < maxCharacters)
 	{
-		peerConnection->disconnect (this);
-		peerConnection = nullptr;
+		ucs2.copy (reinterpret_cast<char16_t*> (str), ucs2.length ());
+		str[ucs2.length ()] = 0;
+		return true;
 	}
-
-	return kResultOk;
+	return false;
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API ComponentBase::connect (IConnectionPoint* other)
+std::string convert (const Steinberg::Vst::TChar* str)
 {
-	if (!other)
-		return kInvalidArgument;
-
-	// check if already connected
-	if (peerConnection)
-		return kResultFalse;
-
-	peerConnection = other;
-	return kResultOk;
+	return converter ().to_bytes (reinterpret_cast<const UTF16Type*> (str));
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API ComponentBase::disconnect (IConnectionPoint* other)
+std::string convert (const Steinberg::Vst::TChar* str, uint32_t max)
 {
-	if (peerConnection && other == peerConnection)
+	std::string result;
+	if (str)
 	{
-		peerConnection = nullptr;
-		return kResultOk;
-	}
-	return kResultFalse;
-}
-
-//------------------------------------------------------------------------
-tresult PLUGIN_API ComponentBase::notify (IMessage* message)
-{
-	if (!message)
-		return kInvalidArgument;
-
-	if (FIDStringsEqual (message->getMessageID (), "TextMessage"))
-	{
-		TChar string[256] = {0};
-		if (message->getAttributes ()->getString ("Text", string, sizeof (string)) == kResultOk)
+		Steinberg::Vst::TChar tmp[2] {};
+		for (uint32_t i = 0; i < max; ++i, ++str)
 		{
-			String tmp (string);
-			tmp.toMultiByte (kCP_Utf8);
-			return receiveText (tmp.text8 ());
+			tmp[0] = *str;
+			if (tmp[0] == 0)
+				break;
+			result += convert (tmp);
 		}
 	}
-
-	return kResultFalse;
+	return result;
 }
 
 //------------------------------------------------------------------------
-IMessage* ComponentBase::allocateMessage () const
+std::string convert (const std::u16string& str)
 {
-	FUnknownPtr<IHostApplication> hostApp (hostContext);
-	if (hostApp)
-		return Vst::allocateMessage (hostApp);
-	return nullptr;
+	return converter ().to_bytes (reinterpret_cast<const UTF16Type*> (str.data ()),
+	                              reinterpret_cast<const UTF16Type*> (str.data () + str.size ()));
 }
 
 //------------------------------------------------------------------------
-tresult ComponentBase::sendMessage (IMessage* message) const
+std::string convert (const char* str, uint32_t max)
 {
-	if (message != nullptr && getPeer () != nullptr)
-		return getPeer ()->notify (message);
-	return kResultFalse;
-}
-
-//------------------------------------------------------------------------
-tresult ComponentBase::sendTextMessage (const char8* text) const
-{
-	if (auto msg = owned (allocateMessage ()))
+	std::string result;
+	if (str)
 	{
-		msg->setMessageID ("TextMessage");
-		String tmp (text, kCP_Utf8);
-		if (tmp.length () >= 256)
-			tmp.remove (255);
-		msg->getAttributes ()->setString ("Text", tmp.text16 ());
-		return sendMessage (msg);
+		result.reserve (max);
+		for (uint32_t i = 0; i < max; ++i, ++str)
+		{
+			if (*str == 0)
+				break;
+			result += *str;
+		}
 	}
-	return kResultFalse;
+	return result;
 }
 
 //------------------------------------------------------------------------
-tresult ComponentBase::sendMessageID (const char8* messageID) const
-{
-	if (auto msg = owned (allocateMessage ()))
-	{
-		msg->setMessageID (messageID);
-		return sendMessage (msg);
-	}
-	return kResultFalse;
-}
-
-//------------------------------------------------------------------------
-tresult ComponentBase::receiveText (const char8* /*text*/)
-{
-	return kResultOk;
-}
-
-//------------------------------------------------------------------------
-} // namespace Vst
-} // namespace Steinberg
+} // String
+} // VST3

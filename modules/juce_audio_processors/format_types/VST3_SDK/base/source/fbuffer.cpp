@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -605,7 +605,7 @@ bool Buffer::toWideString (int32 sourceCodePage)
 			endString8 ();
 
 		Buffer dest (getFillSize () * sizeof (char16));
-		int32 result = String::multiByteToWideString (dest.str16 (), buffer, dest.getFree () / sizeof (char16), sourceCodePage);
+		int32 result = String::multiByteToWideString (dest.str16 (), str8 (), dest.getFree () / sizeof (char16), sourceCodePage);
 		if (result > 0)
 		{
 			dest.setFillSize ((result - 1) * sizeof (char16));

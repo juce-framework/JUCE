@@ -3020,7 +3020,7 @@ public:
             {
                 if (componentStream != nullptr)
                 {
-                    int64 result;
+                    Steinberg::int64 result;
                     componentStream->seek (0, IBStream::kIBSeekSet, &result);
                     setComponentStateAndResetParameters (*componentStream);
                 }

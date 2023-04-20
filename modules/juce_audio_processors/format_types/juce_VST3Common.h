@@ -430,7 +430,7 @@ namespace detail
 inline bool isLayoutTableValid()
 {
     for (const auto& item : detail::layoutTable)
-        if ((size_t) countNumberOfBits (item.arrangement) != item.channelOrder.size())
+        if ((size_t) countNumberOfBits ((uint64) item.arrangement) != item.channelOrder.size())
             return false;
 
     std::set<Steinberg::Vst::SpeakerArrangement> arrangements;
