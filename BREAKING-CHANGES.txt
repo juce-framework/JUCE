@@ -6,6 +6,30 @@ develop
 
 Change
 ------
+Unique device IDs on Windows have been updated to use a more reliable SMBIOS
+parser. The SystemStats::getUniqueDeviceID function now returns new IDs using
+this improved parser. Additionally, a new function,
+SystemStats::getMachineIdentifiers, has been introduced to aggregate all ID
+sources. It is recommended to use this new function to verify any IDs.
+
+Possible Issues
+----------------
+The SystemStats::getUniqueDeviceID function will return a different ID for the
+same machine due to the updated parser.
+
+Workaround
+----------
+For code that previously relied on SystemStats::getUniqueDeviceID, it is advised
+to switch to using SystemStats::getMachineIdentifiers() instead.
+
+Rationale
+---------
+This update ensures the generation of more stable and reliable unique device IDs,
+while also maintaining backward compatibility with the previous ID generation methods.
+
+
+Change
+------
 The Grid layout algorithm has been slightly altered to provide more consistent
 behaviour. The new approach guarantees that dimensions specified using the
 absolute Px quantity will always be correctly rounded when applied to the
