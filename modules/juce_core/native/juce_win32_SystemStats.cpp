@@ -659,28 +659,180 @@ String SystemStats::getDisplayLanguage()
     return languagesBuffer.data();
 }
 
+static constexpr DWORD generateProviderID (const char* string)
+{
+    return (DWORD) string[0] << 0x18
+         | (DWORD) string[1] << 0x10
+         | (DWORD) string[2] << 0x08
+         | (DWORD) string[3] << 0x00;
+}
+
+static std::optional<std::vector<std::byte>> readSMBIOSData()
+{
+    const auto sig = generateProviderID ("RSMB");
+    const auto  id = generateProviderID ("RSDT");
+
+    if (const auto bufLen = GetSystemFirmwareTable (sig, id, nullptr, 0); bufLen > 0)
+    {
+        std::vector<std::byte> buffer;
+
+        buffer.resize (bufLen);
+
+        if (GetSystemFirmwareTable (sig, id, buffer.data(), bufLen) == buffer.size())
+            return std::make_optional (std::move (buffer));
+    }
+
+    return {};
+}
+
+String getLegacyUniqueDeviceID()
+{
+    if (const auto dump = readSMBIOSData())
+    {
+        uint64_t hash = 0;
+        const auto start = dump->data();
+        const auto end   = start + jmin (1024, (int) dump->size());
+
+        for (auto dataPtr = start; dataPtr != end; ++dataPtr)
+            hash = hash * (uint64_t) 101 + (uint8_t) *dataPtr;
+
+        return String (hash);
+    }
+
+    return {};
+}
+
 String SystemStats::getUniqueDeviceID()
 {
-    #define PROVIDER(string) (DWORD) (string[0] << 24 | string[1] << 16 | string[2] << 8 | string[3])
-
-    auto bufLen = GetSystemFirmwareTable (PROVIDER ("RSMB"), PROVIDER ("RSDT"), nullptr, 0);
-
-    if (bufLen > 0)
+    if (const auto smbiosBuffer = readSMBIOSData())
     {
-        HeapBlock<uint8_t> buffer { bufLen };
-        GetSystemFirmwareTable (PROVIDER ("RSMB"), PROVIDER ("RSDT"), (void*) buffer.getData(), bufLen);
-
-        return [&]
+        #pragma pack (push, 1)
+        struct RawSMBIOSData
         {
-            uint64_t hash = 0;
-            const auto start = buffer.getData();
-            const auto end = start + jmin (1024, (int) bufLen);
+            uint8_t unused[4];
+            uint32_t length;
+        };
 
-            for (auto dataPtr = start; dataPtr != end; ++dataPtr)
-                hash = hash * (uint64_t) 101 + *dataPtr;
+        struct SMBIOSHeader
+        {
+            uint8_t  id;
+            uint8_t  length;
+            uint16_t handle;
+        };
+        #pragma pack (pop)
 
-            return String (hash);
-        }();
+        String uuid;
+        const auto* asRawSMBIOSData = unalignedPointerCast<const RawSMBIOSData*> (smbiosBuffer->data());
+        Span<const std::byte> content (smbiosBuffer->data() + sizeof (RawSMBIOSData), asRawSMBIOSData->length);
+
+        while (! content.empty())
+        {
+            const auto* header      = unalignedPointerCast<const SMBIOSHeader*> (content.data());
+            const auto* stringTable = unalignedPointerCast<const char*> (content.data() + header->length);
+            std::vector<const char*> strings;
+
+            // Each table comprises a struct and a varying number of null terminated
+            // strings. The string section is delimited by a pair of null terminators.
+            // Some fields in the header are indices into the string table.
+
+            const auto sizeofStringTable = [stringTable, &strings, &content]
+            {
+                size_t tableLen = 0;
+
+                while (tableLen < content.size())
+                {
+                    const auto* str = stringTable + tableLen;
+                    const auto n = strlen (str);
+
+                    if (n == 0)
+                        break;
+
+                    strings.push_back (str);
+                    tableLen += n + 1;
+                }
+
+                return jmax (tableLen, (size_t) 1) + 1;
+            }();
+
+            const auto stringFromOffset = [&content, &strings = std::as_const (strings)] (size_t byteOffset)
+            {
+                if (const auto index = std::to_integer<size_t> (content[byteOffset]); 0 < index && index <= strings.size())
+                    return strings[index - 1];
+
+                return "";
+            };
+
+            enum
+            {
+                systemManufacturer      = 0x04,
+                systemProductName       = 0x05,
+                systemSerialNumber      = 0x07,
+                systemUUID              = 0x08, // 16byte UUID. Can be all 0xFF or all 0x00. Might be user changeable.
+                systemSKU               = 0x19,
+                systemFamily            = 0x1a,
+
+                baseboardManufacturer   = 0x04,
+                baseboardProduct        = 0x05,
+                baseboardVersion        = 0x06,
+                baseboardSerialNumber   = 0x07,
+                baseboardAssetTag       = 0x08,
+
+                processorManufacturer   = 0x07,
+                processorVersion        = 0x10,
+                processorAssetTag       = 0x21,
+                processorPartNumber     = 0x22
+            };
+
+            switch (header->id)
+            {
+                case 1: // System
+                {
+                    uuid += stringFromOffset (systemManufacturer);
+                    uuid += "\n";
+                    uuid += stringFromOffset (systemProductName);
+                    uuid += "\n";
+
+                    char hexBuf[(16 * 2) + 1]{};
+                    const auto* src = content.data() + systemUUID;
+
+                    for (auto i = 0; i != 16; ++i)
+                        snprintf (hexBuf + 2 * i, 3, "%02hhX", src[i]);
+
+                    uuid += hexBuf;
+                    uuid += "\n";
+                    break;
+                }
+
+                case 2: // Baseboard
+                    uuid += stringFromOffset (baseboardManufacturer);
+                    uuid += "\n";
+                    uuid += stringFromOffset (baseboardProduct);
+                    uuid += "\n";
+                    uuid += stringFromOffset (baseboardVersion);
+                    uuid += "\n";
+                    uuid += stringFromOffset (baseboardSerialNumber);
+                    uuid += "\n";
+                    uuid += stringFromOffset (baseboardAssetTag);
+                    uuid += "\n";
+                    break;
+
+                case 4: // Processor
+                    uuid += stringFromOffset (processorManufacturer);
+                    uuid += "\n";
+                    uuid += stringFromOffset (processorVersion);
+                    uuid += "\n";
+                    uuid += stringFromOffset (processorAssetTag);
+                    uuid += "\n";
+                    uuid += stringFromOffset (processorPartNumber);
+                    uuid += "\n";
+                    break;
+                }
+
+            const auto increment = header->length + sizeofStringTable;
+            content = Span (content.data() + increment, content.size() - increment);
+        }
+
+        return String (uuid.hashCode64());
     }
 
     // Please tell someone at JUCE if this occurs
