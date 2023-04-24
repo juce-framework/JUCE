@@ -112,6 +112,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
  #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <public.sdk/source/common/memorystream.h>
+ #include <public.sdk/source/vst/utility/uid.h>
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
 
@@ -143,6 +144,11 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
   #include <base/source/flock.cpp>
  #endif
 
+#pragma push_macro ("True")
+#undef True
+#pragma push_macro ("False")
+#undef False
+
  #include <base/source/updatehandler.cpp>
  #include <pluginterfaces/base/conststringtable.cpp>
  #include <pluginterfaces/base/funknown.cpp>
@@ -155,7 +161,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <public.sdk/source/common/memorystream.cpp>
  #include <public.sdk/source/common/pluginview.cpp>
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
+ #include <public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp>
  #include <public.sdk/source/vst/utility/stringconvert.cpp>
+ #include <public.sdk/source/vst/utility/uid.h>
  #include <public.sdk/source/vst/vstbus.cpp>
  #include <public.sdk/source/vst/vstcomponent.cpp>
  #include <public.sdk/source/vst/vstcomponentbase.cpp>
@@ -163,6 +171,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <public.sdk/source/vst/vstinitiids.cpp>
  #include <public.sdk/source/vst/vstparameters.cpp>
  #include <public.sdk/source/vst/vstpresetfile.cpp>
+
+#pragma pop_macro ("True")
+#pragma pop_macro ("False")
 
  #if VST_VERSION >= 0x03060c   // 3.6.12
   #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
