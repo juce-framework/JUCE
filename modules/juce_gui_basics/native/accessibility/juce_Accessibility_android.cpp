@@ -296,8 +296,6 @@ public:
             if (auto* parent = accessibilityHandler.getParent())
                 env->CallVoidMethod (info, AndroidAccessibilityNodeInfo.setVirtualParent,
                                      sourceView, parent->getNativeImplementation()->getVirtualViewId());
-            else
-                env->CallVoidMethod (info, AndroidAccessibilityNodeInfo.setParent, sourceView);
         }
 
         {
