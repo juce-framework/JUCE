@@ -78,7 +78,8 @@ namespace build_tools
             case Type::StaticLibrary:
             case Type::DynamicLibrary:
             case Type::LV2PlugIn:
-            case Type::LV2TurtleProgram:
+            case Type::LV2Helper:
+            case Type::VST3Helper:
             case Type::SharedCodeTarget:
             case Type::AggregateTarget:
             case Type::unspecified:
@@ -109,7 +110,8 @@ namespace build_tools
             case Type::StaticLibrary:
             case Type::DynamicLibrary:
             case Type::LV2PlugIn:
-            case Type::LV2TurtleProgram:
+            case Type::LV2Helper:
+            case Type::VST3Helper:
             case Type::SharedCodeTarget:
             case Type::AggregateTarget:
             case Type::unspecified:

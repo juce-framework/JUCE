@@ -122,8 +122,9 @@ public:
             case Target::AAXPlugIn:
             case Target::UnityPlugIn:
             case Target::LV2PlugIn:
-            case Target::LV2TurtleProgram:
+            case Target::LV2Helper:
             case Target::VST3PlugIn:
+            case Target::VST3Helper:
             case Target::AudioUnitPlugIn:
             case Target::AudioUnitv3PlugIn:
             case Target::unspecified:

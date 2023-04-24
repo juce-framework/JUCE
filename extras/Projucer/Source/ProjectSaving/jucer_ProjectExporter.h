@@ -216,11 +216,50 @@ public:
     void createPropertyEditors (PropertyListBuilder&);
     void addSettingsForProjectType (const build_tools::ProjectType&);
 
-    build_tools::RelativePath getLV2TurtleDumpProgramSource() const
+    build_tools::RelativePath getLV2HelperProgramSource() const
     {
         return getModuleFolderRelativeToProject ("juce_audio_plugin_client")
                .getChildFile ("LV2")
                .getChildFile ("juce_LV2TurtleDumpProgram.cpp");
+    }
+
+    std::vector<build_tools::RelativePath> getVST3HelperProgramSources (const ProjectExporter& exporter) const
+    {
+        const auto base = getModuleFolderRelativeToProject ("juce_audio_processors").getChildFile ("format_types")
+                                                                                    .getChildFile ("VST3_SDK");
+        const auto vst = base.getChildFile ("public.sdk")
+                             .getChildFile ("source")
+                             .getChildFile ("vst");
+        const auto hosting = vst.getChildFile ("hosting");
+
+        std::vector<build_tools::RelativePath> result
+        {
+            base.getChildFile ("public.sdk")
+                .getChildFile ("samples")
+                .getChildFile ("vst-utilities")
+                .getChildFile ("moduleinfotool")
+                .getChildFile ("source")
+                .getChildFile ("main.cpp"),
+            base.getChildFile ("pluginterfaces")
+                .getChildFile ("base")
+                .getChildFile ("coreiids.cpp"),
+            hosting.getChildFile ("module.cpp"),
+            vst.getChildFile ("moduleinfo")
+               .getChildFile ("moduleinfocreator.cpp"),
+            vst.getChildFile ("moduleinfo")
+               .getChildFile ("moduleinfoparser.cpp"),
+            vst.getChildFile ("utility")
+               .getChildFile ("stringconvert.cpp"),
+        };
+
+        if (exporter.isOSX())
+            result.push_back (hosting.getChildFile ("module_mac.mm"));
+        else if (exporter.isLinux())
+            result.push_back (hosting.getChildFile ("module_linux.cpp"));
+        else if (exporter.isWindows())
+            result.push_back (hosting.getChildFile ("module_win32.cpp"));
+
+        return result;
     }
 
     //==============================================================================

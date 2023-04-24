@@ -298,10 +298,10 @@ public:
             case Target::AudioUnitPlugIn:
             case Target::UnityPlugIn:
             case Target::LV2PlugIn:
-            case Target::LV2TurtleProgram:
+            case Target::LV2Helper:
+            case Target::VST3Helper:
                 return ! iOS;
             case Target::unspecified:
-            default:
                 break;
         }
 
@@ -1068,11 +1068,16 @@ public:
                     break;
 
                 case ConsoleApp:
-                case LV2TurtleProgram:
+                case LV2Helper:
+                case VST3Helper:
                     xcodeFileType = "compiled.mach-o.executable";
                     xcodeBundleExtension = String();
                     xcodeProductType = "com.apple.product-type.tool";
                     xcodeCopyToProductInstallPathAfterBuild = false;
+
+                    if (type == VST3Helper)
+                        xcodeFrameworks.add ("Cocoa");
+
                     break;
 
                 case StaticLibrary:
@@ -1216,8 +1221,11 @@ public:
                     if (xcodeFileType == "archive.ar")
                         return getStaticLibbedFilename (binaryName);
 
-                    if (type == LV2TurtleProgram)
+                    if (type == LV2Helper)
                         return Project::getLV2FileWriterName();
+
+                    if (type == VST3Helper)
+                        return Project::getVST3FileWriterName();
 
                     return binaryName + xcodeBundleExtension;
                 }();
@@ -1257,36 +1265,42 @@ public:
             if (! owner.project.isAudioPluginProject())
                 return;
 
-            if (type == XcodeTarget::StandalonePlugIn) // depends on AUv3 and shared code
-            {
-                if (auto* auv3Target = owner.getTargetOfType (XcodeTarget::AudioUnitv3PlugIn))
-                    dependencyIDs.add (auv3Target->addDependencyFor (*this));
-
-                if (auto* sharedCodeTarget = owner.getTargetOfType (XcodeTarget::SharedCodeTarget))
-                    dependencyIDs.add (sharedCodeTarget->addDependencyFor (*this));
-            }
-            else if (type == XcodeTarget::AggregateTarget) // depends on all other targets
+            if (type == XcodeTarget::AggregateTarget) // depends on all other targets
             {
                 for (auto* target : owner.targets)
                     if (target->type != XcodeTarget::AggregateTarget)
                         dependencyIDs.add (target->addDependencyFor (*this));
-            }
-            else if (type == XcodeTarget::LV2PlugIn)
-            {
-                if (auto* helperTarget = owner.getTargetOfType (XcodeTarget::LV2TurtleProgram))
-                    dependencyIDs.add (helperTarget->addDependencyFor (*this));
 
+                return;
+            }
+
+            if (type == XcodeTarget::LV2Helper || type == XcodeTarget::VST3Helper)
+            {
+                return;
+            }
+
+            if (type != XcodeTarget::SharedCodeTarget) // everything else depends on the sharedCodeTarget
+            {
                 if (auto* sharedCodeTarget = owner.getTargetOfType (XcodeTarget::SharedCodeTarget))
                     dependencyIDs.add (sharedCodeTarget->addDependencyFor (*this));
             }
-            else if (type == XcodeTarget::LV2TurtleProgram)
+
+            if (type == LV2PlugIn)
             {
-                // No thanks
+                if (auto* helperTarget = owner.getTargetOfType (LV2Helper))
+                    dependencyIDs.add (helperTarget->addDependencyFor (*this));
             }
-            else if (type != XcodeTarget::SharedCodeTarget) // shared code doesn't depend on anything; all other targets depend only on the shared code
+
+            if (type == VST3PlugIn && owner.project.isVst3ManifestEnabled())
             {
-                if (auto* sharedCodeTarget = owner.getTargetOfType (XcodeTarget::SharedCodeTarget))
-                    dependencyIDs.add (sharedCodeTarget->addDependencyFor (*this));
+                if (auto* helperTarget = owner.getTargetOfType (VST3Helper))
+                    dependencyIDs.add (helperTarget->addDependencyFor (*this));
+            }
+
+            if (type == XcodeTarget::StandalonePlugIn)
+            {
+                if (auto* auv3Target = owner.getTargetOfType (XcodeTarget::AudioUnitv3PlugIn))
+                    dependencyIDs.add (auv3Target->addDependencyFor (*this));
             }
         }
 
@@ -1479,8 +1493,11 @@ public:
 
             const auto productName = [&]
             {
-                if (type == LV2TurtleProgram)
+                if (type == LV2Helper)
                     return Project::getLV2FileWriterName().quoted();
+
+                if (type == VST3Helper)
+                    return Project::getVST3FileWriterName().quoted();
 
                 return owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString (type == UnityPlugIn)).quoted();
             }();
@@ -1815,7 +1832,8 @@ public:
                 case LV2PlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getLV2PluginBinaryLocationString() : String();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
                 case StaticLibrary:
-                case LV2TurtleProgram:
+                case LV2Helper:
+                case VST3Helper:
                 case DynamicLibrary:
                 case AudioUnitv3PlugIn:
                 case StandalonePlugIn:
@@ -1831,7 +1849,7 @@ public:
             if (getTargetFileType() == pluginBundle)
                 flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
-            if (type != Target::SharedCodeTarget && type != Target::LV2TurtleProgram)
+            if (type != Target::SharedCodeTarget && type != Target::LV2Helper && type != Target::VST3Helper)
             {
                 if (owner.project.isAudioPluginProject())
                 {
@@ -2104,16 +2122,31 @@ private:
 
             target->addMainBuildProduct();
 
-            if (target->type == XcodeTarget::LV2TurtleProgram
+            if (target->type == XcodeTarget::LV2Helper
                 && project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
-                const auto path = rebaseFromProjectFolderToBuildTarget (getLV2TurtleDumpProgramSource());
+                const auto path = rebaseFromProjectFolderToBuildTarget (getLV2HelperProgramSource ());
                 addFile (FileOptions().withRelativePath ({ expandPath (path.toUnixStyle()), path.getRoot() })
                                       .withSkipPCHEnabled (true)
                                       .withCompilationEnabled (true)
                                       .withInhibitWarningsEnabled (true)
                                       .withCompilerFlags ("-std=c++11")
                                       .withXcodeTarget (target));
+            }
+
+            if (target->type == XcodeTarget::VST3Helper
+                && project.getEnabledModules().isModuleEnabled ("juce_audio_processors"))
+            {
+                for (const auto& source : getVST3HelperProgramSources (*this))
+                {
+                    const auto path = rebaseFromProjectFolderToBuildTarget (source);
+                    addFile (FileOptions().withRelativePath ({ expandPath (path.toUnixStyle()), path.getRoot() })
+                                          .withSkipPCHEnabled (true)
+                                          .withCompilationEnabled (true)
+                                          .withInhibitWarningsEnabled (true)
+                                          .withCompilerFlags ("-std=c++17 -fobjc-arc")
+                                          .withXcodeTarget (target));
+                }
             }
 
             auto targetName = String (target->getName());
@@ -2266,7 +2299,8 @@ private:
 
                 if (! projectType.isStaticLibrary()
                     && target->type != XcodeTarget::SharedCodeTarget
-                    && target->type != XcodeTarget::LV2TurtleProgram
+                    && target->type != XcodeTarget::LV2Helper
+                    && target->type != XcodeTarget::VST3Helper
                     && ! skipAUv3)
                     target->addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
@@ -2286,42 +2320,68 @@ private:
 
                 if (! projectType.isStaticLibrary()
                     && target->type != XcodeTarget::SharedCodeTarget
-                    && target->type != XcodeTarget::LV2TurtleProgram)
+                    && target->type != XcodeTarget::LV2Helper)
+                {
                     target->addBuildPhase ("PBXFrameworksBuildPhase", target->frameworkIDs);
+                }
             }
 
-            if (target->type == XcodeTarget::LV2PlugIn)
+            // When building LV2 and VST3 plugins on Arm macs, we need to load and run the plugin
+            // bundle during a post-build step in order to generate the plugin's supporting files.
+            // Arm macs will only load shared libraries if they are signed, but Xcode runs its
+            // signing step after any post-build scripts. As a workaround, we check whether the
+            // plugin is signed and generate an adhoc certificate if necessary, before running
+            // the manifest-generator.
+            if (target->type == XcodeTarget::VST3PlugIn || target->type == XcodeTarget::LV2PlugIn)
             {
-                // When building LV2 plugins on Arm macs, we need to load and run the plugin bundle
-                // during a post-build step in order to generate the plugin's supporting files. Arm
-                // macs will only load shared libraries if they are signed, but Xcode runs its
-                // signing step after any post-build scripts. As a workaround, we check whether the
-                // plugin is signed and generate an adhoc certificate if necessary, before running
-                // the manifest-generator.
-                auto script = "set -e\n"
-                              "xcrun codesign --verify \"$CONFIGURATION_BUILD_DIR/$PRODUCT_NAME\" "
-                              "|| xcrun codesign -s - \"$CONFIGURATION_BUILD_DIR/$PRODUCT_NAME\"\n"
-                              "\"$CONFIGURATION_BUILD_DIR/../"
-                            + Project::getLV2FileWriterName()
-                            + "\" \"$CONFIGURATION_BUILD_DIR/$PRODUCT_NAME\"\n";
+                String script = "set -e\n";
 
-                for (ConstConfigIterator config (*this); config.next();)
+                // Delete manifest if it's left over from an old build
+                if (target->type == XcodeTarget::VST3PlugIn)
+                    script << "rm -f \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/moduleinfo.json\"\n";
+
+                // Sign the bundle so that it can be loaded by the manifest generator tools
+                script << "xcrun codesign --verify \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\" "
+                          "|| xcrun codesign -f -s - \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\"\n";
+
+                if (target->type == XcodeTarget::LV2PlugIn)
                 {
-                    auto& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
-                    const auto installPath = target->getInstallPathForConfiguration (xcodeConfig);
+                    // Note: LV2 has a non-standard config build dir
+                    script << "\"$CONFIGURATION_BUILD_DIR/../"
+                            + Project::getLV2FileWriterName()
+                            + "\" \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\"\n";
 
-                    if (installPath.isNotEmpty())
+                    for (ConstConfigIterator config (*this); config.next();)
                     {
-                        const auto destination = installPath.replace ("$(HOME)", "$HOME");
+                        auto& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
+                        const auto installPath = target->getInstallPathForConfiguration (xcodeConfig);
 
-                        script << "if [ \"$CONFIGURATION\" = \"" << config->getName() << "\" ]; then\n"
-                                  "mkdir -p \"" << destination << "\"\n"
-                                  "/bin/ln -sfh \"$CONFIGURATION_BUILD_DIR\" \"" << destination << "\"\n"
-                                  "fi\n";
+                        if (installPath.isNotEmpty())
+                        {
+                            const auto destination = installPath.replace ("$(HOME)", "$HOME");
+
+                            script << R"(if [ "$CONFIGURATION" = ")" << config->getName() << "\" ]; then\n"
+                                      "mkdir -p \"" << destination << "\"\n"
+                                      "/bin/ln -sfh \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\" \"" << destination << "\"\n"
+                                      "fi\n";
+                        }
                     }
                 }
+                else if (target->type == XcodeTarget::VST3PlugIn && project.isVst3ManifestEnabled())
+                {
+                    // Generate the manifest
+                    script << "\"$CONFIGURATION_BUILD_DIR/" << Project::getVST3FileWriterName() << "\" "
+                              "-create "
+                              "-version " << project.getVersionString().quoted() << " "
+                              "-path \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\" "
+                              "-output \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/moduleinfo.json\"\n";
+                    // Sign the manifest (a prerequisite of signing the containing bundle)
+                    script << "xcrun codesign -f -s - \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/moduleinfo.json\"\n";
+                    // Sign the full bundle
+                    script << "xcrun codesign -f -s - \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\"\n";
+                }
 
-                target->addShellScriptBuildPhase ("Generate manifest", script);
+                target->addShellScriptBuildPhase ("Update manifest", script);
             }
 
             target->addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
