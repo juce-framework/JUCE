@@ -409,7 +409,7 @@ private:
                     }
                 }
 
-                jassert (successCount == (int) [assetKeys.get() count]);
+                jassertquiet (successCount == (int) [assetKeys.get() count]);
                 preparePlayerItem();
             }
 
