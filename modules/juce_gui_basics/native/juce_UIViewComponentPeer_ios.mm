@@ -56,19 +56,31 @@ static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler
     {
         id accessibleElement = [&childHandler]
         {
-            id native = static_cast<id> (childHandler->getNativeImplementation());
+            id nativeChild = static_cast<id> (childHandler->getNativeImplementation());
 
-            if (! childHandler->getChildren().empty())
-                return [native accessibilityContainer];
+            if (   ! childHandler->getChildren().empty()
+                || AccessibilityHandler::getNativeChildForComponent (childHandler->getComponent()) != nullptr)
+            {
+                return [nativeChild accessibilityContainer];
+            }
 
-            return native;
+            return nativeChild;
         }();
 
         if (accessibleElement != nil)
             [accessibleChildren addObject: accessibleElement];
     }
 
-    [accessibleChildren addObject: static_cast<id> (handler.getNativeImplementation())];
+    id nativeHandler = static_cast<id> (handler.getNativeImplementation());
+
+    if (auto* view = static_cast<UIView*> (AccessibilityHandler::getNativeChildForComponent (handler.getComponent())))
+    {
+        [static_cast<UIAccessibilityElement*> (view) setAccessibilityContainer: [nativeHandler accessibilityContainer]];
+
+        [accessibleChildren addObject: view];
+    }
+
+    [accessibleChildren addObject: nativeHandler];
 
     return accessibleChildren;
 }
