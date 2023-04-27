@@ -23,3 +23,6 @@ inclusion in JUCE.
 
 - std:: qualification was added to std::move call in module.cpp to silence
   a -Wunqualified-std-cast-call warning
+
+- The main.cpp of moduleinfotool was updated to include information exported
+  by the plugin's IPluginCompatibility object, if present.

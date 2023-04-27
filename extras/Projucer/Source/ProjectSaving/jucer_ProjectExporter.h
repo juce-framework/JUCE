@@ -227,29 +227,33 @@ public:
     {
         const auto base = getModuleFolderRelativeToProject ("juce_audio_processors").getChildFile ("format_types")
                                                                                     .getChildFile ("VST3_SDK");
-        const auto vst = base.getChildFile ("public.sdk")
-                             .getChildFile ("source")
-                             .getChildFile ("vst");
+        const auto publicSdk = base.getChildFile ("public.sdk");
+        const auto source = publicSdk.getChildFile ("source");
+        const auto vst = source.getChildFile ("vst");
         const auto hosting = vst.getChildFile ("hosting");
+        const auto plugBase = base.getChildFile ("pluginterfaces")
+                                  .getChildFile ("base");
 
         std::vector<build_tools::RelativePath> result
         {
+            hosting.getChildFile ("module.cpp"),
             base.getChildFile ("public.sdk")
                 .getChildFile ("samples")
                 .getChildFile ("vst-utilities")
                 .getChildFile ("moduleinfotool")
                 .getChildFile ("source")
                 .getChildFile ("main.cpp"),
-            base.getChildFile ("pluginterfaces")
-                .getChildFile ("base")
-                .getChildFile ("coreiids.cpp"),
-            hosting.getChildFile ("module.cpp"),
+            source.getChildFile ("common")
+                  .getChildFile ("memorystream.cpp"),
             vst.getChildFile ("moduleinfo")
                .getChildFile ("moduleinfocreator.cpp"),
             vst.getChildFile ("moduleinfo")
                .getChildFile ("moduleinfoparser.cpp"),
             vst.getChildFile ("utility")
                .getChildFile ("stringconvert.cpp"),
+            vst.getChildFile ("vstinitiids.cpp"),
+            plugBase.getChildFile ("coreiids.cpp"),
+            plugBase.getChildFile ("funknown.cpp"),
         };
 
         if (exporter.isOSX())

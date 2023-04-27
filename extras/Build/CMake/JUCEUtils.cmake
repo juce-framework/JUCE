@@ -948,7 +948,8 @@ function(_juce_add_vst3_manifest_helper_target)
     get_target_property(module_path juce::juce_audio_processors INTERFACE_JUCE_MODULE_PATH)
     set(vst3_dir "${module_path}/juce_audio_processors/format_types/VST3_SDK")
     set(public_dir "${vst3_dir}/public.sdk")
-    set(public_vst_dir "${public_dir}/source/vst")
+    set(public_source_dir "${public_dir}/source")
+    set(public_vst_dir "${public_source_dir}/vst")
     set(hosting_dir "${public_vst_dir}/hosting")
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -966,23 +967,27 @@ function(_juce_add_vst3_manifest_helper_target)
         "${extra_source}"
         "${hosting_dir}/module.cpp"
         "${public_dir}/samples/vst-utilities/moduleinfotool/source/main.cpp"
+        "${public_source_dir}/common/memorystream.cpp"
         "${public_vst_dir}/moduleinfo/moduleinfocreator.cpp"
         "${public_vst_dir}/moduleinfo/moduleinfoparser.cpp"
         "${public_vst_dir}/utility/stringconvert.cpp"
-        "${vst3_dir}/pluginterfaces/base/coreiids.cpp")
+        "${public_vst_dir}/vstinitiids.cpp"
+        "${vst3_dir}/pluginterfaces/base/coreiids.cpp"
+        "${vst3_dir}/pluginterfaces/base/funknown.cpp")
 
     add_executable(juce::juce_vst3_helper ALIAS juce_vst3_helper)
 
     target_compile_features(juce_vst3_helper PRIVATE cxx_std_17)
-    target_include_directories(juce_vst3_helper PRIVATE
-        "${module_path}/juce_audio_processors/format_types/VST3_SDK")
+    target_include_directories(juce_vst3_helper PRIVATE "${vst3_dir}")
 
     if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
        OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
         target_compile_options(juce_vst3_helper PRIVATE
+            "-Wno-deprecated-declarations"
             "-Wno-expansion-to-defined"
-            "-Wno-deprecated-declarations")
+            "-Wno-format"
+            "-Wno-pragma-pack")
     endif()
 
     if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
@@ -996,7 +1001,7 @@ function(_juce_add_vst3_manifest_helper_target)
     set_target_properties(juce_vst3_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
-    target_link_libraries(juce_vst3_helper PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
+    target_link_libraries(juce_vst3_helper PRIVATE Threads::Threads ${CMAKE_DL_LIBS} juce_recommended_config_flags)
 endfunction()
 
 # ==================================================================================================
