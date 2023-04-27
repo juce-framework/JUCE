@@ -46,7 +46,7 @@ public:
     /** Sets the threshold in dB of the noise-gate.*/
     void setThreshold (SampleType newThreshold);
 
-    /** Sets the ratio of the noise-gate (must be higher or equal to 1).*/
+    /** Sets the ratio of the noise-gate.*/
     void setRatio (SampleType newRatio);
 
     /** Sets the attack time in milliseconds of the noise-gate.*/
