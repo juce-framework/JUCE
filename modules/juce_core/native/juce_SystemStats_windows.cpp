@@ -796,7 +796,7 @@ String SystemStats::getUniqueDeviceID()
                     const auto* src = content.data() + systemUUID;
 
                     for (auto i = 0; i != 16; ++i)
-                        snprintf (hexBuf + 2 * i, 3, "%02hhX", src[i]);
+                        snprintf (hexBuf + 2 * i, 3, "%02hhX", std::to_integer<uint8_t> (src[i]));
 
                     uuid += hexBuf;
                     uuid += "\n";
