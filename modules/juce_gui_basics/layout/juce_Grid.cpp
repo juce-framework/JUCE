@@ -175,8 +175,8 @@ struct Grid::Helpers
                         if (! currentItem.isFractional())
                             return roundingFunction (absoluteSize);
 
-                        const auto result = roundingFunction (absoluteSize + carriedError);
-                        carriedError = result - absoluteSize;
+                        const auto result = roundingFunction (absoluteSize - carriedError);
+                        carriedError += result - absoluteSize;
                         return result;
                     }();
 
@@ -1145,8 +1145,7 @@ void Grid::performLayout (Rectangle<int> targetArea)
                          sizeCalculation.roundingFunction (rect.getHeight()) };
             };
 
-            return rounded (Helpers::BoxAlignment::alignItem (*item, *this, areaBounds))
-                       + targetArea.toFloat().getPosition();
+            return rounded (Helpers::BoxAlignment::alignItem (*item, *this, areaBounds));
         };
 
         item->currentBounds = getBounds (calculation) + targetArea.toFloat().getPosition();
@@ -1513,6 +1512,122 @@ struct GridTests  : public UnitTest
                 grid.performLayout (bounds);
 
                 expectEquals (component.getWidth(), targetSize);
+            }
+        }
+
+        {
+            beginTest ("Evaluate invariants on randomised Grid layouts");
+
+            struct Solution
+            {
+                Grid grid;
+                std::deque<Component> components;
+                int absoluteWidth;
+                Rectangle<int> bounds;
+            };
+
+            auto createSolution = [this] (int numColumns,
+                                          float probabilityOfFractionalColumn,
+                                          Rectangle<int> bounds) -> Solution
+            {
+                auto random = getRandom();
+
+                Grid grid;
+                grid.templateRows = { Grid::Fr { 1 } };
+
+                // Ensuring that the sum of absolute item widths never exceed total width
+                const auto widthOfAbsolute = (int) ((float) bounds.getWidth() / (float) (numColumns + 1));
+
+                for (int i = 0; i < numColumns; ++i)
+                {
+                    if (random.nextFloat() < probabilityOfFractionalColumn)
+                        grid.templateColumns.add (Grid::Fr { 1 });
+                    else
+                        grid.templateColumns.add (Grid::Px { widthOfAbsolute });
+                }
+
+                std::deque<Component> itemComponents (static_cast<size_t> (grid.templateColumns.size()));
+
+                for (auto& c : itemComponents)
+                    grid.items.add (GridItem { c });
+
+                grid.performLayout (bounds);
+
+                return { std::move (grid), std::move (itemComponents), widthOfAbsolute, bounds };
+            };
+
+            const auto getFractionalComponentWidths = [] (const Solution& solution)
+            {
+                std::vector<int> result;
+
+                for (int i = 0; i < solution.grid.templateColumns.size(); ++i)
+                    if (solution.grid.templateColumns[i].isFractional())
+                        result.push_back (solution.components[(size_t) i].getWidth());
+
+                return result;
+            };
+
+            const auto getAbsoluteComponentWidths = [] (const Solution& solution)
+            {
+                std::vector<int> result;
+
+                for (int i = 0; i < solution.grid.templateColumns.size(); ++i)
+                    if (! solution.grid.templateColumns[i].isFractional())
+                        result.push_back (solution.components[(size_t) i].getWidth());
+
+                return result;
+            };
+
+            const auto evaluateInvariants = [&] (const Solution& solution)
+            {
+                const auto fractionalWidths = getFractionalComponentWidths (solution);
+
+                if (! fractionalWidths.empty())
+                {
+                    const auto [min, max] = std::minmax_element (fractionalWidths.begin(),
+                                                                 fractionalWidths.end());
+                    expectLessOrEqual (*max - *min, 1, "Fr { 1 } items are expected to share the "
+                                                       "rounding errors equally and hence couldn't "
+                                                       "deviate in size by more than 1 px");
+                }
+
+                const auto absoluteWidths = getAbsoluteComponentWidths (solution);
+
+                for (const auto& w : absoluteWidths)
+                    expectEquals (w, solution.absoluteWidth, "Sizes specified in absolute dimensions should "
+                                                             "be preserved");
+
+                Rectangle<int> unionOfComponentBounds;
+
+                for (const auto& c : solution.components)
+                    unionOfComponentBounds = unionOfComponentBounds.getUnion (c.getBoundsInParent());
+
+                if ((size_t) solution.grid.templateColumns.size() == absoluteWidths.size())
+                    expect (solution.bounds.contains (unionOfComponentBounds), "Non-oversized absolute Components "
+                                                                               "should never be placed outside the "
+                                                                               "provided bounds.");
+                else
+                    expect (unionOfComponentBounds == solution.bounds, "With fractional items, positioned items "
+                                                                       "should cover the provided bounds exactly");
+            };
+
+            const auto knownPreviousBad = createSolution (5, 1.0f, Rectangle<int> { 0, 0, 600, 200 }.reduced (16));
+            evaluateInvariants (knownPreviousBad);
+
+            auto random = getRandom();
+
+            for (int i = 0; i < 1000; ++i)
+            {
+                const auto numColumns = random.nextInt (Range<int> { 1, 26 });
+                const auto probabilityOfFractionalColumn = random.nextFloat();
+                const auto bounds = Rectangle<int> { random.nextInt (Range<int> { 0, 3 }),
+                                                     random.nextInt (Range<int> { 0, 3 }),
+                                                     random.nextInt (Range<int> { 300, 1200 }),
+                                                     random.nextInt (Range<int> { 100, 500 }) }
+                                        .reduced (random.nextInt (Range<int> { 0, 16 }));
+
+                const auto randomSolution = createSolution (numColumns, probabilityOfFractionalColumn, bounds);
+                evaluateInvariants (randomSolution);
             }
         }
     }
