@@ -586,7 +586,7 @@ AudioChannelSet AudioChannelSet::ambisonic (int order)
         return numToSet;
     };
 
-    const auto numAmbisonicChannels = (order + 1) * (order + 1);
+    const auto numAmbisonicChannels = square (order + 1);
 
     for (int rangeIdx = 0, bitsSet = 0; bitsSet < numAmbisonicChannels; ++rangeIdx)
     {
