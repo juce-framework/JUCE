@@ -141,6 +141,7 @@ private:
     std::unique_ptr<SavedState> state;
     OwnedArray<SavedState> stateStack;
 
+    void setContextClipToPath (const Path&, const AffineTransform&);
     void drawGradient();
     void createPath (const Path&) const;
     void createPath (const Path&, const AffineTransform&) const;

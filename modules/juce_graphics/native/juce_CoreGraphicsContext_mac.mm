@@ -295,7 +295,7 @@ void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
     clipToRectangleListWithoutTest (remaining);
 }
 
-void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& transform)
+void CoreGraphicsContext::setContextClipToPath (const Path& path, const AffineTransform& transform)
 {
     createPath (path, transform);
 
@@ -303,7 +303,11 @@ void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& t
         CGContextClip (context.get());
     else
         CGContextEOClip (context.get());
+}
 
+void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& transform)
+{
+    setContextClipToPath (path, transform);
     lastClipRect.reset();
 }
 
@@ -506,12 +510,7 @@ void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& tra
     }
     else
     {
-        createPath (path, transform);
-
-        if (path.isUsingNonZeroWinding())
-            CGContextClip (context.get());
-        else
-            CGContextEOClip (context.get());
+        setContextClipToPath (path, transform);
 
         if (state->fillType.isGradient())
             drawGradient();
