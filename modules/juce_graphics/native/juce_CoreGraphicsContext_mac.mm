@@ -497,26 +497,14 @@ void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& tra
 {
     ScopedCGContextState scopedState (context.get());
 
+    setContextClipToPath (path, transform);
+
     if (state->fillType.isColour())
-    {
-        flip();
-        applyTransform (transform);
-        createPath (path);
-
-        if (path.isUsingNonZeroWinding())
-            CGContextFillPath (context.get());
-        else
-            CGContextEOFillPath (context.get());
-    }
+        CGContextFillRect (context.get(), CGContextGetClipBoundingBox (context.get()));
+    else if (state->fillType.isGradient())
+        drawGradient();
     else
-    {
-        setContextClipToPath (path, transform);
-
-        if (state->fillType.isGradient())
-            drawGradient();
-        else
-            drawImage (state->fillType.image, state->fillType.transform, true);
-    }
+        drawImage (state->fillType.image, state->fillType.transform, true);
 }
 
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform)
@@ -768,24 +756,6 @@ void CoreGraphicsContext::drawGradient()
     else
         CGContextDrawLinearGradient (context.get(), state->gradient.get(), p1, p2,
                                      kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
-}
-
-void CoreGraphicsContext::createPath (const Path& path) const
-{
-    CGContextBeginPath (context.get());
-
-    for (Path::Iterator i (path); i.next();)
-    {
-        switch (i.elementType)
-        {
-            case Path::Iterator::startNewSubPath:  CGContextMoveToPoint (context.get(), i.x1, i.y1); break;
-            case Path::Iterator::lineTo:           CGContextAddLineToPoint (context.get(), i.x1, i.y1); break;
-            case Path::Iterator::quadraticTo:      CGContextAddQuadCurveToPoint (context.get(), i.x1, i.y1, i.x2, i.y2); break;
-            case Path::Iterator::cubicTo:          CGContextAddCurveToPoint (context.get(), i.x1, i.y1, i.x2, i.y2, i.x3, i.y3); break;
-            case Path::Iterator::closePath:        CGContextClosePath (context.get()); break;
-            default:                               jassertfalse; break;
-        }
-    }
 }
 
 void CoreGraphicsContext::createPath (const Path& path, const AffineTransform& transform) const

@@ -143,7 +143,6 @@ private:
 
     void setContextClipToPath (const Path&, const AffineTransform&);
     void drawGradient();
-    void createPath (const Path&) const;
     void createPath (const Path&, const AffineTransform&) const;
     void flip() const;
     void applyTransform (const AffineTransform&) const;
