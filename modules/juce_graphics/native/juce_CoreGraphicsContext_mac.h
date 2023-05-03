@@ -120,8 +120,7 @@ private:
     detail::ContextPtr context;
     const CGFloat flipHeight;
     detail::ColorSpacePtr rgbColourSpace, greyColourSpace;
-    mutable Rectangle<int> lastClipRect;
-    mutable bool lastClipRectIsValid = false;
+    mutable std::optional<Rectangle<int>> lastClipRect;
 
     struct SavedState
     {
