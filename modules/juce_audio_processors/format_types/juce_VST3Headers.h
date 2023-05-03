@@ -121,7 +121,10 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
 
- #define NOMINMAX // Some of the steinberg sources don't set this before including windows.h
+ #ifndef NOMINMAX
+  #define NOMINMAX // Some of the steinberg sources don't set this before including windows.h
+ #endif
+
  #include <base/source/baseiids.cpp>
  #include <base/source/fbuffer.cpp>
  #include <base/source/fdebug.cpp>
