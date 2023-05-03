@@ -175,7 +175,7 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
         {
             // this window can get lost behind JUCE windows which are set to be alwaysOnTop
             // so if there are any set it to be topmost
-            const auto topmostFlag = detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows() ? MB_TOPMOST : 0;
+            const auto topmostFlag = WindowUtils::areThereAnyAlwaysOnTopWindows() ? MB_TOPMOST : 0;
 
             const auto iconFlags = [&]() -> decltype (topmostFlag)
             {

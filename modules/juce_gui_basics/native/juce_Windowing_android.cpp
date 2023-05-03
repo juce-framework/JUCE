@@ -2444,12 +2444,6 @@ void Desktop::allowedOrientationsChanged()
 }
 
 //==============================================================================
-bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()
-{
-    return false;
-}
-
-//==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (create,          "<init>",         "()V") \
  FIELD  (density,         "density",        "F") \

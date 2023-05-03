@@ -4776,37 +4776,6 @@ void JUCE_CALLTYPE Process::makeForegroundProcess() {}
 void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
-static BOOL CALLBACK enumAlwaysOnTopWindows (HWND hwnd, LPARAM lParam)
-{
-    if (IsWindowVisible (hwnd))
-    {
-        DWORD processID = 0;
-        GetWindowThreadProcessId (hwnd, &processID);
-
-        if (processID == GetCurrentProcessId())
-        {
-            WINDOWINFO info{};
-
-            if (GetWindowInfo (hwnd, &info)
-                 && (info.dwExStyle & WS_EX_TOPMOST) != 0)
-            {
-                *reinterpret_cast<bool*> (lParam) = true;
-                return FALSE;
-            }
-        }
-    }
-
-    return TRUE;
-}
-
-bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()
-{
-    bool anyAlwaysOnTopFound = false;
-    EnumWindows (&enumAlwaysOnTopWindows, (LPARAM) &anyAlwaysOnTopFound);
-    return anyAlwaysOnTopFound;
-}
-
-//==============================================================================
 bool detail::MouseInputSourceList::addSource()
 {
     auto numSources = sources.size();
