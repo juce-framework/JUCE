@@ -715,13 +715,13 @@ public final class ComponentPeerView extends ViewGroup
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             {
                 super.closeConnection();
+
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                    setImeConsumesInput (false);
             }
             else
             {
                 finishComposingText();
-
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                    setImeConsumesInput (false);
             }
         }
 
