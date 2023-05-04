@@ -191,12 +191,18 @@ Possible values:
   - (Optional) A list (space or comma-separated) of weak linked OSX frameworks that are needed
     by this module
 
+- EmbeddedOSXFrameworks
+  - (Optional) A list (space or comma-separated) of OSX frameworks to embed. This is the same as the Xcode exporter's Embedded framework, specific for this module.
+
 - iOSFrameworks
   - (Optional) A list (space or comma-separated) of iOS frameworks that are needed by this module
 
 - WeakiOSFrameworks
   - (Optional) A list (space or comma-separated) of weak linked iOS frameworks that are needed
     by this module
+
+- EmbeddediOSFrameworks
+  - (Optional) A list (space or comma-separated) of iOS frameworks to embed. This is the same as the Xcode exporter's Embedded framework, specific for this module.
 
 - linuxPackages
   - (Optional) A list (space or comma-separated) pkg-config packages that should be used to pass
