@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -186,6 +186,7 @@ public:
 	const std::string& getName () const noexcept { return name; }
 	const std::string& getPath () const noexcept { return path; }
 	const PluginFactory& getFactory () const noexcept { return factory; }
+	bool isBundle () const noexcept { return hasBundleStructure; }
 //------------------------------------------------------------------------
 protected:
 	virtual ~Module () noexcept = default;
@@ -194,6 +195,7 @@ protected:
 	PluginFactory factory {nullptr};
 	std::string name;
 	std::string path;
+	bool hasBundleStructure {true};
 };
 
 //------------------------------------------------------------------------

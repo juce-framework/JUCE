@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -81,8 +81,8 @@ struct Iterator
 	bool operator== (const Iterator& other) const { return other.el == el; }
 	bool operator!= (const Iterator& other) const { return other.el != el; }
 
-	JsonElement operator* () const { return el; }
-	JsonElement operator-> () const { return el; }
+	const JsonElement& operator* () const { return el; }
+	const JsonElement& operator-> () const { return el; }
 
 	Iterator& operator++ ()
 	{

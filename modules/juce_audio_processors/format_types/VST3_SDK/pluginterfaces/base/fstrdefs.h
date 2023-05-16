@@ -133,12 +133,11 @@ inline SMTG_CONSTEXPR14 int32 _tstrcmp (const T* src, const T* dst)
 
 	if (*src == 0 && *dst == 0)
 		return 0;
-	else if (*src == 0)
+	if (*src == 0)
 		return -1;
-	else if (*dst == 0)
+	if (*dst == 0)
 		return 1;
-	else
-		return (int32) (*src - *dst);
+	return (int32) (*src - *dst);
 }
 
 inline SMTG_CONSTEXPR14 int32 tstrcmp (const tchar* src, const tchar* dst) {return _tstrcmp (src, dst);}
@@ -169,12 +168,11 @@ inline SMTG_CONSTEXPR14 int32 _tstrncmp (const T* first, const T* last, uint32 c
 
 	if (*first == 0 && *last == 0)
 		return 0;
-	else if (*first == 0)
+	if (*first == 0)
 		return -1;
-	else if (*last == 0)
+	if (*last == 0)
 		return 1;
-	else
-		return (int32) (*first - *last);
+	return (int32) (*first - *last);
 }
 
 inline SMTG_CONSTEXPR14 int32 tstrncmp (const tchar* first, const tchar* last, uint32 count) {return _tstrncmp (first, last, count);}

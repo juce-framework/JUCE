@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -39,13 +39,13 @@
 #include "public.sdk/source/vst/vstcomponentbase.h"
 #include "public.sdk/source/vst/vstparameters.h"
 #include "public.sdk/source/common/pluginview.h"
-#include "base/source/fstring.h"
 
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/ivstunits.h"
 
-#include <vector>
 #include <map>
+#include <string>
+#include <vector>
 
 //------------------------------------------------------------------------
 namespace Steinberg {
@@ -241,8 +241,8 @@ public:
 	OBJ_METHODS (ProgramList, FObject)
 //------------------------------------------------------------------------
 protected:
-	using StringMap = std::map<String, String>;
-	using StringVector = std::vector<String>;
+	using StringMap = std::map<std::string, std::u16string>;
+	using StringVector = std::vector<std::u16string>;
 	using ProgramInfoVector = std::vector<StringMap>;
 	ProgramListInfo info;
 	UnitID unitId;
@@ -275,7 +275,7 @@ public:
 
 	OBJ_METHODS (ProgramListWithPitchNames, ProgramList)
 protected:
-	using PitchNameMap = std::map<int16, String>;
+	using PitchNameMap = std::map<int16, std::u16string>;
 	using PitchNamesVector = std::vector<PitchNameMap>;
 	PitchNamesVector pitchNames;
 };

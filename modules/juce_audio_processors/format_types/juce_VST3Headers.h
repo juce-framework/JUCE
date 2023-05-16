@@ -92,6 +92,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/base/conststringtable.h>
  #include <pluginterfaces/base/funknown.h>
  #include <pluginterfaces/base/ipluginbase.h>
+ #include <pluginterfaces/base/iplugincompatibility.h>
  #include <pluginterfaces/base/ustring.h>
  #include <pluginterfaces/gui/iplugview.h>
  #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>

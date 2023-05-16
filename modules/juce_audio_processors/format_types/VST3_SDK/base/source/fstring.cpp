@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -293,7 +293,7 @@ static inline int strnicmp16 (const Steinberg::char16* s1, const Steinberg::char
 //-----------------------------------------------------------------------------
 static inline int sprintf16 (Steinberg::char16* wcs, const Steinberg::char16* format, ...)
 {
-    assert(false && "DEPRECATED No Linux implementation");
+	assert (false && "DEPRECATED No Linux implementation");
 	return 0;
 }
 
@@ -316,7 +316,7 @@ static inline int vsnwprintf (Steinberg::char16* wcs, size_t maxlen,
 //-----------------------------------------------------------------------------
 static inline Steinberg::char16* strrchr16 (const Steinberg::char16* str, Steinberg::char16 c)
 {
-    assert(false && "DEPRECATED No Linux implementation");
+	assert (false && "DEPRECATED No Linux implementation");
 	return nullptr;
 }
 
@@ -667,7 +667,7 @@ int32 ConstString::compare (const ConstString& str, int32 n, CompareMode mode) c
 			return 0;
 		return 1;
 	}
-	else if (isEmpty ())
+	if (isEmpty ())
 		return -1;
 
 	if (!isWide && !str.isWide)
@@ -676,33 +676,23 @@ int32 ConstString::compare (const ConstString& str, int32 n, CompareMode mode) c
 		{
 			if (isCaseSensitive (mode))
 				return strcmp (*this, str);
-			else
-				return stricmp (*this, str);
+			return stricmp (*this, str);
 		}
-		else
-		{
-			if (isCaseSensitive (mode))
-				return strncmp (*this, str, n);
-			else
-				return strnicmp (*this, str, n);
-		}
+		if (isCaseSensitive (mode))
+			return strncmp (*this, str, n);
+		return strnicmp (*this, str, n);
 	}
-	else if (isWide && str.isWide)
+	if (isWide && str.isWide)
 	{
 		if (n < 0)
 		{
 			if (isCaseSensitive (mode))
 				return strcmp16 (*this, str);
-			else
-				return stricmp16 (*this, str);
+			return stricmp16 (*this, str);
 		}
-		else
-		{
-			if (isCaseSensitive (mode))
-				return strncmp16 (*this, str, n);
-			else
-				return strnicmp16 (*this, str, n);
-		}
+		if (isCaseSensitive (mode))
+			return strncmp16 (*this, str, n);
+		return strnicmp16 (*this, str, n);
 	}
 	return compareAt (0, str, n, mode);
 }
@@ -725,7 +715,7 @@ int32 ConstString::compareAt (uint32 index, const ConstString& str, int32 n, Com
 			return 0;
 		return 1;
 	}
-	else if (isEmpty ())
+	if (isEmpty ())
 		return -1;
 
 	if (!isWide && !str.isWide)
@@ -746,18 +736,13 @@ int32 ConstString::compareAt (uint32 index, const ConstString& str, int32 n, Com
 		{
 			if (isCaseSensitive (mode))
 				return strcmp (toCompare, str);
-			else
-				return stricmp (toCompare, str);
+			return stricmp (toCompare, str);
 		}
-		else
-		{
-			if (isCaseSensitive (mode))
-				return strncmp (toCompare, str, n);
-			else
-				return strnicmp (toCompare, str, n);
-		}
+		if (isCaseSensitive (mode))
+			return strncmp (toCompare, str, n);
+		return strnicmp (toCompare, str, n);
 	}
-	else if (isWide && str.isWide)
+	if (isWide && str.isWide)
 	{
 		char16* toCompare = buffer16;
 		if (index > 0)
@@ -775,34 +760,25 @@ int32 ConstString::compareAt (uint32 index, const ConstString& str, int32 n, Com
 		{
 			if (isCaseSensitive (mode))
 				return strcmp16 (toCompare, str.text16 ());
-			else
-				return stricmp16 (toCompare, str.text16 ());
+			return stricmp16 (toCompare, str.text16 ());
 		}
-		else
-		{
-			if (isCaseSensitive (mode))
-				return strncmp16 (toCompare, str.text16 (), n);
-			else
-				return strnicmp16 (toCompare, str.text16 (), n);
-		}
+		if (isCaseSensitive (mode))
+			return strncmp16 (toCompare, str.text16 (), n);
+		return strnicmp16 (toCompare, str.text16 (), n);
 	}
-	else
+	
+	if (isWide)
 	{
-		if (isWide)
-		{
-			String tmp (str.text8 ());
-			if (tmp.toWideString () == false)
-				return -1;
-			return compareAt (index, tmp, n, mode);
-		}
-		else
-		{
-			String tmp (text8 ());
-			if (tmp.toWideString () == false)
-				return 1;
-			return tmp.compareAt (index, str, n, mode);
-		}
+		String tmp (str.text8 ());
+		if (tmp.toWideString () == false)
+			return -1;
+		return compareAt (index, tmp, n, mode);
 	}
+		
+	String tmp (text8 ());
+	if (tmp.toWideString () == false)
+		return 1;
+	return tmp.compareAt (index, str, n, mode);
 }
 
 //------------------------------------------------------------------------
@@ -814,28 +790,23 @@ Steinberg::int32 ConstString::naturalCompare (const ConstString& str, CompareMod
 			return 0;
 		return 1;
 	}
-	else if (isEmpty ())
+	if (isEmpty ())
 		return -1;
 
 	if (!isWide && !str.isWide)
 		return strnatcmp8 (buffer8, str.text8 (), isCaseSensitive (mode));
-	else if (isWide && str.isWide)
+	if (isWide && str.isWide)
 		return strnatcmp16 (buffer16, str.text16 (), isCaseSensitive (mode));
-	else
+	
+	if (isWide)
 	{
-		if (isWide)
-		{
-			String tmp (str.text8 ());
-			tmp.toWideString ();
-			return strnatcmp16 (buffer16, tmp.text16 (), isCaseSensitive (mode));
-		}
-		else
-		{
-			String tmp (text8 ());
-			tmp.toWideString ();
-			return strnatcmp16 (tmp.text16 (), str.text16 (), isCaseSensitive (mode));
-		}
+		String tmp (str.text8 ());
+		tmp.toWideString ();
+		return strnatcmp16 (buffer16, tmp.text16 (), isCaseSensitive (mode));
 	}
+	String tmp (text8 ());
+	tmp.toWideString ();
+	return strnatcmp16 (tmp.text16 (), str.text16 (), isCaseSensitive (mode));
 }
 
 //-----------------------------------------------------------------------------
@@ -845,7 +816,7 @@ bool ConstString::startsWith (const ConstString& str, CompareMode mode /*= kCase
 	{
 		return isEmpty ();
 	}
-	else if (isEmpty ())
+	if (isEmpty ())
 	{
 		return false;
 	}
@@ -859,13 +830,13 @@ bool ConstString::startsWith (const ConstString& str, CompareMode mode /*= kCase
 			return strncmp (buffer8, str.buffer8, str.length ()) == 0;
 		return strnicmp (buffer8, str.buffer8, str.length ()) == 0;
 	}
-	else if (isWide && str.isWide)
+	if (isWide && str.isWide)
 	{
 		if (isCaseSensitive (mode))
 			return strncmp16 (buffer16, str.buffer16, str.length ()) == 0;
 		return strnicmp16 (buffer16, str.buffer16, str.length ()) == 0;
 	}
-	else if (isWide)
+	if (isWide)
 	{
 		String tmp (str.text8 ());
 		tmp.toWideString ();
@@ -875,16 +846,13 @@ bool ConstString::startsWith (const ConstString& str, CompareMode mode /*= kCase
 			return strncmp16 (buffer16, tmp.buffer16, tmp.length ()) == 0;
 		return strnicmp16 (buffer16, tmp.buffer16, tmp.length ()) == 0;
 	}
-	else
-	{
-		String tmp (text8 ());
-		tmp.toWideString ();
-		if (str.length () > tmp.length ())
-			return false;
-		if (isCaseSensitive (mode))
-			return strncmp16 (tmp.buffer16, str.buffer16, str.length ()) == 0;
-		return strnicmp16 (tmp.buffer16, str.buffer16, str.length ()) == 0;
-	}
+	String tmp (text8 ());
+	tmp.toWideString ();
+	if (str.length () > tmp.length ())
+		return false;
+	if (isCaseSensitive (mode))
+		return strncmp16 (tmp.buffer16, str.buffer16, str.length ()) == 0;
+	return strnicmp16 (tmp.buffer16, str.buffer16, str.length ()) == 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -894,7 +862,7 @@ bool ConstString::endsWith (const ConstString& str, CompareMode mode /*= kCaseSe
 	{
 		return isEmpty ();
 	}
-	else if (isEmpty ())
+	if (isEmpty ())
 	{
 		return false;
 	}
@@ -908,13 +876,13 @@ bool ConstString::endsWith (const ConstString& str, CompareMode mode /*= kCaseSe
 			return strncmp (buffer8 + (length () - str.length ()), str.buffer8, str.length ()) == 0;
 		return strnicmp (buffer8 + (length () - str.length ()), str.buffer8, str.length ()) == 0;
 	}
-	else if (isWide && str.isWide)
+	if (isWide && str.isWide)
 	{
 		if (isCaseSensitive (mode))
 			return strncmp16 (buffer16 + (length () - str.length ()), str.buffer16, str.length ()) == 0;
 		return strnicmp16 (buffer16 + (length () - str.length ()), str.buffer16, str.length ()) == 0;
 	}
-	else if (isWide)
+	if (isWide)
 	{
 		String tmp (str.text8 ());
 		tmp.toWideString ();
@@ -924,16 +892,13 @@ bool ConstString::endsWith (const ConstString& str, CompareMode mode /*= kCaseSe
 			return strncmp16 (buffer16 + (length () - tmp.length ()), tmp.buffer16, tmp.length ()) == 0;
 		return strnicmp16 (buffer16 + (length () - tmp.length ()), tmp.buffer16, tmp.length ()) == 0;
 	}
-	else
-	{
-		String tmp (text8 ());
-		tmp.toWideString ();
-		if (str.length () > tmp.length ())
-			return false;
-		if (isCaseSensitive (mode))
-			return strncmp16 (tmp.buffer16 + (tmp.length () - str.length ()), str.buffer16, str.length ()) == 0;
-		return strnicmp16 (tmp.buffer16 + (tmp.length () - str.length ()), str.buffer16, str.length ()) == 0;
-	}
+	String tmp (text8 ());
+	tmp.toWideString ();
+	if (str.length () > tmp.length ())
+		return false;
+	if (isCaseSensitive (mode))
+		return strncmp16 (tmp.buffer16 + (tmp.length () - str.length ()), str.buffer16, str.length ()) == 0;
+	return strnicmp16 (tmp.buffer16 + (tmp.length () - str.length ()), str.buffer16, str.length ()) == 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -976,7 +941,7 @@ int32 ConstString::findNext (int32 startIndex, const ConstString& str, int32 n, 
 		}
 		return -1;
 	}
-	else if (!isWide && !str.isWide)
+	if (!isWide && !str.isWide)
 	{
 		uint32 stringLength = str.length ();
 		n = n < 0 ? stringLength : Min<uint32> (n, stringLength);
@@ -1207,7 +1172,7 @@ int32 ConstString::findPrev (int32 startIndex, const ConstString& str, int32 n, 
 		}
 		return -1;
 	}
-	else if (!isWide && !str.isWide)
+	if (!isWide && !str.isWide)
 	{
 		uint32 stringLength = str.length ();
 		n = n < 0 ? stringLength : Min<uint32> (n, stringLength);
@@ -1313,13 +1278,11 @@ int32 ConstString::getFirstDifferent (const ConstString& str, CompareMode mode) 
 				return -1;
 			return getFirstDifferent (tmp, mode);
 		}
-		else
-		{
-			String tmp (text8 ());
-			if (tmp.toWideString () == false)
-				return -1;
-			return tmp.getFirstDifferent (str, mode);
-		}
+		
+		String tmp (text8 ());
+		if (tmp.toWideString () == false)
+			return -1;
+		return tmp.getFirstDifferent (str, mode);
 	}
 
 	uint32 len1 = len;
@@ -1375,8 +1338,7 @@ bool ConstString::scanInt64 (int64& value, uint32 offset, bool scanToEnd) const
 
 	if (isWide)
 		return scanInt64_16 (buffer16 + offset, value, scanToEnd);
-	else
-		return scanInt64_8 (buffer8 + offset, value, scanToEnd);
+	return scanInt64_8 (buffer8 + offset, value, scanToEnd);
 }
 
 //-----------------------------------------------------------------------------
@@ -1387,8 +1349,7 @@ bool ConstString::scanUInt64 (uint64& value, uint32 offset, bool scanToEnd) cons
 
 	if (isWide)
 		return scanUInt64_16 (buffer16 + offset, value, scanToEnd);
-	else
-		return scanUInt64_8 (buffer8 + offset, value, scanToEnd);
+	return scanUInt64_8 (buffer8 + offset, value, scanToEnd);
 }
 
 //-----------------------------------------------------------------------------
@@ -1399,8 +1360,7 @@ bool ConstString::scanHex (uint8& value, uint32 offset, bool scanToEnd) const
 
 	if (isWide)
 		return scanHex_16 (buffer16 + offset, value, scanToEnd);
-	else
-		return scanHex_8 (buffer8 + offset, value, scanToEnd);
+	return scanHex_8 (buffer8 + offset, value, scanToEnd);
 }
 
 //-----------------------------------------------------------------------------
@@ -1411,8 +1371,7 @@ bool ConstString::scanInt32 (int32& value, uint32 offset, bool scanToEnd) const
 
 	if (isWide)
 		return scanInt32_16 (buffer16 + offset, value, scanToEnd);
-	else
-		return scanInt32_8 (buffer8 + offset, value, scanToEnd);
+	return scanInt32_8 (buffer8 + offset, value, scanToEnd);
 }
 
 //-----------------------------------------------------------------------------
@@ -1423,8 +1382,7 @@ bool ConstString::scanUInt32 (uint32& value, uint32 offset, bool scanToEnd) cons
 
 	if (isWide)
 		return scanUInt32_16 (buffer16 + offset, value, scanToEnd);
-	else
-		return scanUInt32_8 (buffer8 + offset, value, scanToEnd);
+	return scanUInt32_8 (buffer8 + offset, value, scanToEnd);
 }
 
 //-----------------------------------------------------------------------------
@@ -1434,7 +1392,7 @@ bool ConstString::scanInt64_8 (const char8* text, int64& value, bool scanToEnd)
 	{
 		if (sscanf (text, "%" FORMAT_INT64A, &value) == 1)
 			return true;
-		else if (scanToEnd == false)
+		if (scanToEnd == false)
 			return false;
 		text++;
 	}
@@ -1460,7 +1418,7 @@ bool ConstString::scanUInt64_8 (const char8* text, uint64& value, bool scanToEnd
 	{
 		if (sscanf (text, "%" FORMAT_UINT64A, &value) == 1)
 			return true;
-		else if (scanToEnd == false)
+		if (scanToEnd == false)
 			return false;
 		text++;
 	}
@@ -1510,7 +1468,7 @@ bool ConstString::scanHex_8 (const char8* text, uint8& value, bool scanToEnd)
 			value = (uint8)v;
 			return true;
 		}
-		else if (scanToEnd == false)
+		if (scanToEnd == false)
 			return false;
 		text++;
 	}
@@ -1565,7 +1523,7 @@ bool ConstString::scanFloat (double& value, uint32 offset, bool scanToEnd) const
 	{
 		if (sscanf (txt, "%lf", &value) == 1)
 			return true;
-		else if (scanToEnd == false)
+		if (scanToEnd == false)
 			return false;
 		txt++;
 	}
@@ -1593,7 +1551,7 @@ char16 ConstString::toLower (char16 c)
 		}
 		return c;
 	#elif SMTG_OS_LINUX
-	assert(false && "DEPRECATED No Linux implementation");
+	assert (false && "DEPRECATED No Linux implementation");
 		return c;
 	#else
 		return towlower (c);
@@ -1621,7 +1579,7 @@ char16 ConstString::toUpper (char16 c)
 		}
 		return c;
     #elif SMTG_OS_LINUX
-	assert(false && "DEPRECATED No Linux implementation");
+	assert (false && "DEPRECATED No Linux implementation");
 		return c;
 	#else
 		return towupper (c);
@@ -1767,8 +1725,7 @@ bool ConstString::isDigit (uint32 index) const
 
 	if (isWide)
 		return ConstString::isCharDigit (buffer16[index]);
-	else
-		return ConstString::isCharDigit (buffer8[index]);
+	return ConstString::isCharDigit (buffer8[index]);
 }
 
 //-----------------------------------------------------------------------------
@@ -1919,7 +1876,7 @@ int32 ConstString::multiByteToWideString (char16* dest, const char8* source, int
 	}
 	else
 	{
-		assert(false && "DEPRECATED No Linux implementation");
+		assert (false && "DEPRECATED No Linux implementation");
 	}
 
 #endif
@@ -1999,13 +1956,12 @@ int32 ConstString::wideStringToMultiByte (char8* dest, const char16* wideString,
 	}
 	else
 	{
-		assert(false && "DEPRECATED No Linux implementation");
+		assert (false && "DEPRECATED No Linux implementation");
 	}
 	return result;
 
 #else
-#warning DEPRECATED No Linux implementation
-	assert(false && "DEPRECATED No Linux implementation");
+	assert (false && "DEPRECATED No Linux implementation");
 	return 0;
 #endif
 
@@ -2445,12 +2401,10 @@ bool String::setChar8 (uint32 index, char8 c)
 			len = index;
 			return true;
 		}
-		else
-		{
-			if (resize (index + 1, isWide, true) == false)
-				return false;
-			len = index + 1;
-		}
+		
+		if (resize (index + 1, isWide, true) == false)
+			return false;
+		len = index + 1;
 	}
 	
 	if (index < len && buffer)
@@ -2497,12 +2451,9 @@ bool String::setChar16 (uint32 index, char16 c)
 			len = index;
 			return true;
 		}
-		else
-		{
-			if (resize (index + 1, isWide, true) == false)
-				return false;
-			len = index + 1;
-		}
+		if (resize (index + 1, isWide, true) == false)
+			return false;
+		len = index + 1;
 	}
 
 	if (index < len && buffer)
@@ -2536,8 +2487,7 @@ String& String::assign (const ConstString& str, int32 n)
 {
 	if (str.isWideString ())
 		return assign (str.text16 (), n < 0 ? str.length () : n);
-	else
-		return assign (str.text8 (), n < 0 ? str.length () : n);
+	return assign (str.text8 (), n < 0 ? str.length () : n);
 }
 
 //-----------------------------------------------------------------------------
@@ -2633,8 +2583,7 @@ String& String::append (const ConstString& str, int32 n)
 {
 	if (str.isWideString ())
 		return append (str.text16 (), n);
-	else
-		return append (str.text8 (), n);
+	return append (str.text8 (), n);
 }
 
 //-----------------------------------------------------------------------------
@@ -2718,7 +2667,7 @@ String& String::append (const char8 c, int32 n)
 	{
 		return append (str, 1);
 	}
-	else if (n > 1)
+	if (n > 1)
 	{
 		if (isWide)
 		{
@@ -2752,7 +2701,7 @@ String& String::append (const char16 c, int32 n)
 		char16 str[] = {c, 0};
 		return append (str, 1);
 	}
-	else if (n > 1)
+	if (n > 1)
 	{
 		if (!isWide)
 		{
@@ -2781,8 +2730,7 @@ String& String::insertAt (uint32 idx, const ConstString& str, int32 n)
 {
 	if (str.isWideString ())
 		return insertAt (idx, str.text16 (), n);
-	else
-		return insertAt (idx, str.text8 (), n);
+	return insertAt (idx, str.text8 (), n);
 }
 
 //-----------------------------------------------------------------------------
@@ -2860,8 +2808,7 @@ String& String::replace (uint32 idx, int32 n1, const ConstString& str, int32 n2)
 {
 	if (str.isWideString ())
 		return replace (idx, n1, str.text16 (), n2);
-	else
-		return replace (idx, n1, str.text8 (), n2);
+	return replace (idx, n1, str.text8 (), n2);
 }
 
 // "replace" replaces n1 number of characters at the specified index with
@@ -3749,11 +3696,9 @@ unsigned char* String::toPascalString (unsigned char* buf)
 		}
 		return buf;
 	}
-	else
-	{
-		*buf = 0;
-		return buf;
-	}
+	
+	*buf = 0;
+	return buf;
 }
 
 //-----------------------------------------------------------------------------
@@ -3852,7 +3797,7 @@ void* ConstString::toCFStringRef (uint32 encoding, bool mutableCFString) const
 				return (void*)CFStringCreateWithCString (kCFAllocator, "", encoding);
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 #endif
@@ -3886,9 +3831,9 @@ template <class T> int32 tstrnatcmp (const T* s1, const T* s2, bool caseSensitiv
 {
 	if (s1 == nullptr && s2 == nullptr)
 		return 0;
-	else if (s1 == nullptr)
+	if (s1 == nullptr)
 		return -1;
-	else if (s2 == nullptr)
+	if (s2 == nullptr)
 		return 1;
 
 	while (*s1 && *s2)
@@ -3949,12 +3894,11 @@ template <class T> int32 tstrnatcmp (const T* s1, const T* s2, bool caseSensitiv
 
 	if (*s1 == 0 && *s2 == 0)
 		return 0;
-	else if (*s1 == 0)
+	if (*s1 == 0)
 		return -1;
-	else if (*s2 == 0)
+	if (*s2 == 0)
 		return 1;
-	else
-		return (int32)(*s1 - *s2);
+	return (int32)(*s1 - *s2);
 }
 
 //------------------------------------------------------------------------

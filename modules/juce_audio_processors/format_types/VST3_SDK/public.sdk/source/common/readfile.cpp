@@ -2,10 +2,10 @@
 // Project     : VST SDK
 // Flags       : clang-format SMTGSequencer
 //
-// Category    : moduleinfo
-// Filename    : public.sdk/source/vst/moduleinfo/moduleinfo.h
-// Created by  : Steinberg, 12/2021
-// Description :
+// Category    : readfile
+// Filename    : public.sdk/source/common/readfile.cpp
+// Created by  : Steinberg, 3/2023
+// Description : read file routine
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -35,66 +35,42 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#pragma once
+#include "readfile.h"
+#include "public.sdk/source/vst/utility/stringconvert.h"
+#include "pluginterfaces/base/fplatform.h"
+#include <fstream>
+#include <sstream>
 
-#include <cstdint>
-#include <string>
-#include <vector>
-
-//------------------------------------------------------------------------
 namespace Steinberg {
 
 //------------------------------------------------------------------------
-struct ModuleInfo
+std::string readFile (const std::string& path)
 {
-//------------------------------------------------------------------------
-	struct FactoryInfo
-	{
-		std::string vendor;
-		std::string url;
-		std::string email;
-		int32_t flags {0};
-	};
+#if SMTG_OS_WINDOWS
+	auto u16Path = VST3::StringConvert::convert (path);
+	std::ifstream file (reinterpret_cast<const wchar_t*> (u16Path.data ()),
+	                    std::ios_base::in | std::ios_base::binary);
+#else
+	std::ifstream file (path, std::ios_base::in | std::ios_base::binary);
+#endif
+	if (!file.is_open ())
+		return {};
+
+#if SMTG_CPP17
+	 auto size = file.seekg (0, std::ios_base::end).tellg ();
+	 file.seekg (0, std::ios_base::beg);
+	 std::string data;
+	 data.resize (size);
+	 file.read (data.data (), data.size ());
+	 if (file.bad ())
+		return {};
+	 return data;
+#else
+	std::stringstream buffer;
+	buffer << file.rdbuf ();
+	return buffer.str ();
+#endif
+}
 
 //------------------------------------------------------------------------
-	struct Snapshot
-	{
-		double scaleFactor {1.};
-		std::string path;
-	};
-	using SnapshotList = std::vector<Snapshot>;
-
-//------------------------------------------------------------------------
-	struct ClassInfo
-	{
-		std::string cid;
-		std::string category;
-		std::string name;
-		std::string vendor;
-		std::string version;
-		std::string sdkVersion;
-		std::vector<std::string> subCategories;
-		SnapshotList snapshots;
-		int32_t cardinality {0x7FFFFFFF};
-		uint32_t flags {0};
-	};
-
-//------------------------------------------------------------------------
-	struct Compatibility
-	{
-		std::string newCID;
-		std::vector<std::string> oldCID;
-	};
-
-	using ClassList = std::vector<ClassInfo>;
-	using CompatibilityList = std::vector<Compatibility>;
-
-	std::string name;
-	std::string version;
-	FactoryInfo factoryInfo;
-	ClassList classes;
-	CompatibilityList compatibility;
-};
-
-//------------------------------------------------------------------------
-} // Steinberg
+} // namespace Steinberg

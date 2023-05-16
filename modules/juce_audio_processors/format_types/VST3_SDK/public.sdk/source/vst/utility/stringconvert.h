@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -120,12 +120,27 @@ extern std::string convert (const std::u16string& str);
 extern std::string convert (const char* str, uint32_t max);
 
 //------------------------------------------------------------------------
-} // String
+} // StringConvert
 
 //------------------------------------------------------------------------
 inline const Steinberg::Vst::TChar* toTChar (const std::u16string& str)
 {
 	return reinterpret_cast<const Steinberg::Vst::TChar*> (str.data ());
+}
+
+//------------------------------------------------------------------------
+/**
+ *	convert an number to an UTF-16 string
+ *
+ *	@param value number
+ *	
+ *	@return UTF-16 string
+ */
+template<typename NumberT>
+std::u16string toString (NumberT value)
+{
+	auto u8str = std::to_string (value);
+	return StringConvert::convert (u8str);
 }
 
 //------------------------------------------------------------------------

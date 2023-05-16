@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -38,8 +38,8 @@
 #include "moduleinfoparser.h"
 #include "jsoncxx.h"
 #include "pluginterfaces/base/ipluginbase.h"
-#include <stdexcept>
 #include <limits>
+#include <stdexcept>
 
 //------------------------------------------------------------------------
 namespace Steinberg::ModuleInfoLib {
@@ -141,7 +141,7 @@ struct ModuleInfoJsonParser
 		uint32_t parsed {0};
 		if (auto obj = value.asObject ())
 		{
-			for (const auto el : *obj)
+			for (const auto& el : *obj)
 			{
 				auto elementName = el.name ().text ();
 				if (elementName == "Vendor")
@@ -172,7 +172,7 @@ struct ModuleInfoJsonParser
 					auto flags = el.value ().asObject ();
 					if (!flags)
 						throw parse_error ("Expect 'Flags' to be a JSON Object", el.name ());
-					for (const auto flag : *flags)
+					for (const auto& flag : *flags)
 					{
 						auto flagName = flag.name ().text ();
 						auto flagValue = flag.value ().asBoolean ();
@@ -229,7 +229,7 @@ struct ModuleInfoJsonParser
 		auto array = value.asArray ();
 		if (!array)
 			throw parse_error ("Expect Classes Array", value);
-		for (const auto classInfoEl : *array)
+		for (const auto& classInfoEl : *array)
 		{
 			auto classInfo = classInfoEl.value ().asObject ();
 			if (!classInfo)
@@ -239,7 +239,7 @@ struct ModuleInfoJsonParser
 
 			uint32_t parsed {0};
 
-			for (const auto el : *classInfo)
+			for (const auto& el : *classInfo)
 			{
 				auto elementName = el.name ().text ();
 				if (elementName == "CID")
@@ -291,7 +291,7 @@ struct ModuleInfoJsonParser
 					auto subCatArr = el.value ().asArray ();
 					if (!subCatArr)
 						throw parse_error ("Expect Array here", el.value ());
-					for (const auto catEl : *subCatArr)
+					for (const auto& catEl : *subCatArr)
 					{
 						auto cat = getText (catEl.value ());
 						ci.subCategories.emplace_back (cat);
@@ -319,13 +319,13 @@ struct ModuleInfoJsonParser
 					auto snapArr = el.value ().asArray ();
 					if (!snapArr)
 						throw parse_error ("Expect Array here", el.value ());
-					for (const auto snapEl : *snapArr)
+					for (const auto& snapEl : *snapArr)
 					{
 						auto snap = snapEl.value ().asObject ();
 						if (!snap)
 							throw parse_error ("Expect Object here", snapEl.value ());
 						ModuleInfo::Snapshot snapshot;
-						for (const auto spEl : *snap)
+						for (const auto& spEl : *snap)
 						{
 							auto spElName = spEl.name ().text ();
 							if (spElName == "Path")
@@ -369,14 +369,14 @@ struct ModuleInfoJsonParser
 		auto arr = value.asArray ();
 		if (!arr)
 			throw parse_error ("Expect Array here", value);
-		for (const auto el : *arr)
+		for (const auto& el : *arr)
 		{
 			auto obj = el.value ().asObject ();
 			if (!obj)
 				throw parse_error ("Expect Object here", el.value ());
 
 			ModuleInfo::Compatibility compat;
-			for (const auto objEl : *obj)
+			for (const auto& objEl : *obj)
 			{
 				auto elementName = objEl.name ().text ();
 				if (elementName == "New")
@@ -386,7 +386,7 @@ struct ModuleInfoJsonParser
 					auto oldElArr = objEl.value ().asArray ();
 					if (!oldElArr)
 						throw parse_error ("Expect Array here", objEl.value ());
-					for (const auto old : *oldElArr)
+					for (const auto& old : *oldElArr)
 					{
 						compat.oldCID.emplace_back (getText (old.value ()));
 					}
@@ -416,7 +416,7 @@ struct ModuleInfoJsonParser
 		};
 
 		uint32_t parsed {0};
-		for (const auto el : *docObj)
+		for (const auto& el : *docObj)
 		{
 			auto elementName = el.name ().text ();
 			if (elementName == "Name")
