@@ -500,7 +500,10 @@ void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& tra
     setContextClipToPath (path, transform);
 
     if (state->fillType.isColour())
-        CGContextFillRect (context.get(), CGContextGetClipBoundingBox (context.get()));
+    {
+        createPath (path, transform);
+        CGContextFillPath (context.get());
+    }
     else if (state->fillType.isGradient())
         drawGradient();
     else
