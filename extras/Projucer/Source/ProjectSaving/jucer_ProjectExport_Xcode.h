@@ -2135,18 +2135,15 @@ private:
             }
 
             if (target->type == XcodeTarget::VST3Helper
-                && project.getEnabledModules().isModuleEnabled ("juce_audio_processors"))
+                && project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
-                for (const auto& source : getVST3HelperProgramSources (*this))
-                {
-                    const auto path = rebaseFromProjectFolderToBuildTarget (source);
-                    addFile (FileOptions().withRelativePath ({ expandPath (path.toUnixStyle()), path.getRoot() })
-                                          .withSkipPCHEnabled (true)
-                                          .withCompilationEnabled (true)
-                                          .withInhibitWarningsEnabled (true)
-                                          .withCompilerFlags ("-std=c++17 -fobjc-arc")
-                                          .withXcodeTarget (target));
-                }
+                const auto path = rebaseFromProjectFolderToBuildTarget (getVST3HelperProgramSource());
+                addFile (FileOptions().withRelativePath ({ expandPath (path.toUnixStyle()), path.getRoot() })
+                                      .withSkipPCHEnabled (true)
+                                      .withCompilationEnabled (true)
+                                      .withInhibitWarningsEnabled (true)
+                                      .withCompilerFlags ("-std=c++17 -fobjc-arc")
+                                      .withXcodeTarget (target));
             }
 
             auto targetName = String (target->getName());
@@ -2369,16 +2366,11 @@ private:
                 }
                 else if (target->type == XcodeTarget::VST3PlugIn && project.isVst3ManifestEnabled())
                 {
-                    // Generate the manifest
                     script << "\"$CONFIGURATION_BUILD_DIR/" << Project::getVST3FileWriterName() << "\" "
                               "-create "
                               "-version " << project.getVersionString().quoted() << " "
                               "-path \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\" "
-                              "-output \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/moduleinfo.json\"\n";
-                    // Sign the manifest (a prerequisite of signing the containing bundle)
-                    script << "xcrun codesign -f -s - \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/moduleinfo.json\"\n";
-                    // Sign the full bundle
-                    script << "xcrun codesign -f -s - \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\"\n";
+                              "-output \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/Resources/moduleinfo.json\"\n";
                 }
 
                 target->addShellScriptBuildPhase ("Update manifest", script);
@@ -2986,7 +2978,7 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << " /* Project object */;\n}\n";
     }
 
-    String addFileReference (String pathString, String fileType = {}) const
+    String addFileReference (String pathString, const String& fileType = {}) const
     {
         String sourceTree ("SOURCE_ROOT");
         build_tools::RelativePath path (pathString, build_tools::RelativePath::unknown);
@@ -3004,7 +2996,7 @@ private:
         return addFileOrFolderReference (pathString, sourceTree, fileType.isEmpty() ? getFileType (pathString) : fileType);
     }
 
-    String addFileOrFolderReference (const String& pathString, String sourceTree, String fileType) const
+    String addFileOrFolderReference (const String& pathString, const String& sourceTree, const String& fileType) const
     {
         auto fileRefID = createFileRefID (pathString);
         auto filename = build_tools::RelativePath (pathString, build_tools::RelativePath::unknown).getFileName();

@@ -21,4 +21,16 @@
 #
 # ==============================================================================
 
+if(NOT EXISTS "${src}")
+    message(STATUS "Unable to copy ${src} as it does not exist")
+    return()
+endif()
+
+get_filename_component(name "${src}" NAME)
+
+if(EXISTS "${dest}/${name}")
+    message(STATUS "Destination ${dest}/${name} exists, overwriting")
+    file(REMOVE_RECURSE "${dest}/${name}")
+endif()
+
 file(INSTALL ${src} DESTINATION ${dest} USE_SOURCE_PERMISSIONS)
