@@ -1774,7 +1774,7 @@ protected:
                             if (target->type == MSVCTargetBase::LV2PlugIn && lv2HelperGuid.isNotEmpty())
                                 out << "\t\t" << lv2HelperGuid << " = " << lv2HelperGuid << newLine;
 
-                            if (target->type == MSVCTargetBase::VST3PlugIn && vst3HelperGuid.isNotEmpty() && project.isVst3ManifestEnabled())
+                            if (target->type == MSVCTargetBase::VST3PlugIn && vst3HelperGuid.isNotEmpty())
                                 out << "\t\t" << vst3HelperGuid << " = " << vst3HelperGuid << newLine;
 
                             out << "\tEndProjectSection" << newLine;

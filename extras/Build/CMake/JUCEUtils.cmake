@@ -1019,23 +1019,21 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
                 LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_TARGET_ARCHITECTURE}-linux")
         endif()
 
-        if("${manifest_enabled}")
-            # Add a target for the helper tool
-            _juce_add_vst3_manifest_helper_target()
+        # Add a target for the helper tool
+        _juce_add_vst3_manifest_helper_target()
 
-            get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
+        get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
 
-            # Use the helper tool to write out the moduleinfo.json
-            add_custom_command(TARGET ${target_name} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E remove -f "${output_path}/Contents/moduleinfo.json"
-                COMMAND ${CMAKE_COMMAND} -E make_directory "${output_path}/Contents/Resources"
-                COMMAND juce_vst3_helper
-                    -create
-                    -version "${target_version_string}"
-                    -path "${output_path}"
-                    -output "${output_path}/Contents/Resources/moduleinfo.json"
-                VERBATIM)
-        endif()
+        # Use the helper tool to write out the moduleinfo.json
+        add_custom_command(TARGET ${target_name} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E remove -f "${output_path}/Contents/moduleinfo.json"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${output_path}/Contents/Resources"
+            COMMAND juce_vst3_helper
+                -create
+                -version "${target_version_string}"
+                -path "${output_path}"
+                -output "${output_path}/Contents/Resources/moduleinfo.json"
+            VERBATIM)
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_VST3_COPY_DIR)
     elseif(kind STREQUAL "VST")
@@ -1503,8 +1501,6 @@ function(_juce_set_fallback_properties target)
     _juce_set_property_if_not_set(${target} VST_NUM_MIDI_INS 16)
     _juce_set_property_if_not_set(${target} VST_NUM_MIDI_OUTS 16)
 
-    _juce_set_property_if_not_set(${target} VST3_MANIFEST_ENABLED FALSE)
-
     _juce_set_property_if_not_set(${target} AU_SANDBOX_SAFE FALSE)
 
     _juce_set_property_if_not_set(${target} SUPPRESS_AU_PLIST_RESOURCE_USAGE FALSE)
@@ -1792,7 +1788,6 @@ function(_juce_initialise_target target)
         IS_ARA_EFFECT
         ARA_FACTORY_ID
         ARA_DOCUMENT_ARCHIVE_ID
-        VST3_MANIFEST_ENABLED
 
         VST_COPY_DIR
         VST3_COPY_DIR

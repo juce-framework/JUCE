@@ -1291,7 +1291,7 @@ public:
                     dependencyIDs.add (helperTarget->addDependencyFor (*this));
             }
 
-            if (type == VST3PlugIn && owner.project.isVst3ManifestEnabled())
+            if (type == VST3PlugIn)
             {
                 if (auto* helperTarget = owner.getTargetOfType (VST3Helper))
                     dependencyIDs.add (helperTarget->addDependencyFor (*this));
@@ -2125,7 +2125,7 @@ private:
             if (target->type == XcodeTarget::LV2Helper
                 && project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
-                const auto path = rebaseFromProjectFolderToBuildTarget (getLV2HelperProgramSource ());
+                const auto path = rebaseFromProjectFolderToBuildTarget (getLV2HelperProgramSource());
                 addFile (FileOptions().withRelativePath ({ expandPath (path.toUnixStyle()), path.getRoot() })
                                       .withSkipPCHEnabled (true)
                                       .withCompilationEnabled (true)
@@ -2364,7 +2364,7 @@ private:
                         }
                     }
                 }
-                else if (target->type == XcodeTarget::VST3PlugIn && project.isVst3ManifestEnabled())
+                else if (target->type == XcodeTarget::VST3PlugIn)
                 {
                     script << "\"$CONFIGURATION_BUILD_DIR/" << Project::getVST3FileWriterName() << "\" "
                               "-create "
