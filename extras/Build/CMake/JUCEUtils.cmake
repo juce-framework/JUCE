@@ -949,6 +949,7 @@ function(_juce_add_vst3_manifest_helper_target)
     set(vst3_dir "${module_path}/juce_audio_processors/format_types/VST3_SDK")
     set(public_dir "${vst3_dir}/public.sdk")
     set(public_source_dir "${public_dir}/source")
+    set(public_common_dir "${public_source_dir}/common")
     set(public_vst_dir "${public_source_dir}/vst")
     set(hosting_dir "${public_vst_dir}/hosting")
 
@@ -966,8 +967,9 @@ function(_juce_add_vst3_manifest_helper_target)
     add_executable(juce_vst3_helper
         "${extra_source}"
         "${hosting_dir}/module.cpp"
+        "${public_common_dir}/memorystream.cpp"
+        "${public_common_dir}/readfile.cpp"
         "${public_dir}/samples/vst-utilities/moduleinfotool/source/main.cpp"
-        "${public_source_dir}/common/memorystream.cpp"
         "${public_vst_dir}/moduleinfo/moduleinfocreator.cpp"
         "${public_vst_dir}/moduleinfo/moduleinfoparser.cpp"
         "${public_vst_dir}/utility/stringconvert.cpp"

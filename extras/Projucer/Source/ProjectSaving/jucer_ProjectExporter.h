@@ -245,6 +245,8 @@ public:
                 .getChildFile ("main.cpp"),
             source.getChildFile ("common")
                   .getChildFile ("memorystream.cpp"),
+            source.getChildFile ("common")
+                  .getChildFile ("readfile.cpp"),
             vst.getChildFile ("moduleinfo")
                .getChildFile ("moduleinfocreator.cpp"),
             vst.getChildFile ("moduleinfo")
