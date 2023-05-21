@@ -94,6 +94,17 @@ struct VST3ClientExtensions
         All other input buses will always be designated kAux.
     */
     virtual bool getPluginHasMainInput() const  { return true; }
+
+    /** This function should return the UIDs of any compatible VST2 plug-ins.
+
+        Each item in the vector should be a 32-character string consisting only
+        of the characters 0-9 and A-F.
+
+        This information will be used to implement the IPluginCompatibility
+        interface. Hosts can use this interface to determine whether this VST3
+        is capable of replacing a given VST2.
+    */
+    virtual std::vector<String> getCompatibleClasses() const { return {}; }
 };
 
 } // namespace juce
