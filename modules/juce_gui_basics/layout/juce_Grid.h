@@ -216,10 +216,7 @@ public:
 
 private:
     //==============================================================================
-    struct SizeCalculation;
-    struct PlacementHelpers;
-    struct AutoPlacement;
-    struct BoxAlignment;
+    struct Helpers;
 };
 
 constexpr Grid::Px operator"" _px (long double px)          { return Grid::Px { px }; }

@@ -497,17 +497,17 @@ private:
      DECLARE_JNI_CLASS_WITH_BYTECODE (JuceWebViewClient16, "com/rmsl/juce/JuceWebView$Client", 16, JuceWebView16ByteCode)
     #undef JNI_CLASS_MEMBERS
 
-    static jboolean webViewPageLoadStarted (JNIEnv*, Pimpl& t, jstring url)
+    static jboolean webViewPageLoadStarted (JNIEnv*, Pimpl& t, jobject /*webView*/, jstring url)
     {
         return t.handlePageAboutToLoad (juceString (url));
     }
 
-    static void webViewPageLoadFinished (JNIEnv*, Pimpl& t, jstring url)
+    static void webViewPageLoadFinished (JNIEnv*, Pimpl& t, jobject /*webView*/, jstring url)
     {
         t.owner.pageFinishedLoading (juceString (url));
     }
 
-    static void webViewReceivedSslError (JNIEnv* env, Pimpl& t, jobject sslError)
+    static void webViewReceivedSslError (JNIEnv* env, Pimpl& t, jobject /*webView*/, jobject /*sslErrorHandler*/, jobject sslError)
     {
         const auto errorString = LocalRef<jstring> ((jstring) env->CallObjectMethod (sslError, SslError.toString));
         t.owner.pageLoadHadNetworkError (juceString (errorString));
@@ -533,7 +533,7 @@ private:
     }
 
     //==============================================================================
-    static void webViewReceivedHttpError (JNIEnv* env, Pimpl& t, jobject errorResponse)
+    static void webViewReceivedHttpError (JNIEnv* env, Pimpl& t, jobject /*webView*/, jobject /*request*/, jobject errorResponse)
     {
         LocalRef<jclass> responseClass (env->FindClass ("android/webkit/WebResourceResponse"));
 

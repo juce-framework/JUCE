@@ -93,7 +93,7 @@ public:
     */
     void setPosition (double newPosition);
 
-    /** Returns the position that the next data block will be read from
+    /** Returns the position that the next data block will be read from.
         This is a time in seconds.
     */
     double getCurrentPosition() const;

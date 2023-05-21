@@ -850,7 +850,7 @@ public:
         jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
         jassert (source != nullptr);
 
-        if (gainToApplyToSource != 0 && numSamples > 0)
+        if (! approximatelyEqual (gainToApplyToSource, Type()) && numSamples > 0)
         {
             auto* d = channels[destChannel] + destStartSample;
 
@@ -858,14 +858,14 @@ public:
             {
                 isClear = false;
 
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::copyWithMultiply (d, source, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::copy (d, source, numSamples);
             }
             else
             {
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::addWithMultiply (d, source, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::add (d, source, numSamples);
@@ -899,7 +899,7 @@ public:
                           Type startGain,
                           Type endGain) noexcept
     {
-        if (startGain == endGain)
+        if (approximatelyEqual (startGain, endGain))
         {
             addFrom (destChannel, destStartSample, source, numSamples, startGain);
         }
@@ -1023,9 +1023,9 @@ public:
         {
             auto* d = channels[destChannel] + destStartSample;
 
-            if (gain != Type (1))
+            if (! approximatelyEqual (gain, Type (1)))
             {
-                if (gain == Type())
+                if (approximatelyEqual (gain, Type()))
                 {
                     if (! isClear)
                         FloatVectorOperations::clear (d, numSamples);
@@ -1071,7 +1071,7 @@ public:
                            Type startGain,
                            Type endGain) noexcept
     {
-        if (startGain == endGain)
+        if (approximatelyEqual (startGain, endGain))
         {
             copyFrom (destChannel, destStartSample, source, numSamples, startGain);
         }

@@ -1566,27 +1566,28 @@ class RenderSequenceSignature
 
 public:
     RenderSequenceSignature (const PrepareSettings s, const Nodes& n, const Connections& c)
-        : settings (s), connections (c), nodes (getNodeIDs (n)) {}
+        : settings (s), connections (c), nodes (getNodeMap (n)) {}
 
     bool operator== (const RenderSequenceSignature& other) const { return tie() == other.tie(); }
     bool operator!= (const RenderSequenceSignature& other) const { return tie() != other.tie(); }
 
 private:
-    static std::vector<AudioProcessorGraph::NodeID> getNodeIDs (const Nodes& n)
+    using NodeMap = std::map<AudioProcessorGraph::NodeID, AudioProcessor::BusesLayout>;
+
+    static NodeMap getNodeMap (const Nodes& n)
     {
         const auto& nodeRefs = n.getNodes();
-        std::vector<AudioProcessorGraph::NodeID> result;
-        result.reserve ((size_t) nodeRefs.size());
+        NodeMap result;
 
         for (const auto& node : nodeRefs)
-            result.push_back (node->nodeID);
+            result.emplace (node->nodeID, node->getProcessor()->getBusesLayout());
 
         return result;
     }
 
     PrepareSettings settings;
     Connections connections;
-    std::vector<AudioProcessorGraph::NodeID> nodes;
+    NodeMap nodes;
 };
 
 //==============================================================================
@@ -1676,16 +1677,10 @@ bool AudioProcessorGraph::Connection::operator< (const Connection& other) const 
 }
 
 //==============================================================================
-class AudioProcessorGraph::Pimpl : public AsyncUpdater
+class AudioProcessorGraph::Pimpl
 {
 public:
     explicit Pimpl (AudioProcessorGraph& o) : owner (&o) {}
-
-    ~Pimpl() override
-    {
-        cancelPendingUpdate();
-        clear (UpdateKind::sync);
-    }
 
     const auto& getNodes() const { return nodes.getNodes(); }
 
@@ -1839,7 +1834,7 @@ public:
         if (updateKind == UpdateKind::sync && MessageManager::getInstance()->isThisTheMessageThread())
             handleAsyncUpdate();
         else
-            triggerAsyncUpdate();
+            updater.triggerAsyncUpdate();
     }
 
     void reset()
@@ -1901,7 +1896,7 @@ private:
         rebuild (updateKind);
     }
 
-    void handleAsyncUpdate() override
+    void handleAsyncUpdate()
     {
         if (const auto newSettings = nodeStates.applySettings (nodes))
         {
@@ -1932,6 +1927,7 @@ private:
     RenderSequenceExchange renderSequenceExchange;
     NodeID lastNodeID;
     std::optional<RenderSequenceSignature> lastBuiltSequence;
+    LockingAsyncUpdater updater { [this] { handleAsyncUpdate(); } };
 };
 
 //==============================================================================

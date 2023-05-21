@@ -324,7 +324,11 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 StringArray OnlineUnlockStatus::MachineIDUtilities::getLocalMachineIDs()
 {
-    auto identifiers = SystemStats::getDeviceIdentifiers();
+    auto flags = SystemStats::MachineIdFlags::macAddresses
+               | SystemStats::MachineIdFlags::fileSystemId
+               | SystemStats::MachineIdFlags::legacyUniqueId
+               | SystemStats::MachineIdFlags::uniqueId;
+    auto identifiers = SystemStats::getMachineIdentifiers (flags);
 
     for (auto& identifier : identifiers)
         identifier = getEncodedIDString (identifier);

@@ -386,7 +386,7 @@ public:
         auto endPtr = values.end();
 
         for (; e != endPtr; ++e)
-            if (elementToLookFor == *e)
+            if (exactlyEqual (elementToLookFor, *e))
                 return static_cast<int> (e - values.begin());
 
         return -1;

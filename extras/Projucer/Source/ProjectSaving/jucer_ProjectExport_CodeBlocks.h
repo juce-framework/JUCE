@@ -139,10 +139,8 @@ public:
         if (isWindows())
         {
             props.add (new ChoicePropertyComponent (targetPlatformValue, "Target platform",
-                                                    { "Windows NT 4.0", "Windows 2000", "Windows XP", "Windows Server 2003", "Windows Vista", "Windows Server 2008",
-                                                      "Windows 7", "Windows 8", "Windows 8.1", "Windows 10" },
-                                                    { "0x0400", "0x0500", "0x0501", "0x0502", "0x0600", "0x0600",
-                                                      "0x0601", "0x0602", "0x0603", "0x0A00" }),
+                                                    { "Windows Vista", "Windows Server 2008", "Windows 7", "Windows 8", "Windows 8.1", "Windows 10" },
+                                                    { "0x0600",        "0x0600",              "0x0601",    "0x0602",    "0x0603",      "0x0A00" }),
                        "This sets the preprocessor macro WINVER to an appropriate value for the corresponding platform.");
         }
     }

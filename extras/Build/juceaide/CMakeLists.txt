@@ -49,6 +49,8 @@ if(JUCE_BUILD_HELPER_TOOLS)
            NAMESPACE juce_tools::
            FILE "${JUCE_BINARY_DIR}/JUCEToolsExport.cmake")
 else()
+    set(extra_compiler_flag_arguments)
+
     # If we're building using the NDK, the gradle wrapper will try to inject its own compiler using
     # environment variables, which is unfortunate because we really don't want to cross-compile
     # juceaide.
@@ -97,6 +99,10 @@ else()
         if(DEFINED ENV{PATH_ORIG})
             set(ENV{PATH} "$ENV{PATH_ORIG}")
         endif()
+    else()
+        set(extra_compiler_flag_arguments
+            "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
+            "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
     endif()
 
     message(STATUS "Configuring juceaide")
@@ -110,6 +116,7 @@ else()
             "-DCMAKE_BUILD_TYPE=Debug"
             "-DJUCE_BUILD_HELPER_TOOLS=ON"
             "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+            ${extra_compiler_flag_arguments}
         WORKING_DIRECTORY "${JUCE_SOURCE_DIR}"
         OUTPUT_VARIABLE command_output
         ERROR_VARIABLE command_output

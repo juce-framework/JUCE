@@ -1112,6 +1112,11 @@ public:
             [view setNeedsDisplayInRect: makeNSRect (i)];
 
         lastRepaintTime = Time::getMillisecondCounter();
+
+       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        if (metalRenderer == nullptr)
+       #endif
+            deferredRepaints.clear();
     }
 
     void performAnyPendingRepaintsNow() override
