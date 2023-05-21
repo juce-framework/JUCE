@@ -50,7 +50,7 @@ AlertWindow::AlertWindow (const String& title,
      associatedComponent (comp),
      desktopScale (comp != nullptr ? Component::getApproximateScaleFactorForComponent (comp) : 1.0f)
 {
-    setAlwaysOnTop (detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows());
+    setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
 
     accessibleMessageLabel.setColour (Label::textColourId,       Colours::transparentBlack);
     accessibleMessageLabel.setColour (Label::backgroundColourId, Colours::transparentBlack);

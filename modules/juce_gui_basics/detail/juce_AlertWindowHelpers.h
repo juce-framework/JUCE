@@ -97,7 +97,7 @@ struct AlertWindowHelpers
                         alert->setCentrePosition (parent->getLocalBounds().getCentre());
                 }
 
-                alert->setAlwaysOnTop (detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows());
+                alert->setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
 
                 return alert;
             }

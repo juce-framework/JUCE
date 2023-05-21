@@ -1,6 +1,6 @@
 # Welcome to VST 3 SDK Interfaces
 
-Here are located all VST interfaces definitions (including VST Component/Controller, UI, Test).
+Here are located all **VST 3** interfaces definitions (including VST Component/Controller, UI, Test).
 
 ## License & Usage guidelines
 

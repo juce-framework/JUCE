@@ -179,7 +179,7 @@ public:
     {
         if (panel != nil)
         {
-            setAlwaysOnTop (detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows());
+            setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
             addToDesktop (0);
 
             enterModalState (true);

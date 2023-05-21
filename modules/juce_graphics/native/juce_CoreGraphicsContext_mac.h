@@ -120,8 +120,7 @@ private:
     detail::ContextPtr context;
     const CGFloat flipHeight;
     detail::ColorSpacePtr rgbColourSpace, greyColourSpace;
-    mutable Rectangle<int> lastClipRect;
-    mutable bool lastClipRectIsValid = false;
+    mutable std::optional<Rectangle<int>> lastClipRect;
 
     struct SavedState
     {
@@ -142,8 +141,8 @@ private:
     std::unique_ptr<SavedState> state;
     OwnedArray<SavedState> stateStack;
 
+    void setContextClipToPath (const Path&, const AffineTransform&);
     void drawGradient();
-    void createPath (const Path&) const;
     void createPath (const Path&, const AffineTransform&) const;
     void flip() const;
     void applyTransform (const AffineTransform&) const;

@@ -4377,14 +4377,7 @@ extern "C" SMTG_EXPORT_SYMBOL IPluginFactory* PLUGIN_API GetPluginFactory()
     #pragma comment(linker, "/EXPORT:GetPluginFactory=_GetPluginFactory@0")
    #endif
 
-    static JucePluginFactory* globalFactory = nullptr;
-
-    if (globalFactory == nullptr)
-        globalFactory = new JucePluginFactory();
-    else
-        globalFactory->addRef();
-
-    return globalFactory;
+    return new JucePluginFactory();
 }
 
 //==============================================================================

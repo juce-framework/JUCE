@@ -828,7 +828,7 @@ public:
                    0, 0);
 
         setOpaque (true);
-        setAlwaysOnTop (detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows());
+        setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
         addToDesktop (0);
     }
 

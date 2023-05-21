@@ -499,12 +499,6 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()
-{
-    return false;
-}
-
-//==============================================================================
 Image detail::WindowingHelpers::createIconForFile (const File&)
 {
     return {};

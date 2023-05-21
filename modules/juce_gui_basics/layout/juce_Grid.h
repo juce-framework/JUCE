@@ -156,9 +156,6 @@ public:
     /** Creates an empty Grid container with default parameters. */
     Grid() = default;
 
-    /** Destructor */
-    ~Grid() noexcept = default;
-
     //==============================================================================
     /** Specifies the alignment of content inside the items along the rows. */
     JustifyItems   justifyItems   = JustifyItems::stretch;

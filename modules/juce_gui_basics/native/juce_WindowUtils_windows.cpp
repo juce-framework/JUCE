@@ -23,30 +23,37 @@
   ==============================================================================
 */
 
-namespace juce::detail
+namespace juce
 {
 
-struct WindowingHelpers
+static BOOL CALLBACK enumAlwaysOnTopWindows (HWND hwnd, LPARAM lParam)
 {
-    WindowingHelpers() = delete;
-
-    static Image createIconForFile (const File& file);
-
-    #if JUCE_WINDOWS
-     static bool isEmbeddedInForegroundProcess (Component* c);
-     static bool isWindowOnCurrentVirtualDesktop (void*);
-    #else
-     static bool isEmbeddedInForegroundProcess (Component*) { return false; }
-     static bool isWindowOnCurrentVirtualDesktop (void*) { return true; }
-    #endif
-
-    /*  Returns true if this process is in the foreground, or if the viewComponent
-        is embedded into a window owned by the foreground process.
-    */
-    static bool isForegroundOrEmbeddedProcess (Component* viewComponent)
+    if (IsWindowVisible (hwnd))
     {
-        return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
-    }
-};
+        DWORD processID = 0;
+        GetWindowThreadProcessId (hwnd, &processID);
 
-} // namespace juce::detail
+        if (processID == GetCurrentProcessId())
+        {
+            WINDOWINFO info{};
+
+            if (GetWindowInfo (hwnd, &info)
+                 && (info.dwExStyle & WS_EX_TOPMOST) != 0)
+            {
+                *reinterpret_cast<bool*> (lParam) = true;
+                return FALSE;
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+bool WindowUtils::areThereAnyAlwaysOnTopWindows()
+{
+    bool anyAlwaysOnTopFound = false;
+    EnumWindows (&enumAlwaysOnTopWindows, (LPARAM) &anyAlwaysOnTopFound);
+    return anyAlwaysOnTopFound;
+}
+
+} // namespace juce

@@ -465,16 +465,6 @@ void Displays::findDisplays (const float masterScale)
 }
 
 //==============================================================================
-bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()
-{
-    for (NSWindow* window in [NSApp windows])
-        if ([window level] > NSNormalWindowLevel)
-            return true;
-
-    return false;
-}
-
-//==============================================================================
 static void selectImageForDrawing (const Image& image)
 {
     [NSGraphicsContext saveGraphicsState];

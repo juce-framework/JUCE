@@ -27,10 +27,6 @@ namespace juce
 {
 
 //==============================================================================
-static int numAlwaysOnTopPeers = 0;
-bool detail::WindowingHelpers::areThereAnyAlwaysOnTopWindows()  { return numAlwaysOnTopPeers > 0; }
-
-//==============================================================================
 class LinuxComponentPeer  : public ComponentPeer,
                             private XWindowSystemUtilities::XSettings::Listener
 {
@@ -48,7 +44,7 @@ public:
             return;
 
         if (isAlwaysOnTop)
-            ++numAlwaysOnTopPeers;
+            ++WindowUtilsInternal::numAlwaysOnTopPeers;
 
         repainter = std::make_unique<LinuxRepaintManager> (*this);
 
@@ -79,7 +75,7 @@ public:
             xSettings->removeListener (this);
 
         if (isAlwaysOnTop)
-            --numAlwaysOnTopPeers;
+            --WindowUtilsInternal::numAlwaysOnTopPeers;
     }
 
     ::Window getWindowHandle() const noexcept

@@ -221,8 +221,8 @@ void CoreGraphicsContext::setOrigin (Point<int> o)
 {
     CGContextTranslateCTM (context.get(), o.x, -o.y);
 
-    if (lastClipRectIsValid)
-        lastClipRect.translate (-o.x, -o.y);
+    if (lastClipRect.has_value())
+        lastClipRect->translate (-o.x, -o.y);
 }
 
 void CoreGraphicsContext::addTransform (const AffineTransform& transform)
@@ -231,7 +231,7 @@ void CoreGraphicsContext::addTransform (const AffineTransform& transform)
                                     .followedBy (transform)
                                     .translated (0, (float) -flipHeight)
                                     .scaled (1.0f, -1.0f));
-    lastClipRectIsValid = false;
+    lastClipRect.reset();
 
     jassert (getPhysicalPixelScaleFactor() > 0.0f);
 }
@@ -249,14 +249,14 @@ bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)
     CGContextClipToRect (context.get(), CGRectMake (r.getX(), flipHeight - r.getBottom(),
                                                     r.getWidth(), r.getHeight()));
 
-    if (lastClipRectIsValid)
+    if (lastClipRect.has_value())
     {
         // This is actually incorrect, because the actual clip region may be complex, and
         // clipping its bounds to a rect may not be right... But, removing this shortcut
         // doesn't actually fix anything because CoreGraphics also ignores complex regions
         // when calculating the resultant clip bounds, and makes the same mistake!
-        lastClipRect = lastClipRect.getIntersection (r);
-        return ! lastClipRect.isEmpty();
+        lastClipRect = lastClipRect->getIntersection (r);
+        return ! lastClipRect->isEmpty();
     }
 
     return ! isClipEmpty();
@@ -267,7 +267,6 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<in
     if (clipRegion.isEmpty())
     {
         CGContextClipToRect (context.get(), CGRectZero);
-        lastClipRectIsValid = true;
         lastClipRect = Rectangle<int>();
         return false;
     }
@@ -280,7 +279,7 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<in
         rects[i++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
 
     CGContextClipToRects (context.get(), rects, numRects);
-    lastClipRectIsValid = false;
+    lastClipRect.reset();
     return true;
 }
 
@@ -296,7 +295,7 @@ void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
     clipToRectangleListWithoutTest (remaining);
 }
 
-void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& transform)
+void CoreGraphicsContext::setContextClipToPath (const Path& path, const AffineTransform& transform)
 {
     createPath (path, transform);
 
@@ -304,8 +303,12 @@ void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& t
         CGContextClip (context.get());
     else
         CGContextEOClip (context.get());
+}
 
-    lastClipRectIsValid = false;
+void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& transform)
+{
+    setContextClipToPath (path, transform);
+    lastClipRect.reset();
 }
 
 void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform)
@@ -329,7 +332,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         applyTransform (t.inverted());
         flip();
 
-        lastClipRectIsValid = false;
+        lastClipRect.reset();
     }
 }
 
@@ -340,18 +343,17 @@ bool CoreGraphicsContext::clipRegionIntersects (const Rectangle<int>& r)
 
 Rectangle<int> CoreGraphicsContext::getClipBounds() const
 {
-    if (! lastClipRectIsValid)
+    if (! lastClipRect.has_value())
     {
         auto bounds = CGRectIntegral (CGContextGetClipBoundingBox (context.get()));
 
-        lastClipRectIsValid = true;
-        lastClipRect.setBounds (roundToInt (bounds.origin.x),
-                                roundToInt (flipHeight - (bounds.origin.y + bounds.size.height)),
-                                roundToInt (bounds.size.width),
-                                roundToInt (bounds.size.height));
+        lastClipRect = Rectangle<int> (roundToInt (bounds.origin.x),
+                                       roundToInt (flipHeight - (bounds.origin.y + bounds.size.height)),
+                                       roundToInt (bounds.size.width),
+                                       roundToInt (bounds.size.height));
     }
 
-    return lastClipRect;
+    return *lastClipRect;
 }
 
 bool CoreGraphicsContext::isClipEmpty() const
@@ -376,7 +378,7 @@ void CoreGraphicsContext::restoreState()
         CGContextSetTextMatrix (context.get(), state->textMatrix);
 
         stateStack.removeLast (1, false);
-        lastClipRectIsValid = false;
+        lastClipRect.reset();
     }
     else
     {
@@ -495,31 +497,14 @@ void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& tra
 {
     ScopedCGContextState scopedState (context.get());
 
+    setContextClipToPath (path, transform);
+
     if (state->fillType.isColour())
-    {
-        flip();
-        applyTransform (transform);
-        createPath (path);
-
-        if (path.isUsingNonZeroWinding())
-            CGContextFillPath (context.get());
-        else
-            CGContextEOFillPath (context.get());
-    }
+        CGContextFillRect (context.get(), CGContextGetClipBoundingBox (context.get()));
+    else if (state->fillType.isGradient())
+        drawGradient();
     else
-    {
-        createPath (path, transform);
-
-        if (path.isUsingNonZeroWinding())
-            CGContextClip (context.get());
-        else
-            CGContextEOClip (context.get());
-
-        if (state->fillType.isGradient())
-            drawGradient();
-        else
-            drawImage (state->fillType.image, state->fillType.transform, true);
-    }
+        drawImage (state->fillType.image, state->fillType.transform, true);
 }
 
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform)
@@ -771,24 +756,6 @@ void CoreGraphicsContext::drawGradient()
     else
         CGContextDrawLinearGradient (context.get(), state->gradient.get(), p1, p2,
                                      kCGGradientDrawsBeforeStartLocation | kCGGradientDrawsAfterEndLocation);
-}
-
-void CoreGraphicsContext::createPath (const Path& path) const
-{
-    CGContextBeginPath (context.get());
-
-    for (Path::Iterator i (path); i.next();)
-    {
-        switch (i.elementType)
-        {
-            case Path::Iterator::startNewSubPath:  CGContextMoveToPoint (context.get(), i.x1, i.y1); break;
-            case Path::Iterator::lineTo:           CGContextAddLineToPoint (context.get(), i.x1, i.y1); break;
-            case Path::Iterator::quadraticTo:      CGContextAddQuadCurveToPoint (context.get(), i.x1, i.y1, i.x2, i.y2); break;
-            case Path::Iterator::cubicTo:          CGContextAddCurveToPoint (context.get(), i.x1, i.y1, i.x2, i.y2, i.x3, i.y3); break;
-            case Path::Iterator::closePath:        CGContextClosePath (context.get()); break;
-            default:                               jassertfalse; break;
-        }
-    }
 }
 
 void CoreGraphicsContext::createPath (const Path& path, const AffineTransform& transform) const

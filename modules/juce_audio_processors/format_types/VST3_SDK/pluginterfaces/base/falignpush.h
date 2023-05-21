@@ -9,7 +9,7 @@
 //-----------------------------------------------------------------------------
 // This file is part of a Steinberg SDK. It is subject to the license terms
 // in the LICENSE file found in the top-level directory of this distribution
-// and at www.steinberg.net/sdklicenses. 
+// and at www.steinberg.net/sdklicenses.
 // No part of the SDK, including this file, may be copied, modified, propagated,
 // or distributed except according to the terms contained in the LICENSE file.
 //-----------------------------------------------------------------------------
@@ -27,7 +27,10 @@
 	#pragma -a8
 #elif SMTG_OS_WINDOWS
 	//! @brief warning C4996: alignment changed after including header, may be due to missing #pragma pack(pop)
-	#pragma warning(disable : 4103)
+	#if defined (_MSC_VER)
+		#pragma warning(disable : 4103)
+	#endif
+
 	#pragma pack(push)
 	#if SMTG_PLATFORM_64
 		#pragma pack(16)

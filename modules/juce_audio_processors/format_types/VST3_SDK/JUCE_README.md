@@ -22,7 +22,13 @@ inclusion in JUCE.
   force UTF-8 mode on Windows.
 
 - std:: qualification was added to std::move call in module.cpp to silence
-  a -Wunqualified-std-cast-call warning
+  a -Wunqualified-std-cast-call warning.
 
 - The main.cpp of moduleinfotool was updated to include information exported
   by the plugin's IPluginCompatibility object, if present.
+
+- Preprocessor definitions that expanded to include the keyword 'defined' were
+  removed in fplatform.h to silence -Wexpansion-to-defined warnings.
+
+- Pragma warning was guarded in falignpush.h to silence -Wunknown-pragma
+  warnings.

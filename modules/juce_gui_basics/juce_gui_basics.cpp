@@ -143,6 +143,7 @@
  #if JUCE_IOS
   #include "native/juce_UIViewComponentPeer_ios.mm"
   #include "native/accessibility/juce_Accessibility_ios.mm"
+  #include "native/juce_WindowUtils_ios.mm"
   #include "native/juce_Windowing_ios.mm"
   #include "native/juce_NativeMessageBox_ios.mm"
   #include "native/juce_NativeModalWrapperComponent_ios.h"
@@ -156,6 +157,7 @@
   #include "native/accessibility/juce_Accessibility_mac.mm"
   #include "native/juce_PerScreenDisplayLinks_mac.h"
   #include "native/juce_NSViewComponentPeer_mac.mm"
+  #include "native/juce_WindowUtils_mac.mm"
   #include "native/juce_Windowing_mac.mm"
   #include "native/juce_NativeMessageBox_mac.mm"
   #include "native/juce_MainMenu_mac.mm"
@@ -172,6 +174,7 @@
  #include "native/accessibility/juce_UIAProviders_windows.h"
  #include "native/accessibility/juce_AccessibilityElement_windows.cpp"
  #include "native/accessibility/juce_Accessibility_windows.cpp"
+ #include "native/juce_WindowUtils_windows.cpp"
  #include "native/juce_Windowing_windows.cpp"
  #include "native/juce_NativeMessageBox_windows.cpp"
  #include "native/juce_DragAndDrop_windows.cpp"
@@ -184,6 +187,7 @@
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
 
  #include "native/juce_ScopedWindowAssociation_linux.h"
+ #include "native/juce_WindowUtils_linux.cpp"
  #include "native/juce_Windowing_linux.cpp"
  #include "native/juce_NativeMessageBox_linux.cpp"
  #include "native/juce_XWindowSystem_linux.cpp"
@@ -196,6 +200,7 @@
 
  #include "juce_core/files/juce_common_MimeTypes.h"
  #include "native/accessibility/juce_Accessibility_android.cpp"
+ #include "native/juce_WindowUtils_android.cpp"
  #include "native/juce_Windowing_android.cpp"
  #include "native/juce_NativeMessageBox_android.cpp"
  #include "native/juce_FileChooser_android.cpp"

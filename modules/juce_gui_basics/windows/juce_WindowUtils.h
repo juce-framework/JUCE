@@ -23,30 +23,15 @@
   ==============================================================================
 */
 
-namespace juce::detail
+namespace juce
 {
 
-struct WindowingHelpers
+struct WindowUtils
 {
-    WindowingHelpers() = delete;
+    WindowUtils() = delete;
 
-    static Image createIconForFile (const File& file);
-
-    #if JUCE_WINDOWS
-     static bool isEmbeddedInForegroundProcess (Component* c);
-     static bool isWindowOnCurrentVirtualDesktop (void*);
-    #else
-     static bool isEmbeddedInForegroundProcess (Component*) { return false; }
-     static bool isWindowOnCurrentVirtualDesktop (void*) { return true; }
-    #endif
-
-    /*  Returns true if this process is in the foreground, or if the viewComponent
-        is embedded into a window owned by the foreground process.
-    */
-    static bool isForegroundOrEmbeddedProcess (Component* viewComponent)
-    {
-        return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
-    }
+    /** Returns true if any windows have a z order that is higher than normal. */
+    static bool areThereAnyAlwaysOnTopWindows();
 };
 
-} // namespace juce::detail
+} // namespace juce

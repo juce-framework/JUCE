@@ -104,13 +104,44 @@
 	#endif
 
 	#ifdef __cplusplus
-		#define SMTG_CPP11	__cplusplus >= 201103L || _MSC_VER > 1600 || SMTG_INTEL_CXX11_MODE
+		#if __cplusplus >= 201103L || _MSC_VER > 1600 || SMTG_INTEL_CXX11_MODE
+			#define SMTG_CPP11 1
+		#else
+			#define SMTG_CPP11 0
+		#endif
+
 		#define SMTG_CPP11_STDLIBSUPPORT SMTG_CPP11
-		#define SMTG_CPP14 (__cplusplus >= 201402L || (defined (_MSVC_LANG) && _MSVC_LANG >= 201402L))
-		#define SMTG_CPP17 (__cplusplus >= 201703L || (defined (_MSVC_LANG) && _MSVC_LANG >= 201703L))
-		#define SMTG_HAS_NOEXCEPT (_MSC_FULL_VER >= 190023026 || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1300))
-		#define SMTG_HAS_CPP11_CONSTEXPR (_MSC_FULL_VER >= 190024210L || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1500) || (defined(__MINGW32__) && SMTG_CPP11))
-		#define SMTG_HAS_CPP14_CONSTEXPR (((_MSC_VER >= 1915L) && (_MSVC_LANG >= 201402L)) || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER > 1700) || (defined(__MINGW32__) && SMTG_CPP14))
+
+		#if (__cplusplus >= 201402L || (defined (_MSVC_LANG) && _MSVC_LANG >= 201402L))
+			#define SMTG_CPP14 1
+		#else
+			#define SMTG_CPP14 0
+		#endif
+
+		#if (__cplusplus >= 201703L || (defined (_MSVC_LANG) && _MSVC_LANG >= 201703L))
+			#define SMTG_CPP17 1
+		#else
+			#define SMTG_CPP17 0
+		#endif
+
+		#if (_MSC_FULL_VER >= 190023026 || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1300))
+			#define SMTG_HAS_NOEXCEPT 1
+		#else
+			#define SMTG_HAS_NOEXCEPT 0
+		#endif
+
+		#if (_MSC_FULL_VER >= 190024210L || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER >= 1500) || (defined(__MINGW32__) && SMTG_CPP11))
+			#define SMTG_HAS_CPP11_CONSTEXPR 1
+		#else
+			#define SMTG_HAS_CPP11_CONSTEXPR 0
+		#endif
+
+		#if (((_MSC_VER >= 1915L) && (_MSVC_LANG >= 201402L)) || (SMTG_INTEL_CXX11_MODE && SMTG_INTEL_COMPILER > 1700) || (defined(__MINGW32__) && SMTG_CPP14))
+			#define SMTG_HAS_CPP14_CONSTEXPR 1
+		#else
+			#define SMTG_HAS_CPP14_CONSTEXPR 0
+		#endif
+
 	#endif
 
 	#define SMTG_DEPRECATED_ATTRIBUTE(message) __declspec (deprecated ("Is Deprecated: " message))
