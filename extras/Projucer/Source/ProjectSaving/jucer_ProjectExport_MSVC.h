@@ -228,8 +228,11 @@ public:
         {
             using Target = build_tools::ProjectType::Target::Type;
 
-            if (type == Target::LV2TurtleProgram)
+            if (type == Target::LV2Helper)
                 return Project::getLV2FileWriterName() + suffix;
+
+            if (type == Target::VST3Helper)
+                return Project::getVST3FileWriterName() + suffix;
 
             const auto forceUnityPrefix = type == Target::UnityPlugIn;
             auto target = File::createLegalFileName (getTargetBinaryNameString (forceUnityPrefix).trim());
@@ -655,12 +658,12 @@ public:
                 }
 
                 auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesStringArray());
-                auto additionalDependencies = type != SharedCodeTarget && type != LV2TurtleProgram && ! externalLibraries.isEmpty()
+                auto additionalDependencies = type != SharedCodeTarget && type != LV2Helper && type != VST3Helper && ! externalLibraries.isEmpty()
                                                         ? externalLibraries.joinIntoString (";") + ";%(AdditionalDependencies)"
                                                         : String();
 
                 auto librarySearchPaths = config.getLibrarySearchPaths();
-                auto additionalLibraryDirs = type != SharedCodeTarget && type != LV2TurtleProgram && librarySearchPaths.size() > 0
+                auto additionalLibraryDirs = type != SharedCodeTarget && type != LV2Helper && type != VST3Helper && librarySearchPaths.size() > 0
                                                        ? getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";")) + ";%(AdditionalLibraryDirectories)"
                                                        : String();
 
@@ -672,7 +675,7 @@ public:
                                                                                                             : "%(IgnoreSpecificDefaultLibraries)");
                     link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
                     link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (pdbFilename);
-                    link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp || type == LV2TurtleProgram ? "Console" : "Windows");
+                    link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp || type == LV2Helper || type == VST3Helper ? "Console" : "Windows");
 
                     if (config.getArchitectureString() == "Win32")
                         link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
@@ -718,7 +721,7 @@ public:
                     bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true, type)));
                 }
 
-                if (type != SharedCodeTarget && type != LV2TurtleProgram)
+                if (type != SharedCodeTarget && type != LV2Helper && type != VST3Helper)
                 {
                     auto* lib = group->createNewChildElement ("Lib");
 
@@ -729,14 +732,27 @@ public:
                         lib->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (additionalLibraryDirs);
                 }
 
-                auto manifestFile = getOwner().getManifestPath();
-                if (manifestFile.getRoot() != build_tools::RelativePath::unknown)
+                if (auto manifestFile = getOwner().getManifestPath(); manifestFile.getRoot() != build_tools::RelativePath::unknown || type == VST3Helper)
                 {
                     auto* bsc = group->createNewChildElement ("Manifest");
-                    bsc->createNewChildElement ("AdditionalManifestFiles")
-                       ->addTextElement (manifestFile.rebased (getOwner().getProject().getFile().getParentDirectory(),
-                                                               getOwner().getTargetFolder(),
-                                                               build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
+                    auto* additional = bsc->createNewChildElement ("AdditionalManifestFiles");
+
+                    if (manifestFile.getRoot() != build_tools::RelativePath::unknown)
+                    {
+                        additional->addTextElement (manifestFile.rebased (getOwner().getProject().getFile().getParentDirectory(),
+                                                                          getOwner().getTargetFolder(),
+                                                                          build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
+                    }
+
+                    if (type == VST3Helper)
+                    {
+                        const auto manifest = getOwner().getModuleFolderRelativeToProject ("juce_audio_processors").getChildFile ("format_types")
+                                                                                                                   .getChildFile ("VST3_SDK")
+                                                                                                                   .getChildFile ("helper.manifest");
+                        additional->addTextElement (manifest.rebased (getOwner().getProject().getFile().getParentDirectory(),
+                                                                      getOwner().getTargetFolder(),
+                                                                      build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
+                    }
                 }
 
                 if (getTargetFileType() == staticLibrary && config.getArchitectureString() == "Win32")
@@ -774,11 +790,20 @@ public:
                         addFilesToCompile (group, *cppFiles, *headerFiles, *otherFilesGroup);
                 }
 
-                if (type == LV2TurtleProgram)
+                if (type == LV2Helper)
                 {
-                    const auto location = owner.rebaseFromProjectFolderToBuildTarget (owner.getLV2TurtleDumpProgramSource())
+                    const auto location = owner.rebaseFromProjectFolderToBuildTarget (owner.getLV2HelperProgramSource())
                                                .toWindowsStyle();
                     cppFiles->createNewChildElement ("ClCompile")->setAttribute ("Include", location);
+                }
+                else if (type == VST3Helper)
+                {
+                    for (const auto& source : owner.getVST3HelperProgramSources (owner))
+                    {
+                        const auto location = owner.rebaseFromProjectFolderToBuildTarget (source)
+                                                   .toWindowsStyle();
+                        cppFiles->createNewChildElement ("ClCompile")->setAttribute ("Include", location);
+                    }
                 }
             }
 
@@ -1274,7 +1299,7 @@ public:
                 const auto* writerTarget = [&]() -> MSVCTargetBase*
                 {
                     for (auto* target : owner.targets)
-                        if (target->type == LV2TurtleProgram)
+                        if (target->type == LV2Helper)
                             return target;
 
                     return nullptr;
@@ -1298,10 +1323,42 @@ public:
             if (type == VST3PlugIn)
             {
                 const auto segments = getVst3BundleStructure (config);
+
+                const auto manifestScript = [&]() -> String
+                {
+                    const auto* writerTarget = [&]() -> MSVCTargetBase*
+                    {
+                        for (auto* target : owner.targets)
+                            if (target->type == VST3Helper)
+                                return target;
+
+                        return nullptr;
+                    }();
+
+                    if (writerTarget == nullptr)
+                        return "";
+
+                    const auto writer = writerTarget->getConfigTargetPath (config)
+                                      + "\\"
+                                      + writerTarget->getBinaryNameWithSuffix (config);
+
+                    // moduleinfotool doesn't handle Windows-style path separators properly when computing the bundle name
+                    const auto normalisedBundlePath = getOwner().getOutDirFile (config, segments[0]).replace ("\\", "/");
+
+                    return "\r\n"
+                         + writer.quoted()
+                         + " -create -version "
+                         + getOwner().project.getVersionString().quoted()
+                         + " -path "
+                         + normalisedBundlePath.quoted()
+                         + " -output "
+                         + (getOwner().getOutDirFile (config, segments[0]) + "\\Contents\\moduleinfo.json").quoted();
+                }();
+
                 const auto pkgScript = copyBuildOutputIntoBundle (segments);
                 const auto copyScript = copyBundleToInstallDirectory (segments, config.getVST3BinaryLocationString());
 
-                return pkgScript + copyScript;
+                return pkgScript + manifestScript + copyScript;
             }
 
             if (type == VSTPlugIn && config.isPluginBinaryCopyStepEnabled())
@@ -1365,7 +1422,7 @@ public:
         {
             auto librarySearchPaths = config.getLibrarySearchPaths();
 
-            if (type != SharedCodeTarget && type != LV2TurtleProgram)
+            if (type != SharedCodeTarget && type != LV2Helper && type != VST3Helper)
                 if (auto* shared = getOwner().getSharedCodeTarget())
                     librarySearchPaths.add (shared->getConfigTargetPath (config));
 
@@ -1388,7 +1445,7 @@ public:
 
             result.addArray (msBuildEscape (getOwner().getModuleLibs()));
 
-            if (type != SharedCodeTarget && type != LV2TurtleProgram)
+            if (type != SharedCodeTarget && type != LV2Helper && type != VST3Helper)
                 if (auto* shared = getOwner().getSharedCodeTarget())
                     result.add (msBuildEscape (shared->getBinaryNameWithSuffix (config)));
 
@@ -1487,10 +1544,11 @@ public:
         case Target::AggregateTarget:
         case Target::VSTPlugIn:
         case Target::VST3PlugIn:
+        case Target::VST3Helper:
         case Target::AAXPlugIn:
         case Target::UnityPlugIn:
         case Target::LV2PlugIn:
-        case Target::LV2TurtleProgram:
+        case Target::LV2Helper:
         case Target::DynamicLibrary:
             return true;
         case Target::AudioUnitPlugIn:
@@ -1690,7 +1748,8 @@ protected:
     void writeProjectDependencies (OutputStream& out) const
     {
         const auto sharedCodeGuid = getTargetGuid (MSVCTargetBase::SharedCodeTarget);
-        const auto turtleGuid     = getTargetGuid (MSVCTargetBase::LV2TurtleProgram);
+        const auto lv2HelperGuid  = getTargetGuid (MSVCTargetBase::LV2Helper);
+        const auto vst3HelperGuid = getTargetGuid (MSVCTargetBase::VST3Helper);
 
         for (int addingOtherTargets = 0; addingOtherTargets < (sharedCodeGuid.isNotEmpty() ? 2 : 1); ++addingOtherTargets)
         {
@@ -1706,13 +1765,17 @@ protected:
 
                         if (sharedCodeGuid.isNotEmpty()
                             && target->type != MSVCTargetBase::SharedCodeTarget
-                            && target->type != MSVCTargetBase::LV2TurtleProgram)
+                            && target->type != MSVCTargetBase::LV2Helper
+                            && target->type != MSVCTargetBase::VST3Helper)
                         {
                             out << "\tProjectSection(ProjectDependencies) = postProject" << newLine
                                 << "\t\t" << sharedCodeGuid << " = " << sharedCodeGuid << newLine;
 
-                            if (target->type == MSVCTargetBase::LV2PlugIn && turtleGuid.isNotEmpty())
-                                out << "\t\t" << turtleGuid << " = " << turtleGuid << newLine;
+                            if (target->type == MSVCTargetBase::LV2PlugIn && lv2HelperGuid.isNotEmpty())
+                                out << "\t\t" << lv2HelperGuid << " = " << lv2HelperGuid << newLine;
+
+                            if (target->type == MSVCTargetBase::VST3PlugIn && vst3HelperGuid.isNotEmpty() && project.isVst3ManifestEnabled())
+                                out << "\t\t" << vst3HelperGuid << " = " << vst3HelperGuid << newLine;
 
                             out << "\tEndProjectSection" << newLine;
                         }

@@ -201,6 +201,47 @@ static void fillDescriptionWith (PluginDescription& description, ObjectType& obj
         description.manufacturerName = toString (object.vendor).trim();
 }
 
+static std::vector<PluginDescription> createPluginDescriptions (const File& pluginFile, const Steinberg::ModuleInfo& info)
+{
+    std::vector<PluginDescription> result;
+
+    for (const auto& c : info.classes)
+    {
+        if (c.category != kVstAudioEffectClass)
+            continue;
+
+        PluginDescription description;
+
+        description.fileOrIdentifier    = pluginFile.getFullPathName();
+        description.lastFileModTime     = pluginFile.getLastModificationTime();
+        description.lastInfoUpdateTime  = Time::getCurrentTime();
+        description.manufacturerName    = CharPointer_UTF8 (info.factoryInfo.vendor.c_str());
+        description.name                = CharPointer_UTF8 (info.name.c_str());
+        description.descriptiveName     = CharPointer_UTF8 (info.name.c_str());
+        description.pluginFormatName    = "VST3";
+        description.numInputChannels    = 0;
+        description.numOutputChannels   = 0;
+
+        const auto uid = VST3::UID::fromString (c.cid);
+
+        if (! uid)
+            continue;
+
+        description.deprecatedUid       = getHashForRange (uid->data());
+        description.uniqueId            = getHashForRange (getNormalisedTUID (uid->data()));
+
+        description.category            = CharPointer_UTF8 (c.category.c_str());
+
+        description.isInstrument = std::any_of (c.subCategories.begin(),
+                                                c.subCategories.end(),
+                                                [] (const auto& subcategory) { return subcategory == "Instrument"; });
+
+        result.push_back (description);
+    }
+
+    return result;
+}
+
 static void createPluginDescription (PluginDescription& description,
                                      const File& pluginFile, const String& company, const String& name,
                                      const PClassInfo& info, PClassInfo2* info2, PClassInfoW* infoW,
@@ -863,26 +904,41 @@ private:
 };
 
 //==============================================================================
-struct DescriptionFactory
+struct DescriptionLister
 {
-    DescriptionFactory (VST3HostContext* host, IPluginFactory* pluginFactory)
-        : vst3HostContext (host), factory (pluginFactory)
+    static std::vector<PluginDescription> findDescriptionsFast (const File& file)
     {
-        jassert (pluginFactory != nullptr);
+        const auto moduleinfo = file.getChildFile ("Contents").getChildFile ("moduleinfo.json");
+
+        if (! moduleinfo.existsAsFile())
+            return {};
+
+        MemoryBlock mb;
+
+        if (! moduleinfo.loadFileAsData (mb))
+            return {};
+
+        const std::string_view blockAsStringView (static_cast<const char*> (mb.getData()), mb.getSize());
+        const auto parsed = Steinberg::ModuleInfoLib::parseJson (blockAsStringView, nullptr);
+
+        if (! parsed)
+            return {};
+
+        return createPluginDescriptions (file, *parsed);
     }
 
-    virtual ~DescriptionFactory() {}
-
-    Result findDescriptionsAndPerform (const File& file)
+    static std::vector<PluginDescription> findDescriptionsSlow (VST3HostContext& host,
+                                                                IPluginFactory& factory,
+                                                                const File& file)
     {
+        std::vector<PluginDescription> result;
+
         StringArray foundNames;
         PFactoryInfo factoryInfo;
-        factory->getFactoryInfo (&factoryInfo);
+        factory.getFactoryInfo (&factoryInfo);
         auto companyName = toString (factoryInfo.vendor).trim();
 
-        Result result (Result::ok());
-
-        auto numClasses = factory->countClasses();
+        auto numClasses = factory.countClasses();
 
         // Every ARA::IMainFactory must have a matching Steinberg::IComponent.
         // The match is determined by the two classes having the same name.
@@ -892,7 +948,7 @@ struct DescriptionFactory
         for (Steinberg::int32 i = 0; i < numClasses; ++i)
         {
             PClassInfo info;
-            factory->getClassInfo (i, &info);
+            factory.getClassInfo (i, &info);
             if (std::strcmp (info.category, kARAMainFactoryClass) == 0)
                 araMainFactoryClassNames.insert (info.name);
         }
@@ -901,7 +957,7 @@ struct DescriptionFactory
         for (Steinberg::int32 i = 0; i < numClasses; ++i)
         {
             PClassInfo info;
-            factory->getClassInfo (i, &info);
+            factory.getClassInfo (i, &info);
 
             if (std::strcmp (info.category, kVstAudioEffectClass) != 0)
                 continue;
@@ -918,13 +974,13 @@ struct DescriptionFactory
                 VSTComSmartPtr<IPluginFactory2> pf2;
                 VSTComSmartPtr<IPluginFactory3> pf3;
 
-                if (pf2.loadFrom (factory))
+                if (pf2.loadFrom (&factory))
                 {
                     info2.reset (new PClassInfo2());
                     pf2->getClassInfo2 (i, info2.get());
                 }
 
-                if (pf3.loadFrom (factory))
+                if (pf3.loadFrom (&factory))
                 {
                     infoW.reset (new PClassInfoW());
                     pf3->getClassInfoUnicode (i, infoW.get());
@@ -938,9 +994,9 @@ struct DescriptionFactory
             {
                 VSTComSmartPtr<Vst::IComponent> component;
 
-                if (component.loadFrom (factory, info.cid))
+                if (component.loadFrom (&factory, info.cid))
                 {
-                    if (component->initialize (vst3HostContext->getFUnknown()) == kResultOk)
+                    if (component->initialize (host.getFUnknown()) == kResultOk)
                     {
                         auto numInputs  = getNumSingleDirectionChannelsFor (component, Direction::input);
                         auto numOutputs = getNumSingleDirectionChannelsFor (component, Direction::output);
@@ -966,41 +1022,11 @@ struct DescriptionFactory
                 desc.hasARAExtension = true;
 
             if (desc.uniqueId != 0)
-                result = performOnDescription (desc);
-
-            if (result.failed())
-                break;
+                result.push_back (desc);
         }
 
         return result;
     }
-
-    virtual Result performOnDescription (PluginDescription&) = 0;
-
-private:
-    VSTComSmartPtr<VST3HostContext> vst3HostContext;
-    VSTComSmartPtr<IPluginFactory> factory;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DescriptionFactory)
-};
-
-struct DescriptionLister  : public DescriptionFactory
-{
-    DescriptionLister (VST3HostContext* host, IPluginFactory* pluginFactory)
-        : DescriptionFactory (host, pluginFactory)
-    {
-    }
-
-    Result performOnDescription (PluginDescription& desc)
-    {
-        list.add (new PluginDescription (desc));
-        return Result::ok();
-    }
-
-    OwnedArray<PluginDescription> list;
-
-private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DescriptionLister)
 };
 
 //==============================================================================
@@ -1407,9 +1433,11 @@ private:
                 if (std::strcmp (info.category, kVstAudioEffectClass) != 0)
                     continue;
 
+                const auto uniqueId = getHashForRange (getNormalisedTUID (info.cid));
+                const auto deprecatedUid = getHashForRange (info.cid);
+
                 if (toString (info.name).trim() == description.name
-                    && (getHashForRange (getNormalisedTUID (info.cid)) == description.uniqueId
-                        || getHashForRange (info.cid) == description.deprecatedUid))
+                    && (uniqueId == description.uniqueId || deprecatedUid == description.deprecatedUid))
                 {
                     name = description.name;
                     return true;
@@ -3850,7 +3878,18 @@ bool VST3PluginFormat::setStateFromVSTPresetFile (AudioPluginInstance* api, cons
 
 void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
 {
-    if (fileMightContainThisPluginType (fileOrIdentifier))
+    if (! fileMightContainThisPluginType (fileOrIdentifier))
+        return;
+
+    if (const auto fast = DescriptionLister::findDescriptionsFast (File (fileOrIdentifier)); ! fast.empty())
+    {
+        for (const auto& d : fast)
+            results.add (new PluginDescription (d));
+
+        return;
+    }
+
+    for (const auto& file : getLibraryPaths (fileOrIdentifier))
     {
         /**
             Since there is no apparent indication if a VST3 plugin is a shell or not,
@@ -3858,21 +3897,16 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
             for every housed plugin.
         */
 
-        VSTComSmartPtr<IPluginFactory> pluginFactory (DLLHandleCache::getInstance()->findOrCreateHandle (fileOrIdentifier)
-                                                                                    .getPluginFactory());
+        VSTComSmartPtr<IPluginFactory> pluginFactory (DLLHandleCache::getInstance()->findOrCreateHandle (file)
+                                                              .getPluginFactory());
 
-        if (pluginFactory != nullptr)
-        {
-            VSTComSmartPtr<VST3HostContext> host (new VST3HostContext());
-            DescriptionLister lister (host, pluginFactory);
-            lister.findDescriptionsAndPerform (File (fileOrIdentifier));
+        if (pluginFactory == nullptr)
+            continue;
 
-            results.addCopiesOf (lister.list);
-        }
-        else
-        {
-            jassertfalse;
-        }
+        VSTComSmartPtr<VST3HostContext> host (new VST3HostContext());
+
+        for (const auto& d : DescriptionLister::findDescriptionsSlow (*host, *pluginFactory, File (file)))
+            results.add (new PluginDescription (d));
     }
 }
 
@@ -3893,12 +3927,11 @@ void VST3PluginFormat::createARAFactoryAsync (const PluginDescription& descripti
 }
 
 static std::unique_ptr<AudioPluginInstance> createVST3Instance (VST3PluginFormat& format,
-                                                                const PluginDescription& description)
+                                                                const PluginDescription& description,
+                                                                const File& file)
 {
     if (! format.fileMightContainThisPluginType (description.fileOrIdentifier))
         return nullptr;
-
-    const File file { description.fileOrIdentifier };
 
     struct ScopedWorkingDirectory
     {
@@ -3927,15 +3960,33 @@ static std::unique_ptr<AudioPluginInstance> createVST3Instance (VST3PluginFormat
     return instance;
 }
 
+StringArray VST3PluginFormat::getLibraryPaths (const String& fileOrIdentifier)
+{
+   #if JUCE_WINDOWS
+    if (! File (fileOrIdentifier).existsAsFile())
+    {
+        StringArray files;
+        recursiveFileSearch (files, fileOrIdentifier, true);
+        return files;
+    }
+   #endif
+
+    return { fileOrIdentifier };
+}
+
 void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
                                              double, int, PluginCreationCallback callback)
 {
-    auto result = createVST3Instance (*this, description);
+    for (const auto& file : getLibraryPaths (description.fileOrIdentifier))
+    {
+        if (auto result = createVST3Instance (*this, description, file))
+        {
+            callback (std::move (result), {});
+            return;
+        }
+    }
 
-    const auto errorMsg = result == nullptr ? TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3")
-                                            : String();
-
-    callback (std::move (result), errorMsg);
+    callback (nullptr, TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3"));
 }
 
 bool VST3PluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const
@@ -3947,12 +3998,7 @@ bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdent
 {
     auto f = File::createFileWithoutCheckingPath (fileOrIdentifier);
 
-    return f.hasFileExtension (".vst3")
-          #if JUCE_MAC || JUCE_LINUX || JUCE_BSD
-           && f.exists();
-          #else
-           && f.existsAsFile();
-          #endif
+    return f.hasFileExtension (".vst3") && f.exists();
 }
 
 String VST3PluginFormat::getNameOfPluginFromIdentifier (const String& fileOrIdentifier)

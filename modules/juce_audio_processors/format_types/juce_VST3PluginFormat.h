@@ -76,6 +76,7 @@ private:
                                int initialBufferSize, PluginCreationCallback) override;
     bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const override;
     void recursiveFileSearch (StringArray&, const File&, bool recursive);
+    StringArray getLibraryPaths (const String&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginFormat)
 };

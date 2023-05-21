@@ -391,6 +391,7 @@ namespace Ids
     DECLARE_ID (lv2Uri);
     DECLARE_ID (lv2UriUi);
     DECLARE_ID (lv2BinaryLocation);
+    DECLARE_ID (vst3ManifestEnabled);
 
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);
