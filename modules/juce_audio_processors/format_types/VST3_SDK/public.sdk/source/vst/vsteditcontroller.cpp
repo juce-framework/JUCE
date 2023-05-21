@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,7 +48,7 @@ KnobMode EditController::hostKnobMode = kCircularMode;
 //------------------------------------------------------------------------
 // EditController Implementation
 //------------------------------------------------------------------------
-EditController::EditController () : componentHandler (nullptr), componentHandler2 (nullptr)
+EditController::EditController ()
 {
 }
 
@@ -63,17 +63,8 @@ tresult PLUGIN_API EditController::terminate ()
 {
 	parameters.removeAll ();
 
-	if (componentHandler)
-	{
-		componentHandler->release ();
-		componentHandler = nullptr;
-	}
-
-	if (componentHandler2)
-	{
-		componentHandler2->release ();
-		componentHandler2 = nullptr;
-	}
+	componentHandler.reset ();
+	componentHandler2.reset ();
 
 	return ComponentBase::terminate ();
 }
@@ -189,25 +180,11 @@ tresult PLUGIN_API EditController::setComponentHandler (IComponentHandler* newHa
 		return kResultTrue;
 	}
 
-	if (componentHandler)
-	{
-		componentHandler->release ();
-	}
-
 	componentHandler = newHandler;
-	if (componentHandler)
-	{
-		componentHandler->addRef ();
-	}
+	componentHandler2.reset ();
 
-	// try to get the extended version
-	if (componentHandler2)
-	{
-		componentHandler2->release ();
-		componentHandler2 = nullptr;
-	}
-
-	if (newHandler)
+    // try to get the extended version
+    if (newHandler)
 	{
 		newHandler->queryInterface (IComponentHandler2::iid, (void**)&componentHandler2);
 	}
@@ -302,10 +279,6 @@ tresult EditController::requestOpenEditor (FIDString name)
 EditorView::EditorView (EditController* _controller, ViewRect* size)
 : CPluginView (size), controller (_controller)
 {
-	if (controller)
-	{
-		controller->addRef ();
-	}
 }
 
 //------------------------------------------------------------------------
@@ -314,7 +287,7 @@ EditorView::~EditorView ()
 	if (controller)
 	{
 		controller->editorDestroyed (this);
-		controller->release ();
+		controller = nullptr;
 	}
 }
 
@@ -340,7 +313,7 @@ void EditorView::removedFromParent ()
 //------------------------------------------------------------------------
 // EditControllerEx1 implementation
 //------------------------------------------------------------------------
-EditControllerEx1::EditControllerEx1 () : selectedUnit (kRootUnitId)
+EditControllerEx1::EditControllerEx1 ()
 {
 	UpdateHandler::instance ();
 }

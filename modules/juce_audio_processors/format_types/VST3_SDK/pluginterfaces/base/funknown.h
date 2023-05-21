@@ -60,19 +60,18 @@
 #endif
 
 //------------------------------------------------------------------------
-#define DECLARE_UID(name, l1, l2, l3, l4) ::Steinberg::TUID name = INLINE_UID (l1, l2, l3, l4);
+#define DECLARE_UID(name, l1, l2, l3, l4) SMTG_CONSTEXPR14 ::Steinberg::TUID name = INLINE_UID (l1, l2, l3, l4);
 
 //------------------------------------------------------------------------
 #define EXTERN_UID(name) extern const ::Steinberg::TUID name;
 
 #ifdef INIT_CLASS_IID
-#define DECLARE_CLASS_IID(ClassName, l1, l2, l3, l4)                              \
-	static const ::Steinberg::TUID ClassName##_iid = INLINE_UID (l1, l2, l3, l4); \
-	\
-const ::Steinberg::FUID ClassName::iid (ClassName##_iid);
+#define DECLARE_CLASS_IID(ClassName, l1, l2, l3, l4)                                               \
+	static SMTG_CONSTEXPR14 const ::Steinberg::TUID ClassName##_iid = INLINE_UID (l1, l2, l3, l4); \
+	const ::Steinberg::FUID ClassName::iid (ClassName##_iid);
 #else
 #define DECLARE_CLASS_IID(ClassName, l1, l2, l3, l4) \
-	static const ::Steinberg::TUID ClassName##_iid = INLINE_UID (l1, l2, l3, l4);
+	static SMTG_CONSTEXPR14 const ::Steinberg::TUID ClassName##_iid = INLINE_UID (l1, l2, l3, l4);
 #endif
 
 #define DEF_CLASS_IID(ClassName) const ::Steinberg::FUID ClassName::iid (ClassName##_iid);
@@ -207,7 +206,16 @@ typedef int64 LARGE_INT; // obsolete
 //------------------------------------------------------------------------
 //	FUID class declaration
 //------------------------------------------------------------------------
-typedef int8 TUID[16]; ///< plain UID type
+typedef char TUID[16]; ///< plain UID type
+
+#if SMTG_CPP14
+//------------------------------------------------------------------------
+inline SMTG_CONSTEXPR14 void copyTUID (char* dst, const char* src)
+{
+	for (auto i = 0; i < 16; ++i)
+		dst[i] = src[i];
+}
+#endif
 
 //------------------------------------------------------------------------
 /* FUnknown private */
@@ -301,12 +309,18 @@ public:
 		kCLASS_UID    ///< "DECLARE_CLASS_IID (Interface, 0x00000000, 0x00000000, 0x00000000, 0x00000000)"
 	};
 	/** Prints the UID to a string (or debug output if string is NULL).
-	    \param string is the output string if not NULL.
-	    \param style can be chosen from the FUID::UIDPrintStyle enumeration. */
+	    \param style can be chosen from the FUID::UIDPrintStyle enumeration. 
+	    \param string is the output string if not NULL. 
+	    \param stringBufferSize is the size of the output string  */
+	void print (int32 style, char8* string = nullptr, size_t stringBufferSize = 0) const;
+
+#if SMTG_CPP17
+	[[deprecated ("Use the print method with the buffer size")]]
+#endif
 	void print (char8* string = nullptr, int32 style = kINLINE_UID) const;
 
 	template <size_t N>
-	inline explicit FUID (const int8 (&uid)[N])
+	inline explicit FUID (const char (&uid)[N])
 	{
 #if SMTG_CPP11_STDLIBSUPPORT
 		static_assert (N == sizeof (TUID), "only TUID allowed");
@@ -442,7 +456,7 @@ using VoidT = typename Void<T>::Type;
 //------------------------------------------------------------------------
 /**
  *  This type trait detects if a class has an @c iid member variable. It is used to detect if
- *  the FUID and DECLARE_CLASS_IID method or the SKI::UID method is used.
+ *  the FUID and DECLARE_CLASS_IID method or the U::UID method is used.
  */
 template <typename T, typename U = void>
 struct HasIIDType : std::false_type
@@ -459,7 +473,7 @@ struct HasIIDType<T, FUnknownPrivate::VoidT<typename T::IID>> : std::true_type
 } // FUnknownPrivate
 
 //------------------------------------------------------------------------
-/** @return the TUID for a SKI interface which uses the SKI::UID method. */
+/** @return the TUID for an interface which uses the U::UID method. */
 template <typename T,
           typename std::enable_if<FUnknownPrivate::HasIIDType<T>::value>::type* = nullptr>
 const TUID& getTUID ()
@@ -468,7 +482,7 @@ const TUID& getTUID ()
 }
 
 //------------------------------------------------------------------------
-/** @return the TUID for a SKI interface which uses the FUID and DECLARE_CLASS_IID method. */
+/** @return the TUID for an interface which uses the FUID and DECLARE_CLASS_IID method. */
 template <typename T,
           typename std::enable_if<!FUnknownPrivate::HasIIDType<T>::value>::type* = nullptr>
 const TUID& getTUID ()

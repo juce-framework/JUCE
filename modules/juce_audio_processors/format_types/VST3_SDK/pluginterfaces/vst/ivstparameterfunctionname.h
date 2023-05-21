@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
-
 namespace FunctionNameType {
 //--------------------------------------------------------------------
 	const CString kCompGainReduction			= "Comp:GainReduction"; /**  */
@@ -45,6 +44,12 @@ namespace FunctionNameType {
     const CString kRandomize = "Randomize"; /**	Allow to assign some randomized values to some
                                                parameters in a controlled way*/
 
+	/// Panner Type
+	const CString kPanPosCenterX = "PanPosCenterX";	///< Gravity point X-axis [0, 1]=>[L-R] (for stereo: middle between left and right)
+	const CString kPanPosCenterY = "PanPosCenterY";	///< Gravity point Y-axis [0, 1]=>[Front-Rear]
+	const CString kPanPosCenterZ = "PanPosCenterZ";	///< Gravity point Z-axis [0, 1]=>[Bottom-Top]
+
+
 } // FunctionNameType
 
 //------------------------------------------------------------------------
@@ -55,10 +60,11 @@ namespace FunctionNameType {
 - [released: 3.7.0]
 - [optional]
 
-This interface allows the host to get a parameter associated to a specific meaning (a functionName) for a given unit.
-The host can use this information, for example, for drawing a Gain Reduction meter in its own UI.
-In order to get the plain value of this parameter, the host should use the IEditController::normalizedParamToPlain.
-The host can automatically map parameters to dedicated UI controls, such as the wet-dry mix knob or Randomize button.
+This interface allows the host to get a parameter associated to a specific meaning (a functionName)
+for a given unit. The host can use this information, for example, for drawing a Gain Reduction meter
+in its own UI. In order to get the plain value of this parameter, the host should use the
+IEditController::normalizedParamToPlain. The host can automatically map parameters to dedicated UI
+controls, such as the wet-dry mix knob or Randomize button.
 
 \section IParameterFunctionNameExample Example
 
@@ -70,38 +76,39 @@ The host can automatically map parameters to dedicated UI controls, such as the 
 in MyController class declaration
 class MyController : public Vst::EditController, public Vst::IParameterFunctionName
 {
-	...
-	tresult PLUGIN_API getParameterIDFromFunctionName (UnitID unitID, FIDString functionName,
-													Vst::ParamID& paramID) override;
-	...
+    ...
+    tresult PLUGIN_API getParameterIDFromFunctionName (UnitID unitID, FIDString functionName,
+                                                    Vst::ParamID& paramID) override;
+    ...
 
-	OBJ_METHODS (MyController, Vst::EditController)
-	DEFINE_INTERFACES
-		...
-		DEF_INTERFACE (Vst::IParameterFunctionName)
-	END_DEFINE_INTERFACES (Vst::EditController)
-	...
+    OBJ_METHODS (MyController, Vst::EditController)
+    DEFINE_INTERFACES
+        ...
+        DEF_INTERFACE (Vst::IParameterFunctionName)
+    END_DEFINE_INTERFACES (Vst::EditController)
+    DELEGATE_REFCOUNT (Vst::EditController)
+    ...
 }
 
 #include "ivstparameterfunctionname.h"
 namespace Steinberg {
-	namespace Vst {
-		DEF_CLASS_IID (IParameterFunctionName)
-	}
+    namespace Vst {
+        DEF_CLASS_IID (IParameterFunctionName)
+    }
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API MyController::getParameterIDFromFunctionName (UnitID unitID, FIDString functionName,
-                                                                 Vst::ParamID& paramID)
+tresult PLUGIN_API MyController::getParameterIDFromFunctionName (UnitID unitID, FIDString
+functionName, Vst::ParamID& paramID)
 {
-	using namespace Vst;
+    using namespace Vst;
 
-	paramID = kNoParamId;
+    paramID = kNoParamId;
 
-	if (unitID == kRootUnitId && FIDStringsEqual (functionName, kCompGainReduction))
-		paramID = kMyGainReductionId;
+    if (unitID == kRootUnitId && FIDStringsEqual (functionName, kCompGainReduction))
+        paramID = kMyGainReductionId;
 
-	return (paramID != kNoParamId) ? kResultOk : kResultFalse;
+    return (paramID != kNoParamId) ? kResultOk : kResultFalse;
 }
 
 //--- a host implementation example: --------------------
@@ -109,14 +116,15 @@ tresult PLUGIN_API MyController::getParameterIDFromFunctionName (UnitID unitID, 
 FUnknownPtr<Vst::IParameterFunctionName> functionName (mEditController->getIEditController ());
 if (functionName)
 {
-	Vst::ParamID paramID;
-	if (functionName->getParameterIDFromFunctionName (Vst::FunctionNameType::kCompGainReduction, paramID) == kResultTrue)
-	{
-		// paramID could be cached for performance issue
-		ParamValue norm = mEditController->getIEditController ()->getParamNormalized (paramID);
-		ParamValue plain = mEditController->getIEditController ()->normalizedParamToPlain (paramID, norm);
-		// plain is something like -6 (-6dB)
-	}
+    Vst::ParamID paramID;
+    if (functionName->getParameterIDFromFunctionName (kRootUnitId,
+                                                      Vst::FunctionNameType::kCompGainReduction, paramID) == kResultTrue)
+    {
+        // paramID could be cached for performance issue
+        ParamValue norm = mEditController->getIEditController ()->getParamNormalized (paramID);
+        ParamValue plain = mEditController->getIEditController ()->normalizedParamToPlain (paramID, norm);
+        // plain is something like -6 (-6dB)
+    }
 }
 \endcode
 */

@@ -1056,7 +1056,7 @@ public:
                 }
 
                 {
-                    int64 colour;
+                    Steinberg::int64 colour;
                     if (list->getInt (Vst::ChannelContext::kChannelColorKey, colour) == kResultTrue)
                         trackProperties.colour = Colour (Vst::ChannelContext::GetRed ((uint32) colour),  Vst::ChannelContext::GetGreen ((uint32) colour),
                                                          Vst::ChannelContext::GetBlue ((uint32) colour), Vst::ChannelContext::GetAlpha ((uint32) colour));
@@ -1493,7 +1493,7 @@ private:
 
         flags &= ~pluginShouldBeMarkedDirtyFlag;
 
-        if (auto* handler = componentHandler)
+        if (auto* handler = componentHandler.get())
             handler->restartComponent (flags);
     }
 

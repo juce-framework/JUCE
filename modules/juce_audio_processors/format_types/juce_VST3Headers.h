@@ -47,18 +47,22 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
                                      "-Wextra-semi",
                                      "-Wfloat-equal",
                                      "-Wformat",
+                                     "-Wformat-truncation=",
                                      "-Wformat=",
                                      "-Wignored-qualifiers",
                                      "-Winconsistent-missing-destructor-override",
                                      "-Wint-to-pointer-cast",
+                                     "-Wlogical-op-parentheses",
                                      "-Wmaybe-uninitialized",
                                      "-Wmissing-braces",
                                      "-Wmissing-field-initializers",
                                      "-Wmissing-prototypes",
                                      "-Wnon-virtual-dtor",
                                      "-Woverloaded-virtual",
+                                     "-Wparentheses",
                                      "-Wpedantic",
                                      "-Wpragma-pack",
+                                     "-Wredundant-decls",
                                      "-Wreorder",
                                      "-Wshadow",
                                      "-Wshadow-field",
@@ -120,6 +124,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
 
+ #define NOMINMAX // Some of the steinberg sources don't set this before including windows.h
  #include <base/source/baseiids.cpp>
  #include <base/source/fbuffer.cpp>
  #include <base/source/fdebug.cpp>
@@ -149,18 +154,19 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/base/ustring.cpp>
  #include <pluginterfaces/gui/iplugview.h>
  #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
- #include <pluginterfaces/vst/ivstmidicontrollers.h>
  #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
+ #include <pluginterfaces/vst/ivstmidicontrollers.h>
  #include <public.sdk/source/common/memorystream.cpp>
  #include <public.sdk/source/common/pluginview.cpp>
- #include <public.sdk/source/vst/vsteditcontroller.cpp>
+ #include <public.sdk/source/vst/hosting/hostclasses.cpp>
+ #include <public.sdk/source/vst/utility/stringconvert.cpp>
  #include <public.sdk/source/vst/vstbus.cpp>
- #include <public.sdk/source/vst/vstinitiids.cpp>
  #include <public.sdk/source/vst/vstcomponent.cpp>
  #include <public.sdk/source/vst/vstcomponentbase.cpp>
+ #include <public.sdk/source/vst/vsteditcontroller.cpp>
+ #include <public.sdk/source/vst/vstinitiids.cpp>
  #include <public.sdk/source/vst/vstparameters.cpp>
  #include <public.sdk/source/vst/vstpresetfile.cpp>
- #include <public.sdk/source/vst/hosting/hostclasses.cpp>
 
  #if VST_VERSION >= 0x03060c   // 3.6.12
   #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>

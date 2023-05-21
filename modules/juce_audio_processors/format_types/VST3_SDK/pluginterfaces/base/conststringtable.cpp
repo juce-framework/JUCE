@@ -44,7 +44,7 @@ const char16* ConstStringTable::getString (const char8* str) const
 }
 
 //----------------------------------------------------------------------------
-const char16 ConstStringTable::getString (const char8 str) const
+char16 ConstStringTable::getString (const char8 str) const
 {
 	std::map<const char8, char16>::iterator iter = charMap->find (str);
 	if (iter != charMap->end ())

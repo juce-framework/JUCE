@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,6 +44,8 @@
 #include "pluginterfaces/base/funknown.h"
 #include "pluginterfaces/base/iupdatehandler.h"
 #include "base/source/fdebug.h" // use of NEW
+
+#define SMTG_DEPENDENCY_COUNT	DEVELOPMENT
 
 namespace Steinberg {
 
@@ -82,10 +84,15 @@ class FObject : public IDependent
 {
 public:
 	//------------------------------------------------------------------------
-	FObject () : refCount (1) {}											///< default constructor...
-	FObject (const FObject&) : refCount (1) {}								///< overloaded constructor...
-	virtual ~FObject () {}													///< destructor...
-	FObject& operator = (const FObject&) { return *this; }					///< overloads operator "=" as the reference assignment
+	FObject () = default;													///< default constructor...
+	FObject (const FObject&)												///< overloaded constructor...
+		: refCount (1)
+#if SMTG_DEPENDENCY_COUNT
+		, dependencyCount (0) 
+#endif		
+	{}			
+	FObject& operator= (const FObject&) { return *this; }					///< overloads operator "=" as the reference assignment
+	virtual ~FObject ();													///< destructor...
 
 	// OBJECT_METHODS
 	static inline FClassID getFClassID () {return "FObject";}				///< return Class ID as an ASCII string (statically)
@@ -124,8 +131,10 @@ public:
 
 //------------------------------------------------------------------------
 protected:
-	int32 refCount;															///< COM-model local reference count
-
+	int32 refCount = 1;															///< COM-model local reference count
+#if SMTG_DEPENDENCY_COUNT
+	int16 dependencyCount = 0;
+#endif
 	static IUpdateHandler* gUpdateHandler;
 };
 

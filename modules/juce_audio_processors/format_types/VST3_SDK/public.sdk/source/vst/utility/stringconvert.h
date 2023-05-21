@@ -2,9 +2,9 @@
 // Project     : VST SDK
 //
 // Category    : Helpers
-// Filename    : public.sdk/source/vst/vstbus.cpp
-// Created by  : Steinberg, 03/2008
-// Description : VST Bus Implementation
+// Filename    : public.sdk/source/vst/utility/stringconvert.h
+// Created by  : Steinberg, 11/2014
+// Description : c++11 unicode string convert functions
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -34,65 +34,99 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include "vstbus.h"
+#pragma once
 
-namespace Steinberg {
-namespace Vst {
+#include "pluginterfaces/vst/vsttypes.h"
+#include <string>
 
 //------------------------------------------------------------------------
-// Bus Implementation
+namespace VST3 {
+namespace StringConvert {
+
 //------------------------------------------------------------------------
-Bus::Bus (const TChar* _name, BusType _busType, int32 _flags)
-: name (_name), busType (_busType), flags (_flags), active (false)
+/**
+ *  convert an UTF-8 string to an UTF-16 string
+ *
+ *  @param utf8Str UTF-8 string
+ *
+ *  @return UTF-16 string
+ */
+extern std::u16string convert (const std::string& utf8Str);
+
+//------------------------------------------------------------------------
+/**
+ *  convert an UTF-8 string to an UTF-16 string buffer with max 127 characters
+ *
+ *  @param utf8Str UTF-8 string
+ *  @param str     UTF-16 string buffer
+ *
+ *  @return true on success
+ */
+extern bool convert (const std::string& utf8Str, Steinberg::Vst::String128 str);
+
+//------------------------------------------------------------------------
+/**
+ *  convert an UTF-8 string to an UTF-16 string buffer
+ *
+ *  @param utf8Str       UTF-8 string
+ *  @param str           UTF-16 string buffer
+ *  @param maxCharacters max characters that fit into str
+ *
+ *  @return true on success
+ */
+extern bool convert (const std::string& utf8Str, Steinberg::Vst::TChar* str,
+                     uint32_t maxCharacters);
+
+//------------------------------------------------------------------------
+/**
+ *  convert an UTF-16 string buffer to an UTF-8 string
+ *
+ *  @param str UTF-16 string buffer
+ *
+ *  @return UTF-8 string
+ */
+extern std::string convert (const Steinberg::Vst::TChar* str);
+
+//------------------------------------------------------------------------
+/**
+ *  convert an UTF-16 string buffer to an UTF-8 string
+ *
+ *  @param str UTF-16 string buffer
+ *	@param max maximum characters in str
+ *
+ *  @return UTF-8 string
+ */
+extern std::string convert (const Steinberg::Vst::TChar* str, uint32_t max);
+
+//------------------------------------------------------------------------
+/**
+ *  convert an UTF-16 string to an UTF-8 string
+ *
+ *  @param str UTF-16 string
+ *
+ *  @return UTF-8 string
+ */
+extern std::string convert (const std::u16string& str);
+
+//------------------------------------------------------------------------
+/**
+ *  convert a ASCII string buffer to an UTF-8 string
+ *
+ *  @param str ASCII string buffer
+ *	@param max maximum characters in str
+ *
+ *  @return UTF-8 string
+ */
+extern std::string convert (const char* str, uint32_t max);
+
+//------------------------------------------------------------------------
+} // String
+
+//------------------------------------------------------------------------
+inline const Steinberg::Vst::TChar* toTChar (const std::u16string& str)
 {
+	return reinterpret_cast<const Steinberg::Vst::TChar*> (str.data ());
 }
 
 //------------------------------------------------------------------------
-bool Bus::getInfo (BusInfo& info)
-{
-	name.copyTo16 (info.name, 0, str16BufferSize (info.name) - 1);
-	info.busType = busType;
-	info.flags = flags;
-	return true;
-}
-
-//------------------------------------------------------------------------
-// EventBus Implementation
-//------------------------------------------------------------------------
-EventBus::EventBus (const TChar* name, BusType busType, int32 flags, int32 channelCount)
-: Bus (name, busType, flags), channelCount (channelCount)
-{
-}
-
-//------------------------------------------------------------------------
-bool EventBus::getInfo (BusInfo& info)
-{
-	info.channelCount = channelCount;
-	return Bus::getInfo (info);
-}
-
-//------------------------------------------------------------------------
-// AudioBus Implementation
-//------------------------------------------------------------------------
-AudioBus::AudioBus (const TChar* name, BusType busType, int32 flags, SpeakerArrangement arr)
-: Bus (name, busType, flags), speakerArr (arr)
-{
-}
-
-//------------------------------------------------------------------------
-bool AudioBus::getInfo (BusInfo& info)
-{
-	info.channelCount = SpeakerArr::getChannelCount (speakerArr);
-	return Bus::getInfo (info);
-}
-
-//------------------------------------------------------------------------
-// BusList Implementation
-//------------------------------------------------------------------------
-BusList::BusList (MediaType type, BusDirection dir) : type (type), direction (dir)
-{
-}
-
-//------------------------------------------------------------------------
-} // namespace Vst
-} // namespace Steinberg
+} // VST3

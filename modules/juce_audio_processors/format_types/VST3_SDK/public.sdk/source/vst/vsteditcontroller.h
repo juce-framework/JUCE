@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -125,8 +125,8 @@ public:
 	REFCOUNT_METHODS (ComponentBase)
 //------------------------------------------------------------------------
 protected:
-	IComponentHandler* componentHandler;
-	IComponentHandler2* componentHandler2;
+	IPtr<IComponentHandler> componentHandler;
+    IPtr<IComponentHandler2> componentHandler2;
 
 	ParameterContainer parameters;
 
@@ -153,7 +153,7 @@ public:
 
 //------------------------------------------------------------------------
 protected:
-	EditController* controller;
+	IPtr<EditController> controller;
 };
 
 //------------------------------------------------------------------------
@@ -366,7 +366,7 @@ protected:
 	UnitVector units;
 	ProgramListVector programLists;
 	ProgramIndexMap programIndexMap;
-	UnitID selectedUnit;
+	UnitID selectedUnit {kRootUnitId};
 };
 
 //------------------------------------------------------------------------

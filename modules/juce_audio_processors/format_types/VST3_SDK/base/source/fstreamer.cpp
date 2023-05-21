@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -185,6 +185,30 @@ bool FStreamer::readChar16 (char16& c)
 	}
 	c = 0;
 	return false;
+}
+
+//------------------------------------------------------------------------
+bool FStreamer::writeInt8 (int8 c)
+{
+	return writeRaw ((void*)&c, sizeof (int8)) == sizeof (int8);
+}
+
+//------------------------------------------------------------------------
+bool FStreamer::readInt8 (int8& c)
+{
+	return readRaw ((void*)&c, sizeof (int8)) == sizeof (int8);
+}
+
+//------------------------------------------------------------------------
+bool FStreamer::writeInt8u (uint8 c)
+{
+	return writeRaw ((void*)&c, sizeof (uint8)) == sizeof (uint8);
+}
+
+//------------------------------------------------------------------------
+bool FStreamer::readInt8u (uint8& c)
+{
+	return readRaw ((void*)&c, sizeof (uint8)) == sizeof (uint8);
 }
 
 // int16 -----------------------------------------------------------------
@@ -630,7 +654,7 @@ int32 FStreamer::readStringUtf8 (tchar* ptr, int32 nChars)
 			break;
 	}
 
-	char8* source = tmp.int8Ptr ();
+	char8* source = tmp.str8 ();
 	uint32 codePage = kCP_Default; // for legacy take default page if no utf8 bom is present...
 	if (tmp.getFillSize () > 2)
 	{
