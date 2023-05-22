@@ -856,10 +856,8 @@ private:
 //==============================================================================
 struct DescriptionLister
 {
-    static std::vector<PluginDescription> findDescriptionsFast (const File& file)
+    static std::vector<PluginDescription> tryLoadFast (const File& file, const File& moduleinfo)
     {
-        const auto moduleinfo = file.getChildFile ("Contents").getChildFile ("moduleinfo.json");
-
         if (! moduleinfo.existsAsFile())
             return {};
 
@@ -875,6 +873,16 @@ struct DescriptionLister
             return {};
 
         return createPluginDescriptions (file, *parsed);
+    }
+
+    static std::vector<PluginDescription> findDescriptionsFast (const File& file)
+    {
+        const auto moduleinfoNewLocation = file.getChildFile ("Contents").getChildFile ("Resources").getChildFile ("moduleinfo.json");
+
+        if (const auto loaded = tryLoadFast (file, moduleinfoNewLocation); ! loaded.empty())
+            return loaded;
+
+        return tryLoadFast (file, file.getChildFile ("Contents").getChildFile ("moduleinfo.json"));
     }
 
     static std::vector<PluginDescription> findDescriptionsSlow (VST3HostContext& host,
