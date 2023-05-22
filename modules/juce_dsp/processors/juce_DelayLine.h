@@ -283,7 +283,7 @@ private:
     {
         if constexpr (std::is_same_v<InterpolationType, DelayLineInterpolationTypes::Lagrange3rd>)
         {
-            if (delayInt >= 1)
+            if (delayFrac < (SampleType) 2.0 && delayInt >= 1)
             {
                 delayFrac++;
                 delayInt--;
