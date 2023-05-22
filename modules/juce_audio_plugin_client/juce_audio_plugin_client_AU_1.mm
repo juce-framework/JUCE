@@ -1602,7 +1602,7 @@ public:
             activeUIs.add (view);
 
             editorCompHolder->addToDesktop (detail::PluginUtilities::getDesktopFlags (editor), view);
-            editorCompHolder->setVisible (view);
+            editorCompHolder->setVisible (true);
 
             return view;
         }
