@@ -175,6 +175,8 @@ public:
             setResizable (ui->isResizable(), false);
         }
 
+        setConstrainer (&constrainer);
+
        #if JUCE_IOS || JUCE_ANDROID
         const auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true).toFloat();
         const auto scaleFactor = jmin ((screenBounds.getWidth()  - 50.0f) / (float) getWidth(),
@@ -233,6 +235,38 @@ public:
     }
 
 private:
+    class DecoratorConstrainer : public BorderedComponentBoundsConstrainer
+    {
+    public:
+        explicit DecoratorConstrainer (DocumentWindow& windowIn)
+            : window (windowIn) {}
+
+        ComponentBoundsConstrainer* getWrappedConstrainer() const override
+        {
+            auto* editor = dynamic_cast<AudioProcessorEditor*> (window.getContentComponent());
+            return editor != nullptr ? editor->getConstrainer() : nullptr;
+        }
+
+        BorderSize<int> getAdditionalBorder() const override
+        {
+            const auto nativeFrame = [&]() -> BorderSize<int>
+            {
+                if (auto* peer = window.getPeer())
+                    if (const auto frameSize = peer->getFrameSizeIfPresent())
+                        return *frameSize;
+
+                return {};
+            }();
+
+            return nativeFrame.addedTo (window.getContentComponentBorder());
+        }
+
+    private:
+        DocumentWindow& window;
+    };
+
+    DecoratorConstrainer constrainer { *this };
+
     float getDesktopScaleFactor() const override     { return 1.0f; }
 
     static AudioProcessorEditor* createProcessorEditor (AudioProcessor& processor,
@@ -257,10 +291,21 @@ private:
             return {};
         }
 
-        if (type == PluginWindow::Type::generic)  return new GenericAudioProcessorEditor (processor);
-        if (type == PluginWindow::Type::programs) return new ProgramAudioProcessorEditor (processor);
-        if (type == PluginWindow::Type::audioIO)  return new IOConfigurationWindow (processor);
-        if (type == PluginWindow::Type::debug)    return new PluginDebugWindow (processor);
+        if (type == PluginWindow::Type::generic)
+        {
+            auto* result = new GenericAudioProcessorEditor (processor);
+            result->setResizeLimits (200, 300, 1'000, 10'000);
+            return result;
+        }
+
+        if (type == PluginWindow::Type::programs)
+            return new ProgramAudioProcessorEditor (processor);
+
+        if (type == PluginWindow::Type::audioIO)
+            return new IOConfigurationWindow (processor);
+
+        if (type == PluginWindow::Type::debug)
+            return new PluginDebugWindow (processor);
 
         jassertfalse;
         return {};
