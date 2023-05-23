@@ -620,7 +620,7 @@ public:
         {
             ++insideToFrontCall;
 
-            if (makeActiveWindow && ! inBecomeKeyWindow)
+            if (makeActiveWindow && ! inBecomeKeyWindow && [window canBecomeKeyWindow])
                 [window makeKeyAndOrderFront: nil];
             else
                 [window orderFront: nil];
@@ -1566,7 +1566,7 @@ public:
     {
         if (window != nil)
         {
-            if (! inBecomeKeyWindow)
+            if (! inBecomeKeyWindow && [window canBecomeKeyWindow])
                 [window makeKeyWindow];
 
             [window makeFirstResponder: view];
