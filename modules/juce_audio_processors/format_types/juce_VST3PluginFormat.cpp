@@ -1477,9 +1477,9 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory (VST3ModuleHandle& m
 }
 
 //==============================================================================
-struct VST3PluginWindow : public AudioProcessorEditor,
-                          private ComponentMovementWatcher,
-                          private IPlugFrame
+struct VST3PluginWindow final : public AudioProcessorEditor,
+                                private ComponentMovementWatcher,
+                                private IPlugFrame
 {
     VST3PluginWindow (AudioPluginInstance* owner, IPlugView* pluginView)
         : AudioProcessorEditor (owner),
@@ -1498,6 +1498,8 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         setContentScaleFactor();
         resizeToFit();
+
+        setResizable (view->canResize() == kResultTrue, false);
     }
 
     ~VST3PluginWindow() override
