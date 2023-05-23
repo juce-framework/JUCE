@@ -1479,6 +1479,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory (VST3ModuleHandle& m
 //==============================================================================
 struct VST3PluginWindow final : public AudioProcessorEditor,
                                 private ComponentMovementWatcher,
+                                private ComponentBoundsConstrainer,
                                 private IPlugFrame
 {
     VST3PluginWindow (AudioPluginInstance* owner, IPlugView* pluginView)
@@ -1492,6 +1493,7 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
         setSize (10, 10);
         setOpaque (true);
         setVisible (true);
+        setConstrainer (this);
 
         warnOnFailure (view->setFrame (this));
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
@@ -1565,6 +1567,19 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
     bool keyPressed (const KeyPress& /*key*/) override  { return true; }
 
 private:
+    void checkBounds (Rectangle<int>& bounds,
+                      const Rectangle<int>&,
+                      const Rectangle<int>&,
+                      bool,
+                      bool,
+                      bool,
+                      bool) override
+    {
+        auto rect = componentToVST3Rect (bounds);
+        view->checkSizeConstraint (&rect);
+        bounds = vst3ToComponentRect (rect);
+    }
+
     //==============================================================================
     void componentPeerChanged() override {}
 
