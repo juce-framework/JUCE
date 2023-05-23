@@ -268,6 +268,7 @@
 #include "keyboard/juce_ModifierKeys.cpp"
 #include "layout/juce_ComponentAnimator.cpp"
 #include "layout/juce_ComponentBoundsConstrainer.cpp"
+#include "layout/juce_BorderedComponentBoundsConstrainer.cpp"
 #include "layout/juce_ComponentBuilder.cpp"
 #include "layout/juce_ComponentMovementWatcher.cpp"
 #include "layout/juce_ConcertinaPanel.cpp"
