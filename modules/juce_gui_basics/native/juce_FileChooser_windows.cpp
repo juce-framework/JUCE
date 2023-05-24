@@ -876,6 +876,8 @@ public:
         return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
     }
 
+    void inputAttemptWhenModal() override {}
+
 private:
     FileChooser& owner;
     std::shared_ptr<Win32NativeFileChooser> nativeFileChooser;
