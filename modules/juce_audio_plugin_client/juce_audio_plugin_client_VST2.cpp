@@ -104,7 +104,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 using namespace juce;
 
-#include <juce_audio_plugin_client/detail/juce_WindowsHooks.h>
+#include <juce_gui_basics/native/juce_WindowsHooks_windows.h>
 #include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
 #include <juce_audio_plugin_client/detail/juce_VSTWindowUtilities.h>
 
