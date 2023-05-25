@@ -174,6 +174,8 @@
  #include "native/accessibility/juce_UIAProviders_windows.h"
  #include "native/accessibility/juce_AccessibilityElement_windows.cpp"
  #include "native/accessibility/juce_Accessibility_windows.cpp"
+ #include "native/juce_WindowsHooks_windows.h"
+ #include "native/juce_WindowsHooks_windows.cpp"
  #include "native/juce_WindowUtils_windows.cpp"
  #include "native/juce_Windowing_windows.cpp"
  #include "native/juce_NativeMessageBox_windows.cpp"
