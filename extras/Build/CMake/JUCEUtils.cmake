@@ -925,7 +925,7 @@ function(_juce_add_lv2_manifest_helper_target)
     endif()
 
     get_target_property(module_path juce::juce_audio_plugin_client INTERFACE_JUCE_MODULE_PATH)
-    set(source "${module_path}/juce_audio_plugin_client/LV2/juce_LV2TurtleDumpProgram.cpp")
+    set(source "${module_path}/juce_audio_plugin_client/LV2/juce_LV2ManifestHelper.cpp")
     add_executable(juce_lv2_helper "${source}")
     add_executable(juce::juce_lv2_helper ALIAS juce_lv2_helper)
     target_compile_features(juce_lv2_helper PRIVATE cxx_std_17)

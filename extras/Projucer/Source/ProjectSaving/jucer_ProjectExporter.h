@@ -220,7 +220,7 @@ public:
     {
         return getModuleFolderRelativeToProject ("juce_audio_plugin_client")
                .getChildFile ("LV2")
-               .getChildFile ("juce_LV2TurtleDumpProgram.cpp");
+               .getChildFile ("juce_LV2ManifestHelper.cpp");
     }
 
     std::vector<build_tools::RelativePath> getVST3HelperProgramSources (const ProjectExporter& exporter) const
