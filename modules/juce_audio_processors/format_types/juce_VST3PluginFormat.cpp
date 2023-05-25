@@ -2225,7 +2225,7 @@ public:
         for (const auto* item : queues)
         {
             auto* ptr = item->ptr.get();
-            callback (ptr->getParameterIndex(), ptr->get());
+            callback (ptr->getParameterIndex(), ptr->getParameterId(), ptr->get());
         }
     }
 
@@ -2734,9 +2734,12 @@ public:
 
         processor->process (data);
 
-        outputParameterChanges->forEach ([&] (Steinberg::int32 index, float value)
+        outputParameterChanges->forEach ([&] (Steinberg::int32 index, Vst::ParamID id, float value)
         {
-            parameterDispatcher.push (index, value);
+            cachedParamValues.setWithoutNotifying (index, value);
+
+            if (auto* param = getParameterForID (id))
+                param->setValueWithoutUpdatingProcessor (value);
         });
 
         midiMessages.clear();
