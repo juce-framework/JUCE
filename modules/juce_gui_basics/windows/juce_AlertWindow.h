@@ -328,11 +328,13 @@ public:
         Ideal for ok/cancel or yes/no choices. The return key can also be used
         to trigger the first button, and the escape key for the second button.
 
-        If the callback parameter is null, the box is shown modally, and the method will
-        block until the user has clicked the button (or pressed the escape or return keys).
-        If the callback parameter is non-null, the box will be displayed and placed into a
-        modal state, but this method will return immediately, and the callback will be invoked
-        later when the user dismisses the box.
+        If JUCE_MODAL_LOOPS_PERMITTED is not defined or the callback parameter is non-null,
+        this function will return immediately. The object passed as the callback argument will
+        receive the result of the alert window asynchronously.
+        Otherwise, if JUCE_MODAL_LOOPS_PERMITTED is defined and the callback parameter is null,
+        the box is shown modally, and the method will block until the user has clicked the button
+        (or pressed the escape or return keys). This mode of operation can cause problems,
+        especially in plugins, so it is not recommended.
 
         @param iconType     the type of icon to show
         @param title        the headline to show at the top of the box
@@ -379,11 +381,13 @@ public:
 
         The escape key can be used to trigger the third button.
 
-        If the callback parameter is null, the box is shown modally, and the method will
-        block until the user has clicked the button (or pressed the escape or return keys).
-        If the callback parameter is non-null, the box will be displayed and placed into a
-        modal state, but this method will return immediately, and the callback will be invoked
-        later when the user dismisses the box.
+        If JUCE_MODAL_LOOPS_PERMITTED is not defined or the callback parameter is non-null,
+        this function will return immediately. The object passed as the callback argument will
+        receive the result of the alert window asynchronously.
+        Otherwise, if JUCE_MODAL_LOOPS_PERMITTED is defined and the callback parameter is null,
+        the box is shown modally, and the method will block until the user has clicked the button
+        (or pressed the escape or return keys). This mode of operation can cause problems,
+        especially in plugins, so it is not recommended.
 
         @param iconType     the type of icon to show
         @param title        the headline to show at the top of the box
