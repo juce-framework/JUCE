@@ -147,7 +147,7 @@ struct SIMDFallbackOps
         UnionType a {av}, b {bv};
 
         for (size_t i = 0; i < n; ++i)
-            if (a.s[i] != b.s[i])
+            if (! exactlyEqual (a.s[i], b.s[i]))
                 return false;
 
         return true;
@@ -181,8 +181,8 @@ struct SIMDFallbackOps
     struct ScalarOr  { static forcedinline MaskType     op (MaskType a,   MaskType b)     noexcept { return a | b; } };
     struct ScalarXor { static forcedinline MaskType     op (MaskType a,   MaskType b)     noexcept { return a ^ b; } };
     struct ScalarNot { static forcedinline MaskType     op (MaskType a,   MaskType b)     noexcept { return (~a) & b; } };
-    struct ScalarEq  { static forcedinline bool         op (ScalarType a, ScalarType b)   noexcept { return (a == b); } };
-    struct ScalarNeq { static forcedinline bool         op (ScalarType a, ScalarType b)   noexcept { return (a != b); } };
+    struct ScalarEq  { static forcedinline bool         op (ScalarType a, ScalarType b)   noexcept { return exactlyEqual (a, b); } };
+    struct ScalarNeq { static forcedinline bool         op (ScalarType a, ScalarType b)   noexcept { return ! exactlyEqual (a, b); } };
     struct ScalarGt  { static forcedinline bool         op (ScalarType a, ScalarType b)   noexcept { return (a >  b); } };
     struct ScalarGeq { static forcedinline bool         op (ScalarType a, ScalarType b)   noexcept { return (a >= b); } };
 
