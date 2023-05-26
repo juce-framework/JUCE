@@ -1875,7 +1875,7 @@ public:
             flags = getCleanedStringArray (flags);
         }
 
-        //==========================================================================
+        //==============================================================================
         void writeInfoPlistFile() const
         {
             if (! shouldCreatePList())

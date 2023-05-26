@@ -59,7 +59,7 @@ struct MPEKeyboardComponent::MPENoteComponent : public Component
         g.drawEllipse (bounds.withSizeKeepingCentre (pressSize, pressSize), 1.0f);
     }
 
-    //==========================================================================
+    //==============================================================================
     MPEKeyboardComponent& owner;
 
     float radiusScale = 0.0f, noteOnVelocity = 0.0f, pressure = 0.5f;
@@ -145,7 +145,7 @@ void MPEKeyboardComponent::colourChanged()
     repaint();
 }
 
-//==========================================================================
+//==============================================================================
 MPEValue MPEKeyboardComponent::mousePositionToPitchbend (int initialNote, Point<float> mousePos)
 {
     auto constrainedMousePos = [&]
