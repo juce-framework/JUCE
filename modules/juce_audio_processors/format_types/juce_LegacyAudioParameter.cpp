@@ -29,7 +29,7 @@ namespace juce
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
-class LegacyAudioParameter :   public AudioProcessorParameter
+class LegacyAudioParameter :   public HostedAudioProcessorParameter
 {
 public:
     LegacyAudioParameter (AudioProcessor& audioProcessorToUse, int audioParameterIndex)
@@ -54,7 +54,7 @@ public:
     bool isMetaParameter() const override              { return processor->isMetaParameter (parameterIndex); }
     Category getCategory() const override              { return processor->getParameterCategory (parameterIndex); }
     String getCurrentValueAsText() const override      { return processor->getParameterText (parameterIndex); }
-    String getParamID() const                          { return processor->getParameterID (parameterIndex); }
+    String getParameterID() const override             { return processor->getParameterID (parameterIndex); }
 
     //==============================================================================
     float getValueForText (const String&) const override
@@ -101,12 +101,12 @@ public:
     static String getParamID (const AudioProcessorParameter* param, bool forceLegacyParamIDs) noexcept
     {
         if (auto* legacy = dynamic_cast<const LegacyAudioParameter*> (param))
-            return forceLegacyParamIDs ? String (legacy->parameterIndex) : legacy->getParamID();
+            return forceLegacyParamIDs ? String (legacy->parameterIndex) : legacy->getParameterID();
 
-        if (auto* paramWithID = dynamic_cast<const AudioProcessorParameterWithID*> (param))
+        if (auto* paramWithID = dynamic_cast<const HostedAudioProcessorParameter*> (param))
         {
             if (! forceLegacyParamIDs)
-                return paramWithID->paramID;
+                return paramWithID->getParameterID();
         }
 
         if (param != nullptr)

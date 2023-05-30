@@ -446,11 +446,11 @@ void AudioProcessor::validateParameter (AudioProcessorParameter* param)
 void AudioProcessor::checkForDuplicateTrimmedParamID ([[maybe_unused]] AudioProcessorParameter* param)
 {
    #if JUCE_DEBUG && ! JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
-    if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (param))
+    if (auto* withID = dynamic_cast<HostedAudioProcessorParameter*> (param))
     {
         constexpr auto maximumSafeAAXParameterIdLength = 31;
 
-        const auto paramID = withID->paramID;
+        const auto paramID = withID->getParameterID();
 
         // If you hit this assertion, a parameter name is too long to be supported
         // by the AAX plugin format.
@@ -478,9 +478,9 @@ void AudioProcessor::checkForDuplicateTrimmedParamID ([[maybe_unused]] AudioProc
 void AudioProcessor::checkForDuplicateParamID ([[maybe_unused]] AudioProcessorParameter* param)
 {
    #if JUCE_DEBUG
-    if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (param))
+    if (auto* withID = dynamic_cast<HostedAudioProcessorParameter*> (param))
     {
-        auto insertResult = paramIDs.insert (withID->paramID);
+        auto insertResult = paramIDs.insert (withID->getParameterID());
 
         // If you hit this assertion then the parameter ID is not unique
         jassert (insertResult.second);
@@ -1430,8 +1430,8 @@ const String AudioProcessor::getParameterName (int index)
 String AudioProcessor::getParameterID (int index)
 {
     // Don't use getParamChecked here, as this must also work for legacy plug-ins
-    if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (getParameters()[index]))
-        return p->paramID;
+    if (auto* p = dynamic_cast<HostedAudioProcessorParameter*> (getParameters()[index]))
+        return p->getParameterID();
 
     return String (index);
 }

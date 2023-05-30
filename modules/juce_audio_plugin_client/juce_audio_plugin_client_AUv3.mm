@@ -1150,8 +1150,8 @@ private:
 
         auto getParameterIdentifier = [&parameter]
         {
-            if (const auto* paramWithID = dynamic_cast<const AudioProcessorParameterWithID*> (&parameter))
-                return paramWithID->paramID;
+            if (const auto* paramWithID = dynamic_cast<const HostedAudioProcessorParameter*> (&parameter))
+                return paramWithID->getParameterID();
 
             // This could clash if any groups have been given integer IDs!
             return String (parameter.getParameterIndex());
