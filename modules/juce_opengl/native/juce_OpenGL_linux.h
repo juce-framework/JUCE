@@ -346,7 +346,6 @@ public:
 
     void swapBuffers()
     {
-        XWindowSystemUtilities::ScopedXLock xLock;
         glXSwapBuffers (display, glxWindow.get());
     }
 
