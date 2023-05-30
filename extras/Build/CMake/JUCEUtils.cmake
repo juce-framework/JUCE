@@ -543,7 +543,7 @@ function(_juce_execute_juceaide)
         ERROR_VARIABLE output)
 
     if(result_variable)
-        message(FATAL_ERROR "Running juceaide failed:\n${output}")
+        message(FATAL_ERROR "Running juceaide failed:\ncommand: ${juceaide_location} ${ARGN}\noutput: ${output}")
     endif()
 endfunction()
 
