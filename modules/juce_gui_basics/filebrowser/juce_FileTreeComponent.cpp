@@ -195,8 +195,9 @@ public:
                 return it->second;
 
             auto insertion = contentsLists.emplace (std::piecewise_construct,
-                                                   std::forward_as_tuple (f),
-                                                   std::forward_as_tuple (nullptr, root.getTimeSliceThread()));
+                                                    std::forward_as_tuple (f),
+                                                    std::forward_as_tuple (root.getFilter(),
+                                                                           root.getTimeSliceThread()));
             return insertion.first->second;
         }();
 
