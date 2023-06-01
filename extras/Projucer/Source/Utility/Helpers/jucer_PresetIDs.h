@@ -270,6 +270,7 @@ namespace Ids
     DECLARE_ID (iosBackgroundAudio);
     DECLARE_ID (iosBackgroundBle);
     DECLARE_ID (iosPushNotifications);
+    DECLARE_ID (iosAUHostIAA);
     DECLARE_ID (iosAppGroups);
     DECLARE_ID (iCloudPermissions);
     DECLARE_ID (networkingMulticast);

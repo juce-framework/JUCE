@@ -39,6 +39,7 @@ namespace build_tools
         bool isAUPluginHost                 = false;
         bool isiCloudPermissionsEnabled     = false;
         bool isPushNotificationsEnabled     = false;
+        bool isAUHostIAAEnabled             = false;
         bool isAppGroupsEnabled             = false;
         bool isHardenedRuntimeEnabled       = false;
         bool isAppSandboxEnabled            = false;
