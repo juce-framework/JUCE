@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -176,7 +176,7 @@ bool PresetFile::loadPreset (IBStream* stream, const FUID& classID, IComponent* 
 }
 
 //------------------------------------------------------------------------
-PresetFile::PresetFile (IBStream* stream) : stream (stream), entryCount (0)
+PresetFile::PresetFile (IBStream* stream) : stream (stream)
 {
 	memset (entries, 0, sizeof (entries));
 
@@ -780,7 +780,7 @@ tresult PLUGIN_API ReadOnlyBStream::read (void* buffer, int32 numBytes, int32* n
 	if (!sourceStream)
 		return kNotInitialized;
 
-	int32 maxBytesToRead = (int32) (sectionSize - seekPosition);
+	int32 maxBytesToRead = static_cast<int32> (sectionSize - seekPosition);
 	if (numBytes > maxBytesToRead)
 		numBytes = maxBytesToRead;
 	if (numBytes <= 0)

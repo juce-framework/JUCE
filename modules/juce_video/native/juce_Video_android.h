@@ -921,7 +921,7 @@ private:
                 auto* env = getEnv();
 
                 // Perform a potentially pending volume setting
-                if (lastAudioVolume != std::numeric_limits<float>::min())
+                if (! exactlyEqual (lastAudioVolume, std::numeric_limits<float>::min()))
                     env->CallVoidMethod (nativeMediaPlayer, AndroidMediaPlayer.setVolume, (jfloat) lastAudioVolume, (jfloat) lastAudioVolume);
 
                 env->CallVoidMethod (nativeMediaPlayer, AndroidMediaPlayer.start);

@@ -31,10 +31,21 @@ namespace juce::detail
 // This function is in juce_win32_Windowing.cpp
 bool offerKeyMessageToJUCEWindow (MSG&);
 
-class WindowsHooks
+class WindowsHooks::Hooks
 {
 public:
-    WindowsHooks() = default;
+    Hooks() = default;
+
+    ~Hooks()
+    {
+        if (mouseWheelHook != nullptr)
+            UnhookWindowsHookEx (mouseWheelHook);
+
+        if (keyboardHook != nullptr)
+            UnhookWindowsHookEx (keyboardHook);
+    }
+
+    static inline std::weak_ptr<Hooks> weak;
 
 private:
     static LRESULT CALLBACK mouseWheelHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
@@ -64,50 +75,33 @@ private:
         {
             zerostruct (msg);
             msg.message = WM_USER;
-            return 1;
+            return 0;
         }
 
         return CallNextHookEx (getSingleton()->keyboardHook, nCode, wParam, lParam);
     }
 
-    class Hooks
-    {
-    public:
-        Hooks() = default;
-
-        ~Hooks()
-        {
-            if (mouseWheelHook != nullptr)
-                UnhookWindowsHookEx (mouseWheelHook);
-
-            if (keyboardHook != nullptr)
-                UnhookWindowsHookEx (keyboardHook);
-        }
-
-        HHOOK mouseWheelHook = SetWindowsHookEx (WH_MOUSE,
-                                                 mouseWheelHookCallback,
-                                                 (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
-                                                 GetCurrentThreadId());
-        HHOOK keyboardHook = SetWindowsHookEx (WH_GETMESSAGE,
-                                               keyboardHookCallback,
-                                               (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
-                                               GetCurrentThreadId());
-    };
-
-    static std::shared_ptr<const Hooks> getSingleton()
-    {
-        static std::weak_ptr<const Hooks> weak;
-
-        if (auto locked = weak.lock())
-            return locked;
-
-        auto strong = std::make_shared<Hooks>();
-        weak = strong;
-        return strong;
-    }
-
-    std::shared_ptr<const Hooks> hooks = getSingleton();
+    HHOOK mouseWheelHook = SetWindowsHookEx (WH_MOUSE,
+                                             mouseWheelHookCallback,
+                                             (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                             GetCurrentThreadId());
+    HHOOK keyboardHook = SetWindowsHookEx (WH_GETMESSAGE,
+                                           keyboardHookCallback,
+                                           (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                           GetCurrentThreadId());
 };
+
+auto WindowsHooks::getSingleton() -> std::shared_ptr<Hooks>
+{
+    auto& weak = Hooks::weak;
+
+    if (auto locked = weak.lock())
+        return locked;
+
+    auto strong = std::make_shared<Hooks>();
+    weak = strong;
+    return strong;
+}
 
 } // namespace juce::detail
 

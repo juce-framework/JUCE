@@ -1089,57 +1089,17 @@ private:
         accordingly. The end result is that the peer is resized twice in a row to different sizes,
         which can appear glitchy/flickery to the user.
     */
-    struct DecoratorConstrainer : public ComponentBoundsConstrainer
+    class DecoratorConstrainer : public BorderedComponentBoundsConstrainer
     {
-        void checkBounds (Rectangle<int>& bounds,
-                          const Rectangle<int>& previousBounds,
-                          const Rectangle<int>& limits,
-                          bool isStretchingTop,
-                          bool isStretchingLeft,
-                          bool isStretchingBottom,
-                          bool isStretchingRight) override
+    public:
+        ComponentBoundsConstrainer* getWrappedConstrainer() const override
         {
-            auto* decorated = contentComponent != nullptr ? contentComponent->getEditorConstrainer()
-                                                          : nullptr;
+            return contentComponent != nullptr ? contentComponent->getEditorConstrainer() : nullptr;
+        }
 
-            if (decorated != nullptr)
-            {
-                const auto border = contentComponent->computeBorder();
-                const auto requestedBounds = bounds;
-
-                border.subtractFrom (bounds);
-                decorated->checkBounds (bounds,
-                                        border.subtractedFrom (previousBounds),
-                                        limits,
-                                        isStretchingTop,
-                                        isStretchingLeft,
-                                        isStretchingBottom,
-                                        isStretchingRight);
-                border.addTo (bounds);
-                bounds = bounds.withPosition (requestedBounds.getPosition());
-
-                if (isStretchingTop && ! isStretchingBottom)
-                    bounds = bounds.withBottomY (previousBounds.getBottom());
-
-                if (! isStretchingTop && isStretchingBottom)
-                    bounds = bounds.withY (previousBounds.getY());
-
-                if (isStretchingLeft && ! isStretchingRight)
-                    bounds = bounds.withRightX (previousBounds.getRight());
-
-                if (! isStretchingLeft && isStretchingRight)
-                    bounds = bounds.withX (previousBounds.getX());
-            }
-            else
-            {
-                ComponentBoundsConstrainer::checkBounds (bounds,
-                                                         previousBounds,
-                                                         limits,
-                                                         isStretchingTop,
-                                                         isStretchingLeft,
-                                                         isStretchingBottom,
-                                                         isStretchingRight);
-            }
+        BorderSize<int> getAdditionalBorder() const override
+        {
+            return contentComponent != nullptr ? contentComponent->computeBorder() : BorderSize<int>{};
         }
 
         void setMainContentComponent (MainContentComponent* in) { contentComponent = in; }

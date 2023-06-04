@@ -65,7 +65,7 @@ namespace AndroidHighPerformanceAudioHelpers
     static bool canUseHighPerformanceAudioPath (int nativeBufferSize, int requestedBufferSize, int requestedSampleRate)
     {
         return ((requestedBufferSize % nativeBufferSize) == 0)
-               && (requestedSampleRate == getNativeSampleRate())
+               && approximatelyEqual ((double) requestedSampleRate, getNativeSampleRate())
                && isProAudioDevice();
     }
 

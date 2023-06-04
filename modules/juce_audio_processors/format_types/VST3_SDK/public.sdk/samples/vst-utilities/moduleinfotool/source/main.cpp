@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,13 +35,16 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
+#include "base/source/fcommandline.h"
+#include "pluginterfaces/base/fplatform.h"
+#include "pluginterfaces/base/iplugincompatibility.h"
+#include "pluginterfaces/vst/vsttypes.h"
 #include "public.sdk/source/common/memorystream.h"
+#include "public.sdk/source/common/readfile.h"
 #include "public.sdk/source/vst/hosting/module.h"
 #include "public.sdk/source/vst/moduleinfo/moduleinfocreator.h"
 #include "public.sdk/source/vst/moduleinfo/moduleinfoparser.h"
-#include "base/source/fcommandline.h"
-#include "pluginterfaces/vst/vsttypes.h"
-#include "pluginterfaces/base/iplugincompatibility.h"
+#include "public.sdk/source/vst/utility/stringconvert.h"
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -74,25 +77,9 @@ void printUsage (std::ostream& s)
 }
 
 //------------------------------------------------------------------------
-std::string loadFile (const std::string& path)
-{
-	std::ifstream file (path, std::ios_base::in | std::ios_base::binary);
-	if (!file.is_open ())
-		return {};
-	auto size = file.seekg (0, std::ios_base::end).tellg ();
-	file.seekg (0, std::ios_base::beg);
-	std::string data;
-	data.resize (size);
-	file.read (data.data (), data.size ());
-	if (file.bad ())
-		return {};
-	return data;
-}
-
-//------------------------------------------------------------------------
 std::optional<ModuleInfo::CompatibilityList> openAndParseCompatJSON (const std::string& path)
 {
-	auto data = loadFile (path);
+	auto data = readFile (path);
 	if (data.empty ())
 	{
 		std::cout << "Can not read '" << path << "'\n";
@@ -275,7 +262,7 @@ int validate (const std::string& modulePath, std::string infoJsonPath)
 		infoJsonPath = *path;
 	}
 
-	auto data = loadFile (infoJsonPath);
+	auto data = readFile (infoJsonPath);
 	if (data.empty ())
 	{
 		std::cerr << "Empty or non existing file: '" << infoJsonPath << "'" << '\n';
@@ -364,13 +351,19 @@ int run (int argc, char* argv[])
 		if (valueMap.count (optOutputPath) != 0)
 		{
 			writeToFile = true;
+#if SMTG_OS_WINDOWS
+			auto tmp = VST3::StringConvert::convert (valueMap[optOutputPath]);
+			auto outputFile = reinterpret_cast<const wchar_t*> (tmp.data ());
+#else
 			auto outputFile = valueMap[optOutputPath];
+#endif
 			auto ostream = new std::ofstream (outputFile);
+			
 			if (ostream->is_open ())
 				outputStream = ostream;
 			else
 			{
-				std::cout << "Cannot create output file: " << outputFile << '\n';
+				std::cout << "Cannot create output file: " << valueMap[optOutputPath] << '\n';
 				return result;
 			}
 		}
@@ -394,7 +387,53 @@ int run (int argc, char* argv[])
 } // Steinberg
 
 //------------------------------------------------------------------------
+#if SMTG_OS_WINDOWS
+//------------------------------------------------------------------------
+#include <Windows.h>
+#include <vector>
+
+//------------------------------------------------------------------------
+using Utf8String = std::string;
+
+//------------------------------------------------------------------------
+using Utf8Args = std::vector<Utf8String>;
+Utf8Args toUtf8Args (int argc, wchar_t* wargv[])
+{
+	Utf8Args utf8Args;
+	for (int i = 0; i < argc; i++)
+	{
+		auto str = reinterpret_cast<const Steinberg::Vst::TChar*>(wargv[i]);
+		utf8Args.push_back (VST3::StringConvert::convert (str));
+	}
+
+	return utf8Args;
+}
+
+//------------------------------------------------------------------------
+using Utf8ArgPtrs = std::vector<char*>;
+Utf8ArgPtrs toUtf8ArgPtrs (Utf8Args& utf8Args)
+{
+	Utf8ArgPtrs utf8ArgPtrs;
+	for (auto& el : utf8Args)
+	{
+		utf8ArgPtrs.push_back (el.data ());
+	}
+
+	return utf8ArgPtrs;
+}
+
+//------------------------------------------------------------------------
+int wmain (int argc, wchar_t* wargv[])
+{
+	Utf8Args utf8Args = toUtf8Args (argc, wargv);
+	Utf8ArgPtrs utf8ArgPtrs = toUtf8ArgPtrs (utf8Args);
+
+	char** argv = &(utf8ArgPtrs.at (0));
+	return Steinberg::ModuleInfoTool::run (argc, argv);
+}
+#else
 int main (int argc, char* argv[])
 {
 	return Steinberg::ModuleInfoTool::run (argc, argv);
 }
+#endif

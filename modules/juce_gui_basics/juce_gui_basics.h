@@ -199,6 +199,7 @@ namespace juce
 #include "desktop/juce_Desktop.h"
 #include "desktop/juce_Displays.h"
 #include "layout/juce_ComponentBoundsConstrainer.h"
+#include "layout/juce_BorderedComponentBoundsConstrainer.h"
 #include "mouse/juce_ComponentDragger.h"
 #include "mouse/juce_DragAndDropTarget.h"
 #include "mouse/juce_DragAndDropContainer.h"

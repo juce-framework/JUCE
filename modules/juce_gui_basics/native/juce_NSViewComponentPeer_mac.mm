@@ -620,7 +620,7 @@ public:
         {
             ++insideToFrontCall;
 
-            if (makeActiveWindow && ! inBecomeKeyWindow)
+            if (makeActiveWindow && ! inBecomeKeyWindow && [window canBecomeKeyWindow])
                 [window makeKeyAndOrderFront: nil];
             else
                 [window orderFront: nil];
@@ -1566,7 +1566,7 @@ public:
     {
         if (window != nil)
         {
-            if (! inBecomeKeyWindow)
+            if (! inBecomeKeyWindow && [window canBecomeKeyWindow])
                 [window makeKeyWindow];
 
             [window makeFirstResponder: view];
@@ -2235,8 +2235,33 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
         addMethod (@selector (performKeyEquivalent:), [] (id self, SEL s, NSEvent* ev) -> BOOL
         {
             if (auto* owner = getOwner (self))
+            {
+                const auto ref = owner->safeComponent;
+
                 if (owner->sendEventToInputContextOrComponent (ev))
+                {
+                    if (ref == nullptr)
+                        return YES;
+
+                    const auto isFirstResponder = [&]
+                    {
+                        if (auto* v = owner->view)
+                            if (auto* w = v.window)
+                                return w.firstResponder == self;
+
+                        return false;
+                    }();
+
+                    // If the view isn't the first responder, but the view has successfully
+                    // performed the key equivalent, then the key event must have been passed down
+                    // the view hierarchy to this point. In that case, the view won't be sent a
+                    // matching keyUp event, so we simulate it here.
+                    if (! isFirstResponder)
+                        owner->redirectKeyUp (ev);
+
                     return YES;
+                }
+            }
 
             return sendSuperclassMessage<BOOL> (self, s, ev);
         });

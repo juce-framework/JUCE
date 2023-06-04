@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2022, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -322,7 +322,7 @@ public:
 	String (const ConstString& str, int32 n = -1);		///< assign n characters of str (-1: all)
 	String (const FVariant& var);						///< assign from FVariant
 	String (IString* str);						///< assign from IString
-	~String ();
+	~String () SMTG_OVERRIDE;
 
 #if SMTG_CPP11_STDLIBSUPPORT
 	String (String&& str);

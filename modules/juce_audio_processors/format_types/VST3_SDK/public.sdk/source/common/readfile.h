@@ -1,11 +1,11 @@
 //-----------------------------------------------------------------------------
-// Project     : VST SDK
 // Flags       : clang-format SMTGSequencer
+// Project     : VST SDK
 //
-// Category    : moduleinfo
-// Filename    : public.sdk/source/vst/moduleinfo/moduleinfo.h
-// Created by  : Steinberg, 12/2021
-// Description :
+// Category    : readfile
+// Filename    : public.sdk/source/common/readfile.h
+// Created by  : Steinberg, 3/2023
+// Description : read file routine
 //
 //-----------------------------------------------------------------------------
 // LICENSE
@@ -37,64 +37,19 @@
 
 #pragma once
 
-#include <cstdint>
 #include <string>
-#include <vector>
 
-//------------------------------------------------------------------------
 namespace Steinberg {
 
 //------------------------------------------------------------------------
-struct ModuleInfo
-{
-//------------------------------------------------------------------------
-	struct FactoryInfo
-	{
-		std::string vendor;
-		std::string url;
-		std::string email;
-		int32_t flags {0};
-	};
+/** Reads entire file content
+\ingroup sdkBase
+
+Returns entire file content at the given path
+\endcode
+*/
+std::string readFile (const std::string& path);
 
 //------------------------------------------------------------------------
-	struct Snapshot
-	{
-		double scaleFactor {1.};
-		std::string path;
-	};
-	using SnapshotList = std::vector<Snapshot>;
 
-//------------------------------------------------------------------------
-	struct ClassInfo
-	{
-		std::string cid;
-		std::string category;
-		std::string name;
-		std::string vendor;
-		std::string version;
-		std::string sdkVersion;
-		std::vector<std::string> subCategories;
-		SnapshotList snapshots;
-		int32_t cardinality {0x7FFFFFFF};
-		uint32_t flags {0};
-	};
-
-//------------------------------------------------------------------------
-	struct Compatibility
-	{
-		std::string newCID;
-		std::vector<std::string> oldCID;
-	};
-
-	using ClassList = std::vector<ClassInfo>;
-	using CompatibilityList = std::vector<Compatibility>;
-
-	std::string name;
-	std::string version;
-	FactoryInfo factoryInfo;
-	ClassList classes;
-	CompatibilityList compatibility;
-};
-
-//------------------------------------------------------------------------
-} // Steinberg
+} // namespace Steinberg

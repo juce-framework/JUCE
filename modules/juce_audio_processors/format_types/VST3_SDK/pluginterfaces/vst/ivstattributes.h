@@ -106,7 +106,7 @@ tresult PLUGIN_API MyPlugin::setState (IBStream* state)
 				UString128 tmp (string);
 				char ascii[128];
 				tmp.toAscii (ascii, 128);
-				if (!strncmp (ascii, StateType::kProject, strlen (StateType::kProject)))
+				if (strncmp (ascii, StateType::kProject, strlen (StateType::kProject)) == 0)
 				{
 					// we are in project loading context...
 				}

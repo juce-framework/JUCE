@@ -406,7 +406,7 @@ void FUID::toRegistryString (char8* string) const
 	char8 s5[13];
 	Steinberg::toString8 (s5, data, 10, 16);
 
-	snprintf (string, 36, "{%s-%s-%s-%s-%s}", s1, s2, s3, s4, s5);
+	snprintf (string, 40, "{%s-%s-%s-%s-%s}", s1, s2, s3, s4, s5);
 #endif
 }
 

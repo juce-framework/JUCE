@@ -948,7 +948,7 @@ namespace WavFileHelpers
         }
     };
 
-    //=============================================================================
+    //==============================================================================
     namespace IXMLChunk
     {
         static const std::unordered_set<String> aswgMetadataKeys
