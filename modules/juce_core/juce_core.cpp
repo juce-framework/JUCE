@@ -187,6 +187,8 @@
 #include "files/juce_FileFilter.cpp"
 #include "files/juce_WildcardFileFilter.cpp"
 #include "native/juce_ThreadPriorities_native.h"
+#include "native/juce_PlatformTimerListener.h"
+#include "native/juce_HighResolutionTimerThread.h"
 
 //==============================================================================
 #if ! JUCE_WINDOWS
@@ -205,6 +207,7 @@
  #include "native/juce_SharedCode_intel.h"
  #include "native/juce_SystemStats_mac.mm"
  #include "native/juce_Threads_mac.mm"
+ #include "native/juce_PlatformTimer_mac.mm"
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -213,20 +216,34 @@
  #include "native/juce_Registry_windows.cpp"
  #include "native/juce_SystemStats_windows.cpp"
  #include "native/juce_Threads_windows.cpp"
+ #include "native/juce_PlatformTimer_windows.cpp"
 
 //==============================================================================
-#elif JUCE_LINUX || JUCE_BSD
+#elif JUCE_LINUX
  #include "native/juce_CommonFile_linux.cpp"
  #include "native/juce_Files_linux.cpp"
  #include "native/juce_Network_linux.cpp"
  #if JUCE_USE_CURL
   #include "native/juce_Network_curl.cpp"
  #endif
- #if JUCE_BSD
-  #include "native/juce_SharedCode_intel.h"
- #endif
  #include "native/juce_SystemStats_linux.cpp"
  #include "native/juce_Threads_linux.cpp"
+ #include "native/juce_FileDescriptor_linux.cpp"
+ #include "native/juce_PlatformTimer_linux.cpp"
+
+//==============================================================================
+#elif JUCE_BSD
+ #include "native/juce_CommonFile_linux.cpp"
+ #include "native/juce_Files_linux.cpp"
+ #include "native/juce_Network_linux.cpp"
+ #if JUCE_USE_CURL
+  #include "native/juce_Network_curl.cpp"
+ #endif
+ #include "native/juce_SharedCode_intel.h"
+ #include "native/juce_SystemStats_linux.cpp"
+ #include "native/juce_Threads_linux.cpp"
+ #include "native/juce_FileDescriptor_linux.cpp"
+ #include "native/juce_PlatformTimer_linux.cpp"
 
 //==============================================================================
 #elif JUCE_ANDROID
@@ -238,10 +255,13 @@
  #include "native/juce_SystemStats_android.cpp"
  #include "native/juce_Threads_android.cpp"
  #include "native/juce_RuntimePermissions_android.cpp"
+ #include "native/juce_FileDescriptor_linux.cpp"
+ #include "native/juce_PlatformTimer_linux.cpp"
 
+//==============================================================================
 #elif JUCE_WASM
  #include "native/juce_SystemStats_wasm.cpp"
-
+ #include "native/juce_PlatformTimer_wasm.cpp"
 #endif
 
 #include "files/juce_common_MimeTypes.h"
