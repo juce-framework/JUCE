@@ -102,7 +102,6 @@ public:
           iosBackgroundAudioValue                      (settings, Ids::iosBackgroundAudio,                      getUndoManager()),
           iosBackgroundBleValue                        (settings, Ids::iosBackgroundBle,                        getUndoManager()),
           iosPushNotificationsValue                    (settings, Ids::iosPushNotifications,                    getUndoManager()),
-          iosAUHostIAAValue                            (settings, Ids::iosAUHostIAA,                                  getUndoManager()),
           iosAppGroupsValue                            (settings, Ids::iosAppGroups,                            getUndoManager()),
           iCloudPermissionsValue                       (settings, Ids::iCloudPermissions,                       getUndoManager()),
           networkingMulticastValue                     (settings, Ids::networkingMulticast,                     getUndoManager()),
@@ -225,7 +224,6 @@ public:
     bool isBackgroundAudioEnabled() const                   { return iosBackgroundAudioValue.get(); }
     bool isBackgroundBleEnabled() const                     { return iosBackgroundBleValue.get(); }
     bool isPushNotificationsEnabled() const                 { return iosPushNotificationsValue.get(); }
-    bool isAUHostIAAEnabled() const                         { return iosAUHostIAAValue.get(); }
     bool isAppGroupsEnabled() const                         { return iosAppGroupsValue.get(); }
     bool isiCloudPermissionsEnabled() const                 { return iCloudPermissionsValue.get(); }
     bool isNetworkingMulticastEnabled() const               { return networkingMulticastValue.get(); }
@@ -618,9 +616,6 @@ public:
             props.add (new ChoicePropertyComponent (iCloudPermissionsValue, "iCloud Permissions"),
                        "Enable this to grant your app the capability to use native file load/save browser windows on iOS.");
 
-            props.add (new ChoicePropertyComponent (iosAUHostIAAValue, "[Deprecated] AU Host Inter-App Audio Capability"),
-                       "If your app is an AU host then you can enable this to grant your app the capability to receive Inter-App Audio. "
-                       "Inter-App Audio is deprecated in iOS 13.");
         }
 
         props.add (new ChoicePropertyComponent (networkingMulticastValue, "Networking Multicast Capability"),
@@ -1341,8 +1336,9 @@ public:
 
             capabilities["ApplicationGroups.iOS"] = owner.iOS && owner.isAppGroupsEnabled();
             capabilities["InAppPurchase"]         = owner.isInAppPurchasesEnabled();
-            capabilities["InterAppAudio"]         = owner.iOS && ((type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())
-                                                                  || (owner.getProject().isAUPluginHost() && owner.isAUHostIAAEnabled()));
+            capabilities["InterAppAudio"]         = owner.iOS && ((type == Target::StandalonePlugIn
+                                                                   && owner.getProject().shouldEnableIAA())
+                                                                  || owner.getProject().isAUPluginHost());
             capabilities["Push"]                  = owner.isPushNotificationsEnabled();
             capabilities["Sandbox"]               = type == Target::AudioUnitv3PlugIn || owner.isAppSandboxEnabled();
             capabilities["HardenedRuntime"]       = owner.isHardenedRuntimeEnabled();
@@ -1404,7 +1400,7 @@ public:
              || owner.isHardenedRuntimeEnabled()
              || owner.isNetworkingMulticastEnabled()
              || (owner.isiOS() && owner.isiCloudPermissionsEnabled())
-             || (owner.isiOS() && owner.getProject().isAUPluginHost() && owner.isAUHostIAAEnabled()))
+             || (owner.isiOS() && owner.getProject().isAUPluginHost()))
                 return true;
 
             if (owner.project.isAudioPluginProject()
@@ -3201,7 +3197,6 @@ private:
         options.isAUPluginHost                  = project.isAUPluginHost();
         options.isiCloudPermissionsEnabled      = isiCloudPermissionsEnabled();
         options.isPushNotificationsEnabled      = isPushNotificationsEnabled();
-        options.isAUHostIAAEnabled              = isAUHostIAAEnabled();
         options.isAppGroupsEnabled              = isAppGroupsEnabled();
         options.isHardenedRuntimeEnabled        = isHardenedRuntimeEnabled();
         options.isAppSandboxEnabled             = isAppSandboxEnabled();
@@ -3697,7 +3692,7 @@ private:
                                  bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
                                  sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
                                  uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, uiRequiresFullScreenValue, documentExtensionsValue, iosInAppPurchasesValue,
-                                 iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAUHostIAAValue, iosAppGroupsValue, iCloudPermissionsValue,
+                                 iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                                  networkingMulticastValue, iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                                  exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue, buildNumber;
     ScopedMessageBox messageBox;

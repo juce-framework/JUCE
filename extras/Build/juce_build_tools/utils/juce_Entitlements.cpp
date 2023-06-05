@@ -49,7 +49,7 @@ namespace build_tools
 
         if (isiOS)
         {
-            if ((isAudioPluginProject && shouldEnableIAA) || (isAUPluginHost && isAUHostIAAEnabled))
+            if ((isAudioPluginProject && shouldEnableIAA) || isAUPluginHost)
                 entitlements.set ("inter-app-audio", "<true/>");
 
             if (isiCloudPermissionsEnabled)

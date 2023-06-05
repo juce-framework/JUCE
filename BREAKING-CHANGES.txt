@@ -6,26 +6,6 @@ develop
 
 Change
 ------
-The Projucer no longer automatically adds the iOS Inter-App Audio entitlement
-to AU hosts.
-
-Possible Issues
-----------------
-iOS AU hosts that rely upon Inter-App Audio will no longer be able to receive
-Inter-App Audio.
-
-Workaround
-----------
-Use the new "[Deprecated] AU Host Inter-App Audio Capability" option in the
-Projucer.
-
-Rationale
----------
-Inter-App Audio is deprecated in iOS 13.
-
-
-Change
-------
 Unique device IDs on Windows have been updated to use a more reliable SMBIOS
 parser. The SystemStats::getUniqueDeviceID function now returns new IDs using
 this improved parser. Additionally, a new function,
