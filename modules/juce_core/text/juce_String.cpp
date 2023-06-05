@@ -719,19 +719,30 @@ void String::appendCharPointer (const CharPointerType startOfTextToAppend,
 {
     jassert (startOfTextToAppend.getAddress() != nullptr && endOfTextToAppend.getAddress() != nullptr);
 
-    auto extraBytesNeeded = getAddressDifference (endOfTextToAppend.getAddress(),
-                                                  startOfTextToAppend.getAddress());
-    jassert (extraBytesNeeded >= 0);
 
+    auto bytesNeededForNewPart = getAddressDifference (endOfTextToAppend.getAddress(),
+                                                  startOfTextToAppend.getAddress());
+    jassert (bytesNeededForNewPart >= 0);
+    if (bytesNeededForNewPart == 0) return;
+
+    
+    auto allocatedNumBytes = StringHolderUtils::getAllocatedNumBytes(text);
+    auto usedBytes = CharPointerType::getBytesRequiredFor(text) + 1;
+    auto currentlyUnusedBytes = allocatedNumBytes - usedBytes;
+
+    size_t extraBytesNeeded = 0;
+    if (bytesNeededForNewPart > currentlyUnusedBytes)
+        extraBytesNeeded = bytesNeededForNewPart - currentlyUnusedBytes;
+
+    auto byteOffsetOfNull = getByteOffsetOfEnd();
     if (extraBytesNeeded > 0)
     {
-        auto byteOffsetOfNull = getByteOffsetOfEnd();
-        preallocateBytes ((size_t) extraBytesNeeded + byteOffsetOfNull);
-
-        auto* newStringStart = addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull);
-        memcpy (newStringStart, startOfTextToAppend.getAddress(), (size_t) extraBytesNeeded);
-        CharPointerType (addBytesToPointer (newStringStart, extraBytesNeeded)).writeNull();
+        preallocateBytes(extraBytesNeeded + allocatedNumBytes + 1);
     }
+
+    auto* newStringStart = addBytesToPointer (text.getAddress(), (int)byteOffsetOfNull);
+    memcpy (newStringStart, startOfTextToAppend.getAddress(), (size_t) bytesNeededForNewPart);
+    CharPointerType (addBytesToPointer (newStringStart, bytesNeededForNewPart)).writeNull();
 }
 
 String& String::operator+= (const wchar_t* t)
@@ -2473,6 +2484,11 @@ public:
             expect (s2 == "1234567890xyz123123");
             s2 << StringRef ("def");
             expect (s2 == "1234567890xyz123123def");
+
+            String sPrealloc("a");
+            sPrealloc.preallocateBytes(10);
+            sPrealloc += "bcd";
+            expect(sPrealloc == "abcd");
 
             // int16
             {
