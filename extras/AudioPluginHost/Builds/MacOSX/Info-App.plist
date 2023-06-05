@@ -12,7 +12,7 @@
     <key>CFBundleIconFile</key>
     <string>Icon.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>com.juce.pluginhost</string>
+    <string>com.juce.audiopluginhost</string>
     <key>CFBundleName</key>
     <string>AudioPluginHost</string>
     <key>CFBundleDisplayName</key>
