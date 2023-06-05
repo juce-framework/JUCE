@@ -28,9 +28,6 @@
 namespace juce::detail
 {
 
-// This function is in juce_win32_Windowing.cpp
-bool offerKeyMessageToJUCEWindow (MSG&);
-
 class WindowsHooks::Hooks
 {
 public:
@@ -71,7 +68,7 @@ private:
         MSG& msg = *(MSG*) lParam;
 
         if (nCode == HC_ACTION && wParam == PM_REMOVE
-             && offerKeyMessageToJUCEWindow (msg))
+             && HWNDComponentPeer::offerKeyMessageToJUCEWindow (msg))
         {
             zerostruct (msg);
             msg.message = WM_USER;
