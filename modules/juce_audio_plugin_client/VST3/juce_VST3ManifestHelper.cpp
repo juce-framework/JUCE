@@ -23,6 +23,11 @@
   ==============================================================================
 */
 
+// This suppresses a warning in juce_TargetPlatform.h
+#ifndef JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED
+ #define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1
+#endif
+
 #include <juce_core/system/juce_CompilerWarnings.h>
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc++98-compat-extra-semi",
