@@ -130,7 +130,8 @@
 #endif
 
 //==============================================================================
-#include "utilities/juce_VSTCallbackHandler.h"
+#include "utilities/juce_AAXClientExtensions.h"
+#include "utilities/juce_VST2ClientExtensions.h"
 #include "utilities/juce_VST3ClientExtensions.h"
 #include "utilities/juce_NativeScaleFactorNotifier.h"
 #include "format_types/juce_ARACommon.h"

@@ -40,9 +40,11 @@ namespace juce
     plugin, you should implement a global function called createPluginFilter() which
     creates and returns a new instance of your subclass.
 
+    @see AAXClientExtensions, VST2ClientExtensions, VST3ClientExtensions
+
     @tags{Audio}
 */
-class JUCE_API  AudioProcessor
+class JUCE_API  AudioProcessor : private AAXClientExtensions
 {
 protected:
     struct BusesProperties;
@@ -1176,18 +1178,30 @@ public:
     void setRateAndBufferSizeDetails (double sampleRate, int blockSize) noexcept;
 
     //==============================================================================
-    /** AAX plug-ins need to report a unique "plug-in id" for every audio layout
-        configuration that your AudioProcessor supports on the main bus. Override this
-        function if you want your AudioProcessor to use a custom "plug-in id" (for example
-        to stay backward compatible with older versions of JUCE).
-
-        The default implementation will compute a unique integer from the input and output
-        layout and add this value to the 4 character code 'jcaa' (for native AAX) or 'jyaa'
-        (for AudioSuite plug-ins).
+    /** Returns a reference to an object that implements AAX specific information regarding
+        this AudioProcessor.
     */
-    virtual int32 getAAXPluginIDForMainBusConfig (const AudioChannelSet& mainInputLayout,
-                                                  const AudioChannelSet& mainOutputLayout,
-                                                  bool idForAudioSuite) const;
+    virtual AAXClientExtensions& getAAXClientExtensions()       { return *this; }
+
+    /** Returns a non-owning pointer to an object that implements VST2 specific information
+        regarding this AudioProcessor.
+
+        By default, for backwards compatibility, this will attempt to dynamic-cast this
+        AudioProcessor to VST2ClientExtensions.
+        It is recommended to override this function to return a pointer directly to an object
+        of the correct type in order to avoid this dynamic cast.
+    */
+    virtual VST2ClientExtensions* getVST2ClientExtensions();
+
+    /** Returns a non-owning pointer to an object that implements VST3 specific information
+        regarding this AudioProcessor.
+
+        By default, for backwards compatibility, this will attempt to dynamic-cast this
+        AudioProcessor to VST3ClientExtensions.
+        It is recommended to override this function to return a pointer directly to an object
+        of the correct type in order to avoid this dynamic cast.
+    */
+    virtual VST3ClientExtensions* getVST3ClientExtensions();
 
     //==============================================================================
     /** Some plug-ins support sharing response curve data with the host so that it can
@@ -1444,6 +1458,15 @@ public:
    #endif
 
 private:
+    /** This is deprecated. Instead, create an AAXClientExtensions object,
+        implement getPluginIDForMainBusConfig() and return the object from
+        getAAXClientExtensions().
+    */
+    [[deprecated ("Override AAXClientExtensions::getPluginIDForMainBusConfig() instead")]]
+    virtual int32 getAAXPluginIDForMainBusConfig (const AudioChannelSet&,
+                                                  const AudioChannelSet&,
+                                                  const bool) const { return {}; }
+
     //==============================================================================
     struct InOutChannelPair
     {

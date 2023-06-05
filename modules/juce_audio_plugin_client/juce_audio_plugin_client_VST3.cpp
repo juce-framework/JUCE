@@ -371,7 +371,7 @@ static QueryInterfaceResult queryAdditionalInterfaces (AudioProcessor* processor
 
     void* obj = nullptr;
 
-    if (auto* extensions = dynamic_cast<VST3ClientExtensions*> (processor))
+    if (auto* extensions = processor->getVST3ClientExtensions())
     {
         const auto result = (extensions->*member) (targetIID, &obj);
         return { result, obj };
@@ -1523,7 +1523,7 @@ private:
     {
         audioProcessor = newAudioProcessor;
 
-        if (auto* extensions = dynamic_cast<VST3ClientExtensions*> (audioProcessor->get()))
+        if (auto* extensions = audioProcessor->get()->getVST3ClientExtensions())
         {
             extensions->setIComponentHandler (componentHandler);
             extensions->setIHostApplication (hostContext.get());
@@ -3082,7 +3082,7 @@ public:
                     {
                         if (isFirstBus)
                         {
-                            if (auto* extensions = dynamic_cast<VST3ClientExtensions*> (pluginInstance))
+                            if (auto* extensions = pluginInstance->getVST3ClientExtensions())
                                 return extensions->getPluginHasMainInput() ? Vst::kMain : Vst::kAux;
 
                             return Vst::kMain;
@@ -3957,7 +3957,7 @@ public:
         const ScopedJuceInitialiser_GUI libraryInitialiser;
 
         auto filter = createPluginFilterOfType (AudioProcessor::WrapperType::wrapperType_VST3);
-        auto* extensions = dynamic_cast<const VST3ClientExtensions*> (filter.get());
+        auto* extensions = filter->getVST3ClientExtensions();
 
         if (extensions == nullptr || extensions->getCompatibleClasses().empty())
             return kResultFalse;

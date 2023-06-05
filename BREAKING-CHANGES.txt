@@ -6,6 +6,31 @@ develop
 
 Change
 ------
+AudioProcessor::getAAXPluginIDForMainBusConfig() has been deprecated.
+
+Possible Issues
+---------------
+Any AudioProcessor overriding this method will fail to compile.
+
+Workaround
+----------
+- Create an object which inherits from AAXClientExtensions.
+- In the object override and implement getPluginIDForMainBusConfig().
+- In the AudioProcessor override getAAXClientExtensions() and return a pointer
+  to the object.
+
+Rationale
+---------
+Additional AAX specific functionality was required in the audio processor.
+Rather than continuing to grow and expand the AudioProcessor class with format
+specific functionality, separating this concern into a new class allows for
+greater expansion for those that need it without burdening those that don't.
+Moving this function into this class improves consistency both with the new
+functionality and with similar functionality for the VST2 and VST3 formats.
+
+
+Change
+------
 Unique device IDs on Windows have been updated to use a more reliable SMBIOS
 parser. The SystemStats::getUniqueDeviceID function now returns new IDs using
 this improved parser. Additionally, a new function,
@@ -24,8 +49,9 @@ to switch to using SystemStats::getMachineIdentifiers() instead.
 
 Rationale
 ---------
-This update ensures the generation of more stable and reliable unique device IDs,
-while also maintaining backward compatibility with the previous ID generation methods.
+This update ensures the generation of more stable and reliable unique device
+IDs, while also maintaining backward compatibility with the previous ID
+generation methods.
 
 
 Change

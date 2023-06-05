@@ -1823,7 +1823,7 @@ private:
         if (args.index == Vst2::effGetParamDisplay)
             return handleCockosGetParameterText (args.value, args.ptr, args.opt);
 
-        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor.get()))
+        if (auto callbackHandler = processor->getVST2ClientExtensions())
             return callbackHandler->handleVstManufacturerSpecific (args.index, args.value, args.ptr, args.opt);
 
         return 0;
@@ -1882,7 +1882,7 @@ private:
         if (matches ("hasCockosExtensions"))
             return (int32) 0xbeef0000;
 
-        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor.get()))
+        if (auto callbackHandler = processor->getVST2ClientExtensions())
             return callbackHandler->handleVstPluginCanDo (args.index, args.value, args.ptr, args.opt);
 
         return 0;
@@ -2115,7 +2115,7 @@ namespace
                     auto* wrapper = new JuceVSTWrapper (audioMaster, std::move (processor));
                     auto* aEffect = wrapper->getAEffect();
 
-                    if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processorPtr))
+                    if (auto* callbackHandler = processorPtr->getVST2ClientExtensions())
                     {
                         callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect] (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
                         {

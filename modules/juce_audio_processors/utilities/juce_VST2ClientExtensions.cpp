@@ -26,14 +26,14 @@
 namespace juce
 {
 
-pointer_sized_int VSTCallbackHandler::handleVstPluginCanDo ([[maybe_unused]] int32 index,
-                                                            [[maybe_unused]] pointer_sized_int value,
-                                                            [[maybe_unused]] void* ptr,
-                                                            [[maybe_unused]] float opt)
+pointer_sized_int VST2ClientExtensions::handleVstPluginCanDo ([[maybe_unused]] int32 index,
+                                                              [[maybe_unused]] pointer_sized_int value,
+                                                              [[maybe_unused]] void* ptr,
+                                                              [[maybe_unused]] float opt)
 {
     return 0;
 }
 
-void VSTCallbackHandler::handleVstHostCallbackAvailable ([[maybe_unused]] std::function<VstHostCallbackType>&& callback) {}
+void VST2ClientExtensions::handleVstHostCallbackAvailable ([[maybe_unused]] std::function<VstHostCallbackType>&& callback) {}
 
 } // namespace juce

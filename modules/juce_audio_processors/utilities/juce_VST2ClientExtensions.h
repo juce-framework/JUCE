@@ -26,19 +26,19 @@
 namespace juce
 {
 
-/** An interface to allow an AudioProcessor to send and receive VST specific calls from
-    the host.
+/**
+    An interface to allow an AudioProcessor to implement extended VST2-specific functionality.
 
-    To use this class, ensure that your AudioProcessor publicly inherits
-    from VSTCallbackHandler.
+    To use this class, create an object that inherits from it, implement the methods, then return
+    a pointer to the object in your AudioProcessor::getVST2ClientExtensions() method.
 
-    @see VST3ClientExtensions
+    @see AudioProcessor, AAXClientExtensions, VST3ClientExtensions
 
     @tags{Audio}
 */
-struct VSTCallbackHandler
+struct VST2ClientExtensions
 {
-    virtual ~VSTCallbackHandler() = default;
+    virtual ~VST2ClientExtensions() = default;
 
     /** This is called by the VST plug-in wrapper when it receives unhandled
         plug-in "can do" calls from the host.
@@ -56,18 +56,19 @@ struct VSTCallbackHandler
                                                              void* ptr,
                                                              float opt) = 0;
 
-    // Note: VS2013 prevents a "using" declaration here
     /** The host callback function type. */
-    typedef pointer_sized_int (VstHostCallbackType) (int32 opcode,
-                                                     int32 index,
-                                                     pointer_sized_int value,
-                                                     void* ptr,
-                                                     float opt);
+    using VstHostCallbackType = pointer_sized_int (int32 opcode,
+                                                   int32 index,
+                                                   pointer_sized_int value,
+                                                   void* ptr,
+                                                   float opt);
 
     /** This is called once by the VST plug-in wrapper after its constructor.
         You can use the supplied function to query the VST host.
     */
     virtual void handleVstHostCallbackAvailable (std::function<VstHostCallbackType>&& callback);
 };
+
+using VSTCallbackHandler [[deprecated ("replace with VST2ClientExtensions")]] = VST2ClientExtensions;
 
 } // namespace juce
