@@ -107,7 +107,7 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (auto* m = getOwner().getModel())
+        if (auto* m = getModel (getOwner()))
         {
             if (asBase().isEnabled() && e.mouseWasDraggedSinceMouseDown() && ! isDragging)
             {
@@ -143,6 +143,9 @@ private:
     const Base& asBase()    const { return *static_cast<const Base*> (this); }
           Base& asBase()          { return *static_cast<      Base*> (this); }
 
+    static TableListBoxModel* getModel (TableListBox& x)     { return x.getTableListBoxModel(); }
+    static ListBoxModel*      getModel (ListBox& x)          { return x.getListBoxModel(); }
+
     int row = -1;
     bool selected = false, isDragging = false, isDraggingToScroll = false, selectRowOnMouseUp = false;
 };
@@ -156,7 +159,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        if (auto* m = owner.getModel())
+        if (auto* m = owner.getListBoxModel())
             m->paintListBoxItem (getRow(), g, getWidth(), getHeight(), isSelected());
     }
 
@@ -164,7 +167,7 @@ public:
     {
         updateRowAndSelection (newRow, nowSelected);
 
-        if (auto* m = owner.getModel())
+        if (auto* m = owner.getListBoxModel())
         {
             setMouseCursor (m->getMouseCursorForRow (getRow()));
 
@@ -188,14 +191,14 @@ public:
     {
         owner.selectRowsBasedOnModifierKeys (getRow(), e.mods, isMouseUp);
 
-        if (auto* m = owner.getModel())
+        if (auto* m = owner.getListBoxModel())
             m->listBoxItemClicked (getRow(), e);
     }
 
     void mouseDoubleClick (const MouseEvent& e) override
     {
         if (isEnabled())
-            if (auto* m = owner.getModel())
+            if (auto* m = owner.getListBoxModel())
                 m->listBoxItemDoubleClicked (getRow(), e);
     }
 
@@ -207,7 +210,7 @@ public:
 
     String getTooltip() override
     {
-        if (auto* m = owner.getModel())
+        if (auto* m = owner.getListBoxModel())
             return m->getTooltipForRow (getRow());
 
         return {};
@@ -238,7 +241,7 @@ private:
 
         String getTitle() const override
         {
-            if (auto* m = rowComponent.owner.getModel())
+            if (auto* m = rowComponent.owner.getListBoxModel())
                 return m->getNameForRow (rowComponent.getRow());
 
             return {};
@@ -248,7 +251,7 @@ private:
 
         AccessibleState getCurrentState() const override
         {
-            if (auto* m = rowComponent.owner.getModel())
+            if (auto* m = rowComponent.owner.getListBoxModel())
                 if (rowComponent.getRow() >= m->getNumRows())
                     return AccessibleState().withIgnored();
 
@@ -345,7 +348,7 @@ public:
     {
         updateVisibleArea (true);
 
-        if (auto* m = owner.getModel())
+        if (auto* m = owner.getListBoxModel())
             m->listWasScrolled();
 
         startTimer (50);

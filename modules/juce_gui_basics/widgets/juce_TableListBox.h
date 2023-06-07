@@ -233,7 +233,7 @@ public:
     void setModel (TableListBoxModel* newModel);
 
     /** Returns the model currently in use. */
-    TableListBoxModel* getModel() const noexcept                    { return model; }
+    TableListBoxModel* getTableListBoxModel() const noexcept        { return model; }
 
     //==============================================================================
     /** Returns the header component being used in this table. */
@@ -333,6 +333,10 @@ public:
     void resized() override;
     /** @internal */
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
+    /** Returns the model currently in use. */
+    [[deprecated ("This function hides the non-virtual ListBox::getModel, use getTableListBoxModel instead")]]
+    TableListBoxModel* getModel() const noexcept  { return getTableListBoxModel(); }
 
 private:
     //==============================================================================
