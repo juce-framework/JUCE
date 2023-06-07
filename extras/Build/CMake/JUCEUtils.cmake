@@ -543,7 +543,7 @@ function(_juce_execute_juceaide)
         ERROR_VARIABLE output)
 
     if(result_variable)
-        message(FATAL_ERROR "Running juceaide failed:\n${output}")
+        message(FATAL_ERROR "Running juceaide failed:\ncommand: ${juceaide_location} ${ARGN}\noutput: ${output}")
     endif()
 endfunction()
 
@@ -947,57 +947,28 @@ function(_juce_add_vst3_manifest_helper_target)
 
     get_target_property(module_path juce::juce_audio_processors INTERFACE_JUCE_MODULE_PATH)
     set(vst3_dir "${module_path}/juce_audio_processors/format_types/VST3_SDK")
-    set(public_dir "${vst3_dir}/public.sdk")
-    set(public_source_dir "${public_dir}/source")
-    set(public_common_dir "${public_source_dir}/common")
-    set(public_vst_dir "${public_source_dir}/vst")
-    set(hosting_dir "${public_vst_dir}/hosting")
+
+    set(extension "cpp")
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        set(extra_source "${hosting_dir}/module_mac.mm")
-        set_source_files_properties("${extra_source}" PROPERTIES COMPILE_FLAGS "-fobjc-arc")
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        set(extra_source "${hosting_dir}/module_linux.cpp")
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        set(extra_source
-            "${vst3_dir}/helper.manifest"
-            "${hosting_dir}/module_win32.cpp")
+        set(extension "mm")
     endif()
 
-    add_executable(juce_vst3_helper
-        "${extra_source}"
-        "${hosting_dir}/module.cpp"
-        "${public_common_dir}/memorystream.cpp"
-        "${public_common_dir}/readfile.cpp"
-        "${public_dir}/samples/vst-utilities/moduleinfotool/source/main.cpp"
-        "${public_vst_dir}/moduleinfo/moduleinfocreator.cpp"
-        "${public_vst_dir}/moduleinfo/moduleinfoparser.cpp"
-        "${public_vst_dir}/utility/stringconvert.cpp"
-        "${public_vst_dir}/vstinitiids.cpp"
-        "${vst3_dir}/pluginterfaces/base/coreiids.cpp"
-        "${vst3_dir}/pluginterfaces/base/funknown.cpp")
+    set(source "${module_path}/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.${extension}")
 
+    add_executable(juce_vst3_helper "${source}")
     add_executable(juce::juce_vst3_helper ALIAS juce_vst3_helper)
 
+    target_include_directories(juce_vst3_helper PRIVATE "${vst3_dir}" "${module_path}")
+
+    add_library(juce_interface_definitions INTERFACE)
+    _juce_add_standard_defs(juce_interface_definitions)
+    target_link_libraries(juce_vst3_helper PRIVATE juce_interface_definitions)
     target_compile_features(juce_vst3_helper PRIVATE cxx_std_17)
-    target_include_directories(juce_vst3_helper PRIVATE "${vst3_dir}")
-
-    if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-       OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-       OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
-        target_compile_options(juce_vst3_helper PRIVATE
-            "-Wno-deprecated-declarations"
-            "-Wno-expansion-to-defined"
-            "-Wno-format"
-            "-Wno-pragma-pack")
-    endif()
-
-    if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-        target_compile_options(juce_vst3_helper PRIVATE /EHsc /wd6387 /wd6031)
-    endif()
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         _juce_link_frameworks(juce_vst3_helper PRIVATE Cocoa)
+        target_compile_options(juce_vst3_helper PRIVATE -fobjc-arc)
     endif()
 
     set_target_properties(juce_vst3_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
@@ -1048,47 +1019,21 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
                 LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_TARGET_ARCHITECTURE}-linux")
         endif()
 
-        set(remove_command remove)
+        # Add a target for the helper tool
+        _juce_add_vst3_manifest_helper_target()
 
-        if("${CMAKE_VERSION}" VERSION_GREATER_EQUAL "3.17")
-            set(remove_command rm)
-        endif()
+        get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
 
-        # Delete moduleinfo.json if it exists, and repair signing so we can still load the bundle
+        # Use the helper tool to write out the moduleinfo.json
         add_custom_command(TARGET ${target_name} POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E ${remove_command} -f "${output_path}/Contents/moduleinfo.json"
-            COMMAND "${CMAKE_COMMAND}"
-                "-Dsrc=${output_path}"
-                "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
+            COMMAND ${CMAKE_COMMAND} -E remove -f "${output_path}/Contents/moduleinfo.json"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${output_path}/Contents/Resources"
+            COMMAND juce_vst3_helper
+                -create
+                -version "${target_version_string}"
+                -path "${output_path}"
+                -output "${output_path}/Contents/Resources/moduleinfo.json"
             VERBATIM)
-
-        get_target_property(manifest_enabled ${shared_code_target} JUCE_VST3_MANIFEST_ENABLED)
-
-        if("${manifest_enabled}")
-            # Add a target for the helper tool
-            _juce_add_vst3_manifest_helper_target()
-
-            get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
-
-            # Use the helper tool to write out the moduleinfo.json
-            add_custom_command(TARGET ${target_name} POST_BUILD
-                COMMAND juce_vst3_helper
-                    -create
-                    -version "${target_version_string}"
-                    -path "${output_path}"
-                    -output "${output_path}/Contents/moduleinfo.json"
-                VERBATIM)
-
-            # Sign the moduleinfo.json then the full bundle from the inside out
-            if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-                add_custom_command(TARGET ${target_name} POST_BUILD
-                    COMMAND xcrun codesign -f -s "-" "${output_path}/Contents/moduleinfo.json"
-                    COMMAND "${CMAKE_COMMAND}"
-                        "-Dsrc=${output_path}"
-                        "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
-                    VERBATIM)
-            endif()
-        endif()
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_VST3_COPY_DIR)
     elseif(kind STREQUAL "VST")
@@ -1556,8 +1501,6 @@ function(_juce_set_fallback_properties target)
     _juce_set_property_if_not_set(${target} VST_NUM_MIDI_INS 16)
     _juce_set_property_if_not_set(${target} VST_NUM_MIDI_OUTS 16)
 
-    _juce_set_property_if_not_set(${target} VST3_MANIFEST_ENABLED FALSE)
-
     _juce_set_property_if_not_set(${target} AU_SANDBOX_SAFE FALSE)
 
     _juce_set_property_if_not_set(${target} SUPPRESS_AU_PLIST_RESOURCE_USAGE FALSE)
@@ -1845,7 +1788,6 @@ function(_juce_initialise_target target)
         IS_ARA_EFFECT
         ARA_FACTORY_ID
         ARA_DOCUMENT_ARCHIVE_ID
-        VST3_MANIFEST_ENABLED
 
         VST_COPY_DIR
         VST3_COPY_DIR

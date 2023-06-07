@@ -798,12 +798,9 @@ public:
                 }
                 else if (type == VST3Helper)
                 {
-                    for (const auto& source : owner.getVST3HelperProgramSources (owner))
-                    {
-                        const auto location = owner.rebaseFromProjectFolderToBuildTarget (source)
-                                                   .toWindowsStyle();
-                        cppFiles->createNewChildElement ("ClCompile")->setAttribute ("Include", location);
-                    }
+                    const auto location = owner.rebaseFromProjectFolderToBuildTarget (owner.getVST3HelperProgramSource())
+                                               .toWindowsStyle();
+                    cppFiles->createNewChildElement ("ClCompile")->setAttribute ("Include", location);
                 }
             }
 
@@ -1344,15 +1341,18 @@ public:
 
                     // moduleinfotool doesn't handle Windows-style path separators properly when computing the bundle name
                     const auto normalisedBundlePath = getOwner().getOutDirFile (config, segments[0]).replace ("\\", "/");
+                    const auto contentsDir = normalisedBundlePath + "\\Contents";
+                    const auto resourceDir = contentsDir + "\\Resources";
 
-                    return "\r\n"
-                         + writer.quoted()
-                         + " -create -version "
-                         + getOwner().project.getVersionString().quoted()
-                         + " -path "
-                         + normalisedBundlePath.quoted()
-                         + " -output "
-                         + (getOwner().getOutDirFile (config, segments[0]) + "\\Contents\\moduleinfo.json").quoted();
+                    return "\r\ndel /s /q " + (contentsDir + "\\moduleinfo.json").quoted() + "\r\n"
+                           "if not exist " + resourceDir.quoted() + " mkdir " + resourceDir.quoted() + "\r\n"
+                          + writer.quoted()
+                          + " -create -version "
+                          + getOwner().project.getVersionString().quoted()
+                          + " -path "
+                          + normalisedBundlePath.quoted()
+                          + " -output "
+                          + (resourceDir + "\\moduleinfo.json").quoted();
                 }();
 
                 const auto pkgScript = copyBuildOutputIntoBundle (segments);
@@ -1774,7 +1774,7 @@ protected:
                             if (target->type == MSVCTargetBase::LV2PlugIn && lv2HelperGuid.isNotEmpty())
                                 out << "\t\t" << lv2HelperGuid << " = " << lv2HelperGuid << newLine;
 
-                            if (target->type == MSVCTargetBase::VST3PlugIn && vst3HelperGuid.isNotEmpty() && project.isVst3ManifestEnabled())
+                            if (target->type == MSVCTargetBase::VST3PlugIn && vst3HelperGuid.isNotEmpty())
                                 out << "\t\t" << vst3HelperGuid << " = " << vst3HelperGuid << newLine;
 
                             out << "\tEndProjectSection" << newLine;

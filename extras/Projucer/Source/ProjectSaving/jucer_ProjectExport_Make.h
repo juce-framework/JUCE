@@ -356,7 +356,7 @@ public:
 
             if (type == LV2PlugIn)
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER)";
-            else if (type == VST3PlugIn && owner.project.isVst3ManifestEnabled())
+            else if (type == VST3PlugIn)
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER)";
 
             out << newLine;
@@ -408,16 +408,14 @@ public:
 
             if (type == VST3PlugIn)
             {
-                if (owner.project.isVst3ManifestEnabled())
-                {
-                    out << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER) "
-                           "-create "
-                           "-version " << owner.project.getVersionString().quoted() << " "
-                           "-path \"$(JUCE_OUTDIR)/$(JUCE_VST3DIR)\" "
-                           "-output \"$(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/moduleinfo.json\" " << newLine;
-                }
-
-                out << "\t-$(V_AT)[ ! \"$(JUCE_VST3DESTDIR)\" ] || (mkdir -p $(JUCE_VST3DESTDIR) && cp -R $(JUCE_COPYCMD_VST3))" << newLine;
+                out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/Resources" << newLine
+                    << "\t-$(V_AT)rm -f $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/moduleinfo.json" << newLine
+                    << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER) "
+                       "-create "
+                       "-version " << owner.project.getVersionString().quoted() << " "
+                       "-path \"$(JUCE_OUTDIR)/$(JUCE_VST3DIR)\" "
+                       "-output \"$(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/Resources/moduleinfo.json\"" << newLine
+                    << "\t-$(V_AT)[ ! \"$(JUCE_VST3DESTDIR)\" ] || (mkdir -p $(JUCE_VST3DESTDIR) && cp -R $(JUCE_COPYCMD_VST3))" << newLine;
             }
             else if (type == VSTPlugIn)
             {
@@ -1200,13 +1198,10 @@ private:
             }
             else if (targetType == MakefileTarget::VST3Helper)
             {
-                for (const auto& source : getVST3HelperProgramSources (*this))
-                {
-                    targetFiles.emplace_back (source.rebased (projectFolder,
-                                                              getTargetFolder(),
-                                                              build_tools::RelativePath::buildTargetFolder),
-                                              String{});
-                }
+                targetFiles.emplace_back (getVST3HelperProgramSource().rebased (projectFolder,
+                                                                                getTargetFolder(),
+                                                                                build_tools::RelativePath::buildTargetFolder),
+                                          String{});
             }
 
             return targetFiles;

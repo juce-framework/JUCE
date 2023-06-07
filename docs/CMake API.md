@@ -527,17 +527,6 @@ attributes directly to these creation functions, rather than adding them later.
   `Pitch Shift`, `Restoration`, `Reverb`, `Sampler`, `Spatial`, `Stereo`, `Surround`, `Synth`,
   `Tools`, `Up-Downmix`
 
-`VST3_MANIFEST_ENABLED`
-- May be either TRUE or FALSE. Defaults to FALSE. Set this to TRUE if you want a moduleinfo.json
-  file to be generated as part of the VST3 build. This may improve startup/scanning time for hosts
-  that understand the contents of this file. This setting is disabled by default because the
-  moduleinfo.json path can cause problems during code signing on macOS. Bundles containing a
-  moduleinfo.json may be rejected by code signing verification at any point in the future without
-  notice per https://developer.apple.com/library/archive/technotes/tn2206. If you enable this
-  setting, be aware that the code signature for the moduleinfo.json will be stored in its extended
-  file attributes. Therefore, you will need to ensure that these attributes are not changed or
-  removed when distributing the VST3.
-
 `AU_MAIN_TYPE`
 - Should be one of: `kAudioUnitType_Effect`, `kAudioUnitType_FormatConverter`,
   `kAudioUnitType_Generator`, `kAudioUnitType_MIDIProcessor`, `kAudioUnitType_Mixer`,

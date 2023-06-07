@@ -26,6 +26,56 @@
 namespace juce
 {
 
+template <typename T>
+int threeWayCompare (const T& a, const T& b)
+{
+    if (a < b) return -1;
+    if (b < a) return 1;
+    return 0;
+}
+
+int threeWayCompare (const String& a, const String& b);
+int threeWayCompare (const String& a, const String& b)
+{
+    return a.compare (b);
+}
+
+struct ReverseCompareString
+{
+    String value;
+};
+
+int threeWayCompare (const ReverseCompareString& a, const ReverseCompareString& b);
+int threeWayCompare (const ReverseCompareString& a, const ReverseCompareString& b)
+{
+    return b.value.compare (a.value);
+}
+
+template <size_t position, typename... Ts>
+constexpr int threeWayCompareImpl (const std::tuple<Ts...>& a, const std::tuple<Ts...>& b)
+{
+    if constexpr (position == sizeof... (Ts))
+    {
+        ignoreUnused (a, b);
+        return 0;
+    }
+    else
+    {
+        const auto head = threeWayCompare (std::get<position> (a), std::get<position> (b));
+
+        if (head != 0)
+            return head;
+
+        return threeWayCompareImpl<position + 1> (a, b);
+    }
+}
+
+template <typename... Ts>
+constexpr int threeWayCompare (const std::tuple<Ts...>& a, const std::tuple<Ts...>& b)
+{
+    return threeWayCompareImpl<0> (a, b);
+}
+
 //==============================================================================
 class FileListTreeItem   : public TreeViewItem,
                            private TimeSliceClient,
@@ -255,6 +305,56 @@ private:
     std::map<File, DirectoryContentsList> contentsLists;
 };
 
+struct FileEntry
+{
+    String path;
+    bool isDirectory;
+
+    int compareWindows (const FileEntry& other) const
+    {
+        const auto toTuple = [] (const auto& x) { return std::tuple (! x.isDirectory, x.path.toLowerCase()); };
+        return threeWayCompare (toTuple (*this), toTuple (other));
+    }
+
+    int compareLinux (const FileEntry& other) const
+    {
+        const auto toTuple = [] (const auto& x) { return std::tuple (x.path.toUpperCase(), ReverseCompareString { x.path }); };
+        return threeWayCompare (toTuple (*this), toTuple (other));
+    }
+
+    int compareDefault (const FileEntry& other) const
+    {
+        return threeWayCompare (path.toLowerCase(), other.path.toLowerCase());
+    }
+};
+
+class OSDependentFileComparisonRules
+{
+public:
+    explicit OSDependentFileComparisonRules (SystemStats::OperatingSystemType systemTypeIn)
+        : systemType (systemTypeIn)
+    {}
+
+    int compare (const FileEntry& first, const FileEntry& second) const
+    {
+        if ((systemType & SystemStats::OperatingSystemType::Windows) != 0)
+            return first.compareWindows (second);
+
+        if ((systemType & SystemStats::OperatingSystemType::Linux) != 0)
+            return first.compareLinux (second);
+
+        return first.compareDefault (second);
+    }
+
+    bool operator() (const FileEntry& first, const FileEntry& second) const
+    {
+        return compare (first, second) < 0;
+    }
+
+private:
+    SystemStats::OperatingSystemType systemType;
+};
+
 class FileTreeComponent::Controller  : private DirectoryScanner::Listener
 {
 public:
@@ -373,6 +473,10 @@ private:
 
         struct Comparator
         {
+            // The different OSes compare and order files in different ways. This function aims
+            // to match these different rules of comparison to mimic other FileBrowserComponent
+            // view modes where we don't need to order the results, and can just rely on the
+            // ordering of the list provided by the OS.
             static int compareElements (TreeViewItem* first, TreeViewItem* second)
             {
                 auto* item1 = dynamic_cast<FileListTreeItem*> (first);
@@ -381,13 +485,10 @@ private:
                 if (item1 == nullptr || item2 == nullptr)
                     return 0;
 
-                if (item1->file < item2->file)
-                    return -1;
+                static const OSDependentFileComparisonRules comparisonRules { SystemStats::getOperatingSystemType() };
 
-                if (item1->file > item2->file)
-                    return 1;
-
-                return 0;
+                return comparisonRules.compare ({ item1->file.getFullPathName(), item1->file.isDirectory() },
+                                                { item2->file.getFullPathName(), item2->file.isDirectory() });
             }
         };
 
@@ -505,5 +606,76 @@ void FileTreeComponent::setItemHeight (int newHeight)
             root->treeHasChanged();
     }
 }
+
+#if JUCE_UNIT_TESTS
+
+class FileTreeComponentTests  : public UnitTest
+{
+public:
+    //==============================================================================
+    FileTreeComponentTests() : UnitTest ("FileTreeComponentTests", UnitTestCategories::gui) {}
+
+    void runTest() override
+    {
+        const auto checkOrder = [] (const auto& orderedFiles, const std::vector<String>& expected)
+        {
+            return std::equal (orderedFiles.begin(), orderedFiles.end(),
+                               expected.begin(), expected.end(),
+                               [] (const auto& entry, const auto& expectedPath) { return entry.path == expectedPath; });
+        };
+
+        const auto doSort = [] (const auto platform, auto& range)
+        {
+            std::sort (range.begin(), range.end(), OSDependentFileComparisonRules { platform });
+        };
+
+        beginTest ("Test Linux filename ordering");
+        {
+            std::vector<FileEntry> filesToOrder { { "_test", false },
+                                                  { "Atest", false },
+                                                  { "atest", false } };
+
+            doSort (SystemStats::OperatingSystemType::Linux, filesToOrder);
+
+            expect (checkOrder (filesToOrder, { "atest", "Atest", "_test" }));
+        }
+
+        beginTest ("Test Windows filename ordering");
+        {
+            std::vector<FileEntry> filesToOrder { { "cmake_install.cmake", false },
+                                                  { "CMakeFiles", true },
+                                                  { "JUCEConfig.cmake", false },
+                                                  { "tools", true },
+                                                  { "cmakefiles.cmake", false } };
+
+            doSort (SystemStats::OperatingSystemType::Windows, filesToOrder);
+
+            expect (checkOrder (filesToOrder, { "CMakeFiles",
+                                                "tools",
+                                                "cmake_install.cmake",
+                                                "cmakefiles.cmake",
+                                                "JUCEConfig.cmake" }));
+        }
+
+        beginTest ("Test MacOS filename ordering");
+        {
+            std::vector<FileEntry> filesToOrder { { "cmake_install.cmake", false },
+                                                  { "CMakeFiles", true },
+                                                  { "tools", true },
+                                                  { "JUCEConfig.cmake", false } };
+
+            doSort (SystemStats::OperatingSystemType::MacOSX, filesToOrder);
+
+            expect (checkOrder (filesToOrder, { "cmake_install.cmake",
+                                                "CMakeFiles",
+                                                "JUCEConfig.cmake",
+                                                "tools" }));
+        }
+    }
+};
+
+static FileTreeComponentTests fileTreeComponentTests;
+
+#endif
 
 } // namespace juce

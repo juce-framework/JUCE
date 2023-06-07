@@ -478,6 +478,24 @@ static std::optional<Array<AudioChannelSet::ChannelType>> getSpeakerOrder (Stein
     return {};
 }
 
+struct Ambisonics
+{
+    struct Mapping
+    {
+        Steinberg::Vst::SpeakerArrangement arrangement;
+        AudioChannelSet channelSet;
+    };
+
+    inline static const Mapping mappings[]
+    {
+        { Steinberg::Vst::SpeakerArr::kAmbi5thOrderACN, AudioChannelSet::ambisonic (5) },
+        { Steinberg::Vst::SpeakerArr::kAmbi6thOrderACN, AudioChannelSet::ambisonic (6) },
+        { Steinberg::Vst::SpeakerArr::kAmbi7thOrderACN, AudioChannelSet::ambisonic (7) },
+    };
+
+    Ambisonics() = delete;
+};
+
 static std::optional<Steinberg::Vst::SpeakerArrangement> getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
@@ -504,6 +522,10 @@ static std::optional<Steinberg::Vst::SpeakerArrangement> getVst3SpeakerArrangeme
     if (getChannelCount (result) == channels.size())
         return result;
 
+    for (const auto& mapping : Ambisonics::mappings)
+        if (channels == mapping.channelSet)
+            return mapping.arrangement;
+
     return {};
 }
 
@@ -513,6 +535,10 @@ inline std::optional<AudioChannelSet> getChannelSetForSpeakerArrangement (Steinb
 
     if (const auto order = getSpeakerOrder (arr))
         return AudioChannelSet::channelSetWithChannels (*order);
+
+    for (const auto& mapping : Ambisonics::mappings)
+        if (arr == mapping.arrangement)
+            return mapping.channelSet;
 
     // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
     return {};

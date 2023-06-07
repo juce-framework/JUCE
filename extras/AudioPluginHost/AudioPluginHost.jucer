@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
-              juceFolder="../../../juce" bundleIdentifier="com.juce.pluginhost"
+              juceFolder="../../../juce" bundleIdentifier="com.juce.audiopluginhost"
               companyName="Raw Material Software Limited" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="Raw Material Software Limited"
               useAppConfig="0" addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">

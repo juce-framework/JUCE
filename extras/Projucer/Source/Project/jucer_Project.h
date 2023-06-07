@@ -293,8 +293,6 @@ public:
     bool isPluginAAXBypassDisabled() const            { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableBypass); }
     bool isPluginAAXMultiMonoDisabled() const         { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableMultiMono); }
 
-    bool isVst3ManifestEnabled() const                { return vst3ManifestEnabledValue.get(); }
-
     void disableStandaloneForARAPlugIn();
 
     static StringArray getAllAUMainTypeStrings() noexcept;
@@ -587,7 +585,7 @@ private:
                                  pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
                                  pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue,
                                  pluginEnableARA, pluginARAAnalyzableContentValue, pluginARAFactoryIDValue, pluginARAArchiveIDValue, pluginARACompatibleArchiveIDsValue, pluginARATransformFlagsValue,
-                                 pluginVSTNumMidiInputsValue, pluginVSTNumMidiOutputsValue, pluginLV2URIValue, vst3ManifestEnabledValue;
+                                 pluginVSTNumMidiInputsValue, pluginVSTNumMidiOutputsValue, pluginLV2URIValue;
 
     //==============================================================================
     std::unique_ptr<EnabledModulesList> enabledModulesList;

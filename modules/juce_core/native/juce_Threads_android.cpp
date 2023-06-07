@@ -448,6 +448,4 @@ JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
 JUCE_API void JUCE_CALLTYPE Process::raisePrivilege() {}
 JUCE_API void JUCE_CALLTYPE Process::lowerPrivilege() {}
 
-
-
 } // namespace juce

@@ -73,9 +73,10 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_add_standard_defs juce_target)
+    _juce_get_debug_config_genex(debug_config)
     target_compile_definitions(${juce_target} INTERFACE
         JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
-        $<IF:$<CONFIG:DEBUG>,DEBUG=1 _DEBUG=1,NDEBUG=1 _NDEBUG=1>
+        $<IF:${debug_config},DEBUG=1 _DEBUG=1,NDEBUG=1 _NDEBUG=1>
         $<$<PLATFORM_ID:Android>:JUCE_ANDROID=1>)
 endfunction()
 
@@ -445,7 +446,8 @@ function(juce_add_module module_path)
 
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         list(REMOVE_ITEM headers
-            "${module_path}/LV2/juce_LV2ManifestHelper.cpp")
+            "${module_path}/LV2/juce_LV2ManifestHelper.cpp"
+            "${module_path}/VST3/juce_VST3ManifestHelper.cpp")
 
         _juce_get_platform_plugin_kinds(plugin_kinds)
 

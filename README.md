@@ -56,6 +56,7 @@ of the target you wish to build.
 
 #### Building JUCE Projects
 
+- __C++ Standard__: 17+
 - __macOS/iOS__: Xcode 10.1 (macOS 10.13.6)
 - __Windows__: Windows 8.1 and Visual Studio 2017
 - __Linux__: g++ 7.0 or Clang 6.0 (for a full list of dependencies, see

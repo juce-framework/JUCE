@@ -180,7 +180,8 @@ public:
             // and sleeps if necessary.
 
             auto swapTime = Time::getMillisecondCounterHiRes() - now;
-            auto frameTime = (int) (now - lastSwapTime);
+            auto frameTime = (int) std::min ((uint64_t) std::numeric_limits<int>::max(),
+                                             (uint64_t) now - (uint64_t) lastSwapTime);
 
             if (swapTime < 0.5 && frameTime < minSwapTime - 3)
             {
