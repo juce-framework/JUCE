@@ -1224,10 +1224,10 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Network_windows.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimer_linux.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimer_generic.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimer_wasm.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimer_linux.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimer_windows.cpp">
