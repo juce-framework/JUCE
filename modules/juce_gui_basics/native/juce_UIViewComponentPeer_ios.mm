@@ -2198,6 +2198,8 @@ void UIViewComponentPeer::displayLinkCallback()
 
     for (const auto& r : deferredRepaints)
         [view setNeedsDisplayInRect: convertToCGRect (r)];
+
+    deferredRepaints.clear();
 }
 
 //==============================================================================
