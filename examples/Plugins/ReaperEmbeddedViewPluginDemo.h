@@ -47,7 +47,7 @@
 
 *******************************************************************************/
 
-/*  This demo shows how to use the VSTCallbackHandler and VST3ClientExtensions
+/*  This demo shows how to use the VST2ClientExtensions and VST3ClientExtensions
     classes to provide extended functionality in compatible VST/VST3 hosts.
 
     If this project is built as a VST or VST3 plugin and loaded in REAPER
@@ -146,7 +146,7 @@ private:
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-class VST2Extensions : public VSTCallbackHandler
+class VST2Extensions : public VST2ClientExtensions
 {
 public:
     explicit VST2Extensions (EmbeddedViewListener& l)
