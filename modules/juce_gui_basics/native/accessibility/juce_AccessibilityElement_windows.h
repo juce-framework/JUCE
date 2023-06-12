@@ -27,9 +27,9 @@ namespace juce
 {
 
 class AccessibilityNativeHandle  : public ComBaseClassHelper<IRawElementProviderSimple,
-                                                             IRawElementProviderHwndOverride,
                                                              ComTypes::IRawElementProviderFragment,
-                                                             ComTypes::IRawElementProviderFragmentRoot>
+                                                             ComTypes::IRawElementProviderFragmentRoot,
+                                                             ComTypes::IRawElementProviderHwndOverride>
 {
 public:
     explicit AccessibilityNativeHandle (AccessibilityHandler& handler);

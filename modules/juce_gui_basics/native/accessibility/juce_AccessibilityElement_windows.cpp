@@ -187,7 +187,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::get_ProviderOptions (ProviderOptions* 
     *options = (ProviderOptions) (ProviderOptions_ServerSideProvider | ProviderOptions_UseComThreading);
 
     if (AccessibilityHandler::getNativeChildForComponent (accessibilityHandler.getComponent()) != nullptr)
-        *options |= ProviderOptions_OverrideProvider;
+        *options = (ProviderOptions) (*options | ProviderOptions_OverrideProvider);
 
     return S_OK;
 }
