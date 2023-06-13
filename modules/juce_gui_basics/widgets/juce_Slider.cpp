@@ -1572,10 +1572,11 @@ void Slider::lookAndFeelChanged()   { pimpl->lookAndFeelChanged (getLookAndFeel(
 void Slider::enablementChanged()    { repaint(); pimpl->updateTextBoxEnablement(); }
 
 //==============================================================================
-Range<double> Slider::getRange() const noexcept  { return { pimpl->normRange.start, pimpl->normRange.end }; }
-double Slider::getMaximum() const noexcept       { return pimpl->normRange.end; }
-double Slider::getMinimum() const noexcept       { return pimpl->normRange.start; }
-double Slider::getInterval() const noexcept      { return pimpl->normRange.interval; }
+NormalisableRange<double> Slider::getNormalisableRange() const noexcept { return pimpl->normRange; }
+Range<double> Slider::getRange() const noexcept                         { return { pimpl->normRange.start, pimpl->normRange.end }; }
+double Slider::getMaximum() const noexcept                              { return pimpl->normRange.end; }
+double Slider::getMinimum() const noexcept                              { return pimpl->normRange.start; }
+double Slider::getInterval() const noexcept                             { return pimpl->normRange.interval; }
 
 void Slider::setRange (double newMin, double newMax, double newInt)      { pimpl->setRange (newMin, newMax, newInt); }
 void Slider::setRange (Range<double> newRange, double newInt)            { pimpl->setRange (newRange.getStart(), newRange.getEnd(), newInt); }

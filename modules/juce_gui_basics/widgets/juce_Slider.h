@@ -424,6 +424,9 @@ public:
     */
     void setNormalisableRange (NormalisableRange<double> newNormalisableRange);
 
+    /** Returns the slider's normalisable range. */
+    NormalisableRange<double> getNormalisableRange() const noexcept;
+
     /** Returns the slider's range. */
     Range<double> getRange() const noexcept;
 
