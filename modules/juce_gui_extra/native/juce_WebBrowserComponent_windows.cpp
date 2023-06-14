@@ -456,7 +456,7 @@ public:
     {
         return    webView != nullptr
                || webView2ConstructionHelper.webView2BeingCreated == this
-               || webView2ConstructionHelper.viewsWaitingForCreation.contains (this);
+               || webView2ConstructionHelper.viewsWaitingForCreation.count (this) > 0;
     }
 
     void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData) override
@@ -873,7 +873,7 @@ private:
 
                                         for (auto* childWindow : directChildWindows)
                                         {
-                                            if (! self->webView2ConstructionHelper.associatedWebViewNativeWindows.contains (childWindow))
+                                            if (self->webView2ConstructionHelper.associatedWebViewNativeWindows.count (childWindow) == 0)
                                             {
                                                 if (anyChildWindow (childWindow,
                                                                     [browserProcessId] (auto* childOfChild)
