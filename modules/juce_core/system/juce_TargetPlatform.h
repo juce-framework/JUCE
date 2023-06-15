@@ -33,6 +33,7 @@
     - Either JUCE_LITTLE_ENDIAN or JUCE_BIG_ENDIAN.
     - Either JUCE_INTEL or JUCE_ARM
     - Either JUCE_GCC or JUCE_CLANG or JUCE_MSVC
+    - Either JUCE_GLIBC or JUCE_MUSL will be defined on Linux depending on the system's libc implementation.
 */
 
 //==============================================================================
@@ -182,6 +183,14 @@
     #define JUCE_ARM 1
   #elif __MMX__ || __SSE__ || __amd64__
     #define JUCE_INTEL 1
+  #endif
+
+  #if JUCE_LINUX
+    #ifdef __GLIBC__
+      #define JUCE_GLIBC 1
+    #else
+      #define JUCE_MUSL 1
+    #endif
   #endif
 #endif
 
