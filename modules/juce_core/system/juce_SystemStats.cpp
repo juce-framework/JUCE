@@ -178,7 +178,7 @@ String SystemStats::getStackBacktrace()
 {
     String result;
 
-   #if JUCE_ANDROID || JUCE_MINGW || JUCE_WASM
+   #if JUCE_ANDROID || JUCE_MINGW || JUCE_WASM || JUCE_MUSL
     jassertfalse; // sorry, not implemented yet!
 
    #elif JUCE_WINDOWS
