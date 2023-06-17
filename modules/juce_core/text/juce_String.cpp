@@ -2487,10 +2487,10 @@ public:
             s2 << StringRef ("def");
             expect (s2 == "1234567890xyz123123def");
 
-            String sPrealloc("a");
+            String sPrealloc ("a");
             sPrealloc.preallocateBytes (10);
             sPrealloc += "bcd";
-            expect(sPrealloc == "abcd");
+            expect (sPrealloc == "abcd");
 
             // int16
             {
