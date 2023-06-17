@@ -244,7 +244,7 @@ String::String (const String& other) noexcept   : text (other.text)
 {
     StringHolderUtils::retain (text);
     size_t num = getNumBytesAsUTF8();
-    preallocateBytes(num);
+    preallocateBytes (num);
 }
 
 void String::swapWith (String& other) noexcept
@@ -728,8 +728,8 @@ void String::appendCharPointer (const CharPointerType startOfTextToAppend,
     if (bytesNeededForNewPart == 0) return;
 
     
-    auto allocatedNumBytes = StringHolderUtils::getAllocatedNumBytes(text);
-    auto usedBytes = CharPointerType::getBytesRequiredFor(text) + 1;
+    auto allocatedNumBytes = StringHolderUtils::getAllocatedNumBytes (text);
+    auto usedBytes = CharPointerType::getBytesRequiredFor (text) + 1;
     auto currentlyUnusedBytes = allocatedNumBytes - usedBytes;
 
     size_t extraBytesNeeded = 0;
@@ -2488,7 +2488,7 @@ public:
             expect (s2 == "1234567890xyz123123def");
 
             String sPrealloc("a");
-            sPrealloc.preallocateBytes(10);
+            sPrealloc.preallocateBytes (10);
             sPrealloc += "bcd";
             expect(sPrealloc == "abcd");
 
