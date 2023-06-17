@@ -243,6 +243,8 @@ String::~String() noexcept
 String::String (const String& other) noexcept   : text (other.text)
 {
     StringHolderUtils::retain (text);
+    size_t num = getNumBytesAsUTF8();
+    preallocateBytes(num);
 }
 
 void String::swapWith (String& other) noexcept
@@ -826,17 +828,17 @@ JUCE_API String JUCE_CALLTYPE operator+ (const wchar_t* s1, const String& s2) { 
 JUCE_API String JUCE_CALLTYPE operator+ (char s1, const String& s2)           { return String::charToString ((juce_wchar) (uint8) s1) + s2; }
 JUCE_API String JUCE_CALLTYPE operator+ (wchar_t s1, const String& s2)        { return String::charToString (s1) + s2; }
 
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const String& s2)         { return s1 += s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const char* s2)           { return s1 += s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const wchar_t* s2)        { return s1 += s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, const std::string& s2)    { return s1 += s2.c_str(); }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const String& s2)         { String s(s1); return s += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const char* s2)           { String s(s1); return s += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const wchar_t* s2)        { String s(s1); return s += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, const std::string& s2)    { String s(s1); return s += s2.c_str(); }
 
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, char s2)                  { return s1 += s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, wchar_t s2)               { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, char s2)                  { String s(s1); return s += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, wchar_t s2)               { String s(s1); return s += s2; }
 
 #if ! JUCE_NATIVE_WCHAR_IS_UTF32
 JUCE_API String JUCE_CALLTYPE operator+ (juce_wchar s1, const String& s2)     { return String::charToString (s1) + s2; }
-JUCE_API String JUCE_CALLTYPE operator+ (String s1, juce_wchar s2)            { return s1 += s2; }
+JUCE_API String JUCE_CALLTYPE operator+ (String s1, juce_wchar s2)            { String s(s1); return s += s2; }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, juce_wchar s2)         { return s1 += s2; }
 #endif
 
