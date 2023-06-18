@@ -55,8 +55,13 @@ EdgeTable::EdgeTable (Rectangle<int> area, const Path& path, const AffineTransfo
 
     while (iter.next())
     {
-        auto y1 = static_cast<int64_t> (iter.y1 * 256.0f);
-        auto y2 = static_cast<int64_t> (iter.y2 * 256.0f);
+        const auto scaleIterY = [] (auto y)
+        {
+            return static_cast<int64_t> (y * 256.0f + (y >= 0 ? 0.5f : -0.5f));
+        };
+
+        auto y1 = scaleIterY (iter.y1);
+        auto y2 = scaleIterY (iter.y2);
 
         if (y1 != y2)
         {

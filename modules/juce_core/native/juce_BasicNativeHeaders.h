@@ -245,8 +245,6 @@
  #include <sys/types.h>
  #include <sys/user.h>
  #include <sys/wait.h>
- #include <sys/timerfd.h>
- #include <sys/eventfd.h>
  #include <utime.h>
  #include <poll.h>
 

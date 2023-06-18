@@ -971,6 +971,10 @@ function(_juce_add_vst3_manifest_helper_target)
         target_compile_options(juce_vst3_helper PRIVATE -fobjc-arc)
     endif()
 
+    if(MSYS OR MINGW)
+        target_link_options(juce_vst3_helper PRIVATE -municode)
+    endif()
+
     set_target_properties(juce_vst3_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
@@ -1019,21 +1023,24 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
                 LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_TARGET_ARCHITECTURE}-linux")
         endif()
 
-        # Add a target for the helper tool
-        _juce_add_vst3_manifest_helper_target()
+        # The VST3 helper tool requires <filesystem> which is broken before mingw version 9
+        if((NOT (MSYS OR MINGW)) OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9)
+            # Add a target for the helper tool
+            _juce_add_vst3_manifest_helper_target()
 
-        get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
+            get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
 
-        # Use the helper tool to write out the moduleinfo.json
-        add_custom_command(TARGET ${target_name} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E remove -f "${output_path}/Contents/moduleinfo.json"
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${output_path}/Contents/Resources"
-            COMMAND juce_vst3_helper
-                -create
-                -version "${target_version_string}"
-                -path "${output_path}"
-                -output "${output_path}/Contents/Resources/moduleinfo.json"
-            VERBATIM)
+            # Use the helper tool to write out the moduleinfo.json
+            add_custom_command(TARGET ${target_name} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E remove -f "${output_path}/Contents/moduleinfo.json"
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${output_path}/Contents/Resources"
+                COMMAND juce_vst3_helper
+                    -create
+                    -version "${target_version_string}"
+                    -path "${output_path}"
+                    -output "${output_path}/Contents/Resources/moduleinfo.json"
+                VERBATIM)
+        endif()
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_VST3_COPY_DIR)
     elseif(kind STREQUAL "VST")

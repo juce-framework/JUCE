@@ -38,8 +38,8 @@ public:
     };
 
     //==============================================================================
-    static String getDisplayNameWindows()        { return "Code::Blocks (Windows)"; }
-    static String getDisplayNameLinux()          { return "Code::Blocks (Linux)"; }
+    static String getDisplayNameWindows()        { return "[Deprecated] Code::Blocks (Windows)"; }
+    static String getDisplayNameLinux()          { return "[Deprecated] Code::Blocks (Linux)"; }
 
     static String getValueTreeTypeNameWindows()  { return "CODEBLOCKS_WINDOWS"; }
     static String getValueTreeTypeNameLinux()    { return "CODEBLOCKS_LINUX"; }

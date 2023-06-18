@@ -447,6 +447,7 @@ function(juce_add_module module_path)
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         list(REMOVE_ITEM headers
             "${module_path}/LV2/juce_LV2ManifestHelper.cpp"
+            "${module_path}/VST3/juce_VST3ManifestHelper.mm"
             "${module_path}/VST3/juce_VST3ManifestHelper.cpp")
 
         _juce_get_platform_plugin_kinds(plugin_kinds)

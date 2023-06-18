@@ -1036,7 +1036,7 @@ void WebBrowserComponent::visibilityChanged()
     checkWindowAssociation();
 }
 
-void WebBrowserComponent::focusGained (FocusChangeType)
+void WebBrowserComponent::focusGainedWithDirection (FocusChangeType, FocusChangeDirection)
 {
 }
 

@@ -280,6 +280,13 @@ public:
     JUCE_COMCALL get_FragmentRoot (__RPC__deref_out_opt IRawElementProviderFragmentRoot * *pRetVal) = 0;
 };
 
+JUCE_COMCLASS (IRawElementProviderHwndOverride, "1d5df27c-8947-4425-b8d9-79787bb460b8") : public IUnknown
+{
+public:
+    JUCE_COMCALL GetOverrideProviderForHwnd (__RPC__in HWND hwnd,
+                                             __RPC__deref_out_opt IRawElementProviderSimple** pRetVal) = 0;
+};
+
 JUCE_COMCLASS (IExpandCollapseProvider, "d847d3a5-cab0-4a98-8c32-ecb45c59ad24") : public IUnknown
 {
 public:
@@ -473,6 +480,7 @@ constexpr CLSID CLSID_SpVoice { 0x96749377, 0x3391, 0x11D2, { 0x9E, 0xE3, 0x00, 
 #ifdef __CRT_UUID_DECL
 __CRT_UUID_DECL (juce::ComTypes::IRawElementProviderFragmentRoot, 0x620ce2a5, 0xab8f, 0x40a9, 0x86, 0xcb, 0xde, 0x3c, 0x75, 0x59, 0x9b, 0x58)
 __CRT_UUID_DECL (juce::ComTypes::IRawElementProviderFragment,     0xf7063da8, 0x8359, 0x439c, 0x92, 0x97, 0xbb, 0xc5, 0x29, 0x9a, 0x7d, 0x87)
+__CRT_UUID_DECL (juce::ComTypes::IRawElementProviderHwndOverride, 0x1d5df27c, 0x8947, 0x4425, 0xb8, 0xd9, 0x79, 0x78, 0x7b, 0xb4, 0x60, 0xb8)
 __CRT_UUID_DECL (juce::ComTypes::IExpandCollapseProvider,         0xd847d3a5, 0xcab0, 0x4a98, 0x8c, 0x32, 0xec, 0xb4, 0x5c, 0x59, 0xad, 0x24)
 __CRT_UUID_DECL (juce::ComTypes::IGridItemProvider,               0xd02541f1, 0xfb81, 0x4d64, 0xae, 0x32, 0xf5, 0x20, 0xf8, 0xa6, 0xdb, 0xd1)
 __CRT_UUID_DECL (juce::ComTypes::IGridProvider,                   0xb17d6187, 0x0907, 0x464b, 0xa1, 0x68, 0x0e, 0xf1, 0x7a, 0x15, 0x72, 0xb1)

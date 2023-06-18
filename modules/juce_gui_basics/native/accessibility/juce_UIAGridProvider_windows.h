@@ -99,11 +99,11 @@ public:
 
                 for (const auto& child : children)
                 {
-                    IRawElementProviderSimple* provider = nullptr;
+                    ComSmartPtr<IRawElementProviderSimple> provider;
 
                     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
                     if (child != nullptr)
-                        child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (&provider));
+                        child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
                     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                     if (provider == nullptr)

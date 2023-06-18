@@ -28,6 +28,63 @@ namespace juce
 
 AccessibilityHandler* AccessibilityHandler::currentlyFocusedHandler = nullptr;
 
+class NativeChildHandler
+{
+public:
+    static NativeChildHandler& getInstance()
+    {
+        static NativeChildHandler instance;
+        return instance;
+    }
+
+    void* getNativeChild (Component& component) const
+    {
+        if (auto it = nativeChildForComponent.find (&component);
+            it != nativeChildForComponent.end())
+        {
+            return it->second;
+        }
+
+        return nullptr;
+    }
+
+    Component* getComponent (void* nativeChild) const
+    {
+        if (auto it = componentForNativeChild.find (nativeChild);
+            it != componentForNativeChild.end())
+        {
+            return it->second;
+        }
+
+        return nullptr;
+    }
+
+    void setNativeChild (Component& component, void* nativeChild)
+    {
+        clearComponent (component);
+
+        if (nativeChild != nullptr)
+        {
+            nativeChildForComponent[&component]  = nativeChild;
+            componentForNativeChild[nativeChild] = &component;
+        }
+    }
+
+private:
+    NativeChildHandler() = default;
+
+    void clearComponent (Component& component)
+    {
+        if (auto* nativeChild = getNativeChild (component))
+            componentForNativeChild.erase (nativeChild);
+
+        nativeChildForComponent.erase (&component);
+    }
+
+    std::map<void*, Component*> componentForNativeChild;
+    std::map<Component*, void*> nativeChildForComponent;
+};
+
 AccessibilityHandler::AccessibilityHandler (Component& comp,
                                             AccessibilityRole accessibilityRole,
                                             AccessibilityActions accessibilityActions,
@@ -320,6 +377,21 @@ std::unique_ptr<AccessibilityHandler::AccessibilityNativeImpl> AccessibilityHand
     ignoreUnused (handler);
     return nullptr;
    #endif
+}
+
+void* AccessibilityHandler::getNativeChildForComponent (Component& component)
+{
+    return NativeChildHandler::getInstance().getNativeChild (component);
+}
+
+Component* AccessibilityHandler::getComponentForNativeChild (void* nativeChild)
+{
+    return NativeChildHandler::getInstance().getComponent (nativeChild);
+}
+
+void AccessibilityHandler::setNativeChildForComponent (Component& component, void* nativeChild)
+{
+    NativeChildHandler::getInstance().setNativeChild (component, nativeChild);
 }
 
 #if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED

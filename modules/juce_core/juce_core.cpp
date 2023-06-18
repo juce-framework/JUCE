@@ -242,8 +242,7 @@
  #include "native/juce_SharedCode_intel.h"
  #include "native/juce_SystemStats_linux.cpp"
  #include "native/juce_Threads_linux.cpp"
- #include "native/juce_FileDescriptor_linux.cpp"
- #include "native/juce_PlatformTimer_linux.cpp"
+ #include "native/juce_PlatformTimer_generic.cpp"
 
 //==============================================================================
 #elif JUCE_ANDROID
@@ -261,7 +260,7 @@
 //==============================================================================
 #elif JUCE_WASM
  #include "native/juce_SystemStats_wasm.cpp"
- #include "native/juce_PlatformTimer_wasm.cpp"
+ #include "native/juce_PlatformTimer_generic.cpp"
 #endif
 
 #include "files/juce_common_MimeTypes.h"

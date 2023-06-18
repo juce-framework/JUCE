@@ -37,13 +37,13 @@ namespace Steinberg
 namespace juce
 {
 
-/** An interface to allow an AudioProcessor to implement extended VST3-specific
-    functionality.
+/**
+    An interface to allow an AudioProcessor to implement extended VST3-specific functionality.
 
-    To use this class, ensure that your AudioProcessor publicly inherits
-    from VST3ClientExtensions.
+    To use this class, create an object that inherits from it, implement the methods, then return
+    a pointer to the object in your AudioProcessor::getVST3ClientExtensions() method.
 
-    @see VSTCallbackHandler
+    @see AudioProcessor, AAXClientExtensions, VST2ClientExtensions
 
     @tags{Audio}
 */

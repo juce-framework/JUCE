@@ -28,7 +28,8 @@ namespace juce
 
 class AccessibilityNativeHandle  : public ComBaseClassHelper<IRawElementProviderSimple,
                                                              ComTypes::IRawElementProviderFragment,
-                                                             ComTypes::IRawElementProviderFragmentRoot>
+                                                             ComTypes::IRawElementProviderFragmentRoot,
+                                                             ComTypes::IRawElementProviderHwndOverride>
 {
 public:
     explicit AccessibilityNativeHandle (AccessibilityHandler& handler);
@@ -57,6 +58,8 @@ public:
 
     JUCE_COMRESULT ElementProviderFromPoint (double x, double y, ComTypes::IRawElementProviderFragment** pRetVal) override;
     JUCE_COMRESULT GetFocus (ComTypes::IRawElementProviderFragment** pRetVal) override;
+
+    JUCE_COMRESULT GetOverrideProviderForHwnd (HWND hwnd, IRawElementProviderSimple** pRetVal) override;
 
 private:
     //==============================================================================

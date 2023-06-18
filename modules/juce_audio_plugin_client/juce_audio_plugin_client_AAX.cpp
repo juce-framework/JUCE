@@ -2881,11 +2881,13 @@ namespace AAXClasses
         properties->AddProperty (AAX_eProperty_InputStemFormat,     static_cast<AAX_CPropertyValue> (aaxInputFormat));
         properties->AddProperty (AAX_eProperty_OutputStemFormat,    static_cast<AAX_CPropertyValue> (aaxOutputFormat));
 
+        const auto& extensions = processor.getAAXClientExtensions();
+
         // This value needs to match the RTAS wrapper's Type ID, so that
         // the host knows that the RTAS/AAX plugins are equivalent.
-        const int32 pluginID = processor.getAAXPluginIDForMainBusConfig (fullLayout.getMainInputChannelSet(),
-                                                                         fullLayout.getMainOutputChannelSet(),
-                                                                         false);
+        const auto pluginID = extensions.getPluginIDForMainBusConfig (fullLayout.getMainInputChannelSet(),
+                                                                      fullLayout.getMainOutputChannelSet(),
+                                                                      false);
 
         // The plugin id generated from your AudioProcessor's getAAXPluginIDForMainBusConfig callback
         // it not unique. Please fix your implementation!
@@ -2896,9 +2898,9 @@ namespace AAXClasses
 
        #if ! (JucePlugin_AAXDisableAudioSuite || JucePlugin_EnhancedAudioSuite)
         properties->AddProperty (AAX_eProperty_PlugInID_AudioSuite,
-                                 processor.getAAXPluginIDForMainBusConfig (fullLayout.getMainInputChannelSet(),
-                                                                           fullLayout.getMainOutputChannelSet(),
-                                                                           true));
+                                 extensions.getPluginIDForMainBusConfig (fullLayout.getMainInputChannelSet(),
+                                                                         fullLayout.getMainOutputChannelSet(),
+                                                                         true));
        #endif
 
        #if JucePlugin_AAXDisableMultiMono
@@ -3004,11 +3006,13 @@ namespace AAXClasses
 
         const int numMeters = addAAXMeters (*plugin, descriptor);
 
-       #ifdef JucePlugin_AAXPageTableFile
-        // optional page table setting - define this macro in your project if you want
-        // to set this value - see Avid documentation for details about its format.
-        descriptor.AddResourceInfo (AAX_eResourceType_PageTable, JucePlugin_AAXPageTableFile);
-       #endif
+        const auto& extensions = plugin->getAAXClientExtensions();
+
+        if (const auto searchPath = extensions.getPageFileSearchPath().getFullPathName(); searchPath.isNotEmpty())
+            descriptor.AddResourceInfo (AAX_eResourceType_PageTableDir, searchPath.toRawUTF8());
+
+       if (const auto filename = extensions.getPageFileName(); filename.isNotEmpty())
+            descriptor.AddResourceInfo (AAX_eResourceType_PageTable, filename.toRawUTF8());
 
 #if JucePlugin_EnhancedAudioSuite
         if (isEnhancedAudioSuite)

@@ -103,7 +103,10 @@ private:
 
 //==============================================================================
 UIViewComponent::UIViewComponent() {}
-UIViewComponent::~UIViewComponent() {}
+UIViewComponent::~UIViewComponent()
+{
+    AccessibilityHandler::setNativeChildForComponent (*this, nullptr);
+}
 
 void UIViewComponent::setView (void* view)
 {
@@ -113,6 +116,8 @@ void UIViewComponent::setView (void* view)
 
         if (view != nullptr)
             pimpl.reset (new Pimpl ((UIView*) view, *this));
+
+        AccessibilityHandler::setNativeChildForComponent (*this, getView());
     }
 }
 
@@ -128,5 +133,10 @@ void UIViewComponent::resizeToFitView()
 }
 
 void UIViewComponent::paint (Graphics&) {}
+
+std::unique_ptr<AccessibilityHandler> UIViewComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+}
 
 } // namespace juce

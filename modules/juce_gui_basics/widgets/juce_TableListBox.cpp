@@ -41,7 +41,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        if (auto* tableModel = owner.getModel())
+        if (auto* tableModel = owner.getTableListBoxModel())
         {
             tableModel->paintRowBackground (g, getRow(), getWidth(), getHeight(), isSelected());
 
@@ -80,7 +80,7 @@ public:
 
         updateRowAndSelection (newRow, isNowSelected);
 
-        auto* tableModel = owner.getModel();
+        auto* tableModel = owner.getTableListBoxModel();
 
         if (tableModel != nullptr && getRow() < owner.getNumRows())
         {
@@ -171,7 +171,7 @@ public:
         auto columnId = owner.getHeader().getColumnIdAtX (e.x);
 
         if (columnId != 0)
-            if (auto* m = owner.getModel())
+            if (auto* m = owner.getTableListBoxModel())
                 m->cellClicked (getRow(), columnId, e);
     }
 
@@ -183,7 +183,7 @@ public:
         const auto columnId = owner.getHeader().getColumnIdAtX (e.x);
 
         if (columnId != 0)
-            if (auto* m = owner.getModel())
+            if (auto* m = owner.getTableListBoxModel())
                 m->cellDoubleClicked (getRow(), columnId, e);
     }
 
@@ -192,7 +192,7 @@ public:
         auto columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 
         if (columnId != 0)
-            if (auto* m = owner.getModel())
+            if (auto* m = owner.getTableListBoxModel())
                 return m->getCellTooltip (getRow(), columnId);
 
         return {};
@@ -219,7 +219,7 @@ public:
         return std::make_unique<RowAccessibilityHandler> (*this);
     }
 
-    ListBox& getOwner() const { return owner; }
+    TableListBox& getOwner() const { return owner; }
 
 private:
     //==============================================================================
@@ -247,7 +247,7 @@ private:
 
         AccessibleState getCurrentState() const override
         {
-            if (auto* m = rowComponent.owner.getModel())
+            if (auto* m = rowComponent.owner.getTableListBoxModel())
                 if (rowComponent.getRow() >= m->getNumRows())
                     return AccessibleState().withIgnored();
 
@@ -578,7 +578,7 @@ std::unique_ptr<AccessibilityHandler> TableListBox::createAccessibilityHandler()
 
         int getNumRows() const override
         {
-            if (auto* tableModel = tableListBox.getModel())
+            if (auto* tableModel = tableListBox.getTableListBoxModel())
                 return tableModel->getNumRows();
 
             return 0;

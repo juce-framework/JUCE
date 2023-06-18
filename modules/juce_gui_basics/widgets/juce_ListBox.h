@@ -221,7 +221,7 @@ public:
     void setModel (ListBoxModel* newModel);
 
     /** Returns the current list model. */
-    ListBoxModel* getModel() const noexcept
+    ListBoxModel* getListBoxModel() const noexcept
     {
        #if ! JUCE_DISABLE_ASSERTIONS
         checkModelPtrIsValid();
@@ -611,6 +611,9 @@ public:
     [[deprecated ("This method's bool parameter has changed: see the new method signature.")]]
     void setSelectedRows (const SparseSet<int>&, bool);
    #endif
+
+    [[deprecated ("The name of this function is ambiguous if derived classes supply their own models, use getListBoxModel instead")]]
+    ListBoxModel* getModel() const noexcept  { return getListBoxModel(); }
 
 private:
     //==============================================================================

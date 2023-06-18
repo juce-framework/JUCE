@@ -277,7 +277,8 @@ private:
                     if (handler->getComponent().isOnDesktop())
                         return static_cast<id> (handler->getComponent().getWindowHandle());
 
-                    if (! handler->getChildren().empty())
+                    if (   ! handler->getChildren().empty()
+                        || AccessibilityHandler::getNativeChildForComponent (handler->getComponent()) != nullptr)
                     {
                         if (UIAccessibilityElement* container = getContainer (self))
                             return container;

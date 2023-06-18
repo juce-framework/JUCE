@@ -906,6 +906,25 @@ void Project::updateModuleWarnings()
     updateModuleNotFoundWarning (moduleNotFound);
 }
 
+void Project::updateExporterWarnings()
+{
+    const Identifier deprecatedExporters[] = { "CODEBLOCKS_WINDOWS", "CODEBLOCKS_LINUX" };
+
+    for (const auto exporter : getExporters())
+    {
+        for (const auto& name : deprecatedExporters)
+        {
+            if (exporter.getType() == name)
+            {
+                addProjectMessage (ProjectMessages::Ids::deprecatedExporter, {});
+                return;
+            }
+        }
+    }
+
+    removeProjectMessage (ProjectMessages::Ids::deprecatedExporter);
+}
+
 void Project::updateCppStandardWarning (bool showWarning)
 {
     if (showWarning)
@@ -1139,24 +1158,24 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
     changed();
 }
 
-void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
+void Project::valueTreeChildAddedOrRemoved (ValueTree& parent, ValueTree& child)
 {
-    ignoreUnused (parent);
-
     if (child.getType() == Ids::MODULE)
         updateModuleWarnings();
+    else if (parent.getType() == Ids::EXPORTFORMATS)
+        updateExporterWarnings();
 
     changed();
 }
 
-void Project::valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int index)
+void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
 {
-    ignoreUnused (parent, index);
+    valueTreeChildAddedOrRemoved (parent, child);
+}
 
-    if (child.getType() == Ids::MODULE)
-        updateModuleWarnings();
-
-    changed();
+void Project::valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int)
+{
+    valueTreeChildAddedOrRemoved (parent, child);
 }
 
 void Project::valueTreeChildOrderChanged (ValueTree&, int, int)

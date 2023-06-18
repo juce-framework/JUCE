@@ -93,12 +93,12 @@ public:
 
                         if (isPositiveAndBelow (column->begin, children.size()))
                         {
-                            IRawElementProviderSimple* provider = nullptr;
+                            ComSmartPtr<IRawElementProviderSimple> provider;
 
                             if (auto* child = children[(size_t) column->begin])
                             {
                                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-                                if (child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (&provider)) == S_OK && provider != nullptr)
+                                if (child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress())) == S_OK && provider != nullptr)
                                 {
                                     *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, 1);
                                     LONG index = 0;
