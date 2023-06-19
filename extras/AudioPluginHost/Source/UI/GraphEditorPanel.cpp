@@ -50,7 +50,7 @@
      FileSearchPath paths;
 
      static constexpr auto numJobs = 5;
-     ThreadPool pool { numJobs };
+     ThreadPool pool { ThreadPoolOptions{}.withNumberOfThreads (numJobs) };
 
      void startScan()
      {

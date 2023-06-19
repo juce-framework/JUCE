@@ -363,7 +363,7 @@ private:
     }
 
     //==============================================================================
-    ThreadPool jobPool { 1 };
+    ThreadPool jobPool { ThreadPoolOptions{}.withNumberOfThreads (1) };
 
     //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (LicenseQueryThread)

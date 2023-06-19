@@ -43,6 +43,9 @@ class JUCE_API  Thread
 {
 public:
     //==============================================================================
+    static constexpr size_t osDefaultStackSize { 0 };
+
+    //==============================================================================
     /** The different runtime priorities of non-realtime threads.
 
         @see startThread
@@ -95,7 +98,7 @@ public:
                                 is zero then the default stack size of the OS will
                                 be used.
     */
-    explicit Thread (const String& threadName, size_t threadStackSize = 0);
+    explicit Thread (const String& threadName, size_t threadStackSize = osDefaultStackSize);
 
     /** Destructor.
 

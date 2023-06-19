@@ -317,7 +317,8 @@ private:
     }
 
     //==============================================================================
-    ThreadPool pool           { 3 };
+    ThreadPool pool           { ThreadPoolOptions{}.withThreadName ("Demo thread pool")
+                                                   .withNumberOfThreads (3) };
     TextButton controlButton  { "Thread type" };
     bool isUsingPool = false;
 
