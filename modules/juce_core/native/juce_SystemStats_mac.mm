@@ -351,6 +351,7 @@ int SystemStats::getPageSize()
 
 String SystemStats::getUniqueDeviceID()
 {
+   #if JUCE_MAC
     constexpr mach_port_t port = 0;
 
     const auto dict = IOServiceMatching ("IOPlatformExpertDevice");
@@ -363,6 +364,14 @@ String SystemStats::getUniqueDeviceID()
             if (CFGetTypeID (uuidTypeRef.get()) == CFStringGetTypeID())
                 return String::fromCFString ((CFStringRef) uuidTypeRef.get()).removeCharacters ("-");
     }
+   #elif JUCE_IOS
+    JUCE_AUTORELEASEPOOL
+    {
+        if (UIDevice* device = [UIDevice currentDevice])
+            if (NSUUID* uuid = [device identifierForVendor])
+                return nsStringToJuce ([uuid UUIDString]);
+    }
+   #endif
 
     return "";
 }

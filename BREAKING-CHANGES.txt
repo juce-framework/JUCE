@@ -6,6 +6,30 @@ develop
 
 Change
 ------
+Unique device IDs on iOS now use the OS provided 'identifierForVendor'.
+OnlineUnlockStatus has been updated to handle the iOS edge-case where a device
+ID query might return an empty String.
+
+Possible Issues
+---------------
+The License checks using InAppPurchases, getLocalMachineIDs(), and
+getUniqueDeviceID() may return an empty String if iOS 'is not ready'. This can
+occur for example if the device has restarted but has not yet been unlocked.
+
+Workaround
+----------
+InAppPurchase has been updated to handle this and propagate the error
+accordingly. The relevant methods have been updated to return a Result object
+that can be queried for additional information on failure.
+
+Rationale
+---------
+Apple have introduced restrictions on device identification rendering our
+previous methods unsuitable.
+
+
+Change
+------
 AudioProcessor::getAAXPluginIDForMainBusConfig() has been deprecated.
 
 Possible Issues
