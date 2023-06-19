@@ -417,7 +417,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
     //==============================================================================
     tresult PLUGIN_API requestOpenEditor ([[maybe_unused]] FIDString name) override
     {
-        jassertfalse;
+        // This request cannot currently be surfaced in the JUCE public API
         return kResultFalse;
     }
 
