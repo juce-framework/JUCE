@@ -1319,6 +1319,11 @@ public:
             owner.addObject (v);
         }
 
+        bool shouldUseHardenedRuntime() const
+        {
+            return type != VST3Helper && type != LV2Helper && owner.isHardenedRuntimeEnabled();
+        }
+
         //==============================================================================
         String getTargetAttributes() const
         {
@@ -1341,7 +1346,7 @@ public:
                                                                   || owner.getProject().isAUPluginHost());
             capabilities["Push"]                  = owner.isPushNotificationsEnabled();
             capabilities["Sandbox"]               = type == Target::AudioUnitv3PlugIn || owner.isAppSandboxEnabled();
-            capabilities["HardenedRuntime"]       = owner.isHardenedRuntimeEnabled();
+            capabilities["HardenedRuntime"]       = shouldUseHardenedRuntime();
 
             if (owner.iOS && owner.isiCloudPermissionsEnabled())
                 capabilities["com.apple.iCloud"] = true;
@@ -1397,7 +1402,7 @@ public:
             if (owner.isPushNotificationsEnabled()
              || owner.isAppGroupsEnabled()
              || owner.isAppSandboxEnabled()
-             || owner.isHardenedRuntimeEnabled()
+             || shouldUseHardenedRuntime()
              || owner.isNetworkingMulticastEnabled()
              || (owner.isiOS() && owner.isiCloudPermissionsEnabled())
              || (owner.isiOS() && owner.getProject().isAUPluginHost()))
@@ -1687,7 +1692,7 @@ public:
 
             s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (adjustedConfigBuildDir));
 
-            if (owner.isHardenedRuntimeEnabled())
+            if (shouldUseHardenedRuntime())
                 s.set ("ENABLE_HARDENED_RUNTIME", "YES");
 
             String gccVersion ("com.apple.compilers.llvm.clang.1_0");
