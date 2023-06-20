@@ -351,32 +351,29 @@ int SystemStats::getPageSize()
 
 String SystemStats::getUniqueDeviceID()
 {
-    static const auto deviceId = []
+   #if JUCE_MAC
+    constexpr mach_port_t port = 0;
+
+    const auto dict = IOServiceMatching ("IOPlatformExpertDevice");
+
+    if (const auto service = IOServiceGetMatchingService (port, dict); service != IO_OBJECT_NULL)
     {
-        ChildProcess proc;
+        const ScopeGuard scope { [&] { IOObjectRelease (service); } };
 
-        if (proc.start ("ioreg -rd1 -c IOPlatformExpertDevice", ChildProcess::wantStdOut))
-        {
-            constexpr const char key[] = "\"IOPlatformUUID\"";
-            constexpr const auto keyLen = (int) sizeof (key);
+        if (const CFUniquePtr<CFTypeRef> uuidTypeRef { IORegistryEntryCreateCFProperty (service, CFSTR ("IOPlatformUUID"), kCFAllocatorDefault, 0) })
+            if (CFGetTypeID (uuidTypeRef.get()) == CFStringGetTypeID())
+                return String::fromCFString ((CFStringRef) uuidTypeRef.get()).removeCharacters ("-");
+    }
+   #elif JUCE_IOS
+    JUCE_AUTORELEASEPOOL
+    {
+        if (UIDevice* device = [UIDevice currentDevice])
+            if (NSUUID* uuid = [device identifierForVendor])
+                return nsStringToJuce ([uuid UUIDString]);
+    }
+   #endif
 
-            auto output = proc.readAllProcessOutput();
-            auto index = output.indexOf (key);
-
-            if (index >= 0)
-            {
-                auto start = output.indexOf (index + keyLen, "\"");
-                auto end = output.indexOf (start + 1, "\"");
-                return output.substring (start + 1, end).replace("-", "");
-            }
-        }
-
-        return String();
-    }();
-
-    // Please tell someone at JUCE if this occurs
-    jassert (deviceId.isNotEmpty());
-    return deviceId;
+    return "";
 }
 
 #if JUCE_MAC

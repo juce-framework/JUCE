@@ -553,7 +553,7 @@ private:
 
         if (numThreads > 0)
         {
-            pool.reset (new ThreadPool (numThreads));
+            pool.reset (new ThreadPool (ThreadPoolOptions{}.withNumberOfThreads (numThreads)));
 
             for (int i = numThreads; --i >= 0;)
                 pool->addJob (new ScanJob (*this), true);

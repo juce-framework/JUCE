@@ -358,39 +358,45 @@ String OnlineUnlockStatus::getUserEmail() const
     return status[userNameProp].toString();
 }
 
-bool OnlineUnlockStatus::applyKeyFile (String keyFileContent)
+Result OnlineUnlockStatus::applyKeyFile (const String& keyFileContent)
 {
     KeyFileUtils::KeyFileData data;
     data = KeyFileUtils::getDataFromKeyFile (KeyFileUtils::getXmlFromKeyFile (keyFileContent, getPublicKey()));
 
-    if (data.licensee.isNotEmpty() && data.email.isNotEmpty() && doesProductIDMatch (data.appID))
+    if (data.licensee.isEmpty() || data.email.isEmpty())
+        return Result::fail (LicenseResult::badCredentials);
+
+    if (! doesProductIDMatch (data.appID))
+        return Result::fail (LicenseResult::badProductID);
+
+    if (MachineIDUtilities::getUniqueMachineID().isEmpty())
+        return Result::fail (LicenseResult::notReady);
+
+    setUserEmail (data.email);
+    status.setProperty (keyfileDataProp, keyFileContent, nullptr);
+    status.removeProperty (data.keyFileExpires ? expiryTimeProp : unlockedProp, nullptr);
+
+    var actualResult (0), dummyResult (1.0);
+    var v (machineNumberAllowed (data.machineNumbers, getLocalMachineIDs()));
+    actualResult.swapWith (v);
+    v = machineNumberAllowed (StringArray ("01"), getLocalMachineIDs());
+    dummyResult.swapWith (v);
+    jassert (! dummyResult);
+
+    if (data.keyFileExpires)
     {
-        setUserEmail (data.email);
-        status.setProperty (keyfileDataProp, keyFileContent, nullptr);
-        status.removeProperty (data.keyFileExpires ? expiryTimeProp : unlockedProp, nullptr);
-
-        var actualResult (0), dummyResult (1.0);
-        var v (machineNumberAllowed (data.machineNumbers, getLocalMachineIDs()));
-        actualResult.swapWith (v);
-        v = machineNumberAllowed (StringArray ("01"), getLocalMachineIDs());
-        dummyResult.swapWith (v);
-        jassert (! dummyResult);
-
-        if (data.keyFileExpires)
-        {
-            if ((! dummyResult) && actualResult)
-                status.setProperty (expiryTimeProp, data.expiryTime.toMilliseconds(), nullptr);
-
-            return getExpiryTime().toMilliseconds() > 0;
-        }
-
         if ((! dummyResult) && actualResult)
-            status.setProperty (unlockedProp, actualResult, nullptr);
+            status.setProperty (expiryTimeProp, data.expiryTime.toMilliseconds(), nullptr);
 
-        return isUnlocked();
+        return getExpiryTime().toMilliseconds() > 0 ? Result::ok()
+                                                    : Result::fail (LicenseResult::licenseExpired);
     }
 
-    return false;
+    if ((! dummyResult) && actualResult)
+        status.setProperty (unlockedProp, actualResult, nullptr);
+
+    return isUnlocked() ? Result::ok()
+                        : Result::fail (LicenseResult::unlockFailed);
 }
 
 static bool areMajorWebsitesAvailable()
@@ -412,14 +418,22 @@ OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::handleXmlReply (XmlElement 
 {
     UnlockResult r;
 
-    if (auto keyNode = xml.getChildByName ("KEY"))
+    r.succeeded = false;
+
+    if (const auto keyNode = xml.getChildByName ("KEY"))
     {
-        const String keyText (keyNode->getAllSubText().trim());
-        r.succeeded = keyText.length() > 10 && applyKeyFile (keyText);
-    }
-    else
-    {
-        r.succeeded = false;
+        if (const auto keyText = keyNode->getAllSubText().trim(); keyText.length() > 10)
+        {
+            const auto keyFileResult = applyKeyFile (keyText);
+
+            if (keyFileResult.failed())
+            {
+                r.errorMessage = keyFileResult.getErrorMessage();
+                return r;
+            }
+
+            r.succeeded = true;
+        }
     }
 
     if (xml.hasTagName ("MESSAGE"))

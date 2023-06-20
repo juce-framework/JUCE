@@ -80,7 +80,7 @@ using DisableIfSameOrDerived = std::enable_if_t<! std::is_base_of_v<A, std::remo
 
 /** Copies an object, sets one of the copy's members to the specified value, and then returns the copy. */
 template <typename Object, typename OtherObject, typename Member, typename Other>
-Object withMember (Object copy, Member OtherObject::* member, Other&& value)
+[[nodiscard]] Object withMember (Object copy, Member OtherObject::* member, Other&& value)
 {
     copy.*member = std::forward<Other> (value);
     return copy;
