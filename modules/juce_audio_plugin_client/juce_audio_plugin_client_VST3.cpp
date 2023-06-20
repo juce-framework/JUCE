@@ -3186,10 +3186,10 @@ public:
 
         if (type == Vst::kAudio)
         {
-            const auto numInputBuses  = getNumAudioBuses (true);
-            const auto numOutputBuses = getNumAudioBuses (false);
+            const auto numPublicInputBuses  = getNumAudioBuses (true);
+            const auto numPublicOutputBuses = getNumAudioBuses (false);
 
-            if (! isPositiveAndBelow (index, dir == Vst::kInput ? numInputBuses : numOutputBuses))
+            if (! isPositiveAndBelow (index, dir == Vst::kInput ? numPublicInputBuses : numPublicOutputBuses))
                 return kResultFalse;
 
             // The host is allowed to enable/disable buses as it sees fit, so the plugin needs to be
@@ -3212,11 +3212,17 @@ public:
 
             AudioProcessor::BusesLayout desiredLayout;
 
-            for (auto i = 0; i < numInputBuses; ++i)
+            for (auto i = 0; i < numPublicInputBuses; ++i)
                 desiredLayout.inputBuses.add (bufferMapper.getRequestedLayoutForInputBus ((size_t) i));
 
-            for (auto i = 0; i < numOutputBuses; ++i)
+            while (desiredLayout.inputBuses.size() < pluginInstance->getBusCount (true))
+                desiredLayout.inputBuses.add (AudioChannelSet::disabled());
+
+            for (auto i = 0; i < numPublicOutputBuses; ++i)
                 desiredLayout.outputBuses.add (bufferMapper.getRequestedLayoutForOutputBus ((size_t) i));
+
+            while (desiredLayout.outputBuses.size() < pluginInstance->getBusCount (false))
+                desiredLayout.outputBuses.add (AudioChannelSet::disabled());
 
             const auto prev = pluginInstance->getBusesLayout();
 
