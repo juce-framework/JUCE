@@ -3212,17 +3212,20 @@ public:
 
             AudioProcessor::BusesLayout desiredLayout;
 
-            for (auto i = 0; i < numPublicInputBuses; ++i)
-                desiredLayout.inputBuses.add (bufferMapper.getRequestedLayoutForInputBus ((size_t) i));
+            for (const auto isInput : { true, false })
+            {
+                const auto numPublicBuses = isInput ? numPublicInputBuses : numPublicOutputBuses;
+                auto& layoutBuses = isInput ? desiredLayout.inputBuses : desiredLayout.outputBuses;
 
-            while (desiredLayout.inputBuses.size() < pluginInstance->getBusCount (true))
-                desiredLayout.inputBuses.add (AudioChannelSet::disabled());
+                for (auto i = 0; i < numPublicBuses; ++i)
+                {
+                    layoutBuses.add (isInput ? bufferMapper.getRequestedLayoutForInputBus ((size_t) i)
+                                             : bufferMapper.getRequestedLayoutForOutputBus ((size_t) i));
+                }
 
-            for (auto i = 0; i < numPublicOutputBuses; ++i)
-                desiredLayout.outputBuses.add (bufferMapper.getRequestedLayoutForOutputBus ((size_t) i));
-
-            while (desiredLayout.outputBuses.size() < pluginInstance->getBusCount (false))
-                desiredLayout.outputBuses.add (AudioChannelSet::disabled());
+                while (layoutBuses.size() < pluginInstance->getBusCount (isInput))
+                    layoutBuses.add (AudioChannelSet::disabled());
+            }
 
             const auto prev = pluginInstance->getBusesLayout();
 
