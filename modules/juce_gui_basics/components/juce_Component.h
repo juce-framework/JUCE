@@ -2128,13 +2128,14 @@ public:
         The callback is an optional object which will receive a callback when the modal
         component loses its modal status, either by being hidden or when exitModalState()
         is called. If you pass an object in here, the system will take care of deleting it
-        later, after making the callback
+        later, after making the callback.
 
         If deleteWhenDismissed is true, then when it is dismissed, the component will be
         deleted and then the callback will be called. (This will safely handle the situation
         where the component is deleted before its exitModalState() method is called).
 
-        @see exitModalState, runModalLoop, ModalComponentManager::attachCallback
+        @see exitModalState, runModalLoop, ModalComponentManager::attachCallback,
+             ModalCallbackFunction
     */
     void enterModalState (bool takeKeyboardFocus = true,
                           ModalComponentManager::Callback* callback = nullptr,

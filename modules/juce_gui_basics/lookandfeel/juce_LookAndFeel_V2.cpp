@@ -615,6 +615,11 @@ bool LookAndFeel_V2::isProgressBarOpaque (ProgressBar& progressBar)
     return progressBar.findColour (ProgressBar::backgroundColourId).isOpaque();
 }
 
+ProgressBar::Style LookAndFeel_V2::getDefaultProgressBarStyle (const ProgressBar&)
+{
+    return ProgressBar::Style::linear;
+}
+
 bool LookAndFeel_V2::areScrollbarButtonsVisible()
 {
     return true;

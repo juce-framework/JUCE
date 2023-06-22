@@ -228,6 +228,9 @@ public:
         addAndMakeVisible (closeWindowsButton);
         closeWindowsButton.onClick = [this] { closeAllWindows(); };
 
+        addAndMakeVisible (alertWindowResult);
+        alertWindowResult.setJustificationType (Justification::centred);
+
         setSize (250, 250);
     }
 
@@ -253,14 +256,27 @@ public:
 
     void resized() override
     {
-        Rectangle<int> buttonSize (0, 0, 108, 28);
+        FlexBox flexBox;
+        flexBox.flexDirection = FlexBox::Direction::column;
+        flexBox.justifyContent = FlexBox::JustifyContent::center;
 
-        Rectangle<int> area ((getWidth()  / 2) - (buttonSize.getWidth() / 2),
-                             (getHeight() / 2) -  buttonSize.getHeight(),
-                             buttonSize.getWidth(), buttonSize.getHeight());
+        constexpr auto buttonWidth = 108.0f;
+        constexpr auto componentHeight = 24.0f;
+        constexpr auto gap = 4.0f;
 
-        showWindowsButton .setBounds (area.reduced (2));
-        closeWindowsButton.setBounds (area.translated (0, buttonSize.getHeight()).reduced (2));
+        flexBox.items.add (FlexItem { showWindowsButton }.withHeight (componentHeight)
+                                                         .withMinWidth (buttonWidth)
+                                                         .withAlignSelf (FlexItem::AlignSelf::center));
+
+        flexBox.items.add (FlexItem{}.withHeight (gap));
+        flexBox.items.add (FlexItem { closeWindowsButton }.withHeight (componentHeight)
+                                                          .withMinWidth (buttonWidth)
+                                                          .withAlignSelf (FlexItem::AlignSelf::center));
+
+        flexBox.items.add (FlexItem{}.withHeight (gap));
+        flexBox.items.add (FlexItem { alertWindowResult }.withHeight (componentHeight));
+
+        flexBox.performLayout (getLocalBounds());
     }
 
 private:
@@ -272,6 +288,7 @@ private:
 
     TextButton showWindowsButton   { "Show Windows" },
                closeWindowsButton  { "Close Windows" };
+    Label alertWindowResult { "Alert Window result" };
 
     void showAllWindows()
     {
@@ -280,6 +297,7 @@ private:
         showDocumentWindow (false);
         showDocumentWindow (true);
         showTransparentWindow();
+        showAlertWindow();
         showDialogWindow();
     }
 
@@ -289,6 +307,12 @@ private:
             window.deleteAndZero();
 
         windows.clear();
+        alertWindowResult.setText ("", dontSendNotification);
+    }
+
+    static auto getDisplayArea()
+    {
+        return Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea.reduced (20);
     }
 
     void showDialogWindow()
@@ -333,8 +357,7 @@ private:
                                        | RectanglePlacement::yTop
                                        | RectanglePlacement::doNotResize);
 
-        auto result = placement.appliedTo (area, Desktop::getInstance().getDisplays()
-                                                         .getPrimaryDisplay()->userArea.reduced (20));
+        auto result = placement.appliedTo (area, getDisplayArea());
         dw->setBounds (result);
 
         dw->setResizable (true, ! native);
@@ -354,12 +377,113 @@ private:
                                        | RectanglePlacement::yBottom
                                        | RectanglePlacement::doNotResize);
 
-        auto result = placement.appliedTo (area, Desktop::getInstance().getDisplays()
-                                                         .getPrimaryDisplay()->userArea.reduced (20));
+        auto result = placement.appliedTo (area, getDisplayArea());
         balls->setBounds (result);
 
         balls->setVisible (true);
     }
+
+    void showAlertWindow()
+    {
+        auto* alertWindow = new AlertWindow ("Alert Window",
+                                             "For more complex dialogs, you can easily add components to an AlertWindow, such as...",
+                                             MessageBoxIconType::InfoIcon);
+        windows.add (alertWindow);
+
+        alertWindow->addTextBlock ("Text block");
+        alertWindow->addComboBox ("Combo box", {"Combo box", "Item 2", "Item 3"});
+        alertWindow->addTextEditor ("Text editor", "Text editor");
+        alertWindow->addTextEditor ("Password", "password", "including for passwords", true);
+        alertWindowCustomComponent.emplace();
+        alertWindow->addCustomComponent (&(*alertWindowCustomComponent));
+        alertWindow->addTextBlock ("Progress bar");
+        alertWindow->addProgressBarComponent (alertWindowCustomComponent->value, ProgressBar::Style::linear);
+        alertWindow->addProgressBarComponent (alertWindowCustomComponent->value, ProgressBar::Style::circular);
+        alertWindow->addTextBlock ("Press any button, or the escape key, to close the window");
+
+        enum AlertWindowResult
+        {
+            noButtonPressed,
+            button1Pressed,
+            button2Pressed
+        };
+
+        alertWindow->addButton ("Button 1", AlertWindowResult::button1Pressed);
+        alertWindow->addButton ("Button 2", AlertWindowResult::button2Pressed);
+
+        RectanglePlacement placement { RectanglePlacement::yMid
+                                       | RectanglePlacement::xLeft
+                                       | RectanglePlacement::doNotResize };
+
+        alertWindow->setBounds (placement.appliedTo (alertWindow->getBounds(), getDisplayArea()));
+
+        alertWindowResult.setText ("", dontSendNotification);
+        alertWindow->enterModalState (false, ModalCallbackFunction::create ([ref = SafePointer { this }] (int result)
+        {
+            if (ref == nullptr)
+                return;
+
+            const auto text = [&]
+            {
+                switch (result)
+                {
+                    case noButtonPressed:
+                        return "Dismissed the Alert Window without pressing a button";
+                    case button1Pressed:
+                        return "Dismissed the Alert Window using Button 1";
+                    case button2Pressed:
+                        return "Dismissed the Alert Window using Button 2";
+                }
+
+                return "Unhandled event when dismissing the Alert Window";
+            }();
+
+            ref->alertWindowResult.setText (text, dontSendNotification);
+        }), true);
+    }
+
+    class AlertWindowCustomComponent : public Component,
+                                       private Slider::Listener
+    {
+    public:
+        AlertWindowCustomComponent()
+        {
+            slider.setRange (0.0, 1.0);
+            slider.setValue (0.5, NotificationType::dontSendNotification);
+            slider.addListener (this);
+
+            addAndMakeVisible (label);
+            addAndMakeVisible (slider);
+
+            setSize (200, 50);
+        }
+
+        ~AlertWindowCustomComponent() override
+        {
+            slider.removeListener (this);
+        }
+
+        void resized() override
+        {
+            auto bounds =  getLocalBounds();
+            label.setBounds (bounds.removeFromTop (getHeight() / 2));
+            slider.setBounds (bounds);
+        }
+
+        void sliderValueChanged (Slider*) override
+        {
+            value = slider.getValue();
+        }
+
+        double value { -1.0 };
+
+    private:
+        Label label { "Label", "Custom component" };
+        Slider slider { Slider::SliderStyle::LinearHorizontal,
+                        Slider::TextEntryBoxPosition::NoTextBox };
+    };
+
+    std::optional<AlertWindowCustomComponent> alertWindowCustomComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsDemo)
 };

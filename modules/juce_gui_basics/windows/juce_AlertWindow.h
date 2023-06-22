@@ -33,11 +33,11 @@ namespace juce
     some static methods for running these.
 
     For more complex dialogs, an AlertWindow can be created, then it can have some
-    buttons and components added to it, and its runModalLoop() method is then used to
-    show it. The value returned by runModalLoop() shows which button the
-    user pressed to dismiss the box.
+    buttons and components added to it, and its enterModalState() method is used to
+    show it. The value returned to the ModalComponentManager::Callback shows
+    which button the user pressed to dismiss the box.
 
-    @see ThreadWithProgressWindow
+    @see ThreadWithProgressWindow, Component::enterModalState
 
     @tags{GUI}
 */
@@ -188,8 +188,13 @@ public:
         @param progressValue    a variable that will be repeatedly checked while the
                                 dialog box is visible, to see how far the process has
                                 got. The value should be in the range 0 to 1.0
+        @param style            determines the style the ProgressBar should adopt.
+                                By default this use a style automatically chosen by
+                                the LookAndFeel, but you can force a particular style
+                                by passing a non-optional value.
+        @see ProgressBar::setStyle
     */
-    void addProgressBarComponent (double& progressValue);
+    void addProgressBarComponent (double& progressValue, std::optional<ProgressBar::Style> style = std::nullopt);
 
     //==============================================================================
     /** Adds a user-defined component to the dialog box.

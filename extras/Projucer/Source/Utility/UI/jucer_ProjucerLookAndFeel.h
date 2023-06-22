@@ -74,7 +74,7 @@ public:
     void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
                                    Colour backgroundColour, bool isItemOpen, bool isMouseOver) override;
 
-    void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String& textToShow) override;
+    ProgressBar::Style getDefaultProgressBarStyle (const ProgressBar&) override;
 
     //==============================================================================
     static Path getArrowPath (Rectangle<float> arrowZone, const int direction,

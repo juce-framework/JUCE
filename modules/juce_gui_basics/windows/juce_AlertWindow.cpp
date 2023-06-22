@@ -294,9 +294,9 @@ void AlertWindow::addTextBlock (const String& textBlock)
 }
 
 //==============================================================================
-void AlertWindow::addProgressBarComponent (double& progressValue)
+void AlertWindow::addProgressBarComponent (double& progressValue, std::optional<ProgressBar::Style> style)
 {
-    auto* pb = new ProgressBar (progressValue);
+    auto* pb = new ProgressBar (progressValue, style);
     progressBars.add (pb);
     allComps.add (pb);
     addAndMakeVisible (pb);
