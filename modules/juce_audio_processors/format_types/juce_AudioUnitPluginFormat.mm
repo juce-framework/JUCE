@@ -1290,8 +1290,6 @@ public:
 
             setRateAndBufferSizeDetails ((double) newSampleRate, estimatedSamplesPerBlock);
 
-            updateLatency();
-
             zerostruct (timeStamp);
             timeStamp.mSampleTime = 0;
             timeStamp.mHostTime = mach_absolute_time();
@@ -1306,19 +1304,23 @@ public:
             if (! syncBusLayouts (getBusesLayout(), false, ignore))
                 return;
 
-            prepared = (AudioUnitInitialize (audioUnit) == noErr);
-
-            if (prepared)
+            prepared = [&]
             {
+                if (AudioUnitInitialize (audioUnit) != noErr)
+                    return false;
+
                 if (! haveParameterList)
                     refreshParameterList();
 
                 if (! syncBusLayouts (getBusesLayout(), true, ignore))
                 {
-                    prepared = false;
                     AudioUnitUninitialize (audioUnit);
+                    return false;
                 }
-            }
+
+                updateLatency();
+                return true;
+            }();
 
             inMapping .setUpMapping (audioUnit, true);
             outMapping.setUpMapping (audioUnit, false);
