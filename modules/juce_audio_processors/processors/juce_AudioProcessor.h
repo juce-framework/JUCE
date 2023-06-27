@@ -1458,15 +1458,6 @@ public:
    #endif
 
 private:
-    /** This is deprecated. Instead, create an AAXClientExtensions object,
-        implement getPluginIDForMainBusConfig() and return the object from
-        getAAXClientExtensions().
-    */
-    [[deprecated ("Override AAXClientExtensions::getPluginIDForMainBusConfig() instead")]]
-    virtual int32 getAAXPluginIDForMainBusConfig (const AudioChannelSet&,
-                                                  const AudioChannelSet&,
-                                                  const bool) const { return {}; }
-
     //==============================================================================
     struct InOutChannelPair
     {
