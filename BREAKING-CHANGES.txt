@@ -6,6 +6,53 @@ develop
 
 Change
 ------
+JUCE module compilation files with a platform suffix are now checked case
+insensitively for CMake builds.
+
+Possible Issues
+---------------
+If a JUCE module compilation file ends in a specific platform suffix but does
+not match the case for the string previously checked by the CMake
+implementation, it may have compiled for all platforms. Now, it will only
+compile for the platform specified by the suffix.
+
+Workaround
+----------
+In most cases this was probably a bug, in other cases rename the file to remove
+the platform suffix.
+
+Rationale
+---------
+This change improves consistency between the Projucer and CMake integrations.
+
+
+Change
+------
+An undocumented feature that allowed JUCE module compilation files to compile
+for a specific platform or subset of platforms by declaring the platform name
+followed by an underscore, was removed.
+
+Possible Issues
+---------------
+If a JUCE module compilation file contains a matching platform suffix followed
+by an underscore and is loaded by the Projucer it will no longer compile for
+just that platform.
+
+Workaround
+----------
+Use the suffix of the name only. If the undocumented feature was used to select
+multiple platforms, make multiple separate files for each of the required
+platforms.
+
+Rationale
+---------
+This change improves consistency between the Projucer and CMake integrations.
+Given the functionality was undocumented, the ease of a workaround, and the
+added complexity required for CMake support, the functionality was removed.
+
+
+Change
+------
 Unique device IDs on iOS now use the OS provided 'identifierForVendor'.
 OnlineUnlockStatus has been updated to handle the iOS edge-case where a device
 ID query might return an empty String.
