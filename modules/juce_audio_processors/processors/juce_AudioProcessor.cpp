@@ -1205,7 +1205,7 @@ void AudioProcessor::Bus::updateChannelCount() noexcept
 void AudioProcessor::BusesProperties::addBus (bool isInput, const String& name,
                                               const AudioChannelSet& dfltLayout, bool isActivatedByDefault)
 {
-    jassert (dfltLayout.size() != 0);
+    jassert (! dfltLayout.isDisabled());
 
     BusProperties props;
 

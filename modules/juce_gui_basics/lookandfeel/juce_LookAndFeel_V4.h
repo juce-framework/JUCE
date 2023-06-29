@@ -140,8 +140,9 @@ public:
     Font getAlertWindowFont() override;
 
     //==============================================================================
-    void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String& textToShow) override;
+    void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String&) override;
     bool isProgressBarOpaque (ProgressBar&) override    { return false; }
+    ProgressBar::Style getDefaultProgressBarStyle (const ProgressBar&) override;
 
     //==============================================================================
     int getDefaultScrollbarWidth() override;
@@ -242,9 +243,10 @@ public:
 
 private:
     //==============================================================================
-    void drawLinearProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String&);
-    void drawCircularProgressBar (Graphics&, ProgressBar&, const String&);
+    static void drawLinearProgressBar (Graphics&, const ProgressBar&, int, int, double, const String&);
+    static void drawCircularProgressBar (Graphics&, const ProgressBar&, const String&);
 
+    //==============================================================================
     int getPropertyComponentIndent (PropertyComponent&);
 
     //==============================================================================

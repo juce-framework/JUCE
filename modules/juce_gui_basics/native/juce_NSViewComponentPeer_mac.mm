@@ -2119,7 +2119,6 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
                     layer.framebufferOnly = NO;
                     layer.pixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
                     layer.opaque = getOwner (self)->getComponent().isOpaque();
-                    layer.autoresizingMask = kCALayerHeightSizable | kCALayerWidthSizable;
                     layer.needsDisplayOnBoundsChange = YES;
                     layer.drawsAsynchronously = YES;
                     layer.delegate = owner->layerDelegate.get();

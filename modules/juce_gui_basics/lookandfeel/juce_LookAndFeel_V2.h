@@ -97,6 +97,7 @@ public:
     void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String& textToShow) override;
     void drawSpinningWaitAnimation (Graphics&, const Colour& colour, int x, int y, int w, int h) override;
     bool isProgressBarOpaque (ProgressBar&) override;
+    ProgressBar::Style getDefaultProgressBarStyle (const ProgressBar&) override;
 
     //==============================================================================
     bool areScrollbarButtonsVisible() override;

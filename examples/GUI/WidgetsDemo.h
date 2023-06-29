@@ -461,7 +461,8 @@ private:
 
 
 //==============================================================================
-struct MiscPage   : public Component
+struct MiscPage   : public Component,
+                    private Timer
 {
     MiscPage()
     {
@@ -482,6 +483,21 @@ struct MiscPage   : public Component
             comboBox.addItem ("combo box item " + String (i), i);
 
         comboBox.setSelectedId (1);
+
+        addAndMakeVisible (linearProgressBar);
+        linearProgressBar.setStyle (ProgressBar::Style::linear);
+        linearProgressBar.setBounds (10, 115, 200, 24);
+
+        addAndMakeVisible (circularProgressBar);
+        circularProgressBar.setStyle (ProgressBar::Style::circular);
+        circularProgressBar.setBounds (10, 145, 200, 100);
+
+        startTimerHz (10);
+    }
+
+    ~MiscPage() override
+    {
+        stopTimer();
     }
 
     void lookAndFeelChanged() override
@@ -490,10 +506,37 @@ struct MiscPage   : public Component
         textEditor2.applyFontToAllText (textEditor2.getFont());
     }
 
+    void timerCallback() override
+    {
+        constexpr auto minValue = -0.2;
+        constexpr auto maxValue = 1.2;
+        constexpr auto maxIncrement = 0.05;
+
+        if (progress >= maxValue)
+            progress = minValue;
+        else
+            progress += Random::getSystemRandom().nextDouble() * maxIncrement;
+
+        if (isPositiveAndNotGreaterThan (progress, 1.0))
+        {
+            linearProgressBar.setPercentageDisplay (true);
+            circularProgressBar.setPercentageDisplay (true);
+        }
+        else
+        {
+            linearProgressBar.setTextToDisplay ("Linear progress bar");
+            circularProgressBar.setTextToDisplay ("Circular progress bar");
+        }
+    }
+
     TextEditor textEditor1,
                textEditor2  { "Password", (juce_wchar) 0x2022 };
 
     ComboBox comboBox  { "Combo" };
+
+    double progress { 0.0 };
+    ProgressBar linearProgressBar { progress };
+    ProgressBar circularProgressBar { progress };
 };
 
 //==============================================================================

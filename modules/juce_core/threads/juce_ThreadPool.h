@@ -200,13 +200,15 @@ struct ThreadPoolOptions
 class JUCE_API  ThreadPool
 {
 public:
+    using Options = ThreadPoolOptions;
+
     //==============================================================================
     /** Creates a thread pool based on the provided options.
         Once you've created a pool, you can give it some jobs by calling addJob().
 
         @see ThreadPool::ThreadPoolOptions
     */
-    explicit ThreadPool (const ThreadPoolOptions& options);
+    explicit ThreadPool (const Options& options);
 
     /** Creates a thread pool based using the default arguments provided by
         ThreadPoolOptions.
@@ -215,7 +217,7 @@ public:
 
         @see ThreadPoolOptions
     */
-    ThreadPool() : ThreadPool { ThreadPoolOptions{} } {}
+    ThreadPool() : ThreadPool { Options{} } {}
 
     /** Creates a thread pool.
         Once you've created a pool, you can give it some jobs by calling addJob().

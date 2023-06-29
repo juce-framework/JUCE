@@ -467,7 +467,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
     //==============================================================================
     tresult PLUGIN_API requestOpenEditor ([[maybe_unused]] FIDString name) override
     {
-        jassertfalse;
+        // This request cannot currently be surfaced in the JUCE public API
         return kResultFalse;
     }
 
@@ -2813,9 +2813,8 @@ public:
 
         // not much we can do to check the layout while the audio processor is running
         // Let's at least check if it is a VST3 compatible layout
-        for (int dir = 0; dir < 2; ++dir)
+        for (const auto isInput : { true, false })
         {
-            bool isInput = (dir == 0);
             auto n = getBusCount (isInput);
 
             for (int i = 0; i < n; ++i)
@@ -2828,9 +2827,8 @@ public:
 
     bool syncBusLayouts (const BusesLayout& layouts) const
     {
-        for (int dir = 0; dir < 2; ++dir)
+        for (const auto isInput : { true, false })
         {
-            bool isInput = (dir == 0);
             auto n = getBusCount (isInput);
             const Vst::BusDirection vstDir = (isInput ? Vst::kInput : Vst::kOutput);
 
@@ -3496,9 +3494,8 @@ private:
         VSTComSmartPtr<Vst::IAudioProcessor> processor;
         processor.loadFrom (component.get());
 
-        for (int dirIdx = 0; dirIdx < 2; ++dirIdx)
+        for (const auto isInput : { true, false })
         {
-            const bool isInput = (dirIdx == 0);
             const Vst::BusDirection dir = (isInput ? Vst::kInput : Vst::kOutput);
             const int numBuses = component->getBusCount (Vst::kAudio, dir);
 

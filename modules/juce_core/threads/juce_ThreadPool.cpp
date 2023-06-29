@@ -25,7 +25,7 @@ namespace juce
 
 struct ThreadPool::ThreadPoolThread  : public Thread
 {
-    ThreadPoolThread (ThreadPool& p, const ThreadPoolOptions& options)
+    ThreadPoolThread (ThreadPool& p, const Options& options)
        : Thread { options.threadName, options.threadStackSizeBytes },
          pool { p }
     {
@@ -94,7 +94,7 @@ ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 }
 
 //==============================================================================
-ThreadPool::ThreadPool (const ThreadPoolOptions& options)
+ThreadPool::ThreadPool (const Options& options)
 {
     // not much point having a pool without any threads!
     jassert (options.numberOfThreads > 0);
@@ -109,9 +109,9 @@ ThreadPool::ThreadPool (const ThreadPoolOptions& options)
 ThreadPool::ThreadPool (int numberOfThreads,
                         size_t threadStackSizeBytes,
                         Thread::Priority desiredThreadPriority)
-    : ThreadPool { ThreadPoolOptions{}.withNumberOfThreads (numberOfThreads)
-                                      .withThreadStackSizeBytes (threadStackSizeBytes)
-                                      .withDesiredThreadPriority (desiredThreadPriority) }
+    : ThreadPool { Options{}.withNumberOfThreads (numberOfThreads)
+                            .withThreadStackSizeBytes (threadStackSizeBytes)
+                            .withDesiredThreadPriority (desiredThreadPriority) }
 {
 }
 
