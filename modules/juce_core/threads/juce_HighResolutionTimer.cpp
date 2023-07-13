@@ -41,6 +41,8 @@ public:
             if (timer.getIntervalMs() > 0)
                 timer.cancelTimer();
 
+            jassert (timer.getIntervalMs() == 0);
+
             if (newIntervalMs > 0)
                 timer.startTimer (jmax (0, newIntervalMs));
 
@@ -64,26 +66,26 @@ public:
     }
 
 private:
-    void onTimerExpired (int numberOfExpirations) final
+    void onTimerExpired() final
     {
         callbackThreadId.store (std::this_thread::get_id());
 
-        std::scoped_lock lock { callbackMutex };
-
-        shouldCancelCallbacks.store (! isTimerRunning());
-
-        for (int i = 0; i < numberOfExpirations && ! shouldCancelCallbacks.load(); ++i)
         {
-            try
+            std::scoped_lock lock { callbackMutex };
+
+            if (isTimerRunning())
             {
-                owner.hiResTimerCallback();
-            }
-            catch (...)
-            {
-                // Exceptions thrown in a timer callback won't be
-                // propagated to the main thread, it's best to find a
-                // way to avoid them if possible
-                jassertfalse;
+                try
+                {
+                    owner.hiResTimerCallback();
+                }
+                catch (...)
+                {
+                    // Exceptions thrown in a timer callback won't be
+                    // propagated to the main thread, it's best to find
+                    // a way to avoid them if possible
+                    jassertfalse;
+                }
             }
         }
 

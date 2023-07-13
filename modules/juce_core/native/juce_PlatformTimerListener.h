@@ -26,7 +26,7 @@ namespace juce
 struct PlatformTimerListener
 {
     virtual ~PlatformTimerListener() = default;
-    virtual void onTimerExpired (int numberOfExpirations) = 0;
+    virtual void onTimerExpired() = 0;
 };
 
 } // namespace juce

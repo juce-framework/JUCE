@@ -285,7 +285,7 @@ void Thread::setAffinityMask (const uint32 newAffinityMask)
 }
 
 //==============================================================================
-bool Thread::wait (const int timeOutMilliseconds) const
+bool Thread::wait (double timeOutMilliseconds) const
 {
     return defaultEvent.wait (timeOutMilliseconds);
 }

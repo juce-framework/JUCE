@@ -6,6 +6,25 @@ develop
 
 Change
 ------
+Thread::wait and WaitableEvent::wait now take a double rather than an int to
+indicate the number of milliseconds to wait.
+
+Possible Issues
+---------------
+Calls to either wait function may trigger warnings.
+
+Workaround
+----------
+Explicitly cast the value to double.
+
+Rationale
+---------
+Changing to double allows sub-millisecond waits which was important for
+supporting changes to the HighResolutionTimer.
+
+
+Change
+------
 RealtimeOptions member workDurationMs was replaced by three optional member
 variables in RealtimeOptions, and all RealtimeOptions member variables were
 marked private.

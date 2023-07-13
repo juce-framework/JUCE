@@ -35,7 +35,7 @@ public:
 
         const auto callback = [] (UINT, UINT, DWORD_PTR context, DWORD_PTR, DWORD_PTR)
         {
-            reinterpret_cast<PlatformTimerListener*> (context)->onTimerExpired (1);
+            reinterpret_cast<PlatformTimerListener*> (context)->onTimerExpired();
         };
 
         timerId = timeSetEvent ((UINT) newIntervalMs, 1, callback, (DWORD_PTR) &listener, TIME_PERIODIC | TIME_CALLBACK_FUNCTION);

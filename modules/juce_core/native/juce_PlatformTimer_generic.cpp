@@ -23,86 +23,124 @@
 namespace juce
 {
 
-class PlatformTimer final : private HighResolutionTimerThread::Impl
+class PlatformTimer final : private Thread
 {
 public:
     explicit PlatformTimer (PlatformTimerListener& ptl)
-        : listener { ptl } {}
+        : Thread { "HighResolutionTimerThread" },
+          listener { ptl }
+    {
+        startThread (Priority::highest);
+    }
+
+    ~PlatformTimer()
+    {
+        stopThread (-1);
+    }
 
     void startTimer (int newIntervalMs)
     {
-        if (! thread.isRunning())
-            return;
+        jassert (newIntervalMs > 0);
+        jassert (timer == nullptr);
 
         {
-            std::scoped_lock lock { mutex };
-            intervalMs = newIntervalMs;
-            nextEventTime = Time::getCurrentTime() + RelativeTime::milliseconds (newIntervalMs);
+            std::scoped_lock lock { runCopyMutex };
+            timer = std::make_shared<Timer> (listener, newIntervalMs);
         }
 
-        event.signal();
+        notify();
     }
 
     void cancelTimer()
     {
-        jassert (thread.isRunning());
+        jassert (timer != nullptr);
 
-        {
-            std::scoped_lock lock { mutex };
-            jassert (intervalMs > 0);
-            intervalMs = 0;
-        }
+        timer->cancel();
 
-        event.signal();
+        // Note the only race condition we need to protect against
+        // here is the copy in run().
+        //
+        // Calls to startTimer(), cancelTimer(), and getIntervalMs()
+        // are already guaranteed to be both thread safe and well
+        // synchronised.
+
+        std::scoped_lock lock { runCopyMutex };
+        timer = nullptr;
     }
 
     int getIntervalMs() const
     {
-        std::scoped_lock lock { mutex };
-        return thread.isRunning() ? intervalMs : 0;
+        return isThreadRunning() && timer != nullptr ? timer->getIntervalMs() : 0;
     }
 
 private:
-    int millisecondsUntilNextEvent()
+    void run() final
     {
-        std::scoped_lock lock { mutex };
-        return intervalMs > 0 ? jmax (0, (int) (nextEventTime - Time::getCurrentTime()).inMilliseconds()) : -1;
-    }
-
-    bool nextEvent()
-    {
-        std::scoped_lock lock { mutex };
-        if (intervalMs <= 0 || nextEventTime > Time::getCurrentTime())
-            return false;
-
-        nextEventTime += RelativeTime::milliseconds (intervalMs);
-        return true;
-    }
-
-    void runThread() override
-    {
-        while (! shouldExitThread.load())
+        const auto copyTimer = [&]
         {
-            if (nextEvent())
-                listener.onTimerExpired (1);
-            else
-                event.wait (millisecondsUntilNextEvent());
+            std::scoped_lock lock { runCopyMutex };
+            return timer;
+        };
+
+        while (! threadShouldExit())
+        {
+            if (auto t = copyTimer())
+                t->run();
+
+            wait (-1);
         }
     }
 
-    void signalThreadShouldExit() override
+    class Timer
     {
-        shouldExitThread.store (true);
-        event.signal();
-    }
+    public:
+        Timer (PlatformTimerListener& l, int i)
+            : listener { l }, intervalMs { i } {}
+
+        int getIntervalMs() const
+        {
+            return intervalMs;
+        }
+
+        void cancel()
+        {
+            stop.signal();
+        }
+
+        void run()
+        {
+           #if JUCE_MAC || JUCE_IOS
+            tryToUpgradeCurrentThreadToRealtime (Thread::RealtimeOptions{}.withPeriodMs (intervalMs));
+           #endif
+
+            const auto millisecondsUntil = [] (auto time)
+            {
+                return jmax (0.0, time - Time::getMillisecondCounterHiRes());
+            };
+
+            while (! stop.wait (millisecondsUntil (nextEventTime)))
+            {
+                if (Time::getMillisecondCounterHiRes() >= nextEventTime)
+                {
+                    listener.onTimerExpired();
+                    nextEventTime += intervalMs;
+                }
+            }
+        }
+
+    private:
+        PlatformTimerListener& listener;
+        const int intervalMs;
+        double nextEventTime = Time::getMillisecondCounterHiRes() + intervalMs;
+        WaitableEvent stop { true };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Timer)
+        JUCE_DECLARE_NON_MOVEABLE (Timer)
+    };
 
     PlatformTimerListener& listener;
-    mutable std::mutex mutex;
-    int intervalMs{};
-    Time nextEventTime;
-    WaitableEvent event;
-    std::atomic<bool> shouldExitThread { false };
-    HighResolutionTimerThread thread { *this };
+    mutable std::mutex runCopyMutex;
+    std::shared_ptr<Timer> timer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlatformTimer)
     JUCE_DECLARE_NON_MOVEABLE (PlatformTimer)

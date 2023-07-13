@@ -169,13 +169,13 @@ void ThreadPool::addJob (std::function<void()> jobToRun)
 {
     struct LambdaJobWrapper  : public ThreadPoolJob
     {
-        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (j) {}
+        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (std::move (j)) {}
         JobStatus runJob() override      { job(); return ThreadPoolJob::jobHasFinished; }
 
         std::function<void()> job;
     };
 
-    addJob (new LambdaJobWrapper (jobToRun), true);
+    addJob (new LambdaJobWrapper (std::move (jobToRun)), true);
 }
 
 int ThreadPool::getNumJobs() const noexcept

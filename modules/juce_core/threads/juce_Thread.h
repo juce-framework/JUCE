@@ -440,7 +440,7 @@ public:
 
         @returns    true if the event has been signalled, false if the timeout expires.
     */
-    bool wait (int timeOutMilliseconds) const;
+    bool wait (double timeOutMilliseconds) const;
 
     /** Wakes up the thread.
 
