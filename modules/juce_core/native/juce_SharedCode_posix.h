@@ -894,7 +894,7 @@ public:
                 const auto min = jmax (0, sched_get_priority_min (SCHED_RR));
                 const auto max = jmax (1, sched_get_priority_max (SCHED_RR));
 
-                return jmap (rt->priority, 0, 10, min, max);
+                return jmap (rt->getPriority(), 0, 10, min, max);
             }
 
             // We only use this helper if we're on an old macos/ios platform that might
@@ -959,7 +959,7 @@ private:
     int priority;
 };
 
-static void* makeThreadHandle (PosixThreadAttribute& attr, Thread* userData, void* (*threadEntryProc) (void*))
+static void* makeThreadHandle (PosixThreadAttribute& attr, void* userData, void* (*threadEntryProc) (void*))
 {
     pthread_t handle = {};
 

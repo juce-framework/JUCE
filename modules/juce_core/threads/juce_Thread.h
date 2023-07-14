@@ -75,14 +75,114 @@ public:
     */
     struct RealtimeOptions
     {
-        /** Linux only: A value with a range of 0-10, where 10 is the highest priority. */
-        int priority = 5;
+        /** A value with a range of 0-10, where 10 is the highest priority.
 
-        /** iOS/macOS only: A millisecond value representing the estimated time between each
-                            'Thread::run' call. Your thread may be penalised if you frequently
-                            overrun this.
+            Currently only used by Posix platforms.
+
+            @see getPriority
         */
-        uint32_t workDurationMs = 0;
+        [[nodiscard]] RealtimeOptions withPriority (int newPriority) const
+        {
+            jassert (isPositiveAndNotGreaterThan (newPriority, 10));
+            return withMember (*this, &RealtimeOptions::priority, juce::jlimit (newPriority, 0, 10));
+        }
+
+        /** Specify the expected amount of processing time required each time the thread wakes up.
+
+            Only used by macOS/iOS.
+
+            @see getProcessingTimeMs, withMaximumProcessingTimeMs, withPeriodMs, withPeriodHz
+        */
+        [[nodiscard]] RealtimeOptions withProcessingTimeMs (double newProcessingTimeMs) const
+        {
+            jassert (newProcessingTimeMs > 0.0);
+            return withMember (*this, &RealtimeOptions::processingTimeMs, newProcessingTimeMs);
+        }
+
+        /** Specify the maximum amount of processing time required each time the thread wakes up.
+
+            Only used by macOS/iOS.
+
+            @see getMaximumProcessingTimeMs, withProcessingTimeMs, withPeriodMs, withPeriodHz
+        */
+        [[nodiscard]] RealtimeOptions withMaximumProcessingTimeMs (double newMaximumProcessingTimeMs) const
+        {
+            jassert (newMaximumProcessingTimeMs > 0.0);
+            return withMember (*this, &RealtimeOptions::maximumProcessingTimeMs, newMaximumProcessingTimeMs);
+        }
+
+        /** Specify the approximate amount of time between each thread wake up.
+
+            Alternatively call withPeriodHz().
+
+            Only used by macOS/iOS.
+
+            @see getPeriodMs, withPeriodHz, withProcessingTimeMs, withMaximumProcessingTimeMs,
+        */
+        [[nodiscard]] RealtimeOptions withPeriodMs (double newPeriodMs) const
+        {
+            jassert (newPeriodMs > 0.0);
+            return withMember (*this, &RealtimeOptions::periodMs, newPeriodMs);
+        }
+
+        /** Specify the approximate frequency at which the thread will be woken up.
+
+            Alternatively call withPeriodMs().
+
+            Only used by macOS/iOS.
+
+            @see getPeriodHz, withPeriodMs, withProcessingTimeMs, withMaximumProcessingTimeMs,
+        */
+        [[nodiscard]] RealtimeOptions withPeriodHz (double newPeriodHz) const
+        {
+            jassert (newPeriodHz > 0.0);
+            return withPeriodMs (1'000.0 / newPeriodHz);
+        }
+
+        /** Returns a value with a range of 0-10, where 10 is the highest priority.
+
+            @see withPriority
+        */
+        [[nodiscard]] int getPriority() const
+        {
+            return priority;
+        }
+
+        /** Returns the expected amount of processing time required each time the thread
+            wakes up.
+
+            @see withProcessingTimeMs, getMaximumProcessingTimeMs, getPeriodMs
+        */
+        [[nodiscard]] std::optional<double> getProcessingTimeMs() const
+        {
+            return processingTimeMs;
+        }
+
+        /** Returns the maximum amount of processing time required each time the thread
+            wakes up.
+
+            @see withMaximumProcessingTimeMs, getProcessingTimeMs, getPeriodMs
+        */
+        [[nodiscard]] std::optional<double> getMaximumProcessingTimeMs() const
+        {
+            return maximumProcessingTimeMs;
+        }
+
+        /** Returns the approximate amount of time between each thread wake up, or
+            nullopt if there is no inherent periodicity.
+
+            @see withPeriodMs, withPeriodHz, getProcessingTimeMs, getMaximumProcessingTimeMs
+        */
+        [[nodiscard]] std::optional<double> getPeriodMs() const
+        {
+            return periodMs;
+        }
+
+    private:
+        int priority { 5 };
+        std::optional<double> processingTimeMs;
+        std::optional<double> maximumProcessingTimeMs;
+        std::optional<double> periodMs{};
     };
 
     //==============================================================================
@@ -464,7 +564,7 @@ private:
     const String threadName;
     std::atomic<void*> threadHandle { nullptr };
     std::atomic<ThreadID> threadId { nullptr };
-    Optional<RealtimeOptions> realtimeOptions = {};
+    std::optional<RealtimeOptions> realtimeOptions = {};
     CriticalSection startStopLock;
     WaitableEvent startSuspensionEvent, defaultEvent;
     size_t threadStackSize;

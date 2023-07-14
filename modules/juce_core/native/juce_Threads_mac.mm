@@ -64,28 +64,99 @@ static auto getJucePriority (qos_class_t qos)
     return Thread::Priority::normal;
 }
 
+template<typename Type>
+static std::optional<Type> firstOptionalWithValue (const std::initializer_list<std::optional<Type>>& optionals)
+{
+    for (const auto& optional : optionals)
+        if (optional.has_value())
+            return optional;
+
+    return {};
+}
+
+static bool tryToUpgradeCurrentThreadToRealtime (const Thread::RealtimeOptions& options)
+{
+    const auto periodMs = options.getPeriodMs().value_or (0.0);
+
+    const auto processingTimeMs = firstOptionalWithValue (
+    {
+        options.getProcessingTimeMs(),
+        options.getMaximumProcessingTimeMs(),
+        options.getPeriodMs()
+    }).value_or (10.0);
+
+    const auto maxProcessingTimeMs = options.getMaximumProcessingTimeMs()
+                                            .value_or (processingTimeMs);
+
+    // The processing time can not exceed the maximum processing time!
+    jassert (maxProcessingTimeMs >= processingTimeMs);
+
+    thread_time_constraint_policy_data_t policy;
+    policy.period = (uint32_t) Time::secondsToHighResolutionTicks (periodMs / 1'000.0);
+    policy.computation = (uint32_t) Time::secondsToHighResolutionTicks (processingTimeMs / 1'000.0);
+    policy.constraint = (uint32_t) Time::secondsToHighResolutionTicks (maxProcessingTimeMs / 1'000.0);
+    policy.preemptible = true;
+
+    const auto result = thread_policy_set (pthread_mach_thread_np (pthread_self()),
+                                           THREAD_TIME_CONSTRAINT_POLICY,
+                                           (thread_policy_t) &policy,
+                                           THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+
+    if (result == KERN_SUCCESS)
+        return true;
+
+    // testing has shown that passing a computation value > 50ms can
+    // lead to thread_policy_set returning an error indicating that an
+    // invalid argument was passed. If that happens this code tries to
+    // limit that value in the hope of resolving the issue.
+
+    if (result == KERN_INVALID_ARGUMENT && options.getProcessingTimeMs() > 50.0)
+        return tryToUpgradeCurrentThreadToRealtime (options.withProcessingTimeMs (50.0));
+
+    return false;
+}
+
 bool Thread::createNativeThread (Priority priority)
 {
-    PosixThreadAttribute attr { threadStackSize };
+    PosixThreadAttribute attribute { threadStackSize };
 
     if (@available (macos 10.10, *))
-        pthread_attr_set_qos_class_np (attr.get(), getNativeQOS (priority), 0);
+        pthread_attr_set_qos_class_np (attribute.get(), getNativeQOS (priority), 0);
     else
-        PosixSchedulerPriority::getNativeSchedulerAndPriority (realtimeOptions, priority).apply (attr);
+        PosixSchedulerPriority::getNativeSchedulerAndPriority (realtimeOptions, priority).apply (attribute);
 
-    threadId = threadHandle = makeThreadHandle (attr, this, [] (void* userData) -> void*
+    struct ThreadData
     {
-        auto* myself = static_cast<Thread*> (userData);
+        Thread& thread;
+        std::promise<bool> started;
+    };
+
+    ThreadData threadData { *this };
+
+    threadId = threadHandle = makeThreadHandle (attribute, &threadData, [] (void* userData) -> void*
+    {
+        auto& data { *static_cast<ThreadData*> (userData) };
+        auto& thread = data.thread;
+
+        if (thread.isRealtime()
+            && ! tryToUpgradeCurrentThreadToRealtime (*thread.realtimeOptions))
+        {
+            data.started.set_value (false);
+            return nullptr;
+        }
+
+        data.started.set_value (true);
 
         JUCE_AUTORELEASEPOOL
         {
-            juce_threadEntryPoint (myself);
+            juce_threadEntryPoint (&thread);
         }
 
         return nullptr;
     });
 
-    return threadId != nullptr;
+    return threadId != nullptr
+        && threadData.started.get_future().get();
 }
 
 void Thread::killThread()
@@ -121,30 +192,6 @@ Thread::Priority Thread::getPriority() const
 bool Thread::setPriority (Priority priority)
 {
     jassert (Thread::getCurrentThreadId() == getThreadId());
-
-    if (isRealtime())
-    {
-        // macOS/iOS needs to know how much time you need!
-        jassert (realtimeOptions->workDurationMs > 0);
-
-        mach_timebase_info_data_t timebase;
-        mach_timebase_info (&timebase);
-
-        const auto periodMs = realtimeOptions->workDurationMs;
-        const auto ticksPerMs = ((double) timebase.denom * 1000000.0) / (double) timebase.numer;
-        const auto periodTicks = (uint32_t) jmin ((double) std::numeric_limits<uint32_t>::max(), periodMs * ticksPerMs);
-
-        thread_time_constraint_policy_data_t policy;
-        policy.period = periodTicks;
-        policy.computation = jmin ((uint32_t) 50000, policy.period);
-        policy.constraint = policy.period;
-        policy.preemptible = true;
-
-        return thread_policy_set (pthread_mach_thread_np (pthread_self()),
-                                  THREAD_TIME_CONSTRAINT_POLICY,
-                                  (thread_policy_t) &policy,
-                                  THREAD_TIME_CONSTRAINT_POLICY_COUNT) == KERN_SUCCESS;
-    }
 
     if (@available (macOS 10.10, *))
         return pthread_set_qos_class_self_np (getNativeQOS (priority), 0) == 0;

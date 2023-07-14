@@ -166,7 +166,7 @@ bool Thread::startRealtimeThread (const RealtimeOptions& options)
 
     if (threadHandle == nullptr)
     {
-        realtimeOptions = makeOptional (options);
+        realtimeOptions = std::make_optional (options);
 
         if (startThreadInternal (Priority::normal))
             return true;
@@ -276,7 +276,7 @@ void Thread::removeListener (Listener* listener)
 
 bool Thread::isRealtime() const
 {
-    return realtimeOptions.hasValue();
+    return realtimeOptions.has_value();
 }
 
 void Thread::setAffinityMask (const uint32 newAffinityMask)
