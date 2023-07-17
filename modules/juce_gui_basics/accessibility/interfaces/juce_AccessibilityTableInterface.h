@@ -65,6 +65,7 @@ public:
     */
     virtual const AccessibilityHandler* getHeaderHandler() const = 0;
 
+    /** A simple span of elements. */
     struct Span { int begin, num; };
 
     /** Given the handler of one of the cells in the table, returns the rows covered

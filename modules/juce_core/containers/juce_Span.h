@@ -88,6 +88,8 @@ namespace detail
     or other similar container.
 
     This is a bit like std::span from C++20, but with a more limited interface.
+
+    @tags{Core}
 */
 template <typename Value, size_t Extent = dynamicExtent>
 class Span : private detail::NumBase<Extent> // for empty-base optimisation

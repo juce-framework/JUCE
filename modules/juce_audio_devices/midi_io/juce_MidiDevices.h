@@ -43,6 +43,8 @@ class MidiDeviceListConnectionBroadcaster;
     // Stop listening
     connection.reset();
     @endcode
+
+    @tags{Audio}
 */
 class MidiDeviceListConnection
 {

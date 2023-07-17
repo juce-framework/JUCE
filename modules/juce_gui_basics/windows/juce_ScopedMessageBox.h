@@ -30,6 +30,8 @@ namespace juce
     Objects of this type can be used to programmatically close message boxes.
 
     @see NativeMessageBox::showScopedAsync(), AlertWindow::showScopedAsync()
+
+    @tags{GUI}
 */
 class ScopedMessageBox
 {

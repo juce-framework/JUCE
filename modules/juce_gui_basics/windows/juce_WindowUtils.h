@@ -26,6 +26,11 @@
 namespace juce
 {
 
+/**
+    Windowing helper functions.
+
+    @tags{GUI}
+*/
 struct WindowUtils
 {
     WindowUtils() = delete;

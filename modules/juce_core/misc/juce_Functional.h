@@ -109,6 +109,8 @@ template <typename Object, typename OtherObject, typename Member, typename Other
         doWorkHavingEstablishedPreconditions();
     } // ...or here!
     @endcode
+
+    @tags{Core}
 */
 template <typename Fn> struct ScopeGuard : Fn { ~ScopeGuard() { Fn::operator()(); } };
 template <typename Fn> ScopeGuard (Fn) -> ScopeGuard<Fn>;

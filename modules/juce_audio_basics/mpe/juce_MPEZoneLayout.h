@@ -35,6 +35,8 @@ namespace juce
 
     It also defines a pitchbend range (in semitones) to be applied for per-note pitchbends and
     master pitchbends, respectively.
+
+    @tags{Audio}
 */
 struct MPEZone
 {

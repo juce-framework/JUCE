@@ -46,6 +46,9 @@ class JUCE_API  WebBrowserComponent  : public Component
 {
 public:
     //==============================================================================
+    /**
+        Options to configure WebBrowserComponent.
+    */
     class JUCE_API Options
     {
     public:
