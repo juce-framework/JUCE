@@ -351,4 +351,4 @@
 #include "windows/juce_ThreadWithProgressWindow.cpp"
 #include "windows/juce_TooltipWindow.cpp"
 #include "windows/juce_TopLevelWindow.cpp"
-#include "windows/juce_VBlankAttachement.cpp"
+#include "windows/juce_VBlankAttachment.cpp"
