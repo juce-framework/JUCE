@@ -408,9 +408,9 @@ public:
 
             if (type == VST3PlugIn)
             {
-                out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/Resources" << newLine
-                    << "\t-$(V_AT)rm -f $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/moduleinfo.json" << newLine
-                    << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER) "
+                out << "\t-$(V_AT)mkdir -p \"$(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/Resources\"" << newLine
+                    << "\t-$(V_AT)rm -f \"$(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/moduleinfo.json\"" << newLine
+                    << "\t$(V_AT) \"$(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER)\" "
                        "-create "
                        "-version " << owner.project.getVersionString().quoted() << " "
                        "-path \"$(JUCE_OUTDIR)/$(JUCE_VST3DIR)\" "
