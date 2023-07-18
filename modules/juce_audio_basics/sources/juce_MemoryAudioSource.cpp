@@ -108,26 +108,6 @@ void MemoryAudioSource::setLooping (bool shouldLoop)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-static bool operator== (const AudioBuffer<float>& a, const AudioBuffer<float>& b)
-{
-    if (a.getNumChannels() != b.getNumChannels())
-        return false;
-
-    for (int channel = 0; channel < a.getNumChannels(); ++channel)
-    {
-        auto* aPtr = a.getReadPointer (channel);
-        auto* bPtr = b.getReadPointer (channel);
-
-        if (std::vector<float> (aPtr, aPtr + a.getNumSamples())
-            != std::vector<float> (bPtr, bPtr + b.getNumSamples()))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 struct MemoryAudioSourceTests  : public UnitTest
 {
     MemoryAudioSourceTests()  : UnitTest ("MemoryAudioSource", UnitTestCategories::audio)  {}

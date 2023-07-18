@@ -1281,6 +1281,31 @@ private:
 };
 
 //==============================================================================
+template <typename Type>
+bool operator== (const AudioBuffer<Type>& a, const AudioBuffer<Type>& b)
+{
+    if (a.getNumChannels() != b.getNumChannels())
+        return false;
+
+    for (auto c = 0; c < a.getNumChannels(); ++c)
+    {
+        const auto begin = [c] (auto& x) { return x.getReadPointer (c); };
+        const auto end = [c] (auto& x) { return x.getReadPointer (c) + x.getNumSamples(); };
+
+        if (! std::equal (begin (a), end (a), begin (b), end (b)))
+            return false;
+    }
+
+    return true;
+}
+
+template <typename Type>
+bool operator!= (const AudioBuffer<Type>& a, const AudioBuffer<Type>& b)
+{
+    return ! (a == b);
+}
+
+//==============================================================================
 /**
     A multi-channel buffer of 32-bit floating point audio samples.
 
