@@ -754,24 +754,38 @@ function(_juce_add_resources_rc source_target dest_target)
         return()
     endif()
 
-    get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
-    get_target_property(input_info_file ${source_target} JUCE_INFO_FILE)
+    if(NOT TARGET ${source_target}_rc_lib)
+        get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
+        get_target_property(input_info_file ${source_target} JUCE_INFO_FILE)
 
-    get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
-    set(dependency)
+        get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
+        set(dependency)
 
-    if(generated_icon)
-        set(dependency DEPENDS "${generated_icon}")
+        if(generated_icon)
+            set(dependency DEPENDS "${generated_icon}")
+        endif()
+
+        set(resource_rc_file "${juce_library_code}/${source_target}_resources.rc")
+
+        add_custom_command(OUTPUT "${resource_rc_file}"
+            COMMAND juce::juceaide rcfile "${input_info_file}" "${resource_rc_file}"
+            ${dependency}
+            VERBATIM)
+
+        add_library(${source_target}_rc_lib OBJECT ${resource_rc_file})
+
+        set(compile_defs $<TARGET_GENEX_EVAL:${source_target},$<TARGET_PROPERTY:${source_target},COMPILE_DEFINITIONS>>)
+        set(include_dirs $<TARGET_GENEX_EVAL:${source_target},$<TARGET_PROPERTY:${source_target},INCLUDE_DIRECTORIES>>)
+        set(filtered $<FILTER:${compile_defs},INCLUDE,JUCE_USER_DEFINED_RC_FILE=>)
+        set(has_custom_rc_include $<BOOL:${filtered}>)
+
+        target_include_directories(${source_target}_rc_lib
+            PRIVATE $<${has_custom_rc_include}:${include_dirs}>)
+        set_source_files_properties(${resource_rc_file} PROPERTIES
+            COMPILE_DEFINITIONS $<${has_custom_rc_include}:${compile_defs}>)
     endif()
 
-    set(resource_rc_file "${juce_library_code}/${dest_target}_resources.rc")
-
-    add_custom_command(OUTPUT "${resource_rc_file}"
-        COMMAND juce::juceaide rcfile "${input_info_file}" "${resource_rc_file}"
-        ${dependency}
-        VERBATIM)
-
-    target_sources(${dest_target} PRIVATE "${resource_rc_file}")
+    target_link_libraries(${dest_target} PRIVATE ${source_target}_rc_lib)
 endfunction()
 
 function(_juce_configure_app_bundle source_target dest_target)
