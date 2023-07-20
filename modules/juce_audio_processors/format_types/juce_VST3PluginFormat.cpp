@@ -217,7 +217,12 @@ static std::vector<PluginDescription> createPluginDescriptions (const File& plug
         description.deprecatedUid       = getHashForRange (uid->data());
         description.uniqueId            = getHashForRange (getNormalisedTUID (uid->data()));
 
-        description.category            = CharPointer_UTF8 (c.category.c_str());
+        StringArray categories;
+
+        for (const auto& category : c.subCategories)
+            categories.add (CharPointer_UTF8 (category.c_str()));
+
+        description.category = categories.joinIntoString ("|");
 
         description.isInstrument = std::any_of (c.subCategories.begin(),
                                                 c.subCategories.end(),
