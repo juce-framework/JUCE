@@ -1932,23 +1932,9 @@ void XWindowSystem::setMinimised (::Window windowH, bool shouldBeMinimised) cons
     }
 }
 
-bool XWindowSystem::isMinimised (::Window windowH) const
+bool XWindowSystem::isMinimised (::Window w) const
 {
-    jassert (windowH != 0);
-
-    XWindowSystemUtilities::ScopedXLock xLock;
-    XWindowSystemUtilities::GetXProperty prop (display, windowH, atoms.state, 0, 64, false, atoms.state);
-
-    if (prop.success && prop.actualType == atoms.state
-        && prop.actualFormat == 32 && prop.numItems > 0)
-    {
-        unsigned long state;
-        memcpy (&state, prop.data, sizeof (unsigned long));
-
-        return state == IconicState;
-    }
-
-    return false;
+    return isHidden (w);
 }
 
 void XWindowSystem::setMaximised (::Window windowH, bool shouldBeMaximised) const
@@ -3732,35 +3718,46 @@ void XWindowSystem::handleGravityNotify (LinuxComponentPeer* peer) const
     peer->handleMovedOrResized();
 }
 
+bool XWindowSystem::isIconic (Window w) const
+{
+    jassert (w != 0);
+
+    XWindowSystemUtilities::ScopedXLock xLock;
+    XWindowSystemUtilities::GetXProperty prop (display, w, atoms.state, 0, 64, false, atoms.state);
+
+    if (prop.success && prop.actualType == atoms.state
+        && prop.actualFormat == 32 && prop.numItems > 0)
+    {
+        unsigned long state;
+        memcpy (&state, prop.data, sizeof (unsigned long));
+
+        return state == IconicState;
+    }
+
+    return false;
+}
+
+bool XWindowSystem::isHidden (Window w) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+    XWindowSystemUtilities::GetXProperty prop (display, w, atoms.windowState, 0, 128, false, XA_ATOM);
+
+    if (! (prop.success && prop.actualFormat == 32 && prop.actualType == XA_ATOM))
+        return false;
+
+    const auto* data = unalignedPointerCast<const long*> (prop.data);
+    const auto end = data + prop.numItems;
+
+    return std::find (data, end, atoms.windowStateHidden) != end;
+}
+
 void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XPropertyEvent& event) const
 {
-    const auto isStateChangeEvent = [&]
+    if ((event.atom == atoms.state && isIconic (event.window))
+        || (event.atom == atoms.windowState && isHidden (event.window)))
     {
-        if (event.atom != atoms.state)
-            return false;
-
-        return isMinimised (event.window);
-    };
-
-    const auto isHidden = [&]
-    {
-        if (event.atom != atoms.windowState)
-            return false;
-
-        XWindowSystemUtilities::ScopedXLock xLock;
-        XWindowSystemUtilities::GetXProperty prop (display, event.window, atoms.windowState, 0, 128, false, XA_ATOM);
-
-        if (! (prop.success && prop.actualFormat == 32 && prop.actualType == XA_ATOM))
-            return false;
-
-        const auto* data = unalignedPointerCast<const long*> (prop.data);
-        const auto end = data + prop.numItems;
-
-        return std::find (data, end, atoms.windowStateHidden) != end;
-    };
-
-    if (isStateChangeEvent() || isHidden())
         dismissBlockingModals (peer);
+    }
 
     if (event.atom == XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_FRAME_EXTENTS"))
         peer->updateBorderSize();

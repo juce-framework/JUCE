@@ -294,6 +294,8 @@ private:
     void updateModifierMappings() const;
 
     long getUserTime (::Window) const;
+    bool isHidden (Window) const;
+    bool isIconic (Window) const;
 
     void initialiseXSettings();
 
