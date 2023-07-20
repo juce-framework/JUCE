@@ -550,6 +550,23 @@ public:
                 expect (clientBuffers[3].channelBuffers64[0] == nullptr);
             }
         }
+
+        beginTest ("Speaker layout conversions");
+        {
+            using namespace Steinberg::Vst::SpeakerArr;
+
+            for (const auto& [channelSet, arr] : { std::tuple (AudioChannelSet::ambisonic (1), kAmbi1stOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (2), kAmbi2cdOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (3), kAmbi3rdOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (4), kAmbi4thOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (5), kAmbi5thOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (6), kAmbi6thOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (7), kAmbi7thOrderACN), })
+            {
+                expect (getVst3SpeakerArrangement (channelSet) == arr);
+                expect (channelSet == getChannelSetForSpeakerArrangement (arr));
+            }
+        }
     }
 
 private:

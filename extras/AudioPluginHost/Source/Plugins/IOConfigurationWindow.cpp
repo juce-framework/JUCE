@@ -267,7 +267,7 @@ private:
                 auto itemId = 1;
                 auto selectedId = -1;
 
-                for (auto i = 1; i < AudioChannelSet::maxChannelsOfNamedLayout; ++i)
+                for (auto i = 1; i <= AudioChannelSet::maxChannelsOfNamedLayout; ++i)
                 {
                     for (const auto& set : AudioChannelSet::channelSetsWithNumberOfChannels (i))
                     {

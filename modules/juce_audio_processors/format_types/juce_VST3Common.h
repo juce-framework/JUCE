@@ -241,6 +241,15 @@ static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannel
         case AudioChannelSet::ambisonicACN13:    return Steinberg::Vst::kSpeakerACN13;
         case AudioChannelSet::ambisonicACN14:    return Steinberg::Vst::kSpeakerACN14;
         case AudioChannelSet::ambisonicACN15:    return Steinberg::Vst::kSpeakerACN15;
+        case AudioChannelSet::ambisonicACN16:    return Steinberg::Vst::kSpeakerACN16;
+        case AudioChannelSet::ambisonicACN17:    return Steinberg::Vst::kSpeakerACN17;
+        case AudioChannelSet::ambisonicACN18:    return Steinberg::Vst::kSpeakerACN18;
+        case AudioChannelSet::ambisonicACN19:    return Steinberg::Vst::kSpeakerACN19;
+        case AudioChannelSet::ambisonicACN20:    return Steinberg::Vst::kSpeakerACN20;
+        case AudioChannelSet::ambisonicACN21:    return Steinberg::Vst::kSpeakerACN21;
+        case AudioChannelSet::ambisonicACN22:    return Steinberg::Vst::kSpeakerACN22;
+        case AudioChannelSet::ambisonicACN23:    return Steinberg::Vst::kSpeakerACN23;
+        case AudioChannelSet::ambisonicACN24:    return Steinberg::Vst::kSpeakerACN24;
         case AudioChannelSet::topSideLeft:       return Steinberg::Vst::kSpeakerTsl;
         case AudioChannelSet::topSideRight:      return Steinberg::Vst::kSpeakerTsr;
         case AudioChannelSet::bottomFrontLeft:   return Steinberg::Vst::kSpeakerBfl;
@@ -254,15 +263,6 @@ static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannel
 
         case AudioChannelSet::discreteChannel0:  return Steinberg::Vst::kSpeakerM;
 
-        case AudioChannelSet::ambisonicACN16:
-        case AudioChannelSet::ambisonicACN17:
-        case AudioChannelSet::ambisonicACN18:
-        case AudioChannelSet::ambisonicACN19:
-        case AudioChannelSet::ambisonicACN20:
-        case AudioChannelSet::ambisonicACN21:
-        case AudioChannelSet::ambisonicACN22:
-        case AudioChannelSet::ambisonicACN23:
-        case AudioChannelSet::ambisonicACN24:
         case AudioChannelSet::ambisonicACN25:
         case AudioChannelSet::ambisonicACN26:
         case AudioChannelSet::ambisonicACN27:
@@ -351,6 +351,15 @@ static std::optional<AudioChannelSet::ChannelType> getChannelType (Steinberg::Vs
         case Steinberg::Vst::kSpeakerACN13: return AudioChannelSet::ambisonicACN13;
         case Steinberg::Vst::kSpeakerACN14: return AudioChannelSet::ambisonicACN14;
         case Steinberg::Vst::kSpeakerACN15: return AudioChannelSet::ambisonicACN15;
+        case Steinberg::Vst::kSpeakerACN16: return AudioChannelSet::ambisonicACN16;
+        case Steinberg::Vst::kSpeakerACN17: return AudioChannelSet::ambisonicACN17;
+        case Steinberg::Vst::kSpeakerACN18: return AudioChannelSet::ambisonicACN18;
+        case Steinberg::Vst::kSpeakerACN19: return AudioChannelSet::ambisonicACN19;
+        case Steinberg::Vst::kSpeakerACN20: return AudioChannelSet::ambisonicACN20;
+        case Steinberg::Vst::kSpeakerACN21: return AudioChannelSet::ambisonicACN21;
+        case Steinberg::Vst::kSpeakerACN22: return AudioChannelSet::ambisonicACN22;
+        case Steinberg::Vst::kSpeakerACN23: return AudioChannelSet::ambisonicACN23;
+        case Steinberg::Vst::kSpeakerACN24: return AudioChannelSet::ambisonicACN24;
         case Steinberg::Vst::kSpeakerTsl:   return AudioChannelSet::topSideLeft;
         case Steinberg::Vst::kSpeakerTsr:   return AudioChannelSet::topSideRight;
         case Steinberg::Vst::kSpeakerLcs:   return AudioChannelSet::leftSurroundRear;
@@ -504,6 +513,10 @@ static std::optional<Steinberg::Vst::SpeakerArrangement> getVst3SpeakerArrangeme
     std::call_once (detail::layoutTableCheckedFlag, [] { jassert (isLayoutTableValid()); });
    #endif
 
+    for (const auto& mapping : Ambisonics::mappings)
+        if (channels == mapping.channelSet)
+            return mapping.arrangement;
+
     const auto channelSetMatches = [&channels] (const auto& layoutPair)
     {
         return AudioChannelSet::channelSetWithChannels (layoutPair.channelOrder) == channels;
@@ -522,10 +535,6 @@ static std::optional<Steinberg::Vst::SpeakerArrangement> getVst3SpeakerArrangeme
     if (getChannelCount (result) == channels.size())
         return result;
 
-    for (const auto& mapping : Ambisonics::mappings)
-        if (channels == mapping.channelSet)
-            return mapping.arrangement;
-
     return {};
 }
 
@@ -533,12 +542,12 @@ inline std::optional<AudioChannelSet> getChannelSetForSpeakerArrangement (Steinb
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    if (const auto order = getSpeakerOrder (arr))
-        return AudioChannelSet::channelSetWithChannels (*order);
-
     for (const auto& mapping : Ambisonics::mappings)
         if (arr == mapping.arrangement)
             return mapping.channelSet;
+
+    if (const auto order = getSpeakerOrder (arr))
+        return AudioChannelSet::channelSetWithChannels (*order);
 
     // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
     return {};
