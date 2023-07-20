@@ -125,7 +125,7 @@ public:
         /** Returns an appropriate mouse-cursor for this resize zone. */
         MouseCursor getMouseCursor() const noexcept;
 
-        /** Returns true if dragging this zone will move the enire object without resizing it. */
+        /** Returns true if dragging this zone will move the entire object without resizing it. */
         bool isDraggingWholeObject() const noexcept     { return zone == centre; }
         /** Returns true if dragging this zone will move the object's left edge. */
         bool isDraggingLeftEdge() const noexcept        { return (zone & left) != 0; }

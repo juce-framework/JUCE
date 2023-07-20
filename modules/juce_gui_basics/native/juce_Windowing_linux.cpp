@@ -399,6 +399,12 @@ public:
 
     void clearWindowAssociation() { association = {}; }
 
+    void startHostManagedResize (Point<int> mouseDownPosition,
+                                 ResizableBorderComponent::Zone zone) override
+    {
+        XWindowSystem::getInstance()->startHostManagedResize (windowH, mouseDownPosition, zone);
+    }
+
     //==============================================================================
     static bool isActiveApplication;
     bool focused = false;

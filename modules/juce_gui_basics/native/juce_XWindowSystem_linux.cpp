@@ -1789,6 +1789,68 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
     }
 }
 
+void XWindowSystem::startHostManagedResize (::Window windowH,
+                                            Point<int> mouseDown,
+                                            ResizableBorderComponent::Zone zone)
+{
+    const auto moveResize = XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WM_MOVERESIZE");
+
+    if (moveResize == None)
+        return;
+
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    X11Symbols::getInstance()->xUngrabPointer (display, CurrentTime);
+
+    const auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
+
+    XClientMessageEvent clientMsg;
+    clientMsg.display = display;
+    clientMsg.window = windowH;
+    clientMsg.type = ClientMessage;
+    clientMsg.format = 32;
+    clientMsg.message_type = moveResize;
+    clientMsg.data.l[0] = mouseDown.getX();
+    clientMsg.data.l[1] = mouseDown.getY();
+    clientMsg.data.l[2] = [&]
+    {
+        // It's unclear which header is supposed to contain these
+        static constexpr auto _NET_WM_MOVERESIZE_SIZE_TOPLEFT      = 0;
+        static constexpr auto _NET_WM_MOVERESIZE_SIZE_TOP          = 1;
+        static constexpr auto _NET_WM_MOVERESIZE_SIZE_TOPRIGHT     = 2;
+        static constexpr auto _NET_WM_MOVERESIZE_SIZE_RIGHT        = 3;
+        static constexpr auto _NET_WM_MOVERESIZE_SIZE_BOTTOMRIGHT  = 4;
+        static constexpr auto _NET_WM_MOVERESIZE_SIZE_BOTTOM       = 5;
+        static constexpr auto _NET_WM_MOVERESIZE_SIZE_BOTTOMLEFT   = 6;
+        static constexpr auto _NET_WM_MOVERESIZE_SIZE_LEFT         = 7;
+        static constexpr auto _NET_WM_MOVERESIZE_MOVE              = 8;
+
+        using F = ResizableBorderComponent::Zone::Zones;
+
+        switch (zone.getZoneFlags())
+        {
+            case F::top | F::left:      return _NET_WM_MOVERESIZE_SIZE_TOPLEFT;
+            case F::top:                return _NET_WM_MOVERESIZE_SIZE_TOP;
+            case F::top | F::right:     return _NET_WM_MOVERESIZE_SIZE_TOPRIGHT;
+            case F::right:              return _NET_WM_MOVERESIZE_SIZE_RIGHT;
+            case F::bottom | F::right:  return _NET_WM_MOVERESIZE_SIZE_BOTTOMRIGHT;
+            case F::bottom:             return _NET_WM_MOVERESIZE_SIZE_BOTTOM;
+            case F::bottom | F::left:   return _NET_WM_MOVERESIZE_SIZE_BOTTOMLEFT;
+            case F::left:               return _NET_WM_MOVERESIZE_SIZE_LEFT;
+        }
+
+        return _NET_WM_MOVERESIZE_MOVE;
+    }();
+    clientMsg.data.l[3] = 0;
+    clientMsg.data.l[4] = 1;
+
+    X11Symbols::getInstance()->xSendEvent (display,
+                                           root,
+                                           false,
+                                           SubstructureRedirectMask | SubstructureNotifyMask,
+                                           unalignedPointerCast<XEvent*> (&clientMsg));
+}
+
 void XWindowSystem::updateConstraints (::Window windowH) const
 {
     if (auto* peer = getPeerFor (windowH))
