@@ -45,7 +45,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
                                      "-Wshift-sign-overflow",
                                      "-Wsign-conversion",
                                      "-Wtautological-overlap-compare",
-                                     "-Wzero-as-null-pointer-constant")
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wdeprecated-copy-with-user-provided-dtor",
+                                     "-Wdeprecated")
 
 #include <AAX_Version.h>
 

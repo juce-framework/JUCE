@@ -922,17 +922,35 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      configLinkerFlagsValue        (config, Ids::extraLinkerFlags,         getUndoManager())
 {
     auto& llvmFlags = recommendedCompilerWarningFlags[CompilerNames::llvm] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
-    llvmFlags.common.addArray ({ "-Wshorten-64-to-32", "-Wconversion", "-Wint-conversion",
-                                 "-Wconditional-uninitialized", "-Wconstant-conversion", "-Wbool-conversion",
-                                 "-Wextra-semi", "-Wshift-sign-overflow",
-                                 "-Wshadow-all", "-Wnullable-to-nonnull-conversion",
-                                 "-Wmissing-prototypes" });
-    llvmFlags.cpp.addArray ({ "-Wunused-private-field", "-Winconsistent-missing-destructor-override" });
-    llvmFlags.objc.addArray ({ "-Wunguarded-availability", "-Wunguarded-availability-new" });
+
+    llvmFlags.common.addArray ({ "-Wshadow-all",
+                                 "-Wshorten-64-to-32",
+                                 "-Wconversion",
+                                 "-Wint-conversion",
+                                 "-Wconditional-uninitialized",
+                                 "-Wconstant-conversion",
+                                 "-Wbool-conversion",
+                                 "-Wextra-semi",
+                                 "-Wshift-sign-overflow",
+                                 "-Wmissing-prototypes",
+                                 "-Wnullable-to-nonnull-conversion",
+                                 "-Wpedantic",
+                                 "-Wdeprecated" });
+
+    llvmFlags.cpp.addArray ({ "-Wunused-private-field",
+                              "-Winconsistent-missing-destructor-override" });
+
+    llvmFlags.objc.addArray ({ "-Wunguarded-availability",
+                               "-Wunguarded-availability-new" });
 
     auto& gccFlags = recommendedCompilerWarningFlags[CompilerNames::gcc] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
-    gccFlags.common.addArray ({ "-Wextra", "-Wsign-compare", "-Wno-implicit-fallthrough", "-Wno-maybe-uninitialized",
-                                "-Wredundant-decls", "-Wno-strict-overflow", "-Wshadow" });
+    gccFlags.common.addArray ({ "-Wextra",
+                                "-Wsign-compare",
+                                "-Wno-implicit-fallthrough",
+                                "-Wno-maybe-uninitialized",
+                                "-Wredundant-decls",
+                                "-Wno-strict-overflow",
+                                "-Wshadow" });
 }
 
 String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
