@@ -192,6 +192,19 @@ static std::vector<PluginDescription> createPluginDescriptions (const File& plug
 {
     std::vector<PluginDescription> result;
 
+    const auto araMainFactoryClassNames = [&]
+    {
+        std::unordered_set<String> factories;
+
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+        for (const auto& c : info.classes)
+            if (c.category == kARAMainFactoryClass)
+                factories.insert (CharPointer_UTF8 (c.name.c_str()));
+       #endif
+
+        return factories;
+    }();
+
     for (const auto& c : info.classes)
     {
         if (c.category != kVstAudioEffectClass)
@@ -208,6 +221,7 @@ static std::vector<PluginDescription> createPluginDescriptions (const File& plug
         description.pluginFormatName    = "VST3";
         description.numInputChannels    = 0;
         description.numOutputChannels   = 0;
+        description.hasARAExtension     = araMainFactoryClassNames.find (description.name) != araMainFactoryClassNames.end();
 
         const auto uid = VST3::UID::fromString (c.cid);
 
