@@ -470,7 +470,7 @@ public:
                              Convolution::Stereo::no,
                              Convolution::Trim::yes,
                              Convolution::Normalise::no,
-                             AudioBlock<const float> (channels, numElementsInArray (channels), length));
+                             AudioBlock<const float> (channels, numElementsInArray (channels), (size_t) length));
         }
 
         beginTest ("IRs with extra silence are trimmed appropriately");
