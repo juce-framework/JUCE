@@ -476,8 +476,6 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
 
 CodeEditorComponent::~CodeEditorComponent()
 {
-    giveAwayKeyboardFocus();
-
     if (auto* peer = getPeer())
         peer->refreshTextInputTarget();
 

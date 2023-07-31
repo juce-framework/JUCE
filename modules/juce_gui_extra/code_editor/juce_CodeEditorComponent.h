@@ -38,9 +38,9 @@ class CodeTokeniser;
 
     @tags{GUI}
 */
-class JUCE_API  CodeEditorComponent   : public Component,
-                                        public ApplicationCommandTarget,
-                                        public TextInputTarget
+class JUCE_API  CodeEditorComponent   : public TextInputTarget,
+                                        public Component,
+                                        public ApplicationCommandTarget
 {
 public:
     //==============================================================================
