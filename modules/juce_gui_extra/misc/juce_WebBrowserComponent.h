@@ -68,7 +68,7 @@ public:
 
                     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-                or you need to change windows registry values for your application.  More infromation on the latter
+                or you need to change windows registry values for your application.  More information on the latter
                 can be found here:
 
                 https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/ee330730(v=vs.85)?redirectedfrom=MSDN#browser-emulation
