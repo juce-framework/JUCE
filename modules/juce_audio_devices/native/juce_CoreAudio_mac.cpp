@@ -1113,39 +1113,51 @@ private:
         return noErr;
     }
 
-    static OSStatus deviceListenerProc (AudioDeviceID /*inDevice*/, UInt32 /*inLine*/,
-                                        const AudioObjectPropertyAddress* pa, void* inClientData)
+    static OSStatus deviceListenerProc (AudioDeviceID /*inDevice*/,
+                                        UInt32 numAddresses,
+                                        const AudioObjectPropertyAddress* pa,
+                                        void* inClientData)
     {
-        auto intern = static_cast<CoreAudioInternal*> (inClientData);
+        auto& intern = *static_cast<CoreAudioInternal*> (inClientData);
 
-        switch (pa->mSelector)
+        const auto xruns = std::count_if (pa, pa + numAddresses, [] (const AudioObjectPropertyAddress& x)
         {
-            case kAudioDeviceProcessorOverload:
-                intern->xruns++;
-                break;
+            return x.mSelector == kAudioDeviceProcessorOverload;
+        });
 
-            case kAudioDevicePropertyBufferSize:
-            case kAudioDevicePropertyBufferFrameSize:
-            case kAudioDevicePropertyNominalSampleRate:
-            case kAudioDevicePropertyStreamFormat:
-            case kAudioDevicePropertyDeviceIsAlive:
-            case kAudioStreamPropertyPhysicalFormat:
-                intern->deviceDetailsChanged();
-                break;
+        intern.xruns += xruns;
 
-            case kAudioDevicePropertyDeviceHasChanged:
-            case kAudioObjectPropertyOwnedObjects:
-                intern->deviceRequestedRestart();
-                break;
+        const auto detailsChanged = std::any_of (pa, pa + numAddresses, [] (const AudioObjectPropertyAddress& x)
+        {
+            constexpr UInt32 selectors[]
+            {
+                kAudioDevicePropertyBufferSize,
+                kAudioDevicePropertyBufferFrameSize,
+                kAudioDevicePropertyNominalSampleRate,
+                kAudioDevicePropertyStreamFormat,
+                kAudioDevicePropertyDeviceIsAlive,
+                kAudioStreamPropertyPhysicalFormat,
+            };
 
-            case kAudioDevicePropertyBufferSizeRange:
-            case kAudioDevicePropertyVolumeScalar:
-            case kAudioDevicePropertyMute:
-            case kAudioDevicePropertyPlayThru:
-            case kAudioDevicePropertyDataSource:
-            case kAudioDevicePropertyDeviceIsRunning:
-                break;
-        }
+            return std::find (std::begin (selectors), std::end (selectors), x.mSelector) != std::end (selectors);
+        });
+
+        const auto requestedRestart = std::any_of (pa, pa + numAddresses, [] (const AudioObjectPropertyAddress& x)
+        {
+            constexpr UInt32 selectors[]
+            {
+                kAudioDevicePropertyDeviceHasChanged,
+                kAudioObjectPropertyOwnedObjects,
+            };
+
+            return std::find (std::begin (selectors), std::end (selectors), x.mSelector) != std::end (selectors);
+        });
+
+        if (detailsChanged)
+            intern.deviceDetailsChanged();
+
+        if (requestedRestart)
+            intern.deviceRequestedRestart();
 
         return noErr;
     }
@@ -1378,19 +1390,18 @@ private:
         start (previousCallback);
     }
 
-    static OSStatus hardwareListenerProc (AudioDeviceID /*inDevice*/, UInt32 /*inLine*/, const AudioObjectPropertyAddress* pa, void* inClientData)
+    static OSStatus hardwareListenerProc (AudioDeviceID /*inDevice*/,
+                                          UInt32 numAddresses,
+                                          const AudioObjectPropertyAddress* pa,
+                                          void* inClientData)
     {
-        switch (pa->mSelector)
+        const auto detailsChanged = std::any_of (pa, pa + numAddresses, [] (const AudioObjectPropertyAddress& x)
         {
-            case kAudioHardwarePropertyDevices:
-                static_cast<CoreAudioInternal*> (inClientData)->deviceDetailsChanged();
-                break;
+            return x.mSelector == kAudioHardwarePropertyDevices;
+        });
 
-            case kAudioHardwarePropertyDefaultOutputDevice:
-            case kAudioHardwarePropertyDefaultInputDevice:
-            case kAudioHardwarePropertyDefaultSystemOutputDevice:
-                break;
-        }
+        if (detailsChanged)
+            static_cast<CoreAudioInternal*> (inClientData)->deviceDetailsChanged();
 
         return noErr;
     }
