@@ -1666,6 +1666,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Expression.cpp">
       <Filter>JUCE Modules\juce_core\maths</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions_test.cpp">
+      <Filter>JUCE Modules\juce_core\maths</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Random.cpp">
       <Filter>JUCE Modules\juce_core\maths</Filter>
     </ClCompile>

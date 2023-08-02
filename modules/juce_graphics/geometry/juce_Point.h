@@ -66,7 +66,7 @@ public:
     constexpr bool isOrigin() const noexcept                           { return operator== (Point()); }
 
     /** Returns true if the coordinates are finite values. */
-    constexpr inline bool isFinite() const noexcept                    { return juce_isfinite(x) && juce_isfinite(y); }
+    constexpr inline bool isFinite() const noexcept                    { return juce_isfinite (x) && juce_isfinite (y); }
 
     /** Returns the point's x coordinate. */
     constexpr inline ValueType getX() const noexcept                   { return x; }
