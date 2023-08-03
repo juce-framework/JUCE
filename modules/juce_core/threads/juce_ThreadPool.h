@@ -227,7 +227,7 @@ public:
         @param threadStackSizeBytes  the size of the stack of each thread. If this value
                                      is zero then the default stack size of the OS will
                                      be used.
-        @param priority              the desired priority of each thread in the pool.
+        @param desiredThreadPriority the desired priority of each thread in the pool.
     */
     ThreadPool (int numberOfThreads,
                 size_t threadStackSizeBytes = Thread::osDefaultStackSize,
