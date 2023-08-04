@@ -31,7 +31,7 @@ class AAXPluginId
 public:
     static std::optional<AAXPluginId> create (std::array<char, 4> letters)
     {
-        std::array<size_t, 4> indices;
+        std::array<size_t, 4> indices{};
 
         for (size_t i = 0; i < letters.size(); ++i)
         {
