@@ -84,7 +84,7 @@ public:
         [[nodiscard]] RealtimeOptions withPriority (int newPriority) const
         {
             jassert (isPositiveAndNotGreaterThan (newPriority, 10));
-            return withMember (*this, &RealtimeOptions::priority, juce::jlimit (newPriority, 0, 10));
+            return withMember (*this, &RealtimeOptions::priority, juce::jlimit (0, 10, newPriority));
         }
 
         /** Specify the expected amount of processing time required each time the thread wakes up.
