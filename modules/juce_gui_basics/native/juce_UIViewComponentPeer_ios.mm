@@ -2211,7 +2211,10 @@ void UIViewComponentPeer::displayLinkCallback()
     for (const auto& r : deferredRepaints)
         [view setNeedsDisplayInRect: convertToCGRect (r)];
 
-    deferredRepaints.clear();
+   #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+    if (metalRenderer == nullptr)
+   #endif
+        deferredRepaints.clear();
 }
 
 //==============================================================================
