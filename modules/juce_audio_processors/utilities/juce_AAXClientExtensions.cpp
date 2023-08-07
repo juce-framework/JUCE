@@ -158,7 +158,7 @@ int32 AAXClientExtensions::getPluginIDForMainBusConfig (const AudioChannelSet& m
 String AAXClientExtensions::getPageFileName() const
 {
    #ifdef JucePlugin_AAXPageTableFile
-    #warning "JucePlugin_AAXPageTableFile is deprecated, instead implement AAXClientExtensions::getPageFileName()"
+    JUCE_COMPILER_WARNING ("JucePlugin_AAXPageTableFile is deprecated, instead implement AAXClientExtensions::getPageFileName()")
     return JucePlugin_AAXPageTableFile;
    #else
     return {};
