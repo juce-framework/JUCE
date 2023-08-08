@@ -472,39 +472,42 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExisting
         CGContextSetBlendMode (context.get(), kCGBlendModeCopy);
         fillCGRect (cgRect, false);
         CGContextSetBlendMode (context.get(), kCGBlendModeNormal);
+        return;
     }
-    else
+
+    if (state->fillType.isColour())
     {
-        if (state->fillType.isColour())
-        {
-            CGContextFillRect (context.get(), cgRect);
-        }
-        else
-        {
-            ScopedCGContextState scopedState (context.get());
-
-            CGContextClipToRect (context.get(), cgRect);
-
-            if (state->fillType.isGradient())
-                drawGradient();
-            else
-                drawImage (state->fillType.image, state->fillType.transform, true);
-        }
+        CGContextFillRect (context.get(), cgRect);
+        return;
     }
+
+    ScopedCGContextState scopedState (context.get());
+    CGContextClipToRect (context.get(), cgRect);
+
+    if (state->fillType.isGradient())
+        drawGradient();
+    else
+        drawImage (state->fillType.image, state->fillType.transform, true);
 }
 
 void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& transform)
 {
-    ScopedCGContextState scopedState (context.get());
-
-    setContextClipToPath (path, transform);
-
     if (state->fillType.isColour())
     {
         createPath (path, transform);
-        CGContextFillPath (context.get());
+
+        if (path.isUsingNonZeroWinding())
+            CGContextFillPath (context.get());
+        else
+            CGContextEOFillPath (context.get());
+
+        return;
     }
-    else if (state->fillType.isGradient())
+
+    ScopedCGContextState scopedState (context.get());
+    setContextClipToPath (path, transform);
+
+    if (state->fillType.isGradient())
         drawGradient();
     else
         drawImage (state->fillType.image, state->fillType.transform, true);
@@ -590,28 +593,25 @@ void CoreGraphicsContext::drawLine (const Line<float>& line)
 
 void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
 {
-    HeapBlock<CGRect> rects (list.getNumRectangles());
-
-    size_t num = 0;
+    std::vector<CGRect> rects;
+    rects.reserve ((size_t) list.getNumRectangles());
 
     for (auto& r : list)
-        rects[num++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
+        rects.push_back (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()));
 
     if (state->fillType.isColour())
     {
-        CGContextFillRects (context.get(), rects, num);
+        CGContextFillRects (context.get(), rects.data(), rects.size());
+        return;
     }
+
+    ScopedCGContextState scopedState (context.get());
+    CGContextClipToRects (context.get(), rects.data(), rects.size());
+
+    if (state->fillType.isGradient())
+        drawGradient();
     else
-    {
-        ScopedCGContextState scopedState (context.get());
-
-        CGContextClipToRects (context.get(), rects, num);
-
-        if (state->fillType.isGradient())
-            drawGradient();
-        else
-            drawImage (state->fillType.image, state->fillType.transform, true);
-    }
+        drawImage (state->fillType.image, state->fillType.transform, true);
 }
 
 void CoreGraphicsContext::setFont (const Font& newFont)
@@ -700,10 +700,8 @@ CoreGraphicsContext::SavedState::SavedState()
 CoreGraphicsContext::SavedState::SavedState (const SavedState& other)
     : fillType (other.fillType), font (other.font), fontRef (other.fontRef),
       textMatrix (other.textMatrix), inverseTextMatrix (other.inverseTextMatrix),
-      gradient (other.gradient.get())
+      gradient (other.gradient.get() != nullptr ? CGGradientRetain (other.gradient.get()) : nullptr)
 {
-    if (gradient != nullptr)
-        CGGradientRetain (gradient.get());
 }
 
 CoreGraphicsContext::SavedState::~SavedState() = default;
@@ -717,9 +715,9 @@ void CoreGraphicsContext::SavedState::setFill (const FillType& newFill)
 static CGGradientRef createGradient (const ColourGradient& g, CGColorSpaceRef colourSpace)
 {
     auto numColours = g.getNumColours();
-    auto data = (CGFloat*) alloca ((size_t) numColours * 5 * sizeof (CGFloat));
-    auto locations = data;
-    auto components = data + numColours;
+    std::vector<CGFloat> data ((size_t) numColours * 5);
+    auto locations = data.data();
+    auto components = locations + numColours;
     auto comps = components;
 
     for (int i = 0; i < numColours; ++i)
