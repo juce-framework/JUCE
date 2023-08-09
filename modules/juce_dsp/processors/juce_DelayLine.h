@@ -125,7 +125,7 @@ public:
         For very short delay times, the result of getMaximumDelayInSamples() may
         differ from the last value passed to setMaximumDelayInSamples().
     */
-    int getMaximumDelayInSamples() const noexcept       { return totalSize - 1; }
+    int getMaximumDelayInSamples() const noexcept       { return totalSize - 2; }
 
     /** Resets the internal state variables of the processor. */
     void reset();
