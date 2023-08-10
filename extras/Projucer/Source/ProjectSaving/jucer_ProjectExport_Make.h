@@ -129,14 +129,14 @@ public:
     {
     public:
         MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
-            : build_tools::ProjectType::Target (targetType), owner (exporter)
+            : Target (targetType), owner (exporter)
         {}
 
         StringArray getCompilerFlags() const
         {
             StringArray result;
 
-            if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle)
+            if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle || type == SharedCodeTarget)
             {
                 result.add ("-fPIC");
                 result.add ("-fvisibility=hidden");
