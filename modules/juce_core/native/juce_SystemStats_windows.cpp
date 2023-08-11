@@ -721,45 +721,83 @@ String SystemStats::getUniqueDeviceID()
         };
         #pragma pack (pop)
 
+        if (smbiosBuffer->size() < sizeof (RawSMBIOSData))
+        {
+            // Malformed buffer; not enough room for RawSMBIOSData instance
+            jassertfalse;
+            return {};
+        }
+
         String uuid;
         const auto* asRawSMBIOSData = unalignedPointerCast<const RawSMBIOSData*> (smbiosBuffer->data());
+
+        if (smbiosBuffer->size() < sizeof (RawSMBIOSData) + static_cast<size_t> (asRawSMBIOSData->length))
+        {
+            // Malformed buffer; declared length is longer than the buffer we were given
+            jassertfalse;
+            return {};
+        }
+
         Span<const std::byte> content (smbiosBuffer->data() + sizeof (RawSMBIOSData), asRawSMBIOSData->length);
 
         while (! content.empty())
         {
-            const auto* header      = unalignedPointerCast<const SMBIOSHeader*> (content.data());
-            const auto* stringTable = unalignedPointerCast<const char*> (content.data() + header->length);
-            std::vector<const char*> strings;
+            if (content.size() < sizeof (SMBIOSHeader))
+            {
+                // Malformed buffer; not enough room for header
+                jassertfalse;
+                break;
+            }
+
+            const auto* header = unalignedPointerCast<const SMBIOSHeader*> (content.data());
+
+            if (content.size() < header->length)
+            {
+                // Malformed buffer; declared length is longer than the buffer we were given
+                jassertfalse;
+                break;
+            }
+
+            std::vector<std::string_view> strings;
 
             // Each table comprises a struct and a varying number of null terminated
             // strings. The string section is delimited by a pair of null terminators.
             // Some fields in the header are indices into the string table.
 
-            const auto sizeofStringTable = [stringTable, &strings, &content]
+            const auto endOfStringTable = [&header, &strings, &content]
             {
-                size_t tableLen = 0;
+                const auto* dataTable = unalignedPointerCast<const char*> (content.data());
+                size_t stringOffset = header->length;
 
-                while (tableLen < content.size())
+                while (stringOffset < content.size())
                 {
-                    const auto* str = stringTable + tableLen;
-                    const auto n = strlen (str);
+                    const auto* str = dataTable + stringOffset;
+                    const auto maxLength = content.size() - stringOffset;
+                    const auto n = strnlen (str, maxLength);
 
                     if (n == 0)
                         break;
 
-                    strings.push_back (str);
-                    tableLen += n + 1;
+                    strings.emplace_back (str, n);
+                    stringOffset += std::min (n + 1, maxLength);
                 }
 
-                return jmax (tableLen, (size_t) 1) + 1;
+                const auto lengthAfterHeader = jmax ((size_t) header->length + 2, stringOffset + 1);
+                return jmin (lengthAfterHeader, content.size());
             }();
 
-            const auto stringFromOffset = [&content, &strings = std::as_const (strings)] (size_t byteOffset)
+            const auto stringFromOffset = [&content, &strings] (size_t byteOffset) -> String
             {
-                if (const auto index = std::to_integer<size_t> (content[byteOffset]); 0 < index && index <= strings.size())
-                    return strings[index - 1];
+                if (! isPositiveAndBelow (byteOffset, content.size()))
+                    return std::string{};
 
-                return "";
+                const auto index = std::to_integer<size_t> (content[byteOffset]);
+
+                if (index <= 0 || strings.size() < index)
+                    return std::string{};
+
+                const auto view = strings[index - 1];
+                return std::string { view };
             };
 
             enum
@@ -793,10 +831,14 @@ String SystemStats::getUniqueDeviceID()
                     uuid += "\n";
 
                     char hexBuf[(16 * 2) + 1]{};
-                    const auto* src = content.data() + systemUUID;
 
-                    for (auto i = 0; i != 16; ++i)
-                        snprintf (hexBuf + 2 * i, 3, "%02hhX", std::to_integer<uint8_t> (src[i]));
+                    if (systemUUID + 16 < content.size())
+                    {
+                        const auto* src = content.data() + systemUUID;
+
+                        for (auto i = 0; i != 16; ++i)
+                            snprintf (hexBuf + 2 * i, 3, "%02hhX", std::to_integer<uint8_t> (src[i]));
+                    }
 
                     uuid += hexBuf;
                     uuid += "\n";
@@ -826,10 +868,9 @@ String SystemStats::getUniqueDeviceID()
                     uuid += stringFromOffset (processorPartNumber);
                     uuid += "\n";
                     break;
-                }
+            }
 
-            const auto increment = header->length + sizeofStringTable;
-            content = Span (content.data() + increment, content.size() - increment);
+            content = Span (content.data() + endOfStringTable, content.size() - endOfStringTable);
         }
 
         return String (uuid.hashCode64());
