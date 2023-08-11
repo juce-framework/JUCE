@@ -339,7 +339,8 @@ public:
                     "-Wswitch-enum",
                     "-Wuninitialized",
                     "-Wunreachable-code",
-                    "-Wunused-parameter"
+                    "-Wunused-parameter",
+                    "-Wmissing-field-initializers"
                 };
 
                 result.cpp = {

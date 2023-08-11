@@ -128,10 +128,10 @@ bool Thread::createNativeThread (Priority priority)
     struct ThreadData
     {
         Thread& thread;
-        std::promise<bool> started;
+        std::promise<bool> started{};
     };
 
-    ThreadData threadData { *this };
+    ThreadData threadData { *this, {} };
 
     threadId = threadHandle = makeThreadHandle (attribute, &threadData, [] (void* userData) -> void*
     {

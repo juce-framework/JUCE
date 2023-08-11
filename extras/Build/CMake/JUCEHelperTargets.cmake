@@ -65,6 +65,7 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQU
         -Wpedantic
         -Wdeprecated
         -Wfloat-equal
+        -Wmissing-field-initializers
         $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>:
             -Wzero-as-null-pointer-constant
             -Wunused-private-field
@@ -94,6 +95,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wno-strict-overflow
         -Wshadow
         -Wfloat-equal
+        -Wmissing-field-initializers
         $<$<COMPILE_LANGUAGE:CXX>:
             -Woverloaded-virtual
             -Wreorder
