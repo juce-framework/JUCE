@@ -1345,7 +1345,7 @@ public:
                     const auto resourceDir = contentsDir + "\\Resources";
 
                     return "\r\ndel /s /q " + (contentsDir + "\\moduleinfo.json").quoted() + "\r\n"
-                           "if not exist " + resourceDir.quoted() + " mkdir " + resourceDir.quoted() + "\r\n"
+                           "if not exist \"" + resourceDir + "\\\" del /s /q " + resourceDir.quoted() + " && mkdir " + resourceDir.quoted() + "\r\n"
                           + writer.quoted()
                           + " -create -version "
                           + getOwner().project.getVersionString().quoted()
@@ -1377,7 +1377,7 @@ public:
                 std::for_each (segments.begin(), std::prev (segments.end()), [&] (const auto& s)
                 {
                     directory += (directory.isEmpty() ? "" : "\\") + s;
-                    script += "if not exist \"" + directory + "\" mkdir \"" + directory + "\"\r\n";
+                    script += "if not exist \"" + directory + "\\\" del /s /q " + directory.quoted() + " && mkdir " + directory.quoted() + "\r\n";
                 });
 
                 return script;
