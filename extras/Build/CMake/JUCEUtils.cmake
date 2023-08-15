@@ -1236,6 +1236,8 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
 
     if(NOT kind STREQUAL "LV2")
         _juce_configure_bundle(${shared_code_target} ${target_name})
+    else()
+        _juce_write_configure_time_info(${shared_code_target})
     endif()
 
     _juce_set_plugin_target_properties(${shared_code_target} ${kind})
