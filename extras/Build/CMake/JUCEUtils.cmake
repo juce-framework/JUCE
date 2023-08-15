@@ -886,6 +886,15 @@ function(_juce_set_copy_properties shared_code target from to_property)
 endfunction()
 
 function(juce_enable_copy_plugin_step shared_code_target)
+    get_target_property(step_added ${shared_code_target} _JUCE_PLUGIN_COPY_STEP_ADDED)
+
+    if(step_added)
+        message(WARNING "Plugin copy step requested multiple times for ${shared_code_target}")
+        return()
+    endif()
+
+    set_target_properties(${shared_code_target} PROPERTIES _JUCE_PLUGIN_COPY_STEP_ADDED TRUE)
+
     get_target_property(active_targets "${shared_code_target}" JUCE_ACTIVE_PLUGIN_TARGETS)
 
     foreach(target IN LISTS active_targets)
@@ -981,6 +990,55 @@ function(_juce_add_vst3_manifest_helper_target)
     target_link_libraries(juce_vst3_helper PRIVATE Threads::Threads ${CMAKE_DL_LIBS} juce_recommended_config_flags)
 endfunction()
 
+function(juce_enable_vst3_manifest_step shared_code_target)
+    get_target_property(manifest_step_added ${shared_code_target} _JUCE_VST3_MANIFEST_STEP_ADDED)
+
+    if(manifest_step_added)
+        message(WARNING "VST3 manifest generation has already been enabled for target ${shared_code_target}. "
+            "You may need to set VST3_AUTO_MANIFEST FALSE in juce_add_plugin, and/or check that you're "
+            "not calling juce_enable_vst3_manifest_step multiple times.")
+        return()
+    endif()
+
+    get_target_property(copy_step_added ${shared_code_target} _JUCE_PLUGIN_COPY_STEP_ADDED)
+
+    if(copy_step_added)
+        message(FATAL "VST3 manifest generation would run after plugin copy step, so it has been disabled. "
+            "If you're manually calling juce_enable_vst3_manifest_step, then you probably need to call "
+            "juce_enable_copy_plugin_step too.")
+    endif()
+
+    if((MSYS OR MINGW) AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+        message(WARNING "VST3 manifest generation is disabled for ${shared_code_target} because the compiler is not supported.")
+        return()
+    endif()
+
+    set(target_name ${shared_code_target}_VST3)
+    get_target_property(product ${target_name} JUCE_PLUGIN_ARTEFACT_FILE)
+
+    if(NOT product)
+        message(FATAL "Property JUCE_PLUGIN_ARTEFACT_FILE not set for ${target_name}")
+    endif()
+
+    # Add a target for the helper tool
+    _juce_add_vst3_manifest_helper_target()
+
+    get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
+
+    # Use the helper tool to write out the moduleinfo.json
+    add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove -f "${product}/Contents/moduleinfo.json"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${product}/Contents/Resources"
+        COMMAND juce_vst3_helper
+            -create
+            -version "${target_version_string}"
+            -path "${product}"
+            -output "${product}/Contents/Resources/moduleinfo.json"
+        VERBATIM)
+
+    set_target_properties(${shared_code_target} PROPERTIES _JUCE_VST3_MANIFEST_STEP_ADDED TRUE)
+endfunction()
+
 # ==================================================================================================
 
 function(_juce_set_plugin_target_properties shared_code_target kind)
@@ -1014,7 +1072,6 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         _juce_create_windows_package(${shared_code_target} ${target_name} vst3 "" x86-win x86_64-win)
 
-        # Forward-slash separator is vital for moduleinfotool to work correctly on Windows!
         set(output_path "${products_folder}/${product_name}.vst3")
 
         if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
@@ -1023,26 +1080,13 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
                 LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_TARGET_ARCHITECTURE}-linux")
         endif()
 
-        # The VST3 helper tool requires <filesystem> which is broken before mingw version 9
-        if((NOT (MSYS OR MINGW)) OR CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 9)
-            # Add a target for the helper tool
-            _juce_add_vst3_manifest_helper_target()
-
-            get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
-
-            # Use the helper tool to write out the moduleinfo.json
-            add_custom_command(TARGET ${target_name} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E remove -f "${output_path}/Contents/moduleinfo.json"
-                COMMAND ${CMAKE_COMMAND} -E make_directory "${output_path}/Contents/Resources"
-                COMMAND juce_vst3_helper
-                    -create
-                    -version "${target_version_string}"
-                    -path "${output_path}"
-                    -output "${output_path}/Contents/Resources/moduleinfo.json"
-                VERBATIM)
-        endif()
-
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_VST3_COPY_DIR)
+
+        get_target_property(vst3_auto_manifest ${shared_code_target} JUCE_VST3_AUTO_MANIFEST)
+
+        if(vst3_auto_manifest)
+            juce_enable_vst3_manifest_step(${shared_code_target})
+        endif()
     elseif(kind STREQUAL "VST")
         set_target_properties(${target_name} PROPERTIES
             BUNDLE_EXTENSION vst
@@ -1514,9 +1558,11 @@ function(_juce_set_fallback_properties target)
 
     _juce_set_property_if_not_set(${target} SUPPRESS_AU_PLIST_RESOURCE_USAGE FALSE)
 
-    _juce_set_property_if_not_set(${target} HARDENED_RUNTIME_ENABLED NO)
-    _juce_set_property_if_not_set(${target} APP_SANDBOX_ENABLED NO)
-    _juce_set_property_if_not_set(${target} APP_SANDBOX_INHERIT NO)
+    _juce_set_property_if_not_set(${target} HARDENED_RUNTIME_ENABLED FALSE)
+    _juce_set_property_if_not_set(${target} APP_SANDBOX_ENABLED FALSE)
+    _juce_set_property_if_not_set(${target} APP_SANDBOX_INHERIT FALSE)
+
+    _juce_set_property_if_not_set(${target} VST3_AUTO_MANIFEST TRUE)
 
     get_target_property(is_synth ${target} JUCE_IS_SYNTH)
 
@@ -1771,6 +1817,7 @@ function(_juce_initialise_target target)
         HARDENED_RUNTIME_ENABLED
         APP_SANDBOX_ENABLED
         APP_SANDBOX_INHERIT
+        VST3_AUTO_MANIFEST
 
         PLUGIN_NAME
         PLUGIN_MANUFACTURER_CODE
