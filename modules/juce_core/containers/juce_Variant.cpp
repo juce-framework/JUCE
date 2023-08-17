@@ -314,7 +314,7 @@ struct var::VariantType
     static var objectClone (const var& original)
     {
         if (auto* d = original.getDynamicObject())
-            return d->clone().get();
+            return d->clone().release();
 
         jassertfalse; // can only clone DynamicObjects!
         return {};

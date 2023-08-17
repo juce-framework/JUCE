@@ -1,6 +1,33 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+DynamicObject::clone now returns unique_ptr<DynamicObject> instead of
+ReferenceCountedObjectPtr<DynamicObject>.
+
+Possible Issues
+---------------
+Overrides of this function using the old signature will fail to compile.
+The result of this function may need to be manually converted to a
+ReferenceCountedObjectPtr.
+
+Workaround
+----------
+Update overrides to use the new signature.
+If necessary, manually construct a ReferenceCountedObjectPtr at call sites.
+
+Rationale
+---------
+It's easy to safely upgrade a unique_ptr to a shared/refcounted pointer.
+However, it's not so easy to convert safely in the opposite direction.
+Generally, returning unique_ptrs rather than refcounted pointers leads to more
+flexible APIs.
+
+
 Version 7.0.7
 =============
 
