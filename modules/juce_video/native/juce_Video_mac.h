@@ -797,7 +797,7 @@ private:
 
     static double toSeconds (const CMTime& t) noexcept
     {
-        return t.timescale != 0 ? (t.value / (double) t.timescale) : 0.0;
+        return t.timescale != 0 ? ((double) t.value / (double) t.timescale) : 0.0;
     }
 
     void playerPreparationFinished (const URL& url, Result r)
