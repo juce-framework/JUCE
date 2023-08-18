@@ -29,6 +29,9 @@ String getTemplatedMathsFunctionUnitTestName (const String& functionName)
 {
     const auto getTypeName = []() -> String
     {
+        if constexpr (std::is_same_v<int, T>)
+            return "int";
+
         if constexpr (std::is_same_v<float, T>)
             return "float";
 
@@ -358,6 +361,56 @@ public:
     }
 };
 
+template<>
+class ApproximatelyEqualTests<int> final : public UnitTest
+{
+public:
+    ApproximatelyEqualTests()
+        : UnitTest { getTemplatedMathsFunctionUnitTestName<int> ("approximatelyEqual"), UnitTestCategories::maths }
+    {}
+
+    void runTest() final
+    {
+        beginTest ("Identical integers are always equal");
+        {
+            expect (approximatelyEqual ( 0,  0));
+            expect (approximatelyEqual (-0, -0));
+
+            expect (approximatelyEqual ( 1,  1));
+            expect (approximatelyEqual (-1, -1));
+
+            using limits = std::numeric_limits<int>;
+            constexpr auto min = limits::min();
+            constexpr auto max = limits::max();
+
+            expect (approximatelyEqual (min, min));
+            expect (approximatelyEqual (max, max));
+        }
+
+        beginTest ("Non-identical integers are never equal");
+        {
+            expect (! approximatelyEqual ( 0,  1));
+            expect (! approximatelyEqual ( 0, -1));
+
+            expect (! approximatelyEqual ( 1,  2));
+            expect (! approximatelyEqual (-1, -2));
+
+            using limits = std::numeric_limits<int>;
+            constexpr auto min = limits::min();
+            constexpr auto max = limits::max();
+
+            expect (! approximatelyEqual (min, min + 1));
+            expect (! approximatelyEqual (max, max - 1));
+        }
+
+        beginTest ("Zero is equal regardless of the sign");
+        {
+            expect (approximatelyEqual ( 0, -0));
+            expect (approximatelyEqual (-0,  0));
+        }
+    }
+};
+
 template <typename T>
 class IsFiniteTests final : public UnitTest
 {
@@ -471,8 +524,15 @@ struct MathsFloatingPointFunctionsTests
     ApproximatelyEqualTests<Type> approximatelyEqualTests;
 };
 
+template<>
+struct MathsFloatingPointFunctionsTests<int>
+{
+    ApproximatelyEqualTests<int> approximatelyEqualTests;
+};
+
 struct MathsFunctionsTests
 {
+    MathsFloatingPointFunctionsTests<int> intFunctionTests;
     MathsFloatingPointFunctionsTests<float> floatFunctionTests;
     MathsFloatingPointFunctionsTests<double> doubleFunctionTests;
     MathsFloatingPointFunctionsTests<long double> longDoubleFunctionTests;
