@@ -86,7 +86,7 @@ public:
     DemoSliderPropertyComponent (const String& propertyName)
         : SliderPropertyComponent (propertyName, 0.0, 100.0, 0.001)
     {
-        setValue (Random::getSystemRandom().nextDouble() * 42.0);
+        slider.setValue (Random::getSystemRandom().nextDouble() * 42.0);
     }
 
     void setValue (double newValue) override

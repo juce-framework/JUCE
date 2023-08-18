@@ -155,13 +155,9 @@ public:
     pointer_sized_int handleVstPluginCanDo (int32, pointer_sized_int, void* ptr, float) override
     {
         if (auto* str = static_cast<const char*> (ptr))
-        {
-            if (strcmp (str, "hasCockosEmbeddedUI") == 0)
-                return 0xbeef0000;
-
-            if (strcmp (str, "hasCockosExtensions") == 0)
-                return 0xbeef0000;
-        }
+            for (auto* key : { "hasCockosEmbeddedUI", "hasCockosExtensions" })
+                if (strcmp (str, key) == 0)
+                    return (pointer_sized_int) 0xbeef0000;
 
         return 0;
     }

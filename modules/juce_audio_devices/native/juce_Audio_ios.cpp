@@ -660,7 +660,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
             result.setIsRecording   (hostIsRecording);
             result.setIsLooping     (hostIsCycling);
             result.setLoopPoints    (LoopPoints { hostCycleStartBeat, hostCycleEndBeat });
-            result.setTimeInSeconds (*result.getTimeInSamples() / impl.sampleRate);
+            result.setTimeInSeconds ((double) *result.getTimeInSamples() / impl.sampleRate);
 
             Float64 hostBeat = 0;
             Float64 hostTempo = 0;
@@ -707,7 +707,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
         {
             if (interAppAudioConnected)
             {
-                if (UIImage* hostUIImage = AudioOutputUnitGetHostIcon (audioUnit, size))
+                if (UIImage* hostUIImage = AudioOutputUnitGetHostIcon (audioUnit, (float) size))
                     return juce_createImageFromUIImage (hostUIImage);
             }
         }

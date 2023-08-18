@@ -78,7 +78,7 @@ public:
         addAndMakeVisible (fileChooser);
         fileChooser.addListener (this);
 
-        lookAndFeelChanged();
+        updateLookAndFeel();
 
         setSize (500, 500);
     }
@@ -121,7 +121,7 @@ private:
         editor->loadContent (fileChooser.getCurrentFile().loadFileAsString());
     }
 
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
         if (auto* v4 = dynamic_cast<LookAndFeel_V4*> (&LookAndFeel::getDefaultLookAndFeel()))
         {
@@ -133,6 +133,11 @@ private:
         {
             editor->setColourScheme (cppTokeniser.getDefaultColourScheme());
         }
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
     }
 
     CodeEditorComponent::ColourScheme getDarkCodeEditorColourScheme()

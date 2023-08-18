@@ -412,6 +412,7 @@ public:
         readerSource->setLooping (loopState.getValue());
 
         init();
+        resized();
 
         return true;
     }
@@ -461,7 +462,15 @@ public:
 
         audioSourcePlayer.setSource (currentDemo.get());
 
-        initParameters();
+        auto& parameters = currentDemo->getParameters();
+
+        parametersComponent.reset();
+
+        if (! parameters.empty())
+        {
+            parametersComponent = std::make_unique<DemoParametersComponent> (parameters);
+            addAndMakeVisible (parametersComponent.get());
+        }
     }
 
     void play()
@@ -484,21 +493,6 @@ public:
     }
 
     AudioThumbnailComponent& getThumbnailComponent()    { return header.thumbnailComp; }
-
-    void initParameters()
-    {
-        auto& parameters = currentDemo->getParameters();
-
-        parametersComponent.reset();
-
-        if (parameters.size() > 0)
-        {
-            parametersComponent.reset (new DemoParametersComponent (parameters));
-            addAndMakeVisible (parametersComponent.get());
-        }
-
-        resized();
-    }
 
 private:
     //==============================================================================

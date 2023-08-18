@@ -245,23 +245,25 @@ public:
     //==============================================================================
     bool BusCountWritable ([[maybe_unused]] AudioUnitScope scope) override
     {
-       #ifdef JucePlugin_PreferredChannelConfigurations
+     #ifdef JucePlugin_PreferredChannelConfigurations
         return false;
-       #else
+     #else
         bool isInput;
 
         if (scopeToDirection (scope, isInput) != noErr)
             return false;
 
-       #if JucePlugin_IsMidiEffect
+      #if JucePlugin_IsMidiEffect
         return false;
-       #elif JucePlugin_IsSynth
+      #else
+       #if JucePlugin_IsSynth
         if (isInput) return false;
        #endif
 
         const int busCount = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
         return (juceFilter->canAddBus (isInput) || (busCount > 0 && juceFilter->canRemoveBus (isInput)));
-       #endif
+      #endif
+     #endif
     }
 
     OSStatus SetBusCount (AudioUnitScope scope, UInt32 count) override
@@ -1197,7 +1199,7 @@ public:
             const auto setTimeInSamples = [&] (auto timeInSamples)
             {
                 info.setTimeInSamples ((int64) (timeInSamples + 0.5));
-                info.setTimeInSeconds (*info.getTimeInSamples() / audioUnit.getSampleRate());
+                info.setTimeInSeconds ((double) (*info.getTimeInSamples()) / audioUnit.getSampleRate());
             };
 
             if (audioUnit.CallHostTransportState (&playing,

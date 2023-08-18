@@ -310,7 +310,7 @@ private:
 
                 if (alignedSize > size)
                 {
-                    size = std::max (alignedSize, alignTo ((size_t) (size * growthFactor), pagesize));
+                    size = std::max (alignedSize, alignTo ((size_t) ((float) size * growthFactor), pagesize));
                     allocation = std::make_unique<AllocationWrapper> (pagesize, size);
                 }
 

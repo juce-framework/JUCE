@@ -49,7 +49,7 @@ public:
             if (auto* popoverController = getViewController().popoverPresentationController)
             {
                 popoverController.sourceView = peer->view;
-                popoverController.sourceRect = CGRectMake (0.f, getHeight() - 10.f, getWidth(), 10.f);
+                popoverController.sourceRect = CGRectMake (0.0f, (float) getHeight() - 10.0f, (float) getWidth(), 10.0f);
                 popoverController.canOverlapSourceViewRect = YES;
                 popoverController.delegate = popoverDelegate.get();
             }

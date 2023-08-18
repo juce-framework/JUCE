@@ -675,7 +675,7 @@ public:
         {
             if (! auValueStrings.isEmpty())
             {
-                auto index = roundToInt (jlimit (0.0f, 1.0f, value) * (auValueStrings.size() - 1));
+                auto index = roundToInt (jlimit (0.0f, 1.0f, value) * (float) (auValueStrings.size() - 1));
                 return auValueStrings[index];
             }
 
@@ -714,7 +714,7 @@ public:
                 auto index = auValueStrings.indexOf (text);
 
                 if (index != -1)
-                    return ((float) index) / (auValueStrings.size() - 1);
+                    return ((float) index) / (float) (auValueStrings.size() - 1);
             }
 
             if (valuesHaveStrings)
@@ -2299,8 +2299,8 @@ private:
         setIfNotNull (outCurrentMeasureDownBeat, getFromPlayHead (&AudioPlayHead::PositionInfo::getPpqPositionOfLastBarStart).orFallback (0.0));
 
         const auto signature = getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeSignature).orFallback (AudioPlayHead::TimeSignature{});
-        setIfNotNull (outTimeSig_Numerator,   (UInt32) signature.numerator);
-        setIfNotNull (outTimeSig_Denominator, (UInt32) signature.denominator);
+        setIfNotNull (outTimeSig_Numerator,   (Float32) signature.numerator);
+        setIfNotNull (outTimeSig_Denominator, (UInt32)  signature.denominator);
 
         return noErr;
     }
@@ -2312,7 +2312,7 @@ private:
         const auto nowPlaying = getFromPlayHead (&AudioPlayHead::PositionInfo::getIsPlaying);
         setIfNotNull (outIsPlaying, nowPlaying);
         setIfNotNull (outTransportStateChanged, std::exchange (wasPlaying, nowPlaying) != nowPlaying);
-        setIfNotNull (outCurrentSampleInTimeLine, getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeInSamples).orFallback (0));
+        setIfNotNull (outCurrentSampleInTimeLine, (double) getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeInSamples).orFallback (0));
         setIfNotNull (outIsCycling, getFromPlayHead (&AudioPlayHead::PositionInfo::getIsLooping));
 
         const auto loopPoints = getFromPlayHead (&AudioPlayHead::PositionInfo::getLoopPoints).orFallback (AudioPlayHead::LoopPoints{});

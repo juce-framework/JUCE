@@ -70,7 +70,7 @@ public:
                     .withAlpha (0.5f)
                     .withBrightness (0.7f);
 
-        componentMovedOrResized (containerComponent, true, true);
+        updateParentSize (comp);
 
         x = Random::getSystemRandom().nextFloat() * parentWidth;
         y = Random::getSystemRandom().nextFloat() * parentHeight;
@@ -117,12 +117,17 @@ public:
     }
 
 private:
-    void componentMovedOrResized (Component& comp, bool, bool) override
+    void updateParentSize (Component& comp)
     {
         const ScopedLock lock (drawing);
 
         parentWidth  = (float) comp.getWidth()  - size;
         parentHeight = (float) comp.getHeight() - size;
+    }
+
+    void componentMovedOrResized (Component& comp, bool, bool) override
+    {
+        updateParentSize (comp);
     }
 
     float x = 0.0f, y = 0.0f,

@@ -43,14 +43,14 @@ namespace PushNotificationsDelegateDetailsOsx
         notification.userInfo = varObjectToNSDictionary (n.properties);
 
         auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
-        notification.deliveryDate = [NSDate dateWithTimeIntervalSince1970: triggerTime.toMilliseconds() / 1000.];
+        notification.deliveryDate = [NSDate dateWithTimeIntervalSince1970: (double) triggerTime.toMilliseconds() / 1000.0];
 
         if (n.repeat && n.triggerIntervalSec >= 60)
         {
             auto dateComponents = [[NSDateComponents alloc] init];
             auto intervalSec = NSInteger (n.triggerIntervalSec);
             dateComponents.second = intervalSec;
-            dateComponents.nanosecond = NSInteger ((n.triggerIntervalSec - intervalSec) * 1000000000);
+            dateComponents.nanosecond = NSInteger ((n.triggerIntervalSec - (double) intervalSec) * 1000000000);
 
             notification.deliveryRepeatInterval = dateComponents;
 
@@ -143,7 +143,7 @@ namespace PushNotificationsDelegateDetailsOsx
 
         if (n.deliveryRepeatInterval != nil)
         {
-            notif.triggerIntervalSec = n.deliveryRepeatInterval.second + (n.deliveryRepeatInterval.nanosecond / 1000000000.);
+            notif.triggerIntervalSec = (double) n.deliveryRepeatInterval.second + ((double) n.deliveryRepeatInterval.nanosecond / 1000000000.0);
         }
         else
         {

@@ -298,9 +298,6 @@ private:
     }
 };
 
-constexpr const char* HostAudioProcessorImpl::innerStateTag;
-constexpr const char* HostAudioProcessorImpl::editorStyleTag;
-
 //==============================================================================
 constexpr auto margin = 10;
 

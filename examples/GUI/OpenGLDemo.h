@@ -1044,12 +1044,12 @@ private:
 
             addAndMakeVisible (textureLabel);
             textureLabel.attachToComponent (&textureBox, true);
-
-            lookAndFeelChanged();
         }
 
         void initialise()
         {
+            lookAndFeelChanged();
+
             showBackgroundToggle.setToggleState (false, sendNotification);
             textureBox.setSelectedItemIndex (0);
             presetBox .setSelectedItemIndex (0);

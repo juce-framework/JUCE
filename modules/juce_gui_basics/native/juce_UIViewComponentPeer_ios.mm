@@ -1929,11 +1929,11 @@ void UIViewComponentPeer::updateScreenBounds()
         {
             // this will re-centre the window, but leave its size unchanged
 
-            auto centreRelX = oldArea.getCentreX() / (float) oldDesktop.getWidth();
-            auto centreRelY = oldArea.getCentreY() / (float) oldDesktop.getHeight();
+            auto centreRelX = (float) oldArea.getCentreX() / (float) oldDesktop.getWidth();
+            auto centreRelY = (float) oldArea.getCentreY() / (float) oldDesktop.getHeight();
 
-            auto x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
-            auto y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
+            auto x = ((int) ((float) newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
+            auto y = ((int) ((float) newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
 
             component.setBounds (oldArea.withPosition (x, y));
         }
@@ -2232,7 +2232,7 @@ void UIViewComponentPeer::drawRectWithContext (CGContextRef cg, CGRect)
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
     CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, getComponent().getHeight()));
-    CoreGraphicsContext g (cg, getComponent().getHeight());
+    CoreGraphicsContext g (cg, (float) getComponent().getHeight());
 
     insideDrawRect = true;
     handlePaint (g);

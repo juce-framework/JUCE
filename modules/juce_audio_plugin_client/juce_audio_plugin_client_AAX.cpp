@@ -1257,7 +1257,7 @@ namespace AAXClasses
                 }());
             }
 
-            const auto offset = timeCodeIfAvailable.has_value() ? timeCodeIfAvailable->offset : int64_t{};
+            const auto offset = timeCodeIfAvailable.has_value() ? (double) timeCodeIfAvailable->offset : 0.0;
             const auto effectiveRate = info.getFrameRate().hasValue() ? info.getFrameRate()->getEffectiveRate() : 0.0;
             info.setEditOriginTime (makeOptional (effectiveRate != 0.0 ? offset / effectiveRate : offset));
 
