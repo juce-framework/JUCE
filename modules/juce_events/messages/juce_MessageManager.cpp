@@ -292,10 +292,7 @@ struct MessageManager::Lock::BlockingMessage   : public MessageManager::MessageB
         std::unique_lock lock { mutex };
 
         if (owner != nullptr)
-        {
-            owner->abort();
-            acquired = true;
-        }
+            owner->setAcquired (true);
 
         condvar.wait (lock, [&] { return owner == nullptr; });
     }
@@ -307,18 +304,11 @@ struct MessageManager::Lock::BlockingMessage   : public MessageManager::MessageB
         owner = nullptr;
     }
 
-    bool wasAcquired()
-    {
-        const std::scoped_lock lock { mutex };
-        return acquired;
-    }
-
 private:
     std::mutex mutex;
     std::condition_variable condvar;
 
     const MessageManager::Lock* owner = nullptr;
-    bool acquired = false;
 
     JUCE_DECLARE_NON_COPYABLE (BlockingMessage)
 };
@@ -326,8 +316,23 @@ private:
 //==============================================================================
 MessageManager::Lock::Lock()                            {}
 MessageManager::Lock::~Lock()                           { exit(); }
-void MessageManager::Lock::enter()    const noexcept    {        tryAcquire (true); }
-bool MessageManager::Lock::tryEnter() const noexcept    { return tryAcquire (false); }
+void MessageManager::Lock::enter()    const noexcept    {        exclusiveTryAcquire (true); }
+bool MessageManager::Lock::tryEnter() const noexcept    { return exclusiveTryAcquire (false); }
+
+bool MessageManager::Lock::exclusiveTryAcquire (bool lockIsMandatory) const noexcept
+{
+    if (lockIsMandatory)
+        entryMutex.enter();
+    else if (! entryMutex.tryEnter())
+        return false;
+
+    const auto result = tryAcquire (lockIsMandatory);
+
+    if (! result)
+        entryMutex.exit();
+
+    return result;
+}
 
 bool MessageManager::Lock::tryAcquire (bool lockIsMandatory) const noexcept
 {
@@ -376,7 +381,7 @@ bool MessageManager::Lock::tryAcquire (bool lockIsMandatory) const noexcept
             condvar.wait (lock, [&] { return std::exchange (abortWait, false); });
         }
 
-        if (blockingMessage->wasAcquired())
+        if (acquired)
         {
             mm->threadWithLock = Thread::getCurrentThreadId();
             return true;
@@ -395,15 +400,27 @@ bool MessageManager::Lock::tryAcquire (bool lockIsMandatory) const noexcept
 
 void MessageManager::Lock::exit() const noexcept
 {
+    const auto wasAcquired = [&]
+    {
+        const std::scoped_lock lock { mutex };
+        return acquired;
+    }();
+
+    if (! wasAcquired)
+        return;
+
+    const ScopeGuard unlocker { [&] { entryMutex.exit(); } };
+
     if (blockingMessage == nullptr)
         return;
 
-    const ScopeGuard scope { [&] { blockingMessage = nullptr; } };
+    const ScopeGuard scope { [&]
+    {
+        blockingMessage = nullptr;
+        acquired = false;
+    } };
 
     blockingMessage->stopWaiting();
-
-    if (! blockingMessage->wasAcquired())
-        return;
 
     if (auto* mm = MessageManager::instance)
     {
@@ -414,9 +431,15 @@ void MessageManager::Lock::exit() const noexcept
 
 void MessageManager::Lock::abort() const noexcept
 {
+    setAcquired (false);
+}
+
+void MessageManager::Lock::setAcquired (bool x) const noexcept
+{
     const ScopeGuard scope { [&] { condvar.notify_one(); } };
     const std::scoped_lock lock { mutex };
     abortWait = true;
+    acquired = x;
 }
 
 //==============================================================================
