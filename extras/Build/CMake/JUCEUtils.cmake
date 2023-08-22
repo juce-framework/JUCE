@@ -735,22 +735,17 @@ function(_juce_configure_bundle source_target dest_target)
 
     if(CMAKE_GENERATOR STREQUAL "Xcode")
         get_target_property(product_name ${source_target} JUCE_PRODUCT_NAME)
-
+        set(skip_install NO)
         set(install_path "$(LOCAL_APPS_DIR)")
 
         if(juce_kind_string STREQUAL "AUv3 AppExtension")
-            set(install_path "${install_path}/${product_name}.app")
-
-            if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-                set(install_path "${install_path}/PlugIns")
-            else()
-                set(install_path "${install_path}/Contents/PlugIns")
-            endif()
+            set(skip_install YES)
+            set(install_path "")
         endif()
 
         set_target_properties(${dest_target} PROPERTIES
             XCODE_ATTRIBUTE_INSTALL_PATH "${install_path}"
-            XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
+            XCODE_ATTRIBUTE_SKIP_INSTALL "${skip_install}")
     endif()
 endfunction()
 
@@ -1442,10 +1437,8 @@ function(_juce_configure_plugin_targets target)
 
     if((TARGET ${target}_AUv3) AND (TARGET ${target}_Standalone))
         add_dependencies(${target}_Standalone ${target}_AUv3)
-        # Copy the AUv3 into the Standalone app bundle
-        _juce_copy_dir(${target}_Standalone
-            "$<TARGET_BUNDLE_DIR:${target}_AUv3>"
-            "$<TARGET_BUNDLE_CONTENT_DIR:${target}_Standalone>/PlugIns")
+        set_target_properties(${target}_Standalone PROPERTIES
+            XCODE_EMBED_APP_EXTENSIONS ${target}_AUv3)
     endif()
 
     get_target_property(wants_copy "${target}" JUCE_COPY_PLUGIN_AFTER_BUILD)
