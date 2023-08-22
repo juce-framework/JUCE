@@ -114,6 +114,18 @@ public:
         });
     }
 
+    /** Adds a listener that will be automatically removed again when the Guard is destroyed.
+
+        Be very careful to ensure that the ErasedScopeGuard is destroyed or released before the
+        ListenerList is destroyed, otherwise the ErasedScopeGuard may attempt to dereference a
+        dangling pointer when it is destroyed, which will result in a crash.
+    */
+    ErasedScopeGuard addScoped (ListenerClass& listenerToAdd)
+    {
+        add (&listenerToAdd);
+        return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
+    }
+
     /** Returns the number of registered listeners. */
     int size() const noexcept                                { return listeners.size(); }
 
