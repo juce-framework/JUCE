@@ -391,32 +391,34 @@ private:
         auto d2 = p4 - p3;
         auto divisor = d1.x * d2.y - d2.x * d1.y;
 
-        if (approximatelyEqual (divisor, 0.0f))
+        const auto zero = ValueType{};
+
+        if (approximatelyEqual (divisor, zero))
         {
             if (! (d1.isOrigin() || d2.isOrigin()))
             {
-                if (approximatelyEqual (d1.y, 0.0f) && ! approximatelyEqual (d2.y, 0.0f))
+                if (approximatelyEqual (d1.y, zero) && ! approximatelyEqual (d2.y, zero))
                 {
                     auto along = (p1.y - p3.y) / d2.y;
                     intersection = p1.withX (p3.x + along * d2.x);
                     return isZeroToOne (along);
                 }
 
-                if (approximatelyEqual (d2.y, 0.0f) && ! approximatelyEqual (d1.y, 0.0f))
+                if (approximatelyEqual (d2.y, zero) && ! approximatelyEqual (d1.y, zero))
                 {
                     auto along = (p3.y - p1.y) / d1.y;
                     intersection = p3.withX (p1.x + along * d1.x);
                     return isZeroToOne (along);
                 }
 
-                if (approximatelyEqual (d1.x, 0.0f) && ! approximatelyEqual (d2.x, 0.f))
+                if (approximatelyEqual (d1.x, zero) && ! approximatelyEqual (d2.x, zero))
                 {
                     auto along = (p1.x - p3.x) / d2.x;
                     intersection = p1.withY (p3.y + along * d2.y);
                     return isZeroToOne (along);
                 }
 
-                if (approximatelyEqual (d2.x, 0.0f) && ! approximatelyEqual (d1.x, 0.0f))
+                if (approximatelyEqual (d2.x, zero) && ! approximatelyEqual (d1.x, zero))
                 {
                     auto along = (p3.x - p1.x) / d1.x;
                     intersection = p3.withY (p1.y + along * d1.y);
