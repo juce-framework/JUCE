@@ -1,6 +1,31 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+The minimum supported CMake version is now 3.22.
+
+Possible Issues
+---------------
+It will no longer be possible to configure JUCE projects with CMake versions
+between 3.15 and 3.21 inclusive.
+
+Workaround
+----------
+No workaround is available. Newer versions of CMake can be obtained from the
+official download page, or through system package managers.
+
+Rationale
+---------
+Moving to CMake 3.22 improves consistency with the Projucer's Android exporter,
+which already requires CMake 3.22. It also allows us to make use of the
+XCODE_EMBED_APP_EXTENSIONS property (introduced in CMake 3.21), fixing an
+issue when archiving AUv3 plugins.
+
+
 Version 7.0.6
 =============
 
@@ -1060,7 +1085,7 @@ querying the capabilities of the current context at runtime.
 
 Change
 ------
-The minimum support CMake version is now 3.15.
+The minimum supported CMake version is now 3.15.
 
 Possible Issues
 ---------------

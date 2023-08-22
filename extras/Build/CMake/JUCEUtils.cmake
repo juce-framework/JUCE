@@ -33,7 +33,7 @@
 # ==================================================================================================
 
 include_guard(GLOBAL)
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 
 define_property(TARGET PROPERTY JUCE_COMPANY_NAME INHERITED
     BRIEF_DOCS "The company name for a particular target"
