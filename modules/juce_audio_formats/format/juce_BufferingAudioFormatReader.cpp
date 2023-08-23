@@ -245,10 +245,10 @@ public:
 
     void runTest() override
     {
-        TimeSliceThread timeSlice ("TestBackgroundThread");
-        timeSlice.startThread (Thread::Priority::normal);
+        TimeSliceThread thread ("TestBackgroundThread");
+        thread.startThread (Thread::Priority::normal);
 
-        beginTest ("Timeout");
+        beginTest ("Reading samples from a blocked reader should produce silence");
         {
             struct BlockingReader  : public TestAudioFormatReader
             {
@@ -263,47 +263,50 @@ public:
                                   int64 startSampleInFile,
                                   int numSamples) override
                 {
-                    Thread::sleep (100);
+                    unblock.wait();
                     return TestAudioFormatReader::readSamples (destChannels, numDestChannels, startOffsetInDestBuffer, startSampleInFile, numSamples);
                 }
+
+                WaitableEvent unblock;
             };
 
             Random random { getRandom() };
+            constexpr auto bufferSize = 1024;
 
-            const auto blockingBuffer = generateTestBuffer (random, 1024);
-            expect (! isSilent (blockingBuffer));
+            const auto source = generateTestBuffer (random, bufferSize);
+            expect (! isSilent (source));
 
-            BufferingAudioReader bufferingReader (new BlockingReader (&blockingBuffer), timeSlice, 64);
-            bufferingReader.setReadTimeout (10);
+            auto* blockingReader = new BlockingReader (&source);
+            BufferingAudioReader reader (blockingReader, thread, bufferSize);
 
-            const auto originalBuffer = generateTestBuffer (random, 1024);
-            expect (! isSilent (originalBuffer));
-            expect (originalBuffer != blockingBuffer);
+            auto destination = generateTestBuffer (random, bufferSize);
+            expect (! isSilent (destination));
 
-            auto readBuffer = originalBuffer;
-            expect (readBuffer == originalBuffer);
+            read (reader, destination);
+            expect (isSilent (destination));
 
-            read (bufferingReader, readBuffer);
-            expect (readBuffer != originalBuffer);
-            expect (isSilent (readBuffer));
+            blockingReader->unblock.signal();
         }
 
-        beginTest ("Read samples");
+        beginTest ("Reading samples from a reader should produce the same samples as its source");
         {
             Random random { getRandom() };
 
             for (auto i = 4; i < 18; ++i)
             {
-                const auto backgroundBufferSize = 1 << i;
-                const auto buffer = generateTestBuffer (random, backgroundBufferSize);
+                const auto bufferSize = 1 << i;
+                const auto source = generateTestBuffer (random, bufferSize);
+                expect (! isSilent (source));
 
-                BufferingAudioReader bufferingReader (new TestAudioFormatReader (&buffer), timeSlice, backgroundBufferSize);
-                bufferingReader.setReadTimeout (-1);
+                BufferingAudioReader reader (new TestAudioFormatReader (&source), thread, bufferSize);
+                reader.setReadTimeout (-1);
 
-                AudioBuffer<float> readBuffer { buffer.getNumChannels(), buffer.getNumSamples() };
-                read (bufferingReader, readBuffer);
+                auto destination = generateTestBuffer (random, bufferSize);
+                expect (! isSilent (destination));
+                expect (source != destination);
 
-                expect (buffer == readBuffer);
+                read (reader, destination);
+                expect (source == destination);
             }
         }
     }
