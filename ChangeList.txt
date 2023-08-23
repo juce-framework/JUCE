@@ -3,6 +3,14 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 7.0.7
+  - Fixed some macOS 14.0 deprecations
+  - Fixed some issues with VST3 manifest generation
+  - Fixed a Metal layer rendering issue
+  - Fixed an issue setting realtime thread priorities
+  - Fixed a crash in VirtualDesktopWatcher
+  - Fixed an AUv3 bundling problem
+
 Version 7.0.6
   - Added support for VST3 bundles and moduleinfo.json
   - Improved message box dismissal
