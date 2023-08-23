@@ -286,6 +286,8 @@ static Tolerance<Type> relativeTolerance (Type tolerance)
     of 0.05 will ensure values return equal if the difference between them is less than or equal to
     5% of the larger of the two absolute values.
 
+    @param a            The first number to compare.
+    @param b            The second number to compare.
     @param tolerance    An object that represents both absolute and relative tolerances
                         when evaluating if a and b are equal.
 
