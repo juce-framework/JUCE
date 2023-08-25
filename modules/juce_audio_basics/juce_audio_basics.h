@@ -124,3 +124,10 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "synthesisers/juce_Synthesiser.h"
 #include "audio_play_head/juce_AudioPlayHead.h"
 #include "utilities/juce_AudioWorkgroup.h"
+#include "midi/ump/juce_UMPBytesOnGroup.h"
+#include "midi/ump/juce_UMPDeviceInfo.h"
+
+namespace juce
+{
+    namespace ump = universal_midi_packets;
+}

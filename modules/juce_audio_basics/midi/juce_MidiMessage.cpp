@@ -685,6 +685,11 @@ MidiMessage MidiMessage::createSysExMessage (const void* sysexData, const int da
     return MidiMessage (m, dataSize + 2);
 }
 
+MidiMessage MidiMessage::createSysExMessage (Span<const std::byte> data)
+{
+    return createSysExMessage (data.data(), (int) data.size());
+}
+
 const uint8* MidiMessage::getSysExData() const noexcept
 {
     return isSysEx() ? getRawData() + 1 : nullptr;

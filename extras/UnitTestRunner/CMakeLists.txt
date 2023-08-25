@@ -42,6 +42,7 @@ target_link_libraries(UnitTestRunner PRIVATE
     juce::juce_analytics
     juce::juce_audio_utils
     juce::juce_dsp
+    juce::juce_midi_ci
     juce::juce_opengl
     juce::juce_osc
     juce::juce_product_unlocking
