@@ -96,7 +96,10 @@ public:
     void clear();
 
     /** Returns the NamedValueSet that holds the object's properties. */
-    NamedValueSet& getProperties() noexcept     { return properties; }
+    NamedValueSet& getProperties() noexcept                 { return properties; }
+
+    /** Returns the NamedValueSet that holds the object's properties. */
+    const NamedValueSet& getProperties() const noexcept     { return properties; }
 
     /** Calls var::clone() on all the properties that this object contains. */
     void cloneAllProperties();
