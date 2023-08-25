@@ -32,10 +32,6 @@
   ==============================================================================
 */
 
-#if JUCE_BELA
-extern "C" int cobalt_thread_mode();
-#endif
-
 namespace juce
 {
 
@@ -384,14 +380,7 @@ int64 Time::getHighResolutionTicks() noexcept
 {
     timespec t;
 
-   #if JUCE_BELA
-    if (cobalt_thread_mode() == 0x200 /*XNRELAX*/)
-        clock_gettime (CLOCK_MONOTONIC, &t);
-    else
-        __wrap_clock_gettime (CLOCK_MONOTONIC, &t);
-   #else
     clock_gettime (CLOCK_MONOTONIC, &t);
-   #endif
 
     return (t.tv_sec * (int64) 1000000) + (t.tv_nsec / 1000);
 }
