@@ -1908,7 +1908,8 @@ protected:
         const auto name = path.getFileNameWithoutExtension();
 
         return name.equalsIgnoreCase ("include_juce_gui_basics")
-            || name.equalsIgnoreCase ("include_juce_audio_processors");
+            || name.equalsIgnoreCase ("include_juce_audio_processors")
+            || name.equalsIgnoreCase ("include_juce_core");
     }
 
     StringArray getModuleLibs() const

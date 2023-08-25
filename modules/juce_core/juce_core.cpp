@@ -281,6 +281,7 @@
  #include "maths/juce_MathsFunctions_test.cpp"
  #include "misc/juce_EnumHelpers_test.cpp"
  #include "containers/juce_FixedSizeFunction_test.cpp"
+ #include "javascript/juce_JSONSerialisation_test.cpp"
 #endif
 
 //==============================================================================
