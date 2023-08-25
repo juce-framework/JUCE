@@ -176,8 +176,6 @@ public:
     static AudioIODeviceType* createAudioIODeviceType_OpenSLES();
     /** Creates an Oboe device type if it's available on this platform, or returns null. */
     static AudioIODeviceType* createAudioIODeviceType_Oboe();
-    /** Creates a Bela device type if it's available on this platform, or returns null. */
-    static AudioIODeviceType* createAudioIODeviceType_Bela();
 
     /** @cond */
     [[deprecated ("You should call the method which takes a WASAPIDeviceMode instead.")]]
