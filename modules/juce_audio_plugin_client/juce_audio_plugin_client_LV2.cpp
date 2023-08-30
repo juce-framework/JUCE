@@ -61,6 +61,24 @@ namespace juce
 namespace lv2_client
 {
 
+constexpr bool startsWithValidScheme (const std::string_view str)
+{
+    constexpr const char* prefixes[] { "http://", "https://", "urn:" };
+
+    for (const std::string_view prefix : prefixes)
+        if (prefix == str.substr (0, prefix.size()))
+            return true;
+
+    return false;
+}
+
+// If your LV2 plugin fails to build here, it may be because you haven't explicitly set an LV2 URI,
+// or you've requested a malformed URI.
+// If you're using the Projucer, update the value of the "LV2 URI" field in your project settings.
+// If you're using CMake, specify a valid LV2URI argument to juce_add_plugin.
+static_assert (startsWithValidScheme (JucePlugin_LV2URI),
+               "Your configured LV2 URI must include a leading scheme specifier.");
+
 constexpr auto uriSeparator = ":";
 const auto JucePluginLV2UriUi      = String (JucePlugin_LV2URI) + uriSeparator + "UI";
 const auto JucePluginLV2UriState   = String (JucePlugin_LV2URI) + uriSeparator + "StateString";

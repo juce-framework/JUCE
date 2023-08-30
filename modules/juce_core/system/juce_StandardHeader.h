@@ -67,6 +67,7 @@
 #include <queue>
 #include <set>
 #include <sstream>
+#include <string_view>
 #include <thread>
 #include <typeindex>
 #include <unordered_map>
