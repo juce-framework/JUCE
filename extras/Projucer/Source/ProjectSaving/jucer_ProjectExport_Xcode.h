@@ -1324,6 +1324,12 @@ public:
             return type != VST3Helper && type != LV2Helper && owner.isHardenedRuntimeEnabled();
         }
 
+        bool shouldUseAppSandbox() const
+        {
+            return type == Target::AudioUnitv3PlugIn
+                || (type != VST3Helper && type != LV2Helper && owner.isAppSandboxEnabled());
+        }
+
         //==============================================================================
         String getTargetAttributes() const
         {
@@ -1345,7 +1351,7 @@ public:
                                                                    && owner.getProject().shouldEnableIAA())
                                                                   || owner.getProject().isAUPluginHost());
             capabilities["Push"]                  = owner.isPushNotificationsEnabled();
-            capabilities["Sandbox"]               = type == Target::AudioUnitv3PlugIn || owner.isAppSandboxEnabled();
+            capabilities["Sandbox"]               = shouldUseAppSandbox();
             capabilities["HardenedRuntime"]       = shouldUseHardenedRuntime();
 
             if (owner.iOS && owner.isiCloudPermissionsEnabled())
@@ -1401,7 +1407,7 @@ public:
         {
             if (owner.isPushNotificationsEnabled()
              || owner.isAppGroupsEnabled()
-             || owner.isAppSandboxEnabled()
+             || shouldUseAppSandbox()
              || shouldUseHardenedRuntime()
              || owner.isNetworkingMulticastEnabled()
              || (owner.isiOS() && owner.isiCloudPermissionsEnabled())
