@@ -542,16 +542,14 @@ struct GraphRenderSequence
             return;
         }
 
-        currentAudioInputBuffer = &buffer;
         currentAudioOutputBuffer.setSize (jmax (1, buffer.getNumChannels()), numSamples);
         currentAudioOutputBuffer.clear();
-        currentMidiInputBuffer = &midiMessages;
         currentMidiOutputBuffer.clear();
 
         {
-            const Context context { { *currentAudioInputBuffer,
+            const Context context { { buffer,
                                       currentAudioOutputBuffer,
-                                      *currentMidiInputBuffer,
+                                      midiMessages,
                                       currentMidiOutputBuffer },
                                     audioPlayHead,
                                     numSamples };
@@ -565,7 +563,6 @@ struct GraphRenderSequence
 
         midiMessages.clear();
         midiMessages.addEvents (currentMidiOutputBuffer, 0, buffer.getNumSamples(), 0);
-        currentAudioInputBuffer = nullptr;
     }
 
     JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
@@ -795,8 +792,6 @@ struct GraphRenderSequence
         currentAudioOutputBuffer.setSize (numBuffersNeeded + 1, blockSize);
         currentAudioOutputBuffer.clear();
 
-        currentAudioInputBuffer = nullptr;
-        currentMidiInputBuffer = nullptr;
         currentMidiOutputBuffer.clear();
 
         midiBuffers.clearQuick();
@@ -816,9 +811,7 @@ struct GraphRenderSequence
     int numBuffersNeeded = 0, numMidiBuffersNeeded = 0;
 
     AudioBuffer<FloatType> renderingBuffer, currentAudioOutputBuffer;
-    AudioBuffer<FloatType>* currentAudioInputBuffer = nullptr;
 
-    MidiBuffer* currentMidiInputBuffer = nullptr;
     MidiBuffer currentMidiOutputBuffer;
 
     Array<MidiBuffer> midiBuffers;
