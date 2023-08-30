@@ -2364,7 +2364,7 @@ private:
 
                             script << R"(if [ "$CONFIGURATION" = ")" << config->getName() << "\" ]; then\n"
                                       "mkdir -p \"" << destination << "\"\n"
-                                      "/bin/ln -sfh \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\" \"" << destination << "\"\n"
+                                      "/bin/ln -sfh \"$CONFIGURATION_BUILD_DIR\" \"" << destination << "\"\n"
                                       "fi\n";
                         }
                     }
