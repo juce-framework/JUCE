@@ -508,6 +508,17 @@ attributes directly to these creation functions, rather than adding them later.
 `AAX_IDENTIFIER`
 - The bundle ID for the AAX plugin target. Matches the `BUNDLE_ID` by default.
 
+`LV2URI`
+- This is a string that acts as a unique identifier for an LV2 plugin. If you make any incompatible 
+  changes to your plugin (remove parameters, reorder parameters, change preset format etc.) you MUST
+  change this value. LV2 hosts will assume that any plugins with the same URI are interchangeable.
+  By default, the value of this property will be generated based on the COMPANY_WEBSITE and
+  PLUGIN_NAME. However, in some circumstances, such as the following, you'll need to override the
+  default:
+  - The plugin name contains characters such as spaces that are invalid in a URI; or
+  - The COMPANY_WEBSITE omits the leading scheme identifier (http://); or
+  - There's no website associated with the plugin, so you want to use a 'urn:' identifier instead.
+
 `VST_NUM_MIDI_INS`
 - For VST2 and VST3 plugins that accept midi, this allows you to configure the number of inputs.
 

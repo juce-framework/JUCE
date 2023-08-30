@@ -1180,9 +1180,9 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         get_target_property(JUCE_LV2URI "${shared_code_target}" JUCE_LV2URI)
 
-        if(NOT JUCE_LV2URI MATCHES "https?://.*")
+        if(NOT JUCE_LV2URI MATCHES "https?://.*|urn:.*")
             message(WARNING
-                "LV2URI should be well-formed with an 'http' prefix. "
+                "LV2URI should be well-formed with an 'http' or 'urn' prefix. "
                 "Check the LV2URI argument to juce_add_plugin.")
         endif()
 
