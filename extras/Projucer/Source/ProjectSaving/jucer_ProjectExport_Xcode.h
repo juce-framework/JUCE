@@ -34,6 +34,25 @@ constexpr auto* macOSArch_32BitUniversal = "32BitUniversal";
 constexpr auto* macOSArch_64BitUniversal = "64BitUniversal";
 constexpr auto* macOSArch_64Bit          = "64BitIntel";
 
+static constexpr const char* configGuardTemplate = R"(
+if test "$CONFIGURATION" = "$JUCE_CONFIG_NAME"; then :
+$JUCE_GUARDED_SCRIPT
+fi
+)";
+
+static constexpr const char* copyPluginScriptTemplate = R"(
+if [ -e "$JUCE_INSTALL_PATH$JUCE_PRODUCT_NAME" ]; then :
+  echo "Destination '$JUCE_INSTALL_PATH$JUCE_PRODUCT_NAME' exists, overwriting"
+  rm -rf "$JUCE_INSTALL_PATH$JUCE_PRODUCT_NAME"
+fi
+mkdir -p "$JUCE_INSTALL_PATH"
+cp -r "$JUCE_SOURCE_BUNDLE" "$JUCE_INSTALL_PATH"
+)";
+
+static constexpr const char* adhocCodeSignTemplate = R"(
+xcrun codesign --verify "$JUCE_FULL_PRODUCT_PATH" || xcrun codesign -f -s - "$JUCE_FULL_PRODUCT_PATH"
+)";
+
 //==============================================================================
 class XcodeProjectExporter  : public ProjectExporter
 {
@@ -1674,12 +1693,6 @@ public:
 
                 if (! owner.embeddedFrameworkIDs.isEmpty())
                     s.set ("LD_RUNPATH_SEARCH_PATHS", "\"$(inherited) @executable_path/Frameworks @executable_path/../Frameworks\"");
-
-                if (xcodeCopyToProductInstallPathAfterBuild)
-                {
-                    s.set ("DEPLOYMENT_LOCATION", "YES");
-                    s.set ("DSTROOT", "/");
-                }
             }
 
             if (getTargetFileType() == pluginBundle)
@@ -2284,7 +2297,7 @@ private:
 
             for (ConstConfigIterator config (*this); config.next();)
             {
-                auto& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
+                auto& xcodeConfig = static_cast<const XcodeBuildConfiguration&> (*config);
 
                 auto configSettings = target->getTargetSettings (xcodeConfig);
                 StringArray settingsLines;
@@ -2349,8 +2362,8 @@ private:
                     script << "rm -f \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/moduleinfo.json\"\n";
 
                 // Sign the bundle so that it can be loaded by the manifest generator tools
-                script << "xcrun codesign --verify \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\" "
-                          "|| xcrun codesign -f -s - \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\"\n";
+                script << String { adhocCodeSignTemplate }.replace ("$JUCE_FULL_PRODUCT_PATH",
+                                                                    "$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME");
 
                 if (target->type == XcodeTarget::LV2PlugIn)
                 {
@@ -2358,22 +2371,6 @@ private:
                     script << "\"$CONFIGURATION_BUILD_DIR/../"
                             + Project::getLV2FileWriterName()
                             + "\" \"$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\"\n";
-
-                    for (ConstConfigIterator config (*this); config.next();)
-                    {
-                        auto& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
-                        const auto installPath = target->getInstallPathForConfiguration (xcodeConfig);
-
-                        if (installPath.isNotEmpty())
-                        {
-                            const auto destination = installPath.replace ("$(HOME)", "$HOME");
-
-                            script << R"(if [ "$CONFIGURATION" = ")" << config->getName() << "\" ]; then\n"
-                                      "mkdir -p \"" << destination << "\"\n"
-                                      "/bin/ln -sfh \"$CONFIGURATION_BUILD_DIR\" \"" << destination << "\"\n"
-                                      "fi\n";
-                        }
-                    }
                 }
                 else if (target->type == XcodeTarget::VST3PlugIn)
                 {
@@ -2396,6 +2393,59 @@ private:
             if (project.isAudioPluginProject() && project.shouldBuildUnityPlugin()
                 && target->type == XcodeTarget::UnityPlugIn)
                 embedUnityScript();
+
+            StringArray copyPluginScript;
+
+            for (ConstConfigIterator config (*this); config.next();)
+            {
+                auto& xcodeConfig = static_cast<const XcodeBuildConfiguration&> (*config);
+                auto installPath = target->getInstallPathForConfiguration (xcodeConfig);
+
+                if (target->xcodeCopyToProductInstallPathAfterBuild && installPath.isNotEmpty())
+                {
+                    if (installPath.startsWith ("~"))
+                        installPath = installPath.replace ("~", "$(HOME)");
+
+                    installPath = installPath.replace ("$(HOME)", "$HOME");
+
+                    const auto configGuard = String { configGuardTemplate }.replace ("$JUCE_CONFIG_NAME",
+                                                                                     config->getName());
+
+                    if (target->type == XcodeTarget::Target::LV2PlugIn)
+                    {
+                        const auto copyScript = String { copyPluginScriptTemplate }
+                                                    .replace ("$JUCE_CONFIG_NAME", config->getName())
+                                                    .replace ("$JUCE_INSTALL_PATH", installPath)
+                                                    .replace ("$JUCE_PRODUCT_NAME", "${TARGET_BUILD_DIR##*/}")
+                                                    .replace ("$JUCE_SOURCE_BUNDLE", "${TARGET_BUILD_DIR}");
+
+                        const auto signScript = String { adhocCodeSignTemplate }.replace ("$JUCE_FULL_PRODUCT_PATH",
+                                                                                          installPath + "${TARGET_BUILD_DIR##*/}/" + "$FULL_PRODUCT_NAME");
+
+
+                        copyPluginScript.add (configGuard.replace ("$JUCE_GUARDED_SCRIPT", copyScript + signScript));
+                    }
+                    else
+                    {
+                        const auto copyScript = String { copyPluginScriptTemplate }
+                                                    .replace ("$JUCE_CONFIG_NAME", config->getName())
+                                                    .replace ("$JUCE_INSTALL_PATH", installPath)
+                                                    .replace ("$JUCE_PRODUCT_NAME", "${FULL_PRODUCT_NAME}")
+                                                    .replace ("$JUCE_SOURCE_BUNDLE", "${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}");
+
+                        const auto signScript = String { adhocCodeSignTemplate }.replace ("$JUCE_FULL_PRODUCT_PATH",
+                                                                                          installPath + "$FULL_PRODUCT_NAME");
+
+                        copyPluginScript.add (configGuard.replace ("$JUCE_GUARDED_SCRIPT", copyScript + signScript));
+                    }
+                }
+            }
+
+            if (! copyPluginScript.isEmpty())
+            {
+                copyPluginScript.insert (0, "set -e");
+                target->addShellScriptBuildPhase ("Plugin Copy Step", copyPluginScript.joinIntoString ("\n"));
+            }
 
             addTargetObject (*target);
         }
