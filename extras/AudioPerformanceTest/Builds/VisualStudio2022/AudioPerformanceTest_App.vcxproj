@@ -253,6 +253,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_ADSR_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_AudioWorkgroup.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1079,6 +1082,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_DynamicObject.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_FixedSizeFunction_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
@@ -2425,6 +2431,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEUtils.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEValue.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZoneLayout.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\native\juce_AudioWorkgroup_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\native\juce_CoreAudioLayouts_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\native\juce_CoreAudioTimeConversions_mac.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_AudioSource.h"/>
@@ -2439,6 +2446,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_ToneGeneratorAudioSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_ADSR.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_AudioWorkgroup.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Decibels.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_GenericInterpolator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.h"/>
@@ -2845,6 +2853,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_ArrayBase.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_DynamicObject.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_ElementComparator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_FixedSizeFunction.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_HashMap.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_LinkedListPointer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.h"/>

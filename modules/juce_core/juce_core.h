@@ -286,6 +286,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "containers/juce_NamedValueSet.h"
 #include "containers/juce_DynamicObject.h"
 #include "containers/juce_HashMap.h"
+#include "containers/juce_FixedSizeFunction.h"
 #include "time/juce_RelativeTime.h"
 #include "time/juce_Time.h"
 #include "streams/juce_InputStream.h"

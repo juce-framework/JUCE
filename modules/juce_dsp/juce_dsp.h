@@ -195,6 +195,9 @@ namespace juce
         template <typename Type>
         using Complex = std::complex<Type>;
 
+        template <size_t len, typename T>
+        using FixedSizeFunction = juce::FixedSizeFunction<len, T>;
+
         //==============================================================================
         namespace util
         {
@@ -246,7 +249,6 @@ namespace juce
 #include "maths/juce_LookupTable.h"
 #include "maths/juce_LogRampedValue.h"
 #include "containers/juce_AudioBlock.h"
-#include "containers/juce_FixedSizeFunction.h"
 #include "processors/juce_ProcessContext.h"
 #include "processors/juce_ProcessorWrapper.h"
 #include "processors/juce_ProcessorChain.h"

@@ -25,8 +25,6 @@
 
 namespace juce
 {
-namespace dsp
-{
 
 #ifndef DOXYGEN
 
@@ -237,5 +235,4 @@ template <size_t len, typename T>
 bool operator== (std::nullptr_t, const FixedSizeFunction<len, T>& fn) { return ! (fn != nullptr); }
 
 
-}
 }

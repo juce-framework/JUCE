@@ -111,6 +111,25 @@ public:
             return withMember (*this, &RealtimeOptions::maximumProcessingTimeMs, newMaximumProcessingTimeMs);
         }
 
+        /** Specify the maximum amount of processing time required each time the thread wakes up.
+
+            This is identical to 'withMaximumProcessingTimeMs' except it calculates the processing time
+            from a sample rate and block size. This is useful if you want to run this thread in parallel
+            to an audio device thread.
+
+            Only used by macOS/iOS.
+
+            @see withMaximumProcessingTimeMs, AudioWorkgroup, ScopedWorkgroupToken
+        */
+        [[nodiscard]] RealtimeOptions withApproximateAudioProcessingTime (int samplesPerFrame, double sampleRate) const
+        {
+            jassert (samplesPerFrame > 0);
+            jassert (sampleRate > 0.0);
+
+            const auto approxFrameTimeMs = (samplesPerFrame / sampleRate) * 1000.0;
+            return withMaximumProcessingTimeMs (approxFrameTimeMs);
+        }
+
         /** Specify the approximate amount of time between each thread wake up.
 
             Alternatively call withPeriodHz().

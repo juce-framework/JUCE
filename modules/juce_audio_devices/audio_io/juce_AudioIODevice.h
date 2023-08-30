@@ -292,6 +292,8 @@ public:
     */
     virtual int getInputLatencyInSamples() = 0;
 
+    /** Returns the workgroup for this device. */
+    virtual AudioWorkgroup getWorkgroup() const { return {}; }
 
     //==============================================================================
     /** True if this device can show a pop-up control panel for editing its settings.

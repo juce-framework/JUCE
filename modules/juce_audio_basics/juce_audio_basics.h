@@ -123,3 +123,4 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "sources/juce_ToneGeneratorAudioSource.h"
 #include "synthesisers/juce_Synthesiser.h"
 #include "audio_play_head/juce_AudioPlayHead.h"
+#include "utilities/juce_AudioWorkgroup.h"

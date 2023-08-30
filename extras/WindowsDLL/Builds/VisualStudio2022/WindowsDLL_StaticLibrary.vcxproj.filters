@@ -727,6 +727,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_ADSR_test.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_AudioWorkgroup.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
@@ -1589,6 +1592,9 @@
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_DynamicObject.cpp">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_FixedSizeFunction_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
@@ -3216,6 +3222,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZoneLayout.h">
       <Filter>JUCE Modules\juce_audio_basics\mpe</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\native\juce_AudioWorkgroup_mac.h">
+      <Filter>JUCE Modules\juce_audio_basics\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\native\juce_CoreAudioLayouts_mac.h">
       <Filter>JUCE Modules\juce_audio_basics\native</Filter>
     </ClInclude>
@@ -3256,6 +3265,9 @@
       <Filter>JUCE Modules\juce_audio_basics\synthesisers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_ADSR.h">
+      <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_AudioWorkgroup.h">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_Decibels.h">
@@ -4474,6 +4486,9 @@
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_ElementComparator.h">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_FixedSizeFunction.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_HashMap.h">

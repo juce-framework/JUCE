@@ -21,6 +21,8 @@
 */
 
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
+#include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
+
 
 namespace juce
 {
@@ -1065,6 +1067,19 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
             }
         }
 
+       #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
+        workgroup = [this]
+        {
+            UInt32 dataSize = sizeof (os_workgroup_t);
+            os_workgroup_t wgHandle = nullptr;
+
+            AudioUnitGetProperty (audioUnit, kAudioOutputUnitProperty_OSWorkgroup,
+                                  kAudioUnitScope_Global, 0, &wgHandle, &dataSize);
+
+            return makeRealAudioWorkgroup (wgHandle);
+        }();
+       #endif
+
         AudioUnitAddPropertyListener (audioUnit, kAudioUnitProperty_StreamFormat, dispatchAudioUnitPropertyChange, this);
 
         return true;
@@ -1373,6 +1388,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
     Atomic<bool> hardwareInfoNeedsUpdating { true };
 
     AudioUnit audioUnit {};
+    AudioWorkgroup workgroup;
 
     SharedResourcePointer<AudioSessionHolder> sessionHolder;
 
@@ -1429,6 +1445,7 @@ BigInteger iOSAudioIODevice::getActiveOutputChannels() const        { return pim
 int iOSAudioIODevice::getInputLatencyInSamples()                    { return roundToInt (pimpl->sampleRate * [AVAudioSession sharedInstance].inputLatency); }
 int iOSAudioIODevice::getOutputLatencyInSamples()                   { return roundToInt (pimpl->sampleRate * [AVAudioSession sharedInstance].outputLatency); }
 int iOSAudioIODevice::getXRunCount() const noexcept                 { return pimpl->xrun; }
+AudioWorkgroup iOSAudioIODevice::getWorkgroup() const               { return pimpl->workgroup; }
 
 void iOSAudioIODevice::setMidiMessageCollector (MidiMessageCollector* collector) { pimpl->messageCollector = collector; }
 AudioPlayHead* iOSAudioIODevice::getAudioPlayHead() const           { return &pimpl->playhead; }

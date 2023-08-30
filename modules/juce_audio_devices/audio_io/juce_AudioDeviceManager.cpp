@@ -682,6 +682,11 @@ void AudioDeviceManager::setCurrentAudioDeviceType (const String& type, bool tre
     }
 }
 
+AudioWorkgroup AudioDeviceManager::getDeviceAudioWorkgroup() const
+{
+    return currentAudioDevice != nullptr ? currentAudioDevice->getWorkgroup() : AudioWorkgroup{};
+}
+
 AudioIODeviceType* AudioDeviceManager::getCurrentDeviceTypeObject() const
 {
     for (auto* type : availableDeviceTypes)

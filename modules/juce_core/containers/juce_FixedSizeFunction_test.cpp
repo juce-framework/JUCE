@@ -31,8 +31,6 @@
 
 namespace juce
 {
-namespace dsp
-{
 namespace
 {
 
@@ -97,7 +95,7 @@ class FixedSizeFunctionTest  : public UnitTest
 
 public:
     FixedSizeFunctionTest()
-        : UnitTest ("Fixed Size Function", UnitTestCategories::dsp)
+        : UnitTest ("Fixed Size Function", UnitTestCategories::containers)
     {}
 
     void runTest() override
@@ -349,7 +347,6 @@ public:
 
 FixedSizeFunctionTest fixedSizedFunctionTest;
 
-}
 }
 }
 #undef JUCE_FAIL_ON_ALLOCATION_IN_SCOPE

@@ -1177,6 +1177,16 @@ public:
     */
     void setRateAndBufferSizeDetails (double sampleRate, int blockSize) noexcept;
 
+    /** This is called by the host when the thread workgroup context has changed.
+
+        This will only be called on the audio thread, so you can join the audio workgroup
+        in your implementation of this function.
+
+        You can use this workgroup id to synchronise any real-time threads you have.
+        Note: This is currently only called on Apple devices.
+    */
+    virtual void audioWorkgroupContextChanged ([[maybe_unused]] const AudioWorkgroup& workgroup) {}
+
     //==============================================================================
     /** Returns a reference to an object that implements AAX specific information regarding
         this AudioProcessor.

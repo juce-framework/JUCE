@@ -48,6 +48,7 @@
 #include <juce_graphics/native/juce_CoreGraphicsHelpers_mac.h>
 #include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
+#include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
@@ -93,6 +94,11 @@ private:
     AudioProcessorHolder (AudioProcessorHolder&) = delete;
     AudioProcessorHolder& operator= (AudioProcessorHolder&) = delete;
 };
+
+#if ! JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
+ struct AudioUnitRenderContext;
+ typedef void (^AURenderContextObserver) (const AudioUnitRenderContext*);
+#endif
 
 //==============================================================================
 //=========================== The actual AudioUnit =============================
@@ -186,6 +192,15 @@ public:
         }
 
         internalRenderBlock = CreateObjCBlock (this, &JuceAudioUnitv3::renderCallback);
+
+       #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
+        renderContextObserver = ^(const AudioUnitRenderContext* context)
+        {
+            getAudioProcessor().audioWorkgroupContextChanged (makeRealAudioWorkgroup (context->workgroup));
+        };
+       #else
+        renderContextObserver = ^(const AudioUnitRenderContext*) {};
+       #endif
 
         processor.setRateAndBufferSizeDetails (kDefaultSampleRate, static_cast<int> (maxFrames));
         processor.prepareToPlay (kDefaultSampleRate, static_cast<int> (maxFrames));
@@ -312,9 +327,9 @@ public:
     }
 
     //==============================================================================
-    AUAudioUnitBusArray* getInputBusses()             const { return inputBusses.get();  }
-    AUAudioUnitBusArray* getOutputBusses()            const { return outputBusses.get(); }
-    NSArray<NSNumber*>* getChannelCapabilities()      const { return channelCapabilities.get(); }
+    AUAudioUnitBusArray* getInputBusses()                const { return inputBusses.get();  }
+    AUAudioUnitBusArray* getOutputBusses()               const { return outputBusses.get(); }
+    NSArray<NSNumber*>* getChannelCapabilities()         const { return channelCapabilities.get(); }
 
     bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* auBus)
     {
@@ -383,8 +398,10 @@ public:
     }
 
     //==============================================================================
-    AUInternalRenderBlock getInternalRenderBlock() const  { return internalRenderBlock; }
-    bool getRenderingOffline()                     const  { return getAudioProcessor().isNonRealtime(); }
+    AUInternalRenderBlock   getInternalRenderBlock()      const { return internalRenderBlock; }
+    AURenderContextObserver getInternalContextObserver()  const { return renderContextObserver; }
+
+    bool getRenderingOffline()                            const { return getAudioProcessor().isNonRealtime(); }
     void setRenderingOffline (bool offline)
     {
         auto& processor = getAudioProcessor();
@@ -842,7 +859,11 @@ private:
 
             //==============================================================================
             addMethod (@selector (contextName),                             [] (id self, SEL)                                                   { return _this (self)->getContextName(); });
-            addMethod (@selector (setContextName:),                         [](id self, SEL, NSString* str)                                     { return _this (self)->setContextName (str); });
+            addMethod (@selector (setContextName:),                         [] (id self, SEL, NSString* str)                                    { return _this (self)->setContextName (str); });
+
+           #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
+            addMethod (@selector (renderContextObserver),                   [] (id self, SEL)                                                   { return _this (self)->getInternalContextObserver(); });
+           #endif
 
             //==============================================================================
             if (@available (macOS 10.13, iOS 11.0, *))
@@ -1731,6 +1752,7 @@ private:
     FactoryPresets factoryPresets;
 
     ObjCBlock<AUInternalRenderBlock> internalRenderBlock;
+    ObjCBlock<AURenderContextObserver> renderContextObserver;
 
     AudioUnitHelpers::CoreAudioBufferList audioBuffer;
     AudioUnitHelpers::ChannelRemapper mapper;

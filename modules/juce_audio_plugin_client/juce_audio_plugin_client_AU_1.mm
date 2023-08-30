@@ -63,6 +63,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
+#include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
@@ -403,6 +404,13 @@ public:
                     return noErr;
                #endif
 
+               #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
+                case kAudioUnitProperty_RenderContextObserver:
+                    outWritable = false;
+                    outDataSize = sizeof (AURenderContextObserver);
+                    return noErr;
+               #endif
+
               #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
                     outDataSize = sizeof (CFArrayRef);
@@ -573,6 +581,22 @@ public:
                 }
                #endif
 
+               #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
+                case kAudioUnitProperty_RenderContextObserver:
+                {
+                    if (auto* ptr = (AURenderContextObserver*) outData)
+                    {
+                        *ptr = ^(const AudioUnitRenderContext* context)
+                        {
+                            if (juceFilter)
+                                juceFilter->audioWorkgroupContextChanged (makeRealAudioWorkgroup (context != nullptr ? context->workgroup : nullptr));
+                        };
+
+                        return noErr;
+                    }
+                }
+               #endif
+
                #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
                 {
@@ -647,6 +671,7 @@ public:
                                  const void* inData,
                                  UInt32 inDataSize) override
     {
+
         if (inScope == kAudioUnitScope_Global)
         {
             switch (inID)

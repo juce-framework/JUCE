@@ -172,6 +172,7 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
         return;
 
     sampleCount = 0;
+    currentWorkgroup.reset();
 
     if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
     {
@@ -190,6 +191,7 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
 
         processorToPlay->setProcessingPrecision (supportsDouble ? AudioProcessor::doublePrecision
                                                                 : AudioProcessor::singlePrecision);
+
         processorToPlay->prepareToPlay (sampleRate, blockSize);
     }
 
@@ -210,6 +212,8 @@ void AudioProcessorPlayer::setDoublePrecisionProcessing (bool doublePrecision)
     {
         const ScopedLock sl (lock);
 
+        currentWorkgroup.reset();
+
         if (processor != nullptr)
         {
             processor->releaseResources();
@@ -218,6 +222,7 @@ void AudioProcessorPlayer::setDoublePrecisionProcessing (bool doublePrecision)
 
             processor->setProcessingPrecision (supportsDouble ? AudioProcessor::doublePrecision
                                                               : AudioProcessor::singlePrecision);
+
             processor->prepareToPlay (sampleRate, blockSize);
         }
 
@@ -244,6 +249,8 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
 {
     const ScopedLock sl (lock);
 
+    jassert (currentDevice != nullptr);
+
     // These should have been prepared by audioDeviceAboutToStart()...
     jassert (sampleRate > 0 && blockSize > 0);
 
@@ -268,6 +275,9 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
         jassert (processor->isMidiEffect() || numOutputChannels == actualProcessorChannels.outs);
 
         const ScopedLock sl2 (processor->getCallbackLock());
+
+        if (std::exchange (currentWorkgroup, currentDevice->getWorkgroup()) != currentDevice->getWorkgroup())
+            processor->audioWorkgroupContextChanged (currentWorkgroup);
 
         class PlayHead : private AudioPlayHead
         {
@@ -352,6 +362,7 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
 
 void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* const device)
 {
+    currentDevice = device;
     auto newSampleRate = device->getCurrentSampleRate();
     auto newBlockSize  = device->getCurrentBufferSizeSamples();
     auto numChansIn    = device->getActiveInputChannels().countNumberOfSetBits();
@@ -366,6 +377,8 @@ void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* const device)
     resizeChannels();
 
     messageCollector.reset (sampleRate);
+
+    currentWorkgroup.reset();
 
     if (processor != nullptr)
     {
@@ -389,6 +402,9 @@ void AudioProcessorPlayer::audioDeviceStopped()
     blockSize = 0;
     isPrepared = false;
     tempBuffer.setSize (1, 1);
+
+    currentDevice = nullptr;
+    currentWorkgroup.reset();
 }
 
 void AudioProcessorPlayer::handleIncomingMidiMessage (MidiInput*, const MidiMessage& message)

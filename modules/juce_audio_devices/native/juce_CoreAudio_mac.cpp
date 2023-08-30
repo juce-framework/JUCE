@@ -21,6 +21,7 @@
 */
 
 #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
+#include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
 
 namespace juce
 {
@@ -465,6 +466,18 @@ public:
 
         auto newBitDepth = jmax (getBitDepth (newInput), getBitDepth (newOutput));
 
+       #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
+        audioWorkgroup = [=]() -> AudioWorkgroup
+        {
+            AudioObjectPropertyAddress pa;
+            pa.mSelector = kAudioDevicePropertyIOThreadOSWorkgroup;
+            pa.mScope    = kAudioObjectPropertyScopeWildcard;
+            pa.mElement  = juceAudioObjectPropertyElementMain;
+
+            return makeRealAudioWorkgroup (audioObjectGetProperty<os_workgroup_t> (deviceID, pa).value_or (nullptr));
+        }();
+       #endif
+
         {
             const ScopedLock sl (callbackLock);
 
@@ -777,11 +790,15 @@ public:
 
             const auto* timeStamp = numOutputChans > 0 ? outputTimestamp : inputTimestamp;
             const auto nanos = timeStamp != nullptr ? timeConversions.hostTimeToNanos (timeStamp->mHostTime) : 0;
+            const AudioIODeviceCallbackContext context
+            {
+                timeStamp != nullptr ? &nanos : nullptr,
+            };
 
             callback->audioDeviceIOCallbackWithContext (getTempBuffers (inStream),  numInputChans,
                                                         getTempBuffers (outStream), numOutputChans,
                                                         bufferSize,
-                                                        { timeStamp != nullptr ? &nanos : nullptr });
+                                                        context);
 
             for (int i = numOutputChans; --i >= 0;)
             {
@@ -1024,6 +1041,8 @@ public:
     Array<int> bufferSizes;
     AudioDeviceID deviceID;
     std::unique_ptr<Stream> inStream, outStream;
+
+    AudioWorkgroup audioWorkgroup;
 
 private:
     class ScopedAudioDeviceIOProcID
@@ -1319,6 +1338,11 @@ public:
         return stopAndGetLastCallback();
     }
 
+    AudioWorkgroup getWorkgroup() const override
+    {
+        return internal->audioWorkgroup;
+    }
+
     bool isPlaying() override
     {
         return internal->isPlaying();
@@ -1512,6 +1536,11 @@ public:
             size = jmax (size, d->getDefaultBufferSize());
 
         return size;
+    }
+
+    AudioWorkgroup getWorkgroup() const override
+    {
+        return inputWrapper.getWorkgroup();
     }
 
     String open (const BigInteger& inputChannels,
@@ -1997,6 +2026,7 @@ private:
         void start (AudioIODeviceCallback* callbackToNotify)      const { return device->start (callbackToNotify); }
         AudioIODeviceCallback* stopInternal()                     const { return device->stopInternal(); }
         void close()                                              const { return device->close(); }
+        AudioWorkgroup getWorkgroup()                             const { return device->getWorkgroup(); }
 
         String open (const BigInteger& inputChannels, const BigInteger& outputChannels, double sampleRate, int bufferSizeSamples) const
         {

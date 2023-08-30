@@ -262,6 +262,9 @@ public:
     */
     void setCurrentAudioDeviceType (const String& type, bool treatAsChosenDevice);
 
+    /** Returns the current audio device workgroup, if supported. */
+    AudioWorkgroup getDeviceAudioWorkgroup() const;
+
     /** Closes the currently-open device.
         You can call restartLastAudioDevice() later to reopen it in the same state
         that it was just in.
