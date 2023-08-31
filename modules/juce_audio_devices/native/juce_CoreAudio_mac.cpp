@@ -467,7 +467,7 @@ public:
         auto newBitDepth = jmax (getBitDepth (newInput), getBitDepth (newOutput));
 
        #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
-        audioWorkgroup = [=]() -> AudioWorkgroup
+        audioWorkgroup = [this]() -> AudioWorkgroup
         {
             AudioObjectPropertyAddress pa;
             pa.mSelector = kAudioDevicePropertyIOThreadOSWorkgroup;
