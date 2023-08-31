@@ -105,7 +105,7 @@ public:
                                  androidReadMediaVideoPermission, androidExternalWritePermission,
                                  androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
                                  androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, gradleClangTidy, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -151,6 +151,7 @@ public:
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
           gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.5.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
+          gradleClangTidy                      (settings, Ids::gradleClangTidy,                      getUndoManager(), false),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.3.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
@@ -171,6 +172,9 @@ public:
                                                 { "clang", "gcc" },
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
+
+        props.add (new ChoicePropertyComponent (gradleClangTidy, "Use Clang-Tidy"),
+                   "If enabled and the toolchain is clang this will run clang-tidy when compiling.");
     }
 
     //==============================================================================
@@ -680,10 +684,22 @@ private:
 
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
+        // CMake 3.22 will fail to build Android projects that set ANDROID_ARM_MODE unless NDK 24+ is used
+        mo << "def ndkVersionString = \"25.2.9519653\"" << newLine << newLine;
+
+        if (gradleClangTidy.get() && gradleToolchain.get().toString() == "clang")
+            mo << "Properties properties = new Properties()" << newLine
+               << "properties.load(project.rootProject.file(\"local.properties\").newDataInputStream())" << newLine
+               << "def llvmDir = \"${properties.getProperty('sdk.dir')}/ndk/${ndkVersionString}/toolchains/llvm\"" << newLine
+               << "def clangTidySearch = fileTree(llvmDir).filter { file -> file.name.matches('^clang-tidy(.exe)?$') }" << newLine
+               << "if (clangTidySearch.size() != 1) {" << newLine
+               << "    throw new GradleException(\"Could not locate a unique clang-tidy in ${llvmDir}\")" << newLine
+               << "}" << newLine
+               << "def clangTidy = clangTidySearch.getSingleFile().getAbsolutePath()" << newLine << newLine;
+
         mo << "android {"                                                                    << newLine;
         mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
-        // CMake 3.22 will fail to build Android projects that set ANDROID_ARM_MODE unless NDK 24+ is used
-        mo << "    ndkVersion \"25.2.9519653\""                                              << newLine;
+        mo << "    ndkVersion ndkVersionString"                                              << newLine;
         mo << "    namespace " << project.getBundleIdentifierString().toLowerCase().quoted() << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
@@ -1487,6 +1503,9 @@ private:
         cmakeArgs.add ("\"-DANDROID_CPP_FEATURES=exceptions rtti\"");
         cmakeArgs.add ("\"-DANDROID_ARM_MODE=arm\"");
         cmakeArgs.add ("\"-DANDROID_ARM_NEON=TRUE\"");
+
+        if (isClang && gradleClangTidy.get())
+            cmakeArgs.add ("\"-DCMAKE_CXX_CLANG_TIDY=${clangTidy}\"");
 
         auto cppStandard = [this]
         {
