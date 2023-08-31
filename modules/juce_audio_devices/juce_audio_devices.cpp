@@ -236,6 +236,9 @@ namespace juce
   }
  #endif
 
+#elif JUCE_WASM
+    #include "native/juce_emscripten_Audio.cpp"
+    #include "native/juce_emscripten_Midi.cpp"
 #endif
 
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED

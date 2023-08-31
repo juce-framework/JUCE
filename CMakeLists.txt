@@ -108,7 +108,7 @@ if(JUCE_BUILD_EXTRAS)
     add_subdirectory(extras)
 endif()
 
-option(JUCE_BUILD_EXAMPLES "Add build targets for the DemoRunner and PIPs" OFF)
+option(JUCE_BUILD_EXAMPLES "Add build targets for the DemoRunner and PIPs" ON)
 
 if(JUCE_BUILD_EXAMPLES)
     add_subdirectory(examples)

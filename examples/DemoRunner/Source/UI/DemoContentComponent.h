@@ -26,7 +26,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "../Demos/JUCEDemos.h"
 
 struct DemoContent;
 struct CodeContent;
@@ -52,7 +51,7 @@ public:
 private:
     std::function<void (bool)> demoChangedCallback;
 
-    std::unique_ptr<DemoContent> demoContent;
+  //  std::unique_ptr<DemoContent> demoContent;
 
    #if ! (JUCE_ANDROID || JUCE_IOS)
     std::unique_ptr<CodeContent> codeContent;
