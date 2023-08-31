@@ -48,6 +48,7 @@ public:
 
     static std::shared_ptr<SharedCursorHandle> createStandard (const MouseCursor::StandardCursorType type)
     {
+#ifndef JUCE_WASM
         if (! isPositiveAndBelow (type, MouseCursor::NumStandardCursorTypes))
             return nullptr;
 
@@ -64,6 +65,9 @@ public:
         auto strong = std::make_shared<SharedCursorHandle> (type);
         weak = strong;
         return strong;
+#else
+        return nullptr;
+#endif
     }
 
     bool isStandardType (MouseCursor::StandardCursorType type) const noexcept
@@ -76,7 +80,9 @@ public:
 
 private:
     detail::CustomMouseCursorInfo info;
+
     PlatformSpecificHandle handle;
+
     const MouseCursor::StandardCursorType standardType;
     const bool standard;
 

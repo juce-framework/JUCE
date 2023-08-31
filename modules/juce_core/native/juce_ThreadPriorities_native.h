@@ -54,7 +54,7 @@ struct ThreadPriorities
         { Thread::Priority::background, AndroidThreadPriority::THREAD_PRIORITY_BACKGROUND },
        #endif
 
-       #if JUCE_LINUX || JUCE_BSD
+       #if JUCE_LINUX || JUCE_BSD || JUCE_WASM
         { Thread::Priority::highest,    0 },
         { Thread::Priority::high,       0 },
         { Thread::Priority::normal,     0 },

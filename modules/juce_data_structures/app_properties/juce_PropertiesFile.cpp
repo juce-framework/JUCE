@@ -94,7 +94,7 @@ File PropertiesFile::Options::getDefaultFile() const
                       .getChildFile (folderName.isNotEmpty() ? folderName
                                                              : ("." + applicationName));
 
-   #elif JUCE_WINDOWS
+   #elif JUCE_WINDOWS || JUCE_WASM
     auto dir = File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory
                                                           : File::userApplicationDataDirectory);
 
