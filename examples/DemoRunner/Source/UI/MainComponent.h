@@ -59,8 +59,6 @@ private:
     //==============================================================================
     std::unique_ptr<DemoContentComponent> contentComponent;
     SidePanel demosPanel  { "Demos", 250, true };
-
-    OpenGLContext openGLContext;
     ComponentPeer* peer = nullptr;
     StringArray renderingEngines;
     int currentRenderingEngineIdx = -1;

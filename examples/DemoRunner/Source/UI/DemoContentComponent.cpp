@@ -50,7 +50,7 @@ struct DemoContent    : public Component
     }
 
     Component* getComponent() const noexcept    { return comp.get(); }
-    void showHomeScreen()                       { setComponent (createIntroDemo()); }
+    void showHomeScreen()                       {  }
 
 private:
     std::unique_ptr<Component> comp;
@@ -85,12 +85,7 @@ struct CodeContent    : public Component
 
     void lookAndFeelChanged() override
     {
-        auto* v4 = dynamic_cast <LookAndFeel_V4*> (&Desktop::getInstance().getDefaultLookAndFeel());
 
-        if (v4 != nullptr && (v4->getCurrentColourScheme() != LookAndFeel_V4::getLightColourScheme()))
-            codeEditor.setColourScheme (getDarkColourScheme());
-        else
-            codeEditor.setColourScheme (getLightColourScheme());
     }
 
     CodeDocument document;
@@ -104,8 +99,8 @@ DemoContentComponent::DemoContentComponent (Component& mainComponent, std::funct
     : TabbedComponent (TabbedButtonBar::Orientation::TabsAtTop),
       demoChangedCallback (std::move (callback))
 {
-    demoContent.reset (new DemoContent());
-    addTab ("Demo",     Colours::transparentBlack, demoContent.get(), false);
+    //demoContent.reset (new DemoContent());
+   // addTab ("Demo",     Colours::transparentBlack, demoContent.get(), false);
 
    #if ! (JUCE_ANDROID || JUCE_IOS)
     codeContent.reset (new CodeContent());
@@ -136,16 +131,16 @@ void DemoContentComponent::setDemo (const String& category, int selectedDemoInde
         && (currentDemoIndex == selectedDemoIndex))
         return;
 
-    auto demo = JUCEDemos::getCategory (category).demos[(size_t) selectedDemoIndex];
+ //   auto demo = JUCEDemos::getCategory (category).demos[(size_t) selectedDemoIndex];
 
    #if ! (JUCE_ANDROID || JUCE_IOS)
-    codeContent->document.replaceAllContent (trimPIP (demo.demoFile.loadFileAsString()));
-    codeContent->codeEditor.scrollToLine (0);
+  //  codeContent->document.replaceAllContent (trimPIP (demo.demoFile.loadFileAsString()));
+   // codeContent->codeEditor.scrollToLine (0);
    #endif
 
-    auto* content = demo.callback();
-    demoContent->setComponent (content);
-    demoChangedCallback (demo.isHeavyweight);
+  //  auto* content = demo.callback();
+   // demoContent->setComponent (content);
+   // demoChangedCallback (demo.isHeavyweight);
 
     ensureDemoIsShowing();
 
@@ -155,12 +150,13 @@ void DemoContentComponent::setDemo (const String& category, int selectedDemoInde
 
 bool DemoContentComponent::isShowingHomeScreen() const noexcept
 {
-    return isComponentIntroDemo (demoContent->getComponent()) && getCurrentTabIndex() == 0;
+    return true;
+   // return isComponentIntroDemo (demoContent->getComponent()) && getCurrentTabIndex() == 0;
 }
 
 void DemoContentComponent::showHomeScreen()
 {
-    demoContent->showHomeScreen();
+  //  demoContent->showHomeScreen();
 
    #if ! (JUCE_ANDROID || JUCE_IOS)
     codeContent->setDefaultCodeContent();
@@ -178,7 +174,6 @@ void DemoContentComponent::showHomeScreen()
 
 void DemoContentComponent::clearCurrentDemo()
 {
-    demoContent->setComponent (nullptr);
     demoChangedCallback (false);
 }
 

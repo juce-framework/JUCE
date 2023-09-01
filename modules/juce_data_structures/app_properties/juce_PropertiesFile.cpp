@@ -103,7 +103,12 @@ File PropertiesFile::Options::getDefaultFile() const
 
     dir = dir.getChildFile (folderName.isNotEmpty() ? folderName
                                                     : applicationName);
+
+   #elif JUCE_WASM
+    auto dir = File::getSpecialLocation(File::userApplicationDataDirectory); //TODO: WASM_SUPPORT_MOCK
    #endif
+
+
 
     return (filenameSuffix.startsWithChar (L'.')
                ? dir.getChildFile (applicationName).withFileExtension (filenameSuffix)

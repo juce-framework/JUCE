@@ -448,11 +448,9 @@ void MainComponent::updateRenderingEngine (int renderingEngineIndex)
         if (isShowingHeavyweightDemo)
             return;
 
-        openGLContext.attachTo (*getTopLevelComponent());
     }
     else
     {
-        openGLContext.detach();
         peer->setCurrentRenderingEngine (renderingEngineIndex);
     }
 

@@ -62,7 +62,9 @@ class JUCE_API  AudioIODeviceType
 {
 public:
     //==============================================================================
-    /** Returns the name of this type of driver that this object manages.
+    AudioIODeviceType();
+
+/** Returns the name of this type of driver that this object manages.
 
         This will be something like "DirectSound", "ASIO", "CoreAudio", "ALSA", etc.
     */
@@ -166,6 +168,8 @@ public:
     static AudioIODeviceType* createAudioIODeviceType_Oboe();
     /** Creates a Bela device type if it's available on this platform, or returns null. */
     static AudioIODeviceType* createAudioIODeviceType_Bela();
+    /** Creates a WASM device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_Wasm();
 
    #ifndef DOXYGEN
     [[deprecated ("You should call the method which takes a WASAPIDeviceMode instead.")]]
