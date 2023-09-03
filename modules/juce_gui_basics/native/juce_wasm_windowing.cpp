@@ -1,4 +1,11 @@
 namespace juce {
+
+    std::unique_ptr<detail::ScopedMessageBoxInterface>
+    detail::ScopedMessageBoxInterface::create(const juce::MessageBoxOptions &options) {
+        return nullptr;
+    }
+
+
     class Desktop::NativeDarkModeChangeDetectorImpl{
 
     };

@@ -23,6 +23,10 @@
 //TODO:wasm_support
 namespace juce
 {
+    void MidiOutput::sendMessageNow(const juce::MidiMessage &message) {
+
+    }
+
     struct JuceRtMidiContext {
         MidiInput* midiIn;
         MidiInputCallback* callback{nullptr};

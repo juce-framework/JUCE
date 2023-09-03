@@ -174,17 +174,26 @@ private:
                           int numOutputs, AudioSampleFrame *outputs,
                           int numParams, const AudioParamFrame *params,
                           void *userData) {
+
+        juce::AudioSampleBuffer inputBuffer(2,128);
+        juce::AudioSampleBuffer outputBuffer(2,128);
+        inputBuffer.clear();
+        outputBuffer.clear();
         WASMAudioIODeviceCallback* current = (WASMAudioIODeviceCallback*)userData;
         ScopedLock  sl(current->lock);
         current->callback->audioDeviceIOCallbackWithContext(
-                reinterpret_cast<const float *const *>(inputs[0].data),
-                    inputs[0].numberOfChannels,
-                reinterpret_cast<float *const *>(outputs[0].data),
-                    outputs[0].numberOfChannels,
+                    inputBuffer.getArrayOfWritePointers(),
+                inputBuffer.getNumChannels(),
+                outputBuffer.getArrayOfWritePointers(),
+                outputBuffer.getNumChannels(),
                     128,
                     {}
                 );
-
+        auto writeableChannel =std::min(2,outputs[0].numberOfChannels);
+        auto readPointers = outputBuffer.getArrayOfReadPointers();
+        for(int i =0;i < writeableChannel * 128;i++) {
+       outputs[0].data[i] = readPointers[i / 128][i];
+        }
         return EM_TRUE;
     }
 
