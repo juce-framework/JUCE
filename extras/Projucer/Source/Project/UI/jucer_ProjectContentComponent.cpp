@@ -318,25 +318,26 @@ void ProjectContentComponent::closeDocument()
         hideEditor();
 }
 
-static void showSaveWarning (OpenDocumentManager::Document* currentDocument)
+static ScopedMessageBox showSaveWarning (OpenDocumentManager::Document* currentDocument)
 {
-    AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                      TRANS("Save failed!"),
-                                      TRANS("Couldn't save the file:")
-                                          + "\n" + currentDocument->getFile().getFullPathName());
+    auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                     TRANS ("Save failed!"),
+                                                     TRANS ("Couldn't save the file:")
+                                                         + "\n" + currentDocument->getFile().getFullPathName());
+    return AlertWindow::showScopedAsync (options, nullptr);
 }
 
 void ProjectContentComponent::saveDocumentAsync()
 {
     if (currentDocument != nullptr)
     {
-        currentDocument->saveAsync ([parent = SafePointer<ProjectContentComponent> { this }] (bool savedSuccessfully)
+        currentDocument->saveAsync ([parent = SafePointer { this }] (bool savedSuccessfully)
         {
             if (parent == nullptr)
                 return;
 
             if (! savedSuccessfully)
-                showSaveWarning (parent->currentDocument);
+                parent->messageBox = showSaveWarning (parent->currentDocument);
 
             parent->refreshProjectTreeFileStatuses();
         });
@@ -351,13 +352,13 @@ void ProjectContentComponent::saveAsAsync()
 {
     if (currentDocument != nullptr)
     {
-        currentDocument->saveAsAsync ([parent = SafePointer<ProjectContentComponent> { this }] (bool savedSuccessfully)
+        currentDocument->saveAsAsync ([parent = SafePointer { this }] (bool savedSuccessfully)
         {
             if (parent == nullptr)
                 return;
 
             if (! savedSuccessfully)
-                showSaveWarning (parent->currentDocument);
+                parent->messageBox = showSaveWarning (parent->currentDocument);
 
             parent->refreshProjectTreeFileStatuses();
         });

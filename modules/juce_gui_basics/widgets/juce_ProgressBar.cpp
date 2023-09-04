@@ -26,15 +26,14 @@
 namespace juce
 {
 
-ProgressBar::ProgressBar (double& progress_)
-   : progress (progress_),
-     displayPercentage (true),
-     lastCallbackTime (0)
+ProgressBar::ProgressBar (double& progress_, std::optional<Style> style_)
+   : progress { progress_ },
+     style { style_ }
 {
-    currentValue = jlimit (0.0, 1.0, progress);
 }
 
-ProgressBar::~ProgressBar()
+ProgressBar::ProgressBar (double& progress_)
+   : progress { progress_ }
 {
 }
 
@@ -51,6 +50,17 @@ void ProgressBar::setTextToDisplay (const String& text)
     displayedMessage = text;
 }
 
+void ProgressBar::setStyle (std::optional<Style> newStyle)
+{
+    style = newStyle;
+    repaint();
+}
+
+ProgressBar::Style ProgressBar::getResolvedStyle() const
+{
+    return style.value_or (getLookAndFeel().getDefaultProgressBarStyle (*this));
+}
+
 void ProgressBar::lookAndFeelChanged()
 {
     setOpaque (getLookAndFeel().isProgressBarOpaque (*this));
@@ -59,6 +69,7 @@ void ProgressBar::lookAndFeelChanged()
 void ProgressBar::colourChanged()
 {
     lookAndFeelChanged();
+    repaint();
 }
 
 void ProgressBar::paint (Graphics& g)
@@ -75,9 +86,11 @@ void ProgressBar::paint (Graphics& g)
         text = displayedMessage;
     }
 
-    getLookAndFeel().drawProgressBar (g, *this,
-                                      getWidth(), getHeight(),
-                                      currentValue, text);
+    const auto w = getWidth();
+    const auto h = getHeight();
+    const auto v = currentValue;
+
+    getLookAndFeel().drawProgressBar (g, *this, w, h, v, text);
 }
 
 void ProgressBar::visibilityChanged()
@@ -96,7 +109,7 @@ void ProgressBar::timerCallback()
     const int timeSinceLastCallback = (int) (now - lastCallbackTime);
     lastCallbackTime = now;
 
-    if (currentValue != newProgress
+    if (! approximatelyEqual (currentValue, newProgress)
          || newProgress < 0 || newProgress >= 1.0
          || currentMessage != displayedMessage)
     {

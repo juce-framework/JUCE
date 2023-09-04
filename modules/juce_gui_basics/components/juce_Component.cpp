@@ -23,6 +23,11 @@
   ==============================================================================
 */
 
+#define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
+    jassert ((MessageManager::getInstanceWithoutCreating() != nullptr \
+               && MessageManager::getInstanceWithoutCreating()->currentThreadHasLockedMessageManager()) \
+              || getPeer() == nullptr);
+
 namespace juce
 {
 
@@ -159,343 +164,6 @@ private:
 };
 
 //==============================================================================
-struct FocusRestorer
-{
-    FocusRestorer()  : lastFocus (Component::getCurrentlyFocusedComponent()) {}
-
-    ~FocusRestorer()
-    {
-        if (lastFocus != nullptr
-             && lastFocus->isShowing()
-             && ! lastFocus->isCurrentlyBlockedByAnotherModalComponent())
-            lastFocus->grabKeyboardFocus();
-    }
-
-    WeakReference<Component> lastFocus;
-
-    JUCE_DECLARE_NON_COPYABLE (FocusRestorer)
-};
-
-//==============================================================================
-struct ScalingHelpers
-{
-    template <typename PointOrRect>
-    static PointOrRect unscaledScreenPosToScaled (float scale, PointOrRect pos) noexcept
-    {
-        return scale != 1.0f ? pos / scale : pos;
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect scaledScreenPosToUnscaled (float scale, PointOrRect pos) noexcept
-    {
-        return scale != 1.0f ? pos * scale : pos;
-    }
-
-    // For these, we need to avoid getSmallestIntegerContainer being used, which causes
-    // judder when moving windows
-    static Rectangle<int> unscaledScreenPosToScaled (float scale, Rectangle<int> pos) noexcept
-    {
-        return scale != 1.0f ? Rectangle<int> (roundToInt ((float) pos.getX() / scale),
-                                               roundToInt ((float) pos.getY() / scale),
-                                               roundToInt ((float) pos.getWidth() / scale),
-                                               roundToInt ((float) pos.getHeight() / scale)) : pos;
-    }
-
-    static Rectangle<int> scaledScreenPosToUnscaled (float scale, Rectangle<int> pos) noexcept
-    {
-        return scale != 1.0f ? Rectangle<int> (roundToInt ((float) pos.getX() * scale),
-                                               roundToInt ((float) pos.getY() * scale),
-                                               roundToInt ((float) pos.getWidth() * scale),
-                                               roundToInt ((float) pos.getHeight() * scale)) : pos;
-    }
-
-    static Rectangle<float> unscaledScreenPosToScaled (float scale, Rectangle<float> pos) noexcept
-    {
-        return scale != 1.0f ? Rectangle<float> (pos.getX() / scale,
-                                                 pos.getY() / scale,
-                                                 pos.getWidth() / scale,
-                                                 pos.getHeight() / scale) : pos;
-    }
-
-    static Rectangle<float> scaledScreenPosToUnscaled (float scale, Rectangle<float> pos) noexcept
-    {
-        return scale != 1.0f ? Rectangle<float> (pos.getX() * scale,
-                                                 pos.getY() * scale,
-                                                 pos.getWidth() * scale,
-                                                 pos.getHeight() * scale) : pos;
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect unscaledScreenPosToScaled (PointOrRect pos) noexcept
-    {
-        return unscaledScreenPosToScaled (Desktop::getInstance().getGlobalScaleFactor(), pos);
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect scaledScreenPosToUnscaled (PointOrRect pos) noexcept
-    {
-        return scaledScreenPosToUnscaled (Desktop::getInstance().getGlobalScaleFactor(), pos);
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect unscaledScreenPosToScaled (const Component& comp, PointOrRect pos) noexcept
-    {
-        return unscaledScreenPosToScaled (comp.getDesktopScaleFactor(), pos);
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect scaledScreenPosToUnscaled (const Component& comp, PointOrRect pos) noexcept
-    {
-        return scaledScreenPosToUnscaled (comp.getDesktopScaleFactor(), pos);
-    }
-
-    static Point<int>       addPosition      (Point<int> p,       const Component& c) noexcept  { return p + c.getPosition(); }
-    static Rectangle<int>   addPosition      (Rectangle<int> p,   const Component& c) noexcept  { return p + c.getPosition(); }
-    static Point<float>     addPosition      (Point<float> p,     const Component& c) noexcept  { return p + c.getPosition().toFloat(); }
-    static Rectangle<float> addPosition      (Rectangle<float> p, const Component& c) noexcept  { return p + c.getPosition().toFloat(); }
-    static Point<int>       subtractPosition (Point<int> p,       const Component& c) noexcept  { return p - c.getPosition(); }
-    static Rectangle<int>   subtractPosition (Rectangle<int> p,   const Component& c) noexcept  { return p - c.getPosition(); }
-    static Point<float>     subtractPosition (Point<float> p,     const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
-    static Rectangle<float> subtractPosition (Rectangle<float> p, const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
-
-    static Point<float> screenPosToLocalPos (Component& comp, Point<float> pos)
-    {
-        if (auto* peer = comp.getPeer())
-        {
-            pos = peer->globalToLocal (pos);
-            auto& peerComp = peer->getComponent();
-            return comp.getLocalPoint (&peerComp, unscaledScreenPosToScaled (peerComp, pos));
-        }
-
-        return comp.getLocalPoint (nullptr, unscaledScreenPosToScaled (comp, pos));
-    }
-};
-
-static const char colourPropertyPrefix[] = "jcclr_";
-
-//==============================================================================
-struct Component::ComponentHelpers
-{
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    static void* runModalLoopCallback (void* userData)
-    {
-        return (void*) (pointer_sized_int) static_cast<Component*> (userData)->runModalLoop();
-    }
-   #endif
-
-    static Identifier getColourPropertyID (int colourID)
-    {
-        char buffer[32];
-        auto* end = buffer + numElementsInArray (buffer) - 1;
-        auto* t = end;
-        *t = 0;
-
-        for (auto v = (uint32) colourID;;)
-        {
-            *--t = "0123456789abcdef" [v & 15];
-            v >>= 4;
-
-            if (v == 0)
-                break;
-        }
-
-        for (int i = (int) sizeof (colourPropertyPrefix) - 1; --i >= 0;)
-            *--t = colourPropertyPrefix[i];
-
-        return t;
-    }
-
-    //==============================================================================
-    static bool hitTest (Component& comp, Point<float> localPoint)
-    {
-        const auto intPoint = localPoint.roundToInt();
-        return Rectangle<int> { comp.getWidth(), comp.getHeight() }.contains (intPoint)
-               && comp.hitTest (intPoint.x, intPoint.y);
-    }
-
-    // converts an unscaled position within a peer to the local position within that peer's component
-    template <typename PointOrRect>
-    static PointOrRect rawPeerPositionToLocal (const Component& comp, PointOrRect pos) noexcept
-    {
-        if (comp.isTransformed())
-            pos = pos.transformedBy (comp.getTransform().inverted());
-
-        return ScalingHelpers::unscaledScreenPosToScaled (comp, pos);
-    }
-
-    // converts a position within a peer's component to the unscaled position within the peer
-    template <typename PointOrRect>
-    static PointOrRect localPositionToRawPeerPos (const Component& comp, PointOrRect pos) noexcept
-    {
-        if (comp.isTransformed())
-            pos = pos.transformedBy (comp.getTransform());
-
-        return ScalingHelpers::scaledScreenPosToUnscaled (comp, pos);
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect convertFromParentSpace (const Component& comp, const PointOrRect pointInParentSpace)
-    {
-        const auto transformed = comp.affineTransform != nullptr ? pointInParentSpace.transformedBy (comp.affineTransform->inverted())
-                                                                 : pointInParentSpace;
-
-        if (comp.isOnDesktop())
-        {
-            if (auto* peer = comp.getPeer())
-                return ScalingHelpers::unscaledScreenPosToScaled (comp, peer->globalToLocal (ScalingHelpers::scaledScreenPosToUnscaled (transformed)));
-
-            jassertfalse;
-            return transformed;
-        }
-
-        if (comp.getParentComponent() == nullptr)
-            return ScalingHelpers::subtractPosition (ScalingHelpers::unscaledScreenPosToScaled (comp, ScalingHelpers::scaledScreenPosToUnscaled (transformed)), comp);
-
-        return ScalingHelpers::subtractPosition (transformed, comp);
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect convertToParentSpace (const Component& comp, const PointOrRect pointInLocalSpace)
-    {
-        const auto preTransform = [&]
-        {
-            if (comp.isOnDesktop())
-            {
-                if (auto* peer = comp.getPeer())
-                    return ScalingHelpers::unscaledScreenPosToScaled (peer->localToGlobal (ScalingHelpers::scaledScreenPosToUnscaled (comp, pointInLocalSpace)));
-
-                jassertfalse;
-                return pointInLocalSpace;
-            }
-
-            if (comp.getParentComponent() == nullptr)
-                return ScalingHelpers::unscaledScreenPosToScaled (ScalingHelpers::scaledScreenPosToUnscaled (comp, ScalingHelpers::addPosition (pointInLocalSpace, comp)));
-
-            return ScalingHelpers::addPosition (pointInLocalSpace, comp);
-        }();
-
-        return comp.affineTransform != nullptr ? preTransform.transformedBy (*comp.affineTransform)
-                                               : preTransform;
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect convertFromDistantParentSpace (const Component* parent, const Component& target, PointOrRect coordInParent)
-    {
-        auto* directParent = target.getParentComponent();
-        jassert (directParent != nullptr);
-
-        if (directParent == parent)
-            return convertFromParentSpace (target, coordInParent);
-
-        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
-        return convertFromParentSpace (target, convertFromDistantParentSpace (parent, *directParent, coordInParent));
-        JUCE_END_IGNORE_WARNINGS_MSVC
-    }
-
-    template <typename PointOrRect>
-    static PointOrRect convertCoordinate (const Component* target, const Component* source, PointOrRect p)
-    {
-        while (source != nullptr)
-        {
-            if (source == target)
-                return p;
-
-            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
-
-            if (source->isParentOf (target))
-                return convertFromDistantParentSpace (source, *target, p);
-
-            JUCE_END_IGNORE_WARNINGS_MSVC
-
-            p = convertToParentSpace (*source, p);
-            source = source->getParentComponent();
-        }
-
-        jassert (source == nullptr);
-        if (target == nullptr)
-            return p;
-
-        auto* topLevelComp = target->getTopLevelComponent();
-
-        p = convertFromParentSpace (*topLevelComp, p);
-
-        if (topLevelComp == target)
-            return p;
-
-        return convertFromDistantParentSpace (topLevelComp, *target, p);
-    }
-
-    static bool clipObscuredRegions (const Component& comp, Graphics& g,
-                                     const Rectangle<int> clipRect, Point<int> delta)
-    {
-        bool wasClipped = false;
-
-        for (int i = comp.childComponentList.size(); --i >= 0;)
-        {
-            auto& child = *comp.childComponentList.getUnchecked(i);
-
-            if (child.isVisible() && ! child.isTransformed())
-            {
-                auto newClip = clipRect.getIntersection (child.boundsRelativeToParent);
-
-                if (! newClip.isEmpty())
-                {
-                    if (child.isOpaque() && child.componentTransparency == 0)
-                    {
-                        g.excludeClipRegion (newClip + delta);
-                        wasClipped = true;
-                    }
-                    else
-                    {
-                        auto childPos = child.getPosition();
-
-                        if (clipObscuredRegions (child, g, newClip - childPos, childPos + delta))
-                            wasClipped = true;
-                    }
-                }
-            }
-        }
-
-        return wasClipped;
-    }
-
-    static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
-    {
-        if (auto* p = comp.getParentComponent())
-            return p->getLocalBounds();
-
-        return Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
-    }
-
-    static void releaseAllCachedImageResources (Component& c)
-    {
-        if (auto* cached = c.getCachedComponentImage())
-            cached->releaseResources();
-
-        for (auto* child : c.childComponentList)
-            releaseAllCachedImageResources (*child);
-    }
-
-    //==============================================================================
-    static bool modalWouldBlockComponent (const Component& maybeBlocked, Component* modal)
-    {
-        return modal != nullptr
-            && modal != &maybeBlocked
-            && ! modal->isParentOf (&maybeBlocked)
-            && ! modal->canModalEventBeSentToComponent (&maybeBlocked);
-    }
-
-    template <typename Function>
-    static void sendMouseEventToComponentsThatAreBlockedByModal (Component& modal, Function&& function)
-    {
-        for (auto& ms : Desktop::getInstance().getMouseSources())
-            if (auto* c = ms.getComponentUnderMouse())
-                if (modalWouldBlockComponent (*c, &modal))
-                    (c->*function) (ms, ScalingHelpers::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
-    }
-};
-
-//==============================================================================
 Component::Component() noexcept
   : componentFlags (0)
 {
@@ -574,7 +242,7 @@ void Component::setVisible (bool shouldBeVisible)
 
         if (! shouldBeVisible)
         {
-            ComponentHelpers::releaseAllCachedImageResources (*this);
+            detail::ComponentHelpers::releaseAllCachedImageResources (*this);
 
             if (hasKeyboardFocus (true))
             {
@@ -664,8 +332,8 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
                  jmax (1, getHeight()));
        #endif
 
-        const auto unscaledPosition = ScalingHelpers::scaledScreenPosToUnscaled (getScreenPosition());
-        const auto topLeft = ScalingHelpers::unscaledScreenPosToScaled (*this, unscaledPosition);
+        const auto unscaledPosition = detail::ScalingHelpers::scaledScreenPosToUnscaled (getScreenPosition());
+        const auto topLeft = detail::ScalingHelpers::unscaledScreenPosToScaled (*this, unscaledPosition);
 
         bool wasFullscreen = false;
         bool wasMinimised = false;
@@ -747,7 +415,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             internalHierarchyChanged();
 
             if (auto* handler = getAccessibilityHandler())
-                notifyAccessibilityEventInternal (*handler, InternalAccessibilityEvent::windowOpened);
+                detail::AccessibilityHelpers::notifyAccessibilityEvent (*handler, detail::AccessibilityHelpers::Event::windowOpened);
         }
     }
 }
@@ -761,9 +429,9 @@ void Component::removeFromDesktop()
     if (flags.hasHeavyweightPeerFlag)
     {
         if (auto* handler = getAccessibilityHandler())
-            notifyAccessibilityEventInternal (*handler, InternalAccessibilityEvent::windowClosed);
+            detail::AccessibilityHelpers::notifyAccessibilityEvent (*handler, detail::AccessibilityHelpers::Event::windowClosed);
 
-        ComponentHelpers::releaseAllCachedImageResources (*this);
+        detail::ComponentHelpers::releaseAllCachedImageResources (*this);
 
         auto* peer = ComponentPeer::getPeerFor (this);
         jassert (peer != nullptr);
@@ -1115,15 +783,15 @@ int Component::getScreenY() const                       { return getScreenPositi
 Point<int>     Component::getScreenPosition() const     { return localPointToGlobal (Point<int>()); }
 Rectangle<int> Component::getScreenBounds() const       { return localAreaToGlobal (getLocalBounds()); }
 
-Point<int>       Component::getLocalPoint (const Component* source, Point<int> point) const       { return ComponentHelpers::convertCoordinate (this, source, point); }
-Point<float>     Component::getLocalPoint (const Component* source, Point<float> point) const     { return ComponentHelpers::convertCoordinate (this, source, point); }
-Rectangle<int>   Component::getLocalArea  (const Component* source, Rectangle<int> area) const    { return ComponentHelpers::convertCoordinate (this, source, area); }
-Rectangle<float> Component::getLocalArea  (const Component* source, Rectangle<float> area) const  { return ComponentHelpers::convertCoordinate (this, source, area); }
+Point<int>       Component::getLocalPoint (const Component* source, Point<int> point) const       { return detail::ComponentHelpers::convertCoordinate (this, source, point); }
+Point<float>     Component::getLocalPoint (const Component* source, Point<float> point) const     { return detail::ComponentHelpers::convertCoordinate (this, source, point); }
+Rectangle<int>   Component::getLocalArea  (const Component* source, Rectangle<int> area) const    { return detail::ComponentHelpers::convertCoordinate (this, source, area); }
+Rectangle<float> Component::getLocalArea  (const Component* source, Rectangle<float> area) const  { return detail::ComponentHelpers::convertCoordinate (this, source, area); }
 
-Point<int>       Component::localPointToGlobal (Point<int> point) const       { return ComponentHelpers::convertCoordinate (nullptr, this, point); }
-Point<float>     Component::localPointToGlobal (Point<float> point) const     { return ComponentHelpers::convertCoordinate (nullptr, this, point); }
-Rectangle<int>   Component::localAreaToGlobal  (Rectangle<int> area) const    { return ComponentHelpers::convertCoordinate (nullptr, this, area); }
-Rectangle<float> Component::localAreaToGlobal  (Rectangle<float> area) const  { return ComponentHelpers::convertCoordinate (nullptr, this, area); }
+Point<int>       Component::localPointToGlobal (Point<int> point) const       { return detail::ComponentHelpers::convertCoordinate (nullptr, this, point); }
+Point<float>     Component::localPointToGlobal (Point<float> point) const     { return detail::ComponentHelpers::convertCoordinate (nullptr, this, point); }
+Rectangle<int>   Component::localAreaToGlobal  (Rectangle<int> area) const    { return detail::ComponentHelpers::convertCoordinate (nullptr, this, area); }
+Rectangle<float> Component::localAreaToGlobal  (Rectangle<float> area) const  { return detail::ComponentHelpers::convertCoordinate (nullptr, this, area); }
 
 //==============================================================================
 void Component::setBounds (int x, int y, int w, int h)
@@ -1238,7 +906,7 @@ void Component::sendMovedResizedMessages (bool wasMoved, bool wasResized)
 
     if ((wasMoved || wasResized) && ! checker.shouldBailOut())
         if (auto* handler = getAccessibilityHandler())
-            notifyAccessibilityEventInternal (*handler, InternalAccessibilityEvent::elementMovedOrResized);
+            detail::AccessibilityHelpers::notifyAccessibilityEvent (*handler, detail::AccessibilityHelpers::Event::elementMovedOrResized);
 }
 
 void Component::setSize (int w, int h)                  { setBounds (getX(), getY(), w, h); }
@@ -1271,7 +939,7 @@ void Component::setBoundsRelative (float x, float y, float w, float h)
 
 void Component::centreWithSize (int width, int height)
 {
-    auto parentArea = ComponentHelpers::getParentOrMainMonitorBounds (*this)
+    auto parentArea = detail::ComponentHelpers::getParentOrMainMonitorBounds (*this)
                           .transformedBy (getTransform().inverted());
 
     setBounds (parentArea.getCentreX() - width / 2,
@@ -1281,7 +949,7 @@ void Component::centreWithSize (int width, int height)
 
 void Component::setBoundsInset (BorderSize<int> borders)
 {
-    setBounds (borders.subtractedFrom (ComponentHelpers::getParentOrMainMonitorBounds (*this)));
+    setBounds (borders.subtractedFrom (detail::ComponentHelpers::getParentOrMainMonitorBounds (*this)));
 }
 
 void Component::setBoundsToFit (Rectangle<int> targetArea, Justification justification, bool onlyReduceInSize)
@@ -1391,7 +1059,7 @@ bool Component::hitTest (int x, int y)
             auto& child = *childComponentList.getUnchecked (i);
 
             if (child.isVisible()
-                 && ComponentHelpers::hitTest (child, ComponentHelpers::convertFromParentSpace (child, Point<int> (x, y).toFloat())))
+                 && detail::ComponentHelpers::hitTest (child, detail::ComponentHelpers::convertFromParentSpace (child, Point<int> (x, y).toFloat())))
                 return true;
         }
     }
@@ -1420,14 +1088,14 @@ bool Component::contains (Point<int> point)
 
 bool Component::contains (Point<float> point)
 {
-    if (ComponentHelpers::hitTest (*this, point))
+    if (detail::ComponentHelpers::hitTest (*this, point))
     {
         if (parentComponent != nullptr)
-            return parentComponent->contains (ComponentHelpers::convertToParentSpace (*this, point));
+            return parentComponent->contains (detail::ComponentHelpers::convertToParentSpace (*this, point));
 
         if (flags.hasHeavyweightPeerFlag)
             if (auto* peer = getPeer())
-                return peer->contains (ComponentHelpers::localPositionToRawPeerPos (*this, point).roundToInt(), true);
+                return peer->contains (detail::ComponentHelpers::localPositionToRawPeerPos (*this, point).roundToInt(), true);
     }
 
     return false;
@@ -1456,13 +1124,13 @@ Component* Component::getComponentAt (Point<int> position)
 
 Component* Component::getComponentAt (Point<float> position)
 {
-    if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position))
+    if (flags.visibleFlag && detail::ComponentHelpers::hitTest (*this, position))
     {
         for (int i = childComponentList.size(); --i >= 0;)
         {
             auto* child = childComponentList.getUnchecked (i);
 
-            child = child->getComponentAt (ComponentHelpers::convertFromParentSpace (*child, position));
+            child = child->getComponentAt (detail::ComponentHelpers::convertFromParentSpace (*child, position));
 
             if (child != nullptr)
                 return child;
@@ -1579,7 +1247,7 @@ Component* Component::removeChildComponent (int index, bool sendParentEvents, bo
         childComponentList.remove (index);
         child->parentComponent = nullptr;
 
-        ComponentHelpers::releaseAllCachedImageResources (*child);
+        detail::ComponentHelpers::releaseAllCachedImageResources (*child);
 
         // (NB: there are obscure situations where child->isShowing() = false, but it still has the focus)
         if (child->hasKeyboardFocus (true))
@@ -1732,7 +1400,7 @@ int Component::runModalLoop()
     {
         // use a callback so this can be called from non-gui threads
         return (int) (pointer_sized_int) MessageManager::getInstance()
-                                           ->callFunctionOnMessageThread (&ComponentHelpers::runModalLoopCallback, this);
+                                           ->callFunctionOnMessageThread (&detail::ComponentHelpers::runModalLoopCallback, this);
     }
 
     if (! isCurrentlyModal (false))
@@ -1758,7 +1426,7 @@ void Component::enterModalState (bool shouldTakeKeyboardFocus,
         // While this component is in modal state it may block other components from receiving
         // mouseExit events. To keep mouseEnter and mouseExit calls balanced on these components,
         // we must manually force the mouse to "leave" blocked components.
-        ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*this, &Component::internalMouseExit);
+        detail::ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*this, &Component::internalMouseExit);
 
         if (safeReference == nullptr)
         {
@@ -1799,7 +1467,7 @@ void Component::exitModalState (int returnValue)
             // mouseEnter events. To keep mouseEnter and mouseExit calls balanced on these components,
             // we must manually force the mouse to "enter" blocked components.
             if (deletionChecker != nullptr)
-                ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*deletionChecker, &Component::internalMouseEnter);
+                detail::ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*deletionChecker, &Component::internalMouseEnter);
         }
         else
         {
@@ -1822,7 +1490,7 @@ bool Component::isCurrentlyModal (bool onlyConsiderForemostModalComponent) const
 
 bool Component::isCurrentlyBlockedByAnotherModalComponent() const
 {
-    return ComponentHelpers::modalWouldBlockComponent (*this, getCurrentlyModalComponent());
+    return detail::ComponentHelpers::modalWouldBlockComponent (*this, getCurrentlyModalComponent());
 }
 
 int JUCE_CALLTYPE Component::getNumCurrentlyModalComponents() noexcept
@@ -1923,7 +1591,7 @@ void Component::repaint (Rectangle<int> area)
 void Component::repaintParent()
 {
     if (parentComponent != nullptr)
-        parentComponent->internalRepaint (ComponentHelpers::convertToParentSpace (*this, getLocalBounds()));
+        parentComponent->internalRepaint (detail::ComponentHelpers::convertToParentSpace (*this, getLocalBounds()));
 }
 
 void Component::internalRepaint (Rectangle<int> area)
@@ -1965,7 +1633,7 @@ void Component::internalRepaintUnchecked (Rectangle<int> area, bool isEntireComp
         else
         {
             if (parentComponent != nullptr)
-                parentComponent->internalRepaint (ComponentHelpers::convertToParentSpace (*this, area));
+                parentComponent->internalRepaint (detail::ComponentHelpers::convertToParentSpace (*this, area));
         }
     }
 }
@@ -2006,7 +1674,7 @@ void Component::paintComponentAndChildren (Graphics& g)
     {
         Graphics::ScopedSaveState ss (g);
 
-        if (! (ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, {}) && g.isClipEmpty()))
+        if (! (detail::ComponentHelpers::clipObscuredRegions (*this, g, clipBounds, {}) && g.isClipEmpty()))
             paint (g);
     }
 
@@ -2209,7 +1877,7 @@ void Component::sendLookAndFeelChange()
 
 Colour Component::findColour (int colourID, bool inheritFromParent) const
 {
-    if (auto* v = properties.getVarPointer (ComponentHelpers::getColourPropertyID (colourID)))
+    if (auto* v = properties.getVarPointer (detail::ComponentHelpers::getColourPropertyID (colourID)))
         return Colour ((uint32) static_cast<int> (*v));
 
     if (inheritFromParent && parentComponent != nullptr
@@ -2221,18 +1889,18 @@ Colour Component::findColour (int colourID, bool inheritFromParent) const
 
 bool Component::isColourSpecified (int colourID) const
 {
-    return properties.contains (ComponentHelpers::getColourPropertyID (colourID));
+    return properties.contains (detail::ComponentHelpers::getColourPropertyID (colourID));
 }
 
 void Component::removeColour (int colourID)
 {
-    if (properties.remove (ComponentHelpers::getColourPropertyID (colourID)))
+    if (properties.remove (detail::ComponentHelpers::getColourPropertyID (colourID)))
         colourChanged();
 }
 
 void Component::setColour (int colourID, Colour colour)
 {
-    if (properties.set (ComponentHelpers::getColourPropertyID (colourID), (int) colour.getARGB()))
+    if (properties.set (detail::ComponentHelpers::getColourPropertyID (colourID), (int) colour.getARGB()))
         colourChanged();
 }
 
@@ -2244,7 +1912,7 @@ void Component::copyAllExplicitColoursTo (Component& target) const
     {
         auto name = properties.getName(i);
 
-        if (name.toString().startsWith (colourPropertyPrefix))
+        if (name.toString().startsWith (detail::colourPropertyPrefix))
             if (target.properties.set (name, properties [name]))
                 changed = true;
     }
@@ -2405,7 +2073,7 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
         repaint();
 
     const auto me = makeMouseEvent (source,
-                                    PointerState().withPosition (relativePos),
+                                    detail::PointerState().withPosition (relativePos),
                                     source.getCurrentModifiers(),
                                     this,
                                     this,
@@ -2442,7 +2110,7 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
     flags.cachedMouseInsideComponent = false;
 
     const auto me = makeMouseEvent (source,
-                                    PointerState().withPosition (relativePos),
+                                    detail::PointerState().withPosition (relativePos),
                                     source.getCurrentModifiers(),
                                     this,
                                     this,
@@ -2462,7 +2130,9 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
     MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseExit);
 }
 
-void Component::internalMouseDown (MouseInputSource source, const PointerState& relativePointerState, Time time)
+void Component::internalMouseDown (MouseInputSource source,
+                                   const detail::PointerState& relativePointerState,
+                                   Time time)
 {
     auto& desktop = Desktop::getInstance();
 
@@ -2512,7 +2182,7 @@ void Component::internalMouseDown (MouseInputSource source, const PointerState& 
 
     if (! flags.dontFocusOnMouseClickFlag)
     {
-        grabKeyboardFocusInternal (focusChangedByMouseClick, true);
+        grabKeyboardFocusInternal (focusChangedByMouseClick, true, FocusChangeDirection::unknown);
 
         if (checker.shouldBailOut())
             return;
@@ -2531,7 +2201,10 @@ void Component::internalMouseDown (MouseInputSource source, const PointerState& 
     MouseListenerList::sendMouseEvent (checker, &MouseListener::mouseDown);
 }
 
-void Component::internalMouseUp (MouseInputSource source, const PointerState& relativePointerState, Time time, const ModifierKeys oldModifiers)
+void Component::internalMouseUp (MouseInputSource source,
+                                 const detail::PointerState& relativePointerState,
+                                 Time time,
+                                 const ModifierKeys oldModifiers)
 {
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())
         return;
@@ -2579,7 +2252,7 @@ void Component::internalMouseUp (MouseInputSource source, const PointerState& re
     }
 }
 
-void Component::internalMouseDrag (MouseInputSource source, const PointerState& relativePointerState, Time time)
+void Component::internalMouseDrag (MouseInputSource source, const detail::PointerState& relativePointerState, Time time)
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2618,7 +2291,7 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
     else
     {
         const auto me = makeMouseEvent (source,
-                                        PointerState().withPosition (relativePos),
+                                        detail::PointerState().withPosition (relativePos),
                                         source.getCurrentModifiers(),
                                         this,
                                         this,
@@ -2646,7 +2319,7 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
     auto& desktop = Desktop::getInstance();
 
     const auto me = makeMouseEvent (source,
-                                    PointerState().withPosition (relativePos),
+                                    detail::PointerState().withPosition (relativePos),
                                     source.getCurrentModifiers(),
                                     this,
                                     this,
@@ -2683,7 +2356,7 @@ void Component::internalMagnifyGesture (MouseInputSource source, Point<float> re
     auto& desktop = Desktop::getInstance();
 
     const auto me = makeMouseEvent (source,
-                                    PointerState().withPosition (relativePos),
+                                    detail::PointerState().withPosition (relativePos),
                                     source.getCurrentModifiers(),
                                     this,
                                     this,
@@ -2762,17 +2435,20 @@ void Component::internalBroughtToFront()
 
 //==============================================================================
 void Component::focusGained (FocusChangeType)   {}
+void Component::focusGainedWithDirection (FocusChangeType, FocusChangeDirection) {}
 void Component::focusLost (FocusChangeType)     {}
 void Component::focusOfChildComponentChanged (FocusChangeType) {}
 
 void Component::internalKeyboardFocusGain (FocusChangeType cause)
 {
-    internalKeyboardFocusGain (cause, WeakReference<Component> (this));
+    internalKeyboardFocusGain (cause, WeakReference<Component> (this), FocusChangeDirection::unknown);
 }
 
 void Component::internalKeyboardFocusGain (FocusChangeType cause,
-                                           const WeakReference<Component>& safePointer)
+                                           const WeakReference<Component>& safePointer,
+                                           FocusChangeDirection direction)
 {
+    focusGainedWithDirection (cause, direction);
     focusGained (cause);
 
     if (safePointer == nullptr)
@@ -2884,16 +2560,16 @@ Component* Component::findKeyboardFocusContainer() const
     return findContainer (this, &Component::isKeyboardFocusContainer);
 }
 
-static const Identifier juce_explicitFocusOrderId ("_jexfo");
+static const Identifier explicitFocusOrderId ("_jexfo");
 
 int Component::getExplicitFocusOrder() const
 {
-    return properties [juce_explicitFocusOrderId];
+    return properties [explicitFocusOrderId];
 }
 
 void Component::setExplicitFocusOrder (int newFocusOrderIndex)
 {
-    properties.set (juce_explicitFocusOrderId, newFocusOrderIndex);
+    properties.set (explicitFocusOrderId, newFocusOrderIndex);
 }
 
 std::unique_ptr<ComponentTraverser> Component::createFocusTraverser()
@@ -2912,7 +2588,7 @@ std::unique_ptr<ComponentTraverser> Component::createKeyboardFocusTraverser()
     return parentComponent->createKeyboardFocusTraverser();
 }
 
-void Component::takeKeyboardFocus (FocusChangeType cause)
+void Component::takeKeyboardFocus (FocusChangeType cause, FocusChangeDirection direction)
 {
     if (currentlyFocusedComponent == this)
         return;
@@ -2941,11 +2617,11 @@ void Component::takeKeyboardFocus (FocusChangeType cause)
             componentLosingFocus->internalKeyboardFocusLoss (cause);
 
         if (currentlyFocusedComponent == this)
-            internalKeyboardFocusGain (cause, safePointer);
+            internalKeyboardFocusGain (cause, safePointer, direction);
     }
 }
 
-void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryParent)
+void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryParent, FocusChangeDirection direction)
 {
     if (! isShowing())
         return;
@@ -2953,7 +2629,7 @@ void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryPar
     if (flags.wantsKeyboardFocusFlag
         && (isEnabled() || parentComponent == nullptr))
     {
-        takeKeyboardFocus (cause);
+        takeKeyboardFocus (cause, direction);
         return;
     }
 
@@ -2964,7 +2640,7 @@ void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryPar
     {
         if (auto* defaultComp = traverser->getDefaultComponent (this))
         {
-            defaultComp->grabKeyboardFocusInternal (cause, false);
+            defaultComp->grabKeyboardFocusInternal (cause, false, direction);
             return;
         }
     }
@@ -2972,7 +2648,7 @@ void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryPar
     // if no children want it and we're allowed to try our parent comp,
     // then pass up to parent, which will try our siblings.
     if (canTryParent && parentComponent != nullptr)
-        parentComponent->grabKeyboardFocusInternal (cause, true);
+        parentComponent->grabKeyboardFocusInternal (cause, true, direction);
 }
 
 void Component::grabKeyboardFocus()
@@ -2981,7 +2657,7 @@ void Component::grabKeyboardFocus()
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-    grabKeyboardFocusInternal (focusChangedDirectly, true);
+    grabKeyboardFocusInternal (focusChangedDirectly, true, FocusChangeDirection::unknown);
 
     // A component can only be focused when it's actually on the screen!
     // If this fails then you're probably trying to grab the focus before you've
@@ -3057,7 +2733,10 @@ void Component::moveKeyboardFocusToSibling (bool moveToNext)
                         return;
                 }
 
-                nextComp->grabKeyboardFocusInternal (focusChangedByTabKey, true);
+                nextComp->grabKeyboardFocusInternal (focusChangedByTabKey,
+                                                     true,
+                                                     moveToNext ? FocusChangeDirection::forward
+                                                                : FocusChangeDirection::backward);
                 return;
             }
         }
@@ -3300,7 +2979,7 @@ AccessibilityHandler* Component::getAccessibilityHandler()
         // created, the if() predicate above should evaluate to false on recursive calls,
         // terminating the recursion.
         if (accessibilityHandler != nullptr)
-            notifyAccessibilityEventInternal (*accessibilityHandler, InternalAccessibilityEvent::elementCreated);
+            detail::AccessibilityHelpers::notifyAccessibilityEvent (*accessibilityHandler, detail::AccessibilityHelpers::Event::elementCreated);
         else
             jassertfalse; // createAccessibilityHandler must return non-null
     }

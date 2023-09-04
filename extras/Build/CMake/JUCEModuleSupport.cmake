@@ -33,7 +33,7 @@
 # ==================================================================================================
 
 include_guard(GLOBAL)
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 
 # ==================================================================================================
 
@@ -73,9 +73,10 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_add_standard_defs juce_target)
+    _juce_get_debug_config_genex(debug_config)
     target_compile_definitions(${juce_target} INTERFACE
         JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
-        $<IF:$<CONFIG:DEBUG>,DEBUG=1 _DEBUG=1,NDEBUG=1 _NDEBUG=1>
+        $<IF:${debug_config},DEBUG=1 _DEBUG=1,NDEBUG=1 _NDEBUG=1>
         $<$<PLATFORM_ID:Android>:JUCE_ANDROID=1>)
 endfunction()
 
@@ -155,24 +156,25 @@ function(_juce_get_metadata target key out_var)
 endfunction()
 
 # ==================================================================================================
-
 function(_juce_should_build_module_source filename output_var)
-    get_filename_component(trimmed_name "${filename}" NAME_WE)
+    get_filename_component(trimmed_filename "${filename}" NAME_WE)
+    string(TOLOWER "${trimmed_filename}" trimmed_filename_lowercase)
+
+    set(system_name_regex_for_suffix
+        "android\;Android"
+        "ios\;iOS"
+        "linux\;Linux|.*BSD"
+        "mac\;Darwin"
+        "osx\;Darwin"
+        "windows\;Windows")
 
     set(result TRUE)
 
-    set(pairs
-        "OSX\;Darwin"
-        "Windows\;Windows"
-        "Linux\;Linux"
-        "Android\;Android"
-        "iOS\;iOS")
-
-    foreach(pair IN LISTS pairs)
+    foreach(pair IN LISTS system_name_regex_for_suffix)
         list(GET pair 0 suffix)
-        list(GET pair 1 system_name)
+        list(GET pair 1 regex)
 
-        if((trimmed_name MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME STREQUAL "${system_name}"))
+        if((trimmed_filename_lowercase MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME MATCHES "${regex}"))
             set(result FALSE)
         endif()
     endforeach()
@@ -251,10 +253,13 @@ function(_juce_get_platform_plugin_kinds out)
     endif()
 
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-        list(APPEND result Unity VST VST3 LV2)
+        list(APPEND result VST LV2)
+        if(NOT (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
+            list(APPEND result Unity VST3)
+        endif()
     endif()
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows") AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
         list(APPEND result AAX)
     endif()
 
@@ -310,7 +315,6 @@ endfunction()
 
 function(_juce_add_plugin_wrapper_target format path out_path)
     _juce_module_sources("${path}" "${out_path}" out_var headers)
-    list(FILTER out_var EXCLUDE REGEX "/juce_audio_plugin_client_utils.cpp$")
     set(target_name juce_audio_plugin_client_${format})
 
     _juce_add_interface_library("${target_name}" ${out_var})
@@ -441,23 +445,16 @@ function(juce_add_module module_path)
     _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
 
     if(${module_name} STREQUAL "juce_audio_plugin_client")
-        list(REMOVE_ITEM headers "${module_path}/LV2/juce_LV2TurtleDumpProgram.cpp")
+        list(REMOVE_ITEM headers
+            "${module_path}/LV2/juce_LV2ManifestHelper.cpp"
+            "${module_path}/VST3/juce_VST3ManifestHelper.mm"
+            "${module_path}/VST3/juce_VST3ManifestHelper.cpp")
 
         _juce_get_platform_plugin_kinds(plugin_kinds)
 
         foreach(kind IN LISTS plugin_kinds)
             _juce_add_plugin_wrapper_target(${kind} "${module_path}" "${base_path}")
         endforeach()
-
-        set(utils_source
-            "${base_path}/${module_name}/juce_audio_plugin_client_utils.cpp")
-        add_library(juce_audio_plugin_client_utils INTERFACE)
-        target_sources(juce_audio_plugin_client_utils INTERFACE "${utils_source}")
-
-        if(JUCE_ARG_ALIAS_NAMESPACE)
-            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_audio_plugin_client_utils
-                ALIAS juce_audio_plugin_client_utils)
-        endif()
 
         file(GLOB_RECURSE all_module_files
             CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE

@@ -29,7 +29,7 @@
 */
 #define JUCE_MAJOR_VERSION      7
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        5
+#define JUCE_BUILDNUMBER        7
 
 /** Current JUCE version number.
 
@@ -72,6 +72,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <variant>
 #include <vector>
 
 //==============================================================================

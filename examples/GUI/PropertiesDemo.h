@@ -61,8 +61,10 @@ public:
     void buttonClicked() override
     {
         ++counter;
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon, "Action Button Pressed",
-                                          "Pressing this type of property component can trigger an action such as showing an alert window!");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                         "Action Button Pressed",
+                                                         "Pressing this type of property component can trigger an action such as showing an alert window!");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
         refresh();
     }
 
@@ -73,6 +75,7 @@ public:
 
 private:
     int counter = 0;
+    ScopedMessageBox messageBox;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoButtonPropertyComponent)
 };
 

@@ -99,6 +99,9 @@ private:
     String dragAndDropDescription;
     int itemHeight;
 
+    class Controller;
+    std::unique_ptr<Controller> controller;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileTreeComponent)
 };
 

@@ -77,7 +77,7 @@ public:
             && gradPos1 == other.gradPos1
             && gradPos2 == other.gradPos2
             && imageResourceName == other.imageResourceName
-            && imageOpacity == other.imageOpacity
+            && approximatelyEqual (imageOpacity, other.imageOpacity)
             && imageAnchor == other.imageAnchor;
     }
 
@@ -320,7 +320,7 @@ public:
             return gradCol1.isTransparent() && gradCol2.isTransparent();
 
         case imageBrush:
-            return imageOpacity == 0.0;
+            return approximatelyEqual (imageOpacity, 0.0);
 
         default:
             jassertfalse;

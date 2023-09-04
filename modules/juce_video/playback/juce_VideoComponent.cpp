@@ -29,11 +29,11 @@ namespace juce
 #if ! (JUCE_LINUX || JUCE_BSD)
 
 #if JUCE_MAC || JUCE_IOS
- #include "../native/juce_mac_Video.h"
+ #include "../native/juce_Video_mac.h"
 #elif JUCE_WINDOWS
- #include "../native/juce_win32_Video.h"
+ #include "../native/juce_Video_windows.h"
 #elif JUCE_ANDROID
- #include "../native/juce_android_Video.h"
+ #include "../native/juce_Video_android.h"
 #endif
 
 //==============================================================================

@@ -51,6 +51,7 @@ namespace ProjectMessages
         DECLARE_ID (newVersionAvailable);
         DECLARE_ID (pluginCodeInvalid);
         DECLARE_ID (manufacturerCodeInvalid);
+        DECLARE_ID (deprecatedExporter);
 
         DECLARE_ID (notification);
         DECLARE_ID (warning);
@@ -64,7 +65,8 @@ namespace ProjectMessages
     {
         static Identifier warnings[] = { Ids::incompatibleLicense, Ids::cppStandard, Ids::moduleNotFound,
                                          Ids::jucePath, Ids::jucerFileModified, Ids::missingModuleDependencies,
-                                         Ids::oldProjucer, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid };
+                                         Ids::oldProjucer, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid,
+                                         Ids::deprecatedExporter };
 
         if (std::find (std::begin (warnings), std::end (warnings), message) != std::end (warnings))
             return Ids::warning;
@@ -88,6 +90,7 @@ namespace ProjectMessages
         if (message == Ids::newVersionAvailable)        return "New Version Available";
         if (message == Ids::pluginCodeInvalid)          return "Invalid Plugin Code";
         if (message == Ids::manufacturerCodeInvalid)    return "Invalid Manufacturer Code";
+        if (message == Ids::deprecatedExporter)         return "Deprecated Exporter";
 
         jassertfalse;
         return {};
@@ -105,6 +108,7 @@ namespace ProjectMessages
         if (message == Ids::newVersionAvailable)        return "A new version of JUCE is available to download.";
         if (message == Ids::pluginCodeInvalid)          return "The plugin code should be exactly four characters in length.";
         if (message == Ids::manufacturerCodeInvalid)    return "The manufacturer code should be exactly four characters in length.";
+        if (message == Ids::deprecatedExporter)         return "The project includes a deprecated exporter.";
 
         jassertfalse;
         return {};
@@ -159,6 +163,7 @@ public:
     static String getJuceSourceHFilename()                      { return "JuceHeader.h"; }
     static String getJuceLV2DefinesFilename()                   { return "JuceLV2Defines.h"; }
     static String getLV2FileWriterName()                        { return "juce_lv2_helper"; }
+    static String getVST3FileWriterName()                       { return "juce_vst3_helper"; }
 
     //==============================================================================
     template <class FileType>
@@ -339,11 +344,11 @@ public:
     String getLV2URI() const        { return pluginLV2URIValue.get(); }
 
     //==============================================================================
-    bool isAUPluginHost();
-    bool isVSTPluginHost();
-    bool isVST3PluginHost();
-    bool isLV2PluginHost();
-    bool isARAPluginHost();
+    bool isAUPluginHost()   const;
+    bool isVSTPluginHost()  const;
+    bool isVST3PluginHost() const;
+    bool isLV2PluginHost()  const;
+    bool isARAPluginHost()  const;
 
     //==============================================================================
     bool shouldBuildTargetType (build_tools::ProjectType::Target::Type targetType) const noexcept;
@@ -494,7 +499,10 @@ public:
     bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
-    EnabledModulesList& getEnabledModules();
+    void createEnabledModulesList();
+
+          EnabledModulesList& getEnabledModules();
+    const EnabledModulesList& getEnabledModules() const;
 
     AvailableModulesList& getExporterPathsModulesList()  { return exporterPathsModulesList; }
     void rescanExporterPathModules (bool async = false);
@@ -546,6 +554,12 @@ private:
     void valueTreeChildAdded (ValueTree&, ValueTree&) override;
     void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override;
     void valueTreeChildOrderChanged (ValueTree&, int, int) override;
+
+    void valueTreeChildAddedOrRemoved (ValueTree&, ValueTree&);
+
+    //==============================================================================
+    template <typename This>
+    static auto& getEnabledModulesImpl (This&);
 
     //==============================================================================
     struct ProjectFileModificationPoller  : private Timer
@@ -638,6 +652,7 @@ private:
     void updateJUCEPathWarning();
 
     void updateModuleWarnings();
+    void updateExporterWarnings();
     void updateCppStandardWarning (bool showWarning);
     void updateMissingModuleDependenciesWarning (bool showWarning);
     void updateOldProjucerWarning (bool showWarning);
@@ -652,6 +667,7 @@ private:
 
     std::unique_ptr<FileChooser> chooser;
     std::unique_ptr<ProjectSaver> saver;
+    ScopedMessageBox messageBox;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)

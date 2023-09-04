@@ -160,7 +160,7 @@ namespace MidiFileHelpers
 
         for (int i = 0; i < numEvents; ++i)
         {
-            auto& m = tempoEvents.getEventPointer(i)->message;
+            auto& m = tempoEvents.getEventPointer (i)->message;
             auto eventTime = m.getTimeStamp();
 
             if (eventTime >= time)
@@ -174,9 +174,9 @@ namespace MidiFileHelpers
 
             while (i + 1 < numEvents)
             {
-                auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
+                auto& m2 = tempoEvents.getEventPointer (i + 1)->message;
 
-                if (m2.getTimeStamp() != eventTime)
+                if (! approximatelyEqual (m2.getTimeStamp(), eventTime))
                     break;
 
                 if (m2.isTempoMetaEvent())

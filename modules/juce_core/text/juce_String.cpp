@@ -2266,7 +2266,7 @@ static String serialiseDouble (double input)
 
     int intInput = (int) input;
 
-    if ((double) intInput == input)
+    if (exactlyEqual ((double) intInput, input))
         return { input, 1 };
 
     auto numberOfDecimalPlaces = [absInput]
@@ -2567,16 +2567,16 @@ public:
 
             beginTest ("Numeric conversions");
             expect (String().getIntValue() == 0);
-            expect (String().getDoubleValue() == 0.0);
-            expect (String().getFloatValue() == 0.0f);
+            expectEquals (String().getDoubleValue(), 0.0);
+            expectEquals (String().getFloatValue(), 0.0f);
             expect (s.getIntValue() == 12345678);
             expect (s.getLargeIntValue() == (int64) 12345678);
-            expect (s.getDoubleValue() == 12345678.0);
-            expect (s.getFloatValue() == 12345678.0f);
+            expectEquals (s.getDoubleValue(), 12345678.0);
+            expectEquals (s.getFloatValue(), 12345678.0f);
             expect (String (-1234).getIntValue() == -1234);
             expect (String ((int64) -1234).getLargeIntValue() == -1234);
-            expect (String (-1234.56).getDoubleValue() == -1234.56);
-            expect (String (-1234.56f).getFloatValue() == -1234.56f);
+            expectEquals (String (-1234.56).getDoubleValue(), -1234.56);
+            expectEquals (String (-1234.56f).getFloatValue(), -1234.56f);
             expect (String (std::numeric_limits<int>::max()).getIntValue() == std::numeric_limits<int>::max());
             expect (String (std::numeric_limits<int>::min()).getIntValue() == std::numeric_limits<int>::min());
             expect (String (std::numeric_limits<int64>::max()).getLargeIntValue() == std::numeric_limits<int64>::max());

@@ -82,7 +82,8 @@ namespace build_tools
                 SharedCodeTarget  = 20, // internal
                 AggregateTarget   = 21,
 
-                LV2TurtleProgram  = 25, // internal
+                LV2Helper         = 25, // internal
+                VST3Helper        = 26, // internal
 
                 unspecified       = 30
             };
@@ -118,7 +119,8 @@ namespace build_tools
                     case LV2PlugIn:         return "LV2 Plugin";
                     case SharedCodeTarget:  return "Shared Code";
                     case AggregateTarget:   return "All";
-                    case LV2TurtleProgram:  return "LV2 Manifest Helper";
+                    case LV2Helper:         return "LV2 Manifest Helper";
+                    case VST3Helper:        return "VST3 Manifest Helper";
                     case unspecified:       break;
                 }
 
@@ -141,7 +143,8 @@ namespace build_tools
                 if (name == "LV2 Plugin")           return Type::LV2PlugIn;
                 if (name == "Shared Code")          return Type::SharedCodeTarget;
                 if (name == "All")                  return Type::AggregateTarget;
-                if (name == "LV2 Manifest Helper")  return Type::LV2TurtleProgram;
+                if (name == "LV2 Manifest Helper")  return Type::LV2Helper;
+                if (name == "VST3 Manifest Helper") return Type::VST3Helper;
 
                 jassertfalse;
                 return Type::ConsoleApp;
@@ -164,7 +167,8 @@ namespace build_tools
                     case UnityPlugIn:       return pluginBundle;
                     case LV2PlugIn:         return pluginBundle;
                     case SharedCodeTarget:  return staticLibrary;
-                    case LV2TurtleProgram:  return executable;
+                    case LV2Helper:         return executable;
+                    case VST3Helper:        return executable;
                     case AggregateTarget:
                     case unspecified:
                         break;
@@ -249,7 +253,8 @@ namespace build_tools
                 case Target::StandalonePlugIn:
                 case Target::UnityPlugIn:
                 case Target::LV2PlugIn:
-                case Target::LV2TurtleProgram:
+                case Target::LV2Helper:
+                case Target::VST3Helper:
                 case Target::SharedCodeTarget:
                 case Target::AggregateTarget:
                     return true;
@@ -295,7 +300,8 @@ namespace build_tools
                 case Target::DynamicLibrary:
                 case Target::unspecified:
                 case Target::LV2PlugIn:
-                case Target::LV2TurtleProgram:
+                case Target::LV2Helper:
+                case Target::VST3Helper:
                     break;
             }
 

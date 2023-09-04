@@ -763,6 +763,7 @@ public:
         controlsOverlay.reset (new DemoControlsOverlay (*this));
         addAndMakeVisible (controlsOverlay.get());
 
+        openGLContext.setOpenGLVersionRequired (OpenGLContext::openGL3_2);
         openGLContext.setRenderer (this);
         openGLContext.attachTo (*this);
         openGLContext.setContinuousRepainting (true);
@@ -841,7 +842,9 @@ public:
         glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glActiveTexture (GL_TEXTURE0);
-        glEnable (GL_TEXTURE_2D);
+
+        if (! openGLContext.isCoreProfile())
+            glEnable (GL_TEXTURE_2D);
 
         glViewport (0, 0,
                     roundToInt (desktopScale * (float) bounds.getWidth()),

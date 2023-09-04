@@ -30,6 +30,20 @@
  #define JUCE_STATE_DICTIONARY_KEY   "jucePluginState"
 #endif
 
+
+#if (JUCE_IOS && defined (__IPHONE_15_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_15_0) \
+   || (JUCE_MAC && defined (MAC_OS_VERSION_12_0) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_VERSION_12_0)
+ #define JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED 1
+#else
+ #define JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED 0
+#endif
+
+#include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
+
+#if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
+ #include <juce_audio_basics/midi/ump/juce_UMP.h>
+#endif
+
 namespace juce
 {
 
@@ -359,7 +373,10 @@ struct AudioUnitHelpers
         }
 
         auto layout = processor.getBusesLayout();
-        auto maxNumChanToCheckFor = 9;
+
+        // The 'standard' layout with the most channels defined is AudioChannelSet::create9point1point6().
+        // This value should be updated if larger standard channel layouts are added in the future.
+        constexpr auto maxNumChanToCheckFor = 16;
 
         auto defaultInputs  = processor.getChannelCountOfBus (true,  0);
         auto defaultOutputs = processor.getChannelCountOfBus (false, 0);

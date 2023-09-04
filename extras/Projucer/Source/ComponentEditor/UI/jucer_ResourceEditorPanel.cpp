@@ -265,8 +265,11 @@ void ResourceEditorPanel::reloadAll()
             failed.add (document.getResources().getResourceNames() [i]);
 
     if (failed.size() > 0)
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          TRANS("Reloading resources"),
-                                          TRANS("The following resources couldn't be reloaded from their original files:\n\n")
-                                              + failed.joinIntoString (", "));
+    {
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         TRANS ("Reloading resources"),
+                                                         TRANS ("The following resources couldn't be reloaded from their original files:\n\n")
+                                                             + failed.joinIntoString (", "));
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
+    }
 }

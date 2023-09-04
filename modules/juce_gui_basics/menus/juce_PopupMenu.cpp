@@ -333,7 +333,7 @@ struct MenuWindow  : public Component
                 float parentScaleFactor = 1.0f)
         : Component ("menu"),
           parent (parentWindow),
-          options (opts.withParentComponent (findLookAndFeel (menu, parentWindow)->getParentComponentForMenuOptions (opts))),
+          options (opts.withParentComponent (findNonNullLookAndFeel (menu, parentWindow).getParentComponentForMenuOptions (opts))),
           managerOfChosenCommand (manager),
           componentAttachedTo (options.getTargetComponent()),
           dismissOnMouseUp (shouldDismissOnMouseUp),
@@ -391,6 +391,7 @@ struct MenuWindow  : public Component
             if (i + 1 < menu.items.size() || ! item.isSeparator)
             {
                 auto* child = items.add (new ItemComponent (item, options, *this));
+                child->setExplicitFocusOrder (1 + i);
 
                 if (initialSelectedId != 0 && item.itemID == initialSelectedId)
                     setCurrentlyHighlightedChild (child);
@@ -796,7 +797,7 @@ struct MenuWindow  : public Component
 
     bool doesAnyJuceCompHaveFocus()
     {
-        if (! isForegroundOrEmbeddedProcess (componentAttachedTo))
+        if (! detail::WindowingHelpers::isForegroundOrEmbeddedProcess (componentAttachedTo))
             return false;
 
         if (Component::getCurrentlyFocusedComponent() != nullptr)
@@ -1296,13 +1297,16 @@ struct MenuWindow  : public Component
 
     LookAndFeel* findLookAndFeel (const PopupMenu& menu, MenuWindow* parentWindow) const
     {
-        if (parentWindow != nullptr)
-            return &(parentWindow->getLookAndFeel());
+        return parentWindow != nullptr ? &(parentWindow->getLookAndFeel())
+                                       : menu.lookAndFeel.get();
+    }
 
-        if (auto* lnf = menu.lookAndFeel.get())
-            return lnf;
+    LookAndFeel& findNonNullLookAndFeel (const PopupMenu& menu, MenuWindow* parentWindow) const
+    {
+        if (auto* result = findLookAndFeel (menu, parentWindow))
+            return *result;
 
-        return &getLookAndFeel();
+        return getLookAndFeel();
     }
 
     //==============================================================================
@@ -1403,7 +1407,9 @@ private:
                     && (ModifierKeys::currentModifiers.isAnyMouseButtonDown()
                          || ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown());
 
-        if (! window.doesAnyJuceCompHaveFocus())
+        const auto reallyContained = window.reallyContains (localMousePos, true);
+
+        if (! window.doesAnyJuceCompHaveFocus() && ! reallyContained)
         {
             if (timeNow > window.lastFocusedTime + 10)
             {
@@ -1412,10 +1418,9 @@ private:
                 // Note: This object may have been deleted by the previous call.
             }
         }
-        else if (wasDown && timeNow > window.windowCreationTime + 250
-                   && ! (isDown || overScrollArea))
+        else if (wasDown && timeNow > window.windowCreationTime + 250 && ! isDown && ! overScrollArea)
         {
-            if (window.reallyContains (localMousePos, true))
+            if (reallyContained)
                 window.triggerCurrentlyHighlightedItem();
             else if ((window.hasBeenOver || ! window.dismissOnMouseUp) && ! isOverAny)
                 window.dismissMenu (nullptr);

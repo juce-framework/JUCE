@@ -39,7 +39,7 @@ bool RectanglePlacement::operator!= (const RectanglePlacement& other) const noex
 void RectanglePlacement::applyTo (double& x, double& y, double& w, double& h,
                                   const double dx, const double dy, const double dw, const double dh) const noexcept
 {
-    if (w == 0.0 || h == 0.0)
+    if (approximatelyEqual (w, 0.0) || approximatelyEqual (h, 0.0))
         return;
 
     if ((flags & stretchToFit) != 0)

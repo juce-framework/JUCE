@@ -108,15 +108,13 @@ public:
     class DocumentType
     {
     public:
-        DocumentType() {}
-        virtual ~DocumentType() {}
+        virtual ~DocumentType() = default;
 
         virtual bool canOpenFile (const File& file) = 0;
         virtual Document* openFile (Project* project, const File& file) = 0;
     };
 
     void registerType (DocumentType* type, int index = -1);
-
 
 private:
     //==============================================================================
@@ -129,6 +127,7 @@ private:
     OwnedArray<DocumentType> types;
     OwnedArray<Document> documents;
     Array<DocumentCloseListener*> listeners;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenDocumentManager)
     JUCE_DECLARE_WEAK_REFERENCEABLE (OpenDocumentManager)

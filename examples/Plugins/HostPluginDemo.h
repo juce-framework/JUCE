@@ -213,11 +213,10 @@ public:
         {
             if (error.isNotEmpty())
             {
-                NativeMessageBox::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                                       "Plugin Load Failed",
-                                                       error,
-                                                       nullptr,
-                                                       nullptr);
+                auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                                 "Plugin Load Failed",
+                                                                 error);
+                messageBox = AlertWindow::showScopedAsync (options, nullptr);
                 return;
             }
 
@@ -281,6 +280,7 @@ private:
     std::unique_ptr<AudioPluginInstance> inner;
     EditorStyle editorStyle = EditorStyle{};
     bool active = false;
+    ScopedMessageBox messageBox;
 
     static constexpr const char* innerStateTag = "inner_state";
     static constexpr const char* editorStyleTag = "editor_style";
@@ -297,7 +297,6 @@ private:
         }
     }
 };
-
 
 constexpr const char* HostAudioProcessorImpl::innerStateTag;
 constexpr const char* HostAudioProcessorImpl::editorStyleTag;

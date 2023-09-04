@@ -116,13 +116,18 @@ public:
         is equal to other.
     */
     template <typename OtherType>
-    bool operator== (const OtherType& other) const   { return cachedValue == other; }
+    bool operator== (const OtherType& other) const
+    {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfloat-equal")
+        return cachedValue == other;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }
 
     /** Returns true if the current value of the property (or the fallback value)
         is not equal to other.
      */
     template <typename OtherType>
-    bool operator!= (const OtherType& other) const   { return cachedValue != other; }
+    bool operator!= (const OtherType& other) const   { return ! operator== (other); }
 
     //==============================================================================
     /** Returns the current property as a Value object. */
@@ -245,7 +250,7 @@ inline CachedValue<Type>& CachedValue<Type>::operator= (const Type& newValue)
 template <typename Type>
 inline void CachedValue<Type>::setValue (const Type& newValue, UndoManager* undoManagerToUse)
 {
-    if (cachedValue != newValue || isUsingDefault())
+    if (! exactlyEqual (cachedValue, newValue) || isUsingDefault())
     {
         cachedValue = newValue;
         targetTree.setProperty (targetProperty, VariantConverter<Type>::toVar (newValue), undoManagerToUse);

@@ -293,7 +293,7 @@ private:
             index = roundToInt (getParameter().getValue() * (float) (parameterValues.size() - 1));
         }
 
-        box.setSelectedItemIndex (index);
+        box.setSelectedItemIndex (index, dontSendNotification);
     }
 
     void boxChanged()
@@ -378,7 +378,7 @@ private:
     {
         auto newVal = (float) slider.getValue();
 
-        if (getParameter().getValue() != newVal)
+        if (! approximatelyEqual (getParameter().getValue(), newVal))
         {
             if (! isDragging)
                 getParameter().beginChangeGesture();

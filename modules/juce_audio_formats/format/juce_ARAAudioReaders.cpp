@@ -67,7 +67,7 @@ void ARAAudioSourceReader::willUpdateAudioSourceProperties (ARAAudioSource* audi
                                                             ARAAudioSource::PropertiesPtr newProperties)
 {
     if (audioSource->getSampleCount() != newProperties->sampleCount
-        || audioSource->getSampleRate() != newProperties->sampleRate
+        || ! exactlyEqual (audioSource->getSampleRate(), newProperties->sampleRate)
         || audioSource->getChannelCount() != newProperties->channelCount)
     {
         invalidate();
@@ -277,10 +277,10 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
 {
     jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
 
-    if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime)
-        || (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime)
-        || (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime)
-        || (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)
+    if ((! exactlyEqual (playbackRegion->getStartInAudioModificationTime(), newProperties->startInModificationTime))
+        || ! exactlyEqual (playbackRegion->getDurationInAudioModificationTime(), newProperties->durationInModificationTime)
+        || ! exactlyEqual (playbackRegion->getStartInPlaybackTime(), newProperties->startInPlaybackTime)
+        || ! exactlyEqual (playbackRegion->getDurationInPlaybackTime(), newProperties->durationInPlaybackTime)
         || (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0))
         || (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0))
         || (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0))

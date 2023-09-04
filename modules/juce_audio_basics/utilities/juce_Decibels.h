@@ -60,6 +60,20 @@ public:
                              : minusInfinityDb;
     }
 
+    /** Restricts a gain value based on a lower bound specified in dBFS.
+
+        This is useful if you want to make sure a gain value never reaches zero.
+    */
+    template <typename Type>
+    static Type gainWithLowerBound (Type gain, Type lowerBoundDb)
+    {
+        // You probably want to use a negative decibel value or the gain will
+        // be restricted to boosting only!
+        jassert (lowerBoundDb < (Type) 0.0);
+
+        return jmax ((Type) gain, Decibels::decibelsToGain (lowerBoundDb, lowerBoundDb - (Type) 1.0));
+    }
+
     //==============================================================================
     /** Converts a decibel reading to a string.
 

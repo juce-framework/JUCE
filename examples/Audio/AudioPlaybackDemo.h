@@ -188,7 +188,7 @@ public:
             if (canMoveTransport())
                 setRange ({ newStart, newStart + visibleRange.getLength() });
 
-            if (wheel.deltaY != 0.0f)
+            if (! approximatelyEqual (wheel.deltaY, 0.0f))
                 zoomSlider.setValue (zoomSlider.getValue() - wheel.deltaY);
 
             repaint();
@@ -312,12 +312,7 @@ public:
         thread.startThread (Thread::Priority::normal);
 
        #ifndef JUCE_DEMO_RUNNER
-        RuntimePermissions::request (RuntimePermissions::recordAudio,
-                                     [this] (bool granted)
-                                     {
-                                         int numInputChannels = granted ? 2 : 0;
-                                         audioDeviceManager.initialise (numInputChannels, 2, nullptr, true, {}, nullptr);
-                                     });
+        audioDeviceManager.initialise (0, 2, nullptr, true, {}, nullptr);
        #endif
 
         audioDeviceManager.addAudioCallback (&audioSourcePlayer);
@@ -415,9 +410,14 @@ private:
     //==============================================================================
     void showAudioResource (URL resource)
     {
-        if (loadURLIntoTransport (resource))
-            currentAudioFile = std::move (resource);
+        if (! loadURLIntoTransport (resource))
+        {
+            // Failed to load the audio file!
+            jassertfalse;
+            return;
+        }
 
+        currentAudioFile = std::move (resource);
         zoomSlider.setValue (0, dontSendNotification);
         thumbnail->setURL (currentAudioFile);
     }
@@ -492,7 +492,7 @@ private:
 
             if (FileChooser::isPlatformDialogAvailable())
             {
-                fileChooser = std::make_unique<FileChooser> ("Select an audio file...", File(), "*.wav;*.mp3;*.aif");
+                fileChooser = std::make_unique<FileChooser> ("Select an audio file...", File(), "*.wav;*.flac;*.aif");
 
                 fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
                                           [this] (const FileChooser& fc) mutable

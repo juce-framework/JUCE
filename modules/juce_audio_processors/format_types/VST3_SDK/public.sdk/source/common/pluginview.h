@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,7 +51,7 @@ class CPluginView : public FObject, public IPlugView
 public:
 //------------------------------------------------------------------------
 	CPluginView (const ViewRect* rect = nullptr);
-	virtual ~CPluginView ();
+	~CPluginView () SMTG_OVERRIDE;
 
 	/** Returns its current frame rectangle. */
 	const ViewRect& getRect () const { return rect; }
@@ -109,7 +109,7 @@ public:
 protected:
 	ViewRect rect;
 	void* systemWindow {nullptr};
-	IPlugFrame* plugFrame {nullptr};
+	IPtr<IPlugFrame> plugFrame;
 };
 
 } // namespace

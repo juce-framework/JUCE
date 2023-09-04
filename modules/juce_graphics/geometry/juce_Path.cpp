@@ -28,7 +28,7 @@ namespace juce
 
 // tests that some coordinates aren't NaNs
 #define JUCE_CHECK_COORDS_ARE_VALID(x, y) \
-    jassert (x == x && y == y);
+    jassert (! std::isnan (x) && ! std::isnan (y));
 
 //==============================================================================
 namespace PathHelpers
@@ -58,18 +58,13 @@ namespace PathHelpers
 }
 
 //==============================================================================
-const float Path::lineMarker           = 100001.0f;
-const float Path::moveMarker           = 100002.0f;
-const float Path::quadMarker           = 100003.0f;
-const float Path::cubicMarker          = 100004.0f;
-const float Path::closeSubPathMarker   = 100005.0f;
 
 const float Path::defaultToleranceForTesting = 1.0f;
 const float Path::defaultToleranceForMeasurement = 0.6f;
 
 static bool isMarker (float value, float marker) noexcept
 {
-    return value == marker;
+    return exactlyEqual (value, marker);
 }
 
 //==============================================================================
@@ -726,10 +721,11 @@ void Path::addBubble (Rectangle<float> bodyArea,
 void Path::addPath (const Path& other)
 {
     const auto* d = other.data.begin();
+    const auto size = other.data.size();
 
-    for (int i = 0; i < other.data.size();)
+    for (int i = 0; i < size;)
     {
-        auto type = d[i++];
+        const auto type = d[i++];
 
         if (isMarker (type, moveMarker))
         {
@@ -767,10 +763,11 @@ void Path::addPath (const Path& other,
                     const AffineTransform& transformToApply)
 {
     const auto* d = other.data.begin();
+    const auto size = other.data.size();
 
-    for (int i = 0; i < other.data.size();)
+    for (int i = 0; i < size;)
     {
-        auto type = d[i++];
+        const auto type = d[i++];
 
         if (isMarker (type, closeSubPathMarker))
         {

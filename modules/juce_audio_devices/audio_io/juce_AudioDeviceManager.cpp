@@ -220,6 +220,12 @@ void AudioDeviceManager::audioDeviceListChanged()
     sendChangeMessage();
 }
 
+void AudioDeviceManager::midiDeviceListChanged()
+{
+    openLastRequestedMidiDevices (midiDeviceInfosFromXml, defaultMidiOutputDeviceInfo);
+    sendChangeMessage();
+}
+
 //==============================================================================
 static void addIfNotNull (OwnedArray<AudioIODeviceType>& list, AudioIODeviceType* const device)
 {
@@ -430,65 +436,62 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
     if (error.isNotEmpty() && selectDefaultDeviceOnFailure)
         error = initialise (numInputChansNeeded, numOutputChansNeeded, nullptr, false, preferredDefaultDeviceName);
 
-    midiDeviceInfosFromXml.clear();
     enabledMidiInputs.clear();
 
-    for (auto* c : xml.getChildWithTagNameIterator ("MIDIINPUT"))
-        midiDeviceInfosFromXml.add ({ c->getStringAttribute ("name"), c->getStringAttribute ("identifier") });
-
-    auto isIdentifierAvailable = [] (const Array<MidiDeviceInfo>& available, const String& identifier)
+    const auto midiInputs = [&]
     {
-        for (auto& device : available)
-            if (device.identifier == identifier)
-                return true;
+        Array<MidiDeviceInfo> result;
 
-        return false;
-    };
+        for (auto* c : xml.getChildWithTagNameIterator ("MIDIINPUT"))
+            result.add ({ c->getStringAttribute ("name"), c->getStringAttribute ("identifier") });
 
-    auto getUpdatedIdentifierForName = [&] (const Array<MidiDeviceInfo>& available, const String& name) -> String
-    {
-        for (auto& device : available)
-            if (device.name == name)
-                return device.identifier;
+        return result;
+    }();
 
-        return {};
-    };
+    const MidiDeviceInfo defaultOutputDeviceInfo (xml.getStringAttribute ("defaultMidiOutput"),
+                                                  xml.getStringAttribute ("defaultMidiOutputDevice"));
 
-    auto inputs = MidiInput::getAvailableDevices();
-
-    for (auto& info : midiDeviceInfosFromXml)
-    {
-        if (isIdentifierAvailable (inputs, info.identifier))
-        {
-            setMidiInputDeviceEnabled (info.identifier, true);
-        }
-        else
-        {
-            auto identifier = getUpdatedIdentifierForName (inputs, info.name);
-
-            if (identifier.isNotEmpty())
-                setMidiInputDeviceEnabled (identifier, true);
-        }
-    }
-
-    MidiDeviceInfo defaultOutputDeviceInfo (xml.getStringAttribute ("defaultMidiOutput"),
-                                            xml.getStringAttribute ("defaultMidiOutputDevice"));
-
-    auto outputs = MidiOutput::getAvailableDevices();
-
-    if (isIdentifierAvailable (outputs, defaultOutputDeviceInfo.identifier))
-    {
-        setDefaultMidiOutputDevice (defaultOutputDeviceInfo.identifier);
-    }
-    else
-    {
-        auto identifier = getUpdatedIdentifierForName (outputs, defaultOutputDeviceInfo.name);
-
-        if (identifier.isNotEmpty())
-            setDefaultMidiOutputDevice (identifier);
-    }
+    openLastRequestedMidiDevices (midiInputs, defaultOutputDeviceInfo);
 
     return error;
+}
+
+void AudioDeviceManager::openLastRequestedMidiDevices (const Array<MidiDeviceInfo>& desiredInputs, const MidiDeviceInfo& defaultOutput)
+{
+    const auto openDeviceIfAvailable = [&] (const Array<MidiDeviceInfo>& devices,
+                                            const MidiDeviceInfo& deviceToOpen,
+                                            auto&& doOpen)
+    {
+        const auto iterWithMatchingIdentifier = std::find_if (devices.begin(), devices.end(), [&] (const auto& x)
+        {
+            return x.identifier == deviceToOpen.identifier;
+        });
+
+        if (iterWithMatchingIdentifier != devices.end())
+        {
+            doOpen (deviceToOpen.identifier);
+            return;
+        }
+
+        const auto iterWithMatchingName = std::find_if (devices.begin(), devices.end(), [&] (const auto& x)
+        {
+            return x.name == deviceToOpen.name;
+        });
+
+        if (iterWithMatchingName != devices.end())
+            doOpen (iterWithMatchingName->identifier);
+    };
+
+    midiDeviceInfosFromXml = desiredInputs;
+
+    const auto inputs = MidiInput::getAvailableDevices();
+
+    for (const auto& info : midiDeviceInfosFromXml)
+        openDeviceIfAvailable (inputs, info, [&] (const auto identifier) { setMidiInputDeviceEnabled (identifier, true); });
+
+    const auto outputs = MidiOutput::getAvailableDevices();
+
+    openDeviceIfAvailable (outputs, defaultOutput, [&] (const auto identifier) { setDefaultMidiOutputDevice (identifier); });
 }
 
 String AudioDeviceManager::initialiseWithDefaultDevices (int numInputChannelsNeeded,

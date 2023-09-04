@@ -77,7 +77,7 @@ struct FIRFilterDemoDSP
 
     void updateParameters()
     {
-        if (sampleRate != 0.0)
+        if (! approximatelyEqual (sampleRate, 0.0))
         {
             auto cutoff = static_cast<float> (cutoffParam.getCurrentValue());
             auto windowingMethod = static_cast<WindowingFunction<float>::WindowingMethod> (typeParam.getCurrentSelectedID() - 1);

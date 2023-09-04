@@ -103,6 +103,7 @@ Project::Project (const File& f)
 
     setFile (f);
 
+    createEnabledModulesList();
     initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
@@ -461,7 +462,8 @@ void Project::removeDefunctExporters()
             warningMessage << "\n"
                            << TRANS ("These exporters have been removed from the project. If you save the project they will be also erased from the .jucer file.");
 
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
     }
 }
@@ -677,6 +679,7 @@ Result Project::loadDocument (const File& file)
     projectRoot = newTree;
     projectRoot.addListener (this);
 
+    createEnabledModulesList();
     initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
@@ -901,6 +904,25 @@ void Project::updateModuleWarnings()
     updateMissingModuleDependenciesWarning (missingDependencies);
     updateOldProjucerWarning (oldProjucer);
     updateModuleNotFoundWarning (moduleNotFound);
+}
+
+void Project::updateExporterWarnings()
+{
+    const Identifier deprecatedExporters[] = { "CODEBLOCKS_WINDOWS", "CODEBLOCKS_LINUX" };
+
+    for (const auto exporter : getExporters())
+    {
+        for (const auto& name : deprecatedExporters)
+        {
+            if (exporter.getType() == name)
+            {
+                addProjectMessage (ProjectMessages::Ids::deprecatedExporter, {});
+                return;
+            }
+        }
+    }
+
+    removeProjectMessage (ProjectMessages::Ids::deprecatedExporter);
 }
 
 void Project::updateCppStandardWarning (bool showWarning)
@@ -1136,24 +1158,24 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
     changed();
 }
 
-void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
+void Project::valueTreeChildAddedOrRemoved (ValueTree& parent, ValueTree& child)
 {
-    ignoreUnused (parent);
-
     if (child.getType() == Ids::MODULE)
         updateModuleWarnings();
+    else if (parent.getType() == Ids::EXPORTFORMATS)
+        updateExporterWarnings();
 
     changed();
 }
 
-void Project::valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int index)
+void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
 {
-    ignoreUnused (parent, index);
+    valueTreeChildAddedOrRemoved (parent, child);
+}
 
-    if (child.getType() == Ids::MODULE)
-        updateModuleWarnings();
-
-    changed();
+void Project::valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int)
+{
+    valueTreeChildAddedOrRemoved (parent, child);
 }
 
 void Project::valueTreeChildOrderChanged (ValueTree&, int, int)
@@ -1259,6 +1281,8 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
             return shouldBuildVST();
         case Target::VST3PlugIn:
             return shouldBuildVST3();
+        case Target::VST3Helper:
+            return shouldBuildVST3();
         case Target::AAXPlugIn:
             return shouldBuildAAX();
         case Target::AudioUnitPlugIn:
@@ -1270,7 +1294,7 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
         case Target::UnityPlugIn:
             return shouldBuildUnityPlugin();
         case Target::LV2PlugIn:
-        case Target::LV2TurtleProgram:
+        case Target::LV2Helper:
             return shouldBuildLV2();
         case Target::AggregateTarget:
         case Target::SharedCodeTarget:
@@ -1567,7 +1591,6 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 
         props.add (new TextPropertyComponent (pluginARACompatibleArchiveIDsValue, "Plugin ARA Compatible Document Archive IDs", 1024, true),
                    "List of compatible ARA Document Archive IDs - one per line");
-
     }
 }
 
@@ -2324,27 +2347,27 @@ int Project::getARATransformationFlags() const noexcept
 }
 
 //==============================================================================
-bool Project::isAUPluginHost()
+bool Project::isAUPluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU", false);
 }
 
-bool Project::isVSTPluginHost()
+bool Project::isVSTPluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false);
 }
 
-bool Project::isVST3PluginHost()
+bool Project::isVST3PluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
 }
 
-bool Project::isLV2PluginHost()
+bool Project::isLV2PluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_LV2", false);
 }
 
-bool Project::isARAPluginHost()
+bool Project::isARAPluginHost() const
 {
     return (isVST3PluginHost() || isAUPluginHost()) && isConfigFlagEnabled ("JUCE_PLUGINHOST_ARA", false);
 }
@@ -2505,12 +2528,21 @@ Array<var> Project::getDefaultARATransformationFlags() const noexcept
 }
 
 //==============================================================================
-EnabledModulesList& Project::getEnabledModules()
+template <typename This>
+auto& Project::getEnabledModulesImpl (This& t)
 {
-    if (enabledModulesList == nullptr)
-        enabledModulesList.reset (new EnabledModulesList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
+    // This won't work until you've loaded a project!
+    jassert (t.enabledModulesList != nullptr);
 
-    return *enabledModulesList;
+    return *t.enabledModulesList;
+}
+
+      EnabledModulesList& Project::getEnabledModules()            { return getEnabledModulesImpl (*this); }
+const EnabledModulesList& Project::getEnabledModules() const      { return getEnabledModulesImpl (*this); }
+
+void Project::createEnabledModulesList()
+{
+    enabledModulesList = std::make_unique<EnabledModulesList> (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr));
 }
 
 static StringArray getModulePathsFromExporters (Project& project, bool onlyThisOS)

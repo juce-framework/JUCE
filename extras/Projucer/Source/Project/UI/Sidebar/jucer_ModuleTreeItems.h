@@ -375,10 +375,11 @@ private:
                 {
                     missingDependencies = enabledModules.getExtraDependenciesNeeded (moduleID);
 
-                    AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                                      "Adding Missing Dependencies",
-                                                      "Couldn't locate some of these modules - you'll need to find their "
-                                                      "folders manually and add them to the list.");
+                    auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                                     "Adding Missing Dependencies",
+                                                                     "Couldn't locate some of these modules - you'll need to find their "
+                                                                     "folders manually and add them to the list.");
+                    messageBox = AlertWindow::showScopedAsync (options, nullptr);
                 }
             }
 
@@ -393,6 +394,7 @@ private:
             String moduleID;
             StringArray missingDependencies;
             TextButton fixButton { "Add Required Modules" };
+            ScopedMessageBox messageBox;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingDependenciesComponent)
         };

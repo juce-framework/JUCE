@@ -31,6 +31,8 @@ namespace juce
 
     This is used in the VST and VST3 wrappers to ensure that the editor's scale is kept in sync with
     the scale of its containing component.
+
+    @tags{GUI}
 */
 class NativeScaleFactorNotifier : private ComponentMovementWatcher,
                                   private ComponentPeer::ScaleFactorListener

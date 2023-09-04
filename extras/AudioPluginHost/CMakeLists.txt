@@ -48,6 +48,7 @@ juce_add_binary_data(AudioPluginHostData SOURCES
 
 target_compile_definitions(AudioPluginHost PRIVATE
     JUCE_ALSA=1
+    JUCE_CONTENT_SHARING=1
     JUCE_DIRECTSOUND=1
     JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING=1
     JUCE_PLUGINHOST_LADSPA=1

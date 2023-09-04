@@ -62,18 +62,15 @@ static String ensureCorrectWhitespace (StringRef input)
 
 static bool isJUCEExample (const File& pipFile)
 {
-    int numLinesToTest = 10; // license should be at the top of the file so no need to
-                             // check all lines
+    const auto numLinesToTest = 10; // license should be at the top of the file so no need to check all lines
+    const auto lines = StringArray::fromLines (pipFile.loadFileAsString());
 
-    for (auto line : StringArray::fromLines (pipFile.loadFileAsString()))
-    {
-        if (line.contains ("This file is part of the JUCE examples."))
-            return true;
-
-        --numLinesToTest;
-    }
-
-    return false;
+    return std::any_of (lines.begin(),
+                        lines.begin() + (std::min (lines.size(), numLinesToTest)),
+                        [] (const auto& line)
+                        {
+                            return line.contains ("This file is part of the JUCE examples.");
+                        });
 }
 
 static bool isValidExporterIdentifier (const Identifier& exporterIdentifier)

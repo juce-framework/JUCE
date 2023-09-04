@@ -904,7 +904,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
             {
                 const ScopedLock sl (pluginInstance.lock);
 
-                if (effect->getParameter (effect, getParameterIndex()) != newValue)
+                if (! approximatelyEqual (effect->getParameter (effect, getParameterIndex()), newValue))
                     effect->setParameter (effect, getParameterIndex(), newValue);
             }
         }
@@ -2004,7 +2004,7 @@ private:
 
         void setValue (float newValue) override
         {
-            currentValue = (newValue != 0.0f);
+            currentValue = (! approximatelyEqual (newValue, 0.0f));
 
             if (parent.vstSupportsBypass)
                 parent.dispatch (Vst2::effSetBypass, 0, currentValue ? 1 : 0, nullptr, 0.0f);
@@ -2028,7 +2028,7 @@ private:
         float getValue() const override                                     { return currentValue; }
         float getDefaultValue() const override                              { return 0.0f; }
         String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
-        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS("On") : TRANS("Off")); }
+        String getText (float value, int) const override                    { return (! approximatelyEqual (value, 0.0f) ? TRANS("On") : TRANS("Off")); }
         bool isAutomatable() const override                                 { return true; }
         bool isDiscrete() const override                                    { return true; }
         bool isBoolean() const override                                     { return true; }
@@ -2740,7 +2740,7 @@ private:
     {
         if (processBlockBypassedCalled)
         {
-            if (bypassParam->getValue() == 0.0f || ! lastProcessBlockCallWasBypass)
+            if (approximatelyEqual (bypassParam->getValue(), 0.0f) || ! lastProcessBlockCallWasBypass)
                 bypassParam->setValue (1.0f);
         }
         else
@@ -2805,13 +2805,14 @@ public:
 
     ~VSTPluginWindow() override
     {
+        activeVSTWindows.removeFirstMatchingValue (this);
+
         closePluginWindow();
 
        #if JUCE_MAC
         cocoaWrapper.reset();
        #endif
 
-        activeVSTWindows.removeFirstMatchingValue (this);
         plugin.editorBeingDeleted (this);
     }
 
@@ -3037,8 +3038,8 @@ public:
 
     void broughtToFront() override
     {
-        activeVSTWindows.removeFirstMatchingValue (this);
-        activeVSTWindows.add (this);
+        if (activeVSTWindows.removeFirstMatchingValue (this) != -1)
+            activeVSTWindows.add (this);
 
        #if JUCE_MAC
         dispatch (Vst2::effEditTop, 0, 0, nullptr, 0);

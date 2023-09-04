@@ -49,7 +49,10 @@ namespace build_tools
 
         if (isiOS)
         {
-            if (isAudioPluginProject && shouldEnableIAA)
+            // The Inter-App Audio entitlement is currently deprecated, but it
+            // also "provides access to Audio Unit extensions". Without the
+            // entitlement iOS apps are unable to access AUv3 plug-ins.
+            if ((isAudioPluginProject && shouldEnableIAA) || isAUPluginHost)
                 entitlements.set ("inter-app-audio", "<true/>");
 
             if (isiCloudPermissionsEnabled)

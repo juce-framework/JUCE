@@ -602,9 +602,9 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        if (getIndexChosenByMenu (menuItemID) >= 0)
-            createPlugin (getChosenType (menuItemID), { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
-                                                        proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
+        if (const auto chosen = getChosenType (menuItemID))
+            createPlugin (*chosen, { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
+                                     proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
 }
 
@@ -697,18 +697,19 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
     addToMenu (*tree, m, pluginDescriptions, pluginDescriptionsAndPreference);
 }
 
-int MainHostWindow::getIndexChosenByMenu (int menuID) const
+std::optional<PluginDescriptionAndPreference> MainHostWindow::getChosenType (const int menuID) const
 {
-    const auto i = menuID - menuIDBase;
-    return isPositiveAndBelow (i, pluginDescriptionsAndPreference.size()) ? i : -1;
-}
+    const auto internalIndex = menuID - 1;
 
-PluginDescriptionAndPreference MainHostWindow::getChosenType (const int menuID) const
-{
-    if (menuID >= 1 && menuID < (int) (1 + internalTypes.size()))
-        return PluginDescriptionAndPreference { internalTypes[(size_t) (menuID - 1)] };
+    if (isPositiveAndBelow (internalIndex, internalTypes.size()))
+        return PluginDescriptionAndPreference { internalTypes[(size_t) internalIndex] };
 
-    return pluginDescriptionsAndPreference[getIndexChosenByMenu (menuID)];
+    const auto externalIndex = menuID - menuIDBase;
+
+    if (isPositiveAndBelow (externalIndex, pluginDescriptionsAndPreference.size()))
+        return pluginDescriptionsAndPreference[externalIndex];
+
+    return {};
 }
 
 //==============================================================================

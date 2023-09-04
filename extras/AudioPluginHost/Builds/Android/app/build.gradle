@@ -2,10 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 33
-    namespace "com.juce.pluginhost"
+    ndkVersion "25.2.9519653"
+    namespace "com.juce.audiopluginhost"
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
+            version "3.22.1"
         }
     }
     signingConfigs {
@@ -19,7 +21,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.juce.pluginhost"
+        applicationId "com.juce.audiopluginhost"
         minSdkVersion    23
         targetSdkVersion 33
         externalNativeBuild {

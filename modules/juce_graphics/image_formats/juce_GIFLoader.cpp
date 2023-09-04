@@ -324,8 +324,8 @@ private:
             if (finished)
                 return -1;
 
-            buffer[0] = buffer [lastByteIndex - 2];
-            buffer[1] = buffer [lastByteIndex - 1];
+            buffer[0] = buffer [jmax (0, lastByteIndex - 2)];
+            buffer[1] = buffer [jmax (0, lastByteIndex - 1)];
 
             const int n = readDataBlock (buffer + 2);
 

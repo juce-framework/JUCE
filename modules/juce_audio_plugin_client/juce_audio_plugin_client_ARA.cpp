@@ -23,4 +23,26 @@
   ==============================================================================
 */
 
-#include "ARA/juce_ARA_Wrapper.cpp"
+#include <juce_core/system/juce_TargetPlatform.h>
+#include <juce_audio_plugin_client/detail/juce_CheckSettingMacros.h>
+
+#if JucePlugin_Enable_ARA
+
+#include <juce_audio_plugin_client/detail/juce_IncludeSystemHeaders.h>
+#include <juce_audio_plugin_client/detail/juce_IncludeModuleHeaders.h>
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter",
+                                     "-Wgnu-zero-variadic-macro-arguments",
+                                     "-Wmissing-prototypes",
+                                     "-Wfloat-equal")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
+
+#include <ARA_Library/PlugIn/ARAPlug.cpp>
+#include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
+#include <ARA_Library/Utilities/ARAPitchInterpretation.cpp>
+#include <ARA_Library/Utilities/ARAChannelArrangement.cpp>
+
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+#endif

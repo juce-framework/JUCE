@@ -108,26 +108,6 @@ void MemoryAudioSource::setLooping (bool shouldLoop)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-static bool operator== (const AudioBuffer<float>& a, const AudioBuffer<float>& b)
-{
-    if (a.getNumChannels() != b.getNumChannels())
-        return false;
-
-    for (int channel = 0; channel < a.getNumChannels(); ++channel)
-    {
-        auto* aPtr = a.getReadPointer (channel);
-        auto* bPtr = b.getReadPointer (channel);
-
-        if (std::vector<float> (aPtr, aPtr + a.getNumSamples())
-            != std::vector<float> (bPtr, bPtr + b.getNumSamples()))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 struct MemoryAudioSourceTests  : public UnitTest
 {
     MemoryAudioSourceTests()  : UnitTest ("MemoryAudioSource", UnitTestCategories::audio)  {}
@@ -184,7 +164,7 @@ struct MemoryAudioSourceTests  : public UnitTest
             play (source, channelInfo);
 
             for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-                expect (bufferToFill.getSample (0, sample + buffer.getNumSamples()) == buffer.getSample (0, sample));
+                expectEquals (bufferToFill.getSample (0, sample + buffer.getNumSamples()), buffer.getSample (0, sample));
 
             expect (! isSilent (bufferToFill));
         }
@@ -219,7 +199,7 @@ struct MemoryAudioSourceTests  : public UnitTest
             for (int i = 0; i < 100; ++i)
             {
                 play (source, channelInfo);
-                expect (bufferToFill.getSample (0, 0) == buffer.getSample (0, (i * blockSize) % buffer.getNumSamples()));
+                expectEquals (bufferToFill.getSample (0, 0), buffer.getSample (0, (i * blockSize) % buffer.getNumSamples()));
             }
         }
     }

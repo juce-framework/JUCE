@@ -89,7 +89,7 @@ namespace AnimatedPositionBehaviours
         */
         bool isStopped (double /*position*/) const noexcept
         {
-            return velocity == 0.0;
+            return approximatelyEqual (velocity, 0.0);
         }
 
     private:

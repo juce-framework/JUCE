@@ -406,17 +406,23 @@ void FUID::toRegistryString (char8* string) const
 	char8 s5[13];
 	Steinberg::toString8 (s5, data, 10, 16);
 
-	sprintf (string, "{%s-%s-%s-%s-%s}", s1, s2, s3, s4, s5);
+	snprintf (string, 40, "{%s-%s-%s-%s-%s}", s1, s2, s3, s4, s5);
 #endif
 }
 
 //------------------------------------------------------------------------
 void FUID::print (char8* string, int32 style) const
 {
-	if (!string) // no string: debug output
+	print (style, string, 62);
+}
+
+//------------------------------------------------------------------------
+void FUID::print (int32 style, char8* string, size_t stringBufferSize) const
+{
+	if (!string || stringBufferSize == 0) // no string: debug output
 	{
 		char8 str[128];
-		print (str, style);
+		print (style, str, 128);
 
 #if SMTG_OS_WINDOWS
 		OutputDebugStringA (str);
@@ -433,21 +439,25 @@ void FUID::print (char8* string, int32 style) const
 	switch (style)
 	{
 		case kINLINE_UID:
-			sprintf (string, "INLINE_UID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1, l2, l3, l4);
+			snprintf (string, stringBufferSize, "INLINE_UID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1,
+			          l2, l3, l4);
 			break;
 
 		case kDECLARE_UID:
-			sprintf (string, "DECLARE_UID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1, l2, l3, l4);
+			snprintf (string, stringBufferSize, "DECLARE_UID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1,
+			          l2, l3, l4);
 			break;
 
 		case kFUID:
-			sprintf (string, "FUID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1, l2, l3, l4);
+			snprintf (string, stringBufferSize, "FUID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1, l2, l3,
+			          l4);
 			break;
 
 		case kCLASS_UID:
 		default:
-			sprintf (string, "DECLARE_CLASS_IID (Interface, 0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1,
-			         l2, l3, l4);
+			snprintf (string, stringBufferSize,
+			          "DECLARE_CLASS_IID (Interface, 0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1, l2, l3,
+			          l4);
 			break;
 	}
 }
@@ -467,7 +477,7 @@ static void toString8 (char8* string, const char* data, int32 i1, int32 i2)
 	for (int32 i = i1; i < i2; i++)
 	{
 		char8 s[3];
-		sprintf (s, "%02X", (uint8)data[i]);
+		snprintf (s, 3, "%02X", (uint8)data[i]);
 		strcat (string, s);
 	}
 }

@@ -31,6 +31,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc99-extensions",
                                      "-Wdeprecated-declarations",
                                      "-Wextra-semi",
                                      "-Wfloat-conversion",
+                                     "-Wfloat-equal",
+                                     "-Wformat-overflow",
                                      "-Wimplicit-float-conversion",
                                      "-Wimplicit-int-conversion",
                                      "-Wmicrosoft-include",
@@ -114,3 +116,6 @@ using namespace Utils;
 #pragma pop_macro ("nil")
 
 } // extern "C"
+
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE

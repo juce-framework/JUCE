@@ -336,7 +336,7 @@ int StretchableLayoutManager::sizeToRealSize (double size, int totalSpace)
     if (size < 0)
         size *= -totalSpace;
 
-    return roundToInt (size);
+    return roundToInt (jmax (1.0, size));
 }
 
 } // namespace juce

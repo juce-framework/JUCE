@@ -337,9 +337,11 @@ private:
 
     static BusesProperties getBusesLayout()
     {
-        // Live doesn't like to load midi-only plugins, so we add an audio output there.
-        return PluginHostType().isAbletonLive() ? BusesProperties().withOutput ("out", AudioChannelSet::stereo())
-                                                : BusesProperties();
+        // Live and Cakewalk don't like to load midi-only plugins, so we add an audio output there.
+        const PluginHostType host;
+        return host.isAbletonLive() || host.isSonar()
+             ? BusesProperties().withOutput ("out", AudioChannelSet::stereo())
+             : BusesProperties();
     }
 
     ValueTree state { "state" };

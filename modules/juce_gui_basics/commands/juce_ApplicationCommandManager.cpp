@@ -270,7 +270,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         // getting a bit desperate now: try all desktop comps..
         for (int i = desktop.getNumComponents(); --i >= 0;)
             if (auto* component = desktop.getComponent (i))
-                if (isForegroundOrEmbeddedProcess (component))
+                if (detail::WindowingHelpers::isForegroundOrEmbeddedProcess (component))
                     if (auto* peer = component->getPeer())
                         if (auto* target = findTargetForComponent (peer->getLastFocusedSubcomponent()))
                             return target;

@@ -197,7 +197,7 @@ static inline Steinberg::Vst::SpeakerArrangement getArrangementForBus (Steinberg
     return arrangement;
 }
 
-static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, AudioChannelSet::ChannelType type) noexcept
+static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannelSet& set, AudioChannelSet::ChannelType type) noexcept
 {
     switch (type)
     {
@@ -241,6 +241,15 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
         case AudioChannelSet::ambisonicACN13:    return Steinberg::Vst::kSpeakerACN13;
         case AudioChannelSet::ambisonicACN14:    return Steinberg::Vst::kSpeakerACN14;
         case AudioChannelSet::ambisonicACN15:    return Steinberg::Vst::kSpeakerACN15;
+        case AudioChannelSet::ambisonicACN16:    return Steinberg::Vst::kSpeakerACN16;
+        case AudioChannelSet::ambisonicACN17:    return Steinberg::Vst::kSpeakerACN17;
+        case AudioChannelSet::ambisonicACN18:    return Steinberg::Vst::kSpeakerACN18;
+        case AudioChannelSet::ambisonicACN19:    return Steinberg::Vst::kSpeakerACN19;
+        case AudioChannelSet::ambisonicACN20:    return Steinberg::Vst::kSpeakerACN20;
+        case AudioChannelSet::ambisonicACN21:    return Steinberg::Vst::kSpeakerACN21;
+        case AudioChannelSet::ambisonicACN22:    return Steinberg::Vst::kSpeakerACN22;
+        case AudioChannelSet::ambisonicACN23:    return Steinberg::Vst::kSpeakerACN23;
+        case AudioChannelSet::ambisonicACN24:    return Steinberg::Vst::kSpeakerACN24;
         case AudioChannelSet::topSideLeft:       return Steinberg::Vst::kSpeakerTsl;
         case AudioChannelSet::topSideRight:      return Steinberg::Vst::kSpeakerTsr;
         case AudioChannelSet::bottomFrontLeft:   return Steinberg::Vst::kSpeakerBfl;
@@ -254,15 +263,6 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
 
         case AudioChannelSet::discreteChannel0:  return Steinberg::Vst::kSpeakerM;
 
-        case AudioChannelSet::ambisonicACN16:
-        case AudioChannelSet::ambisonicACN17:
-        case AudioChannelSet::ambisonicACN18:
-        case AudioChannelSet::ambisonicACN19:
-        case AudioChannelSet::ambisonicACN20:
-        case AudioChannelSet::ambisonicACN21:
-        case AudioChannelSet::ambisonicACN22:
-        case AudioChannelSet::ambisonicACN23:
-        case AudioChannelSet::ambisonicACN24:
         case AudioChannelSet::ambisonicACN25:
         case AudioChannelSet::ambisonicACN26:
         case AudioChannelSet::ambisonicACN27:
@@ -274,17 +274,44 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
         case AudioChannelSet::ambisonicACN33:
         case AudioChannelSet::ambisonicACN34:
         case AudioChannelSet::ambisonicACN35:
+        case AudioChannelSet::ambisonicACN36:
+        case AudioChannelSet::ambisonicACN37:
+        case AudioChannelSet::ambisonicACN38:
+        case AudioChannelSet::ambisonicACN39:
+        case AudioChannelSet::ambisonicACN40:
+        case AudioChannelSet::ambisonicACN41:
+        case AudioChannelSet::ambisonicACN42:
+        case AudioChannelSet::ambisonicACN43:
+        case AudioChannelSet::ambisonicACN44:
+        case AudioChannelSet::ambisonicACN45:
+        case AudioChannelSet::ambisonicACN46:
+        case AudioChannelSet::ambisonicACN47:
+        case AudioChannelSet::ambisonicACN48:
+        case AudioChannelSet::ambisonicACN49:
+        case AudioChannelSet::ambisonicACN50:
+        case AudioChannelSet::ambisonicACN51:
+        case AudioChannelSet::ambisonicACN52:
+        case AudioChannelSet::ambisonicACN53:
+        case AudioChannelSet::ambisonicACN54:
+        case AudioChannelSet::ambisonicACN55:
+        case AudioChannelSet::ambisonicACN56:
+        case AudioChannelSet::ambisonicACN57:
+        case AudioChannelSet::ambisonicACN58:
+        case AudioChannelSet::ambisonicACN59:
+        case AudioChannelSet::ambisonicACN60:
+        case AudioChannelSet::ambisonicACN61:
+        case AudioChannelSet::ambisonicACN62:
+        case AudioChannelSet::ambisonicACN63:
         case AudioChannelSet::wideLeft:
         case AudioChannelSet::wideRight:
         case AudioChannelSet::unknown:
             break;
     }
 
-    auto channelIndex = static_cast<Steinberg::Vst::Speaker> (type) - (static_cast<Steinberg::Vst::Speaker> (AudioChannelSet::discreteChannel0) + 6ull);
-    return (1ull << (channelIndex + 33ull /* last speaker in vst layout + 1 */));
+    return {};
 }
 
-static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArrangement arr, Steinberg::Vst::Speaker type) noexcept
+static std::optional<AudioChannelSet::ChannelType> getChannelType (Steinberg::Vst::SpeakerArrangement arr, Steinberg::Vst::Speaker type) noexcept
 {
     switch (type)
     {
@@ -324,6 +351,15 @@ static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArran
         case Steinberg::Vst::kSpeakerACN13: return AudioChannelSet::ambisonicACN13;
         case Steinberg::Vst::kSpeakerACN14: return AudioChannelSet::ambisonicACN14;
         case Steinberg::Vst::kSpeakerACN15: return AudioChannelSet::ambisonicACN15;
+        case Steinberg::Vst::kSpeakerACN16: return AudioChannelSet::ambisonicACN16;
+        case Steinberg::Vst::kSpeakerACN17: return AudioChannelSet::ambisonicACN17;
+        case Steinberg::Vst::kSpeakerACN18: return AudioChannelSet::ambisonicACN18;
+        case Steinberg::Vst::kSpeakerACN19: return AudioChannelSet::ambisonicACN19;
+        case Steinberg::Vst::kSpeakerACN20: return AudioChannelSet::ambisonicACN20;
+        case Steinberg::Vst::kSpeakerACN21: return AudioChannelSet::ambisonicACN21;
+        case Steinberg::Vst::kSpeakerACN22: return AudioChannelSet::ambisonicACN22;
+        case Steinberg::Vst::kSpeakerACN23: return AudioChannelSet::ambisonicACN23;
+        case Steinberg::Vst::kSpeakerACN24: return AudioChannelSet::ambisonicACN24;
         case Steinberg::Vst::kSpeakerTsl:   return AudioChannelSet::topSideLeft;
         case Steinberg::Vst::kSpeakerTsr:   return AudioChannelSet::topSideRight;
         case Steinberg::Vst::kSpeakerLcs:   return AudioChannelSet::leftSurroundRear;
@@ -340,12 +376,7 @@ static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArran
         case Steinberg::Vst::kSpeakerBrr:   return AudioChannelSet::bottomRearRight;
     }
 
-    auto channelType = BigInteger (static_cast<int64> (type)).findNextSetBit (0);
-
-    // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
-    jassert (channelType >= 33);
-
-    return static_cast<AudioChannelSet::ChannelType> (static_cast<int> (AudioChannelSet::discreteChannel0) + 6 + (channelType - 33));
+    return {};
 }
 
 namespace detail
@@ -394,6 +425,8 @@ namespace detail
         { k70_6,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
 
         // The VST3 layout uses 'left/right' and 'left-of-center/right-of-center', but the JUCE layout uses 'left/right' and 'wide-left/wide-right'.
+        { k91_4,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k90_4,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
         { k91_6,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
         { k90_6,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
     };
@@ -406,7 +439,7 @@ namespace detail
 inline bool isLayoutTableValid()
 {
     for (const auto& item : detail::layoutTable)
-        if ((size_t) countNumberOfBits (item.arrangement) != item.channelOrder.size())
+        if ((size_t) countNumberOfBits ((uint64) item.arrangement) != item.channelOrder.size())
             return false;
 
     std::set<Steinberg::Vst::SpeakerArrangement> arrangements;
@@ -423,7 +456,7 @@ inline bool isLayoutTableValid()
     });
 }
 
-static Array<AudioChannelSet::ChannelType> getSpeakerOrder (Steinberg::Vst::SpeakerArrangement arr)
+static std::optional<Array<AudioChannelSet::ChannelType>> getSpeakerOrder (Steinberg::Vst::SpeakerArrangement arr)
 {
     using namespace Steinberg::Vst;
     using namespace Steinberg::Vst::SpeakerArr;
@@ -445,18 +478,44 @@ static Array<AudioChannelSet::ChannelType> getSpeakerOrder (Steinberg::Vst::Spea
     result.ensureStorageAllocated (channels);
 
     for (auto i = 0; i < channels; ++i)
-        result.add (getChannelType (arr, getSpeaker (arr, i)));
+        if (const auto t = getChannelType (arr, getSpeaker (arr, i)))
+            result.add (*t);
 
-    return result;
+    if (getChannelCount (arr) == result.size())
+        return result;
+
+    return {};
 }
 
-static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
+struct Ambisonics
+{
+    struct Mapping
+    {
+        Steinberg::Vst::SpeakerArrangement arrangement;
+        AudioChannelSet channelSet;
+    };
+
+    inline static const Mapping mappings[]
+    {
+        { Steinberg::Vst::SpeakerArr::kAmbi5thOrderACN, AudioChannelSet::ambisonic (5) },
+        { Steinberg::Vst::SpeakerArr::kAmbi6thOrderACN, AudioChannelSet::ambisonic (6) },
+        { Steinberg::Vst::SpeakerArr::kAmbi7thOrderACN, AudioChannelSet::ambisonic (7) },
+    };
+
+    Ambisonics() = delete;
+};
+
+static std::optional<Steinberg::Vst::SpeakerArrangement> getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
    #if JUCE_DEBUG
     std::call_once (detail::layoutTableCheckedFlag, [] { jassert (isLayoutTableValid()); });
    #endif
+
+    for (const auto& mapping : Ambisonics::mappings)
+        if (channels == mapping.channelSet)
+            return mapping.arrangement;
 
     const auto channelSetMatches = [&channels] (const auto& layoutPair)
     {
@@ -470,21 +529,28 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
     Steinberg::Vst::SpeakerArrangement result = 0;
 
     for (const auto& type : channels.getChannelTypes())
-        result |= getSpeakerType (channels, type);
+        if (const auto t = getSpeakerType (channels, type))
+            result |= *t;
 
-    return result;
+    if (getChannelCount (result) == channels.size())
+        return result;
+
+    return {};
 }
 
-inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
+inline std::optional<AudioChannelSet> getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    const auto result = AudioChannelSet::channelSetWithChannels (getSpeakerOrder (arr));
+    for (const auto& mapping : Ambisonics::mappings)
+        if (arr == mapping.arrangement)
+            return mapping.channelSet;
+
+    if (const auto order = getSpeakerOrder (arr))
+        return AudioChannelSet::channelSetWithChannels (*order);
 
     // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
-    jassert (result.size() == getChannelCount (arr));
-
-    return result;
+    return {};
 }
 
 //==============================================================================
@@ -522,7 +588,21 @@ private:
     */
     static std::vector<int> makeChannelIndices (const AudioChannelSet& juceArrangement)
     {
-        const auto order = getSpeakerOrder (getVst3SpeakerArrangement (juceArrangement));
+        const auto order = [&]
+        {
+            const auto fallback = juceArrangement.getChannelTypes();
+            const auto vst3Arrangement = getVst3SpeakerArrangement (juceArrangement);
+
+            if (! vst3Arrangement.has_value())
+                return fallback;
+
+            const auto reordered = getSpeakerOrder (*vst3Arrangement);
+
+            if (! reordered.has_value() || AudioChannelSet::channelSetWithChannels (*reordered) != juceArrangement)
+                return fallback;
+
+            return *reordered;
+        }();
 
         std::vector<int> result;
 
@@ -613,7 +693,9 @@ static int countValidBuses (Steinberg::Vst::AudioBusBuffers* buffers, int32 num)
     }));
 }
 
-template <typename FloatType, typename Iterator>
+enum class Direction { input, output };
+
+template <Direction direction, typename FloatType, typename Iterator>
 static bool validateLayouts (Iterator first, Iterator last, const std::vector<DynamicChannelMapping>& map)
 {
     if ((size_t) std::distance (first, last) > map.size())
@@ -623,12 +705,24 @@ static bool validateLayouts (Iterator first, Iterator last, const std::vector<Dy
 
     for (auto it = first; it != last; ++it, ++mapIterator)
     {
-        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, *it);
-        const auto anyChannelIsNull = std::any_of (busPtr, busPtr + it->numChannels, [] (auto* ptr) { return ptr == nullptr; });
+        auto& bus = *it;
+        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
+        const auto expectedJuceChannels = (int) mapIterator->size();
+        const auto actualVstChannels = (int) bus.numChannels;
+        const auto limit = jmin (expectedJuceChannels, actualVstChannels);
+        const auto anyChannelIsNull = std::any_of (busPtr, busPtr + limit, [] (auto* ptr) { return ptr == nullptr; });
+        constexpr auto isInput = direction == Direction::input;
+
+        const auto channelCountIsUsable = isInput ? expectedJuceChannels <= actualVstChannels
+                                                  : actualVstChannels <= expectedJuceChannels;
 
         // Null channels are allowed if the bus is inactive
-        if (mapIterator->isHostActive() && (anyChannelIsNull || (int) mapIterator->size() != it->numChannels))
+        if (mapIterator->isHostActive() && (anyChannelIsNull || ! channelCountIsUsable))
             return false;
+
+        // If this is hit, the destination bus has fewer channels than the source bus.
+        // As a result, some channels will 'go missing', and channel layouts may be invalid.
+        jassert (actualVstChannels == expectedJuceChannels);
     }
 
     // If the host didn't provide the full complement of buses, it must be because the other
@@ -669,10 +763,10 @@ public:
         // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
         const auto vstInputs = countValidBuses<FloatType> (data.inputs, data.numInputs);
 
-        if (! validateLayouts<FloatType> (data.inputs, data.inputs + vstInputs, inputMap))
+        if (! validateLayouts<Direction::input, FloatType> (data.inputs, data.inputs + vstInputs, inputMap))
             return getBlankBuffer (usedChannels, (int) data.numSamples);
 
-        setUpInputChannels (data, (size_t) vstInputs, scratchBuffer, inputMap,  channels);
+        setUpInputChannels (data, (size_t) vstInputs, scratchBuffer, inputMap, channels);
         setUpOutputChannels (scratchBuffer, outputMap, channels);
 
         const auto channelPtr = channels.empty() ? scratchBuffer.getArrayOfWritePointers()
@@ -690,7 +784,7 @@ private:
     {
         for (size_t busIndex = 0; busIndex < map.size(); ++busIndex)
         {
-            const auto mapping = map[busIndex];
+            const auto& mapping = map[busIndex];
 
             if (! mapping.isClientActive())
                 continue;
@@ -702,7 +796,12 @@ private:
 
             if (mapping.isHostActive() && busIndex < vstInputs)
             {
-                auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.inputs[busIndex]);
+                auto& bus = data.inputs[busIndex];
+
+                // Every JUCE channel must have a VST3 channel counterpart
+                jassert (mapping.size() <= static_cast<size_t> (bus.numChannels));
+
+                auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
 
                 for (size_t channelIndex = 0; channelIndex < mapping.size(); ++channelIndex)
                 {
@@ -921,7 +1020,7 @@ public:
         // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
         const auto vstOutputs = (size_t) countValidBuses<FloatType> (data.outputs, data.numOutputs);
 
-        if (validateLayouts<FloatType> (data.outputs, data.outputs + vstOutputs, *outputMap))
+        if (validateLayouts<Direction::output, FloatType> (data.outputs, data.outputs + vstOutputs, *outputMap))
             copyToHostOutputBuses (vstOutputs);
         else
             clearHostOutputBuses (vstOutputs);
@@ -940,9 +1039,12 @@ private:
             {
                 auto& bus = data.outputs[i];
 
+                // Every VST3 channel must have a JUCE channel counterpart
+                jassert (static_cast<size_t> (bus.numChannels) <= mapping.size());
+
                 if (mapping.isClientActive())
                 {
-                    for (size_t j = 0; j < mapping.size(); ++j)
+                    for (size_t j = 0; j < static_cast<size_t> (bus.numChannels); ++j)
                     {
                         auto* hostChannel = getAudioBusPointer (detail::Tag<FloatType>{}, bus)[j];
                         const auto juceChannel = juceBusOffset + (size_t) mapping.getJuceChannelForVst3Channel ((int) j);
@@ -951,7 +1053,7 @@ private:
                 }
                 else
                 {
-                    for (size_t j = 0; j < mapping.size(); ++j)
+                    for (size_t j = 0; j < static_cast<size_t> (bus.numChannels); ++j)
                     {
                         auto* hostChannel = getAudioBusPointer (detail::Tag<FloatType>{}, bus)[j];
                         FloatVectorOperations::clear (hostChannel, (size_t) data.numSamples);

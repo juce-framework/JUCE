@@ -65,28 +65,28 @@ adding these files to their projects.
 The names of these source files must begin with the name of the module, but they can have
 a number or other suffix if there is more than one.
 
-In order to specify that a source file should only be compiled on a specific platform,
-then the filename can be suffixed with one of the following strings:
+In order to specify that a source file should only be compiled for a specific platform,
+then the filename can be suffixed with one of the following (case insensitive) strings:
 
-    _OSX
-    _Windows
-    _Linux
-    _Android
-    _iOS
+    _mac or _osx    <- compiled for macOS and OSX platforms only
+    _windows        <- compiled for Windows platforms only
+    _linux          <- compiled for Linux and FreeBSD platforms only
+    _andoid         <- compiled for Android platforms only
+    _ios            <- compiled for iOS platforms only
 
 e.g.
 
-    juce_mymodule/juce_mymodule_1.cpp         <- compiled on all platforms
-    juce_mymodule/juce_mymodule_2.cpp         <- compiled on all platforms
-    juce_mymodule/juce_mymodule_OSX.cpp       <- compiled only on OSX
-    juce_mymodule/juce_mymodule_Windows.cpp   <- compiled only on Windows
+    juce_mymodule/juce_mymodule_1.cpp         <- compiled for all platforms
+    juce_mymodule/juce_mymodule_2.cpp         <- compiled for all platforms
+    juce_mymodule/juce_mymodule_mac.cpp       <- compiled for macOS and OSX platforms only
+    juce_mymodule/juce_mymodule_windows.cpp   <- compiled for Windows platforms only
 
 Often this isn't necessary, as in most cases you can easily add checks inside the files
 to do different things depending on the platform, but this may be handy just to avoid
 clutter in user projects where files aren't needed.
 
 To simplify the use of obj-C++ there's also a special-case rule: If the folder contains
-both a .mm and a .cpp file whose names are otherwise identical, then on OSX/iOS the .mm
+both a .mm and a .cpp file whose names are otherwise identical, then on macOS/iOS the .mm
 will be used and the cpp ignored. (And vice-versa for other platforms, of course).
 
 

@@ -119,6 +119,7 @@ const char* PluginHostType::getHostDescription() const noexcept
         case pluginval:                return "pluginval";
         case MergingPyramix:           return "Pyramix";
         case MuseReceptorGeneric:      return "Muse Receptor";
+        case Maschine:                 return "NI Maschine";
         case Reaper:                   return "Reaper";
         case Reason:                   return "Reason";
         case Renoise:                  return "Renoise";
@@ -213,6 +214,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.containsIgnoreCase   ("OsxFL"))                    return FruityLoops;
     if (hostFilename.containsIgnoreCase   ("pluginval"))                return pluginval;
     if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))          return JUCEPluginHost;
+    if (hostFilename.containsIgnoreCase   ("Maschine"))                 return Maschine;
     if (hostFilename.containsIgnoreCase   ("Vienna Ensemble Pro"))      return ViennaEnsemblePro;
     if (hostFilename.containsIgnoreCase   ("auvaltool"))                return AUVal;
     if (hostFilename.containsIgnoreCase   ("com.apple.audio.infohelper")) return AppleInfoHelper;
@@ -280,6 +282,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.containsIgnoreCase   ("Wavelab"))               return SteinbergWavelabGeneric;
     if (hostFilename.containsIgnoreCase   ("TestHost"))              return SteinbergTestHost;
     if (hostFilename.containsIgnoreCase   ("rm-host"))               return MuseReceptorGeneric;
+    if (hostFilename.containsIgnoreCase   ("Maschine"))              return Maschine;
     if (hostFilename.startsWith           ("FL"))                    return FruityLoops;
     if (hostFilename.contains             ("ilbridge."))             return FruityLoops;
     if (hostPath.containsIgnoreCase       ("Studio One"))            return StudioOne;

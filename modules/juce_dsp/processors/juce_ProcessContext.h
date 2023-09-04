@@ -48,9 +48,12 @@ struct ProcessSpec
 
 constexpr bool operator== (const ProcessSpec& a, const ProcessSpec& b)
 {
-    return a.sampleRate         == b.sampleRate
-        && a.maximumBlockSize   == b.maximumBlockSize
-        && a.numChannels        == b.numChannels;
+    const auto tie = [] (const ProcessSpec& p)
+    {
+        return std::tie (p.sampleRate, p.maximumBlockSize, p.numChannels);
+    };
+
+    return tie (a) == tie (b);
 }
 
 constexpr bool operator!= (const ProcessSpec& a, const ProcessSpec& b) { return ! (a == b); }

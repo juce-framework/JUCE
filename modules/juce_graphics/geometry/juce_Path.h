@@ -827,11 +827,11 @@ private:
     PathBounds bounds;
     bool useNonZeroWinding = true;
 
-    static const float lineMarker;
-    static const float moveMarker;
-    static const float quadMarker;
-    static const float cubicMarker;
-    static const float closeSubPathMarker;
+    static constexpr float lineMarker           = 100001.0f;
+    static constexpr float moveMarker           = 100002.0f;
+    static constexpr float quadMarker           = 100003.0f;
+    static constexpr float cubicMarker          = 100004.0f;
+    static constexpr float closeSubPathMarker   = 100005.0f;
 
     JUCE_LEAK_DETECTOR (Path)
 };

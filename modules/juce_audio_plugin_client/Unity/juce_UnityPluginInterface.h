@@ -29,7 +29,7 @@
 //==============================================================================
 #define UNITY_AUDIO_PLUGIN_API_VERSION 0x010401
 
-#if JUCE_MSVC
+#if JUCE_WINDOWS
  #define UNITY_INTERFACE_API __stdcall
  #define UNITY_INTERFACE_EXPORT __declspec(dllexport)
 #else

@@ -1,8 +1,9 @@
 # Welcome to VST SDK 3 base
 
-Here you can find some helper classes useful for developing VST3 Plug-Ins.
+Here you can find some helper classes useful for developing **VST 3** plug-ins.
 
 ## License & Usage guidelines
+
 More details are found at [www.steinberg.net/sdklicenses_vst3](http://www.steinberg.net/sdklicenses_vst3)
 
 ----

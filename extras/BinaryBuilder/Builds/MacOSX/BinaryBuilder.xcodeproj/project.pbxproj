@@ -12,6 +12,7 @@
 		3C6FF7689E2FD827A48E2303 /* Main.cpp */ = {isa = PBXBuildFile; fileRef = 50B7C64414A3E778021F5EC4; };
 		4B72EFB0E9D74CA7227F6CAB /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = 57DDB771ED96A256F190ADF8; };
 		542006E949BB022F198DF0F2 /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = 1A71A586C0F50B6B328D877B; };
+		76329EF5627C14DD1C621F6E /* Security.framework */ = {isa = PBXBuildFile; fileRef = F9E4EBBA2682611A3978340C; };
 		9E4D85A3D54739A0FA80A446 /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = D186E2D509765FAE0758F17D; };
 		C17566E1AACD033B3DD74E9F /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = 6AA23C81496E022290EB2A0C; };
 /* End PBXBuildFile section */
@@ -26,6 +27,7 @@
 		D186E2D509765FAE0758F17D /* include_juce_core.mm */ /* include_juce_core.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_core.mm; path = ../../JuceLibraryCode/include_juce_core.mm; sourceTree = SOURCE_ROOT; };
 		D6C3594C8BEC94040AF108FE /* JuceHeader.h */ /* JuceHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = SOURCE_ROOT; };
 		F769CD634476C91F4C9D0596 /* IOKit.framework */ /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		F9E4EBBA2682611A3978340C /* Security.framework */ /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +38,7 @@
 				4B72EFB0E9D74CA7227F6CAB,
 				C17566E1AACD033B3DD74E9F,
 				0D53D8B0AEE37C02C147344B,
+				76329EF5627C14DD1C621F6E,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +113,7 @@
 				57DDB771ED96A256F190ADF8,
 				6AA23C81496E022290EB2A0C,
 				F769CD634476C91F4C9D0596,
+				F9E4EBBA2682611A3978340C,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -200,7 +204,7 @@
 					"DEBUG=1",
 					"JUCE_DISPLAY_SPLASH_SCREEN=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
-					"JUCE_PROJUCER_VERSION=0x70005",
+					"JUCE_PROJUCER_VERSION=0x70007",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
 					"JUCE_STANDALONE_APPLICATION=1",
@@ -296,7 +300,7 @@
 					"NDEBUG=1",
 					"JUCE_DISPLAY_SPLASH_SCREEN=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
-					"JUCE_PROJUCER_VERSION=0x70005",
+					"JUCE_PROJUCER_VERSION=0x70007",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
 					"JUCE_STANDALONE_APPLICATION=1",

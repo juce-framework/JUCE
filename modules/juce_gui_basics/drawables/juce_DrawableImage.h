@@ -97,10 +97,11 @@ public:
     Rectangle<float> getDrawableBounds() const override;
     /** @internal */
     Path getOutlineAsPath() const override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     bool setImageInternal (const Image&);
 
     //==============================================================================

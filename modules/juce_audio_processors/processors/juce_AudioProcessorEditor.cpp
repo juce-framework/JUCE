@@ -225,4 +225,16 @@ ComponentPeer* AudioProcessorEditor::createNewPeer ([[maybe_unused]] int styleFl
     return Component::createNewPeer (styleFlags, nativeWindow);
 }
 
+bool AudioProcessorEditor::wantsLayerBackedView() const
+{
+   #if JUCE_MODULE_AVAILABLE_juce_opengl && JUCE_MAC
+    if (@available (macOS 10.14, *))
+        return true;
+
+    return false;
+   #else
+    return true;
+   #endif
+}
+
 } // namespace juce

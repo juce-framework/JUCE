@@ -296,11 +296,18 @@ private:
     std::unique_ptr<AudioFormatReader> reader;
 };
 
+struct ProcessingLockInterface
+{
+    virtual ~ProcessingLockInterface() = default;
+    virtual ScopedTryReadLock getProcessingLock() = 0;
+};
+
 //==============================================================================
 class PlaybackRenderer  : public ARAPlaybackRenderer
 {
 public:
-    using ARAPlaybackRenderer::ARAPlaybackRenderer;
+    PlaybackRenderer (ARA::PlugIn::DocumentController* dc, ProcessingLockInterface& lockInterfaceIn)
+        : ARAPlaybackRenderer (dc), lockInterface (lockInterfaceIn) {}
 
     void prepareToPlay (double sampleRateIn,
                         int maximumSamplesPerBlockIn,
@@ -351,6 +358,11 @@ public:
                        AudioProcessor::Realtime realtime,
                        const AudioPlayHead::PositionInfo& positionInfo) noexcept override
     {
+        const auto lock = lockInterface.getProcessingLock();
+
+        if (! lock.isLocked())
+            return true;
+
         const auto numSamples = buffer.getNumSamples();
         jassert (numSamples <= maximumSamplesPerBlock);
         jassert (numChannels == buffer.getNumChannels());
@@ -458,8 +470,7 @@ public:
 
 private:
     //==============================================================================
-    // We're subclassing here only to provide a proper default c'tor for our shared resource
-
+    ProcessingLockInterface& lockInterface;
     SharedResourcePointer<SharedTimeSliceThread> sharedTimesliceThread;
     std::map<ARAAudioSource*, PossiblyBufferedReader> audioSourceReaders;
     bool useBufferedAudioSourceReader = true;
@@ -473,8 +484,12 @@ class EditorRenderer  : public ARAEditorRenderer,
                         private ARARegionSequence::Listener
 {
 public:
-    EditorRenderer (ARA::PlugIn::DocumentController* documentController, const PreviewState* previewStateIn)
-        : ARAEditorRenderer (documentController), previewState (previewStateIn), previewBuffer()
+    EditorRenderer (ARA::PlugIn::DocumentController* documentController,
+                    const PreviewState* previewStateIn,
+                    ProcessingLockInterface& lockInterfaceIn)
+        : ARAEditorRenderer (documentController),
+          lockInterface (lockInterfaceIn),
+          previewState (previewStateIn)
     {
         jassert (previewState != nullptr);
     }
@@ -549,6 +564,11 @@ public:
     {
         ignoreUnused (realtime);
 
+        const auto lock = lockInterface.getProcessingLock();
+
+        if (! lock.isLocked())
+            return true;
+
         return asyncConfigCallback.withLock ([&] (bool locked)
         {
             if (! locked)
@@ -596,9 +616,9 @@ public:
                     const auto previewDimmed = previewedRegion->getAudioModification<ARADemoPluginAudioModification>()
                                                               ->isDimmed();
 
-                    if (lastPreviewTime != previewTime
-                        || lastPlaybackRegion != previewedRegion
-                        || lastPreviewDimmed != previewDimmed)
+                    if (! exactlyEqual (lastPreviewTime, previewTime)
+                        || ! exactlyEqual (lastPlaybackRegion, previewedRegion)
+                        || ! exactlyEqual (lastPreviewDimmed, previewDimmed))
                     {
                         Range<double> previewRangeInPlaybackTime { previewTime - 0.25, previewTime + 0.25 };
                         previewBuffer->clear();
@@ -661,6 +681,7 @@ private:
         });
     }
 
+    ProcessingLockInterface& lockInterface;
     const PreviewState* previewState = nullptr;
     AsyncConfigurationCallback asyncConfigCallback { [this] { configure(); } };
     double lastPreviewTime = 0.0;
@@ -678,7 +699,8 @@ private:
 };
 
 //==============================================================================
-class ARADemoPluginDocumentControllerSpecialisation  : public ARADocumentControllerSpecialisation
+class ARADemoPluginDocumentControllerSpecialisation  : public ARADocumentControllerSpecialisation,
+                                                       private ProcessingLockInterface
 {
 public:
     using ARADocumentControllerSpecialisation::ARADocumentControllerSpecialisation;
@@ -686,6 +708,16 @@ public:
     PreviewState previewState;
 
 protected:
+    void willBeginEditing (ARADocument*) override
+    {
+        processBlockLock.enterWrite();
+    }
+
+    void didEndEditing (ARADocument*) override
+    {
+        processBlockLock.exitWrite();
+    }
+
     ARAAudioModification* doCreateAudioModification (ARAAudioSource* audioSource,
                                                      ARA::ARAAudioModificationHostRef hostRef,
                                                      const ARAAudioModification* optionalModificationToClone) noexcept override
@@ -697,12 +729,12 @@ protected:
 
     ARAPlaybackRenderer* doCreatePlaybackRenderer() noexcept override
     {
-        return new PlaybackRenderer (getDocumentController());
+        return new PlaybackRenderer (getDocumentController(), *this);
     }
 
     EditorRenderer* doCreateEditorRenderer() noexcept override
     {
-        return new EditorRenderer (getDocumentController(), &previewState);
+        return new EditorRenderer (getDocumentController(), &previewState, *this);
     }
 
     bool doRestoreObjectsFromStream (ARAInputStream& input,
@@ -779,6 +811,14 @@ protected:
 
         return true;
     }
+
+private:
+    ScopedTryReadLock getProcessingLock() override
+    {
+        return ScopedTryReadLock { processBlockLock };
+    }
+
+    ReadWriteLock processBlockLock;
 };
 
 struct PlayHeadState
@@ -1062,7 +1102,7 @@ public:
                     const auto quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
                     const int x = timeToViewScaling.getXForTime (tempoConverter.getTimeForQuarter (quarterPos));
                     const auto barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
-                    const int lineWidth = (quarterPos == barSignature.position) ? heavyLineWidth : lightLineWidth;
+                    const int lineWidth = (approximatelyEqual (quarterPos, barSignature.position)) ? heavyLineWidth : lightLineWidth;
                     const int beatsSinceBarStart = roundToInt( barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
                     const int lineHeight = (beatsSinceBarStart == 0) ? rulerHeight : rulerHeight / 2;
                     rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, 2 * rulerHeight - lineHeight, lineWidth, lineHeight));

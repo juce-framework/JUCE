@@ -98,7 +98,7 @@ struct FloatVectorOperationsBase
     /** Multiplies the destination values by the source values. */
     static void JUCE_CALLTYPE multiply (FloatType* dest, const FloatType* src, CountType numValues) noexcept;
 
-    /** Multiplies each source1 value by the correspinding source2 value, then stores it in the destination array. */
+    /** Multiplies each source1 value by the corresponding source2 value, then stores it in the destination array. */
     static void JUCE_CALLTYPE multiply (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType numValues) noexcept;
 
     /** Multiplies each of the destination values by a fixed multiplier. */

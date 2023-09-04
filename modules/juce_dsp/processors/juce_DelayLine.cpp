@@ -86,7 +86,7 @@ template <typename SampleType, typename InterpolationType>
 void DelayLine<SampleType, InterpolationType>::setMaximumDelayInSamples (int maxDelayInSamples)
 {
     jassert (maxDelayInSamples >= 0);
-    totalSize = jmax (4, maxDelayInSamples + 1);
+    totalSize = jmax (4, maxDelayInSamples + 2);
     bufferData.setSize ((int) bufferData.getNumChannels(), totalSize, false, false, true);
     reset();
 }

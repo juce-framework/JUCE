@@ -224,6 +224,15 @@ plugin folders may be protected, so the build may require elevated permissions i
 installation to work correctly, or you may need to adjust the permissions of the destination
 folders.
 
+#### `JUCE_MODULES_ONLY`
+
+Only brings in targets for the built-in JUCE modules, and the `juce_add_module*` CMake functions.
+This is meant for highly custom use-cases where the `juce_add_gui_app` and `juce_add_plugin`
+functions are not required. Most importantly, the 'juceaide' helper tool is not built when this
+option is enabled, which may improve build times for established products that use other methods to
+handle plugin bundle structures, icons, plists, and so on. If this option is enabled, then
+`JUCE_ENABLE_MODULE_SOURCE_GROUPS` will have no effect.
+
 ### Functions
 
 #### `juce_add_<target>`
@@ -266,7 +275,7 @@ attributes directly to these creation functions, rather than adding them later.
 `BUNDLE_ID`
 - An identifier string in the form "com.yourcompany.productname" which should uniquely identify
   this target. Mainly used for macOS builds. If not specified, a default will be generated using
-  the target's `COMPANY_NAME` and `PRODUCT_NAME`.
+  the target's `COMPANY_NAME` and the name of the CMake target.
 
 `MICROPHONE_PERMISSION_ENABLED`
 - May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
@@ -635,6 +644,17 @@ attributes directly to these creation functions, rather than adding them later.
   `kARAPlaybackTransformationContentBasedFadeAtTail`,
   `kARAPlaybackTransformationContentBasedFadeAtHead`
 
+`VST3_AUTO_MANIFEST`
+- May be either TRUE or FALSE (defaults to TRUE). When TRUE, a POST_BUILD step will be added to the
+  VST3 target which will generate a moduleinfo.json file into the Resources subdirectory of the
+  plugin bundle. This is normally desirable, but does require that the plugin can be successfully
+  loaded immediately after building the VST3 target. If the plugin needs further processing before
+  it can be loaded (e.g. custom signing), then set this option to FALSE to disable the automatic
+  manifest generation. To generate the manifest at a later point in the build, use the
+  `juce_enable_vst3_manifest_step` function. It is strongly recommended to generate a manifest for
+  your plugin, as this allows compatible hosts to scan the plugin much more quickly, leading to
+  an improved experience for users.
+
 #### `juce_add_binary_data`
 
     juce_add_binary_data(<name>
@@ -695,6 +715,19 @@ If your custom build steps need to use the location of the plugin artefact, you 
 by querying the property `JUCE_PLUGIN_ARTEFACT_FILE` on a plugin target (*not* the shared code
 target!).
 
+#### `juce_enable_vst3_manifest_step`
+
+    juce_enable_vst3_manifest_step(<target>)
+
+You may call this function to manually enable VST3 manifest generation on a plugin. The argument to
+this function should be a target previously created with `juce_add_plugin`.
+
+VST3_AUTO_MANIFEST TRUE will cause the VST3 manifest to be generated immediately after building.
+This is not always appropriate, if extra build steps (such as signing or modifying the plugin
+bundle) must be executed before the plugin can be loaded. In such cases, you should set
+VST3_AUTO_MANIFEST FALSE, use `add_custom_command(TARGET POST_BUILD)` to add your own post-build
+steps, and then finally call `juce_enable_vst3_manifest_step`.
+
 #### `juce_set_<kind>_sdk_path`
 
     juce_set_aax_sdk_path(<absolute path>)
@@ -754,6 +787,21 @@ your target.
 This function sets the `CMAKE_<LANG>_FLAGS_<MODE>` to empty in the current directory and below,
 allowing alternative optimisation/debug flags to be supplied without conflicting with the
 CMake-supplied defaults.
+
+#### `juce_link_with_embedded_linux_subprocess`
+
+    juce_link_with_embedded_linux_subprocess(<target>)
+
+This function links the provided target with an interface library that generates a barebones 
+standalone executable file and embeds it as a binary resource. This binary resource is only used
+by the `juce_gui_extra` module and only when its `JUCE_WEB_BROWSER` capability is enabled. This
+executable will then be deployed into a temporary file only when the code is running in a
+non-standalone format, and will be used to host a WebKit view. This technique is used by audio
+plugins on Linux.
+
+This function is automatically called if necessary for all targets created by one of the JUCE target
+creation functions i.e. `juce_add_gui_app`, `juce_add_console_app` and `juce_add_gui_app`. You don't
+need to call this function manually in these cases.
 
 ### Targets
 

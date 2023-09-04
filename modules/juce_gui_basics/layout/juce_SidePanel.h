@@ -195,6 +195,8 @@ public:
     void mouseDrag (const MouseEvent&) override;
     /** @internal */
     void mouseUp (const MouseEvent&) override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -221,7 +223,6 @@ private:
     bool shouldShowDismissButton = true;
 
     //==============================================================================
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void lookAndFeelChanged() override;
     void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
     void changeListenerCallback (ChangeBroadcaster*) override;

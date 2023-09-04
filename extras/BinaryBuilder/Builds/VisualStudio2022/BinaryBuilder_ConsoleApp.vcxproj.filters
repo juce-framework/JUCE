@@ -163,6 +163,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Expression.cpp">
       <Filter>JUCE Modules\juce_core\maths</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_MathsFunctions_test.cpp">
+      <Filter>JUCE Modules\juce_core\maths</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\maths\juce_Random.cpp">
       <Filter>JUCE Modules\juce_core\maths</Filter>
     </ClCompile>
@@ -175,6 +178,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_ConsoleApplication.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_EnumHelpers_test.cpp">
+      <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Result.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
@@ -184,82 +190,88 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_AndroidDocument.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_AndroidDocument_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Files.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_CommonFile_linux.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_JNIHelpers.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Files_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Misc.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Files_linux.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Network.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Files_mac.mm">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_RuntimePermissions.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Files_windows.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_SystemStats.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_JNIHelpers_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Threads.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Misc_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_curl_Network.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_NamedPipe_posix.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_linux_CommonFile.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Network_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_linux_Files.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Network_curl.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_linux_Network.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Network_linux.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_linux_SystemStats.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Network_mac.mm">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_linux_Threads.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Network_windows.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_mac_Files.mm">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimer_generic.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_mac_Network.mm">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimer_windows.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_mac_Strings.mm">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Registry_windows.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_mac_SystemStats.mm">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_RuntimePermissions_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_mac_Threads.mm">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Strings_mac.mm">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_posix_NamedPipe.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_SystemStats_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_wasm_SystemStats.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_SystemStats_linux.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_Files.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_SystemStats_mac.mm">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_Network.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_SystemStats_wasm.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_Registry.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_SystemStats_windows.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_SystemStats.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Threads_android.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_Threads.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Threads_linux.cpp">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Threads_mac.mm">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Threads_windows.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.cpp">
@@ -477,6 +489,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_SortedSet.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Span.h">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_SparseSet.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
@@ -603,6 +618,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_ConsoleApplication.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_EnumHelpers.h">
+      <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Functional.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
@@ -618,31 +636,34 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_WindowsRegistry.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_android_JNIHelpers.h">
-      <Filter>JUCE Modules\juce_core\native</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_intel_SharedCode.h">
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_CFHelpers_mac.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_CFHelpers.h">
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_ComSmartPtr_windows.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ObjCHelpers.h">
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_IPAddress_posix.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_native_ThreadPriorities.h">
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_JNIHelpers_android.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_posix_IPAddress.h">
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_ObjCHelpers_mac.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_posix_SharedCode.h">
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimerListener.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_win32_ComSmartPtr.h">
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_SharedCode_intel.h">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_SharedCode_posix.h">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_ThreadPriorities_native.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_IPAddress.h">

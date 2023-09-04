@@ -107,6 +107,34 @@ String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
         case ambisonicACN33:      return NEEDS_TRANS("Ambisonic 33");
         case ambisonicACN34:      return NEEDS_TRANS("Ambisonic 34");
         case ambisonicACN35:      return NEEDS_TRANS("Ambisonic 35");
+        case ambisonicACN36:      return NEEDS_TRANS("Ambisonic 36");
+        case ambisonicACN37:      return NEEDS_TRANS("Ambisonic 37");
+        case ambisonicACN38:      return NEEDS_TRANS("Ambisonic 38");
+        case ambisonicACN39:      return NEEDS_TRANS("Ambisonic 39");
+        case ambisonicACN40:      return NEEDS_TRANS("Ambisonic 40");
+        case ambisonicACN41:      return NEEDS_TRANS("Ambisonic 41");
+        case ambisonicACN42:      return NEEDS_TRANS("Ambisonic 42");
+        case ambisonicACN43:      return NEEDS_TRANS("Ambisonic 43");
+        case ambisonicACN44:      return NEEDS_TRANS("Ambisonic 44");
+        case ambisonicACN45:      return NEEDS_TRANS("Ambisonic 45");
+        case ambisonicACN46:      return NEEDS_TRANS("Ambisonic 46");
+        case ambisonicACN47:      return NEEDS_TRANS("Ambisonic 47");
+        case ambisonicACN48:      return NEEDS_TRANS("Ambisonic 48");
+        case ambisonicACN49:      return NEEDS_TRANS("Ambisonic 49");
+        case ambisonicACN50:      return NEEDS_TRANS("Ambisonic 50");
+        case ambisonicACN51:      return NEEDS_TRANS("Ambisonic 51");
+        case ambisonicACN52:      return NEEDS_TRANS("Ambisonic 52");
+        case ambisonicACN53:      return NEEDS_TRANS("Ambisonic 53");
+        case ambisonicACN54:      return NEEDS_TRANS("Ambisonic 54");
+        case ambisonicACN55:      return NEEDS_TRANS("Ambisonic 55");
+        case ambisonicACN56:      return NEEDS_TRANS("Ambisonic 56");
+        case ambisonicACN57:      return NEEDS_TRANS("Ambisonic 57");
+        case ambisonicACN58:      return NEEDS_TRANS("Ambisonic 58");
+        case ambisonicACN59:      return NEEDS_TRANS("Ambisonic 59");
+        case ambisonicACN60:      return NEEDS_TRANS("Ambisonic 60");
+        case ambisonicACN61:      return NEEDS_TRANS("Ambisonic 61");
+        case ambisonicACN62:      return NEEDS_TRANS("Ambisonic 62");
+        case ambisonicACN63:      return NEEDS_TRANS("Ambisonic 63");
         case bottomFrontLeft:     return NEEDS_TRANS("Bottom Front Left");
         case bottomFrontCentre:   return NEEDS_TRANS("Bottom Front Centre");
         case bottomFrontRight:    return NEEDS_TRANS("Bottom Front Right");
@@ -191,6 +219,34 @@ String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelT
         case ambisonicACN33:      return "ACN33";
         case ambisonicACN34:      return "ACN34";
         case ambisonicACN35:      return "ACN35";
+        case ambisonicACN36:      return "ACN36";
+        case ambisonicACN37:      return "ACN37";
+        case ambisonicACN38:      return "ACN38";
+        case ambisonicACN39:      return "ACN39";
+        case ambisonicACN40:      return "ACN40";
+        case ambisonicACN41:      return "ACN41";
+        case ambisonicACN42:      return "ACN42";
+        case ambisonicACN43:      return "ACN43";
+        case ambisonicACN44:      return "ACN44";
+        case ambisonicACN45:      return "ACN45";
+        case ambisonicACN46:      return "ACN46";
+        case ambisonicACN47:      return "ACN47";
+        case ambisonicACN48:      return "ACN48";
+        case ambisonicACN49:      return "ACN49";
+        case ambisonicACN50:      return "ACN50";
+        case ambisonicACN51:      return "ACN51";
+        case ambisonicACN52:      return "ACN52";
+        case ambisonicACN53:      return "ACN53";
+        case ambisonicACN54:      return "ACN54";
+        case ambisonicACN55:      return "ACN55";
+        case ambisonicACN56:      return "ACN56";
+        case ambisonicACN57:      return "ACN57";
+        case ambisonicACN58:      return "ACN58";
+        case ambisonicACN59:      return "ACN59";
+        case ambisonicACN60:      return "ACN60";
+        case ambisonicACN61:      return "ACN61";
+        case ambisonicACN62:      return "ACN62";
+        case ambisonicACN63:      return "ACN63";
         case topSideLeft:         return "Tsl";
         case topSideRight:        return "Tsr";
         case bottomFrontLeft:     return "Bfl";
@@ -207,9 +263,6 @@ String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelT
         case unknown:
         default:                  break;
     }
-
-    if (type >= ambisonicACN4 && type <= ambisonicACN35)
-        return "ACN" + String (type - ambisonicACN4 + 4);
 
     return {};
 }
@@ -283,6 +336,34 @@ AudioChannelSet::ChannelType AudioChannelSet::getChannelTypeFromAbbreviation (co
     if (abbr == "ACN33") return ambisonicACN33;
     if (abbr == "ACN34") return ambisonicACN34;
     if (abbr == "ACN35") return ambisonicACN35;
+    if (abbr == "ACN36") return ambisonicACN36;
+    if (abbr == "ACN37") return ambisonicACN37;
+    if (abbr == "ACN38") return ambisonicACN38;
+    if (abbr == "ACN39") return ambisonicACN39;
+    if (abbr == "ACN40") return ambisonicACN40;
+    if (abbr == "ACN41") return ambisonicACN41;
+    if (abbr == "ACN42") return ambisonicACN42;
+    if (abbr == "ACN43") return ambisonicACN43;
+    if (abbr == "ACN44") return ambisonicACN44;
+    if (abbr == "ACN45") return ambisonicACN45;
+    if (abbr == "ACN46") return ambisonicACN46;
+    if (abbr == "ACN47") return ambisonicACN47;
+    if (abbr == "ACN48") return ambisonicACN48;
+    if (abbr == "ACN49") return ambisonicACN49;
+    if (abbr == "ACN50") return ambisonicACN50;
+    if (abbr == "ACN51") return ambisonicACN51;
+    if (abbr == "ACN52") return ambisonicACN52;
+    if (abbr == "ACN53") return ambisonicACN53;
+    if (abbr == "ACN54") return ambisonicACN54;
+    if (abbr == "ACN55") return ambisonicACN55;
+    if (abbr == "ACN56") return ambisonicACN56;
+    if (abbr == "ACN57") return ambisonicACN57;
+    if (abbr == "ACN58") return ambisonicACN58;
+    if (abbr == "ACN59") return ambisonicACN59;
+    if (abbr == "ACN60") return ambisonicACN60;
+    if (abbr == "ACN61") return ambisonicACN61;
+    if (abbr == "ACN62") return ambisonicACN62;
+    if (abbr == "ACN63") return ambisonicACN63;
     if (abbr == "Tsl")   return topSideLeft;
     if (abbr == "Tsr")   return topSideRight;
     if (abbr == "Bfl")   return bottomFrontLeft;
@@ -338,6 +419,8 @@ String AudioChannelSet::getDescription() const
     if (*this == createLCRS())         return "LCRS";
 
     if (*this == create5point0())       return "5.0 Surround";
+    if (*this == create5point0point2()) return "5.0.2 Surround";
+    if (*this == create5point0point4()) return "5.0.4 Surround";
     if (*this == create5point1())       return "5.1 Surround";
     if (*this == create5point1point2()) return "5.1.2 Surround";
     if (*this == create5point1point4()) return "5.1.4 Surround";
@@ -351,9 +434,13 @@ String AudioChannelSet::getDescription() const
     if (*this == create7point1SDDS())   return "7.1 Surround SDDS";
     if (*this == create7point0point2()) return "7.0.2 Surround";
     if (*this == create7point0point4()) return "7.0.4 Surround";
+    if (*this == create7point0point6()) return "7.0.6 Surround";
     if (*this == create7point1point2()) return "7.1.2 Surround";
     if (*this == create7point1point4()) return "7.1.4 Surround";
     if (*this == create7point1point6()) return "7.1.6 Surround";
+    if (*this == create9point0point4()) return "9.0.4 Surround";
+    if (*this == create9point1point4()) return "9.1.4 Surround";
+    if (*this == create9point0point6()) return "9.0.6 Surround";
     if (*this == create9point1point6()) return "9.1.6 Surround";
 
     if (*this == quadraphonic())       return "Quadraphonic";
@@ -386,11 +473,11 @@ String AudioChannelSet::getDescription() const
 
 bool AudioChannelSet::isDiscreteLayout() const noexcept
 {
-    for (auto& speaker : getChannelTypes())
-        if (speaker <= ambisonicACN35)
-            return false;
+    const auto channelTypes = getChannelTypes();
 
-    return true;
+    return std::none_of (std::begin (channelTypes),
+                         std::end (channelTypes),
+                         [] (const auto& t) { return t < discreteChannel0; });
 }
 
 int AudioChannelSet::size() const noexcept
@@ -467,26 +554,44 @@ AudioChannelSet AudioChannelSet::quadraphonic()        { return AudioChannelSet 
 AudioChannelSet AudioChannelSet::pentagonal()          { return AudioChannelSet ({ left, right, centre, leftSurroundRear, rightSurroundRear }); }
 AudioChannelSet AudioChannelSet::hexagonal()           { return AudioChannelSet ({ left, right, centre, centreSurround, leftSurroundRear, rightSurroundRear }); }
 AudioChannelSet AudioChannelSet::octagonal()           { return AudioChannelSet ({ left, right, centre, leftSurround, rightSurround, centreSurround, wideLeft, wideRight }); }
+AudioChannelSet AudioChannelSet::create5point0point2() { return AudioChannelSet ({ left, right, centre, leftSurround, rightSurround, topSideLeft, topSideRight }); }
 AudioChannelSet AudioChannelSet::create5point1point2() { return AudioChannelSet ({ left, right, centre, LFE, leftSurround, rightSurround, topSideLeft, topSideRight }); }
+AudioChannelSet AudioChannelSet::create5point0point4() { return AudioChannelSet ({ left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, topRearLeft, topRearRight }); }
 AudioChannelSet AudioChannelSet::create5point1point4() { return AudioChannelSet ({ left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, topRearLeft, topRearRight }); }
 AudioChannelSet AudioChannelSet::create7point0point2() { return AudioChannelSet ({ left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topSideLeft, topSideRight }); }
 AudioChannelSet AudioChannelSet::create7point1point2() { return AudioChannelSet ({ left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topSideLeft, topSideRight }); }
 AudioChannelSet AudioChannelSet::create7point0point4() { return AudioChannelSet ({ left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topFrontLeft, topFrontRight, topRearLeft, topRearRight }); }
 AudioChannelSet AudioChannelSet::create7point1point4() { return AudioChannelSet ({ left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topFrontLeft, topFrontRight, topRearLeft, topRearRight }); }
+AudioChannelSet AudioChannelSet::create7point0point6() { return AudioChannelSet ({ left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topFrontLeft, topFrontRight, topSideLeft, topSideRight, topRearLeft, topRearRight }); }
 AudioChannelSet AudioChannelSet::create7point1point6() { return AudioChannelSet ({ left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topFrontLeft, topFrontRight, topSideLeft, topSideRight, topRearLeft, topRearRight }); }
+AudioChannelSet AudioChannelSet::create9point0point4() { return AudioChannelSet ({ left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topRearLeft, topRearRight }); }
+AudioChannelSet AudioChannelSet::create9point1point4() { return AudioChannelSet ({ left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topRearLeft, topRearRight }); }
+AudioChannelSet AudioChannelSet::create9point0point6() { return AudioChannelSet ({ left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topSideLeft, topSideRight, topRearLeft, topRearRight }); }
 AudioChannelSet AudioChannelSet::create9point1point6() { return AudioChannelSet ({ left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topSideLeft, topSideRight, topRearLeft, topRearRight }); }
 
 AudioChannelSet AudioChannelSet::ambisonic (int order)
 {
-    jassert (isPositiveAndBelow (order, 6));
+    jassert (isPositiveAndBelow (order, 8));
 
-    if (order == 0)
-        return AudioChannelSet ((uint32) (1 << ambisonicACN0));
+    static constexpr std::pair<int, int> continuousRanges[] { { ambisonicACN0,  ambisonicACN3 },
+                                                              { ambisonicACN4,  ambisonicACN35 },
+                                                              { ambisonicACN36, ambisonicACN63 } };
 
-    AudioChannelSet set ((1u << ambisonicACN0) | (1u << ambisonicACN1) | (1u << ambisonicACN2) | (1u << ambisonicACN3));
+    AudioChannelSet set;
 
-    auto numAmbisonicChannels = (order + 1) * (order + 1);
-    set.channels.setRange (ambisonicACN4, numAmbisonicChannels - 4, true);
+    const auto setBits = [&set] (auto range, auto maxNumToSet)
+    {
+        const auto numToSet = std::min (maxNumToSet, range.second - range.first + 1);
+        set.channels.setRange (range.first, numToSet, true);
+        return numToSet;
+    };
+
+    const auto numAmbisonicChannels = square (order + 1);
+
+    for (int rangeIdx = 0, bitsSet = 0; bitsSet < numAmbisonicChannels; ++rangeIdx)
+    {
+        bitsSet += setBits (continuousRanges[rangeIdx], numAmbisonicChannels - bitsSet);
+    }
 
     return set;
 }
@@ -631,15 +736,13 @@ int32 AudioChannelSet::getWaveChannelMask() const noexcept
 }
 
 //==============================================================================
-int JUCE_CALLTYPE AudioChannelSet::getAmbisonicOrderForNumChannels (int numChannels)
+int AudioChannelSet::getAmbisonicOrderForNumChannels (int numChannels, int maxOrderToCheck)
 {
-    auto sqrtMinusOne   = std::sqrt (static_cast<float> (numChannels)) - 1.0f;
-    auto ambisonicOrder = jmax (0, static_cast<int> (std::floor (sqrtMinusOne)));
+    for (auto i = 0; i <= maxOrderToCheck; ++i)
+        if (numChannels == square (i + 1))
+            return i;
 
-    if (ambisonicOrder > 5)
-        return -1;
-
-    return (static_cast<float> (ambisonicOrder) == sqrtMinusOne ? ambisonicOrder : -1);
+    return -1;
 }
 
 

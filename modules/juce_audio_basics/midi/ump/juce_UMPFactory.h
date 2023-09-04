@@ -45,7 +45,7 @@ struct Factory
         static PacketX2 makeSysEx (uint8_t group,
                                    uint8_t status,
                                    uint8_t numBytes,
-                                   const uint8_t* data)
+                                   const std::byte* data)
         {
             jassert (numBytes <= 6);
 
@@ -250,28 +250,28 @@ struct Factory
 
     static PacketX2 makeSysExIn1Packet (uint8_t group,
                                         uint8_t numBytes,
-                                        const uint8_t* data)
+                                        const std::byte* data)
     {
         return Detail::makeSysEx (group, 0x0, numBytes, data);
     }
 
     static PacketX2 makeSysExStart (uint8_t group,
                                     uint8_t numBytes,
-                                    const uint8_t* data)
+                                    const std::byte* data)
     {
         return Detail::makeSysEx (group, 0x1, numBytes, data);
     }
 
     static PacketX2 makeSysExContinue (uint8_t group,
                                        uint8_t numBytes,
-                                       const uint8_t* data)
+                                       const std::byte* data)
     {
         return Detail::makeSysEx (group, 0x2, numBytes, data);
     }
 
     static PacketX2 makeSysExEnd (uint8_t group,
                                   uint8_t numBytes,
-                                  const uint8_t* data)
+                                  const std::byte* data)
     {
         return Detail::makeSysEx (group, 0x3, numBytes, data);
     }

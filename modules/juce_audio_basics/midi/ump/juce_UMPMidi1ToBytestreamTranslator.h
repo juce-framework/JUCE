@@ -73,7 +73,10 @@ public:
             {
                 // Utility messages don't translate to bytestream format
                 if (Utils::getMessageType (firstWord) != 0x00)
-                    callback (fromUmp (PacketX1 { firstWord }, time));
+                {
+                    const auto message = fromUmp (PacketX1 { firstWord }, time);
+                    callback (BytestreamMidiView (&message));
+                }
 
                 break;
             }
@@ -162,16 +165,14 @@ private:
     void startSysExMessage (double time)
     {
         pendingSysExTime = time;
-        pendingSysExData.push_back (0xf0);
+        pendingSysExData.push_back (std::byte { 0xf0 });
     }
 
     template <typename MessageCallback>
     void terminateSysExMessage (MessageCallback&& callback)
     {
-        pendingSysExData.push_back (0xf7);
-        callback (MidiMessage (pendingSysExData.data(),
-                               int (pendingSysExData.size()),
-                               pendingSysExTime));
+        pendingSysExData.push_back (std::byte { 0xf7 });
+        callback (BytestreamMidiView (pendingSysExData, pendingSysExTime));
         pendingSysExData.clear();
     }
 
@@ -206,7 +207,7 @@ private:
         return Utils::getMessageType (word) == 0x1 && ((word >> 0x10) & 0xff) >= 0xf8;
     }
 
-    std::vector<uint8_t> pendingSysExData;
+    std::vector<std::byte> pendingSysExData;
 
     double pendingSysExTime = 0.0;
 };

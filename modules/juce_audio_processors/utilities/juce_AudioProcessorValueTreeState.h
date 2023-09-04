@@ -32,6 +32,8 @@ namespace juce
     AudioParameterFloatAttributes.
 
     @see AudioParameterFloatAttributes, RangedAudioParameterAttributes
+
+    @tags{Audio}
 */
 class AudioProcessorValueTreeStateParameterAttributes
 {

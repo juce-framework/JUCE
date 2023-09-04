@@ -627,7 +627,7 @@ void Graphics::drawEllipse (Rectangle<float> area, float lineThickness) const
 {
     Path p;
 
-    if (area.getWidth() == area.getHeight())
+    if (approximatelyEqual (area.getWidth(), area.getHeight()))
     {
         // For a circle, we can avoid having to generate a stroke
         p.addEllipse (area.expanded (lineThickness * 0.5f));
@@ -781,7 +781,7 @@ void Graphics::drawDashedLine (Line<float> line, const float* dashLengths,
                 const Line<float> segment (line.getStart() + (delta * lastAlpha).toFloat(),
                                            line.getStart() + (delta * jmin (1.0, alpha)).toFloat());
 
-                if (lineThickness != 1.0f)
+                if (! approximatelyEqual (lineThickness, 1.0f))
                     drawLine (segment, lineThickness);
                 else
                     context.drawLine (segment);

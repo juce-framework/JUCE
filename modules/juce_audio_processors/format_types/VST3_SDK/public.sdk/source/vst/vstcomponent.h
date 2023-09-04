@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -59,6 +59,7 @@ public:
 	//---Internal Methods-------
 	/** Sets the controller Class ID associated to its component. */
 	void setControllerClass (const FUID& cid) { controllerClass = cid; }
+	void setControllerClass (const TUID& cid) { controllerClass = FUID::fromTUID (cid); }
 
 	/** Removes all Audio Busses. */
 	tresult removeAudioBusses ();

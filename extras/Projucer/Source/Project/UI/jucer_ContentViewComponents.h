@@ -136,7 +136,7 @@ private:
         for (auto w : widths)
             total += w;
 
-        if (total == 1.0f)
+        if (approximatelyEqual (total, 1.0f))
             return;
 
         auto diff = 1.0f - total;

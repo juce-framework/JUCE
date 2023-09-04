@@ -28,7 +28,7 @@
 
 if(JUCE_BUILD_HELPER_TOOLS)
     # Build the tool for the current system
-    juce_add_console_app(juceaide)
+    juce_add_console_app(juceaide _NO_RESOURCERC)
 
     target_sources(juceaide PRIVATE Main.cpp)
 
@@ -49,6 +49,8 @@ if(JUCE_BUILD_HELPER_TOOLS)
            NAMESPACE juce_tools::
            FILE "${JUCE_BINARY_DIR}/JUCEToolsExport.cmake")
 else()
+    set(extra_compiler_flag_arguments)
+
     # If we're building using the NDK, the gradle wrapper will try to inject its own compiler using
     # environment variables, which is unfortunate because we really don't want to cross-compile
     # juceaide.
@@ -98,13 +100,9 @@ else()
             set(ENV{PATH} "$ENV{PATH_ORIG}")
         endif()
     else()
-        # When building with clang-cl in Clion on Windows for an x64 target, the ABI detection phase
-        # of the inner build can fail unless we pass through these flags too
-        set(extra_configure_flags
-            "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
+        set(extra_compiler_flag_arguments
             "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
-            "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_EXE_LINKER_FLAGS}"
-            "-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
+            "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
     endif()
 
     message(STATUS "Configuring juceaide")
@@ -118,7 +116,7 @@ else()
             "-DCMAKE_BUILD_TYPE=Debug"
             "-DJUCE_BUILD_HELPER_TOOLS=ON"
             "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-            ${extra_configure_flags}
+            ${extra_compiler_flag_arguments}
         WORKING_DIRECTORY "${JUCE_SOURCE_DIR}"
         OUTPUT_VARIABLE command_output
         ERROR_VARIABLE command_output

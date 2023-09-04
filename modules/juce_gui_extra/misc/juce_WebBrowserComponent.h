@@ -46,6 +46,9 @@ class JUCE_API  WebBrowserComponent  : public Component
 {
 public:
     //==============================================================================
+    /**
+        Options to configure WebBrowserComponent.
+    */
     class JUCE_API Options
     {
     public:
@@ -65,7 +68,7 @@ public:
 
                     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-                or you need to change windows registry values for your application.  More infromation on the latter
+                or you need to change windows registry values for your application.  More information on the latter
                 can be found here:
 
                 https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/ee330730(v=vs.85)?redirectedfrom=MSDN#browser-emulation
@@ -264,12 +267,17 @@ public:
     /** @internal */
     void visibilityChanged() override;
     /** @internal */
-    void focusGained (FocusChangeType) override;
+    void focusGainedWithDirection (FocusChangeType, FocusChangeDirection) override;
 
     /** @internal */
     class Pimpl;
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+    }
+
     //==============================================================================
     std::unique_ptr<Pimpl> browser;
     bool blankPageShown = false, unloadPageWhenHidden;

@@ -26,37 +26,6 @@
 namespace juce
 {
 
-namespace LookAndFeelHelpers
-{
-    static Colour createBaseColour (Colour buttonColour,
-                                    bool hasKeyboardFocus,
-                                    bool shouldDrawButtonAsHighlighted,
-                                    bool shouldDrawButtonAsDown) noexcept
-    {
-        const float sat = hasKeyboardFocus ? 1.3f : 0.9f;
-        const Colour baseColour (buttonColour.withMultipliedSaturation (sat));
-
-        if (shouldDrawButtonAsDown)        return baseColour.contrasting (0.2f);
-        if (shouldDrawButtonAsHighlighted) return baseColour.contrasting (0.1f);
-
-        return baseColour;
-    }
-
-    static TextLayout layoutTooltipText (const String& text, Colour colour) noexcept
-    {
-        const float tooltipFontSize = 13.0f;
-        const int maxToolTipWidth = 400;
-
-        AttributedString s;
-        s.setJustification (Justification::centred);
-        s.append (text, Font (tooltipFontSize, Font::bold), colour);
-
-        TextLayout tl;
-        tl.createLayoutWithBalancedLineLengths (s, (float) maxToolTipWidth);
-        return tl;
-    }
-}
-
 //==============================================================================
 LookAndFeel_V2::LookAndFeel_V2()
 {
@@ -237,6 +206,8 @@ LookAndFeel_V2::LookAndFeel_V2()
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
         setColour ((int) standardColours [i], Colour ((uint32) standardColours [i + 1]));
+
+    bubbleShadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.35f), 5, {}));
 }
 
 LookAndFeel_V2::~LookAndFeel_V2()  {}
@@ -259,10 +230,10 @@ void LookAndFeel_V2::drawButtonBackground (Graphics& g,
     const float indentT = button.isConnectedOnTop()    ? 0.1f : halfThickness;
     const float indentB = button.isConnectedOnBottom() ? 0.1f : halfThickness;
 
-    const Colour baseColour (LookAndFeelHelpers::createBaseColour (backgroundColour,
-                                                                   button.hasKeyboardFocus (true),
-                                                                   shouldDrawButtonAsHighlighted,
-                                                                   shouldDrawButtonAsDown)
+    const Colour baseColour (detail::LookAndFeelHelpers::createBaseColour (backgroundColour,
+                                                                           button.hasKeyboardFocus (true),
+                                                                           shouldDrawButtonAsHighlighted,
+                                                                           shouldDrawButtonAsDown)
                                .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f));
 
     drawGlassLozenge (g,
@@ -320,9 +291,9 @@ void LookAndFeel_V2::drawTickBox (Graphics& g, Component& component,
     const float boxSize = w * 0.7f;
 
     drawGlassSphere (g, x, y + (h - boxSize) * 0.5f, boxSize,
-                     LookAndFeelHelpers::createBaseColour (component.findColour (TextButton::buttonColourId)
-                                                                    .withMultipliedAlpha (isEnabled ? 1.0f : 0.5f),
-                                                           true, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown),
+                     detail::LookAndFeelHelpers::createBaseColour (component.findColour (TextButton::buttonColourId)
+                                                                            .withMultipliedAlpha (isEnabled ? 1.0f : 0.5f),
+                                                                   true, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown),
                      isEnabled ? ((shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted) ? 1.1f : 0.5f) : 0.3f);
 
     if (ticked)
@@ -644,6 +615,11 @@ bool LookAndFeel_V2::isProgressBarOpaque (ProgressBar& progressBar)
     return progressBar.findColour (ProgressBar::backgroundColourId).isOpaque();
 }
 
+ProgressBar::Style LookAndFeel_V2::getDefaultProgressBarStyle (const ProgressBar&)
+{
+    return ProgressBar::Style::linear;
+}
+
 bool LookAndFeel_V2::areScrollbarButtonsVisible()
 {
     return true;
@@ -870,6 +846,10 @@ void LookAndFeel_V2::drawBubble (Graphics& g, BubbleComponent& comp,
     g.strokePath (p, PathStrokeType (1.0f));
 }
 
+void LookAndFeel_V2::setComponentEffectForBubbleComponent (BubbleComponent& bubbleComponent)
+{
+    bubbleComponent.setComponentEffect (&bubbleShadow);
+}
 
 //==============================================================================
 Font LookAndFeel_V2::getPopupMenuFont()
@@ -1110,8 +1090,8 @@ int LookAndFeel_V2::getMenuWindowFlags()
 
 void LookAndFeel_V2::drawMenuBarBackground (Graphics& g, int width, int height, bool, MenuBarComponent& menuBar)
 {
-    auto baseColour = LookAndFeelHelpers::createBaseColour (menuBar.findColour (PopupMenu::backgroundColourId),
-                                                            false, false, false);
+    auto baseColour = detail::LookAndFeelHelpers::createBaseColour (menuBar.findColour (PopupMenu::backgroundColourId),
+                                                                    false, false, false);
 
     if (menuBar.isEnabled())
         drawShinyButtonShape (g, -4.0f, 0.0f, (float) width + 8.0f, (float) height,
@@ -1237,9 +1217,9 @@ void LookAndFeel_V2::drawComboBox (Graphics& g, int width, int height, const boo
 
     auto outlineThickness = box.isEnabled() ? (isMouseButtonDown ? 1.2f : 0.5f) : 0.3f;
 
-    auto baseColour = LookAndFeelHelpers::createBaseColour (box.findColour (ComboBox::buttonColourId),
-                                                            box.hasKeyboardFocus (true),
-                                                            false, isMouseButtonDown)
+    auto baseColour = detail::LookAndFeelHelpers::createBaseColour (box.findColour (ComboBox::buttonColourId),
+                                                                    box.hasKeyboardFocus (true),
+                                                                    false, isMouseButtonDown)
                          .withMultipliedAlpha (box.isEnabled() ? 1.0f : 0.5f);
 
     drawGlassLozenge (g,
@@ -1398,16 +1378,26 @@ void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g, int x, int y, int 
     g.strokePath (indent, PathStrokeType (0.5f));
 }
 
+void LookAndFeel_V2::drawLinearSliderOutline (Graphics& g, int, int, int, int,
+                                              const Slider::SliderStyle, Slider& slider)
+{
+    if (slider.getTextBoxPosition() == Slider::NoTextBox)
+    {
+        g.setColour (slider.findColour (Slider::textBoxOutlineColourId));
+        g.drawRect (0, 0, slider.getWidth(), slider.getHeight(), 1);
+    }
+}
+
 void LookAndFeel_V2::drawLinearSliderThumb (Graphics& g, int x, int y, int width, int height,
                                             float sliderPos, float minSliderPos, float maxSliderPos,
                                             const Slider::SliderStyle style, Slider& slider)
 {
     auto sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 
-    auto knobColour = LookAndFeelHelpers::createBaseColour (slider.findColour (Slider::thumbColourId),
-                                                            slider.hasKeyboardFocus (false) && slider.isEnabled(),
-                                                            slider.isMouseOverOrDragging() && slider.isEnabled(),
-                                                            slider.isMouseButtonDown() && slider.isEnabled());
+    auto knobColour = detail::LookAndFeelHelpers::createBaseColour (slider.findColour (Slider::thumbColourId),
+                                                                    slider.hasKeyboardFocus (false) && slider.isEnabled(),
+                                                                    slider.isMouseOverOrDragging() && slider.isEnabled(),
+                                                                    slider.isMouseButtonDown() && slider.isEnabled());
 
     const float outlineThickness = slider.isEnabled() ? 0.8f : 0.3f;
 
@@ -1496,10 +1486,10 @@ void LookAndFeel_V2::drawLinearSlider (Graphics& g, int x, int y, int width, int
     {
         const bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
 
-        auto baseColour = LookAndFeelHelpers::createBaseColour (slider.findColour (Slider::thumbColourId)
-                                                                      .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f),
-                                                                false, isMouseOver,
-                                                                isMouseOver || slider.isMouseButtonDown());
+        auto baseColour = detail::LookAndFeelHelpers::createBaseColour (slider.findColour (Slider::thumbColourId)
+                                                                              .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f),
+                                                                        false, isMouseOver,
+                                                                        isMouseOver || slider.isMouseButtonDown());
 
         drawShinyButtonShape (g,
                               (float) x,
@@ -1512,6 +1502,8 @@ void LookAndFeel_V2::drawLinearSlider (Graphics& g, int x, int y, int width, int
                               baseColour,
                               slider.isEnabled() ? 0.9f : 0.3f,
                               true, true, true, true);
+
+        drawLinearSliderOutline (g, x, y, width, height, style, slider);
     }
     else
     {
@@ -1726,7 +1718,7 @@ Slider::SliderLayout LookAndFeel_V2::getSliderLayout (Slider& slider)
 //==============================================================================
 Rectangle<int> LookAndFeel_V2::getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea)
 {
-    const TextLayout tl (LookAndFeelHelpers::layoutTooltipText (tipText, Colours::black));
+    const TextLayout tl (detail::LookAndFeelHelpers::layoutTooltipText (tipText, Colours::black));
 
     auto w = (int) (tl.getWidth() + 14.0f);
     auto h = (int) (tl.getHeight() + 6.0f);
@@ -1746,7 +1738,7 @@ void LookAndFeel_V2::drawTooltip (Graphics& g, const String& text, int width, in
     g.drawRect (0, 0, width, height, 1);
    #endif
 
-    LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId))
+    detail::LookAndFeelHelpers::layoutTooltipText (text, findColour (TooltipWindow::textColourId))
         .draw (g, Rectangle<float> ((float) width, (float) height));
 }
 

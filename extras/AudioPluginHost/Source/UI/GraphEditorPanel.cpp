@@ -33,8 +33,8 @@
  class AUScanner
  {
  public:
-     AUScanner (KnownPluginList& list)
-         : knownPluginList (list), pool (5)
+     explicit AUScanner (KnownPluginList& list)
+         : knownPluginList (list)
      {
          knownPluginList.clearBlacklistedFiles();
          paths = formatToScan.getDefaultLocationsToSearch();
@@ -49,7 +49,8 @@
      std::unique_ptr<PluginDirectoryScanner> scanner;
      FileSearchPath paths;
 
-     ThreadPool pool;
+     static constexpr auto numJobs = 5;
+     ThreadPool pool { ThreadPoolOptions{}.withNumberOfThreads (numJobs) };
 
      void startScan()
      {
@@ -59,17 +60,14 @@
          scanner.reset (new PluginDirectoryScanner (knownPluginList, formatToScan, paths,
                                                     true, deadMansPedalFile, true));
 
-         for (int i = 5; --i >= 0;)
+         for (int i = numJobs; --i >= 0;)
              pool.addJob (new ScanJob (*this), true);
      }
 
      bool doNextScan()
      {
          String pluginBeingScanned;
-         if (scanner->scanNextFile (true, pluginBeingScanned))
-             return true;
-
-         return false;
+         return scanner->scanNextFile (true, pluginBeingScanned);
      }
 
      struct ScanJob  : public ThreadPoolJob
@@ -896,9 +894,9 @@ void GraphEditorPanel::showPopupMenu (Point<int> mousePos)
         menu->showMenuAsync ({},
                              ModalCallbackFunction::create ([this, mousePos] (int r)
                                                             {
-                                                                if (r > 0)
-                                                                    if (auto* mainWin = findParentComponentOfClass<MainHostWindow>())
-                                                                        createNewPlugin (mainWin->getChosenType (r), mousePos);
+                                                                if (auto* mainWin = findParentComponentOfClass<MainHostWindow>())
+                                                                    if (const auto chosen = mainWin->getChosenType (r))
+                                                                        createNewPlugin (*chosen, mousePos);
                                                             }));
     }
 }

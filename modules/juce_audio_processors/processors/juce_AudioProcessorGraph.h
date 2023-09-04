@@ -127,7 +127,7 @@ public:
             if (processor != nullptr)
             {
                 if (auto* bypassParam = processor->getBypassParameter())
-                    return (bypassParam->getValue() != 0.0f);
+                    return ! approximatelyEqual (bypassParam->getValue(), 0.0f);
             }
 
             return bypassed;
@@ -210,8 +210,11 @@ public:
     */
     enum class UpdateKind
     {
-        sync,   ///< Indicates that the graph should be rebuilt immediately after modification.
-        async   ///< Indicates that the graph rebuild should be deferred.
+        sync,   ///< Graph should be rebuilt immediately after modification.
+        async,  ///< Graph rebuild should be delayed. If you make several changes to the graph
+                ///< inside the same call stack, these changes will be applied in one go.
+        none    ///< Graph should not be rebuilt automatically. Use rebuild() to trigger a graph
+                ///< rebuild.
     };
 
     //==============================================================================
@@ -311,6 +314,14 @@ public:
         their channel counts, which could render some connections obsolete.
     */
     bool removeIllegalConnections (UpdateKind = UpdateKind::sync);
+
+    /** Rebuilds the graph if necessary.
+
+        This function will only ever rebuild the graph on the main thread. If this function is
+        called from another thread, the rebuild request will be dispatched asynchronously to the
+        main thread.
+    */
+    void rebuild();
 
     //==============================================================================
     /** A special type of AudioProcessor that can live inside an AudioProcessorGraph

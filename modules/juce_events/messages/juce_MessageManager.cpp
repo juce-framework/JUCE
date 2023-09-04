@@ -81,8 +81,11 @@ bool MessageManager::MessageBase::post()
 
 //==============================================================================
 #if ! (JUCE_MAC || JUCE_IOS || JUCE_ANDROID)
-// implemented in platform-specific code (juce_linux_Messaging.cpp and juce_win32_Messaging.cpp)
+// implemented in platform-specific code (juce_Messaging_linux.cpp and juce_Messaging_windows.cpp)
+namespace detail
+{
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
+} // namespace detail
 
 class MessageManager::QuitMessage   : public MessageManager::MessageBase
 {
@@ -106,7 +109,7 @@ void MessageManager::runDispatchLoop()
     {
         JUCE_TRY
         {
-            if (! dispatchNextMessageOnSystemQueue (false))
+            if (! detail::dispatchNextMessageOnSystemQueue (false))
                 Thread::sleep (1);
         }
         JUCE_CATCH_EXCEPTION
@@ -130,7 +133,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
     {
         JUCE_TRY
         {
-            if (! dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0))
+            if (! detail::dispatchNextMessageOnSystemQueue (millisecondsToRunFor >= 0))
                 Thread::sleep (1);
         }
         JUCE_CATCH_EXCEPTION
@@ -281,25 +284,41 @@ bool MessageManager::existsAndIsCurrentThread() noexcept
 */
 struct MessageManager::Lock::BlockingMessage   : public MessageManager::MessageBase
 {
-    BlockingMessage (const MessageManager::Lock* parent) noexcept
-        : owner (parent)
-    {}
+    explicit BlockingMessage (const MessageManager::Lock* parent) noexcept
+        : owner (parent) {}
 
     void messageCallback() override
     {
-        {
-            ScopedLock lock (ownerCriticalSection);
+        std::unique_lock lock { mutex };
 
-            if (auto* o = owner.get())
-                o->messageCallback();
+        if (owner != nullptr)
+        {
+            owner->abort();
+            acquired = true;
         }
 
-        releaseEvent.wait();
+        condvar.wait (lock, [&] { return owner == nullptr; });
     }
 
-    CriticalSection ownerCriticalSection;
-    Atomic<const MessageManager::Lock*> owner;
-    WaitableEvent releaseEvent;
+    void stopWaiting()
+    {
+        const ScopeGuard scope { [&] { condvar.notify_one(); } };
+        const std::scoped_lock lock { mutex };
+        owner = nullptr;
+    }
+
+    bool wasAcquired()
+    {
+        const std::scoped_lock lock { mutex };
+        return acquired;
+    }
+
+private:
+    std::mutex mutex;
+    std::condition_variable condvar;
+
+    const MessageManager::Lock* owner = nullptr;
+    bool acquired = false;
 
     JUCE_DECLARE_NON_COPYABLE (BlockingMessage)
 };
@@ -320,9 +339,12 @@ bool MessageManager::Lock::tryAcquire (bool lockIsMandatory) const noexcept
         return false;
     }
 
-    if (! lockIsMandatory && (abortWait.get() != 0))
+    if (! lockIsMandatory && [&]
+                             {
+                                 const std::scoped_lock lock { mutex };
+                                 return std::exchange (abortWait, false);
+                             }())
     {
-        abortWait.set (0);
         return false;
     }
 
@@ -347,65 +369,54 @@ bool MessageManager::Lock::tryAcquire (bool lockIsMandatory) const noexcept
         return false;
     }
 
-    do
+    for (;;)
     {
-        while (abortWait.get() == 0)
-            lockedEvent.wait (-1);
+        {
+            std::unique_lock lock { mutex };
+            condvar.wait (lock, [&] { return std::exchange (abortWait, false); });
+        }
 
-        abortWait.set (0);
-
-        if (lockGained.get() != 0)
+        if (blockingMessage->wasAcquired())
         {
             mm->threadWithLock = Thread::getCurrentThreadId();
             return true;
         }
 
-    } while (lockIsMandatory);
-
-    // we didn't get the lock
-    blockingMessage->releaseEvent.signal();
-
-    {
-        ScopedLock lock (blockingMessage->ownerCriticalSection);
-
-        lockGained.set (0);
-        blockingMessage->owner.set (nullptr);
+        if (! lockIsMandatory)
+            break;
     }
 
+    // we didn't get the lock
+
+    blockingMessage->stopWaiting();
     blockingMessage = nullptr;
     return false;
 }
 
 void MessageManager::Lock::exit() const noexcept
 {
-    if (lockGained.compareAndSetBool (false, true))
+    if (blockingMessage == nullptr)
+        return;
+
+    const ScopeGuard scope { [&] { blockingMessage = nullptr; } };
+
+    blockingMessage->stopWaiting();
+
+    if (! blockingMessage->wasAcquired())
+        return;
+
+    if (auto* mm = MessageManager::instance)
     {
-        auto* mm = MessageManager::instance;
-
-        jassert (mm == nullptr || mm->currentThreadHasLockedMessageManager());
-        lockGained.set (0);
-
-        if (mm != nullptr)
-            mm->threadWithLock = {};
-
-        if (blockingMessage != nullptr)
-        {
-            blockingMessage->releaseEvent.signal();
-            blockingMessage = nullptr;
-        }
+        jassert (mm->currentThreadHasLockedMessageManager());
+        mm->threadWithLock = {};
     }
-}
-
-void MessageManager::Lock::messageCallback() const
-{
-    lockGained.set (1);
-    abort();
 }
 
 void MessageManager::Lock::abort() const noexcept
 {
-    abortWait.set (1);
-    lockedEvent.signal();
+    const ScopeGuard scope { [&] { condvar.notify_one(); } };
+    const std::scoped_lock lock { mutex };
+    abortWait = true;
 }
 
 //==============================================================================

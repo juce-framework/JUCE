@@ -1,6 +1,358 @@
 JUCE breaking changes
 =====================
 
+Version 7.0.7
+=============
+
+Change
+------
+The minimum supported CMake version is now 3.22.
+
+Possible Issues
+---------------
+It will no longer be possible to configure JUCE projects with CMake versions
+between 3.15 and 3.21 inclusive.
+
+Workaround
+----------
+No workaround is available. Newer versions of CMake can be obtained from the
+official download page, or through system package managers.
+
+Rationale
+---------
+Moving to CMake 3.22 improves consistency with the Projucer's Android exporter,
+which already requires CMake 3.22. It also allows us to make use of the
+XCODE_EMBED_APP_EXTENSIONS property (introduced in CMake 3.21), fixing an
+issue when archiving AUv3 plugins.
+
+
+Version 7.0.6
+=============
+
+Change
+------
+Thread::wait and WaitableEvent::wait now take a double rather than an int to
+indicate the number of milliseconds to wait.
+
+Possible Issues
+---------------
+Calls to either wait function may trigger warnings.
+
+Workaround
+----------
+Explicitly cast the value to double.
+
+Rationale
+---------
+Changing to double allows sub-millisecond waits which was important for
+supporting changes to the HighResolutionTimer.
+
+
+Change
+------
+RealtimeOptions member workDurationMs was replaced by three optional member
+variables in RealtimeOptions, and all RealtimeOptions member variables were
+marked private.
+
+Possible Issues
+---------------
+Trying to construct a RealtimeOptions object with one or two values, or access
+any of its member variables, will no longer compile.
+
+Workaround
+----------
+Use the withMember functions to construct the object, and the getter functions
+to access the member variable values.
+
+Rationale
+---------
+The new approach improves the flexibility for users to specify realtime thread
+options on macOS/iOS and improves the flexibility for the API to evolve without
+introducing further breaking changes.
+
+
+Change
+------
+JUCE module compilation files with a platform suffix are now checked case
+insensitively for CMake builds.
+
+Possible Issues
+---------------
+If a JUCE module compilation file ends in a specific platform suffix but does
+not match the case for the string previously checked by the CMake
+implementation, it may have compiled for all platforms. Now, it will only
+compile for the platform specified by the suffix.
+
+Workaround
+----------
+In most cases this was probably a bug, in other cases rename the file to remove
+the platform suffix.
+
+Rationale
+---------
+This change improves consistency between the Projucer and CMake integrations.
+
+
+Change
+------
+An undocumented feature that allowed JUCE module compilation files to compile
+for a specific platform or subset of platforms by declaring the platform name
+followed by an underscore, was removed.
+
+Possible Issues
+---------------
+If a JUCE module compilation file contains a matching platform suffix followed
+by an underscore and is loaded by the Projucer it will no longer compile for
+just that platform.
+
+Workaround
+----------
+Use the suffix of the name only. If the undocumented feature was used to select
+multiple platforms, make multiple separate files for each of the required
+platforms.
+
+Rationale
+---------
+This change improves consistency between the Projucer and CMake integrations.
+Given the functionality was undocumented, the ease of a workaround, and the
+added complexity required for CMake support, the functionality was removed.
+
+
+Change
+------
+Unique device IDs on iOS now use the OS provided 'identifierForVendor'.
+OnlineUnlockStatus has been updated to handle the iOS edge-case where a device
+ID query might return an empty String.
+
+Possible Issues
+---------------
+The License checks using InAppPurchases, getLocalMachineIDs(), and
+getUniqueDeviceID() may return an empty String if iOS 'is not ready'. This can
+occur for example if the device has restarted but has not yet been unlocked.
+
+Workaround
+----------
+InAppPurchase has been updated to handle this and propagate the error
+accordingly. The relevant methods have been updated to return a Result object
+that can be queried for additional information on failure.
+
+Rationale
+---------
+Apple have introduced restrictions on device identification rendering our
+previous methods unsuitable.
+
+
+Change
+------
+AudioProcessor::getAAXPluginIDForMainBusConfig() has been deprecated.
+
+Possible Issues
+---------------
+Any AudioProcessor overriding this method will fail to compile.
+
+Workaround
+----------
+- Create an object which inherits from AAXClientExtensions.
+- In the object override and implement getPluginIDForMainBusConfig().
+- In the AudioProcessor override getAAXClientExtensions() and return a pointer
+  to the object.
+
+Rationale
+---------
+Additional AAX specific functionality was required in the audio processor.
+Rather than continuing to grow and expand the AudioProcessor class with format
+specific functionality, separating this concern into a new class allows for
+greater expansion for those that need it without burdening those that don't.
+Moving this function into this class improves consistency both with the new
+functionality and with similar functionality for the VST2 and VST3 formats.
+
+
+Change
+------
+Unique device IDs on Windows have been updated to use a more reliable SMBIOS
+parser. The SystemStats::getUniqueDeviceID function now returns new IDs using
+this improved parser. Additionally, a new function,
+SystemStats::getMachineIdentifiers, has been introduced to aggregate all ID
+sources. It is recommended to use this new function to verify any IDs.
+
+Possible Issues
+----------------
+The SystemStats::getUniqueDeviceID function will return a different ID for the
+same machine due to the updated parser.
+
+Workaround
+----------
+For code that previously relied on SystemStats::getUniqueDeviceID, it is advised
+to switch to using SystemStats::getMachineIdentifiers() instead.
+
+Rationale
+---------
+This update ensures the generation of more stable and reliable unique device
+IDs, while also maintaining backward compatibility with the previous ID
+generation methods.
+
+
+Change
+------
+The Grid layout algorithm has been slightly altered to provide more consistent
+behaviour. The new approach guarantees that dimensions specified using the
+absolute Px quantity will always be correctly rounded when applied to the
+integer dimensions of Components.
+
+Possible Issues
+---------------
+Components laid out using Grid can observe a size or position change of +/- 1px
+along each dimension compared with the result of the previous algorithm.
+
+Workaround
+----------
+If the Grid based graphical layout is sensitive to changes of +/- 1px, then the
+UI layout code may have to be adjusted to the new algorithm.
+
+Rationale
+---------
+The old Grid layout algorithm could exhibit surprising and difficult to control
+single pixel artifacts, where an item with a specified absolute size of
+e.g. 100px could end up with a layout size of 101px. The new approach
+guarantees that such items will have a layout size exactly as specified, and
+this new behaviour is also in line with CSS behaviour in browsers. The new
+approach makes necessary corrections easier as adding 1px to the size of an
+item with absolute dimensions is guaranteed to translate into an observable 1px
+increase in the layout size.
+
+
+Change
+------
+The k91_4 and k90_4 VST3 layouts are now mapped to the canonical JUCE 9.1.4 and
+9.0.4 AudioChannelSets. This has a different ChannelType layout than the
+AudioChannelSet previously used with such VST3 SpeakerArrangements.
+
+Possible Issues
+---------------
+VST3 plugins that were prepared to work with the k91_4 and k90_4
+SpeakerArrangements may now have incorrect channel mapping. The channels
+previously accessible through ChannelType::left and right are now accessible
+through ChannelType::wideLeft and wideRight, and channels previously accessible
+through ChannelType::leftCentre and rightCentre are now accessible through
+ChannelType::left and right.
+
+Workaround
+----------
+Code that accesses the channels that correspond to the VST3 Speakers kSpeakerL,
+kSpeakerR, kSpeakerLc and kSpeakerRc needs to be updated. These channels are now
+accessible respectively through ChannelTypes wideLeft, wideRight, left and
+right. Previously they were accessible respectively through left, right,
+leftCentre and rightCentre.
+
+Rationale
+---------
+This change allows developers to handle the 9.1.4 and 9.0.4 surround layouts
+with one codepath across all plugin formats. Previously the
+AudioChannelSet::create9point1point4() and create9point0point4() layouts would
+only be used in CoreAudio and AAX, but a different AudioChannelSet would be used
+in VST3 even though they were functionally equivalent.
+
+
+Change
+------
+The signatures of the ContentSharer member functions have been updated. The
+ContentSharer class itself is no longer a singleton.
+
+Possible Issues
+---------------
+Projects that use the old signatures will not build until they are updated.
+
+Workaround
+----------
+Instead of calling content sharer functions through a singleton instance, e.g.
+    ContentSharer::getInstance()->shareText (...);
+call the static member functions directly:
+    ScopedMessageBox messageBox = ContentSharer::shareTextScoped (...);
+The new functions return a ScopedMessageBox instance. On iOS, the content
+sharer will only remain open for as long as the ScopedMessageBox remains alive.
+On Android, this functionality will be added as/when the native APIs allow.
+
+Rationale
+---------
+The new signatures are safer and easier to use. The ScopedMessageBox also
+allows content sharers to be dismissed programmatically, which wasn't
+previously possible.
+
+
+Change
+------
+The minimum supported AAX library version has been bumped to 2.4.0 and the
+library is now built automatically while building an AAX plugin. The
+JucePlugin_AAXLibs_path preprocessor definition is no longer defined in AAX
+plugin builds.
+
+Possible Issues
+---------------
+Projects that use the JucePlugin_AAXLibs_path definition may no longer build
+correctly. Projects that reference an AAX library version earlier than 2.4.0
+will fail to build.
+
+Workaround
+----------
+You must download an AAX library distribution with a version of at least 2.4.0.
+Use the definition JucePlugin_Build_AAX to check whether the AAX format is
+enabled at build time.
+
+Rationale
+---------
+The JUCE framework now requires features only present in version 2.4.0 of the
+AAX library. The build change removes steps from the build process, and ensures
+that the same compiler flags are used across the entire project.
+
+
+Change
+------
+The implementation of ColourGradient::createLookupTable has been updated to use
+non-premultiplied colours.
+
+Possible Issues
+---------------
+Programs that draw transparent gradients using the OpenGL or software
+renderers, or that use lookup tables generated from transparent gradients for
+other purposes, may now produce different results.
+
+Workaround
+----------
+For gradients to render the same as they did previously, transparent colour
+stops should be un-premultiplied. For colours with an alpha component of 0, it
+may be necessary to specify appropriate RGB components.
+
+Rationale
+---------
+Previously, transparent gradients rendered using CoreGraphics looked different
+to the same gradients drawn using OpenGL or the software renderer. This change
+updates the OpenGL and software renderers, so that they produce the same
+results as CoreGraphics.
+
+
+Change
+------
+Projucer-generated MSVC projects now build VST3s as bundles, rather than as
+single DLL files.
+
+Possible Issues
+---------------
+Build workflows that expect the VST3 to be a single DLL may break.
+
+Workaround
+----------
+Any post-build scripts that expect to copy or move the built VST3 should be
+updated so that the entire bundle directory is copied/moved. The DLL itself
+can still be located and extracted from within the generated bundle if
+necessary.
+
+Rationale
+---------
+Distributing VST3s as single files was deprecated in VST3 v3.6.10. JUCE's CMake
+scripts already produce VST3s as bundles, so this change increases consistency
+between the two build systems.
+
+
 Version 7.0.3
 =============
 
@@ -733,7 +1085,7 @@ querying the capabilities of the current context at runtime.
 
 Change
 ------
-The minimum support CMake version is now 3.15.
+The minimum supported CMake version is now 3.15.
 
 Possible Issues
 ---------------

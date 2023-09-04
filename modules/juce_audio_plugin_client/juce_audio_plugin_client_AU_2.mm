@@ -29,26 +29,29 @@
 
 #include <juce_core/system/juce_CompilerWarnings.h>
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wparentheses",
-                                     "-Wextra-tokens",
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wambiguous-reversed-operator",
+                                     "-Wc99-extensions",
+                                     "-Wcast-align",
                                      "-Wcomment",
                                      "-Wconversion",
-                                     "-Wunused-parameter",
-                                     "-Wunused",
-                                     "-Wextra-semi",
-                                     "-Wformat-pedantic",
-                                     "-Wgnu-zero-variadic-macro-arguments",
-                                     "-Wshadow-all",
-                                     "-Wcast-align",
-                                     "-Wswitch-enum",
-                                     "-Wimplicit-fallthrough",
-                                     "-Wzero-as-null-pointer-constant",
-                                     "-Wnullable-to-nonnull-conversion",
-                                     "-Wignored-qualifiers",
-                                     "-Wfour-char-constants",
-                                     "-Wmissing-prototypes",
                                      "-Wdeprecated-anon-enum-enum-conversion",
-                                     "-Wambiguous-reversed-operator")
+                                     "-Wextra-semi",
+                                     "-Wextra-tokens",
+                                     "-Wfloat-equal",
+                                     "-Wformat-pedantic",
+                                     "-Wfour-char-constants",
+                                     "-Wgnu-zero-variadic-macro-arguments",
+                                     "-Wignored-qualifiers",
+                                     "-Wimplicit-fallthrough",
+                                     "-Wmissing-prototypes",
+                                     "-Wnullable-to-nonnull-conversion",
+                                     "-Wparentheses",
+                                     "-Wshadow-all",
+                                     "-Wswitch-enum",
+                                     "-Wunknown-attributes",
+                                     "-Wunused",
+                                     "-Wunused-parameter",
+                                     "-Wzero-as-null-pointer-constant")
 
 // From MacOS 10.13 and iOS 11 Apple has (sensibly!) stopped defining a whole
 // set of functions with rather generic names. However, we still need a couple
@@ -84,18 +87,18 @@ enum MIDICVStatus : unsigned int
 
 #endif
 
-#include "AU/AudioUnitSDK/AUBase.cpp"
-#include "AU/AudioUnitSDK/AUBuffer.cpp"
-#include "AU/AudioUnitSDK/AUBufferAllocator.cpp"
-#include "AU/AudioUnitSDK/AUEffectBase.cpp"
-#include "AU/AudioUnitSDK/AUInputElement.cpp"
-#include "AU/AudioUnitSDK/AUMIDIBase.cpp"
-#include "AU/AudioUnitSDK/AUMIDIEffectBase.cpp"
-#include "AU/AudioUnitSDK/AUOutputElement.cpp"
-#include "AU/AudioUnitSDK/AUPlugInDispatch.cpp"
-#include "AU/AudioUnitSDK/AUScopeElement.cpp"
-#include "AU/AudioUnitSDK/ComponentBase.cpp"
-#include "AU/AudioUnitSDK/MusicDeviceBase.cpp"
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBuffer.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBufferAllocator.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUEffectBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUInputElement.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUMIDIBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUMIDIEffectBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUOutputElement.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUPlugInDispatch.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/AUScopeElement.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/ComponentBase.cpp>
+#include <juce_audio_plugin_client/AU/AudioUnitSDK/MusicDeviceBase.cpp>
 
 #undef verify
 #undef verify_noerr

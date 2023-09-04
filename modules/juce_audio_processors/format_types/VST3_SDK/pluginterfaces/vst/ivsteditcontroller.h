@@ -146,7 +146,14 @@ enum RestartFlags
 	 *  The host ask the plug-in for the new routing with IComponent::getRoutingInfo, \ref vst3Routing
 	 *	see IComponent
 	 *	[SDK 3.6.6] */
-	kRoutingInfoChanged			= 1 << 9
+	kRoutingInfoChanged			= 1 << 9,
+
+	/** Key switches has changed (info, count)
+	 *  Either the Key switches info, the count of Key switches has changed.
+	 *	The host invalidates all caches of Key switches infos and asks the edit controller (IKeyswitchController) for the current ones.
+	 *  See IKeyswitchController
+	 *	[SDK 3.7.3] */
+	 kKeyswitchChanged			= 1 << 10
 };
 
 //------------------------------------------------------------------------

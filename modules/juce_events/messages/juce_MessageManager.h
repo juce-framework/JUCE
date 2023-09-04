@@ -298,12 +298,12 @@ public:
         friend class ReferenceCountedObjectPtr<BlockingMessage>;
 
         bool tryAcquire (bool) const noexcept;
-        void messageCallback() const;
 
         //==============================================================================
         mutable ReferenceCountedObjectPtr<BlockingMessage> blockingMessage;
-        WaitableEvent lockedEvent;
-        mutable Atomic<int> abortWait, lockGained;
+        mutable std::mutex mutex;
+        mutable std::condition_variable condvar;
+        mutable bool abortWait = false, acquired = false;
     };
 
     //==============================================================================

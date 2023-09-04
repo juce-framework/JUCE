@@ -288,12 +288,11 @@ private:
     //==============================================================================
     friend class ComponentPeer;
     friend class Desktop;
-    friend class MouseInputSourceInternal;
-    MouseInputSourceInternal* pimpl;
+    friend class detail::MouseInputSourceList;
+    friend class detail::MouseInputSourceImpl;
+    detail::MouseInputSourceImpl* pimpl;
 
-    struct SourceList;
-
-    explicit MouseInputSource (MouseInputSourceInternal*) noexcept;
+    explicit MouseInputSource (detail::MouseInputSourceImpl*) noexcept;
     void handleEvent (ComponentPeer&, Point<float>, int64 time, ModifierKeys, float, float, const PenDetails&);
     void handleWheel (ComponentPeer&, Point<float>, int64 time, const MouseWheelDetails&);
     void handleMagnifyGesture (ComponentPeer&, Point<float>, int64 time, float scaleFactor);

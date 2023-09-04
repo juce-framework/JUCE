@@ -29,6 +29,8 @@ namespace juce
 /** Properties of an AudioParameterChoice.
 
     @see AudioParameterChoice(), RangedAudioParameterAttributes()
+
+    @tags{Audio}
 */
 class AudioParameterChoiceAttributes : public RangedAudioParameterAttributes<AudioParameterChoiceAttributes, int> {};
 

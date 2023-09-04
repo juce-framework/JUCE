@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@
 
 #include "pluginterfaces/base/funknown.h"
 
+#include "pluginterfaces/base/iplugincompatibility.h"
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
 #include "pluginterfaces/vst/ivstautomationstate.h"
 #include "pluginterfaces/vst/ivstchannelcontextinfo.h"
@@ -58,86 +59,87 @@
 
 //------------------------------------------------------------------------
 namespace Steinberg {
-namespace Vst {
 
 //----VST 3.0--------------------------------
-DEF_CLASS_IID (IComponent)
-DEF_CLASS_IID (IAudioProcessor)
-DEF_CLASS_IID (IUnitData)
-DEF_CLASS_IID (IProgramListData)
+DEF_CLASS_IID (Vst::IComponent)
+DEF_CLASS_IID (Vst::IAudioProcessor)
+DEF_CLASS_IID (Vst::IUnitData)
+DEF_CLASS_IID (Vst::IProgramListData)
 
-DEF_CLASS_IID (IEditController)
-DEF_CLASS_IID (IUnitInfo)
+DEF_CLASS_IID (Vst::IEditController)
+DEF_CLASS_IID (Vst::IUnitInfo)
 
-DEF_CLASS_IID (IConnectionPoint)
+DEF_CLASS_IID (Vst::IConnectionPoint)
 
-DEF_CLASS_IID (IComponentHandler)
-DEF_CLASS_IID (IUnitHandler)
+DEF_CLASS_IID (Vst::IComponentHandler)
+DEF_CLASS_IID (Vst::IUnitHandler)
 
-DEF_CLASS_IID (IParamValueQueue)
-DEF_CLASS_IID (IParameterChanges)
+DEF_CLASS_IID (Vst::IParamValueQueue)
+DEF_CLASS_IID (Vst::IParameterChanges)
 
-DEF_CLASS_IID (IEventList)
-DEF_CLASS_IID (IMessage)
+DEF_CLASS_IID (Vst::IEventList)
+DEF_CLASS_IID (Vst::IMessage)
 
-DEF_CLASS_IID (IHostApplication)
-DEF_CLASS_IID (IAttributeList)
+DEF_CLASS_IID (Vst::IHostApplication)
+DEF_CLASS_IID (Vst::IAttributeList)
 
 //----VST 3.0.1--------------------------------
-DEF_CLASS_IID (IMidiMapping)
+DEF_CLASS_IID (Vst::IMidiMapping)
 
 //----VST 3.0.2--------------------------------
-DEF_CLASS_IID (IParameterFinder)
+DEF_CLASS_IID (Vst::IParameterFinder)
 
 //----VST 3.1----------------------------------
-DEF_CLASS_IID (IComponentHandler2)
-DEF_CLASS_IID (IEditController2)
-DEF_CLASS_IID (IAudioPresentationLatency)
-DEF_CLASS_IID (IVst3ToVst2Wrapper)
-DEF_CLASS_IID (IVst3ToAUWrapper)
+DEF_CLASS_IID (Vst::IComponentHandler2)
+DEF_CLASS_IID (Vst::IEditController2)
+DEF_CLASS_IID (Vst::IAudioPresentationLatency)
+DEF_CLASS_IID (Vst::IVst3ToVst2Wrapper)
+DEF_CLASS_IID (Vst::IVst3ToAUWrapper)
 
 //----VST 3.5----------------------------------
-DEF_CLASS_IID (INoteExpressionController)
-DEF_CLASS_IID (IKeyswitchController)
-DEF_CLASS_IID (IContextMenuTarget)
-DEF_CLASS_IID (IContextMenu)
-DEF_CLASS_IID (IComponentHandler3)
-DEF_CLASS_IID (IEditControllerHostEditing)
-DEF_CLASS_IID (IXmlRepresentationController)
+DEF_CLASS_IID (Vst::INoteExpressionController)
+DEF_CLASS_IID (Vst::IKeyswitchController)
+DEF_CLASS_IID (Vst::IContextMenuTarget)
+DEF_CLASS_IID (Vst::IContextMenu)
+DEF_CLASS_IID (Vst::IComponentHandler3)
+DEF_CLASS_IID (Vst::IEditControllerHostEditing)
+DEF_CLASS_IID (Vst::IXmlRepresentationController)
 
 //----VST 3.6----------------------------------
-DEF_CLASS_IID (IInterAppAudioHost)
-DEF_CLASS_IID (IInterAppAudioConnectionNotification)
-DEF_CLASS_IID (IInterAppAudioPresetManager)
-DEF_CLASS_IID (IStreamAttributes)
+DEF_CLASS_IID (Vst::IInterAppAudioHost)
+DEF_CLASS_IID (Vst::IInterAppAudioConnectionNotification)
+DEF_CLASS_IID (Vst::IInterAppAudioPresetManager)
+DEF_CLASS_IID (Vst::IStreamAttributes)
 
 //----VST 3.6.5--------------------------------
-DEF_CLASS_IID (ChannelContext::IInfoListener)
-DEF_CLASS_IID (IPrefetchableSupport)
-DEF_CLASS_IID (IUnitHandler2)
-DEF_CLASS_IID (IAutomationState)
+DEF_CLASS_IID (Vst::ChannelContext::IInfoListener)
+DEF_CLASS_IID (Vst::IPrefetchableSupport)
+DEF_CLASS_IID (Vst::IUnitHandler2)
+DEF_CLASS_IID (Vst::IAutomationState)
 
 //----VST 3.6.8--------------------------------
-DEF_CLASS_IID (IComponentHandlerBusActivation)
-DEF_CLASS_IID (IVst3ToAAXWrapper)
+DEF_CLASS_IID (Vst::IComponentHandlerBusActivation)
+DEF_CLASS_IID (Vst::IVst3ToAAXWrapper)
 
 //----VST 3.6.11--------------------------------
-DEF_CLASS_IID (INoteExpressionPhysicalUIMapping)
+DEF_CLASS_IID (Vst::INoteExpressionPhysicalUIMapping)
 
 //----VST 3.6.12--------------------------------
-DEF_CLASS_IID (IMidiLearn)
-DEF_CLASS_IID (IPlugInterfaceSupport)
-DEF_CLASS_IID (IVst3WrapperMPESupport)
+DEF_CLASS_IID (Vst::IMidiLearn)
+DEF_CLASS_IID (Vst::IPlugInterfaceSupport)
+DEF_CLASS_IID (Vst::IVst3WrapperMPESupport)
 
 //----VST 3.6.13--------------------------------
-DEF_CLASS_IID (ITestPlugProvider)
+DEF_CLASS_IID (Vst::ITestPlugProvider)
 
 //----VST 3.7-----------------------------------
-DEF_CLASS_IID (IParameterFunctionName)
-DEF_CLASS_IID (IProcessContextRequirements)
-DEF_CLASS_IID (IProgress)
-DEF_CLASS_IID (ITestPlugProvider2)
+DEF_CLASS_IID (Vst::IParameterFunctionName)
+DEF_CLASS_IID (Vst::IProcessContextRequirements)
+DEF_CLASS_IID (Vst::IProgress)
+DEF_CLASS_IID (Vst::ITestPlugProvider2)
 
-//------------------------------------------------------------------------
-} // Vst
+
+//----VST 3.7.5---------------------------------
+DEF_CLASS_IID (IPluginCompatibility)
+
 } // Steinberg

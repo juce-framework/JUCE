@@ -457,7 +457,7 @@ private:
             {
                 const ScopedLock sl (pluginInstance.lock);
 
-                if (paramValue.unscaled != newValue)
+                if (! approximatelyEqual (paramValue.unscaled, newValue))
                     paramValue = ParameterValue (getNewParamScaled (interface->PortRangeHints [paramID], newValue), newValue);
             }
         }
