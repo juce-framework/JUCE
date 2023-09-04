@@ -977,8 +977,8 @@ public:
             if (! clip.isEmpty())
             {
                 Image temp (component.isOpaque() ? Image::RGB : Image::ARGB,
-                            roundToInt (clipW * displayScale),
-                            roundToInt (clipH * displayScale),
+                            roundToInt (static_cast<float>(clipW) * displayScale),
+                            roundToInt (static_cast<float>(clipH) * displayScale),
                             ! component.isOpaque());
 
                 {

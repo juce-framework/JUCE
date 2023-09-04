@@ -320,7 +320,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
         auto image = detail::ImagePtr { CoreGraphicsPixelData::createImage (singleChannelImage, greyColourSpace.get()) };
 
         flip();
-        auto t = AffineTransform::verticalFlip (sourceImage.getHeight()).followedBy (transform);
+        auto t = AffineTransform::verticalFlip (static_cast<float>(sourceImage.getHeight())).followedBy (transform);
         applyTransform (t);
 
         auto r = convertToCGRect (sourceImage.getBounds());
@@ -540,7 +540,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
     CGContextSetAlpha (context.get(), state->fillType.getOpacity());
 
     flip();
-    applyTransform (AffineTransform::verticalFlip (ih).followedBy (transform));
+    applyTransform (AffineTransform::verticalFlip (static_cast<float>(ih)).followedBy (transform));
     auto imageRect = CGRectMake (0, 0, iw, ih);
 
     if (fillEntireClipAsTiles)

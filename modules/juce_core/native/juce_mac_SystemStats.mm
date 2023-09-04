@@ -303,7 +303,7 @@ public:
         }
 
         highResTimerFrequency = (timebase.denom * (uint64) 1000000000) / timebase.numer;
-        highResTimerToMillisecRatio = hiResCounterNumerator / (double) hiResCounterDenominator;
+        highResTimerToMillisecRatio = static_cast<double>(hiResCounterNumerator) / (double) hiResCounterDenominator;
     }
 
     uint32 millisecondsSinceStartup() const noexcept
@@ -313,7 +313,7 @@ public:
 
     double getMillisecondCounterHiRes() const noexcept
     {
-        return mach_absolute_time() * highResTimerToMillisecRatio;
+        return static_cast<double>(mach_absolute_time()) * highResTimerToMillisecRatio;
     }
 
     int64 highResTimerFrequency;
