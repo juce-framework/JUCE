@@ -823,7 +823,8 @@ void ProjectSaver::runPostExportScript()
             return;
         }
 
-        if (! shellProcess.waitForProcessToFinish (10000))
+        // Some scripts can take a long time to complete
+        if (! shellProcess.waitForProcessToFinish (60000))
         {
             addError ("Timeout running shell command: " + argList.joinIntoString (" "));
             return;
