@@ -44,20 +44,16 @@ juce_add_gui_app(DemoRunner
 juce_generate_juce_header(DemoRunner)
 
 target_sources(DemoRunner PRIVATE
-    Source/Demos/DemoPIPs1.cpp
-    Source/Demos/DemoPIPs2.cpp
-    Source/Demos/JUCEDemos.cpp
     Source/Main.cpp
-    Source/UI/DemoContentComponent.cpp
-    Source/UI/MainComponent.cpp)
+)
 
 target_compile_definitions(DemoRunner PRIVATE
     PIP_JUCE_EXAMPLES_DIRECTORY_STRING="${JUCE_SOURCE_DIR}/examples"
     JUCE_ALLOW_STATIC_NULL_VARIABLES=0
     JUCE_CONTENT_SHARING=1
     JUCE_DEMO_RUNNER=1
-    JUCE_PLUGINHOST_LV2=1
-    JUCE_PLUGINHOST_VST3=1
+    JUCE_PLUGINHOST_LV2=0
+    JUCE_PLUGINHOST_VST3=0
     JUCE_STRICT_REFCOUNTEDPOINTER=1
     JUCE_UNIT_TESTS=1
     JUCE_USE_CAMERA=1
@@ -70,10 +66,7 @@ target_link_libraries(DemoRunner PRIVATE
     juce::juce_audio_utils
     juce::juce_box2d
     juce::juce_dsp
-    juce::juce_opengl
-    juce::juce_osc
     juce::juce_product_unlocking
-    juce::juce_video
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)

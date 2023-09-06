@@ -24,9 +24,6 @@
 */
 
 #include <JuceHeader.h>
-#include "../../Assets/DemoUtilities.h"
-
-#include "UI/MainComponent.h"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
@@ -94,7 +91,6 @@ public:
     //==============================================================================
     void initialise (const String& commandLine) override
     {
-        registerAllDemos();
 
       #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
         // (This function call is for one of the demos, which involves launching a child process)
@@ -107,7 +103,7 @@ public:
         mainWindow.reset (new MainAppWindow (getApplicationName()));
     }
 
-    bool backButtonPressed() override    { mainWindow->getMainComponent().getSidePanel().showOrHide (false); return true; }
+    bool backButtonPressed() override    { return true; }
     void shutdown() override             { mainWindow = nullptr; }
 
     //==============================================================================
@@ -142,8 +138,6 @@ private:
                        jmax (850, (int) (0.5f * (float) getParentWidth())),
                        jmax (600, (int) (0.7f * (float) getParentHeight())));
            #endif
-
-            setContentOwned (new MainComponent(), false);
             setVisible (true);
 
            #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
@@ -161,7 +155,7 @@ private:
        #endif
 
         //==============================================================================
-        MainComponent& getMainComponent()    { return *dynamic_cast<MainComponent*> (getContentComponent()); }
+    //    MainComponent& getMainComponent()    { return *dynamic_cast<MainComponent*> (getContentComponent()); }
 
     private:
         std::unique_ptr<Component> taskbarIcon;

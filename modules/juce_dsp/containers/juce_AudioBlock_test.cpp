@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#if !JUCE_WASM
+
 namespace juce
 {
 namespace dsp
@@ -496,3 +498,5 @@ static AudioBlockUnitTests<SIMDRegister<double>> audioBlockSIMDDoubleUnitTests;
 
 } // namespace dsp
 } // namespace juce
+
+#endif

@@ -211,6 +211,9 @@
   #include "native/juce_ContentSharer_android.cpp"
  #endif
 
+#elif JUCE_WASM
+#include "native/juce_wasm_windowing.cpp"
+
 #endif
 
 //==============================================================================

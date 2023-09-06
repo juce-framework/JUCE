@@ -115,6 +115,8 @@ namespace TimeHelpers
                         strftime (buffer, bufferSize - 1, format.toUTF8(), tm);
                        #elif JUCE_WINDOWS
                         wcsftime (buffer, bufferSize - 1, format.toWideCharPointer(), tm);
+                       #elif JUCE_WASM
+                        0;
                        #else
                         wcsftime (buffer, bufferSize - 1, format.toUTF32(), tm);
                        #endif
