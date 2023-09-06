@@ -1,9 +1,10 @@
-== Major JUCE features and updates ==
+# Major JUCE features and updates
 
-This file just lists the more notable headline features. For more detailed info
-about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
+This file lists the more notable headline features. For more detailed info
+about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
-Version 7.0.7
+## Version 7.0.7
+
   - Fixed some macOS 14.0 deprecations
   - Fixed some issues with VST3 manifest generation
   - Fixed a Metal layer rendering issue
@@ -11,7 +12,8 @@ Version 7.0.7
   - Fixed a crash in VirtualDesktopWatcher
   - Fixed an AUv3 bundling problem
 
-Version 7.0.6
+## Version 7.0.6
+
   - Added support for VST3 bundles and moduleinfo.json
   - Improved message box dismissal
   - Improved WebView support
@@ -21,19 +23,22 @@ Version 7.0.6
   - Improved machine ID support
   - Improved the HighResolutionTimer implementation
 
-Version 7.0.5
+## Version 7.0.5
+
   - Fixed Windows 7 compatibility
   - Fixed dark mode notifications on macOS
   - Improved the performance of AudioProcessorGraph
 
-Version 7.0.4
+## Version 7.0.4
+
   - Improved Metal device handling
   - Adopted more C++17 features
   - Improved input handling on macOS and iOS
   - Fixed a GUI display issue on Linux
   - Fixed some compiler warnings
 
-Version 7.0.3
+## Version 7.0.3
+
   - Added a unique machine ID
   - Added new threading classes
   - Improved the performance of multiple OpenGL contexts
@@ -42,18 +47,21 @@ Version 7.0.3
   - Fixed Studio One drawing performance
   - Updated the FLAC library
 
-Version 7.0.2
+## Version 7.0.2
+
   - Fixed accessibility table navigation
   - Fixed Android file access on older APIs
   - Improved Linux VST3 threading
   - Improved ARA integration
 
-Version 7.0.1
+## Version 7.0.1
+
   - Fixed some Xcode and MSVC compiler warnings
   - Improved VST3 bus configuration and channel handling
   - Fixed some Metal layer rendering bugs
 
-Version 7.0.0
+## Version 7.0.0
+
   - Added Audio Random Access (ARA) SDK support
   - Added support for authoring and hosting LV2 plug-ins
   - Added a default renderer for macOS and iOS
@@ -63,14 +71,16 @@ Version 7.0.0
   - Revamped AudioPlayHead functionality
   - Improved accessibility support
 
-Version 6.1.6
+## Version 6.1.6
+
   - Improved the handling of AU multichannel layouts
   - Added JUCE_NODISCARD to builder-patten functions
   - Added recursion options to DirectoryIterator
   - Unified the loading of OpenGL 3.2 core profiles
   - Improved macOS full-screen behaviour with non-native titlebars
 
-Version 6.1.5
+## Version 6.1.5
+
   - Improved the accessibility framework
   - Added handling of non-Latin virtual key codes on macOS
   - Improved X11 compatibility
@@ -79,12 +89,14 @@ Version 6.1.5
   - Improved MinGW-w64 compatibility
   - Added an MPEKeyboardComponent class
 
-Version 6.1.4
+## Version 6.1.4
+
   - Restored Projucer project saving behavior
   - Fixed a CGImage memory access violation on Monterey
   - Improved macOS thread priority management
 
-Version 6.1.3
+## Version 6.1.3
+
   - Added support for Visual Studio 2022 to the Projucer
   - Added support for creating OpenGL 3.2 contexts on Windows
   - Added support for plugin hosts to easily retrieve stable parameter IDs
@@ -95,12 +107,14 @@ Version 6.1.3
   - Improved macOS 12 compatibility, including OpenGL and FileChooser fixes
   - Improved accessibility support
 
-Version 6.1.2
+## Version 6.1.2
+
   - Fixed an OpenGL display refresh rate issue on macOS
   - Improved the scaling behaviour of hosted VST3 plug-ins
   - Improved accessibility support
 
-Version 6.1.1
+## Version 6.1.1
+
   - Fixed a CMake installation issue
   - Improved parameter value loading after plug-in restarts
   - Fixed some problems with multi-line text layouts
@@ -108,7 +122,8 @@ Version 6.1.1
   - Fixed an issue setting OpenGL repaint events
   - Improved accessibility support
 
-Version 6.1.0
+## Version 6.1.0
+
   - Added accessibility support
   - Enabled use of VST3 plug-in extensions
   - Improved OpenGL function loading
@@ -125,7 +140,8 @@ Version 6.1.0
   - Improved modal dismissing
   - Improved assertion handling on macOS ARM
 
-Version 6.0.8
+## Version 6.0.8
+
   - Fixed a macOS graphics invalidation region issue
   - Improved the handling of modal dialog dismissal
   - Fixed audio glitching in CoreAudio before microphone permission is granted
@@ -139,11 +155,13 @@ Version 6.0.8
   - Fixed some DSP convolution issues
   - Added host detection on macOS ARM
 
-Version 6.0.7
+## Version 6.0.7
+
   - Fixed a macOS drawing issue
   - Updated the DemoRunner bundle ID
 
-Version 6.0.6
+## Version 6.0.6
+
   - Moved to the new CoreMIDI API on supported platforms
   - Added support for the "New Build System" in Xcode
   - Made the audio format readers more robust
@@ -151,7 +169,8 @@ Version 6.0.6
   - Fixed a VST3 program parameter issue
   - Updated to Oboe 1.5 on Android
 
-Version 6.0.5
+## Version 6.0.5
+
   - Added more support for styling PopupMenus
   - Fixed some race conditions in the IPC and name named pipe classes
   - Implemented multiple FileChooser improvements
@@ -159,16 +178,19 @@ Version 6.0.5
   - Prevented CoreAudio glitches before accepting audio access permissions
   - Made reading MIDI and audio files more robust
 
-Version 6.0.4
+## Version 6.0.4
+
   - Improved the Projucer update mechanism
   - Fixed an AUv3 parameter normalisation issue
   - Fixed WASAPI exclusive mode sample rate selection bug
   - Fixed a Linux build issue when omitting ALSA
 
-Version 6.0.3
+## Version 6.0.3
+
   - Fixed version numbers in project files
 
-Version 6.0.2
+## Version 6.0.2
+
   - Added support for macOS 11 and arm64
   - Added Windows IAudioClient3 support for low latency audio drivers
   - Added Windows and macOS precompiled header support in the Projucer
@@ -178,7 +200,8 @@ Version 6.0.2
   - Improved resave diffs in Projucer project files
   - Fixed some Linux JACK issues
 
-Version 6.0.1
+## Version 6.0.1
+
   - Fixed a bug in the Projucer GUI editor causing existing code to be overwritten
   - Updated Android Oboe to 1.4.2
   - Bumped default Android Studio gradle and plugin versions to the latest
@@ -192,7 +215,8 @@ Version 6.0.1
   - Fixed Projucer CLion exporter generated CMakeLists.txt
   - Fixed drag and drop for non-DPI aware plug-ins on Windows
 
-Version 6.0.0
+## Version 6.0.0
+
   - Added support for building JUCE projects with CMake
   - Revamped the DSP module
   - Added VST3 support on Linux
@@ -218,7 +242,8 @@ Version 6.0.0
   - Windows and Linux hiDPI scaling improvements
   - Various bug-fixes, improvements and documentation updates
 
-Version 5.4.7
+## Version 5.4.7
+
   - Fixed a macOS focus bug causing Components to not receive mouse events
   - Fixed a potential NullPointerException in the Android IAP code
   - Fixed an entitlements file generation bug in the Projucer
@@ -226,7 +251,8 @@ Version 5.4.7
   - Fixed some build errors and warnings when using Clang on Windows
   - Changed the default architecture specified in Linux Makefiles generated by the Projucer
 
-Version 5.4.6
+## Version 5.4.6
+
   - Fixed compatibility with macOS versions below 10.11
   - Multiple thread safety improvements
   - Added dynamic parameter and parameter group names
@@ -235,7 +261,8 @@ Version 5.4.6
   - Replaced WaitableEvent internals with std::condition_variable
   - Fixed some macOS text alignment issues
 
-Version 5.4.5
+## Version 5.4.5
+
   - Improved message queue performance on Linux
   - Added missing lifecycle callbacks on Android Q
   - Refactored the AudioBlock class
@@ -247,7 +274,8 @@ Version 5.4.5
   - Replaced select() calls with poll()
   - Various bug-fixes, improvements and documentation updates
 
-Version 5.4.4
+## Version 5.4.4
+
   - Improvements to floating point number printing
   - Faster plug-in parameter indexing
   - Added support for persisting attachements to MIDI devices
@@ -257,7 +285,8 @@ Version 5.4.4
   - Added support for Visual Studio 2019
   - Removed support for Visual Studio 2013
 
-Version 5.4.3
+## Version 5.4.3
+
   - Added a Visual Studio 2019 exporter to the Projucer
   - Added options to configure macOS Hardened Runtime in the Projucer
   - Fixed a potential memory corruption when drawing on macOS/iOS
@@ -265,7 +294,8 @@ Version 5.4.3
   - Multiple DSP module enhancements
   - Various bug-fixes, improvements and documentation updates
 
-Version 5.4.2
+## Version 5.4.2
+
   - Restructured the low-level Android native code
   - Added an ADSR envelope class
   - AudioProcessorValueTreeState performance improvements
@@ -273,7 +303,8 @@ Version 5.4.2
   - Improved VST3 hosting
   - Windows hiDPI scaling enhancements
 
-Version 5.4.1
+## Version 5.4.1
+
   - Fixed a VST2 compilation error in VS2013
   - Fixed some live-build compilation errors in the Projucer
   - Fixed a bug in the Oversampling class
@@ -281,7 +312,8 @@ Version 5.4.1
   - Fixed some bugs in the Unity plug-in wrapper
   - Fixed some VS2015 compiler errors
 
-Version 5.4.0
+## Version 5.4.0
+
   - macOS Mojave and iOS 12 support
   - Windows hiDPI support
   - Unity native plug-in support
@@ -293,7 +325,8 @@ Version 5.4.0
   - Support for Android Studio 3.2
   - Various bug-fixes, improvements and documentation updates
 
-Version 5.3.2
+## Version 5.3.2
+
   - Removed the OSX 10.5 and 10.6 deployment target options from the Projucer and enabled more C++11 features across all platforms
   - Replaced all usage of ScopedPointer with std::unique_ptr
   - Added camera support for iOS and Android
@@ -308,7 +341,8 @@ Version 5.3.2
   - Fixed a bug causing an unintentional menu item highlight disco party when using a popup menu in a plug-in's UI
   - Marked as deprecated: String::empty, var::null, File::nonexistent, ValueTree::invalid and other problematic statically-initialised null values
 
-Version 5.3.1
+## Version 5.3.1
+
   - Add Android and iOS support to AudioPluginHost
   - Added support for Bela in the form of an AudioIODeviceType
   - Add bypass support to both hosting and plug-in client code
@@ -327,7 +361,8 @@ Version 5.3.1
   - Added a command-line option to use LF as linefeeds rather than CRLF in the Projucer cleanup tools
   - Multiple documentation updates
 
-Version 5.3.0
+## Version 5.3.0
+
   - Added support for Android OBOE (developer preview)
   - Updated JUCE's MPE classes to comply with the new MMA-adopted specification
   - Multiple documentation updates
@@ -340,7 +375,8 @@ Version 5.3.0
   - Added thread safe methods for getting and setting the AudioProcessorValueTreeState state
   - Added customisable MacOS icons
 
-Version 5.2.1
+## Version 5.2.1
+
   - Added native content sharing support for iOS and Android
   - Added iOS and Android native file chooser support
   - Implemented WebBrowserComponent on Android
@@ -366,7 +402,8 @@ Version 5.2.1
   - Multiple Projucer UI and UX improvements
   - Various documentation tweaks and fixes
 
-Version 5.2.0
+## Version 5.2.0
+
   - Added a CMake exporter to the Projucer
   - JUCE analytics module
   - Added support for push notifications on iOS and Android
@@ -385,7 +422,8 @@ Version 5.2.0
   - Improved the performance of 3D rendering when multiple OpenGL contexts are used at the same time
   - Tweaked the rate at which EdgeTable grows its internal storage, to improve performance rendering large and complex paths
 
-Version 5.1.2
+## Version 5.1.2
+
   - Fixed multiple plugin-resizing bugs
   - Added support for AUv3 MIDI and screen size negotiation
   - Added support for Xcode 9 and iOS 11
@@ -399,7 +437,8 @@ Version 5.1.2
   - Plug-in parameters can be explicitly marked as continuous or discrete
   - Multiple documentation updates
 
-Version 5.1.1
+## Version 5.1.1
+
   - Fixed Windows live build engine on Visual Studio 2017
   - Fixed a compiler error in juce_MathFunctions.h in Visual Studio 2013
   - Fixed a potential crash when using the ProcessorDuplicator
@@ -413,7 +452,8 @@ Version 5.1.1
   - Fixed an issue where a JUCE VST2 would not correctly report that it supports resizing of it’s plugin editor
   - Various documentation tweaks and fixes
 
-Version 5.1.0
+## Version 5.1.0
+
   - Release of the JUCE DSP module
   - Multichannel audio readers and writers
   - Plugin editor Hi-DPI scaling support
@@ -425,7 +465,8 @@ Version 5.1.0
   - Various documentation fixes
   - Various minor improvements and bug fixes
 
-Version 5.0.2
+## Version 5.0.2
+
   - Improved project save speed in the Projucer
   - Added option to save individual exporters in the Projucer
   - Added the ability to create custom colour schemes for the Projucer’s code editor
@@ -448,7 +489,8 @@ Version 5.0.2
   - Various documentation fixes
   - Various minor improvements and bug fixes
 
-Version 5.0.1
+## Version 5.0.1
+
   - Fixed Windows live build engine on Visual Studio 2017
   - Fixed memory-leak in Projucer live build engine
   - Fixed an issue where you could not paste your redeem serial number with Cmd+V on macOS
@@ -456,7 +498,8 @@ Version 5.0.1
   - Minor Projucer UI improvements
   - Various minor improvements and bug fixes
 
-Version 5.0.0
+## Version 5.0.0
+
   - New licensing model
   - Projucer UI/UX overhaul
   - New look and feel (version 4)
@@ -475,7 +518,8 @@ Version 5.0.0
   - Various minor improvements and bug fixes
   - Various documentation improvements
 
-Version 4.3.1
+## Version 4.3.1
+
   - Added support for iOS download tasks
   - Added support for AAX plug-in meters
   - Added support for dynamically disabling/enabling sidechains in ProTools
@@ -490,7 +534,8 @@ Version 4.3.1
   - Various minor improvements and bug fixes
   - Various documentation improvements
 
-Version 4.3.0
+## Version 4.3.0
+
   - Added API and examples for ROLI Blocks
   - Multiple Projucer live-build UI and diagnostics improvements
   - JUCE now supports hosting multi-bus plug-ins
@@ -503,7 +548,8 @@ Version 4.3.0
   - Various minor improvements and bug fixes
   - Various documentation improvements
 
-Version 4.2.4
+## Version 4.2.4
+
   - Pre-release of live build engine on Windows
   - Added FlexBox layout engine
   - Removed dependency on external Steinberg SDK when building and/or hosting VST2 plug-ins
@@ -527,18 +573,21 @@ Version 4.2.4
   - Various minor improvements and bug fixes
   - Various documentation improvements
 
-Version 4.2.3
+## Version 4.2.3
+
   - Various VST3 improvements: resizing VST3 windows, plug-in compatibility issues
   - Use NSURLSession on newer OS X versions
   - Add compatibility for VST 3 SDK update 3.6.6
   - Miscellaneous fixes and improvements
 
-Version 4.2.1
+## Version 4.2.1
+
   - New class CachedValue, for providing easy and efficient access to ValueTree properties
   - Reduced audio plug-in binary sizes on OS X and added symbol-stripping option
   - Miscellaneous fixes and improvements
 
-Version 4.2
+## Version 4.2
+
   - Added support for AudioUnit v3 on OS X and iOS
   - Simplified the JUCE module format. Removed the json module definition files, and made
     it easier to manually add modules to projects. The format is fully described in the
@@ -551,21 +600,25 @@ Version 4.2
     open-source project. This will allow everyone to compile the Projucer's IDE themselves, and
     having just one app instead of two will make things a lot less confusing!
 
-Version  4.1
+## Version  4.1
+
   - Added multi-bus support for audio plug-in clients
   - Added support for MIDI effect plug-ins (AU and AAX).
   - Added new example: Network Graphics Demo
 
-Version 4.0.3
+## Version 4.0.3
+
   - Added MPE (Multidimensional Polyphonic Expression) classes
   - Added full support for generating and parsing Midi RPN/NRPN messages
   - Made the LinearSmoothedValue class public
   - Miscellaneous fixes and minor improvements
 
-Version 4.0.2
+## Version 4.0.2
+
   - Miscellaneous fixes and house-keeping
 
-Version 4.0.1
+## Version 4.0.1
+
   - Initial release of the Projucer!
   - Full OSC support!
   - Android Studio exporting from the Introjucer
@@ -579,12 +632,14 @@ Version 4.0.1
   - Many updates to Introjucer
   - Many new tutorials and examples
 
-Version 3.3.0
+## Version 3.3.0
+
   - New functions for Base64 conversion
   - New command-line options in the introjucer for trimming whitespace and
     replacing tabs in source files
 
-Version 3.2.0
+## Version 3.2.0
+
   - Major OpenGL performance/stability improvements
   - Performance improvements to FloatVectorOperations math functions
   - New FloatVectorOperations: abs, min, max, addWithMultiply, clip
