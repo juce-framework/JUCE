@@ -102,15 +102,19 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
         {
             auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
                                                              TRANS ("Registration Failed"),
-                                                             result.errorMessage);
-            messageBox = AlertWindow::showScopedAsync (options, nullptr);
+                                                             result.errorMessage,
+                                                             {},
+                                                             &form);
+            form.messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else if (result.informativeMessage.isNotEmpty())
         {
             auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
                                                              TRANS ("Registration Complete!"),
-                                                             result.informativeMessage);
-            messageBox = AlertWindow::showScopedAsync (options, nullptr);
+                                                             result.informativeMessage,
+                                                             {},
+                                                             &form);
+            form.messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else if (result.urlToLaunch.isNotEmpty())
         {
@@ -145,7 +149,6 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
     Spinner spinner;
     OnlineUnlockStatus::UnlockResult result;
     String email, password;
-    ScopedMessageBox messageBox;
 
     std::unique_ptr<TextButton> cancelButton;
 
