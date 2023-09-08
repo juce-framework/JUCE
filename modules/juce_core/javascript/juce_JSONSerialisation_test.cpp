@@ -398,29 +398,32 @@ public:
                                                                                     "hello world",
                                                                                     { 5, 6, 7 },
                                                                                     { { "foo", 4 }, { "bar", 5 } } }),
-                             makeObject ({ { "__version__", 2 },
-                                           { "a", 7 },
-                                           { "b", "hello world" },
-                                           { "c", Array<var> { 5, 6, 7 } },
-                                           { "d", Array<var> { makeObject ({ { "first", "bar" }, { "second", 5 } }),
-                                                               makeObject ({ { "first", "foo" }, { "second", 4 } }) } } }));
+                             JSONUtils::makeObject ({ { "__version__", 2 },
+                                                      { "a", 7 },
+                                                      { "b", "hello world" },
+                                                      { "c", Array<var> { 5, 6, 7 } },
+                                                      { "d",
+                                                        Array<var> { JSONUtils::makeObject ({ { "first", "bar" },
+                                                                                              { "second", 5 } }),
+                                                                     JSONUtils::makeObject ({ { "first", "foo" },
+                                                                                              { "second", 4 } }) } } }));
             expectDeepEqual (ToVar::convert (TypeWithInternalUnifiedSerialisation { 7.89,
                                                                                     4.321f,
                                                                                     "custom string",
                                                                                     { "foo", "bar", "baz" } }),
-                             makeObject ({ { "__version__", 5 },
-                                           { "a", 7.89 },
-                                           { "b", 4.321f },
-                                           { "c", "custom string" },
-                                           { "d", Array<var> { "foo", "bar", "baz" } } }));
+                             JSONUtils::makeObject ({ { "__version__", 5 },
+                                                      { "a", 7.89 },
+                                                      { "b", 4.321f },
+                                                      { "c", "custom string" },
+                                                      { "d", Array<var> { "foo", "bar", "baz" } } }));
             expectDeepEqual (ToVar::convert (TypeWithExternalSplitSerialisation { "string", { 1, 2, 3 } }),
-                             makeObject ({ { "__version__", 10 },
-                                           { "a", makeObject ({ { "engaged", true }, { "value", "string" } }) },
-                                           { "b", Array<var> { "0x1", "0x2", "0x3" } } }));
+                             JSONUtils::makeObject ({ { "__version__", 10 },
+                                                      { "a", JSONUtils::makeObject ({ { "engaged", true }, { "value", "string" } }) },
+                                                      { "b", Array<var> { "0x1", "0x2", "0x3" } } }));
             expectDeepEqual (ToVar::convert (TypeWithInternalSplitSerialisation { "string", { 16, 32, 48 } }),
-                             makeObject ({ { "__version__", 1 },
-                                           { "a", "string" },
-                                           { "b", Array<var> { "0x10", "0x20", "0x30" } } }));
+                             JSONUtils::makeObject ({ { "__version__", 1 },
+                                                      { "a", "string" },
+                                                      { "b", Array<var> { "0x10", "0x20", "0x30" } } }));
 
             expect (ToVar::convert (TypeWithBrokenObjectSerialisation { 1, 2 }) == std::nullopt);
             expect (ToVar::convert (TypeWithBrokenPrimitiveSerialisation { 1, 2 }) == std::nullopt);
@@ -429,69 +432,69 @@ public:
             expect (ToVar::convert (TypeWithBrokenDynamicSerialisation { std::vector<TypeWithBrokenObjectSerialisation> (10) }) == std::nullopt);
 
             expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }),
-                             makeObject ({ { "__version__", 3 },
-                                           { "a", 1 },
-                                           { "b", 2 },
-                                           { "c", 3 },
-                                           { "d", 4 } }));
-            expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options{}.withVersionIncluded (false)),
-                             makeObject ({ { "a", 1 },
-                                           { "b", 2 },
-                                           { "c", 3 },
-                                           { "d", 4 } }));
+                             JSONUtils::makeObject ({ { "__version__", 3 },
+                                                      { "a", 1 },
+                                                      { "b", 2 },
+                                                      { "c", 3 },
+                                                      { "d", 4 } }));
+            expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options {}.withVersionIncluded (false)),
+                             JSONUtils::makeObject ({ { "a", 1 },
+                                                      { "b", 2 },
+                                                      { "c", 3 },
+                                                      { "d", 4 } }));
             // Requested explicit version is higher than the type's declared version
-            expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options{}.withExplicitVersion (4)),
+            expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options {}.withExplicitVersion (4)),
                              std::nullopt);
             expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options {}.withExplicitVersion (3)),
-                             makeObject ({ { "__version__", 3 },
-                                           { "a", 1 },
-                                           { "b", 2 },
-                                           { "c", 3 },
-                                           { "d", 4 } }));
+                             JSONUtils::makeObject ({ { "__version__", 3 },
+                                                      { "a", 1 },
+                                                      { "b", 2 },
+                                                      { "c", 3 },
+                                                      { "d", 4 } }));
             expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options {}.withExplicitVersion (2)),
-                             makeObject ({ { "__version__", 2 },
-                                           { "a", 1 },
-                                           { "b", 2 },
-                                           { "c", 3 } }));
+                             JSONUtils::makeObject ({ { "__version__", 2 },
+                                                      { "a", 1 },
+                                                      { "b", 2 },
+                                                      { "c", 3 } }));
             expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options {}.withExplicitVersion (1)),
-                             makeObject ({ { "__version__", 1 },
-                                           { "a", 1 },
-                                           { "b", 2 } }));
+                             JSONUtils::makeObject ({ { "__version__", 1 },
+                                                      { "a", 1 },
+                                                      { "b", 2 } }));
             expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options {}.withExplicitVersion (0)),
-                             makeObject ({ { "__version__", 0 },
-                                           { "a", 1 } }));
+                             JSONUtils::makeObject ({ { "__version__", 0 },
+                                                      { "a", 1 } }));
             expectDeepEqual (ToVar::convert (TypeWithVersionedSerialisation { 1, 2, 3, 4 }, ToVar::Options {}.withExplicitVersion (std::nullopt)),
-                             makeObject ({ { "a", 1 } }));
+                             JSONUtils::makeObject ({ { "a", 1 } }));
 
             expectDeepEqual (ToVar::convert (TypeWithRawVarLast { 200, "success", true }),
-                             makeObject ({ { "status", 200 }, { "message", "success" }, { "extended", true } }));
+                             JSONUtils::makeObject ({ { "status", 200 }, { "message", "success" }, { "extended", true } }));
             expectDeepEqual (ToVar::convert (TypeWithRawVarLast { 200,
                                                                   "success",
-                                                                  makeObject ({ { "status", 123.456 },
-                                                                                { "message", "failure" },
-                                                                                { "extended", true } }) }),
-                             makeObject ({ { "status", 200 },
-                                           { "message", "success" },
-                                           { "extended", makeObject ({ { "status", 123.456 },
-                                                                       { "message", "failure" },
-                                                                       { "extended", true } }) } }));
+                                                                  JSONUtils::makeObject ({ { "status", 123.456 },
+                                                                                           { "message", "failure" },
+                                                                                           { "extended", true } }) }),
+                             JSONUtils::makeObject ({ { "status", 200 },
+                                                      { "message", "success" },
+                                                      { "extended", JSONUtils::makeObject ({ { "status", 123.456 },
+                                                                                             { "message", "failure" },
+                                                                                             { "extended", true } }) } }));
 
             expectDeepEqual (ToVar::convert (TypeWithRawVarFirst { 200, "success", true }),
-                             makeObject ({ { "status", 200 }, { "message", "success" }, { "extended", true } }));
+                             JSONUtils::makeObject ({ { "status", 200 }, { "message", "success" }, { "extended", true } }));
             expectDeepEqual (ToVar::convert (TypeWithRawVarFirst { 200,
                                                                    "success",
-                                                                   makeObject ({ { "status", 123.456 },
-                                                                                 { "message", "failure" },
-                                                                                 { "extended", true } }) }),
-                             makeObject ({ { "status", 200 },
-                                           { "message", "success" },
-                                           { "extended", makeObject ({ { "status", 123.456 },
-                                                                       { "message", "failure" },
-                                                                       { "extended", true } }) } }));
+                                                                   JSONUtils::makeObject ({ { "status", 123.456 },
+                                                                                            { "message", "failure" },
+                                                                                            { "extended", true } }) }),
+                             JSONUtils::makeObject ({ { "status", 200 },
+                                                      { "message", "success" },
+                                                      { "extended", JSONUtils::makeObject ({ { "status", 123.456 },
+                                                                                             { "message", "failure" },
+                                                                                             { "extended", true } }) } }));
 
-            const auto payload = makeObject ({ { "foo", 1 }, { "bar", 2 } });
+            const auto payload = JSONUtils::makeObject ({ { "foo", 1 }, { "bar", 2 } });
             expectDeepEqual (ToVar::convert (TypeWithInnerVar { 404, payload }),
-                             makeObject ({ { "eventId", 404 }, { "payload", payload } }));
+                             JSONUtils::makeObject ({ { "eventId", 404 }, { "payload", payload } }));
         }
 
         beginTest ("FromVar");
@@ -505,34 +508,37 @@ public:
             expect (FromVar::convert<int64> (JSON::fromString ("6")) == 6);
             expect (FromVar::convert<String> (JSON::fromString ("\"hello world\"")) == "hello world");
             expect (FromVar::convert<std::vector<int>> (JSON::fromString ("[1,2,3]")) == std::vector<int> { 1, 2, 3 });
-            expect (FromVar::convert<TypeWithExternalUnifiedSerialisation> (makeObject ({ { "__version__", 2 },
-                                                                                          { "a", 7 },
-                                                                                          { "b", "hello world" },
-                                                                                          { "c", Array<var> { 5, 6, 7 } },
-                                                                                          { "d", Array<var> { makeObject ({ { "first", "bar" }, { "second", 5 } }),
-                                                                                                              makeObject ({ { "first", "foo" }, { "second", 4 } }) } } }))
+            expect (FromVar::convert<TypeWithExternalUnifiedSerialisation> (JSONUtils::makeObject ({ { "__version__", 2 },
+                                                                                                     { "a", 7 },
+                                                                                                     { "b", "hello world" },
+                                                                                                     { "c", Array<var> { 5, 6, 7 } },
+                                                                                                     { "d",
+                                                                                                       Array<var> { JSONUtils::makeObject ({ { "first", "bar" },
+                                                                                                                                             { "second", 5 } }),
+                                                                                                                    JSONUtils::makeObject ({ { "first", "foo" },
+                                                                                                                                             { "second", 4 } }) } } }))
                     == TypeWithExternalUnifiedSerialisation { 7,
                                                               "hello world",
                                                               { 5, 6, 7 },
                                                               { { "foo", 4 }, { "bar", 5 } } });
 
-            expect (FromVar::convert<TypeWithInternalUnifiedSerialisation> (makeObject ({ { "__version__", 5 },
-                                                                                          { "a", 7.89 },
-                                                                                          { "b", 4.321f },
-                                                                                          { "c", "custom string" },
-                                                                                          { "d", Array<var> { "foo", "bar", "baz" } } }))
+            expect (FromVar::convert<TypeWithInternalUnifiedSerialisation> (JSONUtils::makeObject ({ { "__version__", 5 },
+                                                                                                     { "a", 7.89 },
+                                                                                                     { "b", 4.321f },
+                                                                                                     { "c", "custom string" },
+                                                                                                     { "d", Array<var> { "foo", "bar", "baz" } } }))
                     == TypeWithInternalUnifiedSerialisation { 7.89,
                                                               4.321f,
                                                               "custom string",
                                                               { "foo", "bar", "baz" } });
 
-            expect (FromVar::convert<TypeWithExternalSplitSerialisation> (makeObject ({ { "__version__", 10 },
-                                                                                        { "a", makeObject ({ { "engaged", true }, { "value", "string" } }) },
-                                                                                        { "b", Array<var> { "0x1", "0x2", "0x3" } } }))
+            expect (FromVar::convert<TypeWithExternalSplitSerialisation> (JSONUtils::makeObject ({ { "__version__", 10 },
+                                                                                                   { "a", JSONUtils::makeObject ({ { "engaged", true }, { "value", "string" } }) },
+                                                                                                   { "b", Array<var> { "0x1", "0x2", "0x3" } } }))
                     == TypeWithExternalSplitSerialisation { "string", { 1, 2, 3 } });
-            expect (FromVar::convert<TypeWithInternalSplitSerialisation> (makeObject ({ { "__version__", 1 },
-                                                                                        { "a", "string" },
-                                                                                        { "b", Array<var> { "0x10", "0x20", "0x30" } } }))
+            expect (FromVar::convert<TypeWithInternalSplitSerialisation> (JSONUtils::makeObject ({ { "__version__", 1 },
+                                                                                                   { "a", "string" },
+                                                                                                   { "b", Array<var> { "0x10", "0x20", "0x30" } } }))
                     == TypeWithInternalSplitSerialisation { "string", { 16, 32, 48 } });
 
             expect (FromVar::convert<TypeWithBrokenObjectSerialisation> (JSON::fromString ("null")) == std::nullopt);
@@ -541,47 +547,48 @@ public:
             expect (FromVar::convert<TypeWithBrokenNestedSerialisation> (JSON::fromString ("null")) == std::nullopt);
             expect (FromVar::convert<TypeWithBrokenDynamicSerialisation> (JSON::fromString ("null")) == std::nullopt);
 
-            expect (FromVar::convert<TypeWithInternalUnifiedSerialisation> (makeObject ({ { "a", 7.89 },
-                                                                                          { "b", 4.321f } })) == std::nullopt);
+            expect (FromVar::convert<TypeWithInternalUnifiedSerialisation> (JSONUtils::makeObject ({ { "a", 7.89 },
+                                                                                                     { "b", 4.321f } }))
+                    == std::nullopt);
 
-            expect (FromVar::convert<TypeWithVersionedSerialisation> (makeObject ({ { "__version__", 3 },
-                                                                                    { "a", 1 },
-                                                                                    { "b", 2 },
-                                                                                    { "c", 3 },
-                                                                                    { "d", 4 } }))
+            expect (FromVar::convert<TypeWithVersionedSerialisation> (JSONUtils::makeObject ({ { "__version__", 3 },
+                                                                                               { "a", 1 },
+                                                                                               { "b", 2 },
+                                                                                               { "c", 3 },
+                                                                                               { "d", 4 } }))
                     == TypeWithVersionedSerialisation { 1, 2, 3, 4 });
-            expect (FromVar::convert<TypeWithVersionedSerialisation> (makeObject ({ { "__version__", 4 },
-                                                                                    { "a", 1 },
-                                                                                    { "b", 2 },
-                                                                                    { "c", 3 },
-                                                                                    { "d", 4 } }))
+            expect (FromVar::convert<TypeWithVersionedSerialisation> (JSONUtils::makeObject ({ { "__version__", 4 },
+                                                                                               { "a", 1 },
+                                                                                               { "b", 2 },
+                                                                                               { "c", 3 },
+                                                                                               { "d", 4 } }))
                     == TypeWithVersionedSerialisation { 1, 2, 3, 4 });
-            expect (FromVar::convert<TypeWithVersionedSerialisation> (makeObject ({ { "__version__", 2 },
-                                                                                    { "a", 1 },
-                                                                                    { "b", 2 },
-                                                                                    { "c", 3 } }))
+            expect (FromVar::convert<TypeWithVersionedSerialisation> (JSONUtils::makeObject ({ { "__version__", 2 },
+                                                                                               { "a", 1 },
+                                                                                               { "b", 2 },
+                                                                                               { "c", 3 } }))
                     == TypeWithVersionedSerialisation { 1, 2, 3, 0 });
-            expect (FromVar::convert<TypeWithVersionedSerialisation> (makeObject ({ { "__version__", 1 },
-                                                                                    { "a", 1 },
-                                                                                    { "b", 2 } }))
+            expect (FromVar::convert<TypeWithVersionedSerialisation> (JSONUtils::makeObject ({ { "__version__", 1 },
+                                                                                               { "a", 1 },
+                                                                                               { "b", 2 } }))
                     == TypeWithVersionedSerialisation { 1, 2, 0, 0 });
-            expect (FromVar::convert<TypeWithVersionedSerialisation> (makeObject ({ { "__version__", 0 },
-                                                                                    { "a", 1 } }))
+            expect (FromVar::convert<TypeWithVersionedSerialisation> (JSONUtils::makeObject ({ { "__version__", 0 },
+                                                                                               { "a", 1 } }))
                     == TypeWithVersionedSerialisation { 1, 0, 0, 0 });
-            expect (FromVar::convert<TypeWithVersionedSerialisation> (makeObject ({ { "a", 1 } }))
+            expect (FromVar::convert<TypeWithVersionedSerialisation> (JSONUtils::makeObject ({ { "a", 1 } }))
                     == TypeWithVersionedSerialisation { 1, 0, 0, 0 });
 
-            const auto raw = makeObject ({ { "status", 200 }, { "message", "success" }, { "extended", "another string" } });
+            const auto raw = JSONUtils::makeObject ({ { "status", 200 }, { "message", "success" }, { "extended", "another string" } });
             expect (FromVar::convert<TypeWithRawVarLast> (raw) == TypeWithRawVarLast { 200, "success", "another string" });
             expect (FromVar::convert<TypeWithRawVarFirst> (raw) == TypeWithRawVarFirst { 200, "success", "another string" });
 
-            const var payloads[] { makeObject ({ { "foo", 1 }, { "bar", 2 } }),
+            const var payloads[] { JSONUtils::makeObject ({ { "foo", 1 }, { "bar", 2 } }),
                                    var (Array<var> { 1, 2 }),
                                    var() };
 
             for (const auto& payload : payloads)
             {
-                const auto objectWithPayload = makeObject ({ { "eventId", 404 }, { "payload", payload } });
+                const auto objectWithPayload = JSONUtils::makeObject ({ { "eventId", 404 }, { "payload", payload } });
                 expect (FromVar::convert<TypeWithInnerVar> (objectWithPayload) == TypeWithInnerVar { 404, payload });
             }
         }
@@ -593,57 +600,12 @@ private:
         expect (deepEqual (a, b), a.has_value() && b.has_value() ? JSON::toString (*a) + " != " + JSON::toString (*b) : String());
     }
 
-    static var makeObject (const std::map<Identifier, var>& map)
-    {
-        auto obj = std::make_unique<DynamicObject>();
-
-        for (auto& [key, value] : map)
-            obj->setProperty (key, value);
-
-        return obj.release();
-    }
-
-    static bool deepEqual (const DynamicObject& a, const DynamicObject& b)
-    {
-        if (a.getProperties().size() != b.getProperties().size())
-            return false;
-
-        for (const auto& [key, value] : a.getProperties())
-        {
-            if (! b.hasProperty (key))
-                return false;
-
-            if (! deepEqual (value, b.getProperty (key)))
-                return false;
-        }
-
-        return true;
-    }
-
-    static bool deepEqual (const Array<var>& a, const Array<var>& b)
-    {
-        return std::equal (a.begin(), a.end(), b.begin(), b.end(), [] (const var& i, const var& j) { return deepEqual (i, j); });
-    }
-
-    static bool deepEqual (const var& a, const var& b)
-    {
-        if (auto* i = a.getDynamicObject())
-            if (auto* j = b.getDynamicObject())
-                return deepEqual (*i, *j);
-
-        if (auto* i = a.getArray())
-            if (auto* j = b.getArray())
-                return deepEqual (*i, *j);
-
-        return a == b;
-    }
-
     static bool deepEqual (const std::optional<var>& a, const std::optional<var>& b)
     {
-        if (a.has_value() != b.has_value())
-            return false;
+        if (a.has_value() && b.has_value())
+            return JSONUtils::deepEqual (*a, *b);
 
-        return ! a.has_value() || deepEqual (*a, *b);
+        return a == b;
     }
 };
 

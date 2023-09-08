@@ -309,6 +309,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "streams/juce_FileInputSource.h"
 #include "logging/juce_FileLogger.h"
 #include "javascript/juce_JSON.h"
+#include "javascript/juce_JSONUtils.h"
 #include "serialisation/juce_Serialisation.h"
 #include "javascript/juce_JSONSerialisation.h"
 #include "javascript/juce_Javascript.h"

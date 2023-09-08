@@ -1153,6 +1153,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_JSONSerialisation_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_JSONUtils.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2979,6 +2982,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_Javascript.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSON.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSONSerialisation.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSONUtils.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_Logger.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\maths\juce_BigInteger.h"/>

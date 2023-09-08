@@ -178,6 +178,7 @@
 #include "unit_tests/juce_UnitTest.cpp"
 #include "containers/juce_Variant.cpp"
 #include "javascript/juce_JSON.cpp"
+#include "javascript/juce_JSONUtils.cpp"
 #include "javascript/juce_Javascript.cpp"
 #include "containers/juce_DynamicObject.cpp"
 #include "xml/juce_XmlDocument.cpp"

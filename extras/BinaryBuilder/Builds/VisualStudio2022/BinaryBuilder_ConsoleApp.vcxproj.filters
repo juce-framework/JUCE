@@ -160,6 +160,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_JSONSerialisation_test.cpp">
       <Filter>JUCE Modules\juce_core\javascript</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\javascript\juce_JSONUtils.cpp">
+      <Filter>JUCE Modules\juce_core\javascript</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.cpp">
       <Filter>JUCE Modules\juce_core\logging</Filter>
     </ClCompile>
@@ -556,6 +559,9 @@
       <Filter>JUCE Modules\juce_core\javascript</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSONSerialisation.h">
+      <Filter>JUCE Modules\juce_core\javascript</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\javascript\juce_JSONUtils.h">
       <Filter>JUCE Modules\juce_core\javascript</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\logging\juce_FileLogger.h">
