@@ -456,4 +456,53 @@ private:
     };
 };
 
+//==============================================================================
+/**
+    This template-overloaded class can be used to convert between var and custom types.
+
+    If not specialised, the variant converter will attempt to use serialisation functions
+    if they are detected for the given type.
+    For details of what this entails, see the docs for SerialisationTraits.
+
+    In short, the constant 'marshallingVersion', and either the single function 'serialise()', or
+    the function pair 'load()' and 'save()' must be defined for the type. These may be defined
+    as public members of the type T itself, or as public members of juce::SerialisationTraits<T>,
+    which is a specialisation of the SerialisationTraits template struct for the type T.
+
+    @see ToVar, FromVar
+
+    @tags{Core}
+*/
+template <typename Type>
+struct VariantConverter
+{
+    static Type fromVar (const var& v)
+    {
+        if constexpr (detail::serialisationKind<Type> != detail::SerialisationKind::none)
+        {
+            auto converted = FromVar::convert<Type> (v);
+            jassert (converted.has_value());
+            return std::move (converted).value_or (Type{});
+        }
+        else
+        {
+            return static_cast<Type> (v);
+        }
+    }
+
+    static var toVar (const Type& t)
+    {
+        if constexpr (detail::serialisationKind<Type> != detail::SerialisationKind::none)
+        {
+            auto converted = ToVar::convert<> (t);
+            jassert (converted.has_value());
+            return std::move (converted).value_or (var{});
+        }
+        else
+        {
+            return t;
+        }
+    }
+};
+
 } // namespace juce
