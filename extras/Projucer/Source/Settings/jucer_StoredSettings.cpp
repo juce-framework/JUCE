@@ -313,7 +313,7 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
     }
     else if (key == Ids::jucePath)
     {
-        fileToCheckFor = "ChangeList.txt";
+        fileToCheckFor = "CHANGE_LIST.md";
     }
     else
     {

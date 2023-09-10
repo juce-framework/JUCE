@@ -688,9 +688,16 @@ private:
         mo << "def ndkVersionString = \"25.2.9519653\"" << newLine << newLine;
 
         if (gradleClangTidy.get() && gradleToolchain.get().toString() == "clang")
-            mo << "Properties properties = new Properties()" << newLine
-               << "properties.load(project.rootProject.file(\"local.properties\").newDataInputStream())" << newLine
-               << "def llvmDir = \"${properties.getProperty('sdk.dir')}/ndk/${ndkVersionString}/toolchains/llvm\"" << newLine
+            mo << "def sdkDir = {" << newLine
+               << "    def androidHome = System.getenv('ANDROID_HOME')" << newLine
+               << "    if (androidHome) {" << newLine
+               << "        return androidHome" << newLine
+               << "    }" << newLine
+               << "    Properties properties = new Properties()" << newLine
+               << "    properties.load(project.rootProject.file(\"local.properties\").newDataInputStream())" << newLine
+               << "    return properties.getProperty('sdk.dir')" << newLine
+               << "}()" << newLine
+               << "def llvmDir = \"${sdkDir}/ndk/${ndkVersionString}/toolchains/llvm\"" << newLine
                << "def clangTidySearch = fileTree(llvmDir).filter { file -> file.name.matches('^clang-tidy(.exe)?$') }" << newLine
                << "if (clangTidySearch.size() != 1) {" << newLine
                << "    throw new GradleException(\"Could not locate a unique clang-tidy in ${llvmDir}\")" << newLine
