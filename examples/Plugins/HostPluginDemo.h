@@ -500,14 +500,14 @@ public:
         currentScaleFactor = scale;
         AudioProcessorEditor::setScaleFactor (scale);
 
-        const auto posted = MessageManager::callAsync ([ref = SafePointer<HostAudioProcessorEditor> (this), scale]
+        [[maybe_unused]] const auto posted = MessageManager::callAsync ([ref = SafePointer<HostAudioProcessorEditor> (this), scale]
         {
             if (auto* r = ref.getComponent())
                 if (auto* e = r->currentEditorComponent)
                     e->setScaleFactor (scale);
         });
 
-        jassertquiet (posted);
+        jassert (posted);
     }
 
 private:
@@ -520,8 +520,8 @@ private:
         {
             auto editorComponent = std::make_unique<PluginEditorComponent> (hostProcessor.createInnerEditor(), [this]
             {
-                const auto posted = MessageManager::callAsync ([this] { clearPlugin(); });
-                jassertquiet (posted);
+                [[maybe_unused]] const auto posted = MessageManager::callAsync ([this] { clearPlugin(); });
+                jassert (posted);
             });
 
             editorComponent->setScaleFactor (currentScaleFactor);

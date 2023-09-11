@@ -61,7 +61,7 @@ public:
 
         OSCReceiver::addListener (this);
 
-        timerCallback();
+        handleTimerCallback();
         startTimer (2000);
     }
 
@@ -200,10 +200,16 @@ private:
         return {};
     }
 
-    void timerCallback() override
+    void handleTimerCallback()
     {
         send (newClientOSCAddress, clientName + ":" + IPAddress::getLocalAddress().toString()
                                               + ":" + getScreenAreaInGlobalSpace().toString());
+    }
+
+
+    void timerCallback() override
+    {
+        handleTimerCallback();
     }
 
     void handleAsyncUpdate() override

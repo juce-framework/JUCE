@@ -63,6 +63,7 @@ private:
     int tabBarIndent = 0;
 
     //==============================================================================
+    void updateLookAndFeel();
     void lookAndFeelChanged() override;
 
     String trimPIP (const String& fileContents);

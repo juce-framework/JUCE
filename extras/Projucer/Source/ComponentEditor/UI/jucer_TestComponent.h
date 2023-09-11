@@ -54,6 +54,8 @@ public:
 
     //==============================================================================
     void paint (Graphics&) override;
+
+    void handleResize();
     void resized() override;
 
     static void showInDialogBox (JucerDocument&);

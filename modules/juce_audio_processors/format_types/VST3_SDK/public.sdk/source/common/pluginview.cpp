@@ -51,6 +51,7 @@ CPluginView::CPluginView (const ViewRect* _rect)
 //------------------------------------------------------------------------
 CPluginView::~CPluginView ()
 {
+	// NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     setFrame (nullptr);
 }
 

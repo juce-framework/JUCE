@@ -379,7 +379,7 @@ private:
             {
                 NSError* error = nil;
 
-                int successCount = 0;
+                [[maybe_unused]] int successCount = 0;
 
                 for (NSString* key : assetKeys.get())
                 {
@@ -409,7 +409,7 @@ private:
                     }
                 }
 
-                jassertquiet (successCount == (int) [assetKeys.get() count]);
+                jassert (successCount == (int) [assetKeys.get() count]);
                 preparePlayerItem();
             }
 

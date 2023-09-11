@@ -29,8 +29,8 @@ class InternalMessageQueue
 public:
     InternalMessageQueue()
     {
-        auto err = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, msgpipe);
-        jassertquiet (err == 0);
+        [[maybe_unused]] auto err = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, msgpipe);
+        jassert (err == 0);
 
         LinuxEventLoop::registerFdCallback (getReadHandle(),
                                             [this] (int fd)

@@ -82,9 +82,9 @@ public:
 
         const auto numInputChannels  = inputBlock.getNumChannels();
         const auto numOutputChannels = outputBlock.getNumChannels();
-        const auto numSamples        = outputBlock.getNumSamples();
+        [[maybe_unused]] const auto numSamples        = outputBlock.getNumSamples();
 
-        jassertquiet (inputBlock.getNumSamples() == numSamples);
+        jassert (inputBlock.getNumSamples() == numSamples);
 
         if (numOutputChannels != 2 || numInputChannels == 0 || numInputChannels > 2)
             return;

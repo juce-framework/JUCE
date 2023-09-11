@@ -50,6 +50,7 @@ public:
     void selectedRowsChanged (int lastRowSelected) override;
 
 private:
+    void updateLookAndFeel();
     void lookAndFeelChanged() override;
     void reloadAll();
 

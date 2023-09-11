@@ -80,7 +80,7 @@ struct SidePanelHeader    : public Component
         addAndMakeVisible (settingsButton);
         settingsButton.onClick = [this] { owner.settingsButtonClicked(); };
 
-        lookAndFeelChanged();
+        updateLookAndFeel();
     }
 
     void paint (Graphics& g) override
@@ -102,7 +102,7 @@ struct SidePanelHeader    : public Component
         titleLabel.setBounds (bounds);
     }
 
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
         auto& sidePanel = owner.getSidePanel();
         auto& lf = sidePanel.getLookAndFeel();
@@ -117,6 +117,12 @@ struct SidePanelHeader    : public Component
 
         homeButton.setColours (normal, over, down);
         settingsButton.setColours (normal, over, down);
+
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
     }
 
     MainComponent& owner;

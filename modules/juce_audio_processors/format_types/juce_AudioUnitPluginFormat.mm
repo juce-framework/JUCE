@@ -1001,12 +1001,11 @@ public:
 
             if (getElementCount (scope) != n && isBusCountWritable (isInput))
             {
-                OSStatus err;
                 auto newCount = static_cast<UInt32> (n);
                 layoutHasChanged = true;
 
-                err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount));
-                jassertquiet (err == noErr);
+                [[maybe_unused]] auto err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount));
+                jassert (err == noErr);
             }
 
             for (int i = 0; i < n; ++i)

@@ -65,7 +65,7 @@ public:
     CodeBlocksProjectExporter (Project& p, const ValueTree& t, CodeBlocksOS codeBlocksOs)
         : ProjectExporter (p, t), os (codeBlocksOs)
     {
-        if (isWindows())
+        if (isWindowsExporter())
         {
             name = getDisplayNameWindows();
             targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameWindows());
@@ -92,7 +92,7 @@ public:
     bool isAndroidStudio() const override            { return false; }
 
     bool isAndroid() const override                  { return false; }
-    bool isWindows() const override                  { return os == windowsTarget; }
+    bool isWindows() const override                  { return isWindowsExporter(); }
     bool isLinux() const override                    { return os == linuxTarget; }
     bool isOSX() const override                      { return false; }
     bool isiOS() const override                      { return false; }
@@ -195,6 +195,7 @@ public:
 private:
     ValueTreePropertyWithDefault targetPlatformValue;
 
+    bool isWindowsExporter() const            { return os == windowsTarget; }
     String getTargetPlatformString() const    { return targetPlatformValue.get(); }
 
     //==============================================================================

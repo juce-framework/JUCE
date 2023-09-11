@@ -61,7 +61,7 @@ public:
     {
         PropertiesFile::Options options;
 
-        options.applicationName     = getApplicationName();
+        options.applicationName     = appName;
         options.filenameSuffix      = ".settings";
         options.osxLibrarySubFolder = "Application Support";
        #if JUCE_LINUX || JUCE_BSD
@@ -73,7 +73,7 @@ public:
         appProperties.setStorageParameters (options);
     }
 
-    const String getApplicationName() override              { return CharPointer_UTF8 (JucePlugin_Name); }
+    const String getApplicationName() override              { return appName; }
     const String getApplicationVersion() override           { return JucePlugin_VersionString; }
     bool moreThanOneInstanceAllowed() override              { return true; }
     void anotherInstanceStarted (const String&) override    {}
@@ -140,6 +140,9 @@ public:
 protected:
     ApplicationProperties appProperties;
     std::unique_ptr<StandaloneFilterWindow> mainWindow;
+
+private:
+    const String appName { CharPointer_UTF8 (JucePlugin_Name) };
 };
 
 } // namespace juce

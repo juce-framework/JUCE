@@ -120,7 +120,7 @@ void TestComponent::updateContents()
     if (loadedDocument != nullptr)
     {
         addAndMakeVisible (loadedDocument->createTestComponent (alwaysFillBackground));
-        resized();
+        handleResize();
     }
 }
 
@@ -155,13 +155,18 @@ void TestComponent::paint (Graphics& g)
     }
 }
 
-void TestComponent::resized()
+void TestComponent::handleResize()
 {
     if (Component* const c = getChildComponent (0))
     {
         setOpaque (c->isOpaque());
         c->setBounds (getLocalBounds());
     }
+}
+
+void TestComponent::resized()
+{
+    handleResize();
 }
 
 //==============================================================================

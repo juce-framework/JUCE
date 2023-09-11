@@ -422,8 +422,8 @@ private:
 
                                          if (wi.get() != nullptr && wo.get() != nullptr)
                                          {
-                                             auto numWritten = wo->writeFromInputStream (*wi, -1);
-                                             jassertquiet (numWritten > 0);
+                                             [[maybe_unused]] auto numWritten = wo->writeFromInputStream (*wi, -1);
+                                             jassert (numWritten > 0);
                                              wo->flush();
                                          }
                                      }

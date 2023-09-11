@@ -134,10 +134,10 @@ namespace
        #if JUCE_DEBUG
         const int maxVal = 0x3fffffff;
 
-        jassertquiet ((int) x >= -maxVal && (int) x <= maxVal
-                   && (int) y >= -maxVal && (int) y <= maxVal
-                   && (int) w >= 0 && (int) w <= maxVal
-                   && (int) h >= 0 && (int) h <= maxVal);
+        jassert ((int) x >= -maxVal && (int) x <= maxVal
+              && (int) y >= -maxVal && (int) y <= maxVal
+              && (int) w >= 0 && (int) w <= maxVal
+              && (int) h >= 0 && (int) h <= maxVal);
        #endif
 
         return { x, y, w, h };

@@ -1677,20 +1677,25 @@ public:
         {
             if (detail::PluginUtilities::getHostType().isAbletonLive())
             {
-                static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
-                NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];
+                NSEvent* currentEvent = [NSApp currentEvent];
 
-                if (! approximatelyEqual (lastEventTime, eventTime))
+                if (currentEvent != nil)
                 {
-                    lastEventTime = eventTime;
+                    static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
+                    NSTimeInterval eventTime = [currentEvent timestamp];
 
-                    NSView* view = (NSView*) getWindowHandle();
-                    NSView* hostView = [view superview];
-                    NSWindow* hostWindow = [hostView window];
+                    if (! approximatelyEqual (lastEventTime, eventTime))
+                    {
+                        lastEventTime = eventTime;
 
-                    [hostWindow makeFirstResponder: hostView];
-                    [hostView keyDown: (NSEvent*) [NSApp currentEvent]];
-                    [hostWindow makeFirstResponder: view];
+                        auto* view = (NSView*) getWindowHandle();
+                        auto* hostView = [view superview];
+                        auto* hostWindow = [hostView window];
+
+                        [hostWindow makeFirstResponder: hostView];
+                        [hostView keyDown: currentEvent];
+                        [hostWindow makeFirstResponder: view];
+                    }
                 }
             }
 

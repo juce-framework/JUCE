@@ -36,7 +36,7 @@ public:
     UnknownDocument (Project* p, const File& f)
        : project (p), file (f)
     {
-        reloadFromFile();
+        handleReloadFromFile();
     }
 
     //==============================================================================
@@ -57,7 +57,7 @@ public:
     void saveAsync (std::function<void (bool)>) override     {}
     void saveAsAsync (std::function<void (bool)>) override   {}
     bool hasFileBeenModifiedExternally() override            { return fileModificationTime != file.getLastModificationTime(); }
-    void reloadFromFile() override                           { fileModificationTime = file.getLastModificationTime(); }
+    void reloadFromFile() override                           { handleReloadFromFile(); }
     String getName() const override                          { return file.getFileName(); }
     File getFile() const override                            { return file; }
     std::unique_ptr<Component> createEditor() override       { return std::make_unique<ItemPreviewComponent> (file); }
@@ -76,6 +76,8 @@ public:
     }
 
 private:
+    void handleReloadFromFile() { fileModificationTime = file.getLastModificationTime(); }
+
     Project* const project;
     File file;
     Time fileModificationTime;

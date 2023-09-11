@@ -1943,8 +1943,11 @@ private:
         *pluginInput  = cachedInArrangement. getData();
         *pluginOutput = cachedOutArrangement.getData();
 
-        SpeakerMappings::channelSetToVstArrangement (processor->getChannelLayoutOfBus (true,  0), **pluginInput);
-        SpeakerMappings::channelSetToVstArrangement (processor->getChannelLayoutOfBus (false, 0), **pluginOutput);
+        if (*pluginInput != nullptr)
+            SpeakerMappings::channelSetToVstArrangement (processor->getChannelLayoutOfBus (true,  0), **pluginInput);
+
+        if (*pluginOutput != nullptr)
+            SpeakerMappings::channelSetToVstArrangement (processor->getChannelLayoutOfBus (false, 0), **pluginOutput);
 
         return 1;
     }

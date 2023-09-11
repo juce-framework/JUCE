@@ -1918,8 +1918,8 @@ public:
     {
         name = getDisplayName();
 
-        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
-        platformToolsetValue.setDefault (getDefaultToolset());
+        targetPlatformVersion.setDefault (defaultTargetPlatform);
+        platformToolsetValue.setDefault (defaultToolset);
     }
 
     static String getDisplayName()        { return "Visual Studio 2017"; }
@@ -1931,8 +1931,8 @@ public:
     int getVisualStudioVersion() const override                      { return 15; }
     String getSolutionComment() const override                       { return "# Visual Studio 15"; }
     String getToolsVersion() const override                          { return "15.0"; }
-    String getDefaultToolset() const override                        { return "v141"; }
-    String getDefaultWindowsTargetPlatformVersion() const override   { return "Latest"; }
+    String getDefaultToolset() const override                        { return defaultToolset; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
 
     static MSVCProjectExporterVC2017* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -1948,6 +1948,9 @@ public:
         MSVCProjectExporterBase::createExporterProperties (props);
     }
 
+private:
+    const String defaultToolset { "v141" }, defaultTargetPlatform { "Latest" };
+
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
 };
 
@@ -1960,8 +1963,8 @@ public:
     {
         name = getDisplayName();
 
-        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
-        platformToolsetValue.setDefault (getDefaultToolset());
+        targetPlatformVersion.setDefault (defaultTargetPlatform);
+        platformToolsetValue.setDefault (defaultToolset);
     }
 
     static String getDisplayName()        { return "Visual Studio 2019"; }
@@ -1973,8 +1976,8 @@ public:
     int getVisualStudioVersion() const override                      { return 16; }
     String getSolutionComment() const override                       { return "# Visual Studio Version 16"; }
     String getToolsVersion() const override                          { return "16.0"; }
-    String getDefaultToolset() const override                        { return "v142"; }
-    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0"; }
+    String getDefaultToolset() const override                        { return defaultToolset; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
 
     static MSVCProjectExporterVC2019* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -1990,6 +1993,9 @@ public:
         MSVCProjectExporterBase::createExporterProperties (props);
     }
 
+private:
+    const String defaultToolset { "v142" }, defaultTargetPlatform { "10.0" };
+
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2019)
 };
 
@@ -2002,8 +2008,8 @@ public:
     {
         name = getDisplayName();
 
-        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
-        platformToolsetValue.setDefault (getDefaultToolset());
+        targetPlatformVersion.setDefault (defaultTargetPlatform);
+        platformToolsetValue.setDefault (defaultToolset);
     }
 
     static String getDisplayName()        { return "Visual Studio 2022"; }
@@ -2015,8 +2021,8 @@ public:
     int getVisualStudioVersion() const override                      { return 17; }
     String getSolutionComment() const override                       { return "# Visual Studio Version 17"; }
     String getToolsVersion() const override                          { return "17.0"; }
-    String getDefaultToolset() const override                        { return "v143"; }
-    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0"; }
+    String getDefaultToolset() const override                        { return defaultToolset; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
 
     static MSVCProjectExporterVC2022* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -2031,6 +2037,9 @@ public:
         addToolsetProperty (props, { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143", "ClangCL" });
         MSVCProjectExporterBase::createExporterProperties (props);
     }
+
+private:
+    const String defaultToolset { "v143" }, defaultTargetPlatform { "10.0" };
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2022)
 };

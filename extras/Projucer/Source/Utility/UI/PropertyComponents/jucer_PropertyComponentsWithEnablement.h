@@ -68,7 +68,7 @@ public:
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
-        valueChanged (value);
+        handleValueChanged();
     }
 
     ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -84,7 +84,7 @@ public:
         isMultiChoice = true;
         idToCheck = multiChoiceID;
 
-        valueChanged (value);
+        handleValueChanged();
     }
 
     ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -95,7 +95,7 @@ public:
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
-        valueChanged (value);
+        handleValueChanged();
     }
 
     ~ChoicePropertyComponentWithEnablement() override    { value.removeListener (this); }
@@ -120,12 +120,17 @@ private:
         return false;
     }
 
-    void valueChanged (Value&) override
+    void handleValueChanged()
     {
         if (isMultiChoice)
             setEnabled (checkMultiChoiceVar());
         else
             setEnabled (propertyWithDefault.get());
+    }
+
+    void valueChanged (Value&) override
+    {
+        handleValueChanged();
     }
 };
 

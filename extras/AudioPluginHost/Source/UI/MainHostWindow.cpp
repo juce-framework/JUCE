@@ -103,7 +103,7 @@ public:
         if (auto* file = getAppProperties().getUserSettings())
             file->addChangeListener (this);
 
-        changeListenerCallback (nullptr);
+        handleChange();
     }
 
     ~CustomPluginScanner() override
@@ -183,10 +183,15 @@ private:
         }
     }
 
-    void changeListenerCallback (ChangeBroadcaster*) override
+    void handleChange()
     {
         if (auto* file = getAppProperties().getUserSettings())
             scanInProcess = (file->getIntValue (scanModeKey) == 0);
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        handleChange();
     }
 
     std::unique_ptr<Superprocess> superprocess;
@@ -226,10 +231,16 @@ public:
             getAppProperties().getUserSettings()->setValue (scanModeKey, validationModeBox.getSelectedItemIndex());
         };
 
-        resized();
+        handleResize();
     }
 
     void resized() override
+    {
+        handleResize();
+    }
+
+private:
+    void handleResize()
     {
         PluginListComponent::resized();
 
@@ -237,7 +248,7 @@ public:
         validationModeBox.setBounds (buttonBounds.withWidth (130).withRightX (getWidth() - buttonBounds.getX()));
     }
 
-private:
+
     Label validationModeLabel { {}, "Scan mode" };
     ComboBox validationModeBox;
 

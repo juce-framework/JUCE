@@ -150,8 +150,12 @@ std::unique_ptr<ScopedContentSharerInterface> ScopedContentSharerInterface::shar
                     result.add (URL (tempFile));
             }
 
-            for (const auto& url : result)
-                jassertquiet (url.isLocalFile() && url.getLocalFile().existsAsFile());
+            jassert (std::all_of (result.begin(),
+                                  result.end(),
+                                  [] (const auto& url)
+                                  {
+                                      return url.isLocalFile() && url.getLocalFile().existsAsFile();
+                                  }));
 
             return { std::move (result), String{} };
         }

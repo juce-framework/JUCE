@@ -52,7 +52,7 @@ public:
         setVisible (true);
 
         static_cast<Component&> (mainWindow).addChildComponent (this);
-        componentMovedOrResized (true, true);
+        handleComponentMovedOrResized();
 
         enterModalState();
     }
@@ -80,7 +80,9 @@ private:
     void componentVisibilityChanged() override          {}
     using ComponentMovementWatcher::componentVisibilityChanged;
 
-    void componentMovedOrResized (bool, bool) override  { triggerAsyncUpdate(); }
+    void handleComponentMovedOrResized()                { triggerAsyncUpdate(); }
+
+    void componentMovedOrResized (bool, bool) override  { handleComponentMovedOrResized(); }
     using ComponentMovementWatcher::componentMovedOrResized;
 
     void handleAsyncUpdate() override                   { resized(); }

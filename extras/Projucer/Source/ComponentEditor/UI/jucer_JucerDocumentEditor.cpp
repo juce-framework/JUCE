@@ -350,10 +350,10 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
         document->addChangeListener (this);
 
-        resized();
+        handleResize();
         refreshPropertiesPanel();
 
-        changeListenerCallback (nullptr);
+        handleChange();
     }
 }
 
@@ -428,15 +428,25 @@ void JucerDocumentEditor::paint (Graphics& g)
     g.fillAll (findColour (backgroundColourId));
 }
 
-void JucerDocumentEditor::resized()
+void JucerDocumentEditor::handleResize()
 {
     tabbedComponent.setBounds (getLocalBounds().withTrimmedLeft (12));
 }
 
-void JucerDocumentEditor::changeListenerCallback (ChangeBroadcaster*)
+void JucerDocumentEditor::resized()
+{
+    handleResize();
+}
+
+void JucerDocumentEditor::handleChange()
 {
     setName (document->getClassName());
     updateTabs();
+}
+
+void JucerDocumentEditor::changeListenerCallback (ChangeBroadcaster*)
+{
+    handleChange();
 }
 
 //==============================================================================

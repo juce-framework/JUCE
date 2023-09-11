@@ -118,7 +118,7 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code) const;
 
-    void perform (UndoableAction* action, const String& actionName);
+    void perform (std::unique_ptr<UndoableAction> action, const String& actionName);
 
     void moveComponentZOrder (int oldIndex, int newIndex);
 
@@ -127,6 +127,8 @@ private:
     OwnedArray<Component> components;
     SelectedItemSet <Component*> selected;
     int nextCompUID;
+
+    int addComponentIndexAdded = 0;
 
     String getUnusedMemberName (String nameRoot, Component* comp) const;
 };

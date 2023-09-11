@@ -1017,6 +1017,7 @@ bool PaintElementPath::getPoint (int index, int pointNumber, double& x, double& 
     if (pointNumber >= PathPoint::maxRects)
     {
         jassertfalse;
+        x = y = 0;
         return false;
     }
 

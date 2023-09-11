@@ -567,14 +567,14 @@ private:
         }
     }
 
-    void checkSourceIsNotAMember (const ElementType& element)
+    void checkSourceIsNotAMember ([[maybe_unused]] const ElementType& element)
     {
         // when you pass a reference to an existing element into a method like add() which
         // may need to reallocate the array to make more space, the incoming reference may
         // be deleted indirectly during the reallocation operation! To work around this,
         // make a local copy of the item you're trying to add (and maybe use std::move to
         // move it into the add() method to avoid any extra overhead)
-        jassertquiet (std::addressof (element) < begin() || end() <= std::addressof (element));
+        jassert (std::addressof (element) < begin() || end() <= std::addressof (element));
     }
 
     //==============================================================================

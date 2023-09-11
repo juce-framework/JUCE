@@ -712,9 +712,9 @@ Result Project::loadDocument (const File& file)
     return Result::ok();
 }
 
-Result Project::saveDocument (const File& file)
+Result Project::saveDocument ([[maybe_unused]] const File& file)
 {
-    jassertquiet (file == getFile());
+    jassert (file == getFile());
 
     auto sharedResult = Result::ok();
 
@@ -726,9 +726,10 @@ Result Project::saveDocument (const File& file)
     return sharedResult;
 }
 
-void Project::saveDocumentAsync (const File& file, std::function<void (Result)> afterSave)
+void Project::saveDocumentAsync ([[maybe_unused]] const File& file,
+                                 std::function<void (Result)> afterSave)
 {
-    jassertquiet (file == getFile());
+    jassert (file == getFile());
 
     saveProject (Async::yes, nullptr, std::move (afterSave));
 }
@@ -1263,6 +1264,7 @@ const build_tools::ProjectType& Project::getProjectType() const
 
     auto* guiType = build_tools::ProjectType::findType (build_tools::ProjectType_GUIApp::getTypeName());
     jassert (guiType != nullptr);
+    // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.UndefReturn)
     return *guiType;
 }
 

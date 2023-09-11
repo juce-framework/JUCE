@@ -448,7 +448,7 @@ void AudioProcessor::checkForDuplicateTrimmedParamID ([[maybe_unused]] AudioProc
    #if JUCE_DEBUG && ! JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
     if (auto* withID = dynamic_cast<HostedAudioProcessorParameter*> (param))
     {
-        constexpr auto maximumSafeAAXParameterIdLength = 31;
+        [[maybe_unused]] constexpr auto maximumSafeAAXParameterIdLength = 31;
 
         const auto paramID = withID->getParameterID();
 
@@ -459,7 +459,7 @@ void AudioProcessor::checkForDuplicateTrimmedParamID ([[maybe_unused]] AudioProc
         // If you need to retain backwards-compatibility and are unable to change
         // the paramID for this reason, you can add JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
         // to your preprocessor definitions to silence this assertion.
-        jassertquiet (paramID.length() <= maximumSafeAAXParameterIdLength);
+        jassert (paramID.length() <= maximumSafeAAXParameterIdLength);
 
         // If you hit this assertion, two or more parameters have duplicate paramIDs
         // after they have been truncated to support the AAX format.
@@ -470,7 +470,7 @@ void AudioProcessor::checkForDuplicateTrimmedParamID ([[maybe_unused]] AudioProc
         // If you need to retain backwards-compatibility and are unable to change
         // the paramID for this reason, you can add JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
         // to your preprocessor definitions to silence this assertion.
-        jassertquiet (trimmedParamIDs.insert (paramID.substring (0, maximumSafeAAXParameterIdLength)).second);
+        jassert (trimmedParamIDs.insert (paramID.substring (0, maximumSafeAAXParameterIdLength)).second);
     }
    #endif
 }

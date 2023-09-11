@@ -504,11 +504,11 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
     }
 }
 
-void Label::textEditorEscapeKeyPressed (TextEditor& ed)
+void Label::textEditorEscapeKeyPressed ([[maybe_unused]] TextEditor& ed)
 {
     if (editor != nullptr)
     {
-        jassertquiet (&ed == editor.get());
+        jassert (&ed == editor.get());
 
         editor->setText (textValue.toString(), false);
         hideEditor (true);

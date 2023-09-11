@@ -43,7 +43,7 @@ public:
 
     PaintElementPath* owner;
     Path::Iterator::PathElementType type;
-    RelativePositionedRectangle pos [maxRects];
+    RelativePositionedRectangle pos[maxRects] = {};
 
     int getNumPoints() const;
 

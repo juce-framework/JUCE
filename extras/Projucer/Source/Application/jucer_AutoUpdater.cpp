@@ -164,7 +164,7 @@ public:
 
         juceIcon = Drawable::createFromImageData (BinaryData::juce_icon_png,
                                                   BinaryData::juce_icon_pngSize);
-        lookAndFeelChanged();
+        updateLookAndFeel();
 
         setSize (500, 280);
     }
@@ -218,10 +218,15 @@ public:
     }
 
 private:
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
         cancelButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
         releaseNotesEditor.applyFontToAllText (releaseNotesEditor.getFont());
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
     }
 
     void setParentWindow (DialogWindow* parent)

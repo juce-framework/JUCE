@@ -136,6 +136,7 @@ public:
 
         for (int i = 0; i < numSamples; ++i)
         {
+            // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
             const float input = (left[i] + right[i]) * gain;
             float outL = 0, outR = 0;
 

@@ -134,8 +134,8 @@ public:
         static constexpr auto vtableForCallable = detail::makeVtable<Fn, Ret, Args...>();
         vtable = &vtableForCallable;
 
-        auto* ptr = new (&storage) Fn (std::forward<Callable> (callable));
-        jassertquiet ((void*) ptr == (void*) &storage);
+        [[maybe_unused]] auto* ptr = new (&storage) Fn (std::forward<Callable> (callable));
+        jassert ((void*) ptr == (void*) &storage);
     }
 
     /** Move constructor. */

@@ -163,9 +163,7 @@ namespace juce
 
   /** Platform-independent assertion macro which suppresses ignored-variable
       warnings in all build modes. You should probably use a plain jassert()
-      by default, and only replace it with jassertquiet() once you've
-      convinced yourself that any unused-variable warnings emitted by the
-      compiler are harmless.
+      and [[maybe_unused]] by default.
   */
   #define jassertquiet(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
 

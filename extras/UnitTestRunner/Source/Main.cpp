@@ -55,7 +55,7 @@ int main (int argc, char **argv)
 
     if (args.containsOption ("--help|-h"))
     {
-        std::cout << argv[0] << " [--help|-h] [--list-categories] [--category category] [--seed seed]" << std::endl;
+        std::cout << argv[0] << " [--help|-h] [--list-categories] [--category=category] [--seed=seed]" << std::endl;
         return 0;
     }
 

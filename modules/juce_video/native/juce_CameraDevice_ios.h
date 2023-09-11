@@ -52,19 +52,19 @@ struct CameraDevice::Pimpl
         }
 
         [AVCaptureDevice requestAccessForMediaType: AVMediaTypeVideo
-                                 completionHandler: ^(BOOL granted)
+                                 completionHandler: ^([[maybe_unused]] BOOL granted)
          {
              // Access to video is required for camera to work,
              // black images will be produced otherwise!
-             jassertquiet (granted);
+             jassert (granted);
          }];
 
         [AVCaptureDevice requestAccessForMediaType: AVMediaTypeAudio
-                                 completionHandler: ^(BOOL granted)
+                                 completionHandler: ^([[maybe_unused]] BOOL granted)
          {
              // Access to audio is required for camera to work,
              // silence will be produced otherwise!
-             jassertquiet (granted);
+             jassert (granted);
          }];
 
         captureSession.startSessionForDeviceWithId (cameraId);

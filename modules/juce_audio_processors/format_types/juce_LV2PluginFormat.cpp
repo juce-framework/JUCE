@@ -739,10 +739,11 @@ public:
     LV2_Log_Log* getLogFeature() { return &logFeature; }
 
 private:
-    int vprintfCallback (LV2_URID type, const char* fmt, va_list ap) const
+    int vprintfCallback ([[maybe_unused]] LV2_URID type, const char* fmt, va_list ap) const
     {
         // If this is hit, the plugin has encountered some kind of error
-        jassertquiet (type != urids->mLV2_LOG__Error && type != urids->mLV2_LOG__Warning);
+        ignoreUnused (urids);
+        jassert (type != urids->mLV2_LOG__Error && type != urids->mLV2_LOG__Warning);
         return std::vfprintf (stderr, fmt, ap);
     }
 
@@ -2118,9 +2119,9 @@ public:
 
 private:
     template <typename Value>
-    static float getValueFrom (const void* data, uint32_t size)
+    static float getValueFrom (const void* data, [[maybe_unused]] uint32_t size)
     {
-        jassertquiet (size == sizeof (Value));
+        jassert (size == sizeof (Value));
         return (float) readUnaligned<Value> (data);
     }
 

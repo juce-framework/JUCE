@@ -162,6 +162,8 @@ BigInteger& BigInteger::operator= (const BigInteger& other)
     return *this;
 }
 
+BigInteger::~BigInteger() = default;
+
 uint32* BigInteger::getValues() const noexcept
 {
     jassert (heapAllocation != nullptr || allocatedSize <= numPreallocatedInts);

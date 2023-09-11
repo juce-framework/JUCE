@@ -82,7 +82,7 @@ public:
         setWantsKeyboardFocus (true);
         setOpaque (true);
 
-        lookAndFeelChanged();
+        updateLookAndFeel();
 
         setSize (300, 350);
     }
@@ -134,9 +134,14 @@ public:
             URL ("https://juce.com/verification/register").launchInDefaultBrowser();
     }
 
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
         enableGPLButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
     }
 
 private:
