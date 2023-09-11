@@ -589,6 +589,9 @@ public:
                         *ptr = contextObserver;
                         return noErr;
                     }
+
+                    jassertfalse;
+                    break;
                 }
                #endif
 
@@ -618,7 +621,6 @@ public:
                                     pv->outValue = text.getFloatValue();
                                 else
                                     pv->outValue = param->getValueForText (text) * getMaximumParameterValue (param);
-
 
                                 return noErr;
                             }
