@@ -586,12 +586,7 @@ public:
                 {
                     if (auto* ptr = (AURenderContextObserver*) outData)
                     {
-                        *ptr = ^(const AudioUnitRenderContext* context)
-                        {
-                            if (juceFilter)
-                                juceFilter->audioWorkgroupContextChanged (makeRealAudioWorkgroup (context != nullptr ? context->workgroup : nullptr));
-                        };
-
+                        *ptr = contextObserver;
                         return noErr;
                     }
                 }
@@ -2024,6 +2019,14 @@ private:
     int totalInChannels, totalOutChannels;
     HeapBlock<bool> pulledSucceeded;
     HeapBlock<MIDIPacketList> packetList { packetListBytes, 1 };
+    ObjCBlock<AURenderContextObserver> contextObserver { ^(const AudioUnitRenderContext* context)
+    {
+        if (juceFilter == nullptr)
+            return;
+
+        auto workgroup = makeRealAudioWorkgroup (context != nullptr ? context->workgroup : nullptr);
+        juceFilter->audioWorkgroupContextChanged (std::move (workgroup));
+    } };
 
     ThreadLocalValue<bool> inParameterChangedCallback;
 
