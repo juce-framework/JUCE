@@ -2021,6 +2021,8 @@ private:
     int totalInChannels, totalOutChannels;
     HeapBlock<bool> pulledSucceeded;
     HeapBlock<MIDIPacketList> packetList { packetListBytes, 1 };
+
+   #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
     ObjCBlock<AURenderContextObserver> contextObserver { ^(const AudioUnitRenderContext* context)
     {
         if (juceFilter == nullptr)
@@ -2029,6 +2031,7 @@ private:
         auto workgroup = makeRealAudioWorkgroup (context != nullptr ? context->workgroup : nullptr);
         juceFilter->audioWorkgroupContextChanged (std::move (workgroup));
     } };
+   #endif
 
     ThreadLocalValue<bool> inParameterChangedCallback;
 
