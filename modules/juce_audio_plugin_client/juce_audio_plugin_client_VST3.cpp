@@ -4235,10 +4235,6 @@ private:
 
         static const ClassEntry classEntries[]
         {
-            ClassEntry { compatibilityClass, [] (Vst::IHostApplication*) -> Steinberg::FUnknown*
-            {
-                return new JucePluginCompatibility;
-            } },
             ClassEntry { componentClass, [] (Vst::IHostApplication* h) -> Steinberg::FUnknown*
             {
                 return static_cast<Vst::IAudioProcessor*> (new JuceVST3Component (h));
@@ -4246,6 +4242,10 @@ private:
             ClassEntry { controllerClass, [] (Vst::IHostApplication* h) -> Steinberg::FUnknown*
             {
                 return static_cast<Vst::IEditController*> (new JuceVST3EditController (h));
+            } },
+            ClassEntry { compatibilityClass, [] (Vst::IHostApplication*) -> Steinberg::FUnknown*
+            {
+                return new JucePluginCompatibility;
             } },
            #if JucePlugin_Enable_ARA
             ClassEntry { araFactoryClass, [] (Vst::IHostApplication*) -> Steinberg::FUnknown*
