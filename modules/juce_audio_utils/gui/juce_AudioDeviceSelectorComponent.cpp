@@ -227,6 +227,8 @@ public:
         type.scanForDevices();
 
         setup.manager->addChangeListener (this);
+
+        updateAllControls();
     }
 
     ~AudioDeviceSettingsPanel() override
@@ -1154,10 +1156,8 @@ void AudioDeviceSelectorComponent::updateAllControls()
             details.maxNumOutputChannels = maxOutputChannels;
             details.useStereoPairs = showChannelsAsStereoPairs;
 
-            auto sp = std::make_unique<AudioDeviceSettingsPanel> (*type, details, hideAdvancedOptionsWithButton);
-            addAndMakeVisible (*sp);
-            sp->updateAllControls();
-            audioDeviceSettingsComp = std::move (sp);
+            audioDeviceSettingsComp = std::make_unique<AudioDeviceSettingsPanel> (*type, details, hideAdvancedOptionsWithButton);
+            addAndMakeVisible (audioDeviceSettingsComp.get());
         }
     }
 
