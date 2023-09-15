@@ -324,8 +324,8 @@ public:
     }
 
     /** Returns a rectangle which is the same as this one moved by a given amount. */
-    Rectangle translated (ValueType deltaX,
-                          ValueType deltaY) const noexcept
+    [[nodiscard]] Rectangle translated (ValueType deltaX,
+                                        ValueType deltaY) const noexcept
     {
         return { pos.x + deltaX, pos.y + deltaY, w, h };
     }
@@ -448,8 +448,8 @@ public:
         Effectively, the rectangle returned is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
         @see expand, reduce, reduced
     */
-    Rectangle expanded (ValueType deltaX,
-                        ValueType deltaY) const noexcept
+    [[nodiscard]] Rectangle expanded (ValueType deltaX,
+                                      ValueType deltaY) const noexcept
     {
         auto nw = jmax (ValueType(), w + deltaX * 2);
         auto nh = jmax (ValueType(), h + deltaY * 2);
@@ -461,7 +461,7 @@ public:
         Effectively, the rectangle returned is (x - delta, y - delta, w + delta * 2, h + delta * 2).
         @see expand, reduce, reduced
     */
-    Rectangle expanded (ValueType delta) const noexcept
+    [[nodiscard]] Rectangle expanded (ValueType delta) const noexcept
     {
         return expanded (delta, delta);
     }
@@ -482,8 +482,8 @@ public:
         Effectively, the rectangle returned is (x + deltaX, y + deltaY, w - deltaX * 2, h - deltaY * 2).
         @see reduce, expand, expanded
     */
-    Rectangle reduced (ValueType deltaX,
-                       ValueType deltaY) const noexcept
+    [[nodiscard]] Rectangle reduced (ValueType deltaX,
+                                     ValueType deltaY) const noexcept
     {
         return expanded (-deltaX, -deltaY);
     }
@@ -493,7 +493,7 @@ public:
         Effectively, the rectangle returned is (x + delta, y + delta, w - delta * 2, h - delta * 2).
         @see reduce, expand, expanded
     */
-    Rectangle reduced (ValueType delta) const noexcept
+    [[nodiscard]] Rectangle reduced (ValueType delta) const noexcept
     {
         return reduced (delta, delta);
     }
@@ -815,7 +815,7 @@ public:
 
         This should only be used on floating point rectangles.
     */
-    Rectangle transformedBy (const AffineTransform& transform) const noexcept
+    [[nodiscard]] Rectangle transformedBy (const AffineTransform& transform) const noexcept
     {
         using FloatType = TypeHelpers::SmallestFloatType<ValueType>;
 
