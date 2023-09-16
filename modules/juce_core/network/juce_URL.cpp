@@ -448,6 +448,18 @@ int URL::getPort() const
     return colonPos > 0 ? url.substring (colonPos + 1).getIntValue() : 0;
 }
 
+String URL::getOrigin() const
+{
+    const auto schemeAndDomain = getScheme() + "://" + getDomain();
+
+    const auto colonPos = url.indexOfChar (URLHelpers::findStartOfNetLocation (url), ':');
+
+    if (colonPos > 0)
+        return schemeAndDomain + ":" + String { getPort() };
+
+    return schemeAndDomain;
+}
+
 URL URL::withNewDomainAndPath (const String& newURL) const
 {
     URL u (*this);

@@ -154,6 +154,13 @@ public:
     */
     int getPort() const;
 
+    /** Returns the origin of a resource reachable on this URL.
+
+        In the context of cross-origin resource sharing (CORS) a script downloaded from this URL
+        would only be allowed to reach resources from the returned origin.
+    */
+    String getOrigin() const;
+
     /** Returns a new version of this URL with a different domain and path.
 
         e.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
