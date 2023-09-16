@@ -86,11 +86,26 @@ inline File getExamplesDirectory() noexcept
    #endif
 }
 
-inline std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
+enum class AssertAssetExists
+{
+    no,
+    yes
+};
+
+inline std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath,
+                                                            [[maybe_unused]] AssertAssetExists assertExists = AssertAssetExists::yes)
 {
   #if JUCE_ANDROID
     ZipFile apkZip (File::getSpecialLocation (File::invokedExecutableFile));
-    return std::unique_ptr<InputStream> (apkZip.createStreamForEntry (apkZip.getIndexOfFileName ("assets/" + String (resourcePath))));
+    const auto fileIndex = apkZip.getIndexOfFileName ("assets/" + String (resourcePath));
+
+    if (fileIndex == -1)
+    {
+        jassert (assertExists == AssertAssetExists::no);
+        return {};
+    }
+
+    return std::unique_ptr<InputStream> (apkZip.createStreamForEntry (fileIndex));
   #else
    #if JUCE_IOS
     auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
@@ -106,7 +121,12 @@ inline std::unique_ptr<InputStream> createAssetInputStream (const char* resource
    #endif
 
     auto resourceFile = assetsDir.getChildFile (resourcePath);
-    jassert (resourceFile.existsAsFile());
+
+    if (! resourceFile.existsAsFile())
+    {
+        jassert (assertExists == AssertAssetExists::no);
+        return {};
+    }
 
     return resourceFile.createInputStream();
   #endif
