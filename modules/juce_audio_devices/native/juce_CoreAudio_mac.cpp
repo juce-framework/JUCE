@@ -474,7 +474,13 @@ public:
             pa.mScope    = kAudioObjectPropertyScopeWildcard;
             pa.mElement  = juceAudioObjectPropertyElementMain;
 
-            return makeRealAudioWorkgroup (audioObjectGetProperty<os_workgroup_t> (deviceID, pa).value_or (nullptr));
+            if (auto* workgroup = audioObjectGetProperty<os_workgroup_t> (deviceID, pa).value_or (nullptr))
+            {
+                ScopeGuard scope { [&] { os_release (workgroup); } };
+                return makeRealAudioWorkgroup (workgroup);
+            }
+
+            return {};
         }();
        #endif
 

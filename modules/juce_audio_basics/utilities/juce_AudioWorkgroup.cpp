@@ -62,10 +62,7 @@ private:
     static void detach (os_workgroup_t wg, os_workgroup_join_token_s token)
     {
         if (@available (macos 11.0, ios 14.0, *))
-        {
             os_workgroup_leave (wg, &token);
-            os_release (wg);
-        }
     }
 
     static bool attach (os_workgroup_t wg, os_workgroup_join_token_s& tokenOut)
@@ -73,10 +70,7 @@ private:
         if (@available (macos 11.0, ios 14.0, *))
         {
             if (wg != nullptr && os_workgroup_join (wg, &tokenOut) == 0)
-            {
-                os_retain (wg);
                 return true;
-            }
         }
 
         return false;
@@ -97,16 +91,7 @@ private:
 class AudioWorkgroup::WorkgroupProvider
 {
 public:
-    explicit WorkgroupProvider (os_workgroup_t ptr) : handle (ptr) {}
-
-    WorkgroupProvider clone() const
-    {
-        if (handle == nullptr)
-            return WorkgroupProvider { nullptr };
-
-        os_retain (handle.get());
-        return WorkgroupProvider { handle.get() };
-    }
+    explicit WorkgroupProvider (os_workgroup_t ptr) : handle { ptr } {}
 
     void join (WorkgroupToken& token) const
     {
@@ -118,29 +103,65 @@ public:
         // is left before the new one is joined.
         token.reset();
 
-        if (handle != nullptr)
+        if (handle.get() != nullptr)
             token = WorkgroupToken { [provider = WorkgroupToken::TokenProvider { handle.get() }] { return &provider; } };
     }
 
     static os_workgroup_t getWorkgroup (const AudioWorkgroup& wg)
     {
-        if (auto* p = wg.getWorkgroupProvider())
-            return p->handle.get();
+        if (auto* provider = wg.getWorkgroupProvider())
+            return provider->handle.get();
 
         return nullptr;
     }
 
 private:
-    struct Release
+    struct ScopedWorkgroupRetainer
     {
-        void operator() (os_workgroup_t wg) const
+        ScopedWorkgroupRetainer (os_workgroup_t wg) : handle { wg }
         {
-            if (wg != nullptr)
-                os_release (wg);
+            if (handle != nullptr)
+                os_retain (handle);
         }
+
+        ~ScopedWorkgroupRetainer()
+        {
+            if (handle != nullptr)
+                os_release (handle);
+        }
+
+        ScopedWorkgroupRetainer (const ScopedWorkgroupRetainer& other)
+            : ScopedWorkgroupRetainer { other.handle } {}
+
+        ScopedWorkgroupRetainer& operator= (const ScopedWorkgroupRetainer& other)
+        {
+            ScopedWorkgroupRetainer { other }.swap (*this);
+            return *this;
+        }
+
+        ScopedWorkgroupRetainer (ScopedWorkgroupRetainer&& other) noexcept
+        {
+            swap (other);
+        }
+
+        ScopedWorkgroupRetainer& operator= (ScopedWorkgroupRetainer&& other) noexcept
+        {
+            swap (other);
+            return *this;
+        }
+
+        void swap (ScopedWorkgroupRetainer& other) noexcept
+        {
+            std::swap (handle, other.handle);
+        }
+
+        os_workgroup_t get() const noexcept { return handle; }
+
+    private:
+        os_workgroup_t handle { nullptr };
     };
 
-    std::unique_ptr<std::remove_pointer_t<os_workgroup_t>, Release> handle;
+    ScopedWorkgroupRetainer handle;
 };
 
 #else
@@ -151,8 +172,6 @@ class AudioWorkgroup::WorkgroupProvider
 {
 public:
     explicit WorkgroupProvider() = default;
-
-    WorkgroupProvider clone() const { return WorkgroupProvider{}; }
 
     void join (WorkgroupToken& t) const { t.reset(); }
 
@@ -165,7 +184,7 @@ AudioWorkgroup::AudioWorkgroup (const AudioWorkgroup& other)
     : erased ([&]() -> Erased
               {
                   if (auto* p = other.getWorkgroupProvider())
-                      return [provider = p->clone()] { return &provider; };
+                      return [provider = *p] { return &provider; };
 
                   return nullptr;
               }()) {}
