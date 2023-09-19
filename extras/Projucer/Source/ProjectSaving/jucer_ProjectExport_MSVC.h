@@ -565,7 +565,8 @@ public:
                     if (type != SharedCodeTarget)
                     {
                         auto librarySearchPaths = getLibrarySearchPaths (config);
-                        if (librarySearchPaths.size() > 0)
+
+                        if (! librarySearchPaths.isEmpty())
                         {
                             auto* libPath = props->createNewChildElement ("LibraryPath");
                             setConditionAttribute (*libPath, config);
@@ -1021,8 +1022,8 @@ public:
                 bool filesWereAdded = false;
 
                 for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                    if (addFilesToFilter (projectItem.getChild(i),
-                                          (path.isEmpty() ? String() : (path + "\\")) + projectItem.getChild(i).getName(),
+                    if (addFilesToFilter (projectItem.getChild (i),
+                                          (path.isEmpty() ? String() : (path + "\\")) + projectItem.getChild (i).getName(),
                                           cpps, headers, otherFiles, groups))
                         filesWereAdded = true;
 
@@ -1135,6 +1136,14 @@ public:
                 return result + "\\" + config.getTargetBinaryNameString() + ".lv2";
 
             return result;
+        }
+
+        /*  Like getConfigTargetPath, but expands $(ProjectName) so that build products can be used
+            in other projects where $(ProjectName) will expand to a different value.
+        */
+        String getExpandedConfigTargetPath (const MSVCBuildConfiguration& config) const
+        {
+            return getConfigTargetPath (config).replace ("$(ProjectName)", getOwner().getProjectFileBaseName (getName()));
         }
 
         String getIntermediatesPath (const MSVCBuildConfiguration& config) const
@@ -1302,7 +1311,7 @@ public:
                     return nullptr;
                 }();
 
-                const auto writer = writerTarget->getConfigTargetPath (config)
+                const auto writer = writerTarget->getExpandedConfigTargetPath (config)
                                   + "\\"
                                   + writerTarget->getBinaryNameWithSuffix (config);
 
@@ -1335,7 +1344,7 @@ public:
                     if (writerTarget == nullptr)
                         return "";
 
-                    const auto writer = writerTarget->getConfigTargetPath (config)
+                    const auto writer = writerTarget->getExpandedConfigTargetPath (config)
                                       + "\\"
                                       + writerTarget->getBinaryNameWithSuffix (config);
 
@@ -1424,7 +1433,7 @@ public:
 
             if (type != SharedCodeTarget && type != LV2Helper && type != VST3Helper)
                 if (auto* shared = getOwner().getSharedCodeTarget())
-                    librarySearchPaths.add (shared->getConfigTargetPath (config));
+                    librarySearchPaths.add (shared->getExpandedConfigTargetPath (config));
 
             return librarySearchPaths;
         }
@@ -1700,12 +1709,18 @@ protected:
                                  targetPlatformVersion,
                                  manifestFileValue;
 
+    String getProjectFileBaseName (const String& target) const
+    {
+        const auto filename = project.getProjectFilenameRootString();
+
+        return filename + (target.isNotEmpty()
+                           ? (String ("_") + target.removeCharacters (" "))
+                           : "");
+    }
+
     File getProjectFile (const String& extension, const String& target) const
     {
-        auto filename = project.getProjectFilenameRootString();
-
-        if (target.isNotEmpty())
-            filename += String ("_") + target.removeCharacters (" ");
+        const auto filename = getProjectFileBaseName (target);
 
         return getTargetFolder().getChildFile (filename).withFileExtension (extension);
     }
