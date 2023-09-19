@@ -3012,7 +3012,7 @@ private:
                     auto propertyName = o.getPropertyName (j);
                     auto val = o.getProperty (propertyName).toString();
 
-                    if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-@~\r\n\\#%^`*")
+                    if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-@~\r\n\\#%^`*!")
                                             && ! (val.trimStart().startsWithChar ('(')
                                                     || val.trimStart().startsWithChar ('{'))))
                         val = "\"" + val + "\"";
