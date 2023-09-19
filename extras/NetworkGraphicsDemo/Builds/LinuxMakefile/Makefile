@@ -199,6 +199,11 @@ $(JUCE_OBJDIR)/execinfo.cmd:
 	-@if [ -z "$(V_AT)" ]; then echo "Checking if we need to link libexecinfo"; fi
 	$(V_AT)printf "int main() { return 0; }" | $(CXX) -x c++ -o $(@D)/execinfo.x -lexecinfo - >/dev/null 2>&1 && printf -- "-lexecinfo" > "$@" || touch "$@"
 
+$(JUCE_OBJDIR)/cxxfs.cmd:
+	-$(V_AT)mkdir -p $(@D)
+	-@if [ -z "$(V_AT)" ]; then echo "Checking if we need to link stdc++fs"; fi
+	$(V_AT)printf "int main() { return 0; }" | $(CXX) -x c++ -o $(@D)/cxxfs.x -lstdc++fs - >/dev/null 2>&1 && printf -- "-lstdc++fs" > "$@" || touch "$@"
+
 clean:
 	@echo Cleaning NetworkGraphicsDemo
 	$(V_AT)$(CLEANCMD)
