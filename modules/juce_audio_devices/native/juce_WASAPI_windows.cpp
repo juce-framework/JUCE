@@ -756,7 +756,7 @@ private:
                                                                             : AUDCLNT_SHAREMODE_SHARED,
                                                      (WAVEFORMATEX*) &format,
                                                      isExclusiveMode (mode) ? nullptr
-                                                                                  : &nearestFormat);
+                                                                            : &nearestFormat);
         logFailure (hr);
 
         auto supportsSRC = supportsSampleRateConversion (mode);
@@ -888,7 +888,6 @@ private:
 
     bool tryInitialisingWithBufferSize (int bufferSizeSamples)
     {
-
         if (auto format = findSupportedFormat (client, numChannels, sampleRate))
         {
             auto isInitialised = isLowLatencyMode (deviceMode) ? initialiseLowLatencyClient (bufferSizeSamples, *format)
@@ -1164,11 +1163,14 @@ public:
             if (isExclusiveMode (deviceMode) && WaitForSingleObject (clientEvent, 1000) == WAIT_TIMEOUT)
                 break;
 
+            const auto numChannelsToCopy = jmin (actualNumChannels, numSrcBuffers);
+            jassert (numChannelsToCopy <= channelMaps.size());
+
             uint8* outputData = nullptr;
             if (check (renderClient->GetBuffer ((UINT32) samplesToDo, &outputData)))
             {
-                for (int i = 0; i < numSrcBuffers; ++i)
-                    converter->convertSamples (outputData, channelMaps.getUnchecked(i), srcBuffers[i] + offset, 0, samplesToDo);
+                for (int i = 0; i < numChannelsToCopy; ++i)
+                    converter->convertSamples (outputData, channelMaps.getUnchecked (i), srcBuffers[i] + offset, 0, samplesToDo);
 
                 renderClient->ReleaseBuffer ((UINT32) samplesToDo, 0);
             }
