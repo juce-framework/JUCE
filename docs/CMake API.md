@@ -527,7 +527,7 @@ attributes directly to these creation functions, rather than adding them later.
 
 `VST2_CATEGORY`
 - Should be one of: `kPlugCategUnknown`, `kPlugCategEffect`, `kPlugCategSynth`,
-  `kPlugCategAnalysis`, `kPlugCategMatering`, `kPlugCategSpacializer`, `kPlugCategRoomFx`,
+  `kPlugCategAnalysis`, `kPlugCategMastering`, `kPlugCategSpacializer`, `kPlugCategRoomFx`,
   `kPlugSurroundFx`, `kPlugCategRestoration`, `kPlugCategOfflineProcess`, `kPlugCategShell`,
   `kPlugCategGenerator`.
 
