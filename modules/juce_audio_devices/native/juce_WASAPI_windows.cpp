@@ -527,6 +527,16 @@ public:
         isActive = true;
     }
 
+    std::optional<BigInteger> getDefaultLayout() const
+    {
+        if (countNumberOfBits ((uint64) defaultFormatChannelMask) == defaultNumChannels)
+            return BigInteger ((int64) defaultFormatChannelMask);
+
+        BigInteger integer;
+        integer.setRange (0, defaultNumChannels, true);
+        return integer;
+    }
+
     //==============================================================================
     ComSmartPtr<IMMDevice> device;
     ComSmartPtr<IAudioClient> client;
@@ -635,7 +645,7 @@ private:
         if (! check (client->GetMixFormat (&mixFormat)))
             return {};
 
-        WAVEFORMATEXTENSIBLE format;
+        WAVEFORMATEXTENSIBLE format{};
 
         copyWavFormat (format, mixFormat);
         CoTaskMemFree (mixFormat);
@@ -1337,6 +1347,16 @@ public:
     BigInteger getActiveInputChannels() const override      { return inputDevice  != nullptr ? inputDevice->channels  : BigInteger(); }
     String getLastError() override                          { return lastError; }
     int getXRunCount() const noexcept override              { return inputDevice != nullptr ? inputDevice->xruns : -1; }
+
+    std::optional<BigInteger> getDefaultOutputChannels() const override
+    {
+        return outputDevice != nullptr ? outputDevice->getDefaultLayout() : std::nullopt;
+    }
+
+    std::optional<BigInteger> getDefaultInputChannels() const override
+    {
+        return inputDevice != nullptr ? inputDevice->getDefaultLayout() : std::nullopt;
+    }
 
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
                  double sampleRate, int bufferSizeSamples) override
