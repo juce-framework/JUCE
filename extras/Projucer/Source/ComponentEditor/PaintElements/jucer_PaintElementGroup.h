@@ -35,13 +35,13 @@ public:
     PaintElementGroup (PaintRoutine*);
     ~PaintElementGroup() override;
 
-    void ungroup (const bool);
+    void ungroup (bool);
 
     static void groupSelected (PaintRoutine* const);
 
     int getNumElements() const noexcept;
 
-    PaintElement* getElement (const int index) const noexcept;
+    PaintElement* getElement (int index) const noexcept;
     int indexOfElement (const PaintElement* element) const noexcept;
 
     bool containsElement (const PaintElement* element) const;
@@ -49,7 +49,7 @@ public:
     //==============================================================================
     void setInitialBounds (int, int) override;
     Rectangle<int> getCurrentBounds (const Rectangle<int>&) const override;
-    void setCurrentBounds (const Rectangle<int>&, const Rectangle<int>&, const bool) override;
+    void setCurrentBounds (const Rectangle<int>&, const Rectangle<int>&, bool) override;
 
     //==============================================================================
     void draw (Graphics&, const ComponentLayout*, const Rectangle<int>&) override;

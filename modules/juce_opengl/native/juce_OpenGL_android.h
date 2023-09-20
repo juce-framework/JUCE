@@ -201,7 +201,7 @@ public:
 
     //==============================================================================
     void swapBuffers() const noexcept           { eglSwapBuffers (display, surface.get()); }
-    bool setSwapInterval (const int)            { return false; }
+    bool setSwapInterval (int)                  { return false; }
     int getSwapInterval() const                 { return 0; }
 
     //==============================================================================

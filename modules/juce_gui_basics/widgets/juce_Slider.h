@@ -924,7 +924,7 @@ public:
                                        float sliderPos,
                                        float minSliderPos,
                                        float maxSliderPos,
-                                       const Slider::SliderStyle,
+                                       Slider::SliderStyle,
                                        Slider&) = 0;
 
         virtual void drawLinearSliderBackground (Graphics&,
@@ -932,12 +932,12 @@ public:
                                                  float sliderPos,
                                                  float minSliderPos,
                                                  float maxSliderPos,
-                                                 const Slider::SliderStyle style,
+                                                 Slider::SliderStyle,
                                                  Slider&) = 0;
 
         virtual void drawLinearSliderOutline (Graphics&,
                                               int x, int y, int width, int height,
-                                              const Slider::SliderStyle,
+                                              Slider::SliderStyle,
                                               Slider&) = 0;
 
         virtual void drawLinearSliderThumb (Graphics&,
@@ -945,7 +945,7 @@ public:
                                             float sliderPos,
                                             float minSliderPos,
                                             float maxSliderPos,
-                                            const Slider::SliderStyle,
+                                            Slider::SliderStyle,
                                             Slider&) = 0;
 
         virtual int getSliderThumbRadius (Slider&) = 0;

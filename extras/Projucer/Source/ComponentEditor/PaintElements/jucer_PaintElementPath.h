@@ -47,15 +47,15 @@ public:
 
     int getNumPoints() const;
 
-    void changePointType (const Path::Iterator::PathElementType newType,
+    void changePointType (Path::Iterator::PathElementType newType,
                           const Rectangle<int>& parentArea,
-                          const bool undoable);
+                          bool undoable);
 
     void deleteFromPath();
     void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected);
 
 private:
-    PathPoint withChangedPointType (const Path::Iterator::PathElementType newType,
+    PathPoint withChangedPointType (Path::Iterator::PathElementType newType,
                                     const Rectangle<int>& parentArea) const;
 };
 
@@ -150,7 +150,7 @@ class PathPointComponent    : public ElementSiblingComponent
 {
 public:
     PathPointComponent (PaintElementPath* const path_,
-                        const int index, const int pointNumber);
+                        int index, int pointNumber);
 
     ~PathPointComponent();
 

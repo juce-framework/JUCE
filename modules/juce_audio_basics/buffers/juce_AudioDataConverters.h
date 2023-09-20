@@ -279,7 +279,7 @@ public:
     public:
         inline NonInterleaved() = default;
         inline NonInterleaved (const NonInterleaved&) = default;
-        inline NonInterleaved (const int) noexcept {}
+        inline NonInterleaved (int) noexcept {}
         inline void copyFrom (const NonInterleaved&) noexcept {}
         template <class SampleFormatType> inline void advanceData (SampleFormatType& s) noexcept                    { s.advance(); }
         template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) noexcept  { s.skip (numSamples); }

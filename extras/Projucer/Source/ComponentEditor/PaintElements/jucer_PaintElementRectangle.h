@@ -41,7 +41,7 @@ public:
         return PaintElement::getCurrentBounds (parentArea); // bypass the ColouredElement implementation
     }
 
-    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable) override
+    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, bool undoable) override
     {
         PaintElement::setCurrentBounds (newBounds, parentArea, undoable); // bypass the ColouredElement implementation
     }

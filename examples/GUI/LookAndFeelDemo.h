@@ -152,7 +152,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
 
     void drawLinearSliderThumb (Graphics& g, int x, int y, int width, int height,
                                 float sliderPos, float minSliderPos, float maxSliderPos,
-                                const Slider::SliderStyle style, Slider& slider) override
+                                Slider::SliderStyle style, Slider& slider) override
     {
         auto sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 
@@ -194,7 +194,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
 
     void drawLinearSlider (Graphics& g, int x, int y, int width, int height,
                            float sliderPos, float minSliderPos, float maxSliderPos,
-                           const Slider::SliderStyle style, Slider& slider) override
+                           Slider::SliderStyle style, Slider& slider) override
     {
         g.fillAll (slider.findColour (Slider::backgroundColourId));
 
@@ -354,7 +354,7 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
 
     void drawLinearSliderThumb (Graphics& g, int x, int y, int width, int height,
                                 float sliderPos, float minSliderPos, float maxSliderPos,
-                                const Slider::SliderStyle style, Slider& slider) override
+                                Slider::SliderStyle style, Slider& slider) override
     {
         auto sliderRadius = (float) getSliderThumbRadius (slider);
 

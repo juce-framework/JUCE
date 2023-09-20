@@ -220,8 +220,8 @@ public:
 
     /** Same functionality as updateFrom(), but taking doubles instead of ints.
     */
-    void updateFromDouble (const double newX, const double newY,
-                           const double newW, const double newH,
+    void updateFromDouble (double newX, double newY,
+                           double newW, double newH,
                            const Rectangle<int>& target) noexcept
     {
         updatePosAndSize (x, w, newX, newW, xMode, wMode, target.getX(), target.getWidth());
@@ -334,7 +334,7 @@ public:
     /** Sets the raw value of the x coordinate.
         See getX() for the meaning of this value.
     */
-    void setX (const double newX) noexcept          { x = newX; }
+    void setX (double newX) noexcept                { x = newX; }
 
     /** Returns the anchoring mode for the y coordinate.
         To change any of the modes, use setModes().
@@ -364,7 +364,7 @@ public:
     /** Sets the raw value of the y coordinate.
         See getY() for the meaning of this value.
     */
-    void setY (const double newY) noexcept          { y = newY; }
+    void setY (double newY) noexcept          { y = newY; }
 
     /** Returns the mode used to calculate the width.
         To change any of the modes, use setModes().
@@ -383,7 +383,7 @@ public:
 
         See getWidth() for the details about what this value means.
     */
-    void setWidth (const double newWidth) noexcept  { w = newWidth; }
+    void setWidth (double newWidth) noexcept        { w = newWidth; }
 
     /** Returns the mode used to calculate the height.
         To change any of the modes, use setModes().
@@ -402,7 +402,7 @@ public:
 
         See getHeight() for the details about what this value means.
     */
-    void setHeight (const double newHeight) noexcept    { h = newHeight; }
+    void setHeight (double newHeight) noexcept      { h = newHeight; }
 
     //==============================================================================
     /** If the size and position are constance, and wouldn't be affected by changes

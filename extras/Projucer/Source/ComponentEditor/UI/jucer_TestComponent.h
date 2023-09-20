@@ -34,7 +34,7 @@ public:
     //==============================================================================
     TestComponent (JucerDocument* const ownerDocument,
                    JucerDocument* const loadedDocument,
-                   const bool alwaysFillBackground);
+                   bool alwaysFillBackground);
 
     ~TestComponent() override;
 

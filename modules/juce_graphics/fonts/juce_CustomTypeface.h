@@ -157,7 +157,7 @@ private:
     OwnedArray<GlyphInfo> glyphs;
     short lookupTable[128];
 
-    GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) noexcept;
+    GlyphInfo* findGlyph (juce_wchar character, bool loadIfNeeded) noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface)
 };

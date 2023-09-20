@@ -107,7 +107,7 @@ public:
     void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
     bool perform (const InvocationInfo&) override;
 
-    bool isSaveCommand (const CommandID id);
+    bool isSaveCommand (CommandID);
 
     void paint (Graphics&) override;
     void resized() override;
@@ -125,7 +125,7 @@ private:
     void showTranslationTool();
 
     //==============================================================================
-    void showProjectPanel (const int index);
+    void showProjectPanel (int index);
     bool canSelectedProjectBeLaunch();
 
     //==============================================================================

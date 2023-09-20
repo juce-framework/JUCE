@@ -41,7 +41,7 @@ namespace ObjectTypes
     extern const char* const* const elementTypeNames;
     extern const int numElementTypes;
 
-    PaintElement* createNewElement (const int index, PaintRoutine* owner);
+    PaintElement* createNewElement (int index, PaintRoutine* owner);
     PaintElement* createNewImageElement (PaintRoutine* owner);
     PaintElement* createElementForXml (const XmlElement* const e, PaintRoutine* const owner);
 }

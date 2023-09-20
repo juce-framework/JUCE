@@ -75,7 +75,7 @@ public:
     void fillRectList (const RectangleList<float>&) override;
     void fillPath (const Path&, const AffineTransform&) override;
     void drawImage (const Image&, const AffineTransform&) override;
-    void drawLine (const Line <float>&) override;
+    void drawLine (const Line<float>&) override;
 
     //==============================================================================
     const Font& getFont() override;

@@ -60,7 +60,7 @@ public:
     struct JUCE_API  InvocationInfo
     {
         //==============================================================================
-        InvocationInfo (const CommandID commandID);
+        InvocationInfo (CommandID commandID);
 
         //==============================================================================
         /** The UID of the command that should be performed. */
@@ -195,15 +195,15 @@ public:
         @see perform, ApplicationCommandManager::invoke
     */
     bool invoke (const InvocationInfo& invocationInfo,
-                 const bool asynchronously);
+                 bool asynchronously);
 
     /** Invokes a given command directly on this target.
 
         This is just an easy way to call invoke() without having to fill out the InvocationInfo
         structure.
     */
-    bool invokeDirectly (const CommandID commandID,
-                         const bool asynchronously);
+    bool invokeDirectly (CommandID commandID,
+                         bool asynchronously);
 
     //==============================================================================
     /** Searches this target and all subsequent ones for the first one that can handle
@@ -212,14 +212,14 @@ public:
         This will use getNextCommandTarget() to determine the chain of targets to try
         after this one.
     */
-    ApplicationCommandTarget* getTargetForCommand (const CommandID commandID);
+    ApplicationCommandTarget* getTargetForCommand (CommandID commandID);
 
     /** Checks whether this command can currently be performed by this target.
 
         This will return true only if a call to getCommandInfo() doesn't set the
         isDisabled flag to indicate that the command is inactive.
     */
-    bool isCommandActive (const CommandID commandID);
+    bool isCommandActive (CommandID commandID);
 
     /** If this object is a Component, this method will search upwards in its current
         UI hierarchy for the next parent component that implements the

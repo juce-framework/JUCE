@@ -383,7 +383,7 @@ JUCE_API Time operator+ (RelativeTime delta, Time time) noexcept;
 /** Subtracts a RelativeTime from a Time. */
 JUCE_API Time operator- (Time time, RelativeTime delta) noexcept;
 /** Returns the relative time difference between two times. */
-JUCE_API const RelativeTime operator- (Time time1, Time time2) noexcept;
+JUCE_API RelativeTime operator- (Time time1, Time time2) noexcept;
 
 /** Compares two Time objects. */
 JUCE_API bool operator== (Time time1, Time time2) noexcept;
