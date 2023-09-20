@@ -56,7 +56,7 @@ namespace detail
     template <typename Fn, typename Ret, typename... Args>
     std::enable_if_t<std::is_same_v<Ret, void>, Ret> call (void* s, Args... args)
     {
-        (*reinterpret_cast<Fn*> (s)) (args...);
+        (*reinterpret_cast<Fn*> (s)) (std::forward<Args> (args)...);
     }
 
     template <typename Fn, typename Ret, typename... Args>
