@@ -422,7 +422,7 @@ public:
     {
         const auto tie = [] (const PositionedRectangle& r)
         {
-            return std::tie (r.x, r.y, r.xMode, r.yMode, r.wMode, r.hMode);
+            return std::tie (r.x, r.y, r.w, r.h, r.xMode, r.yMode, r.wMode, r.hMode);
         };
 
         return tie (*this) == tie (other);
