@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class ItemPreviewComponent  : public Component
+class ItemPreviewComponent final : public Component
 {
 public:
     ItemPreviewComponent (const File& f)  : file (f)

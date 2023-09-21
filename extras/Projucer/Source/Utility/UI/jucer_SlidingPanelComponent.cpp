@@ -27,7 +27,7 @@
 #include "jucer_SlidingPanelComponent.h"
 
 //==============================================================================
-struct SlidingPanelComponent::DotButton  : public Button
+struct SlidingPanelComponent::DotButton final : public Button
 {
     DotButton (SlidingPanelComponent& sp, int pageIndex)
         : Button (String()), owner (sp), index (pageIndex) {}

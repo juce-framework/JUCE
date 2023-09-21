@@ -101,8 +101,8 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 /** This list box just displays a StringArray and broadcasts a change message when the
     selected row changes.
 */
-class Box2DTestList : public ListBoxModel,
-                      public ChangeBroadcaster
+class Box2DTestList final : public ListBoxModel,
+                            public ChangeBroadcaster
 {
 public:
     Box2DTestList (const StringArray& testList)
@@ -134,7 +134,7 @@ private:
 };
 
 //==============================================================================
-struct Box2DRenderComponent  : public Component
+struct Box2DRenderComponent final : public Component
 {
     Box2DRenderComponent()
     {
@@ -159,9 +159,9 @@ struct Box2DRenderComponent  : public Component
 };
 
 //==============================================================================
-class Box2DDemo : public Component,
-                  private Timer,
-                  private ChangeListener
+class Box2DDemo final : public Component,
+                        private Timer,
+                        private ChangeListener
 {
 public:
     enum Demos

@@ -43,7 +43,7 @@ inline StringArray msBuildEscape (StringArray range)
 }
 
 //==============================================================================
-class MSVCProjectExporterBase   : public ProjectExporter
+class MSVCProjectExporterBase : public ProjectExporter
 {
 public:
     MSVCProjectExporterBase (Project& p, const ValueTree& t, String folderName)
@@ -154,8 +154,8 @@ public:
     }
 
     //==============================================================================
-    class MSVCBuildConfiguration  : public BuildConfiguration,
-                                    private Value::Listener
+    class MSVCBuildConfiguration final : public BuildConfiguration,
+                                         private Value::Listener
     {
     public:
         MSVCBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -417,16 +417,16 @@ public:
     };
 
     //==============================================================================
-    class MSVCTargetBase : public build_tools::ProjectType::Target
+    class MSVCTarget final : public build_tools::ProjectType::Target
     {
     public:
-        MSVCTargetBase (build_tools::ProjectType::Target::Type targetType, const MSVCProjectExporterBase& exporter)
+        MSVCTarget (build_tools::ProjectType::Target::Type targetType, const MSVCProjectExporterBase& exporter)
             : build_tools::ProjectType::Target (targetType), owner (exporter)
         {
             projectGuid = createGUID (owner.getProject().getProjectUIDString() + getName());
         }
 
-        virtual ~MSVCTargetBase() {}
+        virtual ~MSVCTarget() {}
 
         String getProjectVersionString() const     { return "10.00"; }
         String getProjectFileSuffix() const        { return ".vcxproj"; }
@@ -1302,7 +1302,7 @@ public:
 
             if (type == LV2PlugIn)
             {
-                const auto* writerTarget = [&]() -> MSVCTargetBase*
+                const auto* writerTarget = [&]() -> MSVCTarget*
                 {
                     for (auto* target : owner.targets)
                         if (target->type == LV2Helper)
@@ -1332,7 +1332,7 @@ public:
 
                 const auto manifestScript = [&]() -> String
                 {
-                    const auto* writerTarget = [&]() -> MSVCTargetBase*
+                    const auto* writerTarget = [&]() -> MSVCTarget*
                     {
                         for (auto* target : owner.targets)
                             if (target->type == VST3Helper)
@@ -1648,7 +1648,7 @@ public:
         callForAllSupportedTargets ([this] (build_tools::ProjectType::Target::Type targetType)
                                     {
                                         if (targetType != build_tools::ProjectType::Target::AggregateTarget)
-                                            targets.add (new MSVCTargetBase (targetType, *this));
+                                            targets.add (new MSVCTarget (targetType, *this));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter
@@ -1656,7 +1656,7 @@ public:
         jassert (targets.size() > 0);
     }
 
-    const MSVCTargetBase* getSharedCodeTarget() const
+    const MSVCTarget* getSharedCodeTarget() const
     {
         for (auto target : targets)
             if (target->type == build_tools::ProjectType::Target::SharedCodeTarget)
@@ -1700,7 +1700,7 @@ private:
 protected:
     //==============================================================================
     mutable File rcFile, iconFile, packagesConfigFile;
-    OwnedArray<MSVCTargetBase> targets;
+    OwnedArray<MSVCTarget> targets;
 
     ValueTreePropertyWithDefault IPPLibraryValue,
                                  IPP1ALibraryValue,
@@ -1750,7 +1750,7 @@ protected:
         return getCleanedStringArray (searchPaths);
     }
 
-    String getTargetGuid (MSVCTargetBase::Type type) const
+    String getTargetGuid (MSVCTarget::Type type) const
     {
         for (auto* target : targets)
             if (target != nullptr && target->type == type)
@@ -1762,9 +1762,9 @@ protected:
     //==============================================================================
     void writeProjectDependencies (OutputStream& out) const
     {
-        const auto sharedCodeGuid = getTargetGuid (MSVCTargetBase::SharedCodeTarget);
-        const auto lv2HelperGuid  = getTargetGuid (MSVCTargetBase::LV2Helper);
-        const auto vst3HelperGuid = getTargetGuid (MSVCTargetBase::VST3Helper);
+        const auto sharedCodeGuid = getTargetGuid (MSVCTarget::SharedCodeTarget);
+        const auto lv2HelperGuid  = getTargetGuid (MSVCTarget::LV2Helper);
+        const auto vst3HelperGuid = getTargetGuid (MSVCTarget::VST3Helper);
 
         for (int addingOtherTargets = 0; addingOtherTargets < (sharedCodeGuid.isNotEmpty() ? 2 : 1); ++addingOtherTargets)
         {
@@ -1772,24 +1772,24 @@ protected:
             {
                 if (auto* target = targets[i])
                 {
-                    if (sharedCodeGuid.isEmpty() || (addingOtherTargets != 0) == (target->type != MSVCTargetBase::StandalonePlugIn))
+                    if (sharedCodeGuid.isEmpty() || (addingOtherTargets != 0) == (target->type != MSVCTarget::StandalonePlugIn))
                     {
                         out << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << " - "
                             << target->getName() << "\", \""
                             << target->getVCProjFile().getFileName() << "\", \"" << target->getProjectGuid() << '"' << newLine;
 
                         if (sharedCodeGuid.isNotEmpty()
-                            && target->type != MSVCTargetBase::SharedCodeTarget
-                            && target->type != MSVCTargetBase::LV2Helper
-                            && target->type != MSVCTargetBase::VST3Helper)
+                            && target->type != MSVCTarget::SharedCodeTarget
+                            && target->type != MSVCTarget::LV2Helper
+                            && target->type != MSVCTarget::VST3Helper)
                         {
                             out << "\tProjectSection(ProjectDependencies) = postProject" << newLine
                                 << "\t\t" << sharedCodeGuid << " = " << sharedCodeGuid << newLine;
 
-                            if (target->type == MSVCTargetBase::LV2PlugIn && lv2HelperGuid.isNotEmpty())
+                            if (target->type == MSVCTarget::LV2PlugIn && lv2HelperGuid.isNotEmpty())
                                 out << "\t\t" << lv2HelperGuid << " = " << lv2HelperGuid << newLine;
 
-                            if (target->type == MSVCTargetBase::VST3PlugIn && vst3HelperGuid.isNotEmpty())
+                            if (target->type == MSVCTarget::VST3PlugIn && vst3HelperGuid.isNotEmpty())
                                 out << "\t\t" << vst3HelperGuid << " = " << vst3HelperGuid << newLine;
 
                             out << "\tEndProjectSection" << newLine;
@@ -1925,7 +1925,7 @@ protected:
 };
 
 //==============================================================================
-class MSVCProjectExporterVC2017  : public MSVCProjectExporterBase
+class MSVCProjectExporterVC2017 final : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2017 (Project& p, const ValueTree& t)
@@ -1970,7 +1970,7 @@ private:
 };
 
 //==============================================================================
-class MSVCProjectExporterVC2019  : public MSVCProjectExporterBase
+class MSVCProjectExporterVC2019 final : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2019 (Project& p, const ValueTree& t)
@@ -2015,7 +2015,7 @@ private:
 };
 
 //==============================================================================
-class MSVCProjectExporterVC2022  : public MSVCProjectExporterBase
+class MSVCProjectExporterVC2022 final : public MSVCProjectExporterBase
 {
 public:
     MSVCProjectExporterVC2022 (Project& p, const ValueTree& t)

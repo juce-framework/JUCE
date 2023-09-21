@@ -100,7 +100,7 @@ struct StateVariableFilterDemoDSP
     double sampleRate = 0.0;
 };
 
-struct StateVariableFilterDemo    : public Component
+struct StateVariableFilterDemo final : public Component
 {
     StateVariableFilterDemo()
     {

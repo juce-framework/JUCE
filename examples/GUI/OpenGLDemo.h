@@ -951,7 +951,7 @@ private:
             Graphics g (*glRenderer);
             g.addTransform (AffineTransform::scale (desktopScale));
 
-            for (auto s : stars)
+            for (const auto& s : stars)
             {
                 auto size = 0.25f;
 

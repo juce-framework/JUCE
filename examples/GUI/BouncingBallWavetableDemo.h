@@ -50,8 +50,8 @@
 
 
 //==============================================================================
-class BouncingBallWavetableDemo   : public AudioAppComponent,
-                                    private Timer
+class BouncingBallWavetableDemo final : public AudioAppComponent,
+                                        private Timer
 {
 public:
     //==============================================================================

@@ -27,11 +27,11 @@
 
 
 //==============================================================================
-class MakefileProjectExporter  : public ProjectExporter
+class MakefileProjectExporter final : public ProjectExporter
 {
 protected:
     //==============================================================================
-    class MakeBuildConfiguration  : public BuildConfiguration
+    class MakeBuildConfiguration final : public BuildConfiguration
     {
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -125,7 +125,7 @@ protected:
 
 public:
     //==============================================================================
-    class MakefileTarget : public build_tools::ProjectType::Target
+    class MakefileTarget final : public build_tools::ProjectType::Target
     {
     public:
         MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
@@ -299,10 +299,10 @@ public:
 
             for (auto& [path, flags] : filesToCompile)
             {
-                const auto additionalTargetDependencies = [&path = path, this]
+                const auto additionalTargetDependencies = [&p = path, this]
                 {
                     if (   owner.linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper()
-                        && path.getFileName().contains ("include_juce_gui_extra.cpp"))
+                        && p.getFileName().contains ("include_juce_gui_extra.cpp"))
                     {
                         return owner.linuxSubprocessHelperProperties
                             .getLinuxSubprocessHelperBinaryDataSource()

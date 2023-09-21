@@ -29,7 +29,7 @@
 #include "jucer_LicenseQueryThread.h"
 
 //==============================================================================
-class LicenseController  : private Timer
+class LicenseController final : private Timer
 {
 public:
     LicenseController()

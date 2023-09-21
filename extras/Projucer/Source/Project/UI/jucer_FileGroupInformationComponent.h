@@ -27,9 +27,9 @@
 
 
 //==============================================================================
-class FileGroupInformationComponent  : public Component,
-                                       private ListBoxModel,
-                                       private ValueTree::Listener
+class FileGroupInformationComponent final : public Component,
+                                            private ListBoxModel,
+                                            private ValueTree::Listener
 {
 public:
     FileGroupInformationComponent (const Project::Item& group)
@@ -126,7 +126,7 @@ private:
     }
 
     //==============================================================================
-    class FileOptionComponent  : public Component
+    class FileOptionComponent final : public Component
     {
     public:
         FileOptionComponent (const Project::Item& fileItem, ListBoxHeader* listBoxHeader)
@@ -203,8 +203,8 @@ private:
 
     private:
         //==============================================================================
-        class CompilerFlagSchemeSelector  : public Component,
-                                            private Value::Listener
+        class CompilerFlagSchemeSelector final : public Component,
+                                                 private Value::Listener
         {
         public:
             CompilerFlagSchemeSelector (Project::Item& it)

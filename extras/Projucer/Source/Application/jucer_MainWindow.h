@@ -35,12 +35,12 @@ class ProjectContentComponent;
 /**
     The big top-level window where everything happens.
 */
-class MainWindow  : public DocumentWindow,
-                    public ApplicationCommandTarget,
-                    public FileDragAndDropTarget,
-                    public DragAndDropContainer,
-                    private Value::Listener,
-                    private ChangeListener
+class MainWindow final : public DocumentWindow,
+                         public ApplicationCommandTarget,
+                         public FileDragAndDropTarget,
+                         public DragAndDropContainer,
+                         private Value::Listener,
+                         private ChangeListener
 {
 public:
     //==============================================================================

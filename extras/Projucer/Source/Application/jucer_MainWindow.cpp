@@ -33,9 +33,9 @@
 #include "../Project/UI/jucer_ProjectContentComponent.h"
 
 //==============================================================================
-class BlurOverlayWithComponent  : public Component,
-                                  private ComponentMovementWatcher,
-                                  private AsyncUpdater
+class BlurOverlayWithComponent final : public Component,
+                                       private ComponentMovementWatcher,
+                                       private AsyncUpdater
 {
 public:
     BlurOverlayWithComponent (MainWindow& window, std::unique_ptr<Component> comp)

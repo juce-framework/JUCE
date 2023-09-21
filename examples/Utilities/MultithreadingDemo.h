@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class BouncingBall   : private ComponentListener
+class BouncingBall : private ComponentListener
 {
 public:
     BouncingBall (Component& comp)
@@ -145,8 +145,8 @@ private:
 };
 
 //==============================================================================
-class DemoThread    : public BouncingBall,
-                      public Thread
+class DemoThread final : public BouncingBall,
+                         public Thread
 {
 public:
     DemoThread (Component& containerComp)
@@ -194,8 +194,8 @@ private:
 
 
 //==============================================================================
-class DemoThreadPoolJob  : public BouncingBall,
-                           public ThreadPoolJob
+class DemoThreadPoolJob final : public BouncingBall,
+                                public ThreadPoolJob
 {
 public:
     DemoThreadPoolJob (Component& containerComp)
@@ -232,8 +232,8 @@ private:
 };
 
 //==============================================================================
-class MultithreadingDemo   : public Component,
-                             private Timer
+class MultithreadingDemo final : public Component,
+                                 private Timer
 {
 public:
     //==============================================================================

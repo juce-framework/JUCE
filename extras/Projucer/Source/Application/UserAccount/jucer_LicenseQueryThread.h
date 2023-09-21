@@ -181,7 +181,7 @@ private:
         virtual bool parseServerResponse (const String&, LicenseState&) = 0;
     };
 
-    struct UserLogin  : public AccountEnquiryBase
+    struct UserLogin final : public AccountEnquiryBase
     {
         UserLogin (const String& e, const String& p)
             : userEmail (e), userPassword (p)
@@ -230,7 +230,7 @@ private:
         String userEmail, userPassword;
     };
 
-    struct UserLicenseQuery  : public AccountEnquiryBase
+    struct UserLicenseQuery final : public AccountEnquiryBase
     {
         UserLicenseQuery (const String& authToken)
             : userAuthToken (authToken)

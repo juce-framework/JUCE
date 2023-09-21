@@ -29,8 +29,8 @@
 #include "../../Application/jucer_Application.h"
 
 //==============================================================================
-class MessagesPopupWindow  : public Component,
-                             private ComponentMovementWatcher
+class MessagesPopupWindow final : public Component,
+                                  private ComponentMovementWatcher
 {
 public:
     MessagesPopupWindow (Component& target, Component& parent, Project& project)
@@ -95,9 +95,9 @@ public:
 
 private:
     //==============================================================================
-    class MessagesListComponent  : public Component,
-                                   private ValueTree::Listener,
-                                   private AsyncUpdater
+    class MessagesListComponent final : public Component,
+                                        private ValueTree::Listener,
+                                        private AsyncUpdater
     {
     public:
         MessagesListComponent (MessagesPopupWindow& o, Project& currentProject)
@@ -151,7 +151,7 @@ private:
         static constexpr int messageSpacing = 2;
 
         //==============================================================================
-        struct MessageComponent  : public Component
+        struct MessageComponent final : public Component
         {
             MessageComponent (MessagesListComponent& listComponent,
                               const Identifier& messageToDisplay,
@@ -379,7 +379,7 @@ private:
 };
 
 //==============================================================================
-class ProjectMessagesComponent  : public Component
+class ProjectMessagesComponent final : public Component
 {
 public:
     ProjectMessagesComponent()
@@ -492,8 +492,8 @@ public:
 
 private:
     //==============================================================================
-    struct MessageCountComponent  : public Component,
-                                    private ValueTree::Listener
+    struct MessageCountComponent final : public Component,
+                                         private ValueTree::Listener
     {
         MessageCountComponent (ProjectMessagesComponent& o, Path pathToUse)
           : owner (o),

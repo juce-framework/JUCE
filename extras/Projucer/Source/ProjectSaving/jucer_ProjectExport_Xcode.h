@@ -54,7 +54,7 @@ xcrun codesign --verify "$JUCE_FULL_PRODUCT_PATH" || xcrun codesign -f -s - "$JU
 )";
 
 //==============================================================================
-class XcodeProjectExporter  : public ProjectExporter
+class XcodeProjectExporter final : public ProjectExporter
 {
 public:
     //==============================================================================
@@ -824,8 +824,8 @@ public:
 
 protected:
     //==============================================================================
-    class XcodeBuildConfiguration  : public BuildConfiguration,
-                                     private ValueTree::Listener
+    class XcodeBuildConfiguration final : public BuildConfiguration,
+                                          private ValueTree::Listener
     {
     public:
         XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS, const ProjectExporter& e)
@@ -1070,7 +1070,7 @@ public:
     };
 
     //==============================================================================
-    struct XcodeTarget : build_tools::ProjectType::Target
+    struct XcodeTarget final : build_tools::ProjectType::Target
     {
         //==============================================================================
         XcodeTarget (Type targetType, const XcodeProjectExporter& exporter)

@@ -55,7 +55,7 @@
     when the browser changes URL. You don't need to do this, you can just also
     just use the WebBrowserComponent class directly.
 */
-class DemoBrowserComponent  : public WebBrowserComponent
+class DemoBrowserComponent final : public WebBrowserComponent
 {
 public:
     //==============================================================================
@@ -89,7 +89,7 @@ private:
 
 
 //==============================================================================
-class WebBrowserDemo    : public Component
+class WebBrowserDemo final : public Component
 {
 public:
     WebBrowserDemo()

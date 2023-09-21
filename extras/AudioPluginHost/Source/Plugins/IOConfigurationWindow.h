@@ -30,7 +30,7 @@ class GraphDocumentComponent;
 
 
 //==============================================================================
-class IOConfigurationWindow   : public  AudioProcessorEditor
+class IOConfigurationWindow final : public  AudioProcessorEditor
 {
 public:
     IOConfigurationWindow (AudioProcessor&);

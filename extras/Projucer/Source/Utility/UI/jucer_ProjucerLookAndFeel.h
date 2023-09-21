@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class ProjucerLookAndFeel   : public LookAndFeel_V4
+class ProjucerLookAndFeel : public LookAndFeel_V4
 {
 public:
     ProjucerLookAndFeel();

@@ -49,8 +49,8 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class ValueTreeItem  : public TreeViewItem,
-                       private ValueTree::Listener
+class ValueTreeItem final : public TreeViewItem,
+                            private ValueTree::Listener
 {
 public:
     ValueTreeItem (const ValueTree& v, UndoManager& um)
@@ -179,9 +179,9 @@ private:
 };
 
 //==============================================================================
-class ValueTreesDemo   : public Component,
-                         public DragAndDropContainer,
-                         private Timer
+class ValueTreesDemo final : public Component,
+                             public DragAndDropContainer,
+                             private Timer
 {
 public:
     ValueTreesDemo()

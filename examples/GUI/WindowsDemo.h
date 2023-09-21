@@ -50,7 +50,7 @@
 
 //==============================================================================
 /** Just a simple window that deletes itself when closed. */
-class BasicWindow   : public DocumentWindow
+class BasicWindow final : public DocumentWindow
 {
 public:
     BasicWindow (const String& name, Colour backgroundColour, int buttonsNeeded)
@@ -68,8 +68,8 @@ private:
 
 //==============================================================================
 /** This window contains a ColourSelector which can be used to change the window's colour. */
-class ColourSelectorWindow   : public DocumentWindow,
-                               private ChangeListener
+class ColourSelectorWindow final : public DocumentWindow,
+                                   private ChangeListener
 {
 public:
     ColourSelectorWindow (const String& name, Colour backgroundColour, int buttonsNeeded)
@@ -106,8 +106,8 @@ private:
 };
 
 //==============================================================================
-class BouncingBallComponent : public Component,
-                              public Timer
+class BouncingBallComponent final : public Component,
+                                    public Timer
 {
 public:
     BouncingBallComponent()
@@ -159,7 +159,7 @@ private:
 };
 
 //==============================================================================
-class BouncingBallsContainer : public Component
+class BouncingBallsContainer final : public Component
 {
 public:
     BouncingBallsContainer (int numBalls)
@@ -207,7 +207,7 @@ private:
 };
 
 //==============================================================================
-class WindowsDemo   : public Component
+class WindowsDemo final : public Component
 {
 public:
     enum Windows

@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class AppearanceSettings    : private ValueTree::Listener
+class AppearanceSettings final : private ValueTree::Listener
 {
 public:
     AppearanceSettings (bool updateAppWhenChanged);

@@ -28,7 +28,7 @@
 
 //==============================================================================
 template <typename Type>
-class NumericValueSource   : public ValueSourceFilter
+class NumericValueSource final : public ValueSourceFilter
 {
 public:
     NumericValueSource (const Value& source)  : ValueSourceFilter (source) {}

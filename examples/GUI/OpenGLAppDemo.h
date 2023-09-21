@@ -54,7 +54,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class OpenGLAppDemo   : public OpenGLAppComponent
+class OpenGLAppDemo final : public OpenGLAppComponent
 {
 public:
     //==============================================================================

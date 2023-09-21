@@ -26,7 +26,7 @@
 #include <JuceHeader.h>
 
 //==============================================================================
-class ConsoleLogger : public Logger
+class ConsoleLogger final : public Logger
 {
     void logMessage (const String& message) override
     {
@@ -39,7 +39,7 @@ class ConsoleLogger : public Logger
 };
 
 //==============================================================================
-class ConsoleUnitTestRunner : public UnitTestRunner
+class ConsoleUnitTestRunner final : public UnitTestRunner
 {
     void logMessage (const String& message) override
     {

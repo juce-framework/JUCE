@@ -49,8 +49,8 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class NetworkingDemo   : public Component,
-                         private Thread
+class NetworkingDemo final : public Component,
+                             private Thread
 {
 public:
     NetworkingDemo()

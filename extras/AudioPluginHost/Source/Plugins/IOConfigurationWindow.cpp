@@ -31,7 +31,7 @@
 
 
 //==============================================================================
-struct NumberedBoxes  : public TableListBox,
+struct NumberedBoxes final : public TableListBox,
                         private TableListBoxModel,
                         private Button::Listener
 {
@@ -170,9 +170,9 @@ private:
 };
 
 //==============================================================================
-class IOConfigurationWindow::InputOutputConfig  : public Component,
-                                                  private Button::Listener,
-                                                  private NumberedBoxes::Listener
+class IOConfigurationWindow::InputOutputConfig final : public Component,
+                                                       private Button::Listener,
+                                                       private NumberedBoxes::Listener
 {
 public:
     InputOutputConfig (IOConfigurationWindow& parent, bool direction)

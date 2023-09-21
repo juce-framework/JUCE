@@ -33,9 +33,9 @@ class MainHostWindow;
 /**
     A panel that displays and edits a PluginGraph.
 */
-class GraphEditorPanel   : public Component,
-                           public ChangeListener,
-                           private Timer
+class GraphEditorPanel final : public Component,
+                               public ChangeListener,
+                               private Timer
 {
 public:
     //==============================================================================
@@ -98,10 +98,10 @@ private:
 
     It also manages the graph itself, and plays it.
 */
-class GraphDocumentComponent  : public Component,
-                                public DragAndDropTarget,
-                                public DragAndDropContainer,
-                                private ChangeListener
+class GraphDocumentComponent final : public Component,
+                                     public DragAndDropTarget,
+                                     public DragAndDropContainer,
+                                     private ChangeListener
 {
 public:
     GraphDocumentComponent (AudioPluginFormatManager& formatManager,

@@ -48,9 +48,9 @@
 
 
 //==============================================================================
-class OSCLogListBox    : public ListBox,
-                         private ListBoxModel,
-                         private AsyncUpdater
+class OSCLogListBox final : public ListBox,
+                            private ListBoxModel,
+                            private AsyncUpdater
 {
 public:
     OSCLogListBox()
@@ -189,7 +189,7 @@ private:
 };
 
 //==============================================================================
-class OSCSenderDemo   : public Component
+class OSCSenderDemo final : public Component
 {
 public:
     OSCSenderDemo()
@@ -238,9 +238,9 @@ private:
 };
 
 //==============================================================================
-class OSCReceiverDemo   : public Component,
-                          private OSCReceiver,
-                          private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
+class OSCReceiverDemo final : public Component,
+                              private OSCReceiver,
+                              private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
 public:
     //==============================================================================
@@ -289,8 +289,8 @@ private:
 };
 
 //==============================================================================
-class OSCMonitorDemo   : public Component,
-                         private OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>
+class OSCMonitorDemo final : public Component,
+                             private OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>
 {
 public:
     //==============================================================================
@@ -465,7 +465,7 @@ private:
 };
 
 //==============================================================================
-class OSCDemo   : public Component
+class OSCDemo final : public Component
 {
 public:
     OSCDemo()

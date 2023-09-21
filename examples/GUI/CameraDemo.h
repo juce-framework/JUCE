@@ -50,7 +50,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class CameraDemo  : public Component
+class CameraDemo final : public Component
 {
 public:
     CameraDemo()

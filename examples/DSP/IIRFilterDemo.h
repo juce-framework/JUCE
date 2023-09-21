@@ -102,7 +102,7 @@ struct IIRFilterDemoDSP
     double sampleRate = 0.0;
 };
 
-struct IIRFilterDemo    : public Component
+struct IIRFilterDemo final : public Component
 {
     IIRFilterDemo()
     {

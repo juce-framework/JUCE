@@ -28,11 +28,11 @@
     Runs the master node, calls the demo to update the canvas, broadcasts those changes
     out to slaves, and shows a view of all the clients to allow them to be dragged around.
 */
-struct MasterContentComponent  : public Component,
-                                 private Timer,
-                                 private OSCSender,
-                                 private OSCReceiver,
-                                 private OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>
+struct MasterContentComponent final : public Component,
+                                      private Timer,
+                                      private OSCSender,
+                                      private OSCReceiver,
+                                      private OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>
 {
     MasterContentComponent (PropertiesFile& props)
         : properties (props)
@@ -275,7 +275,7 @@ private:
     }
 
     //==============================================================================
-    struct DeviceComponent  : public Component
+    struct DeviceComponent final : public Component
     {
         DeviceComponent (MasterContentComponent& e, String name)
             : Component (name), editor (e)

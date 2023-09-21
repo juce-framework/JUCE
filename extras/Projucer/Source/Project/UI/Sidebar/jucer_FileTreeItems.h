@@ -27,8 +27,8 @@
 
 
 //==============================================================================
-class FileTreeItemBase   : public JucerTreeViewBase,
-                           private ValueTree::Listener
+class FileTreeItemBase : public JucerTreeViewBase,
+                         private ValueTree::Listener
 {
 public:
     FileTreeItemBase (const Project::Item& projectItem)
@@ -398,7 +398,7 @@ protected:
 
     void triggerAsyncRename (const Project::Item& itemToRename)
     {
-        struct RenameMessage  : public CallbackMessage
+        struct RenameMessage final : public CallbackMessage
         {
             RenameMessage (TreeView* const t, const Project::Item& i)
                 : tree (t), itemToRename (i)  {}
@@ -479,7 +479,7 @@ private:
 };
 
 //==============================================================================
-class SourceFileItem   : public FileTreeItemBase
+class SourceFileItem final : public FileTreeItemBase
 {
 public:
     SourceFileItem (const Project::Item& projectItem)
@@ -651,7 +651,7 @@ public:
 };
 
 //==============================================================================
-class GroupItem   : public FileTreeItemBase
+class GroupItem final : public FileTreeItemBase
 {
 public:
     GroupItem (const Project::Item& projectItem, const String& filter = {})

@@ -48,7 +48,7 @@
 
 
 //==============================================================================
-class HelloWorldDemo  : public Component
+class HelloWorldDemo final : public Component
 {
 public:
     //==============================================================================

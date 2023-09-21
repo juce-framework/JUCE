@@ -124,7 +124,7 @@ void LatestVersionCheckerAndUpdater::run()
 }
 
 //==============================================================================
-class UpdateDialog  : public Component
+class UpdateDialog final : public Component
 {
 public:
     UpdateDialog (const String& newVersion, const String& releaseNotes)
@@ -385,7 +385,7 @@ void LatestVersionCheckerAndUpdater::addNotificationToOpenProjects (const Versio
 }
 
 //==============================================================================
-class DownloadAndInstallThread   : private ThreadWithProgressWindow
+class DownloadAndInstallThread final : private ThreadWithProgressWindow
 {
 public:
     DownloadAndInstallThread  (const VersionInfo::Asset& a, const File& t, std::function<void (Result)>&& cb)

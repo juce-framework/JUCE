@@ -50,7 +50,7 @@
 
 //==============================================================================
 /** Holds the various toggle buttons for the animation modes. */
-class ControllersComponent  : public Component
+class ControllersComponent final : public Component
 {
 public:
     ControllersComponent()
@@ -113,7 +113,7 @@ public:
 };
 
 //==============================================================================
-class GraphicsDemoBase  : public Component
+class GraphicsDemoBase : public Component
 {
 public:
     GraphicsDemoBase (ControllersComponent& cc, const String& name)
@@ -280,7 +280,7 @@ public:
 };
 
 //==============================================================================
-class RectangleFillTypesDemo  : public GraphicsDemoBase
+class RectangleFillTypesDemo final : public GraphicsDemoBase
 {
 public:
     RectangleFillTypesDemo (ControllersComponent& cc)
@@ -316,7 +316,7 @@ public:
 };
 
 //==============================================================================
-class PathsDemo  : public GraphicsDemoBase
+class PathsDemo final : public GraphicsDemoBase
 {
 public:
     PathsDemo (ControllersComponent& cc, bool linear, bool radial)
@@ -377,7 +377,7 @@ public:
 };
 
 //==============================================================================
-class StrokesDemo  : public GraphicsDemoBase
+class StrokesDemo final : public GraphicsDemoBase
 {
 public:
     StrokesDemo (ControllersComponent& cc)
@@ -410,7 +410,7 @@ public:
 };
 
 //==============================================================================
-class ImagesRenderingDemo  : public GraphicsDemoBase
+class ImagesRenderingDemo final : public GraphicsDemoBase
 {
 public:
     ImagesRenderingDemo (ControllersComponent& cc, bool argb, bool tiled)
@@ -448,7 +448,7 @@ public:
 };
 
 //==============================================================================
-class GlyphsDemo  : public GraphicsDemoBase
+class GlyphsDemo final : public GraphicsDemoBase
 {
 public:
     GlyphsDemo (ControllersComponent& cc)
@@ -468,7 +468,7 @@ public:
 };
 
 //==============================================================================
-class SVGDemo  : public GraphicsDemoBase
+class SVGDemo final : public GraphicsDemoBase
 {
 public:
     SVGDemo (ControllersComponent& cc)
@@ -513,7 +513,7 @@ public:
 };
 
 //==============================================================================
-class LinesDemo  : public GraphicsDemoBase
+class LinesDemo final : public GraphicsDemoBase
 {
 public:
     LinesDemo (ControllersComponent& cc)
@@ -576,8 +576,8 @@ public:
 };
 
 //==============================================================================
-class DemoHolderComponent  : public Component,
-                             private Timer
+class DemoHolderComponent final : public Component,
+                                  private Timer
 {
 public:
     DemoHolderComponent()
@@ -623,8 +623,8 @@ private:
 };
 
 //==============================================================================
-class TestListComponent   : public Component,
-                            private ListBoxModel
+class TestListComponent final : public Component,
+                                private ListBoxModel
 {
 public:
     TestListComponent (DemoHolderComponent& holder, ControllersComponent& controls)
@@ -695,7 +695,7 @@ private:
 };
 
 //==============================================================================
-class GraphicsDemo  : public Component
+class GraphicsDemo final : public Component
 {
 public:
     GraphicsDemo()

@@ -28,7 +28,7 @@
 #include "../../Utility/Helpers/jucer_TranslationHelpers.h"
 
 //==============================================================================
-class TranslationToolComponent  : public Component
+class TranslationToolComponent final : public Component
 {
 public:
     TranslationToolComponent()

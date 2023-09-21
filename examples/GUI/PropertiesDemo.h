@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class DemoButtonPropertyComponent : public ButtonPropertyComponent
+class DemoButtonPropertyComponent final : public ButtonPropertyComponent
 {
 public:
     DemoButtonPropertyComponent (const String& propertyName)
@@ -80,7 +80,7 @@ private:
 };
 
 //==============================================================================
-class DemoSliderPropertyComponent : public SliderPropertyComponent
+class DemoSliderPropertyComponent final : public SliderPropertyComponent
 {
 public:
     DemoSliderPropertyComponent (const String& propertyName)
@@ -162,8 +162,8 @@ static Array<PropertyComponent*> createChoices (int howMany)
 }
 
 //==============================================================================
-class PropertiesDemo   : public Component,
-                         private Timer
+class PropertiesDemo final : public Component,
+                             private Timer
 {
 public:
     PropertiesDemo()

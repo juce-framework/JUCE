@@ -50,7 +50,7 @@
 #include "WidgetsDemo.h"
 
 //==============================================================================
-class ComponentTransformsDemo  : public Component
+class ComponentTransformsDemo final : public Component
 {
 public:
     ComponentTransformsDemo()

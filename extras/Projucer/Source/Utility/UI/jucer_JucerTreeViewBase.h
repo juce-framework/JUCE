@@ -29,8 +29,8 @@ class ProjectContentComponent;
 class Project;
 
 //==============================================================================
-class JucerTreeViewBase   : public TreeViewItem,
-                            public TooltipClient
+class JucerTreeViewBase : public TreeViewItem,
+                          public TooltipClient
 {
 public:
     JucerTreeViewBase();
@@ -85,7 +85,7 @@ public:
     // To handle situations where an item gets deleted before openness is
     // restored for it, this OpennessRestorer keeps only a pointer to the
     // topmost tree item.
-    struct WholeTreeOpennessRestorer   : public OpennessRestorer
+    struct WholeTreeOpennessRestorer final : public OpennessRestorer
     {
         WholeTreeOpennessRestorer (TreeViewItem& item)  : OpennessRestorer (getTopLevelItem (item))
         {}
@@ -116,7 +116,7 @@ private:
 };
 
 //==============================================================================
-class TreePanelBase   : public Component
+class TreePanelBase : public Component
 {
 public:
     TreePanelBase (const Project* p, const String& treeviewID)
@@ -201,7 +201,7 @@ private:
 };
 
 //==============================================================================
-class TreeItemComponent   : public Component
+class TreeItemComponent final : public Component
 {
 public:
     TreeItemComponent (JucerTreeViewBase& i)  : item (&i)

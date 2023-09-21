@@ -59,7 +59,7 @@ static void showBubbleMessage (Component& targetComponent, const String& textToS
 /** To demonstrate how sliders can have custom snapping applied to their values,
     this simple class snaps the value to 50 if it comes near.
 */
-struct SnappingSlider  : public Slider
+struct SnappingSlider final : public Slider
 {
     double snapValue (double attemptedValue, DragMode dragMode) override
     {
@@ -74,8 +74,8 @@ struct SnappingSlider  : public Slider
 };
 
 /** A TextButton that pops up a colour chooser to change its colours. */
-class ColourChangeButton  : public TextButton,
-                            public ChangeListener
+class ColourChangeButton final : public TextButton,
+                                 public ChangeListener
 {
 public:
     ColourChangeButton()
@@ -112,7 +112,7 @@ public:
 };
 
 //==============================================================================
-struct SlidersPage  : public Component
+struct SlidersPage final : public Component
 {
     SlidersPage()
     {
@@ -261,7 +261,7 @@ private:
 };
 
 //==============================================================================
-struct ButtonsPage   : public Component
+struct ButtonsPage final : public Component
 {
     ButtonsPage (bool isRunningComponentTransformDemo)
     {
@@ -461,8 +461,8 @@ private:
 
 
 //==============================================================================
-struct MiscPage   : public Component,
-                    private Timer
+struct MiscPage final : public Component,
+                        private Timer
 {
     MiscPage()
     {
@@ -540,7 +540,7 @@ struct MiscPage   : public Component,
 };
 
 //==============================================================================
-struct MenuPage   : public Component
+struct MenuPage final : public Component
 {
     MenuPage()
     {
@@ -735,8 +735,8 @@ struct MenuPage   : public Component
 };
 
 //==============================================================================
-class ToolbarDemoComp   : public Component,
-                          private Slider::Listener
+class ToolbarDemoComp final : public Component,
+                              private Slider::Listener
 {
 public:
     ToolbarDemoComp()
@@ -802,7 +802,7 @@ private:
                customiseButton    { "Customise..." };
 
     //==============================================================================
-    class DemoToolbarItemFactory   : public ToolbarItemFactory
+    class DemoToolbarItemFactory final : public ToolbarItemFactory
     {
     public:
         DemoToolbarItemFactory() {}
@@ -977,8 +977,8 @@ private:
 /**
     This class shows how to implement a TableListBoxModel to show in a TableListBox.
 */
-class TableDemoComponent    : public Component,
-                              public TableListBoxModel
+class TableDemoComponent final : public Component,
+                                 public TableListBoxModel
 {
 public:
     TableDemoComponent()
@@ -1303,8 +1303,8 @@ private:
 };
 
 //==============================================================================
-class DragAndDropDemo  : public Component,
-                         public DragAndDropContainer
+class DragAndDropDemo final : public Component,
+                              public DragAndDropContainer
 {
 public:
     DragAndDropDemo()
@@ -1509,7 +1509,7 @@ private:
 };
 
 //==============================================================================
-struct DemoTabbedComponent  : public TabbedComponent
+struct DemoTabbedComponent final : public TabbedComponent
 {
     DemoTabbedComponent (bool isRunningComponenTransformsDemo)
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
@@ -1567,7 +1567,7 @@ struct DemoTabbedComponent  : public TabbedComponent
 };
 
 //==============================================================================
-struct WidgetsDemo   : public Component
+struct WidgetsDemo final : public Component
 {
     WidgetsDemo (bool isRunningComponenTransformsDemo = false)
         : tabs (isRunningComponenTransformsDemo)

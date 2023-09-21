@@ -55,7 +55,7 @@
 /** A simple class that acts as an AudioIODeviceCallback and writes the
     incoming audio data to a WAV file.
 */
-class AudioRecorder  : public AudioIODeviceCallback
+class AudioRecorder final : public AudioIODeviceCallback
 {
 public:
     AudioRecorder (AudioThumbnail& thumbnailToUpdate)
@@ -170,8 +170,8 @@ private:
 };
 
 //==============================================================================
-class RecordingThumbnail  : public Component,
-                            private ChangeListener
+class RecordingThumbnail final : public Component,
+                                 private ChangeListener
 {
 public:
     RecordingThumbnail()
@@ -230,7 +230,7 @@ private:
 };
 
 //==============================================================================
-class AudioRecordingDemo  : public Component
+class AudioRecordingDemo final : public Component
 {
 public:
     AudioRecordingDemo()

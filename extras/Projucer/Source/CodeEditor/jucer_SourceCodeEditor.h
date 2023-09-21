@@ -28,7 +28,7 @@
 #include "jucer_DocumentEditorComponent.h"
 
 //==============================================================================
-class SourceCodeDocument  : public OpenDocumentManager::Document
+class SourceCodeDocument : public OpenDocumentManager::Document
 {
 public:
     SourceCodeDocument (Project*, const File&);
@@ -93,7 +93,7 @@ public:
     CodeDocument& getCodeDocument();
 
     //==============================================================================
-    struct Type  : public OpenDocumentManager::DocumentType
+    struct Type final : public OpenDocumentManager::DocumentType
     {
         bool canOpenFile (const File& file) override
         {
@@ -141,9 +141,9 @@ private:
 class GenericCodeEditorComponent;
 
 //==============================================================================
-class SourceCodeEditor  : public DocumentEditorComponent,
-                          private ValueTree::Listener,
-                          private CodeDocument::Listener
+class SourceCodeEditor final : public DocumentEditorComponent,
+                               private ValueTree::Listener,
+                               private CodeDocument::Listener
 {
 public:
     SourceCodeEditor (OpenDocumentManager::Document*, CodeDocument&);
@@ -178,7 +178,7 @@ private:
 
 
 //==============================================================================
-class GenericCodeEditorComponent  : public CodeEditorComponent
+class GenericCodeEditorComponent : public CodeEditorComponent
 {
 public:
     GenericCodeEditorComponent (const File&, CodeDocument&, CodeTokeniser*);
@@ -224,7 +224,7 @@ private:
 };
 
 //==============================================================================
-class CppCodeEditorComponent  : public GenericCodeEditorComponent
+class CppCodeEditorComponent final : public GenericCodeEditorComponent
 {
 public:
     CppCodeEditorComponent (const File&, CodeDocument&);

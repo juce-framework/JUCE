@@ -113,7 +113,7 @@ struct OverdriveDemoDSP
     double sampleRate = 0.0;
 };
 
-struct OverdriveDemo    : public Component
+struct OverdriveDemo final : public Component
 {
     OverdriveDemo()
     {

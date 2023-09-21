@@ -33,8 +33,8 @@
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
 
 //==============================================================================
-class ProjucerApplication   : public JUCEApplication,
-                              private AsyncUpdater
+class ProjucerApplication final : public JUCEApplication,
+                                  private AsyncUpdater
 {
 public:
     ProjucerApplication() = default;

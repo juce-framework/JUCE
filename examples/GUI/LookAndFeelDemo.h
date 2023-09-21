@@ -55,7 +55,7 @@
     It's a good idea not to hard code your colours, use the findColour method along with appropriate
     ColourIds so you can set these on a per-component basis.
 */
-struct CustomLookAndFeel    : public LookAndFeel_V4
+struct CustomLookAndFeel : public LookAndFeel_V4
 {
     void drawRoundThumb (Graphics& g, float x, float y, float diameter, Colour colour, float outlineThickness)
     {
@@ -296,7 +296,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
 
     This inherits from CustomLookAndFeel above for the linear bar and slider backgrounds.
 */
-struct SquareLookAndFeel    : public CustomLookAndFeel
+struct SquareLookAndFeel final : public CustomLookAndFeel
 {
     void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override
@@ -434,7 +434,7 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
 };
 
 //==============================================================================
-struct LookAndFeelDemoComponent  : public Component
+struct LookAndFeelDemoComponent final : public Component
 {
     LookAndFeelDemoComponent()
     {
@@ -521,7 +521,7 @@ struct LookAndFeelDemoComponent  : public Component
 };
 
 //==============================================================================
-class LookAndFeelDemo   : public Component
+class LookAndFeelDemo final : public Component
 {
 public:
     LookAndFeelDemo()

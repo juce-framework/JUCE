@@ -27,8 +27,8 @@
 
 
 //==============================================================================
-class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
-                                               private Value::Listener
+class TextPropertyComponentWithEnablement final : public TextPropertyComponent,
+                                                  private Value::Listener
 {
 public:
     TextPropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -54,8 +54,8 @@ private:
 };
 
 //==============================================================================
-class ChoicePropertyComponentWithEnablement    : public ChoicePropertyComponent,
-                                                 private Value::Listener
+class ChoicePropertyComponentWithEnablement final : public ChoicePropertyComponent,
+                                                    private Value::Listener
 {
 public:
     ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -135,8 +135,8 @@ private:
 };
 
 //==============================================================================
-class MultiChoicePropertyComponentWithEnablement    : public MultiChoicePropertyComponent,
-                                                      private Value::Listener
+class MultiChoicePropertyComponentWithEnablement final : public MultiChoicePropertyComponent,
+                                                         private Value::Listener
 {
 public:
     MultiChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,

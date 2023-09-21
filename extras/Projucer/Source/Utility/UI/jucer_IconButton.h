@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class IconButton  : public Button
+class IconButton final : public Button
 {
 public:
     IconButton (String buttonName, Image imageToDisplay)

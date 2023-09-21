@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class XmlTreeItem  : public TreeViewItem
+class XmlTreeItem final : public TreeViewItem
 {
 public:
     XmlTreeItem (XmlElement& x)  : xml (x)    {}
@@ -115,7 +115,7 @@ private:
 };
 
 //==============================================================================
-class JsonTreeItem  : public TreeViewItem
+class JsonTreeItem final : public TreeViewItem
 {
 public:
     JsonTreeItem (Identifier i, var value)
@@ -228,8 +228,8 @@ private:
 };
 
 //==============================================================================
-class XMLandJSONDemo   : public Component,
-                         private CodeDocument::Listener
+class XMLandJSONDemo final : public Component,
+                             private CodeDocument::Listener
 {
 public:
     /** The type of database to parse. */

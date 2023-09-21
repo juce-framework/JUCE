@@ -55,7 +55,7 @@
 
 //==============================================================================
 /** A demo synth sound that's just a basic sine wave.. */
-class SineWaveSound : public SynthesiserSound
+class SineWaveSound final : public SynthesiserSound
 {
 public:
     SineWaveSound() {}
@@ -66,7 +66,7 @@ public:
 
 //==============================================================================
 /** A simple demo synth voice that just plays a sine wave.. */
-class SineWaveVoice   : public SynthesiserVoice
+class SineWaveVoice final : public SynthesiserVoice
 {
 public:
     SineWaveVoice() {}
@@ -175,7 +175,7 @@ private:
 
 //==============================================================================
 /** As the name suggest, this class does the actual audio processing. */
-class JuceDemoPluginAudioProcessor  : public AudioProcessor
+class JuceDemoPluginAudioProcessor final : public AudioProcessor
 {
 public:
     //==============================================================================
@@ -362,9 +362,9 @@ public:
 private:
     //==============================================================================
     /** This is the editor component that our filter will display. */
-    class JuceDemoPluginAudioProcessorEditor  : public AudioProcessorEditor,
-                                                private Timer,
-                                                private Value::Listener
+    class JuceDemoPluginAudioProcessorEditor final : public AudioProcessorEditor,
+                                                     private Timer,
+                                                     private Value::Listener
     {
     public:
         JuceDemoPluginAudioProcessorEditor (JuceDemoPluginAudioProcessor& owner)

@@ -274,9 +274,9 @@ private:
 
                 // This is the callback that will actually fire in response to this screen's display
                 // link callback.
-                result.emplace_back (screen, [callbacks = std::move (callbacks)]
+                result.emplace_back (screen, [cbs = std::move (callbacks)]
                 {
-                    for (const auto& callback : callbacks)
+                    for (const auto& callback : cbs)
                         callback();
                 });
             }

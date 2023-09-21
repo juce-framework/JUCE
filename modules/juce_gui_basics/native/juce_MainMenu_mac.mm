@@ -462,9 +462,9 @@ private:
         };
 
         static ValidatorClass validatorClass;
-        static auto* instance = validatorClass.createInstance();
+        static auto* vcInstance = validatorClass.createInstance();
 
-        [item setTarget: instance];
+        [item setTarget: vcInstance];
         [menu insertItem: item atIndex: [menu numberOfItems]];
         [item release];
 

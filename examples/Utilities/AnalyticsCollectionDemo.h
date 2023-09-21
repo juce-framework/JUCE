@@ -58,7 +58,7 @@ enum DemoAnalyticsEventTypes
 };
 
 //==============================================================================
-class GoogleAnalyticsDestination  : public ThreadedAnalyticsDestination
+class GoogleAnalyticsDestination final : public ThreadedAnalyticsDestination
 {
 public:
     GoogleAnalyticsDestination()
@@ -298,7 +298,7 @@ private:
 };
 
 //==============================================================================
-class AnalyticsCollectionDemo   : public Component
+class AnalyticsCollectionDemo final : public Component
 {
 public:
     //==============================================================================

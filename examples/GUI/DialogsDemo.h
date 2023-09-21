@@ -55,7 +55,7 @@ struct MessageBoxOwnerComponent : public Component
 };
 
 //==============================================================================
-class DemoBackgroundThread  : public ThreadWithProgressWindow
+class DemoBackgroundThread final : public ThreadWithProgressWindow
 {
 public:
     explicit DemoBackgroundThread (MessageBoxOwnerComponent& comp)
@@ -117,7 +117,7 @@ public:
 
 
 //==============================================================================
-class DialogsDemo  : public MessageBoxOwnerComponent
+class DialogsDemo final : public MessageBoxOwnerComponent
 {
 public:
     enum DialogType

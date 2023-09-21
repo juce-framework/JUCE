@@ -29,8 +29,8 @@
 #include <mutex>
 
 //==============================================================================
-class MainContentComponent   : public AudioAppComponent,
-                               private Timer
+class MainContentComponent final : public AudioAppComponent,
+                                   private Timer
 {
 public:
     //==============================================================================

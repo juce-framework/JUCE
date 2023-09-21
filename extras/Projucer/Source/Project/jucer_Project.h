@@ -120,11 +120,11 @@ namespace ProjectMessages
 enum class Async { no, yes };
 
 //==============================================================================
-class Project  : public FileBasedDocument,
-                 private ValueTree::Listener,
-                 private LicenseController::LicenseStateListener,
-                 private ChangeListener,
-                 private AvailableModulesList::Listener
+class Project final : public FileBasedDocument,
+                      private ValueTree::Listener,
+                      private LicenseController::LicenseStateListener,
+                      private ChangeListener,
+                      private AvailableModulesList::Listener
 {
 public:
     //==============================================================================
@@ -562,7 +562,7 @@ private:
     static auto& getEnabledModulesImpl (This&);
 
     //==============================================================================
-    struct ProjectFileModificationPoller  : private Timer
+    struct ProjectFileModificationPoller final : private Timer
     {
         ProjectFileModificationPoller (Project& p);
         bool isCheckPending() const noexcept  { return pending; }

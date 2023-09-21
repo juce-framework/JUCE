@@ -32,9 +32,9 @@
     The user may drag files over the property box, enter the path manually and/or click
     the '...' button to open a file selection dialog box.
 */
-class FilePathPropertyComponent    : public PropertyComponent,
-                                     public FileDragAndDropTarget,
-                                     protected Value::Listener
+class FilePathPropertyComponent : public PropertyComponent,
+                                  public FileDragAndDropTarget,
+                                  protected Value::Listener
 {
 public:
     FilePathPropertyComponent (Value valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
@@ -217,7 +217,7 @@ private:
 };
 
 //==============================================================================
-class FilePathPropertyComponentWithEnablement  : public FilePathPropertyComponent
+class FilePathPropertyComponentWithEnablement final : public FilePathPropertyComponent
 {
 public:
     FilePathPropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,

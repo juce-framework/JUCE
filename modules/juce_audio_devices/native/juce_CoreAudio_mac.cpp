@@ -689,7 +689,7 @@ public:
             scopedProcID = [&self = *this,
                             &lock = callbackLock,
                             nextProcID = ScopedAudioDeviceIOProcID { *this, deviceID, audioIOProc },
-                            deviceID = deviceID]() mutable -> ScopedAudioDeviceIOProcID
+                            dID = deviceID]() mutable -> ScopedAudioDeviceIOProcID
             {
                 // It *looks* like AudioDeviceStart may start the audio callback running, and then
                 // immediately lock an internal mutex.
@@ -703,7 +703,7 @@ public:
                 {
                     const ScopedUnlock su (lock);
 
-                    if (self.OK (AudioDeviceStart (deviceID, procID)))
+                    if (self.OK (AudioDeviceStart (dID, procID)))
                         return std::move (nextProcID);
                 }
 

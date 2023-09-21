@@ -30,7 +30,7 @@
 constexpr const char* scanModeKey = "pluginScanMode";
 
 //==============================================================================
-class Superprocess  : private ChildProcessCoordinator
+class Superprocess final : private ChildProcessCoordinator
 {
 public:
     Superprocess()
@@ -94,8 +94,8 @@ private:
 };
 
 //==============================================================================
-class CustomPluginScanner  : public KnownPluginList::CustomScanner,
-                             private ChangeListener
+class CustomPluginScanner final : public KnownPluginList::CustomScanner,
+                                  private ChangeListener
 {
 public:
     CustomPluginScanner()
@@ -202,7 +202,7 @@ private:
 };
 
 //==============================================================================
-class CustomPluginListComponent  : public PluginListComponent
+class CustomPluginListComponent final : public PluginListComponent
 {
 public:
     CustomPluginListComponent (AudioPluginFormatManager& manager,
@@ -256,7 +256,7 @@ private:
 };
 
 //==============================================================================
-class MainHostWindow::PluginListWindow  : public DocumentWindow
+class MainHostWindow::PluginListWindow final : public DocumentWindow
 {
 public:
     PluginListWindow (MainHostWindow& mw, AudioPluginFormatManager& pluginFormatManager)

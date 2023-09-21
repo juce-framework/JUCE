@@ -113,8 +113,8 @@ private:
 };
 
 //==============================================================================
-class MidiTable  : public Component,
-                   private TableListBoxModel
+class MidiTable final : public Component,
+                        private TableListBoxModel
 {
 public:
     MidiTable (MidiListModel& m)
@@ -220,8 +220,8 @@ private:
 };
 
 //==============================================================================
-class MidiLoggerPluginDemoProcessor  : public AudioProcessor,
-                                       private Timer
+class MidiLoggerPluginDemoProcessor final : public AudioProcessor,
+                                            private Timer
 {
 public:
     MidiLoggerPluginDemoProcessor()
@@ -268,8 +268,8 @@ public:
     }
 
 private:
-    class Editor  : public AudioProcessorEditor,
-                    private Value::Listener
+    class Editor final : public AudioProcessorEditor,
+                         private Value::Listener
     {
     public:
         explicit Editor (MidiLoggerPluginDemoProcessor& ownerIn)

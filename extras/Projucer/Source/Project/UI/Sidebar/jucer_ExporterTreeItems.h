@@ -27,8 +27,8 @@
 
 
 //==============================================================================
-class ExporterItem   : public ProjectTreeItemBase,
-                       private Value::Listener
+class ExporterItem final : public ProjectTreeItemBase,
+                           private Value::Listener
 {
 public:
     ExporterItem (Project& p, ProjectExporter* e, int index)
@@ -184,7 +184,7 @@ private:
     }
 
     //==============================================================================
-    struct SettingsComp  : public Component
+    struct SettingsComp final : public Component
     {
         SettingsComp (ProjectExporter& exp)
             : group (exp.getUniqueName(),
@@ -213,7 +213,7 @@ private:
 
 
 //==============================================================================
-class ConfigItem   : public ProjectTreeItemBase
+class ConfigItem final : public ProjectTreeItemBase
 {
 public:
     ConfigItem (const ProjectExporter::BuildConfiguration::Ptr& conf, ProjectExporter& e)
@@ -290,7 +290,7 @@ private:
     ScopedMessageBox messageBox;
 
     //==============================================================================
-    class SettingsComp  : public Component
+    class SettingsComp final : public Component
     {
     public:
         SettingsComp (ProjectExporter::BuildConfiguration& conf)
@@ -319,7 +319,7 @@ private:
 };
 
 //==============================================================================
-class ExportersTreeRoot    : public ProjectTreeItemBase
+class ExportersTreeRoot final : public ProjectTreeItemBase
 {
 public:
     ExportersTreeRoot (Project& p)

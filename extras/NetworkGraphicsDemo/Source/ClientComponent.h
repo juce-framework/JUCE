@@ -29,12 +29,12 @@
     particular client covers, and updates itself when messages arrive from the master
     containing new canvas states.
 */
-class ClientCanvasComponent  : public Component,
-                               private OSCSender,
-                               private OSCReceiver,
-                               private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>,
-                               private AsyncUpdater,
-                               private Timer
+class ClientCanvasComponent final : public Component,
+                                    private OSCSender,
+                                    private OSCReceiver,
+                                    private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>,
+                                    private AsyncUpdater,
+                                    private Timer
 {
 public:
     ClientCanvasComponent (PropertiesFile& p, int windowIndex)  : properties (p)

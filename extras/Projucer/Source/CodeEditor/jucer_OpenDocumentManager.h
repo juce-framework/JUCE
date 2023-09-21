@@ -134,7 +134,7 @@ private:
 };
 
 //==============================================================================
-class RecentDocumentList    : private OpenDocumentManager::DocumentCloseListener
+class RecentDocumentList final : private OpenDocumentManager::DocumentCloseListener
 {
 public:
     RecentDocumentList();

@@ -53,7 +53,7 @@
 #include <ARA_Library/Utilities/ARATimelineConversion.h>
 
 //==============================================================================
-class ARADemoPluginAudioModification  : public ARAAudioModification
+class ARADemoPluginAudioModification final : public ARAAudioModification
 {
 public:
     ARADemoPluginAudioModification (ARAAudioSource* audioSource,
@@ -79,7 +79,7 @@ struct PreviewState
     std::atomic<ARAPlaybackRegion*> previewedRegion { nullptr };
 };
 
-class SharedTimeSliceThread  : public TimeSliceThread
+class SharedTimeSliceThread final : public TimeSliceThread
 {
 public:
     SharedTimeSliceThread()
@@ -89,7 +89,7 @@ public:
     }
 };
 
-class AsyncConfigurationCallback  : private AsyncUpdater
+class AsyncConfigurationCallback final : private AsyncUpdater
 {
 public:
     explicit AsyncConfigurationCallback (std::function<void()> callbackIn)
@@ -303,7 +303,7 @@ struct ProcessingLockInterface
 };
 
 //==============================================================================
-class PlaybackRenderer  : public ARAPlaybackRenderer
+class PlaybackRenderer final : public ARAPlaybackRenderer
 {
 public:
     PlaybackRenderer (ARA::PlugIn::DocumentController* dc, ProcessingLockInterface& lockInterfaceIn)
@@ -480,8 +480,8 @@ private:
     std::unique_ptr<AudioBuffer<float>> tempBuffer;
 };
 
-class EditorRenderer  : public ARAEditorRenderer,
-                        private ARARegionSequence::Listener
+class EditorRenderer final : public ARAEditorRenderer,
+                             private ARARegionSequence::Listener
 {
 public:
     EditorRenderer (ARA::PlugIn::DocumentController* documentController,
@@ -699,8 +699,8 @@ private:
 };
 
 //==============================================================================
-class ARADemoPluginDocumentControllerSpecialisation  : public ARADocumentControllerSpecialisation,
-                                                       private ProcessingLockInterface
+class ARADemoPluginDocumentControllerSpecialisation final : public ARADocumentControllerSpecialisation,
+                                                            private ProcessingLockInterface
 {
 public:
     using ARADocumentControllerSpecialisation::ARADocumentControllerSpecialisation;
@@ -853,8 +853,8 @@ struct PlayHeadState
 };
 
 //==============================================================================
-class ARADemoPluginAudioProcessorImpl  : public AudioProcessor,
-                                         public AudioProcessorARAExtension
+class ARADemoPluginAudioProcessorImpl : public AudioProcessor,
+                                        public AudioProcessorARAExtension
 {
 public:
     //==============================================================================
@@ -985,14 +985,14 @@ private:
     ListenerList<Listener> listeners;
 };
 
-class RulersView : public Component,
-                   public SettableTooltipClient,
-                   private Timer,
-                   private TimeToViewScaling::Listener,
-                   private ARAMusicalContext::Listener
+class RulersView final : public Component,
+                         public SettableTooltipClient,
+                         private Timer,
+                         private TimeToViewScaling::Listener,
+                         private ARAMusicalContext::Listener
 {
 public:
-    class CycleMarkerComponent : public Component
+    class CycleMarkerComponent final : public Component
     {
         void paint (Graphics& g) override
         {
@@ -1233,7 +1233,7 @@ private:
     bool isDraggingCycle = false;
 };
 
-class RulersHeader : public Component
+class RulersHeader final : public Component
 {
 public:
     RulersHeader()
@@ -1274,7 +1274,7 @@ private:
 };
 
 //==============================================================================
-struct WaveformCache : private ARAAudioSource::Listener
+struct WaveformCache final : private ARAAudioSource::Listener
 {
     WaveformCache() : thumbnailCache (20)
     {
@@ -1325,12 +1325,12 @@ private:
     std::map<ARAAudioSource*, std::unique_ptr<AudioThumbnail>> thumbnails;
 };
 
-class PlaybackRegionView : public Component,
-                           public ChangeListener,
-                           public SettableTooltipClient,
-                           private ARAAudioSource::Listener,
-                           private ARAPlaybackRegion::Listener,
-                           private ARAEditorView::Listener
+class PlaybackRegionView final : public Component,
+                                 public ChangeListener,
+                                 public SettableTooltipClient,
+                                 private ARAAudioSource::Listener,
+                                 private ARAPlaybackRegion::Listener,
+                                 private ARAEditorView::Listener
 {
 public:
     PlaybackRegionView (ARAEditorView& editorView, ARAPlaybackRegion& region, WaveformCache& cache)
@@ -1467,7 +1467,7 @@ public:
     }
 
 private:
-    class PreviewRegionOverlay  : public Component
+    class PreviewRegionOverlay final : public Component
     {
         static constexpr auto previewLength = 0.5;
 
@@ -1522,11 +1522,11 @@ private:
     bool isSelected = false;
 };
 
-class RegionSequenceView : public Component,
-                           public ChangeBroadcaster,
-                           private TimeToViewScaling::Listener,
-                           private ARARegionSequence::Listener,
-                           private ARAPlaybackRegion::Listener
+class RegionSequenceView final : public Component,
+                                 public ChangeBroadcaster,
+                                 private TimeToViewScaling::Listener,
+                                 private ARARegionSequence::Listener,
+                                 private ARAPlaybackRegion::Listener
 {
 public:
     RegionSequenceView (ARAEditorView& editorView, TimeToViewScaling& scaling, ARARegionSequence& rs, WaveformCache& cache)
@@ -1645,7 +1645,7 @@ private:
     double playbackDuration = 0.0;
 };
 
-class ZoomControls : public Component
+class ZoomControls final : public Component
 {
 public:
     ZoomControls()
@@ -1672,8 +1672,8 @@ private:
     TextButton zoomInButton { "+" }, zoomOutButton { "-" };
 };
 
-class PlayheadPositionLabel : public Label,
-                              private Timer
+class PlayheadPositionLabel final : public Label,
+                                    private Timer
 {
 public:
     PlayheadPositionLabel (PlayHeadState& playHeadStateIn)
@@ -1769,9 +1769,9 @@ private:
     ARAMusicalContext* selectedMusicalContext = nullptr;
 };
 
-class TrackHeader : public Component,
-                    private ARARegionSequence::Listener,
-                    private ARAEditorView::Listener
+class TrackHeader final : public Component,
+                          private ARARegionSequence::Listener,
+                          private ARAEditorView::Listener
 {
 public:
     TrackHeader (ARAEditorView& editorView, ARARegionSequence& regionSequenceIn)
@@ -1848,7 +1848,7 @@ private:
 
 constexpr auto trackHeight = 60;
 
-class VerticalLayoutViewportContent : public Component
+class VerticalLayoutViewportContent final : public Component
 {
 public:
     void resized() override
@@ -1863,7 +1863,7 @@ public:
     }
 };
 
-class VerticalLayoutViewport : public Viewport
+class VerticalLayoutViewport final : public Viewport
 {
 public:
     VerticalLayoutViewport()
@@ -1887,12 +1887,12 @@ private:
     }
 };
 
-class OverlayComponent : public Component,
-                         private Timer,
-                         private TimeToViewScaling::Listener
+class OverlayComponent final : public Component,
+                               private Timer,
+                               private TimeToViewScaling::Listener
 {
 public:
-    class PlayheadMarkerComponent : public Component
+    class PlayheadMarkerComponent final : public Component
     {
         void paint (Graphics& g) override { g.fillAll (Colours::yellow.darker (0.2f)); }
     };
@@ -1981,11 +1981,11 @@ private:
     PlayheadMarkerComponent playheadMarker;
 };
 
-class DocumentView  : public Component,
-                      public ChangeListener,
-                      public ARAMusicalContext::Listener,
-                      private ARADocument::Listener,
-                      private ARAEditorView::Listener
+class DocumentView final : public Component,
+                           public ChangeListener,
+                           public ARAMusicalContext::Listener,
+                           private ARADocument::Listener,
+                           private ARAEditorView::Listener
 {
 public:
     DocumentView (ARAEditorView& editorView, PlayHeadState& playHeadState)
@@ -2287,8 +2287,8 @@ private:
 };
 
 
-class ARADemoPluginProcessorEditor  : public AudioProcessorEditor,
-                                      public AudioProcessorEditorARAExtension
+class ARADemoPluginProcessorEditor final : public AudioProcessorEditor,
+                                           public AudioProcessorEditorARAExtension
 {
 public:
     explicit ARADemoPluginProcessorEditor (ARADemoPluginAudioProcessorImpl& p)
@@ -2334,7 +2334,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADemoPluginProcessorEditor)
 };
 
-class ARADemoPluginAudioProcessor  : public ARADemoPluginAudioProcessorImpl
+class ARADemoPluginAudioProcessor final : public ARADemoPluginAudioProcessorImpl
 {
 public:
     bool hasEditor() const override               { return true; }

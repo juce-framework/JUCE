@@ -375,7 +375,7 @@ void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Lis
 }
 
 //==============================================================================
-class GenericCodeEditorComponent::FindPanel  : public Component
+class GenericCodeEditorComponent::FindPanel final : public Component
 {
 public:
     FindPanel()

@@ -28,7 +28,7 @@
 #include "jucer_ProjectExport_MSVC.h"
 
 //==============================================================================
-class CodeBlocksProjectExporter  : public ProjectExporter
+class CodeBlocksProjectExporter final : public ProjectExporter
 {
 public:
     enum CodeBlocksOS
@@ -199,7 +199,7 @@ private:
     String getTargetPlatformString() const    { return targetPlatformValue.get(); }
 
     //==============================================================================
-    class CodeBlocksBuildConfiguration  : public BuildConfiguration
+    class CodeBlocksBuildConfiguration final : public BuildConfiguration
     {
     public:
         CodeBlocksBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -262,7 +262,7 @@ private:
         yes
     };
 
-    class CodeBlocksTarget : public build_tools::ProjectType::Target
+    class CodeBlocksTarget final : public build_tools::ProjectType::Target
     {
     public:
         CodeBlocksTarget (const CodeBlocksProjectExporter& e,

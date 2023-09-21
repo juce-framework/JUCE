@@ -30,7 +30,7 @@
 
 
 //==============================================================================
-class UnknownDocument  : public OpenDocumentManager::Document
+class UnknownDocument final : public OpenDocumentManager::Document
 {
 public:
     UnknownDocument (Project* p, const File& f)
@@ -40,7 +40,7 @@ public:
     }
 
     //==============================================================================
-    struct Type  : public OpenDocumentManager::DocumentType
+    struct Type final : public OpenDocumentManager::DocumentType
     {
         bool canOpenFile (const File&) override                     { return true; }
         Document* openFile (Project* p, const File& f) override     { return new UnknownDocument (p, f); }

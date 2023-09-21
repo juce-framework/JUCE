@@ -134,7 +134,7 @@ struct OscillatorDemoDSP
     std::vector<DSPDemoParameterBase*> parameters { &typeParam, &accuracy, &freqParam, &gainParam, &mixParam };
 };
 
-struct OscillatorDemo    : public Component
+struct OscillatorDemo final : public Component
 {
     OscillatorDemo()
     {

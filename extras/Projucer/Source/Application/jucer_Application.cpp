@@ -29,7 +29,7 @@ void registerGUIEditorCommands();
 
 
 //==============================================================================
-struct ProjucerApplication::MainMenuModel  : public MenuBarModel
+struct ProjucerApplication::MainMenuModel final : public MenuBarModel
 {
     MainMenuModel()
     {

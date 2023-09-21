@@ -34,10 +34,10 @@ class Sidebar;
 struct WizardHolder;
 
 //==============================================================================
-class ProjectContentComponent  : public Component,
-                                 public ApplicationCommandTarget,
-                                 private ChangeListener,
-                                 private OpenDocumentManager::DocumentCloseListener
+class ProjectContentComponent final : public Component,
+                                      public ApplicationCommandTarget,
+                                      private ChangeListener,
+                                      private OpenDocumentManager::DocumentCloseListener
 {
 public:
     //==============================================================================

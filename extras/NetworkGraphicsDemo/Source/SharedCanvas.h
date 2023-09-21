@@ -289,7 +289,7 @@ private:
 };
 
 //==============================================================================
-class CanvasGeneratingContext    : public LowLevelGraphicsContext
+class CanvasGeneratingContext final : public LowLevelGraphicsContext
 {
 public:
     CanvasGeneratingContext (SharedCanvasDescription& c)  : canvas (c)
@@ -405,7 +405,7 @@ public:
 
 private:
     //==============================================================================
-    struct SharedCanvasHolder  : public ReferenceCountedObject
+    struct SharedCanvasHolder final : public ReferenceCountedObject
     {
         SharedCanvasDescription canvas;
     };

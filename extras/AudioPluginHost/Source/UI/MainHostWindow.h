@@ -74,11 +74,11 @@ void addPluginAutoScaleOptionsSubMenu (AudioPluginInstance*, PopupMenu&);
 constexpr const char* processUID = "juceaudiopluginhost";
 
 //==============================================================================
-class MainHostWindow    : public DocumentWindow,
-                          public MenuBarModel,
-                          public ApplicationCommandTarget,
-                          public ChangeListener,
-                          public FileDragAndDropTarget
+class MainHostWindow final : public DocumentWindow,
+                             public MenuBarModel,
+                             public ApplicationCommandTarget,
+                             public ChangeListener,
+                             public FileDragAndDropTarget
 {
 public:
     //==============================================================================

@@ -29,7 +29,7 @@
 #include "../../Project/UI/jucer_UserAvatarComponent.h"
 
 //==============================================================================
-class LoginFormComponent  : public Component
+class LoginFormComponent final : public Component
 {
 public:
     LoginFormComponent (MainWindow& window)
@@ -145,8 +145,8 @@ public:
     }
 
 private:
-    class ProgressButton  : public TextButton,
-                            private Timer
+    class ProgressButton final : public TextButton,
+                                 private Timer
     {
     public:
         ProgressButton (const String& buttonName)

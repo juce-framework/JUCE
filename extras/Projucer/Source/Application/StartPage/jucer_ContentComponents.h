@@ -32,7 +32,7 @@
 #include "jucer_NewProjectWizard.h"
 
 //==============================================================================
-class ItemHeader  : public Component
+class ItemHeader final : public Component
 {
 public:
     ItemHeader (StringRef name, StringRef description, const char* iconSvgData)
@@ -88,7 +88,7 @@ private:
 };
 
 //==============================================================================
-class TemplateComponent  : public Component
+class TemplateComponent final : public Component
 {
 public:
     TemplateComponent (const NewProjectTemplates::ProjectTemplate& temp,
@@ -257,7 +257,7 @@ private:
 };
 
 //==============================================================================
-class ExampleComponent  : public Component
+class ExampleComponent final : public Component
 {
 public:
     ExampleComponent (const File& f, std::function<void (const File&)> selectedCallback)

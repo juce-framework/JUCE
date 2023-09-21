@@ -30,7 +30,7 @@
 #include <future>
 
 //==============================================================================
-class AvailableModulesList  : private AsyncUpdater
+class AvailableModulesList final : private AsyncUpdater
 {
 public:
     using ModuleIDAndFolder     = std::pair<String, File>;

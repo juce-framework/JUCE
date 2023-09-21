@@ -57,7 +57,7 @@ namespace
 }
 
 //==============================================================================
-class NewCppFileWizard  : public NewFileWizard::Type
+class NewCppFileWizard final : public NewFileWizard::Type
 {
 public:
     String getName() override  { return "CPP File"; }
@@ -85,7 +85,7 @@ public:
 };
 
 //==============================================================================
-class NewHeaderFileWizard  : public NewFileWizard::Type
+class NewHeaderFileWizard final : public NewFileWizard::Type
 {
 public:
     String getName() override  { return "Header File"; }
@@ -220,7 +220,7 @@ private:
 };
 
 //==============================================================================
-class NewSingleFileComponentFileWizard  : public NewComponentFileWizard
+class NewSingleFileComponentFileWizard final : public NewComponentFileWizard
 {
 public:
     String getName() override  { return "Component class (in a single source file)"; }

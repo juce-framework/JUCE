@@ -88,7 +88,7 @@ public:
         pluginList.addChangeListener (this);
     }
 
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const final
     {
         const auto& mainOutput = layouts.getMainOutputChannelSet();
         const auto& mainInput  = layouts.getMainInputChannelSet();
@@ -102,7 +102,7 @@ public:
         return true;
     }
 
-    void prepareToPlay (double sr, int bs) override
+    void prepareToPlay (double sr, int bs) final
     {
         const ScopedLock sl (innerMutex);
 
@@ -115,7 +115,7 @@ public:
         }
     }
 
-    void releaseResources() override
+    void releaseResources() final
     {
         const ScopedLock sl (innerMutex);
 
@@ -125,7 +125,7 @@ public:
             inner->releaseResources();
     }
 
-    void reset() override
+    void reset() final
     {
         const ScopedLock sl (innerMutex);
 
@@ -136,12 +136,12 @@ public:
     // In this example, we don't actually pass any audio through the inner processor.
     // In a 'real' plugin, we'd need to add some synchronisation to ensure that the inner
     // plugin instance was never modified (deleted, replaced etc.) during a call to processBlock.
-    void processBlock (AudioBuffer<float>&, MidiBuffer&) override
+    void processBlock (AudioBuffer<float>&, MidiBuffer&) final
     {
         jassert (! isUsingDoublePrecision());
     }
 
-    void processBlock (AudioBuffer<double>&, MidiBuffer&) override
+    void processBlock (AudioBuffer<double>&, MidiBuffer&) final
     {
         jassert (isUsingDoublePrecision());
     }
@@ -149,18 +149,18 @@ public:
     bool hasEditor() const override                                   { return false; }
     AudioProcessorEditor* createEditor() override                     { return nullptr; }
 
-    const String getName() const override                             { return "HostPluginDemo"; }
-    bool acceptsMidi() const override                                 { return true; }
-    bool producesMidi() const override                                { return true; }
-    double getTailLengthSeconds() const override                      { return 0.0; }
+    const String getName() const final                                { return "HostPluginDemo"; }
+    bool acceptsMidi() const final                                    { return true; }
+    bool producesMidi() const final                                   { return true; }
+    double getTailLengthSeconds() const final                         { return 0.0; }
 
-    int getNumPrograms() override                                     { return 0; }
-    int getCurrentProgram() override                                  { return 0; }
-    void setCurrentProgram (int) override                             {}
-    const String getProgramName (int) override                        { return "None"; }
-    void changeProgramName (int, const String&) override              {}
+    int getNumPrograms() final                                        { return 0; }
+    int getCurrentProgram() final                                     { return 0; }
+    void setCurrentProgram (int) final                                {}
+    const String getProgramName (int) final                           { return "None"; }
+    void changeProgramName (int, const String&) final                 {}
 
-    void getStateInformation (MemoryBlock& destData) override
+    void getStateInformation (MemoryBlock& destData) final
     {
         const ScopedLock sl (innerMutex);
 
@@ -185,7 +185,7 @@ public:
         destData.replaceAll (text.toRawUTF8(), text.getNumBytesAsUTF8());
     }
 
-    void setStateInformation (const void* data, int sizeInBytes) override
+    void setStateInformation (const void* data, int sizeInBytes) final
     {
         const ScopedLock sl (innerMutex);
 
@@ -285,7 +285,7 @@ private:
     static constexpr const char* innerStateTag = "inner_state";
     static constexpr const char* editorStyleTag = "editor_style";
 
-    void changeListenerCallback (ChangeBroadcaster* source) override
+    void changeListenerCallback (ChangeBroadcaster* source) final
     {
         if (source != &pluginList)
             return;
@@ -312,7 +312,7 @@ static void doLayout (Component* main, Component& bottom, int bottomHeight, Rect
     grid.performLayout (bounds);
 }
 
-class PluginLoaderComponent : public Component
+class PluginLoaderComponent final : public Component
 {
 public:
     template <typename Callback>
@@ -348,7 +348,7 @@ public:
     }
 
 private:
-    struct Buttons : public Component
+    struct Buttons final : public Component
     {
         Buttons()
         {
@@ -390,7 +390,7 @@ private:
 };
 
 //==============================================================================
-class PluginEditorComponent : public Component
+class PluginEditorComponent final : public Component
 {
 public:
     template <typename Callback>
@@ -435,7 +435,7 @@ private:
 };
 
 //==============================================================================
-class ScaledDocumentWindow : public DocumentWindow
+class ScaledDocumentWindow final : public DocumentWindow
 {
 public:
     ScaledDocumentWindow (Colour bg, float scale)
@@ -448,7 +448,7 @@ private:
 };
 
 //==============================================================================
-class HostAudioProcessorEditor  : public AudioProcessorEditor
+class HostAudioProcessorEditor final : public AudioProcessorEditor
 {
 public:
     explicit HostAudioProcessorEditor (HostAudioProcessorImpl& owner)
@@ -576,7 +576,7 @@ private:
 };
 
 //==============================================================================
-class HostAudioProcessor : public HostAudioProcessorImpl
+class HostAudioProcessor final : public HostAudioProcessorImpl
 {
 public:
     bool hasEditor() const override { return true; }
