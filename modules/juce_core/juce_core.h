@@ -246,6 +246,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_ScopedPointer.h"
 #include "memory/juce_OptionalScopedPointer.h"
 #include "containers/juce_Optional.h"
+#include "containers/juce_Enumerate.h"
 #include "containers/juce_ScopedValueSetter.h"
 #include "memory/juce_Singleton.h"
 #include "memory/juce_WeakReference.h"

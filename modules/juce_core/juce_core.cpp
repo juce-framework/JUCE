@@ -280,6 +280,7 @@
 #if JUCE_UNIT_TESTS
  #include "containers/juce_HashMap_test.cpp"
  #include "containers/juce_Optional_test.cpp"
+ #include "containers/juce_Enumerate_test.cpp"
  #include "maths/juce_MathsFunctions_test.cpp"
  #include "misc/juce_EnumHelpers_test.cpp"
  #include "containers/juce_FixedSizeFunction_test.cpp"
