@@ -55,10 +55,8 @@ struct Factory
 
             std::array<uint32_t, 2> words;
 
-            size_t index = 0;
-
-            for (auto& word : words)
-                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index++);
+            for (const auto [index, word] : enumerate (words))
+                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index);
 
             return PacketX2 { words };
         }
@@ -79,10 +77,8 @@ struct Factory
 
             std::array<uint32_t, 4> words;
 
-            size_t index = 0;
-
-            for (auto& word : words)
-                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index++);
+            for (const auto [index, word] : enumerate (words))
+                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index);
 
             return PacketX4 { words };
         }

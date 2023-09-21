@@ -2231,10 +2231,8 @@ public:
 
     void initialise (const std::vector<Vst::ParamID>& idsIn)
     {
-        Steinberg::int32 index = 0;
-
-        for (const auto& id : idsIn)
-            map.emplace (id, Entry { std::make_unique<ParamValueQueue> (id, Steinberg::int32 { index++ }) });
+        for (const auto [index, id] : enumerate (idsIn))
+            map.emplace (id, Entry { std::make_unique<ParamValueQueue> (id, (Steinberg::int32) index) });
 
         queues.reserve (map.size());
         queues.clear();

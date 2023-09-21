@@ -72,11 +72,10 @@ public:
     {
         jassert (columnHeaders.size() == columnWidths.size());
 
-        auto index = 0;
-        for (auto s : columnHeaders)
+        for (const auto [index, s] : enumerate (columnHeaders))
         {
             addAndMakeVisible (headers.add (new Label (s, s)));
-            widths.add (columnWidths.getUnchecked (index++));
+            widths.add (columnWidths.getUnchecked ((int) index));
         }
 
         recalculateWidths();

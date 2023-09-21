@@ -251,10 +251,9 @@ private:
     const std::map<LV2_URID, size_t> uridToIndexMap = [&]
     {
         std::map<LV2_URID, size_t> result;
-        size_t index = 0;
 
-        for (const auto& urid : indexToUridMap)
-            result.emplace (urid, index++);
+        for (const auto [index, urid] : enumerate (indexToUridMap))
+            result.emplace (urid, index);
 
         return result;
     }();
@@ -1079,9 +1078,9 @@ private:
                       "\tlv2:portProperty lv2:enumeration " << (param.isBoolean() ? ", lv2:toggled " : "") << ";\n"
                       "\tlv2:scalePoint ";
 
-                auto counter = 0;
+                const auto strings = param.getAllValueStrings();
 
-                for (const auto& string : param.getAllValueStrings())
+                for (const auto& [counter, string] : enumerate (strings))
                 {
                     const auto value = jmap ((float) counter, 0.0f, (float) numSteps - 1.0f, min, max);
 
@@ -1089,8 +1088,6 @@ private:
                           "\t\trdfs:label \"" << string << "\" ;\n"
                           "\t\trdf:value " << value << " ;\n"
                           "\t]";
-
-                    ++counter;
                 }
             }
 

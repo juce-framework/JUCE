@@ -221,16 +221,15 @@ private:
         {
             RadioButtonsGroupComponent()
             {
-                int index = 1;
-                for (auto& b : radioButtons)
+                for (const auto [n, b] : enumerate (radioButtons, 1))
                 {
                     b.setRadioGroupId (1);
-                    b.setButtonText ("Button " + String (index++));
+                    b.setButtonText ("Button " + String (n));
                     b.setHasFocusOutline (true);
                     addAndMakeVisible (b);
                 }
 
-                radioButtons[(size_t) Random::getSystemRandom().nextInt (numRadioButtons)].setToggleState (true, dontSendNotification);
+                radioButtons[(size_t) Random::getSystemRandom().nextInt ((int) radioButtons.size())].setToggleState (true, dontSendNotification);
 
                 setTitle ("Radio Buttons Group");
                 setFocusContainerType (FocusContainerType::focusContainer);
@@ -239,14 +238,13 @@ private:
             void resized() override
             {
                 auto bounds = getLocalBounds();
-                const auto height = bounds.getHeight() / numRadioButtons;
+                const auto height = bounds.getHeight() / (int) radioButtons.size();
 
                 for (auto& b : radioButtons)
                     b.setBounds (bounds.removeFromTop (height).reduced (2));
             }
 
-            static constexpr int numRadioButtons = 3;
-            std::array<ToggleButton, numRadioButtons> radioButtons;
+            std::array<ToggleButton, 3> radioButtons;
         };
 
         //==============================================================================

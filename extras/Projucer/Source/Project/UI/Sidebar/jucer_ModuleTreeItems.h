@@ -519,13 +519,14 @@ public:
         auto& enabledModules = project.getEnabledModules();
         PopupMenu allModules;
 
-        int index = 100;
-
         // JUCE path
         PopupMenu jucePathModules;
 
-        for (auto& mod : ProjucerApplication::getApp().getJUCEPathModulesList().getAllModules())
-            jucePathModules.addItem (index++, mod.first, ! enabledModules.isModuleEnabled (mod.first));
+        for (const auto [index, mod] : enumerate (ProjucerApplication::getApp().getJUCEPathModulesList().getAllModules(),
+                                                  100))
+        {
+            jucePathModules.addItem (index, mod.first, ! enabledModules.isModuleEnabled (mod.first));
+        }
 
         jucePathModules.addSeparator();
         jucePathModules.addItem (-1, "Re-scan path");
@@ -533,11 +534,13 @@ public:
         allModules.addSubMenu ("Global JUCE modules path", jucePathModules);
 
         // User path
-        index = 200;
         PopupMenu userPathModules;
 
-        for (auto& mod : ProjucerApplication::getApp().getUserPathsModulesList().getAllModules())
-            userPathModules.addItem (index++, mod.first, ! enabledModules.isModuleEnabled (mod.first));
+        for (const auto [index, mod] : enumerate (ProjucerApplication::getApp().getUserPathsModulesList().getAllModules(),
+                                                  200))
+        {
+            userPathModules.addItem (index, mod.first, ! enabledModules.isModuleEnabled (mod.first));
+        }
 
         userPathModules.addSeparator();
         userPathModules.addItem (-2, "Re-scan path");
@@ -545,11 +548,13 @@ public:
         allModules.addSubMenu ("Global user modules path", userPathModules);
 
         // Exporter path
-        index = 300;
         PopupMenu exporterPathModules;
 
-        for (auto& mod : project.getExporterPathsModulesList().getAllModules())
-            exporterPathModules.addItem (index++, mod.first, ! enabledModules.isModuleEnabled (mod.first));
+        for (const auto [index, mod] : enumerate (project.getExporterPathsModulesList().getAllModules(),
+                                                  300))
+        {
+            exporterPathModules.addItem (index, mod.first, ! enabledModules.isModuleEnabled (mod.first));
+        }
 
         exporterPathModules.addSeparator();
         exporterPathModules.addItem (-3, "Re-scan path");
