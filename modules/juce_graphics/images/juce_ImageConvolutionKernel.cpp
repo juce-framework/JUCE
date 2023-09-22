@@ -176,7 +176,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                             }
                             else
                             {
-                                src += 4;
+                                src += destData.pixelStride;
                             }
 
                             ++sx;
@@ -230,7 +230,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                             }
                             else
                             {
-                                src += 3;
+                                src += destData.pixelStride;
                             }
 
                             ++sx;
@@ -238,9 +238,9 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                     }
                 }
 
-                *dest++ = (uint8) roundToInt (c1);
-                *dest++ = (uint8) roundToInt (c2);
-                *dest++ = (uint8) roundToInt (c3);
+                *dest++ = (uint8) jmin (0xff, roundToInt (c1));
+                *dest++ = (uint8) jmin (0xff, roundToInt (c2));
+                *dest++ = (uint8) jmin (0xff, roundToInt (c3));
             }
         }
     }
@@ -279,7 +279,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                             }
                             else
                             {
-                                src += 3;
+                                src += destData.pixelStride;
                             }
 
                             ++sx;
@@ -287,7 +287,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                     }
                 }
 
-                *dest++ = (uint8) roundToInt (c1);
+                *dest++ = (uint8) jmin (0xff, roundToInt (c1));
             }
         }
     }
