@@ -70,13 +70,12 @@ private:
     HyperlinkButton linkButton { "www.juce.com", { "http://www.juce.com" } };
 
     //==============================================================================
-    struct LogoDrawComponent  : public Component,
-                                private Timer
+    struct LogoDrawComponent  : public Component
     {
         LogoDrawComponent()
         {
             setTitle ("JUCE Logo");
-            startTimerHz (30); // repaint at 30 fps
+            timer.startTimerHz (30); // repaint at 30 fps
         }
 
         void paint (Graphics& g) override
@@ -108,16 +107,12 @@ private:
                                                         getLocalBounds().reduced (20, getHeight() / 4).toFloat()));
         }
 
-        void timerCallback() override
-        {
-            repaint();
-            elapsed += 0.02f;
-        }
-
         std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
         {
             return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::image);
         }
+
+        Timer timer { [this] { repaint(); elapsed += 0.02f; } };
 
         Path logoPath  { getJUCELogoPath() };
         float elapsed = 0.0f;

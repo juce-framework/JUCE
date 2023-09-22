@@ -66,6 +66,11 @@ protected:
 
 public:
     //==============================================================================
+    /** Creates a Timer and assigns a lambda to the callback object.
+    */
+    Timer (std::function<void()>) noexcept;
+
+    //==============================================================================
     /** Destructor. */
     virtual ~Timer();
 
@@ -75,7 +80,12 @@ public:
         It's perfectly ok to call startTimer() or stopTimer() from within this
         callback to change the subsequent intervals.
     */
-    virtual void timerCallback() = 0;
+    virtual void timerCallback() {}
+
+    /** You can assign a lambda to this callback object to have it called
+        periodically.
+     */
+    std::function<void()> onTimer;
 
     //==============================================================================
     /** Starts the timer and sets the length of interval required.
