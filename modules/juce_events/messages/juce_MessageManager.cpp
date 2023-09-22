@@ -414,19 +414,15 @@ void MessageManager::Lock::exit() const noexcept
     if (blockingMessage == nullptr)
         return;
 
-    const ScopeGuard scope { [&]
-    {
-        blockingMessage = nullptr;
-        acquired = false;
-    } };
-
-    blockingMessage->stopWaiting();
-
     if (auto* mm = MessageManager::instance)
     {
         jassert (mm->currentThreadHasLockedMessageManager());
         mm->threadWithLock = {};
     }
+
+    blockingMessage->stopWaiting();
+    blockingMessage = nullptr;
+    acquired = false;
 }
 
 void MessageManager::Lock::abort() const noexcept
