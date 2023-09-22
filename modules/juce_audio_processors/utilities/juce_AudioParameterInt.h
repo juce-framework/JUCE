@@ -71,6 +71,30 @@ public:
                        int maxValue,
                        int defaultValue,
                        const AudioParameterIntAttributes& attributes = {});
+    
+    /** Creates a AudioParameterInt with the specified parameters with a normalized range.
+
+        Note that the attributes argument is optional and only needs to be
+        supplied if you want to change options from their default values.
+
+        Example usage:
+        @code
+        auto attributes = AudioParameterIntAttributes().withStringFromValueFunction ([] (auto x, auto) { return String (x); })
+                                                       .withLabel ("things");
+        auto param = std::make_unique<juce::AudioParameterInt>("paramID", "Parameter Name", NormalisableRange<float> (0, 100), 50, attributes);
+        @endcode
+
+        @param parameterID         The parameter ID to use
+        @param parameterName       The parameter name to use
+        @param range               The normalize range 
+        @param defaultValue        The default value
+        @param attributes          Optional characteristics
+    */
+    AudioParameterInt(const ParameterID& parameterID,
+                    const String& parameterName,
+                    NormalisableRange<float> range,
+                    int defaultValue,
+                    const AudioParameterIntAttributes& attributes = {});
 
     /** Creates a AudioParameterInt with the specified parameters.
 

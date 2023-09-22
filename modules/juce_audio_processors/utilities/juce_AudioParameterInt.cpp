@@ -51,6 +51,23 @@ AudioParameterInt::AudioParameterInt (const ParameterID& idToUse, const String& 
     jassert (minValue < maxValue); // must have a non-zero range of values!
 }
 
+AudioParameterInt::AudioParameterInt(const ParameterID& idToUse, const String& nameToUse,
+    NormalisableRange<float> range, int def,
+    const AudioParameterIntAttributes& attributes)
+    : RangedAudioParameter(idToUse, nameToUse, attributes.getAudioProcessorParameterWithIDAttributes()),
+    range(range),
+    value((float)def),
+    defaultValue(convertTo0to1((float)def)),
+    stringFromIntFunction(attributes.getStringFromValueFunction() != nullptr
+        ? attributes.getStringFromValueFunction()
+        : [](int v, int) { return String(v); }),
+    intFromStringFunction(attributes.getValueFromStringFunction() != nullptr
+        ? attributes.getValueFromStringFunction()
+        : [](const String& text) { return text.getIntValue(); })
+{
+}
+
+
 AudioParameterInt::~AudioParameterInt()
 {
     #if __cpp_lib_atomic_is_always_lock_free

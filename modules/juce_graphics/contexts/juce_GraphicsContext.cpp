@@ -805,6 +805,13 @@ void Graphics::drawImageAt (const Image& imageToDraw, int x, int y, bool fillAlp
                           fillAlphaChannel);
 }
 
+void Graphics::drawImageAt(const Image& imageToDraw, float x, float y, bool fillAlphaChannel) const
+{
+    drawImageTransformed(imageToDraw,
+        AffineTransform::translation(x, y),
+        fillAlphaChannel);
+}
+
 void Graphics::drawImage (const Image& imageToDraw, Rectangle<float> targetArea,
                           RectanglePlacement placementWithinTarget, bool fillAlphaChannelWithCurrentBrush) const
 {
