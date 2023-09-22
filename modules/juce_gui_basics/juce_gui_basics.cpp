@@ -49,7 +49,6 @@
 
 //==============================================================================
 #if JUCE_MAC
- #import <WebKit/WebKit.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
  #import <MetalKit/MetalKit.h>
 

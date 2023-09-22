@@ -46,6 +46,8 @@
 
 #pragma once
 
+#if JUCE_WEB_BROWSER
+
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
@@ -148,3 +150,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserDemo)
 };
+
+#endif

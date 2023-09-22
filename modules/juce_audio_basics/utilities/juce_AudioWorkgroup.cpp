@@ -101,7 +101,11 @@ public:
 
     WorkgroupProvider clone() const
     {
-        return WorkgroupProvider { handle != nullptr ? os_retain (handle.get()) : nullptr };
+        if (handle == nullptr)
+            return WorkgroupProvider { nullptr };
+
+        os_retain (handle.get());
+        return WorkgroupProvider { handle.get() };
     }
 
     void join (WorkgroupToken& token) const
