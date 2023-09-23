@@ -28,8 +28,10 @@ namespace juce
 namespace dsp
 {
 
+#if JUCE_USE_SIMD
 template <typename SampleType>
 String& operator<< (String& str, SIMDRegister<SampleType>) { return str; }
+#endif
 
 template <typename SampleType>
 class AudioBlockUnitTests   : public UnitTest
