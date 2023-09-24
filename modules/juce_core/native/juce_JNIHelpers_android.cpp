@@ -193,7 +193,7 @@ void JNIClassBase::initialise (JNIEnv* env, jobject context)
                 }
 
                 // fallback by trying to load the class from bytecode
-                if (byteCode != nullptr)
+                if (classRef == nullptr && byteCode != nullptr)
                 {
                     LocalRef<jobject> byteCodeClassLoader;
 
