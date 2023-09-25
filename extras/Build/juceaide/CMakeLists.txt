@@ -49,16 +49,8 @@ if(JUCE_BUILD_HELPER_TOOLS)
            NAMESPACE juce_tools::
            FILE "${JUCE_BINARY_DIR}/JUCEToolsExport.cmake")
 else()
-    set(extra_compiler_flag_arguments)
+    message(STATUS "Configuring juceaide")
 
-    # If we're building using the NDK, the gradle wrapper will try to inject its own compiler using
-    # environment variables, which is unfortunate because we really don't want to cross-compile
-    # juceaide.
-    # Similarly, when cross-compiling from Linux->Windows (e.g. using
-    # Fedora's mingw64-cmake command), the environment might be configured
-    # for cross-compiling, and we'll need to attempt to put it back to the
-    # host settings in order to build an executable that can run on the host
-    # machine.
     if(CMAKE_CROSSCOMPILING)
         unset(ENV{ADDR2LINE})
         unset(ENV{AR})
@@ -99,13 +91,12 @@ else()
         if(DEFINED ENV{PATH_ORIG})
             set(ENV{PATH} "$ENV{PATH_ORIG}")
         endif()
-    else()
-        set(extra_compiler_flag_arguments
-            "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
-            "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
     endif()
 
-    message(STATUS "Configuring juceaide")
+    # Generator platform is only supported on specific generators
+    if(CMAKE_GENERATOR MATCHES "^Visual Studio.*$")
+        set(ENV{CMAKE_GENERATOR_PLATFORM} "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    endif()
 
     # Looks like we're bootstrapping, reinvoke CMake
     execute_process(COMMAND "${CMAKE_COMMAND}"
