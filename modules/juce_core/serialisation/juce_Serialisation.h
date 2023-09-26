@@ -136,6 +136,8 @@ template <typename> struct SerialisationTraits
     The following are specialisations of SerialisationTraits for commonly-used types.
 */
 
+#ifndef DOXYGEN
+
 template <typename... Ts>
 struct SerialisationTraits<std::vector<Ts...>>
 {
@@ -381,8 +383,6 @@ struct SerialisationTraits<std::array<Element, N>>
             archive (element);
     }
 };
-
-#ifndef DOXYGEN
 
 /*
     This namespace holds utilities for detecting and using serialisation functions.
