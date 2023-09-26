@@ -218,11 +218,7 @@ inline Path getJUCELogoPath()
 // 0.0 and 1.0 at a random speed
 struct BouncingNumber
 {
-    BouncingNumber()
-        : speed (0.0004 + 0.0007 * Random::getSystemRandom().nextDouble()),
-          phase (Random::getSystemRandom().nextDouble())
-    {
-    }
+    virtual ~BouncingNumber() = default;
 
     float getValue() const
     {
@@ -231,10 +227,11 @@ struct BouncingNumber
     }
 
 protected:
-    double speed, phase;
+    double speed = 0.0004 + 0.0007 * Random::getSystemRandom().nextDouble(),
+           phase = Random::getSystemRandom().nextDouble();
 };
 
-struct SlowerBouncingNumber  : public BouncingNumber
+struct SlowerBouncingNumber final : public BouncingNumber
 {
     SlowerBouncingNumber()
     {
