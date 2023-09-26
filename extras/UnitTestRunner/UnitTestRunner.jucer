@@ -12,10 +12,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner"
-                       recommendedWarnings="LLVM"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner"
-                       recommendedWarnings="LLVM"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="UnitTestRunner" recommendedWarnings="LLVM"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="UnitTestRunner" recommendedWarnings="LLVM"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -25,7 +23,6 @@
         <MODULEPATH id="juce_gui_basics" path="../../modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
-        <MODULEPATH id="juce_video" path="../../modules"/>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
@@ -51,7 +48,6 @@
         <MODULEPATH id="juce_gui_basics" path="../../modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
-        <MODULEPATH id="juce_video" path="../../modules"/>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
@@ -71,7 +67,6 @@
                        warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="../../modules"/>
         <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
         <MODULEPATH id="juce_osc" path="../../modules"/>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
@@ -98,7 +93,6 @@
                        warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="../../modules"/>
         <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
         <MODULEPATH id="juce_osc" path="../../modules"/>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
@@ -125,7 +119,6 @@
                        warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="../../modules"/>
         <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
         <MODULEPATH id="juce_osc" path="../../modules"/>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
@@ -165,7 +158,6 @@
     <MODULES id="juce_osc" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_product_unlocking" showAllCode="1" useLocalCopy="0"
             useGlobalPath="0"/>
-    <MODULES id="juce_video" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_PLUGINHOST_LV2="1" JUCE_PLUGINHOST_VST3="1"/>
   <LIVE_SETTINGS>

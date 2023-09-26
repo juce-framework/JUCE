@@ -41,7 +41,6 @@ target_link_libraries(UnitTestRunner PRIVATE
     juce::juce_opengl
     juce::juce_osc
     juce::juce_product_unlocking
-    juce::juce_video
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
