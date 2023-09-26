@@ -23,6 +23,50 @@
 namespace juce
 {
 
+/**
+    Allows serialisation functions to be attached to a specific type without having to modify the
+    declaration of that type.
+
+    A specialisation of SerialisationTraits must include:
+    - A static constexpr data member named 'marshallingVersion' with a value that is convertible
+      to std::optional<int>.
+    - Either:
+        - Normally, a single function with the following signature:
+          @code
+          template <typename Archive, typename Item>
+          static void serialise (Archive& archive, Item& item);
+          @endcode
+        - For types that must do slightly different work when loading and saving, you may supply two
+          functions with the following signatures, where "T" is a placeholder for the type on which
+          SerialisationTraits is specialised:
+          @code
+          template <typename Archive>
+          static void load (Archive& archive, T& item);
+
+          template <typename Archive>
+          static void save (Archive& archive, const T& item);
+          @endcode
+
+    If the marshallingVersion converts to a null optional, then all versioning information will be
+    ignored when marshalling the type. Otherwise, if the value converts to a non-null optional, this
+    versioning information will be included when serialising the type.
+
+    Inside serialise() and load() you may call archive.getVersion() to find the detected version
+    of the object being deserialised. archive.getVersion() will return an std::optional<int>,
+    where 'nullopt' indicates that no versioning information was detected.
+
+    Marshalling functions can also be specified directly inside the type to be marshalled. This
+    approach may be preferable as it is more concise. Internal marshalling functions are written
+    in exactly the same way as external ones; i.e. the type must include a marshallingVersion,
+    and either a single serialise function, or a load/save pair of functions, as specified above.
+
+    @tags{Core}
+*/
+template <typename T> struct SerialisationTraits
+{
+    /*  Intentionally left blank. */
+};
+
 #define JUCE_COMPARISON_OPS X(==) X(!=) X(<) X(<=) X(>) X(>=)
 
 /**
@@ -63,7 +107,7 @@ template <typename T> constexpr auto named (std::string_view c, const T& t) { re
     If you need to write your own serialisation routines for a dynamically-sized type, ensure
     that you archive an instance of SerialisationSize before any of the contents of the container.
 
-    @tparam     the (probably numeric) type of the size value
+    @tparam T   the (probably numeric) type of the size value
 
     @see serialisztionSize()
 
@@ -86,50 +130,6 @@ template <typename T> constexpr auto serialisationSize       (T& t) -> std::enab
 template <typename T> constexpr auto serialisationSize (const T& t) -> std::enable_if_t<std::is_integral_v<T>, SerialisationSize<const T>> { return { t }; }
 
 #undef JUCE_COMPARISON_OPS
-
-/**
-    Allows serialisation functions to be attached to a specific type without having to modify the
-    declaration of that type.
-
-    A specialisation of SerialisationTraits must include:
-    - A static constexpr data member named 'marshallingVersion' with a value that is convertible
-      to std::optional<int>.
-    - Either:
-        - Normally, a single function with the following signature:
-          @code
-          template <typename Archive, typename Item>
-          static void serialise (Archive& archive, Item& item);
-          @endcode
-        - For types that must do slightly different work when loading and saving, you may supply two
-          functions with the following signatures, where "T" is a placeholder for the type on which
-          SerialisationTraits is specialised:
-          @code
-          template <typename Archive>
-          static void load (Archive& archive, T& item);
-
-          template <typename Archive>
-          static void save (Archive& archive, const T& item);
-          @endcode
-
-    If the marshallingVersion converts to a null optional, then all versioning information will be
-    ignored when marshalling the type. Otherwise, if the value converts to a non-null optional, this
-    versioning information will be included when serialising the type.
-
-    Inside serialise() and load() you may call archive.getVersion() to find the detected version
-    of the object being deserialised. archive.getVersion() will return an std::optional<int>,
-    where 'nullopt' indicates that no versioning information was detected.
-
-    Marshalling functions can also be specified directly inside the type to be marshalled. This
-    approach may be preferable as it is more concise. Internal marshalling functions are written
-    in exactly the same way as external ones; i.e. the type must include a marshallingVersion,
-    and either a single serialise function, or a load/save pair of functions, as specified above.
-
-    @tags{Core}
-*/
-template <typename> struct SerialisationTraits
-{
-    /*  Intentionally left blank. */
-};
 
 //==============================================================================
 /*
