@@ -326,15 +326,15 @@ public:
         addAndMakeVisible (pluginListComponent);
         addAndMakeVisible (buttons);
 
-        const auto getCallback = [this, &list, callback = std::forward<Callback> (callback)] (EditorStyle style)
+        const auto getCallback = [this, &list, cb = std::forward<Callback> (callback)] (EditorStyle style)
         {
-            return [this, &list, callback, style]
+            return [this, &list, cb, style]
             {
                 const auto index = pluginListComponent.getTableListBox().getSelectedRow();
                 const auto& types = list.getTypes();
 
                 if (isPositiveAndBelow (index, types.size()))
-                    NullCheckedInvocation::invoke (callback, types.getReference (index), style);
+                    NullCheckedInvocation::invoke (cb, types.getReference (index), style);
             };
         };
 
