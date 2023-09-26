@@ -625,8 +625,7 @@ void ComboBox::handleAsyncUpdate()
     if (checker.shouldBailOut())
         return;
 
-    if (onChange != nullptr)
-        onChange();
+    NullCheckedInvocation::invoke (onChange);
 
     if (checker.shouldBailOut())
         return;

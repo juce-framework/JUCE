@@ -359,8 +359,7 @@ public:
         if (checker.shouldBailOut())
             return;
 
-        if (owner.onValueChange != nullptr)
-            owner.onValueChange();
+        NullCheckedInvocation::invoke (owner.onValueChange);
 
         if (checker.shouldBailOut())
             return;
@@ -379,8 +378,7 @@ public:
         if (checker.shouldBailOut())
             return;
 
-        if (owner.onDragStart != nullptr)
-            owner.onDragStart();
+        NullCheckedInvocation::invoke (owner.onDragStart);
     }
 
     void sendDragEnd()
@@ -394,8 +392,7 @@ public:
         if (checker.shouldBailOut())
             return;
 
-        if (owner.onDragEnd != nullptr)
-            owner.onDragEnd();
+        NullCheckedInvocation::invoke (owner.onDragEnd);
     }
 
     void incrementOrDecrement (double delta)

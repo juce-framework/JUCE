@@ -245,9 +245,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                                        if (weakRef == nullptr)
                                            return;
 
-                                       if (weakRef->pictureTakenCallback != nullptr)
-                                           weakRef->pictureTakenCallback (image);
-
+                                       NullCheckedInvocation::invoke (weakRef->pictureTakenCallback, image);
                                        weakRef->pictureTakenCallback = nullptr;
                                    });
     }

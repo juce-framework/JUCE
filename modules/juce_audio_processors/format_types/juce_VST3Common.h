@@ -100,8 +100,8 @@ public:
     {
         const auto toReturn = result.extract (obj);
 
-        if (result.isOk() && addRefFn != nullptr && *obj != nullptr)
-            addRefFn (*obj);
+        if (result.isOk() && *obj != nullptr)
+            NullCheckedInvocation::invoke (addRefFn, *obj);
 
         return toReturn;
     }

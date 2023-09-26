@@ -334,8 +334,7 @@ void MultiChoicePropertyComponent::setExpanded (bool shouldBeExpanded) noexcept
     if (auto* propertyPanel = findParentComponentOfClass<PropertyPanel>())
         propertyPanel->resized();
 
-    if (onHeightChange != nullptr)
-        onHeightChange();
+    NullCheckedInvocation::invoke (onHeightChange);
 
     expandButton.setTransform (AffineTransform::rotation (expanded ? MathConstants<float>::pi : MathConstants<float>::twoPi,
                                                           (float) expandButton.getBounds().getCentreX(),

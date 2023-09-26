@@ -523,8 +523,8 @@ private:
 
         MessageManager::callAsync ([weakRef = WeakReference<Pimpl> { this }, image]() mutable
         {
-            if (weakRef != nullptr && weakRef->pictureTakenCallback != nullptr)
-                weakRef->pictureTakenCallback (image);
+            if (weakRef != nullptr)
+                NullCheckedInvocation::invoke (weakRef->pictureTakenCallback, image);
         });
     }
 
@@ -551,8 +551,7 @@ private:
     {
         JUCE_CAMERA_LOG ("cameraSessionRuntimeError(), error = " + error);
 
-        if (owner.onErrorOccurred != nullptr)
-            owner.onErrorOccurred (error);
+        NullCheckedInvocation::invoke (owner.onErrorOccurred, error);
     }
 
     //==============================================================================

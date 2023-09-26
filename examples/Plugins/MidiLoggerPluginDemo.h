@@ -89,16 +89,14 @@ public:
         messages.erase (messages.begin(), std::next (messages.begin(), numToRemove));
         messages.insert (messages.end(), std::prev (end, numToAdd), end);
 
-        if (onChange != nullptr)
-            onChange();
+        NullCheckedInvocation::invoke (onChange);
     }
 
     void clear()
     {
         messages.clear();
 
-        if (onChange != nullptr)
-            onChange();
+        NullCheckedInvocation::invoke (onChange);
     }
 
     const MidiMessage& operator[] (size_t ind) const     { return messages[ind]; }

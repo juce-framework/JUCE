@@ -155,7 +155,7 @@ public:
     // invoked by the 'ping' button.
     void pingChildProcess()
     {
-        if (coordinatorProcess.get() != nullptr)
+        if (coordinatorProcess != nullptr)
             coordinatorProcess->sendPingMessageToWorker();
         else
             logMessage ("Child process is not running!");

@@ -312,12 +312,12 @@ private:
     {
         std::unique_ptr<XmlElement> openness;
 
-        if (rootItem.get() != nullptr)
+        if (rootItem != nullptr)
             openness = rootItem->getOpennessState();
 
         createNewRootNode();
 
-        if (openness.get() != nullptr && rootItem.get() != nullptr)
+        if (openness != nullptr && rootItem != nullptr)
             rootItem->restoreOpennessState (*openness);
     }
 
@@ -336,7 +336,7 @@ private:
         }
 
         // if we have a valid TreeViewItem hide any old error messages and set our TreeView to use it
-        if (rootItem.get() != nullptr)
+        if (rootItem != nullptr)
             errorMessage.clear();
 
         errorMessage.setVisible (! errorMessage.isEmpty());

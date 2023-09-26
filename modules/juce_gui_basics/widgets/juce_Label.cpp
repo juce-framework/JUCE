@@ -202,8 +202,7 @@ void Label::editorShown (TextEditor* textEditor)
     if (checker.shouldBailOut())
         return;
 
-    if (onEditorShow != nullptr)
-        onEditorShow();
+    NullCheckedInvocation::invoke (onEditorShow);
 }
 
 void Label::editorAboutToBeHidden (TextEditor* textEditor)
@@ -214,8 +213,7 @@ void Label::editorAboutToBeHidden (TextEditor* textEditor)
     if (checker.shouldBailOut())
         return;
 
-    if (onEditorHide != nullptr)
-        onEditorHide();
+    NullCheckedInvocation::invoke (onEditorHide);
 }
 
 void Label::showEditor()
@@ -463,8 +461,7 @@ void Label::callChangeListeners()
     if (checker.shouldBailOut())
         return;
 
-    if (onTextChange != nullptr)
-        onTextChange();
+    NullCheckedInvocation::invoke (onTextChange);
 }
 
 //==============================================================================

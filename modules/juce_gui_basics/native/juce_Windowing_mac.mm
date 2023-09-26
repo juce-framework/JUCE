@@ -410,8 +410,7 @@ struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
     static void displayReconfigurationCallback (CGDirectDisplayID, CGDisplayChangeSummaryFlags, void* userInfo)
     {
         if (auto* thisPtr = static_cast<DisplaySettingsChangeCallback*> (userInfo))
-            if (thisPtr->forceDisplayUpdate != nullptr)
-                thisPtr->forceDisplayUpdate();
+            NullCheckedInvocation::invoke (thisPtr->forceDisplayUpdate);
     }
 
     std::function<void()> forceDisplayUpdate;

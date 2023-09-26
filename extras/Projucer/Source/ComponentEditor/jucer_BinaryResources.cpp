@@ -137,9 +137,7 @@ void BinaryResources::browseForResource (const String& title,
     {
         if (safeThis == nullptr)
         {
-            if (callback != nullptr)
-                callback ({});
-
+            NullCheckedInvocation::invoke (callback, String{});
             return;
         }
 
@@ -169,8 +167,7 @@ void BinaryResources::browseForResource (const String& title,
             }
         }
 
-        if (callback != nullptr)
-            callback (resourceName);
+        NullCheckedInvocation::invoke (callback, resourceName);
     });
 }
 

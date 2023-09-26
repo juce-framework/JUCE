@@ -129,7 +129,7 @@ public:
                 }
             }
 
-            if (oldOpenness.get() != nullptr)
+            if (oldOpenness != nullptr)
                 treeView.restoreOpennessState (*oldOpenness, false);
         }
     }

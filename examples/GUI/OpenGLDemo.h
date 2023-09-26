@@ -110,10 +110,10 @@ struct OpenGLUtils
         {
             using namespace ::juce::gl;
 
-            if (position.get() != nullptr)        glDisableVertexAttribArray (position->attributeID);
-            if (normal.get() != nullptr)          glDisableVertexAttribArray (normal->attributeID);
-            if (sourceColour.get() != nullptr)    glDisableVertexAttribArray (sourceColour->attributeID);
-            if (textureCoordIn.get() != nullptr)  glDisableVertexAttribArray (textureCoordIn->attributeID);
+            if (position != nullptr)        glDisableVertexAttribArray (position->attributeID);
+            if (normal != nullptr)          glDisableVertexAttribArray (normal->attributeID);
+            if (sourceColour != nullptr)    glDisableVertexAttribArray (sourceColour->attributeID);
+            if (textureCoordIn != nullptr)  glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
         std::unique_ptr<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;
@@ -784,7 +784,7 @@ public:
         // on demand, during the render callback.
         freeAllContextObjects();
 
-        if (controlsOverlay.get() != nullptr)
+        if (controlsOverlay != nullptr)
             controlsOverlay->updateShader();
     }
 
@@ -857,19 +857,19 @@ public:
 
         shader->use();
 
-        if (uniforms->projectionMatrix.get() != nullptr)
+        if (uniforms->projectionMatrix != nullptr)
             uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
 
-        if (uniforms->viewMatrix.get() != nullptr)
+        if (uniforms->viewMatrix != nullptr)
             uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
 
-        if (uniforms->texture.get() != nullptr)
+        if (uniforms->texture != nullptr)
             uniforms->texture->set ((GLint) 0);
 
-        if (uniforms->lightPosition.get() != nullptr)
+        if (uniforms->lightPosition != nullptr)
             uniforms->lightPosition->set (-15.0f, 10.0f, 15.0f, 0.0f);
 
-        if (uniforms->bouncingNumber.get() != nullptr)
+        if (uniforms->bouncingNumber != nullptr)
             uniforms->bouncingNumber->set (bouncingNumber.getValue());
 
         shape->draw (*attributes);

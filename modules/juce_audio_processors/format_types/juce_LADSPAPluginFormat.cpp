@@ -157,8 +157,8 @@ public:
 
         jassert (insideLADSPACallback == 0);
 
-        if (handle != nullptr && plugin != nullptr && plugin->cleanup != nullptr)
-            plugin->cleanup (handle);
+        if (handle != nullptr && plugin != nullptr)
+            NullCheckedInvocation::invoke (plugin->cleanup, handle);
 
         initialised = false;
         module = nullptr;
@@ -209,8 +209,8 @@ public:
         setLatencySamples (0);
 
         // Some plugins crash if this doesn't happen:
-        if (plugin->activate   != nullptr)   plugin->activate (handle);
-        if (plugin->deactivate != nullptr)   plugin->deactivate (handle);
+        NullCheckedInvocation::invoke (plugin->activate, handle);
+        NullCheckedInvocation::invoke (plugin->deactivate, handle);
     }
 
     //==============================================================================
@@ -275,15 +275,14 @@ public:
                 firstParam->setValue (old);
             }
 
-            if (plugin->activate != nullptr)
-                plugin->activate (handle);
+            NullCheckedInvocation::invoke (plugin->activate, handle);
         }
     }
 
     void releaseResources() override
     {
         if (handle != nullptr && plugin->deactivate != nullptr)
-            plugin->deactivate (handle);
+            NullCheckedInvocation::invoke (plugin->deactivate, handle);
 
         tempBuffer.setSize (1, 1);
     }

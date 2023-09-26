@@ -423,8 +423,7 @@ static void setDPIAwareness()
         && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
         return;
 
-    if (setProcessDPIAware != nullptr)
-        setProcessDPIAware();
+    NullCheckedInvocation::invoke (setProcessDPIAware);
 }
 
 static bool isPerMonitorDPIAwareProcess()
@@ -3065,8 +3064,8 @@ private:
             // This avoids a rare stuck-button problem when focus is lost unexpectedly, but must
             // not be called as part of a move, in case it's actually a mouse-drag from another
             // app which ends up here when we get focus before the mouse is released..
-            if (isMouseDownEvent && getNativeRealtimeModifiers != nullptr)
-                getNativeRealtimeModifiers();
+            if (isMouseDownEvent)
+                NullCheckedInvocation::invoke (getNativeRealtimeModifiers);
 
             updateKeyModifiers();
 
@@ -3955,8 +3954,8 @@ public:
     {
         // Ensure that non-client areas are scaled for per-monitor DPI awareness v1 - can't
         // do this in peerWindowProc as we have no window at this point
-        if (message == WM_NCCREATE && enableNonClientDPIScaling != nullptr)
-            enableNonClientDPIScaling (h);
+        if (message == WM_NCCREATE)
+            NullCheckedInvocation::invoke (enableNonClientDPIScaling, h);
 
         if (auto* peer = getOwnerOfWindow (h))
         {

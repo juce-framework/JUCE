@@ -234,7 +234,7 @@ public:
         addAndMakeVisible (bypassButton);
 
         // Clicking will bypass *everything*
-        bypassButton.onClick = [globalBypass] { if (globalBypass != nullptr) globalBypass (-1); };
+        bypassButton.onClick = [globalBypass] { NullCheckedInvocation::invoke (globalBypass, -1); };
 
         setSize (300, 80);
     }

@@ -178,8 +178,7 @@ void Typeface::clearTypefaceCache()
 
     RenderingHelpers::SoftwareRendererSavedState::clearGlyphCache();
 
-    if (clearOpenGLGlyphCache != nullptr)
-        clearOpenGLGlyphCache();
+    NullCheckedInvocation::invoke (clearOpenGLGlyphCache);
 }
 
 //==============================================================================

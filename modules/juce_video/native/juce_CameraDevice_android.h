@@ -2932,16 +2932,14 @@ private:
 
     void cameraDeviceError (const String& error)
     {
-        if (owner.onErrorOccurred != nullptr)
-            owner.onErrorOccurred (error);
+        NullCheckedInvocation::invoke (owner.onErrorOccurred, error);
     }
 
     void invokeCameraOpenCallback (const String& error)
     {
         JUCE_CAMERA_LOG ("invokeCameraOpenCallback(), error = " + error);
 
-        if (cameraOpenCallback != nullptr)
-            cameraOpenCallback (cameraId, error);
+        NullCheckedInvocation::invoke (cameraOpenCallback, cameraId, error);
     }
 
     //==============================================================================
@@ -2955,8 +2953,7 @@ private:
     {
         JUCE_CAMERA_LOG ("notifyPictureTaken()");
 
-        if (pictureTakenCallback != nullptr)
-            pictureTakenCallback (image);
+        NullCheckedInvocation::invoke (pictureTakenCallback, image);
     }
 
     void triggerStillPictureCapture()

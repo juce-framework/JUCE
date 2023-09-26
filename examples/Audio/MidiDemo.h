@@ -311,7 +311,7 @@ private:
         {
             SparseSet<int> selectedRows;
             for (auto i = 0; i < midiDevices.size(); ++i)
-                if (midiDevices[i]->inDevice.get() != nullptr || midiDevices[i]->outDevice.get() != nullptr)
+                if (midiDevices[i]->inDevice != nullptr || midiDevices[i]->outDevice != nullptr)
                     selectedRows.addRange (Range<int> (i, i + 1));
 
             lastSelectedItems = selectedRows;
@@ -356,7 +356,7 @@ private:
     void sendToOutputs (const MidiMessage& msg)
     {
         for (auto midiOutput : midiOutputs)
-            if (midiOutput->outDevice.get() != nullptr)
+            if (midiOutput->outDevice != nullptr)
                 midiOutput->outDevice->sendMessageNow (msg);
     }
 

@@ -110,14 +110,12 @@ struct AppDelegateClass   : public ObjCClass<NSObject>
 
         addMethod (@selector (mainMenuTrackingBegan:), [] (id /*self*/, SEL, NSNotification*)
         {
-            if (menuTrackingChangedCallback != nullptr)
-                menuTrackingChangedCallback (true);
+            NullCheckedInvocation::invoke (menuTrackingChangedCallback, true);
         });
 
         addMethod (@selector (mainMenuTrackingEnded:), [] (id /*self*/, SEL, NSNotification*)
         {
-            if (menuTrackingChangedCallback != nullptr)
-                menuTrackingChangedCallback (false);
+            NullCheckedInvocation::invoke (menuTrackingChangedCallback, false);
         });
 
         // (used as a way of running a dummy thread)

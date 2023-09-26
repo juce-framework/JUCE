@@ -199,7 +199,7 @@ public:
 
         shouldExit = true;
 
-        if (webStream.get() != nullptr)
+        if (webStream != nullptr)
             webStream->cancel();
     }
 

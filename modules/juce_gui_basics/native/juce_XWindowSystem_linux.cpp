@@ -2261,8 +2261,7 @@ void XWindowSystem::setScreenSaverEnabled (bool enabled) const
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
-    if (xScreenSaverSuspend != nullptr)
-        xScreenSaverSuspend (display, ! enabled);
+    NullCheckedInvocation::invoke (xScreenSaverSuspend, display, ! enabled);
 }
 
 Point<float> XWindowSystem::getCurrentMousePosition() const

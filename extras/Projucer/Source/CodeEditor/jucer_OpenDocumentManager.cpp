@@ -172,9 +172,7 @@ void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Docume
 {
     if (! doc->needsSaving())
     {
-        if (callback != nullptr)
-            callback (FileBasedDocument::savedOk);
-
+        NullCheckedInvocation::invoke (callback, FileBasedDocument::savedOk);
         return;
     }
 
@@ -197,14 +195,12 @@ void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Docume
                 if (parent == nullptr)
                     return;
 
-                if (callback != nullptr)
-                    callback (hasSaved ? FileBasedDocument::savedOk : FileBasedDocument::failedToWriteToFile);
+                NullCheckedInvocation::invoke (callback, hasSaved ? FileBasedDocument::savedOk : FileBasedDocument::failedToWriteToFile);
             });
             return;
         }
 
-        if (callback != nullptr)
-            callback (r == 2 ? FileBasedDocument::savedOk : FileBasedDocument::userCancelledSave);
+        NullCheckedInvocation::invoke (callback, r == 2 ? FileBasedDocument::savedOk : FileBasedDocument::userCancelledSave);
     });
 }
 
@@ -233,9 +229,7 @@ void OpenDocumentManager::closeDocumentAsync (Document* doc, SaveIfNeeded saveIf
 {
     if (! documents.contains (doc))
     {
-        if (callback != nullptr)
-            callback (true);
-
+        NullCheckedInvocation::invoke (callback, true);
         return;
     }
 
@@ -249,16 +243,13 @@ void OpenDocumentManager::closeDocumentAsync (Document* doc, SaveIfNeeded saveIf
 
             if (result != FileBasedDocument::savedOk)
             {
-                if (callback != nullptr)
-                    callback (false);
-
+                NullCheckedInvocation::invoke (callback, false);
                 return;
             }
 
             auto closed = parent->closeDocumentWithoutSaving (doc);
 
-            if (callback != nullptr)
-                callback (closed);
+            NullCheckedInvocation::invoke (callback, closed);
         });
 
         return;
@@ -266,8 +257,7 @@ void OpenDocumentManager::closeDocumentAsync (Document* doc, SaveIfNeeded saveIf
 
     auto closed = closeDocumentWithoutSaving (doc);
 
-    if (callback != nullptr)
-        callback (closed);
+    NullCheckedInvocation::invoke (callback, closed);
 }
 
 void OpenDocumentManager::closeFileWithoutSaving (const File& f)
@@ -286,9 +276,7 @@ static void closeLastAsyncRecusrsive (WeakReference<OpenDocumentManager> parent,
 
     if (lastIndex < 0)
     {
-        if (callback != nullptr)
-            callback (true);
-
+        NullCheckedInvocation::invoke (callback, true);
         return;
     }
 
@@ -301,9 +289,7 @@ static void closeLastAsyncRecusrsive (WeakReference<OpenDocumentManager> parent,
 
         if (! closedSuccessfully)
         {
-            if (callback != nullptr)
-                callback (false);
-
+            NullCheckedInvocation::invoke (callback, false);
             return;
         }
 
@@ -334,9 +320,7 @@ void OpenDocumentManager::closeLastDocumentUsingProjectRecursive (WeakReference<
 
                     if (! closedSuccessfully)
                     {
-                        if (callback != nullptr)
-                            callback (false);
-
+                        NullCheckedInvocation::invoke (callback, false);
                         return;
                     }
 
@@ -348,8 +332,7 @@ void OpenDocumentManager::closeLastDocumentUsingProjectRecursive (WeakReference<
         }
     }
 
-    if (callback != nullptr)
-        callback (true);
+    NullCheckedInvocation::invoke (callback, true);
 }
 
 void OpenDocumentManager::closeAllDocumentsUsingProjectAsync (Project& project, SaveIfNeeded askUserToSave, std::function<void (bool)> callback)

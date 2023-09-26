@@ -120,7 +120,7 @@ public:
     //==============================================================================
     void systemRequestedQuit() override
     {
-        if (mainWindow.get() != nullptr)
+        if (mainWindow != nullptr)
             mainWindow->pluginHolder->savePluginState();
 
         if (ModalComponentManager::getInstance()->cancelAllModalComponents())

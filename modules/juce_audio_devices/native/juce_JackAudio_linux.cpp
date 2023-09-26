@@ -517,8 +517,7 @@ private:
             if (oldCallback != nullptr)
                 start (oldCallback);
 
-            if (notifyChannelsChanged != nullptr)
-                notifyChannelsChanged();
+            NullCheckedInvocation::invoke (notifyChannelsChanged);
         }
     }
 

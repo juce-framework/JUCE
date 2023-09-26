@@ -421,8 +421,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
     if (checker.shouldBailOut())
         return;
 
-    if (onClick != nullptr)
-        onClick();
+    NullCheckedInvocation::invoke (onClick);
 }
 
 void Button::sendStateMessage()
@@ -439,8 +438,7 @@ void Button::sendStateMessage()
     if (checker.shouldBailOut())
         return;
 
-    if (onStateChange != nullptr)
-        onStateChange();
+    NullCheckedInvocation::invoke (onStateChange);
 }
 
 //==============================================================================

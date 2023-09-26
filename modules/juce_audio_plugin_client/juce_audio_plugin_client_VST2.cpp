@@ -466,8 +466,7 @@ public:
             }
 
             // Send VST events to the host.
-            if (hostCallback != nullptr)
-                hostCallback (&vstEffect, Vst2::audioMasterProcessEvents, 0, 0, outgoingEvents.events, 0);
+            NullCheckedInvocation::invoke (hostCallback, &vstEffect, Vst2::audioMasterProcessEvents, 0, 0, outgoingEvents.events, 0.0f);
            #elif JUCE_DEBUG
             /*  This assertion is caused when you've added some events to the
                 midiMessages array in your processBlock() method, which usually means
@@ -545,10 +544,7 @@ public:
                 some hosts rely on this behaviour.
             */
             if (vstEffect.flags & Vst2::effFlagsIsSynth || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect)
-            {
-                if (hostCallback != nullptr)
-                    hostCallback (&vstEffect, Vst2::audioMasterWantMidi, 0, 1, nullptr, 0);
-            }
+                NullCheckedInvocation::invoke (hostCallback, &vstEffect, Vst2::audioMasterWantMidi, 0, 1, nullptr, 0.0f);
 
             if (detail::PluginUtilities::getHostType().isAbletonLive()
                  && hostCallback != nullptr
@@ -697,20 +693,17 @@ public:
             return;
         }
 
-        if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterAutomate, index, 0, nullptr, newValue);
+        NullCheckedInvocation::invoke (hostCallback, &vstEffect, Vst2::audioMasterAutomate, index, 0, nullptr, newValue);
     }
 
     void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override
     {
-        if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterBeginEdit, index, 0, nullptr, 0);
+        NullCheckedInvocation::invoke (hostCallback, &vstEffect, Vst2::audioMasterBeginEdit, index, 0, nullptr, 0.0f);
     }
 
     void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override
     {
-        if (hostCallback != nullptr)
-            hostCallback (&vstEffect, Vst2::audioMasterEndEdit, index, 0, nullptr, 0);
+        NullCheckedInvocation::invoke (hostCallback, &vstEffect, Vst2::audioMasterEndEdit, index, 0, nullptr, 0.0f);
     }
 
     void parameterValueChanged (int, float newValue) override

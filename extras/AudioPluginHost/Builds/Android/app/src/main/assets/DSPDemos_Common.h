@@ -379,7 +379,7 @@ public:
 
         r.removeFromTop (20);
 
-        if (parametersComponent.get() != nullptr)
+        if (parametersComponent != nullptr)
             parametersComponent->setBounds (r.removeFromTop (parametersComponent->getHeightNeeded()).reduced (20, 0));
     }
 
@@ -443,7 +443,7 @@ public:
             transportSource.reset (new AudioTransportSource());
             transportSource->addChangeListener (this);
 
-            if (readerSource.get() != nullptr)
+            if (readerSource != nullptr)
             {
                 if (auto* device = audioDeviceManager.getCurrentAudioDevice())
                 {
@@ -475,7 +475,7 @@ public:
 
     void play()
     {
-        if (readerSource.get() == nullptr)
+        if (readerSource == nullptr)
             return;
 
         if (transportSource->getCurrentPosition() >= transportSource->getLengthInSeconds()
@@ -488,7 +488,7 @@ public:
 
     void setLooping (bool shouldLoop)
     {
-        if (readerSource.get() != nullptr)
+        if (readerSource != nullptr)
             readerSource->setLooping (shouldLoop);
     }
 
@@ -633,7 +633,7 @@ private:
     //==============================================================================
     void valueChanged (Value& v) override
     {
-        if (readerSource.get() != nullptr)
+        if (readerSource != nullptr)
             readerSource->setLooping (v.getValue());
     }
 
