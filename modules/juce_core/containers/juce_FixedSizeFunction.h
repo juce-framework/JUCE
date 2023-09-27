@@ -234,5 +234,4 @@ bool operator== (const FixedSizeFunction<len, T>& fn, std::nullptr_t) { return !
 template <size_t len, typename T>
 bool operator== (std::nullptr_t, const FixedSizeFunction<len, T>& fn) { return ! (fn != nullptr); }
 
-
-}
+} // namespace juce
