@@ -388,7 +388,7 @@ private:
 
         static std::optional<bool> pullTyped (std::in_place_type_t<bool>, const var& source)
         {
-            return source.isBool() || source.isInt() || source.isInt64() ? std::optional<bool> ((bool) source) : std::nullopt;
+            return std::optional<bool> ((bool) source);
         }
 
         static std::optional<String> pullTyped (std::in_place_type_t<String>, const var& source)
@@ -478,30 +478,54 @@ struct VariantConverter
 {
     static Type fromVar (const var& v)
     {
-        if constexpr (detail::serialisationKind<Type> != detail::SerialisationKind::none)
-        {
-            auto converted = FromVar::convert<Type> (v);
-            jassert (converted.has_value());
-            return std::move (converted).value_or (Type{});
-        }
-        else
-        {
-            return static_cast<Type> (v);
-        }
+        return static_cast<Type> (v);
     }
 
     static var toVar (const Type& t)
     {
-        if constexpr (detail::serialisationKind<Type> != detail::SerialisationKind::none)
-        {
-            auto converted = ToVar::convert<> (t);
-            jassert (converted.has_value());
-            return std::move (converted).value_or (var{});
-        }
-        else
-        {
-            return t;
-        }
+        return t;
+    }
+};
+
+#ifndef DOXYGEN
+
+template <>
+struct VariantConverter<String>
+{
+    static String fromVar (const var& v)           { return v.toString(); }
+    static var toVar (const String& s)             { return s; }
+};
+
+#endif
+
+/**
+    A helper type that can be used to implement specialisations of VariantConverter that use
+    FromVar::convert and ToVar::convert internally.
+
+    If you've already implemented SerialisationTraits for a specific type, and don't want to write
+    a custom VariantConverter that duplicates that implementation, you can instead write:
+    @code
+    template <>
+    struct juce::VariantConverter<MyType> : public juce::StrictVariantConverter<MyType> {};
+    @endcode
+*/
+template <typename Type>
+struct StrictVariantConverter
+{
+    static_assert (detail::serialisationKind<Type> != detail::SerialisationKind::none);
+
+    static Type fromVar (const var& v)
+    {
+        auto converted = FromVar::convert<Type> (v);
+        jassert (converted.has_value());
+        return std::move (converted).value_or (Type{});
+    }
+
+    static var toVar (const Type& t)
+    {
+        auto converted = ToVar::convert<> (t);
+        jassert (converted.has_value());
+        return std::move (converted).value_or (var{});
     }
 };
 
