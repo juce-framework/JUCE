@@ -174,12 +174,12 @@ public:
                 fontFile = findFontFile (name, isBold, isItalic);
 
             if (fontFile.exists())
-                typeface = GlobalRef (LocalRef<jobject>(env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.createFromFile,
-                                                                                     javaString (fontFile.getFullPathName()).get())));
+                typeface = GlobalRef (LocalRef<jobject> (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.createFromFile,
+                                                                                      javaString (fontFile.getFullPathName()).get())));
             else
-                typeface = GlobalRef (LocalRef<jobject>(env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.create,
-                                                                                     javaString (getName()).get(),
-                                                                                     (isBold ? 1 : 0) + (isItalic ? 2 : 0))));
+                typeface = GlobalRef (LocalRef<jobject> (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.create,
+                                                                                      javaString (getName()).get(),
+                                                                                      (isBold ? 1 : 0) + (isItalic ? 2 : 0))));
         }
 
         initialise (env);
@@ -191,20 +191,20 @@ public:
         auto* env = getEnv();
         auto cacheFile = getCacheFileForData (data, size);
 
-        typeface = GlobalRef (LocalRef<jobject>(env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.createFromFile,
-                                                                             javaString (cacheFile.getFullPathName()).get())));
+        typeface = GlobalRef (LocalRef<jobject> (env->CallStaticObjectMethod (TypefaceClass, TypefaceClass.createFromFile,
+                                                                              javaString (cacheFile.getFullPathName()).get())));
 
         initialise (env);
     }
 
     void initialise (JNIEnv* const env)
     {
-        rect = GlobalRef (LocalRef<jobject>(env->NewObject (AndroidRect, AndroidRect.constructor, 0, 0, 0, 0)));
+        rect = GlobalRef (LocalRef<jobject> (env->NewObject (AndroidRect, AndroidRect.constructor, 0, 0, 0, 0)));
 
         paint = GlobalRef (GraphicsHelpers::createPaint (Graphics::highResamplingQuality));
         const LocalRef<jobject> ignored (paint.callObjectMethod (AndroidPaint.setTypeface, typeface.get()));
 
-        charArray = GlobalRef (LocalRef<jobject>((jobject) env->NewCharArray (2)));
+        charArray = GlobalRef (LocalRef<jobject> ((jobject) env->NewCharArray (2)));
 
         paint.callVoidMethod (AndroidPaint.setTextSize, referenceFontSize);
 
@@ -474,7 +474,7 @@ private:
 
             jassertfalse;
             return File();
-        } ();
+        }();
 
         return result;
     }
@@ -492,20 +492,20 @@ private:
 
         String key;
         {
-            LocalRef<jobject> digest (env->CallStaticObjectMethod (JavaMessageDigest, JavaMessageDigest.getInstance, javaString("MD5").get()));
-            LocalRef<jbyteArray> bytes(env->NewByteArray ((int) size));
+            LocalRef<jobject> digest (env->CallStaticObjectMethod (JavaMessageDigest, JavaMessageDigest.getInstance, javaString ("MD5").get()));
+            LocalRef<jbyteArray> bytes (env->NewByteArray ((int) size));
 
             jboolean ignore;
-            auto* jbytes = env->GetByteArrayElements(bytes.get(), &ignore);
-            memcpy(jbytes, data, size);
-            env->ReleaseByteArrayElements(bytes.get(), jbytes, 0);
+            auto* jbytes = env->GetByteArrayElements (bytes.get(), &ignore);
+            memcpy (jbytes, data, size);
+            env->ReleaseByteArrayElements (bytes.get(), jbytes, 0);
 
-            env->CallVoidMethod(digest.get(), JavaMessageDigest.update, bytes.get());
-            LocalRef<jbyteArray> result((jbyteArray) env->CallObjectMethod(digest.get(), JavaMessageDigest.digest));
+            env->CallVoidMethod (digest.get(), JavaMessageDigest.update, bytes.get());
+            LocalRef<jbyteArray> result ((jbyteArray) env->CallObjectMethod (digest.get(), JavaMessageDigest.digest));
 
-            auto* md5Bytes = env->GetByteArrayElements(result.get(), &ignore);
-            key = String::toHexString(md5Bytes, env->GetArrayLength(result.get()), 0);
-            env->ReleaseByteArrayElements(result.get(), md5Bytes, 0);
+            auto* md5Bytes = env->GetByteArrayElements (result.get(), &ignore);
+            key = String::toHexString (md5Bytes, env->GetArrayLength (result.get()), 0);
+            env->ReleaseByteArrayElements (result.get(), md5Bytes, 0);
         }
 
         ScopedLock lock (cs);

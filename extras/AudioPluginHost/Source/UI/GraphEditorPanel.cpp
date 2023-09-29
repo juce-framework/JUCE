@@ -847,11 +847,11 @@ void GraphEditorPanel::changeListenerCallback (ChangeBroadcaster*)
 void GraphEditorPanel::updateComponents()
 {
     for (int i = nodes.size(); --i >= 0;)
-        if (graph.graph.getNodeForId (nodes.getUnchecked(i)->pluginID) == nullptr)
+        if (graph.graph.getNodeForId (nodes.getUnchecked (i)->pluginID) == nullptr)
             nodes.remove (i);
 
     for (int i = connectors.size(); --i >= 0;)
-        if (! graph.graph.isConnected (connectors.getUnchecked(i)->connection))
+        if (! graph.graph.isConnected (connectors.getUnchecked (i)->connection))
             connectors.remove (i);
 
     for (auto* fc : nodes)
@@ -1283,7 +1283,7 @@ void GraphDocumentComponent::resized()
     const int statusHeight = 20;
 
     if (isOnTouchDevice())
-        titleBarComponent->setBounds (r.removeFromTop(titleBarHeight));
+        titleBarComponent->setBounds (r.removeFromTop (titleBarHeight));
 
     keyboardComp->setBounds (r.removeFromBottom (keysHeight));
     statusBar->setBounds (r.removeFromBottom (statusHeight));

@@ -215,7 +215,7 @@ public:
 
                 expect (! approximatelyEqual (nan, nan));
 
-                const auto expectNotEqualTo = [&](auto value)
+                const auto expectNotEqualTo = [&] (auto value)
                 {
                     expect (! approximatelyEqual (value, nan));
                     expect (! approximatelyEqual (nan, value));
@@ -242,7 +242,7 @@ public:
                 expect (! approximatelyEqual (inf, -inf));
                 expect (! approximatelyEqual (-inf, inf));
 
-                const auto expectNotEqualTo = [&](auto value)
+                const auto expectNotEqualTo = [&] (auto value)
                 {
                     expect (! approximatelyEqual (value, inf));
                     expect (! approximatelyEqual (value, -inf));
@@ -274,11 +274,11 @@ public:
                 (T) 0.0078125 /* 2^-7 */
             };
 
-            const auto testTolerance = [&](auto tolerance)
+            const auto testTolerance = [&] (auto tolerance)
             {
                 const auto t = Tolerance<T>{}.withAbsolute ((T) tolerance);
 
-                const auto testValue= [&](auto value)
+                const auto testValue= [&] (auto value)
                 {
                     const auto boundary = value + tolerance;
 

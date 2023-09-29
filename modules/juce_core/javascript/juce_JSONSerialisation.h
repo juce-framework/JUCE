@@ -144,7 +144,7 @@ private:
             {
                 push ((double) t);
             }
-            else if (auto converted = convert(t))
+            else if (auto converted = convert (t))
             {
                 push (*converted);
             }

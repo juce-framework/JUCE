@@ -69,7 +69,7 @@ public:
     {
         for (auto i = getActiveModules().size(); --i >= 0;)
         {
-            auto* module = getActiveModules().getUnchecked(i);
+            auto* module = getActiveModules().getUnchecked (i);
 
             if (module->file == file)
                 return module;
@@ -300,7 +300,7 @@ public:
             if (plugin->run != nullptr)
             {
                 for (int i = 0; i < outputs.size(); ++i)
-                    plugin->connect_port (handle, (size_t) outputs.getUnchecked(i),
+                    plugin->connect_port (handle, (size_t) outputs.getUnchecked (i),
                                           i < buffer.getNumChannels() ? buffer.getWritePointer (i) : nullptr);
 
                 plugin->run (handle, (size_t) numSamples);
@@ -313,7 +313,7 @@ public:
                 tempBuffer.clear();
 
                 for (int i = 0; i < outputs.size(); ++i)
-                    plugin->connect_port (handle, (size_t) outputs.getUnchecked(i), tempBuffer.getWritePointer (i));
+                    plugin->connect_port (handle, (size_t) outputs.getUnchecked (i), tempBuffer.getWritePointer (i));
 
                 plugin->run_adding (handle, (size_t) numSamples);
 

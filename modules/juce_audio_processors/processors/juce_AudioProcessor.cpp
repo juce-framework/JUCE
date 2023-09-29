@@ -434,7 +434,7 @@ void AudioProcessor::validateParameter (AudioProcessorParameter* param)
     /*  If you're building this plugin as an AudioUnit, and you intend to use the plugin in
         Logic Pro or GarageBand, it's a good idea to set version hints on all of your parameters
         so that you can add parameters safely in future versions of the plugin.
-        See the documentation for AudioProcessorParameter(int) for more information.
+        See the documentation for AudioProcessorParameter (int) for more information.
     */
    #if JucePlugin_Build_AU
     static std::once_flag flag;
@@ -720,8 +720,8 @@ AudioProcessor::BusesLayout AudioProcessor::getNextBestLayoutInList (const Buses
     auto outChannels = legacyLayouts.getReference (bestConfiguration).outChannels;
 
     auto currentState = getBusesLayout();
-    auto currentInLayout  = (getBusCount (true)  > 0 ? currentState.inputBuses .getReference(0) : AudioChannelSet());
-    auto currentOutLayout = (getBusCount (false) > 0 ? currentState.outputBuses.getReference(0) : AudioChannelSet());
+    auto currentInLayout  = (getBusCount (true)  > 0 ? currentState.inputBuses .getReference (0) : AudioChannelSet());
+    auto currentOutLayout = (getBusCount (false) > 0 ? currentState.outputBuses.getReference (0) : AudioChannelSet());
 
     if (inBus != nullptr)
     {
@@ -1104,7 +1104,7 @@ bool AudioProcessor::Bus::isLayoutSupported (const AudioChannelSet& set, BusesLa
 bool AudioProcessor::Bus::isNumberOfChannelsSupported (int channels) const
 {
     if (channels == 0)
-        return isLayoutSupported(AudioChannelSet::disabled());
+        return isLayoutSupported (AudioChannelSet::disabled());
 
     auto set = supportedLayoutWithChannels (channels);
     return (! set.isDisabled()) && isLayoutSupported (set);

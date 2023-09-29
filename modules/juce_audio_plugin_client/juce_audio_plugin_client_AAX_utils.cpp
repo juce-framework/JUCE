@@ -55,7 +55,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6001 6053 4996 5033 4068 4996)
 #include <Libs/AAXLibrary/source/AAX_CChunkDataParser.cpp>
 #include <Libs/AAXLibrary/source/AAX_CHostServices.cpp>
 
-#if defined(_WIN32) && ! defined(WIN32)
+#if defined (_WIN32) && ! defined (WIN32)
  #define WIN32
 #endif
 #include <Libs/AAXLibrary/source/AAX_CMutex.cpp>

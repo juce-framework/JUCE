@@ -53,7 +53,7 @@ public:
 private:
     void updateBounds (Component* child)
     {
-        auto childArea = getLocalArea(child, child->getLocalBounds());
+        auto childArea = getLocalArea (child, child->getLocalBounds());
         setSize (childArea.getWidth(), childArea.getHeight());
     }
 

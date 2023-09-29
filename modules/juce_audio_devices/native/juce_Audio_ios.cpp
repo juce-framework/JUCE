@@ -726,12 +726,12 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
 
         CFURLRef hostUrl;
         UInt32 dataSize = sizeof (hostUrl);
-        OSStatus err = AudioUnitGetProperty(audioUnit,
-                                            kAudioUnitProperty_PeerURL,
-                                            kAudioUnitScope_Global,
-                                            0,
-                                            &hostUrl,
-                                            &dataSize);
+        OSStatus err = AudioUnitGetProperty (audioUnit,
+                                             kAudioUnitProperty_PeerURL,
+                                             kAudioUnitScope_Global,
+                                             0,
+                                             &hostUrl,
+                                             &dataSize);
         if (err == noErr)
         {
             if (@available (iOS 10.0, *))
@@ -993,7 +993,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
         appDesc.componentFlags = 0;
         appDesc.componentFlagsMask = 0;
         OSStatus err = AudioOutputUnitPublish (&appDesc,
-                                               CFSTR(JucePlugin_IAAName),
+                                               CFSTR (JucePlugin_IAAName),
                                                JucePlugin_VersionCode,
                                                audioUnit);
 

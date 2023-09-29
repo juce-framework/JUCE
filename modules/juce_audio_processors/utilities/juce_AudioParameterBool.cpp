@@ -35,7 +35,7 @@ AudioParameterBool::AudioParameterBool (const ParameterID& idToUse,
       valueDefault (def),
       stringFromBoolFunction (attributes.getStringFromValueFunction() != nullptr
                                   ? attributes.getStringFromValueFunction()
-                                  : [] (bool v, int) { return v ? TRANS("On") : TRANS("Off"); }),
+                                  : [] (bool v, int) { return v ? TRANS ("On") : TRANS ("Off"); }),
       boolFromStringFunction (attributes.getValueFromStringFunction() != nullptr
                                   ? attributes.getValueFromStringFunction()
                                   : [] (const String& text)

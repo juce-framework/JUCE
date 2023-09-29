@@ -884,7 +884,7 @@ void Component::sendMovedResizedMessages (bool wasMoved, bool wasResized)
 
         for (int i = childComponentList.size(); --i >= 0;)
         {
-            childComponentList.getUnchecked(i)->parentSizeChanged();
+            childComponentList.getUnchecked (i)->parentSizeChanged();
 
             if (checker.shouldBailOut())
                 return;
@@ -1910,7 +1910,7 @@ void Component::copyAllExplicitColoursTo (Component& target) const
 
     for (int i = properties.size(); --i >= 0;)
     {
-        auto name = properties.getName(i);
+        auto name = properties.getName (i);
 
         if (name.toString().startsWith (detail::colourPropertyPrefix))
             if (target.properties.set (name, properties [name]))

@@ -89,7 +89,7 @@ public:
 
             for (int i = faces.size(); --i >= 0;)
             {
-                CachedFace& face = faces.getReference(i);
+                CachedFace& face = faces.getReference (i);
 
                 if (face.typefaceName == faceName
                      && face.typefaceStyle == faceStyle
@@ -108,7 +108,7 @@ public:
 
         for (int i = faces.size(); --i >= 0;)
         {
-            auto lu = faces.getReference(i).lastUsageCount;
+            auto lu = faces.getReference (i).lastUsageCount;
 
             if (bestLastUsageCount > lu)
             {

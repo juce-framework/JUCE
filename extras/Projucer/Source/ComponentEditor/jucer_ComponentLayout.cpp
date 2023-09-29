@@ -248,7 +248,7 @@ void ComponentLayout::copySelectedToClipboard()
 
     for (int i = 0; i < components.size(); ++i)
     {
-        auto c = components.getUnchecked(i);
+        auto c = components.getUnchecked (i);
 
         if (selected.isSelected (c))
         {
@@ -310,7 +310,7 @@ void ComponentLayout::selectedToFront()
     const SelectedItemSet <Component*> temp (selected);
 
     for (int i = temp.getNumSelected(); --i >= 0;)
-        componentToFront (temp.getSelectedItem(i), true);
+        componentToFront (temp.getSelectedItem (i), true);
 }
 
 void ComponentLayout::selectedToBack()
@@ -318,7 +318,7 @@ void ComponentLayout::selectedToBack()
     const SelectedItemSet <Component*> temp (selected);
 
     for (int i = 0; i < temp.getNumSelected(); ++i)
-        componentToBack (temp.getSelectedItem(i), true);
+        componentToBack (temp.getSelectedItem (i), true);
 }
 
 void ComponentLayout::alignTop()
@@ -457,8 +457,8 @@ Component* ComponentLayout::addComponentFromXml (const XmlElement& xml, const bo
 Component* ComponentLayout::findComponentWithId (const int64 componentId) const
 {
     for (int i = 0; i < components.size(); ++i)
-        if (ComponentTypeHandler::getComponentId (components.getUnchecked(i)) == componentId)
-            return components.getUnchecked(i);
+        if (ComponentTypeHandler::getComponentId (components.getUnchecked (i)) == componentId)
+            return components.getUnchecked (i);
 
     return nullptr;
 }
@@ -626,7 +626,7 @@ public:
           newBounds (bounds),
           oldBounds (comp->getBounds()),
           newProps (props),
-          oldProps(comp->getProperties())
+          oldProps (comp->getProperties())
     {
     }
 
@@ -839,7 +839,7 @@ void ComponentLayout::stretchSelectedComps (int dw, int dh, bool allowSnap)
 void ComponentLayout::fillInGeneratedCode (GeneratedCode& code) const
 {
     for (int i = 0; i < components.size(); ++i)
-        if (Component* const comp = components.getUnchecked(i))
+        if (Component* const comp = components.getUnchecked (i))
             if (ComponentTypeHandler* const type = ComponentTypeHandler::getHandlerFor (*comp))
                 type->fillInGeneratedCode (comp, code);
 }

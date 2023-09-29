@@ -152,13 +152,13 @@ public:
             typeAsString = "(unknown)";
         }
 
-        oscLogList.add (getIndentationString (level + 1) + "- " + typeAsString.paddedRight(' ', 12) + valueAsString);
+        oscLogList.add (getIndentationString (level + 1) + "- " + typeAsString.paddedRight (' ', 12) + valueAsString);
     }
 
     //==============================================================================
     void addInvalidOSCPacket (const char* /* data */, int dataSize)
     {
-        oscLogList.add ("- (" + String(dataSize) + "bytes with invalid format)");
+        oscLogList.add ("- (" + String (dataSize) + "bytes with invalid format)");
     }
 
     //==============================================================================

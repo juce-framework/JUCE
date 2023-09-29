@@ -789,7 +789,7 @@ namespace StringHelpers
     template <typename T>
     inline String& operationAddAssign (String& str, const T number)
     {
-        char buffer [(sizeof(T) * 8) / 2];
+        char buffer [(sizeof (T) * 8) / 2];
         auto* end = buffer + numElementsInArray (buffer);
         auto* start = NumberToStringConverters::numberToString (end, number);
 
@@ -2420,12 +2420,12 @@ public:
             expect (s.compare (String ("012345678")) == 0);
             expect (s.compare (String ("012345679")) < 0);
             expect (s.compare (String ("012345676")) > 0);
-            expect (String("a").compareNatural ("A") == 0);
-            expect (String("A").compareNatural ("B") < 0);
-            expect (String("a").compareNatural ("B") < 0);
-            expect (String("10").compareNatural ("2") > 0);
-            expect (String("Abc 10").compareNatural ("aBC 2") > 0);
-            expect (String("Abc 1").compareNatural ("aBC 2") < 0);
+            expect (String ("a").compareNatural ("A") == 0);
+            expect (String ("A").compareNatural ("B") < 0);
+            expect (String ("a").compareNatural ("B") < 0);
+            expect (String ("10").compareNatural ("2") > 0);
+            expect (String ("Abc 10").compareNatural ("aBC 2") > 0);
+            expect (String ("Abc 1").compareNatural ("aBC 2") < 0);
             expect (s.substring (2, 3) == String::charToString (s[2]));
             expect (s.substring (0, 1) == String::charToString (s[0]));
             expect (s.getLastCharacter() == s [s.length() - 1]);
@@ -2707,7 +2707,7 @@ public:
             expectEquals (s5.upToLastOccurrenceOf (String(), true, false), s5);
             expectEquals (s5.upToLastOccurrenceOf ("zword", true, false), s5);
             expectEquals (s5.upToLastOccurrenceOf ("word", true, false), s5.dropLastCharacters (1));
-            expectEquals (s5.dropLastCharacters(1).upToLastOccurrenceOf ("word", true, false), s5.dropLastCharacters (1));
+            expectEquals (s5.dropLastCharacters (1).upToLastOccurrenceOf ("word", true, false), s5.dropLastCharacters (1));
             expectEquals (s5.upToLastOccurrenceOf ("Word", true, true), s5.dropLastCharacters (1));
             expectEquals (s5.upToLastOccurrenceOf ("word", false, false), s5.dropLastCharacters (5));
             expectEquals (s5.upToLastOccurrenceOf ("Word", false, true), s5.dropLastCharacters (5));

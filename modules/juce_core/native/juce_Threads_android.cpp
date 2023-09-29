@@ -72,7 +72,7 @@ extern "C" jint JNIEXPORT JNI_OnLoad (JavaVM* vm, void*)
     auto* env = getEnv();
 
     // register the initialisation function
-    auto juceJavaClass = env->FindClass("com/rmsl/juce/Java");
+    auto juceJavaClass = env->FindClass ("com/rmsl/juce/Java");
 
     if (juceJavaClass != nullptr)
     {

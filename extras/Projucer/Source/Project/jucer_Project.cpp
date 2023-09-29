@@ -340,7 +340,7 @@ void Project::initialiseAudioPluginValues()
 
     pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
                                               Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
-    pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
+    pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var>(), ",");
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
     pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,                 getUndoManager(), getProjectNameString());
@@ -1415,8 +1415,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
         for (int i = 0; i < types.size(); ++i)
         {
-            projectTypeNames.add (types.getUnchecked(i)->getDescription());
-            projectTypeCodes.add (types.getUnchecked(i)->getType());
+            projectTypeNames.add (types.getUnchecked (i)->getDescription());
+            projectTypeCodes.add (types.getUnchecked (i)->getType());
         }
 
         props.add (new ChoicePropertyComponent (projectTypeValue, "Project Type", projectTypeNames, projectTypeCodes),
@@ -1698,7 +1698,7 @@ Project::Item Project::Item::findItemWithID (const String& targetId) const
     {
         for (auto i = getNumChildren(); --i >= 0;)
         {
-            auto found = getChild(i).findItemWithID (targetId);
+            auto found = getChild (i).findItemWithID (targetId);
 
             if (found.isValid())
                 return found;
@@ -1819,7 +1819,7 @@ Project::Item Project::Item::findItemForFile (const File& file) const
     {
         for (auto i = getNumChildren(); --i >= 0;)
         {
-            auto found = getChild(i).findItemForFile (file);
+            auto found = getChild (i).findItemForFile (file);
 
             if (found.isValid())
                 return found;
@@ -1836,7 +1836,7 @@ File Project::Item::determineGroupFolder() const
 
     for (int i = 0; i < getNumChildren(); ++i)
     {
-        f = getChild(i).getFile();
+        f = getChild (i).getFile();
 
         if (f.exists())
             return f.getParentDirectory();
@@ -1873,7 +1873,7 @@ void Project::Item::initialiseMissingProperties()
     else if (isGroup())
     {
         for (auto i = getNumChildren(); --i >= 0;)
-            getChild(i).initialiseMissingProperties();
+            getChild (i).initialiseMissingProperties();
     }
 }
 
@@ -1960,7 +1960,7 @@ void Project::Item::sortAlphabetically (bool keepGroupsAtStart, bool recursive)
 
     if (recursive)
         for (auto i = getNumChildren(); --i >= 0;)
-            getChild(i).sortAlphabetically (keepGroupsAtStart, true);
+            getChild (i).sortAlphabetically (keepGroupsAtStart, true);
 }
 
 Project::Item Project::Item::getOrCreateSubGroup (const String& name)
@@ -2831,9 +2831,9 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_VSTNumMidiOutputs",           getVSTNumMIDIOutputsString());
     flags.set ("JucePlugin_ARAContentTypes",             String (getARAContentTypes()));
     flags.set ("JucePlugin_ARATransformationFlags",      String (getARATransformationFlags()));
-    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(getARAFactoryIDString()));
-    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(getARADocumentArchiveIDString()));
-    flags.set ("JucePlugin_ARACompatibleArchiveIDs",     toStringLiteral(getARACompatibleArchiveIDStrings()));
+    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral (getARAFactoryIDString()));
+    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral (getARADocumentArchiveIDString()));
+    flags.set ("JucePlugin_ARACompatibleArchiveIDs",     toStringLiteral (getARACompatibleArchiveIDStrings()));
 
     {
         String plugInChannelConfig = getPluginChannelConfigsString();

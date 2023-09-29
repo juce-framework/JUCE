@@ -65,7 +65,7 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
 
         for (int i = 0; i < items.size(); ++i)
         {
-            const Item& it = items.getReference(i);
+            const Item& it = items.getReference (i);
             currentSize += it.size;
 
             if (it.order <= order)
@@ -91,7 +91,7 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
 
             for (int i = 0; i < items.size(); ++i)
             {
-                Item& it = items.getReference(i);
+                Item& it = items.getReference (i);
 
                 if (it.order <= order)
                     it.size = jlimit (it.minSize, it.maxSize, it.size + (it.maxSize - it.size) * scale);
@@ -105,7 +105,7 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
 
             for (int i = 0; i < items.size(); ++i)
             {
-                Item& it = items.getReference(i);
+                Item& it = items.getReference (i);
 
                 if (it.order <= order)
                     it.size = jmax (it.minSize, it.minSize + (it.size - it.minSize) * scale);

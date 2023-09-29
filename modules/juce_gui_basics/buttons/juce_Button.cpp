@@ -122,7 +122,7 @@ void Button::updateAutomaticTooltip (const ApplicationCommandInfo& info)
             tt << " [";
 
             if (key.length() == 1)
-                tt << TRANS("shortcut") << ": '" << key << "']";
+                tt << TRANS ("shortcut") << ": '" << key << "']";
             else
                 tt << key << ']';
         }

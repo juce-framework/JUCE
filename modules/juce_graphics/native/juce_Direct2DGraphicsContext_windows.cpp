@@ -119,7 +119,7 @@ struct Direct2DLowLevelGraphicsContext::Pimpl
         sink->SetFillMode (D2D1_FILL_MODE_WINDING);
 
         for (int i = clipRegion.getNumRectangles(); --i >= 0;)
-            rectToGeometrySink (clipRegion.getRectangle(i), sink, AffineTransform());
+            rectToGeometrySink (clipRegion.getRectangle (i), sink, AffineTransform());
 
         hr = sink->Close();
         return p;
@@ -449,7 +449,7 @@ public:
 
                     const auto p1 = fillType.gradient->point1;
                     const auto p2 = fillType.gradient->point2;
-                    const auto r = p1.getDistanceFrom(p2);
+                    const auto r = p1.getDistanceFrom (p2);
                     const auto props = D2D1::RadialGradientBrushProperties ({ p1.x, p1.y }, {}, r, r);
 
                     owner.pimpl->renderingTarget->CreateRadialGradientBrush (props, brushProps, gradientStops, radialGradient.resetAndGetPointerAddress());

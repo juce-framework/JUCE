@@ -28,7 +28,7 @@ namespace juce
 
 ComboBox::ComboBox (const String& name)
     : Component (name),
-      noChoicesMessage (TRANS("(no choices)"))
+      noChoicesMessage (TRANS ("(no choices)"))
 {
     setRepaintsOnMouseActivity (true);
     lookAndFeelChanged();

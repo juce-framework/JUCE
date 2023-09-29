@@ -28,11 +28,11 @@ namespace juce
     namespace dsp
     {
         DEFINE_SSE_SIMD_CONST (int32_t, float, kAllBitsSet)     = { -1, -1, -1, -1 };
-        DEFINE_SSE_SIMD_CONST (int32_t, float, kEvenHighBit)    = { static_cast<int32_t>(0x80000000), 0, static_cast<int32_t>(0x80000000), 0 };
+        DEFINE_SSE_SIMD_CONST (int32_t, float, kEvenHighBit)    = { static_cast<int32_t> (0x80000000), 0, static_cast<int32_t> (0x80000000), 0 };
         DEFINE_SSE_SIMD_CONST (float, float, kOne)              = { 1.0f, 1.0f, 1.0f, 1.0f };
 
         DEFINE_SSE_SIMD_CONST (int64_t, double, kAllBitsSet)    = { -1LL, -1LL };
-        DEFINE_SSE_SIMD_CONST (int64_t, double, kEvenHighBit)   = { static_cast<int64_t>(0x8000000000000000), 0 };
+        DEFINE_SSE_SIMD_CONST (int64_t, double, kEvenHighBit)   = { static_cast<int64_t> (0x8000000000000000), 0 };
         DEFINE_SSE_SIMD_CONST (double, double, kOne)            = { 1.0, 1.0 };
 
         DEFINE_SSE_SIMD_CONST (int8_t, int8_t, kAllBitsSet)     = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };

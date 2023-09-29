@@ -904,7 +904,7 @@ const uint8 javaComponentPeerView[]
  void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
  void juce_firebaseRemoteNotificationReceived (void*);
  void juce_firebaseRemoteMessagesDeleted();
- void juce_firebaseRemoteMessageSent(void*);
+ void juce_firebaseRemoteMessageSent (void*);
  void juce_firebaseRemoteMessageSendError (void*, void*);
 #endif
 
@@ -2776,7 +2776,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
     auto* env = getEnv();
 
     LocalRef<jobject> clipboardManager (env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService, javaString ("clipboard").get()));
-    env->CallVoidMethod (clipboardManager.get(), AndroidClipboardManager.setText, javaString(text).get());
+    env->CallVoidMethod (clipboardManager.get(), AndroidClipboardManager.setText, javaString (text).get());
 }
 
 String SystemClipboard::getTextFromClipboard()
@@ -2789,7 +2789,7 @@ String SystemClipboard::getTextFromClipboard()
     if (charSequence == nullptr)
         return {};
 
-    return juceString(LocalRef<jstring> ((jstring) env->CallObjectMethod(charSequence.get(), JavaCharSequence.toString)));
+    return juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence.get(), JavaCharSequence.toString)));
 }
 
 //==============================================================================

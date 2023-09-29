@@ -241,7 +241,7 @@ private:
     void updateDeviceComponents()
     {
         for (int i = devices.size(); --i >= 0;)
-            if (getClient (devices.getUnchecked(i)->getName()) == nullptr)
+            if (getClient (devices.getUnchecked (i)->getName()) == nullptr)
                 devices.remove (i);
 
         for (const auto& c : clients)

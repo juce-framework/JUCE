@@ -244,7 +244,7 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 #if JUCE_MINGW
  static uint64 getWindowsVersion()
  {
-     auto filename = _T("kernel32.dll");
+     auto filename = _T ("kernel32.dll");
      DWORD handle = 0;
 
      if (auto size = GetFileVersionInfoSize (filename, &handle))
@@ -256,7 +256,7 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
              VS_FIXEDFILEINFO* info = nullptr;
              UINT verSize = 0;
 
-             if (VerQueryValue (data, (LPCTSTR) _T("\\"), (void**) &info, &verSize))
+             if (VerQueryValue (data, (LPCTSTR) _T ("\\"), (void**) &info, &verSize))
                  if (size > 0 && info != nullptr && info->dwSignature == 0xfeef04bd)
                      return ((uint64) info->dwFileVersionMS << 32) | (uint64) info->dwFileVersionLS;
          }

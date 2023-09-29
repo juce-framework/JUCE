@@ -28,7 +28,7 @@ namespace juce
     namespace dsp
     {
         DEFINE_AVX_SIMD_CONST (int32_t, float, kAllBitsSet)     = { -1, -1, -1, -1, -1, -1, -1, -1 };
-        DEFINE_AVX_SIMD_CONST (int32_t, float, kEvenHighBit)    = { static_cast<int32_t>(0x80000000), 0, static_cast<int32_t>(0x80000000), 0, static_cast<int32_t>(0x80000000), 0, static_cast<int32_t>(0x80000000), 0 };
+        DEFINE_AVX_SIMD_CONST (int32_t, float, kEvenHighBit)    = { static_cast<int32_t> (0x80000000), 0, static_cast<int32_t> (0x80000000), 0, static_cast<int32_t> (0x80000000), 0, static_cast<int32_t> (0x80000000), 0 };
         DEFINE_AVX_SIMD_CONST (float, float, kOne)              = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
         DEFINE_AVX_SIMD_CONST (int64_t, double, kAllBitsSet)    = { -1, -1, -1, -1 };

@@ -44,7 +44,7 @@ void PropertyComponent::paint (Graphics& g)
 
 void PropertyComponent::resized()
 {
-    if (auto c = getChildComponent(0))
+    if (auto c = getChildComponent (0))
         c->setBounds (getLookAndFeel().getPropertyComponentContentPosition (*this));
 }
 

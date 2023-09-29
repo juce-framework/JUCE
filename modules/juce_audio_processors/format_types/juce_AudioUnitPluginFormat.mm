@@ -200,7 +200,7 @@ namespace AudioUnitFormatHelpers
         {
             if (auto bundleRef = CFUniquePtr<CFBundleRef> (CFBundleCreate (kCFAllocatorDefault, url.get())))
             {
-                CFTypeRef bundleName = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleName"));
+                CFTypeRef bundleName = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleName"));
 
                 if (bundleName != nullptr && CFGetTypeID (bundleName) == CFStringGetTypeID())
                     name = String::fromCFString ((CFStringRef) bundleName);
@@ -208,12 +208,12 @@ namespace AudioUnitFormatHelpers
                 if (name.isEmpty())
                     name = file.getFileNameWithoutExtension();
 
-                CFTypeRef versionString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleVersion"));
+                CFTypeRef versionString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleVersion"));
 
                 if (versionString != nullptr && CFGetTypeID (versionString) == CFStringGetTypeID())
                     version = String::fromCFString ((CFStringRef) versionString);
 
-                CFTypeRef manuString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleGetInfoString"));
+                CFTypeRef manuString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleGetInfoString"));
 
                 if (manuString != nullptr && CFGetTypeID (manuString) == CFStringGetTypeID())
                     manufacturer = String::fromCFString ((CFStringRef) manuString);
@@ -1603,7 +1603,7 @@ public:
         {
             AUPreset current;
             current.presetNumber = -1;
-            current.presetName = CFSTR("");
+            current.presetName = CFSTR ("");
 
             UInt32 prstsz = sizeof (AUPreset);
 
@@ -1937,7 +1937,7 @@ private:
 
         float getDefaultValue() const override                              { return 0.0f; }
         String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
-        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS("On") : TRANS("Off")); }
+        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS ("On") : TRANS ("Off")); }
         bool isAutomatable() const override                                 { return true; }
         bool isDiscrete() const override                                    { return true; }
         bool isBoolean() const override                                     { return true; }
@@ -1948,9 +1948,9 @@ private:
         String getParameterID() const override                              { return {}; }
 
         AudioUnitPluginInstance& parent;
-        const StringArray auOnStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
-        const StringArray auOffStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
-        const StringArray values { TRANS("Off"), TRANS("On") };
+        const StringArray auOnStrings  { TRANS ("on"),  TRANS ("yes"), TRANS ("true") };
+        const StringArray auOffStrings { TRANS ("off"), TRANS ("no"),  TRANS ("false") };
+        const StringArray values { TRANS ("Off"), TRANS ("On") };
 
         bool currentValue = false;
     };

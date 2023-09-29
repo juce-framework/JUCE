@@ -74,7 +74,7 @@ Component* Desktop::findComponentAt (Point<int> screenPosition) const
 
     for (int i = desktopComponents.size(); --i >= 0;)
     {
-        auto* c = desktopComponents.getUnchecked(i);
+        auto* c = desktopComponents.getUnchecked (i);
 
         if (c->isVisible())
         {
@@ -181,7 +181,7 @@ int Desktop::getNumMouseSources() const noexcept                                
 int Desktop::getNumDraggingMouseSources() const noexcept                        { return mouseSources->getNumDraggingMouseSources(); }
 MouseInputSource* Desktop::getMouseSource (int index) const noexcept            { return mouseSources->getMouseSource (index); }
 MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept    { return mouseSources->getDraggingMouseSource (index); }
-MouseInputSource Desktop::getMainMouseSource() const noexcept                   { return MouseInputSource (mouseSources->sources.getUnchecked(0)); }
+MouseInputSource Desktop::getMainMouseSource() const noexcept                   { return MouseInputSource (mouseSources->sources.getUnchecked (0)); }
 void Desktop::beginDragAutoRepeat (int interval)                                { mouseSources->beginDragAutoRepeat (interval); }
 
 //==============================================================================

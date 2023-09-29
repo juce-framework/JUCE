@@ -35,7 +35,7 @@ AudioFormatWriter::AudioFormatWriter (OutputStream* const out,
     numChannels (numChannels_),
     bitsPerSample (bitsPerSample_),
     usesFloatingPointData (false),
-    channelLayout (AudioChannelSet::canonicalChannelSet(static_cast<int> (numChannels_))),
+    channelLayout (AudioChannelSet::canonicalChannelSet (static_cast<int> (numChannels_))),
     output (out),
     formatName (formatName_)
 {

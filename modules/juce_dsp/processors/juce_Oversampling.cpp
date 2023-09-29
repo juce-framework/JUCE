@@ -729,11 +729,11 @@ void Oversampling<SampleType>::processSamplesDown (AudioBlock<SampleType>& outpu
     auto currentNumSamples = outputBlock.getNumSamples();
 
     for (int n = 0; n < stages.size() - 1; ++n)
-        currentNumSamples *= stages.getUnchecked(n)->factor;
+        currentNumSamples *= stages.getUnchecked (n)->factor;
 
     for (int n = stages.size() - 1; n > 0; --n)
     {
-        auto& stage = *stages.getUnchecked(n);
+        auto& stage = *stages.getUnchecked (n);
         auto audioBlock = stages.getUnchecked (n - 1)->getProcessedSamples (currentNumSamples);
         stage.processSamplesDown (audioBlock);
 

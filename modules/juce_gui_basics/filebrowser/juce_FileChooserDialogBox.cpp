@@ -186,12 +186,12 @@ void FileChooserDialogBox::okButtonPressed()
 {
     if (warnAboutOverwritingExistingFiles
          && content->chooserComponent.isSaveMode()
-         && content->chooserComponent.getSelectedFile(0).exists())
+         && content->chooserComponent.getSelectedFile (0).exists())
     {
         auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
                                                                TRANS ("File already exists"),
                                                                TRANS ("There's already a file called: FLNM")
-                                                                  .replace ("FLNM", content->chooserComponent.getSelectedFile(0).getFullPathName())
+                                                                  .replace ("FLNM", content->chooserComponent.getSelectedFile (0).getFullPathName())
                                                                  + "\n\n"
                                                                  + TRANS ("Are you sure you want to overwrite it?"),
                                                                TRANS ("Overwrite"),
@@ -225,13 +225,13 @@ void FileChooserDialogBox::createNewFolder()
 
     if (parent.isDirectory())
     {
-        auto* aw = new AlertWindow (TRANS("New Folder"),
-                                    TRANS("Please enter the name for the folder"),
+        auto* aw = new AlertWindow (TRANS ("New Folder"),
+                                    TRANS ("Please enter the name for the folder"),
                                     MessageBoxIconType::NoIcon, this);
 
         aw->addTextEditor ("Folder Name", String(), String(), false);
-        aw->addButton (TRANS("Create Folder"), 1, KeyPress (KeyPress::returnKey));
-        aw->addButton (TRANS("Cancel"),        0, KeyPress (KeyPress::escapeKey));
+        aw->addButton (TRANS ("Create Folder"), 1, KeyPress (KeyPress::returnKey));
+        aw->addButton (TRANS ("Cancel"),        0, KeyPress (KeyPress::escapeKey));
 
         aw->enterModalState (true,
                              ModalCallbackFunction::forComponent (createNewFolderCallback, this,

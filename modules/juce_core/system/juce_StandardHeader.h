@@ -147,7 +147,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
   #pragma warning (disable: 1125) // (virtual override warning)
  #endif
 #elif defined (JUCE_DLL) || defined (JUCE_DLL_BUILD)
- #define JUCE_API __attribute__ ((visibility("default")))
+ #define JUCE_API __attribute__ ((visibility ("default")))
 #endif
 
 //==============================================================================

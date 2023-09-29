@@ -277,7 +277,7 @@ bool ThreadPool::removeAllJobs (bool interruptRunningJobs, int timeOutMs,
 
             for (int i = jobs.size(); --i >= 0;)
             {
-                auto* job = jobs.getUnchecked(i);
+                auto* job = jobs.getUnchecked (i);
 
                 if (selectedJobsToRemove == nullptr || selectedJobsToRemove->isJobSuitable (job))
                 {

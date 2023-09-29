@@ -590,7 +590,7 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
 
     for (int i = jmax (0, startLine); i <= maxLine; ++i)
     {
-        auto& line = *lines.getUnchecked(i);
+        auto& line = *lines.getUnchecked (i);
         auto len = line.lineLength;
 
         if (i == startLine)

@@ -2006,7 +2006,7 @@ namespace AAXClasses
 
                 i.pluginInstance->parameters.process (i.inputChannels, i.outputChannels, sideChainBufferIdx,
                                                       *(i.bufferSize), *(i.bypass) != 0,
-                                                      getMidiNodeIn(i), getMidiNodeOut(i),
+                                                      getMidiNodeIn (i), getMidiNodeOut (i),
                                                       meterTapBuffers);
             }
         }

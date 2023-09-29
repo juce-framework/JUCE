@@ -111,7 +111,7 @@ public:
         ignoreUnused (style, minSliderPos, maxSliderPos);
 
         auto r = Rectangle<int> (x + haloRadius, y, width - (haloRadius * 2), height);
-        auto backgroundBar = r.withSizeKeepingCentre(r.getWidth(), 2);
+        auto backgroundBar = r.withSizeKeepingCentre (r.getWidth(), 2);
 
         sliderPos = (sliderPos - minSliderPos) / static_cast<float> (width);
 
@@ -312,7 +312,7 @@ private:
 class AUv3SynthProcessor final : public AudioProcessor
 {
 public:
-    AUv3SynthProcessor ()
+    AUv3SynthProcessor()
         : AudioProcessor (BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true)),
           currentRecording (1, 1), currentProgram (0)
     {

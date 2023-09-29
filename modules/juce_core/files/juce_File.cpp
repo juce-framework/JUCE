@@ -1055,7 +1055,7 @@ public:
         expect (! File().existsAsFile());
         expect (! File().isDirectory());
        #if ! JUCE_WINDOWS
-        expect (File("/").isDirectory());
+        expect (File ("/").isDirectory());
        #endif
         expect (home.isDirectory());
         expect (home.exists());

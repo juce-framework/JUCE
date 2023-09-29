@@ -1631,7 +1631,7 @@ private:
                     env->CallVoidMethod (captureRequestBuilder, CaptureRequestBuilder.addTarget, surface.get());
                 }
 
-                previewCaptureRequest = GlobalRef (LocalRef<jobject>(env->CallObjectMethod (captureRequestBuilder, CaptureRequestBuilder.build)));
+                previewCaptureRequest = GlobalRef (LocalRef<jobject> (env->CallObjectMethod (captureRequestBuilder, CaptureRequestBuilder.build)));
 
                 env->CallIntMethod (captureSession, CameraCaptureSession.setRepeatingRequest,
                                     previewCaptureRequest.get(), nullptr, handlerToUse.get());
@@ -1687,7 +1687,7 @@ private:
                 {
                     JUCE_CAMERA_LOG ("Taking picture...");
 
-                    stillPictureCaptureRequest = GlobalRef (LocalRef<jobject>(stillPictureCaptureRequestToUse));
+                    stillPictureCaptureRequest = GlobalRef (LocalRef<jobject> (stillPictureCaptureRequestToUse));
 
                     lockFocus();
                 }
@@ -3094,7 +3094,7 @@ private:
         auto quitSafelyMethod = env->GetMethodID (AndroidHandlerThread, "quitSafely", "()Z");
 
         // this code will only run on SDK >= 21
-        jassert(quitSafelyMethod != nullptr);
+        jassert (quitSafelyMethod != nullptr);
 
         env->CallBooleanMethod (handlerThread, quitSafelyMethod);
         env->CallVoidMethod (handlerThread, AndroidHandlerThread.join);

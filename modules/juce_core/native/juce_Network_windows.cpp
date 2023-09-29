@@ -274,7 +274,7 @@ private:
 
     void createConnection (const String& address, WebInputStream::Listener* listener)
     {
-        static HINTERNET sessionHandle = InternetOpen (_T("juce"), INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
+        static HINTERNET sessionHandle = InternetOpen (_T ("juce"), INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0);
 
         closeConnection();
 
@@ -388,7 +388,7 @@ private:
 
     void openHTTPConnection (URL_COMPONENTS& uc, const String& address, WebInputStream::Listener* listener)
     {
-        const TCHAR* mimeTypes[] = { _T("*/*"), nullptr };
+        const TCHAR* mimeTypes[] = { _T ("*/*"), nullptr };
 
         DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES
                         | INTERNET_FLAG_NO_AUTO_REDIRECT;

@@ -128,7 +128,7 @@ public:
                         auto allMimeTypesHaveSameGroup = true;
 
                         LocalRef<jobjectArray> jMimeTypes (env->NewObjectArray (mimeTypes.size(), JavaString,
-                                                                                javaString("").get()));
+                                                                                javaString ("").get()));
 
                         for (int i = 0; i < mimeTypes.size(); ++i)
                         {

@@ -178,7 +178,7 @@ struct SleepEvent
     SleepEvent() noexcept
         : handle (CreateEvent (nullptr, FALSE, FALSE,
                               #if JUCE_DEBUG
-                               _T("JUCE Sleep Event")))
+                               _T ("JUCE Sleep Event")))
                               #else
                                nullptr))
                               #endif

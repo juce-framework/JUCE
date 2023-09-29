@@ -145,7 +145,7 @@ void FileSearchPathListComponent::deleteKeyPressed (int row)
 
 void FileSearchPathListComponent::returnKeyPressed (int row)
 {
-    chooser = std::make_unique<FileChooser> (TRANS("Change folder..."), path.getRawString (row), "*");
+    chooser = std::make_unique<FileChooser> (TRANS ("Change folder..."), path.getRawString (row), "*");
     auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
     chooser->launchAsync (chooserFlags, [this, row] (const FileChooser& fc)
@@ -222,7 +222,7 @@ void FileSearchPathListComponent::addPath()
     if (start == File())
         start = File::getCurrentWorkingDirectory();
 
-    chooser = std::make_unique<FileChooser> (TRANS("Add a folder..."), start, "*");
+    chooser = std::make_unique<FileChooser> (TRANS ("Add a folder..."), start, "*");
     auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
     chooser->launchAsync (chooserFlags, [this] (const FileChooser& fc)

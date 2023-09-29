@@ -75,7 +75,7 @@ struct ImageCache::Pimpl     : private Timer,
 
         for (int i = images.size(); --i >= 0;)
         {
-            auto& item = images.getReference(i);
+            auto& item = images.getReference (i);
 
             if (item.image.getReferenceCount() <= 1)
             {
@@ -97,7 +97,7 @@ struct ImageCache::Pimpl     : private Timer,
         const ScopedLock sl (lock);
 
         for (int i = images.size(); --i >= 0;)
-            if (images.getReference(i).image.getReferenceCount() <= 1)
+            if (images.getReference (i).image.getReferenceCount() <= 1)
                 images.remove (i);
     }
 

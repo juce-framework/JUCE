@@ -524,7 +524,7 @@ MainHostWindow* IOConfigurationWindow::getMainWindow() const
     auto& desktop = Desktop::getInstance();
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
-        if (auto* mainWindow = dynamic_cast<MainHostWindow*> (desktop.getComponent(i)))
+        if (auto* mainWindow = dynamic_cast<MainHostWindow*> (desktop.getComponent (i)))
             return mainWindow;
 
     return nullptr;

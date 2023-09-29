@@ -292,7 +292,7 @@ public:
         auto area = getLocalBounds();
 
         typeBox.setBounds (area.removeFromTop (36).removeFromRight (150).reduced (8));
-        codeDocumentComponent.setBounds (area.removeFromTop(area.getHeight() / 2).reduced (8));
+        codeDocumentComponent.setBounds (area.removeFromTop (area.getHeight() / 2).reduced (8));
         resultsTree          .setBounds (area.reduced (8));
         errorMessage         .setBounds (resultsTree.getBounds());
     }

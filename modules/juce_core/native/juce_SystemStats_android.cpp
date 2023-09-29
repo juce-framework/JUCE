@@ -128,7 +128,7 @@ int SystemStats::getCpuSpeedInMegahertz()
 
     for (int i = 0; i < getNumCpus(); ++i)
     {
-        int freqKHz = File ("/sys/devices/system/cpu/cpu" + String(i) + "/cpufreq/cpuinfo_max_freq")
+        int freqKHz = File ("/sys/devices/system/cpu/cpu" + String (i) + "/cpufreq/cpuinfo_max_freq")
                         .loadFileAsString()
                         .getIntValue();
 

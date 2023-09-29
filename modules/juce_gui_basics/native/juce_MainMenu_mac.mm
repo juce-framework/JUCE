@@ -720,16 +720,16 @@ namespace MainMenuHelpers
         [NSApp setServicesMenu: servicesMenu];
         [menu addItem: [NSMenuItem separatorItem]];
 
-        createMenuItem (menu, TRANS("Hide") + String (" ") + appName, @selector (hide:), nsStringLiteral ("h"));
+        createMenuItem (menu, TRANS ("Hide") + String (" ") + appName, @selector (hide:), nsStringLiteral ("h"));
 
-        [createMenuItem (menu, TRANS("Hide Others"), @selector (hideOtherApplications:), nsStringLiteral ("h"))
+        [createMenuItem (menu, TRANS ("Hide Others"), @selector (hideOtherApplications:), nsStringLiteral ("h"))
             setKeyEquivalentModifierMask: NSEventModifierFlagCommand | NSEventModifierFlagOption];
 
-        createMenuItem (menu, TRANS("Show All"), @selector (unhideAllApplications:), nsEmptyString());
+        createMenuItem (menu, TRANS ("Show All"), @selector (unhideAllApplications:), nsEmptyString());
 
         [menu addItem: [NSMenuItem separatorItem]];
 
-        createMenuItem (menu, TRANS("Quit") + String (" ") + appName, @selector (terminate:), nsStringLiteral ("q"));
+        createMenuItem (menu, TRANS ("Quit") + String (" ") + appName, @selector (terminate:), nsStringLiteral ("q"));
     }
 
     // Since our app has no NIB, this initialises a standard app menu...

@@ -501,7 +501,7 @@ PopupMenu ProjucerApplication::createDocumentMenu()
 
     for (int i = 0; i < numDocs; ++i)
     {
-        OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument(i);
+        OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument (i);
         menu.addItem (activeDocumentsBaseID + i, doc->getName());
     }
 
@@ -1156,7 +1156,7 @@ void ProjucerApplication::saveAllDocuments()
     openDocumentManager.saveAllSyncWithoutAsking();
 
     for (int i = 0; i < mainWindowList.windows.size(); ++i)
-        if (auto* pcc = mainWindowList.windows.getUnchecked(i)->getProjectContentComponent())
+        if (auto* pcc = mainWindowList.windows.getUnchecked (i)->getProjectContentComponent())
             pcc->refreshProjectTreeFileStatuses();
 }
 
@@ -1352,7 +1352,7 @@ void ProjucerApplication::deleteLogger()
                 files.addUsingDefaultSort (f);
 
             for (int i = 0; i < files.size() - maxNumLogFilesToKeep; ++i)
-                files.getReference(i).file.deleteFile();
+                files.getReference (i).file.deleteFile();
         }
     }
 

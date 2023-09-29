@@ -42,7 +42,7 @@ void PaintElementGroup::ungroup (const bool undoable)
 
     for (int i = 0; i < subElements.size(); ++i)
     {
-        std::unique_ptr<XmlElement> xml (subElements.getUnchecked(i)->createXml());
+        std::unique_ptr<XmlElement> xml (subElements.getUnchecked (i)->createXml());
 
         PaintElement* newOne = getOwner()->addElementFromXml (*xml, index, undoable);
         getOwner()->getSelectedElements().addToSelection (newOne);
@@ -62,7 +62,7 @@ void PaintElementGroup::groupSelected (PaintRoutine* routine)
         {
             if (routine->getSelectedElements().isSelected (routine->getElement (i)))
             {
-                std::unique_ptr<XmlElement> xml (routine->getElement(i)->createXml());
+                std::unique_ptr<XmlElement> xml (routine->getElement (i)->createXml());
 
                 if (auto* newOne = ObjectTypes::createElementForXml (xml.get(), routine))
                     newGroup->subElements.add (newOne);
@@ -91,7 +91,7 @@ bool PaintElementGroup::containsElement (const PaintElement* element) const
         return true;
 
     for (int i = subElements.size(); --i >= 0;)
-        if (PaintElementGroup* pg = dynamic_cast<PaintElementGroup*> (subElements.getUnchecked(i)))
+        if (PaintElementGroup* pg = dynamic_cast<PaintElementGroup*> (subElements.getUnchecked (i)))
             if (pg->containsElement (element))
                 return true;
 
@@ -109,10 +109,10 @@ Rectangle<int> PaintElementGroup::getCurrentBounds (const Rectangle<int>& parent
 
     if (subElements.size() > 0)
     {
-        r = subElements.getUnchecked(0)->getCurrentBounds (parentArea);
+        r = subElements.getUnchecked (0)->getCurrentBounds (parentArea);
 
         for (int i = 1; i < subElements.size(); ++i)
-            r = r.getUnion (subElements.getUnchecked(i)->getCurrentBounds (parentArea));
+            r = r.getUnion (subElements.getUnchecked (i)->getCurrentBounds (parentArea));
     }
 
     return r;
@@ -138,7 +138,7 @@ void PaintElementGroup::setCurrentBounds (const Rectangle<int>& b, const Rectang
 
         for (int i = 0; i < subElements.size(); ++i)
         {
-            PaintElement* const e = subElements.getUnchecked(i);
+            PaintElement* const e = subElements.getUnchecked (i);
 
             Rectangle<int> pos (e->getCurrentBounds (parentArea));
 
@@ -158,7 +158,7 @@ void PaintElementGroup::setCurrentBounds (const Rectangle<int>& b, const Rectang
 void PaintElementGroup::draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
 {
     for (int i = 0; i < subElements.size(); ++i)
-        subElements.getUnchecked(i)->draw (g, layout, parentArea);
+        subElements.getUnchecked (i)->draw (g, layout, parentArea);
 }
 
 void PaintElementGroup::getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected)
@@ -170,7 +170,7 @@ void PaintElementGroup::getEditableProperties (Array<PropertyComponent*>& props,
 void PaintElementGroup::fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
 {
     for (int i = 0; i < subElements.size(); ++i)
-        subElements.getUnchecked(i)->fillInGeneratedCode (code, paintMethodCode);
+        subElements.getUnchecked (i)->fillInGeneratedCode (code, paintMethodCode);
 }
 
 const char* PaintElementGroup::getTagName() noexcept        { return "GROUP"; }
@@ -181,7 +181,7 @@ XmlElement* PaintElementGroup::createXml() const
 
     for (int i = 0; i < subElements.size(); ++i)
     {
-        XmlElement* const sub = subElements.getUnchecked(i)->createXml();
+        XmlElement* const sub = subElements.getUnchecked (i)->createXml();
         e->addChildElement (sub);
     }
 

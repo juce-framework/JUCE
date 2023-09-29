@@ -276,7 +276,7 @@ NewFileWizard::~NewFileWizard()
 void NewFileWizard::addWizardsToMenu (PopupMenu& m) const
 {
     for (int i = 0; i < wizards.size(); ++i)
-        m.addItem (menuBaseID + i, "Add New " + wizards.getUnchecked(i)->getName() + "...");
+        m.addItem (menuBaseID + i, "Add New " + wizards.getUnchecked (i)->getName() + "...");
 }
 
 bool NewFileWizard::runWizardFromMenu (int chosenMenuItemID, Project& project, const Project::Item& projectGroupToAddTo) const

@@ -2358,7 +2358,7 @@ public:
     // These accessors are just for an 'overview' and won't give the exact
     // state of the audio engine at a particular point in time.
     // If you call getNumVoices(), get the result '10', and then call
-    // getPlaybackPosiiton(9), there's a chance the audio engine will have
+    // getPlaybackPosiiton (9), there's a chance the audio engine will have
     // been updated to remove some voices in the meantime, so the returned
     // value won't correspond to an existing voice.
     int getNumVoices() const                    { return synthesiser.getNumVoices(); }

@@ -157,7 +157,7 @@ private:
                     if (job->shouldExit())
                         return;
 
-                pathsToCheck.push({ iter.getFile(), path.depth + 1 });
+                pathsToCheck.push ({ iter.getFile(), path.depth + 1 });
             }
         }
     }

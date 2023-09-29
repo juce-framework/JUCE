@@ -124,7 +124,7 @@ public:
           << CodeHelpers::floatLiteral (font.getHeight(), 2)
           << ", ";
 
-        if (font.getAvailableStyles().contains(font.getTypefaceStyle()))
+        if (font.getAvailableStyles().contains (font.getTypefaceStyle()))
             s << "juce::Font::plain).withTypefaceStyle ("
               << CodeHelpers::stringLiteral (font.getTypefaceStyle())
               << ")";

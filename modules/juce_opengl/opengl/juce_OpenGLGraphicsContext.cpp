@@ -162,7 +162,7 @@ private:
     {
         for (int i = images.size(); --i >= 0;)
         {
-            auto& ci = *images.getUnchecked(i);
+            auto& ci = *images.getUnchecked (i);
 
             if (ci.pixelData == im)
             {
@@ -1214,7 +1214,7 @@ struct StateHelpers
 
             for (int i = 0; i < numTexturesToCache - 2; ++i)
             {
-                auto* t = textures.getUnchecked(i);
+                auto* t = textures.getUnchecked (i);
 
                 if (t->getWidth() == w && t->getHeight() == h)
                     return textures.removeAndReturn (i);

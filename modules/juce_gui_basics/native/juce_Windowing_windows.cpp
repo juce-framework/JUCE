@@ -2548,7 +2548,7 @@ private:
                 case WM_POINTERHWHEEL:
                 case WM_POINTERUP:
                 case WM_POINTERACTIVATE:
-                    return isHWNDBlockedByModalComponents(m.hwnd);
+                    return isHWNDBlockedByModalComponents (m.hwnd);
                 case WM_NCLBUTTONDOWN:
                 case WM_NCLBUTTONDBLCLK:
                 case WM_NCRBUTTONDOWN:
@@ -5270,7 +5270,7 @@ private:
             case NoCursor:                      return std::make_unique<BuiltinImpl> (nullptr);
             case WaitCursor:                    cursorName = IDC_WAIT; break;
             case IBeamCursor:                   cursorName = IDC_IBEAM; break;
-            case PointingHandCursor:            cursorName = MAKEINTRESOURCE(32649); break;
+            case PointingHandCursor:            cursorName = MAKEINTRESOURCE (32649); break;
             case CrosshairCursor:               cursorName = IDC_CROSS; break;
 
             case LeftRightResizeCursor:

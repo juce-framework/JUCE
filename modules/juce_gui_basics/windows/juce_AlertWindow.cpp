@@ -344,7 +344,7 @@ void AlertWindow::paint (Graphics& g)
 
     for (int i = textBoxes.size(); --i >= 0;)
     {
-        auto* te = textBoxes.getUnchecked(i);
+        auto* te = textBoxes.getUnchecked (i);
 
         g.drawFittedText (textboxNames[i],
                           te->getX(), te->getY() - 14,
@@ -354,7 +354,7 @@ void AlertWindow::paint (Graphics& g)
 
     for (int i = comboBoxNames.size(); --i >= 0;)
     {
-        auto* cb = comboBoxes.getUnchecked(i);
+        auto* cb = comboBoxes.getUnchecked (i);
 
         g.drawFittedText (comboBoxNames[i],
                           cb->getX(), cb->getY() - 14,
@@ -556,7 +556,7 @@ bool AlertWindow::keyPressed (const KeyPress& key)
 
     if (key.isKeyCode (KeyPress::returnKey) && buttons.size() == 1)
     {
-        buttons.getUnchecked(0)->triggerClick();
+        buttons.getUnchecked (0)->triggerClick();
         return true;
     }
 
@@ -589,7 +589,7 @@ void AlertWindow::showMessageBox (MessageBoxIconType iconType,
             .withIconType (iconType)
             .withTitle (title)
             .withMessage (message)
-            .withButton (buttonText.isEmpty() ? TRANS("OK") : buttonText)
+            .withButton (buttonText.isEmpty() ? TRANS ("OK") : buttonText)
             .withAssociatedComponent (associatedComponent));
 }
 

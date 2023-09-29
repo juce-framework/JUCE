@@ -158,7 +158,7 @@ struct FlockDemo : public BackgroundLogo
 
         for (int i = 0; i < birds.size(); ++i)
             for (int j = i + 1; j < birds.size(); ++j)
-                attractBirds (birds.getReference(i), birds.getReference(j));
+                attractBirds (birds.getReference (i), birds.getReference (j));
 
         for (auto& b : birds)
         {
@@ -172,8 +172,8 @@ struct FlockDemo : public BackgroundLogo
 
         for (int i = rings.size(); --i >= 0;)
         {
-            if (rings.getReference(i).update())
-                rings.getReference(i).draw (g);
+            if (rings.getReference (i).update())
+                rings.getReference (i).draw (g);
             else
                 rings.remove (i);
         }

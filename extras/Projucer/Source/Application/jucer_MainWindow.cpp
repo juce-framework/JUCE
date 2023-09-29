@@ -560,14 +560,14 @@ bool MainWindow::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::
         Array<JucerTreeViewBase*> selected;
 
         for (int i = tv->getNumSelectedItems(); --i >= 0;)
-            if (auto* b = dynamic_cast<JucerTreeViewBase*> (tv->getSelectedItem(i)))
+            if (auto* b = dynamic_cast<JucerTreeViewBase*> (tv->getSelectedItem (i)))
                 selected.add (b);
 
         if (! selected.isEmpty())
         {
             for (int i = selected.size(); --i >= 0;)
             {
-                if (auto* jtvb = selected.getUnchecked(i))
+                if (auto* jtvb = selected.getUnchecked (i))
                 {
                     auto f = jtvb->getDraggableFile();
 
@@ -801,7 +801,7 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
     {
-        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent (i)))
         {
             if (auto* pcc = mw->getProjectContentComponent())
             {
@@ -1012,7 +1012,7 @@ void MainWindowList::saveCurrentlyOpenProjectList()
 
     for (int i = 0; i < desktop.getNumComponents(); ++i)
     {
-        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent (i)))
             if (auto* p = mw->getProject())
                 if (! p->isTemporaryProject())
                     projects.add (p->getFile());
@@ -1041,7 +1041,7 @@ Project* MainWindowList::getFrontmostProject()
     auto& desktop = Desktop::getInstance();
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
-        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent (i)))
             if (auto* p = mw->getProject())
                 return p;
 

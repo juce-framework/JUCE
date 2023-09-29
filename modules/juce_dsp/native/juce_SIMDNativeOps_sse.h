@@ -34,17 +34,17 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wignored-attributes")
 
 #ifdef _MSC_VER
  #define DECLARE_SSE_SIMD_CONST(type, name) \
-    static __declspec(align(16)) const type name [16 / sizeof (type)]
+    static __declspec (align (16)) const type name [16 / sizeof (type)]
 
  #define DEFINE_SSE_SIMD_CONST(type, class_type, name) \
-    __declspec(align(16)) const type SIMDNativeOps<class_type>:: name [16 / sizeof (type)]
+    __declspec (align (16)) const type SIMDNativeOps<class_type>:: name [16 / sizeof (type)]
 
 #else
  #define DECLARE_SSE_SIMD_CONST(type, name) \
-    static const type name [16 / sizeof (type)] __attribute__((aligned(16)))
+    static const type name [16 / sizeof (type)] __attribute__ ((aligned (16)))
 
  #define DEFINE_SSE_SIMD_CONST(type, class_type, name) \
-    const type SIMDNativeOps<class_type>:: name [16 / sizeof (type)] __attribute__((aligned(16)))
+    const type SIMDNativeOps<class_type>:: name [16 / sizeof (type)] __attribute__ ((aligned (16)))
 
 #endif
 
@@ -105,9 +105,9 @@ struct SIMDNativeOps<float>
 
     static forcedinline float JUCE_VECTOR_CALLTYPE sum (__m128 a) noexcept
     {
-       #if defined(__SSE4__)
+       #if defined (__SSE4__)
         const auto retval = _mm_dp_ps (a, _mm_loadu_ps (kOne), 0xff);
-       #elif defined(__SSE3__)
+       #elif defined (__SSE3__)
         const auto shuffled = _mm_movehdup_ps (a);
         const auto sums = _mm_add_ps (a, shuffled);
         const auto retval = _mm_add_ss (sums, _mm_movehl_ps (shuffled, sums));
@@ -175,9 +175,9 @@ struct SIMDNativeOps<double>
 
     static forcedinline double JUCE_VECTOR_CALLTYPE sum (__m128d a) noexcept
     {
-       #if defined(__SSE4__)
+       #if defined (__SSE4__)
         __m128d retval = _mm_dp_pd (a, vconst (kOne), 0xff);
-       #elif defined(__SSE3__)
+       #elif defined (__SSE3__)
         __m128d retval = _mm_hadd_pd (a, a);
        #else
         __m128d retval = _mm_add_pd (_mm_shuffle_pd (a, a, 0x01), a);
@@ -211,7 +211,7 @@ struct SIMDNativeOps<int8_t>
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_xor (__m128i a, __m128i b) noexcept                 { return _mm_xor_si128 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_andnot (__m128i a, __m128i b) noexcept              { return _mm_andnot_si128 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE bit_not (__m128i a) noexcept                            { return _mm_andnot_si128 (a, vconst (kAllBitsSet)); }
-   #if defined(__SSE4__)
+   #if defined (__SSE4__)
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept                     { return _mm_min_epi8 (a, b); }
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept                     { return _mm_max_epi8 (a, b); }
    #else
@@ -411,7 +411,7 @@ struct SIMDNativeOps<uint16_t>
     static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_xor (__m128i a, __m128i b) noexcept                 { return _mm_xor_si128 (a, b); }
     static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_andnot (__m128i a, __m128i b) noexcept              { return _mm_andnot_si128 (a, b); }
     static forcedinline __m128i  JUCE_VECTOR_CALLTYPE bit_not (__m128i a) noexcept                            { return _mm_andnot_si128 (a, vconst (kAllBitsSet)); }
-   #if defined(__SSE4__)
+   #if defined (__SSE4__)
     static forcedinline __m128i  JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept                     { return _mm_min_epu16 (a, b); }
     static forcedinline __m128i  JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept                     { return _mm_max_epu16 (a, b); }
    #else
@@ -492,19 +492,19 @@ struct SIMDNativeOps<int32_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE mul (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined (__SSE4_1__)
         return _mm_mullo_epi32 (a, b);
        #else
         __m128i even = _mm_mul_epu32 (a,b);
         __m128i odd = _mm_mul_epu32 (_mm_srli_si128 (a,4), _mm_srli_si128 (b,4));
-        return _mm_unpacklo_epi32 (_mm_shuffle_epi32(even, _MM_SHUFFLE (0,0,2,0)),
-                                   _mm_shuffle_epi32(odd,  _MM_SHUFFLE (0,0,2,0)));
+        return _mm_unpacklo_epi32 (_mm_shuffle_epi32 (even, _MM_SHUFFLE (0,0,2,0)),
+                                   _mm_shuffle_epi32 (odd,  _MM_SHUFFLE (0,0,2,0)));
        #endif
     }
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined (__SSE4_1__)
         return _mm_min_epi32 (a, b);
        #else
         __m128i lt = greaterThan (b, a);
@@ -514,7 +514,7 @@ struct SIMDNativeOps<int32_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined (__SSE4_1__)
         return _mm_max_epi32 (a, b);
        #else
         __m128i gt = greaterThan (a, b);
@@ -574,19 +574,19 @@ struct SIMDNativeOps<uint32_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE mul (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined (__SSE4_1__)
         return _mm_mullo_epi32 (a, b);
        #else
         __m128i even = _mm_mul_epu32 (a,b);
         __m128i odd = _mm_mul_epu32 (_mm_srli_si128 (a,4), _mm_srli_si128 (b,4));
-        return _mm_unpacklo_epi32 (_mm_shuffle_epi32(even, _MM_SHUFFLE (0,0,2,0)),
-                                   _mm_shuffle_epi32(odd,  _MM_SHUFFLE (0,0,2,0)));
+        return _mm_unpacklo_epi32 (_mm_shuffle_epi32 (even, _MM_SHUFFLE (0,0,2,0)),
+                                   _mm_shuffle_epi32 (odd,  _MM_SHUFFLE (0,0,2,0)));
        #endif
     }
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE min (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined (__SSE4_1__)
         return _mm_min_epi32 (a, b);
        #else
         __m128i lt = greaterThan (b, a);
@@ -596,7 +596,7 @@ struct SIMDNativeOps<uint32_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE max (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined (__SSE4_1__)
         return _mm_max_epi32 (a, b);
        #else
         __m128i gt = greaterThan (a, b);
@@ -644,7 +644,7 @@ struct SIMDNativeOps<int64_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined (__SSE4_1__)
         return _mm_cmpeq_epi64 (a, b);
        #else
         __m128i bitmask = _mm_cmpeq_epi32 (a, b);
@@ -655,7 +655,7 @@ struct SIMDNativeOps<int64_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_2__)
+       #if defined (__SSE4_2__)
         return _mm_cmpgt_epi64 (a, b);
        #else
         return SIMDFallbackOps<int64_t, __m128i>::greaterThan (a, b);
@@ -704,7 +704,7 @@ struct SIMDNativeOps<uint64_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE equal (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_1__)
+       #if defined (__SSE4_1__)
         return _mm_cmpeq_epi64 (a, b);
        #else
         __m128i bitmask = _mm_cmpeq_epi32 (a, b);
@@ -715,7 +715,7 @@ struct SIMDNativeOps<uint64_t>
 
     static forcedinline __m128i JUCE_VECTOR_CALLTYPE greaterThan (__m128i a, __m128i b) noexcept
     {
-       #if defined(__SSE4_2__)
+       #if defined (__SSE4_2__)
         return _mm_cmpgt_epi64 (ssign (a), ssign (b));
        #else
         return SIMDFallbackOps<uint64_t, __m128i>::greaterThan (a, b);

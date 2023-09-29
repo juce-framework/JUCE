@@ -258,7 +258,7 @@ private:
     std::unique_ptr<PluginScannerSubprocess> storedScannerSubprocess;
 };
 
-static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }
+static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*> (JUCEApplication::getInstance()); }
 
 ApplicationProperties& getAppProperties()         { return *getApp().appProperties; }
 ApplicationCommandManager& getCommandManager()    { return getApp().commandManager; }

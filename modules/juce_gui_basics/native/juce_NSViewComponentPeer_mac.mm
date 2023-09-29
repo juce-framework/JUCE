@@ -1896,7 +1896,7 @@ private:
             case NSEventTypeRightMouseUp:
             case NSEventTypeOtherMouseUp:
             case NSEventTypeOtherMouseDragged:
-                if (Desktop::getInstance().getDraggingMouseSource(0) != nullptr)
+                if (Desktop::getInstance().getDraggingMouseSource (0) != nullptr)
                     return false;
                 break;
 

@@ -543,7 +543,7 @@ private:
 
             curVideoComp->onPlaybackStarted = [this]() { processPlaybackStarted(); };
             curVideoComp->onPlaybackStopped = [this]() { processPlaybackPaused(); };
-            curVideoComp->onErrorOccurred   = [this](const String& errorMessage) { errorOccurred (errorMessage); };
+            curVideoComp->onErrorOccurred   = [this] (const String& errorMessage) { errorOccurred (errorMessage); };
             curVideoComp->setVisible (true);
 
            #if JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME

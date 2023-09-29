@@ -54,7 +54,7 @@ TestComponent::~TestComponent()
 void TestComponent::reloadAll()
 {
     for (int i = testComponents.size(); --i >= 0;)
-        testComponents.getUnchecked(i)->reload();
+        testComponents.getUnchecked (i)->reload();
 }
 
 void TestComponent::reload()

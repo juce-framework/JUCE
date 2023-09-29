@@ -431,7 +431,7 @@ struct JSONFormatter
                 if (! allOnOneLine)
                     writeSpaces (out, indentLevel + indentSize);
 
-                write (out, array.getReference(i), indentLevel + indentSize, allOnOneLine, maximumDecimalPlaces);
+                write (out, array.getReference (i), indentLevel + indentSize, allOnOneLine, maximumDecimalPlaces);
 
                 if (i < array.size() - 1)
                 {

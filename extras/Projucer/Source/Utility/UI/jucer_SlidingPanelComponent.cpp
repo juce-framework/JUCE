@@ -110,9 +110,9 @@ void SlidingPanelComponent::resized()
                                  .reduced ((content.getWidth() - dotSize * getNumTabs()) / 2, 10);
 
     for (int i = 0; i < getNumTabs(); ++i)
-        pages.getUnchecked(i)->dotButton->setBounds (dotHolder.removeFromLeft (dotSize));
+        pages.getUnchecked (i)->dotButton->setBounds (dotHolder.removeFromLeft (dotSize));
 
     for (int i = pages.size(); --i >= 0;)
-        if (Component* c = pages.getUnchecked(i)->content)
+        if (Component* c = pages.getUnchecked (i)->content)
             c->setBounds (content.translated (i * content.getWidth(), 0));
 }

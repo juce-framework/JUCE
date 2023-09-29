@@ -37,12 +37,12 @@ namespace GraphicsHelpers
         if (quality > Graphics::lowResamplingQuality)
             constructorFlags |= 2; /*FILTER_BITMAP_FLAG*/
 
-        return LocalRef<jobject>(getEnv()->NewObject (AndroidPaint, AndroidPaint.constructor, constructorFlags));
+        return LocalRef<jobject> (getEnv()->NewObject (AndroidPaint, AndroidPaint.constructor, constructorFlags));
     }
 
     static LocalRef<jobject> createMatrix (JNIEnv* env, const AffineTransform& t)
     {
-        auto m = LocalRef<jobject>(env->NewObject (AndroidMatrix, AndroidMatrix.constructor));
+        auto m = LocalRef<jobject> (env->NewObject (AndroidMatrix, AndroidMatrix.constructor));
 
         jfloat values[9] = { t.mat00, t.mat01, t.mat02,
                              t.mat10, t.mat11, t.mat12,

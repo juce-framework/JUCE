@@ -189,7 +189,7 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode)
 
             for (int i = 0; i < cookies.size(); ++i)
             {
-                IOHIDElementCookie cookie = (IOHIDElementCookie) cookies.getUnchecked(i);
+                IOHIDElementCookie cookie = (IOHIDElementCookie) cookies.getUnchecked (i);
                 (*(IOHIDQueueInterface**) queue)->addElement ((IOHIDQueueInterface**) queue, cookie, 0);
             }
 

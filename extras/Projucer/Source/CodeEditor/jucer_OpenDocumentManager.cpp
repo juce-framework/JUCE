@@ -127,7 +127,7 @@ void OpenDocumentManager::removeListener (DocumentCloseListener* listener)
 bool OpenDocumentManager::canOpenFile (const File& file)
 {
     for (int i = types.size(); --i >= 0;)
-        if (types.getUnchecked(i)->canOpenFile (file))
+        if (types.getUnchecked (i)->canOpenFile (file))
             return true;
 
     return false;
@@ -136,16 +136,16 @@ bool OpenDocumentManager::canOpenFile (const File& file)
 OpenDocumentManager::Document* OpenDocumentManager::openFile (Project* project, const File& file)
 {
     for (int i = documents.size(); --i >= 0;)
-        if (documents.getUnchecked(i)->isForFile (file))
-            return documents.getUnchecked(i);
+        if (documents.getUnchecked (i)->isForFile (file))
+            return documents.getUnchecked (i);
 
     Document* d = nullptr;
 
     for (int i = types.size(); --i >= 0 && d == nullptr;)
     {
-        if (types.getUnchecked(i)->canOpenFile (file))
+        if (types.getUnchecked (i)->canOpenFile (file))
         {
-            d = types.getUnchecked(i)->openFile (project, file);
+            d = types.getUnchecked (i)->openFile (project, file);
             jassert (d != nullptr);
         }
     }
@@ -448,7 +448,7 @@ OpenDocumentManager::Document* RecentDocumentList::getNext()
 bool RecentDocumentList::contains (const File& f) const
 {
     for (int i = previousDocs.size(); --i >= 0;)
-        if (previousDocs.getUnchecked(i)->getFile() == f)
+        if (previousDocs.getUnchecked (i)->getFile() == f)
             return true;
 
     return false;
@@ -457,8 +457,8 @@ bool RecentDocumentList::contains (const File& f) const
 OpenDocumentManager::Document* RecentDocumentList::getClosestPreviousDocOtherThan (OpenDocumentManager::Document* oneToAvoid) const
 {
     for (int i = previousDocs.size(); --i >= 0;)
-        if (previousDocs.getUnchecked(i) != oneToAvoid)
-            return previousDocs.getUnchecked(i);
+        if (previousDocs.getUnchecked (i) != oneToAvoid)
+            return previousDocs.getUnchecked (i);
 
     return nullptr;
 }
@@ -512,7 +512,7 @@ static void saveDocList (const Array <OpenDocumentManager::Document*>& list, Xml
 {
     for (int i = 0; i < list.size(); ++i)
     {
-        const OpenDocumentManager::Document& doc = *list.getUnchecked(i);
+        const OpenDocumentManager::Document& doc = *list.getUnchecked (i);
 
         XmlElement* e = xml.createNewChildElement ("DOC");
 

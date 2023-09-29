@@ -777,7 +777,7 @@ String File::getVersion() const
         VS_FIXEDFILEINFO* vffi;
         UINT len = 0;
 
-        if (VerQueryValue (buffer, (LPTSTR) _T("\\"), (LPVOID*) &vffi, &len))
+        if (VerQueryValue (buffer, (LPTSTR) _T ("\\"), (LPVOID*) &vffi, &len))
         {
             result << (int) HIWORD (vffi->dwFileVersionMS) << '.'
                    << (int) LOWORD (vffi->dwFileVersionMS) << '.'

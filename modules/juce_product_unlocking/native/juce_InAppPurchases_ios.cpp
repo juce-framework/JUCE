@@ -600,7 +600,7 @@ struct InAppPurchases::Pimpl
         NSMutableArray<SKDownload*>* skDownloads = [NSMutableArray arrayWithCapacity: (NSUInteger) downloads.size()];
 
         for (const auto& d : downloads)
-            if (auto impl = dynamic_cast<DownloadImpl*>(d))
+            if (auto impl = dynamic_cast<DownloadImpl*> (d))
                 [skDownloads addObject: impl->download];
 
         return skDownloads;

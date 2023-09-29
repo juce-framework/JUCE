@@ -102,7 +102,7 @@ void PreferencesPanel::showInDialogBox (const String& dialogTitle, int dialogWid
 void PreferencesPanel::resized()
 {
     for (int i = 0; i < buttons.size(); ++i)
-        buttons.getUnchecked(i)->setBounds (i * buttonSize, 0, buttonSize, buttonSize);
+        buttons.getUnchecked (i)->setBounds (i * buttonSize, 0, buttonSize, buttonSize);
 
     if (currentPage != nullptr)
         currentPage->setBounds (getLocalBounds().withTop (buttonSize + 5));

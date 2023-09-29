@@ -110,7 +110,7 @@ struct PropertyListBuilder
     void setPreferredHeight (int height)
     {
         for (int j = components.size(); --j >= 0;)
-            components.getUnchecked(j)->setPreferredHeight (height);
+            components.getUnchecked (j)->setPreferredHeight (height);
     }
 
     Array<PropertyComponent*> components;

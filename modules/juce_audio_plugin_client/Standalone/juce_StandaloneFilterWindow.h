@@ -186,7 +186,7 @@ public:
     /** Pops up a dialog letting the user save the processor's state to a file. */
     void askUserToSaveState (const String& fileSuffix = String())
     {
-        stateFileChooser = std::make_unique<FileChooser> (TRANS("Save current state"),
+        stateFileChooser = std::make_unique<FileChooser> (TRANS ("Save current state"),
                                                           getLastFile(),
                                                           getFilePatterns (fileSuffix));
         auto flags = FileBrowserComponent::saveMode
@@ -216,7 +216,7 @@ public:
     /** Pops up a dialog letting the user re-load the processor's state from a file. */
     void askUserToLoadState (const String& fileSuffix = String())
     {
-        stateFileChooser = std::make_unique<FileChooser> (TRANS("Load a saved state"),
+        stateFileChooser = std::make_unique<FileChooser> (TRANS ("Load a saved state"),
                                                           getLastFile(),
                                                           getFilePatterns (fileSuffix));
         auto flags = FileBrowserComponent::openMode
@@ -292,7 +292,7 @@ public:
 
         o.content.setOwned (content.release());
 
-        o.dialogTitle                   = TRANS("Audio/MIDI Settings");
+        o.dialogTitle                   = TRANS ("Audio/MIDI Settings");
         o.dialogBackgroundColour        = o.content->getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
         o.escapeKeyTriggersCloseButton  = true;
         o.useNativeTitleBar             = true;
@@ -885,12 +885,12 @@ private:
     void buttonClicked (Button*) override
     {
         PopupMenu m;
-        m.addItem (1, TRANS("Audio/MIDI Settings..."));
+        m.addItem (1, TRANS ("Audio/MIDI Settings..."));
         m.addSeparator();
-        m.addItem (2, TRANS("Save current state..."));
-        m.addItem (3, TRANS("Load a saved state..."));
+        m.addItem (2, TRANS ("Save current state..."));
+        m.addItem (3, TRANS ("Load a saved state..."));
         m.addSeparator();
-        m.addItem (4, TRANS("Reset to default state"));
+        m.addItem (4, TRANS ("Reset to default state"));
 
         m.showMenuAsync (PopupMenu::Options(),
                          ModalCallbackFunction::forComponent (menuCallback, this));

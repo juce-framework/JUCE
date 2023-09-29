@@ -4336,11 +4336,11 @@ public:
     void createView() {}
     void destroyView() {}
 
-    std::unique_ptr<AudioProcessorEditor> createEditor(World&,
-                                                       AudioPluginInstance&,
-                                                       InstanceProvider&,
-                                                       TouchListener&,
-                                                       EditorListener&)
+    std::unique_ptr<AudioProcessorEditor> createEditor (World&,
+                                                        AudioPluginInstance&,
+                                                        InstanceProvider&,
+                                                        TouchListener&,
+                                                        EditorListener&)
     {
         return nullptr;
     }

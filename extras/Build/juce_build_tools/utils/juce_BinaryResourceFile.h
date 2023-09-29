@@ -42,7 +42,7 @@ namespace build_tools
 
         String getSizeVariableFor (const File& file) const;
 
-        int getNumFiles() const { return files.size (); }
+        int getNumFiles() const { return files.size(); }
 
         const File& getFile (int index) const { return files.getReference (index); }
 

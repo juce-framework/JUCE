@@ -498,7 +498,7 @@ void Coefficients<NumericType>::getMagnitudeForFrequencyArray (const double* fre
             factor *= jw;
         }
 
-        magnitudes[i] = std::abs(numerator / denominator);
+        magnitudes[i] = std::abs (numerator / denominator);
     }
 }
 

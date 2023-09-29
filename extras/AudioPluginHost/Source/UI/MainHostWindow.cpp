@@ -759,7 +759,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
    #if ! (JUCE_IOS || JUCE_ANDROID)
     case CommandIDs::newFile:
         result.setInfo ("New", "Creates a new filter graph file", category, 0);
-        result.defaultKeypresses.add(KeyPress('n', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('n', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::open:
@@ -1002,7 +1002,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
             auto pos = graphHolder->getLocalPoint (this, Point<int> (x, y));
 
             for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-                if (auto* desc = typesFound.getUnchecked(i))
+                if (auto* desc = typesFound.getUnchecked (i))
                     createPlugin (PluginDescriptionAndPreference { *desc }, pos);
         }
     }

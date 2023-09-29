@@ -229,7 +229,7 @@ struct SlidersPage final : public Component
 
         for (int i = 8; i <= 11; ++i)
         {
-            auto* selectedSlider = sliders.getUnchecked(i);
+            auto* selectedSlider = sliders.getUnchecked (i);
             selectedSlider->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
             selectedSlider->getMaxValueObject().referTo (sharedValueMax);
             selectedSlider->getMinValueObject().referTo (sharedValueMin);
@@ -1133,7 +1133,7 @@ public:
 
     String getText (const int columnNumber, const int rowNumber) const
     {
-        return dataList->getChildElement (rowNumber)->getStringAttribute ( getAttributeNameForColumnId(columnNumber));
+        return dataList->getChildElement (rowNumber)->getStringAttribute (getAttributeNameForColumnId (columnNumber));
     }
 
     void setText (const int columnNumber, const int rowNumber, const String& newText)
@@ -1188,7 +1188,7 @@ private:
         {
             row = newRow;
             columnId = newColumn;
-            setText (owner.getText(columnId, row), dontSendNotification);
+            setText (owner.getText (columnId, row), dontSendNotification);
         }
 
         void paint (Graphics& g) override

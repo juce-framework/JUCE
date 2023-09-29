@@ -1281,7 +1281,7 @@ private:
                 shader.reset (newShader.release());
                 shader->use();
 
-                shape     .reset (new OpenGLUtils::Shape      ());
+                shape     .reset (new OpenGLUtils::Shape());
                 attributes.reset (new OpenGLUtils::Attributes (*shader));
                 uniforms  .reset (new OpenGLUtils::Uniforms   (*shader));
 

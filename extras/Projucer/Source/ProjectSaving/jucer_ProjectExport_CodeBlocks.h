@@ -895,7 +895,7 @@ private:
         if (projectItem.isGroup())
         {
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addCompileUnits (projectItem.getChild(i), xml);
+                addCompileUnits (projectItem.getChild (i), xml);
         }
         else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
@@ -947,7 +947,7 @@ private:
         }
 
         for (int i = 0; i < getAllGroups().size(); ++i)
-            addCompileUnits (getAllGroups().getReference(i), xml);
+            addCompileUnits (getAllGroups().getReference (i), xml);
 
         if (hasResourceFile())
         {

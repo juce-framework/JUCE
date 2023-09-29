@@ -37,9 +37,9 @@ String SystemStats::getJUCEVersion()
     static_assert (sizeof (int64) == 8,                          "Basic sanity test failed: please report!");
     static_assert (sizeof (uint64) == 8,                         "Basic sanity test failed: please report!");
 
-    return "JUCE v" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
-                "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
-                "." JUCE_STRINGIFY(JUCE_BUILDNUMBER);
+    return "JUCE v" JUCE_STRINGIFY (JUCE_MAJOR_VERSION)
+                "." JUCE_STRINGIFY (JUCE_MINOR_VERSION)
+                "." JUCE_STRINGIFY (JUCE_BUILDNUMBER);
 }
 
 #if JUCE_ANDROID && ! defined (JUCE_DISABLE_JUCE_VERSION_PRINTING)

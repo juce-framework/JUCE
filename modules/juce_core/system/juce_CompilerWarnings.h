@@ -232,8 +232,8 @@
 */
 #if JUCE_CLANG && __clang_major__ >= JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION
     #define JUCE_BEGIN_NO_SANITIZE(warnings)                                    \
-        _Pragma(JUCE_TO_STRING(clang attribute push(__attribute__((no_sanitize(warnings))), apply_to=function)))
-    #define JUCE_END_NO_SANITIZE _Pragma(JUCE_TO_STRING(clang attribute pop))
+        _Pragma (JUCE_TO_STRING (clang attribute push (__attribute__ ((no_sanitize (warnings))), apply_to=function)))
+    #define JUCE_END_NO_SANITIZE _Pragma (JUCE_TO_STRING (clang attribute pop))
 #else
     #define JUCE_BEGIN_NO_SANITIZE(warnings)
     #define JUCE_END_NO_SANITIZE

@@ -177,7 +177,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font, const String& t
             auto isWhitespace = isNonBreakingSpace (*t) || t.isWhitespace();
 
             glyphs.add (PositionedGlyph (font, t.getAndAdvance(),
-                                         newGlyphs.getUnchecked(i),
+                                         newGlyphs.getUnchecked (i),
                                          xOffset + thisX, yOffset,
                                          nextX - thisX, isWhitespace));
         }
@@ -239,8 +239,8 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
     {
         int i = lineStartIndex;
 
-        if (glyphs.getReference(i).getCharacter() != '\n'
-              && glyphs.getReference(i).getCharacter() != '\r')
+        if (glyphs.getReference (i).getCharacter() != '\n'
+              && glyphs.getReference (i).getCharacter() != '\r')
             ++i;
 
         auto lineMaxX = glyphs.getReference (lineStartIndex).getLeft() + maxLineWidth;
@@ -256,7 +256,7 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
                 ++i;
 
                 if (c == '\r' && i < glyphs.size()
-                     && glyphs.getReference(i).getCharacter() == '\n')
+                     && glyphs.getReference (i).getCharacter() == '\n')
                     ++i;
 
                 break;

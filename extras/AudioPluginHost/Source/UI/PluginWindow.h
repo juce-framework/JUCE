@@ -99,7 +99,7 @@ private:
 
     void resized() override
     {
-        list.setBounds(getLocalBounds());
+        list.setBounds (getLocalBounds());
     }
 
     int getNumRows() override

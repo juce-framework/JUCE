@@ -165,7 +165,7 @@ namespace ActiveXHelpers
                 *result = static_cast<IOleInPlaceSite*> (inplaceSite);
                 return S_OK;
             }
-            else if (type == __uuidof(IDispatch) && dispatchEventHandler != nullptr)
+            else if (type == __uuidof (IDispatch) && dispatchEventHandler != nullptr)
             {
                 dispatchEventHandler->AddRef();
                 *result = dispatchEventHandler;
@@ -202,7 +202,7 @@ namespace ActiveXHelpers
 
                 auto iidIDispatch = __uuidof (IDispatch);
 
-                if (static_cast<IUnknown*>(eventHandler)->QueryInterface (iidIDispatch, (void**) &newEventHandler) != S_OK
+                if (static_cast<IUnknown*> (eventHandler)->QueryInterface (iidIDispatch, (void**) &newEventHandler) != S_OK
                     || newEventHandler == nullptr)
                     return;
 

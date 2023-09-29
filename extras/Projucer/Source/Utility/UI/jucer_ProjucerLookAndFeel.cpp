@@ -512,7 +512,7 @@ void ProjucerLookAndFeel::setupColours()
     setColour (BooleanPropertyComponent::outlineColourId,       Colours::transparentBlack);
     setColour (BooleanPropertyComponent::backgroundColourId,    findColour (widgetBackgroundColourId));
     setColour (ToggleButton::tickDisabledColourId,              Colour (0xffa9a9a9));
-    setColour (ToggleButton::tickColourId,                      findColour (defaultButtonBackgroundColourId).withMultipliedBrightness(1.3f));
+    setColour (ToggleButton::tickColourId,                      findColour (defaultButtonBackgroundColourId).withMultipliedBrightness (1.3f));
     setColour (CodeEditorComponent::backgroundColourId,         findColour (secondaryBackgroundColourId));
     setColour (CodeEditorComponent::lineNumberTextId,           findColour (codeEditorLineNumberColourId));
     setColour (CodeEditorComponent::lineNumberBackgroundId,     findColour (backgroundColourId));

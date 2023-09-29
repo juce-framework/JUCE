@@ -161,7 +161,7 @@ public:
     {
         for (int i = bar.items.size(); --i >= 0;)
         {
-            auto* tc = bar.items.getUnchecked(i);
+            auto* tc = bar.items.getUnchecked (i);
 
             if (tc != nullptr && dynamic_cast<Spacer*> (tc) == nullptr && ! tc->isVisible())
             {
@@ -385,7 +385,7 @@ String Toolbar::toString() const
     String s ("TB:");
 
     for (int i = 0; i < getNumItems(); ++i)
-        s << getItemId(i) << ' ';
+        s << getItemId (i) << ' ';
 
     return s.trimEnd();
 }
@@ -660,7 +660,7 @@ class Toolbar::CustomisationDialog   : public DialogWindow
 {
 public:
     CustomisationDialog (ToolbarItemFactory& factory, Toolbar& bar, int optionFlags)
-        : DialogWindow (TRANS("Add/remove items from toolbar"), Colours::white, true, true),
+        : DialogWindow (TRANS ("Add/remove items from toolbar"), Colours::white, true, true),
           toolbar (bar)
     {
         setContentOwned (new CustomiserPanel (factory, toolbar, optionFlags), true);
@@ -733,9 +733,9 @@ private:
                 addAndMakeVisible (styleBox);
                 styleBox.setEditableText (false);
 
-                if ((optionFlags & Toolbar::allowIconsOnlyChoice) != 0)     styleBox.addItem (TRANS("Show icons only"), 1);
-                if ((optionFlags & Toolbar::allowIconsWithTextChoice) != 0) styleBox.addItem (TRANS("Show icons and descriptions"), 2);
-                if ((optionFlags & Toolbar::allowTextOnlyChoice) != 0)      styleBox.addItem (TRANS("Show descriptions only"), 3);
+                if ((optionFlags & Toolbar::allowIconsOnlyChoice) != 0)     styleBox.addItem (TRANS ("Show icons only"), 1);
+                if ((optionFlags & Toolbar::allowIconsWithTextChoice) != 0) styleBox.addItem (TRANS ("Show icons and descriptions"), 2);
+                if ((optionFlags & Toolbar::allowTextOnlyChoice) != 0)      styleBox.addItem (TRANS ("Show descriptions only"), 3);
 
                 int selectedStyle = 0;
                 switch (bar.getStyle())

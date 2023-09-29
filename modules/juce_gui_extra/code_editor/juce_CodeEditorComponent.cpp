@@ -584,7 +584,7 @@ void CodeEditorComponent::paint (Graphics& g)
         RectangleList<float> highlightArea;
 
         for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-            if (const auto area = lines.getUnchecked(i)->getHighlightArea (x, lineHeight * i, lineHeight, charWidth))
+            if (const auto area = lines.getUnchecked (i)->getHighlightArea (x, lineHeight * i, lineHeight, charWidth))
                 highlightArea.add (*area);
 
         g.setColour (findColour (CodeEditorComponent::highlightColourId));
@@ -592,7 +592,7 @@ void CodeEditorComponent::paint (Graphics& g)
     }
 
     for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-        lines.getUnchecked(i)->draw (*this, g, font, rightClip, x, lineHeight * i, lineHeight, charWidth);
+        lines.getUnchecked (i)->draw (*this, g, font, rightClip, x, lineHeight * i, lineHeight, charWidth);
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)
@@ -635,7 +635,7 @@ void CodeEditorComponent::rebuildLineTokens()
 
     for (int i = 0; i < numNeeded; ++i)
     {
-        if (lines.getUnchecked(i)->update (document, firstLineOnScreen + i, source, codeTokeniser,
+        if (lines.getUnchecked (i)->update (document, firstLineOnScreen + i, source, codeTokeniser,
                                            spacesPerTab, selectionStart, selectionEnd))
         {
             minLineToRepaint = jmin (minLineToRepaint, i);

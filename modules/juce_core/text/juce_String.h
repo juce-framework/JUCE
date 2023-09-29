@@ -24,7 +24,7 @@
  // Annoyingly we can only forward-declare a typedef by forward-declaring the
  // aliased type
  #if __has_attribute(objc_bridge)
-  #define JUCE_CF_BRIDGED_TYPE(T) __attribute__((objc_bridge(T)))
+  #define JUCE_CF_BRIDGED_TYPE(T) __attribute__ ((objc_bridge (T)))
  #else
   #define JUCE_CF_BRIDGED_TYPE(T)
  #endif

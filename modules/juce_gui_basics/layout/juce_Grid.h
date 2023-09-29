@@ -43,10 +43,10 @@ public:
     /** A size in pixels */
     struct Px  final
     {
-        explicit Px (float p) : pixels (static_cast<long double>(p)) { /*sta (p >= 0.0f);*/ }
-        explicit Px (int p)   : pixels (static_cast<long double>(p)) { /*sta (p >= 0.0f);*/ }
+        explicit Px (float p) : pixels (static_cast<long double> (p)) { /*sta (p >= 0.0f);*/ }
+        explicit Px (int p)   : pixels (static_cast<long double> (p)) { /*sta (p >= 0.0f);*/ }
         explicit constexpr Px (long double p)        : pixels (p) {}
-        explicit constexpr Px (unsigned long long p) : pixels (static_cast<long double>(p)) {}
+        explicit constexpr Px (unsigned long long p) : pixels (static_cast<long double> (p)) {}
 
         long double pixels;
     };

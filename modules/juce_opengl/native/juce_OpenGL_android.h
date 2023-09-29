@@ -125,10 +125,10 @@ public:
             return;
 
         // create a native surface view
-        surfaceView = GlobalRef (LocalRef<jobject>(env->NewObject (JuceOpenGLViewSurface,
-                                                                   JuceOpenGLViewSurface.constructor,
-                                                                   getAppContext().get(),
-                                                                   reinterpret_cast<jlong> (this))));
+        surfaceView = GlobalRef (LocalRef<jobject> (env->NewObject (JuceOpenGLViewSurface,
+                                                                    JuceOpenGLViewSurface.constructor,
+                                                                    getAppContext().get(),
+                                                                    reinterpret_cast<jlong> (this))));
         if (surfaceView.get() == nullptr)
             return;
 

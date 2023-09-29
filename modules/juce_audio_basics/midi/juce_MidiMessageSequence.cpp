@@ -40,7 +40,7 @@ MidiMessageSequence::MidiMessageSequence (const MidiMessageSequence& other)
         auto noteOffIndex = other.getIndexOfMatchingKeyUp (i);
 
         if (noteOffIndex >= 0)
-            list.getUnchecked(i)->noteOffObject = list.getUnchecked (noteOffIndex);
+            list.getUnchecked (i)->noteOffObject = list.getUnchecked (noteOffIndex);
     }
 }
 
@@ -103,7 +103,7 @@ int MidiMessageSequence::getIndexOfMatchingKeyUp (int index) const noexcept
         if (auto* noteOff = meh->noteOffObject)
         {
             for (int i = index; i < list.size(); ++i)
-                if (list.getUnchecked(i) == noteOff)
+                if (list.getUnchecked (i) == noteOff)
                     return i;
 
             jassertfalse; // we've somehow got a pointer to a note-off object that isn't in the sequence
@@ -124,7 +124,7 @@ int MidiMessageSequence::getNextIndexAtTime (double timeStamp) const noexcept
     int i;
 
     for (i = 0; i < numEvents; ++i)
-        if (list.getUnchecked(i)->message.getTimeStamp() >= timeStamp)
+        if (list.getUnchecked (i)->message.getTimeStamp() >= timeStamp)
             break;
 
     return i;
@@ -157,7 +157,7 @@ MidiMessageSequence::MidiEventHolder* MidiMessageSequence::addEvent (MidiEventHo
     int i;
 
     for (i = list.size(); --i >= 0;)
-        if (list.getUnchecked(i)->message.getTimeStamp() <= time)
+        if (list.getUnchecked (i)->message.getTimeStamp() <= time)
             break;
 
     list.insert (i + 1, newEvent);
@@ -227,7 +227,7 @@ void MidiMessageSequence::updateMatchedPairs() noexcept
 {
     for (int i = 0; i < list.size(); ++i)
     {
-        auto* meh = list.getUnchecked(i);
+        auto* meh = list.getUnchecked (i);
         auto& m1 = meh->message;
 
         if (m1.isNoteOn())
@@ -239,7 +239,7 @@ void MidiMessageSequence::updateMatchedPairs() noexcept
 
             for (int j = i + 1; j < len; ++j)
             {
-                auto* meh2 = list.getUnchecked(j);
+                auto* meh2 = list.getUnchecked (j);
                 auto& m = meh2->message;
 
                 if (m.getNoteNumber() == note && m.getChannel() == chan)
@@ -292,15 +292,15 @@ void MidiMessageSequence::extractSysExMessages (MidiMessageSequence& destSequenc
 void MidiMessageSequence::deleteMidiChannelMessages (const int channelNumberToRemove)
 {
     for (int i = list.size(); --i >= 0;)
-        if (list.getUnchecked(i)->message.isForChannel (channelNumberToRemove))
-            list.remove(i);
+        if (list.getUnchecked (i)->message.isForChannel (channelNumberToRemove))
+            list.remove (i);
 }
 
 void MidiMessageSequence::deleteSysExMessages()
 {
     for (int i = list.size(); --i >= 0;)
-        if (list.getUnchecked(i)->message.isSysEx())
-            list.remove(i);
+        if (list.getUnchecked (i)->message.isSysEx())
+            list.remove (i);
 }
 
 //==============================================================================

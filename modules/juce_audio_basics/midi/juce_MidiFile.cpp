@@ -200,7 +200,7 @@ namespace MidiFileHelpers
 
             for (int j = 0; j < numEvents; ++j)
             {
-                auto& m = track->getEventPointer(j)->message;
+                auto& m = track->getEventPointer (j)->message;
 
                 if ((m.*method)())
                     results.addEvent (m);
@@ -439,7 +439,7 @@ void MidiFile::convertTimestampTicksToSeconds()
         {
             for (int j = ms->getNumEvents(); --j >= 0;)
             {
-                auto& m = ms->getEventPointer(j)->message;
+                auto& m = ms->getEventPointer (j)->message;
                 m.setTimeStamp (MidiFileHelpers::convertTicksToSeconds (m.getTimeStamp(), tempoEvents, timeFormat));
             }
         }
@@ -475,7 +475,7 @@ bool MidiFile::writeTrack (OutputStream& mainOut, const MidiMessageSequence& ms)
 
     for (int i = 0; i < ms.getNumEvents(); ++i)
     {
-        auto& mm = ms.getEventPointer(i)->message;
+        auto& mm = ms.getEventPointer (i)->message;
 
         if (mm.isEndOfTrackMetaEvent())
             endOfTrackEventWritten = true;

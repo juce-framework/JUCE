@@ -388,7 +388,7 @@ public:
                 int i;
                 for (i = 0; i < numOut; ++i)
                 {
-                    auto* chan = tmpBuffers.tempChannels.getUnchecked(i);
+                    auto* chan = tmpBuffers.tempChannels.getUnchecked (i);
 
                     if (chan == nullptr)
                     {
@@ -444,7 +444,7 @@ public:
 
                 // copy back any temp channels that may have been used..
                 for (i = 0; i < numOut; ++i)
-                    if (auto* chan = tmpBuffers.tempChannels.getUnchecked(i))
+                    if (auto* chan = tmpBuffers.tempChannels.getUnchecked (i))
                         if (auto* dest = outputs[i])
                             memcpy (dest, chan, (size_t) numSamples * sizeof (FloatType));
             }
@@ -2131,7 +2131,7 @@ namespace
 }
 
 #if ! JUCE_WINDOWS
- #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility("default")))
+ #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
 #endif
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
@@ -2169,8 +2169,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
     }
 
     // don't put initialiseJuce_GUI or shutdownJuce_GUI in these... it will crash!
-    __attribute__((constructor)) void myPluginInit() {}
-    __attribute__((destructor))  void myPluginFini() {}
+    __attribute__ ((constructor)) void myPluginInit() {}
+    __attribute__ ((destructor))  void myPluginFini() {}
 
 //==============================================================================
 // Win32 startup code..

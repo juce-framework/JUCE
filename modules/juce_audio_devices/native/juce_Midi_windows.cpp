@@ -707,7 +707,7 @@ private:
         const ScopedLock sl (activeCollectorLock);
 
         for (int i = activeCollectors.size(); --i >= 0;)
-            if (activeCollectors.getObjectPointer(i)->getReferenceCount() == 1)
+            if (activeCollectors.getObjectPointer (i)->getReferenceCount() == 1)
                 activeCollectors.remove (i);
     }
 

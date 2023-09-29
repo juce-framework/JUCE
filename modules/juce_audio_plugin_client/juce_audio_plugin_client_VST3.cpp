@@ -90,7 +90,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 
 //==============================================================================
 #if JucePlugin_Enable_ARA
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wpragma-pack")
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wpragma-pack")
  #include <ARA_API/ARAVST3.h>
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
@@ -98,9 +98,9 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
   #error "Unsupported ARA version - only ARA version 2 and onward are supported by the current implementation"
  #endif
 
- DEF_CLASS_IID(ARA::IPlugInEntryPoint)
- DEF_CLASS_IID(ARA::IPlugInEntryPoint2)
- DEF_CLASS_IID(ARA::IMainFactory)
+ DEF_CLASS_IID (ARA::IPlugInEntryPoint)
+ DEF_CLASS_IID (ARA::IPlugInEntryPoint2)
+ DEF_CLASS_IID (ARA::IMainFactory)
 #endif
 
 namespace juce
@@ -3124,7 +3124,7 @@ public:
                 info.channelCount = 16;
                #endif
 
-                toString128 (info.name, TRANS("MIDI Input"));
+                toString128 (info.name, TRANS ("MIDI Input"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
             }
@@ -3142,7 +3142,7 @@ public:
                 info.channelCount = 16;
                #endif
 
-                toString128 (info.name, TRANS("MIDI Output"));
+                toString128 (info.name, TRANS ("MIDI Output"));
                 info.busType = Vst::kMain;
                 return kResultTrue;
             }
@@ -3864,7 +3864,7 @@ bool shutdownModule()
 #if JUCE_WINDOWS
  #define JUCE_EXPORTED_FUNCTION
 #else
- #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility("default")))
+ #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility ("default")))
 #endif
 
 #if JUCE_WINDOWS

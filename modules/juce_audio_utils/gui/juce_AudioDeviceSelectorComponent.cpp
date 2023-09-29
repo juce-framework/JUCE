@@ -1000,7 +1000,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         deviceTypeDropDown = std::make_unique<ComboBox>();
 
         for (int i = 0; i < types.size(); ++i)
-            deviceTypeDropDown->addItem (types.getUnchecked(i)->getTypeName(), i + 1);
+            deviceTypeDropDown->addItem (types.getUnchecked (i)->getTypeName(), i + 1);
 
         addAndMakeVisible (deviceTypeDropDown.get());
         deviceTypeDropDown->onChange = [this] { updateDeviceType(); };

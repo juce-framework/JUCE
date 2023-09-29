@@ -366,9 +366,9 @@ public:
         beginTest ("Misc");
 
         char a1[7];
-        expect (numElementsInArray(a1) == 7);
+        expect (numElementsInArray (a1) == 7);
         int a2[3];
-        expect (numElementsInArray(a2) == 3);
+        expect (numElementsInArray (a2) == 3);
 
         expect (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
         expect (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);

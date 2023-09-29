@@ -135,7 +135,7 @@ private:
 
     static SharedObjectHolder& getSharedObjectHolder() noexcept
     {
-        static void* holder [(sizeof (SharedObjectHolder) + sizeof(void*) - 1) / sizeof(void*)] = { nullptr };
+        static void* holder [(sizeof (SharedObjectHolder) + sizeof (void*) - 1) / sizeof (void*)] = { nullptr };
         return *reinterpret_cast<SharedObjectHolder*> (holder);
     }
 

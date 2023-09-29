@@ -39,7 +39,7 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
 {
     alertWindow.reset (LookAndFeel::getDefaultLookAndFeel()
                            .createAlertWindow (title, {},
-                                               cancelButtonText.isEmpty() ? TRANS("Cancel")
+                                               cancelButtonText.isEmpty() ? TRANS ("Cancel")
                                                                           : cancelButtonText,
                                                {}, {}, MessageBoxIconType::NoIcon, hasCancelButton ? 1 : 0,
                                                componentToCentreAround));

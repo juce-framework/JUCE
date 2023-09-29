@@ -385,7 +385,7 @@ public:
 
 private:
     //==============================================================================
-   #if defined(__GNUC__) && __GNUC__ < 5 && ! defined(__clang__)
+   #if defined (__GNUC__) && __GNUC__ < 5 && ! defined (__clang__)
     static constexpr auto isTriviallyCopyable = std::is_scalar_v<ElementType>;
    #else
     static constexpr auto isTriviallyCopyable = std::is_trivially_copyable_v<ElementType>;

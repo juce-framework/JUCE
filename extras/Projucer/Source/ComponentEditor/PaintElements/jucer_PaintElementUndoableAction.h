@@ -60,7 +60,7 @@ public:
 
             for (int i = 1; i < containerGroups.size(); ++i)
             {
-                group = dynamic_cast<PaintElementGroup*> (group->getElement (containerGroups.getUnchecked(i)));
+                group = dynamic_cast<PaintElementGroup*> (group->getElement (containerGroups.getUnchecked (i)));
 
                 if (group == nullptr)
                     return nullptr;

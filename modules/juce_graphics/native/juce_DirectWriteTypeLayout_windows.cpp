@@ -191,7 +191,7 @@ namespace DirectWriteTypeLayout
         {
             for (int i = 0; i < attributedString.getNumAttributes(); ++i)
             {
-                auto& font = attributedString.getAttribute(i).font;
+                auto& font = attributedString.getAttribute (i).font;
                 auto typeface = font.getTypefacePtr();
 
                 if (auto* wt = dynamic_cast<WindowsDirectWriteTypeface*> (typeface.get()))

@@ -30,7 +30,7 @@ ShapeButton::ShapeButton (const String& t, Colour n, Colour o, Colour d)
   : Button (t),
     normalColour   (n), overColour   (o), downColour   (d),
     normalColourOn (n), overColourOn (o), downColourOn (d),
-    useOnColours(false),
+    useOnColours (false),
     maintainShapeProportions (false),
     outlineWidth (0.0f)
 {

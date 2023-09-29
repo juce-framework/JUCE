@@ -237,7 +237,7 @@ JUCE_API void JUCE_CALLTYPE Process::hide()
        #if JUCE_MAC
         [NSApp hide: nil];
        #elif JUCE_IOS
-        [[UIApplication sharedApplication] performSelector: @selector(suspend)];
+        [[UIApplication sharedApplication] performSelector: @selector (suspend)];
        #endif
     }
 }

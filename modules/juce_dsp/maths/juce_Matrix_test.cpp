@@ -47,7 +47,7 @@ struct LinearAlgebraUnitTest  : public UnitTest
             Matrix<ElementType> mat2 (2, 4, data2);
             Matrix<ElementType> mat3 (2, 4, data3);
 
-            u.expect((mat1 + mat2) == mat3);
+            u.expect ((mat1 + mat2) == mat3);
         }
     };
 
@@ -64,7 +64,7 @@ struct LinearAlgebraUnitTest  : public UnitTest
             Matrix<ElementType> mat2 (2, 4, data2);
             Matrix<ElementType> mat3 (2, 4, data3);
 
-            u.expect((mat1 - mat2) == mat3);
+            u.expect ((mat1 - mat2) == mat3);
         }
     };
 
@@ -114,7 +114,7 @@ struct LinearAlgebraUnitTest  : public UnitTest
             Matrix<ElementType> mat2 (4, 2, data2);
             Matrix<ElementType> mat3 (2, 2, data3);
 
-            u.expect((mat1 * mat2) == mat3);
+            u.expect ((mat1 * mat2) == mat3);
         }
     };
 

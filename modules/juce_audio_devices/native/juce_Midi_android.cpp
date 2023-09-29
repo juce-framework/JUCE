@@ -971,7 +971,7 @@ public:
         if (auto dm = deviceManager.get())
         {
             if (auto javaMidiPort = getEnv()->CallObjectMethod (dm, MidiDeviceManager.openMidiOutputPortWithID, (jint) deviceID))
-                return new MidiOutput::Pimpl (LocalRef<jobject>(javaMidiPort));
+                return new MidiOutput::Pimpl (LocalRef<jobject> (javaMidiPort));
 
             // Perhaps the port is already open
             jassertfalse;

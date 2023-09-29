@@ -63,8 +63,8 @@ void JUCEApplication::getCommandInfo (const CommandID commandID, ApplicationComm
 {
     if (commandID == StandardApplicationCommandIDs::quit)
     {
-        result.setInfo (TRANS("Quit"),
-                        TRANS("Quits the application"),
+        result.setInfo (TRANS ("Quit"),
+                        TRANS ("Quits the application"),
                         "Application", 0);
 
         result.defaultKeypresses.add (KeyPress ('q', ModifierKeys::commandModifier, 0));

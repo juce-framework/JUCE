@@ -263,9 +263,9 @@ public:
     void mouseDown (const MouseEvent&) override
     {
         PopupMenu m;
-        m.addItem (1, TRANS("Use this swatch as the current colour"));
+        m.addItem (1, TRANS ("Use this swatch as the current colour"));
         m.addSeparator();
-        m.addItem (2, TRANS("Set this swatch to the current colour"));
+        m.addItem (2, TRANS ("Set this swatch to the current colour"));
 
         m.showMenuAsync (PopupMenu::Options().withTargetComponent (this),
                          ModalCallbackFunction::forComponent (menuStaticCallback, this));
@@ -598,7 +598,7 @@ void ColourSelector::resized()
 
         for (int i = 0; i < swatchComponents.size(); ++i)
         {
-            auto* sc = swatchComponents.getUnchecked(i);
+            auto* sc = swatchComponents.getUnchecked (i);
 
             sc->setBounds (x + xGap / 2,
                            y + yGap / 2,

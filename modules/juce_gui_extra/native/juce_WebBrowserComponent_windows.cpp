@@ -126,7 +126,7 @@ public:
             StringArray headers;
 
             if (userAgent.isNotEmpty())
-                headers.add("User-Agent: " + userAgent);
+                headers.add ("User-Agent: " + userAgent);
 
             if (requestedHeaders != nullptr)
                 headers.addArray (*requestedHeaders);
@@ -262,8 +262,8 @@ private:
 
             if (dispIdMember == /*DISPID_AMBIENT_USERAGENT*/-5513)
             {
-                V_VT( pVarResult ) = VT_BSTR;
-                V_BSTR( pVarResult ) = SysAllocString ((const OLECHAR*) String(owner.userAgent).toWideCharPointer());;
+                V_VT ( pVarResult ) = VT_BSTR;
+                V_BSTR ( pVarResult ) = SysAllocString ((const OLECHAR*) String (owner.userAgent).toWideCharPointer());;
                 return S_OK;
             }
 
@@ -537,7 +537,7 @@ public:
     //==============================================================================
     struct WebViewHandle
     {
-        using LibraryRef = std::unique_ptr<typename std::pointer_traits<HMODULE>::element_type, decltype(&::FreeLibrary)>;
+        using LibraryRef = std::unique_ptr<typename std::pointer_traits<HMODULE>::element_type, decltype (&::FreeLibrary)>;
         LibraryRef loaderHandle {nullptr, &::FreeLibrary};
         ComSmartPtr<ICoreWebView2Environment> environment;
     };
@@ -942,8 +942,8 @@ private:
                 newBounds = (newBounds.toDouble() * peer->getPlatformScaleFactor()).toNearestInt();
            #endif
 
-            webViewController->put_Bounds({ newBounds.getX(), newBounds.getY(),
-                                            newBounds.getRight(), newBounds.getBottom() });
+            webViewController->put_Bounds ({ newBounds.getX(), newBounds.getY(),
+                                             newBounds.getRight(), newBounds.getBottom() });
         }
     }
 
