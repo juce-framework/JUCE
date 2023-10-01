@@ -2063,6 +2063,7 @@ public:
 
     mutable StringArray xcodeFrameworks;
     mutable StringArray xcodeWeakFrameworks;
+    mutable StringArray xcodeEmbeddedFrameworks;
     StringArray xcodeLibs;
 
 private:
@@ -2792,7 +2793,8 @@ private:
         addFrameworkList (getExtraCustomFrameworksString(),
                           [this] (const String& framework) { return addCustomFramework (framework); });
 
-        addFrameworkList (getEmbeddedFrameworksString(),
+        String embeddedFrameworks = getEmbeddedFrameworksString() + "\n" + xcodeEmbeddedFrameworks.joinIntoString ("\n");
+        addFrameworkList (embeddedFrameworks,
                           [this] (const String& framework)
                           {
                               auto frameworkId = addEmbeddedFramework (framework);
