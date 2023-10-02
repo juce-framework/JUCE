@@ -2345,6 +2345,9 @@ public:
         if (focused == nullptr || focused->getPeer() != peer)
             return false;
 
+        if (TranslateMessage (&m))
+            return true;
+
         constexpr UINT keyMessages[] { WM_KEYDOWN,
                                        WM_KEYUP,
                                        WM_SYSKEYDOWN,
@@ -2360,8 +2363,6 @@ public:
 
         if (m.message == WM_CHAR)
             return peer->doKeyChar ((int) m.wParam, m.lParam);
-
-        TranslateMessage (&m);
 
         switch (m.message)
         {
