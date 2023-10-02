@@ -216,12 +216,13 @@ static std::vector<PluginDescription> createPluginDescriptions (const File& plug
         description.lastFileModTime     = pluginFile.getLastModificationTime();
         description.lastInfoUpdateTime  = Time::getCurrentTime();
         description.manufacturerName    = CharPointer_UTF8 (info.factoryInfo.vendor.c_str());
-        description.name                = CharPointer_UTF8 (info.name.c_str());
-        description.descriptiveName     = CharPointer_UTF8 (info.name.c_str());
+        description.name                = CharPointer_UTF8 (c.name.c_str());
+        description.descriptiveName     = CharPointer_UTF8 (c.name.c_str());
         description.pluginFormatName    = "VST3";
         description.numInputChannels    = 0;
         description.numOutputChannels   = 0;
         description.hasARAExtension     = araMainFactoryClassNames.find (description.name) != araMainFactoryClassNames.end();
+        description.version             = CharPointer_UTF8 (c.version.c_str());
 
         const auto uid = VST3::UID::fromString (c.cid);
 
