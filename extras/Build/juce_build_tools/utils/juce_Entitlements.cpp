@@ -123,6 +123,17 @@ namespace juce:: build_tools
                     paths += "\n\t</array>";
                     entitlements.set (option.key, paths);
                 }
+
+                if (! appSandboxExceptionIOKit.isEmpty())
+                {
+                    String ioKitClasses = "<array>";
+
+                    for (const auto& c : appSandboxExceptionIOKit)
+                        ioKitClasses += "\n\t\t<string>" + c + "</string>";
+
+                    ioKitClasses += "\n\t</array>";
+                    entitlements.set ("com.apple.security.temporary-exception.iokit-user-client-class", ioKitClasses);
+                }
             }
         }
 

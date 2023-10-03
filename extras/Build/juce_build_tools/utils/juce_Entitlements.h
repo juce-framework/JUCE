@@ -56,6 +56,7 @@ namespace juce::build_tools
         };
 
         std::vector<KeyAndStringArray> appSandboxTemporaryPaths;
+        StringArray appSandboxExceptionIOKit;
 
     private:
         StringPairArray getEntitlements() const;

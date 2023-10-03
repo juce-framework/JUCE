@@ -54,7 +54,8 @@ xcrun codesign --verify "$JUCE_FULL_PRODUCT_PATH" || xcrun codesign -f -s - "$JU
 )";
 
 //==============================================================================
-class XcodeProjectExporter final : public ProjectExporter
+class XcodeProjectExporter final : public ProjectExporter,
+                                   private MessageBoxQueue::Listener
 {
 public:
     //==============================================================================
@@ -97,6 +98,7 @@ public:
           appSandboxHomeDirRWValue                     (settings, Ids::appSandboxHomeDirRW,                     getUndoManager()),
           appSandboxAbsDirROValue                      (settings, Ids::appSandboxAbsDirRO,                      getUndoManager()),
           appSandboxAbsDirRWValue                      (settings, Ids::appSandboxAbsDirRW,                      getUndoManager()),
+          appSandboxExceptionIOKitValue                (settings, Ids::appSandboxExceptionIOKit,                getUndoManager()),
           hardenedRuntimeValue                         (settings, Ids::hardenedRuntime,                         getUndoManager()),
           hardenedRuntimeOptionsValue                  (settings, Ids::hardenedRuntimeOptions,                  getUndoManager(), Array<var>(), ","),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
@@ -143,6 +145,11 @@ public:
         {
             name = getDisplayNameMac();
             targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameMac());
+        }
+
+        if (needsDisplayMessageBox())
+        {
+            messageBoxQueueListenerScope = project.messageBoxQueue.addListener (*this);
         }
     }
 
@@ -222,6 +229,11 @@ public:
         }
 
         return result;
+    }
+
+    StringArray getAppSandboxExceptionIOKitClasses() const
+    {
+        return getCommaOrWhitespaceSeparatedItems (appSandboxExceptionIOKitValue.get());
     }
 
     Array<var> getValidArchs() const                        { return *validArchsValue.get().getArray(); }
@@ -510,7 +522,6 @@ public:
                 { "Temporary Exception: Audio Unit Hosting",                       "temporary-exception.audio-unit-host" },
                 { "Temporary Exception: Global Mach Service",                      "temporary-exception.mach-lookup.global-name" },
                 { "Temporary Exception: Global Mach Service Dynamic Registration", "temporary-exception.mach-register.global-name" },
-                { "Temporary Exception: IOKit User Client Class",                  "temporary-exception.iokit-user-client-class" },
                 { "Temporary Exception: Shared Preference Domain (Read Only)",     "temporary-exception.shared-preference.read-only" },
                 { "Temporary Exception: Shared Preference Domain (Read/Write)",    "temporary-exception.shared-preference.read-write" }
             };
@@ -540,6 +551,14 @@ public:
                            "A list of the corresponding paths (separated by newlines or whitespace). "
                            "See Apple's File Access Temporary Exceptions documentation.");
             }
+
+            props.add (new TextPropertyComponentWithEnablement (appSandboxExceptionIOKitValue,
+                                                                appSandboxValue,
+                                                                "App sandbox temporary exception: additional IOUserClient subclasses",
+                                                                8192,
+                                                                true),
+                       "A list of IOUserClient subclasses to open or to set properties on. "
+                       "See Apple's IOKit User Client Class Temporary Exception documentation.");
 
             props.add (new ChoicePropertyComponent (hardenedRuntimeValue, "Use Hardened Runtime"),
                        "Enable this to use the hardened runtime required for app notarization.");
@@ -781,32 +800,30 @@ public:
             updateOldOrientationSettings();
     }
 
-    void updateDeprecatedSettingsInteractively() override
-    {
-        if (hasInvalidPostBuildScript())
-        {
-            String alertWindowText = iOS ? "Your Xcode (iOS) Exporter settings use an invalid post-build script. Click 'Update' to remove it."
-                                         : "Your Xcode (macOS) Exporter settings use a pre-JUCE 4.2 post-build script to move the plug-in binaries to their plug-in install folders.\n\n"
-                                           "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
-                                           "Click 'Update' to remove the script (otherwise your plug-in may not compile correctly).";
-
-            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
-                                                                   "Project settings: " + project.getDocumentTitle(),
-                                                                   alertWindowText,
-                                                                   "Update",
-                                                                   "Cancel");
-            messageBox = AlertWindow::showScopedAsync (options, [this] (int result)
-            {
-                if (result != 0)
-                    postbuildCommandValue.resetToDefault();
-            });
-        }
-    }
-
     bool hasInvalidPostBuildScript() const
     {
         // check whether the script is identical to the old one that the Introjucer used to auto-generate
-        return (MD5 (getPostBuildScript().toUTF8()).toHexString() == "265ac212a7e734c5bbd6150e1eae18a1");
+        return    ! userAcknowledgedInvalidPostBuildScript
+               && (MD5 (getPostBuildScript().toUTF8()).toHexString() == "265ac212a7e734c5bbd6150e1eae18a1");
+    }
+
+    bool hasDefunctIOKitSetting() const
+    {
+        auto v = appSandboxOptionsValue.get();
+
+        if (! v.isArray())
+        {
+            jassertfalse;
+            return false;
+        }
+
+        return    ! userAcknowledgedDefunctIOKitSetting
+               && v.getArray()->contains ("com.apple.security.temporary-exception.iokit-user-client-class");
+    }
+
+    bool needsDisplayMessageBox() const
+    {
+        return hasInvalidPostBuildScript() || hasDefunctIOKitSetting();
     }
 
     //==============================================================================
@@ -2082,6 +2099,62 @@ private:
 
     File getProjectBundle() const                 { return getTargetFolder().getChildFile (project.getProjectFilenameRootString()).withFileExtension (".xcodeproj"); }
 
+    void canCreateMessageBox (CreatorFunction f) override
+    {
+        if (hasInvalidPostBuildScript())
+        {
+            String alertWindowText = iOS ? "Your Xcode (iOS) Exporter settings use an invalid post-build script. Click 'Update' to remove it."
+                                         : "Your Xcode (macOS) Exporter settings use a pre-JUCE 4.2 post-build script to move the plug-in binaries to their plug-in install folders.\n\n"
+                                           "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
+                                           "Click 'Update' to remove the script (otherwise your plug-in may not compile correctly).";
+
+            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
+                                                                   "Project settings: " + project.getDocumentTitle(),
+                                                                   alertWindowText,
+                                                                   "Update",
+                                                                   "Cancel");
+
+            messageBox = f (options, [this] (int result)
+                            {
+                                userAcknowledgedInvalidPostBuildScript = true;
+
+                                if (result != 0)
+                                    postbuildCommandValue.resetToDefault();
+
+                                if (! needsDisplayMessageBox())
+                                    messageBoxQueueListenerScope.reset();
+                            });
+        }
+        else if (hasDefunctIOKitSetting())
+        {
+            String alertWindowText = "Your Xcode (macOS) Exporter settings use a defunct, boolean value for the iokit-user-client-class temporary exception entitlement.\n\n"
+                                     "If you need this entitlement, add the IOUserClient subclasses to the new IOKit exception related field.\n\n"
+                                     "For more information see Apple's IOKit User Client Class Temporary Exception documentation.\n\n"
+                                     "Clicking 'Update' will remove the defunct setting from your project.";
+
+            auto options = MessageBoxOptions::makeOptionsOkCancel (MessageBoxIconType::WarningIcon,
+                                                                   "Project settings: " + project.getDocumentTitle(),
+                                                                   alertWindowText,
+                                                                   "Update",
+                                                                   "Cancel");
+
+            messageBox = f (std::move (options), [this] (int result)
+                                                 {
+                                                     userAcknowledgedDefunctIOKitSetting = true;
+
+                                                     if (result != 0)
+                                                     {
+                                                         auto v = appSandboxOptionsValue.get();
+                                                         v.getArray()->removeAllInstancesOf ("com.apple.security.temporary-exception.iokit-user-client-class");
+                                                         appSandboxOptionsValue.setValue (v, nullptr);
+                                                     }
+
+                                                     if (! needsDisplayMessageBox())
+                                                         messageBoxQueueListenerScope.reset();
+                                                 });
+        }
+    }
+
     //==============================================================================
     void createObjects() const
     {
@@ -3267,6 +3340,7 @@ private:
         options.hardenedRuntimeOptions          = getHardenedRuntimeOptions();
         options.appSandboxOptions               = getAppSandboxOptions();
         options.appSandboxTemporaryPaths        = getAppSandboxTemporaryPaths();
+        options.appSandboxExceptionIOKit        = getAppSandboxExceptionIOKitClasses();
 
         const auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
         build_tools::overwriteFileIfDifferentOrThrow (entitlementsFile, options.getEntitlementsFileContent());
@@ -3748,6 +3822,7 @@ private:
                                  iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                                  appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
                                  appSandboxHomeDirROValue, appSandboxHomeDirRWValue, appSandboxAbsDirROValue, appSandboxAbsDirRWValue,
+                                 appSandboxExceptionIOKitValue,
                                  hardenedRuntimeValue, hardenedRuntimeOptionsValue,
                                  microphonePermissionNeededValue, microphonePermissionsTextValue,
                                  cameraPermissionNeededValue, cameraPermissionTextValue,
@@ -3757,7 +3832,6 @@ private:
                                  iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                                  networkingMulticastValue, iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                                  exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue, buildNumber;
-    ScopedMessageBox messageBox;
 
     struct SandboxFileAccessProperty
     {
@@ -3772,6 +3846,12 @@ private:
         { appSandboxAbsDirROValue,  "App sandbox temporary exception: absolute path read only file access",   "absolute-path.read-only" },
         { appSandboxAbsDirRWValue,  "App sandbox temporary exception: absolute path read/write file access",  "absolute-path.read-write" }
     };
+
+    bool userAcknowledgedInvalidPostBuildScript = false;
+    bool userAcknowledgedDefunctIOKitSetting    = false;
+
+    ErasedScopeGuard messageBoxQueueListenerScope;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)
 };

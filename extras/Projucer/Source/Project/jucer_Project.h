@@ -117,6 +117,64 @@ namespace ProjectMessages
     using MessageAction = std::pair<String, std::function<void()>>;
 }
 
+// Can be shared between multiple classes wanting to create a MessageBox. Ensures that there is one
+// MessageBox active at a given time.
+class MessageBoxQueue : private AsyncUpdater
+{
+public:
+    struct Listener
+    {
+        using CreatorFunction = std::function<ScopedMessageBox (MessageBoxOptions, std::function<void (int)>)>;
+
+        virtual ~Listener() = default;
+
+        virtual void canCreateMessageBox (CreatorFunction) = 0;
+    };
+
+    void handleAsyncUpdate()
+    {
+        schedule();
+    }
+
+    auto addListener (Listener& l)
+    {
+        triggerAsyncUpdate();
+        return listeners.addScoped (l);
+    }
+
+private:
+    ScopedMessageBox create (MessageBoxOptions options, std::function<void (int)> callback)
+    {
+        hasActiveMessageBox = true;
+
+        return AlertWindow::showScopedAsync (options, [this, cb = std::move (callback)] (int result)
+                                             {
+                                                 cb (result);
+                                                 hasActiveMessageBox = false;
+                                                 triggerAsyncUpdate();
+                                             });
+    }
+
+    void schedule()
+    {
+        if (hasActiveMessageBox)
+            return;
+
+        auto& currentListeners = listeners.getListeners();
+
+        if (! currentListeners.isEmpty())
+        {
+            currentListeners[0]->canCreateMessageBox ([this] (auto o, auto c)
+                                                              {
+                                                                  return create (o, c);
+                                                              });
+        }
+    }
+
+    ListenerList<Listener> listeners;
+    bool hasActiveMessageBox = false;
+};
+
 enum class Async { no, yes };
 
 //==============================================================================
@@ -124,7 +182,8 @@ class Project final : public FileBasedDocument,
                       private ValueTree::Listener,
                       private LicenseController::LicenseStateListener,
                       private ChangeListener,
-                      private AvailableModulesList::Listener
+                      private AvailableModulesList::Listener,
+                      private MessageBoxQueue::Listener
 {
 public:
     //==============================================================================
@@ -355,8 +414,6 @@ public:
     static build_tools::ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
 
     //==============================================================================
-    void updateDeprecatedProjectSettingsInteractively();
-
     StringPairArray getAppConfigDefs();
     StringPairArray getAudioPluginFlags() const;
 
@@ -548,6 +605,8 @@ public:
     bool isFileModificationCheckPending() const;
     bool isSaveAndExportDisabled() const;
 
+    MessageBoxQueue messageBoxQueue;
+
 private:
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
@@ -556,6 +615,9 @@ private:
     void valueTreeChildOrderChanged (ValueTree&, int, int) override;
 
     void valueTreeChildAddedOrRemoved (ValueTree&, ValueTree&);
+
+    //==============================================================================
+    void canCreateMessageBox (CreatorFunction) override;
 
     //==============================================================================
     template <typename This>
@@ -667,6 +729,9 @@ private:
 
     std::unique_ptr<FileChooser> chooser;
     std::unique_ptr<ProjectSaver> saver;
+
+    std::optional<MessageBoxOptions> exporterRemovalMessageBoxOptions;
+    ErasedScopeGuard messageBoxQueueListenerScope;
     ScopedMessageBox messageBox;
 
     //==============================================================================

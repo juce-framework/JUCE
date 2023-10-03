@@ -261,14 +261,6 @@ void Project::updateDeprecatedProjectSettings()
         exporter->updateDeprecatedSettings();
 }
 
-void Project::updateDeprecatedProjectSettingsInteractively()
-{
-    jassert (! ProjucerApplication::getApp().isRunningCommandLine);
-
-    for (ExporterIterator exporter (*this); exporter.next();)
-        exporter->updateDeprecatedSettingsInteractively();
-}
-
 void Project::initialiseMainGroup()
 {
     // Create main file group if missing
@@ -462,8 +454,8 @@ void Project::removeDefunctExporters()
             warningMessage << "\n"
                            << TRANS ("These exporters have been removed from the project. If you save the project they will be also erased from the .jucer file.");
 
-            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
-            messageBox = AlertWindow::showScopedAsync (options, nullptr);
+            exporterRemovalMessageBoxOptions = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
+            messageBoxQueueListenerScope = messageBoxQueue.addListener (*this);
         }
     }
 }
@@ -1167,6 +1159,14 @@ void Project::valueTreeChildAddedOrRemoved (ValueTree& parent, ValueTree& child)
         updateExporterWarnings();
 
     changed();
+}
+
+void Project::canCreateMessageBox (CreatorFunction f)
+{
+    messageBox = f (*exporterRemovalMessageBoxOptions, [this] (auto)
+                                                       {
+                                                           messageBoxQueueListenerScope.reset();
+                                                       });
 }
 
 void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
