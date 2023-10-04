@@ -40,6 +40,7 @@ namespace UnitTestCategories
     static const String json                       { "JSON" };
     static const String maths                      { "Maths" };
     static const String midi                       { "MIDI" };
+    static const String native                     { "Native" };
     static const String networking                 { "Networking" };
     static const String osc                        { "OSC" };
     static const String smoothedValues             { "SmoothedValues" };

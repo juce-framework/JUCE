@@ -247,6 +247,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_Network_windows.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_ObjCHelpers_mac_test.mm">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_PlatformTimer_generic.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
