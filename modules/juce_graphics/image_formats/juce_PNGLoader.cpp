@@ -355,7 +355,7 @@ namespace PNGHelpers
     static void JUCE_CDECL errorCallback (png_structp p, png_const_charp)
     {
        #ifdef PNG_SETJMP_SUPPORTED
-        setjmp(png_jmpbuf(p));
+        setjmp (png_jmpbuf (p));
        #else
         longjmp (*(jmp_buf*) p->error_ptr, 1);
        #endif

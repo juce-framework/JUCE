@@ -50,7 +50,7 @@
 
 //==============================================================================
 /** This will be the source of our balls and can be dragged around. */
-class BallGeneratorComponent    : public Component
+class BallGeneratorComponent final : public Component
 {
 public:
     BallGeneratorComponent() {}
@@ -93,7 +93,7 @@ private:
 };
 
 //==============================================================================
-struct BallComponent  : public Component
+struct BallComponent final : public Component
 {
     BallComponent (Point<float> pos)
         : position (pos),
@@ -136,8 +136,8 @@ struct BallComponent  : public Component
 };
 
 //==============================================================================
-class AnimationDemo  : public Component,
-                       private Timer
+class AnimationDemo final : public Component,
+                            private Timer
 {
 public:
     AnimationDemo()

@@ -111,7 +111,7 @@ struct EmbeddedViewListener
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor")
 
 //==============================================================================
-class EmbeddedUI : public reaper::IReaperUIEmbedInterface
+class EmbeddedUI final : public reaper::IReaperUIEmbedInterface
 {
 public:
     explicit EmbeddedUI (EmbeddedViewListener& demo) : listener (demo) {}
@@ -146,7 +146,7 @@ private:
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-class VST2Extensions : public VST2ClientExtensions
+class VST2Extensions final : public VST2ClientExtensions
 {
 public:
     explicit VST2Extensions (EmbeddedViewListener& l)
@@ -187,7 +187,7 @@ private:
     EmbeddedViewListener& listener;
 };
 
-class VST3Extensions : public VST3ClientExtensions
+class VST3Extensions final : public VST3ClientExtensions
 {
 public:
     explicit VST3Extensions (EmbeddedViewListener& l)
@@ -222,7 +222,7 @@ private:
 };
 
 //==============================================================================
-class Editor : public AudioProcessorEditor
+class Editor final : public AudioProcessorEditor
 {
 public:
     explicit Editor (AudioProcessor& proc,
@@ -234,7 +234,7 @@ public:
         addAndMakeVisible (bypassButton);
 
         // Clicking will bypass *everything*
-        bypassButton.onClick = [globalBypass] { if (globalBypass != nullptr) globalBypass (-1); };
+        bypassButton.onClick = [globalBypass] { NullCheckedInvocation::invoke (globalBypass, -1); };
 
         setSize (300, 80);
     }
@@ -258,9 +258,9 @@ private:
 };
 
 //==============================================================================
-class ReaperEmbeddedViewDemo  : public AudioProcessor,
-                                private EmbeddedViewListener,
-                                private Timer
+class ReaperEmbeddedViewDemo final : public AudioProcessor,
+                                     private EmbeddedViewListener,
+                                     private Timer
 {
 public:
     ReaperEmbeddedViewDemo()

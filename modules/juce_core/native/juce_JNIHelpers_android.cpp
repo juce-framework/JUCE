@@ -139,14 +139,14 @@ Array<JNIClassBase*>& JNIClassBase::getClasses()
 static File getCodeCacheDirectory()
 {
     int pid = getpid();
-    File cmdline("/proc/" + String(pid) + "/cmdline");
+    File cmdline ("/proc/" + String (pid) + "/cmdline");
 
     auto bundleId = cmdline.loadFileAsString().trimStart().trimEnd();
 
     if (bundleId.isEmpty())
         return {};
 
-    return File("/data/data/" + bundleId + "/code_cache");
+    return File ("/data/data/" + bundleId + "/code_cache");
 }
 
 void JNIClassBase::initialise (JNIEnv* env, jobject context)
@@ -279,14 +279,14 @@ void JNIClassBase::initialiseAllClasses (JNIEnv* env, jobject context)
 {
     const Array<JNIClassBase*>& classes = getClasses();
     for (int i = classes.size(); --i >= 0;)
-        classes.getUnchecked(i)->initialise (env, context);
+        classes.getUnchecked (i)->initialise (env, context);
 }
 
 void JNIClassBase::releaseAllClasses (JNIEnv* env)
 {
     const Array<JNIClassBase*>& classes = getClasses();
     for (int i = classes.size(); --i >= 0;)
-        classes.getUnchecked(i)->release (env);
+        classes.getUnchecked (i)->release (env);
 }
 
 jmethodID JNIClassBase::resolveMethod (JNIEnv* env, const char* methodName, const char* params)

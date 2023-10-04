@@ -149,7 +149,7 @@ struct MathConstants
     /** A predefined value for Euler's number */
     static constexpr FloatType euler = static_cast<FloatType> (2.71828182845904523536L);
 
-    /** A predefined value for sqrt(2) */
+    /** A predefined value for sqrt (2) */
     static constexpr FloatType sqrt2 = static_cast<FloatType> (1.4142135623730950488L);
 };
 
@@ -276,8 +276,8 @@ static Tolerance<Type> relativeTolerance (Type tolerance)
     differences that are subnormal are always considered equal. It is highly recommend this
     value is reviewed depending on the calculation being carried out. In general specifying an
     absolute value is useful when considering values close to zero. For example you might
-    expect sin(pi) to return 0, but what it actually returns is close to the error of the value pi.
-    Therefore, in this example it might be better to set the absolute tolerance to sin(pi).
+    expect sin (pi) to return 0, but what it actually returns is close to the error of the value pi.
+    Therefore, in this example it might be better to set the absolute tolerance to sin (pi).
 
     The default relative tolerance is equal to the machine epsilon which is the difference between
     1.0 and the next floating-point value that can be represented by Type. In most cases this value

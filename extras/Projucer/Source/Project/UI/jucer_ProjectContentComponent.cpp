@@ -266,7 +266,7 @@ void ProjectContentComponent::setScrollableEditorComponent (std::unique_ptr<Comp
 {
     jassert (component.get() != nullptr);
 
-    class ContentViewport  : public Component
+    class ContentViewport final : public Component
     {
     public:
         ContentViewport (std::unique_ptr<Component> content)
@@ -601,7 +601,7 @@ void ProjectContentComponent::showTranslationTool()
 }
 
 //==============================================================================
-struct AsyncCommandRetrier  : public Timer
+struct AsyncCommandRetrier final : public Timer
 {
     AsyncCommandRetrier (const ApplicationCommandTarget::InvocationInfo& i)  : info (i)
     {

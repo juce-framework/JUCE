@@ -758,7 +758,7 @@ private:
                 AUAudioUnit* self = _self;
 
                 self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
-                                        AudioComponentInstantiationOptions, NSError**> (self, @selector(initWithComponentDescription:options:error:), descr, options, error);
+                                        AudioComponentInstantiationOptions, NSError**> (self, @selector (initWithComponentDescription:options:error:), descr, options, error);
 
                 setThis (self, juceAU);
                 return self;
@@ -1183,16 +1183,16 @@ private:
         @try
         {
             // Create methods in AUParameterTree return unretained objects (!) -> see Apple header AUAudioUnitImplementation.h
-            param.reset([[AUParameterTree createParameterWithIdentifier: juceStringToNS (getParameterIdentifier())
-                                                                   name: juceStringToNS (name)
-                                                                address: address
-                                                                    min: 0.0f
-                                                                    max: getMaximumParameterValue (parameter)
-                                                                   unit: unit
-                                                               unitName: nullptr
-                                                                  flags: flags
-                                                           valueStrings: valueStrings.get()
-                                                    dependentParameters: nullptr]
+            param.reset ([[AUParameterTree createParameterWithIdentifier: juceStringToNS (getParameterIdentifier())
+                                                                    name: juceStringToNS (name)
+                                                                 address: address
+                                                                     min: 0.0f
+                                                                     max: getMaximumParameterValue (parameter)
+                                                                    unit: unit
+                                                                unitName: nullptr
+                                                                   flags: flags
+                                                            valueStrings: valueStrings.get()
+                                                     dependentParameters: nullptr]
                          retain]);
         }
 

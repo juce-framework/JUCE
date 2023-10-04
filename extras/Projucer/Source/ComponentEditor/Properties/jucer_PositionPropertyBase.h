@@ -422,15 +422,13 @@ public:
 protected:
     class PositionPropLabel  : public Label
     {
-        PositionPropertyBase& owner;
-
     public:
         PositionPropLabel (PositionPropertyBase& owner_)
             : Label (String(), String()),
               owner (owner_)
         {
             setEditable (true, true, false);
-            lookAndFeelChanged();
+            updateLookAndFeel();
         }
 
         TextEditor* createEditorComponent() override
@@ -448,9 +446,17 @@ protected:
 
         void lookAndFeelChanged() override
         {
+            updateLookAndFeel();
+        }
+
+    private:
+        void updateLookAndFeel()
+        {
             setColour (backgroundColourId, findColour (widgetBackgroundColourId));
             setColour (textColourId, findColour (widgetTextColourId));
         }
+
+        PositionPropertyBase& owner;
     };
 
     ComponentLayout* layout;

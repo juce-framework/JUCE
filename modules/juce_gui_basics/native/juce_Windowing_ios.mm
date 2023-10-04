@@ -189,7 +189,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     isIOSAppActive = false;
 
     for (int i = appBecomingInactiveCallbacks.size(); --i >= 0;)
-        appBecomingInactiveCallbacks.getReference(i)->appBecomingInactive();
+        appBecomingInactiveCallbacks.getReference (i)->appBecomingInactive();
 }
 
 - (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*)identifier

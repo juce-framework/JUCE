@@ -105,7 +105,7 @@ struct FFTFallback  : public FFT::Instance
             return;
         }
 
-        const SpinLock::ScopedLockType sl(processLock);
+        const SpinLock::ScopedLockType sl (processLock);
 
         jassert (configForward != nullptr);
 
@@ -232,7 +232,7 @@ struct FFTFallback  : public FFT::Instance
                 for (int i = fftSize / 2; i < fftSize; ++i)
                 {
                     auto index = fftSize / 2 - (i - fftSize / 2);
-                    twiddleTable[i] = conj(twiddleTable[index]);
+                    twiddleTable[i] = conj (twiddleTable[index]);
                 }
             }
 

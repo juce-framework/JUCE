@@ -75,10 +75,10 @@ public:
                 const auto shouldUseES3 = version != defaultGLVersion
                                        && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0;
 
-                const auto gotContext = (shouldUseES3 && createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
-                                     || createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
+                [[maybe_unused]] const auto gotContext = (shouldUseES3 && createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
+                                                         || createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
 
-                jassertquiet (gotContext);
+                jassert (gotContext);
 
                 if (context != nil)
                 {

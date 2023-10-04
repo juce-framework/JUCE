@@ -50,7 +50,7 @@
 
 
 //==============================================================================
-class AudioAppDemo   : public AudioAppComponent
+class AudioAppDemo final : public AudioAppComponent
 {
 public:
     //==============================================================================

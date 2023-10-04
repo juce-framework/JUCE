@@ -52,5 +52,5 @@ JUCE_API void JUCE_CALLTYPE handleARAAssertion (const char* file, const int line
 #include "juce_ARAPlugInInstanceRoles.cpp"
 #include "juce_AudioProcessor_ARAExtensions.cpp"
 
-ARA_SETUP_DEBUG_MESSAGE_PREFIX(JucePlugin_Name);
+ARA_SETUP_DEBUG_MESSAGE_PREFIX (JucePlugin_Name);
 #endif

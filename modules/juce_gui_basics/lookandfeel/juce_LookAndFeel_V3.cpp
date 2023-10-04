@@ -521,7 +521,7 @@ void LookAndFeel_V3::drawKeymapChangeButton (Graphics& g, int width, int height,
         p.addRectangle (50.0f - thickness, 50.0f + thickness, thickness * 2.0f, 50.0f - indent - thickness);
         p.setUsingNonZeroWinding (false);
 
-        g.setColour (textColour.darker(0.1f).withAlpha (button.isDown() ? 0.7f : (button.isOver() ? 0.5f : 0.3f)));
+        g.setColour (textColour.darker (0.1f).withAlpha (button.isDown() ? 0.7f : (button.isOver() ? 0.5f : 0.3f)));
         g.fillPath (p, p.getTransformToScaleToFit (2.0f, 2.0f, (float) width - 4.0f, (float) height - 4.0f, true));
     }
 

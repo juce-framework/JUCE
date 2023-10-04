@@ -111,8 +111,8 @@ public class JuceActivity   extends Activity
     @Override
     protected void onNewIntent (Intent intent)
     {
-        super.onNewIntent(intent);
-        setIntent(intent);
+        super.onNewIntent (intent);
+        setIntent (intent);
 
         appNewIntent (intent);
     }
@@ -121,10 +121,10 @@ public class JuceActivity   extends Activity
 */
 
 //==============================================================================
-class PushNotificationsDemo   : public Component,
-                                private ChangeListener,
-                                private ComponentListener,
-                                private PushNotifications::Listener
+class PushNotificationsDemo final : public Component,
+                                    private ChangeListener,
+                                    private ComponentListener,
+                                    private PushNotifications::Listener
 {
 public:
     //==============================================================================
@@ -781,7 +781,7 @@ private:
     }
   #endif
 
-    struct RowComponent : public Component
+    struct RowComponent final : public Component
     {
         RowComponent (Label& l, Component& c, int u = 1)
             : label (l),
@@ -1123,7 +1123,7 @@ private:
         OwnedArray<RowComponent> rowComponents;
     };
 
-    struct AuxActionsView   : public Component
+    struct AuxActionsView final : public Component
     {
         AuxActionsView()
         {
@@ -1177,7 +1177,7 @@ private:
         TextButton removeAllPendingNotifsButton     { "Remove All Pending Notifs" };
     };
 
-    struct RemoteView   : public Component
+    struct RemoteView final : public Component
     {
         RemoteView()
         {
@@ -1191,7 +1191,7 @@ private:
 
         void resized()
         {
-            auto rowSize = getHeight () / 10;
+            auto rowSize = getHeight() / 10;
 
             auto bounds = getLocalBounds().reduced (getWidth() / 10, getHeight() / 10);
 
@@ -1209,7 +1209,7 @@ private:
         TextButton unsubscribeFromSportsButton { "UnsubscribeFromSports" };
     };
 
-    struct DemoTabbedComponent  : public TabbedComponent
+    struct DemoTabbedComponent final : public TabbedComponent
     {
         DemoTabbedComponent (PushNotificationsDemo& demoIn, TabbedButtonBar::Orientation orientation)
             : TabbedComponent (orientation), demo (demoIn)

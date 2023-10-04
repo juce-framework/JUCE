@@ -175,6 +175,21 @@ public:
     virtual StringArray getInputChannelNames() = 0;
 
     //==============================================================================
+    /** For devices that support a default layout, returns the channels that are enabled in the
+        default layout.
+
+        Returns nullopt if the device doesn't supply a default layout.
+    */
+    virtual std::optional<BigInteger> getDefaultOutputChannels() const { return {}; }
+
+    /** For devices that support a default layout, returns the channels that are enabled in the
+        default layout.
+
+        Returns nullopt if the device doesn't supply a default layout.
+    */
+    virtual std::optional<BigInteger> getDefaultInputChannels()  const { return {}; }
+
+    //==============================================================================
     /** Returns the set of sample-rates this device supports.
         @see getCurrentSampleRate
     */

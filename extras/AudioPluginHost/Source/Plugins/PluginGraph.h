@@ -55,9 +55,9 @@ struct PluginDescriptionAndPreference
 /**
     A collection of plugins and some connections between them.
 */
-class PluginGraph   : public FileBasedDocument,
-                      public AudioProcessorListener,
-                      private ChangeListener
+class PluginGraph final : public FileBasedDocument,
+                          public AudioProcessorListener,
+                          private ChangeListener
 {
 public:
     //==============================================================================

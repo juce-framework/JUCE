@@ -27,11 +27,11 @@
 
 
 //==============================================================================
-class MakefileProjectExporter  : public ProjectExporter
+class MakefileProjectExporter final : public ProjectExporter
 {
 protected:
     //==============================================================================
-    class MakeBuildConfiguration  : public BuildConfiguration
+    class MakeBuildConfiguration final : public BuildConfiguration
     {
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -125,7 +125,7 @@ protected:
 
 public:
     //==============================================================================
-    class MakefileTarget : public build_tools::ProjectType::Target
+    class MakefileTarget final : public build_tools::ProjectType::Target
     {
     public:
         MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
@@ -299,10 +299,10 @@ public:
 
             for (auto& [path, flags] : filesToCompile)
             {
-                const auto additionalTargetDependencies = [&path = path, this]
+                const auto additionalTargetDependencies = [&p = path, this]
                 {
                     if (   owner.linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper()
-                        && path.getFileName().contains ("include_juce_gui_extra.cpp"))
+                        && p.getFileName().contains ("include_juce_gui_extra.cpp"))
                     {
                         return owner.linuxSubprocessHelperProperties
                             .getLinuxSubprocessHelperBinaryDataSource()
@@ -358,6 +358,8 @@ public:
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER)";
             else if (type == VST3PlugIn)
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER)";
+            else if (type == VST3Helper)
+                out << " $(JUCE_OBJDIR)/cxxfs.cmd";
 
             out << newLine;
 
@@ -398,6 +400,9 @@ public:
                     out << "$(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE) ";
 
                 out << "$(JUCE_LDFLAGS) $(shell cat $(JUCE_OBJDIR)/execinfo.cmd) ";
+
+                if (type == VST3Helper)
+                    out << "$(shell cat $(JUCE_OBJDIR)/cxxfs.cmd) ";
 
                 if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle
                         || type == GUIApp || type == StandalonePlugIn)
@@ -1222,6 +1227,13 @@ private:
             << "\t-$(V_AT)mkdir -p $(@D)" << newLine
             << "\t-@if [ -z \"$(V_AT)\" ]; then echo \"Checking if we need to link libexecinfo\"; fi" << newLine
             << "\t$(V_AT)printf \"int main() { return 0; }\" | $(CXX) -x c++ -o $(@D)/execinfo.x -lexecinfo - >/dev/null 2>&1 && printf -- \"-lexecinfo\" > \"$@\" || touch \"$@\"" << newLine
+            << newLine;
+
+        // stdc++fs is only needed for some compilers
+        out << "$(JUCE_OBJDIR)/cxxfs.cmd:" << newLine
+            << "\t-$(V_AT)mkdir -p $(@D)" << newLine
+            << "\t-@if [ -z \"$(V_AT)\" ]; then echo \"Checking if we need to link stdc++fs\"; fi" << newLine
+            << "\t$(V_AT)printf \"int main() { return 0; }\" | $(CXX) -x c++ -o $(@D)/cxxfs.x -lstdc++fs - >/dev/null 2>&1 && printf -- \"-lstdc++fs\" > \"$@\" || touch \"$@\"" << newLine
             << newLine;
 
         if (linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())

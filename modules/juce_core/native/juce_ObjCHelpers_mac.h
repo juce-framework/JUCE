@@ -46,17 +46,22 @@ inline String nsStringToJuce (NSString* s)
 
 inline NSString* juceStringToNS (const String& s)
 {
-    return [NSString stringWithUTF8String: s.toUTF8()];
+    // This cast helps linters determine nullability
+    return (NSString* _Nonnull) [NSString stringWithUTF8String: s.toUTF8()];
 }
 
 inline NSString* nsStringLiteral (const char* const s) noexcept
 {
-    return [NSString stringWithUTF8String: s];
+    jassert (s != nullptr);
+
+    // This cast helps linters determine nullability
+    return (NSString* _Nonnull) [NSString stringWithUTF8String: s];
 }
 
 inline NSString* nsEmptyString() noexcept
 {
-    return [NSString string];
+    // This cast helps linters determine nullability
+    return (NSString* _Nonnull) [NSString string];
 }
 
 inline NSURL* createNSURLFromFile (const String& f)
@@ -359,6 +364,8 @@ struct ObjCClass
     ObjCClass (const char* nameRoot)
         : cls (objc_allocateClassPair ([SuperclassType class], getRandomisedName (nameRoot).toUTF8(), 0))
     {
+        // The class could not be created. Is the name already in use?
+        jassert (cls != nil);
     }
 
     ~ObjCClass()
@@ -371,7 +378,8 @@ struct ObjCClass
 
     void registerClass()
     {
-        objc_registerClassPair (cls);
+        if (cls != nil)
+            objc_registerClassPair (cls);
     }
 
     SuperclassType* createInstance() const
@@ -393,8 +401,8 @@ struct ObjCClass
     void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
     {
         const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
-        const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
-        jassertquiet (b);
+        [[maybe_unused]] const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
+        jassert (b);
     }
 
     void addProtocol (Protocol* protocol)

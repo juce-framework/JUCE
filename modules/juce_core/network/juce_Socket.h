@@ -69,7 +69,7 @@ public:
 
         @returns  true on success; false may indicate that another socket is already bound
                   on the same port
-        @see bindToPort(int localPortNumber), IPAddress::getAllAddresses
+        @see bindToPort (int localPortNumber), IPAddress::getAllAddresses
     */
     bool bindToPort (int localPortNumber, const String& localAddress);
 
@@ -238,7 +238,7 @@ public:
 
         @returns  true on success; false may indicate that another socket is already bound
                   on the same port
-        @see bindToPort(int localPortNumber), IPAddress::getAllAddresses
+        @see bindToPort (int localPortNumber), IPAddress::getAllAddresses
     */
     bool bindToPort (int localPortNumber, const String& localAddress);
 

@@ -984,7 +984,7 @@ static bool attemptToConsumeKeys (JuceUIView* view, NSSet<UIPress*>* presses)
     return used;
 }
 
-- (void) pressesBegan:(NSSet<UIPress*>*) presses withEvent:(UIPressesEvent*) event
+- (void) pressesBegan: (NSSet<UIPress*>*) presses withEvent: (UIPressesEvent*) event
 {
     const auto handledEvent = [&]
     {
@@ -1033,13 +1033,13 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
     return false;
 }
 
-- (void) pressesEnded:(NSSet<UIPress*>*) presses withEvent:(UIPressesEvent*) event
+- (void) pressesEnded: (NSSet<UIPress*>*) presses withEvent: (UIPressesEvent*) event
 {
     if (! doKeysUp (owner, presses, event))
         [super pressesEnded: presses withEvent: event];
 }
 
-- (void) pressesCancelled:(NSSet<UIPress*>*) presses withEvent:(UIPressesEvent*) event
+- (void) pressesCancelled: (NSSet<UIPress*>*) presses withEvent: (UIPressesEvent*) event
 {
     if (! doKeysUp (owner, presses, event))
         [super pressesCancelled: presses withEvent: event];

@@ -49,7 +49,9 @@
 
 //==============================================================================
 #if JUCE_MAC
- #import <WebKit/WebKit.h>
+ #if JUCE_WEB_BROWSER
+  #import <WebKit/WebKit.h>
+ #endif
  #import <IOKit/IOKitLib.h>
  #import <IOKit/IOCFPlugIn.h>
  #import <IOKit/hid/IOHIDLib.h>
@@ -64,7 +66,9 @@
 
 //==============================================================================
 #elif JUCE_IOS
- #import <WebKit/WebKit.h>
+ #if JUCE_WEB_BROWSER
+  #import <WebKit/WebKit.h>
+ #endif
 
  #if JUCE_PUSH_NOTIFICATIONS
   #import <UserNotifications/UserNotifications.h>

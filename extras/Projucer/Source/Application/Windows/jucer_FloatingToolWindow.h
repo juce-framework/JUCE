@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-struct FloatingToolWindow  : public DialogWindow
+struct FloatingToolWindow final : public DialogWindow
 {
     FloatingToolWindow (const String& title,
                         const String& windowPosPropertyName,

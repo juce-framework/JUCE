@@ -95,7 +95,7 @@ public:
 
         This is useful for offline rendering.
     */
-    bool waitForNextAudioBlockReady (const AudioSourceChannelInfo& info, const uint32 timeout);
+    bool waitForNextAudioBlockReady (const AudioSourceChannelInfo& info, uint32 timeout);
 
 private:
     //==============================================================================

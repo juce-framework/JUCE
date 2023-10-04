@@ -84,7 +84,7 @@ IIRCoefficients IIRCoefficients::makeLowPass (double sampleRate,
 IIRCoefficients IIRCoefficients::makeHighPass (double sampleRate,
                                                double frequency) noexcept
 {
-    return makeHighPass (sampleRate, frequency, 1.0 / std::sqrt(2.0));
+    return makeHighPass (sampleRate, frequency, 1.0 / std::sqrt (2.0));
 }
 
 IIRCoefficients IIRCoefficients::makeHighPass (double sampleRate,

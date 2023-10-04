@@ -73,7 +73,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
         g.setColour (Colours::black);
         g.setFont (15.0f);
 
-        g.drawFittedText (TRANS("Contacting XYZ...").replace ("XYZ", form.status.getWebsiteName()),
+        g.drawFittedText (TRANS ("Contacting XYZ...").replace ("XYZ", form.status.getWebsiteName()),
                           getLocalBounds().reduced (20, 0).removeFromTop (proportionOfHeight (0.6f)),
                           Justification::centred, 5);
     }
@@ -102,15 +102,19 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
         {
             auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
                                                              TRANS ("Registration Failed"),
-                                                             result.errorMessage);
-            messageBox = AlertWindow::showScopedAsync (options, nullptr);
+                                                             result.errorMessage,
+                                                             {},
+                                                             &form);
+            form.messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else if (result.informativeMessage.isNotEmpty())
         {
             auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
                                                              TRANS ("Registration Complete!"),
-                                                             result.informativeMessage);
-            messageBox = AlertWindow::showScopedAsync (options, nullptr);
+                                                             result.informativeMessage,
+                                                             {},
+                                                             &form);
+            form.messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else if (result.urlToLaunch.isNotEmpty())
         {
@@ -145,7 +149,6 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
     Spinner spinner;
     OnlineUnlockStatus::UnlockResult result;
     String email, password;
-    ScopedMessageBox messageBox;
 
     std::unique_ptr<TextButton> cancelButton;
 
@@ -167,7 +170,7 @@ OnlineUnlockForm::OnlineUnlockForm (OnlineUnlockStatus& s,
                                     bool overlayHasCancelButton)
     : message (String(), userInstructions),
       passwordBox (String(), getDefaultPasswordChar()),
-      registerButton (TRANS("Register")),
+      registerButton (TRANS ("Register")),
       cancelButton (TRANS ("Cancel")),
       status (s),
       showOverlayCancelButton (overlayHasCancelButton)
@@ -264,8 +267,8 @@ void OnlineUnlockForm::lookAndFeelChanged()
 {
     Colour labelCol (findColour (TextEditor::backgroundColourId).contrasting (0.5f));
 
-    emailBox.setTextToShowWhenEmpty (TRANS("Email Address"), labelCol);
-    passwordBox.setTextToShowWhenEmpty (TRANS("Password"), labelCol);
+    emailBox.setTextToShowWhenEmpty (TRANS ("Email Address"), labelCol);
+    passwordBox.setTextToShowWhenEmpty (TRANS ("Password"), labelCol);
 }
 
 void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)

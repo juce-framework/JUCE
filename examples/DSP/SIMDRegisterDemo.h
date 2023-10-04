@@ -156,7 +156,7 @@ struct SIMDRegisterDemoDSP
     double sampleRate = 0.0;
 };
 
-struct SIMDRegisterDemo    : public Component
+struct SIMDRegisterDemo final : public Component
 {
     SIMDRegisterDemo()
     {

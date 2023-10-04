@@ -104,7 +104,7 @@ int writeBinaryData (juce::ArgumentList&& args)
     return 0;
 }
 
-struct IconParseResults final
+struct IconParseResults
 {
     juce::build_tools::Icons icons;
     juce::File output;
@@ -191,7 +191,7 @@ bool getBoolValue (const std::unordered_map<juce::String, juce::String>& dict, j
         || str.equalsIgnoreCase ("on");
 }
 
-struct UpdateField final
+struct UpdateField
 {
     const std::unordered_map<juce::String, juce::String>& dict;
 

@@ -34,17 +34,17 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wignored-attributes")
 
 #ifdef _MSC_VER
  #define DECLARE_AVX_SIMD_CONST(type, name) \
-    static __declspec(align(32)) const type name[32 / sizeof (type)]
+    static __declspec (align (32)) const type name[32 / sizeof (type)]
 
  #define DEFINE_AVX_SIMD_CONST(type, class_type, name) \
-    __declspec(align(32)) const type SIMDNativeOps<class_type>:: name[32 / sizeof (type)]
+    __declspec (align (32)) const type SIMDNativeOps<class_type>:: name[32 / sizeof (type)]
 
 #else
  #define DECLARE_AVX_SIMD_CONST(type, name) \
-    static const type name[32 / sizeof (type)] __attribute__((aligned(32)))
+    static const type name[32 / sizeof (type)] __attribute__ ((aligned (32)))
 
  #define DEFINE_AVX_SIMD_CONST(type, class_type, name) \
-    const type SIMDNativeOps<class_type>:: name[32 / sizeof (type)] __attribute__((aligned(32)))
+    const type SIMDNativeOps<class_type>:: name[32 / sizeof (type)] __attribute__ ((aligned (32)))
 
 #endif
 

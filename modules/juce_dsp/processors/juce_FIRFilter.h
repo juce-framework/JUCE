@@ -76,11 +76,11 @@ namespace FIR
 
         //==============================================================================
         /** Prepare this filter for processing. */
-        inline void prepare (const ProcessSpec& spec) noexcept
+        inline void prepare ([[maybe_unused]] const ProcessSpec& spec) noexcept
         {
             // This class can only process mono signals. Use the ProcessorDuplicator class
             // to apply this filter on a multi-channel audio stream.
-            jassertquiet (spec.numChannels == 1);
+            jassert (spec.numChannels == 1);
             reset();
         }
 

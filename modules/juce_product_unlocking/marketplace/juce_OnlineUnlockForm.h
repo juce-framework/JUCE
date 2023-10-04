@@ -87,6 +87,7 @@ private:
 
     struct OverlayComp;
     friend struct OverlayComp;
+    ScopedMessageBox messageBox;
     Component::SafePointer<Component> unlockingOverlay;
 
     void buttonClicked (Button*) override;

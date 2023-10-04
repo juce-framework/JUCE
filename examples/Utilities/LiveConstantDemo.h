@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-struct LiveConstantDemoComponent  : public Component
+struct LiveConstantDemoComponent final : public Component
 {
     LiveConstantDemoComponent() {}
 
@@ -78,7 +78,7 @@ struct LiveConstantDemoComponent  : public Component
 };
 
 //==============================================================================
-class LiveConstantDemo   : public Component
+class LiveConstantDemo final : public Component
 {
 public:
     LiveConstantDemo()

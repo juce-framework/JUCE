@@ -83,7 +83,7 @@ struct GainDemoDSP
     std::vector<DSPDemoParameterBase*> parameters { &gainParam };
 };
 
-struct GainDemo    : public Component
+struct GainDemo final : public Component
 {
     GainDemo()
     {

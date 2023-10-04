@@ -127,9 +127,9 @@ public:
 
             for (int i = 0; i < resourceFile.getNumFiles(); ++i)
             {
-                const File& file = resourceFile.getFile(i);
+                const File& file = resourceFile.getFile (i);
 
-                if (ImageFileFormat::findImageFormatForFileExtension(file))
+                if (ImageFileFormat::findImageFormatForFileExtension (file))
                     choices.add (resourceFile.getClassName() + "::" + resourceFile.getDataVariableFor (file));
             }
         }

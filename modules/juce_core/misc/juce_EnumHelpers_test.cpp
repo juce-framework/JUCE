@@ -75,8 +75,6 @@ public:
 
         beginTest ("operators work as expected");
         {
-            e = {};
-
             e = TestEnum::one;
             expect ((e & TestEnum::one) != TestEnum{});
             e |= TestEnum::other;

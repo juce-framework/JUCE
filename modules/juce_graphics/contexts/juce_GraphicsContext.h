@@ -469,7 +469,7 @@ public:
         By default a Graphics object will be set to mediumRenderingQuality.
         @see Graphics::drawImage, Graphics::drawImageTransformed, Graphics::drawImageWithin
     */
-    void setImageResamplingQuality (const ResamplingQuality newQuality);
+    void setImageResamplingQuality (ResamplingQuality newQuality);
 
     /** Draws an image.
 

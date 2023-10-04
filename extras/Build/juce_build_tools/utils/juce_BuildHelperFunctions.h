@@ -70,7 +70,7 @@ namespace build_tools
                               const String& utf8PointerVariable,
                               const StringArray& strings,
                               const StringArray& codeToExecute,
-                              const int indentLevel);
+                              int indentLevel);
 
     String unixStylePath (const String& path);
     String windowsStylePath (const String& path);

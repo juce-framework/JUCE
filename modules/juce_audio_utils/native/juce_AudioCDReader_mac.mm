@@ -90,7 +90,7 @@ namespace CDReaderHelpers
         volumes.findChildFiles (cds, File::findDirectories, false);
 
         for (int i = cds.size(); --i >= 0;)
-            if (! cds.getReference(i).getChildFile (".TOC.plist").exists())
+            if (! cds.getReference (i).getChildFile (".TOC.plist").exists())
                 cds.remove (i);
     }
 
@@ -122,7 +122,7 @@ StringArray AudioCDReader::getAvailableCDNames()
     StringArray names;
 
     for (int i = 0; i < cds.size(); ++i)
-        names.add (cds.getReference(i).getFileName());
+        names.add (cds.getReference (i).getFileName());
 
     return names;
 }

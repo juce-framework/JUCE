@@ -53,7 +53,7 @@
 
 //==============================================================================
 /** Our demo synth sound is just a basic sine wave.. */
-struct SineWaveSound : public SynthesiserSound
+struct SineWaveSound final : public SynthesiserSound
 {
     bool appliesToNote (int /*midiNoteNumber*/) override    { return true; }
     bool appliesToChannel (int /*midiChannel*/) override    { return true; }
@@ -61,7 +61,7 @@ struct SineWaveSound : public SynthesiserSound
 
 //==============================================================================
 /** Our demo synth voice just plays a sine wave.. */
-struct SineWaveVoice  : public SynthesiserVoice
+struct SineWaveVoice final : public SynthesiserVoice
 {
     bool canPlaySound (SynthesiserSound* sound) override
     {
@@ -153,7 +153,7 @@ private:
 
 //==============================================================================
 // This is an audio source that streams the output of our demo synth.
-struct SynthAudioSource  : public AudioSource
+struct SynthAudioSource final : public AudioSource
 {
     SynthAudioSource (MidiKeyboardState& keyState)  : keyboardState (keyState)
     {
@@ -238,7 +238,7 @@ struct SynthAudioSource  : public AudioSource
 };
 
 //==============================================================================
-class Callback : public AudioIODeviceCallback
+class Callback final : public AudioIODeviceCallback
 {
 public:
     Callback (AudioSourcePlayer& playerIn, LiveScrollingAudioDisplay& displayIn)
@@ -283,7 +283,7 @@ private:
 };
 
 //==============================================================================
-class AudioSynthesiserDemo  : public Component
+class AudioSynthesiserDemo final : public Component
 {
 public:
     AudioSynthesiserDemo()

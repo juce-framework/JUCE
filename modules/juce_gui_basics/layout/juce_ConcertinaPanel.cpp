@@ -95,7 +95,7 @@ struct ConcertinaPanel::PanelSizes
 
         if (totalSpace <= 0)
         {
-            newSizes.get(index).size = panelHeight;
+            newSizes.get (index).size = panelHeight;
         }
         else
         {
@@ -103,7 +103,7 @@ struct ConcertinaPanel::PanelSizes
             auto minSize = getMinimumSize (0, num);
             totalSpace = jmax (totalSpace, minSize);
 
-            newSizes.get(index).setSize (panelHeight);
+            newSizes.get (index).setSize (panelHeight);
             newSizes.stretchRange (0, index,   totalSpace - newSizes.getTotalSize (0, num), stretchLast);
             newSizes.stretchRange (index, num, totalSpace - newSizes.getTotalSize (0, num), stretchLast);
             newSizes = newSizes.fittedInto (totalSpace);
@@ -139,12 +139,12 @@ private:
         Array<Panel*> expandableItems;
 
         for (int i = start; i < end; ++i)
-            if (get(i).canExpand() && ! get(i).isMinimised())
-                expandableItems.add (& get(i));
+            if (get (i).canExpand() && ! get (i).isMinimised())
+                expandableItems.add (& get (i));
 
         for (int attempts = 4; --attempts >= 0 && spaceDiff > 0;)
             for (int i = expandableItems.size(); --i >= 0 && spaceDiff > 0;)
-                spaceDiff -= expandableItems.getUnchecked(i)->expand (spaceDiff / (i + 1));
+                spaceDiff -= expandableItems.getUnchecked (i)->expand (spaceDiff / (i + 1));
 
         growRangeLast (start, end, spaceDiff);
     }
@@ -152,13 +152,13 @@ private:
     void shrinkRangeFirst (int start, int end, int spaceDiff) noexcept
     {
         for (int i = start; i < end && spaceDiff > 0; ++i)
-            spaceDiff -= get(i).reduce (spaceDiff);
+            spaceDiff -= get (i).reduce (spaceDiff);
     }
 
     void shrinkRangeLast (int start, int end, int spaceDiff) noexcept
     {
         for (int i = end; --i >= start && spaceDiff > 0;)
-            spaceDiff -= get(i).reduce (spaceDiff);
+            spaceDiff -= get (i).reduce (spaceDiff);
     }
 
     void stretchRange (int start, int end, int amountToAdd, ExpandMode expandMode) noexcept
@@ -290,7 +290,7 @@ private:
     {
         ConcertinaPanel& panel = getPanel();
         auto ourIndex = panel.holders.indexOf (this);
-        return panel.currentSizes->get(ourIndex).minSize;
+        return panel.currentSizes->get (ourIndex).minSize;
     }
 
     ConcertinaPanel& getPanel() const
@@ -354,10 +354,10 @@ bool ConcertinaPanel::setPanelSize (Component* panelComponent, int height, bool 
     auto index = indexOfComp (panelComponent);
     jassert (index >= 0); // The specified component doesn't seem to have been added!
 
-    height += currentSizes->get(index).minSize;
-    auto oldSize = currentSizes->get(index).size;
+    height += currentSizes->get (index).minSize;
+    auto oldSize = currentSizes->get (index).size;
     setLayout (currentSizes->withResizedPanel (index, height, getHeight()), animate);
-    return oldSize != currentSizes->get(index).size;
+    return oldSize != currentSizes->get (index).size;
 }
 
 bool ConcertinaPanel::expandPanelFully (Component* component, bool animate)
@@ -372,7 +372,7 @@ void ConcertinaPanel::setMaximumPanelSize (Component* component, int maximumSize
 
     if (index >= 0)
     {
-        currentSizes->get(index).maxSize = currentSizes->get(index).minSize + maximumSize;
+        currentSizes->get (index).maxSize = currentSizes->get (index).minSize + maximumSize;
         resized();
     }
 }
@@ -411,7 +411,7 @@ void ConcertinaPanel::resized()
 int ConcertinaPanel::indexOfComp (Component* comp) const noexcept
 {
     for (int i = 0; i < holders.size(); ++i)
-        if (holders.getUnchecked(i)->component == comp)
+        if (holders.getUnchecked (i)->component == comp)
             return i;
 
     return -1;

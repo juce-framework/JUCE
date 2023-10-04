@@ -66,8 +66,8 @@ enum KeyPressCommandIDs
     This is a simple target for the key-presses which will live inside the demo component
     and contains a button that can be moved around with the arrow keys.
 */
-class KeyPressTarget : public Component,
-                       public ApplicationCommandTarget
+class KeyPressTarget final : public Component,
+                             public ApplicationCommandTarget
 {
 public:
     KeyPressTarget()
@@ -213,7 +213,7 @@ private:
 };
 
 //==============================================================================
-class KeyMappingsDemo   : public Component
+class KeyMappingsDemo final : public Component
 {
 public:
     KeyMappingsDemo()

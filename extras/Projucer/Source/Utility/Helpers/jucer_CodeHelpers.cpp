@@ -132,12 +132,12 @@ namespace CodeHelpers
         }
 
         for (int i = 0; i < lines.size(); ++i)
-            lines.getReference(i) = CppTokeniserFunctions::addEscapeChars (lines.getReference(i));
+            lines.getReference (i) = CppTokeniserFunctions::addEscapeChars (lines.getReference (i));
 
         lines.removeEmptyStrings();
 
         for (int i = 0; i < lines.size(); ++i)
-            lines.getReference(i) = "\"" + lines.getReference(i) + "\"";
+            lines.getReference (i) = "\"" + lines.getReference (i) + "\"";
 
         String result (lines.joinIntoString (newLine));
 

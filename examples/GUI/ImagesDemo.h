@@ -49,8 +49,8 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class ImagesDemo  : public Component,
-                    public FileBrowserListener
+class ImagesDemo final : public Component,
+                         public FileBrowserListener
 {
 public:
     ImagesDemo()

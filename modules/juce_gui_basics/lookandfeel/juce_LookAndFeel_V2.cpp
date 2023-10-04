@@ -1745,7 +1745,7 @@ void LookAndFeel_V2::drawTooltip (Graphics& g, const String& text, int width, in
 //==============================================================================
 Button* LookAndFeel_V2::createFilenameComponentBrowseButton (const String& text)
 {
-    return new TextButton (text, TRANS("click to browse for a different file"));
+    return new TextButton (text, TRANS ("click to browse for a different file"));
 }
 
 void LookAndFeel_V2::layoutFilenameComponent (FilenameComponent& filenameComp,

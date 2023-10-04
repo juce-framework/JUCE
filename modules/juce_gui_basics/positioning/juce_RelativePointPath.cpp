@@ -37,7 +37,7 @@ RelativePointPath::RelativePointPath (const RelativePointPath& other)
       containsDynamicPoints (false)
 {
     for (int i = 0; i < other.elements.size(); ++i)
-        elements.add (other.elements.getUnchecked(i)->clone());
+        elements.add (other.elements.getUnchecked (i)->clone());
 }
 
 RelativePointPath::RelativePointPath (const Path& path)
@@ -71,8 +71,8 @@ bool RelativePointPath::operator== (const RelativePointPath& other) const noexce
 
     for (int i = 0; i < elements.size(); ++i)
     {
-        ElementBase* const e1 = elements.getUnchecked(i);
-        ElementBase* const e2 = other.elements.getUnchecked(i);
+        ElementBase* const e1 = elements.getUnchecked (i);
+        ElementBase* const e2 = other.elements.getUnchecked (i);
 
         if (e1->type != e2->type)
             return false;
@@ -106,7 +106,7 @@ void RelativePointPath::swapWith (RelativePointPath& other) noexcept
 void RelativePointPath::createPath (Path& path, Expression::Scope* scope) const
 {
     for (int i = 0; i < elements.size(); ++i)
-        elements.getUnchecked(i)->addToPath (path, scope);
+        elements.getUnchecked (i)->addToPath (path, scope);
 }
 
 bool RelativePointPath::containsAnyDynamicPoints() const

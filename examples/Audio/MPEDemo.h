@@ -95,7 +95,7 @@ private:
 };
 
 //==============================================================================
-class MPESetupComponent : public Component
+class MPESetupComponent final : public Component
 {
 public:
     //==============================================================================
@@ -349,8 +349,8 @@ private:
 };
 
 //==============================================================================
-class ZoneLayoutComponent : public Component,
-                            private MPEInstrument::Listener
+class ZoneLayoutComponent final : public Component,
+                                  private MPEInstrument::Listener
 {
 public:
     //==============================================================================
@@ -466,7 +466,7 @@ private:
 };
 
 //==============================================================================
-class MPEDemoSynthVoice : public MPESynthesiserVoice
+class MPEDemoSynthVoice final : public MPESynthesiserVoice
 {
 public:
     //==============================================================================
@@ -622,10 +622,10 @@ private:
 };
 
 //==============================================================================
-class MPEDemo : public Component,
-                private AudioIODeviceCallback,
-                private MidiInputCallback,
-                private MPEInstrument::Listener
+class MPEDemo final : public Component,
+                      private AudioIODeviceCallback,
+                      private MidiInputCallback,
+                      private MPEInstrument::Listener
 {
 public:
     //==============================================================================

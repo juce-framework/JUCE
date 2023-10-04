@@ -50,20 +50,20 @@ public:
 
     //==============================================================================
     void clearComponents();
-    void removeComponent (Component* comp, const bool undoable);
+    void removeComponent (Component* comp, bool undoable);
 
     Component* addNewComponent (ComponentTypeHandler* const type, int x, int y);
-    Component* addComponentFromXml (const XmlElement& xml, const bool undoable);
+    Component* addComponentFromXml (const XmlElement& xml, bool undoable);
 
-    Component* findComponentWithId (const int64 componentId) const;
+    Component* findComponentWithId (int64 componentId) const;
 
     //==============================================================================
-    void componentToFront (Component* comp, const bool undoable);
-    void componentToBack (Component* comp, const bool undoable);
+    void componentToFront (Component* comp, bool undoable);
+    void componentToBack (Component* comp, bool undoable);
 
-    void setComponentPosition (Component* comp, const RelativePositionedRectangle& newPos, const bool undoable);
-    void setComponentBoundsAndProperties (Component* comp, const Rectangle<int>& newBounds, Component* referenceComponent, const bool undoable);
-    void updateStoredComponentPosition (Component* comp, const bool undoable);
+    void setComponentPosition (Component* comp, const RelativePositionedRectangle& newPos, bool undoable);
+    void setComponentBoundsAndProperties (Component* comp, const Rectangle<int>& newBounds, Component* referenceComponent, bool undoable);
+    void updateStoredComponentPosition (Component* comp, bool undoable);
 
     //==============================================================================
     Component* getComponentRelativePosTarget (Component* comp, int whichDimension) const;
@@ -118,7 +118,7 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code) const;
 
-    void perform (UndoableAction* action, const String& actionName);
+    void perform (std::unique_ptr<UndoableAction> action, const String& actionName);
 
     void moveComponentZOrder (int oldIndex, int newIndex);
 
@@ -127,6 +127,8 @@ private:
     OwnedArray<Component> components;
     SelectedItemSet <Component*> selected;
     int nextCompUID;
+
+    int addComponentIndexAdded = 0;
 
     String getUnusedMemberName (String nameRoot, Component* comp) const;
 };

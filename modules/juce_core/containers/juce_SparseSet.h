@@ -161,7 +161,7 @@ public:
         {
             for (int i = ranges.size(); --i >= 0;)
             {
-                auto& r = ranges.getReference(i);
+                auto& r = ranges.getReference (i);
 
                 if (r.getEnd() <= rangeToRemove.getStart())
                     break;

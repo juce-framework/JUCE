@@ -151,7 +151,7 @@ public:
 
         /** @internal
 
-            Returns true if setBypassed(true) was called on this node.
+            Returns true if setBypassed (true) was called on this node.
             This behaviour is different from isBypassed(), which may additionally return true if
             the node has a bypass parameter that is not set to 0.
         */

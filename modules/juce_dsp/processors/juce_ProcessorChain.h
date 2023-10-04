@@ -120,7 +120,7 @@ private:
     }
 
     std::tuple<Processors...> processors;
-    std::array<bool, sizeof...(Processors)> bypassed { {} };
+    std::array<bool, sizeof... (Processors)> bypassed { {} };
 };
 
 /** Non-member equivalent of ProcessorChain::get which avoids awkward

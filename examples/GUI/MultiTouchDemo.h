@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class MultiTouchDemo    : public Component
+class MultiTouchDemo final : public Component
 {
 public:
     MultiTouchDemo()

@@ -55,13 +55,13 @@ private:
         Array<Component*> alreadyDone;
 
         for (int i = TopLevelWindow::getNumTopLevelWindows(); --i >= 0;)
-            if (auto* c = TopLevelWindow::getTopLevelWindow(i))
+            if (auto* c = TopLevelWindow::getTopLevelWindow (i))
                 repaintAndResizeAllComps (c, alreadyDone);
 
         auto& desktop = Desktop::getInstance();
 
         for (int i = desktop.getNumComponents(); --i >= 0;)
-            if (auto* c = desktop.getComponent(i))
+            if (auto* c = desktop.getComponent (i))
                 repaintAndResizeAllComps (c, alreadyDone);
     }
 
@@ -75,7 +75,7 @@ private:
 
             for (int i = c->getNumChildComponents(); --i >= 0;)
             {
-                if (auto* child = c->getChildComponent(i))
+                if (auto* child = c->getChildComponent (i))
                 {
                     repaintAndResizeAllComps (child, alreadyDone);
                     alreadyDone.add (child);
@@ -100,7 +100,7 @@ int64 parseInt (String s)
         return -parseInt (s.substring (1));
 
     if (s.startsWith ("0x"))
-        return s.substring(2).getHexValue64();
+        return s.substring (2).getHexValue64();
 
     return s.getLargeIntValue();
 }
@@ -282,7 +282,7 @@ public:
         auto r = getLocalBounds().reduced (2, 0);
 
         for (int i = 0; i < editors.size(); ++i)
-            editors.getUnchecked(i)->setBounds (r.removeFromTop (itemHeight));
+            editors.getUnchecked (i)->setBounds (r.removeFromTop (itemHeight));
     }
 
     enum { itemHeight = 120 };

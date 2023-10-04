@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class ContentViewComponent  : public Component
+class ContentViewComponent final : public Component
 {
 public:
     ContentViewComponent()
@@ -71,7 +71,7 @@ public:
     }
 
 private:
-    class LogoComponent  : public Component
+    class LogoComponent final : public Component
     {
     public:
         void paint (Graphics& g) override

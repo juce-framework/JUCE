@@ -27,8 +27,8 @@
 
 
 //==============================================================================
-class SVGPathDataComponent  : public Component,
-                              public FileDragAndDropTarget
+class SVGPathDataComponent final : public Component,
+                                   public FileDragAndDropTarget
 
 {
 public:

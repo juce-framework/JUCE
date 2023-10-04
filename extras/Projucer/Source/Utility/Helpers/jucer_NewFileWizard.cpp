@@ -57,7 +57,7 @@ namespace
 }
 
 //==============================================================================
-class NewCppFileWizard  : public NewFileWizard::Type
+class NewCppFileWizard final : public NewFileWizard::Type
 {
 public:
     String getName() override  { return "CPP File"; }
@@ -85,7 +85,7 @@ public:
 };
 
 //==============================================================================
-class NewHeaderFileWizard  : public NewFileWizard::Type
+class NewHeaderFileWizard final : public NewFileWizard::Type
 {
 public:
     String getName() override  { return "Header File"; }
@@ -220,7 +220,7 @@ private:
 };
 
 //==============================================================================
-class NewSingleFileComponentFileWizard  : public NewComponentFileWizard
+class NewSingleFileComponentFileWizard final : public NewComponentFileWizard
 {
 public:
     String getName() override  { return "Component class (in a single source file)"; }
@@ -276,7 +276,7 @@ NewFileWizard::~NewFileWizard()
 void NewFileWizard::addWizardsToMenu (PopupMenu& m) const
 {
     for (int i = 0; i < wizards.size(); ++i)
-        m.addItem (menuBaseID + i, "Add New " + wizards.getUnchecked(i)->getName() + "...");
+        m.addItem (menuBaseID + i, "Add New " + wizards.getUnchecked (i)->getName() + "...");
 }
 
 bool NewFileWizard::runWizardFromMenu (int chosenMenuItemID, Project& project, const Project::Item& projectGroupToAddTo) const

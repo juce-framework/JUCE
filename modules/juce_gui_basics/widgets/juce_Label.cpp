@@ -202,8 +202,7 @@ void Label::editorShown (TextEditor* textEditor)
     if (checker.shouldBailOut())
         return;
 
-    if (onEditorShow != nullptr)
-        onEditorShow();
+    NullCheckedInvocation::invoke (onEditorShow);
 }
 
 void Label::editorAboutToBeHidden (TextEditor* textEditor)
@@ -214,8 +213,7 @@ void Label::editorAboutToBeHidden (TextEditor* textEditor)
     if (checker.shouldBailOut())
         return;
 
-    if (onEditorHide != nullptr)
-        onEditorHide();
+    NullCheckedInvocation::invoke (onEditorHide);
 }
 
 void Label::showEditor()
@@ -463,8 +461,7 @@ void Label::callChangeListeners()
     if (checker.shouldBailOut())
         return;
 
-    if (onTextChange != nullptr)
-        onTextChange();
+    NullCheckedInvocation::invoke (onTextChange);
 }
 
 //==============================================================================
@@ -504,11 +501,11 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
     }
 }
 
-void Label::textEditorEscapeKeyPressed (TextEditor& ed)
+void Label::textEditorEscapeKeyPressed ([[maybe_unused]] TextEditor& ed)
 {
     if (editor != nullptr)
     {
-        jassertquiet (&ed == editor.get());
+        jassert (&ed == editor.get());
 
         editor->setText (textValue.toString(), false);
         hideEditor (true);

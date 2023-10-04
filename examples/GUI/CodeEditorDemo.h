@@ -53,8 +53,8 @@
 #endif
 
 //==============================================================================
-class CodeEditorDemo  : public Component,
-                        private FilenameComponentListener
+class CodeEditorDemo final : public Component,
+                             private FilenameComponentListener
 {
 public:
     CodeEditorDemo()

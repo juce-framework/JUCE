@@ -189,7 +189,7 @@ struct ComponentHelpers
 
         for (int i = comp.childComponentList.size(); --i >= 0;)
         {
-            auto& child = *comp.childComponentList.getUnchecked(i);
+            auto& child = *comp.childComponentList.getUnchecked (i);
 
             if (child.isVisible() && ! child.isTransformed())
             {

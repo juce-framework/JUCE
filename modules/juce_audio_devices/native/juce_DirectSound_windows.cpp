@@ -37,46 +37,46 @@ extern "C"
 
     #undef INTERFACE
     #define INTERFACE IDirectSound
-    DECLARE_INTERFACE_(IDirectSound, IUnknown)
+    DECLARE_INTERFACE_ (IDirectSound, IUnknown)
     {
-        STDMETHOD(QueryInterface)       (THIS_ REFIID, LPVOID*) PURE;
-        STDMETHOD_(ULONG,AddRef)        (THIS) PURE;
-        STDMETHOD_(ULONG,Release)       (THIS) PURE;
-        STDMETHOD(CreateSoundBuffer)    (THIS_ DSBUFFERDESC*, IDirectSoundBuffer**, LPUNKNOWN) PURE;
-        STDMETHOD(GetCaps)              (THIS_ void*) PURE;
-        STDMETHOD(DuplicateSoundBuffer) (THIS_ IDirectSoundBuffer*, IDirectSoundBuffer**) PURE;
-        STDMETHOD(SetCooperativeLevel)  (THIS_ HWND, DWORD) PURE;
-        STDMETHOD(Compact)              (THIS) PURE;
-        STDMETHOD(GetSpeakerConfig)     (THIS_ LPDWORD) PURE;
-        STDMETHOD(SetSpeakerConfig)     (THIS_ DWORD) PURE;
-        STDMETHOD(Initialize)           (THIS_ const GUID*) PURE;
+        STDMETHOD  (QueryInterface)       (THIS_ REFIID, LPVOID*) PURE;
+        STDMETHOD_ (ULONG,AddRef)         (THIS) PURE;
+        STDMETHOD_ (ULONG,Release)        (THIS) PURE;
+        STDMETHOD  (CreateSoundBuffer)    (THIS_ DSBUFFERDESC*, IDirectSoundBuffer**, LPUNKNOWN) PURE;
+        STDMETHOD  (GetCaps)              (THIS_ void*) PURE;
+        STDMETHOD  (DuplicateSoundBuffer) (THIS_ IDirectSoundBuffer*, IDirectSoundBuffer**) PURE;
+        STDMETHOD  (SetCooperativeLevel)  (THIS_ HWND, DWORD) PURE;
+        STDMETHOD  (Compact)              (THIS) PURE;
+        STDMETHOD  (GetSpeakerConfig)     (THIS_ LPDWORD) PURE;
+        STDMETHOD  (SetSpeakerConfig)     (THIS_ DWORD) PURE;
+        STDMETHOD  (Initialize)           (THIS_ const GUID*) PURE;
     };
 
     #undef INTERFACE
     #define INTERFACE IDirectSoundBuffer
-    DECLARE_INTERFACE_(IDirectSoundBuffer, IUnknown)
+    DECLARE_INTERFACE_ (IDirectSoundBuffer, IUnknown)
     {
-        STDMETHOD(QueryInterface)       (THIS_ REFIID, LPVOID*) PURE;
-        STDMETHOD_(ULONG,AddRef)        (THIS) PURE;
-        STDMETHOD_(ULONG,Release)       (THIS) PURE;
-        STDMETHOD(GetCaps)              (THIS_ void*) PURE;
-        STDMETHOD(GetCurrentPosition)   (THIS_ LPDWORD, LPDWORD) PURE;
-        STDMETHOD(GetFormat)            (THIS_ LPWAVEFORMATEX, DWORD, LPDWORD) PURE;
-        STDMETHOD(GetVolume)            (THIS_ LPLONG) PURE;
-        STDMETHOD(GetPan)               (THIS_ LPLONG) PURE;
-        STDMETHOD(GetFrequency)         (THIS_ LPDWORD) PURE;
-        STDMETHOD(GetStatus)            (THIS_ LPDWORD) PURE;
-        STDMETHOD(Initialize)           (THIS_ IDirectSound*, DSBUFFERDESC*) PURE;
-        STDMETHOD(Lock)                 (THIS_ DWORD, DWORD, LPVOID*, LPDWORD, LPVOID*, LPDWORD, DWORD) PURE;
-        STDMETHOD(Play)                 (THIS_ DWORD, DWORD, DWORD) PURE;
-        STDMETHOD(SetCurrentPosition)   (THIS_ DWORD) PURE;
-        STDMETHOD(SetFormat)            (THIS_ const WAVEFORMATEX*) PURE;
-        STDMETHOD(SetVolume)            (THIS_ LONG) PURE;
-        STDMETHOD(SetPan)               (THIS_ LONG) PURE;
-        STDMETHOD(SetFrequency)         (THIS_ DWORD) PURE;
-        STDMETHOD(Stop)                 (THIS) PURE;
-        STDMETHOD(Unlock)               (THIS_ LPVOID, DWORD, LPVOID, DWORD) PURE;
-        STDMETHOD(Restore)              (THIS) PURE;
+        STDMETHOD  (QueryInterface)       (THIS_ REFIID, LPVOID*) PURE;
+        STDMETHOD_ (ULONG,AddRef)         (THIS) PURE;
+        STDMETHOD_ (ULONG,Release)        (THIS) PURE;
+        STDMETHOD  (GetCaps)              (THIS_ void*) PURE;
+        STDMETHOD  (GetCurrentPosition)   (THIS_ LPDWORD, LPDWORD) PURE;
+        STDMETHOD  (GetFormat)            (THIS_ LPWAVEFORMATEX, DWORD, LPDWORD) PURE;
+        STDMETHOD  (GetVolume)            (THIS_ LPLONG) PURE;
+        STDMETHOD  (GetPan)               (THIS_ LPLONG) PURE;
+        STDMETHOD  (GetFrequency)         (THIS_ LPDWORD) PURE;
+        STDMETHOD  (GetStatus)            (THIS_ LPDWORD) PURE;
+        STDMETHOD  (Initialize)           (THIS_ IDirectSound*, DSBUFFERDESC*) PURE;
+        STDMETHOD  (Lock)                 (THIS_ DWORD, DWORD, LPVOID*, LPDWORD, LPVOID*, LPDWORD, DWORD) PURE;
+        STDMETHOD  (Play)                 (THIS_ DWORD, DWORD, DWORD) PURE;
+        STDMETHOD  (SetCurrentPosition)   (THIS_ DWORD) PURE;
+        STDMETHOD  (SetFormat)            (THIS_ const WAVEFORMATEX*) PURE;
+        STDMETHOD  (SetVolume)            (THIS_ LONG) PURE;
+        STDMETHOD  (SetPan)               (THIS_ LONG) PURE;
+        STDMETHOD  (SetFrequency)         (THIS_ DWORD) PURE;
+        STDMETHOD  (Stop)                 (THIS) PURE;
+        STDMETHOD  (Unlock)               (THIS_ LPVOID, DWORD, LPVOID, DWORD) PURE;
+        STDMETHOD  (Restore)              (THIS) PURE;
     };
 
     //==============================================================================
@@ -93,32 +93,32 @@ extern "C"
 
     #undef INTERFACE
     #define INTERFACE IDirectSoundCapture
-    DECLARE_INTERFACE_(IDirectSoundCapture, IUnknown)
+    DECLARE_INTERFACE_ (IDirectSoundCapture, IUnknown)
     {
-        STDMETHOD(QueryInterface)       (THIS_ REFIID, LPVOID*) PURE;
-        STDMETHOD_(ULONG,AddRef)        (THIS) PURE;
-        STDMETHOD_(ULONG,Release)       (THIS) PURE;
-        STDMETHOD(CreateCaptureBuffer)  (THIS_ DSCBUFFERDESC*, IDirectSoundCaptureBuffer**, LPUNKNOWN) PURE;
-        STDMETHOD(GetCaps)              (THIS_ void*) PURE;
-        STDMETHOD(Initialize)           (THIS_ const GUID*) PURE;
+        STDMETHOD  (QueryInterface)       (THIS_ REFIID, LPVOID*) PURE;
+        STDMETHOD_ (ULONG,AddRef)         (THIS) PURE;
+        STDMETHOD_ (ULONG,Release)        (THIS) PURE;
+        STDMETHOD  (CreateCaptureBuffer)  (THIS_ DSCBUFFERDESC*, IDirectSoundCaptureBuffer**, LPUNKNOWN) PURE;
+        STDMETHOD  (GetCaps)              (THIS_ void*) PURE;
+        STDMETHOD  (Initialize)           (THIS_ const GUID*) PURE;
     };
 
     #undef INTERFACE
     #define INTERFACE IDirectSoundCaptureBuffer
-    DECLARE_INTERFACE_(IDirectSoundCaptureBuffer, IUnknown)
+    DECLARE_INTERFACE_ (IDirectSoundCaptureBuffer, IUnknown)
     {
-        STDMETHOD(QueryInterface)       (THIS_ REFIID, LPVOID*) PURE;
-        STDMETHOD_(ULONG,AddRef)        (THIS) PURE;
-        STDMETHOD_(ULONG,Release)       (THIS) PURE;
-        STDMETHOD(GetCaps)              (THIS_ void*) PURE;
-        STDMETHOD(GetCurrentPosition)   (THIS_ LPDWORD, LPDWORD) PURE;
-        STDMETHOD(GetFormat)            (THIS_ LPWAVEFORMATEX, DWORD, LPDWORD) PURE;
-        STDMETHOD(GetStatus)            (THIS_ LPDWORD) PURE;
-        STDMETHOD(Initialize)           (THIS_ IDirectSoundCapture*, DSCBUFFERDESC*) PURE;
-        STDMETHOD(Lock)                 (THIS_ DWORD, DWORD, LPVOID*, LPDWORD, LPVOID*, LPDWORD, DWORD) PURE;
-        STDMETHOD(Start)                (THIS_ DWORD) PURE;
-        STDMETHOD(Stop)                 (THIS) PURE;
-        STDMETHOD(Unlock)               (THIS_ LPVOID, DWORD, LPVOID, DWORD) PURE;
+        STDMETHOD  (QueryInterface)       (THIS_ REFIID, LPVOID*) PURE;
+        STDMETHOD_ (ULONG,AddRef)         (THIS) PURE;
+        STDMETHOD_ (ULONG,Release)        (THIS) PURE;
+        STDMETHOD  (GetCaps)              (THIS_ void*) PURE;
+        STDMETHOD  (GetCurrentPosition)   (THIS_ LPDWORD, LPDWORD) PURE;
+        STDMETHOD  (GetFormat)            (THIS_ LPWAVEFORMATEX, DWORD, LPDWORD) PURE;
+        STDMETHOD  (GetStatus)            (THIS_ LPDWORD) PURE;
+        STDMETHOD  (Initialize)           (THIS_ IDirectSoundCapture*, DSCBUFFERDESC*) PURE;
+        STDMETHOD  (Lock)                 (THIS_ DWORD, DWORD, LPVOID*, LPDWORD, LPVOID*, LPDWORD, DWORD) PURE;
+        STDMETHOD  (Start)                (THIS_ DWORD) PURE;
+        STDMETHOD  (Stop)                 (THIS) PURE;
+        STDMETHOD  (Unlock)               (THIS_ LPVOID, DWORD, LPVOID, DWORD) PURE;
     };
 
     #undef INTERFACE
@@ -136,24 +136,24 @@ namespace DSoundLogging
 
         switch (hr)
         {
-            case MAKE_HRESULT(1, 0x878, 10):    result = "Device already allocated"; break;
-            case MAKE_HRESULT(1, 0x878, 30):    result = "Control unavailable"; break;
-            case E_INVALIDARG:                  result = "Invalid parameter"; break;
-            case MAKE_HRESULT(1, 0x878, 50):    result = "Invalid call"; break;
-            case E_FAIL:                        result = "Generic error"; break;
-            case MAKE_HRESULT(1, 0x878, 70):    result = "Priority level error"; break;
-            case E_OUTOFMEMORY:                 result = "Out of memory"; break;
-            case MAKE_HRESULT(1, 0x878, 100):   result = "Bad format"; break;
-            case E_NOTIMPL:                     result = "Unsupported function"; break;
-            case MAKE_HRESULT(1, 0x878, 120):   result = "No driver"; break;
-            case MAKE_HRESULT(1, 0x878, 130):   result = "Already initialised"; break;
-            case CLASS_E_NOAGGREGATION:         result = "No aggregation"; break;
-            case MAKE_HRESULT(1, 0x878, 150):   result = "Buffer lost"; break;
-            case MAKE_HRESULT(1, 0x878, 160):   result = "Another app has priority"; break;
-            case MAKE_HRESULT(1, 0x878, 170):   result = "Uninitialised"; break;
-            case E_NOINTERFACE:                 result = "No interface"; break;
-            case S_OK:                          result = "No error"; break;
-            default:                            return "Unknown error: " + String ((int) hr);
+            case MAKE_HRESULT (1, 0x878, 10):    result = "Device already allocated"; break;
+            case MAKE_HRESULT (1, 0x878, 30):    result = "Control unavailable"; break;
+            case E_INVALIDARG:                   result = "Invalid parameter"; break;
+            case MAKE_HRESULT (1, 0x878, 50):    result = "Invalid call"; break;
+            case E_FAIL:                         result = "Generic error"; break;
+            case MAKE_HRESULT (1, 0x878, 70):    result = "Priority level error"; break;
+            case E_OUTOFMEMORY:                  result = "Out of memory"; break;
+            case MAKE_HRESULT (1, 0x878, 100):   result = "Bad format"; break;
+            case E_NOTIMPL:                      result = "Unsupported function"; break;
+            case MAKE_HRESULT (1, 0x878, 120):   result = "No driver"; break;
+            case MAKE_HRESULT (1, 0x878, 130):   result = "Already initialised"; break;
+            case CLASS_E_NOAGGREGATION:          result = "No aggregation"; break;
+            case MAKE_HRESULT (1, 0x878, 150):   result = "Buffer lost"; break;
+            case MAKE_HRESULT (1, 0x878, 160):   result = "Another app has priority"; break;
+            case MAKE_HRESULT (1, 0x878, 170):   result = "Uninitialised"; break;
+            case E_NOINTERFACE:                  result = "No interface"; break;
+            case S_OK:                           result = "No error"; break;
+            default:                             return "Unknown error: " + String ((int) hr);
         }
 
         return result;
@@ -753,14 +753,14 @@ public:
     {
         if (outputDeviceIndex_ >= 0)
         {
-            outChannels.add (TRANS("Left"));
-            outChannels.add (TRANS("Right"));
+            outChannels.add (TRANS ("Left"));
+            outChannels.add (TRANS ("Right"));
         }
 
         if (inputDeviceIndex_ >= 0)
         {
-            inChannels.add (TRANS("Left"));
-            inChannels.add (TRANS("Right"));
+            inChannels.add (TRANS ("Left"));
+            inChannels.add (TRANS ("Right"));
         }
     }
 
@@ -923,10 +923,10 @@ private:
             sleep (5);
 
             for (int i = 0; i < outChans.size(); ++i)
-                outChans.getUnchecked(i)->synchronisePosition();
+                outChans.getUnchecked (i)->synchronisePosition();
 
             for (int i = 0; i < inChans.size(); ++i)
-                inChans.getUnchecked(i)->synchronisePosition();
+                inChans.getUnchecked (i)->synchronisePosition();
         }
     }
 
@@ -949,13 +949,13 @@ public:
 
             for (int i = inChans.size(); --i >= 0;)
             {
-                inChans.getUnchecked(i)->doneFlag = false;
+                inChans.getUnchecked (i)->doneFlag = false;
                 ++numToDo;
             }
 
             for (int i = outChans.size(); --i >= 0;)
             {
-                outChans.getUnchecked(i)->doneFlag = false;
+                outChans.getUnchecked (i)->doneFlag = false;
                 ++numToDo;
             }
 
@@ -968,7 +968,7 @@ public:
                 {
                     for (int i = inChans.size(); --i >= 0;)
                     {
-                        DSoundInternalInChannel* const in = inChans.getUnchecked(i);
+                        DSoundInternalInChannel* const in = inChans.getUnchecked (i);
 
                         if ((! in->doneFlag) && in->service())
                         {
@@ -979,7 +979,7 @@ public:
 
                     for (int i = outChans.size(); --i >= 0;)
                     {
-                        DSoundInternalOutChannel* const out = outChans.getUnchecked(i);
+                        DSoundInternalOutChannel* const out = outChans.getUnchecked (i);
 
                         if ((! out->doneFlag) && out->service())
                         {
@@ -1192,10 +1192,10 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
     if (error.isEmpty())
     {
         for (int i = 0; i < outChans.size(); ++i)
-            outChans.getUnchecked(i)->synchronisePosition();
+            outChans.getUnchecked (i)->synchronisePosition();
 
         for (int i = 0; i < inChans.size(); ++i)
-            inChans.getUnchecked(i)->synchronisePosition();
+            inChans.getUnchecked (i)->synchronisePosition();
 
         startThread (Priority::highest);
         sleep (10);

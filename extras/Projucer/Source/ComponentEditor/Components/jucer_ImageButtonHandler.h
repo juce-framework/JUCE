@@ -294,7 +294,7 @@ public:
     {
         if (undoable)
         {
-            layout.perform (new SetImageKeepsPropAction (button, layout, newState), "change imagebutton proportion mode");
+            layout.perform (std::make_unique<SetImageKeepsPropAction> (button, layout, newState), "change imagebutton proportion mode");
         }
         else
         {
@@ -371,7 +371,7 @@ public:
     {
         if (undoable)
         {
-            layout.perform (new SetImageOpacityAction (button, layout, role, opacity), "change imagebutton opacity");
+            layout.perform (std::make_unique<SetImageOpacityAction> (button, layout, role, opacity), "change imagebutton opacity");
         }
         else
         {
@@ -453,7 +453,7 @@ public:
     {
         if (undoable)
         {
-            layout.perform (new SetImageColourAction (button, layout, role, colour), "change imagebutton colour");
+            layout.perform (std::make_unique<SetImageColourAction> (button, layout, role, colour), "change imagebutton colour");
         }
         else
         {

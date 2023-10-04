@@ -28,7 +28,7 @@
 #include "../../Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h"
 
 //==============================================================================
-class EditorColourSchemeWindowComponent    : public Component
+class EditorColourSchemeWindowComponent final : public Component
 {
 public:
     EditorColourSchemeWindowComponent()
@@ -62,8 +62,8 @@ private:
     //==============================================================================
     struct AppearanceEditor
     {
-        struct FontScanPanel   : public Component,
-                                 private Timer
+        struct FontScanPanel final : public Component,
+                                     private Timer
         {
             FontScanPanel()
             {
@@ -121,7 +121,7 @@ private:
         };
 
         //==============================================================================
-        struct EditorPanel  : public Component
+        struct EditorPanel final : public Component
         {
             EditorPanel()
                 : loadButton ("Load Scheme..."),
@@ -282,7 +282,7 @@ private:
         };
 
         //==============================================================================
-        struct FontNameValueSource   : public ValueSourceFilter
+        struct FontNameValueSource final : public ValueSourceFilter
         {
             FontNameValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
@@ -321,7 +321,7 @@ private:
         };
 
         //==============================================================================
-        struct FontSizeValueSource   : public ValueSourceFilter
+        struct FontSizeValueSource final : public ValueSourceFilter
         {
             FontSizeValueSource (const Value& source)  : ValueSourceFilter (source) {}
 

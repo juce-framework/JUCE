@@ -28,7 +28,7 @@
 #include "../../Application/jucer_Application.h"
 
 //==============================================================================
-class SlidingPanelComponent   : public Component
+class SlidingPanelComponent final : public Component
 {
 public:
     SlidingPanelComponent();

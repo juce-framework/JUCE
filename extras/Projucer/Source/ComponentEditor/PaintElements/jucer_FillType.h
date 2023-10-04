@@ -385,7 +385,7 @@ private:
 
                         for (int i = 0; i < resourceFile.getNumFiles(); ++i)
                         {
-                            const File& file = resourceFile.getFile(i);
+                            const File& file = resourceFile.getFile (i);
 
                             if (imageResourceName == resourceFile.getClassName() + "::" + resourceFile.getDataVariableFor (file))
                             {

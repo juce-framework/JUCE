@@ -125,7 +125,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
 
     int i;
     for (i = 0; i < colours.size(); ++i)
-        if (colours.getReference(i).position > pos)
+        if (colours.getReference (i).position > pos)
             break;
 
     colours.insert (i, { pos, colour });
@@ -177,10 +177,10 @@ Colour ColourGradient::getColourAtPosition (double position) const noexcept
     jassert (approximatelyEqual (colours.getReference (0).position, 0.0)); // the first colour specified has to go at position 0
 
     if (position <= 0 || colours.size() <= 1)
-        return colours.getReference(0).colour;
+        return colours.getReference (0).colour;
 
     int i = colours.size() - 1;
-    while (position < colours.getReference(i).position)
+    while (position < colours.getReference (i).position)
         --i;
 
     auto& p1 = colours.getReference (i);
@@ -199,7 +199,7 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
     JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED // Trying to use this object without setting its coordinates?
     jassert (colours.size() >= 2);
     jassert (numEntries > 0);
-    jassert (approximatelyEqual (colours.getReference(0).position, 0.0)); // The first colour specified has to go at position 0
+    jassert (approximatelyEqual (colours.getReference (0).position, 0.0)); // The first colour specified has to go at position 0
 
     int index = 0;
 

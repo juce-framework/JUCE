@@ -31,7 +31,7 @@
 
 
 //==============================================================================
-struct NumberedBoxes  : public TableListBox,
+struct NumberedBoxes final : public TableListBox,
                         private TableListBoxModel,
                         private Button::Listener
 {
@@ -170,9 +170,9 @@ private:
 };
 
 //==============================================================================
-class IOConfigurationWindow::InputOutputConfig  : public Component,
-                                                  private Button::Listener,
-                                                  private NumberedBoxes::Listener
+class IOConfigurationWindow::InputOutputConfig final : public Component,
+                                                       private Button::Listener,
+                                                       private NumberedBoxes::Listener
 {
 public:
     InputOutputConfig (IOConfigurationWindow& parent, bool direction)
@@ -524,7 +524,7 @@ MainHostWindow* IOConfigurationWindow::getMainWindow() const
     auto& desktop = Desktop::getInstance();
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
-        if (auto* mainWindow = dynamic_cast<MainHostWindow*> (desktop.getComponent(i)))
+        if (auto* mainWindow = dynamic_cast<MainHostWindow*> (desktop.getComponent (i)))
             return mainWindow;
 
     return nullptr;

@@ -55,7 +55,7 @@ struct MessageBoxOwnerComponent : public Component
 };
 
 //==============================================================================
-class DemoBackgroundThread  : public ThreadWithProgressWindow
+class DemoBackgroundThread final : public ThreadWithProgressWindow
 {
 public:
     explicit DemoBackgroundThread (MessageBoxOwnerComponent& comp)
@@ -117,7 +117,7 @@ public:
 
 
 //==============================================================================
-class DialogsDemo  : public MessageBoxOwnerComponent
+class DialogsDemo final : public MessageBoxOwnerComponent
 {
 public:
     enum DialogType
@@ -422,8 +422,8 @@ private:
 
                                          if (wi.get() != nullptr && wo.get() != nullptr)
                                          {
-                                             auto numWritten = wo->writeFromInputStream (*wi, -1);
-                                             jassertquiet (numWritten > 0);
+                                             [[maybe_unused]] auto numWritten = wo->writeFromInputStream (*wi, -1);
+                                             jassert (numWritten > 0);
                                              wo->flush();
                                          }
                                      }

@@ -89,7 +89,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (MessageBoxIconType iconType
     showNativeBoxUnmanaged (MessageBoxOptions().withIconType (iconType)
                                                .withTitle (title)
                                                .withMessage (message)
-                                               .withButton (TRANS("OK"))
+                                               .withButton (TRANS ("OK"))
                                                .withAssociatedComponent (associatedComponent),
                             nullptr,
                             ResultCodeMappingMode::plainIndex);

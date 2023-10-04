@@ -161,7 +161,7 @@ struct AndroidDocumentDetail
                                                                                  documentId.get()) };
 
         return DocumentsContractIteratorEngine { Columns { GlobalRef { uri },
-                                                           GlobalRefImpl<jstring> { javaString("document_id") } },
+                                                           GlobalRefImpl<jstring> { javaString ("document_id") } },
                                                  childrenUri.get() };
     }
 

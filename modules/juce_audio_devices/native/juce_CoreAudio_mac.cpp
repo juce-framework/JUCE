@@ -474,7 +474,13 @@ public:
             pa.mScope    = kAudioObjectPropertyScopeWildcard;
             pa.mElement  = juceAudioObjectPropertyElementMain;
 
-            return makeRealAudioWorkgroup (audioObjectGetProperty<os_workgroup_t> (deviceID, pa).value_or (nullptr));
+            if (auto* workgroup = audioObjectGetProperty<os_workgroup_t> (deviceID, pa).value_or (nullptr))
+            {
+                ScopeGuard scope { [&] { os_release (workgroup); } };
+                return makeRealAudioWorkgroup (workgroup);
+            }
+
+            return {};
         }();
        #endif
 
@@ -689,7 +695,7 @@ public:
             scopedProcID = [&self = *this,
                             &lock = callbackLock,
                             nextProcID = ScopedAudioDeviceIOProcID { *this, deviceID, audioIOProc },
-                            deviceID = deviceID]() mutable -> ScopedAudioDeviceIOProcID
+                            dID = deviceID]() mutable -> ScopedAudioDeviceIOProcID
             {
                 // It *looks* like AudioDeviceStart may start the audio callback running, and then
                 // immediately lock an internal mutex.
@@ -703,7 +709,7 @@ public:
                 {
                     const ScopedUnlock su (lock);
 
-                    if (self.OK (AudioDeviceStart (deviceID, procID)))
+                    if (self.OK (AudioDeviceStart (dID, procID)))
                         return std::move (nextProcID);
                 }
 
@@ -1207,12 +1213,10 @@ class CoreAudioIODevice   : public AudioIODevice,
 public:
     CoreAudioIODevice (CoreAudioIODeviceType* dt,
                        const String& deviceName,
-                       AudioDeviceID inputDeviceId, int inputIndex_,
-                       AudioDeviceID outputDeviceId, int outputIndex_)
+                       AudioDeviceID inputDeviceId,
+                       AudioDeviceID outputDeviceId)
         : AudioIODevice (deviceName, "CoreAudio"),
-          deviceType (dt),
-          inputIndex (inputIndex_),
-          outputIndex (outputIndex_)
+          deviceType (dt)
     {
         internal = [this, &inputDeviceId, &outputDeviceId]
         {
@@ -1260,7 +1264,7 @@ public:
     int getCurrentBufferSizeSamples() override          { return internal->getBufferSize(); }
     int getXRunCount() const noexcept override          { return internal->xruns; }
 
-    int getIndexOfDevice (bool asInput) const           { return asInput ? inputIndex : outputIndex; }
+    int getIndexOfDevice (bool asInput) const           { return deviceType->getDeviceNames (asInput).indexOf (getName()); }
 
     int getDefaultBufferSize() override
     {
@@ -1389,7 +1393,6 @@ public:
     bool shouldRestartDevice() const noexcept    { return restartDevice; }
 
     WeakReference<CoreAudioIODeviceType> deviceType;
-    int inputIndex, outputIndex;
     bool hadDiscontinuity;
 
 private:
@@ -1451,7 +1454,7 @@ public:
           outputWrapper (*this, std::move (outputDevice), false)
     {
         if (getAvailableSampleRates().isEmpty())
-            lastError = TRANS("The input and output devices don't share a common sample rate!");
+            lastError = TRANS ("The input and output devices don't share a common sample rate!");
     }
 
     ~AudioIODeviceCombiner() override
@@ -1700,7 +1703,7 @@ public:
                 if (! forwarder.encounteredError() && newCallback != nullptr)
                     newCallback->audioDeviceAboutToStart (this);
                 else if (lastError.isEmpty())
-                    lastError = TRANS("Failed to initialise all requested devices.");
+                    lastError = TRANS ("Failed to initialise all requested devices.");
             }
 
             const ScopedLock sl (callbackLock);
@@ -2265,12 +2268,12 @@ public:
                                                        : outputDeviceName;
 
         if (inputDeviceID == outputDeviceID)
-            return std::make_unique<CoreAudioIODevice> (this, combinedName, inputDeviceID, inputIndex, outputDeviceID, outputIndex).release();
+            return std::make_unique<CoreAudioIODevice> (this, combinedName, inputDeviceID, outputDeviceID).release();
 
-        auto in = inputDeviceID != 0 ? std::make_unique<CoreAudioIODevice> (this, inputDeviceName, inputDeviceID, inputIndex, 0, -1)
+        auto in = inputDeviceID != 0 ? std::make_unique<CoreAudioIODevice> (this, inputDeviceName, inputDeviceID, 0)
                                      : nullptr;
 
-        auto out = outputDeviceID != 0 ? std::make_unique<CoreAudioIODevice> (this, outputDeviceName, 0, -1, outputDeviceID, outputIndex)
+        auto out = outputDeviceID != 0 ? std::make_unique<CoreAudioIODevice> (this, outputDeviceName, 0, outputDeviceID)
                                        : nullptr;
 
         if (in  == nullptr)  return out.release();

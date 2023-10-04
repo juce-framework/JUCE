@@ -164,8 +164,7 @@ private:
             }
 
             if (message == WM_SETTINGCHANGE)
-                if (settingChangeCallback != nullptr)
-                    settingChangeCallback();
+                NullCheckedInvocation::invoke (settingChangeCallback);
         }
 
         return DefWindowProc (h, message, wParam, lParam);

@@ -712,7 +712,7 @@ void EnabledModulesList::removeModule (String moduleID) // must be pass-by-value
         const ScopedLock sl (stateLock);
 
         for (auto i = state.getNumChildren(); --i >= 0;)
-            if (state.getChild(i) [Ids::ID] == moduleID)
+            if (state.getChild (i) [Ids::ID] == moduleID)
                 state.removeChild (i, getUndoManager());
     }
 

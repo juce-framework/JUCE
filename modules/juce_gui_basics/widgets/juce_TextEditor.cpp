@@ -89,7 +89,7 @@ public:
 
                 if (! CharacterFunctions::isWhitespace (lastAtom.atomText.getLastCharacter()))
                 {
-                    auto& first = other.atoms.getReference(0);
+                    auto& first = other.atoms.getReference (0);
 
                     if (! CharacterFunctions::isWhitespace (first.atomText[0]))
                     {
@@ -105,7 +105,7 @@ public:
 
             while (i < other.atoms.size())
             {
-                atoms.add (other.atoms.getReference(i));
+                atoms.add (other.atoms.getReference (i));
                 ++i;
             }
         }
@@ -118,7 +118,7 @@ public:
 
         for (int i = 0; i < atoms.size(); ++i)
         {
-            auto& atom = atoms.getReference(i);
+            auto& atom = atoms.getReference (i);
             auto nextIndex = index + atom.numChars;
 
             if (index == indexToBreakAt)
@@ -587,7 +587,7 @@ struct TextEditor::Iterator
         int j;
         for (j = 0; j < numGlyphs; ++j)
         {
-            auto& pg = g.getGlyph(j);
+            auto& pg = g.getGlyph (j);
 
             if ((pg.getLeft() + pg.getRight()) / 2 > xToFind)
                 break;
@@ -1807,20 +1807,20 @@ void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
 
     if (passwordCharacter == 0)
     {
-        m.addItem (StandardApplicationCommandIDs::cut,   TRANS("Cut"), writable);
-        m.addItem (StandardApplicationCommandIDs::copy,  TRANS("Copy"), ! selection.isEmpty());
+        m.addItem (StandardApplicationCommandIDs::cut,   TRANS ("Cut"), writable);
+        m.addItem (StandardApplicationCommandIDs::copy,  TRANS ("Copy"), ! selection.isEmpty());
     }
 
-    m.addItem (StandardApplicationCommandIDs::paste,     TRANS("Paste"), writable);
-    m.addItem (StandardApplicationCommandIDs::del,       TRANS("Delete"), writable);
+    m.addItem (StandardApplicationCommandIDs::paste,     TRANS ("Paste"), writable);
+    m.addItem (StandardApplicationCommandIDs::del,       TRANS ("Delete"), writable);
     m.addSeparator();
-    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS("Select All"));
+    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS ("Select All"));
     m.addSeparator();
 
     if (getUndoManager() != nullptr)
     {
-        m.addItem (StandardApplicationCommandIDs::undo, TRANS("Undo"), undoManager.canUndo());
-        m.addItem (StandardApplicationCommandIDs::redo, TRANS("Redo"), undoManager.canRedo());
+        m.addItem (StandardApplicationCommandIDs::undo, TRANS ("Undo"), undoManager.canUndo());
+        m.addItem (StandardApplicationCommandIDs::redo, TRANS ("Redo"), undoManager.canRedo());
     }
 }
 
@@ -2389,7 +2389,7 @@ void TextEditor::reinsert (int insertIndex, const OwnedArray<UniformTextSection>
         if (insertIndex == index)
         {
             for (int j = sectionsToInsert.size(); --j >= 0;)
-                sections.insert (i, new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
+                sections.insert (i, new UniformTextSection (*sectionsToInsert.getUnchecked (j)));
 
             break;
         }
@@ -2399,7 +2399,7 @@ void TextEditor::reinsert (int insertIndex, const OwnedArray<UniformTextSection>
             splitSection (i, insertIndex - index);
 
             for (int j = sectionsToInsert.size(); --j >= 0;)
-                sections.insert (i + 1, new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
+                sections.insert (i + 1, new UniformTextSection (*sectionsToInsert.getUnchecked (j)));
 
             break;
         }
@@ -2424,7 +2424,7 @@ void TextEditor::remove (Range<int> range, UndoManager* const um, const int care
 
         for (int i = 0; i < sections.size(); ++i)
         {
-            auto nextIndex = index + sections.getUnchecked(i)->getTotalLength();
+            auto nextIndex = index + sections.getUnchecked (i)->getTotalLength();
 
             if (range.getStart() > index && range.getStart() < nextIndex)
             {

@@ -54,7 +54,7 @@ TestComponent::~TestComponent()
 void TestComponent::reloadAll()
 {
     for (int i = testComponents.size(); --i >= 0;)
-        testComponents.getUnchecked(i)->reload();
+        testComponents.getUnchecked (i)->reload();
 }
 
 void TestComponent::reload()
@@ -120,7 +120,7 @@ void TestComponent::updateContents()
     if (loadedDocument != nullptr)
     {
         addAndMakeVisible (loadedDocument->createTestComponent (alwaysFillBackground));
-        resized();
+        handleResize();
     }
 }
 
@@ -155,13 +155,18 @@ void TestComponent::paint (Graphics& g)
     }
 }
 
-void TestComponent::resized()
+void TestComponent::handleResize()
 {
     if (Component* const c = getChildComponent (0))
     {
         setOpaque (c->isOpaque());
         c->setBounds (getLocalBounds());
     }
+}
+
+void TestComponent::resized()
+{
+    handleResize();
 }
 
 //==============================================================================

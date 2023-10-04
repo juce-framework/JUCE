@@ -56,7 +56,7 @@ namespace detail
     template <typename Fn, typename Ret, typename... Args>
     std::enable_if_t<std::is_same_v<Ret, void>, Ret> call (void* s, Args... args)
     {
-        (*reinterpret_cast<Fn*> (s)) (args...);
+        (*reinterpret_cast<Fn*> (s)) (std::forward<Args> (args)...);
     }
 
     template <typename Fn, typename Ret, typename... Args>
@@ -134,8 +134,8 @@ public:
         static constexpr auto vtableForCallable = detail::makeVtable<Fn, Ret, Args...>();
         vtable = &vtableForCallable;
 
-        auto* ptr = new (&storage) Fn (std::forward<Callable> (callable));
-        jassertquiet ((void*) ptr == (void*) &storage);
+        [[maybe_unused]] auto* ptr = new (&storage) Fn (std::forward<Callable> (callable));
+        jassert ((void*) ptr == (void*) &storage);
     }
 
     /** Move constructor. */
@@ -234,5 +234,4 @@ bool operator== (const FixedSizeFunction<len, T>& fn, std::nullptr_t) { return !
 template <size_t len, typename T>
 bool operator== (std::nullptr_t, const FixedSizeFunction<len, T>& fn) { return ! (fn != nullptr); }
 
-
-}
+} // namespace juce

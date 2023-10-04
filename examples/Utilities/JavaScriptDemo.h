@@ -49,9 +49,9 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class JavaScriptDemo    : public Component,
-                          private CodeDocument::Listener,
-                          private Timer
+class JavaScriptDemo final : public Component,
+                             private CodeDocument::Listener,
+                             private Timer
 {
 public:
     JavaScriptDemo()
@@ -125,7 +125,7 @@ public:
 
     //==============================================================================
     // This class is used by the script, and provides methods that the JS can call.
-    struct DemoClass  : public DynamicObject
+    struct DemoClass final : public DynamicObject
     {
         DemoClass (JavaScriptDemo& demo) : owner (demo)
         {

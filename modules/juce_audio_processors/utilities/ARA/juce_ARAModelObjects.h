@@ -658,7 +658,7 @@ public:
 
     ARAObject* getChild (size_t index) override;
 
-    ARAObject* getParent () override { return getDocument(); }
+    ARAObject* getParent() override { return getDocument(); }
 
     void visit (ARAObjectVisitor& visitor) override { visitor.visitRegionSequence (*this); }
 

@@ -234,8 +234,8 @@ private:
 
     OwnedArray<KeyPressTime> keysDown;
 
-    void invokeCommand (const CommandID, const KeyPress&, const bool isKeyDown,
-                        const int millisecsSinceKeyPressed, Component* originator) const;
+    void invokeCommand (CommandID, const KeyPress&, bool isKeyDown,
+                        int millisecsSinceKeyPressed, Component* originator) const;
 
     KeyPressMappingSet& operator= (const KeyPressMappingSet&);
     JUCE_LEAK_DETECTOR (KeyPressMappingSet)

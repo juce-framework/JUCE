@@ -28,7 +28,7 @@
 #include "../../Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"
 
 //==============================================================================
-struct ContentViewHeader    : public Component
+struct ContentViewHeader final : public Component
 {
     ContentViewHeader (String headerName, Icon headerIcon)
         : name (headerName), icon (headerIcon)
@@ -54,7 +54,7 @@ struct ContentViewHeader    : public Component
 };
 
 //==============================================================================
-class ListBoxHeader    : public Component
+class ListBoxHeader final : public Component
 {
 public:
     ListBoxHeader (Array<String> columnHeaders)
@@ -154,7 +154,7 @@ private:
 };
 
 //==============================================================================
-class InfoButton  : public Button
+class InfoButton final : public Button
 {
 public:
     InfoButton (const String& infoToDisplay = {})
@@ -217,7 +217,7 @@ private:
     int numLines = 1;
 
     //==============================================================================
-    struct InfoWindow    : public Component
+    struct InfoWindow final : public Component
     {
         InfoWindow (const String& s)
             : stringToDisplay (s)
@@ -241,8 +241,8 @@ private:
 };
 
 //==============================================================================
-class PropertyGroupComponent  : public Component,
-                                private TextPropertyComponent::Listener
+class PropertyGroupComponent final : public Component,
+                                     private TextPropertyComponent::Listener
 {
 public:
     PropertyGroupComponent (String name, Icon icon, String desc = {})
@@ -344,7 +344,7 @@ public:
 
 private:
     //==============================================================================
-    struct PropertyAndInfoWrapper  : public Component
+    struct PropertyAndInfoWrapper final : public Component
     {
         PropertyAndInfoWrapper (PropertyComponent& c, InfoButton& i)
             : propertyComponent (c),

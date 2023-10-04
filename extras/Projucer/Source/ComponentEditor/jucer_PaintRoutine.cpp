@@ -361,7 +361,7 @@ void PaintRoutine::selectedToFront()
     const SelectedItemSet<PaintElement*> temp (selectedElements);
 
     for (int i = temp.getNumSelected(); --i >= 0;)
-        elementToFront (temp.getSelectedItem(i), true);
+        elementToFront (temp.getSelectedItem (i), true);
 }
 
 void PaintRoutine::selectedToBack()
@@ -369,7 +369,7 @@ void PaintRoutine::selectedToBack()
     const SelectedItemSet<PaintElement*> temp (selectedElements);
 
     for (int i = 0; i < temp.getNumSelected(); ++i)
-        elementToBack (temp.getSelectedItem(i), true);
+        elementToBack (temp.getSelectedItem (i), true);
 }
 
 void PaintRoutine::alignTop()

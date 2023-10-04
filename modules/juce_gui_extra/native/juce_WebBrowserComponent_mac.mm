@@ -342,7 +342,7 @@ struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NS
                                bool handlerCalled = false;
                            };
 
-                           auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
+                           auto chooser = std::make_unique<FileChooser> (TRANS ("Select the file you want to upload..."),
                                                                          File::getSpecialLocation (File::userHomeDirectory), "*");
                            auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), completionHandler);
 

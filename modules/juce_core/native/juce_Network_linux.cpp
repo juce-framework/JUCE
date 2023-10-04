@@ -511,9 +511,9 @@ private:
         else
             writeHost (header, httpRequestCmd, originalURL, proxyName, proxyPort);
 
-        writeValueIfNotPresent (header, userHeaders, "User-Agent:", "JUCE/" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
-                                                                        "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
-                                                                        "." JUCE_STRINGIFY(JUCE_BUILDNUMBER));
+        writeValueIfNotPresent (header, userHeaders, "User-Agent:", "JUCE/" JUCE_STRINGIFY (JUCE_MAJOR_VERSION)
+                                                                        "." JUCE_STRINGIFY (JUCE_MINOR_VERSION)
+                                                                        "." JUCE_STRINGIFY (JUCE_BUILDNUMBER));
         writeValueIfNotPresent (header, userHeaders, "Connection:", "close");
 
         const auto postDataSize = postData.getSize();

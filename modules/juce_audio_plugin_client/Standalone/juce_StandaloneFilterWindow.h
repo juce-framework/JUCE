@@ -85,7 +85,7 @@ public:
         shouldMuteInput.addListener (this);
         shouldMuteInput = ! isInterAppAudioConnected();
 
-        createPlugin();
+        handleCreatePlugin();
 
         auto inChannels = (channelConfiguration.size() > 0 ? channelConfiguration[0].numIns
                                                            : processor->getMainBusNumInputChannels());
@@ -117,24 +117,19 @@ public:
     {
         stopTimer();
 
-        deletePlugin();
+        handleDeletePlugin();
         shutDownAudioDevices();
     }
 
     //==============================================================================
     virtual void createPlugin()
     {
-        processor = createPluginFilterOfType (AudioProcessor::wrapperType_Standalone);
-        processor->disableNonMainBuses();
-        processor->setRateAndBufferSizeDetails (44100, 512);
-
-        processorHasPotentialFeedbackLoop = (getNumInputChannels() > 0 && getNumOutputChannels() > 0);
+        handleCreatePlugin();
     }
 
     virtual void deletePlugin()
     {
-        stopPlaying();
-        processor = nullptr;
+        handleDeletePlugin();
     }
 
     int getNumInputChannels() const
@@ -191,7 +186,7 @@ public:
     /** Pops up a dialog letting the user save the processor's state to a file. */
     void askUserToSaveState (const String& fileSuffix = String())
     {
-        stateFileChooser = std::make_unique<FileChooser> (TRANS("Save current state"),
+        stateFileChooser = std::make_unique<FileChooser> (TRANS ("Save current state"),
                                                           getLastFile(),
                                                           getFilePatterns (fileSuffix));
         auto flags = FileBrowserComponent::saveMode
@@ -221,7 +216,7 @@ public:
     /** Pops up a dialog letting the user re-load the processor's state from a file. */
     void askUserToLoadState (const String& fileSuffix = String())
     {
-        stateFileChooser = std::make_unique<FileChooser> (TRANS("Load a saved state"),
+        stateFileChooser = std::make_unique<FileChooser> (TRANS ("Load a saved state"),
                                                           getLastFile(),
                                                           getFilePatterns (fileSuffix));
         auto flags = FileBrowserComponent::openMode
@@ -297,7 +292,7 @@ public:
 
         o.content.setOwned (content.release());
 
-        o.dialogTitle                   = TRANS("Audio/MIDI Settings");
+        o.dialogTitle                   = TRANS ("Audio/MIDI Settings");
         o.dialogBackgroundColour        = o.content->getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
         o.escapeKeyTriggersCloseButton  = true;
         o.useNativeTitleBar             = true;
@@ -428,6 +423,23 @@ public:
     ScopedMessageBox messageBox;
 
 private:
+    //==============================================================================
+    void handleCreatePlugin()
+    {
+        processor = createPluginFilterOfType (AudioProcessor::wrapperType_Standalone);
+        processor->disableNonMainBuses();
+        processor->setRateAndBufferSizeDetails (44100, 512);
+
+        processorHasPotentialFeedbackLoop = (getNumInputChannels() > 0 && getNumOutputChannels() > 0);
+    }
+
+    void handleDeletePlugin()
+    {
+        stopPlaying();
+        processor = nullptr;
+    }
+
+    //==============================================================================
     /*  This class can be used to ensure that audio callbacks use buffers with a
         predictable maximum size.
 
@@ -457,14 +469,14 @@ private:
         }
 
         void audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
-                                               int numInputChannels,
+                                               [[maybe_unused]] int numInputChannels,
                                                float* const* outputChannelData,
-                                               int numOutputChannels,
+                                               [[maybe_unused]] int numOutputChannels,
                                                int numSamples,
                                                const AudioIODeviceCallbackContext& context) override
         {
-            jassertquiet ((int) storedInputChannels.size()  == numInputChannels);
-            jassertquiet ((int) storedOutputChannels.size() == numOutputChannels);
+            jassert ((int) storedInputChannels.size()  == numInputChannels);
+            jassert ((int) storedOutputChannels.size() == numOutputChannels);
 
             int position = 0;
 
@@ -873,12 +885,12 @@ private:
     void buttonClicked (Button*) override
     {
         PopupMenu m;
-        m.addItem (1, TRANS("Audio/MIDI Settings..."));
+        m.addItem (1, TRANS ("Audio/MIDI Settings..."));
         m.addSeparator();
-        m.addItem (2, TRANS("Save current state..."));
-        m.addItem (3, TRANS("Load a saved state..."));
+        m.addItem (2, TRANS ("Save current state..."));
+        m.addItem (3, TRANS ("Load a saved state..."));
         m.addSeparator();
-        m.addItem (4, TRANS("Reset to default state"));
+        m.addItem (4, TRANS ("Reset to default state"));
 
         m.showMenuAsync (PopupMenu::Options(),
                          ModalCallbackFunction::forComponent (menuCallback, this));
@@ -901,7 +913,7 @@ private:
             if (editor != nullptr)
             {
                 editor->addComponentListener (this);
-                componentMovedOrResized (*editor, false, true);
+                handleMovedOrResized();
 
                 addAndMakeVisible (editor.get());
             }
@@ -929,20 +941,7 @@ private:
 
         void resized() override
         {
-            auto r = getLocalBounds();
-
-            if (shouldShowNotification)
-                notification.setBounds (r.removeFromTop (NotificationArea::height));
-
-            if (editor != nullptr)
-            {
-                const auto newPos = r.getTopLeft().toFloat().transformedBy (editor->getTransform().inverted());
-
-                if (preventResizingEditor)
-                    editor->setTopLeftPosition (newPos.roundToInt());
-                else
-                    editor->setBoundsConstrained (editor->getLocalArea (this, r.toFloat()).withPosition (newPos).toNearestInt());
-            }
+            handleResized();
         }
 
         ComponentBoundsConstrainer* getEditorConstrainer() const
@@ -1023,7 +1022,7 @@ private:
             notification.setVisible (shouldShowNotification);
 
            #if JUCE_IOS || JUCE_ANDROID
-            resized();
+            handleResized();
            #else
             if (editor != nullptr)
             {
@@ -1045,7 +1044,25 @@ private:
         }
 
         //==============================================================================
-        void componentMovedOrResized (Component&, bool, bool) override
+        void handleResized()
+        {
+            auto r = getLocalBounds();
+
+            if (shouldShowNotification)
+                notification.setBounds (r.removeFromTop (NotificationArea::height));
+
+            if (editor != nullptr)
+            {
+                const auto newPos = r.getTopLeft().toFloat().transformedBy (editor->getTransform().inverted());
+
+                if (preventResizingEditor)
+                    editor->setTopLeftPosition (newPos.roundToInt());
+                else
+                    editor->setBoundsConstrained (editor->getLocalArea (this, r.toFloat()).withPosition (newPos).toNearestInt());
+            }
+        }
+
+        void handleMovedOrResized()
         {
             const ScopedValueSetter<bool> scope (preventResizingEditor, true);
 
@@ -1056,6 +1073,11 @@ private:
                 setSize (rect.getWidth(),
                          rect.getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
             }
+        }
+
+        void componentMovedOrResized (Component&, bool, bool) override
+        {
+            handleMovedOrResized();
         }
 
         Rectangle<int> getSizeToContainEditor() const

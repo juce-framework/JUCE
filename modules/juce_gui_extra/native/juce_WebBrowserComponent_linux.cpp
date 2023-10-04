@@ -746,7 +746,7 @@ private:
             int status = 0, result = 0;
 
             result = waitpid (childProcess, &status, WNOHANG);
-            for (int i = 0; i < 15 && (! WIFEXITED(status) || result != childProcess); ++i)
+            for (int i = 0; i < 15 && (! WIFEXITED (status) || result != childProcess); ++i)
             {
                 Thread::sleep (100);
                 result = waitpid (childProcess, &status, WNOHANG);
@@ -754,7 +754,7 @@ private:
 
             // clean-up any zombies
             status = 0;
-            if (! WIFEXITED(status) || result != childProcess)
+            if (! WIFEXITED (status) || result != childProcess)
             {
                 for (;;)
                 {

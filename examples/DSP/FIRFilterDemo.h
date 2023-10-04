@@ -98,7 +98,7 @@ struct FIRFilterDemoDSP
     std::vector<DSPDemoParameterBase*> parameters { &cutoffParam, &typeParam };
 };
 
-struct FIRFilterDemo    : public Component
+struct FIRFilterDemo final : public Component
 {
     FIRFilterDemo()
     {

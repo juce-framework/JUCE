@@ -42,7 +42,7 @@ void JucerResourceFile::addResourcesFromProjectItem (const Project::Item& projec
     if (projectItem.isGroup())
     {
         for (int i = 0; i < projectItem.getNumChildren(); ++i)
-            addResourcesFromProjectItem (projectItem.getChild(i));
+            addResourcesFromProjectItem (projectItem.getChild (i));
     }
     else
     {

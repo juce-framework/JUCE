@@ -114,7 +114,7 @@ template <typename SampleType, typename InterpolationType>
 SampleType DelayLine<SampleType, InterpolationType>::popSample (int channel, SampleType delayInSamples, bool updateReadPointer)
 {
     if (delayInSamples >= 0)
-        setDelay(delayInSamples);
+        setDelay (delayInSamples);
 
     auto result = interpolateSample (channel);
 

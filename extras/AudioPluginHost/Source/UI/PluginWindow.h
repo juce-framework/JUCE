@@ -46,10 +46,10 @@ class PluginGraph;
 /**
     A window that shows a log of parameter change messages sent by the plugin.
 */
-class PluginDebugWindow : public AudioProcessorEditor,
-                          public AudioProcessorParameter::Listener,
-                          public ListBoxModel,
-                          public AsyncUpdater
+class PluginDebugWindow final : public AudioProcessorEditor,
+                                public AudioProcessorParameter::Listener,
+                                public ListBoxModel,
+                                public AsyncUpdater
 {
 public:
     PluginDebugWindow (AudioProcessor& proc)
@@ -99,7 +99,7 @@ private:
 
     void resized() override
     {
-        list.setBounds(getLocalBounds());
+        list.setBounds (getLocalBounds());
     }
 
     int getNumRows() override
@@ -146,7 +146,7 @@ private:
 /**
     A desktop window containing a plugin's GUI.
 */
-class PluginWindow  : public DocumentWindow
+class PluginWindow final : public DocumentWindow
 {
 public:
     enum class Type
@@ -235,7 +235,7 @@ public:
     }
 
 private:
-    class DecoratorConstrainer : public BorderedComponentBoundsConstrainer
+    class DecoratorConstrainer final : public BorderedComponentBoundsConstrainer
     {
     public:
         explicit DecoratorConstrainer (DocumentWindow& windowIn)
@@ -327,7 +327,7 @@ private:
     }
 
     //==============================================================================
-    struct ProgramAudioProcessorEditor  : public AudioProcessorEditor
+    struct ProgramAudioProcessorEditor final : public AudioProcessorEditor
     {
         explicit ProgramAudioProcessorEditor (AudioProcessor& p)
             : AudioProcessorEditor (p)

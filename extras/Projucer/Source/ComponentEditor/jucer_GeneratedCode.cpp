@@ -59,7 +59,7 @@ String& GeneratedCode::getCallbackCode (const String& requiredParentClass,
 
     for (int i = callbacks.size(); --i >= 0;)
     {
-        CallbackMethod* const cm = callbacks.getUnchecked(i);
+        CallbackMethod* const cm = callbacks.getUnchecked (i);
 
         if (cm->requiredParentClass == parentClass
              && cm->returnType == returnType
@@ -81,7 +81,7 @@ void GeneratedCode::removeCallback (const String& returnType, const String& prot
 {
     for (int i = callbacks.size(); --i >= 0;)
     {
-        CallbackMethod* const cm = callbacks.getUnchecked(i);
+        CallbackMethod* const cm = callbacks.getUnchecked (i);
 
         if (cm->returnType == returnType && cm->prototype == prototype)
             callbacks.remove (i);
@@ -104,7 +104,7 @@ StringArray GeneratedCode::getExtraParentClasses() const
 
     for (int i = 0; i < callbacks.size(); ++i)
     {
-        CallbackMethod* const cm = callbacks.getUnchecked(i);
+        CallbackMethod* const cm = callbacks.getUnchecked (i);
         s.add (cm->requiredParentClass);
     }
 
@@ -117,7 +117,7 @@ String GeneratedCode::getCallbackDeclarations() const
 
     for (int i = 0; i < callbacks.size(); ++i)
     {
-        CallbackMethod* const cm = callbacks.getUnchecked(i);
+        CallbackMethod* const cm = callbacks.getUnchecked (i);
 
         s << cm->returnType << " " << cm->prototype << " override;\n";
     }
@@ -131,7 +131,7 @@ String GeneratedCode::getCallbackDefinitions() const
 
     for (int i = 0; i < callbacks.size(); ++i)
     {
-        CallbackMethod* const cm = callbacks.getUnchecked(i);
+        CallbackMethod* const cm = callbacks.getUnchecked (i);
 
         const String userCodeBlockName ("User"
             + build_tools::makeValidIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
@@ -217,7 +217,7 @@ static String getIncludeFileCode (const Array<File>& files, const File& targetFi
     String s;
 
     for (int i = 0; i < files.size(); ++i)
-        s << CodeHelpers::createIncludeStatement (files.getReference(i), targetFile) << newLine;
+        s << CodeHelpers::createIncludeStatement (files.getReference (i), targetFile) << newLine;
 
     return s;
 }

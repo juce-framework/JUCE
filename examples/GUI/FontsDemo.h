@@ -49,9 +49,9 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class FontsDemo  : public Component,
-                   private ListBoxModel,
-                   private Slider::Listener
+class FontsDemo final : public Component,
+                        private ListBoxModel,
+                        private Slider::Listener
 {
 public:
     FontsDemo()

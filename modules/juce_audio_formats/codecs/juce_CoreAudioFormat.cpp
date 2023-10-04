@@ -267,7 +267,7 @@ struct CoreAudioFormatMetatdata
         for (int i = 0; i < numTimeSigEvents; ++i)
         {
             int numerator, denominator;
-            timeSigEvents.getEventPointer(i)->message.getTimeSignatureInfo (numerator, denominator);
+            timeSigEvents.getEventPointer (i)->message.getTimeSignatureInfo (numerator, denominator);
 
             String timeSigString;
             timeSigString << numerator << '/' << denominator;

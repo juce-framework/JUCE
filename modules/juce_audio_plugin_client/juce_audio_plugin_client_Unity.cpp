@@ -327,9 +327,9 @@ public:
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
-        const int numConfigs = sizeof (configs) / sizeof (short[2]);
+        [[maybe_unused]] const int numConfigs = sizeof (configs) / sizeof (short[2]);
 
-        jassertquiet (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
+        jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
 
         pluginInstance->setPlayConfigDetails (configs[0][0], configs[0][1], state->sampleRate, samplesPerBlock);
        #else

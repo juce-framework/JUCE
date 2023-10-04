@@ -362,7 +362,7 @@ public:
                                                                &audioRoutingJni);
 
                     if (status == SL_RESULT_SUCCESS && audioRoutingJni != nullptr)
-                        javaProxy = GlobalRef (LocalRef<jobject>(getEnv()->NewLocalRef (audioRoutingJni)));
+                        javaProxy = GlobalRef (LocalRef<jobject> (getEnv()->NewLocalRef (audioRoutingJni)));
                 }
             }
 
@@ -391,7 +391,7 @@ public:
         }
 
         bool isBufferAvailable() const         { return (numBlocksOut.get() < owner.numBuffers); }
-        T* getNextBuffer()                     { nextBlock.set((nextBlock.get() + 1) % owner.numBuffers); return getCurrentBuffer(); }
+        T* getNextBuffer()                     { nextBlock.set ((nextBlock.get() + 1) % owner.numBuffers); return getCurrentBuffer(); }
         T* getCurrentBuffer()                  { return nativeBuffer.get() + (static_cast<size_t> (nextBlock.get()) * getBufferSizeInSamples()); }
         size_t getBufferSizeInSamples() const  { return static_cast<size_t> (owner.bufferSize * numChannels); }
 
@@ -458,7 +458,7 @@ public:
                 auto status = e->CreateAudioPlayer (holder.engine, &obj, &source, &sink, 2,
                                                     queueInterfaces, interfaceRequired);
 
-                if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize(obj, 0) != SL_RESULT_SUCCESS)
+                if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
                 {
                     destroyObject (obj);
                     return {};
@@ -611,7 +611,7 @@ public:
             else
             {
                 for (int i = 0; i < outputChannels; ++i)
-                    zeromem (outputChannelData[i], sizeof(float) * static_cast<size_t> (bufferSize));
+                    zeromem (outputChannelData[i], sizeof (float) * static_cast<size_t> (bufferSize));
             }
         }
 
@@ -913,7 +913,7 @@ public:
             if (numInputChannels > 0 && numOutputChannels > 0 && RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
             {
                 // New versions of the Android emulator do not seem to support audio input anymore on OS X
-                activeInputChans = BigInteger(0);
+                activeInputChans = BigInteger (0);
                 numInputChannels = 0;
 
                 session.reset (OpenSLSession::create (numInputChannels, numOutputChannels,

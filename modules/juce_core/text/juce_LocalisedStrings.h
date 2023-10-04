@@ -55,10 +55,10 @@ namespace juce
     (you can use this to add comments).
 
     Note that this is a singleton class, so don't create or destroy the object directly.
-    There's also a TRANS(text) macro defined to make it easy to use the this.
+    There's also a TRANS (text) macro defined to make it easy to use the this.
 
     @code
-    printSomething (TRANS("hello"));
+    printSomething (TRANS ("hello"));
     @endcode
 
     This macro is used in the JUCE classes themselves, so your application has a chance to

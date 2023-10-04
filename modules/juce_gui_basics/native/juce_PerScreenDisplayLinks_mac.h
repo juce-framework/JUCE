@@ -107,9 +107,9 @@ public:
           link ([display = displayId]
           {
               CVDisplayLinkRef ptr = nullptr;
-              const auto result = CVDisplayLinkCreateWithCGDisplay (display, &ptr);
-              jassertquiet (result == kCVReturnSuccess);
-              jassertquiet (ptr != nullptr);
+              [[maybe_unused]] const auto result = CVDisplayLinkCreateWithCGDisplay (display, &ptr);
+              jassert (result == kCVReturnSuccess);
+              jassert (ptr != nullptr);
               return ptr;
           }()),
           onCallback (std::move (onCallbackIn))
@@ -125,11 +125,11 @@ public:
             return kCVReturnSuccess;
         };
 
-        const auto callbackResult = CVDisplayLinkSetOutputCallback (link.get(), callback, this);
-        jassertquiet (callbackResult == kCVReturnSuccess);
+        [[maybe_unused]] const auto callbackResult = CVDisplayLinkSetOutputCallback (link.get(), callback, this);
+        jassert (callbackResult == kCVReturnSuccess);
 
-        const auto startResult = CVDisplayLinkStart (link.get());
-        jassertquiet (startResult == kCVReturnSuccess);
+        [[maybe_unused]] const auto startResult = CVDisplayLinkStart (link.get());
+        jassert (startResult == kCVReturnSuccess);
     }
 
     ~ScopedDisplayLink() noexcept
@@ -274,9 +274,9 @@ private:
 
                 // This is the callback that will actually fire in response to this screen's display
                 // link callback.
-                result.emplace_back (screen, [callbacks = std::move (callbacks)]
+                result.emplace_back (screen, [cbs = std::move (callbacks)]
                 {
-                    for (const auto& callback : callbacks)
+                    for (const auto& callback : cbs)
                         callback();
                 });
             }

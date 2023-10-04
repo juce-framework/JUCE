@@ -47,7 +47,7 @@ namespace
 
 
 //==============================================================================
-class NetworkGraphicsDemoApplication  : public JUCEApplication
+class NetworkGraphicsDemoApplication final : public JUCEApplication
 {
 public:
     NetworkGraphicsDemoApplication()  : properties (getPropertyFileOptions())
@@ -89,7 +89,7 @@ public:
     }
 
     //==============================================================================
-    struct MainWindow    : public DocumentWindow
+    struct MainWindow final : public DocumentWindow
     {
         explicit MainWindow (PropertiesFile& props)
             : DocumentWindow ("JUCE Networked Graphics Demo - Master", Colours::white, DocumentWindow::allButtons)

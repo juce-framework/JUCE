@@ -114,12 +114,12 @@ Image JUCE_API getIconFromApplication (const String& applicationPath, const int 
         {
             if (auto appBundle = CFUniquePtr<CFBundleRef> (CFBundleCreate (kCFAllocatorDefault, url.get())))
             {
-                if (CFTypeRef infoValue = CFBundleGetValueForInfoDictionaryKey (appBundle.get(), CFSTR("CFBundleIconFile")))
+                if (CFTypeRef infoValue = CFBundleGetValueForInfoDictionaryKey (appBundle.get(), CFSTR ("CFBundleIconFile")))
                 {
                     if (CFGetTypeID (infoValue) == CFStringGetTypeID())
                     {
                         CFStringRef iconFilename = reinterpret_cast<CFStringRef> (infoValue);
-                        CFStringRef resourceURLSuffix = CFStringHasSuffix (iconFilename, CFSTR(".icns")) ? nullptr : CFSTR("icns");
+                        CFStringRef resourceURLSuffix = CFStringHasSuffix (iconFilename, CFSTR (".icns")) ? nullptr : CFSTR ("icns");
 
                         if (auto iconURL = CFUniquePtr<CFURLRef> (CFBundleCopyResourceURL (appBundle.get(), iconFilename, resourceURLSuffix, nullptr)))
                         {

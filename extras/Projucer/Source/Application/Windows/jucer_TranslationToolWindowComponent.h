@@ -28,7 +28,7 @@
 #include "../../Utility/Helpers/jucer_TranslationHelpers.h"
 
 //==============================================================================
-class TranslationToolComponent  : public Component
+class TranslationToolComponent final : public Component
 {
 public:
     TranslationToolComponent()
@@ -162,7 +162,7 @@ private:
 
             StringArray strings;
             TranslationHelpers::scanFolderForTranslations (strings, fc.getResult());
-            setPreTranslationText (TranslationHelpers::mungeStrings(strings));
+            setPreTranslationText (TranslationHelpers::mungeStrings (strings));
         });
     }
 
@@ -196,7 +196,7 @@ private:
     Label label1, label2, label3, label4;
     Label instructionsLabel;
 
-    TextButton generateButton        { TRANS("Generate") },
+    TextButton generateButton        { TRANS ("Generate") },
                scanProjectButton     { "Scan project for TRANS macros" },
                scanFolderButton      { "Scan folder for TRANS macros" },
                loadTranslationButton { "Load existing translation file..."};

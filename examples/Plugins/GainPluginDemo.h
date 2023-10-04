@@ -50,7 +50,7 @@
 
 
 //==============================================================================
-class GainProcessor  : public AudioProcessor
+class GainProcessor final : public AudioProcessor
 {
 public:
 

@@ -440,8 +440,7 @@ struct OSCReceiver::Pimpl   : private Thread,
         }
         catch (const OSCFormatError&)
         {
-            if (formatErrorHandler != nullptr)
-                formatErrorHandler (data, (int) dataSize);
+            NullCheckedInvocation::invoke (formatErrorHandler, data, (int) dataSize);
         }
     }
 

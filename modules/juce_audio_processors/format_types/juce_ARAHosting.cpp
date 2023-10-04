@@ -472,7 +472,7 @@ void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (A
         std::function<void (ARAFactoryWrapper)> callback;
     };
 
-    Extensions extensions { std::move(cb) };
+    Extensions extensions { std::move (cb) };
     instance.getExtensions (extensions);
 }
 

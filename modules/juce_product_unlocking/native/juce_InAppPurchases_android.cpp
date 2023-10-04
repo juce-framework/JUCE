@@ -935,7 +935,7 @@ private:
 
         auto* env = getEnv();
 
-        if (env->CallIntMethod(purchase, AndroidPurchase.getPurchaseState) != 1 /* PURCHASED */)
+        if (env->CallIntMethod (purchase, AndroidPurchase.getPurchaseState) != 1 /* PURCHASED */)
             return {};
 
         return { juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (purchase, AndroidPurchase.getOrderId) }),
@@ -1058,7 +1058,7 @@ private:
     }
 
     //==============================================================================
-    JUCE_DECLARE_WEAK_REFERENCEABLE(Pimpl)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (Pimpl)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 

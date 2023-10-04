@@ -185,7 +185,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
             }
         }
 
-        VstSpeakerConfigurationHolder& operator= (const VstSpeakerConfigurationHolder& vstConfig) { return operator=(vstConfig.get()); }
+        VstSpeakerConfigurationHolder& operator= (const VstSpeakerConfigurationHolder& vstConfig) { return operator= (vstConfig.get()); }
         VstSpeakerConfigurationHolder& operator= (const Vst2::VstSpeakerArrangement& vstConfig)
         {
             Vst2::VstSpeakerArrangement& dst = *allocate (vstConfig.numChannels);

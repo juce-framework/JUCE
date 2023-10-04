@@ -28,10 +28,10 @@
 #include "../../Application/jucer_Application.h"
 
 //==============================================================================
-class UserAvatarComponent  : public Component,
-                             public SettableTooltipClient,
-                             public ChangeBroadcaster,
-                             private LicenseController::LicenseStateListener
+class UserAvatarComponent final : public Component,
+                                  public SettableTooltipClient,
+                                  public ChangeBroadcaster,
+                                  private LicenseController::LicenseStateListener
 {
 public:
     UserAvatarComponent (bool isInteractive)

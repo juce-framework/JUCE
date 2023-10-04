@@ -136,13 +136,13 @@ ChoicePropertyComponent::ChoicePropertyComponent (const String& name)
 
 ChoicePropertyComponent::ChoicePropertyComponent (const String& name,
                                                   const StringArray& choiceList,
-                                                  const Array<var>& correspondingValues)
+                                                  [[maybe_unused]] const Array<var>& correspondingValues)
     : PropertyComponent (name),
       choices (choiceList)
 {
     // The array of corresponding values must contain one value for each of the items in
     // the choices array!
-    jassertquiet (correspondingValues.size() == choices.size());
+    jassert (correspondingValues.size() == choices.size());
 }
 
 ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,

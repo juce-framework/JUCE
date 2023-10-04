@@ -54,7 +54,7 @@ xcrun codesign --verify "$JUCE_FULL_PRODUCT_PATH" || xcrun codesign -f -s - "$JU
 )";
 
 //==============================================================================
-class XcodeProjectExporter  : public ProjectExporter
+class XcodeProjectExporter final : public ProjectExporter
 {
 public:
     //==============================================================================
@@ -824,8 +824,8 @@ public:
 
 protected:
     //==============================================================================
-    class XcodeBuildConfiguration  : public BuildConfiguration,
-                                     private ValueTree::Listener
+    class XcodeBuildConfiguration final : public BuildConfiguration,
+                                          private ValueTree::Listener
     {
     public:
         XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS, const ProjectExporter& e)
@@ -835,7 +835,7 @@ protected:
               macOSDeploymentTarget        (config, Ids::macOSDeploymentTarget,        getUndoManager(), "10.13"),
               macOSArchitecture            (config, Ids::osxArchitecture,              getUndoManager(), macOSArch_Default),
               iosBaseSDK                   (config, Ids::iosBaseSDK,                   getUndoManager()),
-              iosDeploymentTarget          (config, Ids::iosDeploymentTarget,          getUndoManager(), "11.0"),
+              iosDeploymentTarget          (config, Ids::iosDeploymentTarget,          getUndoManager(), "12.0"),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, getUndoManager()),
               codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager()),
@@ -1070,7 +1070,7 @@ public:
     };
 
     //==============================================================================
-    struct XcodeTarget : build_tools::ProjectType::Target
+    struct XcodeTarget final : build_tools::ProjectType::Target
     {
         //==============================================================================
         XcodeTarget (Type targetType, const XcodeProjectExporter& exporter)
@@ -3012,7 +3012,7 @@ private:
                     auto propertyName = o.getPropertyName (j);
                     auto val = o.getProperty (propertyName).toString();
 
-                    if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-@~\r\n\\#%^`*")
+                    if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-@~\r\n\\#%^`*!")
                                             && ! (val.trimStart().startsWithChar ('(')
                                                     || val.trimStart().startsWithChar ('{'))))
                         val = "\"" + val + "\"";

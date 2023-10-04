@@ -169,7 +169,7 @@ public:
                 error << "The device \"" << deviceID << "\" is not available.";
             else
                 error << "Could not open " << (forInput ? "input" : "output") << " device \"" << deviceID
-                      << "\": " << snd_strerror(err) << " (" << err << ")";
+                      << "\": " << snd_strerror (err) << " (" << err << ")";
 
             JUCE_ALSA_LOG ("snd_pcm_open failed; " << error);
         }

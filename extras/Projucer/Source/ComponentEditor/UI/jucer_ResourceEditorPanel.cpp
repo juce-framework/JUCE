@@ -95,7 +95,7 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
     document.addChangeListener (this);
     handleCommandMessage (1);
 
-    lookAndFeelChanged();
+    updateLookAndFeel();
 }
 
 ResourceEditorPanel::~ResourceEditorPanel()
@@ -180,10 +180,15 @@ int ResourceEditorPanel::getColumnAutoSizeWidth (int columnId)
     return widest + 10;
 }
 
-void ResourceEditorPanel::lookAndFeelChanged()
+void ResourceEditorPanel::updateLookAndFeel()
 {
     listBox->setColour (ListBox::backgroundColourId, findColour (secondaryBackgroundColourId));
     listBox->setColour (ListBox::outlineColourId, Colours::transparentBlack);
+}
+
+void ResourceEditorPanel::lookAndFeelChanged()
+{
+    updateLookAndFeel();
 }
 
 //==============================================================================

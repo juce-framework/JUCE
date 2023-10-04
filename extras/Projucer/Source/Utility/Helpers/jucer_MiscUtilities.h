@@ -110,7 +110,7 @@ struct PropertyListBuilder
     void setPreferredHeight (int height)
     {
         for (int j = components.size(); --j >= 0;)
-            components.getUnchecked(j)->setPreferredHeight (height);
+            components.getUnchecked (j)->setPreferredHeight (height);
     }
 
     Array<PropertyComponent*> components;
@@ -119,8 +119,8 @@ struct PropertyListBuilder
 //==============================================================================
 // A ValueSource which takes an input source, and forwards any changes in it.
 // This class is a handy way to create sources which re-map a value.
-class ValueSourceFilter   : public Value::ValueSource,
-                            private Value::Listener
+class ValueSourceFilter : public Value::ValueSource,
+                          private Value::Listener
 {
 public:
     ValueSourceFilter (const Value& source)  : sourceValue (source)

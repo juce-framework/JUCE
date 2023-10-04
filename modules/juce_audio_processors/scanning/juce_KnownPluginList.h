@@ -224,7 +224,7 @@ public:
     // to store the plug-in list at a point in time and use it when calling these methods.
     [[deprecated]] void addToMenu (PopupMenu& menu, SortMethod sortMethod, const String& currentlyTickedPluginID = {}) const;
     [[deprecated]] int getIndexChosenByMenu (int menuResultCode) const;
-    [[deprecated]] std::unique_ptr<PluginTree> createTree (const SortMethod sortMethod) const;
+    [[deprecated]] std::unique_ptr<PluginTree> createTree (SortMethod sortMethod) const;
    #endif
 
 private:

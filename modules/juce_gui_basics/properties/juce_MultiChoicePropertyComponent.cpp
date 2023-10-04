@@ -209,12 +209,12 @@ int MultiChoicePropertyComponent::getTotalButtonsHeight (int numButtons)
 
 MultiChoicePropertyComponent::MultiChoicePropertyComponent (const String& propertyName,
                                                             const StringArray& choices,
-                                                            const Array<var>& correspondingValues)
+                                                            [[maybe_unused]] const Array<var>& correspondingValues)
     : PropertyComponent (propertyName, jmin (getTotalButtonsHeight (choices.size()), collapsedHeight))
 {
     // The array of corresponding values must contain one value for each of the items in
     // the choices array!
-    jassertquiet (choices.size() == correspondingValues.size());
+    jassert (choices.size() == correspondingValues.size());
 
     for (auto choice : choices)
         addAndMakeVisible (choiceButtons.add (new ToggleButton (choice)));
@@ -334,8 +334,7 @@ void MultiChoicePropertyComponent::setExpanded (bool shouldBeExpanded) noexcept
     if (auto* propertyPanel = findParentComponentOfClass<PropertyPanel>())
         propertyPanel->resized();
 
-    if (onHeightChange != nullptr)
-        onHeightChange();
+    NullCheckedInvocation::invoke (onHeightChange);
 
     expandButton.setTransform (AffineTransform::rotation (expanded ? MathConstants<float>::pi : MathConstants<float>::twoPi,
                                                           (float) expandButton.getBounds().getCentreX(),

@@ -49,7 +49,7 @@ int AudioCDReader::getCDDBId()
     const int numTracks = getNumTracks();
 
     for (int i = 0; i < numTracks; ++i)
-        for (int offset = (trackStartSamples.getUnchecked(i) + 88200) / 44100; offset > 0; offset /= 10)
+        for (int offset = (trackStartSamples.getUnchecked (i) + 88200) / 44100; offset > 0; offset /= 10)
             checksum += offset % 10;
 
     const int length = (trackStartSamples.getLast() - trackStartSamples.getFirst()) / 44100;

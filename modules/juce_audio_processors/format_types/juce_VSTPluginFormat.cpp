@@ -379,8 +379,8 @@ public:
 private:
     VSTXMLInfo (const juce::XmlElement& xml)
     {
-        switchValueType.entries.add (new Entry({ TRANS("Off"), Range ("[0, 0.5[") }));
-        switchValueType.entries.add (new Entry({ TRANS("On"),  Range ("[0.5, 1]") }));
+        switchValueType.entries.add (new Entry ({ TRANS ("Off"), Range ("[0, 0.5[") }));
+        switchValueType.entries.add (new Entry ({ TRANS ("On"),  Range ("[0.5, 1]") }));
 
         for (auto* item : xml.getChildIterator())
         {
@@ -443,7 +443,7 @@ private:
 
             if (entryXml->hasAttribute ("value"))
             {
-                entry->range.set(entryXml->getStringAttribute ("value"));
+                entry->range.set (entryXml->getStringAttribute ("value"));
             }
             else
             {
@@ -741,16 +741,16 @@ struct ModuleHandle    : public ReferenceCountedObject
                 {
                     if (CFBundleLoadExecutable (bundleRef.get()))
                     {
-                        moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef.get(), CFSTR("main_macho"));
+                        moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef.get(), CFSTR ("main_macho"));
 
                         if (moduleMain == nullptr)
-                            moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef.get(), CFSTR("VSTPluginMain"));
+                            moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef.get(), CFSTR ("VSTPluginMain"));
 
                         JUCE_VST_WRAPPER_LOAD_CUSTOM_MAIN
 
                         if (moduleMain != nullptr)
                         {
-                            if (CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleName")))
+                            if (CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleName")))
                             {
                                 if (CFGetTypeID (name) == CFStringGetTypeID())
                                 {
@@ -778,7 +778,7 @@ struct ModuleHandle    : public ReferenceCountedObject
                                                     .findChildFiles (File::findFiles, false, "*.vstxml");
 
                             if (! vstXmlFiles.isEmpty())
-                                vstXml = parseXML (vstXmlFiles.getReference(0));
+                                vstXml = parseXML (vstXmlFiles.getReference (0));
                         }
                     }
 
@@ -1996,9 +1996,9 @@ private:
     {
         VST2BypassParameter (VSTPluginInstance& effectToUse)
             : parent (effectToUse),
-              vstOnStrings (TRANS("on"), TRANS("yes"), TRANS("true")),
-              vstOffStrings (TRANS("off"), TRANS("no"), TRANS("false")),
-              values (TRANS("Off"), TRANS("On"))
+              vstOnStrings (TRANS ("on"), TRANS ("yes"), TRANS ("true")),
+              vstOffStrings (TRANS ("off"), TRANS ("no"), TRANS ("false")),
+              values (TRANS ("Off"), TRANS ("On"))
         {
         }
 
@@ -2028,7 +2028,7 @@ private:
         float getValue() const override                                     { return currentValue; }
         float getDefaultValue() const override                              { return 0.0f; }
         String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
-        String getText (float value, int) const override                    { return (! approximatelyEqual (value, 0.0f) ? TRANS("On") : TRANS("Off")); }
+        String getText (float value, int) const override                    { return (! approximatelyEqual (value, 0.0f) ? TRANS ("On") : TRANS ("Off")); }
         bool isAutomatable() const override                                 { return true; }
         bool isDiscrete() const override                                    { return true; }
         bool isBoolean() const override                                     { return true; }
@@ -2121,7 +2121,7 @@ private:
             handleUpdateNowIfNeeded();
 
             for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                if (auto* p = ComponentPeer::getPeer(i))
+                if (auto* p = ComponentPeer::getPeer (i))
                     p->performAnyPendingRepaintsNow();
         }
     }

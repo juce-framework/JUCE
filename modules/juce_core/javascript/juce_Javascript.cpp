@@ -288,7 +288,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         ResultCode perform (const Scope& s, var* returnedValue) const override
         {
-            return (condition->getResult(s) ? trueBranch : falseBranch)->perform (s, returnedValue);
+            return (condition->getResult (s) ? trueBranch : falseBranch)->perform (s, returnedValue);
         }
 
         ExpPtr condition;
@@ -793,7 +793,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             DynamicObject::Ptr newObject (new DynamicObject());
 
             for (int i = 0; i < names.size(); ++i)
-                newObject->setProperty (names.getUnchecked(i), initialisers.getUnchecked(i)->getResult (s));
+                newObject->setProperty (names.getUnchecked (i), initialisers.getUnchecked (i)->getResult (s));
 
             return newObject.get();
         }
@@ -811,7 +811,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             Array<var> a;
 
             for (int i = 0; i < values.size(); ++i)
-                a.add (values.getUnchecked(i)->getResult (s));
+                a.add (values.getUnchecked (i)->getResult (s));
 
             // std::move() needed here for older compilers
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wredundant-move")
@@ -848,7 +848,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             functionRoot->setProperty (thisIdent, args.thisObject);
 
             for (int i = 0; i < parameters.size(); ++i)
-                functionRoot->setProperty (parameters.getReference(i),
+                functionRoot->setProperty (parameters.getReference (i),
                                            i < args.numArguments ? args.arguments[i] : var::undefined());
 
             var result;
@@ -1641,7 +1641,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 auto target = get (a, 0);
 
                 for (int i = (a.numArguments > 1 ? getInt (a, 1) : 0); i < array->size(); ++i)
-                    if (array->getReference(i) == target)
+                    if (array->getReference (i) == target)
                         return i;
             }
 
@@ -1780,7 +1780,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         {
             auto s = getString (a, 0).trim();
 
-            return s[0] == '0' ? (s[1] == 'x' ? s.substring(2).getHexValue64() : getOctalValue (s))
+            return s[0] == '0' ? (s[1] == 'x' ? s.substring (2).getHexValue64() : getOctalValue (s))
                                : s.getLargeIntValue();
         }
     };

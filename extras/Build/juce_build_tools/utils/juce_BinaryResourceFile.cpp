@@ -90,7 +90,7 @@ namespace build_tools
 
         for (int i = 0; i < files.size(); ++i)
         {
-            auto& file = files.getReference(i);
+            auto& file = files.getReference (i);
 
             if (! file.existsAsFile())
                 return Result::fail ("Can't open resource file: " + file.getFullPathName());
@@ -142,7 +142,7 @@ namespace build_tools
 
         while (i < files.size())
         {
-            auto& file = files.getReference(i);
+            auto& file = files.getReference (i);
             auto variableName = variableNames[i];
 
             FileInputStream fileStream (file);

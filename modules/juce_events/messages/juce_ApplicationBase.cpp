@@ -183,7 +183,7 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
  extern void initialiseNSApplication();
 #endif
 
-#if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+#if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined (JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
  extern "C" int juce_gtkWebkitMain (int argc, const char* const* argv);
 #endif
 
@@ -290,9 +290,9 @@ bool JUCEApplicationBase::initialiseApp()
         // a redirect or similar.
         FILE* ignore;
 
-        if (_fileno(stdout) < 0) freopen_s (&ignore, "CONOUT$", "w", stdout);
-        if (_fileno(stderr) < 0) freopen_s (&ignore, "CONOUT$", "w", stderr);
-        if (_fileno(stdin)  < 0) freopen_s (&ignore, "CONIN$",  "r", stdin);
+        if (_fileno (stdout) < 0) freopen_s (&ignore, "CONOUT$", "w", stdout);
+        if (_fileno (stderr) < 0) freopen_s (&ignore, "CONOUT$", "w", stderr);
+        if (_fileno (stdin)  < 0) freopen_s (&ignore, "CONIN$",  "r", stdin);
     }
    #endif
 

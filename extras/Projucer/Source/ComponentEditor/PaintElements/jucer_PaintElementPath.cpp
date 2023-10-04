@@ -203,7 +203,7 @@ void PaintElementPath::setCurrentBounds (const Rectangle<int>& b,
 
         for (int i = 0; i < points.size(); ++i)
         {
-            PathPoint* const destPoint = points.getUnchecked(i);
+            PathPoint* const destPoint = points.getUnchecked (i);
             PathPoint p (*destPoint);
 
             for (int j = p.getNumPoints(); --j >= 0;)
@@ -455,14 +455,14 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     {
         s << "    ";
         fillType.fillInGeneratedCode ("fill", zero, code, s);
-        s << "    g.fillPath (" << pathVariable << ", juce::AffineTransform::translation(x, y));\n";
+        s << "    g.fillPath (" << pathVariable << ", juce::AffineTransform::translation (x, y));\n";
     }
 
     if (isStrokePresent && ! strokeType.isInvisible())
     {
         s << "    ";
         strokeType.fill.fillInGeneratedCode ("stroke", zero, code, s);
-        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", juce::AffineTransform::translation(x, y));\n";
+        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", juce::AffineTransform::translation (x, y));\n";
     }
 
     s << "}\n\n";
@@ -477,7 +477,7 @@ void PaintElementPath::applyCustomPaintSnippets (StringArray& snippets)
     if (! snippets.isEmpty() && (! fillType.isInvisible() || (isStrokePresent && ! strokeType.isInvisible())))
     {
         customPaintCode = snippets[0];
-        snippets.remove(0);
+        snippets.remove (0);
     }
 }
 
@@ -517,7 +517,7 @@ void PaintElementPath::createSiblingComponents()
 
     for (int i = 0; i < points.size(); ++i)
     {
-        switch (points.getUnchecked(i)->type)
+        switch (points.getUnchecked (i)->type)
         {
             case Path::Iterator::startNewSubPath:
                 siblingComponents.add (new PathPointComponent (this, i, 0));
@@ -544,8 +544,8 @@ void PaintElementPath::createSiblingComponents()
 
     for (int i = 0; i < siblingComponents.size(); ++i)
     {
-        getParentComponent()->addAndMakeVisible (siblingComponents.getUnchecked(i));
-        siblingComponents.getUnchecked(i)->updatePosition();
+        getParentComponent()->addAndMakeVisible (siblingComponents.getUnchecked (i));
+        siblingComponents.getUnchecked (i)->updatePosition();
     }
 }
 
@@ -556,7 +556,7 @@ String PaintElementPath::pathToString() const
 
     for (int i = 0; i < points.size(); ++i)
     {
-        const PathPoint* const p = points.getUnchecked(i);
+        const PathPoint* const p = points.getUnchecked (i);
 
         switch (p->type)
         {
@@ -703,7 +703,7 @@ void PaintElementPath::updateStoredPath (const ComponentLayout* layout, const Re
 
         for (int i = 0; i < points.size(); ++i)
         {
-            const PathPoint* const p = points.getUnchecked(i);
+            const PathPoint* const p = points.getUnchecked (i);
 
             switch (p->type)
             {
@@ -1017,6 +1017,7 @@ bool PaintElementPath::getPoint (int index, int pointNumber, double& x, double& 
     if (pointNumber >= PathPoint::maxRects)
     {
         jassertfalse;
+        x = y = 0;
         return false;
     }
 

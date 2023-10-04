@@ -379,7 +379,7 @@ private:
             {
                 NSError* error = nil;
 
-                int successCount = 0;
+                [[maybe_unused]] int successCount = 0;
 
                 for (NSString* key : assetKeys.get())
                 {
@@ -409,7 +409,7 @@ private:
                     }
                 }
 
-                jassertquiet (successCount == (int) [assetKeys.get() count]);
+                jassert (successCount == (int) [assetKeys.get() count]);
                 preparePlayerItem();
             }
 
@@ -810,20 +810,17 @@ private:
 
     void errorOccurred (const String& errorMessage)
     {
-        if (owner.onErrorOccurred != nullptr)
-            owner.onErrorOccurred (errorMessage);
+        NullCheckedInvocation::invoke (owner.onErrorOccurred, errorMessage);
     }
 
     void playbackStarted()
     {
-        if (owner.onPlaybackStarted != nullptr)
-            owner.onPlaybackStarted();
+        NullCheckedInvocation::invoke (owner.onPlaybackStarted);
     }
 
     void playbackStopped()
     {
-        if (owner.onPlaybackStopped != nullptr)
-            owner.onPlaybackStopped();
+        NullCheckedInvocation::invoke (owner.onPlaybackStopped);
     }
 
     void playbackReachedEndTime()

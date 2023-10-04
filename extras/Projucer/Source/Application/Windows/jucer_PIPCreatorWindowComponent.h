@@ -57,8 +57,8 @@ static String getWidthLimitedStringFromVarArray (const var& varArray) noexcept
 }
 
 //==============================================================================
-class PIPCreatorWindowComponent    : public Component,
-                                     private ValueTree::Listener
+class PIPCreatorWindowComponent final : public Component,
+                                        private ValueTree::Listener
 {
 public:
     PIPCreatorWindowComponent()
@@ -109,7 +109,7 @@ public:
 
 private:
     //==============================================================================
-    struct PIPCreatorLookAndFeel    : public ProjucerLookAndFeel
+    struct PIPCreatorLookAndFeel final : public ProjucerLookAndFeel
     {
         PIPCreatorLookAndFeel()    {}
 

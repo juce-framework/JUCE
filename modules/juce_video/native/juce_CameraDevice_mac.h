@@ -146,17 +146,9 @@ struct CameraDevice::Pimpl
        #if JUCE_USE_NEW_CAMERA_API
         if (@available (macOS 10.15, *))
         {
-            const auto deviceType = [&]
-            {
-               #if defined (MAC_OS_VERSION_14_0) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_VERSION_14_0
-                if (@available (macOS 14.0, *))
-                    return AVCaptureDeviceTypeExternal;
-               #endif
-
-                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations", "-Wunguarded-availability-new")
-                return AVCaptureDeviceTypeExternalUnknown;
-                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-            }();
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            const auto deviceType = AVCaptureDeviceTypeExternalUnknown;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             auto* discovery = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes: @[AVCaptureDeviceTypeBuiltInWideAngleCamera, deviceType]
                                                                                      mediaType: AVMediaTypeVideo
@@ -531,8 +523,8 @@ private:
 
         MessageManager::callAsync ([weakRef = WeakReference<Pimpl> { this }, image]() mutable
         {
-            if (weakRef != nullptr && weakRef->pictureTakenCallback != nullptr)
-                weakRef->pictureTakenCallback (image);
+            if (weakRef != nullptr)
+                NullCheckedInvocation::invoke (weakRef->pictureTakenCallback, image);
         });
     }
 
@@ -559,8 +551,7 @@ private:
     {
         JUCE_CAMERA_LOG ("cameraSessionRuntimeError(), error = " + error);
 
-        if (owner.onErrorOccurred != nullptr)
-            owner.onErrorOccurred (error);
+        NullCheckedInvocation::invoke (owner.onErrorOccurred, error);
     }
 
     //==============================================================================

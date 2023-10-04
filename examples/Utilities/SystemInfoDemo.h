@@ -219,7 +219,7 @@ static String getAllSystemInfo()
     return systemInfo;
 }
 
-class SystemInfoDemo  : public Component
+class SystemInfoDemo final : public Component
 {
 public:
     SystemInfoDemo()

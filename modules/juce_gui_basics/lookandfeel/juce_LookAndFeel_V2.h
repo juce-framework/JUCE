@@ -243,19 +243,19 @@ public:
     //==============================================================================
     void drawLinearSlider (Graphics&, int x, int y, int width, int height,
                            float sliderPos, float minSliderPos, float maxSliderPos,
-                           const Slider::SliderStyle, Slider&) override;
+                           Slider::SliderStyle, Slider&) override;
 
     void drawLinearSliderBackground (Graphics&, int x, int y, int width, int height,
                                      float sliderPos, float minSliderPos, float maxSliderPos,
-                                     const Slider::SliderStyle, Slider&) override;
+                                     Slider::SliderStyle, Slider&) override;
 
     void drawLinearSliderOutline (Graphics&, int x, int y, int width, int height,
-                                  const Slider::SliderStyle, Slider&) override;
+                                  Slider::SliderStyle, Slider&) override;
 
 
     void drawLinearSliderThumb (Graphics&, int x, int y, int width, int height,
                                 float sliderPos, float minSliderPos, float maxSliderPos,
-                                const Slider::SliderStyle, Slider&) override;
+                                Slider::SliderStyle, Slider&) override;
 
     void drawRotarySlider (Graphics&, int x, int y, int width, int height,
                            float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle,

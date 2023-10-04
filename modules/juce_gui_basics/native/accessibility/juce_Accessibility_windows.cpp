@@ -246,9 +246,9 @@ struct SpVoiceWrapper  : public DeletedAtShutdown
 {
     SpVoiceWrapper()
     {
-        auto hr = voice.CoCreateInstance (ComTypes::CLSID_SpVoice);
+        [[maybe_unused]] auto hr = voice.CoCreateInstance (ComTypes::CLSID_SpVoice);
 
-        jassertquiet (SUCCEEDED (hr));
+        jassert (SUCCEEDED (hr));
     }
 
     ~SpVoiceWrapper() override

@@ -90,13 +90,13 @@ void MixerAudioSource::removeAllInputs()
 
         for (int i = inputs.size(); --i >= 0;)
             if (inputsToDelete[i])
-                toDelete.add (inputs.getUnchecked(i));
+                toDelete.add (inputs.getUnchecked (i));
 
         inputs.clear();
     }
 
     for (int i = toDelete.size(); --i >= 0;)
-        toDelete.getUnchecked(i)->releaseResources();
+        toDelete.getUnchecked (i)->releaseResources();
 }
 
 void MixerAudioSource::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
@@ -109,7 +109,7 @@ void MixerAudioSource::prepareToPlay (int samplesPerBlockExpected, double sample
     bufferSizeExpected = samplesPerBlockExpected;
 
     for (int i = inputs.size(); --i >= 0;)
-        inputs.getUnchecked(i)->prepareToPlay (samplesPerBlockExpected, sampleRate);
+        inputs.getUnchecked (i)->prepareToPlay (samplesPerBlockExpected, sampleRate);
 }
 
 void MixerAudioSource::releaseResources()
@@ -117,7 +117,7 @@ void MixerAudioSource::releaseResources()
     const ScopedLock sl (lock);
 
     for (int i = inputs.size(); --i >= 0;)
-        inputs.getUnchecked(i)->releaseResources();
+        inputs.getUnchecked (i)->releaseResources();
 
     tempBuffer.setSize (2, 0);
 
@@ -131,7 +131,7 @@ void MixerAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
 
     if (inputs.size() > 0)
     {
-        inputs.getUnchecked(0)->getNextAudioBlock (info);
+        inputs.getUnchecked (0)->getNextAudioBlock (info);
 
         if (inputs.size() > 1)
         {
@@ -142,7 +142,7 @@ void MixerAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
 
             for (int i = 1; i < inputs.size(); ++i)
             {
-                inputs.getUnchecked(i)->getNextAudioBlock (info2);
+                inputs.getUnchecked (i)->getNextAudioBlock (info2);
 
                 for (int chan = 0; chan < info.buffer->getNumChannels(); ++chan)
                     info.buffer->addFrom (chan, info.startSample, tempBuffer, chan, 0, info.numSamples);

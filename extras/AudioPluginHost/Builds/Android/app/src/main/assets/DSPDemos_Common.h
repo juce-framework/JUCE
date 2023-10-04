@@ -38,7 +38,7 @@ struct DSPDemoParameterBase    : public ChangeBroadcaster
 };
 
 //==============================================================================
-struct SliderParameter   : public DSPDemoParameterBase
+struct SliderParameter final : public DSPDemoParameterBase
 {
     SliderParameter (Range<double> range, double skew, double initialValue,
                      const String& labelName, const String& suffix = {})
@@ -66,7 +66,7 @@ private:
 };
 
 //==============================================================================
-struct ChoiceParameter    : public DSPDemoParameterBase
+struct ChoiceParameter final : public DSPDemoParameterBase
 {
     ChoiceParameter (const StringArray& options, int initialId, const String& labelName)
         : DSPDemoParameterBase (labelName)
@@ -89,11 +89,11 @@ private:
 };
 
 //==============================================================================
-class AudioThumbnailComponent    : public Component,
-                                   public FileDragAndDropTarget,
-                                   public ChangeBroadcaster,
-                                   private ChangeListener,
-                                   private Timer
+class AudioThumbnailComponent final : public Component,
+                                      public FileDragAndDropTarget,
+                                      public ChangeBroadcaster,
+                                      private ChangeListener,
+                                      private Timer
 {
 public:
     AudioThumbnailComponent (AudioDeviceManager& adm, AudioFormatManager& afm)
@@ -217,7 +217,7 @@ private:
 };
 
 //==============================================================================
-class DemoParametersComponent    : public Component
+class DemoParametersComponent final : public Component
 {
 public:
     DemoParametersComponent (const std::vector<DSPDemoParameterBase*>& demoParams)
@@ -270,9 +270,9 @@ private:
 
 //==============================================================================
 template <class DemoType>
-struct DSPDemo  : public AudioSource,
-                  public ProcessorWrapper<DemoType>,
-                  private ChangeListener
+struct DSPDemo final : public AudioSource,
+                       public ProcessorWrapper<DemoType>,
+                       private ChangeListener
 {
     DSPDemo (AudioSource& input)
         : inputSource (&input)
@@ -327,10 +327,10 @@ struct DSPDemo  : public AudioSource,
 
 //==============================================================================
 template <class DemoType>
-class AudioFileReaderComponent  : public Component,
-                                  private TimeSliceThread,
-                                  private Value::Listener,
-                                  private ChangeListener
+class AudioFileReaderComponent final : public Component,
+                                       private TimeSliceThread,
+                                       private Value::Listener,
+                                       private ChangeListener
 {
 public:
     //==============================================================================
@@ -379,7 +379,7 @@ public:
 
         r.removeFromTop (20);
 
-        if (parametersComponent.get() != nullptr)
+        if (parametersComponent != nullptr)
             parametersComponent->setBounds (r.removeFromTop (parametersComponent->getHeightNeeded()).reduced (20, 0));
     }
 
@@ -443,7 +443,7 @@ public:
             transportSource.reset (new AudioTransportSource());
             transportSource->addChangeListener (this);
 
-            if (readerSource.get() != nullptr)
+            if (readerSource != nullptr)
             {
                 if (auto* device = audioDeviceManager.getCurrentAudioDevice())
                 {
@@ -475,7 +475,7 @@ public:
 
     void play()
     {
-        if (readerSource.get() == nullptr)
+        if (readerSource == nullptr)
             return;
 
         if (transportSource->getCurrentPosition() >= transportSource->getLengthInSeconds()
@@ -488,7 +488,7 @@ public:
 
     void setLooping (bool shouldLoop)
     {
-        if (readerSource.get() != nullptr)
+        if (readerSource != nullptr)
             readerSource->setLooping (shouldLoop);
     }
 
@@ -496,9 +496,9 @@ public:
 
 private:
     //==============================================================================
-    class AudioPlayerHeader     : public Component,
-                                  private ChangeListener,
-                                  private Value::Listener
+    class AudioPlayerHeader final : public Component,
+                                    private ChangeListener,
+                                    private Value::Listener
     {
     public:
         AudioPlayerHeader (AudioDeviceManager& adm,
@@ -633,7 +633,7 @@ private:
     //==============================================================================
     void valueChanged (Value& v) override
     {
-        if (readerSource.get() != nullptr)
+        if (readerSource != nullptr)
             readerSource->setLooping (v.getValue());
     }
 

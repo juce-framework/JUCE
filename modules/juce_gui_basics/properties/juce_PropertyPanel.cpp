@@ -200,7 +200,7 @@ PropertyPanel::PropertyPanel (const String& name)  : Component (name)
 
 void PropertyPanel::init()
 {
-    messageWhenEmpty = TRANS("(nothing selected)");
+    messageWhenEmpty = TRANS ("(nothing selected)");
 
     addAndMakeVisible (viewport);
     viewport.setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());

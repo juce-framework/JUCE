@@ -216,12 +216,13 @@ static std::vector<PluginDescription> createPluginDescriptions (const File& plug
         description.lastFileModTime     = pluginFile.getLastModificationTime();
         description.lastInfoUpdateTime  = Time::getCurrentTime();
         description.manufacturerName    = CharPointer_UTF8 (info.factoryInfo.vendor.c_str());
-        description.name                = CharPointer_UTF8 (info.name.c_str());
-        description.descriptiveName     = CharPointer_UTF8 (info.name.c_str());
+        description.name                = CharPointer_UTF8 (c.name.c_str());
+        description.descriptiveName     = CharPointer_UTF8 (c.name.c_str());
         description.pluginFormatName    = "VST3";
         description.numInputChannels    = 0;
         description.numOutputChannels   = 0;
         description.hasARAExtension     = araMainFactoryClassNames.find (description.name) != araMainFactoryClassNames.end();
+        description.version             = CharPointer_UTF8 (c.version.c_str());
 
         const auto uid = VST3::UID::fromString (c.cid);
 
@@ -485,7 +486,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
         {
             for (int i = items.size(); --i >= 0;)
             {
-                auto& item = items.getReference(i);
+                auto& item = items.getReference (i);
 
                 if (item.item.tag == toRemove.tag && item.target == target)
                     items.remove (i);
@@ -498,7 +499,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
         {
             for (int i = 0; i < items.size(); ++i)
             {
-                auto& item = items.getReference(i);
+                auto& item = items.getReference (i);
 
                 if (item.item.tag == tag)
                 {
@@ -545,7 +546,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
 
             for (int i = 0; i < items.size(); ++i)
             {
-                auto& item = items.getReference(i);
+                auto& item = items.getReference (i);
 
                 if ((int) item.item.tag == result)
                 {
@@ -1023,7 +1024,7 @@ struct DLLHandle
             if (factory != nullptr)
                 factory->release();
 
-            using ExitModuleFn = bool (PLUGIN_API*) ();
+            using ExitModuleFn = bool (PLUGIN_API*)();
 
             if (auto* exitFn = (ExitModuleFn) getFunction (exitFnName))
                 exitFn();
@@ -1076,7 +1077,7 @@ private:
     static constexpr const char* entryFnName = "InitDll";
     static constexpr const char* exitFnName  = "ExitDll";
 
-    using EntryProc = bool (PLUGIN_API*) ();
+    using EntryProc = bool (PLUGIN_API*)();
    #elif JUCE_LINUX || JUCE_BSD
     static constexpr const char* entryFnName = "ModuleEntry";
     static constexpr const char* exitFnName  = "ModuleExit";
@@ -3618,7 +3619,7 @@ private:
 
             for (int idx = 0; idx < unitCount; ++idx)
             {
-                if (unitInfo->getUnitInfo(idx, uInfo) == kResultOk
+                if (unitInfo->getUnitInfo (idx, uInfo) == kResultOk
                       && uInfo.id == programUnitID)
                 {
                     const int programListCount = unitInfo->getProgramListCount();

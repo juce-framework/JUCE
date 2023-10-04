@@ -260,18 +260,18 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    void call (void (ListenerClass::*callbackFunction) ())
+    void call (void (ListenerClass::*callbackFunction)())
     {
         call ([=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
 
-    void callExcluding (ListenerClass* listenerToExclude, void (ListenerClass::*callbackFunction) ())
+    void callExcluding (ListenerClass* listenerToExclude, void (ListenerClass::*callbackFunction)())
     {
         callExcluding (listenerToExclude, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
 
     template <class BailOutCheckerType>
-    void callChecked (const BailOutCheckerType& bailOutChecker, void (ListenerClass::*callbackFunction) ())
+    void callChecked (const BailOutCheckerType& bailOutChecker, void (ListenerClass::*callbackFunction)())
     {
         callChecked (bailOutChecker, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
@@ -279,7 +279,7 @@ public:
     template <class BailOutCheckerType>
     void callCheckedExcluding (ListenerClass* listenerToExclude,
                                const BailOutCheckerType& bailOutChecker,
-                               void (ListenerClass::*callbackFunction) ())
+                               void (ListenerClass::*callbackFunction)())
     {
         callCheckedExcluding (listenerToExclude, bailOutChecker, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }

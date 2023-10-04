@@ -575,9 +575,9 @@ public:
     */
     void addBubble (Rectangle<float> bodyArea,
                     Rectangle<float> maximumArea,
-                    const Point<float> arrowTipPosition,
-                    const float cornerSize,
-                    const float arrowBaseWidth);
+                    Point<float> arrowTipPosition,
+                    float cornerSize,
+                    float arrowBaseWidth);
 
     /** Adds another path to this one.
 

@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class AboutWindowComponent    : public Component
+class AboutWindowComponent final : public Component
 {
 public:
     AboutWindowComponent()

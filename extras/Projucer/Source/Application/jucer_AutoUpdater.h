@@ -29,8 +29,8 @@
 
 class DownloadAndInstallThread;
 
-class LatestVersionCheckerAndUpdater   : public DeletedAtShutdown,
-                                         private Thread
+class LatestVersionCheckerAndUpdater final : public DeletedAtShutdown,
+                                             private Thread
 {
 public:
     LatestVersionCheckerAndUpdater();

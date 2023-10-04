@@ -32,7 +32,7 @@
 /**
     Manages the internal plugin types.
 */
-class InternalPluginFormat   : public AudioPluginFormat
+class InternalPluginFormat final : public AudioPluginFormat
 {
 public:
     //==============================================================================

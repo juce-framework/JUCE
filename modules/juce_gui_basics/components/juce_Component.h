@@ -2626,7 +2626,7 @@ private:
     void internalMouseEnter (MouseInputSource, Point<float>, Time);
     void internalMouseExit  (MouseInputSource, Point<float>, Time);
     void internalMouseDown  (MouseInputSource, const detail::PointerState&, Time);
-    void internalMouseUp    (MouseInputSource, const detail::PointerState&, Time, const ModifierKeys oldModifiers);
+    void internalMouseUp    (MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
     void internalMouseDrag  (MouseInputSource, const detail::PointerState&, Time);
     void internalMouseMove  (MouseInputSource, Point<float>, Time);
     void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);

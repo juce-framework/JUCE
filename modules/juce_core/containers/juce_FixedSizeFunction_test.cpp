@@ -312,14 +312,26 @@ public:
         {
             JUCE_FAIL_ON_ALLOCATION_IN_SCOPE;
 
-            using Fn = FixedSizeFunction<64, int (std::unique_ptr<int>)>;
+            using FnA = FixedSizeFunction<64, int (std::unique_ptr<int>)>;
 
             auto value = 5;
             auto ptr = std::make_unique<int> (value);
 
-            Fn fn = [] (std::unique_ptr<int> p) { return *p; };
+            FnA fnA = [] (std::unique_ptr<int> p) { return *p; };
 
-            expect (value == fn (std::move (ptr)));
+            expect (value == fnA (std::move (ptr)));
+
+            using FnB = FixedSizeFunction<64, void (std::unique_ptr<int>&&)>;
+
+            FnB fnB = [&value] (std::unique_ptr<int>&& p)
+            {
+                auto x = std::move (p);
+                value = *x;
+            };
+
+            const auto newValue = 10;
+            fnB (std::make_unique<int> (newValue));
+            expect (value == newValue);
         }
 
         beginTest ("Functions be converted from smaller functions");

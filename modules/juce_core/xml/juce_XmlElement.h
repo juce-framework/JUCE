@@ -206,7 +206,7 @@ public:
     /** Returns the name of one of the elements attributes.
 
         E.g. for an element such as \<MOOSE legs="4" antlers="2">, then
-        getAttributeName(1) would return "antlers".
+        getAttributeName (1) would return "antlers".
 
         @see getAttributeValue, getStringAttribute
     */
@@ -215,7 +215,7 @@ public:
     /** Returns the value of one of the elements attributes.
 
         E.g. for an element such as \<MOOSE legs="4" antlers="2">, then
-        getAttributeName(1) would return "2".
+        getAttributeName (1) would return "2".
 
         @see getAttributeName, getStringAttribute
     */
@@ -689,7 +689,7 @@ private:
             return *this;
         }
 
-        Iterator operator++(int)
+        Iterator operator++ (int)
         {
             auto copy = *this;
             ++(*this);
@@ -790,7 +790,7 @@ private:
     void reorderChildElements (XmlElement**, int) noexcept;
     XmlAttributeNode* getAttribute (StringRef) const noexcept;
 
-    // Sigh.. L"" or _T("") string literals are problematic in general, and really inappropriate
+    // Sigh.. L"" or _T ("") string literals are problematic in general, and really inappropriate
     // for XML tags. Use a UTF-8 encoded literal instead, or if you're really determined to use
     // UTF-16, cast it to a String and use the other constructor.
     XmlElement (const wchar_t*) = delete;

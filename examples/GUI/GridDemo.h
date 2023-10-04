@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-struct GridDemo   : public Component
+struct GridDemo final : public Component
 {
     GridDemo()
     {

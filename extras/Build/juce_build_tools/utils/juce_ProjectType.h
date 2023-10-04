@@ -44,8 +44,8 @@ namespace build_tools
             const auto& types = getAllTypes();
 
             for (auto i = types.size(); --i >= 0;)
-                if (types.getUnchecked(i)->getType() == typeCode)
-                    return types.getUnchecked(i);
+                if (types.getUnchecked (i)->getType() == typeCode)
+                    return types.getUnchecked (i);
 
             jassertfalse;
             return nullptr;
@@ -319,7 +319,7 @@ namespace build_tools
         static ProjectType_AudioPlugin plugin;
         static ProjectType_ARAAudioPlugin araplugin;
 
-        return Array<ProjectType*>(&guiApp, &consoleApp, &staticLib, &dll, &plugin, &araplugin);
+        return Array<ProjectType*> (&guiApp, &consoleApp, &staticLib, &dll, &plugin, &araplugin);
     }
 }
 }

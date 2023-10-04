@@ -94,7 +94,7 @@ public:
         FloatingType y (0);
 
         for (int i = coeffs.size(); --i >= 0;)
-            y = (x * y) + coeffs.getUnchecked(i);
+            y = (x * y) + coeffs.getUnchecked (i);
 
         return y;
     }

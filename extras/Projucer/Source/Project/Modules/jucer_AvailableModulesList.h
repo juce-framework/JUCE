@@ -30,7 +30,7 @@
 #include <future>
 
 //==============================================================================
-class AvailableModulesList  : private AsyncUpdater
+class AvailableModulesList final : private AsyncUpdater
 {
 public:
     using ModuleIDAndFolder     = std::pair<String, File>;
@@ -157,7 +157,7 @@ private:
                     if (job->shouldExit())
                         return;
 
-                pathsToCheck.push({ iter.getFile(), path.depth + 1 });
+                pathsToCheck.push ({ iter.getFile(), path.depth + 1 });
             }
         }
     }

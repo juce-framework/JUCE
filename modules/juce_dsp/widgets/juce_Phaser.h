@@ -114,7 +114,7 @@ public:
 
         if (numSamplesDown > 0)
         {
-            auto freqBlock = AudioBlock<SampleType>(bufferFrequency).getSubBlock (0, (size_t) numSamplesDown);
+            auto freqBlock = AudioBlock<SampleType> (bufferFrequency).getSubBlock (0, (size_t) numSamplesDown);
             auto contextFreq = ProcessContextReplacing<SampleType> (freqBlock);
             freqBlock.clear();
 

@@ -219,7 +219,7 @@ AudioPluginInstance::Parameter::Parameter()
 String AudioPluginInstance::Parameter::getText (float value, int maximumStringLength) const
 {
     if (isBoolean())
-        return value < 0.5f ? TRANS("Off") : TRANS("On");
+        return value < 0.5f ? TRANS ("Off") : TRANS ("On");
 
     return String (value).substring (0, maximumStringLength);
 }

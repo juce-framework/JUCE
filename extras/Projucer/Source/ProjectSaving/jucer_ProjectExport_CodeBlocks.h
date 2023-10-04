@@ -28,7 +28,7 @@
 #include "jucer_ProjectExport_MSVC.h"
 
 //==============================================================================
-class CodeBlocksProjectExporter  : public ProjectExporter
+class CodeBlocksProjectExporter final : public ProjectExporter
 {
 public:
     enum CodeBlocksOS
@@ -65,7 +65,7 @@ public:
     CodeBlocksProjectExporter (Project& p, const ValueTree& t, CodeBlocksOS codeBlocksOs)
         : ProjectExporter (p, t), os (codeBlocksOs)
     {
-        if (isWindows())
+        if (isWindowsExporter())
         {
             name = getDisplayNameWindows();
             targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderNameWindows());
@@ -92,7 +92,7 @@ public:
     bool isAndroidStudio() const override            { return false; }
 
     bool isAndroid() const override                  { return false; }
-    bool isWindows() const override                  { return os == windowsTarget; }
+    bool isWindows() const override                  { return isWindowsExporter(); }
     bool isLinux() const override                    { return os == linuxTarget; }
     bool isOSX() const override                      { return false; }
     bool isiOS() const override                      { return false; }
@@ -195,10 +195,11 @@ public:
 private:
     ValueTreePropertyWithDefault targetPlatformValue;
 
+    bool isWindowsExporter() const            { return os == windowsTarget; }
     String getTargetPlatformString() const    { return targetPlatformValue.get(); }
 
     //==============================================================================
-    class CodeBlocksBuildConfiguration  : public BuildConfiguration
+    class CodeBlocksBuildConfiguration final : public BuildConfiguration
     {
     public:
         CodeBlocksBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -261,7 +262,7 @@ private:
         yes
     };
 
-    class CodeBlocksTarget : public build_tools::ProjectType::Target
+    class CodeBlocksTarget final : public build_tools::ProjectType::Target
     {
     public:
         CodeBlocksTarget (const CodeBlocksProjectExporter& e,
@@ -894,7 +895,7 @@ private:
         if (projectItem.isGroup())
         {
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addCompileUnits (projectItem.getChild(i), xml);
+                addCompileUnits (projectItem.getChild (i), xml);
         }
         else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
@@ -946,7 +947,7 @@ private:
         }
 
         for (int i = 0; i < getAllGroups().size(); ++i)
-            addCompileUnits (getAllGroups().getReference(i), xml);
+            addCompileUnits (getAllGroups().getReference (i), xml);
 
         if (hasResourceFile())
         {

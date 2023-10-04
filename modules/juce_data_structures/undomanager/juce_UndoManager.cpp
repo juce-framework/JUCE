@@ -43,7 +43,7 @@ struct UndoManager::ActionSet
     bool undo() const
     {
         for (int i = actions.size(); --i >= 0;)
-            if (! actions.getUnchecked(i)->undo())
+            if (! actions.getUnchecked (i)->undo())
                 return false;
 
         return true;

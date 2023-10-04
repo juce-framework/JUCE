@@ -469,7 +469,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
         auto v0 = std::asinh (epss) / (N * halfPi);
 
         if (r == 1)
-            pa.add(-1.0 / (k / omegap * std::sinh (v0 * halfPi)));
+            pa.add (-1.0 / (k / omegap * std::sinh (v0 * halfPi)));
 
         for (int i = 1; i <= L; ++i)
         {

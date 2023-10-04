@@ -67,7 +67,7 @@
 */
 
 //==============================================================================
-class VoicePurchases      : private InAppPurchases::Listener
+class VoicePurchases final : private InAppPurchases::Listener
 {
 public:
     //==============================================================================
@@ -278,7 +278,7 @@ private:
 };
 
 //==============================================================================
-class PhraseModel : public ListBoxModel
+class PhraseModel final : public ListBoxModel
 {
 public:
     PhraseModel() {}
@@ -308,12 +308,12 @@ private:
 };
 
 //==============================================================================
-class VoiceModel  : public ListBoxModel
+class VoiceModel final : public ListBoxModel
 {
 public:
     //==============================================================================
-    class VoiceRow  : public Component,
-                      private Timer
+    class VoiceRow final : public Component,
+                           private Timer
     {
     public:
         VoiceRow (VoicePurchases& voicePurchases) : purchases (voicePurchases)
@@ -491,8 +491,8 @@ private:
 };
 
 //==============================================================================
-class InAppPurchasesDemo : public Component,
-                           private AsyncUpdater
+class InAppPurchasesDemo final : public Component,
+                                 private AsyncUpdater
 {
 public:
     InAppPurchasesDemo()

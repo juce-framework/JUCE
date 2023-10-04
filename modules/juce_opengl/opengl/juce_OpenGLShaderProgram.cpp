@@ -60,7 +60,7 @@ void OpenGLShaderProgram::release() noexcept
 double OpenGLShaderProgram::getLanguageVersion()
 {
     return String::fromUTF8 ((const char*) glGetString (GL_SHADING_LANGUAGE_VERSION))
-            .retainCharacters("1234567890.").getDoubleValue();
+            .retainCharacters ("1234567890.").getDoubleValue();
 }
 
 bool OpenGLShaderProgram::addShader (const String& code, GLenum type)

@@ -64,7 +64,7 @@ namespace RelativeRectangleHelpers
         else
         {
             for (int i = e.getNumInputs(); --i >= 0;)
-                if (dependsOnSymbolsOtherThanThis (e.getInput(i)))
+                if (dependsOnSymbolsOtherThanThis (e.getInput (i)))
                     return true;
         }
 

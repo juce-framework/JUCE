@@ -322,8 +322,8 @@ public:
     {
         if (owner.isAutoSizeMenuOptionShown())
         {
-            menu.addItem (autoSizeColumnId, TRANS("Auto-size this column"), columnIdClicked != 0);
-            menu.addItem (autoSizeAllId, TRANS("Auto-size all columns"), owner.getHeader().getNumColumns (true) > 0);
+            menu.addItem (autoSizeColumnId, TRANS ("Auto-size this column"), columnIdClicked != 0);
+            menu.addItem (autoSizeAllId, TRANS ("Auto-size all columns"), owner.getHeader().getNumColumns (true) > 0);
             menu.addSeparator();
         }
 

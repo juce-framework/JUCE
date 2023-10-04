@@ -1344,7 +1344,7 @@ public:
         return testStream != nullptr && testStream->openedOk();
     }
 
-    pthread_t startThread (void*(*entry)(void*), void* userPtr)
+    pthread_t startThread (void*(*entry) (void*), void* userPtr)
     {
         pthread_mutex_lock (&threadReadyMutex);
 

@@ -28,10 +28,10 @@
 #include "../../Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"
 
 //==============================================================================
-class GlobalPathsWindowComponent    : public Component,
-                                      private Timer,
-                                      private Value::Listener,
-                                      private ChangeListener
+class GlobalPathsWindowComponent final : public Component,
+                                         private Timer,
+                                         private Value::Listener,
+                                         private ChangeListener
 {
 public:
     GlobalPathsWindowComponent()

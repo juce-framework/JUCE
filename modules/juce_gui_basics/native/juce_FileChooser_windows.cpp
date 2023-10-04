@@ -142,7 +142,7 @@ private:
 
         void resized() override
         {
-            if (Component* const c = getChildComponent(0))
+            if (Component* const c = getChildComponent (0))
                 c->setBounds (getLocalBounds());
         }
 

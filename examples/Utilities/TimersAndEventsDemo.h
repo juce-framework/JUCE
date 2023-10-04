@@ -50,7 +50,7 @@
 
 //==============================================================================
 /** Simple message that holds a Colour. */
-struct ColourMessage  : public Message
+struct ColourMessage final : public Message
 {
     ColourMessage (Colour col)  : colour (col) {}
 
@@ -73,10 +73,10 @@ struct ColourMessage  : public Message
     The flash will then fade using a Timer to repaint itself and will send a change
     message once it is finished.
  */
-class FlashingComponent   : public Component,
-                            public MessageListener,
-                            public ChangeBroadcaster,
-                            private Timer
+class FlashingComponent final : public Component,
+                                public MessageListener,
+                                public ChangeBroadcaster,
+                                private Timer
 {
 public:
     FlashingComponent() {}
@@ -144,8 +144,8 @@ private:
 };
 
 //==============================================================================
-class TimersAndEventsDemo   : public Component,
-                              private ChangeListener
+class TimersAndEventsDemo final : public Component,
+                                  private ChangeListener
 {
 public:
     TimersAndEventsDemo()

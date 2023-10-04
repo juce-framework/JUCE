@@ -66,7 +66,7 @@ void PluginGraph::changeListenerCallback (ChangeBroadcaster*)
     changed();
 
     for (int i = activePluginWindows.size(); --i >= 0;)
-        if (! graph.getNodes().contains (activePluginWindows.getUnchecked(i)->node))
+        if (! graph.getNodes().contains (activePluginWindows.getUnchecked (i)->node))
             activePluginWindows.remove (i);
 }
 

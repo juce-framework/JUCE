@@ -379,7 +379,7 @@ public:
             {
            #else
             curl_off_t curlLength;
-            if (symbols->curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &curlLength) == CURLE_OK)
+            if (symbols->curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &curlLength) == CURLE_OK)
             {
            #endif
                 contentLength = static_cast<int64> (curlLength);

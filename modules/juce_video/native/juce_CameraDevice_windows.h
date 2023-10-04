@@ -67,7 +67,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             }
         }
 
-        hr = graphBuilder->AddFilter (filter, _T("Video Capture"));
+        hr = graphBuilder->AddFilter (filter, _T ("Video Capture"));
         if (FAILED (hr))
             return;
 
@@ -75,7 +75,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         if (FAILED (hr))
             return;
 
-        hr = graphBuilder->AddFilter (smartTee, _T("Smart Tee"));
+        hr = graphBuilder->AddFilter (smartTee, _T ("Smart Tee"));
         if (FAILED (hr))
             return;
 
@@ -105,7 +105,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         callback = new GrabberCallback (*this);
         hr = sampleGrabber->SetCallback (callback, 1);
 
-        hr = graphBuilder->AddFilter (sampleGrabberBase, _T("Sample Grabber"));
+        hr = graphBuilder->AddFilter (sampleGrabberBase, _T ("Sample Grabber"));
         if (FAILED (hr))
             return;
 
@@ -130,7 +130,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
         ComSmartPtr<ComTypes::IBaseFilter> nullFilter;
         hr = nullFilter.CoCreateInstance (ComTypes::CLSID_NullRenderer);
-        hr = graphBuilder->AddFilter (nullFilter, _T("Null Renderer"));
+        hr = graphBuilder->AddFilter (nullFilter, _T ("Null Renderer"));
 
         if (connectFilters (sampleGrabberBase, nullFilter)
               && addGraphToRot())
@@ -245,9 +245,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                                        if (weakRef == nullptr)
                                            return;
 
-                                       if (weakRef->pictureTakenCallback != nullptr)
-                                           weakRef->pictureTakenCallback (image);
-
+                                       NullCheckedInvocation::invoke (weakRef->pictureTakenCallback, image);
                                        weakRef->pictureTakenCallback = nullptr;
                                    });
     }
@@ -351,7 +349,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
                 if (SUCCEEDED (hr))
                 {
-                    hr = graphBuilder->AddFilter (asfWriter, _T("AsfWriter"));
+                    hr = graphBuilder->AddFilter (asfWriter, _T ("AsfWriter"));
 
                     if (SUCCEEDED (hr))
                     {
@@ -498,7 +496,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                             VARIANT var;
                             var.vt = VT_BSTR;
 
-                            hr = propertyBag->Read (_T("FriendlyName"), &var, nullptr);
+                            hr = propertyBag->Read (_T ("FriendlyName"), &var, nullptr);
                             propertyBag = nullptr;
 
                             if (SUCCEEDED (hr))
@@ -731,7 +729,7 @@ private:
 
         ComSmartPtr<IMoniker> moniker;
         WCHAR buffer[128]{};
-        HRESULT hr = CreateItemMoniker (_T("!"), buffer, moniker.resetAndGetPointerAddress());
+        HRESULT hr = CreateItemMoniker (_T ("!"), buffer, moniker.resetAndGetPointerAddress());
         if (FAILED (hr))
             return false;
 
@@ -826,7 +824,7 @@ private:
 void CameraDevice::Pimpl::disconnectAnyViewers()
 {
     for (int i = viewerComps.size(); --i >= 0;)
-        viewerComps.getUnchecked(i)->ownerDeleted();
+        viewerComps.getUnchecked (i)->ownerDeleted();
 }
 
 String CameraDevice::getFileExtension()

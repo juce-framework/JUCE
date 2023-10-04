@@ -434,7 +434,7 @@ void AudioProcessor::validateParameter (AudioProcessorParameter* param)
     /*  If you're building this plugin as an AudioUnit, and you intend to use the plugin in
         Logic Pro or GarageBand, it's a good idea to set version hints on all of your parameters
         so that you can add parameters safely in future versions of the plugin.
-        See the documentation for AudioProcessorParameter(int) for more information.
+        See the documentation for AudioProcessorParameter (int) for more information.
     */
    #if JucePlugin_Build_AU
     static std::once_flag flag;
@@ -448,7 +448,7 @@ void AudioProcessor::checkForDuplicateTrimmedParamID ([[maybe_unused]] AudioProc
    #if JUCE_DEBUG && ! JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
     if (auto* withID = dynamic_cast<HostedAudioProcessorParameter*> (param))
     {
-        constexpr auto maximumSafeAAXParameterIdLength = 31;
+        [[maybe_unused]] constexpr auto maximumSafeAAXParameterIdLength = 31;
 
         const auto paramID = withID->getParameterID();
 
@@ -459,7 +459,7 @@ void AudioProcessor::checkForDuplicateTrimmedParamID ([[maybe_unused]] AudioProc
         // If you need to retain backwards-compatibility and are unable to change
         // the paramID for this reason, you can add JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
         // to your preprocessor definitions to silence this assertion.
-        jassertquiet (paramID.length() <= maximumSafeAAXParameterIdLength);
+        jassert (paramID.length() <= maximumSafeAAXParameterIdLength);
 
         // If you hit this assertion, two or more parameters have duplicate paramIDs
         // after they have been truncated to support the AAX format.
@@ -470,7 +470,7 @@ void AudioProcessor::checkForDuplicateTrimmedParamID ([[maybe_unused]] AudioProc
         // If you need to retain backwards-compatibility and are unable to change
         // the paramID for this reason, you can add JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
         // to your preprocessor definitions to silence this assertion.
-        jassertquiet (trimmedParamIDs.insert (paramID.substring (0, maximumSafeAAXParameterIdLength)).second);
+        jassert (trimmedParamIDs.insert (paramID.substring (0, maximumSafeAAXParameterIdLength)).second);
     }
    #endif
 }
@@ -722,8 +722,8 @@ AudioProcessor::BusesLayout AudioProcessor::getNextBestLayoutInList (const Buses
     auto outChannels = legacyLayouts.getReference (bestConfiguration).outChannels;
 
     auto currentState = getBusesLayout();
-    auto currentInLayout  = (getBusCount (true)  > 0 ? currentState.inputBuses .getReference(0) : AudioChannelSet());
-    auto currentOutLayout = (getBusCount (false) > 0 ? currentState.outputBuses.getReference(0) : AudioChannelSet());
+    auto currentInLayout  = (getBusCount (true)  > 0 ? currentState.inputBuses .getReference (0) : AudioChannelSet());
+    auto currentOutLayout = (getBusCount (false) > 0 ? currentState.outputBuses.getReference (0) : AudioChannelSet());
 
     if (inBus != nullptr)
     {
@@ -1106,7 +1106,7 @@ bool AudioProcessor::Bus::isLayoutSupported (const AudioChannelSet& set, BusesLa
 bool AudioProcessor::Bus::isNumberOfChannelsSupported (int channels) const
 {
     if (channels == 0)
-        return isLayoutSupported(AudioChannelSet::disabled());
+        return isLayoutSupported (AudioChannelSet::disabled());
 
     auto set = supportedLayoutWithChannels (channels);
     return (! set.isDisabled()) && isLayoutSupported (set);

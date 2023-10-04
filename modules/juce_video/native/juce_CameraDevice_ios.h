@@ -52,19 +52,19 @@ struct CameraDevice::Pimpl
         }
 
         [AVCaptureDevice requestAccessForMediaType: AVMediaTypeVideo
-                                 completionHandler: ^(BOOL granted)
+                                 completionHandler: ^([[maybe_unused]] BOOL granted)
          {
              // Access to video is required for camera to work,
              // black images will be produced otherwise!
-             jassertquiet (granted);
+             jassert (granted);
          }];
 
         [AVCaptureDevice requestAccessForMediaType: AVMediaTypeAudio
-                                 completionHandler: ^(BOOL granted)
+                                 completionHandler: ^([[maybe_unused]] BOOL granted)
          {
              // Access to audio is required for camera to work,
              // silence will be produced otherwise!
-             jassertquiet (granted);
+             jassert (granted);
          }];
 
         captureSession.startSessionForDeviceWithId (cameraId);
@@ -1155,14 +1155,9 @@ private:
         JUCE_CAMERA_LOG ("cameraSessionRuntimeError(), error = " + error);
 
         if (! notifiedOfCameraOpening)
-        {
             cameraOpenCallback ({}, error);
-        }
         else
-        {
-            if (owner.onErrorOccurred != nullptr)
-                owner.onErrorOccurred (error);
-        }
+            NullCheckedInvocation::invoke (owner.onErrorOccurred, error);
     }
 
     void callListeners (const Image& image)
@@ -1178,8 +1173,7 @@ private:
     {
         JUCE_CAMERA_LOG ("notifyPictureTaken()");
 
-        if (pictureTakenCallback != nullptr)
-            pictureTakenCallback (image);
+        NullCheckedInvocation::invoke (pictureTakenCallback, image);
     }
 
     //==============================================================================

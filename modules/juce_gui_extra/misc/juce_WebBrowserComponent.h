@@ -96,7 +96,7 @@ public:
             handy to stop the browser using resources in the background when it's not
             actually being used.
         */
-        [[nodiscard]] Options withKeepPageLoadedWhenBrowserIsHidden () const   { return withMember (*this, &Options::keepPageLoadedWhenBrowserIsHidden, true); }
+        [[nodiscard]] Options withKeepPageLoadedWhenBrowserIsHidden() const   { return withMember (*this, &Options::keepPageLoadedWhenBrowserIsHidden, true); }
 
         /**
             Use a specific user agent string when requesting web pages.

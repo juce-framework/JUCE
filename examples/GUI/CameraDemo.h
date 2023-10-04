@@ -50,7 +50,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class CameraDemo  : public Component
+class CameraDemo final : public Component
 {
 public:
     CameraDemo()
@@ -123,7 +123,7 @@ public:
         auto previewArea = shouldUseLandscapeLayout() ? r.removeFromLeft (r.getWidth() / 2)
                                                       : r.removeFromTop (r.getHeight() / 2);
 
-        if (cameraPreviewComp.get() != nullptr)
+        if (cameraPreviewComp != nullptr)
             cameraPreviewComp->setBounds (previewArea);
 
         if (shouldUseLandscapeLayout())

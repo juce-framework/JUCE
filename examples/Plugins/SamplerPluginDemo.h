@@ -111,8 +111,8 @@ struct Command
 };
 
 template <typename Proc, typename Func>
-class TemplateCommand  : public Command<Proc>,
-                         private Func
+class TemplateCommand final : public Command<Proc>,
+                              private Func
 {
 public:
     template <typename FuncPrime>
@@ -257,7 +257,7 @@ private:
 };
 
 //==============================================================================
-class MPESamplerVoice  : public MPESynthesiserVoice
+class MPESamplerVoice final : public MPESynthesiserVoice
 {
 public:
     explicit MPESamplerVoice (std::shared_ptr<const MPESamplerSound> sound)
@@ -501,7 +501,7 @@ private:
 };
 
 template <typename Contents>
-class ReferenceCountingAdapter  : public ReferenceCountedObject
+class ReferenceCountingAdapter final : public ReferenceCountedObject
 {
 public:
     template <typename... Args>
@@ -564,7 +564,7 @@ public:
 };
 
 //==============================================================================
-class MemoryAudioFormatReaderFactory  : public AudioFormatReaderFactory
+class MemoryAudioFormatReaderFactory final : public AudioFormatReaderFactory
 {
 public:
     MemoryAudioFormatReaderFactory (const void* sampleDataIn, size_t dataSizeIn)
@@ -588,7 +588,7 @@ private:
 };
 
 //==============================================================================
-class FileAudioFormatReaderFactory  : public AudioFormatReaderFactory
+class FileAudioFormatReaderFactory final : public AudioFormatReaderFactory
 {
 public:
     explicit FileAudioFormatReaderFactory (File fileIn)
@@ -643,20 +643,20 @@ struct GenericVariantConverter
 };
 
 template <typename Numeric>
-struct VariantConverter<Range<Numeric>>  : GenericVariantConverter<Range<Numeric>> {};
+struct VariantConverter<Range<Numeric>> final : GenericVariantConverter<Range<Numeric>> {};
 
 template<>
-struct VariantConverter<MPEZoneLayout>  : GenericVariantConverter<MPEZoneLayout> {};
+struct VariantConverter<MPEZoneLayout> final : GenericVariantConverter<MPEZoneLayout> {};
 
 template<>
-struct VariantConverter<std::shared_ptr<AudioFormatReaderFactory>>
+struct VariantConverter<std::shared_ptr<AudioFormatReaderFactory>> final
     : GenericVariantConverter<std::shared_ptr<AudioFormatReaderFactory>>
 {};
 
 } // namespace juce
 
 //==============================================================================
-class VisibleRangeDataModel  : private ValueTree::Listener
+class VisibleRangeDataModel final : private ValueTree::Listener
 {
 public:
     class Listener
@@ -757,7 +757,7 @@ private:
 };
 
 //==============================================================================
-class MPESettingsDataModel  : private ValueTree::Listener
+class MPESettingsDataModel final : private ValueTree::Listener
 {
 public:
     class Listener
@@ -947,7 +947,7 @@ private:
 };
 
 //==============================================================================
-class DataModel  : private ValueTree::Listener
+class DataModel final : private ValueTree::Listener
 {
 public:
     class Listener
@@ -1132,8 +1132,8 @@ constexpr int controlSeparation = 6;
 } // namespace
 
 //==============================================================================
-class MPELegacySettingsComponent final  : public Component,
-                                          private MPESettingsDataModel::Listener
+class MPELegacySettingsComponent final : public Component,
+                                         private MPESettingsDataModel::Listener
 {
 public:
     explicit MPELegacySettingsComponent (const MPESettingsDataModel& model,
@@ -1256,8 +1256,8 @@ private:
 };
 
 //==============================================================================
-class MPENewSettingsComponent final  : public Component,
-                                       private MPESettingsDataModel::Listener
+class MPENewSettingsComponent final : public Component,
+                                      private MPESettingsDataModel::Listener
 {
 public:
     MPENewSettingsComponent (const MPESettingsDataModel& model,
@@ -1352,8 +1352,8 @@ private:
 };
 
 //==============================================================================
-class MPESettingsComponent final  : public Component,
-                                    private MPESettingsDataModel::Listener
+class MPESettingsComponent final : public Component,
+                                   private MPESettingsDataModel::Listener
 {
 public:
     MPESettingsComponent (const MPESettingsDataModel& model,
@@ -1446,7 +1446,7 @@ private:
 };
 
 //==============================================================================
-class LoopPointMarker  : public Component
+class LoopPointMarker final : public Component
 {
 public:
     using MouseCallback = std::function<void (LoopPointMarker&, const MouseEvent&)>;
@@ -1523,8 +1523,8 @@ private:
 };
 
 //==============================================================================
-class Ruler  : public Component,
-               private VisibleRangeDataModel::Listener
+class Ruler final : public Component,
+                    private VisibleRangeDataModel::Listener
 {
 public:
     explicit Ruler (const VisibleRangeDataModel& model)
@@ -1614,9 +1614,9 @@ private:
 };
 
 //==============================================================================
-class LoopPointsOverlay  : public Component,
-                           private DataModel::Listener,
-                           private VisibleRangeDataModel::Listener
+class LoopPointsOverlay final : public Component,
+                                private DataModel::Listener,
+                                private VisibleRangeDataModel::Listener
 {
 public:
     LoopPointsOverlay (const DataModel& dModel,
@@ -1715,9 +1715,9 @@ private:
 };
 
 //==============================================================================
-class PlaybackPositionOverlay  : public Component,
-                                 private Timer,
-                                 private VisibleRangeDataModel::Listener
+class PlaybackPositionOverlay final : public Component,
+                                      private Timer,
+                                      private VisibleRangeDataModel::Listener
 {
 public:
     using Provider = std::function<std::vector<float>()>;
@@ -1762,10 +1762,10 @@ private:
 };
 
 //==============================================================================
-class WaveformView  : public Component,
-                      private ChangeListener,
-                      private DataModel::Listener,
-                      private VisibleRangeDataModel::Listener
+class WaveformView final : public Component,
+                           private ChangeListener,
+                           private DataModel::Listener,
+                           private VisibleRangeDataModel::Listener
 {
 public:
     WaveformView (const DataModel& model,
@@ -1853,8 +1853,8 @@ private:
 };
 
 //==============================================================================
-class WaveformEditor  : public Component,
-                        private DataModel::Listener
+class WaveformEditor final : public Component,
+                             private DataModel::Listener
 {
 public:
     WaveformEditor (const DataModel& model,
@@ -1909,9 +1909,9 @@ private:
 };
 
 //==============================================================================
-class MainSamplerView  : public Component,
-                         private DataModel::Listener,
-                         private ChangeListener
+class MainSamplerView final : public Component,
+                              private DataModel::Listener,
+                              private ChangeListener
 {
 public:
     MainSamplerView (const DataModel& model,
@@ -2103,7 +2103,7 @@ struct ProcessorState
 };
 
 //==============================================================================
-class SamplerAudioProcessor  : public AudioProcessor
+class SamplerAudioProcessor final : public AudioProcessor
 {
 public:
     SamplerAudioProcessor()
@@ -2358,7 +2358,7 @@ public:
     // These accessors are just for an 'overview' and won't give the exact
     // state of the audio engine at a particular point in time.
     // If you call getNumVoices(), get the result '10', and then call
-    // getPlaybackPosiiton(9), there's a chance the audio engine will have
+    // getPlaybackPosiiton (9), there's a chance the audio engine will have
     // been updated to remove some voices in the meantime, so the returned
     // value won't correspond to an existing voice.
     int getNumVoices() const                    { return synthesiser.getNumVoices(); }
@@ -2366,10 +2366,10 @@ public:
 
 private:
     //==============================================================================
-    class SamplerAudioProcessorEditor  : public AudioProcessorEditor,
-                                         public FileDragAndDropTarget,
-                                         private DataModel::Listener,
-                                         private MPESettingsDataModel::Listener
+    class SamplerAudioProcessorEditor final : public AudioProcessorEditor,
+                                              public FileDragAndDropTarget,
+                                              private DataModel::Listener,
+                                              private MPESettingsDataModel::Listener
     {
     public:
         SamplerAudioProcessorEditor (SamplerAudioProcessor& p, ProcessorState state)

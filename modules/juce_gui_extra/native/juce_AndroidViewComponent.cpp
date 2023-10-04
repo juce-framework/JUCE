@@ -156,7 +156,7 @@ void AndroidViewComponent::setView (void* view)
             // explicitly create a new local ref here so that we don't
             // delete the users pointer
             auto* env = getEnv();
-            auto localref = LocalRef<jobject>(env->NewLocalRef((jobject) view));
+            auto localref = LocalRef<jobject> (env->NewLocalRef ((jobject) view));
 
             pimpl.reset (new Pimpl (localref, *this));
 

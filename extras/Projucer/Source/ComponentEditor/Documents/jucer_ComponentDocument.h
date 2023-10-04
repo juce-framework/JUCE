@@ -38,11 +38,11 @@ public:
     String getTypeName() const;
 
     JucerDocument* createCopy();
-    Component* createTestComponent (const bool alwaysFillBackground);
+    Component* createTestComponent (bool alwaysFillBackground);
 
     int getNumPaintRoutines() const                             { return 1; }
     StringArray getPaintRoutineNames() const                    { return StringArray ("Graphics"); }
-    PaintRoutine* getPaintRoutine (const int index) const       { return index == 0 ? backgroundGraphics.get() : nullptr; }
+    PaintRoutine* getPaintRoutine (int index) const             { return index == 0 ? backgroundGraphics.get() : nullptr; }
 
     ComponentLayout* getComponentLayout() const                 { return components.get(); }
 

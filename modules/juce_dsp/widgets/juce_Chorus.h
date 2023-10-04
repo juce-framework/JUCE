@@ -103,7 +103,7 @@ public:
             return;
         }
 
-        auto delayValuesBlock = AudioBlock<SampleType>(bufferDelayTimes).getSubBlock (0, numSamples);
+        auto delayValuesBlock = AudioBlock<SampleType> (bufferDelayTimes).getSubBlock (0, numSamples);
         auto contextDelay = ProcessContextReplacing<SampleType> (delayValuesBlock);
         delayValuesBlock.clear();
 
