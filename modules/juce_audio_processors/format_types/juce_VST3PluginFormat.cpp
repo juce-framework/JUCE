@@ -563,10 +563,12 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
 
     Vst::IContextMenu* PLUGIN_API createContextMenu (IPlugView*, const Vst::ParamID*) override
     {
-        if (plugin != nullptr)
-            return new ContextMenu (*plugin);
+        if (plugin == nullptr)
+            return nullptr;
 
-        return nullptr;
+        auto* result = new ContextMenu (*plugin);
+        result->addRef();
+        return result;
     }
 
     tresult PLUGIN_API executeMenuItem (Steinberg::int32) override
