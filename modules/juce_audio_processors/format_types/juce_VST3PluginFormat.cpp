@@ -476,7 +476,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
 
             ItemAndTarget newItem;
             newItem.item = item;
-            newItem.target = target;
+            newItem.target = addVSTComSmartPtrOwner (target);
 
             items.add (newItem);
             return kResultOk;
@@ -488,7 +488,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
             {
                 auto& item = items.getReference (i);
 
-                if (item.item.tag == toRemove.tag && item.target == target)
+                if (item.item.tag == toRemove.tag && item.target.get() == target)
                     items.remove (i);
             }
 
@@ -506,7 +506,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
                     result = item.item;
 
                     if (target != nullptr)
-                        *target = item.target;
+                        *target = item.target.get();
 
                     return kResultTrue;
                 }
@@ -978,8 +978,8 @@ struct DescriptionLister
                 {
                     if (component->initialize (host.getFUnknown()) == kResultOk)
                     {
-                        auto numInputs  = getNumSingleDirectionChannelsFor (component, Direction::input);
-                        auto numOutputs = getNumSingleDirectionChannelsFor (component, Direction::output);
+                        auto numInputs  = getNumSingleDirectionChannelsFor (component.get(), Direction::input);
+                        auto numOutputs = getNumSingleDirectionChannelsFor (component.get(), Direction::output);
 
                         createPluginDescription (desc, file, companyName, name,
                                                  info, info2.get(), infoW.get(), numInputs, numOutputs);
@@ -1397,8 +1397,7 @@ private:
     //==============================================================================
     bool open (const PluginDescription& description)
     {
-        VSTComSmartPtr<IPluginFactory> pluginFactory (DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName())
-                                                                                    .getPluginFactory());
+        auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory());
 
         if (pluginFactory != nullptr)
         {
@@ -1504,10 +1503,10 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
                                 private ComponentBoundsConstrainer,
                                 private IPlugFrame
 {
-    VST3PluginWindow (AudioPluginInstance* owner, IPlugView* pluginView)
+    VST3PluginWindow (AudioPluginInstance* owner, VSTComSmartPtr<IPlugView> pluginView)
         : AudioProcessorEditor (owner),
           ComponentMovementWatcher (this),
-          view (pluginView, false)
+          view (pluginView)
          #if JUCE_MAC
         , embeddedComponent (*owner)
          #endif
@@ -1673,7 +1672,7 @@ private:
     {
         const ScopedValueSetter<bool> recursiveResizeSetter (recursiveResize, true);
 
-        if (incomingView != nullptr && newSize != nullptr && incomingView == view)
+        if (incomingView != nullptr && newSize != nullptr && incomingView == view.get())
         {
             const auto oldPhysicalSize = componentToVST3Rect (getLocalBounds());
             const auto logicalSize = vst3ToComponentRect (*newSize);
@@ -1887,7 +1886,7 @@ struct VST3ComponentHolder
 {
     VST3ComponentHolder (const VST3ModuleHandle::Ptr& m)  : module (m)
     {
-        host = new VST3HostContext();
+        host = addVSTComSmartPtrOwner (new VST3HostContext());
     }
 
     ~VST3ComponentHolder()
@@ -1903,7 +1902,7 @@ struct VST3ComponentHolder
             return false;
         }
 
-        return VSTComSmartPtr<Vst::IEditController>().loadFrom (component);
+        return VSTComSmartPtr<Vst::IEditController>().loadFrom (component.get());
     }
 
     bool fetchController (VSTComSmartPtr<Vst::IEditController>& editController)
@@ -1911,7 +1910,7 @@ struct VST3ComponentHolder
         if (! isComponentInitialised && ! initialise())
             return false;
 
-        editController.loadFrom (component);
+        editController.loadFrom (component.get());
 
         // Get the IEditController:
         TUID controllerCID = { 0 };
@@ -1920,7 +1919,7 @@ struct VST3ComponentHolder
             && component->getControllerClassId (controllerCID) == kResultTrue
             && FUID (controllerCID).isValid())
         {
-            editController.loadFrom (factory, controllerCID);
+            editController.loadFrom (factory.get(), controllerCID);
         }
 
         if (editController == nullptr)
@@ -1934,7 +1933,7 @@ struct VST3ComponentHolder
                 factory->getClassInfo (i, &classInfo);
 
                 if (std::strcmp (classInfo.category, kVstComponentControllerClass) == 0)
-                    editController.loadFrom (factory, classInfo.cid);
+                    editController.loadFrom (factory.get(), classInfo.cid);
             }
         }
 
@@ -1963,7 +1962,7 @@ struct VST3ComponentHolder
             std::unique_ptr<PClassInfo2> info2;
             std::unique_ptr<PClassInfoW> infoW;
 
-            if (pf2.loadFrom (factory))
+            if (pf2.loadFrom (factory.get()))
             {
                 info2.reset (new PClassInfo2());
                 pf2->getClassInfo2 (classIdx, info2.get());
@@ -1973,7 +1972,7 @@ struct VST3ComponentHolder
                 info2.reset();
             }
 
-            if (pf3.loadFrom (factory))
+            if (pf3.loadFrom (factory.get()))
             {
                 pf3->setHostContext (host->getFUnknown());
                 infoW.reset (new PClassInfoW());
@@ -2003,7 +2002,7 @@ struct VST3ComponentHolder
                                      totalNumInputChannels,
                                      totalNumOutputChannels);
 
-            description.hasARAExtension = hasARAExtension (factory, description.name);
+            description.hasARAExtension = hasARAExtension (factory.get(), description.name);
 
             return;
         }
@@ -2022,7 +2021,7 @@ struct VST3ComponentHolder
         // initialisation are only called from the message thread.
         JUCE_ASSERT_MESSAGE_THREAD
 
-        factory = VSTComSmartPtr<IPluginFactory> (module->getPluginFactory());
+        factory = addVSTComSmartPtrOwner (module->getPluginFactory());
 
         int classIdx;
         if ((classIdx = getClassIndex (module->getName())) < 0)
@@ -2032,7 +2031,7 @@ struct VST3ComponentHolder
         if (factory->getClassInfo (classIdx, &info) != kResultOk)
             return false;
 
-        if (! component.loadFrom (factory, info.cid) || component == nullptr)
+        if (! component.loadFrom (factory.get(), info.cid) || component == nullptr)
             return false;
 
         cidOfComponent = FUID (info.cid);
@@ -2161,7 +2160,7 @@ class ParameterChanges : public Vst::IParameterChanges
 
     struct Entry
     {
-        explicit Entry (std::unique_ptr<ParamValueQueue> queue) : ptr (queue.release()) {}
+        explicit Entry (std::unique_ptr<ParamValueQueue> queue) : ptr (addVSTComSmartPtrOwner (queue.release())) {}
 
         VSTComSmartPtr<ParamValueQueue> ptr;
         Steinberg::int32 index = notInVector;
@@ -2411,8 +2410,8 @@ public:
 
         if (editControllerConnection != nullptr && componentConnection != nullptr)
         {
-            editControllerConnection->disconnect (componentConnection);
-            componentConnection->disconnect (editControllerConnection);
+            editControllerConnection->disconnect (componentConnection.get());
+            componentConnection->disconnect (editControllerConnection.get());
         }
 
         editController->setComponentHandler (nullptr);
@@ -2455,7 +2454,7 @@ public:
             editController->initialize (holder->host->getFUnknown());
 
         isControllerInitialised = true;
-        editController->setComponentHandler (holder->host);
+        editController->setComponentHandler (holder->host.get());
         grabInformationObjects();
         interconnectComponentAndController();
 
@@ -2488,7 +2487,7 @@ public:
         {
             explicit Extensions (const VST3PluginInstance* instanceIn) : instance (instanceIn) {}
 
-            Steinberg::Vst::IComponent* getIComponentPtr() const noexcept override   { return instance->holder->component; }
+            Steinberg::Vst::IComponent* getIComponentPtr() const noexcept override   { return instance->holder->component.get(); }
 
             MemoryBlock getPreset() const override             { return instance->getStateForPresetFile(); }
 
@@ -2514,7 +2513,7 @@ public:
         }
     }
 
-    void* getPlatformSpecificData() override   { return holder->component; }
+    void* getPlatformSpecificData() override   { return holder->component.get(); }
 
     void updateMidiMappings()
     {
@@ -2540,7 +2539,7 @@ public:
         const auto numBuses = getBusCount (isInput);
 
         for (auto i = 0; i < numBuses; ++i)
-            result.push_back (getArrangementForBus (processor, isInput, i));
+            result.push_back (getArrangementForBus (processor.get(), isInput, i));
 
         return result;
     }
@@ -2734,8 +2733,8 @@ public:
         data.symbolicSampleSize     = sampleSize;
         data.numInputs              = numInputAudioBuses;
         data.numOutputs             = numOutputAudioBuses;
-        data.inputParameterChanges  = inputParameterChanges;
-        data.outputParameterChanges = outputParameterChanges;
+        data.inputParameterChanges  = inputParameterChanges.get();
+        data.outputParameterChanges = outputParameterChanges.get();
         data.numSamples             = (Steinberg::int32) numSamples;
 
         updateTimingInformation (data, getSampleRate());
@@ -2873,8 +2872,8 @@ public:
     {
         if (trackInfoListener != nullptr)
         {
-            VSTComSmartPtr<Vst::IAttributeList> l (new TrackPropertiesAttributeList (properties));
-            trackInfoListener->setChannelContextInfos (l);
+            auto l = addVSTComSmartPtrOwner (new TrackPropertiesAttributeList (properties));
+            trackInfoListener->setChannelContextInfos (l.get());
         }
     }
 
@@ -2931,7 +2930,7 @@ public:
     //==============================================================================
     String getChannelName (int channelIndex, Direction direction) const
     {
-        auto numBuses = getNumSingleDirectionBusesFor (holder->component, MediaKind::audio, direction);
+        auto numBuses = getNumSingleDirectionBusesFor (holder->component.get(), MediaKind::audio, direction);
 
         int numCountedChannels = 0;
 
@@ -2996,7 +2995,7 @@ public:
     //==============================================================================
     AudioProcessorEditor* createEditor() override
     {
-        if (auto* view = tryCreatingView())
+        if (auto view = becomeVSTComSmartPtrOwner (tryCreatingView()))
             return new VST3PluginWindow (this, view);
 
         return nullptr;
@@ -3008,7 +3007,7 @@ public:
         if (getActiveEditor() != nullptr)
             return true;
 
-        VSTComSmartPtr<IPlugView> view (tryCreatingView(), false);
+        auto view = becomeVSTComSmartPtrOwner (tryCreatingView());
         return view != nullptr;
     }
 
@@ -3090,7 +3089,7 @@ public:
             auto componentStream (createMemoryStreamForState (*head, "IComponent"));
 
             if (componentStream != nullptr && holder->component != nullptr)
-                holder->component->setState (componentStream);
+                holder->component->setState (componentStream.get());
 
             if (editController != nullptr)
             {
@@ -3104,7 +3103,7 @@ public:
                 auto controllerStream (createMemoryStreamForState (*head, "IEditController"));
 
                 if (controllerStream != nullptr)
-                    editController->setState (controllerStream);
+                    editController->setState (controllerStream.get());
             }
         }
     }
@@ -3129,15 +3128,15 @@ public:
 
     MemoryBlock getStateForPresetFile() const
     {
-        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream (new Steinberg::MemoryStream(), false);
+        auto memoryStream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream());
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return {};
 
-        const auto saved = Steinberg::Vst::PresetFile::savePreset (memoryStream,
+        const auto saved = Steinberg::Vst::PresetFile::savePreset (memoryStream.get(),
                                                                    holder->cidOfComponent,
-                                                                   holder->component,
-                                                                   editController);
+                                                                   holder->component.get(),
+                                                                   editController.get());
 
         if (saved)
             return { memoryStream->getData(), static_cast<size_t> (memoryStream->getSize()) };
@@ -3148,13 +3147,13 @@ public:
     bool setStateFromPresetFile (const MemoryBlock& rawData) const
     {
         auto rawDataCopy = rawData;
-        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream (new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()), false);
+        auto memoryStream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()));
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return false;
 
-        return Steinberg::Vst::PresetFile::loadPreset (memoryStream, holder->cidOfComponent,
-                                                       holder->component, editController, nullptr);
+        return Steinberg::Vst::PresetFile::loadPreset (memoryStream.get(), holder->cidOfComponent,
+                                                       holder->component.get(), editController.get(), nullptr);
     }
 
     //==============================================================================
@@ -3267,37 +3266,38 @@ private:
 
             if (mem.fromBase64Encoding (state->getAllSubText()))
             {
-                VSTComSmartPtr<Steinberg::MemoryStream> stream (new Steinberg::MemoryStream(), false);
+                auto stream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream());
                 stream->setSize ((TSize) mem.getSize());
                 mem.copyTo (stream->getData(), 0, mem.getSize());
                 return stream;
             }
         }
 
-        return nullptr;
+        return {};
     }
 
     CachedParamValues cachedParamValues;
-    VSTComSmartPtr<ParameterChanges> inputParameterChanges  { new ParameterChanges };
-    VSTComSmartPtr<ParameterChanges> outputParameterChanges { new ParameterChanges };
-    VSTComSmartPtr<MidiEventList> midiInputs { new MidiEventList }, midiOutputs { new MidiEventList };
+    VSTComSmartPtr<ParameterChanges> inputParameterChanges  = addVSTComSmartPtrOwner (new ParameterChanges);
+    VSTComSmartPtr<ParameterChanges> outputParameterChanges = addVSTComSmartPtrOwner (new ParameterChanges);
+    VSTComSmartPtr<MidiEventList> midiInputs  = addVSTComSmartPtrOwner (new MidiEventList);
+    VSTComSmartPtr<MidiEventList> midiOutputs = addVSTComSmartPtrOwner (new MidiEventList);
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
     bool isControllerInitialised = false, isActive = false, lastProcessBlockCallWasBypass = false;
-    const bool hasMidiInput  = getNumSingleDirectionBusesFor (holder->component, MediaKind::event, Direction::input) > 0,
-               hasMidiOutput = getNumSingleDirectionBusesFor (holder->component, MediaKind::event, Direction::output) > 0;
+    const bool hasMidiInput  = getNumSingleDirectionBusesFor (holder->component.get(), MediaKind::event, Direction::input) > 0,
+               hasMidiOutput = getNumSingleDirectionBusesFor (holder->component.get(), MediaKind::event, Direction::output) > 0;
     VST3Parameter* bypassParam = nullptr;
 
     //==============================================================================
     /** Some plugins need to be "connected" to intercommunicate between their implemented classes */
     void interconnectComponentAndController()
     {
-        componentConnection.loadFrom (holder->component);
-        editControllerConnection.loadFrom (editController);
+        componentConnection.loadFrom (holder->component.get());
+        editControllerConnection.loadFrom (editController.get());
 
         if (componentConnection != nullptr && editControllerConnection != nullptr)
         {
-            warnOnFailure (componentConnection->connect (editControllerConnection));
-            warnOnFailure (editControllerConnection->connect (componentConnection));
+            warnOnFailure (componentConnection->connect (editControllerConnection.get()));
+            warnOnFailure (editControllerConnection->connect (componentConnection.get()));
         }
     }
 
@@ -3396,31 +3396,31 @@ private:
 
     void grabInformationObjects()
     {
-        processor.loadFrom (holder->component);
-        unitInfo.loadFrom (holder->component);
-        programListData.loadFrom (holder->component);
-        unitData.loadFrom (holder->component);
-        editController2.loadFrom (holder->component);
-        midiMapping.loadFrom (holder->component);
-        componentHandler.loadFrom (holder->component);
-        componentHandler2.loadFrom (holder->component);
-        trackInfoListener.loadFrom (holder->component);
+        processor.loadFrom (holder->component.get());
+        unitInfo.loadFrom (holder->component.get());
+        programListData.loadFrom (holder->component.get());
+        unitData.loadFrom (holder->component.get());
+        editController2.loadFrom (holder->component.get());
+        midiMapping.loadFrom (holder->component.get());
+        componentHandler.loadFrom (holder->component.get());
+        componentHandler2.loadFrom (holder->component.get());
+        trackInfoListener.loadFrom (holder->component.get());
 
-        if (processor == nullptr)           processor.loadFrom (editController);
-        if (unitInfo == nullptr)            unitInfo.loadFrom (editController);
-        if (programListData == nullptr)     programListData.loadFrom (editController);
-        if (unitData == nullptr)            unitData.loadFrom (editController);
-        if (editController2 == nullptr)     editController2.loadFrom (editController);
-        if (midiMapping == nullptr)         midiMapping.loadFrom (editController);
-        if (componentHandler == nullptr)    componentHandler.loadFrom (editController);
-        if (componentHandler2 == nullptr)   componentHandler2.loadFrom (editController);
-        if (trackInfoListener == nullptr)   trackInfoListener.loadFrom (editController);
+        if (processor == nullptr)           processor.loadFrom (editController.get());
+        if (unitInfo == nullptr)            unitInfo.loadFrom (editController.get());
+        if (programListData == nullptr)     programListData.loadFrom (editController.get());
+        if (unitData == nullptr)            unitData.loadFrom (editController.get());
+        if (editController2 == nullptr)     editController2.loadFrom (editController.get());
+        if (midiMapping == nullptr)         midiMapping.loadFrom (editController.get());
+        if (componentHandler == nullptr)    componentHandler.loadFrom (editController.get());
+        if (componentHandler2 == nullptr)   componentHandler2.loadFrom (editController.get());
+        if (trackInfoListener == nullptr)   trackInfoListener.loadFrom (editController.get());
     }
 
     void setStateForAllMidiBuses (bool newState)
     {
-        setStateForAllEventBuses (holder->component, newState, Direction::input);
-        setStateForAllEventBuses (holder->component, newState, Direction::output);
+        setStateForAllEventBuses (holder->component.get(), newState, Direction::input);
+        setStateForAllEventBuses (holder->component.get(), newState, Direction::output);
     }
 
     std::vector<ChannelMapping> createChannelMappings (bool isInput) const
@@ -3559,8 +3559,8 @@ private:
                                                   });
         }
 
-        destination.inputEvents = midiInputs;
-        destination.outputEvents = midiOutputs;
+        destination.inputEvents = midiInputs.get();
+        destination.outputEvents = midiOutputs.get();
     }
 
     void updateTimingInformation (Vst::ProcessData& destination, double processSampleRate)
@@ -3836,7 +3836,7 @@ tresult VST3HostContext::ContextMenu::popup (Steinberg::UCoord x, Steinberg::UCo
     // Unfortunately, Steinberg's docs explicitly say this should be modal..
     handleResult (topLevelMenu->showMenu (options));
    #else
-    topLevelMenu->showMenuAsync (options, ModalCallbackFunction::create (menuFinished, VSTComSmartPtr<ContextMenu> (this)));
+    topLevelMenu->showMenuAsync (options, ModalCallbackFunction::create (menuFinished, addVSTComSmartPtrOwner (this)));
    #endif
 
     return kResultOk;
@@ -3885,13 +3885,12 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
             for every housed plugin.
         */
 
-        VSTComSmartPtr<IPluginFactory> pluginFactory (DLLHandleCache::getInstance()->findOrCreateHandle (file)
-                                                              .getPluginFactory());
+        auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file).getPluginFactory());
 
         if (pluginFactory == nullptr)
             continue;
 
-        VSTComSmartPtr<VST3HostContext> host (new VST3HostContext());
+        auto host = addVSTComSmartPtrOwner (new VST3HostContext());
 
         for (const auto& d : DescriptionLister::findDescriptionsSlow (*host, *pluginFactory, File (file)))
             results.add (new PluginDescription (d));
@@ -3907,11 +3906,10 @@ void VST3PluginFormat::createARAFactoryAsync (const PluginDescription& descripti
     }
 
     File file (description.fileOrIdentifier);
-    VSTComSmartPtr<IPluginFactory> pluginFactory (
-        DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory());
+    auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory());
     const auto* pluginName = description.name.toRawUTF8();
 
-    callback ({ ARAFactoryWrapper { ::juce::getARAFactory (pluginFactory, pluginName) }, {} });
+    callback ({ ARAFactoryWrapper { ::juce::getARAFactory (pluginFactory.get(), pluginName) }, {} });
 }
 
 static std::unique_ptr<AudioPluginInstance> createVST3Instance (VST3PluginFormat& format,
