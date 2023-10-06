@@ -352,6 +352,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_HOME_RW      ${target} JUCE_APP_SANDBOX_FILE_ACCESS_HOME_RW)
     _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_ABS_RO       ${target} JUCE_APP_SANDBOX_FILE_ACCESS_ABS_RO)
     _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_ABS_RW       ${target} JUCE_APP_SANDBOX_FILE_ACCESS_ABS_RW)
+    _juce_append_target_property(file_content APP_SANDBOX_EXCEPTION_IOKIT          ${target} JUCE_APP_SANDBOX_EXCEPTION_IOKIT)
     _juce_append_target_property(file_content APP_GROUPS_ENABLED                   ${target} JUCE_APP_GROUPS_ENABLED)
     _juce_append_target_property(file_content APP_GROUP_IDS                        ${target} JUCE_APP_GROUP_IDS)
     _juce_append_target_property(file_content IS_PLUGIN                            ${target} JUCE_IS_PLUGIN)
@@ -1892,6 +1893,7 @@ function(_juce_initialise_target target)
         APP_SANDBOX_FILE_ACCESS_HOME_RW
         APP_SANDBOX_FILE_ACCESS_ABS_RO
         APP_SANDBOX_FILE_ACCESS_ABS_RW
+        APP_SANDBOX_EXCEPTION_IOKIT
         DOCUMENT_EXTENSIONS
         AAX_CATEGORY
         IPHONE_SCREEN_ORIENTATIONS      # iOS only

@@ -454,6 +454,11 @@ attributes directly to these creation functions, rather than adding them later.
 - A set of space-separated paths that will be added to this target's entitlements plist for
   accessing read/write absolute paths if `APP_SANDBOX_ENABLED` is `TRUE`.
 
+`APP_SANDBOX_EXCEPTION_IOKIT`
+- A set of space-separated strings specifying IOUserClient subclasses to open or to set properties 
+  on. These will be added to this target's entitlements plist if `APP_SANDBOX_ENABLED` is `TRUE`. 
+  For more information see Apple's IOKit User Client Class Temporary Exception documentation.
+
 `PLIST_TO_MERGE`
 - A string to insert into an app/plugin's Info.plist.
 

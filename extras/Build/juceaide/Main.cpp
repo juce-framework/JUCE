@@ -368,6 +368,14 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
                                                          std::move (values) });
     }
 
+    {
+        juce::StringArray values;
+        updateField ("APP_SANDBOX_EXCEPTION_IOKIT", values);
+
+        if (! values.isEmpty())
+            result.appSandboxExceptionIOKit = values;
+    }
+
     result.type = type;
 
     return result;
