@@ -194,7 +194,7 @@ Path DrawableText::getOutlineAsPath() const
         pathOfAllGlyphs.addPath (gylphPath);
     }
 
-    pathOfAllGlyphs.applyTransform (getTextTransform (w, h).followedBy (getTransform()));
+    pathOfAllGlyphs.applyTransform (getTextTransform (w, h).followedBy (drawableTransform));
 
     return pathOfAllGlyphs;
 }
