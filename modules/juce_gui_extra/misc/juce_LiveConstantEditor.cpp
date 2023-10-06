@@ -23,12 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 #if JUCE_ENABLE_LIVE_CONSTANT_EDITOR
 
-namespace LiveConstantEditor
+namespace juce::LiveConstantEditor
 {
 
 //==============================================================================
@@ -490,8 +487,6 @@ Component* createIntegerSlider (LivePropertyEditorBase& editor)  { return new Sl
 Component* createFloatSlider   (LivePropertyEditorBase& editor)  { return new SliderComp (editor, true);  }
 Component* createBoolSlider    (LivePropertyEditorBase& editor)  { return new BoolSliderComp (editor); }
 
-}
+} // namespace juce::LiveConstantEditor
 
 #endif
-
-} // namespace juce

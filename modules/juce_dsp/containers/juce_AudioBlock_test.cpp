@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 #if JUCE_USE_SIMD
@@ -496,5 +494,4 @@ static AudioBlockUnitTests<SIMDRegister<float>> audioBlockSIMDFloatUnitTests;
 static AudioBlockUnitTests<SIMDRegister<double>> audioBlockSIMDDoubleUnitTests;
 #endif
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

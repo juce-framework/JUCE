@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -185,5 +183,4 @@ private:
     FloatType temp = 0, source = 0, r = 0, d = 1;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -20,11 +20,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::UnitTestCategories
 {
 
-namespace UnitTestCategories
-{
     static const String analytics                  { "Analytics" };
     static const String audio                      { "Audio" };
     static const String audioProcessorParameters   { "AudioProcessorParameters" };
@@ -50,6 +48,5 @@ namespace UnitTestCategories
     static const String time                       { "Time" };
     static const String values                     { "Values" };
     static const String xml                        { "XML" };
-}
 
-} // namespace juce
+} // namespace juce::UnitTestCategories

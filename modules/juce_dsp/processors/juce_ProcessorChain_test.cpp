@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 class ProcessorChainTest : public UnitTest
@@ -163,5 +161,4 @@ public:
 
 static ProcessorChainTest processorChainUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

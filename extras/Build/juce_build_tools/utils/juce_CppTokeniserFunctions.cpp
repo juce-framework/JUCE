@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
     {
         static const char* const keywords2Char[] =
@@ -202,5 +201,5 @@ namespace build_tools
             }
         }
     }
-}
-}
+
+} // namespace juce::build_tools

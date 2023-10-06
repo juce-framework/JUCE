@@ -23,15 +23,13 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 //==============================================================================
 /** Contains classes for different types of physics behaviours - these classes
     are used as template parameters for the AnimatedPosition class.
 */
-namespace AnimatedPositionBehaviours
+namespace juce::AnimatedPositionBehaviours
 {
+
     /** A non-snapping behaviour that allows the content to be freely flicked in
         either direction, with momentum based on the velocity at which it was
         released, and variable friction to make it come to a halt.
@@ -151,6 +149,5 @@ namespace AnimatedPositionBehaviours
     private:
         double targetSnapPosition = 0.0;
     };
-}
 
-} // namespace juce
+} // namespace juce::AnimatedPositionBehaviours

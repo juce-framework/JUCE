@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 enum class PannerRule
@@ -117,5 +115,4 @@ private:
     double sampleRate = 44100.0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

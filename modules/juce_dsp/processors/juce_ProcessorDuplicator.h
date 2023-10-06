@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -95,5 +93,4 @@ private:
     juce::OwnedArray<MonoProcessorType> processors;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

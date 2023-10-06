@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 struct FFTUnitTest  : public UnitTest
@@ -214,5 +212,4 @@ struct FFTUnitTest  : public UnitTest
 
 static FFTUnitTest fftUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -144,5 +142,4 @@ private:
     double sampleRate = 0, rampDurationSeconds = 0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

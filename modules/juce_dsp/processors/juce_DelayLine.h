@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -313,5 +311,4 @@ private:
     SampleType alpha = 0.0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

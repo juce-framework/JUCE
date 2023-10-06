@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -210,5 +208,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling)
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -367,5 +365,4 @@ static const DryWetMixerTests dryWetMixerTests;
 
 #endif
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

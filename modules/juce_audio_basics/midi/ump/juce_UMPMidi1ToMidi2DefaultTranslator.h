@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -185,7 +183,6 @@ private:
     std::array<ChannelBanks, 16> groupBanks;
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

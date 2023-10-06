@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 enum class BallisticsFilterLevelCalculationType
@@ -146,5 +144,4 @@ private:
     LevelCalculationType levelType = LevelCalculationType::peak;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

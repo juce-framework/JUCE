@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     struct EntitlementOptions final
     {
         String getEntitlementsFileContent() const;
@@ -61,5 +60,5 @@ namespace build_tools
     private:
         StringPairArray getEntitlements() const;
     };
-}
-}
+
+} // namespace juce::build_tools

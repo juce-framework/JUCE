@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     static const char* resourceFileIdentifierString = "JUCER_BINARY_RESOURCE";
 
     //==============================================================================
@@ -285,5 +284,5 @@ namespace build_tools
 
         return { Result::ok(), std::move (filesCreated) };
     }
-}
-}
+
+} // namespace juce::build_tools

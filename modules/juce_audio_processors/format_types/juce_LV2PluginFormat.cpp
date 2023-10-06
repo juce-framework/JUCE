@@ -5175,7 +5175,7 @@ private:
     JUCE_LEAK_DETECTOR (LV2AudioPluginInstance)
 };
 
-} // namespace lv2
+} // namespace lv2_host
 
 //==============================================================================
 class LV2PluginFormat::Pimpl

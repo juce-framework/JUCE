@@ -2024,7 +2024,7 @@ struct MMDeviceMasterVolume
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MMDeviceMasterVolume)
 };
 
-}
+} // namespace WasapiClasses
 
 //==============================================================================
 #define JUCE_SYSTEMAUDIOVOL_IMPLEMENTED 1

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 namespace SIMDRegister_test_internal
@@ -876,5 +874,4 @@ public:
 
 static SIMDRegisterUnitTests SIMDRegisterUnitTests;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

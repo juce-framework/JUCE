@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /** A template specialisation to find corresponding mask type for primitives. */
@@ -263,5 +261,4 @@ struct SIMDFallbackOps
     }
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

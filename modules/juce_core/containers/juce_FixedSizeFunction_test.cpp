@@ -360,5 +360,5 @@ public:
 FixedSizeFunctionTest fixedSizedFunctionTest;
 
 }
-}
+} // namespace juce
 #undef JUCE_FAIL_ON_ALLOCATION_IN_SCOPE

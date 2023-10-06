@@ -188,37 +188,36 @@
 #undef Factor
 #undef check
 
-namespace juce
+namespace juce::dsp
 {
-    namespace dsp
-    {
-        template <typename Type>
-        using Complex = std::complex<Type>;
 
-        template <size_t len, typename T>
-        using FixedSizeFunction = juce::FixedSizeFunction<len, T>;
+template <typename Type>
+using Complex = std::complex<Type>;
 
-        //==============================================================================
-        namespace util
-        {
-            /** Use this function to prevent denormals on intel CPUs.
-                This function will work with both primitives and simple containers.
-            */
-          #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
-            inline void snapToZero (float&       x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
-           #ifndef DOXYGEN
-            inline void snapToZero (double&      x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
-            inline void snapToZero (long double& x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
-           #endif
-          #else
-            inline void snapToZero ([[maybe_unused]] float&       x) noexcept            {}
-           #ifndef DOXYGEN
-            inline void snapToZero ([[maybe_unused]] double&      x) noexcept            {}
-            inline void snapToZero ([[maybe_unused]] long double& x) noexcept            {}
-           #endif
-          #endif
-        }
-    }
+template <size_t len, typename T>
+using FixedSizeFunction = juce::FixedSizeFunction<len, T>;
+
+//==============================================================================
+namespace util
+{
+    /** Use this function to prevent denormals on intel CPUs.
+        This function will work with both primitives and simple containers.
+    */
+  #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
+    inline void snapToZero (float&       x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+   #ifndef DOXYGEN
+    inline void snapToZero (double&      x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+    inline void snapToZero (long double& x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+   #endif
+  #else
+    inline void snapToZero ([[maybe_unused]] float&       x) noexcept            {}
+   #ifndef DOXYGEN
+    inline void snapToZero ([[maybe_unused]] double&      x) noexcept            {}
+    inline void snapToZero ([[maybe_unused]] long double& x) noexcept            {}
+   #endif
+  #endif
+}
+
 }
 
 //==============================================================================
@@ -255,6 +254,7 @@ namespace juce
 #include "processors/juce_ProcessorChain.h"
 #include "processors/juce_ProcessorDuplicator.h"
 #include "processors/juce_IIRFilter.h"
+#include "processors/juce_IIRFilter_Impl.h"
 #include "processors/juce_FIRFilter.h"
 #include "processors/juce_StateVariableFilter.h"
 #include "processors/juce_FirstOrderTPTFilter.h"

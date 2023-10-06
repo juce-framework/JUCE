@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -172,5 +170,4 @@ void LadderFilter<SampleType>::setSampleRate (SampleType newValue) noexcept
 template class LadderFilter<float>;
 template class LadderFilter<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename Element>
@@ -1293,5 +1291,4 @@ int Convolution::getCurrentIRSize() const { return pimpl->getCurrentIRSize(); }
 
 int Convolution::getLatency() const { return pimpl->getLatency(); }
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

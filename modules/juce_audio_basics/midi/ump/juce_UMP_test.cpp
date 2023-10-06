@@ -20,9 +20,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 constexpr uint8_t  operator""_u8  (unsigned long long int i) { return static_cast<uint8_t>  (i); }
@@ -1015,5 +1013,4 @@ private:
 
 static UniversalMidiPacketTests universalMidiPacketTests;
 
-}
-}
+} // namespace juce::universal_midi_packets

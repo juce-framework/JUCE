@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     //==============================================================================
     class ProjectType
     {
@@ -321,5 +320,5 @@ namespace build_tools
 
         return Array<ProjectType*> (&guiApp, &consoleApp, &staticLib, &dll, &plugin, &araplugin);
     }
-}
-}
+
+} // namespace juce::build_tools

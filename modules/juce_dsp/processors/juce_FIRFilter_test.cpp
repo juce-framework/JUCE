@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 class FIRFilterTest : public UnitTest
@@ -218,5 +216,4 @@ public:
 
 static FIRFilterTest firFilterUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

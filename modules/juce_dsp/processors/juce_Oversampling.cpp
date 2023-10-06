@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /** Abstract class for the provided oversampling stages used internally in
@@ -766,5 +764,4 @@ void Oversampling<SampleType>::updateDelayLine()
 template class Oversampling<float>;
 template class Oversampling<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

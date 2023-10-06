@@ -23,15 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
-{
-
 /**
     Classes for FIR filter processing.
 */
-namespace FIR
+namespace juce::dsp::FIR
 {
     template <typename NumericType>
     struct Coefficients;
@@ -279,7 +274,5 @@ namespace FIR
         */
         Array<NumericType> coefficients;
     };
-}
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp::FIR

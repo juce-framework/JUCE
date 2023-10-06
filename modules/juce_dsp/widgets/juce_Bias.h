@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -155,5 +153,4 @@ private:
     }
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

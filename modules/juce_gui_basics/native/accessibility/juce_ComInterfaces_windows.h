@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace ComTypes
+namespace juce::ComTypes
 {
 
 /*
@@ -474,8 +472,7 @@ public:
 
 constexpr CLSID CLSID_SpVoice { 0x96749377, 0x3391, 0x11D2, { 0x9E, 0xE3, 0x00, 0xC0, 0x4F, 0x79, 0x73, 0x96 } };
 
-} // namespace ComTypes
-} // namespace juce
+} // namespace juce::ComTypes
 
 #ifdef __CRT_UUID_DECL
 __CRT_UUID_DECL (juce::ComTypes::IRawElementProviderFragmentRoot, 0x620ce2a5, 0xab8f, 0x40a9, 0x86, 0xcb, 0xde, 0x3c, 0x75, 0x59, 0x9b, 0x58)

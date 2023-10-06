@@ -56,9 +56,7 @@
  #error "You need to define the JucePlugin_LV2URI value! If you're using the Projucer/CMake, the definition will be written into JuceLV2Defines.h automatically."
 #endif
 
-namespace juce
-{
-namespace lv2_client
+namespace juce::lv2_client
 {
 
 constexpr bool startsWithValidScheme (const std::string_view str)
@@ -1829,7 +1827,6 @@ LV2_SYMBOL_EXPORT const LV2UI_Descriptor* lv2ui_descriptor (uint32_t index)
     return &descriptor;
 }
 
-}
-}
+} // namespace juce::lv2_client
 
 #endif
