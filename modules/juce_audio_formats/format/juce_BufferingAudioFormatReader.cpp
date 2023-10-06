@@ -205,6 +205,9 @@ struct TestAudioFormatReader : public AudioFormatReader
         clearSamplesBeyondAvailableLength (destChannels, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
 
+        if (numSamples <= 0)
+            return true;
+
         for (int j = 0; j < numDestChannels; ++j)
         {
             static_assert (sizeof (int) == sizeof (float),

@@ -1858,6 +1858,9 @@ public:
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
 
+        if (numSamples <= 0)
+            return true;
+
         if (map == nullptr || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
         {
             jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.

@@ -56,6 +56,9 @@ bool AudioSubsectionReader::readSamples (int* const* destSamples, int numDestCha
     clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                        startSampleInFile, numSamples, length);
 
+    if (numSamples <= 0)
+        return true;
+
     return source->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer,
                                 startSampleInFile + startSample, numSamples);
 }
