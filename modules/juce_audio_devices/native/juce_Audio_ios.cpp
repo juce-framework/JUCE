@@ -20,10 +20,6 @@
   ==============================================================================
 */
 
-#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
-#include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
-
-
 namespace juce
 {
 
@@ -197,10 +193,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 @end
 
 //==============================================================================
-#if JUCE_MODULE_AVAILABLE_juce_graphics
- #include <juce_graphics/native/juce_CoreGraphicsHelpers_mac.h>
-#endif
-
 namespace juce {
 
 #ifndef JUCE_IOS_AUDIO_LOGGING

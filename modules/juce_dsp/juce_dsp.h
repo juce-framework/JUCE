@@ -239,6 +239,7 @@ namespace juce
  #endif
 
  #include "containers/juce_SIMDRegister.h"
+ #include "containers/juce_SIMDRegister_Impl.h"
 #endif
 
 #include "maths/juce_SpecialFunctions.h"

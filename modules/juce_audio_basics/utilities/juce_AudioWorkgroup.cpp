@@ -20,11 +20,6 @@
   ==============================================================================
 */
 
-
-#if JUCE_MAC || JUCE_IOS
- #include "../native/juce_AudioWorkgroup_mac.h"
-#endif
-
 namespace juce
 {
 

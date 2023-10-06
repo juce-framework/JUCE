@@ -138,6 +138,7 @@
 
 #if JUCE_MAC || JUCE_IOS
  #include "native/accessibility/juce_AccessibilitySharedCode_mac.mm"
+ #include "native/juce_CGMetalLayerRenderer_mac.h"
 
  #if JUCE_IOS
   #include "native/juce_UIViewComponentPeer_ios.mm"
@@ -166,6 +167,9 @@
  #include "native/juce_MouseCursor_mac.mm"
 
 #elif JUCE_WINDOWS
+ #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+  #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
+ #endif
  #include "native/accessibility/juce_ComInterfaces_windows.h"
  #include "native/accessibility/juce_WindowsUIAWrapper_windows.h"
  #include "native/accessibility/juce_AccessibilityElement_windows.h"

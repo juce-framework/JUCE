@@ -351,8 +351,6 @@ private:
 
 #if JUCE_USE_WIN_WEBVIEW2
 
-#include <winuser.h>
-
 using namespace Microsoft::WRL;
 
 static std::vector<HWND> getDirectChildWindows (HWND hwnd)

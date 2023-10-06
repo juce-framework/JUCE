@@ -354,6 +354,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "streams/juce_AndroidDocumentInputSource.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
+ #include "native/juce_CFHelpers_mac.h"
  #include "native/juce_ObjCHelpers_mac.h"
 #endif
 

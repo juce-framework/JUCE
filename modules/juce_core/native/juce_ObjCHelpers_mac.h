@@ -20,8 +20,6 @@
   ==============================================================================
 */
 
-#include "juce_CFHelpers_mac.h"
-
 /* This file contains a few helper functions that are used internally but which
    need to be kept away from the public headers because they use obj-C symbols.
 */

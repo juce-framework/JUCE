@@ -23,10 +23,6 @@
   ==============================================================================
 */
 
-#if JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS
- #include "juce_LinuxSubprocessHelperBinaryData.h"
-#endif
-
 namespace juce
 {
 

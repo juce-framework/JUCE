@@ -25,8 +25,6 @@
 
 #if ! TARGET_IPHONE_SIMULATOR
 
-#include <CoreAudioKit/CoreAudioKit.h>
-
 namespace juce
 {
 

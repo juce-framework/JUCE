@@ -23,10 +23,6 @@
   ==============================================================================
 */
 
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
- #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
-#endif
-
 namespace juce
 {
 
