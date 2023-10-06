@@ -993,7 +993,7 @@ void XmlElement::deleteAllTextElements() noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class XmlElementTests  : public UnitTest
+class XmlElementTests final : public UnitTest
 {
 public:
     XmlElementTests()

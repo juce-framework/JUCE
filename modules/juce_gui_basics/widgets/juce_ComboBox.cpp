@@ -650,7 +650,7 @@ void ComboBox::setSelectedId (const int newItemId, const bool dontSendChange)   
 void ComboBox::setText (const String& newText, const bool dontSendChange)        { setText (newText, dontSendChange ? dontSendNotification : sendNotification); }
 
 //==============================================================================
-class ComboBoxAccessibilityHandler  : public AccessibilityHandler
+class ComboBoxAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit ComboBoxAccessibilityHandler (ComboBox& comboBoxToWrap)
@@ -673,7 +673,7 @@ public:
     String getHelp() const override   { return comboBox.getTooltip(); }
 
 private:
-    class ComboBoxValueInterface  : public AccessibilityTextValueInterface
+    class ComboBoxValueInterface final : public AccessibilityTextValueInterface
     {
     public:
         explicit ComboBoxValueInterface (ComboBox& comboBoxToWrap)

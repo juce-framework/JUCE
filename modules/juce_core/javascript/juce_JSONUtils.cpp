@@ -146,7 +146,7 @@ bool JSONUtils::deepEqual (const var& a, const var& b)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class JSONUtilsTests : public UnitTest
+class JSONUtilsTests final : public UnitTest
 {
 public:
     JSONUtilsTests() : UnitTest ("JSONUtils", UnitTestCategories::json) {}

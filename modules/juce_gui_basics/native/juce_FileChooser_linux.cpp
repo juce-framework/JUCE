@@ -44,8 +44,8 @@ static bool isSet (int flags, int toCheck)
     return (flags & toCheck) != 0;
 }
 
-class FileChooser::Native    : public FileChooser::Pimpl,
-                               private Timer
+class FileChooser::Native final : public FileChooser::Pimpl,
+                                  private Timer
 {
 public:
     Native (FileChooser& fileChooser, int flags)

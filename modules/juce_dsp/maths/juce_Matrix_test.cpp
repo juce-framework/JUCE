@@ -26,7 +26,7 @@
 namespace juce::dsp
 {
 
-struct LinearAlgebraUnitTest  : public UnitTest
+struct LinearAlgebraUnitTest final : public UnitTest
 {
     LinearAlgebraUnitTest()
         : UnitTest ("Linear Algebra UnitTests", UnitTestCategories::dsp)

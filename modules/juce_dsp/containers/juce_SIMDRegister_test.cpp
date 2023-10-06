@@ -101,7 +101,7 @@ namespace SIMDRegister_test_internal
 // These tests need to be strictly run on all platforms supported by JUCE as the
 // SIMD code is highly platform dependent.
 
-class SIMDRegisterUnitTests   : public UnitTest
+class SIMDRegisterUnitTests final : public UnitTest
 {
 public:
     template <typename> struct Tag {};

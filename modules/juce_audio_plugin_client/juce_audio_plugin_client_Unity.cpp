@@ -46,8 +46,8 @@ typedef ComponentPeer* (*createUnityPeerFunctionType) (Component&);
 extern createUnityPeerFunctionType juce_createUnityPeerFn;
 
 //==============================================================================
-class UnityPeer    : public ComponentPeer,
-                     public AsyncUpdater
+class UnityPeer final : public ComponentPeer,
+                        public AsyncUpdater
 {
 public:
     UnityPeer (Component& ed)
@@ -141,7 +141,7 @@ public:
 
 private:
     //==============================================================================
-    struct UnityBitmapImage    : public ImagePixelData
+    struct UnityBitmapImage final : public ImagePixelData
     {
         UnityBitmapImage (uint8* data, int w, int h)
             : ImagePixelData (Image::PixelFormat::ARGB, w, h),
@@ -187,7 +187,7 @@ private:
     };
 
     //==============================================================================
-    struct MouseWatcher    : public Timer
+    struct MouseWatcher final : public Timer
     {
         MouseWatcher (ComponentPeer& o)    : owner (o)    {}
 

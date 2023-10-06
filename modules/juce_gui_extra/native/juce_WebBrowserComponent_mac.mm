@@ -108,7 +108,7 @@ static NSMutableURLRequest* getRequestForURL (const String& url, const StringArr
 
 #if JUCE_MAC
 template <class WebViewClass>
-struct WebViewKeyEquivalentResponder : public ObjCClass<WebViewClass>
+struct WebViewKeyEquivalentResponder final : public ObjCClass<WebViewClass>
 {
     WebViewKeyEquivalentResponder()
         : ObjCClass<WebViewClass> ("WebViewKeyEquivalentResponder_")
@@ -154,7 +154,7 @@ struct WebViewKeyEquivalentResponder : public ObjCClass<WebViewClass>
 };
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
+struct DownloadClickDetectorClass final : public ObjCClass<NSObject>
 {
     DownloadClickDetectorClass()  : ObjCClass ("JUCEWebClickDetector_")
     {
@@ -198,7 +198,7 @@ struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
         addMethod (@selector (webView:runOpenPanelForFileButtonWithResultListener:allowMultipleFiles:),
                    [] (id, SEL, WebView*, id<WebOpenPanelResultListener> resultListener, BOOL allowMultipleFiles)
                    {
-                       struct DeletedFileChooserWrapper : private DeletedAtShutdown
+                       struct DeletedFileChooserWrapper final : private DeletedAtShutdown
                        {
                            DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, id<WebOpenPanelResultListener> rl)
                                : chooser (std::move (fc)), listener (rl)
@@ -258,7 +258,7 @@ private:
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
-struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NSObject>
+struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass final : public ObjCClass<NSObject>
 {
     WebViewDelegateClass()  : ObjCClass ("JUCEWebViewDelegate_")
     {
@@ -312,7 +312,7 @@ struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NS
                        {
                            using CompletionHandlerType = decltype (completionHandler);
 
-                           class DeletedFileChooserWrapper   : private DeletedAtShutdown
+                           class DeletedFileChooserWrapper final : private DeletedAtShutdown
                            {
                            public:
                                DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, CompletionHandlerType h)

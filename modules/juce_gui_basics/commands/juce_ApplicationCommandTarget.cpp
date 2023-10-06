@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class ApplicationCommandTarget::CommandMessage  : public MessageManager::MessageBase
+class ApplicationCommandTarget::CommandMessage final : public MessageManager::MessageBase
 {
 public:
     CommandMessage (ApplicationCommandTarget* const target, const InvocationInfo& inf)

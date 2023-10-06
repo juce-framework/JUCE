@@ -48,7 +48,7 @@ Thread::~Thread()
 //==============================================================================
 // Use a ref-counted object to hold this shared data, so that it can outlive its static
 // shared pointer when threads are still running during static shutdown.
-struct CurrentThreadHolder   : public ReferenceCountedObject
+struct CurrentThreadHolder final : public ReferenceCountedObject
 {
     CurrentThreadHolder() noexcept {}
 
@@ -296,7 +296,7 @@ void Thread::notify() const
 }
 
 //==============================================================================
-struct LambdaThread  : public Thread
+struct LambdaThread final : public Thread
 {
     LambdaThread (std::function<void()>&& f) : Thread ("anonymous"), fn (std::move (f)) {}
 
@@ -354,7 +354,7 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AtomicTests  : public UnitTest
+class AtomicTests final : public UnitTest
 {
 public:
     AtomicTests()
@@ -478,8 +478,8 @@ public:
 static AtomicTests atomicUnitTests;
 
 //==============================================================================
-class ThreadLocalValueUnitTest  : public UnitTest,
-                                  private Thread
+class ThreadLocalValueUnitTest final : public UnitTest,
+                                       private Thread
 {
 public:
     ThreadLocalValueUnitTest()

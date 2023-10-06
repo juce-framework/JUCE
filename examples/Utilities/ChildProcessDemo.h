@@ -231,7 +231,7 @@ private:
 
     TextEditor testResultsBox;
 
-    struct LogMessage  : public Message
+    struct LogMessage final : public Message
     {
         LogMessage (const String& m) : message (m) {}
 
@@ -343,7 +343,7 @@ inline bool invokeChildProcessDemo (const String& commandLine)
      void shutdown() override                                { mainWindow = nullptr; }
 
  private:
-     class MainWindow    : public DocumentWindow
+     class MainWindow final : public DocumentWindow
      {
      public:
          MainWindow (const String& name, std::unique_ptr<Component> c)

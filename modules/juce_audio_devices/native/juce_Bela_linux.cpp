@@ -180,7 +180,7 @@ Array<MidiInput::Pimpl*> MidiInput::Pimpl::midiInputs;
 
 
 //==============================================================================
-class BelaAudioIODevice   : public AudioIODevice
+class BelaAudioIODevice final : public AudioIODevice
 {
 public:
     BelaAudioIODevice()  : AudioIODevice (BelaAudioIODevice::belaTypeName,
@@ -504,7 +504,7 @@ private:
 const char* const BelaAudioIODevice::belaTypeName = "Bela Analog";
 
 //==============================================================================
-struct BelaAudioIODeviceType  : public AudioIODeviceType
+struct BelaAudioIODeviceType final : public AudioIODeviceType
 {
     BelaAudioIODeviceType() : AudioIODeviceType ("Bela") {}
 

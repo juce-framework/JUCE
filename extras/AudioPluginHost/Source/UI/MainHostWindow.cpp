@@ -397,7 +397,7 @@ void MainHostWindow::closeButtonPressed()
     tryToQuitApplication();
 }
 
-struct AsyncQuitRetrier  : private Timer
+struct AsyncQuitRetrier final : private Timer
 {
     AsyncQuitRetrier()   { startTimer (500); }
 

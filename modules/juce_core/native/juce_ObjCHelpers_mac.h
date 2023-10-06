@@ -301,7 +301,7 @@ struct ObjCClass
         jassert (cls != nil);
     }
 
-    ~ObjCClass()
+    virtual ~ObjCClass()
     {
         auto kvoSubclassName = String ("NSKVONotifying_") + class_getName (cls);
 

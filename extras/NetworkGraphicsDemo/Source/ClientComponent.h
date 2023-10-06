@@ -96,7 +96,7 @@ private:
             canvasStateOSCMessageReceived (message);
     }
 
-    struct NewStateMessage  : public Message
+    struct NewStateMessage final : public Message
     {
         NewStateMessage (const MemoryBlock& d) : data (d) {}
         MemoryBlock data;

@@ -26,8 +26,8 @@
 namespace juce
 {
 
-struct SimpleDeviceManagerInputLevelMeter  : public Component,
-                                             public Timer
+struct SimpleDeviceManagerInputLevelMeter final : public Component,
+                                                  public Timer
 {
     SimpleDeviceManagerInputLevelMeter (AudioDeviceManager& m)  : manager (m)
     {
@@ -86,8 +86,8 @@ static void drawTextLayout (Graphics& g, Component& owner, StringRef text, const
 
 
 //==============================================================================
-class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox  : public ListBox,
-                                                                         private ListBoxModel
+class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox final : public ListBox,
+                                                                              private ListBoxModel
 {
 public:
     MidiInputSelectorComponentListBox (AudioDeviceManager& dm, const String& noItems)
@@ -731,8 +731,8 @@ private:
 
 public:
     //==============================================================================
-    class ChannelSelectorListBox  : public ListBox,
-                                    private ListBoxModel
+    class ChannelSelectorListBox final : public ListBox,
+                                         private ListBoxModel
     {
     public:
         enum BoxType

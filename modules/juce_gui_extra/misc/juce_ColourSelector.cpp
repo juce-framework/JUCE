@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct ColourComponentSlider  : public Slider
+struct ColourComponentSlider final : public Slider
 {
     ColourComponentSlider (const String& name)  : Slider (name)
     {
@@ -45,7 +45,7 @@ struct ColourComponentSlider  : public Slider
 };
 
 //==============================================================================
-class ColourSelector::ColourSpaceView  : public Component
+class ColourSelector::ColourSpaceView final : public Component
 {
 public:
     ColourSpaceView (ColourSelector& cs, float& hue, float& sat, float& val, int edgeSize)
@@ -125,7 +125,7 @@ private:
     const int edge;
     Image colours;
 
-    struct ColourSpaceMarker  : public Component
+    struct ColourSpaceMarker final : public Component
     {
         ColourSpaceMarker()
         {
@@ -156,7 +156,7 @@ private:
 };
 
 //==============================================================================
-class ColourSelector::HueSelectorComp  : public Component
+class ColourSelector::HueSelectorComp final : public Component
 {
 public:
     HueSelectorComp (ColourSelector& cs, float& hue, int edgeSize)
@@ -208,7 +208,7 @@ private:
     float& h;
     const int edge;
 
-    struct HueSelectorMarker  : public Component
+    struct HueSelectorMarker final : public Component
     {
         HueSelectorMarker()
         {
@@ -243,7 +243,7 @@ private:
 };
 
 //==============================================================================
-class ColourSelector::SwatchComponent   : public Component
+class ColourSelector::SwatchComponent final : public Component
 {
 public:
     SwatchComponent (ColourSelector& cs, int itemIndex)
@@ -302,7 +302,7 @@ private:
 };
 
 //==============================================================================
-class ColourSelector::ColourPreviewComp  : public Component
+class ColourSelector::ColourPreviewComp final : public Component
 {
 public:
     ColourPreviewComp (ColourSelector& cs, bool isEditable)

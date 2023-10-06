@@ -120,7 +120,7 @@ static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
 constexpr int extendedKeyModifier = 0x30000;
 
 //==============================================================================
-class JuceCALayerDelegate : public ObjCClass<NSObject<CALayerDelegate>>
+class JuceCALayerDelegate final : public ObjCClass<NSObject<CALayerDelegate>>
 {
 public:
     struct Callback
@@ -166,8 +166,8 @@ private:
 };
 
 //==============================================================================
-class NSViewComponentPeer  : public ComponentPeer,
-                             private JuceCALayerDelegate::Callback
+class NSViewComponentPeer final : public ComponentPeer,
+                                  private JuceCALayerDelegate::Callback
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
@@ -1757,7 +1757,7 @@ private:
     // avoid unnecessarily duplicating display-link threads.
     SharedResourcePointer<PerScreenDisplayLinks> sharedDisplayLinks;
 
-    class AsyncRepainter : private AsyncUpdater
+    class AsyncRepainter final : private AsyncUpdater
     {
     public:
         explicit AsyncRepainter (NSViewComponentPeer& o) : owner (o) {}
@@ -2007,7 +2007,7 @@ private:
 
 //==============================================================================
 template <typename Base>
-struct NSViewComponentPeerWrapper  : public Base
+struct NSViewComponentPeerWrapper : public Base
 {
     explicit NSViewComponentPeerWrapper (const char* baseName)
         : Base (baseName)
@@ -2031,7 +2031,7 @@ struct NSViewComponentPeerWrapper  : public Base
 };
 
 //==============================================================================
-struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
+struct JuceNSViewClass final : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 {
     JuceNSViewClass()  : NSViewComponentPeerWrapper ("JUCEView_")
     {
@@ -2602,7 +2602,7 @@ private:
 };
 
 //==============================================================================
-struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindow>>
+struct JuceNSWindowClass final : public NSViewComponentPeerWrapper<ObjCClass<NSWindow>>
 {
     JuceNSWindowClass()  : NSViewComponentPeerWrapper ("JUCEWindow_")
     {

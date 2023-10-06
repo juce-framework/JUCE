@@ -1204,7 +1204,7 @@ namespace WavFileHelpers
 }
 
 //==============================================================================
-class WavAudioFormatReader  : public AudioFormatReader
+class WavAudioFormatReader final : public AudioFormatReader
 {
 public:
     WavAudioFormatReader (InputStream* in)  : AudioFormatReader (in, wavFormatName)
@@ -1579,7 +1579,7 @@ private:
 };
 
 //==============================================================================
-class WavAudioFormatWriter  : public AudioFormatWriter
+class WavAudioFormatWriter final : public AudioFormatWriter
 {
 public:
     WavAudioFormatWriter (OutputStream* const out, const double rate,
@@ -1843,7 +1843,7 @@ private:
 };
 
 //==============================================================================
-class MemoryMappedWavReader   : public MemoryMappedAudioFormatReader
+class MemoryMappedWavReader final : public MemoryMappedAudioFormatReader
 {
 public:
     MemoryMappedWavReader (const File& wavFile, const WavAudioFormatReader& reader)
@@ -2113,7 +2113,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct WaveAudioFormatTests : public UnitTest
+struct WaveAudioFormatTests final : public UnitTest
 {
     WaveAudioFormatTests()
         : UnitTest ("Wave audio format tests", UnitTestCategories::audio)

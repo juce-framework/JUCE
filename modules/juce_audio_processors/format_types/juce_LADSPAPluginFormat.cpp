@@ -42,7 +42,7 @@ static int insideLADSPACallback = 0;
 #endif
 
 //==============================================================================
-class LADSPAModuleHandle    : public ReferenceCountedObject
+class LADSPAModuleHandle final : public ReferenceCountedObject
 {
 public:
     LADSPAModuleHandle (const File& f)

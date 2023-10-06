@@ -208,7 +208,7 @@ template class DryWetMixer<double>;
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct DryWetMixerTests : public UnitTest
+struct DryWetMixerTests final : public UnitTest
 {
     DryWetMixerTests() : UnitTest ("DryWetMixer", UnitTestCategories::dsp) {}
 

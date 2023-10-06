@@ -28,7 +28,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-struct DemoContent    : public Component
+struct DemoContent final : public Component
 {
     DemoContent() noexcept    {}
 
@@ -58,7 +58,7 @@ private:
 
 //==============================================================================
 #if ! (JUCE_ANDROID || JUCE_IOS)
-struct CodeContent    : public Component
+struct CodeContent final : public Component
 {
     CodeContent()
     {

@@ -199,7 +199,7 @@ void ProjucerApplication::shutdown()
     deleteLogger();
 }
 
-struct AsyncQuitRetrier  : private Timer
+struct AsyncQuitRetrier final : private Timer
 {
     AsyncQuitRetrier()   { startTimer (500); }
 

@@ -27,7 +27,7 @@ namespace juce
 {
 
 //==============================================================================
-class CodeEditorComponent::CodeEditorAccessibilityHandler  : public AccessibilityHandler
+class CodeEditorComponent::CodeEditorAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit CodeEditorAccessibilityHandler (CodeEditorComponent& codeEditorComponentToWrap)
@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    class CodeEditorComponentTextInterface  : public AccessibilityTextInterface
+    class CodeEditorComponentTextInterface final : public AccessibilityTextInterface
     {
     public:
         explicit CodeEditorComponentTextInterface (CodeEditorComponent& codeEditorComponentToWrap)
@@ -384,7 +384,7 @@ private:
 };
 
 //==============================================================================
-class CodeEditorComponent::GutterComponent  : public Component
+class CodeEditorComponent::GutterComponent final : public Component
 {
 public:
     GutterComponent() {}

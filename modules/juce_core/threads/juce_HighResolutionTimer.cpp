@@ -138,7 +138,7 @@ bool HighResolutionTimer::isTimerRunning() const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class HighResolutionTimerTests : public UnitTest
+class HighResolutionTimerTests final : public UnitTest
 {
 public:
     HighResolutionTimerTests()
@@ -411,7 +411,7 @@ public:
         }
     }
 
-    class Timer : public HighResolutionTimer
+    class Timer final : public HighResolutionTimer
     {
     public:
         explicit Timer (std::function<void()> fn)

@@ -1087,7 +1087,7 @@ private:
     returns garbage, so make sure to check that the plugin `hasExtensionData` before
     constructing one of these!
 */
-class SharedThreadedWorker : public WorkerResponseListener
+class SharedThreadedWorker final : public WorkerResponseListener
 {
 public:
     ~SharedThreadedWorker() noexcept override
@@ -1383,7 +1383,7 @@ struct MessageBufferInterface
 };
 
 template <typename Header, typename LockTraits>
-class Messages : public MessageBufferInterface<Header>
+class Messages final : public MessageBufferInterface<Header>
 {
     using Read  = typename LockTraits::Read;
     using Write = typename LockTraits::Write;
@@ -1438,7 +1438,7 @@ private:
 };
 
 //==============================================================================
-class LambdaTimer : private Timer
+class LambdaTimer final : private Timer
 {
 public:
     explicit LambdaTimer (std::function<void()> c) : callback (c) {}
@@ -1466,7 +1466,7 @@ struct UiMessageHeader
     MessageHeader header;
 };
 
-class ProcessorToUi : public MessageBufferInterface<UiMessageHeader>
+class ProcessorToUi final : public MessageBufferInterface<UiMessageHeader>
 {
 public:
     ProcessorToUi() { timer.startTimerHz (60); }
@@ -1988,8 +1988,8 @@ private:
     std::vector<AtomPort> atomPorts;
 };
 
-class InstanceWithSupports : private FeaturesDataListener,
-                             private HandleHolder
+class InstanceWithSupports final : private FeaturesDataListener,
+                                   private HandleHolder
 {
 public:
     InstanceWithSupports (World& world,
@@ -2423,7 +2423,7 @@ private:
     JUCE_LEAK_DETECTOR (ParameterValuesAndFlags)
 };
 
-class LV2Parameter  : public AudioPluginInstance::HostedParameter
+class LV2Parameter : public AudioPluginInstance::HostedParameter
 {
 public:
     LV2Parameter (const String& nameIn,
@@ -2740,7 +2740,7 @@ struct TouchListener
     virtual void controlGrabbed (uint32_t port, bool grabbed) = 0;
 };
 
-class AsyncFn : public AsyncUpdater
+class AsyncFn final : public AsyncUpdater
 {
 public:
     explicit AsyncFn (std::function<void()> callbackIn)
@@ -2976,7 +2976,7 @@ static bool noneOf (Range&& range, Predicate&& pred)
     return std::none_of (begin (range), end (range), std::forward<Predicate> (pred));
 }
 
-class PeerChangedListener : private ComponentMovementWatcher
+class PeerChangedListener final : private ComponentMovementWatcher
 {
 public:
     PeerChangedListener (Component& c, std::function<void()> peerChangedIn)
@@ -2995,7 +2995,7 @@ private:
     std::function<void()> peerChanged;
 };
 
-struct ViewSizeListener : private ComponentMovementWatcher
+struct ViewSizeListener final : private ComponentMovementWatcher
 {
     ViewSizeListener (Component& c, PhysicalResizeListener& l)
         : ComponentMovementWatcher (&c), listener (l)
@@ -3025,8 +3025,8 @@ struct ViewSizeListener : private ComponentMovementWatcher
     PhysicalResizeListener& listener;
 };
 
-class ConfiguredEditorComponent : public Component,
-                                  private PhysicalResizeListener
+class ConfiguredEditorComponent final : public Component,
+                                        private PhysicalResizeListener
 {
 public:
     ConfiguredEditorComponent (World& world,
@@ -3182,7 +3182,7 @@ private:
    #if JUCE_LINUX || JUCE_BSD
     struct InnerHolder
     {
-        struct Inner : public XEmbedComponent
+        struct Inner final : public XEmbedComponent
         {
             Inner() : XEmbedComponent (true, true)
             {
@@ -3194,8 +3194,8 @@ private:
         Inner inner;
     };
 
-    struct ViewComponent : public InnerHolder,
-                           public XEmbedComponent
+    struct ViewComponent final : public InnerHolder,
+                                 public XEmbedComponent
     {
         explicit ViewComponent (PhysicalResizeListener& l)
             : XEmbedComponent ((unsigned long) inner.getPeer()->getNativeHandle(), true, false),
@@ -3221,7 +3221,7 @@ private:
         ViewSizeListener listener;
     };
    #elif JUCE_MAC
-    struct ViewComponent : public NSViewComponentWithParent
+    struct ViewComponent final : public NSViewComponentWithParent
     {
         explicit ViewComponent (PhysicalResizeListener&)
             : NSViewComponentWithParent (WantsNudge::no) {}
@@ -3231,7 +3231,7 @@ private:
         void prepareForDestruction() {}
     };
    #elif JUCE_WINDOWS
-    struct ViewComponent : public HWNDComponent
+    struct ViewComponent final : public HWNDComponent
     {
         explicit ViewComponent (PhysicalResizeListener&)
         {
@@ -3252,7 +3252,7 @@ private:
         void prepareForDestruction() {}
 
     private:
-        struct Inner : public Component
+        struct Inner final : public Component
         {
             Inner() { setOpaque (true); }
             void paint (Graphics& g) override { g.fillAll (Colours::black); }
@@ -3261,7 +3261,7 @@ private:
         Inner inner;
     };
    #else
-    struct ViewComponent : public Component
+    struct ViewComponent final : public Component
     {
         explicit ViewComponent (PhysicalResizeListener&) {}
         void* getWidget() { return nullptr; }
@@ -3339,9 +3339,9 @@ struct InstanceProvider
     virtual InstanceWithSupports* getInstanceWithSupports() const = 0;
 };
 
-class Editor  : public AudioProcessorEditor,
-                public UiEventListener,
-                private LogicalResizeListener
+class Editor final : public AudioProcessorEditor,
+                     public UiEventListener,
+                     private LogicalResizeListener
 {
 public:
     Editor (World& worldIn,
@@ -3785,7 +3785,7 @@ private:
     JUCE_LEAK_DETECTOR (IntermediateParameterTree)
 };
 
-struct BypassParameter : public LV2Parameter
+struct BypassParameter final : public LV2Parameter
 {
     BypassParameter (const ParameterInfo& parameterInfo, ParameterValuesAndFlags& cacheIn)
         : LV2Parameter ("Bypass", parameterInfo, cacheIn) {}
@@ -4350,10 +4350,10 @@ public:
 };
 
 //==============================================================================
-class LV2AudioPluginInstance  : public AudioPluginInstance,
-                                private TouchListener,
-                                private EditorListener,
-                                private InstanceProvider
+class LV2AudioPluginInstance final : public AudioPluginInstance,
+                                     private TouchListener,
+                                     private EditorListener,
+                                     private InstanceProvider
 {
 public:
     LV2AudioPluginInstance (std::shared_ptr<World> worldIn,

@@ -25,7 +25,7 @@ namespace juce
 
 #if JUCE_UNIT_TESTS
 
-class ListenerListTests  : public UnitTest
+class ListenerListTests final : public UnitTest
 {
 public:
     //==============================================================================

@@ -39,45 +39,45 @@ namespace juce
 
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
-template <typename> struct Signature;
+template <typename> struct Signature {};
 
 template <typename Result, typename... Args>
 struct Signature<Result (Args...)> {};
 
 // @selector isn't constexpr, so the 'sel' members are functions rather than static constexpr data members
-struct SignatureHasText                         : Signature<BOOL()>                                                              { static auto sel() { return @selector (hasText); } };
-struct SignatureSetSelectedTextRange            : Signature<void (UITextRange*)>                                                 { static auto sel() { return @selector (setSelectedTextRange:); } };
-struct SignatureSelectedTextRange               : Signature<UITextRange*()>                                                      { static auto sel() { return @selector (selectedTextRange); } };
-struct SignatureMarkedTextRange                 : Signature<UITextRange*()>                                                      { static auto sel() { return @selector (markedTextRange); } };
-struct SignatureSetMarkedTextSelectedRange      : Signature<void (NSString*, NSRange)>                                           { static auto sel() { return @selector (setMarkedText:selectedRange:); } };
-struct SignatureUnmarkText                      : Signature<void()>                                                              { static auto sel() { return @selector (unmarkText); } };
-struct SignatureMarkedTextStyle                 : Signature<NSDictionary<NSAttributedStringKey, id>*()>                          { static auto sel() { return @selector (markedTextStyle); } };
-struct SignatureSetMarkedTextStyle              : Signature<void (NSDictionary<NSAttributedStringKey, id>*)>                     { static auto sel() { return @selector (setMarkedTextStyle:); } };
-struct SignatureBeginningOfDocument             : Signature<UITextPosition*()>                                                   { static auto sel() { return @selector (beginningOfDocument); } };
-struct SignatureEndOfDocument                   : Signature<UITextPosition*()>                                                   { static auto sel() { return @selector (endOfDocument); } };
-struct SignatureTokenizer                       : Signature<id<UITextInputTokenizer>()>                                          { static auto sel() { return @selector (tokenizer); } };
-struct SignatureBaseWritingDirection            : Signature<NSWritingDirection (UITextPosition*, UITextStorageDirection)>        { static auto sel() { return @selector (baseWritingDirectionForPosition:inDirection:); } };
-struct SignatureCaretRectForPosition            : Signature<CGRect (UITextPosition*)>                                            { static auto sel() { return @selector (caretRectForPosition:); } };
-struct SignatureCharacterRangeByExtending       : Signature<UITextRange* (UITextPosition*, UITextLayoutDirection)>               { static auto sel() { return @selector (characterRangeByExtendingPosition:inDirection:); } };
-struct SignatureCharacterRangeAtPoint           : Signature<UITextRange* (CGPoint)>                                              { static auto sel() { return @selector (characterRangeAtPoint:); } };
-struct SignatureClosestPositionToPoint          : Signature<UITextPosition* (CGPoint)>                                           { static auto sel() { return @selector (closestPositionToPoint:); } };
-struct SignatureClosestPositionToPointInRange   : Signature<UITextPosition* (CGPoint, UITextRange*)>                             { static auto sel() { return @selector (closestPositionToPoint:withinRange:); } };
-struct SignatureComparePositionToPosition       : Signature<NSComparisonResult (UITextPosition*, UITextPosition*)>               { static auto sel() { return @selector (comparePosition:toPosition:); } };
-struct SignatureOffsetFromPositionToPosition    : Signature<NSInteger (UITextPosition*, UITextPosition*)>                        { static auto sel() { return @selector (offsetFromPosition:toPosition:); } };
-struct SignaturePositionFromPositionInDirection : Signature<UITextPosition* (UITextPosition*, UITextLayoutDirection, NSInteger)> { static auto sel() { return @selector (positionFromPosition:inDirection:offset:); } };
-struct SignaturePositionFromPositionOffset      : Signature<UITextPosition* (UITextPosition*, NSInteger)>                        { static auto sel() { return @selector (positionFromPosition:offset:); } };
-struct SignatureFirstRectForRange               : Signature<CGRect (UITextRange*)>                                               { static auto sel() { return @selector (firstRectForRange:); } };
-struct SignatureSelectionRectsForRange          : Signature<NSArray<UITextSelectionRect*>* (UITextRange*)>                       { static auto sel() { return @selector (selectionRectsForRange:); } };
-struct SignaturePositionWithinRange             : Signature<UITextPosition* (UITextRange*, UITextLayoutDirection)>               { static auto sel() { return @selector (positionWithinRange:farthestInDirection:); } };
-struct SignatureReplaceRangeWithText            : Signature<void (UITextRange*, NSString*)>                                      { static auto sel() { return @selector (replaceRange:withText:); } };
-struct SignatureSetBaseWritingDirection         : Signature<void (NSWritingDirection, UITextRange*)>                             { static auto sel() { return @selector (setBaseWritingDirection:forRange:); } };
-struct SignatureTextInRange                     : Signature<NSString* (UITextRange*)>                                            { static auto sel() { return @selector (textInRange:); } };
-struct SignatureTextRangeFromPosition           : Signature<UITextRange* (UITextPosition*, UITextPosition*)>                     { static auto sel() { return @selector (textRangeFromPosition:toPosition:); } };
-struct SignatureSetInputDelegate                : Signature<void (id)>                                                           { static auto sel() { return @selector (setInputDelegate:); } };
-struct SignatureInputDelegate                   : Signature<id()>                                                                { static auto sel() { return @selector (inputDelegate); } };
-struct SignatureKeyboardType                    : Signature<UIKeyboardType()>                                                    { static auto sel() { return @selector (keyboardType); } };
-struct SignatureAutocapitalizationType          : Signature<UITextAutocapitalizationType()>                                      { static auto sel() { return @selector (autocapitalizationType); } };
-struct SignatureAutocorrectionType              : Signature<UITextAutocorrectionType()>                                          { static auto sel() { return @selector (autocorrectionType); } };
+struct SignatureHasText                         final : public Signature<BOOL()>                                                              { static auto sel() { return @selector (hasText); } };
+struct SignatureSetSelectedTextRange            final : public Signature<void (UITextRange*)>                                                 { static auto sel() { return @selector (setSelectedTextRange:); } };
+struct SignatureSelectedTextRange               final : public Signature<UITextRange*()>                                                      { static auto sel() { return @selector (selectedTextRange); } };
+struct SignatureMarkedTextRange                 final : public Signature<UITextRange*()>                                                      { static auto sel() { return @selector (markedTextRange); } };
+struct SignatureSetMarkedTextSelectedRange      final : public Signature<void (NSString*, NSRange)>                                           { static auto sel() { return @selector (setMarkedText:selectedRange:); } };
+struct SignatureUnmarkText                      final : public Signature<void()>                                                              { static auto sel() { return @selector (unmarkText); } };
+struct SignatureMarkedTextStyle                 final : public Signature<NSDictionary<NSAttributedStringKey, id>*()>                          { static auto sel() { return @selector (markedTextStyle); } };
+struct SignatureSetMarkedTextStyle              final : public Signature<void (NSDictionary<NSAttributedStringKey, id>*)>                     { static auto sel() { return @selector (setMarkedTextStyle:); } };
+struct SignatureBeginningOfDocument             final : public Signature<UITextPosition*()>                                                   { static auto sel() { return @selector (beginningOfDocument); } };
+struct SignatureEndOfDocument                   final : public Signature<UITextPosition*()>                                                   { static auto sel() { return @selector (endOfDocument); } };
+struct SignatureTokenizer                       final : public Signature<id<UITextInputTokenizer>()>                                          { static auto sel() { return @selector (tokenizer); } };
+struct SignatureBaseWritingDirection            final : public Signature<NSWritingDirection (UITextPosition*, UITextStorageDirection)>        { static auto sel() { return @selector (baseWritingDirectionForPosition:inDirection:); } };
+struct SignatureCaretRectForPosition            final : public Signature<CGRect (UITextPosition*)>                                            { static auto sel() { return @selector (caretRectForPosition:); } };
+struct SignatureCharacterRangeByExtending       final : public Signature<UITextRange* (UITextPosition*, UITextLayoutDirection)>               { static auto sel() { return @selector (characterRangeByExtendingPosition:inDirection:); } };
+struct SignatureCharacterRangeAtPoint           final : public Signature<UITextRange* (CGPoint)>                                              { static auto sel() { return @selector (characterRangeAtPoint:); } };
+struct SignatureClosestPositionToPoint          final : public Signature<UITextPosition* (CGPoint)>                                           { static auto sel() { return @selector (closestPositionToPoint:); } };
+struct SignatureClosestPositionToPointInRange   final : public Signature<UITextPosition* (CGPoint, UITextRange*)>                             { static auto sel() { return @selector (closestPositionToPoint:withinRange:); } };
+struct SignatureComparePositionToPosition       final : public Signature<NSComparisonResult (UITextPosition*, UITextPosition*)>               { static auto sel() { return @selector (comparePosition:toPosition:); } };
+struct SignatureOffsetFromPositionToPosition    final : public Signature<NSInteger (UITextPosition*, UITextPosition*)>                        { static auto sel() { return @selector (offsetFromPosition:toPosition:); } };
+struct SignaturePositionFromPositionInDirection final : public Signature<UITextPosition* (UITextPosition*, UITextLayoutDirection, NSInteger)> { static auto sel() { return @selector (positionFromPosition:inDirection:offset:); } };
+struct SignaturePositionFromPositionOffset      final : public Signature<UITextPosition* (UITextPosition*, NSInteger)>                        { static auto sel() { return @selector (positionFromPosition:offset:); } };
+struct SignatureFirstRectForRange               final : public Signature<CGRect (UITextRange*)>                                               { static auto sel() { return @selector (firstRectForRange:); } };
+struct SignatureSelectionRectsForRange          final : public Signature<NSArray<UITextSelectionRect*>* (UITextRange*)>                       { static auto sel() { return @selector (selectionRectsForRange:); } };
+struct SignaturePositionWithinRange             final : public Signature<UITextPosition* (UITextRange*, UITextLayoutDirection)>               { static auto sel() { return @selector (positionWithinRange:farthestInDirection:); } };
+struct SignatureReplaceRangeWithText            final : public Signature<void (UITextRange*, NSString*)>                                      { static auto sel() { return @selector (replaceRange:withText:); } };
+struct SignatureSetBaseWritingDirection         final : public Signature<void (NSWritingDirection, UITextRange*)>                             { static auto sel() { return @selector (setBaseWritingDirection:forRange:); } };
+struct SignatureTextInRange                     final : public Signature<NSString* (UITextRange*)>                                            { static auto sel() { return @selector (textInRange:); } };
+struct SignatureTextRangeFromPosition           final : public Signature<UITextRange* (UITextPosition*, UITextPosition*)>                     { static auto sel() { return @selector (textRangeFromPosition:toPosition:); } };
+struct SignatureSetInputDelegate                final : public Signature<void (id)>                                                           { static auto sel() { return @selector (setInputDelegate:); } };
+struct SignatureInputDelegate                   final : public Signature<id()>                                                                { static auto sel() { return @selector (inputDelegate); } };
+struct SignatureKeyboardType                    final : public Signature<UIKeyboardType()>                                                    { static auto sel() { return @selector (keyboardType); } };
+struct SignatureAutocapitalizationType          final : public Signature<UITextAutocapitalizationType()>                                      { static auto sel() { return @selector (autocapitalizationType); } };
+struct SignatureAutocorrectionType              final : public Signature<UITextAutocorrectionType()>                                          { static auto sel() { return @selector (autocorrectionType); } };
 
 //==============================================================================
 class AccessibilityHandler::AccessibilityNativeImpl
@@ -95,7 +95,7 @@ public:
 
 private:
     //==============================================================================
-    class AccessibilityContainer  : public AccessibleObjCClass<NSObject>
+    class AccessibilityContainer final : public AccessibleObjCClass<NSObject>
     {
     public:
         AccessibilityContainer()
@@ -212,7 +212,7 @@ private:
     };
 
     //==============================================================================
-    class AccessibilityElement  : public AccessibleObjCClass<UIAccessibilityElement>
+    class AccessibilityElement final : public AccessibleObjCClass<UIAccessibilityElement>
     {
         template <typename Func, typename... Items>
         static constexpr void forEach (Func&& func, Items&&... items)

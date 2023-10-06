@@ -213,7 +213,7 @@ void MPEZoneLayout::checkAndLimitZoneParameters (int minValue, int maxValue,
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MPEZoneLayoutTests  : public UnitTest
+class MPEZoneLayoutTests final : public UnitTest
 {
 public:
     MPEZoneLayoutTests()

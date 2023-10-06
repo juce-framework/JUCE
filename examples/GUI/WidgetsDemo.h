@@ -611,7 +611,7 @@ struct MenuPage final : public Component
         addAndMakeVisible (customItemButton);
         customItemButton.onClick = [&]
         {
-            struct CustomComponent  : public PopupMenu::CustomComponent
+            struct CustomComponent final : public PopupMenu::CustomComponent
             {
                 CustomComponent (int widthIn, int heightIn, Colour backgroundIn)
                     : PopupMenu::CustomComponent (false),
@@ -925,7 +925,7 @@ private:
 
         // Demonstrates how to put a custom component into a toolbar - this one contains
         // a ComboBox.
-        class CustomToolbarComboBox : public ToolbarItemComponent
+        class CustomToolbarComboBox final : public ToolbarItemComponent
         {
         public:
             CustomToolbarComboBox (const int toolbarItemId)
@@ -1161,7 +1161,7 @@ private:
 
     //==============================================================================
     // This is a custom Label component, which we use for the table's editable text columns.
-    class EditableTextCustomComponent  : public Label
+    class EditableTextCustomComponent final : public Label
     {
     public:
         EditableTextCustomComponent (TableDemoComponent& td)  : owner (td)
@@ -1209,7 +1209,7 @@ private:
     //==============================================================================
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
-    class RatingColumnCustomComponent    : public Component
+    class RatingColumnCustomComponent final : public Component
     {
     public:
         RatingColumnCustomComponent (TableDemoComponent& td)  : owner (td)
@@ -1328,7 +1328,7 @@ public:
 
 private:
     //==============================================================================
-    struct SourceItemListboxContents  : public ListBoxModel
+    struct SourceItemListboxContents final : public ListBoxModel
     {
         // The following methods implement the necessary virtual functions from ListBoxModel,
         // telling the listbox how many rows there are, painting them, etc.
@@ -1366,10 +1366,10 @@ private:
 
     //==============================================================================
     // and this is a component that can have things dropped onto it..
-    class DragAndDropDemoTarget : public Component,
-                                  public DragAndDropTarget,
-                                  public FileDragAndDropTarget,
-                                  public TextDragAndDropTarget
+    class DragAndDropDemoTarget final : public Component,
+                                        public DragAndDropTarget,
+                                        public FileDragAndDropTarget,
+                                        public TextDragAndDropTarget
     {
     public:
         DragAndDropDemoTarget()    {}
@@ -1530,7 +1530,7 @@ struct DemoTabbedComponent final : public TabbedComponent
 
     // This is a small star button that is put inside one of the tabs. You can
     // use this technique to create things like "close tab" buttons, etc.
-    class CustomTabButton  : public Component
+    class CustomTabButton final : public Component
     {
     public:
         CustomTabButton (bool isRunningComponenTransformsDemo)

@@ -32,7 +32,7 @@ namespace detail
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 } // namespace detail
 
-class Win32NativeFileChooser  : private Thread
+class Win32NativeFileChooser final : private Thread
 {
 public:
     enum { charsAvailableForResult = 32768 };
@@ -124,7 +124,7 @@ public:
 
 private:
     //==============================================================================
-    class CustomComponentHolder  : public Component
+    class CustomComponentHolder final : public Component
     {
     public:
         CustomComponentHolder (Component* const customComp)
@@ -239,7 +239,7 @@ private:
         if (! selectsDirectories && FAILED (dialog.SetFileTypes (numElementsInArray (spec), spec)))
             return false;
 
-        struct Events  : public ComBaseClassHelper<IFileDialogEvents>
+        struct Events final : public ComBaseClassHelper<IFileDialogEvents>
         {
             explicit Events (Win32NativeFileChooser& o) : owner (o) {}
 
@@ -811,9 +811,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Win32NativeFileChooser)
 };
 
-class FileChooser::Native     : public std::enable_shared_from_this<Native>,
-                                public Component,
-                                public FileChooser::Pimpl
+class FileChooser::Native final : public std::enable_shared_from_this<Native>,
+                                  public Component,
+                                  public FileChooser::Pimpl
 {
 public:
     Native (FileChooser& fileChooser, int flagsIn, FilePreviewComponent* previewComp)

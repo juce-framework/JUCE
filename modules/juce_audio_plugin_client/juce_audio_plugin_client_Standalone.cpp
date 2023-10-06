@@ -54,7 +54,7 @@ namespace juce
 {
 
 //==============================================================================
-class StandaloneFilterApp  : public JUCEApplication
+class StandaloneFilterApp final : public JUCEApplication
 {
 public:
     StandaloneFilterApp()

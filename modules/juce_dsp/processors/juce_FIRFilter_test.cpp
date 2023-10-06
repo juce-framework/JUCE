@@ -26,7 +26,7 @@
 namespace juce::dsp
 {
 
-class FIRFilterTest : public UnitTest
+class FIRFilterTest final : public UnitTest
 {
     template <typename Type>
     struct Helpers

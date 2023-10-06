@@ -119,7 +119,7 @@ static std::vector<Vst::ParamID> getAllParamIDs (Vst::IEditController& controlle
 /*  Allows parameter updates to be queued up without blocking,
     and automatically dispatches these updates on the main thread.
 */
-class EditControllerParameterDispatcher  : private Timer
+class EditControllerParameterDispatcher final : private Timer
 {
 public:
     ~EditControllerParameterDispatcher() override { stopTimer(); }
@@ -402,13 +402,13 @@ static void toProcessContext (Vst::ProcessContext& context,
 //==============================================================================
 class VST3PluginInstance;
 
-struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
-                          public Vst::IComponentHandler2, // From VST V3.1.0 (a very well named class, of course!)
-                          public Vst::IComponentHandler3, // From VST V3.5.0 (also very well named!)
-                          public Vst::IContextMenuTarget,
-                          public Vst::IHostApplication,
-                          public Vst::IUnitHandler,
-                          private ComponentRestarter::Listener
+struct VST3HostContext final : public Vst::IComponentHandler,  // From VST V3.0.0
+                               public Vst::IComponentHandler2, // From VST V3.1.0 (a very well named class, of course!)
+                               public Vst::IComponentHandler3, // From VST V3.5.0 (also very well named!)
+                               public Vst::IContextMenuTarget,
+                               public Vst::IHostApplication,
+                               public Vst::IUnitHandler,
+                               private ComponentRestarter::Listener
 {
     VST3HostContext()
     {
@@ -460,7 +460,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
     }
 
     //==============================================================================
-    struct ContextMenu  : public Vst::IContextMenu
+    struct ContextMenu final : public Vst::IContextMenu
     {
         ContextMenu (VST3PluginInstance& pluginInstance)  : owner (pluginInstance) {}
         virtual ~ContextMenu() {}
@@ -762,7 +762,7 @@ private:
     };
 
     //==============================================================================
-    class AttributeList  : public Vst::IAttributeList
+    class AttributeList final : public Vst::IAttributeList
     {
     public:
         AttributeList() = default;
@@ -850,7 +850,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttributeList)
     };
 
-    struct Message  : public Vst::IMessage
+    struct Message final : public Vst::IMessage
     {
         Message() = default;
         virtual ~Message() = default;
@@ -1159,7 +1159,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DLLHandle)
 };
 
-struct DLLHandleCache  : public DeletedAtShutdown
+struct DLLHandleCache final : public DeletedAtShutdown
 {
     DLLHandleCache() = default;
     ~DLLHandleCache() override { clearSingletonInstance(); }
@@ -1315,7 +1315,7 @@ public:
 
 private:
     //==============================================================================
-    struct TimerCaller  : private Timer
+    struct TimerCaller final : private Timer
     {
         TimerCaller (Linux::ITimerHandler* h, int interval)  : handler (h)  { startTimer (interval); }
         ~TimerCaller() override { stopTimer(); }
@@ -1338,7 +1338,7 @@ private:
 #endif
 
 //==============================================================================
-struct VST3ModuleHandle  : public ReferenceCountedObject
+struct VST3ModuleHandle final : public ReferenceCountedObject
 {
     explicit VST3ModuleHandle (const File& pluginFile, const PluginDescription& pluginDesc)
         : file (pluginFile)
@@ -1785,7 +1785,7 @@ private:
    #if JUCE_WINDOWS
     using HandleFormat = HWND;
 
-    struct ViewComponent : public HWNDComponent
+    struct ViewComponent final : public HWNDComponent
     {
         ViewComponent()
         {
@@ -1799,7 +1799,7 @@ private:
         void paint (Graphics& g) override { g.fillAll (Colours::black); }
 
     private:
-        struct Inner : public Component
+        struct Inner final : public Component
         {
             Inner() { setOpaque (true); }
             void paint (Graphics& g) override { g.fillAll (Colours::black); }
@@ -2086,7 +2086,7 @@ struct VST3ComponentHolder
     This is more memory-efficient than storing large vectors of
     parameter changes that we'll just throw away.
 */
-class ParamValueQueue : public Vst::IParamValueQueue
+class ParamValueQueue final : public Vst::IParamValueQueue
 {
 public:
     ParamValueQueue (Vst::ParamID idIn, Steinberg::int32 parameterIndexIn)
@@ -2154,7 +2154,7 @@ private:
     - Lookup by paramID is also O(1)
     - addParameterData never allocates, as long you pass a paramID already passed to initialise
 */
-class ParameterChanges : public Vst::IParameterChanges
+class ParameterChanges final : public Vst::IParameterChanges
 {
     static constexpr Steinberg::int32 notInVector = -1;
 
@@ -2482,8 +2482,8 @@ public:
 
     void getExtensions (ExtensionsVisitor& visitor) const override
     {
-        struct Extensions :  public ExtensionsVisitor::VST3Client,
-                             public ExtensionsVisitor::ARAClient
+        struct Extensions final :  public ExtensionsVisitor::VST3Client,
+                                   public ExtensionsVisitor::ARAClient
         {
             explicit Extensions (const VST3PluginInstance* instanceIn) : instance (instanceIn) {}
 
@@ -2877,7 +2877,7 @@ public:
         }
     }
 
-    struct TrackPropertiesAttributeList    : public Vst::IAttributeList
+    struct TrackPropertiesAttributeList final : public Vst::IAttributeList
     {
         TrackPropertiesAttributeList (const TrackProperties& properties) : props (properties) {}
         virtual ~TrackPropertiesAttributeList() {}

@@ -49,8 +49,8 @@ static void updateButtonTickColour (ToggleButton* button, bool usingDefault)
 }
 
 //==============================================================================
-class MultiChoicePropertyComponent::MultiChoiceRemapperSource    : public Value::ValueSource,
-                                                                   private Value::Listener
+class MultiChoicePropertyComponent::MultiChoiceRemapperSource final : public Value::ValueSource,
+                                                                      private Value::Listener
 {
 public:
     MultiChoiceRemapperSource (const Value& source, var v, int c)
@@ -107,8 +107,8 @@ private:
 };
 
 //==============================================================================
-class MultiChoicePropertyComponent::MultiChoiceRemapperSourceWithDefault    : public Value::ValueSource,
-                                                                              private Value::Listener
+class MultiChoicePropertyComponent::MultiChoiceRemapperSourceWithDefault final : public Value::ValueSource,
+                                                                                 private Value::Listener
 {
 public:
     MultiChoiceRemapperSourceWithDefault (const ValueTreePropertyWithDefault& val,

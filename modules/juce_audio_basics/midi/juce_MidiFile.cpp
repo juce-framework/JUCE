@@ -530,7 +530,7 @@ bool MidiFile::writeTrack (OutputStream& mainOut, const MidiMessageSequence& ms)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct MidiFileTest  : public UnitTest
+struct MidiFileTest final : public UnitTest
 {
     MidiFileTest()
         : UnitTest ("MidiFile", UnitTestCategories::midi)

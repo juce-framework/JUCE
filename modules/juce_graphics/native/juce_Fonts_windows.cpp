@@ -313,7 +313,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 }
 
 //==============================================================================
-class WindowsTypeface   : public Typeface
+class WindowsTypeface final : public Typeface
 {
 public:
     WindowsTypeface (const Font& font)  : Typeface (font.getTypefaceName(),

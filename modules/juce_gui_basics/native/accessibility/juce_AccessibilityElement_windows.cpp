@@ -31,8 +31,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 int AccessibilityNativeHandle::idCounter = 0;
 
 //==============================================================================
-class UIAScrollProvider  : public UIAProviderBase,
-                           public ComBaseClassHelper<ComTypes::IScrollProvider>
+class UIAScrollProvider final : public UIAProviderBase,
+                                public ComBaseClassHelper<ComTypes::IScrollProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;
@@ -50,8 +50,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIAScrollProvider)
 };
 
-class UIAScrollItemProvider  : public UIAProviderBase,
-                               public ComBaseClassHelper<ComTypes::IScrollItemProvider>
+class UIAScrollItemProvider final : public UIAProviderBase,
+                                    public ComBaseClassHelper<ComTypes::IScrollItemProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;

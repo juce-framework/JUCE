@@ -646,7 +646,7 @@ struct OpenGLUtils
         String name;
     };
 
-    struct DynamicTexture   : public DemoTexture
+    struct DynamicTexture final : public DemoTexture
     {
         DynamicTexture() { name = "Dynamically-generated texture"; }
 
@@ -693,7 +693,7 @@ struct OpenGLUtils
         return image;
     }
 
-    struct BuiltInTexture   : public DemoTexture
+    struct BuiltInTexture final : public DemoTexture
     {
         BuiltInTexture (const char* nm, const void* imageData, size_t imageSize)
             : image (resizeImageToPowerOfTwo (ImageFileFormat::loadFrom (imageData, imageSize)))
@@ -710,7 +710,7 @@ struct OpenGLUtils
         }
     };
 
-    struct TextureFromFile   : public DemoTexture
+    struct TextureFromFile final : public DemoTexture
     {
         TextureFromFile (const File& file)
         {
@@ -727,7 +727,7 @@ struct OpenGLUtils
         }
     };
 
-    struct TextureFromAsset   : public DemoTexture
+    struct TextureFromAsset final : public DemoTexture
     {
         TextureFromAsset (const char* assetName)
         {
@@ -749,9 +749,9 @@ struct OpenGLUtils
 /** This is the main demo component - the GL context gets attached to it, and
     it implements the OpenGLRenderer callback so that it can do real GL work.
 */
-class OpenGLDemo  : public Component,
-                    private OpenGLRenderer,
-                    private AsyncUpdater
+class OpenGLDemo final : public Component,
+                         private OpenGLRenderer,
+                         private AsyncUpdater
 {
 public:
     OpenGLDemo()
@@ -982,10 +982,10 @@ private:
         This component sits on top of the main GL demo, and contains all the sliders
         and widgets that control things.
     */
-    class DemoControlsOverlay  : public Component,
-                                 private CodeDocument::Listener,
-                                 private Slider::Listener,
-                                 private Timer
+    class DemoControlsOverlay final : public Component,
+                                      private CodeDocument::Listener,
+                                      private Slider::Listener,
+                                      private Timer
     {
     public:
         DemoControlsOverlay (OpenGLDemo& d)

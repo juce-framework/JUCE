@@ -34,7 +34,7 @@ namespace juce::dsp
 namespace
 {
 
-class ConvolutionTest  : public UnitTest
+class ConvolutionTest final : public UnitTest
 {
     template <typename Callback>
     static void nTimes (int n, Callback&& callback)

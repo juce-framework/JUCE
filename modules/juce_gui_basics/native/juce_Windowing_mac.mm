@@ -53,7 +53,7 @@ static NSView* getNSViewForDragEvent (Component* sourceComp)
     return nil;
 }
 
-class NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
+class NSDraggingSourceHelper final : public ObjCClass<NSObject<NSDraggingSource>>
 {
 public:
     static void setText (id self, const String& text)
@@ -312,7 +312,7 @@ public:
     }
 
 private:
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
         {
@@ -333,7 +333,7 @@ std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNative
 }
 
 //==============================================================================
-class ScreenSaverDefeater   : public Timer
+class ScreenSaverDefeater final : public Timer
 {
 public:
     ScreenSaverDefeater()
@@ -394,7 +394,7 @@ bool Desktop::isScreenSaverEnabled()
 }
 
 //==============================================================================
-struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
+struct DisplaySettingsChangeCallback final : private DeletedAtShutdown
 {
     DisplaySettingsChangeCallback()
     {

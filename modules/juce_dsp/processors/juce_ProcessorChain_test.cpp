@@ -26,7 +26,7 @@
 namespace juce::dsp
 {
 
-class ProcessorChainTest : public UnitTest
+class ProcessorChainTest final : public UnitTest
 {
     template <int AddValue>
     struct MockProcessor

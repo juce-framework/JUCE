@@ -151,8 +151,8 @@ private:
 };
 
 //==============================================================================
-class ListBox::RowComponent  : public TooltipClient,
-                               public ComponentWithListRowMouseBehaviours<RowComponent>
+class ListBox::RowComponent final  : public TooltipClient,
+                                     public ComponentWithListRowMouseBehaviours<RowComponent>
 {
 public:
     explicit RowComponent (ListBox& lb) : owner (lb) {}
@@ -227,7 +227,7 @@ public:
 
 private:
     //==============================================================================
-    class RowAccessibilityHandler  : public AccessibilityHandler
+    class RowAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         explicit RowAccessibilityHandler (RowComponent& rowComponentToWrap)
@@ -269,7 +269,7 @@ private:
         }
 
     private:
-        class RowCellInterface  : public AccessibilityCellInterface
+        class RowCellInterface final : public AccessibilityCellInterface
         {
         public:
             explicit RowCellInterface (RowAccessibilityHandler& h)  : handler (h)  {}
@@ -297,15 +297,15 @@ private:
 
 
 //==============================================================================
-class ListBox::ListViewport  : public Viewport,
-                               private Timer
+class ListBox::ListViewport final : public Viewport,
+                                    private Timer
 {
 public:
     ListViewport (ListBox& lb)  : owner (lb)
     {
         setWantsKeyboardFocus (false);
 
-        struct IgnoredComponent : Component
+        struct IgnoredComponent final : public Component
         {
             std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
             {
@@ -512,7 +512,7 @@ private:
 };
 
 //==============================================================================
-struct ListBoxMouseMoveSelector  : public MouseListener
+struct ListBoxMouseMoveSelector final : public MouseListener
 {
     ListBoxMouseMoveSelector (ListBox& lb) : owner (lb)
     {
@@ -1159,7 +1159,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsT
 
 std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
 {
-    class TableInterface  : public AccessibilityTableInterface
+    class TableInterface final : public AccessibilityTableInterface
     {
     public:
         explicit TableInterface (ListBox& listBoxToWrap)

@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct FTLibWrapper  : public ReferenceCountedObject
+struct FTLibWrapper final : public ReferenceCountedObject
 {
     FTLibWrapper()
     {
@@ -51,7 +51,7 @@ struct FTLibWrapper  : public ReferenceCountedObject
 };
 
 //==============================================================================
-struct FTFaceWrapper     : public ReferenceCountedObject
+struct FTFaceWrapper final : public ReferenceCountedObject
 {
     FTFaceWrapper (const FTLibWrapper::Ptr& ftLib, const File& file, int faceIndex)
         : library (ftLib)
@@ -84,7 +84,7 @@ struct FTFaceWrapper     : public ReferenceCountedObject
 };
 
 //==============================================================================
-class FTTypefaceList  : private DeletedAtShutdown
+class FTTypefaceList final : private DeletedAtShutdown
 {
 public:
     FTTypefaceList()  : library (new FTLibWrapper())
@@ -308,7 +308,7 @@ JUCE_IMPLEMENT_SINGLETON (FTTypefaceList)
 
 
 //==============================================================================
-class FreeTypeTypeface   : public CustomTypeface
+class FreeTypeTypeface final : public CustomTypeface
 {
 public:
     FreeTypeTypeface (const Font& font)

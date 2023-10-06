@@ -106,7 +106,7 @@ LookAndFeel_V4::ColourScheme LookAndFeel_V4::getLightColourScheme()
 }
 
 //==============================================================================
-class LookAndFeel_V4_DocumentWindowButton   : public Button
+class LookAndFeel_V4_DocumentWindowButton final : public Button
 {
 public:
     LookAndFeel_V4_DocumentWindowButton (const String& name, Colour c, const Path& normal, const Path& toggled)

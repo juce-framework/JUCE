@@ -70,7 +70,7 @@
          return scanner->scanNextFile (true, pluginBeingScanned);
      }
 
-     struct ScanJob  : public ThreadPoolJob
+     struct ScanJob final : public ThreadPoolJob
      {
          ScanJob (AUScanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
 

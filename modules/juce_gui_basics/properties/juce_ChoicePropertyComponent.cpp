@@ -27,8 +27,8 @@ namespace juce
 {
 
 //==============================================================================
-class ChoiceRemapperValueSource  : public Value::ValueSource,
-                                   private Value::Listener
+class ChoiceRemapperValueSource final : public Value::ValueSource,
+                                        private Value::Listener
 {
 public:
     ChoiceRemapperValueSource (const Value& source, const Array<var>& map)
@@ -68,8 +68,8 @@ protected:
 };
 
 //==============================================================================
-class ChoiceRemapperValueSourceWithDefault  : public Value::ValueSource,
-                                              private Value::Listener
+class ChoiceRemapperValueSourceWithDefault final : public Value::ValueSource,
+                                                   private Value::Listener
 {
 public:
     ChoiceRemapperValueSourceWithDefault (const ValueTreePropertyWithDefault& v, const Array<var>& map)

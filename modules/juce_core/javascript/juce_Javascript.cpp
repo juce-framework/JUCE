@@ -57,7 +57,7 @@ namespace TokenTypes
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 
 //==============================================================================
-struct JavascriptEngine::RootObject   : public DynamicObject
+struct JavascriptEngine::RootObject final : public DynamicObject
 {
     RootObject()
     {
@@ -245,7 +245,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct Statement
     {
         Statement (const CodeLocation& l) noexcept : location (l) {}
-        virtual ~Statement() {}
+        virtual ~Statement() = default;
 
         enum ResultCode  { ok = 0, returnWasHit, breakWasHit, continueWasHit };
         virtual ResultCode perform (const Scope&, var*) const  { return ok; }
@@ -266,7 +266,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     using ExpPtr = std::unique_ptr<Expression>;
 
-    struct BlockStatement  : public Statement
+    struct BlockStatement final : public Statement
     {
         BlockStatement (const CodeLocation& l) noexcept : Statement (l) {}
 
@@ -282,7 +282,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         OwnedArray<Statement> statements;
     };
 
-    struct IfStatement  : public Statement
+    struct IfStatement final : public Statement
     {
         IfStatement (const CodeLocation& l) noexcept : Statement (l) {}
 
@@ -295,7 +295,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         std::unique_ptr<Statement> trueBranch, falseBranch;
     };
 
-    struct VarStatement  : public Statement
+    struct VarStatement final : public Statement
     {
         VarStatement (const CodeLocation& l) noexcept : Statement (l) {}
 
@@ -309,7 +309,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ExpPtr initialiser;
     };
 
-    struct LoopStatement  : public Statement
+    struct LoopStatement final : public Statement
     {
         LoopStatement (const CodeLocation& l, bool isDo) noexcept : Statement (l), isDoLoop (isDo) {}
 
@@ -339,7 +339,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         bool isDoLoop;
     };
 
-    struct ReturnStatement  : public Statement
+    struct ReturnStatement final : public Statement
     {
         ReturnStatement (const CodeLocation& l, Expression* v) noexcept : Statement (l), returnValue (v) {}
 
@@ -352,26 +352,26 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ExpPtr returnValue;
     };
 
-    struct BreakStatement  : public Statement
+    struct BreakStatement final : public Statement
     {
         BreakStatement (const CodeLocation& l) noexcept : Statement (l) {}
         ResultCode perform (const Scope&, var*) const override  { return breakWasHit; }
     };
 
-    struct ContinueStatement  : public Statement
+    struct ContinueStatement final : public Statement
     {
         ContinueStatement (const CodeLocation& l) noexcept : Statement (l) {}
         ResultCode perform (const Scope&, var*) const override  { return continueWasHit; }
     };
 
-    struct LiteralValue  : public Expression
+    struct LiteralValue final : public Expression
     {
         LiteralValue (const CodeLocation& l, const var& v) noexcept : Expression (l), value (v) {}
         var getResult (const Scope&) const override   { return value; }
         var value;
     };
 
-    struct UnqualifiedName  : public Expression
+    struct UnqualifiedName final : public Expression
     {
         UnqualifiedName (const CodeLocation& l, const Identifier& n) noexcept : Expression (l), name (n) {}
 
@@ -388,7 +388,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Identifier name;
     };
 
-    struct DotOperator  : public Expression
+    struct DotOperator final : public Expression
     {
         DotOperator (const CodeLocation& l, ExpPtr& p, const Identifier& c) noexcept : Expression (l), parent (p.release()), child (c) {}
 
@@ -422,7 +422,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Identifier child;
     };
 
-    struct ArraySubscript  : public Expression
+    struct ArraySubscript final : public Expression
     {
         ArraySubscript (const CodeLocation& l) noexcept : Expression (l) {}
 
@@ -476,7 +476,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ExpPtr object, index;
     };
 
-    struct BinaryOperatorBase  : public Expression
+    struct BinaryOperatorBase : public Expression
     {
         BinaryOperatorBase (const CodeLocation& l, ExpPtr& a, ExpPtr& b, TokenType op) noexcept
             : Expression (l), lhs (a.release()), rhs (b.release()), operation (op) {}
@@ -485,7 +485,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         TokenType operation;
     };
 
-    struct BinaryOperator  : public BinaryOperatorBase
+    struct BinaryOperator : public BinaryOperatorBase
     {
         BinaryOperator (const CodeLocation& l, ExpPtr& a, ExpPtr& b, TokenType op) noexcept
             : BinaryOperatorBase (l, a, b, op) {}
@@ -516,7 +516,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             { location.throwError (getTokenName (operation) + " is not allowed on the " + typeName + " type"); return {}; }
     };
 
-    struct EqualsOp  : public BinaryOperator
+    struct EqualsOp final : public BinaryOperator
     {
         EqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::equals) {}
         var getWithUndefinedArg() const override                               { return true; }
@@ -526,7 +526,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var getWithArrayOrObject (const var& a, const var& b) const override   { return a == b; }
     };
 
-    struct NotEqualsOp  : public BinaryOperator
+    struct NotEqualsOp final : public BinaryOperator
     {
         NotEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::notEquals) {}
         var getWithUndefinedArg() const override                               { return false; }
@@ -536,7 +536,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var getWithArrayOrObject (const var& a, const var& b) const override   { return a != b; }
     };
 
-    struct LessThanOp  : public BinaryOperator
+    struct LessThanOp final : public BinaryOperator
     {
         LessThanOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::lessThan) {}
         var getWithDoubles (double a, double b) const override                 { return a < b; }
@@ -544,7 +544,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var getWithStrings (const String& a, const String& b) const override   { return a < b; }
     };
 
-    struct LessThanOrEqualOp  : public BinaryOperator
+    struct LessThanOrEqualOp final : public BinaryOperator
     {
         LessThanOrEqualOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::lessThanOrEqual) {}
         var getWithDoubles (double a, double b) const override                 { return a <= b; }
@@ -552,7 +552,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var getWithStrings (const String& a, const String& b) const override   { return a <= b; }
     };
 
-    struct GreaterThanOp  : public BinaryOperator
+    struct GreaterThanOp final : public BinaryOperator
     {
         GreaterThanOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::greaterThan) {}
         var getWithDoubles (double a, double b) const override                 { return a > b; }
@@ -560,7 +560,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var getWithStrings (const String& a, const String& b) const override   { return a > b; }
     };
 
-    struct GreaterThanOrEqualOp  : public BinaryOperator
+    struct GreaterThanOrEqualOp final : public BinaryOperator
     {
         GreaterThanOrEqualOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::greaterThanOrEqual) {}
         var getWithDoubles (double a, double b) const override                 { return a >= b; }
@@ -568,7 +568,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var getWithStrings (const String& a, const String& b) const override   { return a >= b; }
     };
 
-    struct AdditionOp  : public BinaryOperator
+    struct AdditionOp final : public BinaryOperator
     {
         AdditionOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::plus) {}
         var getWithDoubles (double a, double b) const override                 { return a + b; }
@@ -576,95 +576,95 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var getWithStrings (const String& a, const String& b) const override   { return a + b; }
     };
 
-    struct SubtractionOp  : public BinaryOperator
+    struct SubtractionOp final : public BinaryOperator
     {
         SubtractionOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::minus) {}
         var getWithDoubles (double a, double b) const override { return a - b; }
         var getWithInts (int64 a, int64 b) const override      { return a - b; }
     };
 
-    struct MultiplyOp  : public BinaryOperator
+    struct MultiplyOp final : public BinaryOperator
     {
         MultiplyOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::times) {}
         var getWithDoubles (double a, double b) const override { return a * b; }
         var getWithInts (int64 a, int64 b) const override      { return a * b; }
     };
 
-    struct DivideOp  : public BinaryOperator
+    struct DivideOp final : public BinaryOperator
     {
         DivideOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
         var getWithDoubles (double a, double b) const override  { return exactlyEqual (b, 0.0) ? std::numeric_limits<double>::infinity() : a / b; }
         var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var ((double) a / (double) b) : var (std::numeric_limits<double>::infinity()); }
     };
 
-    struct ModuloOp  : public BinaryOperator
+    struct ModuloOp final : public BinaryOperator
     {
         ModuloOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::modulo) {}
         var getWithDoubles (double a, double b) const override  { return exactlyEqual (b, 0.0) ? std::numeric_limits<double>::infinity() : fmod (a, b); }
         var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var (a % b) : var (std::numeric_limits<double>::infinity()); }
     };
 
-    struct BitwiseOrOp  : public BinaryOperator
+    struct BitwiseOrOp final : public BinaryOperator
     {
         BitwiseOrOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseOr) {}
         var getWithInts (int64 a, int64 b) const override   { return a | b; }
     };
 
-    struct BitwiseAndOp  : public BinaryOperator
+    struct BitwiseAndOp final : public BinaryOperator
     {
         BitwiseAndOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseAnd) {}
         var getWithInts (int64 a, int64 b) const override   { return a & b; }
     };
 
-    struct BitwiseXorOp  : public BinaryOperator
+    struct BitwiseXorOp final : public BinaryOperator
     {
         BitwiseXorOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::bitwiseXor) {}
         var getWithInts (int64 a, int64 b) const override   { return a ^ b; }
     };
 
-    struct LeftShiftOp  : public BinaryOperator
+    struct LeftShiftOp final : public BinaryOperator
     {
         LeftShiftOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::leftShift) {}
         var getWithInts (int64 a, int64 b) const override   { return ((int) a) << (int) b; }
     };
 
-    struct RightShiftOp  : public BinaryOperator
+    struct RightShiftOp final : public BinaryOperator
     {
         RightShiftOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::rightShift) {}
         var getWithInts (int64 a, int64 b) const override   { return ((int) a) >> (int) b; }
     };
 
-    struct RightShiftUnsignedOp  : public BinaryOperator
+    struct RightShiftUnsignedOp final : public BinaryOperator
     {
         RightShiftUnsignedOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::rightShiftUnsigned) {}
         var getWithInts (int64 a, int64 b) const override   { return (int) (((uint32) a) >> (int) b); }
     };
 
-    struct LogicalAndOp  : public BinaryOperatorBase
+    struct LogicalAndOp final : public BinaryOperatorBase
     {
         LogicalAndOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::logicalAnd) {}
         var getResult (const Scope& s) const override       { return lhs->getResult (s) && rhs->getResult (s); }
     };
 
-    struct LogicalOrOp  : public BinaryOperatorBase
+    struct LogicalOrOp final : public BinaryOperatorBase
     {
         LogicalOrOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::logicalOr) {}
         var getResult (const Scope& s) const override       { return lhs->getResult (s) || rhs->getResult (s); }
     };
 
-    struct TypeEqualsOp  : public BinaryOperatorBase
+    struct TypeEqualsOp final : public BinaryOperatorBase
     {
         TypeEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::typeEquals) {}
         var getResult (const Scope& s) const override       { return areTypeEqual (lhs->getResult (s), rhs->getResult (s)); }
     };
 
-    struct TypeNotEqualsOp  : public BinaryOperatorBase
+    struct TypeNotEqualsOp final : public BinaryOperatorBase
     {
         TypeNotEqualsOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperatorBase (l, a, b, TokenTypes::typeNotEquals) {}
         var getResult (const Scope& s) const override       { return ! areTypeEqual (lhs->getResult (s), rhs->getResult (s)); }
     };
 
-    struct ConditionalOp  : public Expression
+    struct ConditionalOp final : public Expression
     {
         ConditionalOp (const CodeLocation& l) noexcept : Expression (l) {}
 
@@ -674,7 +674,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ExpPtr condition, trueBranch, falseBranch;
     };
 
-    struct Assignment  : public Expression
+    struct Assignment final : public Expression
     {
         Assignment (const CodeLocation& l, ExpPtr& dest, ExpPtr& source) noexcept : Expression (l), target (dest.release()), newValue (source.release()) {}
 
@@ -688,7 +688,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         ExpPtr target, newValue;
     };
 
-    struct SelfAssignment  : public Expression
+    struct SelfAssignment : public Expression
     {
         SelfAssignment (const CodeLocation& l, Expression* dest, Expression* source) noexcept
             : Expression (l), target (dest), newValue (source) {}
@@ -705,7 +705,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         TokenType op;
     };
 
-    struct PostAssignment  : public SelfAssignment
+    struct PostAssignment final : public SelfAssignment
     {
         PostAssignment (const CodeLocation& l, Expression* dest, Expression* source) noexcept : SelfAssignment (l, dest, source) {}
 
@@ -717,7 +717,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         }
     };
 
-    struct FunctionCall  : public Expression
+    struct FunctionCall : public Expression
     {
         FunctionCall (const CodeLocation& l) noexcept : Expression (l) {}
 
@@ -761,7 +761,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         OwnedArray<Expression> arguments;
     };
 
-    struct NewOperator  : public FunctionCall
+    struct NewOperator final : public FunctionCall
     {
         NewOperator (const CodeLocation& l) noexcept : FunctionCall (l) {}
 
@@ -784,7 +784,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         }
     };
 
-    struct ObjectDeclaration  : public Expression
+    struct ObjectDeclaration final : public Expression
     {
         ObjectDeclaration (const CodeLocation& l) noexcept : Expression (l) {}
 
@@ -802,7 +802,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         OwnedArray<Expression> initialisers;
     };
 
-    struct ArrayDeclaration  : public Expression
+    struct ArrayDeclaration final : public Expression
     {
         ArrayDeclaration (const CodeLocation& l) noexcept : Expression (l) {}
 
@@ -823,7 +823,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     };
 
     //==============================================================================
-    struct FunctionObject  : public DynamicObject
+    struct FunctionObject final : public DynamicObject
     {
         FunctionObject() noexcept {}
 
@@ -1056,7 +1056,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     };
 
     //==============================================================================
-    struct ExpressionTreeBuilder  : private TokenIterator
+    struct ExpressionTreeBuilder final : private TokenIterator
     {
         ExpressionTreeBuilder (const String code)  : TokenIterator (code) {}
 
@@ -1531,7 +1531,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     static String getString (Args a, int index) noexcept   { return get (a, index).toString(); }
 
     //==============================================================================
-    struct ObjectClass  : public DynamicObject
+    struct ObjectClass final : public DynamicObject
     {
         ObjectClass()
         {
@@ -1545,7 +1545,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     };
 
     //==============================================================================
-    struct ArrayClass  : public DynamicObject
+    struct ArrayClass final : public DynamicObject
     {
         ArrayClass()
         {
@@ -1650,7 +1650,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     };
 
     //==============================================================================
-    struct StringClass  : public DynamicObject
+    struct StringClass final : public DynamicObject
     {
         StringClass()
         {
@@ -1692,7 +1692,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     };
 
     //==============================================================================
-    struct MathClass  : public DynamicObject
+    struct MathClass final : public DynamicObject
     {
         MathClass()
         {
@@ -1763,7 +1763,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     };
 
     //==============================================================================
-    struct JSONClass  : public DynamicObject
+    struct JSONClass final : public DynamicObject
     {
         JSONClass()                        { setMethod ("stringify", stringify); }
         static Identifier getClassName()   { static const Identifier i ("JSON"); return i; }
@@ -1771,7 +1771,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     };
 
     //==============================================================================
-    struct IntegerClass  : public DynamicObject
+    struct IntegerClass final : public DynamicObject
     {
         IntegerClass()                     { setMethod ("parseInt",  parseInt); }
         static Identifier getClassName()   { static const Identifier i ("Integer"); return i; }

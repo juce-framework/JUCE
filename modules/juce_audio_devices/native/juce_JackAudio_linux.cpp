@@ -158,7 +158,7 @@ struct JackPortIterator
 };
 
 //==============================================================================
-class JackAudioIODevice   : public AudioIODevice
+class JackAudioIODevice final : public AudioIODevice
 {
 public:
     JackAudioIODevice (const String& inName,
@@ -416,7 +416,7 @@ public:
 
 private:
     //==============================================================================
-    class MainThreadDispatcher  : private AsyncUpdater
+    class MainThreadDispatcher final : private AsyncUpdater
     {
     public:
         explicit MainThreadDispatcher (JackAudioIODevice& device)  : ref (device) {}
@@ -579,7 +579,7 @@ private:
 //==============================================================================
 class JackAudioIODeviceType;
 
-class JackAudioIODeviceType  : public AudioIODeviceType
+class JackAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     JackAudioIODeviceType()

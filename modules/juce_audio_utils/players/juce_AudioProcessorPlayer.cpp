@@ -279,7 +279,7 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float* const*
         if (std::exchange (currentWorkgroup, currentDevice->getWorkgroup()) != currentDevice->getWorkgroup())
             processor->audioWorkgroupContextChanged (currentWorkgroup);
 
-        class PlayHead : private AudioPlayHead
+        class PlayHead final : private AudioPlayHead
         {
         public:
             PlayHead (AudioProcessor& proc,
@@ -416,7 +416,7 @@ void AudioProcessorPlayer::handleIncomingMidiMessage (MidiInput*, const MidiMess
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct AudioProcessorPlayerTests  : public UnitTest
+struct AudioProcessorPlayerTests final : public UnitTest
 {
     AudioProcessorPlayerTests()
         : UnitTest ("AudioProcessorPlayer", UnitTestCategories::audio) {}

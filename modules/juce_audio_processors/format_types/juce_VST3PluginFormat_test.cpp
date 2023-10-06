@@ -29,7 +29,7 @@
 namespace juce
 {
 
-class VST3PluginFormatTests : public UnitTest
+class VST3PluginFormatTests final : public UnitTest
 {
 public:
     VST3PluginFormatTests()

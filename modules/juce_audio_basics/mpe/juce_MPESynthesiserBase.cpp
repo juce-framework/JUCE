@@ -164,7 +164,7 @@ void MPESynthesiserBase::setMinimumRenderingSubdivisionSize (int numSamples, boo
 
 namespace
 {
-    class MpeSynthesiserBaseTests : public UnitTest
+    class MpeSynthesiserBaseTests final : public UnitTest
     {
         enum class CallbackKind { process, midi };
 
@@ -190,7 +190,7 @@ namespace
             std::vector<CallbackKind> order;
         };
 
-        class MockSynthesiser  : public MPESynthesiserBase
+        class MockSynthesiser final : public MPESynthesiserBase
         {
         public:
             Events events;

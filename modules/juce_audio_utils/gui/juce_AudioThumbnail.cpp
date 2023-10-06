@@ -86,7 +86,7 @@ private:
 
 //==============================================================================
 template <typename T>
-class AudioBufferReader  : public AudioFormatReader
+class AudioBufferReader final : public AudioFormatReader
 {
 public:
     AudioBufferReader (const AudioBuffer<T>* bufferIn, double rate)
@@ -144,7 +144,7 @@ private:
 };
 
 //==============================================================================
-class AudioThumbnail::LevelDataSource   : public TimeSliceClient
+class AudioThumbnail::LevelDataSource final : public TimeSliceClient
 {
 public:
     LevelDataSource (AudioThumbnail& thumb, AudioFormatReader* newReader, int64 hash)

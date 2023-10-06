@@ -50,7 +50,7 @@ private:
         if (nCode >= 0 && wParam == WM_MOUSEWHEEL)
         {
             // using a local copy of this struct to support old mingw libraries
-            struct MOUSEHOOKSTRUCTEX_  : public MOUSEHOOKSTRUCT  { DWORD mouseData; };
+            struct MOUSEHOOKSTRUCTEX_ final : public MOUSEHOOKSTRUCT  { DWORD mouseData; };
 
             auto& hs = *(MOUSEHOOKSTRUCTEX_*) lParam;
 

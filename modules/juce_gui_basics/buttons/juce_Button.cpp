@@ -26,10 +26,10 @@
 namespace juce
 {
 
-struct Button::CallbackHelper  : public Timer,
-                                 public ApplicationCommandManagerListener,
-                                 public Value::Listener,
-                                 public KeyListener
+struct Button::CallbackHelper final : public Timer,
+                                      public ApplicationCommandManagerListener,
+                                      public Value::Listener,
+                                      public KeyListener
 {
     CallbackHelper (Button& b) : button (b)   {}
 

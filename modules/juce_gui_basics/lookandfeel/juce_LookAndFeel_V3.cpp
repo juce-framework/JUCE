@@ -533,7 +533,7 @@ void LookAndFeel_V3::drawKeymapChangeButton (Graphics& g, int width, int height,
 }
 
 
-class LookAndFeel_V3_DocumentWindowButton   : public Button
+class LookAndFeel_V3_DocumentWindowButton final : public Button
 {
 public:
     LookAndFeel_V3_DocumentWindowButton (const String& name, Colour c, const Path& normal, const Path& toggled)

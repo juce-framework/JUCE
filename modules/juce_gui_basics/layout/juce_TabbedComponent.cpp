@@ -53,7 +53,7 @@ namespace TabbedComponentHelpers
 }
 
 //==============================================================================
-struct TabbedComponent::ButtonBar  : public TabbedButtonBar
+struct TabbedComponent::ButtonBar final : public TabbedButtonBar
 {
     ButtonBar (TabbedComponent& tabComp, TabbedButtonBar::Orientation o)
         : TabbedButtonBar (o), owner (tabComp)

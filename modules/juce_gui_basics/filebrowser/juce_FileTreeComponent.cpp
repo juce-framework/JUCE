@@ -77,9 +77,9 @@ constexpr int threeWayCompare (const std::tuple<Ts...>& a, const std::tuple<Ts..
 }
 
 //==============================================================================
-class FileListTreeItem   : public TreeViewItem,
-                           private TimeSliceClient,
-                           private AsyncUpdater
+class FileListTreeItem final : public TreeViewItem,
+                               private TimeSliceClient,
+                               private AsyncUpdater
 {
 public:
     FileListTreeItem (FileTreeComponent& treeComp,
@@ -210,7 +210,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileListTreeItem)
 };
 
-class DirectoryScanner  : private ChangeListener
+class DirectoryScanner final : private ChangeListener
 {
 public:
     struct Listener
@@ -355,7 +355,7 @@ private:
     SystemStats::OperatingSystemType systemType;
 };
 
-class FileTreeComponent::Controller  : private DirectoryScanner::Listener
+class FileTreeComponent::Controller final : private DirectoryScanner::Listener
 {
 public:
     explicit Controller (FileTreeComponent& ownerIn)
@@ -609,7 +609,7 @@ void FileTreeComponent::setItemHeight (int newHeight)
 
 #if JUCE_UNIT_TESTS
 
-class FileTreeComponentTests  : public UnitTest
+class FileTreeComponentTests final : public UnitTest
 {
 public:
     //==============================================================================

@@ -31,7 +31,7 @@ const auto menuItemInvokedSelector = @selector (menuItemInvoked:);
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
-struct JuceMainMenuBarHolder : private DeletedAtShutdown
+struct JuceMainMenuBarHolder final : private DeletedAtShutdown
 {
     JuceMainMenuBarHolder()
         : mainMenuBar ([[NSMenu alloc] initWithTitle: nsStringLiteral ("MainMenu")])
@@ -68,8 +68,8 @@ struct JuceMainMenuBarHolder : private DeletedAtShutdown
 JUCE_IMPLEMENT_SINGLETON (JuceMainMenuBarHolder)
 
 //==============================================================================
-class JuceMainMenuHandler   : private MenuBarModel::Listener,
-                              private DeletedAtShutdown
+class JuceMainMenuHandler final : private MenuBarModel::Listener,
+                                  private DeletedAtShutdown
 {
 public:
     JuceMainMenuHandler()
@@ -449,7 +449,7 @@ private:
         // When the f35Event is invoked, the item's enablement is checked and a
         // NSBeep is triggered if the item appears to be disabled.
         // This ValidatorClass exists solely to return YES from validateMenuItem.
-        struct ValidatorClass   : public ObjCClass<NSObject>
+        struct ValidatorClass final : public ObjCClass<NSObject>
         {
             ValidatorClass()  : ObjCClass ("JUCEMenuValidator_")
             {
@@ -537,7 +537,7 @@ private:
     }
 
     //==============================================================================
-    struct JuceMenuCallbackClass   : public ObjCClass<NSObject>
+    struct JuceMenuCallbackClass final : public ObjCClass<NSObject>
     {
         JuceMenuCallbackClass()  : ObjCClass ("JUCEMainMenu_")
         {
@@ -664,7 +664,7 @@ private:
     // This override is also important because it stops the base class
     // calling ModalComponentManager::bringToFront, which can get
     // recursive when file dialogs are involved
-    struct SilentDummyModalComp  : public Component
+    struct SilentDummyModalComp final : public Component
     {
         explicit SilentDummyModalComp (FilePreviewComponent* p)
             : preview (p) {}

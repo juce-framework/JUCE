@@ -825,7 +825,7 @@ private:
     }
 
     //==============================================================================
-    struct Class    : public ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>>
+    struct Class final : public ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>>
     {
         Class()
             : ObjCClass ("JucePushNotificationsDelegate_")

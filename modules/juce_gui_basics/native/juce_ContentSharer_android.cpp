@@ -688,7 +688,7 @@ DECLARE_JNI_CLASS (AndroidReceiver, "com/rmsl/juce/Receiver")
 #undef JNI_CLASS_MEMBERS
 
     //==============================================================================
-class AndroidContentSharerPrepareFilesTask : private AsyncUpdater
+class AndroidContentSharerPrepareFilesTask final : private AsyncUpdater
 {
 public:
     AndroidContentSharerPrepareFilesTask (const Array<URL>& fileUrls,
@@ -875,7 +875,7 @@ private:
 
 auto detail::ScopedContentSharerInterface::shareFiles (const Array<URL>& urls, Component*) -> std::unique_ptr<ScopedContentSharerInterface>
 {
-    class NativeScopedContentSharerInterface : public detail::ScopedContentSharerInterface
+    class NativeScopedContentSharerInterface final : public detail::ScopedContentSharerInterface
     {
     public:
         explicit NativeScopedContentSharerInterface (Array<URL> f)
@@ -914,7 +914,7 @@ auto detail::ScopedContentSharerInterface::shareFiles (const Array<URL>& urls, C
 
 auto detail::ScopedContentSharerInterface::shareText (const String& text, Component*) -> std::unique_ptr<ScopedContentSharerInterface>
 {
-    class NativeScopedContentSharerInterface : public detail::ScopedContentSharerInterface
+    class NativeScopedContentSharerInterface final : public detail::ScopedContentSharerInterface
     {
     public:
         explicit NativeScopedContentSharerInterface (String t)

@@ -211,7 +211,7 @@ bool DrawableText::replaceColour (Colour originalColour, Colour replacementColou
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> DrawableText::createAccessibilityHandler()
 {
-    class DrawableTextAccessibilityHandler  : public AccessibilityHandler
+    class DrawableTextAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         DrawableTextAccessibilityHandler (DrawableText& drawableTextToWrap)

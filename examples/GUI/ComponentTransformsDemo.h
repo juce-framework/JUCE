@@ -98,7 +98,7 @@ public:
 private:
     std::unique_ptr<Component> content;
 
-    struct CornerDragger  : public Component
+    struct CornerDragger final : public Component
     {
         CornerDragger()
         {

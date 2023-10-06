@@ -750,7 +750,7 @@ int AudioChannelSet::getAmbisonicOrderForNumChannels (int numChannels, int maxOr
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AudioChannelSetUnitTest  : public UnitTest
+class AudioChannelSetUnitTest final : public UnitTest
 {
 public:
     AudioChannelSetUnitTest()

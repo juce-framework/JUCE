@@ -1296,7 +1296,7 @@ uint32 readLittleEndianBitsInBuffer (const void* buffer, uint32 startBit, uint32
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class BigIntegerTests  : public UnitTest
+class BigIntegerTests final : public UnitTest
 {
 public:
     BigIntegerTests()

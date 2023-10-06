@@ -65,7 +65,7 @@ String& operator<< (String& str, const ConstructCounts& c)
                << " }";
 }
 
-class FixedSizeFunctionTest  : public UnitTest
+class FixedSizeFunctionTest final : public UnitTest
 {
     static void toggleBool (bool& b) { b = ! b; }
 

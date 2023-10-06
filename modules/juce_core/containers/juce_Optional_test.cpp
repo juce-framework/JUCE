@@ -31,7 +31,7 @@ struct ThrowOnMoveOrSwap
 };
 static void swap (ThrowOnMoveOrSwap&, ThrowOnMoveOrSwap&) { throw std::bad_alloc{}; }
 
-class OptionalUnitTest : public UnitTest
+class OptionalUnitTest final : public UnitTest
 {
 public:
     OptionalUnitTest() : UnitTest ("Optional", UnitTestCategories::containers) {}
@@ -297,7 +297,7 @@ public:
         }
 
         struct Foo {};
-        struct Bar : Foo {};
+        struct Bar final : public Foo {};
 
         beginTest ("Can be constructed from compatible type");
         {

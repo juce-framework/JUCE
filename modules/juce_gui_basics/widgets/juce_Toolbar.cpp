@@ -29,7 +29,7 @@ namespace juce
 const char* const Toolbar::toolbarDragDescriptor = "_toolbarItem_";
 
 //==============================================================================
-class Toolbar::Spacer  : public ToolbarItemComponent
+class Toolbar::Spacer final : public ToolbarItemComponent
 {
 public:
     Spacer (int itemID, float sizeToUse, bool shouldDrawBar)
@@ -151,7 +151,7 @@ private:
 };
 
 //==============================================================================
-class Toolbar::MissingItemsComponent  : public PopupMenu::CustomComponent
+class Toolbar::MissingItemsComponent final : public PopupMenu::CustomComponent
 {
 public:
     MissingItemsComponent (Toolbar& bar, int h)
@@ -656,7 +656,7 @@ void Toolbar::lookAndFeelChanged()
 void Toolbar::mouseDown (const MouseEvent&) {}
 
 //==============================================================================
-class Toolbar::CustomisationDialog   : public DialogWindow
+class Toolbar::CustomisationDialog final : public DialogWindow
 {
 public:
     CustomisationDialog (ToolbarItemFactory& factory, Toolbar& bar, int optionFlags)

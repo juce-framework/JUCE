@@ -28,7 +28,7 @@ constexpr uint16_t operator""_u16 (unsigned long long int i) { return static_cas
 constexpr uint32_t operator""_u32 (unsigned long long int i) { return static_cast<uint32_t> (i); }
 constexpr uint64_t operator""_u64 (unsigned long long int i) { return static_cast<uint64_t> (i); }
 
-class UniversalMidiPacketTests : public UnitTest
+class UniversalMidiPacketTests final : public UnitTest
 {
 public:
     UniversalMidiPacketTests()

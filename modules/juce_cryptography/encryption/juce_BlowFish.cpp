@@ -369,7 +369,7 @@ int BlowFish::unpad (const void* data, size_t size) noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class BlowFishTests  : public UnitTest
+class BlowFishTests final : public UnitTest
 {
 public:
     BlowFishTests()

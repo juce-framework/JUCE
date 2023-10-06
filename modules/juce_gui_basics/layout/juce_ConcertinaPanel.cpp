@@ -212,7 +212,7 @@ private:
 };
 
 //==============================================================================
-class ConcertinaPanel::PanelHolder  : public Component
+class ConcertinaPanel::PanelHolder final : public Component
 {
 public:
     PanelHolder (Component* comp, bool takeOwnership)

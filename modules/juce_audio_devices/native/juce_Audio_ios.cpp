@@ -217,8 +217,8 @@ static void logNSError (NSError* e)
 #define JUCE_NSERROR_CHECK(X)     { NSError* error = nil; X; logNSError (error); }
 
 //==============================================================================
-class iOSAudioIODeviceType  : public AudioIODeviceType,
-                              public AsyncUpdater
+class iOSAudioIODeviceType final : public AudioIODeviceType,
+                                   public AsyncUpdater
 {
 public:
     iOSAudioIODeviceType();
@@ -246,7 +246,7 @@ private:
 };
 
 //==============================================================================
-struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
+struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 {
     Pimpl (iOSAudioIODeviceType* ioDeviceType, iOSAudioIODevice& ioDevice)
         : deviceType (ioDeviceType),
@@ -557,7 +557,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
     }
 
     //==============================================================================
-    class PlayHead : public AudioPlayHead
+    class PlayHead final : public AudioPlayHead
     {
     public:
         explicit PlayHead (Pimpl& implIn) : impl (implIn) {}

@@ -111,7 +111,7 @@ MidiBuffer MPEMessages::setZoneLayout (MPEZoneLayout layout)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MPEMessagesTests  : public UnitTest
+class MPEMessagesTests final : public UnitTest
 {
 public:
     MPEMessagesTests()

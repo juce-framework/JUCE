@@ -68,7 +68,7 @@ struct Oversampling<SampleType>::OversamplingStage
     signal, which could be equivalent to a "one time" oversampling processing.
 */
 template <typename SampleType>
-struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
+struct OversamplingDummy final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
@@ -108,7 +108,7 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
     leading to specific processing optimizations.
 */
 template <typename SampleType>
-struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::OversamplingStage
+struct Oversampling2TimesEquirippleFIR final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
@@ -260,7 +260,7 @@ private:
     phase, and provided with a method to get the exact resulting latency.
 */
 template <typename SampleType>
-struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::OversamplingStage
+struct Oversampling2TimesPolyphaseIIR final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 

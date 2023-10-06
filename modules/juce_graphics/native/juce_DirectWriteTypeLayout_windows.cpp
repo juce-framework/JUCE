@@ -29,7 +29,7 @@ namespace juce
 #if JUCE_USE_DIRECTWRITE
 namespace DirectWriteTypeLayout
 {
-    class CustomDirectWriteTextRenderer   : public ComBaseClassHelper<IDWriteTextRenderer>
+    class CustomDirectWriteTextRenderer final : public ComBaseClassHelper<IDWriteTextRenderer>
     {
     public:
         CustomDirectWriteTextRenderer (IDWriteFontCollection& fonts, const AttributedString& as)

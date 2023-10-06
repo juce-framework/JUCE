@@ -73,7 +73,7 @@ void DialogWindow::resized()
 }
 
 //==============================================================================
-class DefaultDialogWindow   : public DialogWindow
+class DefaultDialogWindow final : public DialogWindow
 {
 public:
     DefaultDialogWindow (LaunchOptions& options)

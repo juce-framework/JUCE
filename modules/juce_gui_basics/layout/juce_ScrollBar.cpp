@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class ScrollBar::ScrollbarButton  : public Button
+class ScrollBar::ScrollbarButton final : public Button
 {
 public:
     ScrollbarButton (int direc, ScrollBar& s)
@@ -443,7 +443,7 @@ bool ScrollBar::getVisibility() const noexcept
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> ScrollBar::createAccessibilityHandler()
 {
-    class ValueInterface  : public AccessibilityRangedNumericValueInterface
+    class ValueInterface final : public AccessibilityRangedNumericValueInterface
     {
     public:
         explicit ValueInterface (ScrollBar& scrollBarToWrap)  : scrollBar (scrollBarToWrap) {}

@@ -214,7 +214,7 @@ static String operator""_S (const char* chars, size_t)
     return String { chars };
 }
 
-class StringPairArrayTests : public UnitTest
+class StringPairArrayTests final : public UnitTest
 {
 public:
     StringPairArrayTests()

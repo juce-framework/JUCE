@@ -27,7 +27,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-class AudioPerformanceTestApplication  : public JUCEApplication
+class AudioPerformanceTestApplication final : public JUCEApplication
 {
 public:
     //==============================================================================
@@ -55,7 +55,7 @@ public:
     }
 
     //==============================================================================
-    class MainWindow    : public DocumentWindow
+    class MainWindow final : public DocumentWindow
     {
     public:
         explicit MainWindow (String name)

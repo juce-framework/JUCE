@@ -545,7 +545,7 @@ Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class JSONTests  : public UnitTest
+class JSONTests final : public UnitTest
 {
 public:
     JSONTests()

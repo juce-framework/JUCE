@@ -41,7 +41,7 @@ DECLARE_JNI_CLASS (AndroidAudioManager, "android/media/AudioManager")
 #endif
 
 //==============================================================================
-struct PCMDataFormatEx : SLDataFormat_PCM
+struct PCMDataFormatEx final : SLDataFormat_PCM
 {
     SLuint32 representation;
 };
@@ -106,7 +106,7 @@ public:
 
 private:
     //==============================================================================
-    struct ControlBlock : ReferenceCountedObject
+    struct ControlBlock final : ReferenceCountedObject
     {
         ControlBlock() = default;
         ControlBlock (SLObjectItf o) : ptr (o) {}
@@ -118,7 +118,7 @@ private:
 };
 
 template <typename T>
-class SlRef : public SlObjectRef
+class SlRef final : public SlObjectRef
 {
 public:
     //==============================================================================
@@ -312,7 +312,7 @@ OpenSLEngineHolder& getEngineHolder()
 class SLRealtimeThread;
 
 //==============================================================================
-class OpenSLAudioIODevice  : public AudioIODevice
+class OpenSLAudioIODevice final : public AudioIODevice
 {
 public:
     //==============================================================================
@@ -427,7 +427,7 @@ public:
 
     //==============================================================================
     template <typename T>
-    struct OpenSLQueueRunnerPlayer      : OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>
+    struct OpenSLQueueRunnerPlayer final : OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>
     {
         using Base = OpenSLQueueRunner<T, OpenSLQueueRunnerPlayer<T>, SLPlayItf_>;
 
@@ -472,7 +472,7 @@ public:
     };
 
     template <typename T>
-    struct OpenSLQueueRunnerRecorder  : public OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>
+    struct OpenSLQueueRunnerRecorder final : public OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>
     {
         using Base = OpenSLQueueRunner<T, OpenSLQueueRunnerRecorder<T>, SLRecordItf_>;
 
@@ -631,7 +631,7 @@ public:
     };
 
     template <typename T>
-    class OpenSLSessionT : public OpenSLSession
+    class OpenSLSessionT final : public OpenSLSession
     {
     public:
         OpenSLSessionT (int numInputChannels, int numOutputChannels,
@@ -1068,7 +1068,7 @@ OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (
 }
 
 //==============================================================================
-class OpenSLAudioDeviceType  : public AudioIODeviceType
+class OpenSLAudioDeviceType final : public AudioIODeviceType
 {
 public:
     OpenSLAudioDeviceType()  : AudioIODeviceType (OpenSLAudioIODevice::openSLTypeName) {}

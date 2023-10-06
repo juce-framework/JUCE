@@ -104,7 +104,7 @@ struct PermissionsRequest
 };
 
 //==============================================================================
-struct PermissionsOverlay   : FragmentOverlay
+struct PermissionsOverlay final : public FragmentOverlay
 {
     PermissionsOverlay (CriticalSection& cs) : overlayGuard (cs) {}
     ~PermissionsOverlay() override = default;

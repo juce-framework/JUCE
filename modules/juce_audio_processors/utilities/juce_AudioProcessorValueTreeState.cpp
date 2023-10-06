@@ -60,7 +60,7 @@ void AudioProcessorValueTreeState::Parameter::valueChanged (float newValue)
 }
 
 //==============================================================================
-class AudioProcessorValueTreeState::ParameterAdapter   : private AudioProcessorParameter::Listener
+class AudioProcessorValueTreeState::ParameterAdapter final : private AudioProcessorParameter::Listener
 {
 private:
     using Listener = AudioProcessorValueTreeState::Listener;
@@ -208,7 +208,7 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& proc
                                                             ParameterLayout parameterLayout)
     : AudioProcessorValueTreeState (processorToConnectTo, undoManagerToUse)
 {
-    struct PushBackVisitor : ParameterLayout::Visitor
+    struct PushBackVisitor final : ParameterLayout::Visitor
     {
         explicit PushBackVisitor (AudioProcessorValueTreeState& stateIn)
             : state (&stateIn) {}
@@ -506,7 +506,7 @@ AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessor
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct ParameterAdapterTests  : public UnitTest
+struct ParameterAdapterTests final : public UnitTest
 {
     ParameterAdapterTests()
         : UnitTest ("Parameter Adapter", UnitTestCategories::audioProcessorParameters)
@@ -600,7 +600,7 @@ inline bool operator!= (const NormalisableRange<ValueType>& a,
 }
 } // namespace
 
-class AudioProcessorValueTreeStateTests  : public UnitTest
+class AudioProcessorValueTreeStateTests final : public UnitTest
 {
 private:
     using Parameter = AudioProcessorValueTreeState::Parameter;
@@ -608,7 +608,7 @@ private:
     using ParameterLayout = AudioProcessorValueTreeState::ParameterLayout;
     using Attributes = AudioProcessorValueTreeStateParameterAttributes;
 
-    class TestAudioProcessor : public AudioProcessor
+    class TestAudioProcessor final : public AudioProcessor
     {
     public:
         TestAudioProcessor() = default;

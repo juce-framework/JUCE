@@ -33,7 +33,7 @@ using MenuTrackingChangedCallback = void (*)(bool);
 MenuTrackingChangedCallback menuTrackingChangedCallback = nullptr;
 
 //==============================================================================
-struct AppDelegateClass   : public ObjCClass<NSObject>
+struct AppDelegateClass final : public ObjCClass<NSObject>
 {
     AppDelegateClass()  : ObjCClass ("JUCEAppDelegate_")
     {
@@ -353,7 +353,7 @@ void MessageManager::stopDispatchLoop()
     }
     else
     {
-        struct QuitCallback  : public CallbackMessage
+        struct QuitCallback final : public CallbackMessage
         {
             QuitCallback() {}
             void messageCallback() override    { MessageManager::getInstance()->stopDispatchLoop(); }
@@ -463,7 +463,7 @@ private:
     MountedVolumeListChangeDetector& owner;
     id delegate;
 
-    struct ObserverClass   : public ObjCClass<NSObject>
+    struct ObserverClass final : public ObjCClass<NSObject>
     {
         ObserverClass()  : ObjCClass<NSObject> ("JUCEDriveObserver_")
         {

@@ -560,7 +560,7 @@ public:
 
 private:
     //==============================================================================
-    struct SessionEventCallback  : public ComBaseClassHelper<IAudioSessionEvents>
+    struct SessionEventCallback final : public ComBaseClassHelper<IAudioSessionEvents>
     {
         SessionEventCallback (WASAPIDeviceBase& d) : owner (d) {}
 
@@ -923,7 +923,7 @@ private:
 };
 
 //==============================================================================
-class WASAPIInputDevice  : public WASAPIDeviceBase
+class WASAPIInputDevice final : public WASAPIDeviceBase
 {
 public:
     WASAPIInputDevice (const ComSmartPtr<IMMDevice>& d, WASAPIDeviceMode mode)
@@ -1071,7 +1071,7 @@ private:
 };
 
 //==============================================================================
-class WASAPIOutputDevice  : public WASAPIDeviceBase
+class WASAPIOutputDevice final : public WASAPIDeviceBase
 {
 public:
     WASAPIOutputDevice (const ComSmartPtr<IMMDevice>& d, WASAPIDeviceMode mode)
@@ -1198,7 +1198,7 @@ private:
 };
 
 //==============================================================================
-class WASAPIAudioIODevice  : public AudioIODevice,
+class WASAPIAudioIODevice final : public AudioIODevice,
                              public Thread,
                              private AsyncUpdater
 {
@@ -1716,7 +1716,7 @@ private:
 
 
 //==============================================================================
-class WASAPIAudioIODeviceType  : public AudioIODeviceType
+class WASAPIAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     explicit WASAPIAudioIODeviceType (WASAPIDeviceMode mode)
@@ -1815,7 +1815,7 @@ private:
     ComSmartPtr<IMMDeviceEnumerator> enumerator;
 
     //==============================================================================
-    class ChangeNotificationClient : public ComBaseClassHelper<IMMNotificationClient>
+    class ChangeNotificationClient final : public ComBaseClassHelper<IMMNotificationClient>
     {
     public:
         explicit ChangeNotificationClient (WASAPIAudioIODeviceType* d)

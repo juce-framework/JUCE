@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class OpenGLFrameBufferImage   : public ImagePixelData
+class OpenGLFrameBufferImage final : public ImagePixelData
 {
 public:
     OpenGLFrameBufferImage (OpenGLContext& c, int w, int h)
@@ -150,7 +150,7 @@ private:
     };
 
     template <class ReaderType, class WriterType>
-    struct DataReleaser  : public Image::BitmapData::BitmapDataReleaser
+    struct DataReleaser final : public Image::BitmapData::BitmapDataReleaser
     {
         DataReleaser (OpenGLFrameBuffer& fb, int x, int y, int w, int h)
             : data ((size_t) (w * h)),

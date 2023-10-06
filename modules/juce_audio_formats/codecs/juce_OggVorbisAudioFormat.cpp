@@ -109,7 +109,7 @@ const char* const OggVorbisAudioFormat::id3trackNumber = "id3trackNumber";
 
 
 //==============================================================================
-class OggReader : public AudioFormatReader
+class OggReader final : public AudioFormatReader
 {
 public:
     OggReader (InputStream* inp)  : AudioFormatReader (inp, oggFormatName)
@@ -262,7 +262,7 @@ private:
 };
 
 //==============================================================================
-class OggWriter  : public AudioFormatWriter
+class OggWriter final : public AudioFormatWriter
 {
 public:
     OggWriter (OutputStream* out, double rate,

@@ -108,8 +108,8 @@ void callOnMessageThread (Callback&& callback)
     request that the editor bounds are updated. We can call `setSize` on this
     component from inside those dedicated callbacks.
 */
-struct NSViewComponentWithParent  : public NSViewComponent,
-                                    private AsyncUpdater
+struct NSViewComponentWithParent : public NSViewComponent,
+                                   private AsyncUpdater
 {
     enum class WantsNudge { no, yes };
 
@@ -156,7 +156,7 @@ private:
         }
     }
 
-    struct InnerNSView : public ObjCClass<NSView>
+    struct InnerNSView final : public ObjCClass<NSView>
     {
         InnerNSView()
             : ObjCClass ("JuceInnerNSView_")

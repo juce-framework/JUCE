@@ -1164,7 +1164,7 @@ const char* MidiMessage::getControllerName (const int n)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct MidiMessageTest  : public UnitTest
+struct MidiMessageTest final : public UnitTest
 {
     MidiMessageTest()
         : UnitTest ("MidiMessage", UnitTestCategories::midi)

@@ -91,7 +91,7 @@ void JUCEApplicationBase::sendUnhandledException (const std::exception* const e,
 #endif
 
 #if JUCE_HANDLE_MULTIPLE_INSTANCES
-struct JUCEApplicationBase::MultipleInstanceHandler  : public ActionListener
+struct JUCEApplicationBase::MultipleInstanceHandler final : public ActionListener
 {
     MultipleInstanceHandler (const String& appName)
         : appLock ("juceAppLock_" + appName)

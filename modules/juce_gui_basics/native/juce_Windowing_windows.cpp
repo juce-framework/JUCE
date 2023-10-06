@@ -969,7 +969,7 @@ const int KeyPress::rewindKey               = 0x30003;
 
 
 //==============================================================================
-class WindowsBitmapImage  : public ImagePixelData
+class WindowsBitmapImage final : public ImagePixelData
 {
 public:
     WindowsBitmapImage (const Image::PixelFormat format,
@@ -1159,7 +1159,7 @@ namespace IconConverters
         if (icon == nullptr)
             return {};
 
-        struct ScopedICONINFO   : public ICONINFO
+        struct ScopedICONINFO final : public ICONINFO
         {
             ScopedICONINFO()
             {
@@ -1425,8 +1425,8 @@ static HMONITOR getMonitorFromOutput (ComSmartPtr<IDXGIOutput> output)
 using VBlankListener = ComponentPeer::VBlankListener;
 
 //==============================================================================
-class VSyncThread : private Thread,
-                    private AsyncUpdater
+class VSyncThread final : private Thread,
+                          private AsyncUpdater
 {
 public:
     VSyncThread (ComSmartPtr<IDXGIOutput> out,
@@ -1514,7 +1514,7 @@ private:
 };
 
 //==============================================================================
-class VBlankDispatcher : public DeletedAtShutdown
+class VBlankDispatcher final : public DeletedAtShutdown
 {
 public:
     void updateDisplay (VBlankListener& listener, HMONITOR monitor)
@@ -1654,7 +1654,7 @@ private:
 JUCE_IMPLEMENT_SINGLETON (VBlankDispatcher)
 
 //==============================================================================
-class SimpleTimer  : private Timer
+class SimpleTimer final : private Timer
 {
 public:
     SimpleTimer (int intervalMs, std::function<void()> callbackIn)
@@ -1679,12 +1679,12 @@ private:
 };
 
 //==============================================================================
-class HWNDComponentPeer  : public ComponentPeer,
-                           private VBlankListener,
-                           private Timer
-                          #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-                           , public ModifierKeyReceiver
-                          #endif
+class HWNDComponentPeer final : public ComponentPeer,
+                                private VBlankListener,
+                                private Timer
+                               #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+                                , public ModifierKeyReceiver
+                               #endif
 {
 public:
     enum RenderingEngineType
@@ -2192,7 +2192,7 @@ public:
     static ModifierKeys modifiersAtLastCallback;
 
     //==============================================================================
-    struct FileDropTarget    : public ComBaseClassHelper<IDropTarget>
+    struct FileDropTarget final : public ComBaseClassHelper<IDropTarget>
     {
         FileDropTarget (HWNDComponentPeer& p)   : peer (p) {}
 
@@ -2425,7 +2425,7 @@ private:
     static MultiTouchMapper<DWORD> currentTouches;
 
     //==============================================================================
-    struct TemporaryImage    : private Timer
+    struct TemporaryImage final : private Timer
     {
         TemporaryImage() {}
 
@@ -2455,7 +2455,7 @@ private:
     TemporaryImage offscreenImageGenerator;
 
     //==============================================================================
-    class WindowClassHolder    : private DeletedAtShutdown
+    class WindowClassHolder final : private DeletedAtShutdown
     {
     public:
         WindowClassHolder()
@@ -4851,7 +4851,7 @@ void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 }
 
 //==============================================================================
-class ScreenSaverDefeater   : public Timer
+class ScreenSaverDefeater final : public Timer
 {
 public:
     ScreenSaverDefeater()

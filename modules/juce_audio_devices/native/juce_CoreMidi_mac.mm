@@ -80,7 +80,7 @@ namespace CoreMidiHelpers
 
    #if JUCE_HAS_NEW_COREMIDI_API
     template <>
-    struct API_AVAILABLE (macos (11.0), ios (14.0)) Sender<ImplementationStrategy::onlyNew> : public SenderBase
+    struct API_AVAILABLE (macos (11.0), ios (14.0)) Sender<ImplementationStrategy::onlyNew> final : public SenderBase
     {
         void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytestreamMidiView& m) override
         {
@@ -167,7 +167,7 @@ namespace CoreMidiHelpers
 
    #if JUCE_HAS_OLD_COREMIDI_API
     template <>
-    struct Sender<ImplementationStrategy::onlyOld> : public SenderBase
+    struct Sender<ImplementationStrategy::onlyOld> final : public SenderBase
     {
         void send (MIDIPortRef port, MIDIEndpointRef endpoint, const ump::BytestreamMidiView& m) override
         {

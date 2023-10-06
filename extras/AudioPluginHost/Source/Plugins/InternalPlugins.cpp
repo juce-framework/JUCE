@@ -224,7 +224,7 @@ public:
 
 private:
     //==============================================================================
-    struct SineWaveSound  : public SynthesiserSound
+    struct SineWaveSound final : public SynthesiserSound
     {
         SineWaveSound() = default;
 
@@ -232,7 +232,7 @@ private:
         bool appliesToChannel (int /*midiChannel*/) override    { return true; }
     };
 
-    struct SineWaveVoice  : public SynthesiserVoice
+    struct SineWaveVoice final : public SynthesiserVoice
     {
         SineWaveVoice() = default;
 

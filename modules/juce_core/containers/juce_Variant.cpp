@@ -401,7 +401,7 @@ struct var::VariantType
         }
     }
 
-    struct RefCountedArray  : public ReferenceCountedObject
+    struct RefCountedArray final : public ReferenceCountedObject
     {
         RefCountedArray (const Array<var>& a)  : array (a)  { incReferenceCount(); }
         RefCountedArray (Array<var>&& a)  : array (std::move (a)) { incReferenceCount(); }

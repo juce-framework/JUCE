@@ -384,7 +384,7 @@ struct CoreAudioFormatMetatdata
 };
 
 //==============================================================================
-class CoreAudioReader : public AudioFormatReader
+class CoreAudioReader final : public AudioFormatReader
 {
 public:
     using StreamKind = CoreAudioFormat::StreamKind;
@@ -664,7 +664,7 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
 #define DEFINE_CHANNEL_LAYOUT_DFL_ENTRY(x) CoreAudioChannelLayoutTag { x, #x, AudioChannelSet() }
 #define DEFINE_CHANNEL_LAYOUT_TAG_ENTRY(x, y) CoreAudioChannelLayoutTag { x, #x, y }
 
-class CoreAudioLayoutsUnitTest  : public UnitTest
+class CoreAudioLayoutsUnitTest final : public UnitTest
 {
 public:
     CoreAudioLayoutsUnitTest()

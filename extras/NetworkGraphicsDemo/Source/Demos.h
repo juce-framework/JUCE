@@ -64,7 +64,7 @@ struct GridLines final : public AnimatedContent
 };
 
 //==============================================================================
-struct BackgroundLogo : public AnimatedContent
+struct BackgroundLogo final : public AnimatedContent
 {
     BackgroundLogo()
     {

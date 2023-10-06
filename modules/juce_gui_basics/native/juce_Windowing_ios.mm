@@ -556,7 +556,7 @@ public:
     }
 
 private:
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
         {
@@ -674,7 +674,7 @@ void Displays::findDisplays (float masterScale)
         auto getInsets() const { return insets; }
 
     private:
-        struct DelegateClass : public ObjCClass<NSObject>
+        struct DelegateClass final : public ObjCClass<NSObject>
         {
             DelegateClass() : ObjCClass<NSObject> ("JUCEOnScreenKeyboardObserver_")
             {

@@ -1158,7 +1158,7 @@ void Grid::performLayout (Rectangle<int> targetArea)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct GridTests  : public UnitTest
+struct GridTests final : public UnitTest
 {
     GridTests()
         : UnitTest ("Grid", UnitTestCategories::gui)

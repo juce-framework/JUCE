@@ -334,7 +334,7 @@ private:
         //   created on the main thread, but the MidiDeviceListConnectionBroadcaster's constructor
         //   can't complete until the AlsaClient's destructor has run, which in turn requires the
         //   SequencerThread to join.
-        class UpdateNotifier : private AsyncUpdater
+        class UpdateNotifier final : private AsyncUpdater
         {
         public:
             ~UpdateNotifier() override { cancelPendingUpdate(); }
@@ -528,13 +528,13 @@ struct AlsaPortPtr
     explicit AlsaPortPtr (AlsaClient::Port* p)
         : ptr (p) {}
 
-    ~AlsaPortPtr() noexcept { AlsaClient::getInstance()->deletePort (ptr); }
+    virtual ~AlsaPortPtr() noexcept { AlsaClient::getInstance()->deletePort (ptr); }
 
     AlsaClient::Port* ptr = nullptr;
 };
 
 //==============================================================================
-class MidiInput::Pimpl : public AlsaPortPtr
+class MidiInput::Pimpl final : public AlsaPortPtr
 {
 public:
     using AlsaPortPtr::AlsaPortPtr;
@@ -633,7 +633,7 @@ void MidiInput::stop()
 }
 
 //==============================================================================
-class MidiOutput::Pimpl : public AlsaPortPtr
+class MidiOutput::Pimpl final : public AlsaPortPtr
 {
 public:
     using AlsaPortPtr::AlsaPortPtr;

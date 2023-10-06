@@ -387,8 +387,8 @@ struct UIViewPeerControllerReceiver
 };
 
 //==============================================================================
-class UIViewComponentPeer  : public ComponentPeer,
-                             public UIViewPeerControllerReceiver
+class UIViewComponentPeer final : public ComponentPeer,
+                                  public UIViewPeerControllerReceiver
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
@@ -543,7 +543,7 @@ private:
     }
 
     //==============================================================================
-    class AsyncRepaintMessage  : public CallbackMessage
+    class AsyncRepaintMessage final : public CallbackMessage
     {
     public:
         UIViewComponentPeer* const peer;

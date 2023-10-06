@@ -49,7 +49,7 @@ public:
 
 private:
     //==============================================================================
-    class API_AVAILABLE (macos (10.10)) AccessibilityElement  : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
+    class API_AVAILABLE (macos (10.10)) AccessibilityElement final : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
     {
     public:
         static Holder create (AccessibilityHandler& handler)

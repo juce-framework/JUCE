@@ -48,8 +48,8 @@ struct InternalWebViewType
 };
 
 //==============================================================================
-class Win32WebView   : public InternalWebViewType,
-                       public ActiveXControlComponent
+class Win32WebView final : public InternalWebViewType,
+                           public ActiveXControlComponent
 {
 public:
     Win32WebView (WebBrowserComponent& parent, const String& userAgentToUse)
@@ -247,8 +247,8 @@ private:
     String userAgent;
 
     //==============================================================================
-    struct EventHandler  : public ComBaseClassHelper<IDispatch>,
-                           public ComponentMovementWatcher
+    struct EventHandler final : public ComBaseClassHelper<IDispatch>,
+                                public ComponentMovementWatcher
     {
         EventHandler (Win32WebView& w)  : ComponentMovementWatcher (&w.owner), owner (w) {}
 
@@ -395,10 +395,10 @@ static bool anyChildWindow (HWND hwnd, std::function<bool (HWND)> predicate)
     return result;
 }
 
-class WebView2  : public InternalWebViewType,
-                  public Component,
-                  public ComponentMovementWatcher,
-                  private AsyncUpdater
+class WebView2 final : public InternalWebViewType,
+                       public Component,
+                       public ComponentMovementWatcher,
+                       private AsyncUpdater
 {
 public:
     WebView2 (WebBrowserComponent& o, const WebBrowserComponent::Options& prefs)

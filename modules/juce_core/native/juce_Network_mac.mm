@@ -107,7 +107,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments ([[maybe_unused]] const Str
 }
 
 //==============================================================================
-class URLConnectionStateBase  : public Thread
+class URLConnectionStateBase : public Thread
 {
 public:
     explicit URLConnectionStateBase (NSURLRequest* req, int maxRedirects)
@@ -155,7 +155,7 @@ private:
 // so we'll turn off deprecation warnings. This code will be removed at some point
 // in the future.
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated")
-class URLConnectionStatePreYosemite  : public URLConnectionStateBase
+class URLConnectionStatePreYosemite final : public URLConnectionStateBase
 {
 public:
     URLConnectionStatePreYosemite (NSURLRequest* req, const int maxRedirects)
@@ -331,7 +331,7 @@ public:
 
 private:
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCENetworkDelegate_")
         {
@@ -391,7 +391,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 //==============================================================================
-class API_AVAILABLE (macos (10.9)) URLConnectionState : public URLConnectionStateBase
+class API_AVAILABLE (macos (10.9)) URLConnectionState final : public URLConnectionStateBase
 {
 public:
     URLConnectionState (NSURLRequest* req, const int maxRedirects)
@@ -599,7 +599,7 @@ public:
 
 private:
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject>
+    struct DelegateClass final : public ObjCClass<NSObject>
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCE_URLDelegate_")
         {
@@ -669,7 +669,7 @@ private:
 
 //==============================================================================
 #if JUCE_IOS
-struct BackgroundDownloadTask  : public URL::DownloadTask
+struct BackgroundDownloadTask final : public URL::DownloadTask
 {
     BackgroundDownloadTask (const URL& urlToUse,
                             const File& targetLocationToUse,
@@ -869,7 +869,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     }
 
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject<NSURLSessionDelegate>>
+    struct DelegateClass final : public ObjCClass<NSObject<NSURLSessionDelegate>>
     {
         DelegateClass()  : ObjCClass<NSObject<NSURLSessionDelegate>> ("JUCE_URLDelegate_")
         {

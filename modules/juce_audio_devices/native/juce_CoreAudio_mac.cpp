@@ -39,7 +39,7 @@ constexpr auto juceAudioObjectPropertyElementMain =
        #endif
 
 //==============================================================================
-class ManagedAudioBufferList : public AudioBufferList
+class ManagedAudioBufferList final : public AudioBufferList
 {
 public:
     struct Deleter
@@ -290,8 +290,8 @@ class CoreAudioIODeviceType;
 class CoreAudioIODevice;
 
 //==============================================================================
-class CoreAudioInternal  : private Timer,
-                           private AsyncUpdater
+class CoreAudioInternal final : private Timer,
+                                private AsyncUpdater
 {
 private:
     // members with deduced return types need to be defined before they
@@ -1204,8 +1204,8 @@ private:
 
 
 //==============================================================================
-class CoreAudioIODevice   : public AudioIODevice,
-                            private Timer
+class CoreAudioIODevice final : public AudioIODevice,
+                                private Timer
 {
 public:
     CoreAudioIODevice (CoreAudioIODeviceType* dt,
@@ -1435,9 +1435,9 @@ private:
 
 
 //==============================================================================
-class AudioIODeviceCombiner    : public AudioIODevice,
-                                 private AsyncRestarter,
-                                 private Timer
+class AudioIODeviceCombiner final : public AudioIODevice,
+                                    private AsyncRestarter,
+                                    private Timer
 {
 public:
     AudioIODeviceCombiner (const String& deviceName, CoreAudioIODeviceType* deviceType,
@@ -1970,7 +1970,7 @@ private:
     void handleAudioDeviceError (const String& errorMessage)   { shutdown (errorMessage.isNotEmpty() ? errorMessage : String ("unknown")); }
 
     //==============================================================================
-    struct DeviceWrapper  : public AudioIODeviceCallback
+    struct DeviceWrapper final : public AudioIODeviceCallback
     {
         DeviceWrapper (AudioIODeviceCombiner& cd, std::unique_ptr<CoreAudioIODevice> d, bool shouldBeInput)
             : owner (cd),
@@ -2069,7 +2069,7 @@ private:
     /* If the current AudioIODeviceCombiner::callback is nullptr, it sets itself as the callback
        and forwards error related callbacks to the provided callback
     */
-    class ScopedErrorForwarder  : public AudioIODeviceCallback
+    class ScopedErrorForwarder final : public AudioIODeviceCallback
     {
     public:
         ScopedErrorForwarder (AudioIODeviceCombiner& ownerIn, AudioIODeviceCallback* cb)
@@ -2127,8 +2127,8 @@ private:
 
 
 //==============================================================================
-class CoreAudioIODeviceType  : public AudioIODeviceType,
-                               private AsyncUpdater
+class CoreAudioIODeviceType final : public AudioIODeviceType,
+                                    private AsyncUpdater
 {
 public:
     CoreAudioIODeviceType()  : AudioIODeviceType ("CoreAudio")

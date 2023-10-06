@@ -27,7 +27,7 @@ namespace juce
 {
 
 //==============================================================================
-class WebKitSymbols  : public DeletedAtShutdown
+class WebKitSymbols final : public DeletedAtShutdown
 {
 public:
     //==============================================================================
@@ -344,7 +344,7 @@ private:
     WebKitSymbols::getInstance()->juce_g_signal_connect_data (instance, detailed_signal, c_handler, data, nullptr, (GConnectFlags) 0)
 
 //==============================================================================
-class GtkChildProcess : private CommandReceiver::Responder
+class GtkChildProcess final : private CommandReceiver::Responder
 {
 public:
     //==============================================================================

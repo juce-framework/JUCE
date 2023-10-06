@@ -255,7 +255,7 @@ static int32 getPluginIDForMainBusConfigJuce705 (const AudioChannelSet& mainInpu
     return (idForAudioSuite ? 0x6a796161 /* 'jyaa' */ : 0x6a636161 /* 'jcaa' */) + uniqueFormatId;
 }
 
-class AAXClientExtensionsTests  : public UnitTest
+class AAXClientExtensionsTests final : public UnitTest
 {
 public:
     AAXClientExtensionsTests()

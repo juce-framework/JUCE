@@ -87,7 +87,7 @@ namespace detail
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 } // namespace detail
 
-class MessageManager::QuitMessage   : public MessageManager::MessageBase
+class MessageManager::QuitMessage final : public MessageManager::MessageBase
 {
 public:
     QuitMessage() {}
@@ -149,7 +149,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 #endif
 
 //==============================================================================
-class AsyncFunctionCallback   : public MessageManager::MessageBase
+class AsyncFunctionCallback final : public MessageManager::MessageBase
 {
 public:
     AsyncFunctionCallback (MessageCallbackFunction* const f, void* const param)
@@ -194,7 +194,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func
 
 bool MessageManager::callAsync (std::function<void()> fn)
 {
-    struct AsyncCallInvoker  : public MessageBase
+    struct AsyncCallInvoker final : public MessageBase
     {
         AsyncCallInvoker (std::function<void()> f) : callback (std::move (f)) {}
         void messageCallback() override  { callback(); }
@@ -282,7 +282,7 @@ bool MessageManager::existsAndIsCurrentThread() noexcept
     accessed from another thread inside a MM lock, you're screwed. (this is exactly what happens
     in Cocoa).
 */
-struct MessageManager::Lock::BlockingMessage   : public MessageManager::MessageBase
+struct MessageManager::Lock::BlockingMessage final : public MessageManager::MessageBase
 {
     explicit BlockingMessage (const MessageManager::Lock* parent) noexcept
         : owner (parent) {}

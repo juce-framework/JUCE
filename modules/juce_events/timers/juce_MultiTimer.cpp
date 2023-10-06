@@ -23,7 +23,7 @@
 namespace juce
 {
 
-struct MultiTimerCallback    : public Timer
+struct MultiTimerCallback final : public Timer
 {
     MultiTimerCallback (const int tid, MultiTimer& mt) noexcept
         : owner (mt), timerID (tid)

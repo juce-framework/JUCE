@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class KeyMappingEditorComponent::ChangeKeyButton  : public Button
+class KeyMappingEditorComponent::ChangeKeyButton final : public Button
 {
 public:
     ChangeKeyButton (KeyMappingEditorComponent& kec, CommandID command,
@@ -92,7 +92,7 @@ public:
     }
 
     //==============================================================================
-    class KeyEntryWindow  : public AlertWindow
+    class KeyEntryWindow final : public AlertWindow
     {
     public:
         KeyEntryWindow (KeyMappingEditorComponent& kec)
@@ -208,7 +208,7 @@ private:
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::ItemComponent  : public Component
+class KeyMappingEditorComponent::ItemComponent final : public Component
 {
 public:
     ItemComponent (KeyMappingEditorComponent& kec, CommandID command)
@@ -276,7 +276,7 @@ private:
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::MappingItem  : public TreeViewItem
+class KeyMappingEditorComponent::MappingItem final : public TreeViewItem
 {
 public:
     MappingItem (KeyMappingEditorComponent& kec, CommandID command)
@@ -298,7 +298,7 @@ private:
 
 
 //==============================================================================
-class KeyMappingEditorComponent::CategoryItem  : public TreeViewItem
+class KeyMappingEditorComponent::CategoryItem final : public TreeViewItem
 {
 public:
     CategoryItem (KeyMappingEditorComponent& kec, const String& name)
@@ -341,8 +341,8 @@ private:
 };
 
 //==============================================================================
-class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
-                                                  private ChangeListener
+class KeyMappingEditorComponent::TopLevelItem final : public TreeViewItem,
+                                                      private ChangeListener
 {
 public:
     TopLevelItem (KeyMappingEditorComponent& kec)   : owner (kec)

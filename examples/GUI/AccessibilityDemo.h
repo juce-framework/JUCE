@@ -339,7 +339,7 @@ private:
         {
             RootItem()
             {
-                struct Item  : public TreeViewItem
+                struct Item final : public TreeViewItem
                 {
                     Item (int index, int depth, int numSubItems)
                         : textToDisplay ("Item " + String (index)
@@ -511,7 +511,7 @@ private:
                 and accessibility clients. This derived class represents the properties
                 set via the demo UI.
             */
-            struct CustomAccessibilityHandler  : public AccessibilityHandler
+            struct CustomAccessibilityHandler final : public AccessibilityHandler
             {
                 explicit CustomAccessibilityHandler (CustomWidgetComponent& comp)
                     : AccessibilityHandler (comp.accessibleComponent,
@@ -821,7 +821,7 @@ private:
 
         std::unique_ptr<AccessibilityValueInterface> getValueInterface()
         {
-            struct Numeric  : public AccessibilityNumericValueInterface
+            struct Numeric final : public AccessibilityNumericValueInterface
             {
                 explicit Numeric (ValueInterfaceComponent& o)
                     : owner (o)
@@ -835,7 +835,7 @@ private:
                 ValueInterfaceComponent& owner;
             };
 
-            struct Ranged  : public AccessibilityRangedNumericValueInterface
+            struct Ranged final : public AccessibilityRangedNumericValueInterface
             {
                 explicit Ranged (ValueInterfaceComponent& o)
                     : owner (o)
@@ -857,7 +857,7 @@ private:
                 ValueInterfaceComponent& owner;
             };
 
-            struct Text  : public AccessibilityTextValueInterface
+            struct Text final : public AccessibilityTextValueInterface
             {
                 explicit Text (ValueInterfaceComponent& o)
                     : owner (o)

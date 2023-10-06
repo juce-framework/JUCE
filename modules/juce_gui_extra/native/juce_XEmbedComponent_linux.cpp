@@ -69,7 +69,7 @@ class XEmbedComponent::Pimpl  : private ComponentListener
 {
 public:
     //==============================================================================
-    struct SharedKeyWindow : public ReferenceCountedObject
+    struct SharedKeyWindow final : public ReferenceCountedObject
     {
         SharedKeyWindow (ComponentPeer* peerToUse)
             : keyPeer (peerToUse),

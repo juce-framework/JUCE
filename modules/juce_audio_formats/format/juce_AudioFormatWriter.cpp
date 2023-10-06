@@ -211,7 +211,7 @@ bool AudioFormatWriter::flush()
 }
 
 //==============================================================================
-class AudioFormatWriter::ThreadedWriter::Buffer   : private TimeSliceClient
+class AudioFormatWriter::ThreadedWriter::Buffer final : private TimeSliceClient
 {
 public:
     Buffer (TimeSliceThread& tst, AudioFormatWriter* w, int channels, int numSamples)

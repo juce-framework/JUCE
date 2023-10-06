@@ -46,7 +46,7 @@ float Font::getDefaultMinimumHorizontalScaleFactor() noexcept                { r
 void Font::setDefaultMinimumHorizontalScaleFactor (float newValue) noexcept  { FontValues::minimumHorizontalScale = newValue; }
 
 //==============================================================================
-class TypefaceCache  : private DeletedAtShutdown
+class TypefaceCache final : private DeletedAtShutdown
 {
 public:
     TypefaceCache()
