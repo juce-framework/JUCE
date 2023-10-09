@@ -1748,10 +1748,34 @@ public:
             addIvar<JuceAU*> ("au");
             addIvar<EditorCompHolder*> ("editor");
 
-            addMethod (@selector (dealloc),                     dealloc);
-            addMethod (@selector (applicationWillTerminate:),   applicationWillTerminate);
-            addMethod (@selector (viewDidMoveToWindow),         viewDidMoveToWindow);
-            addMethod (@selector (mouseDownCanMoveWindow),      mouseDownCanMoveWindow);
+            addMethod (@selector (dealloc), [] (id self, SEL)
+            {
+                if (activeUIs.contains (self))
+                    shutdown (self);
+
+                sendSuperclassMessage<void> (self, @selector (dealloc));
+            });
+
+            addMethod (@selector (applicationWillTerminate:), [] (id self, SEL, NSNotification*)
+            {
+                shutdown (self);
+            });
+
+            addMethod (@selector (viewDidMoveToWindow), [] (id self, SEL)
+            {
+                if (NSWindow* w = [(NSView*) self window])
+                {
+                    [w setAcceptsMouseMovedEvents: YES];
+
+                    if (EditorCompHolder* const editorComp = getEditor (self))
+                        [w makeFirstResponder: (NSView*) editorComp->getWindowHandle()];
+                }
+            });
+
+            addMethod (@selector (mouseDownCanMoveWindow), [] (id, SEL)
+            {
+                return NO;
+            });
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (clipsToBounds), [] (id, SEL) { return YES; });
@@ -1786,19 +1810,6 @@ public:
         static void setEditor (id self, EditorCompHolder* e)    { object_setInstanceVariable (self, "editor", e); }
 
     private:
-        static void dealloc (id self, SEL)
-        {
-            if (activeUIs.contains (self))
-                shutdown (self);
-
-            sendSuperclassMessage<void> (self, @selector (dealloc));
-        }
-
-        static void applicationWillTerminate (id self, SEL, NSNotification*)
-        {
-            shutdown (self);
-        }
-
         static void shutdown (id self)
         {
             [[NSNotificationCenter defaultCenter] removeObserver: self];
@@ -1816,22 +1827,6 @@ public:
                 shutdownJuce_GUI();
             }
         }
-
-        static void viewDidMoveToWindow (id self, SEL)
-        {
-            if (NSWindow* w = [(NSView*) self window])
-            {
-                [w setAcceptsMouseMovedEvents: YES];
-
-                if (EditorCompHolder* const editorComp = getEditor (self))
-                    [w makeFirstResponder: (NSView*) editorComp->getWindowHandle()];
-            }
-        }
-
-        static BOOL mouseDownCanMoveWindow (id, SEL)
-        {
-            return NO;
-        }
     };
 
     //==============================================================================
@@ -1839,44 +1834,40 @@ public:
     {
         JuceUICreationClass()  : ObjCClass<NSObject> ("JUCE_AUCocoaViewClass_")
         {
-            addMethod (@selector (interfaceVersion),             interfaceVersion);
-            addMethod (@selector (description),                  description);
-            addMethod (@selector (uiViewForAudioUnit:withSize:), uiViewForAudioUnit);
+            addMethod (@selector (interfaceVersion), [] (id, SEL) { return 0; });
+            addMethod (@selector (description), [] (id, SEL)
+            {
+                return [NSString stringWithString: nsStringLiteral (JucePlugin_Name)];
+            });
+
+            addMethod (@selector (uiViewForAudioUnit:withSize:), [] (id, SEL, AudioUnit inAudioUnit, NSSize) -> NSView*
+            {
+                void* pointers[2];
+                UInt32 propertySize = sizeof (pointers);
+
+                if (AudioUnitGetProperty (inAudioUnit, juceFilterObjectPropertyID,
+                                          kAudioUnitScope_Global, 0, pointers, &propertySize) == noErr)
+                {
+                    if (AudioProcessor* filter = static_cast<AudioProcessor*> (pointers[0]))
+                    {
+                        if (AudioProcessorEditor* editorComp = filter->createEditorIfNeeded())
+                        {
+                           #if JucePlugin_Enable_ARA
+                            jassert (dynamic_cast<AudioProcessorEditorARAExtension*> (editorComp) != nullptr);
+                            // for proper view embedding, ARA plug-ins must be resizable
+                            jassert (editorComp->isResizable());
+                           #endif
+                            return EditorCompHolder::createViewFor (filter, static_cast<JuceAU*> (pointers[1]), editorComp);
+                        }
+                    }
+                }
+
+                return nil;
+            });
 
             addProtocol (@protocol (AUCocoaUIBase));
 
             registerClass();
-        }
-
-    private:
-        static unsigned int interfaceVersion (id, SEL)   { return 0; }
-
-        static NSString* description (id, SEL)
-        {
-            return [NSString stringWithString: nsStringLiteral (JucePlugin_Name)];
-        }
-
-        static NSView* uiViewForAudioUnit (id, SEL, AudioUnit inAudioUnit, NSSize)
-        {
-            void* pointers[2];
-            UInt32 propertySize = sizeof (pointers);
-
-            if (AudioUnitGetProperty (inAudioUnit, juceFilterObjectPropertyID,
-                                      kAudioUnitScope_Global, 0, pointers, &propertySize) == noErr)
-            {
-                if (AudioProcessor* filter = static_cast<AudioProcessor*> (pointers[0]))
-                    if (AudioProcessorEditor* editorComp = filter->createEditorIfNeeded())
-                    {
-                       #if JucePlugin_Enable_ARA
-                        jassert (dynamic_cast<AudioProcessorEditorARAExtension*> (editorComp) != nullptr);
-                        // for proper view embedding, ARA plug-ins must be resizable
-                        jassert (editorComp->isResizable());
-                       #endif
-                        return EditorCompHolder::createViewFor (filter, static_cast<JuceAU*> (pointers[1]), editorComp);
-                    }
-            }
-
-            return nil;
         }
     };
 

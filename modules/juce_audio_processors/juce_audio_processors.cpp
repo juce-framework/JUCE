@@ -163,8 +163,14 @@ private:
         {
             addIvar<NSViewComponentWithParent*> ("owner");
 
-            addMethod (@selector (isOpaque),       isOpaque);
-            addMethod (@selector (didAddSubview:), didAddSubview);
+            addMethod (@selector (isOpaque), [] (id, SEL) { return YES; });
+
+            addMethod (@selector (didAddSubview:), [] (id self, SEL, NSView*)
+            {
+                if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
+                    if (owner->wantsNudge == WantsNudge::yes)
+                        owner->triggerAsyncUpdate();
+            });
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (clipsToBounds), [] (id, SEL) { return YES; });
@@ -172,17 +178,6 @@ private:
 
             registerClass();
         }
-
-        static BOOL isOpaque  (id, SEL) { return YES; }
-
-        static void nudge (id self)
-        {
-            if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
-                if (owner->wantsNudge == WantsNudge::yes)
-                    owner->triggerAsyncUpdate();
-        }
-
-        static void didAddSubview (id self, SEL, NSView*)      { nudge (self); }
     };
 
     static InnerNSView& getViewClass()
