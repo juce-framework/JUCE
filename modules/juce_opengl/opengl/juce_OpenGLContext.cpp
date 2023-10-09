@@ -1607,6 +1607,11 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         auto bottom = (GLshort) targetClipArea.getBottom();
         const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
 
+        GLint oldProgram{};
+        glGetIntegerv (GL_CURRENT_PROGRAM, &oldProgram);
+
+        const ScopeGuard bindPreviousProgram { [&] { extensions.glUseProgram ((GLuint) oldProgram); } };
+
         auto& program = OverlayShaderProgram::select (*this);
         program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat(), flippedVertically);
 
