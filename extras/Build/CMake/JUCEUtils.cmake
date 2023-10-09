@@ -894,6 +894,26 @@ function(_juce_set_copy_properties shared_code target from to_property)
     set_target_properties("${target}" PROPERTIES JUCE_PLUGIN_ARTEFACT_FILE "${from}")
 endfunction()
 
+function(_juce_adhoc_sign target)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        return()
+    endif()
+
+    get_target_property(bundle "${target}" BUNDLE)
+
+    set(src "$<TARGET_FILE:${target}>")
+
+    if(bundle)
+        set(src "$<TARGET_BUNDLE_DIR:${target}>")
+    endif()
+
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+            "-Dsrc=${src}"
+            "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
+        VERBATIM)
+endfunction()
+
 function(juce_enable_copy_plugin_step shared_code_target)
     get_target_property(step_added ${shared_code_target} _JUCE_PLUGIN_COPY_STEP_ADDED)
 
@@ -913,24 +933,20 @@ function(juce_enable_copy_plugin_step shared_code_target)
             continue()
         endif()
 
+        _juce_adhoc_sign("${target}")
+
         get_target_property(source "${target}" JUCE_PLUGIN_ARTEFACT_FILE)
 
-        if(source)
-            if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-                add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND "${CMAKE_COMMAND}"
-                        "-Dsrc=${source}"
-                        "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
-                    VERBATIM)
-            endif()
+        if(NOT source)
+            continue()
+        endif()
 
-            get_target_property(dest "${target}" JUCE_PLUGIN_COPY_DIR)
+        get_target_property(dest "${target}" JUCE_PLUGIN_COPY_DIR)
 
-            if(dest)
-                _juce_copy_dir("${target}" "${source}" "$<GENEX_EVAL:${dest}>")
-            else()
-                message(WARNING "Target '${target}' requested copy but no destination is set")
-            endif()
+        if(dest)
+            _juce_copy_dir("${target}" "${source}" "$<GENEX_EVAL:${dest}>")
+        else()
+            message(WARNING "Target '${target}' requested copy but no destination is set")
         endif()
     endforeach()
 endfunction()
@@ -1016,7 +1032,7 @@ function(juce_enable_vst3_manifest_step shared_code_target)
     get_target_property(copy_step_added ${shared_code_target} _JUCE_PLUGIN_COPY_STEP_ADDED)
 
     if(copy_step_added)
-        message(FATAL "VST3 manifest generation would run after plugin copy step, so it has been disabled. "
+        message(FATAL_ERROR "VST3 manifest generation would run after plugin copy step, so it has been disabled. "
             "If you're manually calling juce_enable_vst3_manifest_step, then you probably need to call "
             "juce_enable_copy_plugin_step too.")
     endif()
@@ -1030,7 +1046,7 @@ function(juce_enable_vst3_manifest_step shared_code_target)
     get_target_property(product ${target_name} JUCE_PLUGIN_ARTEFACT_FILE)
 
     if(NOT product)
-        message(FATAL "Property JUCE_PLUGIN_ARTEFACT_FILE not set for ${target_name}")
+        message(FATAL_ERROR "Property JUCE_PLUGIN_ARTEFACT_FILE not set for ${target_name}")
     endif()
 
     # Add a target for the helper tool
@@ -1094,6 +1110,8 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
         endif()
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_VST3_COPY_DIR)
+
+        _juce_adhoc_sign(${target_name})
 
         get_target_property(vst3_auto_manifest ${shared_code_target} JUCE_VST3_AUTO_MANIFEST)
 
@@ -1196,6 +1214,8 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         set(output_path "${products_folder}/${product_name}.lv2")
         set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${output_path}")
+
+        _juce_adhoc_sign(${target_name})
 
         _juce_add_lv2_manifest_helper_target()
 
