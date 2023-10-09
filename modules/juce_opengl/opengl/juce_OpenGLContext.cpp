@@ -1522,7 +1522,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
         struct OverlayShaderProgram final : public ReferenceCountedObject
         {
-            OverlayShaderProgram (OpenGLContext& context)
+            explicit OverlayShaderProgram (OpenGLContext& context)
                 : program (context), params (program)
             {}
 
@@ -1574,7 +1574,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
             struct Params
             {
-                Params (OpenGLShaderProgram& prog)
+                explicit Params (OpenGLShaderProgram& prog)
                     : positionAttribute (prog, "position"),
                       screenSize (prog, "screenSize"),
                       imageTexture (prog, "imageTexture"),
