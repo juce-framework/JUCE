@@ -141,7 +141,6 @@ void Drawable::setBoundsToEnclose (Rectangle<float> area)
     auto newBounds = smallestIntegerContainer + parentOrigin;
     originRelativeToComponent = -smallestIntegerContainer.getPosition();
     setBounds (newBounds);
-    updateTransform();
 }
 
 //==============================================================================
