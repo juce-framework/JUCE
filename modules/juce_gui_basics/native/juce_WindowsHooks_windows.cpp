@@ -65,12 +65,11 @@ private:
 
     static LRESULT CALLBACK keyboardHookCallback (int nCode, WPARAM wParam, LPARAM lParam)
     {
-        MSG& msg = *(MSG*) lParam;
+        auto& msg = *reinterpret_cast<MSG*> (lParam);
 
-        if (nCode == HC_ACTION && wParam == PM_REMOVE
-             && HWNDComponentPeer::offerKeyMessageToJUCEWindow (msg))
+        if (nCode == HC_ACTION && wParam == PM_REMOVE && HWNDComponentPeer::offerKeyMessageToJUCEWindow (msg))
         {
-            zerostruct (msg);
+            msg = {};
             msg.message = WM_USER;
             return 0;
         }
