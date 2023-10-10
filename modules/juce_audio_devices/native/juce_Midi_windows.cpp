@@ -1505,7 +1505,7 @@ private:
 
     //==============================================================================
     template <typename MIDIIOStaticsType, typename MIDIPort>
-    class WinRTIOWrapper final : private BLEDeviceWatcher::Listener
+    class WinRTIOWrapper : private BLEDeviceWatcher::Listener
     {
     public:
         WinRTIOWrapper (BLEDeviceWatcher& bleWatcher,
