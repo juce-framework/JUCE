@@ -27,30 +27,6 @@ project(JUCE VERSION 7.0.7 LANGUAGES C CXX)
 
 include(CMakeDependentOption)
 
-option(JUCE_SILENCE_XCODE_15_LINKER_WARNING
-       "By default, JUCE will warn when using a potentially dangerous combination of compiler and deployment target.
-        You can set this option to disable the warning if you're confident that your project is unaffected."
-       OFF)
-
-if(NOT JUCE_SILENCE_XCODE_15_LINKER_WARNING
-   AND CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
-   AND CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 15.0)
-    message(WARNING "You are using Xcode 15.\n"
-            "If you're also using Link Time Optimisation (LTO), the resulting binary could be broken.\n"
-            "As a workaround, add either -Wl,-weak_reference_mismatches, or -Wl,-ld_classic to your linker flags.\n"
-            "You may set the option JUCE_SILENCE_XCODE_15_LINKER_WARNING to disable this warning after applying a workaround.\n"
-            "For more details see https://developer.apple.com/documentation/xcode-release-notes/xcode-15-release-notes#Linking.")
-
-   if((CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS_EQUAL 12.0)
-      OR (CMAKE_SYSTEM_NAME STREQUAL "iOS" AND CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS_EQUAL 14.0))
-        message(WARNING "You are using Xcode 15 to target an older Apple platform.\n"
-                "The linker in this version of Xcode may produce a binary that crashes on older Apple platforms.\n"
-                "As a workaround, either use a more recent deployment target, or add -Wl,-ld_classic to your linker flags.\n"
-                "You may set the option JUCE_SILENCE_XCODE_15_LINKER_WARNING to disable this warning after applying a workaround.\n"
-                "For more details see https://developer.apple.com/documentation/xcode-release-notes/xcode-15-release-notes#Linking.")
-    endif()
-endif()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 set(JUCE_MODULES_DIR "${JUCE_SOURCE_DIR}/modules" CACHE INTERNAL

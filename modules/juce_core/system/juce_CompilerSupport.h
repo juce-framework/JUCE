@@ -63,6 +63,39 @@
   #endif
  #endif
 
+ #if ! defined (JUCE_SILENCE_XCODE_15_LINKER_WARNING)                          \
+     && defined (__apple_build_version__)                                      \
+     && __clang_major__ == 15                                                  \
+     && __clang_minor__ == 0
+  // This is a warning because builds may be usable when LTO is disabled
+  #pragma GCC warning "If you are using Link Time Optimisation (LTO), the "    \
+      "new linker introduced in Xcode 15 may produce a broken binary.\n"       \
+      "As a workaround, add either '-Wl,-weak_reference_mismatches,weak' or "  \
+      "'-Wl,-ld_classic' to your linker flags.\n"                              \
+      "Once you've selected a workaround, you can add "                        \
+      "JUCE_SILENCE_XCODE_15_LINKER_WARNING to your preprocessor definitions " \
+      "to silence this warning."
+
+  #if ((defined (MAC_OS_X_VERSION_MIN_REQUIRED)                                \
+        && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_VERSION_13_0)                \
+       || (defined (__IPHONE_OS_VERSION_MIN_REQUIRED)                          \
+           && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_15_0))
+   // This is an error because the linker _will_ produce a binary that is
+   // broken on older platforms
+   static_assert (std::string_view (__clang_version__)
+                      != std::string_view ("15.0.0 (clang-1500.0.40.1)"),
+                  "The new linker introduced in Xcode 15.0 will produce "
+                  "broken binaries when targeting older platforms.\n"
+                  "To work around this issue, bump your deployment target to "
+                  "macOS 13 or iOS 15, re-enable the old linker by adding "
+                  "'-Wl,-ld_classic' to your link flags, or update to Xcode "
+                  "15.1.\n"
+                  "Once you've selected a workaround, you can add "
+                  "JUCE_SILENCE_XCODE_15_LINKER_WARNING to your preprocessor "
+                  "definitions to silence this warning.");
+  #endif
+ #endif
+
  #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
 
