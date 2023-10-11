@@ -291,6 +291,7 @@ namespace juce::build_tools
                 case Target::UnityPlugIn:
                 case Target::SharedCodeTarget:
                 case Target::AggregateTarget:
+                case Target::VST3Helper:
                     return true;
 
                 case Target::GUIApp:
@@ -300,7 +301,6 @@ namespace juce::build_tools
                 case Target::unspecified:
                 case Target::LV2PlugIn:
                 case Target::LV2Helper:
-                case Target::VST3Helper:
                     break;
             }
 
