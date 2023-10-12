@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		02E8F35A8E0D4A0DF6F38D60 /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = 1DE5BBC777FB64798D823002; };
 		05A08E366EBF8D650974E695 /* jucer_HeaderComponent.cpp */ = {isa = PBXBuildFile; fileRef = 516D6D7C564DD5DF5C15CB06; };
+		08D8FA18C031543DEAA7C97A /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = DF40404150A5A3D6F5AAC856; settings = { ATTRIBUTES = (Weak, ); }; };
 		091A57B4B9CE623E75E9A756 /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = E983E6DDE3318B872EBE347F; };
 		09C4EDDF7F8B6E75EA3CE3A9 /* jucer_DocumentEditorComponent.cpp */ = {isa = PBXBuildFile; fileRef = BC3B310D42C489E8B8D93327; };
 		0A89E8E0E99C3B5B2B38F2E6 /* jucer_NewProjectWizard.cpp */ = {isa = PBXBuildFile; fileRef = C2835F16963B34839FC36220; };
@@ -52,6 +53,7 @@
 		6FD9428439B572B558EF64EA /* jucer_ButtonDocument.cpp */ = {isa = PBXBuildFile; fileRef = BF301C2E545AEB4AC112C176; };
 		71713DE4716DCEDB45A206E2 /* jucer_OpenDocumentManager.cpp */ = {isa = PBXBuildFile; fileRef = F9111E150CFF155329D44853; };
 		7D750EF5FCE1E1A461D435BE /* jucer_PaintElementPath.cpp */ = {isa = PBXBuildFile; fileRef = 4AE72953E3B3DF06D3B9BA86; };
+		7F1928D425D075E93DC254A8 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = E419F3AED6A220EDCB179A8C; settings = { ATTRIBUTES = (Weak, ); }; };
 		83431B7234A78ECFB3C15F63 /* jucer_GeneratedCode.cpp */ = {isa = PBXBuildFile; fileRef = 78D0DBC4798FF040FDB90F6D; };
 		89116B0BD882B51C63A84425 /* jucer_ResourceEditorPanel.cpp */ = {isa = PBXBuildFile; fileRef = 0EE17BE4154CF1B2EE683894; };
 		8B4A593B3869815BBAC3EF93 /* AudioUnit.framework */ = {isa = PBXBuildFile; fileRef = 7B3F7ECF6DBF8C8EE5C2CB86; };
@@ -334,6 +336,7 @@
 		DB9C8E35DF815B803CB4A9CF /* include_juce_core.mm */ /* include_juce_core.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_core.mm; path = ../../JuceLibraryCode/include_juce_core.mm; sourceTree = SOURCE_ROOT; };
 		DDC382008FFD9F9E0B2B0EDD /* jucer_SVGPathDataWindowComponent.h */ /* jucer_SVGPathDataWindowComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_SVGPathDataWindowComponent.h; path = ../../Source/Application/Windows/jucer_SVGPathDataWindowComponent.h; sourceTree = SOURCE_ROOT; };
 		DE4A987B2D5529990A6AA9D4 /* jucer_AboutWindowComponent.h */ /* jucer_AboutWindowComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AboutWindowComponent.h; path = ../../Source/Application/Windows/jucer_AboutWindowComponent.h; sourceTree = SOURCE_ROOT; };
+		DF40404150A5A3D6F5AAC856 /* MetalKit.framework */ /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		DFBEB8E086832AEB0FBEADF0 /* jucer_StoredSettings.h */ /* jucer_StoredSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_StoredSettings.h; path = ../../Source/Settings/jucer_StoredSettings.h; sourceTree = SOURCE_ROOT; };
 		E111A336FE13C033EAA0A1D1 /* jucer_NewCppFileTemplate.h */ /* jucer_NewCppFileTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_NewCppFileTemplate.h; path = ../../Source/BinaryData/Templates/jucer_NewCppFileTemplate.h; sourceTree = SOURCE_ROOT; };
 		E13A54A6D3A1895EACE53E51 /* jucer_ResourceFile.cpp */ /* jucer_ResourceFile.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ResourceFile.cpp; path = ../../Source/ProjectSaving/jucer_ResourceFile.cpp; sourceTree = SOURCE_ROOT; };
@@ -344,6 +347,7 @@
 		E2B668E2A65AEE8F07B406C8 /* jucer_AppearanceSettings.h */ /* jucer_AppearanceSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AppearanceSettings.h; path = ../../Source/Settings/jucer_AppearanceSettings.h; sourceTree = SOURCE_ROOT; };
 		E367FC2BDAF5EBA48D767FBB /* jucer_FilePathPropertyComponent.h */ /* jucer_FilePathPropertyComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FilePathPropertyComponent.h; path = ../../Source/Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h; sourceTree = SOURCE_ROOT; };
 		E3BADF21095BC23DE2CB454F /* jucer_ProjectTreeItemBase.h */ /* jucer_ProjectTreeItemBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectTreeItemBase.h; path = ../../Source/Project/UI/Sidebar/jucer_ProjectTreeItemBase.h; sourceTree = SOURCE_ROOT; };
+		E419F3AED6A220EDCB179A8C /* Metal.framework */ /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		E4532338917106FA0B61A429 /* jucer_NewFileWizard.cpp */ /* jucer_NewFileWizard.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_NewFileWizard.cpp; path = ../../Source/Utility/Helpers/jucer_NewFileWizard.cpp; sourceTree = SOURCE_ROOT; };
 		E468FDB5504C5D9315B2D04F /* jucer_ComponentDocument.h */ /* jucer_ComponentDocument.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentDocument.h; path = ../../Source/ComponentEditor/Documents/jucer_ComponentDocument.h; sourceTree = SOURCE_ROOT; };
 		E5D6C36496F5BC84D7213BE8 /* QuartzCore.framework */ /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -407,6 +411,8 @@
 				11D42F7EC6E6539D79A7F4B1,
 				54C391DB9AC4AFABD2EFFD7E,
 				B980464FA2761CCD64B1FAD6,
+				7F1928D425D075E93DC254A8,
+				08D8FA18C031543DEAA7C97A,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -459,6 +465,8 @@
 				E5D6C36496F5BC84D7213BE8,
 				4E410AEB132B44674291105A,
 				CF6C8BD0DA3D8CD4E99EBADA,
+				E419F3AED6A220EDCB179A8C,
+				DF40404150A5A3D6F5AAC856,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1184,7 +1192,6 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../Build $(SRCROOT)/../../../../modules";
 				OTHER_CFLAGS = "-Wall -Wcast-align -Wfloat-equal -Wno-ignored-qualifiers -Wsign-compare -Wsign-conversion -Wstrict-aliasing -Wswitch-enum -Wuninitialized -Wunreachable-code -Wunused-parameter -Wmissing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wmissing-prototypes -Wnullable-to-nonnull-conversion -Wpedantic -Wdeprecated -Wunguarded-availability -Wunguarded-availability-new";
 				OTHER_CPLUSPLUSFLAGS = "-Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant -Wunused-private-field -Winconsistent-missing-destructor-override -Wall -Wcast-align -Wfloat-equal -Wno-ignored-qualifiers -Wsign-compare -Wsign-conversion -Wstrict-aliasing -Wswitch-enum -Wuninitialized -Wunreachable-code -Wunused-parameter -Wmissing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wmissing-prototypes -Wnullable-to-nonnull-conversion -Wpedantic -Wdeprecated -Wunguarded-availability -Wunguarded-availability-new";
-				OTHER_LDFLAGS = "-weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.theprojucer;
 				PRODUCT_NAME = "Projucer";
 				USE_HEADERMAP = NO;
@@ -1253,7 +1260,6 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../Build $(SRCROOT)/../../../../modules";
 				OTHER_CFLAGS = "-Wall -Wcast-align -Wfloat-equal -Wno-ignored-qualifiers -Wsign-compare -Wsign-conversion -Wstrict-aliasing -Wswitch-enum -Wuninitialized -Wunreachable-code -Wunused-parameter -Wmissing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wmissing-prototypes -Wnullable-to-nonnull-conversion -Wpedantic -Wdeprecated -Wunguarded-availability -Wunguarded-availability-new";
 				OTHER_CPLUSPLUSFLAGS = "-Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant -Wunused-private-field -Winconsistent-missing-destructor-override -Wall -Wcast-align -Wfloat-equal -Wno-ignored-qualifiers -Wsign-compare -Wsign-conversion -Wstrict-aliasing -Wswitch-enum -Wuninitialized -Wunreachable-code -Wunused-parameter -Wmissing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wmissing-prototypes -Wnullable-to-nonnull-conversion -Wpedantic -Wdeprecated -Wunguarded-availability -Wunguarded-availability-new";
-				OTHER_LDFLAGS = "-weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.theprojucer;
 				PRODUCT_NAME = "Projucer";
 				USE_HEADERMAP = NO;

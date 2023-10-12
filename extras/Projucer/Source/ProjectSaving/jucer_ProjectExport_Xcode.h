@@ -1785,9 +1785,6 @@ public:
                 StringArray linkerFlags;
                 getLinkerSettings (config, linkerFlags);
 
-                for (const auto& weakFramework : owner.xcodeWeakFrameworks)
-                    linkerFlags.add ("-weak_framework " + weakFramework);
-
                 if (linkerFlags.size() > 0)
                     s.set ("OTHER_LDFLAGS", linkerFlags.joinIntoString (" ").quoted());
 
@@ -2846,17 +2843,27 @@ private:
                 s.insert (0, "AudioUnit");
             }
 
-            for (auto& framework : s)
+            for (const auto& [frameworkList, kind] : { std::tuple (&s,                   FrameworkKind::normal),
+                                                       std::tuple (&xcodeWeakFrameworks, FrameworkKind::weak) })
             {
-                auto frameworkID = addFramework (framework);
+                auto cleaned = *frameworkList;
+                cleaned.trim();
+                cleaned.removeDuplicates (true);
 
-                // find all the targets that are referring to this object
-                for (auto& target : targets)
+                for (auto& framework : cleaned)
                 {
-                    if (xcodeFrameworks.contains (framework) || target->xcodeFrameworks.contains (framework))
+                    auto frameworkID = addFramework (framework, kind);
+
+                    // find all the targets that are referring to this object
+                    for (auto& target : targets)
                     {
-                        target->frameworkIDs.add (frameworkID);
-                        target->frameworkNames.add (framework);
+                        if (xcodeFrameworks.contains (framework)
+                            || xcodeWeakFrameworks.contains (framework)
+                            || target->xcodeFrameworks.contains (framework))
+                        {
+                            target->frameworkIDs.add (frameworkID);
+                            target->frameworkNames.add (framework);
+                        }
                     }
                 }
             }
@@ -3207,6 +3214,7 @@ private:
         FileOptions& withInhibitWarningsEnabled (bool e)                    { inhibitWarnings = e;       return *this; }
         FileOptions& withSkipPCHEnabled (bool e)                            { skipPCH = e;               return *this; }
         FileOptions& withXcodeTarget (XcodeTarget* t)                       { xcodeTarget = t;           return *this; }
+        FileOptions& withAttributeWeak (bool w)                             { weak = w;                  return *this; }
 
         String path;
         String fileRefID;
@@ -3216,6 +3224,7 @@ private:
         bool addToXcodeResources = false;
         bool inhibitWarnings = false;
         bool skipPCH = false;
+        bool weak = false;
         XcodeTarget* xcodeTarget = nullptr;
     };
 
@@ -3291,8 +3300,12 @@ private:
                     + (opts.skipPCH ? " -D" + BuildConfiguration::getSkipPrecompiledHeaderDefine() : String())).trim();
         }();
 
-        if (compilerFlags.isNotEmpty())
-            v.setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags + "\"; }", nullptr);
+        const auto compilerFlagSetting = compilerFlags.isNotEmpty() ? (" COMPILER_FLAGS = \"" + compilerFlags + "\"; ") : "";
+        const auto attributeSetting = opts.weak ? " ATTRIBUTES = (Weak, ); " : "";
+        const auto settingsString = compilerFlagSetting + attributeSetting;
+
+        if (settingsString.isNotEmpty())
+            v.setProperty ("settings", "{" + settingsString + "}", nullptr);
 
         addObject (v);
 
@@ -3404,7 +3417,13 @@ private:
         return {};
     }
 
-    String addFramework (const String& frameworkName) const
+    enum class FrameworkKind
+    {
+        normal,
+        weak,
+    };
+
+    String addFramework (const String& frameworkName, FrameworkKind kind) const
     {
         auto path = frameworkName;
         auto isRelativePath = path.startsWith ("../");
@@ -3421,7 +3440,8 @@ private:
         frameworkFileIDs.add (fileRefID);
 
         return addBuildFile (FileOptions().withPath (path)
-                                          .withFileRefID (fileRefID));
+                                          .withFileRefID (fileRefID)
+                                          .withAttributeWeak (kind == FrameworkKind::weak));
     }
 
     String addCustomFramework (String frameworkPath) const

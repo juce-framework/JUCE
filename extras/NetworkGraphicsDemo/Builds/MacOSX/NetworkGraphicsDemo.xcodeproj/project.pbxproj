@@ -15,6 +15,7 @@
 		3717B9F9A0F7C9CB95F1BE7F /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = 7BE6330821794919A88ED8ED; };
 		3C30D7C28C86F4054257DCD5 /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = C78806A6727F44EACFDED4A5; };
 		61B523C52EBA17F738FFE31A /* include_juce_opengl.mm */ = {isa = PBXBuildFile; fileRef = 660F1970CF687A7AE8371C6D; };
+		64DEB67F9523F28D899D1821 /* MetalKit.framework */ = {isa = PBXBuildFile; fileRef = C8C4E9A4028028FF1F5B76F2; settings = { ATTRIBUTES = (Weak, ); }; };
 		65B2C4ED19229E0EDC8EF993 /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = 696F7896036B652369517438; };
 		67DF295E93E54432043126DF /* CoreAudio.framework */ = {isa = PBXBuildFile; fileRef = 6799B056504F9F017998B9E2; };
 		6C2200C52B65E1BE80544E50 /* include_juce_audio_devices.mm */ = {isa = PBXBuildFile; fileRef = AF330F41D1A4865108690E3C; };
@@ -29,6 +30,7 @@
 		9EFD2AA2FFF3C125FDAA4279 /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = 7525879E73E8AF32FFA0CDDE; };
 		9F618C008A503063D10076C4 /* BinaryData.cpp */ = {isa = PBXBuildFile; fileRef = 74711D7544168CCAC4969A07; };
 		A1F34D09F4E4338775917ED1 /* include_juce_audio_formats.mm */ = {isa = PBXBuildFile; fileRef = C6E2284D86D93F1D9D5C7666; };
+		AC37CDB417E2D3FE619E5944 /* Metal.framework */ = {isa = PBXBuildFile; fileRef = B57F11A8AC0C8D3A8BF3BDCF; settings = { ATTRIBUTES = (Weak, ); }; };
 		B323E5E5FBD5663B21A8E623 /* OpenGL.framework */ = {isa = PBXBuildFile; fileRef = 996E743A20FC78671766BF59; };
 		BB9A9692D99DD0DDB1047B60 /* include_juce_audio_basics.mm */ = {isa = PBXBuildFile; fileRef = 6D1F9E505D20C09647124F0A; };
 		C4D6C466C41173D6970553D2 /* AudioToolbox.framework */ = {isa = PBXBuildFile; fileRef = 9E8129263CD42C6029FC2CAD; };
@@ -85,11 +87,13 @@
 		AF330F41D1A4865108690E3C /* include_juce_audio_devices.mm */ /* include_juce_audio_devices.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_devices.mm; path = ../../JuceLibraryCode/include_juce_audio_devices.mm; sourceTree = SOURCE_ROOT; };
 		AFF729977947528F3E4AAA96 /* include_juce_cryptography.mm */ /* include_juce_cryptography.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_cryptography.mm; path = ../../JuceLibraryCode/include_juce_cryptography.mm; sourceTree = SOURCE_ROOT; };
 		B5433B00F012AD87AADBFCD6 /* juce_cryptography */ /* juce_cryptography */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_cryptography; path = ../../../../modules/juce_cryptography; sourceTree = SOURCE_ROOT; };
+		B57F11A8AC0C8D3A8BF3BDCF /* Metal.framework */ /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		B76F10A7778664E164A01934 /* juce_audio_basics */ /* juce_audio_basics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_basics; path = ../../../../modules/juce_audio_basics; sourceTree = SOURCE_ROOT; };
 		B9B80E3572715F63FFC3678B /* ClientComponent.h */ /* ClientComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ClientComponent.h; path = ../../Source/ClientComponent.h; sourceTree = SOURCE_ROOT; };
 		BA2E40409255F1B078406221 /* juce_data_structures */ /* juce_data_structures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_data_structures; path = ../../../../modules/juce_data_structures; sourceTree = SOURCE_ROOT; };
 		C6E2284D86D93F1D9D5C7666 /* include_juce_audio_formats.mm */ /* include_juce_audio_formats.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_formats.mm; path = ../../JuceLibraryCode/include_juce_audio_formats.mm; sourceTree = SOURCE_ROOT; };
 		C78806A6727F44EACFDED4A5 /* Cocoa.framework */ /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		C8C4E9A4028028FF1F5B76F2 /* MetalKit.framework */ /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		CB82A14817C3E2ABBBBC3864 /* DiscRecording.framework */ /* DiscRecording.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiscRecording.framework; path = System/Library/Frameworks/DiscRecording.framework; sourceTree = SDKROOT; };
 		D12A0DFFE18728E84D9AB739 /* JuceHeader.h */ /* JuceHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = SOURCE_ROOT; };
 		E4162459ED4C829EF7B19691 /* App */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "JUCE Network Graphics Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -120,6 +124,8 @@
 				EC14DA30C090DDC62084DB4C,
 				88DB5C5128E42AD59AD944D9,
 				8ECB0767EE340DD83869E37D,
+				AC37CDB417E2D3FE619E5944,
+				64DEB67F9523F28D899D1821,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +170,8 @@
 				935CA85EF98714D3A17AE737,
 				9D1E94FAB66D1FB2531A3F9F,
 				EC794872987FEA2E129C589A,
+				B57F11A8AC0C8D3A8BF3BDCF,
+				C8C4E9A4028028FF1F5B76F2,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -414,7 +422,6 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
-				OTHER_LDFLAGS = "-weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.NetworkGraphicsDemo;
 				PRODUCT_NAME = "JUCE Network Graphics Demo";
 				USE_HEADERMAP = NO;
@@ -575,7 +582,6 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
-				OTHER_LDFLAGS = "-weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.NetworkGraphicsDemo;
 				PRODUCT_NAME = "JUCE Network Graphics Demo";
 				USE_HEADERMAP = NO;
