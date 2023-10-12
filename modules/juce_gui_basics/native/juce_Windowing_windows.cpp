@@ -2358,7 +2358,7 @@ public:
 
         // The event was a keypress, rather than a text character
 
-        if (auto* target = peer->findCurrentTextInputTarget())
+        if (peer->findCurrentTextInputTarget() != nullptr)
         {
             // If there's a focused text input target, we want to attempt "real" text input with an
             // IME, and we want to prevent the host from eating keystrokes (spaces etc.).
