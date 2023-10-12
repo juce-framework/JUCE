@@ -269,10 +269,18 @@ private:
             {
                 if (auto* handler = getHandler (self))
                 {
-                    if (handler->getCurrentState().isCheckable())
-                        return juceStringToNS (handler->getCurrentState().isChecked() ? TRANS ("On") : TRANS ("Off"));
+                    if (! handler->getCurrentState().isCheckable())
+                        return getAccessibilityValueFromInterfaces (*handler);
 
-                    return getAccessibilityValueFromInterfaces (*handler);
+                    const auto checked = handler->getCurrentState().isChecked();
+
+                    if (   handler->getRole() == AccessibilityRole::toggleButton
+                        || handler->getRole() == AccessibilityRole::radioButton)
+                    {
+                        return checked ? @YES : @NO;
+                    }
+
+                    return juceStringToNS (checked ? TRANS ("On") : TRANS ("Off"));
                 }
 
                 return nil;
