@@ -700,14 +700,10 @@ public:
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-        if (! approximatelyEqual (gain, Type (1)) && ! isClear)
+        if (! isClear)
         {
             auto* d = channels[channel] + startSample;
-
-            if (approximatelyEqual (gain, Type()))
-                FloatVectorOperations::clear (d, numSamples);
-            else
-                FloatVectorOperations::multiply (d, gain, numSamples);
+            FloatVectorOperations::multiply (d, gain, numSamples);
         }
     }
 
@@ -742,23 +738,16 @@ public:
     {
         if (! isClear)
         {
-            if (approximatelyEqual (startGain, endGain))
-            {
-                applyGain (channel, startSample, numSamples, startGain);
-            }
-            else
-            {
-                jassert (isPositiveAndBelow (channel, numChannels));
-                jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
+            jassert (isPositiveAndBelow (channel, numChannels));
+            jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-                const auto increment = (endGain - startGain) / (float) numSamples;
-                auto* d = channels[channel] + startSample;
+            const auto increment = (endGain - startGain) / (float) numSamples;
+            auto* d = channels[channel] + startSample;
 
-                while (--numSamples >= 0)
-                {
-                    *d++ *= startGain;
-                    startGain += increment;
-                }
+            while (--numSamples >= 0)
+            {
+                *d++ *= startGain;
+                startGain += increment;
             }
         }
     }
@@ -812,7 +801,7 @@ public:
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));
         jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
-        if (! approximatelyEqual (gainToApplyToSource, (Type) 0) && numSamples > 0 && ! source.isClear)
+        if (numSamples > 0 && ! source.isClear)
         {
             auto* d = channels[destChannel] + destStartSample;
             auto* s = source.channels[sourceChannel] + sourceStartSample;
@@ -822,18 +811,11 @@ public:
             if (isClear)
             {
                 isClear = false;
-
-                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
-                    FloatVectorOperations::copyWithMultiply (d, s, gainToApplyToSource, numSamples);
-                else
-                    FloatVectorOperations::copy (d, s, numSamples);
+                FloatVectorOperations::copyWithMultiply (d, s, gainToApplyToSource, numSamples);
             }
             else
             {
-                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
-                    FloatVectorOperations::addWithMultiply (d, s, gainToApplyToSource, numSamples);
-                else
-                    FloatVectorOperations::add (d, s, numSamples);
+                FloatVectorOperations::addWithMultiply (d, s, gainToApplyToSource, numSamples);
             }
 
             JUCE_END_IGNORE_WARNINGS_MSVC
@@ -864,26 +846,16 @@ public:
         jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
         jassert (source != nullptr);
 
-        if (! approximatelyEqual (gainToApplyToSource, Type()) && numSamples > 0)
+        auto* d = channels[destChannel] + destStartSample;
+
+        if (isClear)
         {
-            auto* d = channels[destChannel] + destStartSample;
-
-            if (isClear)
-            {
-                isClear = false;
-
-                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
-                    FloatVectorOperations::copyWithMultiply (d, source, gainToApplyToSource, numSamples);
-                else
-                    FloatVectorOperations::copy (d, source, numSamples);
-            }
-            else
-            {
-                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
-                    FloatVectorOperations::addWithMultiply (d, source, gainToApplyToSource, numSamples);
-                else
-                    FloatVectorOperations::add (d, source, numSamples);
-            }
+            isClear = false;
+            FloatVectorOperations::copyWithMultiply (d, source, gainToApplyToSource, numSamples);
+        }
+        else
+        {
+            FloatVectorOperations::addWithMultiply (d, source, gainToApplyToSource, numSamples);
         }
     }
 
@@ -913,27 +885,20 @@ public:
                           Type startGain,
                           Type endGain) noexcept
     {
-        if (approximatelyEqual (startGain, endGain))
-        {
-            addFrom (destChannel, destStartSample, source, numSamples, startGain);
-        }
-        else
-        {
-            jassert (isPositiveAndBelow (destChannel, numChannels));
-            jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
-            jassert (source != nullptr);
+        jassert (isPositiveAndBelow (destChannel, numChannels));
+        jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
+        jassert (source != nullptr);
 
-            if (numSamples > 0)
+        if (numSamples > 0)
+        {
+            isClear = false;
+            const auto increment = (endGain - startGain) / (Type) numSamples;
+            auto* d = channels[destChannel] + destStartSample;
+
+            while (--numSamples >= 0)
             {
-                isClear = false;
-                const auto increment = (endGain - startGain) / (Type) numSamples;
-                auto* d = channels[destChannel] + destStartSample;
-
-                while (--numSamples >= 0)
-                {
-                    *d++ += startGain * *source++;
-                    startGain += increment;
-                }
+                *d++ += startGain * *source++;
+                startGain += increment;
             }
         }
     }
@@ -1036,25 +1001,8 @@ public:
         if (numSamples > 0)
         {
             auto* d = channels[destChannel] + destStartSample;
-
-            if (! approximatelyEqual (gain, Type (1)))
-            {
-                if (approximatelyEqual (gain, Type()))
-                {
-                    if (! isClear)
-                        FloatVectorOperations::clear (d, numSamples);
-                }
-                else
-                {
-                    isClear = false;
-                    FloatVectorOperations::copyWithMultiply (d, source, gain, numSamples);
-                }
-            }
-            else
-            {
-                isClear = false;
-                FloatVectorOperations::copy (d, source, numSamples);
-            }
+            isClear = false;
+            FloatVectorOperations::copyWithMultiply (d, source, gain, numSamples);
         }
     }
 
@@ -1085,27 +1033,20 @@ public:
                            Type startGain,
                            Type endGain) noexcept
     {
-        if (approximatelyEqual (startGain, endGain))
-        {
-            copyFrom (destChannel, destStartSample, source, numSamples, startGain);
-        }
-        else
-        {
-            jassert (isPositiveAndBelow (destChannel, numChannels));
-            jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
-            jassert (source != nullptr);
+        jassert (isPositiveAndBelow (destChannel, numChannels));
+        jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
+        jassert (source != nullptr);
 
-            if (numSamples > 0)
+        if (numSamples > 0)
+        {
+            isClear = false;
+            const auto increment = (endGain - startGain) / (Type) numSamples;
+            auto* d = channels[destChannel] + destStartSample;
+
+            while (--numSamples >= 0)
             {
-                isClear = false;
-                const auto increment = (endGain - startGain) / (Type) numSamples;
-                auto* d = channels[destChannel] + destStartSample;
-
-                while (--numSamples >= 0)
-                {
-                    *d++ = startGain * *source++;
-                    startGain += increment;
-                }
+                *d++ = startGain * *source++;
+                startGain += increment;
             }
         }
     }
