@@ -44,6 +44,12 @@ static File createTempFile (const File& parentDirectory, String name,
     return parentDirectory.getNonexistentChildFile (name, suffix, (optionFlags & TemporaryFile::putNumbersInBrackets) != 0);
 }
 
+TemporaryFile::TemporaryFile() : TemporaryFile { String{} } {}
+
+TemporaryFile::TemporaryFile (const String& suffix) : TemporaryFile { suffix, 0 } {}
+
+TemporaryFile::TemporaryFile (const File& target) : TemporaryFile { target, 0 } {}
+
 TemporaryFile::TemporaryFile (const String& suffix, const int optionFlags)
     : temporaryFile (createTempFile (File::getSpecialLocation (File::tempDirectory),
                                      "temp_" + String::toHexString (Random::getSystemRandom().nextInt()),
