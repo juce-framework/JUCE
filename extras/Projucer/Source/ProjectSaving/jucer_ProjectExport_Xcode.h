@@ -2481,33 +2481,26 @@ private:
                     const auto configGuard = String { configGuardTemplate }.replace ("$JUCE_CONFIG_NAME",
                                                                                      config->getName());
 
-                    if (target->type == XcodeTarget::Target::LV2PlugIn)
+                    const auto signScript = String { adhocCodeSignTemplate }.replace ("$JUCE_FULL_PRODUCT_PATH",
+                                                                                      "${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}");
+
+                    const auto copyScript = [&]
                     {
-                        const auto copyScript = String { copyPluginScriptTemplate }
-                                                    .replace ("$JUCE_CONFIG_NAME", config->getName())
-                                                    .replace ("$JUCE_INSTALL_PATH", installPath)
-                                                    .replace ("$JUCE_PRODUCT_NAME", "${TARGET_BUILD_DIR##*/}")
-                                                    .replace ("$JUCE_SOURCE_BUNDLE", "${TARGET_BUILD_DIR}");
+                        const auto base = String { copyPluginScriptTemplate }
+                                              .replace ("$JUCE_CONFIG_NAME", config->getName())
+                                              .replace ("$JUCE_INSTALL_PATH", installPath);
 
-                        const auto signScript = String { adhocCodeSignTemplate }.replace ("$JUCE_FULL_PRODUCT_PATH",
-                                                                                          installPath + "${TARGET_BUILD_DIR##*/}/" + "$FULL_PRODUCT_NAME");
+                        if (target->type == XcodeTarget::Target::LV2PlugIn)
+                        {
+                            return base.replace ("$JUCE_PRODUCT_NAME", "${TARGET_BUILD_DIR##*/}")
+                                       .replace ("$JUCE_SOURCE_BUNDLE", "${TARGET_BUILD_DIR}");
+                        }
 
+                        return base.replace ("$JUCE_PRODUCT_NAME", "${FULL_PRODUCT_NAME}")
+                                   .replace ("$JUCE_SOURCE_BUNDLE", "${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}");
+                    }();
 
-                        copyPluginScript.add (configGuard.replace ("$JUCE_GUARDED_SCRIPT", copyScript + signScript));
-                    }
-                    else
-                    {
-                        const auto copyScript = String { copyPluginScriptTemplate }
-                                                    .replace ("$JUCE_CONFIG_NAME", config->getName())
-                                                    .replace ("$JUCE_INSTALL_PATH", installPath)
-                                                    .replace ("$JUCE_PRODUCT_NAME", "${FULL_PRODUCT_NAME}")
-                                                    .replace ("$JUCE_SOURCE_BUNDLE", "${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}");
-
-                        const auto signScript = String { adhocCodeSignTemplate }.replace ("$JUCE_FULL_PRODUCT_PATH",
-                                                                                          installPath + "$FULL_PRODUCT_NAME");
-
-                        copyPluginScript.add (configGuard.replace ("$JUCE_GUARDED_SCRIPT", copyScript + signScript));
-                    }
+                    copyPluginScript.add (configGuard.replace ("$JUCE_GUARDED_SCRIPT", signScript + copyScript));
                 }
             }
 
