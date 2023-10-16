@@ -22,7 +22,8 @@
 class ADSRComponent final : public Component
 {
 public:
-    ADSRComponent() : envelope { *this }
+    ADSRComponent()
+        : envelope { *this }
     {
         for (Slider* slider : { &adsrAttack, &adsrDecay, &adsrSustain, &adsrRelease })
         {
