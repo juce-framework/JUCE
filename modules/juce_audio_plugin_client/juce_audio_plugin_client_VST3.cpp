@@ -3965,33 +3965,38 @@ public:
         auto filter = createPluginFilterOfType (AudioProcessor::WrapperType::wrapperType_VST3);
         auto* extensions = filter->getVST3ClientExtensions();
 
-        if (extensions == nullptr || extensions->getCompatibleClasses().empty())
-            return kResultFalse;
-
-        DynamicObject::Ptr object { new DynamicObject };
-
-        // New iid is the ID of our Audio Effect class
-        object->setProperty ("New", String (VST3::UID (JuceVST3Component::iid).toString()));
-        object->setProperty ("Old", [&]
+        const auto compatibilityObjects = [&]
         {
-            Array<var> oldArray;
+            if (extensions == nullptr || extensions->getCompatibleClasses().empty())
+                return Array<var>();
 
-            for (const auto& uid : extensions->getCompatibleClasses())
+            DynamicObject::Ptr object { new DynamicObject };
+
+            // New iid is the ID of our Audio Effect class
+            object->setProperty ("New", String (VST3::UID (JuceVST3Component::iid).toString()));
+            object->setProperty ("Old", [&]
             {
-                // All UIDs returned from getCompatibleClasses should be 32 characters long
-                jassert (uid.length() == 32);
+                Array<var> oldArray;
 
-                // All UIDs returned from getCompatibleClasses should be in hex notation
-                jassert (uid.containsOnly ("ABCDEF0123456789"));
+                for (const auto& uid : extensions->getCompatibleClasses())
+                {
+                    // All UIDs returned from getCompatibleClasses should be 32 characters long
+                    jassert (uid.length() == 32);
 
-                oldArray.add (uid);
-            }
+                    // All UIDs returned from getCompatibleClasses should be in hex notation
+                    jassert (uid.containsOnly ("ABCDEF0123456789"));
 
-            return oldArray;
-        }());
+                    oldArray.add (uid);
+                }
+
+                return oldArray;
+            }());
+
+            return Array<var> { object.get() };
+        }();
 
         MemoryOutputStream memory;
-        JSON::writeToStream (memory, var { Array<var> { object.get() } });
+        JSON::writeToStream (memory, var { compatibilityObjects });
         return stream->write (memory.getMemoryBlock().getData(), (Steinberg::int32) memory.getDataSize());
     }
 
