@@ -1054,7 +1054,7 @@ namespace AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result GetParameterNumberofSteps (AAX_CParamID paramID, int32_t* result) const
+        AAX_Result GetParameterNumberOfSteps (AAX_CParamID paramID, int32_t* result) const override
         {
             if (auto* param = getParameterFromID (paramID))
                 *result = getSafeNumberOfParameterSteps (*param);
