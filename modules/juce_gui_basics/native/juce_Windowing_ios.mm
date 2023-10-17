@@ -599,24 +599,6 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return Orientations::convertToJuce (orientation);
 }
 
-template <typename Value>
-static BorderSize<Value> operator/ (BorderSize<Value> border, Value scale)
-{
-    return { border.getTop()    / scale,
-             border.getLeft()   / scale,
-             border.getBottom() / scale,
-             border.getRight()  / scale };
-}
-
-template <typename Value>
-static BorderSize<int> roundToInt (BorderSize<Value> border)
-{
-    return { roundToInt (border.getTop()),
-             roundToInt (border.getLeft()),
-             roundToInt (border.getBottom()),
-             roundToInt (border.getRight()) };
-}
-
 // The most straightforward way of retrieving the screen area available to an iOS app
 // seems to be to create a new window (which will take up all available space) and to
 // query its frame.
@@ -636,10 +618,10 @@ static BorderSize<int> getSafeAreaInsets (float masterScale)
     if (@available (iOS 11.0, *))
     {
         UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
-        return roundToInt (BorderSize<double> { safeInsets.top,
-                                                safeInsets.left,
-                                                safeInsets.bottom,
-                                                safeInsets.right } / (double) masterScale);
+        return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
+                                                                          safeInsets.left,
+                                                                          safeInsets.bottom,
+                                                                          safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
     }
 
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
@@ -746,7 +728,8 @@ void Displays::findDisplays (float masterScale)
         d.totalArea = convertToRectInt ([s bounds]) / masterScale;
         d.userArea = getRecommendedWindowBounds() / masterScale;
         d.safeAreaInsets = getSafeAreaInsets (masterScale);
-        d.keyboardInsets = roundToInt (keyboardChangeDetector.getInsets() / (double) masterScale);
+        const auto scaledInsets = keyboardChangeDetector.getInsets().multipliedBy (1.0 / (double) masterScale);
+        d.keyboardInsets = detail::WindowingHelpers::roundToInt (scaledInsets);
         d.isMain = true;
         d.scale = masterScale * s.scale;
         d.dpi = 160 * d.scale;

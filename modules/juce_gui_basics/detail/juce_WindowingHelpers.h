@@ -47,6 +47,15 @@ struct WindowingHelpers
     {
         return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
     }
+
+    template <typename Value>
+    static BorderSize<int> roundToInt (BorderSize<Value> border)
+    {
+        return { ::juce::roundToInt (border.getTop()),
+                 ::juce::roundToInt (border.getLeft()),
+                 ::juce::roundToInt (border.getBottom()),
+                 ::juce::roundToInt (border.getRight()) };
+    }
 };
 
 } // namespace juce::detail
