@@ -6,7 +6,8 @@
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" applicationCategory="public.app-category.developer-tools">
+    <XCODE_MAC targetFolder="Builds/MacOSX" applicationCategory="public.app-category.developer-tools"
+               extraDefs="JUCE_SILENCE_XCODE_15_LINKER_WARNING=1" extraLinkerFlags="-Wl,-weak_reference_mismatches,weak">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="BinaryBuilder"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"/>

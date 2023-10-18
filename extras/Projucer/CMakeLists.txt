@@ -87,7 +87,11 @@ target_compile_definitions(Projucer PRIVATE
     JUCE_LOG_ASSERTIONS=1
     JUCE_STRICT_REFCOUNTEDPOINTER=1
     JUCE_USE_CURL=1
-    JUCE_WEB_BROWSER=0)
+    JUCE_WEB_BROWSER=0
+    # This is a temporary workaround to allow builds to complete on Xcode 15.
+    # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
+    # deploy to older versions of macOS.
+    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
 
 juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Icons/background_logo.svg

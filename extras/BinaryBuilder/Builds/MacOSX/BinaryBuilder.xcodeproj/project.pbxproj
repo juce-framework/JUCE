@@ -209,6 +209,7 @@
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
 					"JUCE_STANDALONE_APPLICATION=1",
+					"JUCE_SILENCE_XCODE_15_LINKER_WARNING=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 					"JUCE_APP_VERSION=1.0.0",
 					"JUCE_APP_VERSION_HEX=0x10000",
@@ -230,6 +231,7 @@
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
+				OTHER_LDFLAGS = "-Wl,-weak_reference_mismatches,weak";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
 				USE_HEADERMAP = NO;
@@ -305,6 +307,7 @@
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
 					"JUCE_STANDALONE_APPLICATION=1",
+					"JUCE_SILENCE_XCODE_15_LINKER_WARNING=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 					"JUCE_APP_VERSION=1.0.0",
 					"JUCE_APP_VERSION_HEX=0x10000",
@@ -327,6 +330,7 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
+				OTHER_LDFLAGS = "-Wl,-weak_reference_mismatches,weak";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.binarybuilder;
 				PRODUCT_NAME = "BinaryBuilder";
 				USE_HEADERMAP = NO;

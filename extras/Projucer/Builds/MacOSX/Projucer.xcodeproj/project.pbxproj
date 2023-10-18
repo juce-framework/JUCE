@@ -1166,6 +1166,7 @@
 					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
 					"JUCE_WEB_BROWSER=0",
 					"JUCE_STANDALONE_APPLICATION=1",
+					"JUCE_SILENCE_XCODE_15_LINKER_WARNING=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 					"JUCE_APP_VERSION=7.0.7",
 					"JUCE_APP_VERSION_HEX=0x70007",
@@ -1192,6 +1193,7 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../Build $(SRCROOT)/../../../../modules";
 				OTHER_CFLAGS = "-Wall -Wcast-align -Wfloat-equal -Wno-ignored-qualifiers -Wsign-compare -Wsign-conversion -Wstrict-aliasing -Wswitch-enum -Wuninitialized -Wunreachable-code -Wunused-parameter -Wmissing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wmissing-prototypes -Wnullable-to-nonnull-conversion -Wpedantic -Wdeprecated -Wunguarded-availability -Wunguarded-availability-new";
 				OTHER_CPLUSPLUSFLAGS = "-Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant -Wunused-private-field -Winconsistent-missing-destructor-override -Wall -Wcast-align -Wfloat-equal -Wno-ignored-qualifiers -Wsign-compare -Wsign-conversion -Wstrict-aliasing -Wswitch-enum -Wuninitialized -Wunreachable-code -Wunused-parameter -Wmissing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wmissing-prototypes -Wnullable-to-nonnull-conversion -Wpedantic -Wdeprecated -Wunguarded-availability -Wunguarded-availability-new";
+				OTHER_LDFLAGS = "-Wl,-weak_reference_mismatches,weak";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.theprojucer;
 				PRODUCT_NAME = "Projucer";
 				USE_HEADERMAP = NO;
@@ -1234,6 +1236,7 @@
 					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
 					"JUCE_WEB_BROWSER=0",
 					"JUCE_STANDALONE_APPLICATION=1",
+					"JUCE_SILENCE_XCODE_15_LINKER_WARNING=1",
 					"JUCER_XCODE_MAC_F6D2F4CF=1",
 					"JUCE_APP_VERSION=7.0.7",
 					"JUCE_APP_VERSION_HEX=0x70007",
@@ -1260,6 +1263,7 @@
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../Build $(SRCROOT)/../../../../modules";
 				OTHER_CFLAGS = "-Wall -Wcast-align -Wfloat-equal -Wno-ignored-qualifiers -Wsign-compare -Wsign-conversion -Wstrict-aliasing -Wswitch-enum -Wuninitialized -Wunreachable-code -Wunused-parameter -Wmissing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wmissing-prototypes -Wnullable-to-nonnull-conversion -Wpedantic -Wdeprecated -Wunguarded-availability -Wunguarded-availability-new";
 				OTHER_CPLUSPLUSFLAGS = "-Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant -Wunused-private-field -Winconsistent-missing-destructor-override -Wall -Wcast-align -Wfloat-equal -Wno-ignored-qualifiers -Wsign-compare -Wsign-conversion -Wstrict-aliasing -Wswitch-enum -Wuninitialized -Wunreachable-code -Wunused-parameter -Wmissing-field-initializers -Wshadow-all -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wmissing-prototypes -Wnullable-to-nonnull-conversion -Wpedantic -Wdeprecated -Wunguarded-availability -Wunguarded-availability-new";
+				OTHER_LDFLAGS = "-Wl,-weak_reference_mismatches,weak";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.theprojucer;
 				PRODUCT_NAME = "Projucer";
 				USE_HEADERMAP = NO;
