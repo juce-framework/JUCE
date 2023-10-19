@@ -1,6 +1,6 @@
 # JUCE breaking changes
 
-# `develop` branch
+# Version 7.0.8
 
 ## Change
 

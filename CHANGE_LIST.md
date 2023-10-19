@@ -3,6 +3,16 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 7.0.8
+
+  - Added macOS/iOS AudioWorkgroup support
+  - Added Xcode 15, macOS Sonoma and LLVM 17 compatibility
+  - Added serialisation tools
+  - Fixed some VST3 manifest generation issues
+  - Fixed a MessageManager locking bug
+  - Fixed GCC 7 VST3 support
+  - Fixed some SVG scaling issues
+
 ## Version 7.0.7
 
   - Fixed some macOS 14.0 deprecations

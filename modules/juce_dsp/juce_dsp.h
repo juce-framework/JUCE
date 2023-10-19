@@ -35,7 +35,7 @@
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            7.0.7
+  version:            7.0.8
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
