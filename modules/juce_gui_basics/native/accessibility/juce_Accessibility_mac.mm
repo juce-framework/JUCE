@@ -792,8 +792,18 @@ private:
                 for (auto* childHandler : children)
                     [accessibleChildren addObject: static_cast<id> (childHandler->getNativeImplementation())];
 
-                if (auto* nativeChild = AccessibilityHandler::getNativeChildForComponent (handler->getComponent()))
-                    [accessibleChildren addObject: static_cast<id> (nativeChild)];
+                if (id nativeChild = static_cast<id> (AccessibilityHandler::getNativeChildForComponent (handler->getComponent())))
+                {
+                    // Having both native and non-native children would require implementing an
+                    // ordering. However, this situation doesn't occur with any of our current
+                    // use-cases.
+                    jassert ([accessibleChildren count] == 0);
+
+                    if ([nativeChild isAccessibilityElement])
+                        [accessibleChildren addObject:nativeChild];
+                    else if (auto* childrenOfChild = [nativeChild accessibilityChildren]; childrenOfChild != nil)
+                        [accessibleChildren addObjectsFromArray:(NSArray* _Nonnull) childrenOfChild];
+                }
 
                 return accessibleChildren;
             }
