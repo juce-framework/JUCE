@@ -240,7 +240,7 @@ public:
             {
                 auto extension = wildcard.fromLastOccurrenceOf (".", false, false);
 
-                result.addArray (MimeTypeTable::getMimeTypesForFileExtension (extension));
+                result.addArray (detail::MimeTypeTable::getMimeTypesForFileExtension (extension));
             }
         }
 
@@ -280,7 +280,7 @@ bool FileChooser::isPlatformDialogAvailable()
 void FileChooser::registerCustomMimeTypeForFileExtension (const String& mimeType,
                                                           const String& fileExtension)
 {
-    MimeTypeTable::registerCustomMimeTypeForFileExtension (mimeType, fileExtension);
+    detail::MimeTypeTable::registerCustomMimeTypeForFileExtension (mimeType, fileExtension);
 }
 
 } // namespace juce

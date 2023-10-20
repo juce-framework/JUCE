@@ -208,6 +208,8 @@ constexpr bool exactlyEqual (Type a, Type b)
 /** A class encapsulating both relative and absolute tolerances for use in floating-point comparisons.
 
     @see approximatelyEqual, absoluteTolerance, relativeTolerance
+
+    @tags{Core}
 */
 template <typename Type>
 class Tolerance

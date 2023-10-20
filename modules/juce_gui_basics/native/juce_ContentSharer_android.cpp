@@ -482,7 +482,7 @@ private:
         if (extension.isEmpty())
             return nullptr;
 
-        return juceStringArrayToJava (filterMimeTypes (MimeTypeTable::getMimeTypesForFileExtension (extension), juceString (mimeTypeFilter.get())));
+        return juceStringArrayToJava (filterMimeTypes (detail::MimeTypeTable::getMimeTypesForFileExtension (extension), juceString (mimeTypeFilter.get())));
     }
 
     std::unique_ptr<ActivityLauncher> doIntent (const LocalRef<jobject>& intent,
@@ -776,7 +776,7 @@ private:
 
         if (std::none_of (extensions.begin(), extensions.end(), [] (const String& s) { return s.isEmpty(); }))
             for (const auto& extension : extensions)
-                for (const auto& mime : MimeTypeTable::getMimeTypesForFileExtension (extension))
+                for (const auto& mime : detail::MimeTypeTable::getMimeTypesForFileExtension (extension))
                     mimes.insert (mime);
 
         for (const auto& mime : mimes)

@@ -26,7 +26,7 @@
 namespace juce::detail
 {
 
-/** Keeps track of the active top level window. */
+/* Keeps track of the active top level window. */
 class TopLevelWindowManager  : private Timer,
                                private DeletedAtShutdown
 {
