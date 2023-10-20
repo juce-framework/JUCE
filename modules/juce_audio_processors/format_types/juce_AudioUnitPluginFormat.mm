@@ -1290,8 +1290,6 @@ public:
 
             setRateAndBufferSizeDetails ((double) newSampleRate, estimatedSamplesPerBlock);
 
-            updateLatency();
-
             zerostruct (timeStamp);
             timeStamp.mSampleTime = 0;
             timeStamp.mHostTime = mach_absolute_time();
@@ -1317,6 +1315,10 @@ public:
                 {
                     prepared = false;
                     AudioUnitUninitialize (audioUnit);
+                }
+                else
+                {
+                    updateLatency();
                 }
             }
 
