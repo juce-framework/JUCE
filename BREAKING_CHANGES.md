@@ -1,5 +1,31 @@
 # JUCE breaking changes
 
+## Change
+
+CachedValue::operator==() will now emit floating point comparison warnings if 
+they are enabled for the project.
+
+**Possible Issues**
+
+Code using this function to compare floating point values may fail to compile
+due to the warnings.
+
+**Workaround**
+
+Rather than using CachedValue::operator==() for floating point types, use the
+exactlyEqual() or approximatelyEqual() functions in combination with
+CachedValue::get().
+
+**Rationale**
+
+The JUCE Framework now offers the free-standing exactlyEqual() and 
+approximatelyEqual() functions to clearly express the desired semantics when
+comparing floating point values. These functions are intended to eliminate
+the ambiguity in code-bases regarding these types. However, when such a value
+is wrapped in a CachedValue the corresponding warning was suppressed until now,
+making such efforts incomplete.
+
+
 # Version 7.0.8
 
 ## Change
