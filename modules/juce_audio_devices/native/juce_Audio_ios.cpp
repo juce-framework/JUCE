@@ -276,7 +276,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
     static void setAudioSessionCategory (NSString* category)
     {
-        NSUInteger options = AVAudioSessionCategoryOptionAllowAirPlay;
+        NSUInteger options = 0;
 
        #if ! JUCE_DISABLE_AUDIO_MIXING_WITH_OTHER_APPS
         options |= AVAudioSessionCategoryOptionMixWithOthers; // Alternatively AVAudioSessionCategoryOptionDuckOthers
@@ -285,7 +285,8 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         if (category == AVAudioSessionCategoryPlayAndRecord)
         {
             options |= AVAudioSessionCategoryOptionDefaultToSpeaker
-                     | AVAudioSessionCategoryOptionAllowBluetooth;
+                     | AVAudioSessionCategoryOptionAllowBluetooth
+                     | AVAudioSessionCategoryOptionAllowAirPlay;
 
             if (@available (iOS 10.0, *))
                 options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
