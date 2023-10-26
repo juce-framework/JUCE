@@ -459,17 +459,17 @@ public:
             const auto localBounds = component.getLocalBounds();
             const auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
 
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            // Some hosts (Pro Tools 2022.7) do not take the current DPI into account when sizing
-            // plugin editor windows. Instead of querying the OS for the DPI of the editor window,
-            // we approximate based on the physical size of the window that was actually provided
-            // for the context to draw into. This may break if the OpenGL context's component is
-            // scaled differently in its width and height - but in this case, a single scale factor
-            // isn't that helpful anyway.
-            const auto newScale = (float) newArea.getWidth() / (float) localBounds.getWidth();
-           #else
-            const auto newScale = (float) displayScale;
-           #endif
+            const auto newScale = [&]
+            {
+               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+                // Some hosts (Pro Tools 2022.7) do not take the window scaling into account when sizing
+                // plugin editor windows. The displayScale however seems to be correctly reported even in
+                // such cases.
+                return (float) displayScale * Desktop::getInstance().getGlobalScaleFactor();
+               #else
+                return (float) displayScale;
+               #endif
+            }();
 
             areaAndScale.set ({ newArea, newScale }, [&]
             {
