@@ -240,9 +240,9 @@ namespace NewProjectTemplates
               getModulesRequiredForAudioProcessor(),
               {
                   { FileCreationOptions::araPluginFiles, { { "PluginProcessor.cpp",               "jucer_AudioPluginFilterTemplate_cpp" },
-                                                           { "PluginProcessor.h",                 "jucer_AudioPluginFilterTemplate_h" },
-                                                           { "PluginEditor.cpp",                  "jucer_AudioPluginEditorTemplate_cpp" },
-                                                           { "PluginEditor.h",                    "jucer_AudioPluginEditorTemplate_h" },
+                                                           { "PluginProcessor.h",                 "jucer_AudioPluginARAFilterTemplate_h" },
+                                                           { "PluginEditor.cpp",                  "jucer_AudioPluginARAEditorTemplate_cpp" },
+                                                           { "PluginEditor.h",                    "jucer_AudioPluginARAEditorTemplate_h" },
                                                            { "PluginARADocumentController.cpp",   "jucer_AudioPluginARADocumentControllerTemplate_cpp" },
                                                            { "PluginARADocumentController.h",     "jucer_AudioPluginARADocumentControllerTemplate_h" },
                                                            { "PluginARAPlaybackRenderer.cpp",     "jucer_AudioPluginARAPlaybackRendererTemplate_cpp" },

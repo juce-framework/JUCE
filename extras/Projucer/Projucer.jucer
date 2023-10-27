@@ -243,6 +243,12 @@
               compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.cpp"/>
         <FILE id="nEnvoi" name="jucer_AudioPluginARADocumentControllerTemplate.h"
               compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.h"/>
+        <FILE id="iwCmfX" name="jucer_AudioPluginARAEditorTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.cpp"/>
+        <FILE id="Sg3E7I" name="jucer_AudioPluginARAEditorTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.h"/>
+        <FILE id="GiKUFl" name="jucer_AudioPluginARAFilterTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAFilterTemplate.h"/>
         <FILE id="H2uvhd" name="jucer_AudioPluginARAPlaybackRendererTemplate.cpp"
               compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.cpp"/>
         <FILE id="U7eXlD" name="jucer_AudioPluginARAPlaybackRendererTemplate.h"

@@ -355,6 +355,9 @@
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARADocumentControllerTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAEditorTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAPlaybackRendererTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
@@ -2113,6 +2116,12 @@
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARADocumentControllerTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAEditorTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAFilterTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAPlaybackRendererTemplate.h">
