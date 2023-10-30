@@ -223,6 +223,11 @@ public:
         addAndMakeVisible (comp);
     }
 
+    ~PanelHolder() {
+        if (customHeaderComponent != nullptr)
+            customHeaderComponent->removeMouseListener (this);
+    }
+
     void paint (Graphics& g) override
     {
         if (customHeaderComponent == nullptr)
@@ -270,6 +275,9 @@ public:
 
     void setCustomHeaderComponent (Component* headerComponent, bool shouldTakeOwnership)
     {
+        if (customHeaderComponent != nullptr)
+            customHeaderComponent->removeMouseListener (this);
+
         customHeaderComponent.set (headerComponent, shouldTakeOwnership);
 
         if (headerComponent != nullptr)
