@@ -225,14 +225,14 @@ public:
 
     void paint (Graphics& g) override
     {
-        if (customHeaderComponent == nullptr)
-        {
-            const Rectangle<int> area (getWidth(), getHeaderSize());
-            g.reduceClipRegion (area);
+        if (customHeader.get() != nullptr)
+            return;
 
-            getLookAndFeel().drawConcertinaPanelHeader (g, area, isMouseOver(), isMouseButtonDown(),
-                                                        getPanel(), *component);
-        }
+        const Rectangle<int> area (getWidth(), getHeaderSize());
+        g.reduceClipRegion (area);
+
+        getLookAndFeel().drawConcertinaPanelHeader (g, area, isMouseOver(), isMouseButtonDown(),
+                                                    getPanel(), *component);
     }
 
     void resized() override
@@ -240,8 +240,8 @@ public:
         auto bounds = getLocalBounds();
         auto headerBounds = bounds.removeFromTop (getHeaderSize());
 
-        if (customHeaderComponent != nullptr)
-            customHeaderComponent->setBounds (headerBounds);
+        if (customHeader.get() != nullptr)
+            customHeader.get()->setBounds (headerBounds);
 
         component->setBounds (bounds);
     }
@@ -270,13 +270,8 @@ public:
 
     void setCustomHeaderComponent (Component* headerComponent, bool shouldTakeOwnership)
     {
-        customHeaderComponent.set (headerComponent, shouldTakeOwnership);
-
-        if (headerComponent != nullptr)
-        {
-            addAndMakeVisible (customHeaderComponent);
-            customHeaderComponent->addMouseListener (this, false);
-        }
+        customHeader = CustomHeader (this, OptionalScopedPointer (headerComponent, shouldTakeOwnership));
+        addAndMakeVisible (headerComponent);
     }
 
     OptionalScopedPointer<Component> component;
@@ -284,7 +279,46 @@ public:
 private:
     PanelSizes dragStartSizes;
     int mouseDownY;
-    OptionalScopedPointer<Component> customHeaderComponent;
+
+    struct CustomHeader
+    {
+        CustomHeader() = default;
+
+        CustomHeader (MouseListener* l, OptionalScopedPointer<Component> c)
+            : listener (l), customHeaderComponent (std::move (c)) {}
+
+        CustomHeader (CustomHeader&& other) noexcept
+            : listener (std::exchange (other.listener, nullptr)),
+              customHeaderComponent (std::exchange (other.customHeaderComponent, {}))
+        {
+            if (customHeaderComponent != nullptr)
+                customHeaderComponent->addMouseListener (listener, false);
+        }
+
+        CustomHeader& operator= (CustomHeader&& other) noexcept
+        {
+            std::swap (other.listener, listener);
+            std::swap (other.customHeaderComponent, customHeaderComponent);
+            return *this;
+        }
+
+        CustomHeader (const CustomHeader& other) = delete;
+        CustomHeader& operator= (const CustomHeader& other) = delete;
+
+        ~CustomHeader() noexcept
+        {
+            if (customHeaderComponent != nullptr)
+                customHeaderComponent->removeMouseListener (listener);
+        }
+
+        Component* get() const { return customHeaderComponent.get(); }
+
+    private:
+        MouseListener* listener = nullptr;
+        OptionalScopedPointer<Component> customHeaderComponent;
+    };
+
+    CustomHeader customHeader;
 
     int getHeaderSize() const noexcept
     {
@@ -310,7 +344,7 @@ ConcertinaPanel::ConcertinaPanel()
 {
 }
 
-ConcertinaPanel::~ConcertinaPanel() {}
+ConcertinaPanel::~ConcertinaPanel() = default;
 
 int ConcertinaPanel::getNumPanels() const noexcept
 {
