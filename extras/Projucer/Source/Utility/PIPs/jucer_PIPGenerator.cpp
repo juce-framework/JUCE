@@ -27,6 +27,7 @@
 #include "../../ProjectSaving/jucer_ProjectExporter.h"
 #include "../../ProjectSaving/jucer_ProjectExport_Xcode.h"
 #include "../../ProjectSaving/jucer_ProjectExport_Android.h"
+#include "../../ProjectSaving/jucer_ProjectExport_MSVC.h"
 #include "jucer_PIPGenerator.h"
 
 //==============================================================================
@@ -242,6 +243,15 @@ ValueTree PIPGenerator::createExporterChild (const Identifier& exporterIdentifie
     ValueTree exporter (exporterIdentifier);
 
     exporter.setProperty (Ids::targetFolder, "Builds/" + ProjectExporter::getTypeInfoForExporter (exporterIdentifier).targetFolder, nullptr);
+
+    const Identifier vsExporters[] { MSVCProjectExporterVC2017::getValueTreeTypeName(),
+                                     MSVCProjectExporterVC2019::getValueTreeTypeName(),
+                                     MSVCProjectExporterVC2022::getValueTreeTypeName() };
+
+    if (isJUCEExample (pipFile) && std::find (std::begin (vsExporters), std::end (vsExporters), exporterIdentifier) != std::end (vsExporters))
+    {
+        exporter.setProperty (Ids::extraCompilerFlags, "/bigobj", nullptr);
+    }
 
     if (isJUCEExample (pipFile) && exporterRequiresExampleAssets (exporterIdentifier, metadata[Ids::name]))
     {
