@@ -2231,6 +2231,10 @@ function(juce_add_pip header)
                 endif()
             endforeach()
         endif()
+
+        if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
+            target_compile_options(${JUCE_PIP_NAME} PRIVATE /bigobj)
+        endif()
     endif()
 endfunction()
 
