@@ -2780,7 +2780,7 @@ private:
 
     void updateStateFromUI()
     {
-        if (editable == Editable::yes)
+        if constexpr (editable == Editable::yes)
         {
             auto updated = *state;
             auto& props = updated.properties;
