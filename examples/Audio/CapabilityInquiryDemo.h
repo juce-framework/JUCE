@@ -3771,9 +3771,9 @@ private:
         {
             const auto& [muid, propName] = *details;
 
-            const auto encodingToUse = [&, muid = muid, propName = propName]() -> std::optional<ci::Encoding>
+            const auto encodingToUse = [&, muidCopy = muid, propNameCopy = propName]() -> std::optional<ci::Encoding>
             {
-                if (auto* deviceResource = findDeviceResource (appState->transient, muid, propName))
+                if (auto* deviceResource = findDeviceResource (appState->transient, muidCopy, propNameCopy))
                     return deviceResource->getBestCommonEncoding();
 
                 return {};
@@ -3805,9 +3805,9 @@ private:
         {
             const auto& [muid, propName] = *details;
 
-            const auto encodingToUse = [&, muid = muid, propName = propName]() -> std::optional<ci::Encoding>
+            const auto encodingToUse = [&, muidCopy = muid, propNameCopy = propName]() -> std::optional<ci::Encoding>
             {
-                if (auto* deviceResource = findDeviceResource (appState->transient, muid, propName))
+                if (auto* deviceResource = findDeviceResource (appState->transient, muidCopy, propNameCopy))
                     return deviceResource->getBestCommonEncoding();
 
                 return {};
@@ -3860,12 +3860,12 @@ private:
 
         const auto& [muid, propName] = *details;
 
-        const auto subId = [&, propName = propName]
+        const auto subId = [&, propNameCopy = propName]
         {
             const auto ongoing = device->getOngoingSubscriptionsForMuid (selectedDevice->muid);
             const auto iter = std::find_if (ongoing.begin(), ongoing.end(), [&] (const auto& sub)
             {
-                return sub.resource == propName;
+                return sub.resource == propNameCopy;
             });
 
             return iter != ongoing.end() ? iter->subscribeId : String();
@@ -4559,11 +4559,11 @@ private:
             auto group = msg.group;
             auto time = Time::getCurrentTime();
 
-            MessageManager::callAsync ([weak, bytes = std::move (bytes), group, time]
+            MessageManager::callAsync ([weak, movedBytes = std::move (bytes), group, time]
             {
                 // This call is async because we may send messages in direct response to model updates.
                 if (weak != nullptr)
-                    weak->addLogEntry ({ group, bytes }, Model::MessageKind::outgoing, time);
+                    weak->addLogEntry ({ group, movedBytes }, Model::MessageKind::outgoing, time);
             });
 
             if (auto* out = demo.output.get())
