@@ -250,7 +250,7 @@ std::vector<std::byte> Encodings::decode (Span<const std::byte> bytes, Encoding 
                 return {};
             }
 
-            result.resize (previousSize + (size_t) read);
+            result.resize ((size_t) read + previousSize);
 
             if (read == 0)
                 return result;

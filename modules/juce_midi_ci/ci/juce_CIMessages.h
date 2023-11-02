@@ -316,7 +316,7 @@ namespace Message
     {
         auto tie() const
         {
-            return std::tuple();
+            return std::tuple<>();
         }
 
         bool operator== (const ProfileInquiry& x) const { return tie() == x.tie(); }
@@ -655,7 +655,7 @@ namespace Message
     {
         auto tie() const
         {
-            return std::tuple();
+            return std::tuple<>();
         }
 
         bool operator== (const ProcessInquiry& x) const { return tie() == x.tie(); }
@@ -710,7 +710,7 @@ namespace Message
     {
         auto tie() const
         {
-            return std::tuple();
+            return std::tuple<>();
         }
 
         bool operator== (const ProcessEndMidiMessageReport& x) const { return tie() == x.tie(); }

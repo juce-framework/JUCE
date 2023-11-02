@@ -1634,7 +1634,7 @@ private:
         const auto channelIndex = address.getChannel() != ci::ChannelInGroup::wholeGroup
                                 ? (size_t) address.getChannel()
                                 : 16;
-        const auto buttonIndex = address.getGroup() * numChannelColumns + channelIndex;
+        const auto buttonIndex = (size_t) address.getGroup() * numChannelColumns + channelIndex;
         return buttons[buttonIndex];
     }
 

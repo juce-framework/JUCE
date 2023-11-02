@@ -146,7 +146,8 @@ void PropertyDataMessageChunker::populateStorage() const
     std::rotate (storage->begin(), storage->begin() + getRoomForBody(), storage->end());
 
     // ...and bring the storage buffer down to size, if we didn't manage to fill it
-    storage->resize (storage->size() + numBytesRead - (size_t) getRoomForBody());
+    const auto room = (size_t) getRoomForBody();
+    storage->resize (storage->size() + numBytesRead - room);
 }
 
 } // namespace juce::midi_ci::detail
