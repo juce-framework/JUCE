@@ -54,6 +54,11 @@ enum class ChannelInGroup : uint8_t
     wholeBlock = 0x7f, ///< Refers to all channels in the function block that contains the UMP group
 };
 
+/**
+    Utility functions for working with the ChannelInGroup enum.
+
+    @tags{Audio}
+*/
 struct ChannelInGroupUtils
 {
     ChannelInGroupUtils() = delete;
@@ -84,6 +89,8 @@ namespace Message
 {
     /** Wraps a span, providing equality operators that compare the span
         contents elementwise.
+
+        @tags{Audio}
     */
     template <typename T>
     struct ComparableRange
@@ -104,6 +111,8 @@ namespace Message
     //==============================================================================
     /**
         Holds fields that can be found at the beginning of every MIDI CI message.
+
+        @tags{Audio}
     */
     struct Header
     {
@@ -124,6 +133,8 @@ namespace Message
 
     /**
         Groups together a CI message header, and some number of trailing bytes.
+
+        @tags{Audio}
     */
     struct Generic
     {
@@ -132,7 +143,10 @@ namespace Message
     };
 
     //==============================================================================
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct DiscoveryResponse
     {
         ump::DeviceInfo device;
@@ -150,7 +164,10 @@ namespace Message
         bool operator!= (const DiscoveryResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct Discovery
     {
         ump::DeviceInfo device;
@@ -167,7 +184,10 @@ namespace Message
         bool operator!= (const Discovery& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct EndpointInquiryResponse
     {
         std::byte status;
@@ -182,7 +202,10 @@ namespace Message
         bool operator!= (const EndpointInquiryResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct EndpointInquiry
     {
         std::byte status;
@@ -196,7 +219,10 @@ namespace Message
         bool operator!= (const EndpointInquiry& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct InvalidateMUID
     {
         MUID target = MUID::makeUnchecked (0);
@@ -210,7 +236,10 @@ namespace Message
         bool operator!= (const InvalidateMUID& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ACK
     {
         std::byte originalCategory{};
@@ -234,7 +263,10 @@ namespace Message
         bool operator!= (const ACK& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct NAK
     {
         std::byte originalCategory{};        /**< Only valid if the message header specifies version 0x02 or greater. */
@@ -258,7 +290,10 @@ namespace Message
         bool operator!= (const NAK& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileInquiryResponse
     {
         Span<const Profile> enabledProfiles;
@@ -273,7 +308,10 @@ namespace Message
         bool operator!= (const ProfileInquiryResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileInquiry
     {
         auto tie() const
@@ -285,7 +323,10 @@ namespace Message
         bool operator!= (const ProfileInquiry& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileAdded
     {
         Profile profile{};
@@ -299,7 +340,10 @@ namespace Message
         bool operator!= (const ProfileAdded& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileRemoved
     {
         Profile profile{};
@@ -313,7 +357,10 @@ namespace Message
         bool operator!= (const ProfileRemoved& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileDetailsResponse
     {
         Profile profile{};
@@ -329,7 +376,10 @@ namespace Message
         bool operator!= (const ProfileDetailsResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileDetails
     {
         Profile profile{};
@@ -344,7 +394,10 @@ namespace Message
         bool operator!= (const ProfileDetails& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileOn
     {
         Profile profile{};
@@ -359,7 +412,10 @@ namespace Message
         bool operator!= (const ProfileOn& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileOff
     {
         Profile profile{};
@@ -373,7 +429,10 @@ namespace Message
         bool operator!= (const ProfileOff& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileEnabledReport
     {
         Profile profile{};
@@ -388,7 +447,10 @@ namespace Message
         bool operator!= (const ProfileEnabledReport& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileDisabledReport
     {
         Profile profile{};
@@ -403,7 +465,10 @@ namespace Message
         bool operator!= (const ProfileDisabledReport& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProfileSpecificData
     {
         Profile profile{};
@@ -418,7 +483,10 @@ namespace Message
         bool operator!= (const ProfileSpecificData& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertyExchangeCapabilitiesResponse
     {
         std::byte numSimultaneousRequestsSupported{};
@@ -434,7 +502,10 @@ namespace Message
         bool operator!= (const PropertyExchangeCapabilitiesResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertyExchangeCapabilities
     {
         std::byte numSimultaneousRequestsSupported{};
@@ -452,6 +523,8 @@ namespace Message
 
     /** A property-exchange message that has no payload, and must therefore
         be contained in a single chunk.
+
+        @tags{Audio}
     */
     struct StaticSizePropertyExchange
     {
@@ -466,6 +539,8 @@ namespace Message
 
     /** A property-exchange message that may form part of a multi-chunk
         message sequence.
+
+        @tags{Audio}
     */
     struct DynamicSizePropertyExchange
     {
@@ -485,56 +560,80 @@ namespace Message
         }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertyGetDataResponse : public DynamicSizePropertyExchange
     {
         bool operator== (const PropertyGetDataResponse& x) const { return tie() == x.tie(); }
         bool operator!= (const PropertyGetDataResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertyGetData : public StaticSizePropertyExchange
     {
         bool operator== (const PropertyGetData& x) const { return tie() == x.tie(); }
         bool operator!= (const PropertyGetData& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertySetDataResponse : public StaticSizePropertyExchange
     {
         bool operator== (const PropertySetDataResponse& x) const { return tie() == x.tie(); }
         bool operator!= (const PropertySetDataResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertySetData : public DynamicSizePropertyExchange
     {
         bool operator== (const PropertySetData& x) const { return tie() == x.tie(); }
         bool operator!= (const PropertySetData& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertySubscribeResponse : public DynamicSizePropertyExchange
     {
         bool operator== (const PropertySubscribeResponse& x) const { return tie() == x.tie(); }
         bool operator!= (const PropertySubscribeResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertySubscribe : public DynamicSizePropertyExchange
     {
         bool operator== (const PropertySubscribe& x) const { return tie() == x.tie(); }
         bool operator!= (const PropertySubscribe& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct PropertyNotify : public DynamicSizePropertyExchange
     {
         bool operator== (const PropertyNotify& x) const { return tie() == x.tie(); }
         bool operator!= (const PropertyNotify& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProcessInquiryResponse
     {
         std::byte supportedFeatures{};
@@ -548,7 +647,10 @@ namespace Message
         bool operator!= (const ProcessInquiryResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProcessInquiry
     {
         auto tie() const
@@ -560,7 +662,10 @@ namespace Message
         bool operator!= (const ProcessInquiry& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProcessMidiMessageReportResponse
     {
         std::byte messageDataControl{};
@@ -577,7 +682,10 @@ namespace Message
         bool operator!= (const ProcessMidiMessageReportResponse& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProcessMidiMessageReport
     {
         std::byte messageDataControl{};
@@ -594,7 +702,10 @@ namespace Message
         bool operator!= (const ProcessMidiMessageReport& x) const { return ! operator== (x); }
     };
 
-    /** See the MIDI-CI specification. */
+    /** See the MIDI-CI specification.
+
+        @tags{Audio}
+    */
     struct ProcessEndMidiMessageReport
     {
         auto tie() const
@@ -611,6 +722,8 @@ namespace Message
 
         The body may be set to std::monostate to indicate some kind of failure, such as a malformed
         incoming message.
+
+        @tags{Audio}
     */
     struct Parsed
     {
