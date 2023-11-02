@@ -516,96 +516,50 @@ public:
 
     void showPopupMenu (Point<int> p) override
     {
-        auto& enabledModules = project.getEnabledModules();
-        PopupMenu allModules;
+        PopupMenu moduleMenus;
 
-        // JUCE path
-        PopupMenu jucePathModules;
-
-        for (const auto [index, mod] : enumerate (ProjucerApplication::getApp().getJUCEPathModulesList().getAllModules(),
-                                                  100))
+        const auto addModulesSubMenu = [&] (const auto& description, const auto& modules, auto rescan)
         {
-            jucePathModules.addItem (index, mod.first, ! enabledModules.isModuleEnabled (mod.first));
-        }
+            PopupMenu menu;
 
-        jucePathModules.addSeparator();
-        jucePathModules.addItem (-1, "Re-scan path");
+            for (const auto& mod : modules)
+            {
+                menu.addItem (PopupMenu::Item { mod.first }
+                                  .setID (-1)
+                                  .setEnabled (! project.getEnabledModules().isModuleEnabled (mod.first))
+                                  .setAction ([this, name = mod.first] { project.getEnabledModules().addModuleInteractive (name); }));
+            }
 
-        allModules.addSubMenu ("Global JUCE modules path", jucePathModules);
+            menu.addSeparator();
+            menu.addItem (PopupMenu::Item { "Re-scan path" }.setID (-1).setAction (rescan));
+            moduleMenus.addSubMenu (description, menu);
+        };
 
-        // User path
-        PopupMenu userPathModules;
+        addModulesSubMenu ("Global JUCE modules path",
+                           ProjucerApplication::getApp().getJUCEPathModulesList().getAllModules(),
+                           [] { ProjucerApplication::getApp().rescanJUCEPathModules(); });
 
-        for (const auto [index, mod] : enumerate (ProjucerApplication::getApp().getUserPathsModulesList().getAllModules(),
-                                                  200))
-        {
-            userPathModules.addItem (index, mod.first, ! enabledModules.isModuleEnabled (mod.first));
-        }
+        addModulesSubMenu ("Global user modules path",
+                           ProjucerApplication::getApp().getUserPathsModulesList().getAllModules(),
+                           [] { ProjucerApplication::getApp().rescanUserPathModules(); });
 
-        userPathModules.addSeparator();
-        userPathModules.addItem (-2, "Re-scan path");
-
-        allModules.addSubMenu ("Global user modules path", userPathModules);
-
-        // Exporter path
-        PopupMenu exporterPathModules;
-
-        for (const auto [index, mod] : enumerate (project.getExporterPathsModulesList().getAllModules(),
-                                                  300))
-        {
-            exporterPathModules.addItem (index, mod.first, ! enabledModules.isModuleEnabled (mod.first));
-        }
-
-        exporterPathModules.addSeparator();
-        exporterPathModules.addItem (-3, "Re-scan path");
-
-        allModules.addSubMenu ("Exporter paths", exporterPathModules);
+        addModulesSubMenu ("Exporter paths",
+                           project.getExporterPathsModulesList().getAllModules(),
+                           [this] { project.rescanExporterPathModules(); });
 
         PopupMenu menu;
-        menu.addSubMenu ("Add a module", allModules);
-
+        menu.addSubMenu ("Add a module", moduleMenus);
         menu.addSeparator();
-        menu.addItem (1001, "Add a module from a specified folder...");
+        menu.addItem (PopupMenu::Item { "Add a module from a specified folder..." }
+                          .setID (-1)
+                          .setAction ([this] { project.getEnabledModules().addModuleFromUserSelectedFile(); }));
 
         launchPopupMenu (menu, p);
     }
 
     void handlePopupMenuResult (int resultCode) override
     {
-        if (resultCode == 1001)
-        {
-            project.getEnabledModules().addModuleFromUserSelectedFile();
-        }
-        else if (resultCode < 0)
-        {
-            if      (resultCode == -1)  ProjucerApplication::getApp().rescanJUCEPathModules();
-            else if (resultCode == -2)  ProjucerApplication::getApp().rescanUserPathModules();
-            else if (resultCode == -3)  project.rescanExporterPathModules();
-        }
-        else if (resultCode > 0)
-        {
-            std::vector<AvailableModulesList::ModuleIDAndFolder> list;
-            int offset = -1;
-
-            if (resultCode < 200)
-            {
-                list = ProjucerApplication::getApp().getJUCEPathModulesList().getAllModules();
-                offset = 100;
-            }
-            else if (resultCode < 300)
-            {
-                list = ProjucerApplication::getApp().getUserPathsModulesList().getAllModules();
-                offset = 200;
-            }
-            else if (resultCode < 400)
-            {
-                list = project.getExporterPathsModulesList().getAllModules();
-                offset = 300;
-            }
-
-            if (offset != -1)
-                project.getEnabledModules().addModuleInteractive (list[(size_t) (resultCode - offset)].first);
-        }
+        jassertquiet (resultCode == -1 || resultCode == 0);
     }
 
     //==============================================================================
