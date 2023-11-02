@@ -285,15 +285,16 @@ private:
         CustomHeader() = default;
 
         CustomHeader (MouseListener* l, OptionalScopedPointer<Component> c)
-            : listener (l), customHeaderComponent (std::move (c)) {}
-
-        CustomHeader (CustomHeader&& other) noexcept
-            : listener (std::exchange (other.listener, nullptr)),
-              customHeaderComponent (std::exchange (other.customHeaderComponent, {}))
+            : listener (l),
+              customHeaderComponent (std::move (c))
         {
             if (customHeaderComponent != nullptr)
                 customHeaderComponent->addMouseListener (listener, false);
         }
+
+        CustomHeader (CustomHeader&& other) noexcept
+            : listener (std::exchange (other.listener, nullptr)),
+              customHeaderComponent (std::exchange (other.customHeaderComponent, {})) {}
 
         CustomHeader& operator= (CustomHeader&& other) noexcept
         {
