@@ -686,6 +686,12 @@ struct MenuWindow final : public Component
         {
             dismissMenu (nullptr);
         }
+        // surge patch to work around reaper issue described in #7281
+        else if (key.isKeyCode(KeyPress::F10Key) && key.getModifiers().isShiftDown())
+        {
+            dismissMenu (nullptr);
+        }
+        // end surge patch
         else
         {
             return false;
