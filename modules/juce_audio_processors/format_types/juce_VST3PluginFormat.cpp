@@ -2244,7 +2244,7 @@ public:
         for (const auto* item : queues)
         {
             auto* ptr = item->ptr.get();
-            callback (ptr->getParameterIndex(), ptr->getParameterId(), ptr->get());
+            callback (ptr->getParameterId(), ptr->get());
         }
     }
 
@@ -2291,8 +2291,8 @@ public:
         */
         void setValueWithoutUpdatingProcessor (float newValue)
         {
-            pluginInstance.cachedParamValues.setWithoutNotifying (vstParamIndex, newValue);
-            sendValueChangedMessageToListeners (newValue);
+            if (! exactlyEqual (pluginInstance.cachedParamValues.exchangeWithoutNotifying (vstParamIndex, newValue), newValue))
+                sendValueChangedMessageToListeners (newValue);
         }
 
         String getText (float value, int maximumLength) const override
@@ -2753,10 +2753,8 @@ public:
 
         processor->process (data);
 
-        outputParameterChanges->forEach ([&] (Steinberg::int32 index, Vst::ParamID id, float value)
+        outputParameterChanges->forEach ([&] (Vst::ParamID id, float value)
         {
-            cachedParamValues.setWithoutNotifying (index, value);
-
             if (auto* param = getParameterForID (id))
                 param->setValueWithoutUpdatingProcessor (value);
         });

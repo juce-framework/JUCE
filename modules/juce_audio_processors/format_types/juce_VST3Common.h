@@ -1737,8 +1737,15 @@ public:
 
     Steinberg::Vst::ParamID getParamID (Steinberg::int32 index) const noexcept { return paramIds[(size_t) index]; }
 
-    void set                 (Steinberg::int32 index, float value)   { floatCache.setValueAndBits ((size_t) index, value, 1); }
-    void setWithoutNotifying (Steinberg::int32 index, float value)   { floatCache.setValue        ((size_t) index, value); }
+    void set (Steinberg::int32 index, float value)
+    {
+        floatCache.setValueAndBits ((size_t) index, value, 1);
+    }
+
+    float exchangeWithoutNotifying (Steinberg::int32 index, float value)
+    {
+        return floatCache.exchangeValue ((size_t) index, value);
+    }
 
     float get (Steinberg::int32 index) const noexcept { return floatCache.get ((size_t) index); }
 

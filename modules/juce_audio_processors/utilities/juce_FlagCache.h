@@ -140,17 +140,17 @@ public:
 
     size_t size() const noexcept { return values.size(); }
 
-    void setValue (size_t index, float value)
+    float exchangeValue (size_t index, float value)
     {
         jassert (index < size());
-        values[index].store (value, std::memory_order_relaxed);
+        return values[index].exchange (value, std::memory_order_relaxed);
     }
 
     void setBits (size_t index, uint32_t bits) { flags.set (index, bits); }
 
     void setValueAndBits (size_t index, float value, uint32_t bits)
     {
-        setValue (index, value);
+        exchangeValue (index, value);
         setBits (index, bits);
     }
 
