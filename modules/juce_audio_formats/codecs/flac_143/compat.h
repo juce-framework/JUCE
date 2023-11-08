@@ -173,10 +173,13 @@
 #ifdef _WIN32
 /* All char* strings are in UTF-8 format. Added to support Unicode files on Windows */
 
+#if 0
 #include "win_utf8_io.h"
 #define flac_printf printf_utf8
 #define flac_fprintf fprintf_utf8
 #define flac_vfprintf vfprintf_utf8
+#endif
+
 #define flac_fopen fopen_utf8
 #define flac_chmod chmod_utf8
 #define flac_utime utime_utf8
@@ -234,7 +237,7 @@ extern "C" {
 int flac_snprintf(char *str, size_t size, const char *fmt, ...);
 int flac_vsnprintf(char *str, size_t size, const char *fmt, va_list va);
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* FLAC__SHARE__COMPAT_H */

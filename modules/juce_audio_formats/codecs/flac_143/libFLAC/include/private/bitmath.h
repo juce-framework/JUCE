@@ -83,7 +83,7 @@ static inline uint32_t FLAC__clz_uint32(FLAC__uint32 v)
 #elif defined(_MSC_VER)
 	{
 		uint32_t idx;
-		_BitScanReverse(&idx, v);
+		_BitScanReverse((unsigned long*) &idx, v);
 		return idx ^ 31U;
 	}
 #else
@@ -107,7 +107,7 @@ static inline uint32_t FLAC__clz_uint64(FLAC__uint64 v)
 #elif (defined(__INTEL_COMPILER) || defined(_MSC_VER)) && (defined(_M_IA64) || defined(_M_X64))
 	{
 		uint32_t idx;
-		_BitScanReverse64(&idx, v);
+		_BitScanReverse64((unsigned long*) &idx, v);
 		return idx ^ 63U;
 	}
 #else
@@ -161,7 +161,7 @@ static inline uint32_t FLAC__bitmath_ilog2(FLAC__uint32 v)
 #elif defined(_MSC_VER)
 	{
 		uint32_t idx;
-		_BitScanReverse(&idx, v);
+		_BitScanReverse((unsigned long*) &idx, v);
 		return idx;
 	}
 #else
@@ -178,7 +178,7 @@ static inline uint32_t FLAC__bitmath_ilog2_wide(FLAC__uint64 v)
 #elif (defined(__INTEL_COMPILER) || defined(_MSC_VER)) && (defined(_M_IA64) || defined(_M_X64))
 	{
 		uint32_t idx;
-		_BitScanReverse64(&idx, v);
+		_BitScanReverse64((unsigned long*) &idx, v);
 		return idx;
 	}
 #else

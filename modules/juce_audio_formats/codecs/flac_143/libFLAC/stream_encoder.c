@@ -319,11 +319,11 @@ static FLAC__StreamDecoderWriteStatus verify_write_callback_(const FLAC__StreamD
 static void verify_metadata_callback_(const FLAC__StreamDecoder *decoder, const FLAC__StreamMetadata *metadata, void *client_data);
 static void verify_error_callback_(const FLAC__StreamDecoder *decoder, FLAC__StreamDecoderErrorStatus status, void *client_data);
 
-static FLAC__StreamEncoderReadStatus file_read_callback_(const FLAC__StreamEncoder *encoder, FLAC__byte buffer[], size_t *bytes, void *client_data);
-static FLAC__StreamEncoderSeekStatus file_seek_callback_(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset, void *client_data);
-static FLAC__StreamEncoderTellStatus file_tell_callback_(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset, void *client_data);
-static FLAC__StreamEncoderWriteStatus file_write_callback_(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, uint32_t samples, uint32_t current_frame, void *client_data);
-static FILE *get_binary_stdout_(void);
+//static FLAC__StreamEncoderReadStatus file_read_callback_(const FLAC__StreamEncoder *encoder, FLAC__byte buffer[], size_t *bytes, void *client_data);
+//static FLAC__StreamEncoderSeekStatus file_seek_callback_(const FLAC__StreamEncoder *encoder, FLAC__uint64 absolute_byte_offset, void *client_data);
+//static FLAC__StreamEncoderTellStatus file_tell_callback_(const FLAC__StreamEncoder *encoder, FLAC__uint64 *absolute_byte_offset, void *client_data);
+//static FLAC__StreamEncoderWriteStatus file_write_callback_(const FLAC__StreamEncoder *encoder, const FLAC__byte buffer[], size_t bytes, uint32_t samples, uint32_t current_frame, void *client_data);
+//static FILE *get_binary_stdout_(void);
 
 
 /***********************************************************************
@@ -538,18 +538,18 @@ FLAC_API FLAC__StreamEncoder *FLAC__stream_encoder_new(void)
 
 	FLAC__ASSERT(sizeof(int) >= 4); /* we want to die right away if this is not true */
 
-	encoder = calloc(1, sizeof(FLAC__StreamEncoder));
+	encoder = (FLAC__StreamEncoder*) calloc(1, sizeof(FLAC__StreamEncoder));
 	if(encoder == 0) {
 		return 0;
 	}
 
-	encoder->protected_ = calloc(1, sizeof(FLAC__StreamEncoderProtected));
+	encoder->protected_ = (FLAC__StreamEncoderProtected*) calloc(1, sizeof(FLAC__StreamEncoderProtected));
 	if(encoder->protected_ == 0) {
 		free(encoder);
 		return 0;
 	}
 
-	encoder->private_ = calloc(1, sizeof(FLAC__StreamEncoderPrivate));
+	encoder->private_ = (FLAC__StreamEncoderPrivate*) calloc(1, sizeof(FLAC__StreamEncoderPrivate));
 	if(encoder->private_ == 0) {
 		free(encoder->protected_);
 		free(encoder);
@@ -663,8 +663,10 @@ static FLAC__StreamEncoderInitStatus init_stream_internal_(
 	if(encoder->protected_->state != FLAC__STREAM_ENCODER_UNINITIALIZED)
 		return FLAC__STREAM_ENCODER_INIT_STATUS_ALREADY_INITIALIZED;
 
-	if(FLAC__HAS_OGG == 0 && is_ogg)
+   #if FLAC__HAS_OGG == 0
+	if(is_ogg)
 		return FLAC__STREAM_ENCODER_INIT_STATUS_UNSUPPORTED_CONTAINER;
+   #endif
 
 	if(0 == write_callback || (seek_callback && 0 == tell_callback))
 		return FLAC__STREAM_ENCODER_INIT_STATUS_INVALID_CALLBACKS;
@@ -1135,7 +1137,7 @@ static FLAC__StreamEncoderInitStatus init_stream_internal_(
 		 */
 		encoder->private_->verify.input_fifo.size = encoder->protected_->blocksize+OVERREAD_;
 		for(i = 0; i < encoder->protected_->channels; i++) {
-			if(0 == (encoder->private_->verify.input_fifo.data[i] = safe_malloc_mul_2op_p(sizeof(FLAC__int32), /*times*/encoder->private_->verify.input_fifo.size))) {
+			if(0 == (encoder->private_->verify.input_fifo.data[i] = (FLAC__int32*) safe_malloc_mul_2op_p(sizeof(FLAC__int32), /*times*/encoder->private_->verify.input_fifo.size))) {
 				encoder->protected_->state = FLAC__STREAM_ENCODER_MEMORY_ALLOCATION_ERROR;
 				return FLAC__STREAM_ENCODER_INIT_STATUS_ENCODER_ERROR;
 			}
@@ -1324,6 +1326,7 @@ FLAC_API FLAC__StreamEncoderInitStatus FLAC__stream_encoder_init_ogg_stream(
 	);
 }
 
+#if 0
 static FLAC__StreamEncoderInitStatus init_FILE_internal_(
 	FLAC__StreamEncoder *encoder,
 	FILE *file,
@@ -1463,6 +1466,7 @@ FLAC_API FLAC__StreamEncoderInitStatus FLAC__stream_encoder_init_ogg_file(
 {
 	return init_file_internal_(encoder, filename, progress_callback, client_data, /*is_ogg=*/true);
 }
+#endif
 
 FLAC_API FLAC__bool FLAC__stream_encoder_finish(FLAC__StreamEncoder *encoder)
 {
@@ -1942,7 +1946,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_total_samples_estimate(FLAC__Stream
 	FLAC__ASSERT(0 != encoder->protected_);
 	if(encoder->protected_->state != FLAC__STREAM_ENCODER_UNINITIALIZED)
 		return false;
-	value = flac_min(value, (FLAC__U64L(1) << FLAC__STREAM_METADATA_STREAMINFO_TOTAL_SAMPLES_LEN) - 1);
+	value = flac_min(value, (FLAC__uint64)((FLAC__U64L(1) << FLAC__STREAM_METADATA_STREAMINFO_TOTAL_SAMPLES_LEN) - 1));
 	encoder->protected_->total_samples_estimate = value;
 	return true;
 }
@@ -1966,7 +1970,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_metadata(FLAC__StreamEncoder *encod
 	}
 	if(num_blocks) {
 		FLAC__StreamMetadata **m;
-		if(0 == (m = safe_malloc_mul_2op_p(sizeof(m[0]), /*times*/num_blocks)))
+		if(0 == (m = (FLAC__StreamMetadata**) safe_malloc_mul_2op_p(sizeof(m[0]), /*times*/num_blocks)))
 			return false;
 		memcpy(m, metadata, sizeof(m[0]) * num_blocks);
 		encoder->protected_->metadata = m;
@@ -2700,8 +2704,8 @@ FLAC__bool write_bitbuffer_(FLAC__StreamEncoder *encoder, uint32_t samples, FLAC
 	FLAC__bitwriter_clear(encoder->private_->frame);
 
 	if(samples > 0) {
-		encoder->private_->streaminfo.data.stream_info.min_framesize = flac_min(bytes, encoder->private_->streaminfo.data.stream_info.min_framesize);
-		encoder->private_->streaminfo.data.stream_info.max_framesize = flac_max(bytes, encoder->private_->streaminfo.data.stream_info.max_framesize);
+		encoder->private_->streaminfo.data.stream_info.min_framesize = flac_min((uint32_t) bytes, encoder->private_->streaminfo.data.stream_info.min_framesize);
+		encoder->private_->streaminfo.data.stream_info.max_framesize = flac_max((uint32_t) bytes, encoder->private_->streaminfo.data.stream_info.max_framesize);
 	}
 
 	return true;
@@ -2726,7 +2730,7 @@ FLAC__StreamEncoderWriteStatus write_frame_(FLAC__StreamEncoder *encoder, const 
 	 * Watch for the STREAMINFO block and first SEEKTABLE block to go by and store their offsets.
 	 */
 	if(samples == 0) {
-		FLAC__MetadataType type = (buffer[0] & 0x7f);
+		FLAC__MetadataType type = (FLAC__MetadataType) (buffer[0] & 0x7f);
 		if(type == FLAC__METADATA_TYPE_STREAMINFO)
 			encoder->protected_->streaminfo_offset = output_position;
 		else if(type == FLAC__METADATA_TYPE_SEEKTABLE && encoder->protected_->seektable_offset == 0)
@@ -3515,7 +3519,7 @@ FLAC__bool process_subframe_(
 			uint32_t i;
 			signal_is_constant = true;
 			if(subframe_bps <= 32){
-				const FLAC__int32 *integer_signal_ = integer_signal;
+				const FLAC__int32 *integer_signal_ = (FLAC__int32*) integer_signal;
 				for(i = 1; i < frame_header->blocksize; i++) {
 					if(integer_signal_[0] != integer_signal_[i]) {
 						signal_is_constant = false;
@@ -3524,7 +3528,7 @@ FLAC__bool process_subframe_(
 				}
 			}
 			else {
-				const FLAC__int64 *integer_signal_ = integer_signal;
+				const FLAC__int64 *integer_signal_ = (FLAC__int64*) integer_signal;
 				for(i = 1; i < frame_header->blocksize; i++) {
 					if(integer_signal_[0] != integer_signal_[i]) {
 						signal_is_constant = false;
@@ -3722,9 +3726,9 @@ FLAC__bool apply_apodization_(FLAC__StreamEncoder *encoder,
 	if(apply_apodization_state->b == 1) {
 		/* window full subblock */
 		if(subframe_bps <= 32)
-			FLAC__lpc_window_data(integer_signal, encoder->private_->window[apply_apodization_state->a], encoder->private_->windowed_signal, blocksize);
+			FLAC__lpc_window_data((const FLAC__int32*) integer_signal, encoder->private_->window[apply_apodization_state->a], encoder->private_->windowed_signal, blocksize);
 		else
-			FLAC__lpc_window_data_wide(integer_signal, encoder->private_->window[apply_apodization_state->a], encoder->private_->windowed_signal, blocksize);
+			FLAC__lpc_window_data_wide((const FLAC__int64*) integer_signal, encoder->private_->window[apply_apodization_state->a], encoder->private_->windowed_signal, blocksize);
 		encoder->private_->local_lpc_compute_autocorrelation(encoder->private_->windowed_signal, blocksize, (*max_lpc_order_this_apodization)+1, apply_apodization_state->autoc);
 		if(apply_apodization_state->current_apodization->type == FLAC__APODIZATION_SUBDIVIDE_TUKEY){
 			uint32_t i;
@@ -3750,9 +3754,9 @@ FLAC__bool apply_apodization_(FLAC__StreamEncoder *encoder,
 		if(!(apply_apodization_state->c % 2)) {
 			/* on even c, evaluate the (c/2)th partial window of size blocksize/b  */
 			if(subframe_bps <= 32)
-				FLAC__lpc_window_data_partial(integer_signal, encoder->private_->window[apply_apodization_state->a], encoder->private_->windowed_signal, blocksize, blocksize/apply_apodization_state->b/2, (apply_apodization_state->c/2*blocksize)/apply_apodization_state->b);
+				FLAC__lpc_window_data_partial((const FLAC__int32*) integer_signal, encoder->private_->window[apply_apodization_state->a], encoder->private_->windowed_signal, blocksize, blocksize/apply_apodization_state->b/2, (apply_apodization_state->c/2*blocksize)/apply_apodization_state->b);
 			else
-				FLAC__lpc_window_data_partial_wide(integer_signal, encoder->private_->window[apply_apodization_state->a], encoder->private_->windowed_signal, blocksize, blocksize/apply_apodization_state->b/2, (apply_apodization_state->c/2*blocksize)/apply_apodization_state->b);
+				FLAC__lpc_window_data_partial_wide((const FLAC__int64*) integer_signal, encoder->private_->window[apply_apodization_state->a], encoder->private_->windowed_signal, blocksize, blocksize/apply_apodization_state->b/2, (apply_apodization_state->c/2*blocksize)/apply_apodization_state->b);
 			encoder->private_->local_lpc_compute_autocorrelation(encoder->private_->windowed_signal, blocksize/apply_apodization_state->b, (*max_lpc_order_this_apodization)+1, apply_apodization_state->autoc);
 		}
 		else {
@@ -4068,11 +4072,11 @@ uint32_t evaluate_verbatim_subframe_(
 
 	if(subframe_bps <= 32){
 		subframe->data.verbatim.data_type = FLAC__VERBATIM_SUBFRAME_DATA_TYPE_INT32;
-		subframe->data.verbatim.data.int32 = signal;
+		subframe->data.verbatim.data.int32 = (const FLAC__int32*) signal;
 	}
 	else {
 		subframe->data.verbatim.data_type = FLAC__VERBATIM_SUBFRAME_DATA_TYPE_INT64;
-		subframe->data.verbatim.data.int64 = signal;
+		subframe->data.verbatim.data.int64 = (const FLAC__int64*) signal;
 	}
 
 	estimate = FLAC__SUBFRAME_ZERO_PAD_LEN + FLAC__SUBFRAME_TYPE_LEN + FLAC__SUBFRAME_WASTED_BITS_FLAG_LEN + subframe->wasted_bits + (blocksize * subframe_bps);
@@ -4319,14 +4323,14 @@ static inline uint32_t count_rice_bits_in_partition_(
 )
 {
 	return (uint32_t)(flac_min( // To make sure the return value doesn't overflow
-		FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN + /* actually could end up being FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN but err on side of 16bps */
+        (uint32_t) (FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_PARAMETER_LEN + /* actually could end up being FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN but err on side of 16bps */
 		(1+rice_parameter) * partition_samples + /* 1 for unary stop bit + rice_parameter for the binary portion */
 		(
 			rice_parameter?
 				(abs_residual_partition_sum >> (rice_parameter-1)) /* rice_parameter-1 because the real coder sign-folds instead of using a sign bit */
 				: (abs_residual_partition_sum << 1) /* can't shift by negative number, so reverse */
 		)
-		- (partition_samples >> 1),UINT32_MAX));
+		- (partition_samples >> 1)),UINT32_MAX));
 		/* -(partition_samples>>1) to subtract out extra contributions to the abs_residual_partition_sum.
 		 * The actual number of bits used is closer to the sum(for all i in the partition) of  abs(residual[i])>>(rice_parameter-1)
 		 * By using the abs_residual_partition sum, we also add in bits in the LSBs that would normally be shifted out.
@@ -4635,6 +4639,7 @@ void verify_error_callback_(const FLAC__StreamDecoder *decoder, FLAC__StreamDeco
 	encoder->protected_->state = FLAC__STREAM_ENCODER_VERIFY_DECODER_ERROR;
 }
 
+#if 0
 FLAC__StreamEncoderReadStatus file_read_callback_(const FLAC__StreamEncoder *encoder, FLAC__byte buffer[], size_t *bytes, void *client_data)
 {
 	(void)client_data;
@@ -4736,3 +4741,4 @@ FILE *get_binary_stdout_(void)
 
 	return stdout;
 }
+#endif
