@@ -30,15 +30,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "private/cpu.h"
+#include "include/private/cpu.h"
 
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
 #ifndef FLAC__NO_ASM
 #if defined FLAC__CPU_ARM64 && FLAC__HAS_NEONINTRIN
-#include "private/lpc.h"
-#include "FLAC/assert.h"
-#include "FLAC/format.h"
-#include "private/macros.h"
+#include "include/private/lpc.h"
+#include "../assert.h"
+#include "../format.h"
+
 #include <arm_neon.h>
 
 #if FLAC__HAS_A64NEONINTRIN

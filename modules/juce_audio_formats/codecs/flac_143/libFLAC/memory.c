@@ -38,10 +38,10 @@
 #include <stdint.h>
 #endif
 
-#include "private/memory.h"
-#include "FLAC/assert.h"
-#include "share/compat.h"
-#include "share/alloc.h"
+#include "include/private/memory.h"
+#include "../assert.h"
+#include "../compat.h"
+#include "../alloc.h"
 
 void *FLAC__memory_alloc_aligned(size_t bytes, void **aligned_address)
 {

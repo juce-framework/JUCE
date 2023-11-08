@@ -37,12 +37,12 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "FLAC/assert.h"
-#include "FLAC/format.h"
-#include "share/compat.h"
-#include "private/bitmath.h"
-#include "private/lpc.h"
-#include "private/macros.h"
+#include "../assert.h"
+#include "../format.h"
+#include "../compat.h"
+#include "include/private/bitmath.h"
+#include "include/private/lpc.h"
+
 
 #if !defined(NDEBUG) || defined FLAC__OVERFLOW_DETECT || defined FLAC__OVERFLOW_DETECT_VERBOSE
 #include <stdio.h>

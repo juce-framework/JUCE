@@ -43,29 +43,29 @@
 #include <windows.h> /* for GetFileType() */
 #include <io.h> /* for _get_osfhandle() */
 #endif
-#include "share/compat.h"
-#include "FLAC/assert.h"
-#include "FLAC/stream_decoder.h"
-#include "protected/stream_encoder.h"
-#include "private/bitwriter.h"
-#include "private/bitmath.h"
-#include "private/crc.h"
-#include "private/cpu.h"
-#include "private/fixed.h"
-#include "private/format.h"
-#include "private/lpc.h"
-#include "private/md5.h"
-#include "private/memory.h"
-#include "private/macros.h"
+#include "../compat.h"
+#include "../assert.h"
+#include "../stream_decoder.h"
+#include "include/protected/stream_encoder.h"
+#include "include/private/bitwriter.h"
+#include "include/private/bitmath.h"
+#include "include/private/crc.h"
+#include "include/private/cpu.h"
+#include "include/private/fixed.h"
+#include "include/private/format.h"
+#include "include/private/lpc.h"
+#include "include/private/md5.h"
+#include "include/private/memory.h"
+
 #if FLAC__HAS_OGG
-#include "private/ogg_helper.h"
-#include "private/ogg_mapping.h"
+#include "include/private/ogg_helper.h"
+#include "include/private/ogg_mapping.h"
 #endif
-#include "private/stream_encoder.h"
-#include "private/stream_encoder_framing.h"
-#include "private/window.h"
-#include "share/alloc.h"
-#include "share/private.h"
+#include "include/private/stream_encoder.h"
+#include "include/private/stream_encoder_framing.h"
+#include "include/private/window.h"
+#include "../alloc.h"
+#include "../private.h"
 
 
 /* Exact Rice codeword length calculation is off by default.  The simple

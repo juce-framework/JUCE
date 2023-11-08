@@ -34,7 +34,7 @@
 #define FLAC__PRIVATE__BITWRITER_H
 
 #include <stdio.h> /* for FILE */
-#include "FLAC/ordinals.h"
+#include "../../../ordinals.h"
 
 /*
  * opaque structure definition

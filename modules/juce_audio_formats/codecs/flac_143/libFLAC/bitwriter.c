@@ -36,15 +36,15 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "private/bitwriter.h"
-#include "private/crc.h"
-#include "private/format.h"
-#include "private/macros.h"
-#include "private/stream_encoder.h"
-#include "FLAC/assert.h"
-#include "share/alloc.h"
-#include "share/compat.h"
-#include "share/endswap.h"
+#include "include/private/bitwriter.h"
+#include "include/private/crc.h"
+#include "include/private/format.h"
+
+#include "include/private/stream_encoder.h"
+#include "../assert.h"
+#include "../alloc.h"
+#include "../compat.h"
+#include "../endswap.h"
 
 /* Things should be fastest when this matches the machine word size */
 /* WATCHOUT: if you change this you must also change the following #defines down to SWAP_BE_WORD_TO_HOST below to match */

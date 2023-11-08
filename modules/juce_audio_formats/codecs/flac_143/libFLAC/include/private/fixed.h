@@ -37,9 +37,9 @@
 #include <config.h>
 #endif
 
-#include "private/cpu.h"
-#include "private/float.h"
-#include "FLAC/format.h"
+#include "cpu.h"
+#include "float.h"
+#include "../../../format.h"
 
 /*
  *	FLAC__fixed_compute_best_predictor()

@@ -46,7 +46,7 @@
 #include <stdint.h> /* for SIZE_MAX in case limits.h didn't get it */
 #endif
 #include <stdlib.h> /* for size_t, malloc(), etc */
-#include "share/compat.h"
+#include "compat.h"
 
 #ifndef SIZE_MAX
 # ifndef SIZE_T_MAX

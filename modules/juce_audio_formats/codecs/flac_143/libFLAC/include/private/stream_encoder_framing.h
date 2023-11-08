@@ -33,7 +33,7 @@
 #ifndef FLAC__PRIVATE__STREAM_ENCODER_FRAMING_H
 #define FLAC__PRIVATE__STREAM_ENCODER_FRAMING_H
 
-#include "FLAC/format.h"
+#include "../../../format.h"
 #include "bitwriter.h"
 
 FLAC__bool FLAC__add_metadata_block(const FLAC__StreamMetadata *metadata, FLAC__BitWriter *bw, FLAC__bool update_vendor_string);

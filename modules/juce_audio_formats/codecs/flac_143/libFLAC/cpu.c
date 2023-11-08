@@ -34,8 +34,8 @@
 #  include <config.h>
 #endif
 
-#include "private/cpu.h"
-#include "share/compat.h"
+#include "include/private/cpu.h"
+#include "../compat.h"
 #include <stdlib.h>
 #include <string.h>
 

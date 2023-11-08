@@ -37,12 +37,12 @@
 #include <stdio.h>
 #include <stdlib.h> /* for qsort() */
 #include <string.h> /* for memset() */
-#include "FLAC/assert.h"
-#include "FLAC/format.h"
-#include "share/alloc.h"
-#include "share/compat.h"
-#include "private/format.h"
-#include "private/macros.h"
+#include "../assert.h"
+#include "../format.h"
+#include "../alloc.h"
+#include "../compat.h"
+#include "include/private/format.h"
+
 
 #if (defined GIT_COMMIT_HASH && defined GIT_COMMIT_DATE)
 # ifdef GIT_COMMIT_TAG
