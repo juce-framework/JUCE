@@ -204,6 +204,21 @@ void AudioWorkgroup::join (WorkgroupToken& token) const
     token.reset();
 }
 
+size_t AudioWorkgroup::getMaxParallelThreadCount() const
+{
+   #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
+
+    if (@available (macos 11.0, ios 14.0, *))
+    {
+        if (auto wg = WorkgroupProvider::getWorkgroup (*this))
+            return (size_t) os_workgroup_max_parallel_threads (wg, nullptr);
+    }
+
+   #endif
+
+   return 0;
+}
+
 AudioWorkgroup::operator bool() const { return WorkgroupProvider::getWorkgroup (*this) != nullptr; }
 
 #if JUCE_AUDIOWORKGROUP_TYPES_AVAILABLE
