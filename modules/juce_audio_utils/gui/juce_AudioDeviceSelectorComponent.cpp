@@ -1104,6 +1104,12 @@ void AudioDeviceSelectorComponent::resized()
     setSize (getWidth(), r.getY());
 }
 
+void AudioDeviceSelectorComponent::childBoundsChanged (Component* child)
+{
+    if (child == audioDeviceSettingsComp.get())
+        resized();
+}
+
 void AudioDeviceSelectorComponent::updateDeviceType()
 {
     if (auto* type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1])
