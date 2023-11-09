@@ -49,8 +49,11 @@ public:
             Array<var> array { 45, 67.8, true, "Hello array!" };
             data->setProperty ("array", array);
 
-            auto *nsDictionary = varObjectToNSDictionary (data.get());
-            auto clone = nsDictionaryToVar (nsDictionary);
+            const auto* nsDictionary = varToNSDictionary (data.get());
+            expect (nsDictionary != nullptr);
+
+            const auto clone = nsDictionaryToVar (nsDictionary);
+            expect (clone.isObject());
 
             expect (clone.getProperty ("integer", {}).isInt());
             expect (clone.getProperty ("double",  {}).isDouble());
@@ -62,7 +65,19 @@ public:
             expect (clone.getProperty ("double",  {}) == var { 2.3 });
             expect (clone.getProperty ("boolean", {}) == var { true });
             expect (clone.getProperty ("string",  {}) == var { "Hello world!" });
-            expect (clone.getProperty ("array",   {}) == array);
+            expect (clone.getProperty ("array",   {}) == var { array });
+        }
+
+        beginTest ("varToNSDictionary converts a void variant to an empty dictionary");
+        {
+            var voidVariant;
+
+            const auto* nsDictionary = varToNSDictionary (voidVariant);
+            expect (nsDictionary != nullptr);
+
+            const auto result = nsDictionaryToVar (nsDictionary);
+            expect (result.isObject());
+            expect (result.getDynamicObject()->getProperties().isEmpty());
         }
     }
 };

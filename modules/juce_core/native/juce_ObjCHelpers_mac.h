@@ -96,20 +96,17 @@ inline var jsonDataToVar (NSData* jsonData)
     return JSON::parse (nsStringToJuce ([jsonString autorelease]));
 }
 
-inline NSDictionary* varObjectToNSDictionary (const var& varToParse)
+// If for any reason the given var cannot be converted into a valid dictionary
+// an empty dictionary will be returned instead
+inline NSDictionary* varToNSDictionary (const var& varToParse)
 {
-    jassert (varToParse.isObject());
-
-    if (! varToParse.isObject())
-        return nullptr;
-
     NSError* error { nullptr };
     NSDictionary* dictionary = [NSJSONSerialization JSONObjectWithData: varToJsonData (varToParse)
                                                                options: NSJSONReadingMutableContainers
                                                                  error: &error];
 
-    jassert (error == nullptr);
-    jassert (dictionary != nullptr);
+    if (dictionary == nullptr || error != nullptr)
+        return @{};
 
     return dictionary;
 }
@@ -127,7 +124,7 @@ inline NSData* jsonObjectToData (const NSObject* jsonObject)
     return jsonData;
 }
 
-inline var nsDictionaryToVar (NSDictionary* dictionary)
+inline var nsDictionaryToVar (const NSDictionary* dictionary)
 {
     return jsonDataToVar (jsonObjectToData (dictionary));
 }

@@ -57,7 +57,7 @@ struct PushNotificationsDelegateDetails
         action.title          = juceStringToNS (a.title);
         action.behavior       = a.style == Action::text ? UIUserNotificationActionBehaviorTextInput
                                                         : UIUserNotificationActionBehaviorDefault;
-        action.parameters     = varObjectToNSDictionary (a.parameters);
+        action.parameters     = varToNSDictionary (a.parameters);
         action.activationMode = a.triggerInBackground ? UIUserNotificationActivationModeBackground
                                                       : UIUserNotificationActivationModeForeground;
         action.destructive    = (bool) a.destructive;
@@ -120,7 +120,7 @@ struct PushNotificationsDelegateDetails
 
         auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
         notification.fireDate   = [NSDate dateWithTimeIntervalSince1970: (double) triggerTime.toMilliseconds() / 1000.0];
-        notification.userInfo   = varObjectToNSDictionary (n.properties);
+        notification.userInfo   = varToNSDictionary (n.properties);
 
         auto soundToPlayString = n.soundToPlay.toString (true);
 
@@ -152,7 +152,7 @@ struct PushNotificationsDelegateDetails
         else if (soundToPlayString.isNotEmpty())
             content.sound = [UNNotificationSound soundNamed: juceStringToNS (soundToPlayString)];
 
-        auto* propsDict = (NSMutableDictionary*) varObjectToNSDictionary (n.properties);
+        auto* propsDict = (NSMutableDictionary*) varToNSDictionary (n.properties);
         [propsDict setObject: juceStringToNS (soundToPlayString) forKey: nsStringLiteral ("com.juce.soundName")];
         content.userInfo = propsDict;
 

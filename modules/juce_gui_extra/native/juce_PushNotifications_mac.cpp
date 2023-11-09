@@ -40,7 +40,7 @@ namespace PushNotificationsDelegateDetailsOsx
         notification.title           = juceStringToNS (n.title);
         notification.subtitle        = juceStringToNS (n.subtitle);
         notification.informativeText = juceStringToNS (n.body);
-        notification.userInfo = varObjectToNSDictionary (n.properties);
+        notification.userInfo = varToNSDictionary (n.properties);
 
         auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
         notification.deliveryDate = [NSDate dateWithTimeIntervalSince1970: (double) triggerTime.toMilliseconds() / 1000.0];
