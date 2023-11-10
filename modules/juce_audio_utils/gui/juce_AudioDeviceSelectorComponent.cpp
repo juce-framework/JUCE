@@ -208,6 +208,63 @@ struct AudioDeviceSetupDetails
 static String getNoDeviceString()   { return "<< " + TRANS ("none") + " >>"; }
 
 //==============================================================================
+class AudioDeviceSelectorComponent::MidiOutputSelector final : public Component,
+                                                               private ChangeListener
+{
+public:
+    explicit MidiOutputSelector (AudioDeviceManager& dm)
+        : deviceManager (dm)
+    {
+        deviceManager.addChangeListener (this);
+        selector.onChange = [&]
+        {
+            const auto selectedId = selector.getSelectedId();
+            jassert (selectedId != 0);
+
+            const auto deviceId = selectedId == -1
+                                ? String{}
+                                : MidiOutput::getAvailableDevices()[selectedId - 1].identifier;
+            deviceManager.setDefaultMidiOutputDevice (deviceId);
+        };
+
+        updateListOfDevices();
+        addAndMakeVisible (selector);
+    }
+
+    ~MidiOutputSelector() final
+    {
+        deviceManager.removeChangeListener (this);
+    }
+
+    void resized() final { selector.setBounds (getLocalBounds()); }
+
+private:
+    void updateListOfDevices()
+    {
+        selector.clear();
+
+        const auto midiOutputs = MidiOutput::getAvailableDevices();
+
+        selector.addItem (getNoDeviceString(), -1);
+        selector.setSelectedId (-1, dontSendNotification);
+        selector.addSeparator();
+
+        for (auto [id, midiOutput] : enumerate (midiOutputs, 1))
+        {
+            selector.addItem (midiOutput.name, id);
+
+            if (midiOutput.identifier == deviceManager.getDefaultMidiOutputIdentifier())
+                selector.setSelectedId (id, dontSendNotification);
+        }
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) final { updateListOfDevices(); }
+
+    ComboBox selector;
+    AudioDeviceManager& deviceManager;
+};
+
+//==============================================================================
 class AudioDeviceSettingsPanel : public Component,
                                  private ChangeListener
 {
@@ -1036,9 +1093,8 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
 
     if (showMidiOutputSelector)
     {
-        midiOutputSelector = std::make_unique<ComboBox>();
+        midiOutputSelector = std::make_unique<MidiOutputSelector> (deviceManager);
         addAndMakeVisible (midiOutputSelector.get());
-        midiOutputSelector->onChange = [this] { updateMidiOutput(); };
 
         midiOutputLabel = std::make_unique<Label> ("lm", TRANS ("MIDI Output:"));
         midiOutputLabel->attachToComponent (midiOutputSelector.get(), true);
@@ -1120,16 +1176,6 @@ void AudioDeviceSelectorComponent::updateDeviceType()
     }
 }
 
-void AudioDeviceSelectorComponent::updateMidiOutput()
-{
-    auto selectedId = midiOutputSelector->getSelectedId();
-
-    if (selectedId == -1)
-        deviceManager.setDefaultMidiOutputDevice ({});
-    else
-        deviceManager.setDefaultMidiOutputDevice (currentMidiOutputs[selectedId - 1].identifier);
-}
-
 void AudioDeviceSelectorComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     updateAllControls();
@@ -1167,29 +1213,6 @@ void AudioDeviceSelectorComponent::updateAllControls()
         midiInputsList->updateDevices();
         midiInputsList->updateContent();
         midiInputsList->repaint();
-    }
-
-    if (midiOutputSelector != nullptr)
-    {
-        midiOutputSelector->clear();
-
-        currentMidiOutputs = MidiOutput::getAvailableDevices();
-
-        midiOutputSelector->addItem (getNoDeviceString(), -1);
-        midiOutputSelector->addSeparator();
-
-        auto defaultOutputIdentifier = deviceManager.getDefaultMidiOutputIdentifier();
-        int i = 0;
-
-        for (auto& out : currentMidiOutputs)
-        {
-            midiOutputSelector->addItem (out.name, i + 1);
-
-            if (defaultOutputIdentifier.isNotEmpty() && out.identifier == defaultOutputIdentifier)
-                midiOutputSelector->setSelectedId (i + 1);
-
-            ++i;
-        }
     }
 
     resized();
