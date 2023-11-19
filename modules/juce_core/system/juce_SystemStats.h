@@ -65,6 +65,7 @@ public:
         MacOS_11        = MacOSX | 16,
         MacOS_12        = MacOSX | 17,
         MacOS_13        = MacOSX | 18,
+        MacOS_14        = MacOSX | 19,
 
         Win2000         = Windows | 1,
         WinXP           = Windows | 2,
