@@ -43,6 +43,11 @@ enum class PropertySubscriptionCommand
    #undef X
 };
 
+/**
+    Functions to use with PropertySubscriptionCommand.
+
+    @tags{Audio}
+*/
 struct PropertySubscriptionCommandUtils
 {
     PropertySubscriptionCommandUtils() = delete;
@@ -244,6 +249,8 @@ struct PropertyDelegate
 
 } // namespace juce::midi_ci
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 
@@ -268,3 +275,5 @@ struct SerialisationTraits<midi_ci::PropertySubscriptionCommand>
 };
 
 } // namespace juce
+
+#endif  // ifndef DOXYGEN

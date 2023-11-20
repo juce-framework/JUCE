@@ -319,6 +319,7 @@ private:
     pair somewhere that requires an iterable range, such as in a ranged-for loop.
 
     @see makeRange()
+    @tags{Core}
 */
 template <typename Begin, typename End>
 class IteratorPair

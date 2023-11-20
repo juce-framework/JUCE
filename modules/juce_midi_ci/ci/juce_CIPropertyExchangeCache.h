@@ -44,7 +44,9 @@ public:
     JUCE_DECLARE_NON_COPYABLE (InitiatorPropertyExchangeCache)
 
     /** Holds a token that can be used to stop waiting for a reply, along with
-        an identifier byte which uniquely identifies an ongoing transaction.
+        an identifier byte that uniquely identifies an ongoing transaction.
+
+        @tags{Audio}
     */
     struct TokenAndId
     {
