@@ -3,6 +3,12 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 7.0.9
+
+  - Added MIDI-CI support
+  - Added enumerate utility function
+  - Fixed a macOS/iOS CMake signing issue
+
 ## Version 7.0.8
 
   - Added macOS/iOS AudioWorkgroup support

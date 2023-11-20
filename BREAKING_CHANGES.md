@@ -1,5 +1,7 @@
 # JUCE breaking changes
 
+# Version 7.0.9
+
 ## Change
 
 CachedValue::operator==() will now emit floating point comparison warnings if 
