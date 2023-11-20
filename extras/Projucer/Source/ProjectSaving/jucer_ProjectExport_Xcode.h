@@ -46,7 +46,7 @@ if [ -e "$JUCE_INSTALL_PATH$JUCE_PRODUCT_NAME" ]; then :
   rm -rf "$JUCE_INSTALL_PATH$JUCE_PRODUCT_NAME"
 fi
 mkdir -p "$JUCE_INSTALL_PATH"
-cp -r "$JUCE_SOURCE_BUNDLE" "$JUCE_INSTALL_PATH"
+ln -sfhv "$JUCE_SOURCE_BUNDLE" "$JUCE_INSTALL_PATH"
 )";
 
 static constexpr const char* adhocCodeSignTemplate = R"(
