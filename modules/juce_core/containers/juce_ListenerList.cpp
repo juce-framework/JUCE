@@ -300,6 +300,119 @@ public:
                 expect (test.wereAllNonRemovedListenersCalled (numCalls));
             }
         }
+
+        beginTest ("Deleting the listener list from a callback");
+        {
+            struct Listener
+            {
+                std::function<void()> onCallback;
+                void notify() { onCallback(); }
+            };
+
+            auto listeners = std::make_unique<juce::ListenerList<Listener>>();
+
+            const auto callback = [&]
+            {
+                expect (listeners != nullptr);
+                listeners.reset();
+            };
+
+            Listener listener1 { callback };
+            Listener listener2 { callback };
+
+            listeners->add (&listener1);
+            listeners->add (&listener2);
+
+            listeners->call (&Listener::notify);
+
+            expect (listeners == nullptr);
+        }
+
+        beginTest ("Using a BailOutChecker");
+        {
+            struct Listener
+            {
+                std::function<void()> onCallback;
+                void notify() { onCallback(); }
+            };
+
+            ListenerList<Listener> listeners;
+
+            bool listener1Called = false;
+            bool listener2Called = false;
+            bool listener3Called = false;
+
+            Listener listener1 { [&]{ listener1Called = true; } };
+            Listener listener2 { [&]{ listener2Called = true; } };
+            Listener listener3 { [&]{ listener3Called = true; } };
+
+            listeners.add (&listener1);
+            listeners.add (&listener2);
+            listeners.add (&listener3);
+
+            struct BailOutChecker
+            {
+                bool& bailOutBool;
+                bool shouldBailOut() const { return bailOutBool; }
+            };
+
+            BailOutChecker bailOutChecker { listener2Called };
+            listeners.callChecked (bailOutChecker, &Listener::notify);
+
+            expect (  listener1Called);
+            expect (  listener2Called);
+            expect (! listener3Called);
+        }
+
+        beginTest ("Using a critical section");
+        {
+            struct Listener
+            {
+                std::function<void()> onCallback;
+                void notify() { onCallback(); }
+            };
+
+            struct TestCriticalSection
+            {
+                TestCriticalSection()  { isAlive() = true; }
+                ~TestCriticalSection() { isAlive() = false; }
+
+                static void enter() noexcept { numOutOfScopeCalls() += isAlive() ? 0 : 1; }
+                static void exit() noexcept  { numOutOfScopeCalls() += isAlive() ? 0 : 1; }
+
+                static bool tryEnter() noexcept
+                {
+                    numOutOfScopeCalls() += isAlive() ? 0 : 1;
+                    return true;
+                }
+
+                using ScopedLockType = GenericScopedLock<TestCriticalSection>;
+
+                static bool& isAlive()
+                {
+                    static bool inScope = false;
+                    return inScope;
+                }
+
+                static int& numOutOfScopeCalls()
+                {
+                    static int numOutOfScopeCalls = 0;
+                    return numOutOfScopeCalls;
+                }
+            };
+
+            auto listeners = std::make_unique<juce::ListenerList<Listener, Array<Listener*, TestCriticalSection>>>();
+
+            const auto callback = [&]{ listeners.reset(); };
+
+            Listener listener { callback };
+
+            listeners->add (&listener);
+            listeners->call (&Listener::notify);
+
+            expect (listeners == nullptr);
+            expect (TestCriticalSection::numOutOfScopeCalls() == 0);
+        }
     }
 
 private:

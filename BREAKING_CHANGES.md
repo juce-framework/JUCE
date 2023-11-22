@@ -4,6 +4,26 @@
 
 ## Change
 
+The ListenerList::Iterator class has been removed.
+
+**Possible Issues**
+
+Any code directly referencing the ListenerList::Iterator will fail to compile.
+
+**Workaround**
+
+In most cases there should be a public member function that does the required
+job, for example, call, add, remove, or clear. In other cases you can access the
+raw array of listeners to iterate through them by calling getListeners().
+
+**Rationale**
+
+Iterating through the listeners using the ListenerList::Iterator could in a
+number of cases lead to surprising results and undefined behavior.
+
+
+## Change
+
 The background colour of the Toolbar::CustomisationDialog has been changed from
 white to a new, customisable value, that matches Toolbar::backgroundColourId by
 default.
