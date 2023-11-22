@@ -172,14 +172,18 @@ struct PropertyDelegateDetail
     static auto getSubscribeId (const PropertyRequestHeader&) { return String{}; }
     static auto getSubscribeId (const PropertyReplyHeader&) { return String{}; }
 
-    static auto getStatus (const PropertySubscriptionHeader&) { return 0; }
-    static auto getStatus (const PropertyRequestHeader&) { return 0; }
-    static auto getStatus (const PropertyReplyHeader& h) { return h.status; }
+    static std::optional<int> getStatus (const PropertySubscriptionHeader&) { return {}; }
+    static std::optional<int> getStatus (const PropertyRequestHeader&) { return {}; }
+    static std::optional<int> getStatus (const PropertyReplyHeader& h) { return h.status; }
 
     template <typename T>
     static auto toFieldsFromHeader (const T& t)
     {
         auto fields = t.extended;
+
+        // Status shall always be included if it is present in the header
+        if (const auto status = getStatus (t))
+            fields["status"] = *status;
 
         if (getResource (t) != getResource (T()))
             fields["resource"] = getResource (t);
@@ -198,9 +202,6 @@ struct PropertyDelegateDetail
 
         if (t.mediaType != T().mediaType)
             fields["mediaType"] = t.mediaType;
-
-        if (getStatus (t) != getStatus (T()))
-            fields["status"] = getStatus (t);
 
         if (getSetPartial (t))
             fields["setPartial"] = true;
