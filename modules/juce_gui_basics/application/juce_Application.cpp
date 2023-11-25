@@ -63,8 +63,8 @@ void JUCEApplication::getCommandInfo (const CommandID commandID, ApplicationComm
 {
     if (commandID == StandardApplicationCommandIDs::quit)
     {
-        result.setInfo (TRANS("Quit"),
-                        TRANS("Quits the application"),
+        result.setInfo (TRANS ("Quit"),
+                        TRANS ("Quits the application"),
                         "Application", 0);
 
         result.defaultKeypresses.add (KeyPress ('q', ModifierKeys::commandModifier, 0));
@@ -83,16 +83,12 @@ bool JUCEApplication::perform (const InvocationInfo& info)
 }
 
 //==============================================================================
-#if JUCE_MAC
- extern void juce_initialiseMacMainMenu();
-#endif
-
 bool JUCEApplication::initialiseApp()
 {
     if (JUCEApplicationBase::initialiseApp())
     {
        #if JUCE_MAC
-        juce_initialiseMacMainMenu(); // (needs to get the app's name)
+        initialiseMacMainMenu(); // (needs to get the app's name)
        #endif
 
         return true;

@@ -39,7 +39,7 @@ AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
 
     for (int i = cs.types.size(); --i >= 0;)
     {
-        auto& t = cs.types.getReference(i);
+        auto& t = cs.types.getReference (i);
         getColourValue (t.name) = t.colour.toString();
     }
 
@@ -86,7 +86,7 @@ StringArray AppearanceSettings::getPresetSchemes()
 {
     StringArray s;
     for (int i = 0; i < presetSchemeFiles.size(); ++i)
-        s.add (presetSchemeFiles.getReference(i).getFileNameWithoutExtension());
+        s.add (presetSchemeFiles.getReference (i).getFileNameWithoutExtension());
 
     return s;
 }
@@ -165,7 +165,7 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 
     for (int i = cs.types.size(); --i >= 0;)
     {
-        CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference(i);
+        CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference (i);
         getColour (t.name, t.colour);
     }
 

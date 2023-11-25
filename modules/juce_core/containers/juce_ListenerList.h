@@ -114,6 +114,18 @@ public:
         });
     }
 
+    /** Adds a listener that will be automatically removed again when the Guard is destroyed.
+
+        Be very careful to ensure that the ErasedScopeGuard is destroyed or released before the
+        ListenerList is destroyed, otherwise the ErasedScopeGuard may attempt to dereference a
+        dangling pointer when it is destroyed, which will result in a crash.
+    */
+    ErasedScopeGuard addScoped (ListenerClass& listenerToAdd)
+    {
+        add (&listenerToAdd);
+        return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
+    }
+
     /** Returns the number of registered listeners. */
     int size() const noexcept                                { return listeners.size(); }
 
@@ -248,18 +260,18 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    void call (void (ListenerClass::*callbackFunction) ())
+    void call (void (ListenerClass::*callbackFunction)())
     {
         call ([=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
 
-    void callExcluding (ListenerClass* listenerToExclude, void (ListenerClass::*callbackFunction) ())
+    void callExcluding (ListenerClass* listenerToExclude, void (ListenerClass::*callbackFunction)())
     {
         callExcluding (listenerToExclude, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
 
     template <class BailOutCheckerType>
-    void callChecked (const BailOutCheckerType& bailOutChecker, void (ListenerClass::*callbackFunction) ())
+    void callChecked (const BailOutCheckerType& bailOutChecker, void (ListenerClass::*callbackFunction)())
     {
         callChecked (bailOutChecker, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
@@ -267,7 +279,7 @@ public:
     template <class BailOutCheckerType>
     void callCheckedExcluding (ListenerClass* listenerToExclude,
                                const BailOutCheckerType& bailOutChecker,
-                               void (ListenerClass::*callbackFunction) ())
+                               void (ListenerClass::*callbackFunction)())
     {
         callCheckedExcluding (listenerToExclude, bailOutChecker, [=] (ListenerClass& l) { (l.*callbackFunction)(); });
     }
@@ -325,7 +337,10 @@ private:
         WrappedIterator (const ListenerList& listToIterate, WrappedIterator*& listHeadIn)
             : it (listToIterate), listHead (listHeadIn), next (listHead)
         {
+            // GCC 12.2 with O1 and above gets confused here
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdangling-pointer")
             listHead = this;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         ~WrappedIterator()

@@ -29,7 +29,19 @@ function(_juce_create_atomic_target target_name)
         return()
     endif()
 
-    set(test_file_contents
+    set(test_atomic_with_is_lock_free_file_contents
+            [[
+            #include <atomic>
+
+            int main (int argc, char** argv)
+            {
+                std::atomic<long long> ll { static_cast<long long> (argc) };
+                ll ^= static_cast<long long> (ll.is_lock_free());
+                return static_cast<int> (ll);
+            }
+        ]])
+
+    set(test_simple_atomic_file_contents
         [[
             #include <atomic>
 
@@ -47,11 +59,11 @@ function(_juce_create_atomic_target target_name)
     string(RANDOM LENGTH 16 random_dir_string)
     set(test_bindir "${CMAKE_CURRENT_BINARY_DIR}/check_atomic_dir_${random_dir_string}")
 
-    file(WRITE "${test_file_name}" "${test_file_contents}")
+    file(WRITE "${test_file_name}" "${test_atomic_with_is_lock_free_file_contents}")
 
     try_compile(compile_result "${test_bindir}" "${test_file_name}"
         OUTPUT_VARIABLE test_build_output_0
-        CXX_STANDARD 14
+        CXX_STANDARD 17
         CXX_STANDARD_REQUIRED TRUE
         CXX_EXTENSIONS FALSE)
 
@@ -59,20 +71,42 @@ function(_juce_create_atomic_target target_name)
         try_compile(compile_result "${test_bindir}" "${test_file_name}"
             OUTPUT_VARIABLE test_build_output_1
             LINK_LIBRARIES atomic
-            CXX_STANDARD 14
+            CXX_STANDARD 17
             CXX_STANDARD_REQUIRED TRUE
             CXX_EXTENSIONS FALSE)
 
         if (NOT compile_result)
-            message(FATAL_ERROR
-                "First build output:\n"
-                "${test_build_output_0}"
-                "\n\nSecond build output:\n"
-                "${test_build_output_1}"
-                "\n\nJUCE requires support for std::atomic, but this system cannot "
-                "successfully compile a program which uses std::atomic. "
-                "You may need to install a dedicated libatomic package using your "
-                "system's package manager.")
+            file(WRITE "${test_file_name}" "${test_simple_atomic_file_contents}")
+
+            try_compile(compile_result "${test_bindir}" "${test_file_name}"
+                    OUTPUT_VARIABLE test_build_output_2
+                    LINK_LIBRARIES atomic
+                    CXX_STANDARD 17
+                    CXX_STANDARD_REQUIRED TRUE
+                    CXX_EXTENSIONS FALSE)
+
+            if (NOT compile_result)
+                message(FATAL_ERROR
+                    "First build output:\n"
+                    "${test_build_output_0}"
+                    "\n\nSecond build output:\n"
+                    "${test_build_output_1}"
+                    "\n\nThird build output:\n"
+                    "${test_build_output_2}"
+                    "\n\nJUCE requires support for std::atomic, but this system cannot "
+                    "successfully compile a program which uses std::atomic. "
+                    "You may need to install a dedicated libatomic package using your "
+                    "system's package manager.")
+            else()
+                message(WARNING
+                    "First build output:\n"
+                    "${test_build_output_0}"
+                    "\n\nSecond build output:\n"
+                    "${test_build_output_1}"
+                    "\n\nIf you are seeing this warning it means that the libatomic library"
+                    "on this system doesn't support is_lock_free."
+                    "Please let the JUCE team know.")
+            endif()
         endif()
 
         target_link_libraries("${target_name}" INTERFACE atomic)

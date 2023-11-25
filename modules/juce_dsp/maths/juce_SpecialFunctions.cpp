@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 double SpecialFunctions::besselI0 (double x) noexcept
@@ -139,5 +137,4 @@ Complex<double> SpecialFunctions::asne (Complex<double> w, double k) noexcept
     return 2.0 / MathConstants<double>::pi * std::asin (last);
 }
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -27,13 +27,13 @@ namespace juce
 {
 
 #if JUCE_MAC
- #include "../native/juce_mac_CameraDevice.h"
+ #include "../native/juce_CameraDevice_mac.h"
 #elif JUCE_WINDOWS
- #include "../native/juce_win32_CameraDevice.h"
+ #include "../native/juce_CameraDevice_windows.h"
 #elif JUCE_IOS
- #include "../native/juce_ios_CameraDevice.h"
+ #include "../native/juce_CameraDevice_ios.h"
 #elif JUCE_ANDROID
- #include "../native/juce_android_CameraDevice.h"
+ #include "../native/juce_CameraDevice_android.h"
 #endif
 
 #if JUCE_ANDROID || JUCE_IOS
@@ -191,10 +191,10 @@ StringArray CameraDevice::getAvailableDevices()
     }
 }
 
-CameraDevice* CameraDevice::openDevice (int index,
-                                        int minWidth, int minHeight,
-                                        int maxWidth, int maxHeight,
-                                        bool useHighQuality)
+CameraDevice* CameraDevice::openDevice ([[maybe_unused]] int index,
+                                        [[maybe_unused]] int minWidth, [[maybe_unused]] int minHeight,
+                                        [[maybe_unused]] int maxWidth, [[maybe_unused]] int maxHeight,
+                                        [[maybe_unused]] bool useHighQuality)
 {
     jassert (juce::MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
@@ -204,9 +204,6 @@ CameraDevice* CameraDevice::openDevice (int index,
     if (d != nullptr && d->pimpl->openedOk())
         return d.release();
    #else
-    ignoreUnused (index, minWidth, minHeight);
-    ignoreUnused (maxWidth, maxHeight, useHighQuality);
-
     // Use openDeviceAsync to open a camera device on iOS or Android.
     jassertfalse;
    #endif

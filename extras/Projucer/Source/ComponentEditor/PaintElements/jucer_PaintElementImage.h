@@ -65,7 +65,7 @@ public:
         String newResource, oldResource;
     };
 
-    void setResource (const String&, const bool);
+    void setResource (const String&, bool);
 
     String getResource() const;
 
@@ -73,7 +73,7 @@ public:
     class SetOpacityAction   : public PaintElementUndoableAction <PaintElementImage>
     {
     public:
-        SetOpacityAction (PaintElementImage* const, const double);
+        SetOpacityAction (PaintElementImage* const, double);
 
         bool perform();
         bool undo();
@@ -82,7 +82,7 @@ public:
         double newOpacity, oldOpacity;
     };
 
-    void setOpacity (double, const bool);
+    void setOpacity (double, bool);
     double getOpacity() const noexcept;
 
     //==============================================================================
@@ -94,7 +94,7 @@ public:
     class SetStretchModeAction   : public PaintElementUndoableAction <PaintElementImage>
     {
     public:
-        SetStretchModeAction (PaintElementImage* const, const StretchMode);
+        SetStretchModeAction (PaintElementImage* const, StretchMode);
 
         bool perform();
         bool undo();
@@ -105,7 +105,7 @@ public:
 
     StretchMode getStretchMode() const noexcept;
 
-    void setStretchMode (const StretchMode, const bool);
+    void setStretchMode (StretchMode, bool);
 
     //==============================================================================
     XmlElement* createXml() const override;

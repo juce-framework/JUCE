@@ -177,7 +177,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font, const String& t
             auto isWhitespace = isNonBreakingSpace (*t) || t.isWhitespace();
 
             glyphs.add (PositionedGlyph (font, t.getAndAdvance(),
-                                         newGlyphs.getUnchecked(i),
+                                         newGlyphs.getUnchecked (i),
                                          xOffset + thisX, yOffset,
                                          nextX - thisX, isWhitespace));
         }
@@ -239,8 +239,8 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
     {
         int i = lineStartIndex;
 
-        if (glyphs.getReference(i).getCharacter() != '\n'
-              && glyphs.getReference(i).getCharacter() != '\r')
+        if (glyphs.getReference (i).getCharacter() != '\n'
+              && glyphs.getReference (i).getCharacter() != '\r')
             ++i;
 
         auto lineMaxX = glyphs.getReference (lineStartIndex).getLeft() + maxLineWidth;
@@ -256,7 +256,7 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
                 ++i;
 
                 if (c == '\r' && i < glyphs.size()
-                     && glyphs.getReference(i).getCharacter() == '\n')
+                     && glyphs.getReference (i).getCharacter() == '\n')
                     ++i;
 
                 break;
@@ -312,7 +312,7 @@ void GlyphArrangement::addFittedText (const Font& f, const String& text,
                                       Justification layout, int maximumLines,
                                       float minimumHorizontalScale)
 {
-    if (minimumHorizontalScale == 0.0f)
+    if (approximatelyEqual (minimumHorizontalScale, 0.0f))
         minimumHorizontalScale = Font::getDefaultMinimumHorizontalScaleFactor();
 
     // doesn't make much sense if this is outside a sensible range of 0.5 to 1.0
@@ -363,7 +363,7 @@ void GlyphArrangement::moveRangeOfGlyphs (int startIndex, int num, const float d
 {
     jassert (startIndex >= 0);
 
-    if (dx != 0.0f || dy != 0.0f)
+    if (! approximatelyEqual (dx, 0.0f) || ! approximatelyEqual (dy, 0.0f))
     {
         if (num < 0 || startIndex + num > glyphs.size())
             num = glyphs.size() - startIndex;
@@ -491,7 +491,7 @@ void GlyphArrangement::justifyGlyphs (int startIndex, int num,
             {
                 auto glyphY = glyphs.getReference (startIndex + i).getBaselineY();
 
-                if (glyphY != baseY)
+                if (! approximatelyEqual (glyphY, baseY))
                 {
                     spreadOutLine (startIndex + lineStart, i - lineStart, width);
 
@@ -695,7 +695,7 @@ void GlyphArrangement::drawGlyphUnderline (const Graphics& g, const PositionedGl
     auto lineThickness = (pg.font.getDescent()) * 0.3f;
     auto nextX = pg.x + pg.w;
 
-    if (i < glyphs.size() - 1 && glyphs.getReference (i + 1).y == pg.y)
+    if (i < glyphs.size() - 1 && approximatelyEqual (glyphs.getReference (i + 1).y, pg.y))
         nextX = glyphs.getReference (i + 1).x;
 
     Path p;

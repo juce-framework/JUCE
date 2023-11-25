@@ -68,7 +68,7 @@ namespace ValueTreeSynchroniserHelpers
         stream.writeCompressedInt (path.size());
 
         for (int i = path.size(); --i >= 0;)
-            stream.writeCompressedInt (path.getUnchecked(i));
+            stream.writeCompressedInt (path.getUnchecked (i));
     }
 
     static ValueTree readSubTreeLocation (MemoryInputStream& input, ValueTree v)

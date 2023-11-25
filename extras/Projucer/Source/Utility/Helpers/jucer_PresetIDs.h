@@ -202,6 +202,7 @@ namespace Ids
     DECLARE_ID (appSandboxHomeDirRW);
     DECLARE_ID (appSandboxAbsDirRO);
     DECLARE_ID (appSandboxAbsDirRW);
+    DECLARE_ID (appSandboxExceptionIOKit);
     DECLARE_ID (hardenedRuntime);
     DECLARE_ID (hardenedRuntimeOptions);
     DECLARE_ID (microphonePermissionNeeded);
@@ -234,7 +235,13 @@ namespace Ids
     DECLARE_ID (androidGradleSettingsContent);
     DECLARE_ID (androidCustomStringXmlElements);
     DECLARE_ID (androidBluetoothNeeded);
+    DECLARE_ID (androidBluetoothScanNeeded);
+    DECLARE_ID (androidBluetoothAdvertiseNeeded);
+    DECLARE_ID (androidBluetoothConnectNeeded);
     DECLARE_ID (androidExternalReadNeeded);
+    DECLARE_ID (androidReadMediaAudioPermission);
+    DECLARE_ID (androidReadMediaImagesPermission);
+    DECLARE_ID (androidReadMediaVideoPermission);
     DECLARE_ID (androidExternalWriteNeeded);
     DECLARE_ID (androidInAppBilling);
     DECLARE_ID (androidVibratePermissionNeeded);
@@ -277,6 +284,7 @@ namespace Ids
     const Identifier androidPluginVersion ("gradleWrapperVersion"); // old name is very confusing, but we need to remain backward compatible
     DECLARE_ID (gradleToolchain);
     DECLARE_ID (gradleToolchainVersion);
+    DECLARE_ID (gradleClangTidy);
     DECLARE_ID (linuxExtraPkgConfig);
     DECLARE_ID (font);
     DECLARE_ID (colour);
@@ -385,6 +393,7 @@ namespace Ids
     DECLARE_ID (lv2Uri);
     DECLARE_ID (lv2UriUi);
     DECLARE_ID (lv2BinaryLocation);
+    DECLARE_ID (vst3ManifestEnabled);
 
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);

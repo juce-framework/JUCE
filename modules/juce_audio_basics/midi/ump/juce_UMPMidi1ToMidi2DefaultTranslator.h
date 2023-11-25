@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -61,10 +59,10 @@ public:
 
         const HelperValues helperValues
         {
-            (uint8_t) ((0x4 << 0x4) | Utils::getGroup (firstWord)),
-            (uint8_t) ((firstWord >> 0x10) & 0xff),
-            (uint8_t) ((firstWord >> 0x08) & 0x7f),
-            (uint8_t) ((firstWord >> 0x00) & 0x7f),
+            std::byte ((0x4 << 0x4) | Utils::getGroup (firstWord)),
+            std::byte ((firstWord >> 0x10) & 0xff),
+            std::byte ((firstWord >> 0x08) & 0x7f),
+            std::byte ((firstWord >> 0x00) & 0x7f),
         };
 
         switch (Utils::getStatus (firstWord))
@@ -128,32 +126,32 @@ private:
 
     struct HelperValues
     {
-        uint8_t typeAndGroup;
-        uint8_t byte0;
-        uint8_t byte1;
-        uint8_t byte2;
+        std::byte typeAndGroup;
+        std::byte byte0;
+        std::byte byte1;
+        std::byte byte2;
     };
 
-    static PacketX2 processNoteOnOrOff (const HelperValues helpers);
-    static PacketX2 processPolyPressure (const HelperValues helpers);
+    static PacketX2 processNoteOnOrOff (HelperValues helpers);
+    static PacketX2 processPolyPressure (HelperValues helpers);
 
-    bool processControlChange (const HelperValues helpers, PacketX2& packet);
+    bool processControlChange (HelperValues helpers, PacketX2& packet);
 
-    PacketX2 processProgramChange (const HelperValues helpers) const;
+    PacketX2 processProgramChange (HelperValues helpers) const;
 
-    static PacketX2 processChannelPressure (const HelperValues helpers);
-    static PacketX2 processPitchBend (const HelperValues helpers);
+    static PacketX2 processChannelPressure (HelperValues helpers);
+    static PacketX2 processPitchBend (HelperValues helpers);
 
     class PnAccumulator
     {
     public:
-        bool addByte (uint8_t cc, uint8_t byte);
+        bool addByte (uint8_t cc, std::byte byte);
 
-        const std::array<uint8_t, 4>& getBytes() const noexcept { return bytes; }
+        const std::array<std::byte, 4>& getBytes() const noexcept { return bytes; }
         PnKind getKind() const noexcept { return kind; }
 
     private:
-        std::array<uint8_t, 4> bytes;
+        std::array<std::byte, 4> bytes;
         uint8_t index = 0;
         PnKind kind = PnKind::nrpn;
     };
@@ -185,7 +183,6 @@ private:
     std::array<ChannelBanks, 16> groupBanks;
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

@@ -28,67 +28,24 @@
 #if JUCE_MAC || JUCE_IOS
 
  #if JUCE_IOS
-  #if JUCE_MODULE_AVAILABLE_juce_opengl && defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
+  #if JUCE_MODULE_AVAILABLE_juce_opengl
    #define GLES_SILENCE_DEPRECATION 1
   #endif
 
+  #define Component CarbonDummyCompName
   #import <Foundation/Foundation.h>
+  #undef Component
+
   #import <UIKit/UIKit.h>
   #import <CoreData/CoreData.h>
   #import <MobileCoreServices/MobileCoreServices.h>
   #include <sys/fcntl.h>
  #else
-  #if JUCE_MODULE_AVAILABLE_juce_opengl && defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14
+  #if JUCE_MODULE_AVAILABLE_juce_opengl
    #define GL_SILENCE_DEPRECATION 1
   #endif
 
   #import <Cocoa/Cocoa.h>
-  #if (! defined MAC_OS_X_VERSION_10_12) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12
-   #define NSEventModifierFlagCommand       NSCommandKeyMask
-   #define NSEventModifierFlagControl       NSControlKeyMask
-   #define NSEventModifierFlagHelp          NSHelpKeyMask
-   #define NSEventModifierFlagNumericPad    NSNumericPadKeyMask
-   #define NSEventModifierFlagOption        NSAlternateKeyMask
-   #define NSEventModifierFlagShift         NSShiftKeyMask
-   #define NSCompositingOperationSourceOver NSCompositeSourceOver
-   #define NSEventMaskApplicationDefined    NSApplicationDefinedMask
-   #define NSEventTypeApplicationDefined    NSApplicationDefined
-   #define NSEventTypeCursorUpdate          NSCursorUpdate
-   #define NSEventTypeMouseMoved            NSMouseMoved
-   #define NSEventTypeLeftMouseDown         NSLeftMouseDown
-   #define NSEventTypeRightMouseDown        NSRightMouseDown
-   #define NSEventTypeOtherMouseDown        NSOtherMouseDown
-   #define NSEventTypeLeftMouseUp           NSLeftMouseUp
-   #define NSEventTypeRightMouseUp          NSRightMouseUp
-   #define NSEventTypeOtherMouseUp          NSOtherMouseUp
-   #define NSEventTypeLeftMouseDragged      NSLeftMouseDragged
-   #define NSEventTypeRightMouseDragged     NSRightMouseDragged
-   #define NSEventTypeOtherMouseDragged     NSOtherMouseDragged
-   #define NSEventTypeScrollWheel           NSScrollWheel
-   #define NSEventTypeKeyDown               NSKeyDown
-   #define NSEventTypeKeyUp                 NSKeyUp
-   #define NSEventTypeFlagsChanged          NSFlagsChanged
-   #define NSEventMaskAny                   NSAnyEventMask
-   #define NSWindowStyleMaskBorderless      NSBorderlessWindowMask
-   #define NSWindowStyleMaskClosable        NSClosableWindowMask
-   #define NSWindowStyleMaskFullScreen      NSFullScreenWindowMask
-   #define NSWindowStyleMaskMiniaturizable  NSMiniaturizableWindowMask
-   #define NSWindowStyleMaskResizable       NSResizableWindowMask
-   #define NSWindowStyleMaskTitled          NSTitledWindowMask
-   #define NSAlertStyleCritical             NSCriticalAlertStyle
-   #define NSControlSizeRegular             NSRegularControlSize
-   #define NSEventTypeMouseEntered          NSMouseEntered
-   #define NSEventTypeMouseExited           NSMouseExited
-   #define NSAlertStyleInformational        NSInformationalAlertStyle
-   #define NSEventTypeTabletPoint           NSTabletPoint
-   #define NSEventTypeTabletProximity       NSTabletProximity
-   #define NSEventTypeFlagsChanged          NSFlagsChanged
-   #define NSEventTypeAppKitDefined         NSAppKitDefined
-   #define NSEventTypeSystemDefined         NSSystemDefined
-   #define NSEventTypeApplicationDefined    NSApplicationDefined
-   #define NSEventTypePeriodic              NSPeriodic
-   #define NSEventTypeSmartMagnify          NSEventTypeSmartMagnify
-  #endif
   #import <CoreAudio/HostTime.h>
   #include <sys/dir.h>
  #endif
@@ -156,18 +113,7 @@
  #include <iphlpapi.h>
  #include <accctrl.h>
  #include <aclapi.h>
-
- #if ! JUCE_CXX17_IS_AVAILABLE
-  #pragma push_macro ("WIN_NOEXCEPT")
-  #define WIN_NOEXCEPT
- #endif
-
  #include <mapi.h>
-
- #if ! JUCE_CXX17_IS_AVAILABLE
-  #pragma pop_macro ("WIN_NOEXCEPT")
- #endif
-
  #include <float.h>
  #include <process.h>
  #include <shlobj.h>
@@ -257,11 +203,14 @@
  #include <sys/ptrace.h>
  #include <sys/socket.h>
  #include <sys/stat.h>
+ #include <sys/syscall.h>
  #include <sys/sysinfo.h>
  #include <sys/time.h>
  #include <sys/types.h>
  #include <sys/vfs.h>
  #include <sys/wait.h>
+ #include <sys/timerfd.h>
+ #include <sys/eventfd.h>
  #include <utime.h>
  #include <poll.h>
 
@@ -318,11 +267,13 @@
  #include <dirent.h>
  #include <fnmatch.h>
  #include <sys/wait.h>
+ #include <sys/timerfd.h>
+ #include <sys/eventfd.h>
  #include <android/api-level.h>
  #include <poll.h>
 
- // If you are getting include errors here, then you to re-build the Projucer
- // and re-save your .jucer file.
+ // If you are getting include errors here, then you need to re-build
+ // the Projucer and re-save your .jucer file.
  #include <cpu-features.h>
 #endif
 

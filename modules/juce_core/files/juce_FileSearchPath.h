@@ -71,12 +71,26 @@ public:
 
     /** Returns one of the folders in this search path.
         The file returned isn't guaranteed to actually be a valid directory.
-        @see getNumPaths
+        @see getNumPaths, getRawString
     */
     File operator[] (int index) const;
 
+    /** Returns the unaltered text of the folder at the specified index.
+
+        Unlike operator[], this function returns the exact text that was entered. It does not
+        attempt to convert the path into an absolute path.
+
+        This may be useful if the directory string is expected to understand environment variables
+        or other placeholders that the File constructor doesn't necessarily understand.
+        @see operator[]
+    */
+    String getRawString (int index) const;
+
     /** Returns the search path as a semicolon-separated list of directories. */
     String toString() const;
+
+    /** Returns the search paths, joined with the provided separator. */
+    String toStringWithSeparator (StringRef separator) const;
 
     //==============================================================================
     /** Adds a new directory to the search path.

@@ -291,7 +291,7 @@ void PaintElement::updateBounds (const Rectangle<int>& parentArea)
                                    borderThickness));
 
         for (int i = siblingComponents.size(); --i >= 0;)
-            siblingComponents.getUnchecked(i)->updatePosition();
+            siblingComponents.getUnchecked (i)->updatePosition();
     }
 }
 
@@ -652,7 +652,7 @@ void PaintElement::updateSiblingComps()
             createSiblingComponents();
 
         for (int i = siblingComponents.size(); --i >= 0;)
-            siblingComponents.getUnchecked(i)->updatePosition();
+            siblingComponents.getUnchecked (i)->updatePosition();
     }
     else
     {

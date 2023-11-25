@@ -101,6 +101,9 @@ public:
     /** Returns the type of justification, as set in setJustificationType(). */
     Justification getJustificationType() const noexcept         { return justification; }
 
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
 protected:
     //==============================================================================
     /** @internal */

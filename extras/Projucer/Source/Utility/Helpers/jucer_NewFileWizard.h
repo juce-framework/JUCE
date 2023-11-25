@@ -39,12 +39,13 @@ public:
     class Type
     {
     public:
-        Type() {}
-        virtual ~Type()  {}
+        virtual ~Type() = default;
 
         //==============================================================================
         virtual String getName() = 0;
         virtual void createNewFile (Project&, Project::Item projectGroupToAddTo) = 0;
+
+        void showFailedToWriteMessage (const File& file);
 
     protected:
         //==============================================================================
@@ -52,10 +53,9 @@ public:
                                      const Project::Item& projectGroupToAddTo,
                                      std::function<void (File)> callback);
 
-        static void showFailedToWriteMessage (const File& file);
-
     private:
         std::unique_ptr<FileChooser> chooser;
+        ScopedMessageBox messageBox;
     };
 
     //==============================================================================

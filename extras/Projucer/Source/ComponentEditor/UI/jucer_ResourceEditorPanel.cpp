@@ -95,7 +95,7 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
     document.addChangeListener (this);
     handleCommandMessage (1);
 
-    lookAndFeelChanged();
+    updateLookAndFeel();
 }
 
 ResourceEditorPanel::~ResourceEditorPanel()
@@ -180,10 +180,15 @@ int ResourceEditorPanel::getColumnAutoSizeWidth (int columnId)
     return widest + 10;
 }
 
-void ResourceEditorPanel::lookAndFeelChanged()
+void ResourceEditorPanel::updateLookAndFeel()
 {
     listBox->setColour (ListBox::backgroundColourId, findColour (secondaryBackgroundColourId));
     listBox->setColour (ListBox::outlineColourId, Colours::transparentBlack);
+}
+
+void ResourceEditorPanel::lookAndFeelChanged()
+{
+    updateLookAndFeel();
 }
 
 //==============================================================================
@@ -265,8 +270,11 @@ void ResourceEditorPanel::reloadAll()
             failed.add (document.getResources().getResourceNames() [i]);
 
     if (failed.size() > 0)
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          TRANS("Reloading resources"),
-                                          TRANS("The following resources couldn't be reloaded from their original files:\n\n")
-                                              + failed.joinIntoString (", "));
+    {
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         TRANS ("Reloading resources"),
+                                                         TRANS ("The following resources couldn't be reloaded from their original files:\n\n")
+                                                             + failed.joinIntoString (", "));
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
+    }
 }

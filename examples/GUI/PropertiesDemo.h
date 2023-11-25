@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class DemoButtonPropertyComponent : public ButtonPropertyComponent
+class DemoButtonPropertyComponent final : public ButtonPropertyComponent
 {
 public:
     DemoButtonPropertyComponent (const String& propertyName)
@@ -61,8 +61,10 @@ public:
     void buttonClicked() override
     {
         ++counter;
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon, "Action Button Pressed",
-                                          "Pressing this type of property component can trigger an action such as showing an alert window!");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                         "Action Button Pressed",
+                                                         "Pressing this type of property component can trigger an action such as showing an alert window!");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
         refresh();
     }
 
@@ -73,17 +75,18 @@ public:
 
 private:
     int counter = 0;
+    ScopedMessageBox messageBox;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoButtonPropertyComponent)
 };
 
 //==============================================================================
-class DemoSliderPropertyComponent : public SliderPropertyComponent
+class DemoSliderPropertyComponent final : public SliderPropertyComponent
 {
 public:
     DemoSliderPropertyComponent (const String& propertyName)
         : SliderPropertyComponent (propertyName, 0.0, 100.0, 0.001)
     {
-        setValue (Random::getSystemRandom().nextDouble() * 42.0);
+        slider.setValue (Random::getSystemRandom().nextDouble() * 42.0);
     }
 
     void setValue (double newValue) override
@@ -159,8 +162,8 @@ static Array<PropertyComponent*> createChoices (int howMany)
 }
 
 //==============================================================================
-class PropertiesDemo   : public Component,
-                         private Timer
+class PropertiesDemo final : public Component,
+                             private Timer
 {
 public:
     PropertiesDemo()

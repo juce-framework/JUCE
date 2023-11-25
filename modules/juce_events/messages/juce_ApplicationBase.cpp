@@ -91,7 +91,7 @@ void JUCEApplicationBase::sendUnhandledException (const std::exception* const e,
 #endif
 
 #if JUCE_HANDLE_MULTIPLE_INSTANCES
-struct JUCEApplicationBase::MultipleInstanceHandler  : public ActionListener
+struct JUCEApplicationBase::MultipleInstanceHandler final : public ActionListener
 {
     MultipleInstanceHandler (const String& appName)
         : appLock ("juceAppLock_" + appName)
@@ -183,8 +183,8 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
  extern void initialiseNSApplication();
 #endif
 
-#if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
- extern int juce_gtkWebkitMain (int argc, const char* argv[]);
+#if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined (JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+ extern "C" int juce_gtkWebkitMain (int argc, const char* const* argv);
 #endif
 
 #if JUCE_WINDOWS
@@ -199,14 +199,12 @@ String JUCEApplicationBase::getCommandLineParameters()
 {
     String argString;
 
-    for (int i = 1; i < juce_argc; ++i)
+    for (const auto& arg : getCommandLineParameterArray())
     {
-        String arg { CharPointer_UTF8 (juce_argv[i]) };
-
-        if (arg.containsChar (' ') && ! arg.isQuotedString())
-            arg = arg.quoted ('"');
-
-        argString << arg << ' ';
+        const auto withQuotes = arg.containsChar (' ') && ! arg.isQuotedString()
+                              ? arg.quoted ('"')
+                              : arg;
+        argString << withQuotes << ' ';
     }
 
     return argString.trim();
@@ -214,7 +212,12 @@ String JUCEApplicationBase::getCommandLineParameters()
 
 StringArray JUCEApplicationBase::getCommandLineParameterArray()
 {
-    return StringArray (juce_argv + 1, juce_argc - 1);
+    StringArray result;
+
+    for (int i = 1; i < juce_argc; ++i)
+        result.add (CharPointer_UTF8 (juce_argv[i]));
+
+    return result;
 }
 
 int JUCEApplicationBase::main (int argc, const char* argv[])
@@ -228,7 +231,7 @@ int JUCEApplicationBase::main (int argc, const char* argv[])
         initialiseNSApplication();
        #endif
 
-       #if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+       #if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined (JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
         if (argc >= 2 && String (argv[1]) == "--juce-gtkwebkitfork-child")
             return juce_gtkWebkitMain (argc, argv);
        #endif
@@ -279,17 +282,17 @@ bool JUCEApplicationBase::initialiseApp()
     }
    #endif
 
-   #if JUCE_WINDOWS && JUCE_STANDALONE_APPLICATION && (! defined (_CONSOLE)) && (! JUCE_MINGW)
-    if (AttachConsole (ATTACH_PARENT_PROCESS) != 0)
+   #if JUCE_WINDOWS && (! defined (_CONSOLE)) && (! JUCE_MINGW)
+    if (isStandaloneApp() && AttachConsole (ATTACH_PARENT_PROCESS) != 0)
     {
         // if we've launched a GUI app from cmd.exe or PowerShell, we need this to enable printf etc.
         // However, only reassign stdout, stderr, stdin if they have not been already opened by
         // a redirect or similar.
         FILE* ignore;
 
-        if (_fileno(stdout) < 0) freopen_s (&ignore, "CONOUT$", "w", stdout);
-        if (_fileno(stderr) < 0) freopen_s (&ignore, "CONOUT$", "w", stderr);
-        if (_fileno(stdin)  < 0) freopen_s (&ignore, "CONIN$",  "r", stdin);
+        if (_fileno (stdout) < 0) freopen_s (&ignore, "CONOUT$", "w", stdout);
+        if (_fileno (stderr) < 0) freopen_s (&ignore, "CONOUT$", "w", stderr);
+        if (_fileno (stdin)  < 0) freopen_s (&ignore, "CONIN$",  "r", stdin);
     }
    #endif
 

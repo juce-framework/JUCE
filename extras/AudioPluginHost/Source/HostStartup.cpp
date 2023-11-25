@@ -31,8 +31,8 @@
  #error "If you're building the audio plugin host, you probably want to enable VST and/or AU support"
 #endif
 
-class PluginScannerSubprocess : private ChildProcessWorker,
-                                private AsyncUpdater
+class PluginScannerSubprocess final : private ChildProcessWorker,
+                                      private AsyncUpdater
 {
 public:
     PluginScannerSubprocess()
@@ -139,8 +139,8 @@ private:
 };
 
 //==============================================================================
-class PluginHostApp  : public JUCEApplication,
-                       private AsyncUpdater
+class PluginHostApp final : public JUCEApplication,
+                            private AsyncUpdater
 {
 public:
     PluginHostApp() = default;
@@ -258,7 +258,7 @@ private:
     std::unique_ptr<PluginScannerSubprocess> storedScannerSubprocess;
 };
 
-static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }
+static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*> (JUCEApplication::getInstance()); }
 
 ApplicationProperties& getAppProperties()         { return *getApp().appProperties; }
 ApplicationCommandManager& getCommandManager()    { return getApp().commandManager; }

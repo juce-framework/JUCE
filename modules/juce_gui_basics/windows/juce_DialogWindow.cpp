@@ -73,7 +73,7 @@ void DialogWindow::resized()
 }
 
 //==============================================================================
-class DefaultDialogWindow   : public DialogWindow
+class DefaultDialogWindow final : public DialogWindow
 {
 public:
     DefaultDialogWindow (LaunchOptions& options)
@@ -83,9 +83,6 @@ public:
                             ? Component::getApproximateScaleFactorForComponent (options.componentToCentreAround)
                             : 1.0f)
     {
-        setUsingNativeTitleBar (options.useNativeTitleBar);
-        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
-
         if (options.content.willDeleteObject())
             setContentOwned (options.content.release(), true);
         else
@@ -93,6 +90,9 @@ public:
 
         centreAroundComponent (options.componentToCentreAround, getWidth(), getHeight());
         setResizable (options.resizable, options.useBottomRightCornerResizer);
+
+        setUsingNativeTitleBar (options.useNativeTitleBar);
+        setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
     }
 
     void closeButtonPressed() override

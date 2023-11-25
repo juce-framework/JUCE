@@ -114,6 +114,9 @@ protected:
     ARA::PlugIn::ContentReader* doCreatePlaybackRegionContentReader (ARA::PlugIn::PlaybackRegion* playbackRegion,
                                                                      ARA::ARAContentType type,
                                                                      const ARA::ARAContentTimeRange* range) noexcept override;
+    void doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                             ARA::ARATimeDuration* headTime,
+                                             ARA::ARATimeDuration* tailTime) noexcept override;
 
     //==============================================================================
     // ARAAudioSource analysis
@@ -659,6 +662,13 @@ ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::ARADocumentCont
     return specialisation->doCreatePlaybackRegionContentReader (playbackRegion, type, range);
 }
 
+void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::doGetPlaybackRegionHeadAndTailTime (const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                                                         ARA::ARATimeDuration* headTime,
+                                                                                                         ARA::ARATimeDuration* tailTime) noexcept
+{
+    specialisation->doGetPlaybackRegionHeadAndTailTime (playbackRegion, headTime, tailTime);
+}
+
 bool ARADocumentControllerSpecialisation::ARADocumentControllerImpl::doIsAudioSourceContentAnalysisIncomplete (const ARA::PlugIn::AudioSource* audioSource,
                                                                                                                ARA::ARAContentType type) noexcept
 {
@@ -799,7 +809,7 @@ bool ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
     if (! archiveWriter->writeBytesToArchive ((ARA::ARASize) position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
 
-    position += numberOfBytes;
+    position += (int64) numberOfBytes;
     return true;
 }
 
@@ -834,138 +844,130 @@ ARAEditorView* ARADocumentControllerSpecialisation::doCreateEditorView()
     return new ARAEditorView (getDocumentController());
 }
 
-bool ARADocumentControllerSpecialisation::doIsAudioSourceContentAvailable (const ARA::PlugIn::AudioSource* audioSource,
-                                                                           ARA::ARAContentType type)
+bool ARADocumentControllerSpecialisation::doIsAudioSourceContentAvailable ([[maybe_unused]] const ARA::PlugIn::AudioSource* audioSource,
+                                                                           [[maybe_unused]] ARA::ARAContentType type)
 {
-    juce::ignoreUnused (audioSource, type);
     return false;
 }
 
-ARA::ARAContentGrade ARADocumentControllerSpecialisation::doGetAudioSourceContentGrade (const ARA::PlugIn::AudioSource* audioSource,
-                                                                                        ARA::ARAContentType type)
+ARA::ARAContentGrade ARADocumentControllerSpecialisation::doGetAudioSourceContentGrade ([[maybe_unused]] const ARA::PlugIn::AudioSource* audioSource,
+                                                                                        [[maybe_unused]] ARA::ARAContentType type)
 {
     // Overriding doIsAudioSourceContentAvailable() requires overriding
     // doGetAudioSourceContentGrade() accordingly!
     jassertfalse;
 
-    juce::ignoreUnused (audioSource, type);
     return ARA::kARAContentGradeInitial;
 }
 
-ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::doCreateAudioSourceContentReader (ARA::PlugIn::AudioSource* audioSource,
-                                                                                                   ARA::ARAContentType type,
-                                                                                                   const ARA::ARAContentTimeRange* range)
+ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::doCreateAudioSourceContentReader ([[maybe_unused]] ARA::PlugIn::AudioSource* audioSource,
+                                                                                                   [[maybe_unused]] ARA::ARAContentType type,
+                                                                                                   [[maybe_unused]] const ARA::ARAContentTimeRange* range)
 {
     // Overriding doIsAudioSourceContentAvailable() requires overriding
     // doCreateAudioSourceContentReader() accordingly!
     jassertfalse;
 
-    juce::ignoreUnused (audioSource, type, range);
     return nullptr;
 }
 
-bool ARADocumentControllerSpecialisation::doIsAudioModificationContentAvailable (const ARA::PlugIn::AudioModification* audioModification,
-                                                                                 ARA::ARAContentType type)
+bool ARADocumentControllerSpecialisation::doIsAudioModificationContentAvailable ([[maybe_unused]] const ARA::PlugIn::AudioModification* audioModification,
+                                                                                 [[maybe_unused]] ARA::ARAContentType type)
 {
-    juce::ignoreUnused (audioModification, type);
     return false;
 }
 
-ARA::ARAContentGrade ARADocumentControllerSpecialisation::doGetAudioModificationContentGrade (const ARA::PlugIn::AudioModification* audioModification,
-                                                                                              ARA::ARAContentType type)
+ARA::ARAContentGrade ARADocumentControllerSpecialisation::doGetAudioModificationContentGrade ([[maybe_unused]] const ARA::PlugIn::AudioModification* audioModification,
+                                                                                              [[maybe_unused]] ARA::ARAContentType type)
 {
     // Overriding doIsAudioModificationContentAvailable() requires overriding
     // doGetAudioModificationContentGrade() accordingly!
     jassertfalse;
 
-    juce::ignoreUnused (audioModification, type);
     return ARA::kARAContentGradeInitial;
 }
 
-ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::doCreateAudioModificationContentReader (ARA::PlugIn::AudioModification* audioModification,
-                                                                                                         ARA::ARAContentType type,
-                                                                                                         const ARA::ARAContentTimeRange* range)
+ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::doCreateAudioModificationContentReader ([[maybe_unused]] ARA::PlugIn::AudioModification* audioModification,
+                                                                                                         [[maybe_unused]] ARA::ARAContentType type,
+                                                                                                         [[maybe_unused]] const ARA::ARAContentTimeRange* range)
 {
     // Overriding doIsAudioModificationContentAvailable() requires overriding
     // doCreateAudioModificationContentReader() accordingly!
     jassertfalse;
 
-    juce::ignoreUnused (audioModification, type, range);
     return nullptr;
 }
 
-bool ARADocumentControllerSpecialisation::doIsPlaybackRegionContentAvailable (const ARA::PlugIn::PlaybackRegion* playbackRegion,
-                                                                              ARA::ARAContentType type)
+bool ARADocumentControllerSpecialisation::doIsPlaybackRegionContentAvailable ([[maybe_unused]] const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                              [[maybe_unused]] ARA::ARAContentType type)
 {
-    juce::ignoreUnused (playbackRegion, type);
     return false;
 }
 
-ARA::ARAContentGrade ARADocumentControllerSpecialisation::doGetPlaybackRegionContentGrade (const ARA::PlugIn::PlaybackRegion* playbackRegion,
-                                                                                           ARA::ARAContentType type)
+ARA::ARAContentGrade ARADocumentControllerSpecialisation::doGetPlaybackRegionContentGrade ([[maybe_unused]] const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                                           [[maybe_unused]] ARA::ARAContentType type)
 {
     // Overriding doIsPlaybackRegionContentAvailable() requires overriding
     // doGetPlaybackRegionContentGrade() accordingly!
     jassertfalse;
 
-    juce::ignoreUnused (playbackRegion, type);
     return ARA::kARAContentGradeInitial;
 }
 
-ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::doCreatePlaybackRegionContentReader (ARA::PlugIn::PlaybackRegion* playbackRegion,
-                                                                                                      ARA::ARAContentType type,
-                                                                                                      const ARA::ARAContentTimeRange* range)
+ARA::PlugIn::ContentReader* ARADocumentControllerSpecialisation::doCreatePlaybackRegionContentReader ([[maybe_unused]] ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                                                      [[maybe_unused]] ARA::ARAContentType type,
+                                                                                                      [[maybe_unused]] const ARA::ARAContentTimeRange* range)
 {
     // Overriding doIsPlaybackRegionContentAvailable() requires overriding
     // doCreatePlaybackRegionContentReader() accordingly!
     jassertfalse;
 
-    juce::ignoreUnused (playbackRegion, type, range);
     return nullptr;
 }
 
-bool ARADocumentControllerSpecialisation::doIsAudioSourceContentAnalysisIncomplete (const ARA::PlugIn::AudioSource* audioSource,
-                                                                                    ARA::ARAContentType type)
+void ARADocumentControllerSpecialisation::doGetPlaybackRegionHeadAndTailTime ([[maybe_unused]] const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                              ARA::ARATimeDuration* headTime,
+                                                                              ARA::ARATimeDuration* tailTime)
 {
-    juce::ignoreUnused (audioSource, type);
+    *headTime = 0.0;
+    *tailTime = 0.0;
+}
+
+bool ARADocumentControllerSpecialisation::doIsAudioSourceContentAnalysisIncomplete ([[maybe_unused]] const ARA::PlugIn::AudioSource* audioSource,
+                                                                                    [[maybe_unused]] ARA::ARAContentType type)
+{
     return false;
 }
 
-void ARADocumentControllerSpecialisation::doRequestAudioSourceContentAnalysis (ARA::PlugIn::AudioSource* audioSource,
-                                                                               std::vector<ARA::ARAContentType> const& contentTypes)
+void ARADocumentControllerSpecialisation::doRequestAudioSourceContentAnalysis ([[maybe_unused]] ARA::PlugIn::AudioSource* audioSource,
+                                                                               [[maybe_unused]] std::vector<ARA::ARAContentType> const& contentTypes)
 {
-    juce::ignoreUnused (audioSource, contentTypes);
 }
 
 ARA::ARAInt32 ARADocumentControllerSpecialisation::doGetProcessingAlgorithmsCount() { return 0; }
 
 const ARA::ARAProcessingAlgorithmProperties*
-    ARADocumentControllerSpecialisation::doGetProcessingAlgorithmProperties (ARA::ARAInt32 algorithmIndex)
+    ARADocumentControllerSpecialisation::doGetProcessingAlgorithmProperties ([[maybe_unused]] ARA::ARAInt32 algorithmIndex)
 {
-    juce::ignoreUnused (algorithmIndex);
     return nullptr;
 }
 
-ARA::ARAInt32 ARADocumentControllerSpecialisation::doGetProcessingAlgorithmForAudioSource (const ARA::PlugIn::AudioSource* audioSource)
+ARA::ARAInt32 ARADocumentControllerSpecialisation::doGetProcessingAlgorithmForAudioSource ([[maybe_unused]] const ARA::PlugIn::AudioSource* audioSource)
 {
     // doGetProcessingAlgorithmForAudioSource() must be implemented if the supported
     // algorithm count is greater than zero.
     if (getDocumentController()->getProcessingAlgorithmsCount() > 0)
         jassertfalse;
 
-    juce::ignoreUnused (audioSource);
     return 0;
 }
 
-void ARADocumentControllerSpecialisation::doRequestProcessingAlgorithmForAudioSource (ARA::PlugIn::AudioSource* audioSource,
-                                                                                      ARA::ARAInt32 algorithmIndex)
+void ARADocumentControllerSpecialisation::doRequestProcessingAlgorithmForAudioSource ([[maybe_unused]] ARA::PlugIn::AudioSource* audioSource,
+                                                                                      [[maybe_unused]] ARA::ARAInt32 algorithmIndex)
 {
     // doRequestProcessingAlgorithmForAudioSource() must be implemented if the supported
     // algorithm count is greater than zero.
-    if (getDocumentController()->getProcessingAlgorithmsCount() > 0)
-        jassertfalse;
-
-    juce::ignoreUnused (audioSource, algorithmIndex);
+    jassert (getDocumentController()->getProcessingAlgorithmsCount() <= 0);
 }
 
 } // namespace juce

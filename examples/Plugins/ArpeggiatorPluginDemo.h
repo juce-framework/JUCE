@@ -52,7 +52,7 @@
 
 
 //==============================================================================
-class Arpeggiator  : public AudioProcessor
+class Arpeggiator final : public AudioProcessor
 {
 public:
 

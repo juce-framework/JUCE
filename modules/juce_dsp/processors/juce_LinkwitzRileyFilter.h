@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 enum class LinkwitzRileyFilterType
@@ -139,5 +137,4 @@ private:
     Type filterType = Type::lowpass;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

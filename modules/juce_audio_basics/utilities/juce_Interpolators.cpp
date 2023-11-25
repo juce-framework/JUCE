@@ -25,7 +25,7 @@ namespace juce
 
 #if JUCE_UNIT_TESTS
 
-class InterpolatorTests  : public UnitTest
+class InterpolatorTests final : public UnitTest
 {
 public:
     InterpolatorTests()

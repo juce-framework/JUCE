@@ -28,7 +28,7 @@
 #include "../../Application/jucer_Application.h"
 
 //==============================================================================
-class SlidingPanelComponent   : public Component
+class SlidingPanelComponent final : public Component
 {
 public:
     SlidingPanelComponent();
@@ -58,7 +58,6 @@ public:
 
 private:
     struct DotButton;
-    friend struct DotButton;
 
     struct PageInfo
     {

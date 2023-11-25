@@ -23,38 +23,21 @@
 namespace juce
 {
 
-namespace detail
-{
-namespace adlSwap
-{
-using std::swap;
-
-template <typename T>
-constexpr auto isNothrowSwappable = noexcept (swap (std::declval<T&>(), std::declval<T&>()));
-} // namespace adlSwap
-} // namespace detail
-
-/** A type representing the null state of an Optional.
-    Similar to std::nullopt_t.
-*/
-struct Nullopt
-{
-    explicit constexpr Nullopt (int) {}
-};
-
-/** An object that can be used when constructing and comparing Optional instances.
-    Similar to std::nullopt.
-*/
-constexpr Nullopt nullopt { 0 };
+using Nullopt = std::nullopt_t;
+constexpr auto nullopt = std::nullopt;
 
 // Without this, our tests can emit "unreachable code" warnings during
 // link time code generation.
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 
+#ifndef DOXYGEN
+#define JUCE_OPTIONAL_OPERATORS X(==) X(!=) X(<) X(<=) X(>) X(>=)
+#endif
+
 /**
     A simple optional type.
 
-    Has similar (not necessarily identical!) semantics to std::optional.
+    In new code, you should probably prefer using std::optional directly.
 
     This is intended to stand-in for std::optional while JUCE's minimum
     supported language standard is lower than C++17. When the minimum language
@@ -72,224 +55,104 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 template <typename Value>
 class Optional
 {
-    template <typename T, typename U>
-    struct NotConstructibleFromSimilarType
-    {
-        static constexpr auto value = ! std::is_constructible<T, Optional<U>&>::value
-                                   && ! std::is_constructible<T, const Optional<U>&>::value
-                                   && ! std::is_constructible<T, Optional<U>&&>::value
-                                   && ! std::is_constructible<T, const Optional<U>&&>::value
-                                   && ! std::is_convertible<Optional<U>&, T>::value
-                                   && ! std::is_convertible<const Optional<U>&, T>::value
-                                   && ! std::is_convertible<Optional<U>&&, T>::value
-                                   && ! std::is_convertible<const Optional<U>&&, T>::value;
-    };
-
-    template <typename T, typename U>
-    using OptionalCopyConstructorEnabled = std::enable_if_t<std::is_constructible<T, const U&>::value && NotConstructibleFromSimilarType<T, U>::value>;
-
-    template <typename T, typename U>
-    using OptionalMoveConstructorEnabled = std::enable_if_t<std::is_constructible<T, U&&>::value && NotConstructibleFromSimilarType<T, U>::value>;
-
-    template <typename T, typename U>
-    static auto notAssignableFromSimilarType = NotConstructibleFromSimilarType<T, U>::value
-                                               && ! std::is_assignable<T&, Optional<U>&>::value
-                                               && ! std::is_assignable<T&, const Optional<U>&>::value
-                                               && ! std::is_assignable<T&, Optional<U>&&>::value
-                                               && ! std::is_assignable<T&, const Optional<U>&&>::value;
-
-    template <typename T, typename U>
-    using OptionalCopyAssignmentEnabled = std::enable_if_t<std::is_constructible<T, const U&>::value
-                                                           && std::is_assignable<T&, const U&>::value
-                                                           && NotConstructibleFromSimilarType<T, U>::value>;
-
-    template <typename T, typename U>
-    using OptionalMoveAssignmentEnabled = std::enable_if_t<std::is_constructible<T, U>::value
-                                                           && std::is_nothrow_assignable<T&, U>::value
-                                                           && NotConstructibleFromSimilarType<T, U>::value>;
+    template <typename>   struct IsOptional              : std::false_type {};
+    template <typename T> struct IsOptional<Optional<T>> : std::true_type  {};
 
 public:
-    Optional() : placeholder() {}
+    Optional() = default;
+    Optional (const Optional&) = default;
+    Optional (Optional&&) = default;
+    Optional& operator= (const Optional&) = default;
+    Optional& operator= (Optional&&) = default;
 
-    Optional (Nullopt) noexcept : placeholder() {}
+    Optional (Nullopt) noexcept {}
 
-    template <typename U = Value,
-              typename = std::enable_if_t<std::is_constructible<Value, U&&>::value
-                                          && ! std::is_same<std::decay_t<U>, Optional>::value>>
-    Optional (U&& value) noexcept (noexcept (Value (std::forward<U> (value))))
-        : storage (std::forward<U> (value)), valid (true)
-    {
-    }
+    template <typename Head, typename... Tail, std::enable_if_t<! IsOptional<std::decay_t<Head>>::value, int> = 0>
+    Optional (Head&& head, Tail&&... tail)
+        noexcept (std::is_nothrow_constructible_v<std::optional<Value>, Head, Tail...>)
+        : opt (std::forward<Head> (head), std::forward<Tail> (tail)...) {}
 
-    Optional (Optional&& other) noexcept (noexcept (std::declval<Optional>().constructFrom (other)))
-        : placeholder()
-    {
-        constructFrom (other);
-    }
-
-    Optional (const Optional& other)
-        : placeholder(), valid (other.valid)
-    {
-        if (valid)
-            new (&storage) Value (*other);
-    }
-
-    template <typename Other, typename = OptionalMoveConstructorEnabled<Value, Other>>
-    Optional (Optional<Other>&& other) noexcept (noexcept (std::declval<Optional>().constructFrom (other)))
-        : placeholder()
-    {
-        constructFrom (other);
-    }
-
-    template <typename Other, typename = OptionalCopyConstructorEnabled<Value, Other>>
+    template <typename Other>
     Optional (const Optional<Other>& other)
-        : placeholder(), valid (other.hasValue())
-    {
-        if (valid)
-            new (&storage) Value (*other);
-    }
+        noexcept (std::is_nothrow_constructible_v<std::optional<Value>, const std::optional<Other>&>)
+        : opt (other.opt) {}
 
-    Optional& operator= (Nullopt) noexcept
+    template <typename Other>
+    Optional (Optional<Other>&& other)
+        noexcept (std::is_nothrow_constructible_v<std::optional<Value>, std::optional<Other>&&>)
+        : opt (std::move (other.opt)) {}
+
+    template <typename Other, std::enable_if_t<! IsOptional<std::decay_t<Other>>::value, int> = 0>
+    Optional& operator= (Other&& other)
+        noexcept (std::is_nothrow_assignable_v<std::optional<Value>, Other>)
     {
-        reset();
+        opt = std::forward<Other> (other);
         return *this;
     }
 
-    template <typename U = Value,
-              typename = std::enable_if_t<std::is_nothrow_move_constructible<U>::value
-                                          && std::is_nothrow_move_assignable<U>::value>>
-    Optional& operator= (Optional&& other) noexcept (noexcept (std::declval<Optional>().assign (std::declval<Optional&>())))
-    {
-        assign (other);
-        return *this;
-    }
-
-    template <typename U = Value,
-              typename = std::enable_if_t<! std::is_same<std::decay_t<U>, Optional>::value
-                                          && std::is_constructible<Value, U>::value
-                                          && std::is_assignable<Value&, U>::value
-                                          && (! std::is_scalar<Value>::value || ! std::is_same<std::decay_t<U>, Value>::value)>>
-    Optional& operator= (U&& value)
-    {
-        if (valid)
-            **this = std::forward<U> (value);
-        else
-            new (&storage) Value (std::forward<U> (value));
-
-        valid = true;
-        return *this;
-    }
-
-    /** Maintains the strong exception safety guarantee. */
-    Optional& operator= (const Optional& other)
-    {
-        auto copy = other;
-        assign (copy);
-        return *this;
-    }
-
-    template <typename Other, typename = OptionalMoveAssignmentEnabled<Value, Other>>
-    Optional& operator= (Optional<Other>&& other) noexcept (noexcept (std::declval<Optional>().assign (other)))
-    {
-        assign (other);
-        return *this;
-    }
-
-    /** Maintains the strong exception safety guarantee. */
-    template <typename Other, typename = OptionalCopyAssignmentEnabled<Value, Other>>
+    template <typename Other>
     Optional& operator= (const Optional<Other>& other)
+        noexcept (std::is_nothrow_assignable_v<std::optional<Value>, const std::optional<Other>&>)
     {
-        auto copy = other;
-        assign (copy);
+        opt = other.opt;
         return *this;
     }
 
-    ~Optional() noexcept
+    template <typename Other>
+    Optional& operator= (Optional<Other>&& other)
+        noexcept (std::is_nothrow_assignable_v<std::optional<Value>, std::optional<Other>&&>)
     {
-        reset();
+        opt = std::move (other.opt);
+        return *this;
     }
 
-          Value* operator->()       noexcept { return reinterpret_cast<      Value*> (&storage); }
-    const Value* operator->() const noexcept { return reinterpret_cast<const Value*> (&storage); }
-
-          Value& operator*()       noexcept { return *operator->(); }
-    const Value& operator*() const noexcept { return *operator->(); }
-
-    explicit operator bool() const noexcept { return valid; }
-    bool hasValue() const noexcept { return valid; }
-
-    void reset()
+    template <typename... Other>
+    auto& emplace (Other&&... other)
     {
-        if (std::exchange (valid, false))
-            operator*().~Value();
+        return opt.emplace (std::forward<Other> (other)...);
     }
 
-    /** Like std::optional::value_or */
+    void reset() noexcept
+    {
+        opt.reset();
+    }
+
+    void swap (Optional& other)
+        noexcept (std::is_nothrow_swappable_v<std::optional<Value>>)
+    {
+        opt.swap (other.opt);
+    }
+
+    decltype (auto) operator->()       { return opt.operator->(); }
+    decltype (auto) operator->() const { return opt.operator->(); }
+    decltype (auto) operator* ()       { return opt.operator* (); }
+    decltype (auto) operator* () const { return opt.operator* (); }
+
+    explicit operator bool() const noexcept { return opt.has_value(); }
+    bool hasValue() const noexcept { return opt.has_value(); }
+
     template <typename U>
-    Value orFallback (U&& fallback) const { return *this ? **this : std::forward<U> (fallback); }
+    decltype (auto) orFallback (U&& fallback) const& { return opt.value_or (std::forward<U> (fallback)); }
 
-    template <typename... Args>
-    Value& emplace (Args&&... args)
-    {
-        reset();
-        new (&storage) Value (std::forward<Args> (args)...);
-        valid = true;
-        return **this;
-    }
+    template <typename U>
+    decltype (auto) orFallback (U&& fallback) & { return opt.value_or (std::forward<U> (fallback)); }
 
-    void swap (Optional& other) noexcept (std::is_nothrow_move_constructible<Value>::value
-                                          && detail::adlSwap::isNothrowSwappable<Value>)
-    {
-        if (hasValue() && other.hasValue())
-        {
-            using std::swap;
-            swap (**this, *other);
-        }
-        else if (hasValue() || other.hasValue())
-        {
-            (hasValue() ? other : *this).constructFrom (hasValue() ? *this : other);
-        }
-    }
+    #define X(op) \
+        template <typename T, typename U> friend bool operator op (const Optional<T>&, const Optional<U>&); \
+        template <typename T> friend bool operator op (const Optional<T>&, Nullopt); \
+        template <typename T> friend bool operator op (Nullopt, const Optional<T>&); \
+        template <typename T, typename U> friend bool operator op (const Optional<T>&, const U&); \
+        template <typename T, typename U> friend bool operator op (const T&, const Optional<U>&);
+
+    JUCE_OPTIONAL_OPERATORS
+
+    #undef X
 
 private:
     template <typename Other>
-    void constructFrom (Optional<Other>& other) noexcept (noexcept (Value (std::move (*other))))
-    {
-        if (! other.hasValue())
-            return;
+    friend class Optional;
 
-        new (&storage) Value (std::move (*other));
-        valid = true;
-        other.reset();
-    }
-
-    template <typename Other>
-    void assign (Optional<Other>& other) noexcept (noexcept (std::declval<Value&>() = std::move (*other)) && noexcept (std::declval<Optional>().constructFrom (other)))
-    {
-        if (valid)
-        {
-            if (other.hasValue())
-            {
-                **this = std::move (*other);
-                other.reset();
-            }
-            else
-            {
-                reset();
-            }
-        }
-        else
-        {
-            constructFrom (other);
-        }
-    }
-
-    union
-    {
-        char placeholder;
-        Value storage;
-    };
-    bool valid = false;
+    std::optional<Value> opt;
 };
 
 JUCE_END_IGNORE_WARNINGS_MSVC
@@ -300,102 +163,18 @@ Optional<std::decay_t<Value>> makeOptional (Value&& v)
     return std::forward<Value> (v);
 }
 
-template <class T, class U>
-bool operator== (const Optional<T>& lhs, const Optional<U>& rhs)
-{
-    if (lhs.hasValue() != rhs.hasValue()) return false;
-    if (! lhs.hasValue()) return true;
-    return *lhs == *rhs;
-}
+#ifndef DOXYGEN
+#define X(op) \
+    template <typename T, typename U> bool operator op (const Optional<T>& lhs, const Optional<U>& rhs) { return lhs.opt op rhs.opt; } \
+    template <typename T> bool operator op (const Optional<T>& lhs, Nullopt rhs) { return lhs.opt op rhs; } \
+    template <typename T> bool operator op (Nullopt lhs, const Optional<T>& rhs) { return lhs op rhs.opt; } \
+    template <typename T, typename U> bool operator op (const Optional<T>& lhs, const U& rhs) { return lhs.opt op rhs; } \
+    template <typename T, typename U> bool operator op (const T& lhs, const Optional<U>& rhs) { return lhs op rhs.opt; }
 
-template <class T, class U>
-bool operator!= (const Optional<T>& lhs, const Optional<U>& rhs)
-{
-    if (lhs.hasValue() != rhs.hasValue()) return true;
-    if (! lhs.hasValue()) return false;
-    return *lhs != *rhs;
-}
+JUCE_OPTIONAL_OPERATORS
 
-template <class T, class U>
-bool operator< (const Optional<T>& lhs, const Optional<U>& rhs)
-{
-    if (! rhs.hasValue()) return false;
-    if (! lhs.hasValue()) return true;
-    return *lhs < *rhs;
-}
-
-template <class T, class U>
-bool operator<= (const Optional<T>& lhs, const Optional<U>& rhs)
-{
-    if (! lhs.hasValue()) return true;
-    if (! rhs.hasValue()) return false;
-    return *lhs <= *rhs;
-}
-
-template <class T, class U>
-bool operator> (const Optional<T>& lhs, const Optional<U>& rhs)
-{
-    if (! lhs.hasValue()) return false;
-    if (! rhs.hasValue()) return true;
-    return *lhs > *rhs;
-}
-
-template <class T, class U>
-bool operator>= (const Optional<T>& lhs, const Optional<U>& rhs)
-{
-    if (! rhs.hasValue()) return true;
-    if (! lhs.hasValue()) return false;
-    return *lhs >= *rhs;
-}
-
-template <class T>
-bool operator== (const Optional<T>& opt, Nullopt) noexcept { return ! opt.hasValue(); }
-template <class T>
-bool operator== (Nullopt, const Optional<T>& opt) noexcept { return ! opt.hasValue(); }
-template <class T>
-bool operator!= (const Optional<T>& opt, Nullopt) noexcept { return opt.hasValue(); }
-template <class T>
-bool operator!= (Nullopt, const Optional<T>& opt) noexcept { return opt.hasValue(); }
-template <class T>
-bool operator< (const Optional<T>&, Nullopt) noexcept { return false; }
-template <class T>
-bool operator< (Nullopt, const Optional<T>& opt) noexcept { return opt.hasValue(); }
-template <class T>
-bool operator<= (const Optional<T>& opt, Nullopt) noexcept { return ! opt.hasValue(); }
-template <class T>
-bool operator<= (Nullopt, const Optional<T>&) noexcept { return true; }
-template <class T>
-bool operator> (const Optional<T>& opt, Nullopt) noexcept { return opt.hasValue(); }
-template <class T>
-bool operator> (Nullopt, const Optional<T>&) noexcept { return false; }
-template <class T>
-bool operator>= (const Optional<T>&, Nullopt) noexcept { return true; }
-template <class T>
-bool operator>= (Nullopt, const Optional<T>& opt) noexcept { return ! opt.hasValue(); }
-
-template <class T, class U>
-bool operator== (const Optional<T>& opt, const U& value) { return opt.hasValue() ? *opt == value : false; }
-template <class T, class U>
-bool operator== (const T& value, const Optional<U>& opt) { return opt.hasValue() ? value == *opt : false; }
-template <class T, class U>
-bool operator!= (const Optional<T>& opt, const U& value) { return opt.hasValue() ? *opt != value : true; }
-template <class T, class U>
-bool operator!= (const T& value, const Optional<U>& opt) { return opt.hasValue() ? value != *opt : true; }
-template <class T, class U>
-bool operator< (const Optional<T>& opt, const U& value) { return opt.hasValue() ? *opt < value : true; }
-template <class T, class U>
-bool operator< (const T& value, const Optional<U>& opt) { return opt.hasValue() ? value < *opt : false; }
-template <class T, class U>
-bool operator<= (const Optional<T>& opt, const U& value) { return opt.hasValue() ? *opt <= value : true; }
-template <class T, class U>
-bool operator<= (const T& value, const Optional<U>& opt) { return opt.hasValue() ? value <= *opt : false; }
-template <class T, class U>
-bool operator> (const Optional<T>& opt, const U& value) { return opt.hasValue() ? *opt > value : false; }
-template <class T, class U>
-bool operator> (const T& value, const Optional<U>& opt) { return opt.hasValue() ? value > *opt : true; }
-template <class T, class U>
-bool operator>= (const Optional<T>& opt, const U& value) { return opt.hasValue() ? *opt >= value : false; }
-template <class T, class U>
-bool operator>= (const T& value, const Optional<U>& opt) { return opt.hasValue() ? value >= *opt : true; }
+#undef X
+#undef JUCE_OPTIONAL_OPERATORS
+#endif
 
 } // namespace juce

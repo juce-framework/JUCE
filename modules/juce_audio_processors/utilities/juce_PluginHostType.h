@@ -58,10 +58,12 @@ public:
         AdobeAudition,              /**< Represents Adobe Audition. */
         AdobePremierePro,           /**< Represents Adobe Premiere Pro. */
         AppleGarageBand,            /**< Represents Apple GarageBand. */
+        AppleInfoHelper,            /**< Represents Apple com.apple.audio.InfoHelper. */
         AppleLogic,                 /**< Represents Apple Logic Pro. */
         AppleMainStage,             /**< Represents Apple Main Stage. */
         Ardour,                     /**< Represents Ardour. */
         AULab,                      /**< Represents AU Lab. */
+        AUVal,                      /**< Represents Apple AU validator. */
         AvidProTools,               /**< Represents Avid Pro Tools. */
         BitwigStudio,               /**< Represents Bitwig Studio. */
         CakewalkSonar8,             /**< Represents Cakewalk Sonar 8. */
@@ -76,6 +78,7 @@ public:
         MagixSequoia,               /**< Represents Magix Sequoia. */
         MergingPyramix,             /**< Represents Merging Pyramix. */
         MuseReceptorGeneric,        /**< Represents Muse Receptor. */
+        Maschine,                   /**< Represents Native Instruments Maschine. */
         pluginval,                  /**< Represents pluginval. */
         Reaper,                     /**< Represents Cockos Reaper. */
         Reason,                     /**< Represents Reason. */
@@ -121,10 +124,14 @@ public:
                                                       || type == AbletonLiveGeneric; }
     /** Returns true if the host is Adobe Audition. */
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
+    /** Returns true if the host is com.apple.audio.InfoHelper. */
+    bool isAppleInfoHelper() const noexcept   { return type == AppleInfoHelper; }
     /** Returns true if the host is Ardour. */
     bool isArdour() const noexcept            { return type == Ardour; }
     /** Returns true if the host is AU Lab. */
     bool isAULab() const noexcept             { return type == AULab; }
+    /** Returns true if the host is auval. */
+    bool isAUVal() const noexcept             { return type == AUVal; }
     /** Returns true if the host is Bitwig Studio. */
     bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
     /** Returns true if the host is any version of Steinberg Cubase. */
@@ -197,6 +204,8 @@ public:
     bool isWavelab() const noexcept           { return isWavelabLegacy() || type == SteinbergWavelab7 || type == SteinbergWavelab8 || type == SteinbergWavelabGeneric; }
     /** Returns true if the host is Steinberg WaveLab 6 or below. */
     bool isWavelabLegacy() const noexcept     { return type == SteinbergWavelab5 || type == SteinbergWavelab6; }
+    /** Returns true if the host is Native Instruments Maschine. */
+    bool isMaschine() const noexcept          { return type == Maschine; }
 
     //==============================================================================
     /** Returns a human-readable description of the host. */

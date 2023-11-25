@@ -27,15 +27,41 @@ namespace juce
 {
 
 AnimatedAppComponent::AnimatedAppComponent()
-    : lastUpdateTime (Time::getCurrentTime()), totalUpdates (0)
 {
     setOpaque (true);
 }
 
-void AnimatedAppComponent::setFramesPerSecond (int framesPerSecond)
+void AnimatedAppComponent::setFramesPerSecond (int framesPerSecondIn)
 {
-    jassert (framesPerSecond > 0 && framesPerSecond < 1000);
-    startTimerHz (framesPerSecond);
+    jassert (0 < framesPerSecond && framesPerSecond < 1000);
+    framesPerSecond = framesPerSecondIn;
+    updateSync();
+}
+
+void AnimatedAppComponent::updateSync()
+{
+    if (useVBlank)
+    {
+        stopTimer();
+
+        if (vBlankAttachment.isEmpty())
+            vBlankAttachment = { this, [this] { timerCallback(); } };
+    }
+    else
+    {
+        vBlankAttachment = {};
+
+        const auto interval = 1000 / framesPerSecond;
+
+        if (getTimerInterval() != interval)
+            startTimer (interval);
+    }
+}
+
+void AnimatedAppComponent::setSynchroniseToVBlank (bool syncToVBlank)
+{
+    useVBlank = syncToVBlank;
+    updateSync();
 }
 
 int AnimatedAppComponent::getMillisecondsSinceLastUpdate() const noexcept

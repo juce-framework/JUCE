@@ -48,13 +48,12 @@
 
 #include "../Assets/DemoUtilities.h"
 
-//==============================================================================
-class DemoThumbnailComp  : public Component,
-                           public ChangeListener,
-                           public FileDragAndDropTarget,
-                           public ChangeBroadcaster,
-                           private ScrollBar::Listener,
-                           private Timer
+class DemoThumbnailComp final : public Component,
+                                public ChangeListener,
+                                public FileDragAndDropTarget,
+                                public ChangeBroadcaster,
+                                private ScrollBar::Listener,
+                                private Timer
 {
 public:
     DemoThumbnailComp (AudioFormatManager& formatManager,
@@ -83,23 +82,9 @@ public:
 
     void setURL (const URL& url)
     {
-        InputSource* inputSource = nullptr;
-
-       #if ! JUCE_IOS
-        if (url.isLocalFile())
+        if (auto inputSource = makeInputSource (url))
         {
-            inputSource = new FileInputSource (url.getLocalFile());
-        }
-        else
-       #endif
-        {
-            if (inputSource == nullptr)
-                inputSource = new URLInputSource (url);
-        }
-
-        if (inputSource != nullptr)
-        {
-            thumbnail.setSource (inputSource);
+            thumbnail.setSource (inputSource.release());
 
             Range<double> newRange (0.0, thumbnail.getTotalLength());
             scrollbar.setRangeLimits (newRange);
@@ -203,13 +188,12 @@ public:
             if (canMoveTransport())
                 setRange ({ newStart, newStart + visibleRange.getLength() });
 
-            if (wheel.deltaY != 0.0f)
+            if (! approximatelyEqual (wheel.deltaY, 0.0f))
                 zoomSlider.setValue (zoomSlider.getValue() - wheel.deltaY);
 
             repaint();
         }
     }
-
 
 private:
     AudioTransportSource& transportSource;
@@ -267,13 +251,13 @@ private:
 };
 
 //==============================================================================
-class AudioPlaybackDemo  : public Component,
-                          #if (JUCE_ANDROID || JUCE_IOS)
-                           private Button::Listener,
-                          #else
-                           private FileBrowserListener,
-                          #endif
-                           private ChangeListener
+class AudioPlaybackDemo final : public Component,
+                               #if (JUCE_ANDROID || JUCE_IOS)
+                                private Button::Listener,
+                               #else
+                                private FileBrowserListener,
+                               #endif
+                                private ChangeListener
 {
 public:
     AudioPlaybackDemo()
@@ -313,7 +297,7 @@ public:
         zoomSlider.onValueChange = [this] { thumbnail->setZoomFactor (zoomSlider.getValue()); };
         zoomSlider.setSkewFactor (2);
 
-        thumbnail.reset (new DemoThumbnailComp (formatManager, transportSource, zoomSlider));
+        thumbnail = std::make_unique<DemoThumbnailComp> (formatManager, transportSource, zoomSlider);
         addAndMakeVisible (thumbnail.get());
         thumbnail->addChangeListener (this);
 
@@ -325,15 +309,10 @@ public:
         // audio setup
         formatManager.registerBasicFormats();
 
-        thread.startThread (3);
+        thread.startThread (Thread::Priority::normal);
 
        #ifndef JUCE_DEMO_RUNNER
-        RuntimePermissions::request (RuntimePermissions::recordAudio,
-                                     [this] (bool granted)
-                                     {
-                                         int numInputChannels = granted ? 2 : 0;
-                                         audioDeviceManager.initialise (numInputChannels, 2, nullptr, true, {}, nullptr);
-                                     });
+        audioDeviceManager.initialise (0, 2, nullptr, true, {}, nullptr);
        #endif
 
         audioDeviceManager.addAudioCallback (&audioSourcePlayer);
@@ -431,9 +410,14 @@ private:
     //==============================================================================
     void showAudioResource (URL resource)
     {
-        if (loadURLIntoTransport (resource))
-            currentAudioFile = std::move (resource);
+        if (! loadURLIntoTransport (resource))
+        {
+            // Failed to load the audio file!
+            jassertfalse;
+            return;
+        }
 
+        currentAudioFile = std::move (resource);
         zoomSlider.setValue (0, dontSendNotification);
         thumbnail->setURL (currentAudioFile);
     }
@@ -445,34 +429,30 @@ private:
         transportSource.setSource (nullptr);
         currentAudioFileSource.reset();
 
-        AudioFormatReader* reader = nullptr;
+        const auto source = makeInputSource (audioURL);
 
-       #if ! JUCE_IOS
-        if (audioURL.isLocalFile())
-        {
-            reader = formatManager.createReaderFor (audioURL.getLocalFile());
-        }
-        else
-       #endif
-        {
-            if (reader == nullptr)
-                reader = formatManager.createReaderFor (audioURL.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)));
-        }
+        if (source == nullptr)
+            return false;
 
-        if (reader != nullptr)
-        {
-            currentAudioFileSource.reset (new AudioFormatReaderSource (reader, true));
+        auto stream = rawToUniquePtr (source->createInputStream());
 
-            // ..and plug it into our transport source
-            transportSource.setSource (currentAudioFileSource.get(),
-                                       32768,                   // tells it to buffer this many samples ahead
-                                       &thread,                 // this is the background thread to use for reading-ahead
-                                       reader->sampleRate);     // allows for sample rate correction
+        if (stream == nullptr)
+            return false;
 
-            return true;
-        }
+        auto reader = rawToUniquePtr (formatManager.createReaderFor (std::move (stream)));
 
-        return false;
+        if (reader == nullptr)
+            return false;
+
+        currentAudioFileSource = std::make_unique<AudioFormatReaderSource> (reader.release(), true);
+
+        // ..and plug it into our transport source
+        transportSource.setSource (currentAudioFileSource.get(),
+                                   32768,                   // tells it to buffer this many samples ahead
+                                   &thread,                 // this is the background thread to use for reading-ahead
+                                   currentAudioFileSource->getAudioFormatReader()->sampleRate);     // allows for sample rate correction
+
+        return true;
     }
 
     void startOrStop()
@@ -512,7 +492,7 @@ private:
 
             if (FileChooser::isPlatformDialogAvailable())
             {
-                fileChooser.reset (new FileChooser ("Select an audio file...", File(), "*.wav;*.mp3;*.aif"));
+                fileChooser = std::make_unique<FileChooser> ("Select an audio file...", File(), "*.wav;*.flac;*.aif");
 
                 fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
                                           [this] (const FileChooser& fc) mutable

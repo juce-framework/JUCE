@@ -61,7 +61,7 @@ public:
         @returns    true if the object has been signalled, false if the timeout expires first.
         @see signal, reset
     */
-    bool wait (int timeOutMilliseconds = -1) const;
+    bool wait (double timeOutMilliseconds = -1.0) const;
 
     /** Wakes up any threads that are currently waiting on this object.
 

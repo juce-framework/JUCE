@@ -29,8 +29,8 @@
 
 class DownloadAndInstallThread;
 
-class LatestVersionCheckerAndUpdater   : public DeletedAtShutdown,
-                                         private Thread
+class LatestVersionCheckerAndUpdater final : public DeletedAtShutdown,
+                                             private Thread
 {
 public:
     LatestVersionCheckerAndUpdater();
@@ -57,6 +57,7 @@ private:
     std::unique_ptr<DownloadAndInstallThread> installer;
     std::unique_ptr<Component> dialogWindow;
     std::unique_ptr<FileChooser> chooser;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (LatestVersionCheckerAndUpdater)
 };

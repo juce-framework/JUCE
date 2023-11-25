@@ -64,7 +64,7 @@ inline String quotedString (const String& s, bool wrapInTransMacro)
     String lit (CodeHelpers::stringLiteral (s));
 
     if (wrapInTransMacro && lit.startsWithChar ('"'))
-        return "TRANS(" + lit + ")";
+        return "TRANS (" + lit + ")";
 
     return lit;
 }

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 enum class StateVariableTPTFilterType
@@ -80,7 +78,7 @@ public:
 
         Note: The bandwidth of the resonance increases with the value of the
         parameter. To have a standard 12 dB / octave filter, the value must be set
-        at 1 / sqrt(2).
+        at 1 / sqrt (2).
     */
     void setResonance (SampleType newResonance);
 
@@ -162,5 +160,4 @@ private:
                resonance       = static_cast<SampleType> (1.0 / std::sqrt (2.0));
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -27,7 +27,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-class AudioPerformanceTestApplication  : public JUCEApplication
+class AudioPerformanceTestApplication final : public JUCEApplication
 {
 public:
     //==============================================================================
@@ -55,14 +55,14 @@ public:
     }
 
     //==============================================================================
-    class MainWindow    : public DocumentWindow
+    class MainWindow final : public DocumentWindow
     {
     public:
         explicit MainWindow (String name)
             : DocumentWindow (name, Colours::lightgrey, DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
-            setContentOwned (createMainContentComponent(), true);
+            setContentOwned (new MainContentComponent(), true);
             setResizable (false, false);
 
            #if JUCE_IOS || JUCE_ANDROID

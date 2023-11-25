@@ -92,7 +92,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void audioDeviceIOCallbackWithContext (const float**, int, float**, int, int, const AudioIODeviceCallbackContext&) override;
+    void audioDeviceIOCallbackWithContext (const float* const*, int, float* const*, int, int, const AudioIODeviceCallbackContext&) override;
     /** @internal */
     void audioDeviceAboutToStart (AudioIODevice*) override;
     /** @internal */
@@ -138,6 +138,9 @@ private:
     MidiMessageCollector messageCollector;
     MidiOutput* midiOutput = nullptr;
     uint64_t sampleCount = 0;
+
+    AudioIODevice* currentDevice = nullptr;
+    AudioWorkgroup currentWorkgroup;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorPlayer)
 };

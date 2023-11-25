@@ -28,7 +28,7 @@ namespace juce
 
 #if JUCE_USE_LAME_AUDIO_FORMAT
 
-class LAMEEncoderAudioFormat::Writer   : public AudioFormatWriter
+class LAMEEncoderAudioFormat::Writer final : public AudioFormatWriter
 {
 public:
     Writer (OutputStream* destStream, const String& formatName,
@@ -112,8 +112,8 @@ private:
 
         if (cp.start (processArgs))
         {
-            auto childOutput = cp.readAllProcessOutput();
-            DBG (childOutput); ignoreUnused (childOutput);
+            [[maybe_unused]] auto childOutput = cp.readAllProcessOutput();
+            DBG (childOutput);
 
             cp.waitForProcessToFinish (10000);
             return tempMP3.getFile().getSize() > 0;

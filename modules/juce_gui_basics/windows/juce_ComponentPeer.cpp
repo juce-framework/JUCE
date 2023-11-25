@@ -74,7 +74,7 @@ bool ComponentPeer::isValidPeer (const ComponentPeer* const peer) noexcept
 
 void ComponentPeer::updateBounds()
 {
-    setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBoundsInParent()), false);
+    setBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBoundsInParent()), false);
 }
 
 bool ComponentPeer::isKioskMode() const
@@ -181,7 +181,6 @@ bool ComponentPeer::handleKeyPress (const int keyCode, const juce_wchar textChar
                                      ModifierKeys::currentModifiers.withoutMouseButtons(),
                                      textCharacter));
 }
-
 
 bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
 {
@@ -316,7 +315,7 @@ void ComponentPeer::handleMovedOrResized()
     {
         const WeakReference<Component> deletionChecker (&component);
 
-        auto newBounds = Component::ComponentHelpers::rawPeerPositionToLocal (component, getBounds());
+        auto newBounds = detail::ComponentHelpers::rawPeerPositionToLocal (component, getBounds());
         auto oldBounds = component.getBounds();
 
         const bool wasMoved   = (oldBounds.getPosition() != newBounds.getPosition());
@@ -431,7 +430,7 @@ Rectangle<float> ComponentPeer::globalToLocal (const Rectangle<float>& screenPos
 
 Rectangle<int> ComponentPeer::getAreaCoveredBy (const Component& subComponent) const
 {
-    return ScalingHelpers::scaledScreenPosToUnscaled
+    return detail::ScalingHelpers::scaledScreenPosToUnscaled
             (component, component.getLocalArea (&subComponent, subComponent.getLocalBounds()));
 }
 
@@ -587,8 +586,8 @@ void ComponentPeer::setRepresentedFile (const File&)
 }
 
 //==============================================================================
-int ComponentPeer::getCurrentRenderingEngine() const            { return 0; }
-void ComponentPeer::setCurrentRenderingEngine (int index)       { jassert (index == 0); ignoreUnused (index); }
+int ComponentPeer::getCurrentRenderingEngine() const                             { return 0; }
+void ComponentPeer::setCurrentRenderingEngine ([[maybe_unused]] int index)       { jassert (index == 0); }
 
 //==============================================================================
 std::function<ModifierKeys()> ComponentPeer::getNativeRealtimeModifiers = nullptr;
@@ -607,7 +606,7 @@ void ComponentPeer::forceDisplayUpdate()
     Desktop::getInstance().displays->refresh();
 }
 
-void ComponentPeer::globalFocusChanged (Component*)
+void ComponentPeer::globalFocusChanged ([[maybe_unused]] Component* comp)
 {
     refreshTextInputTarget();
 }

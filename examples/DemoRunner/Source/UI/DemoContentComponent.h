@@ -32,7 +32,7 @@ struct DemoContent;
 struct CodeContent;
 
 //==============================================================================
-class DemoContentComponent  : public TabbedComponent
+class DemoContentComponent final : public TabbedComponent
 {
 public:
     DemoContentComponent (Component& mainComponent, std::function<void (bool)> demoChangedCallback);
@@ -63,6 +63,7 @@ private:
     int tabBarIndent = 0;
 
     //==============================================================================
+    void updateLookAndFeel();
     void lookAndFeelChanged() override;
 
     String trimPIP (const String& fileContents);

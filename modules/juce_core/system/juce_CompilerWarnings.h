@@ -31,7 +31,8 @@
 #define JUCE_NTH_ARG_(_00, _01, _02, _03, _04, _05, _06, _07, _08, _09,        \
                       _10, _11, _12, _13, _14, _15, _16, _17, _18, _19,        \
                       _20, _21, _22, _23, _24, _25, _26, _27, _28, _29,        \
-                      _30, _31, _32, _33, _34, _35, _36, _37, _38, _39, N, ...)\
+                      _30, _31, _32, _33, _34, _35, _36, _37, _38, _39,        \
+                      _40, _41, _42, _43, _44, _45, _46, _47, _48, _49, N, ...)\
     N
 
 #define JUCE_EACH_00_(FN)
@@ -74,10 +75,30 @@
 #define JUCE_EACH_37_(FN, X, ...) FN(X) JUCE_EACH_36_(FN, __VA_ARGS__)
 #define JUCE_EACH_38_(FN, X, ...) FN(X) JUCE_EACH_37_(FN, __VA_ARGS__)
 #define JUCE_EACH_39_(FN, X, ...) FN(X) JUCE_EACH_38_(FN, __VA_ARGS__)
+#define JUCE_EACH_40_(FN, X, ...) FN(X) JUCE_EACH_39_(FN, __VA_ARGS__)
+#define JUCE_EACH_41_(FN, X, ...) FN(X) JUCE_EACH_40_(FN, __VA_ARGS__)
+#define JUCE_EACH_42_(FN, X, ...) FN(X) JUCE_EACH_41_(FN, __VA_ARGS__)
+#define JUCE_EACH_43_(FN, X, ...) FN(X) JUCE_EACH_42_(FN, __VA_ARGS__)
+#define JUCE_EACH_44_(FN, X, ...) FN(X) JUCE_EACH_43_(FN, __VA_ARGS__)
+#define JUCE_EACH_45_(FN, X, ...) FN(X) JUCE_EACH_44_(FN, __VA_ARGS__)
+#define JUCE_EACH_46_(FN, X, ...) FN(X) JUCE_EACH_45_(FN, __VA_ARGS__)
+#define JUCE_EACH_47_(FN, X, ...) FN(X) JUCE_EACH_46_(FN, __VA_ARGS__)
+#define JUCE_EACH_48_(FN, X, ...) FN(X) JUCE_EACH_47_(FN, __VA_ARGS__)
+#define JUCE_EACH_49_(FN, X, ...) FN(X) JUCE_EACH_48_(FN, __VA_ARGS__)
 
 /** Apply the macro FN to each of the other arguments. */
 #define JUCE_EACH(FN, ...)                                                     \
     JUCE_NTH_ARG_(, __VA_ARGS__,                                               \
+                  JUCE_EACH_49_,                                               \
+                  JUCE_EACH_48_,                                               \
+                  JUCE_EACH_47_,                                               \
+                  JUCE_EACH_46_,                                               \
+                  JUCE_EACH_45_,                                               \
+                  JUCE_EACH_44_,                                               \
+                  JUCE_EACH_43_,                                               \
+                  JUCE_EACH_42_,                                               \
+                  JUCE_EACH_41_,                                               \
+                  JUCE_EACH_40_,                                               \
                   JUCE_EACH_39_,                                               \
                   JUCE_EACH_38_,                                               \
                   JUCE_EACH_37_,                                               \
@@ -211,8 +232,8 @@
 */
 #if JUCE_CLANG && __clang_major__ >= JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION
     #define JUCE_BEGIN_NO_SANITIZE(warnings)                                    \
-        _Pragma(JUCE_TO_STRING(clang attribute push(__attribute__((no_sanitize(warnings))), apply_to=function)))
-    #define JUCE_END_NO_SANITIZE _Pragma(JUCE_TO_STRING(clang attribute pop))
+        _Pragma (JUCE_TO_STRING (clang attribute push (__attribute__ ((no_sanitize (warnings))), apply_to=function)))
+    #define JUCE_END_NO_SANITIZE _Pragma (JUCE_TO_STRING (clang attribute pop))
 #else
     #define JUCE_BEGIN_NO_SANITIZE(warnings)
     #define JUCE_END_NO_SANITIZE

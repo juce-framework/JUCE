@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     struct EntitlementOptions final
     {
         String getEntitlementsFileContent() const;
@@ -36,6 +35,7 @@ namespace build_tools
         bool isiOS                          = false;
         bool isAudioPluginProject           = false;
         bool shouldEnableIAA                = false;
+        bool isAUPluginHost                 = false;
         bool isiCloudPermissionsEnabled     = false;
         bool isPushNotificationsEnabled     = false;
         bool isAppGroupsEnabled             = false;
@@ -56,9 +56,10 @@ namespace build_tools
         };
 
         std::vector<KeyAndStringArray> appSandboxTemporaryPaths;
+        StringArray appSandboxExceptionIOKit;
 
     private:
         StringPairArray getEntitlements() const;
     };
-}
-}
+
+} // namespace juce::build_tools

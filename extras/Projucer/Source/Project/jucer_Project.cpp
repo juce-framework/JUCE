@@ -103,6 +103,7 @@ Project::Project (const File& f)
 
     setFile (f);
 
+    createEnabledModulesList();
     initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
@@ -236,7 +237,7 @@ bool Project::setCppVersionFromOldExporterSettings()
         }
     }
 
-    if (highestLanguageStandard >= 14)
+    if (highestLanguageStandard >= 17)
     {
         cppStandardValue = highestLanguageStandard;
         return true;
@@ -247,19 +248,17 @@ bool Project::setCppVersionFromOldExporterSettings()
 
 void Project::updateDeprecatedProjectSettings()
 {
-    if (cppStandardValue.get().toString() == "11")
-        cppStandardValue.resetToDefault();
+    for (const auto& version : { "11", "14" })
+    {
+        if (cppStandardValue.get().toString() == version)
+        {
+            cppStandardValue.resetToDefault();
+            break;
+        }
+    }
 
     for (ExporterIterator exporter (*this); exporter.next();)
         exporter->updateDeprecatedSettings();
-}
-
-void Project::updateDeprecatedProjectSettingsInteractively()
-{
-    jassert (! ProjucerApplication::getApp().isRunningCommandLine);
-
-    for (ExporterIterator exporter (*this); exporter.next();)
-        exporter->updateDeprecatedSettingsInteractively();
 }
 
 void Project::initialiseMainGroup()
@@ -299,7 +298,7 @@ void Project::initialiseProjectValues()
     useAppConfigValue.referTo             (projectRoot, Ids::useAppConfig,                  getUndoManager(), true);
     addUsingNamespaceToJuceHeader.referTo (projectRoot, Ids::addUsingNamespaceToJuceHeader, getUndoManager(), true);
 
-    cppStandardValue.referTo (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
+    cppStandardValue.referTo (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "17");
 
     headerSearchPathsValue.referTo   (projectRoot, Ids::headerPath, getUndoManager());
     preprocessorDefsValue.referTo    (projectRoot, Ids::defines,    getUndoManager());
@@ -333,7 +332,7 @@ void Project::initialiseAudioPluginValues()
 
     pluginFormatsValue.referTo               (projectRoot, Ids::pluginFormats,              getUndoManager(),
                                               Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString()), ",");
-    pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var> (), ",");
+    pluginCharacteristicsValue.referTo       (projectRoot, Ids::pluginCharacteristicsValue, getUndoManager(), Array<var>(), ",");
 
     pluginNameValue.referTo                  (projectRoot, Ids::pluginName,                 getUndoManager(), getProjectNameString());
     pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,                 getUndoManager(), getProjectNameString());
@@ -455,7 +454,8 @@ void Project::removeDefunctExporters()
             warningMessage << "\n"
                            << TRANS ("These exporters have been removed from the project. If you save the project they will be also erased from the .jucer file.");
 
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
+            exporterRemovalMessageBoxOptions = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
+            messageBoxQueueListenerScope = messageBoxQueue.addListener (*this);
         }
     }
 }
@@ -671,6 +671,7 @@ Result Project::loadDocument (const File& file)
     projectRoot = newTree;
     projectRoot.addListener (this);
 
+    createEnabledModulesList();
     initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
@@ -703,9 +704,9 @@ Result Project::loadDocument (const File& file)
     return Result::ok();
 }
 
-Result Project::saveDocument (const File& file)
+Result Project::saveDocument ([[maybe_unused]] const File& file)
 {
-    jassertquiet (file == getFile());
+    jassert (file == getFile());
 
     auto sharedResult = Result::ok();
 
@@ -717,9 +718,10 @@ Result Project::saveDocument (const File& file)
     return sharedResult;
 }
 
-void Project::saveDocumentAsync (const File& file, std::function<void (Result)> afterSave)
+void Project::saveDocumentAsync ([[maybe_unused]] const File& file,
+                                 std::function<void (Result)> afterSave)
 {
-    jassertquiet (file == getFile());
+    jassert (file == getFile());
 
     saveProject (Async::yes, nullptr, std::move (afterSave));
 }
@@ -895,6 +897,25 @@ void Project::updateModuleWarnings()
     updateMissingModuleDependenciesWarning (missingDependencies);
     updateOldProjucerWarning (oldProjucer);
     updateModuleNotFoundWarning (moduleNotFound);
+}
+
+void Project::updateExporterWarnings()
+{
+    const Identifier deprecatedExporters[] = { "CODEBLOCKS_WINDOWS", "CODEBLOCKS_LINUX" };
+
+    for (const auto exporter : getExporters())
+    {
+        for (const auto& name : deprecatedExporters)
+        {
+            if (exporter.getType() == name)
+            {
+                addProjectMessage (ProjectMessages::Ids::deprecatedExporter, {});
+                return;
+            }
+        }
+    }
+
+    removeProjectMessage (ProjectMessages::Ids::deprecatedExporter);
 }
 
 void Project::updateCppStandardWarning (bool showWarning)
@@ -1130,24 +1151,32 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
     changed();
 }
 
-void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
+void Project::valueTreeChildAddedOrRemoved (ValueTree& parent, ValueTree& child)
 {
-    ignoreUnused (parent);
-
     if (child.getType() == Ids::MODULE)
         updateModuleWarnings();
+    else if (parent.getType() == Ids::EXPORTFORMATS)
+        updateExporterWarnings();
 
     changed();
 }
 
-void Project::valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int index)
+void Project::canCreateMessageBox (CreatorFunction f)
 {
-    ignoreUnused (parent, index);
+    messageBox = f (*exporterRemovalMessageBoxOptions, [this] (auto)
+                                                       {
+                                                           messageBoxQueueListenerScope.reset();
+                                                       });
+}
 
-    if (child.getType() == Ids::MODULE)
-        updateModuleWarnings();
+void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
+{
+    valueTreeChildAddedOrRemoved (parent, child);
+}
 
-    changed();
+void Project::valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int)
+{
+    valueTreeChildAddedOrRemoved (parent, child);
 }
 
 void Project::valueTreeChildOrderChanged (ValueTree&, int, int)
@@ -1235,6 +1264,7 @@ const build_tools::ProjectType& Project::getProjectType() const
 
     auto* guiType = build_tools::ProjectType::findType (build_tools::ProjectType_GUIApp::getTypeName());
     jassert (guiType != nullptr);
+    // NOLINTNEXTLINE(clang-analyzer-core.uninitialized.UndefReturn)
     return *guiType;
 }
 
@@ -1253,6 +1283,8 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
             return shouldBuildVST();
         case Target::VST3PlugIn:
             return shouldBuildVST3();
+        case Target::VST3Helper:
+            return shouldBuildVST3();
         case Target::AAXPlugIn:
             return shouldBuildAAX();
         case Target::AudioUnitPlugIn:
@@ -1264,7 +1296,7 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
         case Target::UnityPlugIn:
             return shouldBuildUnityPlugin();
         case Target::LV2PlugIn:
-        case Target::LV2TurtleProgram:
+        case Target::LV2Helper:
             return shouldBuildLV2();
         case Target::AggregateTarget:
         case Target::SharedCodeTarget:
@@ -1383,8 +1415,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
         for (int i = 0; i < types.size(); ++i)
         {
-            projectTypeNames.add (types.getUnchecked(i)->getDescription());
-            projectTypeCodes.add (types.getUnchecked(i)->getType());
+            projectTypeNames.add (types.getUnchecked (i)->getDescription());
+            projectTypeCodes.add (types.getUnchecked (i)->getType());
         }
 
         props.add (new ChoicePropertyComponent (projectTypeValue, "Project Type", projectTypeNames, projectTypeCodes),
@@ -1561,7 +1593,6 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 
         props.add (new TextPropertyComponent (pluginARACompatibleArchiveIDsValue, "Plugin ARA Compatible Document Archive IDs", 1024, true),
                    "List of compatible ARA Document Archive IDs - one per line");
-
     }
 }
 
@@ -1667,7 +1698,7 @@ Project::Item Project::Item::findItemWithID (const String& targetId) const
     {
         for (auto i = getNumChildren(); --i >= 0;)
         {
-            auto found = getChild(i).findItemWithID (targetId);
+            auto found = getChild (i).findItemWithID (targetId);
 
             if (found.isValid())
                 return found;
@@ -1717,7 +1748,8 @@ Value Project::Item::getShouldSkipPCHValue()                { return state.getPr
 bool Project::Item::shouldSkipPCH() const                   { return isModuleCode() || state [Ids::skipPCH]; }
 
 Value Project::Item::getCompilerFlagSchemeValue()           { return state.getPropertyAsValue (Ids::compilerFlagScheme, getUndoManager()); }
-String Project::Item::getCompilerFlagSchemeString() const   { return state [Ids::compilerFlagScheme]; }
+
+String Project::Item::getCompilerFlagSchemeString() const   { return state[Ids::compilerFlagScheme]; }
 
 void Project::Item::setCompilerFlagScheme (const String& scheme)
 {
@@ -1787,7 +1819,7 @@ Project::Item Project::Item::findItemForFile (const File& file) const
     {
         for (auto i = getNumChildren(); --i >= 0;)
         {
-            auto found = getChild(i).findItemForFile (file);
+            auto found = getChild (i).findItemForFile (file);
 
             if (found.isValid())
                 return found;
@@ -1804,7 +1836,7 @@ File Project::Item::determineGroupFolder() const
 
     for (int i = 0; i < getNumChildren(); ++i)
     {
-        f = getChild(i).getFile();
+        f = getChild (i).getFile();
 
         if (f.exists())
             return f.getParentDirectory();
@@ -1841,7 +1873,7 @@ void Project::Item::initialiseMissingProperties()
     else if (isGroup())
     {
         for (auto i = getNumChildren(); --i >= 0;)
-            getChild(i).initialiseMissingProperties();
+            getChild (i).initialiseMissingProperties();
     }
 }
 
@@ -1928,7 +1960,7 @@ void Project::Item::sortAlphabetically (bool keepGroupsAtStart, bool recursive)
 
     if (recursive)
         for (auto i = getNumChildren(); --i >= 0;)
-            getChild(i).sortAlphabetically (keepGroupsAtStart, true);
+            getChild (i).sortAlphabetically (keepGroupsAtStart, true);
 }
 
 Project::Item Project::Item::getOrCreateSubGroup (const String& name)
@@ -2317,27 +2349,27 @@ int Project::getARATransformationFlags() const noexcept
 }
 
 //==============================================================================
-bool Project::isAUPluginHost()
+bool Project::isAUPluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_AU", false);
 }
 
-bool Project::isVSTPluginHost()
+bool Project::isVSTPluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST", false);
 }
 
-bool Project::isVST3PluginHost()
+bool Project::isVST3PluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
 }
 
-bool Project::isLV2PluginHost()
+bool Project::isLV2PluginHost() const
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_LV2", false);
 }
 
-bool Project::isARAPluginHost()
+bool Project::isARAPluginHost() const
 {
     return (isVST3PluginHost() || isAUPluginHost()) && isConfigFlagEnabled ("JUCE_PLUGINHOST_ARA", false);
 }
@@ -2498,12 +2530,21 @@ Array<var> Project::getDefaultARATransformationFlags() const noexcept
 }
 
 //==============================================================================
-EnabledModulesList& Project::getEnabledModules()
+template <typename This>
+auto& Project::getEnabledModulesImpl (This& t)
 {
-    if (enabledModulesList == nullptr)
-        enabledModulesList.reset (new EnabledModulesList (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr)));
+    // This won't work until you've loaded a project!
+    jassert (t.enabledModulesList != nullptr);
 
-    return *enabledModulesList;
+    return *t.enabledModulesList;
+}
+
+      EnabledModulesList& Project::getEnabledModules()            { return getEnabledModulesImpl (*this); }
+const EnabledModulesList& Project::getEnabledModules() const      { return getEnabledModulesImpl (*this); }
+
+void Project::createEnabledModulesList()
+{
+    enabledModulesList = std::make_unique<EnabledModulesList> (*this, projectRoot.getOrCreateChildWithName (Ids::MODULES, nullptr));
 }
 
 static StringArray getModulePathsFromExporters (Project& project, bool onlyThisOS)
@@ -2790,9 +2831,9 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_VSTNumMidiOutputs",           getVSTNumMIDIOutputsString());
     flags.set ("JucePlugin_ARAContentTypes",             String (getARAContentTypes()));
     flags.set ("JucePlugin_ARATransformationFlags",      String (getARATransformationFlags()));
-    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(getARAFactoryIDString()));
-    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(getARADocumentArchiveIDString()));
-    flags.set ("JucePlugin_ARACompatibleArchiveIDs",     toStringLiteral(getARACompatibleArchiveIDStrings()));
+    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral (getARAFactoryIDString()));
+    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral (getARADocumentArchiveIDString()));
+    flags.set ("JucePlugin_ARACompatibleArchiveIDs",     toStringLiteral (getARACompatibleArchiveIDStrings()));
 
     {
         String plugInChannelConfig = getPluginChannelConfigsString();

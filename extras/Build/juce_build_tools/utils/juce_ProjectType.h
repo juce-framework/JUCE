@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     //==============================================================================
     class ProjectType
     {
@@ -44,8 +43,8 @@ namespace build_tools
             const auto& types = getAllTypes();
 
             for (auto i = types.size(); --i >= 0;)
-                if (types.getUnchecked(i)->getType() == typeCode)
-                    return types.getUnchecked(i);
+                if (types.getUnchecked (i)->getType() == typeCode)
+                    return types.getUnchecked (i);
 
             jassertfalse;
             return nullptr;
@@ -82,7 +81,8 @@ namespace build_tools
                 SharedCodeTarget  = 20, // internal
                 AggregateTarget   = 21,
 
-                LV2TurtleProgram  = 25, // internal
+                LV2Helper         = 25, // internal
+                VST3Helper        = 26, // internal
 
                 unspecified       = 30
             };
@@ -118,7 +118,8 @@ namespace build_tools
                     case LV2PlugIn:         return "LV2 Plugin";
                     case SharedCodeTarget:  return "Shared Code";
                     case AggregateTarget:   return "All";
-                    case LV2TurtleProgram:  return "LV2 Manifest Helper";
+                    case LV2Helper:         return "LV2 Manifest Helper";
+                    case VST3Helper:        return "VST3 Manifest Helper";
                     case unspecified:       break;
                 }
 
@@ -141,7 +142,8 @@ namespace build_tools
                 if (name == "LV2 Plugin")           return Type::LV2PlugIn;
                 if (name == "Shared Code")          return Type::SharedCodeTarget;
                 if (name == "All")                  return Type::AggregateTarget;
-                if (name == "LV2 Manifest Helper")  return Type::LV2TurtleProgram;
+                if (name == "LV2 Manifest Helper")  return Type::LV2Helper;
+                if (name == "VST3 Manifest Helper") return Type::VST3Helper;
 
                 jassertfalse;
                 return Type::ConsoleApp;
@@ -164,7 +166,8 @@ namespace build_tools
                     case UnityPlugIn:       return pluginBundle;
                     case LV2PlugIn:         return pluginBundle;
                     case SharedCodeTarget:  return staticLibrary;
-                    case LV2TurtleProgram:  return executable;
+                    case LV2Helper:         return executable;
+                    case VST3Helper:        return executable;
                     case AggregateTarget:
                     case unspecified:
                         break;
@@ -194,7 +197,7 @@ namespace build_tools
     };
 
     //==============================================================================
-    struct ProjectType_GUIApp  : public ProjectType
+    struct ProjectType_GUIApp final : public ProjectType
     {
         ProjectType_GUIApp()  : ProjectType (getTypeName(), "GUI Application") {}
 
@@ -203,7 +206,7 @@ namespace build_tools
         bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::GUIApp); }
     };
 
-    struct ProjectType_ConsoleApp  : public ProjectType
+    struct ProjectType_ConsoleApp final : public ProjectType
     {
         ProjectType_ConsoleApp()  : ProjectType (getTypeName(), "Console Application") {}
 
@@ -212,7 +215,7 @@ namespace build_tools
         bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::ConsoleApp); }
     };
 
-    struct ProjectType_StaticLibrary  : public ProjectType
+    struct ProjectType_StaticLibrary final : public ProjectType
     {
         ProjectType_StaticLibrary()  : ProjectType (getTypeName(), "Static Library") {}
 
@@ -230,7 +233,7 @@ namespace build_tools
         bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::DynamicLibrary); }
     };
 
-    struct ProjectType_AudioPlugin  : public ProjectType
+    struct ProjectType_AudioPlugin final : public ProjectType
     {
         ProjectType_AudioPlugin()  : ProjectType (getTypeName(), "Audio Plug-in") {}
 
@@ -249,7 +252,8 @@ namespace build_tools
                 case Target::StandalonePlugIn:
                 case Target::UnityPlugIn:
                 case Target::LV2PlugIn:
-                case Target::LV2TurtleProgram:
+                case Target::LV2Helper:
+                case Target::VST3Helper:
                 case Target::SharedCodeTarget:
                 case Target::AggregateTarget:
                     return true;
@@ -266,7 +270,7 @@ namespace build_tools
         }
     };
 
-    struct ProjectType_ARAAudioPlugin : public ProjectType
+    struct ProjectType_ARAAudioPlugin final : public ProjectType
     {
         ProjectType_ARAAudioPlugin() : ProjectType (getTypeName(), "ARA Audio Plug-in") {}
 
@@ -287,6 +291,7 @@ namespace build_tools
                 case Target::UnityPlugIn:
                 case Target::SharedCodeTarget:
                 case Target::AggregateTarget:
+                case Target::VST3Helper:
                     return true;
 
                 case Target::GUIApp:
@@ -295,7 +300,7 @@ namespace build_tools
                 case Target::DynamicLibrary:
                 case Target::unspecified:
                 case Target::LV2PlugIn:
-                case Target::LV2TurtleProgram:
+                case Target::LV2Helper:
                     break;
             }
 
@@ -313,7 +318,7 @@ namespace build_tools
         static ProjectType_AudioPlugin plugin;
         static ProjectType_ARAAudioPlugin araplugin;
 
-        return Array<ProjectType*>(&guiApp, &consoleApp, &staticLib, &dll, &plugin, &araplugin);
+        return Array<ProjectType*> (&guiApp, &consoleApp, &staticLib, &dll, &plugin, &araplugin);
     }
-}
-}
+
+} // namespace juce::build_tools

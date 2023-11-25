@@ -29,7 +29,7 @@
 */
 #define JUCE_MAJOR_VERSION      7
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        0
+#define JUCE_BUILDNUMBER        9
 
 /** Current JUCE version number.
 
@@ -43,8 +43,7 @@
 
 #if ! DOXYGEN
 #define JUCE_VERSION_ID \
-    volatile auto juceVersionId = "juce_version_" JUCE_STRINGIFY(JUCE_MAJOR_VERSION) "_" JUCE_STRINGIFY(JUCE_MINOR_VERSION) "_" JUCE_STRINGIFY(JUCE_BUILDNUMBER); \
-    ignoreUnused (juceVersionId);
+    [[maybe_unused]] volatile auto juceVersionId = "juce_version_" JUCE_STRINGIFY(JUCE_MAJOR_VERSION) "_" JUCE_STRINGIFY(JUCE_MINOR_VERSION) "_" JUCE_STRINGIFY(JUCE_BUILDNUMBER);
 #endif
 
 //==============================================================================
@@ -55,6 +54,7 @@
 #include <condition_variable>
 #include <cstddef>
 #include <functional>
+#include <future>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -63,15 +63,18 @@
 #include <memory>
 #include <mutex>
 #include <numeric>
+#include <optional>
 #include <queue>
 #include <set>
 #include <sstream>
+#include <string_view>
+#include <thread>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <variant>
 #include <vector>
-#include <set>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"
@@ -89,6 +92,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
 
 #if JUCE_MAC || JUCE_IOS
  #include <libkern/OSAtomic.h>
+ #include <libkern/OSByteOrder.h>
  #include <xlocale.h>
  #include <signal.h>
 #endif
@@ -144,7 +148,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
   #pragma warning (disable: 1125) // (virtual override warning)
  #endif
 #elif defined (JUCE_DLL) || defined (JUCE_DLL_BUILD)
- #define JUCE_API __attribute__ ((visibility("default")))
+ #define JUCE_API __attribute__ ((visibility ("default")))
 #endif
 
 //==============================================================================

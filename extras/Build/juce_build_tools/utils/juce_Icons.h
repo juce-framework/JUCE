@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     struct Icons
     {
         std::unique_ptr<Drawable> small;
@@ -40,10 +39,10 @@ namespace build_tools
     Image getBestIconForSize (const Icons& icons,
                               int size,
                               bool returnNullIfNothingBigEnough);
-    Image rescaleImageForIcon (Drawable& d, const int size);
+    Image rescaleImageForIcon (Drawable& d, int size);
 
     RelativePath createXcassetsFolderFromIcons (const Icons& icons,
                                                 const File& targetFolder,
                                                 String projectFilenameRootString);
-}
-}
+
+} // namespace juce::build_tools

@@ -49,15 +49,15 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class ImagesDemo  : public Component,
-                    public FileBrowserListener
+class ImagesDemo final : public Component,
+                         public FileBrowserListener
 {
 public:
     ImagesDemo()
     {
         setOpaque (true);
         imageList.setDirectory (File::getSpecialLocation (File::userPicturesDirectory), true, true);
-        directoryThread.startThread (1);
+        directoryThread.startThread (Thread::Priority::background);
 
         fileTree.setTitle ("Files");
         fileTree.addListener (this);

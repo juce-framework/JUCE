@@ -46,7 +46,7 @@ namespace juce
     New code:
 
         RuntimePermissions::request (
-            RuntimePermissions::audioRecording,
+            RuntimePermissions::recordAudio,
             [this] (bool wasGranted)
             {
                  if (! wasGranted)
@@ -86,7 +86,22 @@ public:
         writeExternalStorage = 4,
 
         /** Permission to use camera */
-        camera = 5
+        camera = 5,
+
+        /** Permission to read audio files that your app didn't create.
+            Has the same effect as readExternalStorage on iOS and Android versions before 33.
+        */
+        readMediaAudio = 6,
+
+        /** Permission to read image files that your app didn't create.
+            Has the same effect as readExternalStorage on iOS and Android versions before 33.
+        */
+        readMediaImages = 7,
+
+        /** Permission to read video files that your app didn't create.
+            Has the same effect as readExternalStorage on iOS and Android versions before 33.
+        */
+        readMediaVideo = 8
     };
 
     //==============================================================================

@@ -67,7 +67,7 @@
   #define LILV_DEFAULT_LV2_PATH \
     "%APPDATA%\\LV2"                LILV_PATH_SEP \
     "%COMMONPROGRAMFILES%\\LV2"
- #elif JUCE_LINUX || JUCE_ANDROID
+ #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
   #define LILV_DEFAULT_LV2_PATH \
     "~/.lv2"                        LILV_PATH_SEP \
     "/usr/lib/lv2"                  LILV_PATH_SEP \

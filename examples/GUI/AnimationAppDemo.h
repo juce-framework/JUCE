@@ -52,14 +52,14 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class AnimationAppDemo   : public AnimatedAppComponent
+class AnimationAppDemo final : public AnimatedAppComponent
 {
 public:
     //==============================================================================
     AnimationAppDemo()
     {
         setSize (800, 600);
-        setFramesPerSecond (60);
+        setSynchroniseToVBlank (true);
     }
 
     void update() override

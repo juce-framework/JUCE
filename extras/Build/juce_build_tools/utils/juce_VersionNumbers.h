@@ -23,15 +23,14 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     StringArray getVersionSegments (StringRef p);
 
     int getVersionAsHexIntegerFromParts (const StringArray& versionString);
     int getVersionAsHexInteger (StringRef versionString);
 
     String getVersionAsHex (StringRef versionString);
-}
-}
+
+} // namespace juce::build_tools

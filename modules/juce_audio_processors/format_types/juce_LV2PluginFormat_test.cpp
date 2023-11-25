@@ -28,7 +28,7 @@
 namespace juce
 {
 
-class LV2PluginFormatTests : public UnitTest
+class LV2PluginFormatTests final : public UnitTest
 {
 public:
     LV2PluginFormatTests()

@@ -82,7 +82,7 @@ OSCColour OSCArgument::getColour() const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class OSCArgumentTests  : public UnitTest
+class OSCArgumentTests final : public UnitTest
 {
 public:
     OSCArgumentTests()
@@ -138,7 +138,7 @@ public:
             expect (! arg.isBlob());
             expect (! arg.isColour());
 
-            expect (arg.getFloat32() == value);
+            expectEquals (arg.getFloat32(), value);
         }
 
         beginTest ("String");

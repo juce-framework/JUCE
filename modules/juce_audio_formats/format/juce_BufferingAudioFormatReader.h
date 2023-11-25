@@ -63,7 +63,7 @@ public:
     void setReadTimeout (int timeoutMilliseconds) noexcept;
 
     //==============================================================================
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
 private:

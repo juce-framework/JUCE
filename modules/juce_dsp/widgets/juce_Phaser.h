@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -114,7 +112,7 @@ public:
 
         if (numSamplesDown > 0)
         {
-            auto freqBlock = AudioBlock<SampleType>(bufferFrequency).getSubBlock (0, (size_t) numSamplesDown);
+            auto freqBlock = AudioBlock<SampleType> (bufferFrequency).getSubBlock (0, (size_t) numSamplesDown);
             auto contextFreq = ProcessContextReplacing<SampleType> (freqBlock);
             freqBlock.clear();
 
@@ -202,5 +200,4 @@ private:
     static constexpr int numStages = 6;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

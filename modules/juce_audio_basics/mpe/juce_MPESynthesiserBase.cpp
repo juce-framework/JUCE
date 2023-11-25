@@ -107,7 +107,7 @@ void MPESynthesiserBase::renderNextBlock (AudioBuffer<floatType>& outputAudio,
                                           int numSamples)
 {
     // you must set the sample rate before using this!
-    jassert (sampleRate != 0);
+    jassert (! approximatelyEqual (sampleRate, 0.0));
 
     const ScopedLock sl (noteStateLock);
 
@@ -144,7 +144,7 @@ template void MPESynthesiserBase::renderNextBlock<double> (AudioBuffer<double>&,
 //==============================================================================
 void MPESynthesiserBase::setCurrentPlaybackSampleRate (const double newRate)
 {
-    if (sampleRate != newRate)
+    if (! approximatelyEqual (sampleRate, newRate))
     {
         const ScopedLock sl (noteStateLock);
         instrument.releaseAllNotes();
@@ -164,7 +164,7 @@ void MPESynthesiserBase::setMinimumRenderingSubdivisionSize (int numSamples, boo
 
 namespace
 {
-    class MpeSynthesiserBaseTests : public UnitTest
+    class MpeSynthesiserBaseTests final : public UnitTest
     {
         enum class CallbackKind { process, midi };
 
@@ -190,7 +190,7 @@ namespace
             std::vector<CallbackKind> order;
         };
 
-        class MockSynthesiser  : public MPESynthesiserBase
+        class MockSynthesiser final : public MPESynthesiserBase
         {
         public:
             Events events;

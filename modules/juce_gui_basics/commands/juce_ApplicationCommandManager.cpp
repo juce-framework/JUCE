@@ -88,7 +88,7 @@ void ApplicationCommandManager::registerAllCommandsForTarget (ApplicationCommand
 
         for (int i = 0; i < commandIDs.size(); ++i)
         {
-            ApplicationCommandInfo info (commandIDs.getUnchecked(i));
+            ApplicationCommandInfo info (commandIDs.getUnchecked (i));
             target->getCommandInfo (info.commandID, info);
 
             registerCommand (info);
@@ -122,8 +122,8 @@ void ApplicationCommandManager::commandStatusChanged()
 ApplicationCommandInfo* ApplicationCommandManager::getMutableCommandForID (CommandID commandID) const noexcept
 {
     for (int i = commands.size(); --i >= 0;)
-        if (commands.getUnchecked(i)->commandID == commandID)
-            return commands.getUnchecked(i);
+        if (commands.getUnchecked (i)->commandID == commandID)
+            return commands.getUnchecked (i);
 
     return nullptr;
 }
@@ -155,7 +155,7 @@ StringArray ApplicationCommandManager::getCommandCategories() const
     StringArray s;
 
     for (int i = 0; i < commands.size(); ++i)
-        s.addIfNotAlreadyThere (commands.getUnchecked(i)->categoryName, false);
+        s.addIfNotAlreadyThere (commands.getUnchecked (i)->categoryName, false);
 
     return s;
 }
@@ -165,8 +165,8 @@ Array<CommandID> ApplicationCommandManager::getCommandsInCategory (const String&
     Array<CommandID> results;
 
     for (int i = 0; i < commands.size(); ++i)
-        if (commands.getUnchecked(i)->categoryName == categoryName)
-            results.add (commands.getUnchecked(i)->commandID);
+        if (commands.getUnchecked (i)->categoryName == categoryName)
+            results.add (commands.getUnchecked (i)->commandID);
 
     return results;
 }
@@ -270,7 +270,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         // getting a bit desperate now: try all desktop comps..
         for (int i = desktop.getNumComponents(); --i >= 0;)
             if (auto* component = desktop.getComponent (i))
-                if (isForegroundOrEmbeddedProcess (component))
+                if (detail::WindowingHelpers::isForegroundOrEmbeddedProcess (component))
                     if (auto* peer = component->getPeer())
                         if (auto* target = findTargetForComponent (peer->getLastFocusedSubcomponent()))
                             return target;

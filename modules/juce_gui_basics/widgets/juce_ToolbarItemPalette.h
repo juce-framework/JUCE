@@ -60,6 +60,8 @@ public:
     //==============================================================================
     /** @internal */
     void resized() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     ToolbarItemFactory& factory;
@@ -68,7 +70,6 @@ private:
     OwnedArray<ToolbarItemComponent> items;
 
     friend class Toolbar;
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void replaceComponent (ToolbarItemComponent&);
     void addComponent (int itemId, int index);
 

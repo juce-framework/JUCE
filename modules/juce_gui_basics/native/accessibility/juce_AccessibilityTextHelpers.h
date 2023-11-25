@@ -26,33 +26,58 @@
 namespace juce
 {
 
-template <typename Ptr>
-struct CharPtrIteratorTraits
-{
-    using difference_type = int;
-    using value_type = decltype (*std::declval<Ptr>());
-    using pointer = value_type*;
-    using reference = value_type;
-    using iterator_category = std::bidirectional_iterator_tag;
-};
-
-} // namespace juce
-
-namespace std
-{
-
-template <> struct iterator_traits<juce::CharPointer_UTF8>  : juce::CharPtrIteratorTraits<juce::CharPointer_UTF8>  {};
-template <> struct iterator_traits<juce::CharPointer_UTF16> : juce::CharPtrIteratorTraits<juce::CharPointer_UTF16> {};
-template <> struct iterator_traits<juce::CharPointer_UTF32> : juce::CharPtrIteratorTraits<juce::CharPointer_UTF32> {};
-template <> struct iterator_traits<juce::CharPointer_ASCII> : juce::CharPtrIteratorTraits<juce::CharPointer_ASCII> {};
-
-} // namespace std
-
-namespace juce
-{
-
 struct AccessibilityTextHelpers
 {
+    /*  Wraps a CharPtr into a stdlib-compatible iterator.
+
+        MSVC's std::reverse_iterator requires the wrapped iterator to be default constructible
+        when building in C++20 mode, but I don't really want to add public default constructors to
+        the CharPtr types. Instead, we add a very basic default constructor here which sets the
+        wrapped CharPtr to nullptr.
+    */
+    template <typename CharPtr>
+    class CharPtrIteratorAdapter
+    {
+    public:
+        using difference_type = int;
+        using value_type = decltype (*std::declval<CharPtr>());
+        using pointer = value_type*;
+        using reference = value_type;
+        using iterator_category = std::bidirectional_iterator_tag;
+
+        CharPtrIteratorAdapter() = default;
+        constexpr explicit CharPtrIteratorAdapter (CharPtr arg) : ptr (arg) {}
+
+        constexpr auto operator*() const { return *ptr; }
+
+        constexpr CharPtrIteratorAdapter& operator++()
+        {
+            ++ptr;
+            return *this;
+        }
+
+        constexpr CharPtrIteratorAdapter& operator--()
+        {
+            --ptr;
+            return *this;
+        }
+
+        constexpr bool operator== (const CharPtrIteratorAdapter& other) const { return ptr == other.ptr; }
+        constexpr bool operator!= (const CharPtrIteratorAdapter& other) const { return ptr != other.ptr; }
+
+        constexpr auto operator+ (difference_type offset) const { return CharPtrIteratorAdapter { ptr + offset }; }
+        constexpr auto operator- (difference_type offset) const { return CharPtrIteratorAdapter { ptr - offset }; }
+
+    private:
+        CharPtr ptr { {} };
+    };
+
+    template <typename CharPtr>
+    static auto makeCharPtrIteratorAdapter (CharPtr ptr)
+    {
+        return CharPtrIteratorAdapter<CharPtr> { ptr };
+    }
+
     enum class BoundaryType
     {
         character,
@@ -115,13 +140,17 @@ struct AccessibilityTextHelpers
         word.
     */
     template <typename CharPtr>
-    static int findNextWordEndOffset (CharPtr begin,
-                                      CharPtr end,
-                                      CharPtr ptr,
+    static int findNextWordEndOffset (CharPtr beginIn,
+                                      CharPtr endIn,
+                                      CharPtr ptrIn,
                                       Direction direction,
                                       IncludeThisBoundary includeBoundary,
                                       IncludeWhitespaceAfterWords includeWhitespace)
     {
+        const auto begin = makeCharPtrIteratorAdapter (beginIn);
+        const auto end   = makeCharPtrIteratorAdapter (endIn);
+        const auto ptr   = makeCharPtrIteratorAdapter (ptrIn);
+
         const auto move = [&] (auto b, auto e, auto iter)
         {
             const auto isSpace = [] (juce_wchar c) { return CharacterFunctions::isWhitespace (c); };
@@ -155,12 +184,16 @@ struct AccessibilityTextHelpers
         specific direction.
     */
     template <typename CharPtr>
-    static int findNextLineOffset (CharPtr begin,
-                                   CharPtr end,
-                                   CharPtr ptr,
+    static int findNextLineOffset (CharPtr beginIn,
+                                   CharPtr endIn,
+                                   CharPtr ptrIn,
                                    Direction direction,
                                    IncludeThisBoundary includeBoundary)
     {
+        const auto begin = makeCharPtrIteratorAdapter (beginIn);
+        const auto end   = makeCharPtrIteratorAdapter (endIn);
+        const auto ptr   = makeCharPtrIteratorAdapter (ptrIn);
+
         const auto findNewline = [] (auto from, auto to) { return std::find (from, to, juce_wchar { '\n' }); };
 
         if (direction == Direction::forwards)

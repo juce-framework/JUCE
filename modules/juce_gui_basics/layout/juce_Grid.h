@@ -43,10 +43,10 @@ public:
     /** A size in pixels */
     struct Px  final
     {
-        explicit Px (float p) : pixels (static_cast<long double>(p)) { /*sta (p >= 0.0f);*/ }
-        explicit Px (int p)   : pixels (static_cast<long double>(p)) { /*sta (p >= 0.0f);*/ }
+        explicit Px (float p) : pixels (static_cast<long double> (p)) { /*sta (p >= 0.0f);*/ }
+        explicit Px (int p)   : pixels (static_cast<long double> (p)) { /*sta (p >= 0.0f);*/ }
         explicit constexpr Px (long double p)        : pixels (p) {}
-        explicit constexpr Px (unsigned long long p) : pixels (static_cast<long double>(p)) {}
+        explicit constexpr Px (unsigned long long p) : pixels (static_cast<long double> (p)) {}
 
         long double pixels;
     };
@@ -156,9 +156,6 @@ public:
     /** Creates an empty Grid container with default parameters. */
     Grid() = default;
 
-    /** Destructor */
-    ~Grid() noexcept = default;
-
     //==============================================================================
     /** Specifies the alignment of content inside the items along the rows. */
     JustifyItems   justifyItems   = JustifyItems::stretch;
@@ -216,14 +213,11 @@ public:
 
 private:
     //==============================================================================
-    struct SizeCalculation;
-    struct PlacementHelpers;
-    struct AutoPlacement;
-    struct BoxAlignment;
+    struct Helpers;
 };
 
-constexpr Grid::Px operator"" _px (long double px)          { return Grid::Px { px }; }
-constexpr Grid::Px operator"" _px (unsigned long long px)   { return Grid::Px { px }; }
-constexpr Grid::Fr operator"" _fr (unsigned long long fr)   { return Grid::Fr { fr }; }
+constexpr Grid::Px operator""_px (long double px)          { return Grid::Px { px }; }
+constexpr Grid::Px operator""_px (unsigned long long px)   { return Grid::Px { px }; }
+constexpr Grid::Fr operator""_fr (unsigned long long fr)   { return Grid::Fr { fr }; }
 
 } // namespace juce

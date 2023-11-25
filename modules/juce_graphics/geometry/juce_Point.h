@@ -54,14 +54,19 @@ public:
     /** Copies this point from another one. */
     Point& operator= (const Point&) = default;
 
-    constexpr inline bool operator== (Point other) const noexcept      { return x == other.x && y == other.y; }
-    constexpr inline bool operator!= (Point other) const noexcept      { return x != other.x || y != other.y; }
+    constexpr inline bool operator== (Point other) const noexcept
+    {
+        const auto tie = [] (const Point& p) { return std::tie (p.x, p.y); };
+        return tie (*this) == tie (other);
+    }
+
+    constexpr inline bool operator!= (Point other) const noexcept      { return ! operator== (other); }
 
     /** Returns true if the point is (0, 0). */
-    constexpr bool isOrigin() const noexcept                           { return x == ValueType() && y == ValueType(); }
+    constexpr bool isOrigin() const noexcept                           { return operator== (Point()); }
 
     /** Returns true if the coordinates are finite values. */
-    constexpr inline bool isFinite() const noexcept                    { return juce_isfinite(x) && juce_isfinite(y); }
+    constexpr inline bool isFinite() const noexcept                    { return juce_isfinite (x) && juce_isfinite (y); }
 
     /** Returns the point's x coordinate. */
     constexpr inline ValueType getX() const noexcept                   { return x; }
@@ -123,7 +128,7 @@ public:
     template <typename OtherType>
     constexpr Point operator* (OtherType multiplier) const noexcept
     {
-        using CommonType = typename std::common_type<ValueType, OtherType>::type;
+        using CommonType = std::common_type_t<ValueType, OtherType>;
         return Point ((ValueType) ((CommonType) x * (CommonType) multiplier),
                       (ValueType) ((CommonType) y * (CommonType) multiplier));
     }
@@ -132,7 +137,7 @@ public:
     template <typename OtherType>
     constexpr Point operator/ (OtherType divisor) const noexcept
     {
-        using CommonType = typename std::common_type<ValueType, OtherType>::type;
+        using CommonType = std::common_type_t<ValueType, OtherType>;
         return Point ((ValueType) ((CommonType) x / (CommonType) divisor),
                       (ValueType) ((CommonType) y / (CommonType) divisor));
     }
@@ -150,7 +155,7 @@ public:
 
     //==============================================================================
     /** This type will be double if the Point's type is double, otherwise it will be float. */
-    using FloatType = typename TypeHelpers::SmallestFloatType<ValueType>::type;
+    using FloatType = TypeHelpers::SmallestFloatType<ValueType>;
 
     //==============================================================================
     /** Returns the straight-line distance between this point and the origin. */

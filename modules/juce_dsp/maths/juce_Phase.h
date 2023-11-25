@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -63,5 +61,4 @@ struct Phase
     Type phase = 0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -71,6 +71,12 @@ public:
     /** Resizes this component to fit the view that it contains. */
     void resizeToFitView();
 
+    /** Resizes the NSView to match the bounds of this component.
+
+        Most of the time, this will be done for you automatically.
+    */
+    void resizeViewToFit();
+
     //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
@@ -78,6 +84,8 @@ public:
     void alphaChanged() override;
     /** @internal */
     static ReferenceCountedObject* attachViewToComponent (Component&, void*);
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     ReferenceCountedObjectPtr<ReferenceCountedObject> attachment;

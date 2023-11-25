@@ -156,6 +156,11 @@ public:
     */
     virtual var getDragSourceDescription (const SparseSet<int>& rowsToDescribe);
 
+    /** Called when starting a drag operation on a list row to determine whether the item may be
+        dragged to other windows. Returns true by default.
+    */
+    virtual bool mayDragToExternalWindows() const   { return true; }
+
     /** You can override this to provide tool tips for specific rows.
         @see TooltipClient
     */
@@ -216,7 +221,7 @@ public:
     void setModel (ListBoxModel* newModel);
 
     /** Returns the current list model. */
-    ListBoxModel* getModel() const noexcept
+    ListBoxModel* getListBoxModel() const noexcept
     {
        #if ! JUCE_DISABLE_ASSERTIONS
         checkModelPtrIsValid();
@@ -260,6 +265,11 @@ public:
         By default this is true, but you may want to turn it off.
     */
     void setRowSelectedOnMouseDown (bool isSelectedOnMouseDown) noexcept;
+
+    /** Gets whether a row should be selected when the mouse is pressed or released.
+        By default this is true, but you may want to turn it off.
+    */
+    bool getRowSelectedOnMouseDown() const                  { return selectOnMouseDown; }
 
     /** Makes the list react to mouse moves by selecting the row that the mouse if over.
 
@@ -455,7 +465,7 @@ public:
     /** Returns the row number that the given component represents.
         If the component isn't one of the list's rows, this will return -1.
     */
-    int getRowNumberOfComponent (Component* rowComponent) const noexcept;
+    int getRowNumberOfComponent (const Component* rowComponent) const noexcept;
 
     /** Returns the width of a row (which may be less than the width of this component
         if there's a scrollbar).
@@ -593,12 +603,17 @@ public:
     /** @internal */
     void startDragAndDrop (const MouseEvent&, const SparseSet<int>& rowsToDrag,
                            const var& dragDescription, bool allowDraggingToOtherWindows);
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     //==============================================================================
    #ifndef DOXYGEN
     [[deprecated ("This method's bool parameter has changed: see the new method signature.")]]
     void setSelectedRows (const SparseSet<int>&, bool);
    #endif
+
+    [[deprecated ("The name of this function is ambiguous if derived classes supply their own models, use getListBoxModel instead")]]
+    ListBoxModel* getModel() const noexcept  { return getListBoxModel(); }
 
 private:
     //==============================================================================
@@ -622,7 +637,6 @@ private:
 
     void assignModelPtr (ListBoxModel*);
     void checkModelPtrIsValid() const;
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     bool hasAccessibleHeaderComponent() const;
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);

@@ -28,7 +28,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-struct DemoContent    : public Component
+struct DemoContent final : public Component
 {
     DemoContent() noexcept    {}
 
@@ -58,7 +58,7 @@ private:
 
 //==============================================================================
 #if ! (JUCE_ANDROID || JUCE_IOS)
-struct CodeContent    : public Component
+struct CodeContent final : public Component
 {
     CodeContent()
     {
@@ -67,7 +67,7 @@ struct CodeContent    : public Component
         codeEditor.setReadOnly (true);
         codeEditor.setScrollbarThickness (8);
 
-        lookAndFeelChanged();
+        updateLookAndFeel();
     }
 
     void resized() override
@@ -83,14 +83,19 @@ struct CodeContent    : public Component
                                     "*******************************************************************************/\n");
     }
 
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
-        auto* v4 = dynamic_cast <LookAndFeel_V4*> (&Desktop::getInstance().getDefaultLookAndFeel());
+        auto* v4 = dynamic_cast<LookAndFeel_V4*> (&Desktop::getInstance().getDefaultLookAndFeel());
 
         if (v4 != nullptr && (v4->getCurrentColourScheme() != LookAndFeel_V4::getLightColourScheme()))
             codeEditor.setColourScheme (getDarkColourScheme());
         else
             codeEditor.setColourScheme (getLightColourScheme());
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
     }
 
     CodeDocument document;
@@ -115,7 +120,7 @@ DemoContentComponent::DemoContentComponent (Component& mainComponent, std::funct
     addTab ("Settings", Colours::transparentBlack, new SettingsContent (dynamic_cast<MainComponent&> (mainComponent)), true);
 
     setTabBarDepth (40);
-    lookAndFeelChanged();
+    updateLookAndFeel();
 }
 
 DemoContentComponent::~DemoContentComponent()
@@ -182,12 +187,17 @@ void DemoContentComponent::clearCurrentDemo()
     demoChangedCallback (false);
 }
 
-void DemoContentComponent::lookAndFeelChanged()
+void DemoContentComponent::updateLookAndFeel()
 {
     auto backgroundColour = findColour (ResizableWindow::backgroundColourId);
 
     for (int i = 0; i < getNumTabs(); ++i)
         setTabBackgroundColour (i, backgroundColour);
+}
+
+void DemoContentComponent::lookAndFeelChanged()
+{
+    updateLookAndFeel();
 }
 
 String DemoContentComponent::trimPIP (const String& fileContents)

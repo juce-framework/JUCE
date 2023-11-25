@@ -29,7 +29,7 @@ struct ContentComponent;
 struct ProjectTemplatesAndExamples;
 
 //==============================================================================
-class StartPageComponent  : public Component
+class StartPageComponent final : public Component
 {
 public:
     StartPageComponent (std::function<void (std::unique_ptr<Project>&&)>&& newProjectCb,

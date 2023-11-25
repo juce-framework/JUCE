@@ -279,7 +279,7 @@ public:
     public:
         inline NonInterleaved() = default;
         inline NonInterleaved (const NonInterleaved&) = default;
-        inline NonInterleaved (const int) noexcept {}
+        inline NonInterleaved (int) noexcept {}
         inline void copyFrom (const NonInterleaved&) noexcept {}
         template <class SampleFormatType> inline void advanceData (SampleFormatType& s) noexcept                    { s.advance(); }
         template <class SampleFormatType> inline void advanceDataBy (SampleFormatType& s, int numSamples) noexcept  { s.skip (numSamples); }
@@ -435,6 +435,9 @@ public:
 
         /** Adds a number of samples to the pointer's position. */
         Pointer& operator+= (int samplesToJump) noexcept        { this->advanceDataBy (data, samplesToJump); return *this; }
+
+        /** Returns a new pointer with the specified offset from this pointer's position. */
+        Pointer operator+ (int samplesToJump) const             { return Pointer { *this } += samplesToJump; }
 
         /** Writes a stream of samples into this pointer from another pointer.
             This will copy the specified number of samples, converting between formats appropriately.
@@ -662,7 +665,7 @@ private:
     {
         using ElementType = std::remove_pointer_t<decltype (DataFormat::data)>;
         using ChannelType = std::conditional_t<IsConst, const ElementType*, ElementType*>;
-        using DataType = std::conditional_t<IsInterleaved, ChannelType, ChannelType*>;
+        using DataType = std::conditional_t<IsInterleaved, ChannelType, ChannelType const*>;
         using PointerType = Pointer<DataFormat,
                                     Endianness,
                                     std::conditional_t<IsInterleaved, Interleaved, NonInterleaved>,

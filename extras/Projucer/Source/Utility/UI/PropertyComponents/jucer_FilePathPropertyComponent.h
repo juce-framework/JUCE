@@ -32,9 +32,9 @@
     The user may drag files over the property box, enter the path manually and/or click
     the '...' button to open a file selection dialog box.
 */
-class FilePathPropertyComponent    : public PropertyComponent,
-                                     public FileDragAndDropTarget,
-                                     protected Value::Listener
+class FilePathPropertyComponent : public PropertyComponent,
+                                  public FileDragAndDropTarget,
+                                  protected Value::Listener
 {
 public:
     FilePathPropertyComponent (Value valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
@@ -114,7 +114,7 @@ private:
         browseButton.onClick = [this] { browse(); };
         addAndMakeVisible (browseButton);
 
-        lookAndFeelChanged();
+        updateLookAndFeel();
     }
 
     void setTo (File f)
@@ -187,12 +187,17 @@ private:
         }
     }
 
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
         browseButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
         browseButton.setColour (TextButton::textColourOffId, Colours::white);
 
         updateEditorColour();
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
     }
 
     //==============================================================================
@@ -212,7 +217,7 @@ private:
 };
 
 //==============================================================================
-class FilePathPropertyComponentWithEnablement  : public FilePathPropertyComponent
+class FilePathPropertyComponentWithEnablement final : public FilePathPropertyComponent
 {
 public:
     FilePathPropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -232,16 +237,21 @@ public:
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
-        valueChanged (value);
+        handleValueChanged (value);
     }
 
     ~FilePathPropertyComponentWithEnablement() override    { value.removeListener (this); }
 
 private:
-    void valueChanged (Value& v) override
+    void handleValueChanged (Value& v)
     {
         FilePathPropertyComponent::valueChanged (v);
         setEnabled (propertyWithDefault.get());
+    }
+
+    void valueChanged (Value& v) override
+    {
+        handleValueChanged (v);
     }
 
     ValueTreePropertyWithDefault propertyWithDefault;

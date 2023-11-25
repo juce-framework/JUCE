@@ -27,7 +27,7 @@ namespace juce
 {
 
 //==============================================================================
-class CodeEditorComponent::CodeEditorAccessibilityHandler  : public AccessibilityHandler
+class CodeEditorComponent::CodeEditorAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit CodeEditorAccessibilityHandler (CodeEditorComponent& codeEditorComponentToWrap)
@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    class CodeEditorComponentTextInterface  : public AccessibilityTextInterface
+    class CodeEditorComponentTextInterface final : public AccessibilityTextInterface
     {
     public:
         explicit CodeEditorComponentTextInterface (CodeEditorComponent& codeEditorComponentToWrap)
@@ -71,21 +71,7 @@ private:
 
         void setSelection (Range<int> r) override
         {
-            if (r == codeEditorComponent.getHighlightedRegion())
-                return;
-
-            if (r.isEmpty())
-            {
-                codeEditorComponent.caretPos.setPosition (r.getStart());
-                return;
-            }
-
-            auto& doc = codeEditorComponent.document;
-
-            const auto cursorAtStart = r.getEnd() == codeEditorComponent.getHighlightedRegion().getStart()
-                                    || r.getEnd() == codeEditorComponent.getHighlightedRegion().getEnd();
-            codeEditorComponent.selectRegion (CodeDocument::Position (doc, cursorAtStart ? r.getEnd() : r.getStart()),
-                                              CodeDocument::Position (doc, cursorAtStart ? r.getStart() : r.getEnd()));
+            codeEditorComponent.setHighlightedRegion (r);
         }
 
         String getText (Range<int> r) const override
@@ -108,32 +94,7 @@ private:
 
         RectangleList<int> getTextBounds (Range<int> textRange) const override
         {
-            auto& doc = codeEditorComponent.document;
-
-            RectangleList<int> localRects;
-
-            CodeDocument::Position startPosition (doc, textRange.getStart());
-            CodeDocument::Position endPosition   (doc, textRange.getEnd());
-
-            for (int line = startPosition.getLineNumber(); line <= endPosition.getLineNumber(); ++line)
-            {
-                CodeDocument::Position lineStart (doc, line, 0);
-                CodeDocument::Position lineEnd   (doc, line, doc.getLine (line).length());
-
-                if (line == startPosition.getLineNumber())
-                    lineStart = lineStart.movedBy (startPosition.getIndexInLine());
-
-                if (line == endPosition.getLineNumber())
-                    lineEnd = { doc, line, endPosition.getIndexInLine() };
-
-                auto startPos = codeEditorComponent.getCharacterBounds (lineStart).getTopLeft();
-                auto endPos = codeEditorComponent.getCharacterBounds (lineEnd).getTopLeft();
-
-                localRects.add (startPos.x,
-                                startPos.y,
-                                jmax (1, endPos.x - startPos.x),
-                                codeEditorComponent.getLineHeight());
-            }
+            const auto localRects = codeEditorComponent.getTextBounds (textRange);
 
             RectangleList<int> globalRects;
 
@@ -213,11 +174,23 @@ public:
         return true;
     }
 
-    void getHighlightArea (RectangleList<float>& area, float x, int y, int lineH, float characterWidth) const
+    Optional<Rectangle<float>> getHighlightArea (float x, int y, int lineH, float characterWidth) const
     {
-        if (highlightColumnStart < highlightColumnEnd)
-            area.add (Rectangle<float> (x + (float) highlightColumnStart * characterWidth - 1.0f, (float) y - 0.5f,
-                                        (float) (highlightColumnEnd - highlightColumnStart) * characterWidth + 1.5f, (float) lineH + 1.0f));
+        return getHighlightArea (x, y, lineH, characterWidth, { highlightColumnStart, highlightColumnEnd });
+    }
+
+    Optional<Rectangle<float>> getHighlightArea (float x,
+                                                 int y,
+                                                 int lineH,
+                                                 float characterWidth,
+                                                 Range<int> highlightColumns) const
+    {
+        if (highlightColumns.isEmpty())
+            return {};
+
+        return Rectangle<float> (x + (float) highlightColumns.getStart() * characterWidth - 1.0f, (float) y - 0.5f,
+                                 (float) (highlightColumns.getEnd() - highlightColumns.getStart()) * characterWidth + 1.5f, (float) lineH + 1.0f);
+
     }
 
     void draw (CodeEditorComponent& owner, Graphics& g, const Font& fontToUse,
@@ -411,7 +384,7 @@ private:
 };
 
 //==============================================================================
-class CodeEditorComponent::GutterComponent  : public Component
+class CodeEditorComponent::GutterComponent final : public Component
 {
 public:
     GutterComponent() {}
@@ -503,6 +476,9 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
 
 CodeEditorComponent::~CodeEditorComponent()
 {
+    if (auto* peer = getPeer())
+        peer->refreshTextInputTarget();
+
     document.removeListener (pimpl.get());
 }
 
@@ -530,15 +506,7 @@ bool CodeEditorComponent::isTextInputActive() const
 
 void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int>>&)
 {
-    jassertfalse; // TODO Windows IME not yet supported for this comp..
-}
-
-Rectangle<int> CodeEditorComponent::getCaretRectangle()
-{
-    if (caret != nullptr)
-        return getLocalArea (caret.get(), caret->getLocalBounds());
-
-    return {};
+    // TODO IME composition ranges not yet supported for this component
 }
 
 void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
@@ -598,32 +566,33 @@ void CodeEditorComponent::paint (Graphics& g)
 {
     g.fillAll (findColour (CodeEditorComponent::backgroundColourId));
 
-    auto gutterSize = getGutterSize();
-    auto bottom = horizontalScrollBar.isVisible() ? horizontalScrollBar.getY() : getHeight();
-    auto right  = verticalScrollBar.isVisible()   ? verticalScrollBar.getX()   : getWidth();
+    const auto gutterSize = getGutterSize();
+    const auto bottom = horizontalScrollBar.isVisible() ? horizontalScrollBar.getY() : getHeight();
+    const auto right  = verticalScrollBar.isVisible()   ? verticalScrollBar.getX()   : getWidth();
 
     g.reduceClipRegion (gutterSize, 0, right - gutterSize, bottom);
 
     g.setFont (font);
 
-    auto clip = g.getClipBounds();
-    auto firstLineToDraw = jmax (0, clip.getY() / lineHeight);
-    auto lastLineToDraw  = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
-    auto x = (float) (gutterSize - xOffset * charWidth);
-    auto rightClip = (float) clip.getRight();
+    const auto clip = g.getClipBounds();
+    const auto firstLineToDraw = jmax (0, clip.getY() / lineHeight);
+    const auto lastLineToDraw  = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
+    const auto x = (float) (gutterSize - xOffset * charWidth);
+    const auto rightClip = (float) clip.getRight();
 
     {
         RectangleList<float> highlightArea;
 
         for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-            lines.getUnchecked(i)->getHighlightArea (highlightArea, x, lineHeight * i, lineHeight, charWidth);
+            if (const auto area = lines.getUnchecked (i)->getHighlightArea (x, lineHeight * i, lineHeight, charWidth))
+                highlightArea.add (*area);
 
         g.setColour (findColour (CodeEditorComponent::highlightColourId));
         g.fillRectList (highlightArea);
     }
 
     for (int i = firstLineToDraw; i < lastLineToDraw; ++i)
-        lines.getUnchecked(i)->draw (*this, g, font, rightClip, x, lineHeight * i, lineHeight, charWidth);
+        lines.getUnchecked (i)->draw (*this, g, font, rightClip, x, lineHeight * i, lineHeight, charWidth);
 }
 
 void CodeEditorComponent::setScrollbarThickness (const int thickness)
@@ -666,7 +635,7 @@ void CodeEditorComponent::rebuildLineTokens()
 
     for (int i = 0; i < numNeeded; ++i)
     {
-        if (lines.getUnchecked(i)->update (document, firstLineOnScreen + i, source, codeTokeniser,
+        if (lines.getUnchecked (i)->update (document, firstLineOnScreen + i, source, codeTokeniser,
                                            spacesPerTab, selectionStart, selectionEnd))
         {
             minLineToRepaint = jmin (minLineToRepaint, i);
@@ -704,10 +673,9 @@ void CodeEditorComponent::codeDocumentChanged (const int startIndex, const int e
     updateScrollBars();
 }
 
-void CodeEditorComponent::retokenise (int startIndex, int endIndex)
+void CodeEditorComponent::retokenise (int startIndex, [[maybe_unused]] int endIndex)
 {
     const CodeDocument::Position affectedTextStart (document, startIndex);
-    juce::ignoreUnused (endIndex); // Leave room for more efficient impl in future.
 
     clearCachedIterators (affectedTextStart.getLineNumber());
 
@@ -827,7 +795,7 @@ void CodeEditorComponent::scrollToColumnInternal (double column)
 {
     const double newOffset = jlimit (0.0, document.getMaximumLineLength() + 3.0, column);
 
-    if (xOffset != newOffset)
+    if (! approximatelyEqual (xOffset, newOffset))
     {
         xOffset = newOffset;
         updateCaretPosition();
@@ -891,6 +859,37 @@ CodeDocument::Position CodeEditorComponent::getPositionAt (int x, int y) const
     const int index = columnToIndex (line, column);
 
     return CodeDocument::Position (document, line, index);
+}
+
+int CodeEditorComponent::getCharIndexForPoint (Point<int> point) const
+{
+    return getPositionAt (point.x, point.y).getPosition();
+}
+
+RectangleList<int> CodeEditorComponent::getTextBounds (Range<int> textRange) const
+{
+    RectangleList<int> localRects;
+
+    const CodeDocument::Position startPosition (document, textRange.getStart());
+    const CodeDocument::Position endPosition   (document, textRange.getEnd());
+
+    for (int line = startPosition.getLineNumber(); line <= endPosition.getLineNumber(); ++line)
+    {
+        const CodeDocument::Position lineStartColumn0 { document, line, 0 };
+
+        const auto lineStart = line == startPosition.getLineNumber() ? lineStartColumn0.movedBy (startPosition.getIndexInLine())
+                                                                     : lineStartColumn0;
+
+        const CodeDocument::Position lineEnd { document, line, line == endPosition.getLineNumber() ? endPosition.getIndexInLine()
+                                                                                                   : document.getLine (line).length() };
+
+        const auto startPos = getCharacterBounds (lineStart).getTopLeft();
+        const auto endPos   = getCharacterBounds (lineEnd)  .getTopLeft();
+
+        localRects.add (startPos.x, startPos.y, jmax (1, endPos.x - startPos.x), getLineHeight());
+    }
+
+    return localRects;
 }
 
 //==============================================================================
@@ -1336,8 +1335,13 @@ bool CodeEditorComponent::isHighlightActive() const noexcept
 
 void CodeEditorComponent::setHighlightedRegion (const Range<int>& newRange)
 {
-    selectRegion (CodeDocument::Position (document, newRange.getStart()),
-                  CodeDocument::Position (document, newRange.getEnd()));
+    if (newRange == getHighlightedRegion())
+        return;
+
+    const auto cursorAtStart = newRange.getEnd() == getHighlightedRegion().getStart()
+                            || newRange.getEnd() == getHighlightedRegion().getEnd();
+    selectRegion (CodeDocument::Position (document, cursorAtStart ? newRange.getEnd() : newRange.getStart()),
+                  CodeDocument::Position (document, cursorAtStart ? newRange.getStart() : newRange.getEnd()));
 }
 
 String CodeEditorComponent::getTextInRange (const Range<int>& range) const
@@ -1590,8 +1594,8 @@ void CodeEditorComponent::mouseDoubleClick (const MouseEvent& e)
 
 void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if ((verticalScrollBar.isVisible() && wheel.deltaY != 0.0f)
-         || (horizontalScrollBar.isVisible() && wheel.deltaX != 0.0f))
+    if ((verticalScrollBar.isVisible() && ! approximatelyEqual (wheel.deltaY, 0.0f))
+         || (horizontalScrollBar.isVisible() && ! approximatelyEqual (wheel.deltaX, 0.0f)))
     {
         {
             MouseWheelDetails w (wheel);

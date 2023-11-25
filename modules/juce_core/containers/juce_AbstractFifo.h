@@ -48,7 +48,7 @@ namespace juce
                 copySomeData (myBuffer + scope.startIndex1, someData, scope.blockSize1);
 
             if (scope.blockSize2 > 0)
-                copySomeData (myBuffer + scope.startIndex2, someData, scope.blockSize2);
+                copySomeData (myBuffer + scope.startIndex2, someData + scope.blockSize1, scope.blockSize2);
         }
 
         void readFromFifo (int* someData, int numItems)

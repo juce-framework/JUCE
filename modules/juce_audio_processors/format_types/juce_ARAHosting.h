@@ -25,7 +25,7 @@
 
 #pragma once
 
-#if (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU) && (JUCE_MAC || JUCE_WINDOWS)) || DOXYGEN
+#if (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)) || DOXYGEN
 
 // Include ARA SDK headers
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
@@ -107,6 +107,8 @@ struct ConversionFunctions
     when the lifetime of the helper class object ends.
 
     You shouldn't use this class directly but instead inherit from the helper classes.
+
+    @tags{ARA}
 */
 template <typename Base, typename PtrIn>
 class ManagedARAHandle
@@ -279,6 +281,8 @@ private:
 
 /** This class is used internally by PlaybackRegionRegistry to be notified when a PlaybackRegion
     object is deleted.
+
+    @tags{ARA}
 */
 struct DeletionListener
 {
@@ -653,6 +657,8 @@ using EditorRendererInterface   = PlaybackRegionRegistry<ARA::ARAEditorRendererR
 
     Returned by ARAHostDocumentController::bindDocumentToPluginInstance(). The corresponding
     ARAHostDocumentController must remain valid as long as the plugin extension is in use.
+
+    @tags{ARA}
 */
 class PlugInExtensionInstance final
 {

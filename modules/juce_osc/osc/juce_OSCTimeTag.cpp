@@ -76,7 +76,7 @@ bool OSCTimeTag::isImmediately() const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class OSCTimeTagTests  : public UnitTest
+class OSCTimeTagTests final : public UnitTest
 {
 public:
     OSCTimeTagTests()

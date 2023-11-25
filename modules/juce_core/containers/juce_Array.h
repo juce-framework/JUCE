@@ -386,7 +386,7 @@ public:
         auto endPtr = values.end();
 
         for (; e != endPtr; ++e)
-            if (elementToLookFor == *e)
+            if (exactlyEqual (elementToLookFor, *e))
                 return static_cast<int> (e - values.begin());
 
         return -1;
@@ -404,7 +404,7 @@ public:
         auto endPtr = values.end();
 
         for (; e != endPtr; ++e)
-            if (elementToLookFor == *e)
+            if (exactlyEqual (elementToLookFor, *e))
                 return true;
 
         return false;
@@ -649,7 +649,7 @@ public:
         @see add
     */
     template <class OtherArrayType>
-    typename std::enable_if<! std::is_pointer<OtherArrayType>::value, void>::type
+    std::enable_if_t<! std::is_pointer_v<OtherArrayType>, void>
     addArray (const OtherArrayType& arrayToAddFrom,
               int startIndex,
               int numElementsToAdd = -1)
@@ -727,32 +727,7 @@ public:
         @see addSorted, sort
     */
     template <typename ElementComparator, typename TargetValueType>
-    int indexOfSorted (ElementComparator& comparator, TargetValueType elementToLookFor) const
-    {
-        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
-                                   // avoids getting warning messages about the parameter being unused
-
-        const ScopedLockType lock (getLock());
-
-        for (int s = 0, e = values.size();;)
-        {
-            if (s >= e)
-                return -1;
-
-            if (comparator.compareElements (elementToLookFor, values[s]) == 0)
-                return s;
-
-            auto halfway = (s + e) / 2;
-
-            if (halfway == s)
-                return -1;
-
-            if (comparator.compareElements (elementToLookFor, values[halfway]) >= 0)
-                s = halfway;
-            else
-                e = halfway;
-        }
-    }
+    int indexOfSorted (ElementComparator& comparator, TargetValueType elementToLookFor) const;
 
     //==============================================================================
     /** Removes an element from the array.
@@ -1106,14 +1081,7 @@ public:
         @see addSorted, indexOfSorted, sortArray
     */
     template <class ElementComparator>
-    void sort (ElementComparator& comparator,
-               bool retainOrderOfEquivalentItems = false)
-    {
-        const ScopedLockType lock (getLock());
-        ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
-                                   // avoids getting warning messages about the parameter being unused
-        sortArray (comparator, values.begin(), 0, size() - 1, retainOrderOfEquivalentItems);
-    }
+    void sort (ElementComparator& comparator, bool retainOrderOfEquivalentItems = false);
 
     //==============================================================================
     /** Returns the CriticalSection that locks this array.
@@ -1149,5 +1117,44 @@ private:
             values.shrinkToNoMoreThan (jmax (values.size(), jmax (minimumAllocatedSize, 64 / (int) sizeof (ElementType))));
     }
 };
+
+//==============================================================================
+template <typename ElementType, typename TypeOfCriticalSectionToUse, int minimumAllocatedSize>
+template <typename ElementComparator, typename TargetValueType>
+int Array<ElementType, TypeOfCriticalSectionToUse, minimumAllocatedSize>::indexOfSorted (
+    [[maybe_unused]] ElementComparator& comparator,
+    TargetValueType elementToLookFor) const
+{
+    const ScopedLockType lock (getLock());
+
+    for (int s = 0, e = values.size();;)
+    {
+        if (s >= e)
+            return -1;
+
+        if (comparator.compareElements (elementToLookFor, values[s]) == 0)
+            return s;
+
+        auto halfway = (s + e) / 2;
+
+        if (halfway == s)
+            return -1;
+
+        if (comparator.compareElements (elementToLookFor, values[halfway]) >= 0)
+            s = halfway;
+        else
+            e = halfway;
+    }
+}
+
+template <typename ElementType, typename TypeOfCriticalSectionToUse, int minimumAllocatedSize>
+template <class ElementComparator>
+void Array<ElementType, TypeOfCriticalSectionToUse, minimumAllocatedSize>::sort (
+    [[maybe_unused]] ElementComparator& comparator,
+    bool retainOrderOfEquivalentItems)
+{
+    const ScopedLockType lock (getLock());
+    sortArray (comparator, values.begin(), 0, size() - 1, retainOrderOfEquivalentItems);
+}
 
 } // namespace juce

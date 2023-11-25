@@ -490,8 +490,8 @@ public:
     template <typename ResultType>
     struct HexParser
     {
-        static_assert (std::is_unsigned<ResultType>::value, "ResultType must be unsigned because "
-                                                            "left-shifting a negative value is UB");
+        static_assert (std::is_unsigned_v<ResultType>, "ResultType must be unsigned because "
+                                                       "left-shifting a negative value is UB");
 
         template <typename CharPointerType>
         static ResultType parse (CharPointerType t) noexcept

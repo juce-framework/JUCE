@@ -67,6 +67,9 @@ public:
     static JucerDocumentEditor* getActiveDocumentHolder();
 
 private:
+    void handleResize();
+
+    void handleChange();
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     std::unique_ptr<JucerDocument> document;

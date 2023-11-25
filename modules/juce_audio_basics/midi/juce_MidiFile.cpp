@@ -160,7 +160,7 @@ namespace MidiFileHelpers
 
         for (int i = 0; i < numEvents; ++i)
         {
-            auto& m = tempoEvents.getEventPointer(i)->message;
+            auto& m = tempoEvents.getEventPointer (i)->message;
             auto eventTime = m.getTimeStamp();
 
             if (eventTime >= time)
@@ -174,9 +174,9 @@ namespace MidiFileHelpers
 
             while (i + 1 < numEvents)
             {
-                auto& m2 = tempoEvents.getEventPointer(i + 1)->message;
+                auto& m2 = tempoEvents.getEventPointer (i + 1)->message;
 
-                if (m2.getTimeStamp() != eventTime)
+                if (! approximatelyEqual (m2.getTimeStamp(), eventTime))
                     break;
 
                 if (m2.isTempoMetaEvent())
@@ -200,7 +200,7 @@ namespace MidiFileHelpers
 
             for (int j = 0; j < numEvents; ++j)
             {
-                auto& m = track->getEventPointer(j)->message;
+                auto& m = track->getEventPointer (j)->message;
 
                 if ((m.*method)())
                     results.addEvent (m);
@@ -439,7 +439,7 @@ void MidiFile::convertTimestampTicksToSeconds()
         {
             for (int j = ms->getNumEvents(); --j >= 0;)
             {
-                auto& m = ms->getEventPointer(j)->message;
+                auto& m = ms->getEventPointer (j)->message;
                 m.setTimeStamp (MidiFileHelpers::convertTicksToSeconds (m.getTimeStamp(), tempoEvents, timeFormat));
             }
         }
@@ -475,7 +475,7 @@ bool MidiFile::writeTrack (OutputStream& mainOut, const MidiMessageSequence& ms)
 
     for (int i = 0; i < ms.getNumEvents(); ++i)
     {
-        auto& mm = ms.getEventPointer(i)->message;
+        auto& mm = ms.getEventPointer (i)->message;
 
         if (mm.isEndOfTrackMetaEvent())
             endOfTrackEventWritten = true;
@@ -530,7 +530,7 @@ bool MidiFile::writeTrack (OutputStream& mainOut, const MidiMessageSequence& ms)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct MidiFileTest  : public UnitTest
+struct MidiFileTest final : public UnitTest
 {
     MidiFileTest()
         : UnitTest ("MidiFile", UnitTestCategories::midi)

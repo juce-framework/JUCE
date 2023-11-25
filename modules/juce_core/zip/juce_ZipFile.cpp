@@ -136,7 +136,7 @@ static bool hasSymbolicPart (const File& root, const File& f)
 }
 
 //==============================================================================
-struct ZipFile::ZipInputStream  : public InputStream
+struct ZipFile::ZipInputStream final : public InputStream
 {
     ZipInputStream (ZipFile& zf, const ZipFile::ZipEntryHolder& zei)
         : file (zf),
@@ -670,7 +670,7 @@ bool ZipFile::Builder::writeToStream (OutputStream& target, double* const progre
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct ZIPTests   : public UnitTest
+struct ZIPTests final : public UnitTest
 {
     ZIPTests()
         : UnitTest ("ZIP", UnitTestCategories::compression)

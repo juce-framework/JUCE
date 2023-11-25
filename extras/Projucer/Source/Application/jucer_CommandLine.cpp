@@ -229,7 +229,7 @@ namespace
         command.add ("-m");
         command.add (version.quoted());
 
-        std::cout << "Performing command: " << command.joinIntoString(" ") << std::endl;
+        std::cout << "Performing command: " << command.joinIntoString (" ") << std::endl;
 
         ChildProcess c;
 
@@ -525,7 +525,7 @@ namespace
         auto files = findAllSourceFiles (target);
 
         for (int i = 0; i < files.size(); ++i)
-            fixIncludes (files.getReference(i), files);
+            fixIncludes (files.getReference (i), files);
     }
 
     //==============================================================================
@@ -586,7 +586,7 @@ namespace
         }
 
         for (int i = 0; i < sections.size(); ++i)
-            sections.getReference(i).index = i;
+            sections.getReference (i).index = i;
 
         for (int i = 0; i < sections.size(); ++i)
             sections.swap (i, rng.nextInt (sections.size()));
@@ -597,7 +597,7 @@ namespace
             << "{" << preferredLineFeed;
 
         for (int i = 0; i < sections.size(); ++i)
-            sections.getReference(i).writeGenerator (out);
+            sections.getReference (i).writeGenerator (out);
 
         out << preferredLineFeed
             << "    String result = " << getStringConcatenationExpression (rng, 0, sections.size()) << ";" << preferredLineFeed
@@ -645,7 +645,7 @@ namespace
     {
         args.checkMinNumArguments (3);
         auto source = args[1].resolveAsExistingFile();
-        auto target = args[2].resolveAsExistingFile();
+        auto target = args[2].resolveAsFile();
 
         MemoryOutputStream literal;
         size_t dataSize = 0;

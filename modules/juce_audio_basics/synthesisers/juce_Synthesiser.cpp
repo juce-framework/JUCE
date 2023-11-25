@@ -98,9 +98,20 @@ void Synthesiser::clearVoices()
 
 SynthesiserVoice* Synthesiser::addVoice (SynthesiserVoice* const newVoice)
 {
-    const ScopedLock sl (lock);
-    newVoice->setCurrentPlaybackSampleRate (sampleRate);
-    return voices.add (newVoice);
+    SynthesiserVoice* voice;
+
+    {
+        const ScopedLock sl (lock);
+        newVoice->setCurrentPlaybackSampleRate (sampleRate);
+        voice = voices.add (newVoice);
+    }
+
+    {
+        const ScopedLock sl (stealLock);
+        usableVoicesToStealArray.ensureStorageAllocated (voices.size() + 1);
+    }
+
+    return voice;
 }
 
 void Synthesiser::removeVoice (const int index)
@@ -142,7 +153,7 @@ void Synthesiser::setMinimumRenderingSubdivisionSize (int numSamples, bool shoul
 //==============================================================================
 void Synthesiser::setCurrentPlaybackSampleRate (const double newRate)
 {
-    if (sampleRate != newRate)
+    if (! approximatelyEqual (sampleRate, newRate))
     {
         const ScopedLock sl (lock);
         allNotesOff (0, false);
@@ -160,7 +171,7 @@ void Synthesiser::processNextBlock (AudioBuffer<floatType>& outputAudio,
                                     int numSamples)
 {
     // must set the sample rate before using this!
-    jassert (sampleRate != 0);
+    jassert (! exactlyEqual (sampleRate, 0.0));
     const int targetChannels = outputAudio.getNumChannels();
 
     auto midiIterator = midiData.findNextSamplePosition (startSample);
@@ -471,15 +482,14 @@ void Synthesiser::handleSostenutoPedal (int midiChannel, bool isDown)
     }
 }
 
-void Synthesiser::handleSoftPedal (int midiChannel, bool /*isDown*/)
+void Synthesiser::handleSoftPedal ([[maybe_unused]] int midiChannel, bool /*isDown*/)
 {
-    ignoreUnused (midiChannel);
     jassert (midiChannel > 0 && midiChannel <= 16);
 }
 
-void Synthesiser::handleProgramChange (int midiChannel, int programNumber)
+void Synthesiser::handleProgramChange ([[maybe_unused]] int midiChannel,
+                                       [[maybe_unused]] int programNumber)
 {
-    ignoreUnused (midiChannel, programNumber);
     jassert (midiChannel > 0 && midiChannel <= 16);
 }
 
@@ -514,9 +524,13 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
     SynthesiserVoice* low = nullptr; // Lowest sounding note, might be sustained, but NOT in release phase
     SynthesiserVoice* top = nullptr; // Highest sounding note, might be sustained, but NOT in release phase
 
+    // All major OSes use double-locking so this will be lock- and wait-free as long as the lock is not
+    // contended. This is always the case if you do not call findVoiceToSteal on multiple threads at
+    // the same time.
+    const ScopedLock sl (stealLock);
+
     // this is a list of voices we can steal, sorted by how long they've been running
-    Array<SynthesiserVoice*> usableVoices;
-    usableVoices.ensureStorageAllocated (voices.size());
+    usableVoicesToStealArray.clear();
 
     for (auto* voice : voices)
     {
@@ -524,7 +538,7 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
         {
             jassert (voice->isVoiceActive()); // We wouldn't be here otherwise
 
-            usableVoices.add (voice);
+            usableVoicesToStealArray.add (voice);
 
             // NB: Using a functor rather than a lambda here due to scare-stories about
             // compilers generating code containing heap allocations..
@@ -533,7 +547,7 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
                 bool operator() (const SynthesiserVoice* a, const SynthesiserVoice* b) const noexcept { return a->wasStartedBefore (*b); }
             };
 
-            std::sort (usableVoices.begin(), usableVoices.end(), Sorter());
+            std::sort (usableVoicesToStealArray.begin(), usableVoicesToStealArray.end(), Sorter());
 
             if (! voice->isPlayingButReleased()) // Don't protect released notes
             {
@@ -553,22 +567,22 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
         top = nullptr;
 
     // The oldest note that's playing with the target pitch is ideal..
-    for (auto* voice : usableVoices)
+    for (auto* voice : usableVoicesToStealArray)
         if (voice->getCurrentlyPlayingNote() == midiNoteNumber)
             return voice;
 
     // Oldest voice that has been released (no finger on it and not held by sustain pedal)
-    for (auto* voice : usableVoices)
+    for (auto* voice : usableVoicesToStealArray)
         if (voice != low && voice != top && voice->isPlayingButReleased())
             return voice;
 
     // Oldest voice that doesn't have a finger on it:
-    for (auto* voice : usableVoices)
+    for (auto* voice : usableVoicesToStealArray)
         if (voice != low && voice != top && ! voice->isKeyDown())
             return voice;
 
     // Oldest voice that isn't protected
-    for (auto* voice : usableVoices)
+    for (auto* voice : usableVoicesToStealArray)
         if (voice != low && voice != top)
             return voice;
 

@@ -28,29 +28,62 @@ namespace juce
 
 AccessibilityHandler* AccessibilityHandler::currentlyFocusedHandler = nullptr;
 
-enum class InternalAccessibilityEvent
+class NativeChildHandler
 {
-    elementCreated,
-    elementDestroyed,
-    elementMovedOrResized,
-    focusChanged,
-    windowOpened,
-    windowClosed
+public:
+    static NativeChildHandler& getInstance()
+    {
+        static NativeChildHandler instance;
+        return instance;
+    }
+
+    void* getNativeChild (Component& component) const
+    {
+        if (auto it = nativeChildForComponent.find (&component);
+            it != nativeChildForComponent.end())
+        {
+            return it->second;
+        }
+
+        return nullptr;
+    }
+
+    Component* getComponent (void* nativeChild) const
+    {
+        if (auto it = componentForNativeChild.find (nativeChild);
+            it != componentForNativeChild.end())
+        {
+            return it->second;
+        }
+
+        return nullptr;
+    }
+
+    void setNativeChild (Component& component, void* nativeChild)
+    {
+        clearComponent (component);
+
+        if (nativeChild != nullptr)
+        {
+            nativeChildForComponent[&component]  = nativeChild;
+            componentForNativeChild[nativeChild] = &component;
+        }
+    }
+
+private:
+    NativeChildHandler() = default;
+
+    void clearComponent (Component& component)
+    {
+        if (auto* nativeChild = getNativeChild (component))
+            componentForNativeChild.erase (nativeChild);
+
+        nativeChildForComponent.erase (&component);
+    }
+
+    std::map<void*, Component*> componentForNativeChild;
+    std::map<Component*, void*> nativeChildForComponent;
 };
-
-void notifyAccessibilityEventInternal (const AccessibilityHandler&, InternalAccessibilityEvent);
-
-inline String getAccessibleApplicationOrPluginName()
-{
-   #if defined (JucePlugin_Name)
-    return JucePlugin_Name;
-   #else
-    if (auto* app = JUCEApplicationBase::getInstance())
-        return app->getApplicationName();
-
-    return "JUCE Application";
-   #endif
-}
 
 AccessibilityHandler::AccessibilityHandler (Component& comp,
                                             AccessibilityRole accessibilityRole,
@@ -68,7 +101,7 @@ AccessibilityHandler::AccessibilityHandler (Component& comp,
 AccessibilityHandler::~AccessibilityHandler()
 {
     giveAwayFocus();
-    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::elementDestroyed);
+    detail::AccessibilityHelpers::notifyAccessibilityEvent (*this, detail::AccessibilityHelpers::Event::elementDestroyed);
 }
 
 //==============================================================================
@@ -320,13 +353,13 @@ void AccessibilityHandler::grabFocusInternal (bool canTryParent)
 void AccessibilityHandler::giveAwayFocusInternal() const
 {
     currentlyFocusedHandler = nullptr;
-    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
+    detail::AccessibilityHelpers::notifyAccessibilityEvent (*this, detail::AccessibilityHelpers::Event::focusChanged);
 }
 
 void AccessibilityHandler::takeFocus()
 {
     currentlyFocusedHandler = this;
-    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
+    detail::AccessibilityHelpers::notifyAccessibilityEvent (*this, detail::AccessibilityHelpers::Event::focusChanged);
 
     if ((component.isShowing() || component.isOnDesktop())
         && component.getWantsKeyboardFocus()
@@ -335,5 +368,36 @@ void AccessibilityHandler::takeFocus()
         component.grabKeyboardFocus();
     }
 }
+
+std::unique_ptr<AccessibilityHandler::AccessibilityNativeImpl> AccessibilityHandler::createNativeImpl (AccessibilityHandler& handler)
+{
+   #if JUCE_NATIVE_ACCESSIBILITY_INCLUDED
+    return std::make_unique<AccessibilityNativeImpl> (handler);
+   #else
+    ignoreUnused (handler);
+    return nullptr;
+   #endif
+}
+
+void* AccessibilityHandler::getNativeChildForComponent (Component& component)
+{
+    return NativeChildHandler::getInstance().getNativeChild (component);
+}
+
+Component* AccessibilityHandler::getComponentForNativeChild (void* nativeChild)
+{
+    return NativeChildHandler::getInstance().getComponent (nativeChild);
+}
+
+void AccessibilityHandler::setNativeChildForComponent (Component& component, void* nativeChild)
+{
+    NativeChildHandler::getInstance().setNativeChild (component, nativeChild);
+}
+
+#if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED
+ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
+ void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}
+ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const { return nullptr; }
+#endif
 
 } // namespace juce

@@ -68,4 +68,4 @@ enum class AccessibilityRole
     unspecified
 };
 
-}
+} // namespace juce

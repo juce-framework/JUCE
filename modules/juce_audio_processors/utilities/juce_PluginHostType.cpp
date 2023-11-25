@@ -56,7 +56,7 @@ void PluginHostType::switchToHostApplication() const
    #endif
 }
 
-bool PluginHostType::isInAAXAudioSuite (AudioProcessor& processor)
+bool PluginHostType::isInAAXAudioSuite ([[maybe_unused]] AudioProcessor& processor)
 {
    #if JucePlugin_Build_AAX
     if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_AAX
@@ -66,14 +66,11 @@ bool PluginHostType::isInAAXAudioSuite (AudioProcessor& processor)
     }
    #endif
 
-    ignoreUnused (processor);
     return false;
 }
 
-Image PluginHostType::getHostIcon (int size) const
+Image PluginHostType::getHostIcon ([[maybe_unused]] int size) const
 {
-    ignoreUnused (size);
-
    #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
     if (isInterAppAudioConnected())
         return juce_getIAAHostIcon (size);
@@ -101,10 +98,12 @@ const char* PluginHostType::getHostDescription() const noexcept
         case AdobeAudition:            return "Adobe Audition";
         case AdobePremierePro:         return "Adobe Premiere";
         case AppleGarageBand:          return "Apple GarageBand";
+        case AppleInfoHelper:          return "com.apple.audio.InfoHelper";
         case AppleLogic:               return "Apple Logic";
         case AppleMainStage:           return "Apple MainStage";
         case Ardour:                   return "Ardour";
         case AULab:                    return "AU Lab";
+        case AUVal:                    return "auval";
         case AvidProTools:             return "ProTools";
         case BitwigStudio:             return "Bitwig Studio";
         case CakewalkSonar8:           return "Cakewalk Sonar 8";
@@ -120,6 +119,7 @@ const char* PluginHostType::getHostDescription() const noexcept
         case pluginval:                return "pluginval";
         case MergingPyramix:           return "Pyramix";
         case MuseReceptorGeneric:      return "Muse Receptor";
+        case Maschine:                 return "NI Maschine";
         case Reaper:                   return "Reaper";
         case Reason:                   return "Reason";
         case Renoise:                  return "Renoise";
@@ -214,7 +214,10 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.containsIgnoreCase   ("OsxFL"))                    return FruityLoops;
     if (hostFilename.containsIgnoreCase   ("pluginval"))                return pluginval;
     if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))          return JUCEPluginHost;
+    if (hostFilename.containsIgnoreCase   ("Maschine"))                 return Maschine;
     if (hostFilename.containsIgnoreCase   ("Vienna Ensemble Pro"))      return ViennaEnsemblePro;
+    if (hostFilename.containsIgnoreCase   ("auvaltool"))                return AUVal;
+    if (hostFilename.containsIgnoreCase   ("com.apple.audio.infohelper")) return AppleInfoHelper;
 
     if (hostIdReportedByWrapper == "com.apple.logic.pro")               return AppleLogic;
     if (hostIdReportedByWrapper == "com.apple.garageband")              return AppleGarageBand;
@@ -279,6 +282,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.containsIgnoreCase   ("Wavelab"))               return SteinbergWavelabGeneric;
     if (hostFilename.containsIgnoreCase   ("TestHost"))              return SteinbergTestHost;
     if (hostFilename.containsIgnoreCase   ("rm-host"))               return MuseReceptorGeneric;
+    if (hostFilename.containsIgnoreCase   ("Maschine"))              return Maschine;
     if (hostFilename.startsWith           ("FL"))                    return FruityLoops;
     if (hostFilename.contains             ("ilbridge."))             return FruityLoops;
     if (hostPath.containsIgnoreCase       ("Studio One"))            return StudioOne;

@@ -34,13 +34,12 @@ public:
     explicit MagnifierComponent (Component* c) : content (c)
     {
         addAndMakeVisible (content.get());
-        childBoundsChanged (content.get());
+        updateBounds (content.get());
     }
 
     void childBoundsChanged (Component* child)
     {
-        auto childArea = getLocalArea (child, child->getLocalBounds());
-        setSize (childArea.getWidth(), childArea.getHeight());
+        updateBounds (child);
     }
 
     double getScaleFactor() const   { return scaleFactor; }
@@ -52,6 +51,12 @@ public:
     }
 
 private:
+    void updateBounds (Component* child)
+    {
+        auto childArea = getLocalArea (child, child->getLocalBounds());
+        setSize (childArea.getWidth(), childArea.getHeight());
+    }
+
     double scaleFactor = 1.0;
     std::unique_ptr<Component> content;
 };

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -71,7 +69,7 @@ struct WaveShaper
 };
 
 //==============================================================================
-#if JUCE_CXX17_IS_AVAILABLE && ! ((JUCE_MAC || JUCE_IOS) && JUCE_CLANG && __clang_major__ < 10)
+#if ! ((JUCE_MAC || JUCE_IOS) && JUCE_CLANG && __clang_major__ < 10)
 template <typename Functor>
 static WaveShaper<typename std::invoke_result<Functor>, Functor> CreateWaveShaper (Functor functionToUse)   { return {functionToUse}; }
 #else
@@ -79,5 +77,4 @@ template <typename Functor>
 static WaveShaper<typename std::result_of<Functor>, Functor> CreateWaveShaper (Functor functionToUse)   { return {functionToUse}; }
 #endif
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

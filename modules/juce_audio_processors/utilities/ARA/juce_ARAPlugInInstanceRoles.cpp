@@ -28,12 +28,10 @@
 namespace juce
 {
 
-bool ARARenderer::processBlock (AudioBuffer<double>& buffer,
-                                AudioProcessor::Realtime realtime,
-                                const AudioPlayHead::PositionInfo& positionInfo) noexcept
+bool ARARenderer::processBlock ([[maybe_unused]] AudioBuffer<double>& buffer,
+                                [[maybe_unused]] AudioProcessor::Realtime realtime,
+                                [[maybe_unused]] const AudioPlayHead::PositionInfo& positionInfo) noexcept
 {
-    ignoreUnused (buffer, realtime, positionInfo);
-
     // If you hit this assertion then either the caller called the double
     // precision version of processBlock on a processor which does not support it
     // (i.e. supportsDoublePrecisionProcessing() returns false), or the implementation
@@ -42,6 +40,12 @@ bool ARARenderer::processBlock (AudioBuffer<double>& buffer,
 
     return false;
 }
+
+void ARARenderer::prepareToPlay ([[maybe_unused]] double sampleRate,
+                                 [[maybe_unused]] int maximumSamplesPerBlock,
+                                 [[maybe_unused]] int numChannels,
+                                 [[maybe_unused]] AudioProcessor::ProcessingPrecision precision,
+                                 [[maybe_unused]] AlwaysNonRealtime alwaysNonRealtime) {}
 
 //==============================================================================
 #if ARA_VALIDATE_API_CALLS
@@ -61,6 +65,21 @@ void ARAPlaybackRenderer::removePlaybackRegion (ARA::ARAPlaybackRegionRef playba
     ARA::PlugIn::PlaybackRenderer::removePlaybackRegion (playbackRegionRef);
 }
 #endif
+
+bool ARAPlaybackRenderer::processBlock ([[maybe_unused]] AudioBuffer<float>& buffer,
+                                        [[maybe_unused]] AudioProcessor::Realtime realtime,
+                                        [[maybe_unused]] const AudioPlayHead::PositionInfo& positionInfo) noexcept
+{
+    return false;
+}
+
+//==============================================================================
+bool ARAEditorRenderer::processBlock ([[maybe_unused]] AudioBuffer<float>& buffer,
+                                      [[maybe_unused]] AudioProcessor::Realtime isNonRealtime,
+                                      [[maybe_unused]] const AudioPlayHead::PositionInfo& positionInfo) noexcept
+{
+    return true;
+}
 
 //==============================================================================
 void ARAEditorView::doNotifySelection (const ARA::PlugIn::ViewSelection* viewSelection) noexcept
@@ -88,5 +107,8 @@ void ARAEditorView::removeListener (Listener* l)
 {
     listeners.remove (l);
 }
+
+void ARAEditorView::Listener::onNewSelection ([[maybe_unused]] const ARAViewSelection& viewSelection) {}
+void ARAEditorView::Listener::onHideRegionSequences ([[maybe_unused]] const std::vector<ARARegionSequence*>& regionSequences) {}
 
 } // namespace juce

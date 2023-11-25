@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2011-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,50 +60,14 @@
  * silog2(  9) = 5
  * silog2( 10) = 5
  */
-unsigned FLAC__bitmath_silog2(int v)
+uint32_t FLAC__bitmath_silog2(FLAC__int64 v)
 {
-	while(1) {
-		if(v == 0) {
-			return 0;
-		}
-		else if(v > 0) {
-			unsigned l = 0;
-			while(v) {
-				l++;
-				v >>= 1;
-			}
-			return l+1;
-		}
-		else if(v == -1) {
-			return 2;
-		}
-		else {
-			v++;
-			v = -v;
-		}
-	}
-}
+	if(v == 0)
+		return 0;
 
-unsigned FLAC__bitmath_silog2_wide(FLAC__int64 v)
-{
-	while(1) {
-		if(v == 0) {
-			return 0;
-		}
-		else if(v > 0) {
-			unsigned l = 0;
-			while(v) {
-				l++;
-				v >>= 1;
-			}
-			return l+1;
-		}
-		else if(v == -1) {
-			return 2;
-		}
-		else {
-			v++;
-			v = -v;
-		}
-	}
+	if(v == -1)
+		return 2;
+
+	v = (v < 0) ? (-(v+1)) : v;
+	return FLAC__bitmath_ilog2_wide(v)+2;
 }

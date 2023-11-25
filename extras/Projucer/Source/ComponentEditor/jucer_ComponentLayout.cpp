@@ -48,19 +48,14 @@ void ComponentLayout::changed()
         document->changed();
 }
 
-void ComponentLayout::perform (UndoableAction* action, const String& actionName)
+void ComponentLayout::perform (std::unique_ptr<UndoableAction> action, const String& actionName)
 {
     jassert (document != nullptr);
 
     if (document != nullptr)
-    {
-        document->getUndoManager().perform (action, actionName);
-    }
+        document->getUndoManager().perform (action.release(), actionName);
     else
-    {
-        std::unique_ptr<UndoableAction> deleter (action);
         action->perform();
-    }
 }
 
 //==============================================================================
@@ -76,8 +71,8 @@ void ComponentLayout::clearComponents()
 class AddCompAction  : public UndoableAction
 {
 public:
-    AddCompAction (XmlElement* const xml_, ComponentLayout& layout_)
-       : indexAdded (-1),
+    AddCompAction (XmlElement* const xml_, ComponentLayout& layout_, int& index)
+       : indexRef (index),
          xml (xml_),
          layout (layout_)
     {
@@ -89,21 +84,21 @@ public:
         Component* const newComp = layout.addComponentFromXml (*xml, false);
         jassert (newComp != nullptr);
 
-        indexAdded = layout.indexOfComponent (newComp);
-        jassert (indexAdded >= 0);
-        return indexAdded >= 0;
+        indexRef = layout.indexOfComponent (newComp);
+        jassert (indexRef >= 0);
+        return indexRef >= 0;
     }
 
     bool undo()
     {
         showCorrectTab();
-        layout.removeComponent (layout.getComponent (indexAdded), false);
+        layout.removeComponent (layout.getComponent (indexRef), false);
         return true;
     }
 
     int getSizeInUnits()    { return 10; }
 
-    int indexAdded;
+    int& indexRef;
 
 private:
     std::unique_ptr<XmlElement> xml;
@@ -164,7 +159,7 @@ void ComponentLayout::removeComponent (Component* comp, const bool undoable)
     {
         if (undoable)
         {
-            perform (new DeleteCompAction (comp, *this), "Delete components");
+            perform (std::make_unique<DeleteCompAction> (comp, *this), "Delete components");
         }
         else
         {
@@ -224,7 +219,7 @@ void ComponentLayout::componentToFront (Component* comp, const bool undoable)
     if (comp != nullptr && components.contains (comp))
     {
         if (undoable)
-            perform (new FrontBackCompAction (comp, *this, -1), "Move components to front");
+            perform (std::make_unique<FrontBackCompAction> (comp, *this, -1), "Move components to front");
         else
             moveComponentZOrder (components.indexOf (comp), -1);
     }
@@ -235,7 +230,7 @@ void ComponentLayout::componentToBack (Component* comp, const bool undoable)
     if (comp != nullptr && components.contains (comp))
     {
         if (undoable)
-            perform (new FrontBackCompAction (comp, *this, 0), "Move components to back");
+            perform (std::make_unique<FrontBackCompAction> (comp, *this, 0), "Move components to back");
         else
             moveComponentZOrder (components.indexOf (comp), 0);
     }
@@ -253,7 +248,7 @@ void ComponentLayout::copySelectedToClipboard()
 
     for (int i = 0; i < components.size(); ++i)
     {
-        auto c = components.getUnchecked(i);
+        auto c = components.getUnchecked (i);
 
         if (selected.isSelected (c))
         {
@@ -315,7 +310,7 @@ void ComponentLayout::selectedToFront()
     const SelectedItemSet <Component*> temp (selected);
 
     for (int i = temp.getNumSelected(); --i >= 0;)
-        componentToFront (temp.getSelectedItem(i), true);
+        componentToFront (temp.getSelectedItem (i), true);
 }
 
 void ComponentLayout::selectedToBack()
@@ -323,7 +318,7 @@ void ComponentLayout::selectedToBack()
     const SelectedItemSet <Component*> temp (selected);
 
     for (int i = 0; i < temp.getNumSelected(); ++i)
-        componentToBack (temp.getSelectedItem(i), true);
+        componentToBack (temp.getSelectedItem (i), true);
 }
 
 void ComponentLayout::alignTop()
@@ -432,9 +427,8 @@ Component* ComponentLayout::addComponentFromXml (const XmlElement& xml, const bo
 {
     if (undoable)
     {
-        AddCompAction* const action = new AddCompAction (new XmlElement (xml), *this);
-        perform (action, "Add new components");
-        return components [action->indexAdded];
+        perform (std::make_unique<AddCompAction> (new XmlElement (xml), *this, addComponentIndexAdded), "Add new components");
+        return components [addComponentIndexAdded];
     }
 
     if (ComponentTypeHandler* const type
@@ -463,8 +457,8 @@ Component* ComponentLayout::addComponentFromXml (const XmlElement& xml, const bo
 Component* ComponentLayout::findComponentWithId (const int64 componentId) const
 {
     for (int i = 0; i < components.size(); ++i)
-        if (ComponentTypeHandler::getComponentId (components.getUnchecked(i)) == componentId)
-            return components.getUnchecked(i);
+        if (ComponentTypeHandler::getComponentId (components.getUnchecked (i)) == componentId)
+            return components.getUnchecked (i);
 
     return nullptr;
 }
@@ -632,7 +626,7 @@ public:
           newBounds (bounds),
           oldBounds (comp->getBounds()),
           newProps (props),
-          oldProps(comp->getProperties())
+          oldProps (comp->getProperties())
     {
     }
 
@@ -667,7 +661,7 @@ void ComponentLayout::setComponentPosition (Component* comp,
     {
         if (undoable)
         {
-            perform (new ChangeCompPositionAction (comp, *this, newPos), "Move components");
+            perform (std::make_unique<ChangeCompPositionAction> (comp, *this, newPos), "Move components");
         }
         else
         {
@@ -701,7 +695,7 @@ void ComponentLayout::setComponentBoundsAndProperties (Component* componentToPos
     {
         if (undoable)
         {
-            perform (new ChangeCompBoundsAndPropertiesAction (componentToPosition, *this, newBounds, props), "Change component bounds");
+            perform (std::make_unique<ChangeCompBoundsAndPropertiesAction> (componentToPosition, *this, newBounds, props), "Change component bounds");
         }
         else
         {
@@ -845,7 +839,7 @@ void ComponentLayout::stretchSelectedComps (int dw, int dh, bool allowSnap)
 void ComponentLayout::fillInGeneratedCode (GeneratedCode& code) const
 {
     for (int i = 0; i < components.size(); ++i)
-        if (Component* const comp = components.getUnchecked(i))
+        if (Component* const comp = components.getUnchecked (i))
             if (ComponentTypeHandler* const type = ComponentTypeHandler::getHandlerFor (*comp))
                 type->fillInGeneratedCode (comp, code);
 }

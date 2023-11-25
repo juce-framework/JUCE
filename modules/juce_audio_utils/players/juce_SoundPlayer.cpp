@@ -27,7 +27,7 @@ namespace juce
 {
 
 // This is an AudioTransportSource which will own it's assigned source
-struct AudioSourceOwningTransportSource  : public AudioTransportSource
+struct AudioSourceOwningTransportSource final : public AudioTransportSource
 {
     AudioSourceOwningTransportSource (PositionableAudioSource* s, double sr)  : source (s)
     {
@@ -48,8 +48,8 @@ private:
 //==============================================================================
 // An AudioSourcePlayer which will remove itself from the AudioDeviceManager's
 // callback list once it finishes playing its source
-struct AutoRemovingTransportSource  : public AudioTransportSource,
-                                      private Timer
+struct AutoRemovingTransportSource final : public AudioTransportSource,
+                                           private Timer
 {
     AutoRemovingTransportSource (MixerAudioSource& mixerToUse, AudioTransportSource* ts, bool ownSource,
                                  int samplesPerBlock, double requiredSampleRate)
@@ -85,7 +85,7 @@ private:
 };
 
 // An AudioSource which simply outputs a buffer
-class AudioBufferSource  : public PositionableAudioSource
+class AudioBufferSource final : public PositionableAudioSource
 {
 public:
     AudioBufferSource (AudioBuffer<float>* audioBuffer, bool ownBuffer, bool playOnAllChannels)
@@ -242,15 +242,16 @@ void SoundPlayer::playTestSound()
 }
 
 //==============================================================================
-void SoundPlayer::audioDeviceIOCallback (const float** inputChannelData,
-                                         int numInputChannels,
-                                         float** outputChannelData,
-                                         int numOutputChannels,
-                                         int numSamples)
+void SoundPlayer::audioDeviceIOCallbackWithContext (const float* const* inputChannelData,
+                                                    int numInputChannels,
+                                                    float* const* outputChannelData,
+                                                    int numOutputChannels,
+                                                    int numSamples,
+                                                    const AudioIODeviceCallbackContext& context)
 {
-    player.audioDeviceIOCallback (inputChannelData, numInputChannels,
-                                  outputChannelData, numOutputChannels,
-                                  numSamples);
+    player.audioDeviceIOCallbackWithContext (inputChannelData, numInputChannels,
+                                             outputChannelData, numOutputChannels,
+                                             numSamples, context);
 }
 
 void SoundPlayer::audioDeviceAboutToStart (AudioIODevice* device)

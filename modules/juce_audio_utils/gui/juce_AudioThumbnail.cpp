@@ -83,8 +83,68 @@ private:
     int8 values[2];
 };
 
+
 //==============================================================================
-class AudioThumbnail::LevelDataSource   : public TimeSliceClient
+template <typename T>
+class AudioBufferReader final : public AudioFormatReader
+{
+public:
+    AudioBufferReader (const AudioBuffer<T>* bufferIn, double rate)
+        : AudioFormatReader (nullptr, "AudioBuffer"), buffer (bufferIn)
+    {
+        sampleRate = rate;
+        bitsPerSample = 32;
+        lengthInSamples = buffer->getNumSamples();
+        numChannels = (unsigned int) buffer->getNumChannels();
+        usesFloatingPointData = std::is_floating_point_v<T>;
+    }
+
+    bool readSamples (int* const* destChannels,
+                      int numDestChannels,
+                      int startOffsetInDestBuffer,
+                      int64 startSampleInFile,
+                      int numSamples) override
+    {
+        clearSamplesBeyondAvailableLength (destChannels, numDestChannels, startOffsetInDestBuffer,
+                                           startSampleInFile, numSamples, lengthInSamples);
+
+        const auto numAvailableSamples = (int) ((int64) buffer->getNumSamples() - startSampleInFile);
+        const auto numSamplesToCopy = std::clamp (numAvailableSamples, 0, numSamples);
+
+        if (numSamplesToCopy == 0)
+            return true;
+
+        for (int i = 0; i < numDestChannels; ++i)
+        {
+            if (void* targetChannel = destChannels[i])
+            {
+                const auto dest = DestType (targetChannel) + startOffsetInDestBuffer;
+
+                if (i < buffer->getNumChannels())
+                    dest.convertSamples (SourceType (buffer->getReadPointer (i) + startSampleInFile), numSamplesToCopy);
+                else
+                    dest.clearSamples (numSamples);
+            }
+        }
+
+        return true;
+    }
+
+private:
+    using SourceNumericalType =
+        std::conditional_t<std::is_same_v<T, int>, AudioData::Int32,
+                           std::conditional_t<std::is_same_v<T, float>, AudioData::Float32, void>>;
+
+    using DestinationNumericalType = std::conditional_t<std::is_floating_point_v<T>, AudioData::Float32, AudioData::Int32>;
+
+    using DestType   = AudioData::Pointer<DestinationNumericalType, AudioData::LittleEndian, AudioData::NonInterleaved, AudioData::NonConst>;
+    using SourceType = AudioData::Pointer<SourceNumericalType,      AudioData::LittleEndian, AudioData::NonInterleaved, AudioData::Const>;
+
+    const AudioBuffer<T>* buffer;
+};
+
+//==============================================================================
+class AudioThumbnail::LevelDataSource final : public TimeSliceClient
 {
 public:
     LevelDataSource (AudioThumbnail& thumb, AudioFormatReader* newReader, int64 hash)
@@ -441,8 +501,8 @@ private:
 
         if (numSamples == numSamplesCached
              && numChannelsCached == numChans
-             && startTime == cachedStart
-             && timePerPixel == cachedTimePerPixel
+             && approximatelyEqual (startTime, cachedStart)
+             && approximatelyEqual (timePerPixel, cachedTimePerPixel)
              && ! cacheNeedsRefilling)
         {
             return ! cacheNeedsRefilling;
@@ -612,7 +672,7 @@ bool AudioThumbnail::loadFrom (InputStream& rawInput)
 
     for (int i = 0; i < numThumbnailSamples; ++i)
         for (int chan = 0; chan < numChannels; ++chan)
-            channels.getUnchecked(chan)->getData(i)->read (input);
+            channels.getUnchecked (chan)->getData (i)->read (input);
 
     return true;
 }
@@ -621,7 +681,7 @@ void AudioThumbnail::saveTo (OutputStream& output) const
 {
     const ScopedLock sl (lock);
 
-    const int numThumbnailSamples = channels.size() == 0 ? 0 : channels.getUnchecked(0)->getSize();
+    const int numThumbnailSamples = channels.size() == 0 ? 0 : channels.getUnchecked (0)->getSize();
 
     output.write ("jatm", 4);
     output.writeInt (samplesPerThumbSample);
@@ -635,7 +695,7 @@ void AudioThumbnail::saveTo (OutputStream& output) const
 
     for (int i = 0; i < numThumbnailSamples; ++i)
         for (int chan = 0; chan < numChannels; ++chan)
-            channels.getUnchecked(chan)->getData(i)->write (output);
+            channels.getUnchecked (chan)->getData (i)->write (output);
 }
 
 //==============================================================================
@@ -685,6 +745,16 @@ void AudioThumbnail::setReader (AudioFormatReader* newReader, int64 hash)
 
     if (newReader != nullptr)
         setDataSource (new LevelDataSource (*this, newReader, hash));
+}
+
+void AudioThumbnail::setSource (const AudioBuffer<float>* newSource, double rate, int64 hash)
+{
+    setReader (new AudioBufferReader<float> (newSource, rate), hash);
+}
+
+void AudioThumbnail::setSource (const AudioBuffer<int>* newSource, double rate, int64 hash)
+{
+    setReader (new AudioBufferReader<int> (newSource, rate), hash);
 }
 
 int64 AudioThumbnail::getHashCode() const

@@ -32,7 +32,7 @@
 #include "jucer_ContentComponents.h"
 
 //==============================================================================
-struct ContentComponent  : public Component
+struct ContentComponent final : public Component
 {
     ContentComponent()
     {
@@ -164,7 +164,7 @@ static std::unique_ptr<Component> createProjectTemplatesTab (ContentComponent& c
 }
 
 //==============================================================================
-struct ProjectTemplatesAndExamples  : public TabbedComponent
+struct ProjectTemplatesAndExamples final : public TabbedComponent
 {
     ProjectTemplatesAndExamples (ContentComponent& c,
                                  std::function<void (std::unique_ptr<Project>&&)>&& newProjectCb,
@@ -203,8 +203,8 @@ struct ProjectTemplatesAndExamples  : public TabbedComponent
 
 private:
     //==============================================================================
-    struct SetJUCEPathComponent    : public Component,
-                                     private ChangeListener
+    struct SetJUCEPathComponent final : public Component,
+                                        private ChangeListener
     {
         explicit SetJUCEPathComponent (ProjectTemplatesAndExamples& o)
             : owner (o)

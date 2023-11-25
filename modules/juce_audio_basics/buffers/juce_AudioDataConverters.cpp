@@ -454,7 +454,7 @@ void AudioDataConverters::deinterleaveSamples (const float* source, float** dest
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AudioConversionTests  : public UnitTest
+class AudioConversionTests final : public UnitTest
 {
 public:
     AudioConversionTests()
@@ -599,7 +599,7 @@ public:
 
             for (int ch = 0; ch < numChannels; ++ch)
                 for (int i = 0; i < numSamples; ++i)
-                    expect (destBuffer.getSample (0, ch + (i * numChannels)) == sourceBuffer.getSample (ch, i));
+                    expectEquals (destBuffer.getSample (0, ch + (i * numChannels)), sourceBuffer.getSample (ch, i));
         }
 
         beginTest ("Deinterleaving");
@@ -620,7 +620,7 @@ public:
 
             for (int ch = 0; ch < numChannels; ++ch)
                 for (int i = 0; i < numSamples; ++i)
-                    expect (sourceBuffer.getSample (0, ch + (i * numChannels)) == destBuffer.getSample (ch, i));
+                    expectEquals (sourceBuffer.getSample (0, ch + (i * numChannels)), destBuffer.getSample (ch, i));
         }
     }
 };

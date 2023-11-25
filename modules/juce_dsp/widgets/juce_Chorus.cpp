@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -137,5 +135,4 @@ void Chorus<SampleType>::update()
 template class Chorus<float>;
 template class Chorus<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

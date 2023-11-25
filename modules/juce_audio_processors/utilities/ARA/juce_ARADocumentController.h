@@ -123,7 +123,7 @@ public:
     template <typename SpecialisationType>
     static const ARA::ARAFactory* createARAFactory()
     {
-        static_assert (std::is_base_of<ARADocumentControllerSpecialisation, SpecialisationType>::value,
+        static_assert (std::is_base_of_v<ARADocumentControllerSpecialisation, SpecialisationType>,
                        "DocumentController specialization types must inherit from ARADocumentControllerSpecialisation");
         return ARA::PlugIn::PlugInEntry::getPlugInEntry<FactoryConfig<SpecialisationType>>()->getFactory();
     }
@@ -282,6 +282,15 @@ protected:
                                                                                     ARA::ARAContentType type,
                                                                                     const ARA::ARAContentTimeRange* range);
 
+    /** Override to implement getPlaybackRegionHeadAndTailTime().
+
+        This function is called within
+        ARA::PlugIn::DocumentControllerDelegate::doGetPlaybackRegionHeadAndTailTime.
+    */
+    virtual void                        doGetPlaybackRegionHeadAndTailTime         (const ARA::PlugIn::PlaybackRegion* playbackRegion,
+                                                                                    ARA::ARATimeDuration* headTime,
+                                                                                    ARA::ARATimeDuration* tailTime);
+
     //==============================================================================
     // ARAAudioSource analysis
 
@@ -335,28 +344,28 @@ protected:
 
     //==============================================================================
     /** Override to return a custom subclass instance of ARADocument. */
-    ARADocument*          doCreateDocument();
+    virtual ARADocument*          doCreateDocument();
 
     /** Override to return a custom subclass instance of ARAMusicalContext. */
-    ARAMusicalContext*    doCreateMusicalContext       (ARADocument* document,
-                                                        ARA::ARAMusicalContextHostRef hostRef);
+    virtual ARAMusicalContext*    doCreateMusicalContext       (ARADocument* document,
+                                                                ARA::ARAMusicalContextHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARARegionSequence. */
-    ARARegionSequence*    doCreateRegionSequence       (ARADocument* document,
-                                                        ARA::ARARegionSequenceHostRef hostRef);
+    virtual ARARegionSequence*    doCreateRegionSequence       (ARADocument* document,
+                                                                ARA::ARARegionSequenceHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARAAudioSource. */
-    ARAAudioSource*       doCreateAudioSource          (ARADocument* document,
-                                                        ARA::ARAAudioSourceHostRef hostRef);
+    virtual ARAAudioSource*       doCreateAudioSource          (ARADocument* document,
+                                                                ARA::ARAAudioSourceHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARAAudioModification. */
-    ARAAudioModification* doCreateAudioModification    (ARAAudioSource* audioSource,
-                                                        ARA::ARAAudioModificationHostRef hostRef,
-                                                        const ARAAudioModification* optionalModificationToClone);
+    virtual ARAAudioModification* doCreateAudioModification    (ARAAudioSource* audioSource,
+                                                                ARA::ARAAudioModificationHostRef hostRef,
+                                                                const ARAAudioModification* optionalModificationToClone);
 
     /** Override to return a custom subclass instance of ARAPlaybackRegion. */
-    ARAPlaybackRegion*    doCreatePlaybackRegion       (ARAAudioModification* modification,
-                                                        ARA::ARAPlaybackRegionHostRef hostRef);
+    virtual ARAPlaybackRegion*    doCreatePlaybackRegion       (ARAAudioModification* modification,
+                                                                ARA::ARAPlaybackRegionHostRef hostRef);
 
 private:
     //==============================================================================

@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -529,12 +529,10 @@ int8* Buffer::operator + (uint32 i)
 {
 	if (i < memSize)
 		return buffer + i;
-	else
-	{
-		static int8 eof;
-		eof = 0;
-		return &eof;
-	}
+	
+	static int8 eof;
+	eof = 0;
+	return &eof;
 }
 
 //-------------------------------------------------------------------------------------
@@ -605,7 +603,7 @@ bool Buffer::toWideString (int32 sourceCodePage)
 			endString8 ();
 
 		Buffer dest (getFillSize () * sizeof (char16));
-		int32 result = String::multiByteToWideString (dest.str16 (), buffer, dest.getFree () / sizeof (char16), sourceCodePage);
+		int32 result = String::multiByteToWideString (dest.str16 (), str8 (), dest.getFree () / sizeof (char16), sourceCodePage);
 		if (result > 0)
 		{
 			dest.setFillSize ((result - 1) * sizeof (char16));

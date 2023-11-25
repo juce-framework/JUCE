@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 struct FFT::Instance
@@ -79,7 +77,7 @@ struct FFT::EngineImpl  : public FFT::Engine
 
 //==============================================================================
 //==============================================================================
-struct FFTFallback  : public FFT::Instance
+struct FFTFallback final : public FFT::Instance
 {
     // this should have the least priority of all engines
     static constexpr int priority = -1;
@@ -105,7 +103,7 @@ struct FFTFallback  : public FFT::Instance
             return;
         }
 
-        const SpinLock::ScopedLockType sl(processLock);
+        const SpinLock::ScopedLockType sl (processLock);
 
         jassert (configForward != nullptr);
 
@@ -232,7 +230,7 @@ struct FFTFallback  : public FFT::Instance
                 for (int i = fftSize / 2; i < fftSize; ++i)
                 {
                     auto index = fftSize / 2 - (i - fftSize / 2);
-                    twiddleTable[i] = conj(twiddleTable[index]);
+                    twiddleTable[i] = conj (twiddleTable[index]);
                 }
             }
 
@@ -434,7 +432,7 @@ FFT::EngineImpl<FFTFallback> fftFallback;
 //==============================================================================
 //==============================================================================
 #if (JUCE_MAC || JUCE_IOS) && JUCE_USE_VDSP_FRAMEWORK
-struct AppleFFT  : public FFT::Instance
+struct AppleFFT final : public FFT::Instance
 {
     static constexpr int priority = 5;
 
@@ -733,7 +731,7 @@ FFT::EngineImpl<FFTWImpl> fftwEngine;
 //==============================================================================
 //==============================================================================
 #if JUCE_DSP_USE_INTEL_MKL
-struct IntelFFT  : public FFT::Instance
+struct IntelFFT final : public FFT::Instance
 {
     static constexpr int priority = 8;
 
@@ -819,7 +817,7 @@ FFT::EngineImpl<IntelFFT> fftwEngine;
 // setting at 'Project' > 'Properties' > 'Configuration Properties' > 'Intel
 // Performance Libraries' > 'Use Intel(R) IPP'
 #if _IPP_SEQUENTIAL_STATIC || _IPP_SEQUENTIAL_DYNAMIC || _IPP_PARALLEL_STATIC || _IPP_PARALLEL_DYNAMIC
-class IntelPerformancePrimitivesFFT : public FFT::Instance
+class IntelPerformancePrimitivesFFT final : public FFT::Instance
 {
 public:
     static constexpr auto priority = 9;
@@ -997,5 +995,4 @@ void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData, bool ign
     zeromem (inputOutputData + limit, static_cast<size_t> (size * 2 - limit) * sizeof (float));
 }
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

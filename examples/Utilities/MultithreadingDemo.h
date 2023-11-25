@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class BouncingBall   : private ComponentListener
+class BouncingBall : private ComponentListener
 {
 public:
     BouncingBall (Component& comp)
@@ -70,7 +70,7 @@ public:
                     .withAlpha (0.5f)
                     .withBrightness (0.7f);
 
-        componentMovedOrResized (containerComponent, true, true);
+        updateParentSize (comp);
 
         x = Random::getSystemRandom().nextFloat() * parentWidth;
         y = Random::getSystemRandom().nextFloat() * parentHeight;
@@ -117,12 +117,17 @@ public:
     }
 
 private:
-    void componentMovedOrResized (Component& comp, bool, bool) override
+    void updateParentSize (Component& comp)
     {
         const ScopedLock lock (drawing);
 
         parentWidth  = (float) comp.getWidth()  - size;
         parentHeight = (float) comp.getHeight() - size;
+    }
+
+    void componentMovedOrResized (Component& comp, bool, bool) override
+    {
+        updateParentSize (comp);
     }
 
     float x = 0.0f, y = 0.0f,
@@ -140,17 +145,15 @@ private:
 };
 
 //==============================================================================
-class DemoThread    : public BouncingBall,
-                      public Thread
+class DemoThread final : public BouncingBall,
+                         public Thread
 {
 public:
     DemoThread (Component& containerComp)
         : BouncingBall (containerComp),
           Thread ("JUCE Demo Thread")
     {
-        // give the threads a random priority, so some will move more
-        // smoothly than others..
-        startThread (Random::getSystemRandom().nextInt (3) + 3);
+        startThread();
     }
 
     ~DemoThread() override
@@ -191,8 +194,8 @@ private:
 
 
 //==============================================================================
-class DemoThreadPoolJob  : public BouncingBall,
-                           public ThreadPoolJob
+class DemoThreadPoolJob final : public BouncingBall,
+                                public ThreadPoolJob
 {
 public:
     DemoThreadPoolJob (Component& containerComp)
@@ -229,8 +232,8 @@ private:
 };
 
 //==============================================================================
-class MultithreadingDemo   : public Component,
-                             private Timer
+class MultithreadingDemo final : public Component,
+                                 private Timer
 {
 public:
     //==============================================================================
@@ -319,7 +322,8 @@ private:
     }
 
     //==============================================================================
-    ThreadPool pool           { 3 };
+    ThreadPool pool           { ThreadPoolOptions{}.withThreadName ("Demo thread pool")
+                                                   .withNumberOfThreads (3) };
     TextButton controlButton  { "Thread type" };
     bool isUsingPool = false;
 

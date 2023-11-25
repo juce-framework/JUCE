@@ -32,9 +32,20 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Build;
+import android.text.Selection;
+import android.text.SpanWatcher;
+import android.text.Spannable;
+import android.text.Spanned;
+import android.text.TextWatcher;
+import android.util.Pair;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.SpannableStringBuilder;
+import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,10 +61,11 @@ import android.view.inputmethod.InputMethodManager;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+
 import java.util.List;
 
 public final class ComponentPeerView extends ViewGroup
-        implements View.OnFocusChangeListener, Application.ActivityLifecycleCallbacks
+        implements View.OnFocusChangeListener, Application.ActivityLifecycleCallbacks, Choreographer.FrameCallback
 {
     public ComponentPeerView (Context context, boolean opaque_, long host)
     {
@@ -62,9 +74,10 @@ public final class ComponentPeerView extends ViewGroup
         if (Application.class.isInstance (context))
         {
             ((Application) context).registerActivityLifecycleCallbacks (this);
-        } else
+        }
+        else
         {
-            ((Application) context.getApplicationContext ()).registerActivityLifecycleCallbacks (this);
+            ((Application) context.getApplicationContext()).registerActivityLifecycleCallbacks (this);
         }
 
         this.host = host;
@@ -76,7 +89,7 @@ public final class ComponentPeerView extends ViewGroup
         setOnFocusChangeListener (this);
 
         // swap red and blue colours to match internal opengl texture format
-        ColorMatrix colorMatrix = new ColorMatrix ();
+        ColorMatrix colorMatrix = new ColorMatrix();
 
         float[] colorTransform = {0, 0, 1.0f, 0, 0,
                 0, 1.0f, 0, 0, 0,
@@ -90,10 +103,12 @@ public final class ComponentPeerView extends ViewGroup
 
         try
         {
-            method = getClass ().getMethod ("setLayerType", int.class, Paint.class);
-        } catch (SecurityException e)
+            method = getClass().getMethod ("setLayerType", int.class, Paint.class);
+        }
+        catch (SecurityException e)
         {
-        } catch (NoSuchMethodException e)
+        }
+        catch (NoSuchMethodException e)
         {
         }
 
@@ -103,17 +118,22 @@ public final class ComponentPeerView extends ViewGroup
             {
                 int layerTypeNone = 0;
                 method.invoke (this, layerTypeNone, null);
-            } catch (java.lang.IllegalArgumentException e)
+            }
+            catch (java.lang.IllegalArgumentException e)
             {
-            } catch (java.lang.IllegalAccessException e)
+            }
+            catch (java.lang.IllegalAccessException e)
             {
-            } catch (java.lang.reflect.InvocationTargetException e)
+            }
+            catch (java.lang.reflect.InvocationTargetException e)
             {
             }
         }
+
+        Choreographer.getInstance().postFrameCallback (this);
     }
 
-    public void clear ()
+    public void clear()
     {
         host = 0;
     }
@@ -130,15 +150,28 @@ public final class ComponentPeerView extends ViewGroup
         handlePaint (host, canvas, paint);
     }
 
+    private native void handleDoFrame (long host, long frameTimeNanos);
+
     @Override
-    public boolean isOpaque ()
+    public void doFrame (long frameTimeNanos)
+    {
+        if (host == 0)
+            return;
+
+        handleDoFrame (host, frameTimeNanos);
+
+        Choreographer.getInstance().postFrameCallback (this);
+    }
+
+    @Override
+    public boolean isOpaque()
     {
         return opaque;
     }
 
     private final boolean opaque;
     private long host;
-    private final Paint paint = new Paint ();
+    private final Paint paint = new Paint();
 
     //==============================================================================
     private native void handleMouseDown (long host, int index, float x, float y, long time);
@@ -152,25 +185,25 @@ public final class ComponentPeerView extends ViewGroup
         if (host == 0)
             return false;
 
-        int action = event.getAction ();
-        long time = event.getEventTime ();
+        int action = event.getAction();
+        long time = event.getEventTime();
 
         switch (action & MotionEvent.ACTION_MASK)
         {
             case MotionEvent.ACTION_DOWN:
-                handleMouseDown (host, event.getPointerId (0), event.getRawX (), event.getRawY (), time);
+                handleMouseDown (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
                 return true;
 
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                handleMouseUp (host, event.getPointerId (0), event.getRawX (), event.getRawY (), time);
+                handleMouseUp (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
                 return true;
 
             case MotionEvent.ACTION_MOVE:
             {
-                handleMouseDrag (host, event.getPointerId (0), event.getRawX (), event.getRawY (), time);
+                handleMouseDrag (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
 
-                int n = event.getPointerCount ();
+                int n = event.getPointerCount();
 
                 if (n > 1)
                 {
@@ -190,8 +223,9 @@ public final class ComponentPeerView extends ViewGroup
 
                 if (i == 0)
                 {
-                    handleMouseUp (host, event.getPointerId (0), event.getRawX (), event.getRawY (), time);
-                } else
+                    handleMouseUp (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
+                }
+                else
                 {
                     int point[] = new int[2];
                     getLocationOnScreen (point);
@@ -207,8 +241,9 @@ public final class ComponentPeerView extends ViewGroup
 
                 if (i == 0)
                 {
-                    handleMouseDown (host, event.getPointerId (0), event.getRawX (), event.getRawY (), time);
-                } else
+                    handleMouseDown (host, event.getPointerId (0), event.getRawX(), event.getRawY(), time);
+                }
+                else
                 {
                     int point[] = new int[2];
                     getLocationOnScreen (point);
@@ -238,31 +273,131 @@ public final class ComponentPeerView extends ViewGroup
     }
 
     //==============================================================================
+    public static class TextInputTarget
+    {
+        public TextInputTarget (long owner) { host = owner; }
+
+        public boolean isTextInputActive()                                      { return ComponentPeerView.textInputTargetIsTextInputActive (host); }
+        public int getHighlightedRegionBegin()                                  { return ComponentPeerView.textInputTargetGetHighlightedRegionBegin (host); }
+        public int getHighlightedRegionEnd()                                    { return ComponentPeerView.textInputTargetGetHighlightedRegionEnd (host); }
+        public void setHighlightedRegion (int b, int e)                         {        ComponentPeerView.textInputTargetSetHighlightedRegion (host, b, e); }
+        public String getTextInRange (int b, int e)                             { return ComponentPeerView.textInputTargetGetTextInRange (host, b, e); }
+        public void insertTextAtCaret (String text)                             {        ComponentPeerView.textInputTargetInsertTextAtCaret (host, text); }
+        public int getCaretPosition()                                           { return ComponentPeerView.textInputTargetGetCaretPosition (host); }
+        public int getTotalNumChars()                                           { return ComponentPeerView.textInputTargetGetTotalNumChars (host); }
+        public int getCharIndexForPoint (Point point)                           { return ComponentPeerView.textInputTargetGetCharIndexForPoint (host, point); }
+        public int getKeyboardType()                                            { return ComponentPeerView.textInputTargetGetKeyboardType (host); }
+        public void setTemporaryUnderlining (List<Pair<Integer, Integer>> list) {        ComponentPeerView.textInputTargetSetTemporaryUnderlining (host, list); }
+
+        //==============================================================================
+        private final long host;
+    }
+
+    private native static boolean   textInputTargetIsTextInputActive (long host);
+    private native static int       textInputTargetGetHighlightedRegionBegin (long host);
+    private native static int       textInputTargetGetHighlightedRegionEnd (long host);
+    private native static void      textInputTargetSetHighlightedRegion (long host, int begin, int end);
+    private native static String    textInputTargetGetTextInRange (long host, int begin, int end);
+    private native static void      textInputTargetInsertTextAtCaret (long host, String text);
+    private native static int       textInputTargetGetCaretPosition (long host);
+    private native static int       textInputTargetGetTotalNumChars (long host);
+    private native static int       textInputTargetGetCharIndexForPoint (long host, Point point);
+    private native static int       textInputTargetGetKeyboardType (long host);
+    private native static void      textInputTargetSetTemporaryUnderlining (long host, List<Pair<Integer, Integer>> list);
+
+    private native long getFocusedTextInputTargetPointer (long host);
+
+    private TextInputTarget getFocusedTextInputTarget (long host)
+    {
+        final long ptr = getFocusedTextInputTargetPointer (host);
+        return ptr != 0 ? new TextInputTarget (ptr) : null;
+    }
+
+    //==============================================================================
     private native void handleKeyDown (long host, int keycode, int textchar, int kbFlags);
     private native void handleKeyUp (long host, int keycode, int textchar);
     private native void handleBackButton (long host);
     private native void handleKeyboardHidden (long host);
 
-    public void showKeyboard (String type)
+    private static int getInputTypeForJuceVirtualKeyboardType (int type)
     {
-        InputMethodManager imm = (InputMethodManager) getContext ().getSystemService (Context.INPUT_METHOD_SERVICE);
-
-        if (imm != null)
+        switch (type)
         {
-            if (type.length () > 0)
-            {
-                imm.showSoftInput (this, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
-                imm.setInputMethod (getWindowToken (), type);
-                keyboardDismissListener.startListening ();
-            } else
-            {
-                imm.hideSoftInputFromWindow (getWindowToken (), 0);
-                keyboardDismissListener.stopListening ();
-            }
+            case 0:                                             // textKeyboard
+                return InputType.TYPE_CLASS_TEXT
+                     | InputType.TYPE_TEXT_VARIATION_NORMAL
+                     | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                     | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+            case 1:                                             // numericKeyboard
+                return InputType.TYPE_CLASS_NUMBER
+                     | InputType.TYPE_NUMBER_VARIATION_NORMAL;
+            case 2:                                             // decimalKeyboard
+                return InputType.TYPE_CLASS_NUMBER
+                     | InputType.TYPE_NUMBER_VARIATION_NORMAL
+                     | InputType.TYPE_NUMBER_FLAG_DECIMAL;
+            case 3:                                             // urlKeyboard
+                return InputType.TYPE_CLASS_TEXT
+                     | InputType.TYPE_TEXT_VARIATION_URI
+                     | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+            case 4:                                             // emailAddressKeyboard
+                return InputType.TYPE_CLASS_TEXT
+                     | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                     | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+            case 5:                                             // phoneNumberKeyboard
+                return InputType.TYPE_CLASS_PHONE;
+            case 6:                                             // passwordKeyboard
+                return InputType.TYPE_CLASS_TEXT
+                     | InputType.TYPE_TEXT_VARIATION_PASSWORD
+                     | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
         }
+
+        return 0;
     }
 
-    public void backButtonPressed ()
+    InputMethodManager getInputMethodManager()
+    {
+        return (InputMethodManager) getContext().getSystemService (Context.INPUT_METHOD_SERVICE);
+    }
+
+    public void closeInputMethodContext()
+    {
+        InputMethodManager imm = getInputMethodManager();
+
+        if (imm == null)
+            return;
+
+        if (cachedConnection != null)
+            cachedConnection.closeConnection();
+
+        imm.restartInput (this);
+    }
+
+    public void showKeyboard (int virtualKeyboardType, int selectionStart, int selectionEnd)
+    {
+        InputMethodManager imm = getInputMethodManager();
+
+        if (imm == null)
+            return;
+
+        // restartingInput causes a call back to onCreateInputConnection, where we'll pick
+        // up the correct keyboard characteristics to use for the focused TextInputTarget.
+        imm.restartInput (this);
+        imm.showSoftInput (this, 0);
+        keyboardDismissListener.startListening();
+    }
+
+    public void hideKeyboard()
+    {
+        InputMethodManager imm = getInputMethodManager();
+
+        if (imm == null)
+            return;
+
+        imm.hideSoftInputFromWindow (getWindowToken(), 0);
+        keyboardDismissListener.stopListening();
+    }
+
+    public void backButtonPressed()
     {
         if (host == 0)
             return;
@@ -276,6 +411,11 @@ public final class ComponentPeerView extends ViewGroup
         if (host == 0)
             return false;
 
+        // The key event may move the cursor, or in some cases it might enter characters (e.g.
+        // digits). In this case, we need to reset the IME so that it's aware of the new contents
+        // of the TextInputTarget.
+        closeInputMethodContext();
+
         switch (keyCode)
         {
             case KeyEvent.KEYCODE_VOLUME_UP:
@@ -283,7 +423,7 @@ public final class ComponentPeerView extends ViewGroup
                 return super.onKeyDown (keyCode, event);
             case KeyEvent.KEYCODE_BACK:
             {
-                backButtonPressed ();
+                backButtonPressed();
                 return true;
             }
 
@@ -293,8 +433,9 @@ public final class ComponentPeerView extends ViewGroup
 
         handleKeyDown (host,
                        keyCode,
-                       event.getUnicodeChar (),
-                       event.getMetaState ());
+                       event.getUnicodeChar(),
+                       event.getMetaState());
+
         return true;
     }
 
@@ -304,7 +445,7 @@ public final class ComponentPeerView extends ViewGroup
         if (host == 0)
             return false;
 
-        handleKeyUp (host, keyCode, event.getUnicodeChar ());
+        handleKeyUp (host, keyCode, event.getUnicodeChar());
         return true;
     }
 
@@ -314,17 +455,17 @@ public final class ComponentPeerView extends ViewGroup
         if (host == 0)
             return false;
 
-        if (keyCode != KeyEvent.KEYCODE_UNKNOWN || event.getAction () != KeyEvent.ACTION_MULTIPLE)
+        if (keyCode != KeyEvent.KEYCODE_UNKNOWN || (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && event.getAction() != KeyEvent.ACTION_MULTIPLE))
             return super.onKeyMultiple (keyCode, count, event);
 
-        if (event.getCharacters () != null)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && event.getCharacters() != null)
         {
-            int utf8Char = event.getCharacters ().codePointAt (0);
+            int utf8Char = event.getCharacters().codePointAt (0);
 
             handleKeyDown (host,
                            keyCode,
                            utf8Char,
-                           event.getMetaState ());
+                           event.getMetaState());
             return true;
         }
 
@@ -339,39 +480,40 @@ public final class ComponentPeerView extends ViewGroup
             view = viewToUse;
         }
 
-        private void startListening ()
+        private void startListening()
         {
-            view.getViewTreeObserver ().addOnGlobalLayoutListener (viewTreeObserver);
+            view.getViewTreeObserver().addOnGlobalLayoutListener (viewTreeObserver);
         }
 
-        private void stopListening ()
+        private void stopListening()
         {
-            view.getViewTreeObserver ().removeGlobalOnLayoutListener (viewTreeObserver);
+            view.getViewTreeObserver().removeOnGlobalLayoutListener (viewTreeObserver);
         }
 
         private class TreeObserver implements ViewTreeObserver.OnGlobalLayoutListener
         {
-            TreeObserver ()
+            TreeObserver()
             {
                 keyboardShown = false;
             }
 
             @Override
-            public void onGlobalLayout ()
+            public void onGlobalLayout()
             {
-                Rect r = new Rect ();
+                Rect r = new Rect();
 
-                View parentView = getRootView ();
+                View parentView = getRootView();
                 int diff;
 
                 if (parentView == null)
                 {
                     getWindowVisibleDisplayFrame (r);
-                    diff = getHeight () - (r.bottom - r.top);
-                } else
+                    diff = getHeight() - (r.bottom - r.top);
+                }
+                else
                 {
                     parentView.getWindowVisibleDisplayFrame (r);
-                    diff = parentView.getHeight () - (r.bottom - r.top);
+                    diff = parentView.getHeight() - (r.bottom - r.top);
                 }
 
                 // Arbitrary threshold, surely keyboard would take more than 20 pix.
@@ -381,7 +523,7 @@ public final class ComponentPeerView extends ViewGroup
                     handleKeyboardHidden (view.host);
                 }
 
-                if (!keyboardShown && diff > 20)
+                if (! keyboardShown && diff > 20)
                     keyboardShown = true;
             }
 
@@ -389,25 +531,228 @@ public final class ComponentPeerView extends ViewGroup
         }
 
         private final ComponentPeerView view;
-        private final TreeObserver viewTreeObserver = new TreeObserver ();
+        private final TreeObserver viewTreeObserver = new TreeObserver();
     }
 
     private final KeyboardDismissListener keyboardDismissListener = new KeyboardDismissListener (this);
 
-    // this is here to make keyboard entry work on a Galaxy Tab2 10.1
+    //==============================================================================
+    // This implementation is quite similar to the ChangeListener in Android's built-in TextView.
+    private static final class ChangeWatcher implements SpanWatcher, TextWatcher
+    {
+        public ChangeWatcher (ComponentPeerView viewIn, Editable editableIn, TextInputTarget targetIn)
+        {
+            view = viewIn;
+            editable = editableIn;
+            target = targetIn;
+
+            updateEditableSelectionFromTarget (editable, target);
+        }
+
+        @Override
+        public void onSpanAdded (Spannable text, Object what, int start, int end)
+        {
+            updateTargetRangesFromEditable (editable, target);
+        }
+
+        @Override
+        public void onSpanRemoved (Spannable text, Object what, int start, int end)
+        {
+            updateTargetRangesFromEditable (editable, target);
+        }
+
+        @Override
+        public void onSpanChanged (Spannable text, Object what, int ostart, int oend, int nstart, int nend)
+        {
+            updateTargetRangesFromEditable (editable, target);
+        }
+
+        @Override
+        public void afterTextChanged (Editable s)
+        {
+        }
+
+        @Override
+        public void beforeTextChanged (CharSequence s, int start, int count, int after)
+        {
+            contentsBeforeChange = s.toString();
+        }
+
+        @Override
+        public void onTextChanged (CharSequence s, int start, int before, int count)
+        {
+            if (editable != s || contentsBeforeChange == null)
+                return;
+
+            final String newText = s.subSequence (start, start + count).toString();
+
+            int code = 0;
+
+            if (newText.endsWith ("\n") || newText.endsWith ("\r"))
+                code = KeyEvent.KEYCODE_ENTER;
+
+            if (newText.endsWith ("\t"))
+                code = KeyEvent.KEYCODE_TAB;
+
+            target.setHighlightedRegion (contentsBeforeChange.codePointCount (0, start),
+                                         contentsBeforeChange.codePointCount (0, start + before));
+            target.insertTextAtCaret (code != 0 ? newText.substring (0, newText.length() - 1)
+                                                : newText);
+
+            // Treating return/tab as individual keypresses rather than part of the composition
+            // sequence allows TextEditor onReturn and onTab to work as expected.
+            if (code != 0)
+                view.onKeyDown (code, new KeyEvent (KeyEvent.ACTION_DOWN, code));
+
+            updateTargetRangesFromEditable (editable, target);
+            contentsBeforeChange = null;
+        }
+
+        private static void updateEditableSelectionFromTarget (Editable editable, TextInputTarget text)
+        {
+            final int start = text.getHighlightedRegionBegin();
+            final int end   = text.getHighlightedRegionEnd();
+
+            if (start < 0 || end < 0)
+                return;
+
+            final String string = editable.toString();
+            Selection.setSelection (editable,
+                                    string.offsetByCodePoints (0, start),
+                                    string.offsetByCodePoints (0, end));
+        }
+
+        private static void updateTargetSelectionFromEditable (Editable editable, TextInputTarget target)
+        {
+            final int start = Selection.getSelectionStart (editable);
+            final int end   = Selection.getSelectionEnd   (editable);
+
+            if (start < 0 || end < 0)
+                return;
+
+            final String string = editable.toString();
+            target.setHighlightedRegion (string.codePointCount (0, start),
+                                         string.codePointCount (0, end));
+        }
+
+        private static List<Pair<Integer, Integer>> getUnderlinedRanges (Editable editable)
+        {
+            final int start = BaseInputConnection.getComposingSpanStart (editable);
+            final int end   = BaseInputConnection.getComposingSpanEnd   (editable);
+
+            if (start < 0 || end < 0)
+                return null;
+
+            final String string = editable.toString();
+
+            final ArrayList<Pair<Integer, Integer>> pairs = new ArrayList<>();
+            pairs.add (new Pair<> (string.codePointCount (0, start), string.codePointCount (0, end)));
+            return pairs;
+        }
+
+        private static void updateTargetCompositionRangesFromEditable (Editable editable, TextInputTarget target)
+        {
+            target.setTemporaryUnderlining (getUnderlinedRanges (editable));
+        }
+
+        private static void updateTargetRangesFromEditable (Editable editable, TextInputTarget target)
+        {
+            updateTargetSelectionFromEditable         (editable, target);
+            updateTargetCompositionRangesFromEditable (editable, target);
+        }
+
+        private final ComponentPeerView view;
+        private final TextInputTarget target;
+        private final Editable editable;
+        private String contentsBeforeChange;
+    }
+
+    private static final class Connection extends BaseInputConnection
+    {
+        Connection (ComponentPeerView viewIn, boolean fullEditor, TextInputTarget targetIn)
+        {
+            super (viewIn, fullEditor);
+            view = viewIn;
+            target = targetIn;
+        }
+
+        @Override
+        public Editable getEditable()
+        {
+            if (cached != null)
+                return cached;
+
+            if (target == null)
+                return cached = super.getEditable();
+
+            int length = target.getTotalNumChars();
+            String initialText = target.getTextInRange (0, length);
+            cached = new SpannableStringBuilder (initialText);
+            // Span the entire range of text, so that we pick up changes at any location.
+            // Use cached.length rather than target.getTotalNumChars here, because this
+            // range is in UTF-16 code units, rather than code points.
+            changeWatcher = new ChangeWatcher (view, cached, target);
+            cached.setSpan (changeWatcher, 0, cached.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            return cached;
+        }
+
+        /** Call this to stop listening for selection/composition updates.
+
+            We do this before closing the current input method context (e.g. when the user
+            taps on a text view to move the cursor), because otherwise the input system
+            might send another round of notifications *during* the restartInput call, after we've
+            requested that the input session should end.
+        */
+        @Override
+        public void closeConnection()
+        {
+            if (cached != null && changeWatcher != null)
+                cached.removeSpan (changeWatcher);
+
+            cached = null;
+            target = null;
+
+            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+            {
+                super.closeConnection();
+
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                    setImeConsumesInput (false);
+            }
+            else
+            {
+                finishComposingText();
+            }
+        }
+
+        private ComponentPeerView view;
+        private TextInputTarget target;
+        private Editable cached;
+        private ChangeWatcher changeWatcher;
+    }
+
     @Override
     public InputConnection onCreateInputConnection (EditorInfo outAttrs)
     {
+        TextInputTarget focused = getFocusedTextInputTarget (host);
+
         outAttrs.actionLabel = "";
         outAttrs.hintText = "";
         outAttrs.initialCapsMode = 0;
-        outAttrs.initialSelEnd = outAttrs.initialSelStart = -1;
+        outAttrs.initialSelStart = focused != null ? focused.getHighlightedRegionBegin() : -1;
+        outAttrs.initialSelEnd   = focused != null ? focused.getHighlightedRegionEnd()   : -1;
         outAttrs.label = "";
-        outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_EXTRACT_UI;
-        outAttrs.inputType = InputType.TYPE_NULL;
+        outAttrs.imeOptions = EditorInfo.IME_ACTION_UNSPECIFIED
+                            | EditorInfo.IME_FLAG_NO_EXTRACT_UI
+                            | EditorInfo.IME_FLAG_NO_ENTER_ACTION;
+        outAttrs.inputType = focused != null ? getInputTypeForJuceVirtualKeyboardType (focused.getKeyboardType())
+                                             : 0;
 
-        return new BaseInputConnection (this, false);
+        cachedConnection = new Connection (this, true, focused);
+        return cachedConnection;
     }
+
+    private Connection cachedConnection;
 
     //==============================================================================
     @Override
@@ -447,11 +792,13 @@ public final class ComponentPeerView extends ViewGroup
         Method systemUIVisibilityMethod = null;
         try
         {
-            systemUIVisibilityMethod = this.getClass ().getMethod ("setSystemUiVisibility", int.class);
-        } catch (SecurityException e)
+            systemUIVisibilityMethod = this.getClass().getMethod ("setSystemUiVisibility", int.class);
+        }
+        catch (SecurityException e)
         {
             return;
-        } catch (NoSuchMethodException e)
+        }
+        catch (NoSuchMethodException e)
         {
             return;
         }
@@ -460,18 +807,21 @@ public final class ComponentPeerView extends ViewGroup
         try
         {
             systemUIVisibilityMethod.invoke (this, visibility);
-        } catch (java.lang.IllegalArgumentException e)
+        }
+        catch (java.lang.IllegalArgumentException e)
         {
-        } catch (java.lang.IllegalAccessException e)
+        }
+        catch (java.lang.IllegalAccessException e)
         {
-        } catch (java.lang.reflect.InvocationTargetException e)
+        }
+        catch (java.lang.reflect.InvocationTargetException e)
         {
         }
     }
 
-    public boolean isVisible ()
+    public boolean isVisible()
     {
-        return getVisibility () == VISIBLE;
+        return getVisibility() == VISIBLE;
     }
 
     public void setVisible (boolean b)
@@ -538,6 +888,7 @@ public final class ComponentPeerView extends ViewGroup
     }
 
     //==============================================================================
+    private native View getNativeView (long host, int virtualViewId);
     private native boolean populateAccessibilityNodeInfo (long host, int virtualViewId, AccessibilityNodeInfo info);
     private native boolean handlePerformAction (long host, int virtualViewId, int action, Bundle arguments);
     private native Integer getInputFocusViewId (long host);
@@ -556,11 +907,27 @@ public final class ComponentPeerView extends ViewGroup
             if (host == 0)
                 return null;
 
-            final AccessibilityNodeInfo nodeInfo = AccessibilityNodeInfo.obtain (view, virtualViewId);
+            View nativeView = getNativeView (host, virtualViewId);
+
+            if (nativeView != null)
+                return nativeView.createAccessibilityNodeInfo();
+
+            final AccessibilityNodeInfo nodeInfo;
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R)
+            {
+                nodeInfo = new AccessibilityNodeInfo (view, virtualViewId);
+            }
+            else
+            {
+                nodeInfo = AccessibilityNodeInfo.obtain (view, virtualViewId);
+            }
 
             if (! populateAccessibilityNodeInfo (host, virtualViewId, nodeInfo))
             {
-                nodeInfo.recycle();
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.R)
+                    nodeInfo.recycle();
+
                 return null;
             }
 
@@ -601,10 +968,10 @@ public final class ComponentPeerView extends ViewGroup
     }
 
     private final JuceAccessibilityNodeProvider nodeProvider = new JuceAccessibilityNodeProvider (this);
-    private final AccessibilityManager accessibilityManager = (AccessibilityManager) getContext ().getSystemService (Context.ACCESSIBILITY_SERVICE);
+    private final AccessibilityManager accessibilityManager = (AccessibilityManager) getContext().getSystemService (Context.ACCESSIBILITY_SERVICE);
 
     @Override
-    public AccessibilityNodeProvider getAccessibilityNodeProvider ()
+    public AccessibilityNodeProvider getAccessibilityNodeProvider()
     {
         return nodeProvider;
     }

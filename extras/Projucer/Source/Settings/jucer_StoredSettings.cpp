@@ -80,7 +80,7 @@ PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
 
     for (auto i = propertyFiles.size(); --i >= 0;)
     {
-        auto* const props = propertyFiles.getUnchecked(i);
+        auto* const props = propertyFiles.getUnchecked (i);
         if (props->getFile().getFileNameWithoutExtension() == filename)
             return *props;
     }
@@ -127,7 +127,7 @@ void StoredSettings::flush()
     saveSwatchColours();
 
     for (auto i = propertyFiles.size(); --i >= 0;)
-        propertyFiles.getUnchecked(i)->saveIfNeeded();
+        propertyFiles.getUnchecked (i)->saveIfNeeded();
 }
 
 void StoredSettings::reload()
@@ -166,7 +166,7 @@ void StoredSettings::setLastProjects (const Array<File>& files)
 {
     StringArray s;
     for (int i = 0; i < files.size(); ++i)
-        s.add (files.getReference(i).getFullPathName());
+        s.add (files.getReference (i).getFullPathName());
 
     getGlobalProperties().setValue ("lastProjects", s.joinIntoString ("|"));
 }
@@ -233,7 +233,7 @@ void StoredSettings::saveSwatchColours()
     auto& props = getGlobalProperties();
 
     for (auto i = 0; i < swatchColours.size(); ++i)
-        props.setValue ("swatchColour" + String (i), swatchColours.getReference(i).toString());
+        props.setValue ("swatchColour" + String (i), swatchColours.getReference (i).toString());
 }
 
 StoredSettings::ColourSelectorWithSwatches::ColourSelectorWithSwatches() {}
@@ -313,7 +313,7 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
     }
     else if (key == Ids::jucePath)
     {
-        fileToCheckFor = "ChangeList.txt";
+        fileToCheckFor = "CHANGE_LIST.md";
     }
     else
     {

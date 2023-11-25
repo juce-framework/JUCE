@@ -282,7 +282,8 @@ StringArray getJUCEModules() noexcept
         "juce_opengl",
         "juce_osc",
         "juce_product_unlocking",
-        "juce_video"
+        "juce_video",
+        "juce_midi_ci"
     };
 
     return juceModuleIds;

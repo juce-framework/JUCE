@@ -163,24 +163,22 @@ static bool checkPeerIsValid (OpenGLContext* context)
     {
         if (auto* comp = context->getTargetComponent())
         {
-            if (auto* peer = comp->getPeer())
+            if (auto* peer [[maybe_unused]] = comp->getPeer())
             {
                #if JUCE_MAC || JUCE_IOS
                 if (auto* nsView = (JUCE_IOS_MAC_VIEW*) peer->getNativeHandle())
                 {
-                    if (auto nsWindow = [nsView window])
+                    if ([[maybe_unused]] auto nsWindow = [nsView window])
                     {
                        #if JUCE_MAC
                         return ([nsWindow isVisible]
                                   && (! [nsWindow hidesOnDeactivate] || [NSApp isActive]));
                        #else
-                        ignoreUnused (nsWindow);
                         return true;
                        #endif
                     }
                 }
                #else
-                ignoreUnused (peer);
                 return true;
                #endif
             }
@@ -215,7 +213,9 @@ static void checkGLError (const char* file, const int line)
 
 static void clearGLError() noexcept
 {
+   #if JUCE_DEBUG
     while (glGetError() != GL_NO_ERROR) {}
+   #endif
 }
 
 struct OpenGLTargetSaver
@@ -255,14 +255,14 @@ private:
 #if JUCE_MAC || JUCE_IOS
 
  #if JUCE_MAC
-  #include "native/juce_OpenGL_osx.h"
+  #include "native/juce_OpenGL_mac.h"
  #else
   #include "native/juce_OpenGL_ios.h"
  #endif
 
 #elif JUCE_WINDOWS
  #include "opengl/juce_wgl.h"
- #include "native/juce_OpenGL_win32.h"
+ #include "native/juce_OpenGL_windows.h"
 
 #define JUCE_IMPL_WGL_EXTENSION_FUNCTION(name) \
     decltype (juce::OpenGLContext::NativeContext::name) juce::OpenGLContext::NativeContext::name = nullptr;
@@ -275,7 +275,8 @@ JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB)
 #undef JUCE_IMPL_WGL_EXTENSION_FUNCTION
 
 #elif JUCE_LINUX || JUCE_BSD
- #include "native/juce_OpenGL_linux_X11.h"
+ #include <juce_gui_basics/native/juce_ScopedWindowAssociation_linux.h>
+ #include "native/juce_OpenGL_linux.h"
 
 #elif JUCE_ANDROID
  #include "native/juce_OpenGL_android.h"

@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class ValueTree::SharedObject  : public ReferenceCountedObject
+class ValueTree::SharedObject final : public ReferenceCountedObject
 {
 public:
     using Ptr = ReferenceCountedObjectPtr<SharedObject>;
@@ -46,7 +46,7 @@ public:
 
     SharedObject& operator= (const SharedObject&) = delete;
 
-    ~SharedObject()
+    ~SharedObject() override
     {
         jassert (parent == nullptr); // this should never happen unless something isn't obeying the ref-counting!
 
@@ -408,7 +408,7 @@ public:
     }
 
     //==============================================================================
-    struct SetPropertyAction  : public UndoableAction
+    struct SetPropertyAction final : public UndoableAction
     {
         SetPropertyAction (Ptr targetObject, const Identifier& propertyName,
                            const var& newVal, const var& oldVal, bool isAdding, bool isDeleting,
@@ -472,7 +472,7 @@ public:
     };
 
     //==============================================================================
-    struct AddOrRemoveChildAction  : public UndoableAction
+    struct AddOrRemoveChildAction final : public UndoableAction
     {
         AddOrRemoveChildAction (Ptr parentObject, int index, SharedObject* newChild)
             : target (std::move (parentObject)),
@@ -524,7 +524,7 @@ public:
     };
 
     //==============================================================================
-    struct MoveChildAction  : public UndoableAction
+    struct MoveChildAction final : public UndoableAction
     {
         MoveChildAction (Ptr parentObject, int fromIndex, int toIndex) noexcept
             : parent (std::move (parentObject)), startIndex (fromIndex), endIndex (toIndex)
@@ -669,6 +669,9 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoMa
 {
     jassert (object != nullptr || source.object == nullptr); // Trying to add properties to a null ValueTree will fail!
 
+    if (source == *this)
+        return;
+
     if (source.object == nullptr)
         removeAllProperties (undoManager);
     else if (object != nullptr)
@@ -678,6 +681,9 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoMa
 void ValueTree::copyPropertiesAndChildrenFrom (const ValueTree& source, UndoManager* undoManager)
 {
     jassert (object != nullptr || source.object == nullptr); // Trying to copy to a null ValueTree will fail!
+
+    if (source == *this)
+        return;
 
     copyPropertiesFrom (source, undoManager);
     removeAllChildren (undoManager);
@@ -803,8 +809,8 @@ int ValueTree::getReferenceCount() const noexcept
 }
 
 //==============================================================================
-struct ValueTreePropertyValueSource  : public Value::ValueSource,
-                                       private ValueTree::Listener
+struct ValueTreePropertyValueSource final : public Value::ValueSource,
+                                            private ValueTree::Listener
 {
     ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um, bool sync)
         : tree (vt), property (prop), undoManager (um), updateSynchronously (sync)
@@ -867,7 +873,7 @@ ValueTree::Iterator::Iterator (const ValueTree& v, bool isEnd)
 
 ValueTree::Iterator& ValueTree::Iterator::operator++()
 {
-    internal = static_cast<SharedObject**> (internal) + 1;
+    ++internal;
     return *this;
 }
 
@@ -876,7 +882,7 @@ bool ValueTree::Iterator::operator!= (const Iterator& other) const  { return int
 
 ValueTree ValueTree::Iterator::operator*() const
 {
-    return ValueTree (SharedObject::Ptr (*static_cast<SharedObject**> (internal)));
+    return ValueTree (SharedObject::Ptr (*internal));
 }
 
 ValueTree::Iterator ValueTree::begin() const noexcept   { return Iterator (*this, false); }
@@ -1112,7 +1118,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class ValueTreeTests  : public UnitTest
+class ValueTreeTests final : public UnitTest
 {
 public:
     ValueTreeTests()

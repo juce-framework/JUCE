@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename ElementType>
@@ -34,7 +32,7 @@ Matrix<ElementType> Matrix<ElementType>::identity (size_t size)
     Matrix result (size, size);
 
     for (size_t i = 0; i < size; ++i)
-        result(i, i) = 1;
+        result (i, i) = 1;
 
     return result;
 }
@@ -60,8 +58,8 @@ Matrix<ElementType> Matrix<ElementType>::toeplitz (const Matrix& vector, size_t 
 template <typename ElementType>
 Matrix<ElementType> Matrix<ElementType>::hankel (const Matrix& vector, size_t size, size_t offset)
 {
-    jassert(vector.isOneColumnVector());
-    jassert(vector.rows >= (2 * (size - 1) + 1));
+    jassert (vector.isOneColumnVector());
+    jassert (vector.rows >= (2 * (size - 1) + 1));
 
     Matrix result (size, size);
 
@@ -176,7 +174,7 @@ bool Matrix<ElementType>::solve (Matrix& b) const noexcept
         {
             auto denominator = A (0,0);
 
-            if (denominator == 0)
+            if (approximatelyEqual (denominator, (ElementType) 0))
                 return false;
 
             b (0, 0) /= denominator;
@@ -187,7 +185,7 @@ bool Matrix<ElementType>::solve (Matrix& b) const noexcept
         {
             auto denominator = A (0, 0) * A (1, 1) - A (0, 1) * A (1, 0);
 
-            if (denominator == 0)
+            if (approximatelyEqual (denominator, (ElementType) 0))
                 return false;
 
             auto factor = (1 / denominator);
@@ -204,7 +202,7 @@ bool Matrix<ElementType>::solve (Matrix& b) const noexcept
                              + A (0, 1) * (A (1, 2) * A (2, 0) - A (1, 0) * A (2, 2))
                              + A (0, 2) * (A (1, 0) * A (2, 1) - A (1, 1) * A (2, 0));
 
-            if (denominator == 0)
+            if (approximatelyEqual (denominator, (ElementType) 0))
                 return false;
 
             auto factor = 1 / denominator;
@@ -231,10 +229,10 @@ bool Matrix<ElementType>::solve (Matrix& b) const noexcept
 
             for (size_t j = 0; j < n; ++j)
             {
-                if (M (j, j) == 0)
+                if (approximatelyEqual (M (j, j), (ElementType) 0))
                 {
                     auto i = j;
-                    while (i < n && M (i, j) == 0)
+                    while (i < n && approximatelyEqual (M (i, j), (ElementType) 0))
                         ++i;
 
                     if (i == n)
@@ -313,5 +311,4 @@ String Matrix<ElementType>::toString() const
 template class Matrix<float>;
 template class Matrix<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

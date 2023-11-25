@@ -27,7 +27,12 @@ juce_generate_juce_header(BinaryBuilder)
 
 target_sources(BinaryBuilder PRIVATE Source/Main.cpp)
 
-target_compile_definitions(BinaryBuilder PRIVATE JUCE_USE_CURL=0)
+target_compile_definitions(BinaryBuilder PRIVATE
+    JUCE_USE_CURL=0
+    # This is a temporary workaround to allow builds to complete on Xcode 15.
+    # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
+    # deploy to older versions of macOS/iOS.
+    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
 
 target_link_libraries(BinaryBuilder PRIVATE
     juce::juce_core

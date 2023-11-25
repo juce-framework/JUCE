@@ -98,7 +98,7 @@ struct FloatVectorOperationsBase
     /** Multiplies the destination values by the source values. */
     static void JUCE_CALLTYPE multiply (FloatType* dest, const FloatType* src, CountType numValues) noexcept;
 
-    /** Multiplies each source1 value by the correspinding source2 value, then stores it in the destination array. */
+    /** Multiplies each source1 value by the corresponding source2 value, then stores it in the destination array. */
     static void JUCE_CALLTYPE multiply (FloatType* dest, const FloatType* src1, const FloatType* src2, CountType numValues) noexcept;
 
     /** Multiplies each of the destination values by a fixed multiplier. */
@@ -142,65 +142,26 @@ struct FloatVectorOperationsBase
 namespace detail
 {
 
-template <typename...>
-struct NameForwarder;
-
-template <typename Head>
-struct NameForwarder<Head> : Head {};
-
-template <typename Head, typename... Tail>
-struct NameForwarder<Head, Tail...> : Head, NameForwarder<Tail...>
+template <typename... Bases>
+struct NameForwarder : public Bases...
 {
-    using Head::clear;
-    using NameForwarder<Tail...>::clear;
-
-    using Head::fill;
-    using NameForwarder<Tail...>::fill;
-
-    using Head::copy;
-    using NameForwarder<Tail...>::copy;
-
-    using Head::copyWithMultiply;
-    using NameForwarder<Tail...>::copyWithMultiply;
-
-    using Head::add;
-    using NameForwarder<Tail...>::add;
-
-    using Head::subtract;
-    using NameForwarder<Tail...>::subtract;
-
-    using Head::addWithMultiply;
-    using NameForwarder<Tail...>::addWithMultiply;
-
-    using Head::subtractWithMultiply;
-    using NameForwarder<Tail...>::subtractWithMultiply;
-
-    using Head::multiply;
-    using NameForwarder<Tail...>::multiply;
-
-    using Head::negate;
-    using NameForwarder<Tail...>::negate;
-
-    using Head::abs;
-    using NameForwarder<Tail...>::abs;
-
-    using Head::min;
-    using NameForwarder<Tail...>::min;
-
-    using Head::max;
-    using NameForwarder<Tail...>::max;
-
-    using Head::clip;
-    using NameForwarder<Tail...>::clip;
-
-    using Head::findMinAndMax;
-    using NameForwarder<Tail...>::findMinAndMax;
-
-    using Head::findMinimum;
-    using NameForwarder<Tail...>::findMinimum;
-
-    using Head::findMaximum;
-    using NameForwarder<Tail...>::findMaximum;
+    using Bases::clear...,
+          Bases::fill...,
+          Bases::copy...,
+          Bases::copyWithMultiply...,
+          Bases::add...,
+          Bases::subtract...,
+          Bases::addWithMultiply...,
+          Bases::subtractWithMultiply...,
+          Bases::multiply...,
+          Bases::negate...,
+          Bases::abs...,
+          Bases::min...,
+          Bases::max...,
+          Bases::clip...,
+          Bases::findMinAndMax...,
+          Bases::findMinimum...,
+          Bases::findMaximum...;
 };
 
 } // namespace detail
@@ -261,7 +222,7 @@ public:
     ~ScopedNoDenormals() noexcept;
 
 private:
-  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || (JUCE_64BIT && JUCE_ARM))
     intptr_t fpsr;
   #endif
 };

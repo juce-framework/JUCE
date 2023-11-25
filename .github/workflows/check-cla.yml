@@ -10,7 +10,6 @@ jobs:
         run: |
           import urllib.request
           import json
-          import itertools
           import sys
           def jsonRequest(url, data={}):
               req = urllib.request.Request(url,
@@ -19,9 +18,12 @@ jobs:
               with urllib.request.urlopen(req) as response:
                   return json.loads(response.read().decode('utf-8'))
           prCommits = jsonRequest('https://api.github.com/repos/juce-framework/JUCE/pulls/${{ github.event.number }}/commits')
-          authors = map(lambda commit: [commit['author']['login'], commit['committer']['login']], prCommits)
-          uniqueAuthors = list(set(itertools.chain.from_iterable(authors)))
-          print(f'\nPR authors: {", ".join(uniqueAuthors)}')
+          allAuthors = [commit[authorType]['login'] for authorType in ['author', 'committer'] for commit in prCommits if commit[authorType]]
+          uniqueAuthors = [name for name in list(set(allAuthors)) if name != 'web-flow']
+          if (len(uniqueAuthors) == 0):
+              print(f'\nNo author or committer user IDs contained within commit information\n\n{prCommits}\n')
+              sys.exit(1)
+          print(f'Authors: {uniqueAuthors}')
           claResult = jsonRequest('https://cla.juce.com/check', {'logins': uniqueAuthors})
           unsignedLogins = claResult['unsigned']
           if (len(unsignedLogins) != 0):

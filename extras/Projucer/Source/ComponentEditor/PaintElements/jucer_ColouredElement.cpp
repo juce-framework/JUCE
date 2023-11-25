@@ -167,8 +167,8 @@ public:
     ElementFillPositionProperty (ColouredElement* const owner_,
                                  const String& name,
                                  ComponentPositionDimension dimension_,
-                                 const bool isStart_,
-                                 const bool isForStroke_)
+                                 bool isStart_,
+                                 bool isForStroke_)
      : PositionPropertyBase (owner_, name, dimension_, false, false,
                              owner_->getDocument()->getComponentLayout()),
        listener (owner_),

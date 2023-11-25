@@ -853,12 +853,20 @@ void MPEInstrument::releaseAllNotes()
     notes.clear();
 }
 
+//==============================================================================
+void MPEInstrument::Listener::noteAdded ([[maybe_unused]] MPENote newNote)                 {}
+void MPEInstrument::Listener::notePressureChanged  ([[maybe_unused]] MPENote changedNote)  {}
+void MPEInstrument::Listener::notePitchbendChanged ([[maybe_unused]] MPENote changedNote)  {}
+void MPEInstrument::Listener::noteTimbreChanged    ([[maybe_unused]] MPENote changedNote)  {}
+void MPEInstrument::Listener::noteKeyStateChanged  ([[maybe_unused]] MPENote changedNote)  {}
+void MPEInstrument::Listener::noteReleased ([[maybe_unused]] MPENote finishedNote)         {}
+void MPEInstrument::Listener::zoneLayoutChanged()                                          {}
 
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MPEInstrumentTests : public UnitTest
+class MPEInstrumentTests final : public UnitTest
 {
 public:
     MPEInstrumentTests()
@@ -2193,8 +2201,8 @@ private:
     /* This mock class is used for unit testing whether the methods of
        MPEInstrument are called correctly.
     */
-    class UnitTestInstrument : public MPEInstrument,
-                               private MPEInstrument::Listener
+    class UnitTestInstrument final : public MPEInstrument,
+                                     private MPEInstrument::Listener
     {
         using Base = MPEInstrument;
 

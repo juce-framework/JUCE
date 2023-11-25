@@ -28,7 +28,7 @@
 #include "../../Utility/Helpers/jucer_TranslationHelpers.h"
 
 //==============================================================================
-class TranslationToolComponent  : public Component
+class TranslationToolComponent final : public Component
 {
 public:
     TranslationToolComponent()
@@ -122,10 +122,11 @@ private:
 
         if (postStrings.size() != preStrings.size())
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              TRANS("Error"),
-                                              TRANS("The pre- and post-translation text doesn't match!\n\n"
-                                                    "Perhaps it got mangled by the translator?"));
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             TRANS ("Error"),
+                                                             TRANS ("The pre- and post-translation text doesn't match!\n\n"
+                                                                    "Perhaps it got mangled by the translator?"));
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
             return;
         }
 
@@ -136,10 +137,16 @@ private:
     void scanProject()
     {
         if (Project* project = ProjucerApplication::getApp().mainWindowList.getFrontmostProject())
+        {
             setPreTranslationText (TranslationHelpers::getPreTranslationText (*project));
+        }
         else
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Translation Tool",
-                                              "This will only work when you have a project open!");
+        {
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "Translation Tool",
+                                                             "This will only work when you have a project open!");
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
+        }
     }
 
     void scanFolder()
@@ -155,7 +162,7 @@ private:
 
             StringArray strings;
             TranslationHelpers::scanFolderForTranslations (strings, fc.getResult());
-            setPreTranslationText (TranslationHelpers::mungeStrings(strings));
+            setPreTranslationText (TranslationHelpers::mungeStrings (strings));
         });
     }
 
@@ -189,10 +196,11 @@ private:
     Label label1, label2, label3, label4;
     Label instructionsLabel;
 
-    TextButton generateButton        { TRANS("Generate") },
+    TextButton generateButton        { TRANS ("Generate") },
                scanProjectButton     { "Scan project for TRANS macros" },
                scanFolderButton      { "Scan folder for TRANS macros" },
                loadTranslationButton { "Load existing translation file..."};
 
     std::unique_ptr<FileChooser> chooser;
+    ScopedMessageBox messageBox;
 };

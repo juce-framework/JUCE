@@ -350,10 +350,10 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
         document->addChangeListener (this);
 
-        resized();
+        handleResize();
         refreshPropertiesPanel();
 
-        changeListenerCallback (nullptr);
+        handleChange();
     }
 }
 
@@ -428,15 +428,25 @@ void JucerDocumentEditor::paint (Graphics& g)
     g.fillAll (findColour (backgroundColourId));
 }
 
-void JucerDocumentEditor::resized()
+void JucerDocumentEditor::handleResize()
 {
     tabbedComponent.setBounds (getLocalBounds().withTrimmedLeft (12));
 }
 
-void JucerDocumentEditor::changeListenerCallback (ChangeBroadcaster*)
+void JucerDocumentEditor::resized()
+{
+    handleResize();
+}
+
+void JucerDocumentEditor::handleChange()
 {
     setName (document->getClassName());
     updateTabs();
+}
+
+void JucerDocumentEditor::changeListenerCallback (ChangeBroadcaster*)
+{
+    handleChange();
 }
 
 //==============================================================================
@@ -734,25 +744,25 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
     switch (commandID)
     {
     case JucerCommandIDs::toFront:
-        result.setInfo (TRANS("Bring to front"), TRANS("Brings the currently selected component to the front."), CommandCategories::editing, 0);
+        result.setInfo (TRANS ("Bring to front"), TRANS ("Brings the currently selected component to the front."), CommandCategories::editing, 0);
         result.setActive (isSomethingSelected());
         result.defaultKeypresses.add (KeyPress ('f', cmd, 0));
         break;
 
     case JucerCommandIDs::toBack:
-        result.setInfo (TRANS("Send to back"), TRANS("Sends the currently selected component to the back."), CommandCategories::editing, 0);
+        result.setInfo (TRANS ("Send to back"), TRANS ("Sends the currently selected component to the back."), CommandCategories::editing, 0);
         result.setActive (isSomethingSelected());
         result.defaultKeypresses.add (KeyPress ('b', cmd, 0));
         break;
 
     case JucerCommandIDs::group:
-        result.setInfo (TRANS("Group selected items"), TRANS("Turns the currently selected elements into a single group object."), CommandCategories::editing, 0);
+        result.setInfo (TRANS ("Group selected items"), TRANS ("Turns the currently selected elements into a single group object."), CommandCategories::editing, 0);
         result.setActive (currentPaintRoutine != nullptr && currentPaintRoutine->getSelectedElements().getNumSelected() > 1);
         result.defaultKeypresses.add (KeyPress ('k', cmd, 0));
         break;
 
     case JucerCommandIDs::ungroup:
-        result.setInfo (TRANS("Ungroup selected items"), TRANS("Turns the currently selected elements into a single group object."), CommandCategories::editing, 0);
+        result.setInfo (TRANS ("Ungroup selected items"), TRANS ("Turns the currently selected elements into a single group object."), CommandCategories::editing, 0);
         result.setActive (currentPaintRoutine != nullptr
                            && currentPaintRoutine->getSelectedElements().getNumSelected() == 1
                            && currentPaintRoutine->getSelectedElements().getSelectedItem (0)->getTypeName() == "Group");
@@ -760,60 +770,60 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
         break;
 
     case JucerCommandIDs::test:
-        result.setInfo (TRANS("Test component..."), TRANS("Runs the current component interactively."), CommandCategories::view, 0);
+        result.setInfo (TRANS ("Test component..."), TRANS ("Runs the current component interactively."), CommandCategories::view, 0);
         result.defaultKeypresses.add (KeyPress ('t', cmd, 0));
         break;
 
     case JucerCommandIDs::enableSnapToGrid:
-        result.setInfo (TRANS("Enable snap-to-grid"), TRANS("Toggles whether components' positions are aligned to a grid."), CommandCategories::view, 0);
+        result.setInfo (TRANS ("Enable snap-to-grid"), TRANS ("Toggles whether components' positions are aligned to a grid."), CommandCategories::view, 0);
         result.setTicked (document != nullptr && document->isSnapActive (false));
         result.defaultKeypresses.add (KeyPress ('g', cmd, 0));
         break;
 
     case JucerCommandIDs::showGrid:
-        result.setInfo (TRANS("Show snap-to-grid"), TRANS("Toggles whether the snapping grid is displayed on-screen."), CommandCategories::view, 0);
+        result.setInfo (TRANS ("Show snap-to-grid"), TRANS ("Toggles whether the snapping grid is displayed on-screen."), CommandCategories::view, 0);
         result.setTicked (document != nullptr && document->isSnapShown());
         result.defaultKeypresses.add (KeyPress ('g', cmd | shift, 0));
         break;
 
     case JucerCommandIDs::editCompLayout:
-        result.setInfo (TRANS("Edit sub-component layout"), TRANS("Switches to the sub-component editor view."), CommandCategories::view, 0);
+        result.setInfo (TRANS ("Edit sub-component layout"), TRANS ("Switches to the sub-component editor view."), CommandCategories::view, 0);
         result.setTicked (currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress ('n', cmd, 0));
         break;
 
     case JucerCommandIDs::editCompGraphics:
-        result.setInfo (TRANS("Edit background graphics"), TRANS("Switches to the background graphics editor view."), CommandCategories::view, 0);
+        result.setInfo (TRANS ("Edit background graphics"), TRANS ("Switches to the background graphics editor view."), CommandCategories::view, 0);
         result.setTicked (currentPaintRoutine != nullptr);
         result.defaultKeypresses.add (KeyPress ('m', cmd, 0));
         break;
 
     case JucerCommandIDs::bringBackLostItems:
-        result.setInfo (TRANS("Retrieve offscreen items"), TRANS("Moves any items that are lost beyond the edges of the screen back to the centre."), CommandCategories::editing, 0);
+        result.setInfo (TRANS ("Retrieve offscreen items"), TRANS ("Moves any items that are lost beyond the edges of the screen back to the centre."), CommandCategories::editing, 0);
         result.setActive (currentPaintRoutine != nullptr || currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress ('m', cmd, 0));
         break;
 
     case JucerCommandIDs::zoomIn:
-        result.setInfo (TRANS("Zoom in"), TRANS("Zooms in on the current component."), CommandCategories::editing, 0);
+        result.setInfo (TRANS ("Zoom in"), TRANS ("Zooms in on the current component."), CommandCategories::editing, 0);
         result.setActive (currentPaintRoutine != nullptr || currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress (']', cmd, 0));
         break;
 
     case JucerCommandIDs::zoomOut:
-        result.setInfo (TRANS("Zoom out"), TRANS("Zooms out on the current component."), CommandCategories::editing, 0);
+        result.setInfo (TRANS ("Zoom out"), TRANS ("Zooms out on the current component."), CommandCategories::editing, 0);
         result.setActive (currentPaintRoutine != nullptr || currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress ('[', cmd, 0));
         break;
 
     case JucerCommandIDs::zoomNormal:
-        result.setInfo (TRANS("Zoom to 100%"), TRANS("Restores the zoom level to normal."), CommandCategories::editing, 0);
+        result.setInfo (TRANS ("Zoom to 100%"), TRANS ("Restores the zoom level to normal."), CommandCategories::editing, 0);
         result.setActive (currentPaintRoutine != nullptr || currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress ('1', cmd, 0));
         break;
 
     case JucerCommandIDs::spaceBarDrag:
-        result.setInfo (TRANS("Scroll while dragging mouse"), TRANS("When held down, this key lets you scroll around by dragging with the mouse."),
+        result.setInfo (TRANS ("Scroll while dragging mouse"), TRANS ("When held down, this key lets you scroll around by dragging with the mouse."),
                         CommandCategories::view, ApplicationCommandInfo::wantsKeyUpDownCallbacks);
         result.setActive (currentPaintRoutine != nullptr || currentLayout != nullptr);
         result.defaultKeypresses.add (KeyPress (KeyPress::spaceKey, 0, 0));
@@ -853,9 +863,9 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
                 currentAmount = 33;
 
             result.setInfo (commandID == JucerCommandIDs::compOverlay0
-                                ? TRANS("No component overlay")
-                                : TRANS("Overlay with opacity of 123%").replace ("123", String (amount)),
-                            TRANS("Changes the opacity of the components that are shown over the top of the graphics editor."),
+                                ? TRANS ("No component overlay")
+                                : TRANS ("Overlay with opacity of 123%").replace ("123", String (amount)),
+                            TRANS ("Changes the opacity of the components that are shown over the top of the graphics editor."),
                             CommandCategories::view, 0);
             result.setActive (currentPaintRoutine != nullptr && document->getComponentLayout() != nullptr);
             result.setTicked (amount == currentAmount);

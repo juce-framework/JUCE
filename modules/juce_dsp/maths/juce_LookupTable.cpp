@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename FloatType>
@@ -152,5 +150,4 @@ template class LookupTable<double>;
 template class LookupTableTransform<float>;
 template class LookupTableTransform<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

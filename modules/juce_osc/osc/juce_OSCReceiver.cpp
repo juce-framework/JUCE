@@ -409,7 +409,7 @@ struct OSCReceiver::Pimpl   : private Thread,
     }
 
     //==============================================================================
-    struct CallbackMessage   : public Message
+    struct CallbackMessage final : public Message
     {
         CallbackMessage (OSCBundle::Element oscElement)  : content (oscElement) {}
 
@@ -440,8 +440,7 @@ struct OSCReceiver::Pimpl   : private Thread,
         }
         catch (const OSCFormatError&)
         {
-            if (formatErrorHandler != nullptr)
-                formatErrorHandler (data, (int) dataSize);
+            NullCheckedInvocation::invoke (formatErrorHandler, data, (int) dataSize);
         }
     }
 
@@ -664,7 +663,7 @@ void OSCReceiver::registerFormatErrorHandler (FormatErrorHandler handler)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class OSCInputStreamTests  : public UnitTest
+class OSCInputStreamTests final : public UnitTest
 {
 public:
     OSCInputStreamTests()

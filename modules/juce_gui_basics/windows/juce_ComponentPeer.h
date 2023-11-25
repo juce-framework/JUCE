@@ -258,6 +258,16 @@ public:
     */
     void setConstrainer (ComponentBoundsConstrainer* newConstrainer) noexcept;
 
+    /** Asks the window-manager to begin resizing this window, on platforms where this is useful
+        (currently just Linux/X11).
+
+        @param mouseDownPosition    The position of the mouse event that started the resize in
+                                    unscaled peer coordinates
+        @param zone                 The edges of the window that may be moved during the resize
+    */
+    virtual void startHostManagedResize ([[maybe_unused]] Point<int> mouseDownPosition,
+                                         [[maybe_unused]] ResizableBorderComponent::Zone zone) {}
+
     /** Returns the current constrainer, if one has been set. */
     ComponentBoundsConstrainer* getConstrainer() const noexcept             { return constrainer; }
 
@@ -474,6 +484,34 @@ public:
     void removeScaleFactorListener (ScaleFactorListener* listenerToRemove)    { scaleFactorListeners.remove (listenerToRemove);  }
 
     //==============================================================================
+    /** Used to receive callbacks on every vertical blank event of the display that the peer
+        currently belongs to.
+
+        On Linux this is currently limited to receiving callbacks from a timer approximately at
+        display refresh rate.
+
+        This is a low-level facility used by the peer implementations. If you wish to synchronise
+        Component events with the display refresh, you should probably use the VBlankAttachment,
+        which automatically takes care of listening to the vblank events of the right peer.
+
+        @see VBlankAttachment
+    */
+    struct JUCE_API  VBlankListener
+    {
+        /** Destructor. */
+        virtual ~VBlankListener() = default;
+
+        /** Called on every vertical blank of the display to which the peer is associated. */
+        virtual void onVBlank() = 0;
+    };
+
+    /** Adds a VBlankListener. */
+    void addVBlankListener (VBlankListener* listenerToAdd)       { vBlankListeners.add (listenerToAdd); }
+
+    /** Removes a VBlankListener. */
+    void removeVBlankListener (VBlankListener* listenerToRemove) { vBlankListeners.remove (listenerToRemove); }
+
+    //==============================================================================
     /** On Windows and Linux this will return the OS scaling factor currently being applied
         to the native window. This is used to convert between physical and logical pixels
         at the OS API level and you shouldn't need to use it in your own code unless you
@@ -524,6 +562,7 @@ protected:
     ComponentBoundsConstrainer* constrainer = nullptr;
     static std::function<ModifierKeys()> getNativeRealtimeModifiers;
     ListenerList<ScaleFactorListener> scaleFactorListeners;
+    ListenerList<VBlankListener> vBlankListeners;
     Style style = Style::automatic;
 
 private:

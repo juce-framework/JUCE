@@ -27,7 +27,7 @@ namespace juce
 {
 
 DirectoryContentsList::DirectoryContentsList (const FileFilter* f, TimeSliceThread& t)
-   : fileFilter (f), thread (t)
+    : fileFilter (f), thread (t)
 {
 }
 
@@ -158,7 +158,7 @@ bool DirectoryContentsList::contains (const File& targetFile) const
     const ScopedLock sl (fileListLock);
 
     for (int i = files.size(); --i >= 0;)
-        if (root.getChildFile (files.getUnchecked(i)->filename) == targetFile)
+        if (root.getChildFile (files.getUnchecked (i)->filename) == targetFile)
             return true;
 
     return false;
@@ -202,33 +202,27 @@ int DirectoryContentsList::useTimeSlice()
 
 bool DirectoryContentsList::checkNextFile (bool& hasChanged)
 {
-    if (fileFindHandle != nullptr)
+    if (fileFindHandle == nullptr)
+        return false;
+
+    if (*fileFindHandle == RangedDirectoryIterator())
     {
-        if (*fileFindHandle != RangedDirectoryIterator())
-        {
-            const auto entry = *(*fileFindHandle)++;
-
-            if (addFile (entry.getFile(),
-                         entry.isDirectory(),
-                         entry.getFileSize(),
-                         entry.getModificationTime(),
-                         entry.getCreationTime(),
-                         entry.isReadOnly()))
-            {
-                hasChanged = true;
-            }
-
-            return true;
-        }
-
         fileFindHandle = nullptr;
         isSearching = false;
-
-        if (! wasEmpty && files.isEmpty())
-            hasChanged = true;
+        hasChanged = true;
+        return false;
     }
 
-    return false;
+    const auto entry = *(*fileFindHandle)++;
+
+    hasChanged |= addFile (entry.getFile(),
+                           entry.isDirectory(),
+                           entry.getFileSize(),
+                           entry.getModificationTime(),
+                           entry.getCreationTime(),
+                           entry.isReadOnly());
+
+    return true;
 }
 
 bool DirectoryContentsList::addFile (const File& file, const bool isDir,
@@ -252,7 +246,7 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
         info->isReadOnly       = isReadOnly;
 
         for (int i = files.size(); --i >= 0;)
-            if (files.getUnchecked(i)->filename == info->filename)
+            if (files.getUnchecked (i)->filename == info->filename)
                 return false;
 
         files.add (std::move (info));

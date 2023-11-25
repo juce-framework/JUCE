@@ -590,7 +590,7 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
 
     for (int i = jmax (0, startLine); i <= maxLine; ++i)
     {
-        auto& line = *lines.getUnchecked(i);
+        auto& line = *lines.getUnchecked (i);
         auto len = line.lineLength;
 
         if (i == startLine)
@@ -879,7 +879,7 @@ void CodeDocument::addListener    (CodeDocument::Listener* l)   { listeners.add 
 void CodeDocument::removeListener (CodeDocument::Listener* l)   { listeners.remove (l); }
 
 //==============================================================================
-struct CodeDocument::InsertAction   : public UndoableAction
+struct CodeDocument::InsertAction final : public UndoableAction
 {
     InsertAction (CodeDocument& doc, const String& t, const int pos) noexcept
         : owner (doc), text (t), insertPos (pos)
@@ -967,7 +967,7 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
 }
 
 //==============================================================================
-struct CodeDocument::DeleteAction  : public UndoableAction
+struct CodeDocument::DeleteAction final : public UndoableAction
 {
     DeleteAction (CodeDocument& doc, int start, int end) noexcept
         : owner (doc), startPos (start), endPos (end),
@@ -1063,7 +1063,7 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct CodeDocumentTest  : public UnitTest
+struct CodeDocumentTest final : public UnitTest
 {
     CodeDocumentTest()
         : UnitTest ("CodeDocument", UnitTestCategories::text)

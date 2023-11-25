@@ -36,6 +36,8 @@ namespace juce
     i.e. the identifiers AudioParameterFloatAttributes and RangedAudioParameterAttributes<float>
     should not be interchangable because we might need to add float-specific attributes in
     the future. Users should not refer directly to RangedAudioParameterAttributes.
+
+    @tags{Audio}
 */
 template <typename Derived, typename Value>
 class RangedAudioParameterAttributes
@@ -49,34 +51,34 @@ public:
     using ValueFromString = std::function<Value (const String&)>;
 
     /** An optional lambda function that converts a non-normalised value to a string with a maximum length. This may be used by hosts to display the parameter's value. */
-    JUCE_NODISCARD auto withStringFromValueFunction (StringFromValue x)                       const { return withMember (asDerived(), &Derived::stringFromValue, std::move (x)); }
+    [[nodiscard]] auto withStringFromValueFunction (StringFromValue x)                       const { return withMember (asDerived(), &Derived::stringFromValue, std::move (x)); }
 
     /** An optional lambda function that parses a string and converts it into a non-normalised value. Some hosts use this to allow users to type in parameter values. */
-    JUCE_NODISCARD auto withValueFromStringFunction (ValueFromString x)                       const { return withMember (asDerived(), &Derived::valueFromString, std::move (x)); }
+    [[nodiscard]] auto withValueFromStringFunction (ValueFromString x)                       const { return withMember (asDerived(), &Derived::valueFromString, std::move (x)); }
 
     /** See AudioProcessorParameterWithIDAttributes::withLabel() */
-    JUCE_NODISCARD auto withLabel (String x)                                                  const { return withMember (asDerived(), &Derived::attributes, attributes.withLabel (std::move (x))); }
+    [[nodiscard]] auto withLabel (String x)                                                  const { return withMember (asDerived(), &Derived::attributes, attributes.withLabel (std::move (x))); }
 
     /** See AudioProcessorParameterWithIDAttributes::withCategory() */
-    JUCE_NODISCARD auto withCategory (Category x)                                             const { return withMember (asDerived(), &Derived::attributes, attributes.withCategory (std::move (x))); }
+    [[nodiscard]] auto withCategory (Category x)                                             const { return withMember (asDerived(), &Derived::attributes, attributes.withCategory (std::move (x))); }
 
     /** See AudioProcessorParameter::isMetaParameter() */
-    JUCE_NODISCARD auto withMeta (bool x)                                                     const { return withMember (asDerived(), &Derived::attributes, attributes.withMeta (std::move (x))); }
+    [[nodiscard]] auto withMeta (bool x)                                                     const { return withMember (asDerived(), &Derived::attributes, attributes.withMeta (std::move (x))); }
 
     /** See AudioProcessorParameter::isAutomatable() */
-    JUCE_NODISCARD auto withAutomatable (bool x)                                              const { return withMember (asDerived(), &Derived::attributes, attributes.withAutomatable (std::move (x))); }
+    [[nodiscard]] auto withAutomatable (bool x)                                              const { return withMember (asDerived(), &Derived::attributes, attributes.withAutomatable (std::move (x))); }
 
     /** See AudioProcessorParameter::isOrientationInverted() */
-    JUCE_NODISCARD auto withInverted (bool x)                                                 const { return withMember (asDerived(), &Derived::attributes, attributes.withInverted (std::move (x))); }
+    [[nodiscard]] auto withInverted (bool x)                                                 const { return withMember (asDerived(), &Derived::attributes, attributes.withInverted (std::move (x))); }
 
     /** An optional lambda function that converts a non-normalised value to a string with a maximum length. This may be used by hosts to display the parameter's value. */
-    JUCE_NODISCARD const auto& getStringFromValueFunction()                                   const { return stringFromValue; }
+    [[nodiscard]] const auto& getStringFromValueFunction()                                   const { return stringFromValue; }
 
     /** An optional lambda function that parses a string and converts it into a non-normalised value. Some hosts use this to allow users to type in parameter values. */
-    JUCE_NODISCARD const auto& getValueFromStringFunction()                                   const { return valueFromString; }
+    [[nodiscard]] const auto& getValueFromStringFunction()                                   const { return valueFromString; }
 
     /** Gets attributes that would also apply to an AudioProcessorParameterWithID */
-    JUCE_NODISCARD const auto& getAudioProcessorParameterWithIDAttributes()                   const { return attributes; }
+    [[nodiscard]] const auto& getAudioProcessorParameterWithIDAttributes()                   const { return attributes; }
 
 private:
     auto& asDerived() const { return *static_cast<const Derived*> (this); }

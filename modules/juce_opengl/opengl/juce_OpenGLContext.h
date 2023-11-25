@@ -133,11 +133,22 @@ public:
     /** Returns true if non-power-of-two textures are supported in this context. */
     bool isTextureNpotSupported() const;
 
-    /** OpenGL versions, used by setOpenGLVersionRequired(). */
+    /** OpenGL versions, used by setOpenGLVersionRequired().
+
+        The Core profile doesn't include some legacy functionality, including the
+        fixed-function pipeline.
+
+        The Compatibility profile is backwards-compatible, and includes functionality
+        deprecated in the Core profile. However, not all implementations provide
+        compatibility profiles targeting later versions of OpenGL. To run on the
+        broadest range of hardware, using the 3.2 Core profile is recommended.
+    */
     enum OpenGLVersion
     {
-        defaultGLVersion = 0,
-        openGL3_2
+        defaultGLVersion = 0, ///< Whatever the device decides to give us, normally a compatibility profile
+        openGL3_2,            ///< 3.2 Core profile
+        openGL4_1,            ///< 4.1 Core profile, the latest supported by macOS at time of writing
+        openGL4_3             ///< 4.3 Core profile, will enable improved debugging support when building in Debug
     };
 
     /** Sets a preference for the version of GL that this context should use, if possible.
@@ -283,6 +294,12 @@ public:
     */
     void* getRawContext() const noexcept;
 
+    /** Returns true if this context is using the core profile.
+
+        @see OpenGLVersion
+    */
+    bool isCoreProfile() const;
+
     /** This structure holds a set of dynamically loaded GL functions for use on this context. */
     OpenGLExtensionFunctions extensions;
 
@@ -318,6 +335,13 @@ public:
    #endif
 
 private:
+    enum class InitResult
+    {
+        fatal,
+        retry,
+        success
+    };
+
     friend class OpenGLTexture;
 
     class CachedImage;

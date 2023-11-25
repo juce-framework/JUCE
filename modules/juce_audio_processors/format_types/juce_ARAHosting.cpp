@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-#if (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU) && (JUCE_MAC || JUCE_WINDOWS))
+#if (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU) && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX))
 
 #include "juce_ARAHosting.h"
-#include <ARA_Library/Debug/ARADebug.h>
 
 #include <ARA_Library/Dispatch/ARAHostDispatch.cpp>
 
@@ -278,8 +277,18 @@ class ARAHostDocumentController::Impl
 public:
     Impl (ARAFactoryWrapper araFactoryIn,
           std::unique_ptr<ARA::Host::DocumentControllerHostInstance>&& dcHostInstanceIn,
-          const ARA::ARADocumentControllerInstance* documentControllerInstance)
+          const ARA::ARADocumentControllerInstance* documentControllerInstance,
+          std::unique_ptr<ARA::Host::AudioAccessControllerInterface>&& audioAccessControllerIn,
+          std::unique_ptr<ARA::Host::ArchivingControllerInterface>&& archivingControllerIn,
+          std::unique_ptr<ARA::Host::ContentAccessControllerInterface>&& contentAccessControllerIn,
+          std::unique_ptr<ARA::Host::ModelUpdateControllerInterface>&& modelUpdateControllerIn,
+          std::unique_ptr<ARA::Host::PlaybackControllerInterface>&& playbackControllerIn)
         : araFactory (std::move (araFactoryIn)),
+          audioAccessController (std::move (audioAccessControllerIn)),
+          archivingController (std::move (archivingControllerIn)),
+          contentAccessController (std::move (contentAccessControllerIn)),
+          modelUpdateController (std::move (modelUpdateControllerIn)),
+          playbackController (std::move (playbackControllerIn)),
           dcHostInstance (std::move (dcHostInstanceIn)),
           documentController (documentControllerInstance)
     {
@@ -300,16 +309,23 @@ public:
                     std::unique_ptr<ARA::Host::PlaybackControllerInterface>&& playbackController)
     {
         std::unique_ptr<ARA::Host::DocumentControllerHostInstance> dcHostInstance =
-            std::make_unique<ARA::Host::DocumentControllerHostInstance> (audioAccessController.release(),
-                                                                         archivingController.release(),
-                                                                         contentAccessController.release(),
-                                                                         modelUpdateController.release(),
-                                                                         playbackController.release());
+            std::make_unique<ARA::Host::DocumentControllerHostInstance> (audioAccessController.get(),
+                                                                         archivingController.get(),
+                                                                         contentAccessController.get(),
+                                                                         modelUpdateController.get(),
+                                                                         playbackController.get());
 
         const auto documentProperties = makeARASizedStruct (&ARA::ARADocumentProperties::name, documentName.toRawUTF8());
 
         if (auto* dci = araFactory.get()->createDocumentControllerWithDocument (dcHostInstance.get(), &documentProperties))
-            return std::make_unique<Impl> (std::move (araFactory), std::move (dcHostInstance), dci);
+            return std::make_unique<Impl> (std::move (araFactory),
+                                           std::move (dcHostInstance),
+                                           dci,
+                                           std::move (audioAccessController),
+                                           std::move (archivingController),
+                                           std::move (contentAccessController),
+                                           std::move (modelUpdateController),
+                                           std::move (playbackController));
 
         return {};
     }
@@ -324,7 +340,7 @@ public:
             using Vst3Fn = decltype (vst3Fn);
             using AuFn = decltype (auFn);
 
-            struct Visitor : ExtensionsVisitor, Vst3Fn, AuFn
+            struct Visitor final : public ExtensionsVisitor, Vst3Fn, AuFn
             {
                 explicit Visitor (Vst3Fn vst3Fn, AuFn auFn) : Vst3Fn (std::move (vst3Fn)), AuFn (std::move (auFn)) {}
                 void visitVST3Client (const VST3Client& x) override { Vst3Fn::operator() (x); }
@@ -386,6 +402,13 @@ public:
 
 private:
     ARAFactoryWrapper araFactory;
+
+    std::unique_ptr<ARA::Host::AudioAccessControllerInterface>   audioAccessController;
+    std::unique_ptr<ARA::Host::ArchivingControllerInterface>     archivingController;
+    std::unique_ptr<ARA::Host::ContentAccessControllerInterface> contentAccessController;
+    std::unique_ptr<ARA::Host::ModelUpdateControllerInterface>   modelUpdateController;
+    std::unique_ptr<ARA::Host::PlaybackControllerInterface>      playbackController;
+
     std::unique_ptr<ARA::Host::DocumentControllerHostInstance> dcHostInstance;
     ARA::Host::DocumentController documentController;
 };
@@ -435,7 +458,7 @@ void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (A
     if (! instance.getPluginDescription().hasARAExtension)
         cb (ARAFactoryWrapper{});
 
-    struct Extensions : public ExtensionsVisitor
+    struct Extensions final : public ExtensionsVisitor
     {
         Extensions (std::function<void (ARAFactoryWrapper)> callbackIn)
             : callback (std::move (callbackIn))
@@ -449,7 +472,7 @@ void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (A
         std::function<void (ARAFactoryWrapper)> callback;
     };
 
-    Extensions extensions { std::move(cb) };
+    Extensions extensions { std::move (cb) };
     instance.getExtensions (extensions);
 }
 

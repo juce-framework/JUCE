@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
     /**
         Allows conversion from bytestream- or Universal MIDI Packet-formatted
@@ -35,7 +33,7 @@ namespace universal_midi_packets
     struct ToUMP1Converter
     {
         template <typename Fn>
-        void convert (const MidiMessage& m, Fn&& fn)
+        void convert (const BytestreamMidiView& m, Fn&& fn)
         {
             Conversion::toMidi1 (m, std::forward<Fn> (fn));
         }
@@ -56,7 +54,7 @@ namespace universal_midi_packets
     struct ToUMP2Converter
     {
         template <typename Fn>
-        void convert (const MidiMessage& m, Fn&& fn)
+        void convert (const BytestreamMidiView& m, Fn&& fn)
         {
             Conversion::toMidi1 (m, [&] (const View& v)
             {
@@ -88,6 +86,15 @@ namespace universal_midi_packets
     */
     class GenericUMPConverter
     {
+        template <typename This, typename... Args>
+        static void visit (This& t, Args&&... args)
+        {
+            if (t.mode == PacketProtocol::MIDI_1_0)
+                convertImpl (std::get<0> (t.converters), std::forward<Args> (args)...);
+            else
+                convertImpl (std::get<1> (t.converters), std::forward<Args> (args)...);
+        }
+
     public:
         explicit GenericUMPConverter (PacketProtocol m)
             : mode (m) {}
@@ -97,33 +104,43 @@ namespace universal_midi_packets
             std::get<1> (converters).reset();
         }
 
-        template <typename Fn>
-        void convert (const MidiMessage& m, Fn&& fn)
+        template <typename Converter, typename Fn>
+        static void convertImpl (Converter& converter, const BytestreamMidiView& m, Fn&& fn)
         {
-            switch (mode)
+            converter.convert (m, std::forward<Fn> (fn));
+        }
+
+        template <typename Converter, typename Fn>
+        static void convertImpl (Converter& converter, const View& m, Fn&& fn)
+        {
+            converter.convert (m, std::forward<Fn> (fn));
+        }
+
+        template <typename Converter, typename Fn>
+        static void convertImpl (Converter& converter, Iterator b, Iterator e, Fn&& fn)
+        {
+            std::for_each (b, e, [&] (const auto& v)
             {
-                case PacketProtocol::MIDI_1_0: return std::get<0> (converters).convert (m, std::forward<Fn> (fn));
-                case PacketProtocol::MIDI_2_0: return std::get<1> (converters).convert (m, std::forward<Fn> (fn));
-            }
+                convertImpl (converter, v, fn);
+            });
+        }
+
+        template <typename Fn>
+        void convert (const BytestreamMidiView& m, Fn&& fn)
+        {
+            visit (*this, m, std::forward<Fn> (fn));
         }
 
         template <typename Fn>
         void convert (const View& v, Fn&& fn)
         {
-            switch (mode)
-            {
-                case PacketProtocol::MIDI_1_0: return std::get<0> (converters).convert (v, std::forward<Fn> (fn));
-                case PacketProtocol::MIDI_2_0: return std::get<1> (converters).convert (v, std::forward<Fn> (fn));
-            }
+            visit (*this, v, std::forward<Fn> (fn));
         }
 
         template <typename Fn>
         void convert (Iterator begin, Iterator end, Fn&& fn)
         {
-            std::for_each (begin, end, [&] (const View& v)
-            {
-                convert (v, fn);
-            });
+            visit (*this, begin, end, std::forward<Fn> (fn));
         }
 
         PacketProtocol getProtocol() const noexcept { return mode; }
@@ -163,7 +180,6 @@ namespace universal_midi_packets
 
         Midi1ToBytestreamTranslator translator;
     };
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

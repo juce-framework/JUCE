@@ -125,6 +125,7 @@ private:
     class CategoryItem;
     class ItemComponent;
     std::unique_ptr<TopLevelItem> treeItem;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingEditorComponent)
 };

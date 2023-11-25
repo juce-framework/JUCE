@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_LV2
+#if JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))
  #ifndef _CRT_SECURE_NO_WARNINGS
   #define _CRT_SECURE_NO_WARNINGS
  #endif

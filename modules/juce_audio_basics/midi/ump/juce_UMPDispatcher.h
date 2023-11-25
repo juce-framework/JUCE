@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -123,7 +121,7 @@ public:
 
             void handleIncomingMidiMessage (void*, const MidiMessage& msg) const
             {
-                Conversion::toMidi1 (msg, [&] (const View& view)
+                Conversion::toMidi1 (BytestreamMidiView (&msg), [&] (const View& view)
                 {
                     dispatch.converter.convert (view, *callbackPtr);
                 });
@@ -196,7 +194,6 @@ private:
     ToBytestreamConverter converter;
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

@@ -29,7 +29,7 @@
 namespace juce
 {
 
-class VST3PluginFormatTests : public UnitTest
+class VST3PluginFormatTests final : public UnitTest
 {
 public:
     VST3PluginFormatTests()
@@ -550,6 +550,23 @@ public:
                 expect (clientBuffers[3].channelBuffers64[0] == nullptr);
             }
         }
+
+        beginTest ("Speaker layout conversions");
+        {
+            using namespace Steinberg::Vst::SpeakerArr;
+
+            for (const auto& [channelSet, arr] : { std::tuple (AudioChannelSet::ambisonic (1), kAmbi1stOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (2), kAmbi2cdOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (3), kAmbi3rdOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (4), kAmbi4thOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (5), kAmbi5thOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (6), kAmbi6thOrderACN),
+                                                   std::tuple (AudioChannelSet::ambisonic (7), kAmbi7thOrderACN), })
+            {
+                expect (getVst3SpeakerArrangement (channelSet) == arr);
+                expect (channelSet == getChannelSetForSpeakerArrangement (arr));
+            }
+        }
     }
 
 private:
@@ -575,16 +592,14 @@ private:
 
         void init()
         {
-            auto index = 1;
-
-            for (auto& channel : buffers)
-                std::fill (channel.begin(), channel.end(), (float) index++);
+            for (const auto [index, channel] : enumerate (buffers, 1))
+                std::fill (channel.begin(), channel.end(), (float) index);
         }
 
         bool allMatch (int channel, float value) const
         {
             const auto& buf = buffers[(size_t) channel];
-            return std::all_of (buf.begin(), buf.end(), [&] (auto x) { return x == value; });
+            return std::all_of (buf.begin(), buf.end(), [&] (auto x) { return exactlyEqual (x, value); });
         }
 
         bool isClear (int channel) const
@@ -607,13 +622,13 @@ private:
 
     static bool channelStartsWithValue (Steinberg::Vst::AudioBusBuffers& bus, size_t index, float value)
     {
-        return bus.channelBuffers32[index][0] == value;
+        return exactlyEqual (bus.channelBuffers32[index][0], value);
     }
 
     static bool allMatch (const AudioBuffer<float>& buf, int index, float value)
     {
         const auto* ptr = buf.getReadPointer (index);
-        return std::all_of (ptr, ptr + buf.getNumSamples(), [&] (auto x) { return x == value; });
+        return std::all_of (ptr, ptr + buf.getNumSamples(), [&] (auto x) { return exactlyEqual (x, value); });
     }
 
     struct MultiBusBuffers

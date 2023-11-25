@@ -29,7 +29,7 @@
 #include "../../Project/UI/jucer_UserAvatarComponent.h"
 
 //==============================================================================
-class LoginFormComponent  : public Component
+class LoginFormComponent final : public Component
 {
 public:
     LoginFormComponent (MainWindow& window)
@@ -82,7 +82,7 @@ public:
         setWantsKeyboardFocus (true);
         setOpaque (true);
 
-        lookAndFeelChanged();
+        updateLookAndFeel();
 
         setSize (300, 350);
     }
@@ -134,14 +134,19 @@ public:
             URL ("https://juce.com/verification/register").launchInDefaultBrowser();
     }
 
-    void lookAndFeelChanged() override
+    void updateLookAndFeel()
     {
         enableGPLButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
     }
 
+    void lookAndFeelChanged() override
+    {
+        updateLookAndFeel();
+    }
+
 private:
-    class ProgressButton  : public TextButton,
-                            private Timer
+    class ProgressButton final : public TextButton,
+                                 private Timer
     {
     public:
         ProgressButton (const String& buttonName)

@@ -50,7 +50,7 @@
 #include "WidgetsDemo.h"
 
 //==============================================================================
-class ComponentTransformsDemo  : public Component
+class ComponentTransformsDemo final : public Component
 {
 public:
     ComponentTransformsDemo()
@@ -98,7 +98,7 @@ public:
 private:
     std::unique_ptr<Component> content;
 
-    struct CornerDragger  : public Component
+    struct CornerDragger final : public Component
     {
         CornerDragger()
         {

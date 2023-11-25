@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -138,7 +136,6 @@ struct BytestreamToUMPHandler : public BytestreamInputHandler
     BytestreamToUMPDispatcher dispatcher;
 };
 
-}
-}
+} // juce::universal_midi_packets
 
 #endif

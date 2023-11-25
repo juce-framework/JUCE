@@ -23,15 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
-{
-
 /**
     Classes for FIR filter processing.
 */
-namespace FIR
+namespace juce::dsp::FIR
 {
     template <typename NumericType>
     struct Coefficients;
@@ -76,11 +71,11 @@ namespace FIR
 
         //==============================================================================
         /** Prepare this filter for processing. */
-        inline void prepare (const ProcessSpec& spec) noexcept
+        inline void prepare ([[maybe_unused]] const ProcessSpec& spec) noexcept
         {
             // This class can only process mono signals. Use the ProcessorDuplicator class
             // to apply this filter on a multi-channel audio stream.
-            jassertquiet (spec.numChannels == 1);
+            jassert (spec.numChannels == 1);
             reset();
         }
 
@@ -122,7 +117,7 @@ namespace FIR
         template <typename ProcessContext>
         void process (const ProcessContext& context) noexcept
         {
-            static_assert (std::is_same<typename ProcessContext::SampleType, SampleType>::value,
+            static_assert (std::is_same_v<typename ProcessContext::SampleType, SampleType>,
                            "The sample-type of the FIR filter must match the sample-type supplied to this process callback");
             check();
 
@@ -279,7 +274,5 @@ namespace FIR
         */
         Array<NumericType> coefficients;
     };
-}
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp::FIR

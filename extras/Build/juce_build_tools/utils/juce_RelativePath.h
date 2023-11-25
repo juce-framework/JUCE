@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     //==============================================================================
     /** Manipulates a cross-platform partial file path. (Needed because File is designed
         for absolute paths on the active OS)
@@ -125,5 +124,5 @@ namespace build_tools
             return currentWorkingDirectory.getChildFile (path);
         }
     };
-}
-}
+
+} // namespace juce::build_tools

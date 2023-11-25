@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -98,9 +98,9 @@ public:
 	OBJ_METHODS (Parameter, FObject)
 //------------------------------------------------------------------------
 protected:
-	ParameterInfo info;
-	ParamValue valueNormalized;
-	int32 precision;
+	ParameterInfo info {0};
+	ParamValue valueNormalized {0.};
+	int32 precision {4};
 };
 
 //------------------------------------------------------------------------
@@ -212,7 +212,7 @@ public:
 	int32 getParameterCount () const { return params ? static_cast<int32> (params->size ()) : 0; }
 
 	/** Gets parameter by index. */
-	Parameter* getParameterByIndex (int32 index) const { return params ? params->at (index) : nullptr; }
+	Parameter* getParameterByIndex (int32 index) const;
 
 	/** Removes all parameters. */
 	void removeAll ()
@@ -231,7 +231,7 @@ public:
 protected:
 	using ParameterPtrVector = std::vector<IPtr<Parameter>>;
 	using IndexMap = std::map<ParamID, ParameterPtrVector::size_type>;
-	ParameterPtrVector* params;
+	ParameterPtrVector* params {nullptr};
 	IndexMap id2index;
 };
 

@@ -62,10 +62,8 @@ static Rectangle<float> getLogoArea (Rectangle<float> parentRect)
 }
 
 //==============================================================================
-JUCESplashScreen::JUCESplashScreen (Component& parent)
+JUCESplashScreen::JUCESplashScreen ([[maybe_unused]] Component& parent)
 {
-    ignoreUnused (parent);
-
    #if JUCE_DISPLAY_SPLASH_SCREEN
     if (splashDisplayTime == 0
          || Time::getMillisecondCounter() < splashDisplayTime + (uint32) millisecondsToDisplaySplash)

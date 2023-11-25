@@ -59,10 +59,7 @@ public:
                                 int maximumSamplesPerBlock,
                                 int numChannels,
                                 AudioProcessor::ProcessingPrecision precision,
-                                AlwaysNonRealtime alwaysNonRealtime = AlwaysNonRealtime::no)
-    {
-        ignoreUnused (sampleRate, maximumSamplesPerBlock, numChannels, precision, alwaysNonRealtime);
-    }
+                                AlwaysNonRealtime alwaysNonRealtime = AlwaysNonRealtime::no);
 
     /** Frees render resources allocated in prepareToPlay(). */
     virtual void releaseResources() {}
@@ -128,11 +125,9 @@ public:
 
     bool processBlock (AudioBuffer<float>& buffer,
                        AudioProcessor::Realtime realtime,
-                       const AudioPlayHead::PositionInfo& positionInfo) noexcept override
-    {
-        ignoreUnused (buffer, realtime, positionInfo);
-        return false;
-    }
+                       const AudioPlayHead::PositionInfo& positionInfo) noexcept override;
+
+    using ARARenderer::processBlock;
 
     // Shadowing templated getters to default to JUCE versions of the returned classes
     /** Returns the PlaybackRegions
@@ -189,18 +184,16 @@ public:
     // isNonRealtime of the process context - typically preview is limited to realtime.
     bool processBlock (AudioBuffer<float>& buffer,
                        AudioProcessor::Realtime isNonRealtime,
-                       const AudioPlayHead::PositionInfo& positionInfo) noexcept override
-    {
-        ignoreUnused (buffer, isNonRealtime, positionInfo);
-        return true;
-    }
+                       const AudioPlayHead::PositionInfo& positionInfo) noexcept override;
+
+    using ARARenderer::processBlock;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)
 };
 
 //==============================================================================
-/** Base class for a renderer fulfilling the ARAEditorView role as described in the ARA SDK.
+/** Base class for fulfilling the ARAEditorView role as described in the ARA SDK.
 
     Instances of this class are constructed by the DocumentController. If you are subclassing
     ARAEditorView, make sure to call the base class implementation of overridden functions.
@@ -214,7 +207,7 @@ public:
 
     // Shadowing templated getters to default to JUCE versions of the returned classes
     template <typename RegionSequence_t = ARARegionSequence>
-    std::vector<RegionSequence_t*> const& getHiddenRegionSequences() const noexcept
+    const std::vector<RegionSequence_t*>& getHiddenRegionSequences() const noexcept
     {
         return ARA::PlugIn::EditorView::getHiddenRegionSequences<RegionSequence_t>();
     }
@@ -223,7 +216,7 @@ public:
     void doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept override;
 
     // Base class implementation must be called if overridden
-    void doNotifyHideRegionSequences (std::vector<ARA::PlugIn::RegionSequence*> const& regionSequences) noexcept override;
+    void doNotifyHideRegionSequences (const std::vector<ARA::PlugIn::RegionSequence*>& regionSequences) noexcept override;
 
     /** A base class for listeners that want to know about changes to an ARAEditorView object.
 
@@ -235,25 +228,15 @@ public:
         /** Destructor. */
         virtual ~Listener() = default;
 
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_BEGIN
-
         /** Called when the editor view's selection changes.
             @param viewSelection The current selection state
         */
-        virtual void onNewSelection (const ARA::PlugIn::ViewSelection& viewSelection)
-        {
-            ignoreUnused (viewSelection);
-        }
+        virtual void onNewSelection (const ARAViewSelection& viewSelection);
 
         /** Called when region sequences are flagged as hidden in the host UI.
             @param regionSequences A vector containing all hidden region sequences.
         */
-        virtual void onHideRegionSequences (std::vector<ARARegionSequence*> const& regionSequences)
-        {
-            ignoreUnused (regionSequences);
-        }
-
-       ARA_DISABLE_UNREFERENCED_PARAMETER_WARNING_END
+        virtual void onHideRegionSequences (const std::vector<ARARegionSequence*>& regionSequences);
     };
 
     /** \copydoc ARAListenableModelClass::addListener */

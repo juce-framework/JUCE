@@ -39,13 +39,13 @@ IIRFilterAudioSource::~IIRFilterAudioSource()  {}
 void IIRFilterAudioSource::setCoefficients (const IIRCoefficients& newCoefficients)
 {
     for (int i = iirFilters.size(); --i >= 0;)
-        iirFilters.getUnchecked(i)->setCoefficients (newCoefficients);
+        iirFilters.getUnchecked (i)->setCoefficients (newCoefficients);
 }
 
 void IIRFilterAudioSource::makeInactive()
 {
     for (int i = iirFilters.size(); --i >= 0;)
-        iirFilters.getUnchecked(i)->makeInactive();
+        iirFilters.getUnchecked (i)->makeInactive();
 }
 
 //==============================================================================
@@ -54,7 +54,7 @@ void IIRFilterAudioSource::prepareToPlay (int samplesPerBlockExpected, double sa
     input->prepareToPlay (samplesPerBlockExpected, sampleRate);
 
     for (int i = iirFilters.size(); --i >= 0;)
-        iirFilters.getUnchecked(i)->reset();
+        iirFilters.getUnchecked (i)->reset();
 }
 
 void IIRFilterAudioSource::releaseResources()
@@ -72,7 +72,7 @@ void IIRFilterAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& buff
         iirFilters.add (new IIRFilter (*iirFilters.getUnchecked (0)));
 
     for (int i = 0; i < numChannels; ++i)
-        iirFilters.getUnchecked(i)
+        iirFilters.getUnchecked (i)
             ->processSamples (bufferToFill.buffer->getWritePointer (i, bufferToFill.startSample),
                               bufferToFill.numSamples);
 }

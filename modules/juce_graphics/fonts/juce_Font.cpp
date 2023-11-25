@@ -46,7 +46,7 @@ float Font::getDefaultMinimumHorizontalScaleFactor() noexcept                { r
 void Font::setDefaultMinimumHorizontalScaleFactor (float newValue) noexcept  { FontValues::minimumHorizontalScale = newValue; }
 
 //==============================================================================
-class TypefaceCache  : private DeletedAtShutdown
+class TypefaceCache final : private DeletedAtShutdown
 {
 public:
     TypefaceCache()
@@ -89,7 +89,7 @@ public:
 
             for (int i = faces.size(); --i >= 0;)
             {
-                CachedFace& face = faces.getReference(i);
+                CachedFace& face = faces.getReference (i);
 
                 if (face.typefaceName == faceName
                      && face.typefaceStyle == faceStyle
@@ -108,7 +108,7 @@ public:
 
         for (int i = faces.size(); --i >= 0;)
         {
-            auto lu = faces.getReference(i).lastUsageCount;
+            auto lu = faces.getReference (i).lastUsageCount;
 
             if (bestLastUsageCount > lu)
             {
@@ -178,8 +178,7 @@ void Typeface::clearTypefaceCache()
 
     RenderingHelpers::SoftwareRendererSavedState::clearGlyphCache();
 
-    if (clearOpenGLGlyphCache != nullptr)
-        clearOpenGLGlyphCache();
+    NullCheckedInvocation::invoke (clearOpenGLGlyphCache);
 }
 
 //==============================================================================
@@ -291,7 +290,7 @@ public:
     {
         const ScopedLock lock (mutex);
 
-        if (ascent == 0.0f)
+        if (approximatelyEqual (ascent, 0.0f))
             ascent = getTypefacePtr (f)->getAscent();
 
         return height * ascent;
@@ -569,7 +568,7 @@ void Font::setHeight (float newHeight)
 {
     newHeight = FontValues::limitFontHeight (newHeight);
 
-    if (font->getHeight() != newHeight)
+    if (! approximatelyEqual (font->getHeight(), newHeight))
     {
         dupeInternalIfShared();
         font->setHeight (newHeight);
@@ -581,7 +580,7 @@ void Font::setHeightWithoutChangingWidth (float newHeight)
 {
     newHeight = FontValues::limitFontHeight (newHeight);
 
-    if (font->getHeight() != newHeight)
+    if (! approximatelyEqual (font->getHeight(), newHeight))
     {
         dupeInternalIfShared();
         font->setHorizontalScale (font->getHorizontalScale() * (font->getHeight() / newHeight));
@@ -626,9 +625,9 @@ void Font::setSizeAndStyle (float newHeight,
 {
     newHeight = FontValues::limitFontHeight (newHeight);
 
-    if (font->getHeight() != newHeight
-         || font->getHorizontalScale() != newHorizontalScale
-         || font->getKerning() != newKerningAmount)
+    if (! approximatelyEqual (font->getHeight(), newHeight)
+         || ! approximatelyEqual (font->getHorizontalScale(), newHorizontalScale)
+         || ! approximatelyEqual (font->getKerning(), newKerningAmount))
     {
         dupeInternalIfShared();
         font->setHeight (newHeight);
@@ -647,9 +646,9 @@ void Font::setSizeAndStyle (float newHeight,
 {
     newHeight = FontValues::limitFontHeight (newHeight);
 
-    if (font->getHeight() != newHeight
-         || font->getHorizontalScale() != newHorizontalScale
-         || font->getKerning() != newKerningAmount)
+    if (! approximatelyEqual (font->getHeight(), newHeight)
+         || ! approximatelyEqual (font->getHorizontalScale(), newHorizontalScale)
+         || ! approximatelyEqual (font->getKerning(), newKerningAmount))
     {
         dupeInternalIfShared();
         font->setHeight (newHeight);
@@ -748,7 +747,7 @@ float Font::getStringWidthFloat (const String& text) const
 {
     auto w = getTypefacePtr()->getStringWidth (text);
 
-    if (font->getKerning() != 0.0f)
+    if (! approximatelyEqual (font->getKerning(), 0.0f))
         w += font->getKerning() * (float) text.length();
 
     return w * font->getHeight() * font->getHorizontalScale();
@@ -763,7 +762,7 @@ void Font::getGlyphPositions (const String& text, Array<int>& glyphs, Array<floa
         auto scale = font->getHeight() * font->getHorizontalScale();
         auto* x = xOffsets.getRawDataPointer();
 
-        if (font->getKerning() != 0.0f)
+        if (! approximatelyEqual (font->getKerning(), 0.0f))
         {
             for (int i = 0; i < num; ++i)
                 x[i] = (x[i] + (float) i * font->getKerning()) * scale;

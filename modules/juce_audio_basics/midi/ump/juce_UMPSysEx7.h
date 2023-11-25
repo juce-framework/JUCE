@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -63,7 +61,7 @@ struct SysEx7
     /** Holds the bytes from a single SysEx-7 packet. */
     struct PacketBytes
     {
-        std::array<uint8_t, 6> data;
+        std::array<std::byte, 6> data;
         uint8_t size;
     };
 
@@ -71,7 +69,6 @@ struct SysEx7
     static PacketBytes getDataBytes (const PacketX2& packet);
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

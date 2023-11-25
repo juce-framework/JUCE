@@ -87,7 +87,7 @@ public:
         The number of channels provided here is expected to match the number of channels
         that this AudioVisualiserComponent has been told to use.
     */
-    void pushBuffer (const float** channelData, int numChannels, int numSamples);
+    void pushBuffer (const float* const* channelData, int numChannels, int numSamples);
 
     /** Pushes a single sample (per channel).
         The number of channels provided here is expected to match the number of channels

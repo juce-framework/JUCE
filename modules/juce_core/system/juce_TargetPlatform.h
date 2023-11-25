@@ -62,7 +62,7 @@
 #elif defined (JUCE_ANDROID)
   #undef        JUCE_ANDROID
   #define       JUCE_ANDROID 1
-#elif defined (__FreeBSD__) || (__OpenBSD__)
+#elif defined (__FreeBSD__) || defined (__OpenBSD__)
   #define       JUCE_BSD 1
 #elif defined (LINUX) || defined (__linux__)
   #define       JUCE_LINUX 1
@@ -109,7 +109,11 @@
   /** If defined, this indicates that the processor is little-endian. */
   #define JUCE_LITTLE_ENDIAN 1
 
-  #define JUCE_INTEL 1
+  #if defined (_M_ARM) || defined (_M_ARM64) || defined (__arm__) || defined (__aarch64__)
+    #define JUCE_ARM 1
+  #else
+    #define JUCE_INTEL 1
+  #endif
 #endif
 
 //==============================================================================
@@ -145,9 +149,9 @@
 
   #if JUCE_MAC
     #if ! defined (MAC_OS_X_VERSION_10_14)
-      #error "The 10.14 SDK (Xcode 10.1+) is required to build JUCE apps. You can create apps that run on macOS 10.7+ by changing the deployment target."
-    #elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7
-      #error "Building for OSX 10.6 is no longer supported!"
+      #error "The 10.14 SDK (Xcode 10.1+) is required to build JUCE apps. You can create apps that run on macOS 10.9+ by changing the deployment target."
+    #elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
+      #error "Building for OSX 10.8 and earlier is no longer supported!"
     #endif
   #endif
 #endif

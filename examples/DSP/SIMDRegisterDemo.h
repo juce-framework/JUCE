@@ -124,7 +124,7 @@ struct SIMDRegisterDemoDSP
 
     void updateParameters()
     {
-        if (sampleRate != 0.0)
+        if (! approximatelyEqual (sampleRate, 0.0))
         {
             auto cutoff = static_cast<float> (cutoffParam.getCurrentValue());
             auto qVal   = static_cast<float> (qParam.getCurrentValue());
@@ -156,7 +156,7 @@ struct SIMDRegisterDemoDSP
     double sampleRate = 0.0;
 };
 
-struct SIMDRegisterDemo    : public Component
+struct SIMDRegisterDemo final : public Component
 {
     SIMDRegisterDemo()
     {

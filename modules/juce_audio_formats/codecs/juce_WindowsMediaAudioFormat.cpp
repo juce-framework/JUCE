@@ -29,7 +29,7 @@ namespace juce
 namespace WindowsMediaCodec
 {
 
-class JuceIStream   : public ComBaseClassHelper<IStream>
+class JuceIStream final : public ComBaseClassHelper<IStream>
 {
 public:
     JuceIStream (InputStream& in) noexcept
@@ -127,7 +127,7 @@ static const char* wmFormatName = "Windows Media";
 static const char* const extensions[] = { ".mp3", ".wmv", ".asf", ".wm", ".wma", nullptr };
 
 //==============================================================================
-class WMAudioReader   : public AudioFormatReader
+class WMAudioReader final : public AudioFormatReader
 {
 public:
     WMAudioReader (InputStream* const input_)
@@ -163,7 +163,7 @@ public:
             wmSyncReader->Close();
     }
 
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         if (sampleRate <= 0)
@@ -262,7 +262,7 @@ private:
 
     void checkCoInitialiseCalled()
     {
-        ignoreUnused (CoInitialize (nullptr));
+        [[maybe_unused]] const auto result = CoInitialize (nullptr);
     }
 
     void scanFileForDetails()

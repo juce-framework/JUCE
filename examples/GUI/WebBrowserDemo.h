@@ -46,6 +46,8 @@
 
 #pragma once
 
+#if JUCE_WEB_BROWSER
+
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
@@ -53,7 +55,7 @@
     when the browser changes URL. You don't need to do this, you can just also
     just use the WebBrowserComponent class directly.
 */
-class DemoBrowserComponent  : public WebBrowserComponent
+class DemoBrowserComponent final : public WebBrowserComponent
 {
 public:
     //==============================================================================
@@ -87,7 +89,7 @@ private:
 
 
 //==============================================================================
-class WebBrowserDemo    : public Component
+class WebBrowserDemo final : public Component
 {
 public:
     WebBrowserDemo()
@@ -148,3 +150,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserDemo)
 };
+
+#endif

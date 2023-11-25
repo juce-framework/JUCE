@@ -50,13 +50,13 @@ public:
     virtual void setInitialBounds (int parentWidth, int parentHeight);
 
     virtual Rectangle<int> getCurrentBounds (const Rectangle<int>& activeArea) const;
-    virtual void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& activeArea, const bool undoable);
+    virtual void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& activeArea, bool undoable);
 
     const RelativePositionedRectangle& getPosition() const;
-    void setPosition (const RelativePositionedRectangle& newPosition, const bool undoable);
-    void setPaintElementBounds (const Rectangle<int>& newBounds, const bool undoable);
+    void setPosition (const RelativePositionedRectangle& newPosition, bool undoable);
+    void setPaintElementBounds (const Rectangle<int>& newBounds, bool undoable);
     void setPaintElementBoundsAndProperties (PaintElement* elementToPosition, const Rectangle<int>& newBounds,
-                                             PaintElement* referenceElement, const bool undoable);
+                                             PaintElement* referenceElement, bool undoable);
 
     void updateBounds (const Rectangle<int>& activeArea);
 
@@ -118,7 +118,7 @@ protected:
     Rectangle<int> getCurrentAbsoluteBounds() const;
     void getCurrentAbsoluteBoundsDouble (double& x, double& y, double& w, double& h) const;
 
-    virtual void selectionChanged (const bool isSelected);
+    virtual void selectionChanged (bool isSelected);
 
     virtual void createSiblingComponents();
 

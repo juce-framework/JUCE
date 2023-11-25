@@ -142,7 +142,7 @@ public:
 
         for (auto i = hashSlots.size(); --i >= 0;)
         {
-            auto* h = hashSlots.getUnchecked(i);
+            auto* h = hashSlots.getUnchecked (i);
 
             while (h != nullptr)
             {
@@ -217,7 +217,7 @@ public:
         const ScopedLockType sl (getLock());
 
         for (auto i = getNumSlots(); --i >= 0;)
-            for (auto* entry = hashSlots.getUnchecked(i); entry != nullptr; entry = entry->nextEntry)
+            for (auto* entry = hashSlots.getUnchecked (i); entry != nullptr; entry = entry->nextEntry)
                 if (entry->value == valueToLookFor)
                     return true;
 
@@ -269,7 +269,7 @@ public:
 
         for (auto i = getNumSlots(); --i >= 0;)
         {
-            auto* entry = hashSlots.getUnchecked(i);
+            auto* entry = hashSlots.getUnchecked (i);
             HashEntry* previous = nullptr;
 
             while (entry != nullptr)
@@ -311,7 +311,7 @@ public:
         {
             HashEntry* nextEntry = nullptr;
 
-            for (auto* entry = hashSlots.getUnchecked(i); entry != nullptr; entry = nextEntry)
+            for (auto* entry = hashSlots.getUnchecked (i); entry != nullptr; entry = nextEntry)
             {
                 auto hashIndex = generateHashFor (entry->key, newNumberOfSlots);
 

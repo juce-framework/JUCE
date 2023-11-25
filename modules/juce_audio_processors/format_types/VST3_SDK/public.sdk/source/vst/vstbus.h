@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,10 +37,13 @@
 #pragma once
 
 #include "base/source/fobject.h"
-#include "base/source/fstring.h"
 #include "pluginterfaces/vst/ivstcomponent.h"
 #include "pluginterfaces/vst/ivstaudioprocessor.h"
 
+#include <string>
+#if SMTG_CPP_17
+#include <string_view>
+#endif
 #include <vector>
 
 //------------------------------------------------------------------------
@@ -64,8 +67,13 @@ public:
 	/** Activates the bus. */
 	void setActive (TBool state) { active = state; }
 
+#if SMTG_CPP_17
 	/** Sets a new name for this bus. */
-	void setName (String newName) { name = newName; }
+	void setName (std::u16string_view newName) { name = newName; }
+#else
+	/** Sets a new name for this bus. */
+	void setName (const std::u16string& newName) { name = newName; }
+#endif
 
 	/** Sets a new busType for this bus. */
 	void setBusType (BusType newBusType) { busType = newBusType; }
@@ -79,7 +87,7 @@ public:
 	OBJ_METHODS (Vst::Bus, FObject)
 //------------------------------------------------------------------------
 protected:
-	String name;				///< name
+	std::u16string name;		///< name
 	BusType busType;			///< kMain or kAux, see \ref BusTypes
 	int32 flags;				///< flags, see \ref BusInfo::BusFlags
 	TBool active;				///< activation state

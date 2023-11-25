@@ -66,9 +66,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
  #ifndef WM_APPCOMMAND
   #define WM_APPCOMMAND 0x0319
  #endif
-
- extern "C" void _fpreset();
- extern "C" void _clearfp();
 #elif ! JUCE_WINDOWS
  static void _fpreset() {}
  static void _clearfp() {}
@@ -285,7 +282,7 @@ public:
         Group* parent = nullptr;
     };
 
-    struct Param  : public Base
+    struct Param final : public Base
     {
         int paramID;
         juce::String expr, name, label;
@@ -295,7 +292,7 @@ public:
         float defaultValue;
     };
 
-    struct Group  : public Base
+    struct Group final : public Base
     {
         juce::String name;
         juce::OwnedArray<Base> paramTree;
@@ -382,8 +379,8 @@ public:
 private:
     VSTXMLInfo (const juce::XmlElement& xml)
     {
-        switchValueType.entries.add (new Entry({ TRANS("Off"), Range ("[0, 0.5[") }));
-        switchValueType.entries.add (new Entry({ TRANS("On"),  Range ("[0.5, 1]") }));
+        switchValueType.entries.add (new Entry ({ TRANS ("Off"), Range ("[0, 0.5[") }));
+        switchValueType.entries.add (new Entry ({ TRANS ("On"),  Range ("[0.5, 1]") }));
 
         for (auto* item : xml.getChildIterator())
         {
@@ -446,7 +443,7 @@ private:
 
             if (entryXml->hasAttribute ("value"))
             {
-                entry->range.set(entryXml->getStringAttribute ("value"));
+                entry->range.set (entryXml->getStringAttribute ("value"));
             }
             else
             {
@@ -585,7 +582,7 @@ private:
 };
 
 //==============================================================================
-struct ModuleHandle    : public ReferenceCountedObject
+struct ModuleHandle final : public ReferenceCountedObject
 {
     File file;
     MainCall moduleMain, customMain = {};
@@ -707,7 +704,7 @@ struct ModuleHandle    : public ReferenceCountedObject
                 if (auto hGlob = LoadResource (dllModule, res))
                 {
                     auto* data = static_cast<const char*> (LockResource (hGlob));
-                    return String::fromUTF8 (data, SizeofResource (dllModule, res));
+                    return String::fromUTF8 (data, (int) SizeofResource (dllModule, res));
                 }
             }
         }
@@ -744,16 +741,16 @@ struct ModuleHandle    : public ReferenceCountedObject
                 {
                     if (CFBundleLoadExecutable (bundleRef.get()))
                     {
-                        moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef.get(), CFSTR("main_macho"));
+                        moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef.get(), CFSTR ("main_macho"));
 
                         if (moduleMain == nullptr)
-                            moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef.get(), CFSTR("VSTPluginMain"));
+                            moduleMain = (MainCall) CFBundleGetFunctionPointerForName (bundleRef.get(), CFSTR ("VSTPluginMain"));
 
                         JUCE_VST_WRAPPER_LOAD_CUSTOM_MAIN
 
                         if (moduleMain != nullptr)
                         {
-                            if (CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleName")))
+                            if (CFTypeRef name = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleName")))
                             {
                                 if (CFGetTypeID (name) == CFStringGetTypeID())
                                 {
@@ -781,7 +778,7 @@ struct ModuleHandle    : public ReferenceCountedObject
                                                     .findChildFiles (File::findFiles, false, "*.vstxml");
 
                             if (! vstXmlFiles.isEmpty())
-                                vstXml = parseXML (vstXmlFiles.getReference(0));
+                                vstXml = parseXML (vstXmlFiles.getReference (0));
                         }
                     }
 
@@ -828,6 +825,34 @@ static const int defaultVSTSampleRateValue = 44100;
 static const int defaultVSTBlockSizeValue = 512;
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+
+class TempChannelPointers
+{
+public:
+    template <typename T>
+    auto getArrayOfModifiableWritePointers (AudioBuffer<T>& buffer)
+    {
+        auto& pointers = getPointers (Tag<T>{});
+
+        jassert (buffer.getNumChannels() <= static_cast<int> (pointers.capacity()));
+        pointers.resize (jmax (pointers.size(), (size_t) buffer.getNumChannels()));
+
+        std::copy (buffer.getArrayOfWritePointers(),
+                   buffer.getArrayOfWritePointers() + buffer.getNumChannels(),
+                   pointers.begin());
+
+        return pointers.data();
+    }
+
+private:
+    template <typename> struct Tag {};
+
+    auto& getPointers (Tag<float>)  { return floatPointers; }
+    auto& getPointers (Tag<double>) { return doublePointers; }
+
+    std::vector<float*>  floatPointers  { 128 };
+    std::vector<double*> doublePointers { 128 };
+};
 
 //==============================================================================
 struct VSTPluginInstance final   : public AudioPluginInstance,
@@ -879,7 +904,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
             {
                 const ScopedLock sl (pluginInstance.lock);
 
-                if (effect->getParameter (effect, getParameterIndex()) != newValue)
+                if (! approximatelyEqual (effect->getParameter (effect, getParameterIndex()), newValue))
                     effect->setParameter (effect, getParameterIndex(), newValue);
             }
         }
@@ -1232,7 +1257,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
 
     void getExtensions (ExtensionsVisitor& visitor) const override
     {
-        struct Extensions : public ExtensionsVisitor::VSTClient
+        struct Extensions final : public ExtensionsVisitor::VSTClient
         {
             explicit Extensions (const VSTPluginInstance* instanceIn) : instance (instanceIn) {}
 
@@ -1971,15 +1996,15 @@ private:
     {
         VST2BypassParameter (VSTPluginInstance& effectToUse)
             : parent (effectToUse),
-              vstOnStrings (TRANS("on"), TRANS("yes"), TRANS("true")),
-              vstOffStrings (TRANS("off"), TRANS("no"), TRANS("false")),
-              values (TRANS("Off"), TRANS("On"))
+              vstOnStrings (TRANS ("on"), TRANS ("yes"), TRANS ("true")),
+              vstOffStrings (TRANS ("off"), TRANS ("no"), TRANS ("false")),
+              values (TRANS ("Off"), TRANS ("On"))
         {
         }
 
         void setValue (float newValue) override
         {
-            currentValue = (newValue != 0.0f);
+            currentValue = (! approximatelyEqual (newValue, 0.0f));
 
             if (parent.vstSupportsBypass)
                 parent.dispatch (Vst2::effSetBypass, 0, currentValue ? 1 : 0, nullptr, 0.0f);
@@ -2003,7 +2028,7 @@ private:
         float getValue() const override                                     { return currentValue; }
         float getDefaultValue() const override                              { return 0.0f; }
         String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
-        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS("On") : TRANS("Off")); }
+        String getText (float value, int) const override                    { return (! approximatelyEqual (value, 0.0f) ? TRANS ("On") : TRANS ("Off")); }
         bool isAutomatable() const override                                 { return true; }
         bool isDiscrete() const override                                    { return true; }
         bool isBoolean() const override                                     { return true; }
@@ -2026,6 +2051,7 @@ private:
     bool lastProcessBlockCallWasBypass = false, vstSupportsBypass = false;
     mutable StringArray programNames;
     AudioBuffer<float> outOfPlaceBuffer;
+    TempChannelPointers tempChannelPointers[2];
 
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
@@ -2095,7 +2121,7 @@ private:
             handleUpdateNowIfNeeded();
 
             for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                if (auto* p = ComponentPeer::getPeer(i))
+                if (auto* p = ComponentPeer::getPeer (i))
                     p->performAnyPendingRepaintsNow();
         }
     }
@@ -2456,16 +2482,16 @@ private:
     {
         if ((vstEffect->flags & Vst2::effFlagsCanReplacing) != 0)
         {
-            vstEffect->processReplacing (vstEffect, buffer.getArrayOfWritePointers(),
-                                                    buffer.getArrayOfWritePointers(), sampleFrames);
+            vstEffect->processReplacing (vstEffect, tempChannelPointers[0].getArrayOfModifiableWritePointers (buffer),
+                                                    tempChannelPointers[1].getArrayOfModifiableWritePointers (buffer), sampleFrames);
         }
         else
         {
             outOfPlaceBuffer.setSize (vstEffect->numOutputs, sampleFrames);
             outOfPlaceBuffer.clear();
 
-            vstEffect->process (vstEffect, buffer.getArrayOfWritePointers(),
-                                           outOfPlaceBuffer.getArrayOfWritePointers(), sampleFrames);
+            vstEffect->process (vstEffect, tempChannelPointers[0].getArrayOfModifiableWritePointers (buffer),
+                                           tempChannelPointers[1].getArrayOfModifiableWritePointers (outOfPlaceBuffer), sampleFrames);
 
             for (int i = vstEffect->numOutputs; --i >= 0;)
                 buffer.copyFrom (i, 0, outOfPlaceBuffer.getReadPointer (i), sampleFrames);
@@ -2474,8 +2500,8 @@ private:
 
     inline void invokeProcessFunction (AudioBuffer<double>& buffer, int32 sampleFrames)
     {
-        vstEffect->processDoubleReplacing (vstEffect, buffer.getArrayOfWritePointers(),
-                                                      buffer.getArrayOfWritePointers(), sampleFrames);
+        vstEffect->processDoubleReplacing (vstEffect, tempChannelPointers[0].getArrayOfModifiableWritePointers (buffer),
+                                                      tempChannelPointers[1].getArrayOfModifiableWritePointers (buffer), sampleFrames);
     }
 
     //==============================================================================
@@ -2714,7 +2740,7 @@ private:
     {
         if (processBlockBypassedCalled)
         {
-            if (bypassParam->getValue() == 0.0f || ! lastProcessBlockCallWasBypass)
+            if (approximatelyEqual (bypassParam->getValue(), 0.0f) || ! lastProcessBlockCallWasBypass)
                 bypassParam->setValue (1.0f);
         }
         else
@@ -2735,11 +2761,11 @@ struct VSTPluginWindow;
 static Array<VSTPluginWindow*> activeVSTWindows;
 
 //==============================================================================
-struct VSTPluginWindow   : public AudioProcessorEditor,
-                          #if ! JUCE_MAC
-                           private ComponentMovementWatcher,
-                          #endif
-                           private Timer
+struct VSTPluginWindow final : public AudioProcessorEditor,
+                              #if ! JUCE_MAC
+                               private ComponentMovementWatcher,
+                              #endif
+                               private Timer
 {
 public:
     VSTPluginWindow (VSTPluginInstance& plug)
@@ -2779,13 +2805,14 @@ public:
 
     ~VSTPluginWindow() override
     {
+        activeVSTWindows.removeFirstMatchingValue (this);
+
         closePluginWindow();
 
        #if JUCE_MAC
         cocoaWrapper.reset();
        #endif
 
-        activeVSTWindows.removeFirstMatchingValue (this);
         plugin.editorBeingDeleted (this);
     }
 
@@ -3002,10 +3029,8 @@ public:
     }
 
     //==============================================================================
-    void mouseDown (const MouseEvent& e) override
+    void mouseDown ([[maybe_unused]] const MouseEvent& e) override
     {
-        ignoreUnused (e);
-
        #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
         toFront (true);
        #endif
@@ -3013,8 +3038,8 @@ public:
 
     void broughtToFront() override
     {
-        activeVSTWindows.removeFirstMatchingValue (this);
-        activeVSTWindows.add (this);
+        if (activeVSTWindows.removeFirstMatchingValue (this) != -1)
+            activeVSTWindows.add (this);
 
        #if JUCE_MAC
         dispatch (Vst2::effEditTop, 0, 0, nullptr, 0);
@@ -3110,10 +3135,10 @@ private:
         pluginWantsKeys = (dispatch (Vst2::effKeysRequired, 0, 0, nullptr, 0) == 0);
 
        #if JUCE_WINDOWS
-        originalWndProc = 0;
+        originalWndProc = nullptr;
         auto* pluginHWND = getPluginHWND();
 
-        if (pluginHWND == 0)
+        if (pluginHWND == nullptr)
         {
             isOpen = false;
             setSize (300, 150);
@@ -3153,7 +3178,7 @@ private:
                 {
                     ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
 
-                    SetWindowPos (pluginHWND, 0,
+                    SetWindowPos (pluginHWND, nullptr,
                                   0, 0, rw, rh,
                                   SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 
@@ -3223,11 +3248,11 @@ private:
             JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4244)
             auto* pluginHWND = getPluginHWND();
 
-            if (originalWndProc != 0 && pluginHWND != 0 && IsWindow (pluginHWND))
+            if (originalWndProc != nullptr && pluginHWND != nullptr && IsWindow (pluginHWND))
                 SetWindowLongPtr (pluginHWND, GWLP_WNDPROC, (LONG_PTR) originalWndProc);
             JUCE_END_IGNORE_WARNINGS_MSVC
 
-            originalWndProc = 0;
+            originalWndProc = nullptr;
            #elif JUCE_LINUX || JUCE_BSD
             pluginWindow = 0;
            #endif
@@ -3262,10 +3287,9 @@ private:
         if (! isWindowSizeCorrectForPlugin (w, h))
         {
             updateSizeFromEditor (w, h);
+            embeddedComponent.updateHWNDBounds();
             sizeCheckCount = 0;
         }
-
-        embeddedComponent.updateHWNDBounds();
     }
 
     void checkPluginWindowSize()
@@ -3349,6 +3373,7 @@ private:
 
                    #if JUCE_WINDOWS
                     r->resizeToFit();
+                    r->embeddedComponent.updateHWNDBounds();
                    #endif
                     r->componentMovedOrResized (true, true);
                 }
@@ -3359,7 +3384,7 @@ private:
     NativeScaleFactorNotifier scaleNotifier { this, ScaleNotifierCallback { *this } };
 
     #if JUCE_WINDOWS
-     struct ViewComponent : public HWNDComponent
+     struct ViewComponent final : public HWNDComponent
      {
          ViewComponent()
          {
@@ -3373,7 +3398,7 @@ private:
          void paint (Graphics& g) override { g.fillAll (Colours::black); }
 
      private:
-         struct Inner : public Component
+         struct Inner final : public Component
          {
              Inner() { setOpaque (true); }
              void paint (Graphics& g) override { g.fillAll (Colours::black); }
@@ -3416,10 +3441,12 @@ AudioProcessorEditor* VSTPluginInstance::createEditor()
    #endif
 }
 
-bool VSTPluginInstance::updateSizeFromEditor (int w, int h)
+bool VSTPluginInstance::updateSizeFromEditor ([[maybe_unused]] int w, [[maybe_unused]] int h)
 {
+   #if ! JUCE_IOS && ! JUCE_ANDROID
     if (auto* editor = dynamic_cast<VSTPluginWindow*> (getActiveEditor()))
         return editor->updateSizeFromEditor (w, h);
+   #endif
 
     return false;
 }

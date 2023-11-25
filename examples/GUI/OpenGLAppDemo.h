@@ -54,7 +54,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class OpenGLAppDemo   : public OpenGLAppComponent
+class OpenGLAppDemo final : public OpenGLAppComponent
 {
 public:
     //==============================================================================
@@ -93,10 +93,10 @@ public:
 
     Matrix3D<float> getViewMatrix() const
     {
-        Matrix3D<float> viewMatrix ({ 0.0f, 0.0f, -10.0f });
-        Matrix3D<float> rotationMatrix = viewMatrix.rotation ({ -0.3f, 5.0f * std::sin ((float) getFrameCounter() * 0.01f), 0.0f });
+        auto viewMatrix = Matrix3D<float>::fromTranslation ({ 0.0f, 0.0f, -10.0f });
+        auto rotationMatrix = viewMatrix.rotation ({ -0.3f, 5.0f * std::sin ((float) getFrameCounter() * 0.01f), 0.0f });
 
-        return rotationMatrix * viewMatrix;
+        return viewMatrix * rotationMatrix;
     }
 
     void render() override
@@ -120,10 +120,10 @@ public:
 
         shader->use();
 
-        if (uniforms->projectionMatrix.get() != nullptr)
+        if (uniforms->projectionMatrix != nullptr)
             uniforms->projectionMatrix->setMatrix4 (getProjectionMatrix().mat, 1, false);
 
-        if (uniforms->viewMatrix.get() != nullptr)
+        if (uniforms->viewMatrix != nullptr)
             uniforms->viewMatrix->setMatrix4 (getViewMatrix().mat, 1, false);
 
         shape->draw (*attributes);
@@ -205,7 +205,7 @@ public:
             attributes.reset();
             uniforms  .reset();
 
-            shader.reset (newShader.release());
+            shader = std::move (newShader);
             shader->use();
 
             shape     .reset (new Shape());
@@ -276,10 +276,10 @@ private:
         {
             using namespace ::juce::gl;
 
-            if (position.get() != nullptr)       glDisableVertexAttribArray (position->attributeID);
-            if (normal.get() != nullptr)         glDisableVertexAttribArray (normal->attributeID);
-            if (sourceColour.get() != nullptr)   glDisableVertexAttribArray (sourceColour->attributeID);
-            if (textureCoordIn.get() != nullptr) glDisableVertexAttribArray (textureCoordIn->attributeID);
+            if (position != nullptr)       glDisableVertexAttribArray (position->attributeID);
+            if (normal != nullptr)         glDisableVertexAttribArray (normal->attributeID);
+            if (sourceColour != nullptr)   glDisableVertexAttribArray (sourceColour->attributeID);
+            if (textureCoordIn != nullptr) glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
         std::unique_ptr<OpenGLShaderProgram::Attribute> position, normal, sourceColour, textureCoordIn;

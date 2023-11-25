@@ -91,7 +91,7 @@ double ARARegionSequence::getCommonSampleRate() const
     const auto range = getPlaybackRegions();
     const auto sampleRate = range.size() > 0 ? getSampleRate (range.front()) : 0.0;
 
-    if (std::any_of (range.begin(), range.end(), [&] (auto& x) { return getSampleRate (x) != sampleRate; }))
+    if (std::any_of (range.begin(), range.end(), [&] (auto& x) { return ! exactlyEqual (getSampleRate (x), sampleRate); }))
         return 0.0;
 
     return sampleRate;
@@ -195,5 +195,99 @@ void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags,
                                                                                                 scopeFlags,
                                                                                                 notifyARAHost);
 }
+
+//==============================================================================
+void ARADocumentListener::willBeginEditing ([[maybe_unused]] ARADocument* document) {}
+void ARADocumentListener::didEndEditing ([[maybe_unused]] ARADocument* document) {}
+void ARADocumentListener::willNotifyModelUpdates ([[maybe_unused]] ARADocument* document) {}
+void ARADocumentListener::didNotifyModelUpdates ([[maybe_unused]] ARADocument* document) {}
+void ARADocumentListener::willUpdateDocumentProperties ([[maybe_unused]] ARADocument* document,
+                                                        [[maybe_unused]] ARA::PlugIn::PropertiesPtr<ARA::ARADocumentProperties> newProperties) {}
+void ARADocumentListener::didUpdateDocumentProperties ([[maybe_unused]] ARADocument* document) {}
+void ARADocumentListener::didAddMusicalContextToDocument ([[maybe_unused]] ARADocument* document,
+                                                          [[maybe_unused]] ARAMusicalContext* musicalContext) {}
+void ARADocumentListener::willRemoveMusicalContextFromDocument ([[maybe_unused]] ARADocument* document,
+                                                                [[maybe_unused]] ARAMusicalContext* musicalContext) {}
+void ARADocumentListener::didReorderMusicalContextsInDocument ([[maybe_unused]] ARADocument* document) {}
+void ARADocumentListener::didAddRegionSequenceToDocument ([[maybe_unused]] ARADocument* document,
+                                                          [[maybe_unused]] ARARegionSequence* regionSequence) {}
+void ARADocumentListener::willRemoveRegionSequenceFromDocument ([[maybe_unused]] ARADocument* document,
+                                                                [[maybe_unused]] ARARegionSequence* regionSequence) {}
+void ARADocumentListener::didReorderRegionSequencesInDocument ([[maybe_unused]] ARADocument* document) {}
+void ARADocumentListener::didAddAudioSourceToDocument ([[maybe_unused]] ARADocument* document,
+                                                       [[maybe_unused]] ARAAudioSource* audioSource) {}
+void ARADocumentListener::willRemoveAudioSourceFromDocument ([[maybe_unused]] ARADocument* document,
+                                                             [[maybe_unused]] ARAAudioSource* audioSource) {}
+void ARADocumentListener::willDestroyDocument ([[maybe_unused]] ARADocument* document) {}
+
+//==============================================================================
+void ARAMusicalContextListener::willUpdateMusicalContextProperties ([[maybe_unused]] ARAMusicalContext* musicalContext,
+                                                                    [[maybe_unused]] ARA::PlugIn::PropertiesPtr<ARA::ARAMusicalContextProperties> newProperties) {}
+void ARAMusicalContextListener::didUpdateMusicalContextProperties ([[maybe_unused]] ARAMusicalContext* musicalContext) {}
+void ARAMusicalContextListener::doUpdateMusicalContextContent ([[maybe_unused]] ARAMusicalContext* musicalContext,
+                                                               [[maybe_unused]] ARAContentUpdateScopes scopeFlags) {}
+void ARAMusicalContextListener::didAddRegionSequenceToMusicalContext ([[maybe_unused]] ARAMusicalContext* musicalContext,
+                                                                      [[maybe_unused]] ARARegionSequence* regionSequence) {}
+void ARAMusicalContextListener::willRemoveRegionSequenceFromMusicalContext ([[maybe_unused]] ARAMusicalContext* musicalContext,
+                                                                            [[maybe_unused]] ARARegionSequence* regionSequence) {}
+void ARAMusicalContextListener::didReorderRegionSequencesInMusicalContext ([[maybe_unused]] ARAMusicalContext* musicalContext) {}
+void ARAMusicalContextListener::willDestroyMusicalContext ([[maybe_unused]] ARAMusicalContext* musicalContext) {}
+
+//==============================================================================
+void ARAPlaybackRegionListener::willUpdatePlaybackRegionProperties ([[maybe_unused]] ARAPlaybackRegion* playbackRegion,
+                                                                    [[maybe_unused]] ARA::PlugIn::PropertiesPtr<ARA::ARAPlaybackRegionProperties> newProperties) {}
+void ARAPlaybackRegionListener::didUpdatePlaybackRegionProperties ([[maybe_unused]] ARAPlaybackRegion* playbackRegion) {}
+void ARAPlaybackRegionListener::didUpdatePlaybackRegionContent ([[maybe_unused]] ARAPlaybackRegion* playbackRegion,
+                                                                [[maybe_unused]] ARAContentUpdateScopes scopeFlags) {}
+void ARAPlaybackRegionListener::willDestroyPlaybackRegion ([[maybe_unused]] ARAPlaybackRegion* playbackRegion) {}
+
+//==============================================================================
+void ARARegionSequenceListener::willUpdateRegionSequenceProperties ([[maybe_unused]] ARARegionSequence* regionSequence,
+                                                                    [[maybe_unused]] ARA::PlugIn::PropertiesPtr<ARA::ARARegionSequenceProperties> newProperties) {}
+void ARARegionSequenceListener::didUpdateRegionSequenceProperties ([[maybe_unused]] ARARegionSequence* regionSequence) {}
+void ARARegionSequenceListener::willRemovePlaybackRegionFromRegionSequence ([[maybe_unused]] ARARegionSequence* regionSequence,
+                                                                            [[maybe_unused]] ARAPlaybackRegion* playbackRegion) {}
+void ARARegionSequenceListener::didAddPlaybackRegionToRegionSequence ([[maybe_unused]] ARARegionSequence* regionSequence,
+                                                                      [[maybe_unused]] ARAPlaybackRegion* playbackRegion) {}
+void ARARegionSequenceListener::willDestroyRegionSequence ([[maybe_unused]] ARARegionSequence* regionSequence) {}
+
+//==============================================================================
+void ARAAudioSourceListener::willUpdateAudioSourceProperties ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                              [[maybe_unused]] ARA::PlugIn::PropertiesPtr<ARA::ARAAudioSourceProperties> newProperties) {}
+void ARAAudioSourceListener::didUpdateAudioSourceProperties ([[maybe_unused]] ARAAudioSource* audioSource) {}
+void ARAAudioSourceListener::doUpdateAudioSourceContent ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                         [[maybe_unused]] ARAContentUpdateScopes scopeFlags) {}
+void ARAAudioSourceListener::didUpdateAudioSourceAnalysisProgress ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                                   [[maybe_unused]] ARA::ARAAnalysisProgressState state,
+                                                                   [[maybe_unused]] float progress) {}
+void ARAAudioSourceListener::willEnableAudioSourceSamplesAccess ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                                 [[maybe_unused]] bool enable) {}
+void ARAAudioSourceListener::didEnableAudioSourceSamplesAccess ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                                [[maybe_unused]] bool enable) {}
+void ARAAudioSourceListener::willDeactivateAudioSourceForUndoHistory ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                                      [[maybe_unused]] bool deactivate) {}
+void ARAAudioSourceListener::didDeactivateAudioSourceForUndoHistory ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                                     [[maybe_unused]] bool deactivate) {}
+void ARAAudioSourceListener::didAddAudioModificationToAudioSource ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                                   [[maybe_unused]] ARAAudioModification* audioModification) {}
+void ARAAudioSourceListener::willRemoveAudioModificationFromAudioSource ([[maybe_unused]] ARAAudioSource* audioSource,
+                                                                         [[maybe_unused]] ARAAudioModification* audioModification) {}
+void ARAAudioSourceListener::willDestroyAudioSource ([[maybe_unused]] ARAAudioSource* audioSource) {}
+
+//==============================================================================
+void ARAAudioModificationListener::willUpdateAudioModificationProperties ([[maybe_unused]] ARAAudioModification* audioModification,
+                                                                          [[maybe_unused]] ARA::PlugIn::PropertiesPtr<ARA::ARAAudioModificationProperties> newProperties) {}
+void ARAAudioModificationListener::didUpdateAudioModificationProperties ([[maybe_unused]] ARAAudioModification* audioModification) {}
+void ARAAudioModificationListener::didUpdateAudioModificationContent ([[maybe_unused]] ARAAudioModification* audioModification,
+                                                                      [[maybe_unused]] ARAContentUpdateScopes scopeFlags) {}
+void ARAAudioModificationListener::willDeactivateAudioModificationForUndoHistory ([[maybe_unused]] ARAAudioModification* audioModification,
+                                                                                  [[maybe_unused]] bool deactivate) {}
+void ARAAudioModificationListener::didDeactivateAudioModificationForUndoHistory ([[maybe_unused]] ARAAudioModification* audioModification,
+                                                                                 [[maybe_unused]] bool deactivate) {}
+void ARAAudioModificationListener::didAddPlaybackRegionToAudioModification ([[maybe_unused]] ARAAudioModification* audioModification,
+                                                                            [[maybe_unused]] ARAPlaybackRegion* playbackRegion) {}
+void ARAAudioModificationListener::willRemovePlaybackRegionFromAudioModification ([[maybe_unused]] ARAAudioModification* audioModification,
+                                                                                  [[maybe_unused]] ARAPlaybackRegion* playbackRegion) {}
+void ARAAudioModificationListener::willDestroyAudioModification ([[maybe_unused]] ARAAudioModification* audioModification) {}
 
 } // namespace juce

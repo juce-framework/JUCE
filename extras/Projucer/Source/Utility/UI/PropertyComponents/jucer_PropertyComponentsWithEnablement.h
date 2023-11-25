@@ -27,8 +27,8 @@
 
 
 //==============================================================================
-class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
-                                               private Value::Listener
+class TextPropertyComponentWithEnablement final : public TextPropertyComponent,
+                                                  private Value::Listener
 {
 public:
     TextPropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -54,8 +54,8 @@ private:
 };
 
 //==============================================================================
-class ChoicePropertyComponentWithEnablement    : public ChoicePropertyComponent,
-                                                 private Value::Listener
+class ChoicePropertyComponentWithEnablement final : public ChoicePropertyComponent,
+                                                    private Value::Listener
 {
 public:
     ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -68,7 +68,7 @@ public:
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
-        valueChanged (value);
+        handleValueChanged();
     }
 
     ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -84,7 +84,7 @@ public:
         isMultiChoice = true;
         idToCheck = multiChoiceID;
 
-        valueChanged (value);
+        handleValueChanged();
     }
 
     ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
@@ -95,7 +95,7 @@ public:
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
-        valueChanged (value);
+        handleValueChanged();
     }
 
     ~ChoicePropertyComponentWithEnablement() override    { value.removeListener (this); }
@@ -120,18 +120,23 @@ private:
         return false;
     }
 
-    void valueChanged (Value&) override
+    void handleValueChanged()
     {
         if (isMultiChoice)
             setEnabled (checkMultiChoiceVar());
         else
             setEnabled (propertyWithDefault.get());
     }
+
+    void valueChanged (Value&) override
+    {
+        handleValueChanged();
+    }
 };
 
 //==============================================================================
-class MultiChoicePropertyComponentWithEnablement    : public MultiChoicePropertyComponent,
-                                                      private Value::Listener
+class MultiChoicePropertyComponentWithEnablement final : public MultiChoicePropertyComponent,
+                                                         private Value::Listener
 {
 public:
     MultiChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,

@@ -49,9 +49,9 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class OpenGLDemo2D  : public Component,
-                      private CodeDocument::Listener,
-                      private Timer
+class OpenGLDemo2D final : public Component,
+                           private CodeDocument::Listener,
+                           private Timer
 {
 public:
     OpenGLDemo2D()

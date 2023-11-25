@@ -49,8 +49,8 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class NetworkingDemo   : public Component,
-                         private Thread
+class NetworkingDemo final : public Component,
+                             private Thread
 {
 public:
     NetworkingDemo()
@@ -104,7 +104,7 @@ public:
         int statusCode = 0;
 
         if (auto stream = url.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
-                                                                                 .withConnectionTimeoutMs(10000)
+                                                                                 .withConnectionTimeoutMs (10000)
                                                                                  .withResponseHeaders (&responseHeaders)
                                                                                  .withStatusCode (&statusCode)))
         {

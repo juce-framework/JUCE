@@ -194,7 +194,11 @@ public:
 
     /** Returns a premultiplied ARGB pixel object that represents this colour.
     */
-    const PixelARGB getPixelARGB() const noexcept;
+    PixelARGB getPixelARGB() const noexcept;
+
+    /** Returns an ARGB pixel object that represents this colour.
+    */
+    PixelARGB getNonPremultipliedPixelARGB() const noexcept;
 
     /** Returns a 32-bit integer that represents this colour.
 
@@ -299,35 +303,35 @@ public:
 
     //==============================================================================
     /** Returns a copy of this colour with a different hue. */
-    JUCE_NODISCARD Colour withHue (float newHue) const noexcept;
+    [[nodiscard]] Colour withHue (float newHue) const noexcept;
 
     /** Returns a copy of this colour with a different saturation. */
-    JUCE_NODISCARD Colour withSaturation (float newSaturation) const noexcept;
+    [[nodiscard]] Colour withSaturation (float newSaturation) const noexcept;
 
     /** Returns a copy of this colour with a different saturation in the HSL colour space. */
-    JUCE_NODISCARD Colour withSaturationHSL (float newSaturation) const noexcept;
+    [[nodiscard]] Colour withSaturationHSL (float newSaturation) const noexcept;
 
     /** Returns a copy of this colour with a different brightness.
         @see brighter, darker, withMultipliedBrightness
     */
-    JUCE_NODISCARD Colour withBrightness (float newBrightness) const noexcept;
+    [[nodiscard]] Colour withBrightness (float newBrightness) const noexcept;
 
     /** Returns a copy of this colour with a different lightness.
         @see lighter, darker, withMultipliedLightness
     */
-    JUCE_NODISCARD Colour withLightness (float newLightness) const noexcept;
+    [[nodiscard]] Colour withLightness (float newLightness) const noexcept;
 
     /** Returns a copy of this colour with its hue rotated.
         The new colour's hue is ((this->getHue() + amountToRotate) % 1.0)
         @see brighter, darker, withMultipliedBrightness
     */
-    JUCE_NODISCARD Colour withRotatedHue (float amountToRotate) const noexcept;
+    [[nodiscard]] Colour withRotatedHue (float amountToRotate) const noexcept;
 
     /** Returns a copy of this colour with its saturation multiplied by the given value.
         The new colour's saturation is (this->getSaturation() * multiplier)
         (the result is clipped to legal limits).
     */
-    JUCE_NODISCARD Colour withMultipliedSaturation (float multiplier) const noexcept;
+    [[nodiscard]] Colour withMultipliedSaturation (float multiplier) const noexcept;
 
     /** Returns a copy of this colour with its saturation multiplied by the given value.
         The new colour's saturation is (this->getSaturation() * multiplier)
@@ -335,19 +339,19 @@ public:
 
         This will be in the HSL colour space.
     */
-    JUCE_NODISCARD Colour withMultipliedSaturationHSL (float multiplier) const noexcept;
+    [[nodiscard]] Colour withMultipliedSaturationHSL (float multiplier) const noexcept;
 
     /** Returns a copy of this colour with its brightness multiplied by the given value.
         The new colour's brightness is (this->getBrightness() * multiplier)
         (the result is clipped to legal limits).
     */
-    JUCE_NODISCARD Colour withMultipliedBrightness (float amount) const noexcept;
+    [[nodiscard]] Colour withMultipliedBrightness (float amount) const noexcept;
 
     /** Returns a copy of this colour with its lightness multiplied by the given value.
         The new colour's lightness is (this->lightness() * multiplier)
         (the result is clipped to legal limits).
     */
-    JUCE_NODISCARD Colour withMultipliedLightness (float amount) const noexcept;
+    [[nodiscard]] Colour withMultipliedLightness (float amount) const noexcept;
 
     //==============================================================================
     /** Returns a brighter version of this colour.
@@ -355,14 +359,14 @@ public:
                                 where 0 is unchanged, and higher values make it brighter
         @see withMultipliedBrightness
     */
-    JUCE_NODISCARD Colour brighter (float amountBrighter = 0.4f) const noexcept;
+    [[nodiscard]] Colour brighter (float amountBrighter = 0.4f) const noexcept;
 
     /** Returns a darker version of this colour.
         @param amountDarker     how much darker to make it - a value greater than or equal to 0,
                                 where 0 is unchanged, and higher values make it darker
         @see withMultipliedBrightness
     */
-    JUCE_NODISCARD Colour darker (float amountDarker = 0.4f) const noexcept;
+    [[nodiscard]] Colour darker (float amountDarker = 0.4f) const noexcept;
 
     //==============================================================================
     /** Returns a colour that will be clearly visible against this colour.
@@ -372,7 +376,7 @@ public:
         that's just a little bit lighter; Colours::black.contrasting (1.0f) will
         return white; Colours::white.contrasting (1.0f) will return black, etc.
     */
-    JUCE_NODISCARD Colour contrasting (float amount = 1.0f) const noexcept;
+    [[nodiscard]] Colour contrasting (float amount = 1.0f) const noexcept;
 
     /** Returns a colour that is as close as possible to a target colour whilst
         still being in contrast to this one.
@@ -381,20 +385,20 @@ public:
         nudged up or down so that it differs from the luminosity of this colour
         by at least the amount specified by minLuminosityDiff.
     */
-    JUCE_NODISCARD Colour contrasting (Colour targetColour, float minLuminosityDiff) const noexcept;
+    [[nodiscard]] Colour contrasting (Colour targetColour, float minLuminosityDiff) const noexcept;
 
     /** Returns a colour that contrasts against two colours.
         Looks for a colour that contrasts with both of the colours passed-in.
         Handy for things like choosing a highlight colour in text editors, etc.
     */
-    JUCE_NODISCARD static Colour contrasting (Colour colour1,
+    [[nodiscard]] static Colour contrasting (Colour colour1,
                                               Colour colour2) noexcept;
 
     //==============================================================================
     /** Returns an opaque shade of grey.
         @param brightness the level of grey to return - 0 is black, 1.0 is white
     */
-    JUCE_NODISCARD static Colour greyLevel (float brightness) noexcept;
+    [[nodiscard]] static Colour greyLevel (float brightness) noexcept;
 
     //==============================================================================
     /** Returns a stringified version of this colour.
@@ -403,7 +407,7 @@ public:
     String toString() const;
 
     /** Reads the colour from a string that was created with toString(). */
-    JUCE_NODISCARD static Colour fromString (StringRef encodedColourString);
+    [[nodiscard]] static Colour fromString (StringRef encodedColourString);
 
     /** Returns the colour as a hex string in the form RRGGBB or AARRGGBB. */
     String toDisplayString (bool includeAlphaValue) const;

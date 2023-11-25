@@ -21,9 +21,9 @@
 #
 # ==============================================================================
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 
-project(JUCE VERSION 7.0.0 LANGUAGES C CXX)
+project(JUCE VERSION 7.0.9 LANGUAGES C CXX)
 
 include(CMakeDependentOption)
 
@@ -117,10 +117,6 @@ endif()
 # ==================================================================================================
 # Install configuration
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.14")
-    set(extra_version_arg ARCH_INDEPENDENT)
-endif()
-
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
     VERSION ${JUCE_VERSION}
@@ -164,6 +160,21 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/copyDir.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp"
+              "${JUCE_CMAKE_UTILS_DIR}/juce_LinuxSubprocessHelper.cpp"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
-install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
+if(("${CMAKE_SOURCE_DIR}" STREQUAL "${JUCE_SOURCE_DIR}") AND (NOT JUCE_BUILD_HELPER_TOOLS))
+    _juce_add_lv2_manifest_helper_target()
+
+    if(TARGET juce_lv2_helper)
+        install(TARGETS juce_lv2_helper EXPORT LV2_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
+        install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
+    endif()
+
+    _juce_add_vst3_manifest_helper_target()
+
+    if(TARGET juce_vst3_helper)
+        install(TARGETS juce_vst3_helper EXPORT VST3_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
+        install(EXPORT VST3_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
+    endif()
+endif()

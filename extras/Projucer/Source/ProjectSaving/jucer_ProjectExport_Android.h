@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class AndroidProjectExporter  : public ProjectExporter
+class AndroidProjectExporter final : public ProjectExporter
 {
 public:
     //==============================================================================
@@ -71,6 +71,12 @@ public:
         createOtherExporterProperties (props);
     }
 
+    void updateDeprecatedSettings() override
+    {
+        updateExternalReadPermission();
+        updateBluetoothPermission();
+    }
+
     static String getDisplayName()        { return "Android"; }
     static String getValueTreeTypeName()  { return "ANDROIDSTUDIO"; }
     static String getTargetFolderName()   { return "Android"; }
@@ -94,10 +100,12 @@ public:
                                  androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
                                  androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
                                  androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
-                                 androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
+                                 androidBluetoothScanNeeded, androidBluetoothAdvertiseNeeded, androidBluetoothConnectNeeded,
+                                 androidReadMediaAudioPermission, androidReadMediaImagesPermission,
+                                 androidReadMediaVideoPermission, androidExternalWritePermission,
                                  androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
                                  androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, gradleClangTidy, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -116,15 +124,19 @@ public:
           androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
-          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "30"),
+          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "33"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
           androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
           androidInternetNeeded                (settings, Ids::androidInternetNeeded,                getUndoManager(), true),
           androidMicNeeded                     (settings, Ids::microphonePermissionNeeded,           getUndoManager(), false),
           androidCameraNeeded                  (settings, Ids::cameraPermissionNeeded,               getUndoManager(), false),
-          androidBluetoothNeeded               (settings, Ids::androidBluetoothNeeded,               getUndoManager(), true),
-          androidExternalReadPermission        (settings, Ids::androidExternalReadNeeded,            getUndoManager(), true),
+          androidBluetoothScanNeeded           (settings, Ids::androidBluetoothScanNeeded,           getUndoManager(), false),
+          androidBluetoothAdvertiseNeeded      (settings, Ids::androidBluetoothAdvertiseNeeded,      getUndoManager(), false),
+          androidBluetoothConnectNeeded        (settings, Ids::androidBluetoothConnectNeeded,        getUndoManager(), false),
+          androidReadMediaAudioPermission      (settings, Ids::androidReadMediaAudioPermission,      getUndoManager(), true),
+          androidReadMediaImagesPermission     (settings, Ids::androidReadMediaImagesPermission,     getUndoManager(), true),
+          androidReadMediaVideoPermission      (settings, Ids::androidReadMediaVideoPermission,      getUndoManager(), true),
           androidExternalWritePermission       (settings, Ids::androidExternalWriteNeeded,           getUndoManager(), true),
           androidInAppBillingPermission        (settings, Ids::androidInAppBilling,                  getUndoManager(), false),
           androidVibratePermission             (settings, Ids::androidVibratePermissionNeeded,       getUndoManager(), false),
@@ -137,9 +149,10 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.0.2"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.5.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.0.0"),
+          gradleClangTidy                      (settings, Ids::gradleClangTidy,                      getUndoManager(), false),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.3.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
@@ -159,6 +172,9 @@ public:
                                                 { "clang", "gcc" },
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
+
+        props.add (new ChoicePropertyComponent (gradleClangTidy, "Use Clang-Tidy"),
+                   "If enabled and the toolchain is clang this will run clang-tidy when compiling.");
     }
 
     //==============================================================================
@@ -260,7 +276,7 @@ public:
 
 protected:
     //==============================================================================
-    class AndroidBuildConfiguration  : public BuildConfiguration
+    class AndroidBuildConfiguration final : public BuildConfiguration
     {
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -342,17 +358,45 @@ protected:
     }
 
 private:
+    void updateExternalReadPermission()
+    {
+        const auto needsExternalRead = getSettingString (Ids::androidExternalReadNeeded);
+        settings.removeProperty (Ids::androidExternalReadNeeded, nullptr);
+
+        if (needsExternalRead.isEmpty())
+            return;
+
+        androidReadMediaAudioPermission .setValue (needsExternalRead, nullptr);
+        androidReadMediaImagesPermission.setValue (needsExternalRead, nullptr);
+        androidReadMediaVideoPermission .setValue (needsExternalRead, nullptr);
+    }
+
+    void updateBluetoothPermission()
+    {
+        const auto needsBluetooth = getSettingString (Ids::androidBluetoothNeeded);
+        settings.removeProperty (Ids::androidBluetoothNeeded, nullptr);
+
+        if (needsBluetooth.isEmpty())
+            return;
+
+        androidBluetoothScanNeeded     .setValue (needsBluetooth, nullptr);
+        androidBluetoothAdvertiseNeeded.setValue (needsBluetooth, nullptr);
+        androidBluetoothConnectNeeded  .setValue (needsBluetooth, nullptr);
+    }
+
     void writeCmakeFile (const File& file) const
     {
         build_tools::writeStreamToFile (file, [&] (MemoryOutputStream& mo)
         {
             mo.setNewLineString (getNewLineString());
 
-            mo << "# Automatically generated makefile, created by the Projucer" << newLine
+            mo << "# Automatically generated CMakeLists, created by the Projucer" << newLine
                << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
+               << newLine
+               << "cmake_minimum_required(VERSION 3.22)" << newLine
+               << newLine
+               << "project(juce_jni_project)" << newLine
                << newLine;
-
-            mo << "cmake_minimum_required(VERSION 3.4.1)" << newLine << newLine;
 
             if (! isLibrary())
                 mo << "set(BINARY_NAME \"juce_jni\")" << newLine << newLine;
@@ -405,13 +449,6 @@ private:
                 mo << ")" << newLine << newLine;
             }
 
-            auto cfgExtraLinkerFlags = getExtraLinkerFlagsString();
-            if (cfgExtraLinkerFlags.isNotEmpty())
-            {
-                mo << "set( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\")" << newLine;
-                mo << "set( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
-            }
-
             mo << "enable_language(ASM)" << newLine << newLine;
 
             const auto userLibraries = getUserLibraries();
@@ -455,6 +492,14 @@ private:
                     if (cfgDefines.size() > 0)
                         mo << "    add_definitions(" << getEscapedPreprocessorDefs (cfgDefines).joinIntoString (" ") << ")" << newLine;
 
+                    const auto cfgExtraLinkerFlags = cfg.getAllLinkerFlagsString();
+
+                    if (cfgExtraLinkerFlags.isNotEmpty())
+                    {
+                        mo << "    set( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\" )"       << newLine
+                           << "    set( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_SHARED_LINKER_FLAGS} ${JUCE_LDFLAGS}\" )" << newLine << newLine;
+                    }
+
                     writeCmakePathLines (mo, "    ", "include_directories( AFTER", cfgHeaderPaths);
 
                     if (userLibraries.size() > 0)
@@ -492,7 +537,7 @@ private:
 
                 if (! first)
                 {
-                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration(0));
+                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration (0));
 
                     if (config)
                     {
@@ -535,26 +580,27 @@ private:
                 mo << newLine;
             }
 
-            auto flags = getProjectCompilerFlags();
-
-            if (flags.size() > 0)
-                mo << "target_compile_options( ${BINARY_NAME} PRIVATE " << flags.joinIntoString (" ") << " )" << newLine << newLine;
-
             for (ConstConfigIterator config (*this); config.next();)
             {
                 auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
-                mo << "if( JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() << "\" )" << newLine;
-                mo << "    target_compile_options( ${BINARY_NAME} PRIVATE";
+                mo << "if( JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() << "\" )" << newLine
+                   << "    target_compile_options( ${BINARY_NAME} PRIVATE";
 
-                auto recommendedFlags = cfg.getRecommendedCompilerWarningFlags();
+                const auto recommendedFlags = cfg.getRecommendedCompilerWarningFlags();
 
                 for (auto& recommendedFlagsType : { recommendedFlags.common, recommendedFlags.cpp })
                     for (auto& flag : recommendedFlagsType)
                         mo << " " << flag;
 
-                mo << ")" << newLine;
-                mo << "endif()" << newLine << newLine;
+                const auto flags = getConfigCompilerFlags (cfg);
+
+                if (! flags.isEmpty())
+                    mo << " " << flags.joinIntoString (" ");
+
+                mo << " )"      << newLine
+                   << "endif()" << newLine
+                   <<              newLine;
             }
 
             auto libraries = getAndroidLibraries();
@@ -566,7 +612,6 @@ private:
                 mo << newLine;
             }
 
-            libraries.addArray (userLibraries);
             mo << "target_link_libraries( ${BINARY_NAME}";
             if (libraries.size() > 0)
             {
@@ -580,6 +625,9 @@ private:
 
             if (useOboe)
                 mo << "    \"oboe\"" << newLine;
+
+            for (auto& lib : userLibraries)
+                mo << "    [[" << lib << "]]" << newLine;
 
             mo << ")" << newLine;
         });
@@ -636,11 +684,34 @@ private:
 
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
+        // CMake 3.22 will fail to build Android projects that set ANDROID_ARM_MODE unless NDK 24+ is used
+        mo << "def ndkVersionString = \"25.2.9519653\"" << newLine << newLine;
+
+        if (gradleClangTidy.get() && gradleToolchain.get().toString() == "clang")
+            mo << "def sdkDir = {" << newLine
+               << "    def androidHome = System.getenv('ANDROID_HOME')" << newLine
+               << "    if (androidHome) {" << newLine
+               << "        return androidHome" << newLine
+               << "    }" << newLine
+               << "    Properties properties = new Properties()" << newLine
+               << "    properties.load(project.rootProject.file(\"local.properties\").newDataInputStream())" << newLine
+               << "    return properties.getProperty('sdk.dir')" << newLine
+               << "}()" << newLine
+               << "def llvmDir = \"${sdkDir}/ndk/${ndkVersionString}/toolchains/llvm\"" << newLine
+               << "def clangTidySearch = fileTree(llvmDir).filter { file -> file.name.matches('^clang-tidy(.exe)?$') }" << newLine
+               << "if (clangTidySearch.size() != 1) {" << newLine
+               << "    throw new GradleException(\"Could not locate a unique clang-tidy in ${llvmDir}\")" << newLine
+               << "}" << newLine
+               << "def clangTidy = clangTidySearch.getSingleFile().getAbsolutePath()" << newLine << newLine;
+
         mo << "android {"                                                                    << newLine;
         mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
+        mo << "    ndkVersion ndkVersionString"                                              << newLine;
+        mo << "    namespace " << project.getBundleIdentifierString().toLowerCase().quoted() << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
         mo << "            path \"CMakeLists.txt\""                                          << newLine;
+        mo << "            version \"3.22.1\""                                               << newLine;
         mo << "        }"                                                                    << newLine;
         mo << "    }"                                                                        << newLine;
 
@@ -677,32 +748,25 @@ private:
 
             if (cfg.getArchitectures().isNotEmpty())
             {
-                mo << "            ndk {" << newLine;
-                mo << "                abiFilters " << toGradleList (StringArray::fromTokens (cfg.getArchitectures(),  " ", "")) << newLine;
-                mo << "            }" << newLine;
+                mo << "            ndk {" << newLine
+                   << "                abiFilters " << toGradleList (StringArray::fromTokens (cfg.getArchitectures(),  " ", "")) << newLine
+                   << "            }" << newLine;
             }
 
-            mo << "            externalNativeBuild {" << newLine;
-            mo << "                cmake {"           << newLine;
+            mo << "            externalNativeBuild {" << newLine
+               << "                cmake {"           << newLine;
 
             if (getProject().getProjectType().isStaticLibrary())
                 mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
 
-            mo << "                    arguments "
-               << "\"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\"";
-
-            mo << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-               << "=-O" << cfg.getGCCOptimisationFlag();
-
-            mo << "\""
-               << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-               << "=-O" << cfg.getGCCOptimisationFlag()
-               << "\"" << newLine;
-
-            mo << "                }"                   << newLine;
-            mo << "            }"                       << newLine << newLine;
-            mo << "            dimension \"default\""   << newLine;
-            mo << "       }"                            << newLine;
+            mo << "                    cFlags    \"-O" << cfg.getGCCOptimisationFlag() << "\""                                      << newLine
+               << "                    cppFlags  \"-O" << cfg.getGCCOptimisationFlag() << "\""                                      << newLine
+               << "                    arguments \"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""   << newLine
+               << "                }"                                                                                               << newLine
+               << "            }"                                                                                                   << newLine
+                                                                                                                                    << newLine
+               << "            dimension \"default\""                                                                               << newLine
+               << "        }"                                                                                                       << newLine;
         }
 
         mo << "    }" << newLine;
@@ -772,7 +836,7 @@ private:
         auto numConfigs = getNumConfigurations();
         for (int i = 0; i < numConfigs; ++i)
         {
-            auto config = getConfiguration(i);
+            auto config = getConfiguration (i);
 
             if (config->isDebug()) numDebugConfigs++;
 
@@ -890,7 +954,7 @@ private:
         return mo.toString();
     }
 
-    void addModuleJavaFolderToSourceSet(StringArray& javaSourceSets, const File& source) const
+    void addModuleJavaFolderToSourceSet (StringArray& javaSourceSets, const File& source) const
     {
         if (source.isDirectory())
         {
@@ -1102,11 +1166,23 @@ private:
         props.add (new ChoicePropertyComponent (androidCameraNeeded, "Camera Required"),
                    "If enabled, this will set the android.permission.CAMERA flag in the manifest.");
 
-        props.add (new ChoicePropertyComponent (androidBluetoothNeeded, "Bluetooth Permissions Required"),
-                   "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
+        props.add (new ChoicePropertyComponent (androidBluetoothScanNeeded, "Bluetooth Scan Required"),
+                   "If enabled, this will set the android.permission.BLUETOOTH_SCAN, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest. This is required for Bluetooth MIDI on Android.");
 
-        props.add (new ChoicePropertyComponent (androidExternalReadPermission, "Read From External Storage"),
-                   "If enabled, this will set the android.permission.READ_EXTERNAL_STORAGE flag in the manifest.");
+        props.add (new ChoicePropertyComponent (androidBluetoothAdvertiseNeeded, "Bluetooth Advertise Required"),
+                   "If enabled, this will set the android.permission.BLUETOOTH_ADVERTISE, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest.");
+
+        props.add (new ChoicePropertyComponent (androidBluetoothConnectNeeded, "Bluetooth Connect Required"),
+                   "If enabled, this will set the android.permission.BLUETOOTH_CONNECT, android.permission.BLUETOOTH and android.permission.BLUETOOTH_ADMIN flags in the manifest. This is required for Bluetooth MIDI on Android.");
+
+        props.add (new ChoicePropertyComponent (androidReadMediaAudioPermission, "Read Audio From External Storage"),
+                   "If enabled, this will set the android.permission.READ_MEDIA_AUDIO and android.permission.READ_EXTERNAL_STORAGE flags in the manifest.");
+
+        props.add (new ChoicePropertyComponent (androidReadMediaImagesPermission, "Read Images From External Storage"),
+                   "If enabled, this will set the android.permission.READ_MEDIA_IMAGES and android.permission.READ_EXTERNAL_STORAGE flags in the manifest.");
+
+        props.add (new ChoicePropertyComponent (androidReadMediaVideoPermission, "Read Video From External Storage"),
+                   "If enabled, this will set the android.permission.READ_MEDIA_VIDEO and android.permission.READ_EXTERNAL_STORAGE flags in the manifest.");
 
         props.add (new ChoicePropertyComponent (androidExternalWritePermission, "Write to External Storage"),
                    "If enabled, this will set the android.permission.WRITE_EXTERNAL_STORAGE flag in the manifest.");
@@ -1376,8 +1452,10 @@ private:
     }
 
     //==============================================================================
-    void addCompileUnits (const Project::Item& projectItem, MemoryOutputStream& mo,
-                          Array<build_tools::RelativePath>& excludeFromBuild, Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
+    void addCompileUnits (const Project::Item& projectItem,
+                          MemoryOutputStream& mo,
+                          Array<build_tools::RelativePath>& excludeFromBuild,
+                          Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         if (projectItem.isGroup())
         {
@@ -1402,7 +1480,7 @@ private:
             }
             else
             {
-                auto extraFlags = compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+                auto extraFlags = getCompilerFlagsForProjectItem (projectItem);
 
                 if (extraFlags.isNotEmpty())
                     extraCompilerFlags.add ({ file, extraFlags });
@@ -1410,11 +1488,12 @@ private:
         }
     }
 
-    void addCompileUnits (MemoryOutputStream& mo, Array<build_tools::RelativePath>& excludeFromBuild,
+    void addCompileUnits (MemoryOutputStream& mo,
+                          Array<build_tools::RelativePath>& excludeFromBuild,
                           Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
-            addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild, extraCompilerFlags);
+            addCompileUnits (getAllGroups().getReference (i), mo, excludeFromBuild, extraCompilerFlags);
     }
 
     //==============================================================================
@@ -1431,6 +1510,9 @@ private:
         cmakeArgs.add ("\"-DANDROID_CPP_FEATURES=exceptions rtti\"");
         cmakeArgs.add ("\"-DANDROID_ARM_MODE=arm\"");
         cmakeArgs.add ("\"-DANDROID_ARM_NEON=TRUE\"");
+
+        if (isClang && gradleClangTidy.get())
+            cmakeArgs.add ("\"-DCMAKE_CXX_CLANG_TIDY=${clangTidy}\"");
 
         auto cppStandard = [this]
         {
@@ -1457,10 +1539,10 @@ private:
         return cFlags;
     }
 
-    StringArray getProjectCompilerFlags() const
+    StringArray getConfigCompilerFlags (const BuildConfiguration& config) const
     {
         auto cFlags = getAndroidCompilerFlags();
-        cFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
+        cFlags.addArray (getEscapedFlags (StringArray::fromTokens (config.getAllCompilerFlagsString(), true)));
         return cFlags;
     }
 
@@ -1621,6 +1703,10 @@ private:
         {
             auto* app = createApplicationElement (*manifest);
 
+            auto* receiver = getOrCreateChildWithName (*app, "receiver");
+            setAttributeIfNotPresent (*receiver, "android:name", "com.rmsl.juce.Receiver");
+            setAttributeIfNotPresent (*receiver, "android:exported", "false");
+
             auto* act = createActivityElement (*app);
             createIntentElement (*act);
 
@@ -1641,7 +1727,6 @@ private:
         setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
         setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());
         setAttributeIfNotPresent (*manifest, "android:versionName",  project.getVersionString());
-        setAttributeIfNotPresent (*manifest, "package", project.getBundleIdentifierString().toLowerCase());
 
         return manifest;
     }
@@ -1680,6 +1765,27 @@ private:
             // This permission only has an effect on SDK version 28 and lower
             if (permission == "android.permission.WRITE_EXTERNAL_STORAGE")
                 usesPermission->setAttribute ("android:maxSdkVersion", "28");
+
+            // https://developer.android.com/training/data-storage/shared/documents-files
+            // If the SDK version is <= 28, READ_EXTERNAL_STORAGE is required to access any
+            // media file, including files created by the current app.
+            // If the SDK version is <= 32, READ_EXTERNAL_STORAGE is required to access other
+            // apps' media files.
+            // This permission has no effect on later Android versions.
+            if (permission == "android.permission.READ_EXTERNAL_STORAGE")
+                usesPermission->setAttribute ("android:maxSdkVersion", "32");
+
+            if (permission == "android.permission.BLUETOOTH_SCAN")
+                usesPermission->setAttribute ("android:usesPermissionFlags", "neverForLocation");
+
+            // These permissions are obsoleted by new more fine-grained permissions in API level 31
+            if (permission == "android.permission.BLUETOOTH"
+                || permission == "android.permission.BLUETOOTH_ADMIN"
+                || permission == "android.permission.ACCESS_FINE_LOCATION"
+                || permission == "android.permission.ACCESS_COARSE_LOCATION")
+            {
+                usesPermission->setAttribute ("android:maxSdkVersion", "30");
+            }
         }
     }
 
@@ -1734,10 +1840,9 @@ private:
         auto* act = getOrCreateChildWithName (application, "activity");
 
         setAttributeIfNotPresent (*act, "android:name", getActivityClassString());
-        setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
 
         if (! act->hasAttribute ("android:configChanges"))
-            act->setAttribute ("android:configChanges", "keyboardHidden|orientation|screenSize");
+            act->setAttribute ("android:configChanges", "keyboard|keyboardHidden|orientation|screenSize|navigation");
 
         if (androidScreenOrientation.get() == "landscape")
         {
@@ -1838,7 +1943,18 @@ private:
         if (androidCameraNeeded.get())
             s.add ("android.permission.CAMERA");
 
-        if (androidBluetoothNeeded.get())
+        if (androidBluetoothScanNeeded.get())
+            s.add ("android.permission.BLUETOOTH_SCAN");
+
+        if (androidBluetoothAdvertiseNeeded.get())
+            s.add ("android.permission.BLUETOOTH_ADVERTISE");
+
+        if (androidBluetoothConnectNeeded.get())
+            s.add ("android.permission.BLUETOOTH_CONNECT");
+
+        if (   androidBluetoothScanNeeded.get()
+            || androidBluetoothAdvertiseNeeded.get()
+            || androidBluetoothConnectNeeded.get())
         {
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
@@ -1846,8 +1962,21 @@ private:
             s.add ("android.permission.ACCESS_COARSE_LOCATION");
         }
 
-        if (androidExternalReadPermission.get())
+        if (androidReadMediaAudioPermission.get())
+            s.add ("android.permission.READ_MEDIA_AUDIO");
+
+        if (androidReadMediaImagesPermission.get())
+            s.add ("android.permission.READ_MEDIA_IMAGES");
+
+        if (androidReadMediaVideoPermission.get())
+            s.add ("android.permission.READ_MEDIA_VIDEO");
+
+        if (   androidReadMediaAudioPermission.get()
+            || androidReadMediaImagesPermission.get()
+            || androidReadMediaVideoPermission.get())
+        {
             s.add ("android.permission.READ_EXTERNAL_STORAGE");
+        }
 
         if (androidExternalWritePermission.get())
             s.add ("android.permission.WRITE_EXTERNAL_STORAGE");

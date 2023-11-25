@@ -31,9 +31,7 @@
 
 
 
-namespace juce
-{
-namespace gl
+namespace juce::gl
 {
 
 
@@ -643,5 +641,4 @@ enum : GLenum
 };
 #endif
 
-}
-}
+} // namespace juce::gl

@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -124,7 +124,7 @@ public:
 		TSize size;
 	};
 
-	IBStream* getStream () { return stream; }			///< Returns the associated stream.
+	IBStream* getStream () const { return stream; }			///< Returns the associated stream.
 
 	const FUID& getClassID () const { return classID; }	///< Returns the associated classID (component ID: Processor part (not the controller!)).
 	void setClassID (const FUID& uid) { classID = uid; }///< Sets the associated classID (component ID: Processor part (not the controller!)).
@@ -223,7 +223,7 @@ protected:
 	FUID classID;		///< classID is the FUID of the component (processor) part
 	enum { kMaxEntries = 128 };
 	Entry entries[kMaxEntries];
-	int32 entryCount;
+	int32 entryCount {0};
 };
 
 //------------------------------------------------------------------------

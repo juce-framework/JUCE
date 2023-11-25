@@ -51,8 +51,8 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class AudioSettingsDemo  : public Component,
-                           public ChangeListener
+class AudioSettingsDemo final : public Component,
+                                public ChangeListener
 {
 public:
     AudioSettingsDemo()

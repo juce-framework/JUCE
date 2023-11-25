@@ -37,8 +37,8 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API  TextEditor  : public Component,
-                              public TextInputTarget,
+class JUCE_API  TextEditor  : public TextInputTarget,
+                              public Component,
                               public SettableTooltipClient
 {
 public:
@@ -423,7 +423,7 @@ public:
     /** Returns the current index of the caret.
         @see setCaretPosition
     */
-    int getCaretPosition() const;
+    int getCaretPosition() const override;
 
     /** Moves the caret to be in front of a given character.
         @see getCaretPosition, moveCaretToEnd
@@ -443,12 +443,11 @@ public:
     */
     void scrollEditorToPositionCaret (int desiredCaretX, int desiredCaretY);
 
-    /** Get the graphical position of the caret.
+    /** Get the graphical position of the caret for a particular index in the text.
 
         The rectangle returned is relative to the component's top-left corner.
-        @see scrollEditorToPositionCaret
     */
-    Rectangle<int> getCaretRectangle() override;
+    Rectangle<int> getCaretRectangleForCharIndex (int index) const override;
 
     /** Selects a section of the text. */
     void setHighlightedRegion (const Range<int>& newSelection) override;
@@ -467,12 +466,22 @@ public:
     */
     int getTextIndexAt (int x, int y) const;
 
+    /** Finds the index of the character at a given position.
+        The coordinates are relative to the component's top-left.
+    */
+    int getTextIndexAt (Point<int>) const;
+
+    /** Like getTextIndexAt, but doesn't snap to the beginning/end of the range for
+        points vertically outside the text.
+    */
+    int getCharIndexForPoint (Point<int> point) const override;
+
     /** Counts the number of characters in the text.
 
         This is quicker than getting the text as a string if you just need to know
         the length.
     */
-    int getTotalNumChars() const;
+    int getTotalNumChars() const override;
 
     /** Returns the total width of the text, as it is currently laid-out.
 
@@ -541,7 +550,7 @@ public:
         The bounds are relative to the component's top-left and may extend beyond the bounds
         of the component if the text is long and word wrapping is disabled.
     */
-    RectangleList<int> getTextBounds (Range<int> textRange);
+    RectangleList<int> getTextBounds (Range<int> textRange) const override;
 
     //==============================================================================
     void moveCaretToEnd();
@@ -733,7 +742,9 @@ public:
     /** @internal */
     void setTemporaryUnderlining (const Array<Range<int>>&) override;
     /** @internal */
-    VirtualKeyboardType getKeyboardType() override    { return keyboardType; }
+    VirtualKeyboardType getKeyboardType() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 protected:
     //==============================================================================
@@ -762,10 +773,26 @@ private:
     struct RemoveAction;
     class EditorAccessibilityHandler;
 
+    class GlobalMouseListener : private MouseListener
+    {
+    public:
+        explicit GlobalMouseListener (Component& e) : editor (e) { Desktop::getInstance().addGlobalMouseListener    (this); }
+        ~GlobalMouseListener() override                          { Desktop::getInstance().removeGlobalMouseListener (this); }
+
+        bool lastMouseDownInEditor() const { return mouseDownInEditor; }
+
+    private:
+        void mouseDown (const MouseEvent& event) override { mouseDownInEditor = event.originalComponent == &editor; }
+
+        Component& editor;
+        bool mouseDownInEditor = false;
+    };
+
     std::unique_ptr<Viewport> viewport;
     TextHolderComponent* textHolder;
     BorderSize<int> borderSize { 1, 1, 1, 3 };
     Justification justification { Justification::topLeft };
+    const GlobalMouseListener globalMouseListener { *this };
 
     bool readOnly = false;
     bool caretVisible = true;
@@ -782,7 +809,6 @@ private:
     bool valueTextNeedsUpdating = false;
     bool consumeEscAndReturnKeys = true;
     bool underlineWhitespace = true;
-    bool mouseDownInEditor = false;
     bool clicksOutsideDismissVirtualKeyboard = false;
 
     UndoManager undoManager;
@@ -814,7 +840,6 @@ private:
     ListenerList<Listener> listeners;
     Array<Range<int>> underlinedSections;
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void moveCaret (int newCaretPos);
     void moveCaretTo (int newPosition, bool isSelecting);
     void recreateCaret();
@@ -826,7 +851,6 @@ private:
     void reinsert (int insertIndex, const OwnedArray<UniformTextSection>&);
     void remove (Range<int>, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, Point<float>&, float& lineHeight) const;
-    Rectangle<float> getCaretRectangleFloat() const;
     void updateCaretPosition();
     void updateValueFromText();
     void textWasChangedByValue();

@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct ModalComponentManager::ModalItem  : public ComponentMovementWatcher
+struct ModalComponentManager::ModalItem final : public ComponentMovementWatcher
 {
     ModalItem (Component* comp, bool shouldAutoDelete)
         : ComponentMovementWatcher (comp),
@@ -269,7 +269,7 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 
     if (auto* currentlyModal = getModalComponent (0))
     {
-        FocusRestorer focusRestorer;
+        detail::FocusRestorer focusRestorer;
         bool finished = false;
 
         attachCallback (currentlyModal, ModalCallbackFunction::create ([&] (int r) { returnValue = r; finished = true; }));

@@ -87,11 +87,11 @@ void DynamicObject::cloneAllProperties()
             *v = v->clone();
 }
 
-DynamicObject::Ptr DynamicObject::clone()
+std::unique_ptr<DynamicObject> DynamicObject::clone() const
 {
-    Ptr d (new DynamicObject (*this));
-    d->cloneAllProperties();
-    return d;
+    auto result = std::make_unique<DynamicObject> (*this);
+    result->cloneAllProperties();
+    return result;
 }
 
 void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const bool allOnOneLine, int maximumDecimalPlaces)

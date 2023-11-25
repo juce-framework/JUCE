@@ -23,21 +23,25 @@
 namespace juce
 {
 
-struct ThreadPool::ThreadPoolThread  : public Thread
+struct ThreadPool::ThreadPoolThread final : public Thread
 {
-    ThreadPoolThread (ThreadPool& p, size_t stackSize)
-       : Thread ("Pool", stackSize), pool (p)
+    ThreadPoolThread (ThreadPool& p, const Options& options)
+       : Thread { options.threadName, options.threadStackSizeBytes },
+         pool { p }
     {
     }
 
     void run() override
     {
         while (! threadShouldExit())
+        {
             if (! pool.runNextJob (*this))
                 wait (500);
+        }
     }
 
     std::atomic<ThreadPoolJob*> currentJob { nullptr };
+
     ThreadPool& pool;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread)
@@ -90,31 +94,31 @@ ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 }
 
 //==============================================================================
-ThreadPool::ThreadPool (int numThreads, size_t threadStackSize)
+ThreadPool::ThreadPool (const Options& options)
 {
-    jassert (numThreads > 0); // not much point having a pool without any threads!
+    // not much point having a pool without any threads!
+    jassert (options.numberOfThreads > 0);
 
-    createThreads (numThreads, threadStackSize);
+    for (int i = jmax (1, options.numberOfThreads); --i >= 0;)
+        threads.add (new ThreadPoolThread (*this, options));
+
+    for (auto* t : threads)
+        t->startThread (options.desiredThreadPriority);
 }
 
-ThreadPool::ThreadPool()
+ThreadPool::ThreadPool (int numberOfThreads,
+                        size_t threadStackSizeBytes,
+                        Thread::Priority desiredThreadPriority)
+    : ThreadPool { Options{}.withNumberOfThreads (numberOfThreads)
+                            .withThreadStackSizeBytes (threadStackSizeBytes)
+                            .withDesiredThreadPriority (desiredThreadPriority) }
 {
-    createThreads (SystemStats::getNumCpus());
 }
 
 ThreadPool::~ThreadPool()
 {
     removeAllJobs (true, 5000);
     stopThreads();
-}
-
-void ThreadPool::createThreads (int numThreads, size_t threadStackSize)
-{
-    for (int i = jmax (1, numThreads); --i >= 0;)
-        threads.add (new ThreadPoolThread (*this, threadStackSize));
-
-    for (auto* t : threads)
-        t->startThread();
 }
 
 void ThreadPool::stopThreads()
@@ -150,7 +154,7 @@ void ThreadPool::addJob (ThreadPoolJob* job, bool deleteJobWhenFinished)
 
 void ThreadPool::addJob (std::function<ThreadPoolJob::JobStatus()> jobToRun)
 {
-    struct LambdaJobWrapper  : public ThreadPoolJob
+    struct LambdaJobWrapper final : public ThreadPoolJob
     {
         LambdaJobWrapper (std::function<ThreadPoolJob::JobStatus()> j) : ThreadPoolJob ("lambda"), job (j) {}
         JobStatus runJob() override      { return job(); }
@@ -163,15 +167,15 @@ void ThreadPool::addJob (std::function<ThreadPoolJob::JobStatus()> jobToRun)
 
 void ThreadPool::addJob (std::function<void()> jobToRun)
 {
-    struct LambdaJobWrapper  : public ThreadPoolJob
+    struct LambdaJobWrapper final : public ThreadPoolJob
     {
-        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (j) {}
+        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (std::move (j)) {}
         JobStatus runJob() override      { job(); return ThreadPoolJob::jobHasFinished; }
 
         std::function<void()> job;
     };
 
-    addJob (new LambdaJobWrapper (jobToRun), true);
+    addJob (new LambdaJobWrapper (std::move (jobToRun)), true);
 }
 
 int ThreadPool::getNumJobs() const noexcept
@@ -273,7 +277,7 @@ bool ThreadPool::removeAllJobs (bool interruptRunningJobs, int timeOutMs,
 
             for (int i = jobs.size(); --i >= 0;)
             {
-                auto* job = jobs.getUnchecked(i);
+                auto* job = jobs.getUnchecked (i);
 
                 if (selectedJobsToRemove == nullptr || selectedJobsToRemove->isJobSuitable (job))
                 {
@@ -328,17 +332,6 @@ StringArray ThreadPool::getNamesOfAllJobs (bool onlyReturnActiveJobs) const
             s.add (job->getJobName());
 
     return s;
-}
-
-bool ThreadPool::setThreadPriorities (int newPriority)
-{
-    bool ok = true;
-
-    for (auto* t : threads)
-        if (! t->setPriority (newPriority))
-            ok = false;
-
-    return ok;
 }
 
 ThreadPoolJob* ThreadPool::pickNextJobToRun()

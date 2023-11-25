@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -247,5 +245,4 @@ private:
     Phase<NumericType> phase;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -75,7 +75,7 @@ static LicenseState::Type getLicenseTypeFromValue (const String& d)
 }
 
 #if ! JUCER_ENABLE_GPL_MODE
-struct LicenseController::ModalCompletionCallback : ModalComponentManager::Callback
+struct LicenseController::ModalCompletionCallback final : ModalComponentManager::Callback
 {
     ModalCompletionCallback (LicenseController& controller) : owner (controller) {}
     void modalStateFinished (int returnValue) override       { owner.modalStateFinished (returnValue); }

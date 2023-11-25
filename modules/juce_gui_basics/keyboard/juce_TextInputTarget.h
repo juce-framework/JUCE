@@ -26,7 +26,6 @@
 namespace juce
 {
 
-//==============================================================================
 /**
     An abstract base class which can be implemented by components that function as
     text editors.
@@ -71,8 +70,32 @@ public:
     /** Inserts some text, overwriting the selected text region, if there is one. */
     virtual void insertTextAtCaret (const String& textToInsert) = 0;
 
+    /** Returns the current index of the caret. */
+    virtual int getCaretPosition() const = 0;
+
     /** Returns the position of the caret, relative to the component's origin. */
-    virtual Rectangle<int> getCaretRectangle() = 0;
+    Rectangle<int> getCaretRectangle() const        { return getCaretRectangleForCharIndex (getCaretPosition()); }
+
+    /** Returns the bounding box of the character at the given index. */
+    virtual Rectangle<int> getCaretRectangleForCharIndex (int characterIndex) const = 0;
+
+    /** Returns the total number of codepoints in the string. */
+    virtual int getTotalNumChars() const = 0;
+
+    /** Returns the index closest to the given point.
+
+        This is the location where the cursor might be placed after clicking at the given
+        point in a text field.
+    */
+    virtual int getCharIndexForPoint (Point<int> point) const = 0;
+
+    /** Returns the bounding box for a range of text in the editor. As the range may span
+        multiple lines, this method returns a RectangleList.
+
+        The bounds are relative to the component's top-left and may extend beyond the bounds
+        of the component if the text is long and word wrapping is disabled.
+    */
+    virtual RectangleList<int> getTextBounds (Range<int> textRange) const = 0;
 
     /** A set of possible on-screen keyboard types, for use in the
         getKeyboardType() method.
@@ -84,7 +107,8 @@ public:
         decimalKeyboard,
         urlKeyboard,
         emailAddressKeyboard,
-        phoneNumberKeyboard
+        phoneNumberKeyboard,
+        passwordKeyboard
     };
 
     /** Returns the target's preference for the type of keyboard that would be most appropriate.

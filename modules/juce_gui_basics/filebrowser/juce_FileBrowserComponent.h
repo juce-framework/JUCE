@@ -252,6 +252,8 @@ public:
     FilePreviewComponent* getPreviewComponent() const noexcept;
     /** @internal */
     DirectoryContentsDisplayComponent* getDisplayComponent() const noexcept;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 protected:
     /** Returns a list of names and paths for the default places the user might want to look.
@@ -283,7 +285,6 @@ private:
     TimeSliceThread thread;
     bool wasProcessActive;
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void timerCallback() override;
     void sendListenerChangeMessage();
     bool isFileOrDirSuitable (const File&) const;

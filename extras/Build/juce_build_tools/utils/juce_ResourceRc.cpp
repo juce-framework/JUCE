@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     static String getCommaSeparatedVersionNumber (const String& version)
     {
         auto versionParts = StringArray::fromTokens (version, ",.", "");
@@ -93,5 +92,5 @@ namespace build_tools
 
         overwriteFileIfDifferentOrThrow (resourceRcFile, mo);
     }
-}
-}
+
+} // namespace juce::build_tools

@@ -120,7 +120,7 @@ public:
     int getDefaultHeight() const noexcept                     { return defaultHeight; }
 
     static int64 getComponentId (Component* comp);
-    static void setComponentId (Component* comp, const int64 newID);
+    static void setComponentId (Component* comp, int64 newID);
 
     static RelativePositionedRectangle getComponentPosition (Component* comp);
     static void setComponentPosition (Component* comp,

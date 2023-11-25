@@ -58,7 +58,7 @@ LookAndFeel::~LookAndFeel()
          - there's a WeakReference to it somewhere else in your code
 
        Generally the fix for this will be to make sure you call
-       Component::setLookandFeel (nullptr) on any components that were still using
+       Component::setLookAndFeel (nullptr) on any components that were still using
        it before you delete it, or call LookAndFeel::setDefaultLookAndFeel (nullptr)
        if you had set it up to be the default one. This assertion can also be avoided by
        declaring your LookAndFeel object before any of the Components that use it as

@@ -96,7 +96,10 @@ public:
     void clear();
 
     /** Returns the NamedValueSet that holds the object's properties. */
-    NamedValueSet& getProperties() noexcept     { return properties; }
+    NamedValueSet& getProperties() noexcept                 { return properties; }
+
+    /** Returns the NamedValueSet that holds the object's properties. */
+    const NamedValueSet& getProperties() const noexcept     { return properties; }
 
     /** Calls var::clone() on all the properties that this object contains. */
     void cloneAllProperties();
@@ -107,7 +110,7 @@ public:
         with a (deep) copy of all of its properties. Subclasses can override this to
         implement their own custom copy routines.
     */
-    virtual Ptr clone();
+    virtual std::unique_ptr<DynamicObject> clone() const;
 
     //==============================================================================
     /** Writes this object to a text stream in JSON format.

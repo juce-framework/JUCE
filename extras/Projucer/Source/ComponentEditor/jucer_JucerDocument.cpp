@@ -245,7 +245,7 @@ void JucerDocument::setSnappingGrid (const int numPixels, const bool active, con
 
 void JucerDocument::setComponentOverlayOpacity (const float alpha)
 {
-    if (alpha != componentOverlayOpacity)
+    if (! approximatelyEqual (alpha, componentOverlayOpacity))
     {
         componentOverlayOpacity = alpha;
         changed();
@@ -573,7 +573,7 @@ bool JucerDocument::reloadFromDocument()
     if (currentXML != nullptr && currentXML->isEquivalentTo (newXML.get(), true))
         return true;
 
-    currentXML.reset (newXML.release());
+    currentXML = std::move (newXML);
     stopTimer();
 
     resources.loadFromCpp (getCppFile(), cppContent);

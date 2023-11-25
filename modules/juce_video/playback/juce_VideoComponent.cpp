@@ -29,11 +29,11 @@ namespace juce
 #if ! (JUCE_LINUX || JUCE_BSD)
 
 #if JUCE_MAC || JUCE_IOS
- #include "../native/juce_mac_Video.h"
+ #include "../native/juce_Video_mac.h"
 #elif JUCE_WINDOWS
- #include "../native/juce_win32_Video.h"
+ #include "../native/juce_Video_windows.h"
 #elif JUCE_ANDROID
- #include "../native/juce_android_Video.h"
+ #include "../native/juce_Video_android.h"
 #endif
 
 //==============================================================================
@@ -145,7 +145,6 @@ Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool loadAsync)
 {
    #if JUCE_ANDROID || JUCE_IOS
     ignoreUnused (fileOrUrl, loadAsync);
-
     // You need to use loadAsync on Android & iOS.
     jassertfalse;
     return Result::fail ("load() is not supported on this platform. Use loadAsync() instead.");
@@ -155,7 +154,7 @@ Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool loadAsync)
     if (loadAsync)
         startTimer (50);
     else
-       resized();
+        resized();
 
     return result;
    #endif

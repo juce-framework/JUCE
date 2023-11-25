@@ -29,12 +29,12 @@
     particular client covers, and updates itself when messages arrive from the master
     containing new canvas states.
 */
-class ClientCanvasComponent  : public Component,
-                               private OSCSender,
-                               private OSCReceiver,
-                               private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>,
-                               private AsyncUpdater,
-                               private Timer
+class ClientCanvasComponent final : public Component,
+                                    private OSCSender,
+                                    private OSCReceiver,
+                                    private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>,
+                                    private AsyncUpdater,
+                                    private Timer
 {
 public:
     ClientCanvasComponent (PropertiesFile& p, int windowIndex)  : properties (p)
@@ -61,7 +61,7 @@ public:
 
         OSCReceiver::addListener (this);
 
-        timerCallback();
+        handleTimerCallback();
         startTimer (2000);
     }
 
@@ -96,7 +96,7 @@ private:
             canvasStateOSCMessageReceived (message);
     }
 
-    struct NewStateMessage  : public Message
+    struct NewStateMessage final : public Message
     {
         NewStateMessage (const MemoryBlock& d) : data (d) {}
         MemoryBlock data;
@@ -200,10 +200,16 @@ private:
         return {};
     }
 
-    void timerCallback() override
+    void handleTimerCallback()
     {
         send (newClientOSCAddress, clientName + ":" + IPAddress::getLocalAddress().toString()
                                               + ":" + getScreenAreaInGlobalSpace().toString());
+    }
+
+
+    void timerCallback() override
+    {
+        handleTimerCallback();
     }
 
     void handleAsyncUpdate() override

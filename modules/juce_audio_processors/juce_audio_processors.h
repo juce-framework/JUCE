@@ -35,12 +35,12 @@
 
   ID:                 juce_audio_processors
   vendor:             juce
-  version:            7.0.0
+  version:            7.0.9
   name:               JUCE audio processor classes
   description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_gui_extra, juce_audio_basics
   OSXFrameworks:      CoreAudio CoreMIDI AudioToolbox
@@ -130,7 +130,8 @@
 #endif
 
 //==============================================================================
-#include "utilities/juce_VSTCallbackHandler.h"
+#include "utilities/juce_AAXClientExtensions.h"
+#include "utilities/juce_VST2ClientExtensions.h"
 #include "utilities/juce_VST3ClientExtensions.h"
 #include "utilities/juce_NativeScaleFactorNotifier.h"
 #include "format_types/juce_ARACommon.h"
@@ -167,6 +168,7 @@
 #include "utilities/juce_ParameterAttachments.h"
 #include "utilities/juce_AudioProcessorValueTreeState.h"
 #include "utilities/juce_PluginHostType.h"
+#include "utilities/ARA/juce_ARADebug.h"
 #include "utilities/ARA/juce_ARA_utils.h"
 
 //==============================================================================

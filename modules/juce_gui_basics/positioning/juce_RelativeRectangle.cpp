@@ -64,7 +64,7 @@ namespace RelativeRectangleHelpers
         else
         {
             for (int i = e.getNumInputs(); --i >= 0;)
-                if (dependsOnSymbolsOtherThanThis (e.getInput(i)))
+                if (dependsOnSymbolsOtherThanThis (e.getInput (i)))
                     return true;
         }
 
@@ -116,7 +116,7 @@ bool RelativeRectangle::operator!= (const RelativeRectangle& other) const noexce
 
 //==============================================================================
 // An expression context that can evaluate expressions using "this"
-class RelativeRectangleLocalScope  : public Expression::Scope
+class RelativeRectangleLocalScope final : public Expression::Scope
 {
 public:
     RelativeRectangleLocalScope (const RelativeRectangle& rect_)  : rect (rect_) {}
@@ -197,7 +197,7 @@ void RelativeRectangle::renameSymbol (const Expression::Symbol& oldSymbol, const
 }
 
 //==============================================================================
-class RelativeRectangleComponentPositioner  : public RelativeCoordinatePositionerBase
+class RelativeRectangleComponentPositioner final : public RelativeCoordinatePositionerBase
 {
 public:
     RelativeRectangleComponentPositioner (Component& comp, const RelativeRectangle& r)

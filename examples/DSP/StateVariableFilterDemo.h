@@ -74,7 +74,7 @@ struct StateVariableFilterDemoDSP
 
     void updateParameters()
     {
-        if (sampleRate != 0.0)
+        if (! approximatelyEqual (sampleRate, 0.0))
         {
             filter.setCutoffFrequency (static_cast<float> (cutoffParam.getCurrentValue()));
             filter.setResonance       (static_cast<float> (qParam.getCurrentValue()));
@@ -100,7 +100,7 @@ struct StateVariableFilterDemoDSP
     double sampleRate = 0.0;
 };
 
-struct StateVariableFilterDemo    : public Component
+struct StateVariableFilterDemo final : public Component
 {
     StateVariableFilterDemo()
     {

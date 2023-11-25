@@ -23,12 +23,12 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_LV2
+#if JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))
 
 #include "juce_LV2Common.h"
 #include "juce_LV2Resources.h"
 
-#include <juce_gui_extra/native/juce_mac_NSViewFrameWatcher.h>
+#include <juce_gui_extra/native/juce_NSViewFrameWatcher_mac.h>
 
 #include <thread>
 
@@ -739,10 +739,11 @@ public:
     LV2_Log_Log* getLogFeature() { return &logFeature; }
 
 private:
-    int vprintfCallback (LV2_URID type, const char* fmt, va_list ap) const
+    int vprintfCallback ([[maybe_unused]] LV2_URID type, const char* fmt, va_list ap) const
     {
         // If this is hit, the plugin has encountered some kind of error
-        jassertquiet (type != urids->mLV2_LOG__Error && type != urids->mLV2_LOG__Warning);
+        ignoreUnused (urids);
+        jassert (type != urids->mLV2_LOG__Error && type != urids->mLV2_LOG__Warning);
         return std::vfprintf (stderr, fmt, ap);
     }
 
@@ -944,9 +945,10 @@ struct WorkSubmitter
     CriticalSection* workMutex;
 };
 
-template <typename Trivial, std::enable_if_t<std::is_trivial<Trivial>::value, int> = 0>
+template <typename Trivial>
 static auto toChars (Trivial value)
 {
+    static_assert (std::is_trivial_v<Trivial>);
     std::array<char, sizeof (Trivial)> result;
     writeUnaligned (result.data(), value);
     return result;
@@ -956,7 +958,7 @@ template <typename Context>
 class WorkQueue
 {
 public:
-    static_assert (std::is_trivial<Context>::value, "Context must be copyable as bytes");
+    static_assert (std::is_trivial_v<Context>, "Context must be copyable as bytes");
 
     explicit WorkQueue (int size)
         : fifo (size), data (static_cast<size_t> (size)) {}
@@ -1085,7 +1087,7 @@ private:
     returns garbage, so make sure to check that the plugin `hasExtensionData` before
     constructing one of these!
 */
-class SharedThreadedWorker : public WorkerResponseListener
+class SharedThreadedWorker final : public WorkerResponseListener
 {
 public:
     ~SharedThreadedWorker() noexcept override
@@ -1277,10 +1279,8 @@ private:
                                                   LV2_Options_Option* options,
                                                   LV2_Worker_Schedule* schedule,
                                                   LV2_Resize_Port_Resize* resize,
-                                                  LV2_Log_Log* log)
+                                                  [[maybe_unused]] LV2_Log_Log* log)
     {
-        ignoreUnused (log);
-
         return { LV2_Feature { LV2_STATE__loadDefaultState,         nullptr },
                  LV2_Feature { LV2_BUF_SIZE__boundedBlockLength,    nullptr },
                  LV2_Feature { LV2_URID__map,                       map },
@@ -1383,7 +1383,7 @@ struct MessageBufferInterface
 };
 
 template <typename Header, typename LockTraits>
-class Messages : public MessageBufferInterface<Header>
+class Messages final : public MessageBufferInterface<Header>
 {
     using Read  = typename LockTraits::Read;
     using Write = typename LockTraits::Write;
@@ -1438,7 +1438,7 @@ private:
 };
 
 //==============================================================================
-class LambdaTimer : private Timer
+class LambdaTimer final : private Timer
 {
 public:
     explicit LambdaTimer (std::function<void()> c) : callback (c) {}
@@ -1466,7 +1466,7 @@ struct UiMessageHeader
     MessageHeader header;
 };
 
-class ProcessorToUi : public MessageBufferInterface<UiMessageHeader>
+class ProcessorToUi final : public MessageBufferInterface<UiMessageHeader>
 {
 public:
     ProcessorToUi() { timer.startTimerHz (60); }
@@ -1840,7 +1840,12 @@ class World
 public:
     World() : world (lilv_world_new()) {}
 
-    void loadAll() { lilv_world_load_all (world.get()); }
+    void loadAllFromPaths (const NodeString& paths)
+    {
+        lilv_world_set_option (world.get(), LILV_OPTION_LV2_PATH, paths.get());
+        lilv_world_load_all (world.get());
+    }
+
     void loadBundle   (const NodeUri& uri)      { lilv_world_load_bundle   (world.get(), uri.get()); }
     void unloadBundle (const NodeUri& uri)      { lilv_world_unload_bundle (world.get(), uri.get()); }
 
@@ -1983,8 +1988,8 @@ private:
     std::vector<AtomPort> atomPorts;
 };
 
-class InstanceWithSupports : private FeaturesDataListener,
-                             private HandleHolder
+class InstanceWithSupports final : private FeaturesDataListener,
+                                   private HandleHolder
 {
 public:
     InstanceWithSupports (World& world,
@@ -2114,9 +2119,9 @@ public:
 
 private:
     template <typename Value>
-    static float getValueFrom (const void* data, uint32_t size)
+    static float getValueFrom (const void* data, [[maybe_unused]] uint32_t size)
     {
-        jassertquiet (size == sizeof (Value));
+        jassert (size == sizeof (Value));
         return (float) readUnaligned<Value> (data);
     }
 
@@ -2418,7 +2423,7 @@ private:
     JUCE_LEAK_DETECTOR (ParameterValuesAndFlags)
 };
 
-class LV2Parameter  : public AudioPluginInstance::HostedParameter
+class LV2Parameter : public AudioPluginInstance::HostedParameter
 {
 public:
     LV2Parameter (const String& nameIn,
@@ -2507,7 +2512,7 @@ public:
             // In this case, we find the closest label by searching the midpoints of the scale
             // point values.
             const auto index = std::distance (midPoints.begin(),
-                                              std::lower_bound (midPoints.begin(), midPoints.end(), normalisedValue));
+                                              std::lower_bound (midPoints.begin(), midPoints.end(), denormalised));
             jassert (isPositiveAndBelow (index, info.scalePoints.size()));
             return info.scalePoints[(size_t) index].label;
         }
@@ -2549,6 +2554,7 @@ private:
             return {};
 
         std::vector<float> result;
+        result.reserve (set.size() - 1);
 
         for (auto it = std::next (set.begin()); it != set.end(); ++it)
             result.push_back ((std::prev (it)->value + it->value) * 0.5f);
@@ -2574,15 +2580,8 @@ public:
     File bundlePath;
     URL pluginUri;
 
-    auto withBundlePath (File v) const noexcept { return with (&UiInstanceArgs::bundlePath, std::move (v)); }
-    auto withPluginUri  (URL v)  const noexcept { return with (&UiInstanceArgs::pluginUri,  std::move (v)); }
-
-private:
-    template <typename Member>
-    UiInstanceArgs with (Member UiInstanceArgs::* member, Member value) const noexcept
-    {
-        return juce::lv2_host::with (*this, member, std::move (value));
-    }
+    auto withBundlePath (File v) const noexcept { return withMember (*this, &UiInstanceArgs::bundlePath, std::move (v)); }
+    auto withPluginUri  (URL v)  const noexcept { return withMember (*this, &UiInstanceArgs::pluginUri,  std::move (v)); }
 };
 
 static File bundlePathFromUri (const char* uri)
@@ -2609,7 +2608,7 @@ public:
           mLV2_UI__floatProtocol   (map.map (LV2_UI__floatProtocol)),
           mLV2_ATOM__atomTransfer  (map.map (LV2_ATOM__atomTransfer)),
           mLV2_ATOM__eventTransfer (map.map (LV2_ATOM__eventTransfer)),
-          instance (makeInstance (args.pluginUri, args.bundlePath, features)),
+          instance (makeInstance (args, features)),
           idleCallback (getExtensionData<LV2UI_Idle_Interface> (world, LV2_UI__idleInterface))
     {
         jassert (descriptor != nullptr);
@@ -2677,14 +2676,14 @@ private:
     using Instance = std::unique_ptr<void, void (*) (LV2UI_Handle)>;
     using Idle = int (*) (LV2UI_Handle);
 
-    Instance makeInstance (const URL& pluginUri, const File& bundlePath, const LV2_Feature* const* features)
+    Instance makeInstance (const UiInstanceArgs& args, const LV2_Feature* const* features)
     {
         if (descriptor->get() == nullptr)
             return { nullptr, [] (LV2UI_Handle) {} };
 
         return Instance { descriptor->get()->instantiate (descriptor->get(),
-                                                          pluginUri.toString (false).toRawUTF8(),
-                                                          File::addTrailingSeparator (bundlePath.getFullPathName()).toRawUTF8(),
+                                                          args.pluginUri.toString (true).toRawUTF8(),
+                                                          File::addTrailingSeparator (args.bundlePath.getFullPathName()).toRawUTF8(),
                                                           writeFunction,
                                                           this,
                                                           &widget,
@@ -2741,7 +2740,7 @@ struct TouchListener
     virtual void controlGrabbed (uint32_t port, bool grabbed) = 0;
 };
 
-class AsyncFn : public AsyncUpdater
+class AsyncFn final : public AsyncUpdater
 {
 public:
     explicit AsyncFn (std::function<void()> callbackIn)
@@ -2866,11 +2865,10 @@ private:
 
         ports.forEachPort ([&] (const PortHeader& header)
         {
-            const auto emplaced = result.emplace (header.symbol, header.index);
+            [[maybe_unused]] const auto emplaced = result.emplace (header.symbol, header.index);
 
             // This will complain if there are duplicate port symbols.
             jassert (emplaced.second);
-            ignoreUnused (emplaced);
         });
 
         return result;
@@ -2978,7 +2976,7 @@ static bool noneOf (Range&& range, Predicate&& pred)
     return std::none_of (begin (range), end (range), std::forward<Predicate> (pred));
 }
 
-class PeerChangedListener : private ComponentMovementWatcher
+class PeerChangedListener final : private ComponentMovementWatcher
 {
 public:
     PeerChangedListener (Component& c, std::function<void()> peerChangedIn)
@@ -2997,7 +2995,7 @@ private:
     std::function<void()> peerChanged;
 };
 
-struct ViewSizeListener : private ComponentMovementWatcher
+struct ViewSizeListener final : private ComponentMovementWatcher
 {
     ViewSizeListener (Component& c, PhysicalResizeListener& l)
         : ComponentMovementWatcher (&c), listener (l)
@@ -3027,8 +3025,8 @@ struct ViewSizeListener : private ComponentMovementWatcher
     PhysicalResizeListener& listener;
 };
 
-class ConfiguredEditorComponent : public Component,
-                                  private PhysicalResizeListener
+class ConfiguredEditorComponent final : public Component,
+                                        private PhysicalResizeListener
 {
 public:
     ConfiguredEditorComponent (World& world,
@@ -3184,7 +3182,7 @@ private:
    #if JUCE_LINUX || JUCE_BSD
     struct InnerHolder
     {
-        struct Inner : public XEmbedComponent
+        struct Inner final : public XEmbedComponent
         {
             Inner() : XEmbedComponent (true, true)
             {
@@ -3196,8 +3194,8 @@ private:
         Inner inner;
     };
 
-    struct ViewComponent : public InnerHolder,
-                           public XEmbedComponent
+    struct ViewComponent final : public InnerHolder,
+                                 public XEmbedComponent
     {
         explicit ViewComponent (PhysicalResizeListener& l)
             : XEmbedComponent ((unsigned long) inner.getPeer()->getNativeHandle(), true, false),
@@ -3223,7 +3221,7 @@ private:
         ViewSizeListener listener;
     };
    #elif JUCE_MAC
-    struct ViewComponent : public NSViewComponentWithParent
+    struct ViewComponent final : public NSViewComponentWithParent
     {
         explicit ViewComponent (PhysicalResizeListener&)
             : NSViewComponentWithParent (WantsNudge::no) {}
@@ -3233,7 +3231,7 @@ private:
         void prepareForDestruction() {}
     };
    #elif JUCE_WINDOWS
-    struct ViewComponent : public HWNDComponent
+    struct ViewComponent final : public HWNDComponent
     {
         explicit ViewComponent (PhysicalResizeListener&)
         {
@@ -3254,7 +3252,7 @@ private:
         void prepareForDestruction() {}
 
     private:
-        struct Inner : public Component
+        struct Inner final : public Component
         {
             Inner() { setOpaque (true); }
             void paint (Graphics& g) override { g.fillAll (Colours::black); }
@@ -3263,7 +3261,7 @@ private:
         Inner inner;
     };
    #else
-    struct ViewComponent : public Component
+    struct ViewComponent final : public Component
     {
         explicit ViewComponent (PhysicalResizeListener&) {}
         void* getWidget() { return nullptr; }
@@ -3283,7 +3281,7 @@ private:
             {
                 if (auto* r = ref.getComponent())
                 {
-                    if (std::exchange (r->nativeScaleFactor, platformScale) == platformScale)
+                    if (approximatelyEqual (std::exchange (r->nativeScaleFactor, platformScale), platformScale))
                         return;
 
                     r->nativeScaleFactor = platformScale;
@@ -3341,9 +3339,9 @@ struct InstanceProvider
     virtual InstanceWithSupports* getInstanceWithSupports() const = 0;
 };
 
-class Editor  : public AudioProcessorEditor,
-                public UiEventListener,
-                private LogicalResizeListener
+class Editor final : public AudioProcessorEditor,
+                     public UiEventListener,
+                     private LogicalResizeListener
 {
 public:
     Editor (World& worldIn,
@@ -3656,8 +3654,8 @@ private:
 
     union Data
     {
-        static_assert (std::is_trivial<PortBacking>::value,  "PortBacking must be trivial");
-        static_assert (std::is_trivial<PatchBacking>::value, "PatchBacking must be trivial");
+        static_assert (std::is_trivial_v<PortBacking>,  "PortBacking must be trivial");
+        static_assert (std::is_trivial_v<PatchBacking>, "PatchBacking must be trivial");
 
         explicit Data (PortBacking p)  : port  (p) {}
         explicit Data (PatchBacking p) : patch (p) {}
@@ -3787,7 +3785,7 @@ private:
     JUCE_LEAK_DETECTOR (IntermediateParameterTree)
 };
 
-struct BypassParameter : public LV2Parameter
+struct BypassParameter final : public LV2Parameter
 {
     BypassParameter (const ParameterInfo& parameterInfo, ParameterValuesAndFlags& cacheIn)
         : LV2Parameter ("Bypass", parameterInfo, cacheIn) {}
@@ -4338,11 +4336,11 @@ public:
     void createView() {}
     void destroyView() {}
 
-    std::unique_ptr<AudioProcessorEditor> createEditor(World&,
-                                                       AudioPluginInstance&,
-                                                       InstanceProvider&,
-                                                       TouchListener&,
-                                                       EditorListener&)
+    std::unique_ptr<AudioProcessorEditor> createEditor (World&,
+                                                        AudioPluginInstance&,
+                                                        InstanceProvider&,
+                                                        TouchListener&,
+                                                        EditorListener&)
     {
         return nullptr;
     }
@@ -4352,10 +4350,10 @@ public:
 };
 
 //==============================================================================
-class LV2AudioPluginInstance  : public AudioPluginInstance,
-                                private TouchListener,
-                                private EditorListener,
-                                private InstanceProvider
+class LV2AudioPluginInstance final : public AudioPluginInstance,
+                                     private TouchListener,
+                                     private EditorListener,
+                                     private InstanceProvider
 {
 public:
     LV2AudioPluginInstance (std::shared_ptr<World> worldIn,
@@ -4877,10 +4875,8 @@ private:
                                                              : freeWheelingPort->info.min;
     }
 
-    void pushMessage (MessageHeader header, uint32_t size, const void* data)
+    void pushMessage (MessageHeader header, [[maybe_unused]] uint32_t size, const void* data)
     {
-        ignoreUnused (size);
-
         if (header.protocol == 0 || header.protocol == instance->urids.mLV2_UI__floatProtocol)
         {
             const auto value = readUnaligned<float> (data);
@@ -5179,7 +5175,7 @@ private:
     JUCE_LEAK_DETECTOR (LV2AudioPluginInstance)
 };
 
-} // namespace lv2
+} // namespace lv2_host
 
 //==============================================================================
 class LV2PluginFormat::Pimpl
@@ -5187,7 +5183,7 @@ class LV2PluginFormat::Pimpl
 public:
     Pimpl()
     {
-        world->loadAll();
+        loadAllPluginsFromPaths (getDefaultLocationsToSearch());
 
         const auto tempFile = lv2ResourceFolder.getFile();
 
@@ -5250,9 +5246,9 @@ public:
         return findPluginByUri (description.fileOrIdentifier) != nullptr;
     }
 
-    StringArray searchPathsForPlugins (const FileSearchPath&, bool, bool)
+    StringArray searchPathsForPlugins (const FileSearchPath& paths, bool, bool)
     {
-        world->loadAll();
+        loadAllPluginsFromPaths (paths);
 
         StringArray result;
 
@@ -5262,7 +5258,30 @@ public:
         return result;
     }
 
-    FileSearchPath getDefaultLocationsToSearch() { return {}; }
+    FileSearchPath getDefaultLocationsToSearch()
+    {
+      #if JUCE_MAC
+        return { "~/Library/Audio/Plug-Ins/LV2;"
+                 "~/.lv2;"
+                 "/usr/local/lib/lv2;"
+                 "/usr/lib/lv2;"
+                 "/Library/Audio/Plug-Ins/LV2;" };
+      #elif JUCE_WINDOWS
+        return { "%APPDATA%\\LV2;"
+                 "%COMMONPROGRAMFILES%\\LV2" };
+      #else
+       #if JUCE_64BIT
+        if (File ("/usr/lib64/lv2").exists() || File ("/usr/local/lib64/lv2").exists())
+            return { "~/.lv2;"
+                     "/usr/lib64/lv2;"
+                     "/usr/local/lib64/lv2" };
+       #endif
+
+        return { "~/.lv2;"
+                 "/usr/lib/lv2;"
+                 "/usr/local/lib/lv2" };
+      #endif
+    }
 
     const LilvUI* findEmbeddableUi (const lv2_host::Uis* pluginUis, std::true_type)
     {
@@ -5455,6 +5474,12 @@ public:
     }
 
 private:
+    void loadAllPluginsFromPaths (const FileSearchPath& path)
+    {
+        const auto joined = path.toStringWithSeparator (LILV_PATH_SEP);
+        world->loadAllFromPaths (world->newString (joined.toRawUTF8()));
+    }
+
     struct Free { void operator() (char* ptr) const noexcept { free (ptr); } };
     using StringPtr = std::unique_ptr<char, Free>;
 

@@ -568,7 +568,8 @@ Time& Time::operator-= (RelativeTime delta) noexcept           { millisSinceEpoc
 Time operator+ (Time time, RelativeTime delta) noexcept        { Time t (time); return t += delta; }
 Time operator- (Time time, RelativeTime delta) noexcept        { Time t (time); return t -= delta; }
 Time operator+ (RelativeTime delta, Time time) noexcept        { Time t (time); return t += delta; }
-const RelativeTime operator- (Time time1, Time time2) noexcept { return RelativeTime::milliseconds (time1.toMilliseconds() - time2.toMilliseconds()); }
+
+RelativeTime operator- (Time time1, Time time2) noexcept { return RelativeTime::milliseconds (time1.toMilliseconds() - time2.toMilliseconds()); }
 
 bool operator== (Time time1, Time time2) noexcept      { return time1.toMilliseconds() == time2.toMilliseconds(); }
 bool operator!= (Time time1, Time time2) noexcept      { return time1.toMilliseconds() != time2.toMilliseconds(); }
@@ -610,7 +611,7 @@ Time Time::getCompilationDate()
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class TimeTests  : public UnitTest
+class TimeTests final : public UnitTest
 {
 public:
     TimeTests()

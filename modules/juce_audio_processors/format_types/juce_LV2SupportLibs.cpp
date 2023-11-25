@@ -31,6 +31,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc99-extensions",
                                      "-Wdeprecated-declarations",
                                      "-Wextra-semi",
                                      "-Wfloat-conversion",
+                                     "-Wfloat-equal",
+                                     "-Wformat-overflow",
                                      "-Wimplicit-float-conversion",
                                      "-Wimplicit-int-conversion",
                                      "-Wmicrosoft-include",
@@ -50,6 +52,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100 4200 4244 4267 4389 4702 4706 4800 4996 63
 extern "C"
 {
 
+#include <math.h>
+
 #define is_windows_path serd_is_windows_path
 
 #include "serd/src/base64.c"
@@ -57,6 +61,20 @@ extern "C"
 #include "serd/src/env.c"
 #include "serd/src/n3.c"
 #undef TRY
+
+// node.c will replace isnan and isinf with _isnan and _finite if the former symbols are undefined.
+// MinGW declares these as normal functions rather than as preprocessor definitions, causing the build to fail.
+#if defined (_WIN32) && defined (__GNUC__)
+
+namespace Utils
+{
+    inline int _isnan  (double x) noexcept { return isnan (x); }
+    inline int _finite (double x) noexcept { return ! isinf (x); }
+} // namespace Utils
+
+using namespace Utils;
+#endif
+
 #include "serd/src/node.c"
 #include "serd/src/reader.c"
 #include "serd/src/string.c"
@@ -98,3 +116,6 @@ extern "C"
 #pragma pop_macro ("nil")
 
 } // extern "C"
+
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE

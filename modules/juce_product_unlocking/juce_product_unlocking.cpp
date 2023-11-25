@@ -49,9 +49,9 @@
 
 #if JUCE_IN_APP_PURCHASES
  #if JUCE_ANDROID
-  #include "native/juce_android_InAppPurchases.cpp"
+  #include "native/juce_InAppPurchases_android.cpp"
  #elif JUCE_IOS || JUCE_MAC
-  #include "native/juce_ios_InAppPurchases.cpp"
+  #include "native/juce_InAppPurchases_ios.cpp"
  #endif
 
  #include "in_app_purchases/juce_InAppPurchases.cpp"

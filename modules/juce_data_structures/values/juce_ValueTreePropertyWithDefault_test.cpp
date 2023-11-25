@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class ValueTreePropertyWithDefaultTests  : public UnitTest
+class ValueTreePropertyWithDefaultTests final : public UnitTest
 {
 public:
     ValueTreePropertyWithDefaultTests()

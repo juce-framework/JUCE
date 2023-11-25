@@ -66,7 +66,7 @@ void PluginGraph::changeListenerCallback (ChangeBroadcaster*)
     changed();
 
     for (int i = activePluginWindows.size(); --i >= 0;)
-        if (! graph.getNodes().contains (activePluginWindows.getUnchecked(i)->node))
+        if (! graph.getNodes().contains (activePluginWindows.getUnchecked (i)->node))
             activePluginWindows.remove (i);
 }
 
@@ -100,13 +100,14 @@ void PluginGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instan
 {
     if (instance == nullptr)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          TRANS("Couldn't create plugin"),
-                                          error);
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         TRANS ("Couldn't create plugin"),
+                                                         error);
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
     else
     {
-       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
         if (useARA == PluginDescriptionAndPreference::UseARA::yes
             && instance->getPluginDescription().hasARAExtension)
         {
@@ -410,7 +411,7 @@ void PluginGraph::createNodeFromXml (const XmlElement& xml)
                                                                 graph.getBlockSize(),
                                                                 errorMessage);
 
-           #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+           #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
             if (instance
                 && description.useARA == PluginDescriptionAndPreference::UseARA::yes
                 && description.pluginDescription.hasARAExtension)

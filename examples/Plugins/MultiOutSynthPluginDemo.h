@@ -53,7 +53,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class MultiOutSynth  : public AudioProcessor
+class MultiOutSynth final : public AudioProcessor
 {
 public:
     enum
@@ -156,7 +156,7 @@ public:
             && 1 <= outputs.size()
             && std::all_of (outputs.begin(), outputs.end(), [] (const auto& bus)
                {
-                   return bus == AudioChannelSet::stereo();
+                   return bus.isDisabled() || bus == AudioChannelSet::stereo();
                });
     }
 

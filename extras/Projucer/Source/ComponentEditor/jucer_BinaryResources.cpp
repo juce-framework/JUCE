@@ -137,9 +137,7 @@ void BinaryResources::browseForResource (const String& title,
     {
         if (safeThis == nullptr)
         {
-            if (callback != nullptr)
-                callback ({});
-
+            NullCheckedInvocation::invoke (callback, String{});
             return;
         }
 
@@ -160,16 +158,16 @@ void BinaryResources::browseForResource (const String& title,
         {
             if (! safeThis->add (resourceName, result))
             {
-                AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                                  TRANS("Adding Resource"),
-                                                  TRANS("Failed to load the file!"));
+                auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                                 TRANS ("Adding Resource"),
+                                                                 TRANS ("Failed to load the file!"));
+                safeThis->messageBox = AlertWindow::showScopedAsync (options, nullptr);
 
                 resourceName.clear();
             }
         }
 
-        if (callback != nullptr)
-            callback (resourceName);
+        NullCheckedInvocation::invoke (callback, resourceName);
     });
 }
 

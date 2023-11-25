@@ -324,7 +324,7 @@ public:
         Don't modify any of the pointers that are returned, and bear in mind that
         these will become invalid if the buffer is resized.
     */
-    const Type** getArrayOfReadPointers() const noexcept            { return const_cast<const Type**> (channels); }
+    const Type* const* getArrayOfReadPointers() const noexcept            { return channels; }
 
     /** Returns an array of pointers to the channels in the buffer.
 
@@ -339,7 +339,7 @@ public:
 
         @see setNotClear
     */
-    Type** getArrayOfWritePointers() noexcept                       { isClear = false; return channels; }
+    Type* const* getArrayOfWritePointers() noexcept                       { isClear = false; return channels; }
 
     //==============================================================================
     /** Changes the buffer's size or number of channels.
@@ -465,7 +465,7 @@ public:
         @param newNumSamples    the number of samples to use - this must correspond to the
                                 size of the arrays passed in
     */
-    void setDataToReferTo (Type** dataToReferTo,
+    void setDataToReferTo (Type* const* dataToReferTo,
                            int newNumChannels,
                            int newStartSample,
                            int newNumSamples)
@@ -506,7 +506,7 @@ public:
         @param newNumSamples    the number of samples to use - this must correspond to the
                                 size of the arrays passed in
     */
-    void setDataToReferTo (Type** dataToReferTo,
+    void setDataToReferTo (Type* const* dataToReferTo,
                            int newNumChannels,
                            int newNumSamples)
     {
@@ -558,7 +558,11 @@ public:
         if (! isClear)
         {
             for (int i = 0; i < numChannels; ++i)
+            {
+                JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
                 FloatVectorOperations::clear (channels[i], size);
+                JUCE_END_IGNORE_WARNINGS_MSVC
+            }
 
             isClear = true;
         }
@@ -682,11 +686,11 @@ public:
         jassert (isPositiveAndBelow (channel, numChannels));
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-        if (gain != Type (1) && ! isClear)
+        if (! approximatelyEqual (gain, Type (1)) && ! isClear)
         {
             auto* d = channels[channel] + startSample;
 
-            if (gain == Type())
+            if (approximatelyEqual (gain, Type()))
                 FloatVectorOperations::clear (d, numSamples);
             else
                 FloatVectorOperations::multiply (d, gain, numSamples);
@@ -724,7 +728,7 @@ public:
     {
         if (! isClear)
         {
-            if (startGain == endGain)
+            if (approximatelyEqual (startGain, endGain))
             {
                 applyGain (channel, startSample, numSamples, startGain);
             }
@@ -794,27 +798,31 @@ public:
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));
         jassert (sourceStartSample >= 0 && sourceStartSample + numSamples <= source.size);
 
-        if (gainToApplyToSource != 0 && numSamples > 0 && ! source.isClear)
+        if (! approximatelyEqual (gainToApplyToSource, (Type) 0) && numSamples > 0 && ! source.isClear)
         {
             auto* d = channels[destChannel] + destStartSample;
             auto* s = source.channels[sourceChannel] + sourceStartSample;
+
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
 
             if (isClear)
             {
                 isClear = false;
 
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::copyWithMultiply (d, s, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::copy (d, s, numSamples);
             }
             else
             {
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::addWithMultiply (d, s, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::add (d, s, numSamples);
             }
+
+            JUCE_END_IGNORE_WARNINGS_MSVC
         }
     }
 
@@ -842,7 +850,7 @@ public:
         jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
         jassert (source != nullptr);
 
-        if (gainToApplyToSource != 0 && numSamples > 0)
+        if (! approximatelyEqual (gainToApplyToSource, Type()) && numSamples > 0)
         {
             auto* d = channels[destChannel] + destStartSample;
 
@@ -850,14 +858,14 @@ public:
             {
                 isClear = false;
 
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::copyWithMultiply (d, source, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::copy (d, source, numSamples);
             }
             else
             {
-                if (gainToApplyToSource != Type (1))
+                if (! approximatelyEqual (gainToApplyToSource, Type (1)))
                     FloatVectorOperations::addWithMultiply (d, source, gainToApplyToSource, numSamples);
                 else
                     FloatVectorOperations::add (d, source, numSamples);
@@ -877,7 +885,11 @@ public:
         @param numSamples           the number of samples to process
         @param startGain            the gain to apply to the first sample (this is multiplied with
                                     the source samples before they are added to this buffer)
-        @param endGain              the gain to apply to the final sample. The gain is linearly
+        @param endGain              The gain that would apply to the sample after the final sample.
+                                    The gain that applies to the final sample is
+                                    (numSamples - 1) / numSamples * (endGain - startGain). This
+                                    ensures a continuous ramp when supplying the same value in
+                                    endGain and startGain in subsequent blocks. The gain is linearly
                                     interpolated between the first and last samples.
     */
     void addFromWithRamp (int destChannel,
@@ -887,7 +899,7 @@ public:
                           Type startGain,
                           Type endGain) noexcept
     {
-        if (startGain == endGain)
+        if (approximatelyEqual (startGain, endGain))
         {
             addFrom (destChannel, destStartSample, source, numSamples, startGain);
         }
@@ -900,7 +912,7 @@ public:
             if (numSamples > 0)
             {
                 isClear = false;
-                const auto increment = (endGain - startGain) / numSamples;
+                const auto increment = (endGain - startGain) / (Type) numSamples;
                 auto* d = channels[destChannel] + destStartSample;
 
                 while (--numSamples >= 0)
@@ -1011,9 +1023,9 @@ public:
         {
             auto* d = channels[destChannel] + destStartSample;
 
-            if (gain != Type (1))
+            if (! approximatelyEqual (gain, Type (1)))
             {
-                if (gain == Type())
+                if (approximatelyEqual (gain, Type()))
                 {
                     if (! isClear)
                         FloatVectorOperations::clear (d, numSamples);
@@ -1043,7 +1055,11 @@ public:
         @param numSamples           the number of samples to process
         @param startGain            the gain to apply to the first sample (this is multiplied with
                                     the source samples before they are copied to this buffer)
-        @param endGain              the gain to apply to the final sample. The gain is linearly
+        @param endGain              The gain that would apply to the sample after the final sample.
+                                    The gain that applies to the final sample is
+                                    (numSamples - 1) / numSamples * (endGain - startGain). This
+                                    ensures a continuous ramp when supplying the same value in
+                                    endGain and startGain in subsequent blocks. The gain is linearly
                                     interpolated between the first and last samples.
 
         @see addFrom
@@ -1055,7 +1071,7 @@ public:
                            Type startGain,
                            Type endGain) noexcept
     {
-        if (startGain == endGain)
+        if (approximatelyEqual (startGain, endGain))
         {
             copyFrom (destChannel, destStartSample, source, numSamples, startGain);
         }
@@ -1068,7 +1084,7 @@ public:
             if (numSamples > 0)
             {
                 isClear = false;
-                const auto increment = (endGain - startGain) / numSamples;
+                const auto increment = (endGain - startGain) / (Type) numSamples;
                 auto* d = channels[destChannel] + destStartSample;
 
                 while (--numSamples >= 0)
@@ -1177,7 +1193,7 @@ private:
         jassert (size >= 0);
 
         auto channelListSize = (size_t) (numChannels + 1) * sizeof (Type*);
-        auto requiredSampleAlignment = std::alignment_of<Type>::value;
+        auto requiredSampleAlignment = std::alignment_of_v<Type>;
         size_t alignmentOverflow = channelListSize % requiredSampleAlignment;
 
         if (alignmentOverflow != 0)
@@ -1263,6 +1279,31 @@ private:
 
     JUCE_LEAK_DETECTOR (AudioBuffer)
 };
+
+//==============================================================================
+template <typename Type>
+bool operator== (const AudioBuffer<Type>& a, const AudioBuffer<Type>& b)
+{
+    if (a.getNumChannels() != b.getNumChannels())
+        return false;
+
+    for (auto c = 0; c < a.getNumChannels(); ++c)
+    {
+        const auto begin = [c] (auto& x) { return x.getReadPointer (c); };
+        const auto end = [c] (auto& x) { return x.getReadPointer (c) + x.getNumSamples(); };
+
+        if (! std::equal (begin (a), end (a), begin (b), end (b)))
+            return false;
+    }
+
+    return true;
+}
+
+template <typename Type>
+bool operator!= (const AudioBuffer<Type>& a, const AudioBuffer<Type>& b)
+{
+    return ! (a == b);
+}
 
 //==============================================================================
 /**

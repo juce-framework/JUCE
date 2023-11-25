@@ -140,7 +140,10 @@ AndroidViewComponent::AndroidViewComponent()
 {
 }
 
-AndroidViewComponent::~AndroidViewComponent() {}
+AndroidViewComponent::~AndroidViewComponent()
+{
+    AccessibilityHandler::setNativeChildForComponent (*this, nullptr);
+}
 
 void AndroidViewComponent::setView (void* view)
 {
@@ -153,9 +156,15 @@ void AndroidViewComponent::setView (void* view)
             // explicitly create a new local ref here so that we don't
             // delete the users pointer
             auto* env = getEnv();
-            auto localref = LocalRef<jobject>(env->NewLocalRef((jobject) view));
+            auto localref = LocalRef<jobject> (env->NewLocalRef ((jobject) view));
 
             pimpl.reset (new Pimpl (localref, *this));
+
+            AccessibilityHandler::setNativeChildForComponent (*this, getView());
+        }
+        else
+        {
+            AccessibilityHandler::setNativeChildForComponent (*this, nullptr);
         }
     }
 }
@@ -172,5 +181,10 @@ void AndroidViewComponent::resizeToFitView()
 }
 
 void AndroidViewComponent::paint (Graphics&) {}
+
+std::unique_ptr<AccessibilityHandler> AndroidViewComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+}
 
 } // namespace juce

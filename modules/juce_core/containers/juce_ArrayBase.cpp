@@ -99,15 +99,15 @@ static bool operator== (const ArrayBaseTestsHelpers::NonTriviallyCopyableType& n
     return tct == ntct;
 }
 
-class ArrayBaseTests  : public UnitTest
+class ArrayBaseTests final : public UnitTest
 {
     using CopyableType    = ArrayBaseTestsHelpers::TriviallyCopyableType;
     using NoncopyableType = ArrayBaseTestsHelpers::NonTriviallyCopyableType;
 
-   #if ! (defined(__GNUC__) && __GNUC__ < 5 && ! defined(__clang__))
-    static_assert (std::is_trivially_copyable<CopyableType>::value,
+   #if ! (defined (__GNUC__) && __GNUC__ < 5 && ! defined (__clang__))
+    static_assert (std::is_trivially_copyable_v<CopyableType>,
                    "Test TriviallyCopyableType is not trivially copyable");
-    static_assert (! std::is_trivially_copyable<NoncopyableType>::value,
+    static_assert (! std::is_trivially_copyable_v<NoncopyableType>,
                    "Test NonTriviallyCopyableType is trivially copyable");
    #endif
 
@@ -545,7 +545,7 @@ private:
         virtual ~Base() = default;
     };
 
-    struct Derived : Base
+    struct Derived final : public Base
     {
     };
 

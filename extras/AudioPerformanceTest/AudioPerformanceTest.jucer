@@ -92,8 +92,8 @@
                    androidCpp11="1" targetFolder="Builds/Android" extraCompilerFlags="-mfpu=neon -mfloat-abi=hard -ffast-math -funroll-loops --param max-unroll-times=8 -mhard-float -D_NDK_MATH_NO_SOFTFP=1 -DJUCE_DISABLE_ASSERTIONS=1"
                    gradleToolchainVersion="3.6" androidMinimumSDK="23">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" androidArchitectures="arm64-v8a" isDebug="1" targetName="AudioPerformanceTest"/>
-        <CONFIGURATION name="Release" androidArchitectures="arm64-v8a" isDebug="0" optimisation="6"
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="6"
                        targetName="AudioPerformanceTest"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

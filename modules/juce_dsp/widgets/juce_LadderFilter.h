@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 enum class LadderFilterMode
@@ -149,5 +147,4 @@ private:
     bool enabled = true;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

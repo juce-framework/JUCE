@@ -124,7 +124,7 @@ public:
           << CodeHelpers::floatLiteral (font.getHeight(), 2)
           << ", ";
 
-        if (font.getAvailableStyles().contains(font.getTypefaceStyle()))
+        if (font.getAvailableStyles().contains (font.getTypefaceStyle()))
             s << "juce::Font::plain).withTypefaceStyle ("
               << CodeHelpers::stringLiteral (font.getTypefaceStyle())
               << ")";
@@ -132,7 +132,7 @@ public:
             s << getFontStyleCode (font)
               << ")";
 
-        if (font.getExtraKerningFactor() != 0.0f)
+        if (! approximatelyEqual (font.getExtraKerningFactor(), 0.0f))
             s << ".withExtraKerningFactor ("
               << CodeHelpers::floatLiteral (font.getExtraKerningFactor(), 3)
               << ")";

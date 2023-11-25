@@ -948,7 +948,7 @@ namespace WavFileHelpers
         }
     };
 
-    //=============================================================================
+    //==============================================================================
     namespace IXMLChunk
     {
         static const std::unordered_set<String> aswgMetadataKeys
@@ -1204,7 +1204,7 @@ namespace WavFileHelpers
 }
 
 //==============================================================================
-class WavAudioFormatReader  : public AudioFormatReader
+class WavAudioFormatReader final : public AudioFormatReader
 {
 public:
     WavAudioFormatReader (InputStream* in)  : AudioFormatReader (in, wavFormatName)
@@ -1476,7 +1476,7 @@ public:
     }
 
     //==============================================================================
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
@@ -1579,7 +1579,7 @@ private:
 };
 
 //==============================================================================
-class WavAudioFormatWriter  : public AudioFormatWriter
+class WavAudioFormatWriter final : public AudioFormatWriter
 {
 public:
     WavAudioFormatWriter (OutputStream* const out, const double rate,
@@ -1843,7 +1843,7 @@ private:
 };
 
 //==============================================================================
-class MemoryMappedWavReader   : public MemoryMappedAudioFormatReader
+class MemoryMappedWavReader final : public MemoryMappedAudioFormatReader
 {
 public:
     MemoryMappedWavReader (const File& wavFile, const WavAudioFormatReader& reader)
@@ -1852,11 +1852,14 @@ public:
     {
     }
 
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
+
+        if (numSamples <= 0)
+            return true;
 
         if (map == nullptr || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
         {
@@ -2113,7 +2116,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct WaveAudioFormatTests : public UnitTest
+struct WaveAudioFormatTests final : public UnitTest
 {
     WaveAudioFormatTests()
         : UnitTest ("Wave audio format tests", UnitTestCategories::audio)

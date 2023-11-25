@@ -76,11 +76,11 @@ public:
 
     void drawLinearSlider (Graphics&, int x, int y, int width, int height,
                            float sliderPos, float minSliderPos, float maxSliderPos,
-                           const Slider::SliderStyle, Slider&) override;
+                           Slider::SliderStyle, Slider&) override;
 
     void drawLinearSliderBackground (Graphics&, int x, int y, int width, int height,
                                      float sliderPos, float minSliderPos, float maxSliderPos,
-                                     const Slider::SliderStyle, Slider&) override;
+                                     Slider::SliderStyle, Slider&) override;
 
     void drawConcertinaPanelHeader (Graphics&, const Rectangle<int>& area, bool isMouseOver, bool isMouseDown,
                                     ConcertinaPanel&, Component&) override;

@@ -23,16 +23,13 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 #if JUCE_ENABLE_LIVE_CONSTANT_EDITOR && ! defined (DOXYGEN)
 
 //==============================================================================
 /** You can safely ignore all the stuff in this namespace - it's a bunch of boilerplate
     code used to implement the JUCE_LIVE_CONSTANT functionality.
 */
-namespace LiveConstantEditor
+namespace juce::LiveConstantEditor
 {
     int64 parseInt (String);
     double parseDouble (const String&);
@@ -76,7 +73,7 @@ namespace LiveConstantEditor
     template <typename Type>
     inline String getAsCode (Type& v, bool preferHex)       { return getAsString (v, preferHex); }
     inline String getAsCode (Colour v, bool)                { return "Colour (0x" + String::toHexString ((int) v.getARGB()).paddedLeft ('0', 8) + ")"; }
-    inline String getAsCode (const String& v, bool)         { return CppTokeniserFunctions::addEscapeChars(v).quoted(); }
+    inline String getAsCode (const String& v, bool)         { return CppTokeniserFunctions::addEscapeChars (v).quoted(); }
     inline String getAsCode (const char* v, bool)           { return getAsCode (String (v), false); }
 
     template <typename Type>
@@ -243,7 +240,8 @@ namespace LiveConstantEditor
     {
         return getValue (file, line, String (initialValue));
     }
-}
+
+} // namespace juce::LiveConstantEditor
 
 #endif
 
@@ -301,5 +299,3 @@ namespace LiveConstantEditor
  #define JUCE_LIVE_CONSTANT(initialValue) \
     (initialValue)
 #endif
-
-} // namespace juce

@@ -36,8 +36,8 @@ namespace juce
 
     @tags{GUI}
 */
-class AnimatedAppComponent   : public Component,
-                               private Timer
+class JUCE_API  AnimatedAppComponent   : public Component,
+                                         private Timer
 {
 public:
     AnimatedAppComponent();
@@ -46,6 +46,11 @@ public:
         call update() and repaint the component at the given frequency.
     */
     void setFramesPerSecond (int framesPerSecond);
+
+    /** You can use this function to synchronise animation updates with the current display's vblank
+        events. When this mode is enabled the value passed to setFramesPerSecond() is ignored.
+    */
+    void setSynchroniseToVBlank (bool syncToVBlank);
 
     /** Called periodically, at the frequency specified by setFramesPerSecond().
         This is a the best place to do things like advancing animation parameters,
@@ -66,8 +71,13 @@ public:
 
 private:
     //==============================================================================
-    Time lastUpdateTime;
-    int totalUpdates;
+    void updateSync();
+
+    Time lastUpdateTime = Time::getCurrentTime();
+    int totalUpdates = 0;
+    int framesPerSecond = 60;
+    bool useVBlank = false;
+    VBlankAttachment vBlankAttachment;
 
     void timerCallback() override;
 

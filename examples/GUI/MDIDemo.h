@@ -53,8 +53,8 @@
     also listen to changes in the text and mark the FileBasedDocument as 'dirty'. This 'dirty'
     flag is used to prompt the user to save the note when it is closed.
  */
-class Note    : public Component,
-                public FileBasedDocument
+class Note final : public Component,
+                   public FileBasedDocument
 {
 public:
     Note (const String& name, const String& contents)
@@ -133,7 +133,7 @@ private:
 //==============================================================================
 /** Simple MultiDocumentPanel that just tries to save our notes when they are closed.
  */
-class DemoMultiDocumentPanel    : public MultiDocumentPanel
+class DemoMultiDocumentPanel final : public MultiDocumentPanel
 {
 public:
     DemoMultiDocumentPanel() = default;
@@ -151,6 +151,12 @@ public:
         }
     }
 
+    void activeDocumentChanged() override
+    {
+        if (auto* activeDoc = getActiveDocument())
+            Logger::outputDebugString ("activeDocumentChanged() to " + activeDoc->getName());
+    }
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoMultiDocumentPanel)
 };
@@ -159,8 +165,8 @@ private:
 /** Simple multi-document panel that manages a number of notes that you can store to files.
     By default this will look for notes saved to the desktop and load them up.
  */
-class MDIDemo   : public Component,
-                  public FileDragAndDropTarget
+class MDIDemo final : public Component,
+                      public FileDragAndDropTarget
 {
 public:
     MDIDemo()
@@ -171,8 +177,25 @@ public:
         showInTabsButton.onClick = [this] { updateLayoutMode(); };
         addAndMakeVisible (showInTabsButton);
 
-        addNoteButton.onClick = [this] { addNote ("Note " + String (multiDocumentPanel.getNumDocuments() + 1), "Hello World!"); };
+        oneDocShouldBeFullscreenButton.onClick = [this]
+        {
+            multiDocumentPanel.useFullscreenWhenOneDocument (oneDocShouldBeFullscreenButton.getToggleState());
+        };
+        addAndMakeVisible (oneDocShouldBeFullscreenButton);
+        oneDocShouldBeFullscreenButton.setToggleState (false, juce::sendNotification);
+
+        addNoteButton.onClick = [this]
+        {
+            addNote ("Note " + String (noteCounter), "Hello World! " + String (noteCounter));
+            ++noteCounter;
+        };
         addAndMakeVisible (addNoteButton);
+
+        closeActiveDocumentButton.onClick = [this]
+        {
+            multiDocumentPanel.closeDocumentAsync (multiDocumentPanel.getActiveDocument(), false, [] (auto) {});
+        };
+        addAndMakeVisible (closeActiveDocumentButton);
 
         closeApplicationButton.onClick = [this]
         {
@@ -191,7 +214,7 @@ public:
         addNote ("Notes Demo", "You can drag-and-drop text files onto this page to open them as notes..");
         addExistingNotes();
 
-        setSize (500, 500);
+        setSize (650, 500);
     }
 
     void paint (Graphics& g) override
@@ -203,10 +226,15 @@ public:
     {
         auto area = getLocalBounds();
 
-        auto buttonArea = area.removeFromTop (28).reduced (2);
-        closeApplicationButton.setBounds (buttonArea.removeFromRight (150));
-        addNoteButton         .setBounds (buttonArea.removeFromRight (150));
-        showInTabsButton      .setBounds (buttonArea);
+        auto topButtonRow = area.removeFromTop (28).reduced (2);
+
+        showInTabsButton              .setBounds (topButtonRow.removeFromLeft (150));
+
+        closeApplicationButton        .setBounds (topButtonRow.removeFromRight (150));
+        addNoteButton                 .setBounds (topButtonRow.removeFromRight (150));
+        closeActiveDocumentButton     .setBounds (topButtonRow.removeFromRight (150));
+
+        oneDocShouldBeFullscreenButton.setBounds (area.removeFromTop (28).reduced (2).removeFromLeft (240));
 
         multiDocumentPanel.setBounds (area);
     }
@@ -261,11 +289,14 @@ private:
         createNotesForFiles (files);
     }
 
-    ToggleButton showInTabsButton { "Show with tabs" };
-    TextButton addNoteButton          { "Create a new note" },
-               closeApplicationButton { "Close app" };
+    ToggleButton showInTabsButton               { "Show with tabs" };
+    ToggleButton oneDocShouldBeFullscreenButton { "Fill screen when only one note is open" };
+    TextButton   addNoteButton                  { "Create a new note" },
+                 closeApplicationButton         { "Close app" },
+                 closeActiveDocumentButton      { "Close active document" };
 
     DemoMultiDocumentPanel multiDocumentPanel;
+    int noteCounter = 1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MDIDemo)
 };

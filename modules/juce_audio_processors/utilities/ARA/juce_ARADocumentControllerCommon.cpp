@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class ARADocumentController  : public ARA::PlugIn::DocumentController
+class ARADocumentController : public ARA::PlugIn::DocumentController
 {
 public:
     using ARA::PlugIn::DocumentController::DocumentController;

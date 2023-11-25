@@ -30,7 +30,12 @@ struct ImageCache::Pimpl     : private Timer,
                                private DeletedAtShutdown
 {
     Pimpl() = default;
-    ~Pimpl() override { clearSingletonInstance(); }
+
+    ~Pimpl() override
+    {
+        stopTimer();
+        clearSingletonInstance();
+    }
 
     JUCE_DECLARE_SINGLETON (ImageCache::Pimpl, false)
 
@@ -70,7 +75,7 @@ struct ImageCache::Pimpl     : private Timer,
 
         for (int i = images.size(); --i >= 0;)
         {
-            auto& item = images.getReference(i);
+            auto& item = images.getReference (i);
 
             if (item.image.getReferenceCount() <= 1)
             {
@@ -92,7 +97,7 @@ struct ImageCache::Pimpl     : private Timer,
         const ScopedLock sl (lock);
 
         for (int i = images.size(); --i >= 0;)
-            if (images.getReference(i).image.getReferenceCount() <= 1)
+            if (images.getReference (i).image.getReferenceCount() <= 1)
                 images.remove (i);
     }
 

@@ -252,7 +252,7 @@ public:
         If this is set to nullptr, then getFirstCommandTarget() will by default return the
         result of findDefaultComponentTarget().
 
-        If you use this to set a target, make sure you call setFirstCommandTarget(nullptr)
+        If you use this to set a target, make sure you call setFirstCommandTarget (nullptr)
         before deleting the target object.
     */
     void setFirstCommandTarget (ApplicationCommandTarget* newTarget) noexcept;

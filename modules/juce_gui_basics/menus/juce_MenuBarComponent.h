@@ -95,13 +95,14 @@ public:
     void menuBarItemsChanged (MenuBarModel*) override;
     /** @internal */
     void menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo&) override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
     class AccessibleItemComponent;
 
     //==============================================================================
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void timerCallback() override;
 
     int getItemAt (Point<int>);
@@ -119,7 +120,8 @@ private:
     std::vector<std::unique_ptr<AccessibleItemComponent>> itemComponents;
 
     Point<int> lastMousePos;
-    int itemUnderMouse = -1, currentPopupIndex = -1, topLevelIndexClicked = 0;
+    int itemUnderMouse = -1, currentPopupIndex = -1, topLevelIndexDismissed = 0;
+    int numActiveMenus = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent)
 };

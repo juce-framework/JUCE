@@ -27,8 +27,8 @@ namespace juce
 {
 
 //==============================================================================
-class TextPropertyComponent::LabelComp  : public Label,
-                                          public FileDragAndDropTarget
+class TextPropertyComponent::LabelComp final : public Label,
+                                               public FileDragAndDropTarget
 {
 public:
     LabelComp (TextPropertyComponent& tpc, int charLimit, bool multiline, bool editable)
@@ -120,7 +120,7 @@ private:
 };
 
 //==============================================================================
-class TextRemapperValueSourceWithDefault  : public Value::ValueSource
+class TextRemapperValueSourceWithDefault final : public Value::ValueSource
 {
 public:
     TextRemapperValueSourceWithDefault (const ValueTreePropertyWithDefault& v)

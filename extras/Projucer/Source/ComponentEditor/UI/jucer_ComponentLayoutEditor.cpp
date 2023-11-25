@@ -393,8 +393,8 @@ void ComponentLayoutEditor::itemDropped (const SourceDetails& dragSourceDetails)
     StringArray filenames;
 
     for (int i = 0; i < selectedNodes.size(); ++i)
-        if (selectedNodes.getUnchecked(i)->getFile().hasFileExtension (cppFileExtensions))
-            filenames.add (selectedNodes.getUnchecked(i)->getFile().getFullPathName());
+        if (selectedNodes.getUnchecked (i)->getFile().hasFileExtension (cppFileExtensions))
+            filenames.add (selectedNodes.getUnchecked (i)->getFile().getFullPathName());
 
     filesDropped (filenames, dragSourceDetails.localPosition.x, dragSourceDetails.localPosition.y);
 }

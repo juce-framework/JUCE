@@ -38,14 +38,14 @@ public:
     String getTypeName() const;
 
     JucerDocument* createCopy();
-    Component* createTestComponent (const bool alwaysFillBackground);
+    Component* createTestComponent (bool alwaysFillBackground);
 
     int getNumPaintRoutines() const;
     StringArray getPaintRoutineNames() const;
-    PaintRoutine* getPaintRoutine (const int index) const;
+    PaintRoutine* getPaintRoutine (int index) const;
 
-    void setStatePaintRoutineEnabled (const int index, bool b);
-    bool isStatePaintRoutineEnabled (const int index) const;
+    void setStatePaintRoutineEnabled (int index, bool b);
+    bool isStatePaintRoutineEnabled (int index) const;
 
     int chooseBestEnabledPaintRoutine (int paintRoutineWanted) const;
 

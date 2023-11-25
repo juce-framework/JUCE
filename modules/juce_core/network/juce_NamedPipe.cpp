@@ -69,7 +69,7 @@ String NamedPipe::getName() const
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class NamedPipeTests  : public UnitTest
+class NamedPipeTests final : public UnitTest
 {
 public:
     //==============================================================================
@@ -200,7 +200,7 @@ public:
 
 private:
     //==============================================================================
-    struct NamedPipeThread   : public Thread
+    struct NamedPipeThread : public Thread
     {
         NamedPipeThread (const String& tName, const String& pName,
                          bool shouldCreatePipe, WaitableEvent& completed)
@@ -220,7 +220,7 @@ private:
     };
 
     //==============================================================================
-    struct SenderThread   : public NamedPipeThread
+    struct SenderThread final : public NamedPipeThread
     {
         SenderThread (const String& pName, bool shouldCreatePipe,
                       WaitableEvent& completed, int sData)
@@ -243,7 +243,7 @@ private:
     };
 
     //==============================================================================
-    struct ReceiverThread   : public NamedPipeThread
+    struct ReceiverThread final : public NamedPipeThread
     {
         ReceiverThread (const String& pName, bool shouldCreatePipe,
                         WaitableEvent& completed)

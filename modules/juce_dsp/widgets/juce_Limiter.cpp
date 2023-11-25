@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -94,5 +92,4 @@ void Limiter<SampleType>::update()
 template class Limiter<float>;
 template class Limiter<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

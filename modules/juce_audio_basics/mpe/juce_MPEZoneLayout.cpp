@@ -108,14 +108,11 @@ void MPEZoneLayout::processNextMidiEvent (const MidiMessage& message)
     if (! message.isController())
         return;
 
-    MidiRPNMessage rpn;
-
-    if (rpnDetector.parseControllerMessage (message.getChannel(),
+    if (auto parsed = rpnDetector.tryParse (message.getChannel(),
                                             message.getControllerNumber(),
-                                            message.getControllerValue(),
-                                            rpn))
+                                            message.getControllerValue()))
     {
-        processRpnMessage (rpn);
+        processRpnMessage (*parsed);
     }
 }
 
@@ -216,7 +213,7 @@ void MPEZoneLayout::checkAndLimitZoneParameters (int minValue, int maxValue,
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MPEZoneLayoutTests  : public UnitTest
+class MPEZoneLayoutTests final : public UnitTest
 {
 public:
     MPEZoneLayoutTests()

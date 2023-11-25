@@ -52,8 +52,8 @@
 #include "../Assets/AudioLiveScrollingDisplay.h"
 
 //==============================================================================
-class LatencyTester  : public AudioIODeviceCallback,
-                       private Timer
+class LatencyTester final : public AudioIODeviceCallback,
+                            private Timer
 {
 public:
     LatencyTester (TextEditor& editorBox)
@@ -136,9 +136,12 @@ public:
 
     void audioDeviceStopped() override {}
 
-    void audioDeviceIOCallback (const float** inputChannelData, int numInputChannels,
-                                float** outputChannelData, int numOutputChannels, int numSamples) override
+    void audioDeviceIOCallbackWithContext (const float* const* inputChannelData, int numInputChannels,
+                                           float* const* outputChannelData, int numOutputChannels,
+                                           int numSamples, const AudioIODeviceCallbackContext& context) override
     {
+        ignoreUnused (context);
+
         const ScopedLock sl (lock);
 
         if (testIsRunning)
@@ -301,7 +304,7 @@ private:
 };
 
 //==============================================================================
-class AudioLatencyDemo  : public Component
+class AudioLatencyDemo final : public Component
 {
 public:
     AudioLatencyDemo()

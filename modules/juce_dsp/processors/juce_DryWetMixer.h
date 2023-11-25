@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 enum class DryWetMixingRule
@@ -116,5 +114,4 @@ private:
     int maximumWetLatencyInSamples = 0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

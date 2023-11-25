@@ -25,11 +25,7 @@
 // 16 bit string operations
 #if SMTG_CPP11	// if c++11 unicode string literals
 	#define SMTG_CPP11_CAT_PRIVATE_DONT_USE(a,b)			a ## b
-	#if SMTG_OS_WINDOWS
-		#define STR16(x) SMTG_CPP11_CAT_PRIVATE_DONT_USE(L,x)
-	#else
-		#define STR16(x) SMTG_CPP11_CAT_PRIVATE_DONT_USE(u,x)
-	#endif
+	#define STR16(x) SMTG_CPP11_CAT_PRIVATE_DONT_USE(u,x)
 #else
 	#include "conststringtable.h"
 	#define STR16(x) Steinberg::ConstStringTable::instance ()->getString (x)
@@ -99,19 +95,19 @@
 namespace Steinberg {
 
 //----------------------------------------------------------------------------
-static const tchar kEmptyString[] = { 0 };
-static const char8 kEmptyString8[] = { 0 };
-static const char16 kEmptyString16[] = { 0 };
+static SMTG_CONSTEXPR const tchar kEmptyString[] = { 0 };
+static SMTG_CONSTEXPR const char8 kEmptyString8[] = { 0 };
+static SMTG_CONSTEXPR const char16 kEmptyString16[] = { 0 };
 
 #ifdef UNICODE
-static const tchar kInfiniteSymbol[] = { 0x221E, 0 };
+static SMTG_CONSTEXPR const tchar kInfiniteSymbol[] = { 0x221E, 0 };
 #else
-static const tchar* const kInfiniteSymbol = STR ("oo");
+static SMTG_CONSTEXPR const tchar* const kInfiniteSymbol = STR ("oo");
 #endif
 
 //----------------------------------------------------------------------------
 template <class T>
-inline int32 _tstrlen (const T* wcs)
+inline SMTG_CONSTEXPR14 int32 _tstrlen (const T* wcs)
 {
 	const T* eos = wcs;
 
@@ -121,13 +117,13 @@ inline int32 _tstrlen (const T* wcs)
 	return (int32) (eos - wcs - 1);
 }
 
-inline int32 tstrlen (const tchar* str) {return _tstrlen (str);}
-inline int32 strlen8 (const char8* str) {return _tstrlen (str);}
-inline int32 strlen16 (const char16* str) {return _tstrlen (str);}
+inline SMTG_CONSTEXPR14 int32 tstrlen (const tchar* str) {return _tstrlen (str);}
+inline SMTG_CONSTEXPR14 int32 strlen8 (const char8* str) {return _tstrlen (str);}
+inline SMTG_CONSTEXPR14 int32 strlen16 (const char16* str) {return _tstrlen (str);}
 
 //----------------------------------------------------------------------------
 template <class T>
-inline int32 _tstrcmp (const T* src, const T* dst)
+inline SMTG_CONSTEXPR14 int32 _tstrcmp (const T* src, const T* dst)
 {
 	while (*src == *dst && *dst)
 	{
@@ -137,30 +133,29 @@ inline int32 _tstrcmp (const T* src, const T* dst)
 
 	if (*src == 0 && *dst == 0)
 		return 0;
-	else if (*src == 0)
+	if (*src == 0)
 		return -1;
-	else if (*dst == 0)
+	if (*dst == 0)
 		return 1;
-	else
-		return (int32) (*src - *dst);
+	return (int32) (*src - *dst);
 }
 
-inline int32 tstrcmp (const tchar* src, const tchar* dst) {return _tstrcmp (src, dst);}
-inline int32 strcmp8 (const char8* src, const char8* dst) {return _tstrcmp (src, dst);}
-inline int32 strcmp16 (const char16* src, const char16* dst) {return _tstrcmp (src, dst);}
+inline SMTG_CONSTEXPR14 int32 tstrcmp (const tchar* src, const tchar* dst) {return _tstrcmp (src, dst);}
+inline SMTG_CONSTEXPR14 int32 strcmp8 (const char8* src, const char8* dst) {return _tstrcmp (src, dst);}
+inline SMTG_CONSTEXPR14 int32 strcmp16 (const char16* src, const char16* dst) {return _tstrcmp (src, dst);}
 
 template <typename T>
-inline int32 strcmpT (const T* first, const T* last);
+inline SMTG_CONSTEXPR14 int32 strcmpT (const T* first, const T* last);
 
 template <>
-inline int32 strcmpT<char8> (const char8* first, const char8* last) { return _tstrcmp (first, last); }
+inline SMTG_CONSTEXPR14 int32 strcmpT<char8> (const char8* first, const char8* last) { return _tstrcmp (first, last); }
 
 template <>
-inline int32 strcmpT<char16> (const char16* first, const char16* last) { return _tstrcmp (first, last); }
+inline SMTG_CONSTEXPR14 int32 strcmpT<char16> (const char16* first, const char16* last) { return _tstrcmp (first, last); }
 
 //----------------------------------------------------------------------------
 template <class T>
-inline int32 _tstrncmp (const T* first, const T* last, uint32 count)
+inline SMTG_CONSTEXPR14 int32 _tstrncmp (const T* first, const T* last, uint32 count)
 {
 	if (count == 0)
 		return 0;
@@ -173,43 +168,42 @@ inline int32 _tstrncmp (const T* first, const T* last, uint32 count)
 
 	if (*first == 0 && *last == 0)
 		return 0;
-	else if (*first == 0)
+	if (*first == 0)
 		return -1;
-	else if (*last == 0)
+	if (*last == 0)
 		return 1;
-	else
-		return (int32) (*first - *last);
+	return (int32) (*first - *last);
 }
 
-inline int32 tstrncmp (const tchar* first, const tchar* last, uint32 count) {return _tstrncmp (first, last, count);}
-inline int32 strncmp8 (const char8* first, const char8* last, uint32 count) {return _tstrncmp (first, last, count);}
-inline int32 strncmp16 (const char16* first, const char16* last, uint32 count) {return _tstrncmp (first, last, count);}
+inline SMTG_CONSTEXPR14 int32 tstrncmp (const tchar* first, const tchar* last, uint32 count) {return _tstrncmp (first, last, count);}
+inline SMTG_CONSTEXPR14 int32 strncmp8 (const char8* first, const char8* last, uint32 count) {return _tstrncmp (first, last, count);}
+inline SMTG_CONSTEXPR14 int32 strncmp16 (const char16* first, const char16* last, uint32 count) {return _tstrncmp (first, last, count);}
 
 template <typename T>
-inline int32 strncmpT (const T* first, const T* last, uint32 count);
+inline SMTG_CONSTEXPR14 int32 strncmpT (const T* first, const T* last, uint32 count);
 
 template <>
-inline int32 strncmpT<char8> (const char8* first, const char8* last, uint32 count) { return _tstrncmp (first, last, count); }
+inline SMTG_CONSTEXPR14 int32 strncmpT<char8> (const char8* first, const char8* last, uint32 count) { return _tstrncmp (first, last, count); }
 
 template <>
-inline int32 strncmpT<char16> (const char16* first, const char16* last, uint32 count) {return _tstrncmp (first, last, count); }
+inline SMTG_CONSTEXPR14 int32 strncmpT<char16> (const char16* first, const char16* last, uint32 count) {return _tstrncmp (first, last, count); }
 
 //----------------------------------------------------------------------------
 template <class T>
-inline T* _tstrcpy (T* dst, const T* src)
+inline SMTG_CONSTEXPR14 T* _tstrcpy (T* dst, const T* src)
 {
 	T* cp = dst;
 	while ((*cp++ = *src++) != 0) // copy string
 		;
 	return dst;
 }
-inline tchar* tstrcpy (tchar* dst, const tchar* src) {return _tstrcpy (dst, src);}
-inline char8* strcpy8 (char8* dst, const char8* src) {return _tstrcpy (dst, src);}
-inline char16* strcpy16 (char16* dst, const char16* src) {return _tstrcpy (dst, src);}
+inline SMTG_CONSTEXPR14 tchar* tstrcpy (tchar* dst, const tchar* src) {return _tstrcpy (dst, src);}
+inline SMTG_CONSTEXPR14 char8* strcpy8 (char8* dst, const char8* src) {return _tstrcpy (dst, src);}
+inline SMTG_CONSTEXPR14 char16* strcpy16 (char16* dst, const char16* src) {return _tstrcpy (dst, src);}
 
 //----------------------------------------------------------------------------
 template <class T>
-inline T* _tstrncpy (T* dest, const T* source, uint32 count)
+inline SMTG_CONSTEXPR14 T* _tstrncpy (T* dest, const T* source, uint32 count)
 {
 	T* start = dest;
 	while (count && (*dest++ = *source++) != 0) // copy string
@@ -223,13 +217,13 @@ inline T* _tstrncpy (T* dest, const T* source, uint32 count)
 	return start;
 }
 
-inline tchar* tstrncpy (tchar* dest, const tchar* source, uint32 count) {return _tstrncpy (dest, source, count);}
-inline char8* strncpy8 (char8* dest, const char8* source, uint32 count) {return _tstrncpy (dest, source, count);}
-inline char16* strncpy16 (char16* dest, const char16* source, uint32 count) {return _tstrncpy (dest, source, count);}
+inline SMTG_CONSTEXPR14 tchar* tstrncpy (tchar* dest, const tchar* source, uint32 count) {return _tstrncpy (dest, source, count);}
+inline SMTG_CONSTEXPR14 char8* strncpy8 (char8* dest, const char8* source, uint32 count) {return _tstrncpy (dest, source, count);}
+inline SMTG_CONSTEXPR14 char16* strncpy16 (char16* dest, const char16* source, uint32 count) {return _tstrncpy (dest, source, count);}
 
 //----------------------------------------------------------------------------
 template <class T>
-inline T* _tstrcat (T* dst, const T* src)
+inline SMTG_CONSTEXPR14 T* _tstrcat (T* dst, const T* src)
 {
 	T* cp = dst;
 
@@ -242,12 +236,12 @@ inline T* _tstrcat (T* dst, const T* src)
 	return dst;
 }
 
-inline tchar* tstrcat (tchar* dst, const tchar* src) {return _tstrcat (dst, src); }
-inline char8* strcat8 (char8* dst, const char8* src) {return _tstrcat (dst, src); }
-inline char16* strcat16 (char16* dst, const char16* src) {return _tstrcat (dst, src); }
+inline SMTG_CONSTEXPR14 tchar* tstrcat (tchar* dst, const tchar* src) {return _tstrcat (dst, src); }
+inline SMTG_CONSTEXPR14 char8* strcat8 (char8* dst, const char8* src) {return _tstrcat (dst, src); }
+inline SMTG_CONSTEXPR14 char16* strcat16 (char16* dst, const char16* src) {return _tstrcat (dst, src); }
 
 //----------------------------------------------------------------------------
-inline void str8ToStr16 (char16* dst, const char8* src, int32 n = -1)
+inline SMTG_CONSTEXPR14 void str8ToStr16 (char16* dst, const char8* src, int32 n = -1)
 {
 	int32 i = 0;
 	for (;;)
@@ -278,12 +272,20 @@ inline void str8ToStr16 (char16* dst, const char8* src, int32 n = -1)
 }
 
 //------------------------------------------------------------------------
-inline bool FIDStringsEqual (FIDString id1, FIDString id2)
+inline SMTG_CONSTEXPR14 bool FIDStringsEqual (FIDString id1, FIDString id2)
 {
 	return (id1 && id2) ? (strcmp8 (id1, id2) == 0) : false;
 }
 
-static const uint32 kPrintfBufferSize = 4096;
+static SMTG_CONSTEXPR const uint32 kPrintfBufferSize = 4096;
+
+#if SMTG_OS_WINDOWS
+/* cast between wchar_t and char16 */
+inline wchar_t* wscast (char16* s) { static_assert (sizeof (wchar_t) == sizeof (char16), ""); return reinterpret_cast<wchar_t*> (s); }
+inline char16* wscast (wchar_t* s) { static_assert (sizeof (wchar_t) == sizeof (char16), ""); return reinterpret_cast<char16*> (s);}
+inline const wchar_t* wscast (const char16* s) { static_assert (sizeof (wchar_t) == sizeof (char16), ""); return reinterpret_cast<const wchar_t*> (s); }
+inline const char16* wscast (const wchar_t* s) { static_assert (sizeof (wchar_t) == sizeof (char16), ""); return reinterpret_cast<const char16*> (s); }
+#endif
 
 //------------------------------------------------------------------------
 } // namespace Steinberg

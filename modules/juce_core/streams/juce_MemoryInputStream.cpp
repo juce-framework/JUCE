@@ -104,7 +104,7 @@ void MemoryInputStream::skipNextBytes (int64 numBytesToSkip)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MemoryStreamTests  : public UnitTest
+class MemoryStreamTests final : public UnitTest
 {
 public:
     MemoryStreamTests()
@@ -138,8 +138,8 @@ public:
         expectEquals (mi.readString(), randomString);
         expect (mi.readInt64() == randomInt64);
         expect (mi.readInt64BigEndian() == randomInt64);
-        expect (mi.readDouble() == randomDouble);
-        expect (mi.readDoubleBigEndian() == randomDouble);
+        expectEquals (mi.readDouble(), randomDouble);
+        expectEquals (mi.readDoubleBigEndian(), randomDouble);
 
         const MemoryBlock data ("abcdefghijklmnopqrstuvwxyz", 26);
         MemoryInputStream stream (data, true);

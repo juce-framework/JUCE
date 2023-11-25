@@ -23,12 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
-class FIRFilterTest : public UnitTest
+class FIRFilterTest final : public UnitTest
 {
     template <typename Type>
     struct Helpers
@@ -218,5 +216,4 @@ public:
 
 static FIRFilterTest firFilterUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

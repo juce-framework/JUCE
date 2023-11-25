@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -43,14 +41,7 @@ public:
     Iterator() noexcept = default;
 
     /** Creates an iterator pointing at `ptr`. */
-    explicit Iterator (const uint32_t* ptr, size_t bytes) noexcept
-        : view (ptr)
-       #if JUCE_DEBUG
-        , bytesRemaining (bytes)
-       #endif
-    {
-        ignoreUnused (bytes);
-    }
+    explicit Iterator (const uint32_t* ptr, size_t bytes) noexcept;
 
     using difference_type    = std::iterator_traits<const uint32_t*>::difference_type;
     using value_type         = View;
@@ -124,7 +115,6 @@ private:
    #endif
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

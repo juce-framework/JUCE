@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -184,7 +182,7 @@ public:
         stereo processing.
     */
     template <typename ProcessContext,
-              std::enable_if_t<std::is_same<typename ProcessContext::SampleType, float>::value, int> = 0>
+              std::enable_if_t<std::is_same_v<typename ProcessContext::SampleType, float>, int> = 0>
     void process (const ProcessContext& context) noexcept
     {
         processSamples (context.getInputBlock(), context.getOutputBlock(), context.isBypassed);
@@ -306,5 +304,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Convolution)
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

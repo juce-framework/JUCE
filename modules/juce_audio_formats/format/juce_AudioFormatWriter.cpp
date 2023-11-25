@@ -35,7 +35,7 @@ AudioFormatWriter::AudioFormatWriter (OutputStream* const out,
     numChannels (numChannels_),
     bitsPerSample (bitsPerSample_),
     usesFloatingPointData (false),
-    channelLayout (AudioChannelSet::canonicalChannelSet(static_cast<int> (numChannels_))),
+    channelLayout (AudioChannelSet::canonicalChannelSet (static_cast<int> (numChannels_))),
     output (out),
     formatName (formatName_)
 {
@@ -211,7 +211,7 @@ bool AudioFormatWriter::flush()
 }
 
 //==============================================================================
-class AudioFormatWriter::ThreadedWriter::Buffer   : private TimeSliceClient
+class AudioFormatWriter::ThreadedWriter::Buffer final : private TimeSliceClient
 {
 public:
     Buffer (TimeSliceThread& tst, AudioFormatWriter* w, int channels, int numSamples)

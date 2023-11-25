@@ -27,8 +27,8 @@
 
 
 //==============================================================================
-struct ProjectTreeItemBase  : public JucerTreeViewBase,
-                              public ValueTree::Listener
+struct ProjectTreeItemBase : public JucerTreeViewBase,
+                             public ValueTree::Listener
 {
     ProjectTreeItemBase() {}
 

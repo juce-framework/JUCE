@@ -50,8 +50,8 @@
 
 
 //==============================================================================
-class SimpleFFTDemo   : public AudioAppComponent,
-                        private Timer
+class SimpleFFTDemo final : public AudioAppComponent,
+                            private Timer
 {
 public:
     SimpleFFTDemo() :

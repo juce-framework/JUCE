@@ -46,23 +46,23 @@ public:
 
     //==============================================================================
     int getNumElements() const noexcept                                     { return elements.size(); }
-    PaintElement* getElement (const int index) const noexcept               { return elements [index]; }
+    PaintElement* getElement (int index) const noexcept                     { return elements [index]; }
     int indexOfElement (PaintElement* e) const noexcept                     { return elements.indexOf (e); }
     bool containsElement (PaintElement* e) const noexcept                   { return elements.contains (e); }
 
     //==============================================================================
     void clear();
-    PaintElement* addElementFromXml (const XmlElement& xml, const int index, const bool undoable);
-    PaintElement* addNewElement (PaintElement* elementToCopy, const int index, const bool undoable);
-    void removeElement (PaintElement* element, const bool undoable);
+    PaintElement* addElementFromXml (const XmlElement& xml, int index, bool undoable);
+    PaintElement* addNewElement (PaintElement* elementToCopy, int index, bool undoable);
+    void removeElement (PaintElement* element, bool undoable);
 
-    void elementToFront (PaintElement* element, const bool undoable);
-    void elementToBack (PaintElement* element, const bool undoable);
+    void elementToFront (PaintElement* element, bool undoable);
+    void elementToBack (PaintElement* element, bool undoable);
 
-    const Colour getBackgroundColour() const noexcept                       { return backgroundColour; }
+    Colour getBackgroundColour() const noexcept                       { return backgroundColour; }
     void setBackgroundColour (Colour newColour) noexcept;
 
-    void fillWithBackground (Graphics& g, const bool drawOpaqueBackground);
+    void fillWithBackground (Graphics& g, bool drawOpaqueBackground);
     void drawElements (Graphics& g, const Rectangle<int>& relativeTo);
 
     void dropImageAt (const File& f, int x, int y);
@@ -108,6 +108,8 @@ public:
     void applyCustomPaintSnippets (StringArray&);
 
     //==============================================================================
+    void moveElementZOrder (int oldIndex, int newIndex);
+
 private:
     OwnedArray<PaintElement> elements;
     SelectedItemSet <PaintElement*> selectedElements;
@@ -115,8 +117,4 @@ private:
     JucerDocument* document;
 
     Colour backgroundColour;
-
-    friend class DeleteElementAction;
-    friend class FrontOrBackElementAction;
-    void moveElementZOrder (int oldIndex, int newIndex);
 };

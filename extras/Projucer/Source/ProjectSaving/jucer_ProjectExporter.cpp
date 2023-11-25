@@ -234,6 +234,32 @@ build_tools::RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget 
     return path.rebased (project.getProjectFolder(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
 }
 
+build_tools::RelativePath ProjectExporter::rebaseFromBuildTargetToProjectFolder (const build_tools::RelativePath& path) const
+{
+    jassert (path.getRoot() == build_tools::RelativePath::buildTargetFolder);
+    return path.rebased (getTargetFolder(), project.getProjectFolder(), build_tools::RelativePath::projectFolder);
+}
+
+File ProjectExporter::resolveRelativePath (const build_tools::RelativePath& path) const
+{
+    if (path.isAbsolute())
+        return path.toUnixStyle();
+
+    switch (path.getRoot())
+    {
+        case build_tools::RelativePath::buildTargetFolder:
+            return getTargetFolder().getChildFile (path.toUnixStyle());
+
+        case build_tools::RelativePath::projectFolder:
+            return project.getProjectFolder().getChildFile (path.toUnixStyle());
+
+        case build_tools::RelativePath::unknown:
+            jassertfalse;
+    }
+
+    return path.toUnixStyle();
+}
+
 bool ProjectExporter::shouldFileBeCompiledByDefault (const File& file) const
 {
     return file.hasFileExtension (cOrCppFileExtensions)
@@ -245,7 +271,11 @@ void ProjectExporter::updateCompilerFlagValues()
     compilerFlagSchemesMap.clear();
 
     for (auto& scheme : project.getCompilerFlagSchemes())
-        compilerFlagSchemesMap.set (scheme, { settings, scheme, getUndoManager() });
+    {
+        compilerFlagSchemesMap.emplace (std::piecewise_construct,
+                                        std::forward_as_tuple (scheme),
+                                        std::forward_as_tuple (settings, scheme, getUndoManager()));
+    }
 }
 
 //==============================================================================
@@ -285,9 +315,11 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
                "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
 
-    for (HashMap<String, ValueTreePropertyWithDefault>::Iterator i (compilerFlagSchemesMap); i.next();)
-        props.add (new TextPropertyComponent (compilerFlagSchemesMap.getReference (i.getKey()), "Compiler Flags for " + i.getKey().quoted(), 8192, false),
+    for (const auto& [key, property] : compilerFlagSchemesMap)
+    {
+        props.add (new TextPropertyComponent (property, "Compiler Flags for " + key.quoted(), 8192, false),
                    "The exporter-specific compiler flags that will be added to files using this scheme.");
+    }
 
     props.add (new TextPropertyComponent (extraLinkerFlagsValue, "Extra Linker Flags", 8192, true),
                "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "
@@ -491,6 +523,8 @@ void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, 
     {
         defs.set ("JucePlugin_Enable_ARA", "1");
     }
+
+    linuxSubprocessHelperProperties.setCompileDefinitionIfNecessary (defs);
 }
 
 void ProjectExporter::addDefaultPreprocessorDefs (StringPairArray& defs) const
@@ -505,6 +539,19 @@ String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildC
 {
     return build_tools::replacePreprocessorDefs (getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified),
                                                  sourceString);
+}
+
+String ProjectExporter::getCompilerFlagsForFileCompilerFlagScheme (StringRef schemeName) const
+{
+    if (const auto iter = compilerFlagSchemesMap.find (schemeName); iter != compilerFlagSchemesMap.cend())
+        return iter->second.get().toString();
+
+    return {};
+}
+
+String ProjectExporter::getCompilerFlagsForProjectItem (const Project::Item& item) const
+{
+    return getCompilerFlagsForFileCompilerFlagScheme (item.getCompilerFlagSchemeString());
 }
 
 void ProjectExporter::copyMainGroupFromProject()
@@ -526,7 +573,7 @@ Project::Item& ProjectExporter::getModulesGroup()
 }
 
 //==============================================================================
-static bool isWebBrowserComponentEnabled (Project& project)
+static bool isWebBrowserComponentEnabled (const Project& project)
 {
     static String guiExtrasModule ("juce_gui_extra");
 
@@ -589,6 +636,7 @@ void ProjectExporter::addToModuleLibPaths (const build_tools::RelativePath& path
 
 void ProjectExporter::addToExtraSearchPaths (const build_tools::RelativePath& pathFromProjectFolder, int index)
 {
+    jassert (pathFromProjectFolder.getRoot() == build_tools::RelativePath::projectFolder);
     addProjectPathToBuildPathList (extraSearchPaths, pathFromProjectFolder, index);
 }
 
@@ -761,31 +809,6 @@ ProjectExporter::BuildConfiguration::Ptr ProjectExporter::getConfiguration (int 
     return createBuildConfig (getConfigurations().getChild (index));
 }
 
-bool ProjectExporter::hasConfigurationNamed (const String& nameToFind) const
-{
-    auto configs = getConfigurations();
-    for (int i = configs.getNumChildren(); --i >= 0;)
-        if (configs.getChild(i) [Ids::name].toString() == nameToFind)
-            return true;
-
-    return false;
-}
-
-String ProjectExporter::getUniqueConfigName (String nm) const
-{
-    auto nameRoot = nm;
-    while (CharacterFunctions::isDigit (nameRoot.getLastCharacter()))
-        nameRoot = nameRoot.dropLastCharacters (1);
-
-    nameRoot = nameRoot.trim();
-
-    int suffix = 2;
-    while (hasConfigurationNamed (name))
-        nm = nameRoot + " " + String (suffix++);
-
-    return nm;
-}
-
 void ProjectExporter::addNewConfigurationFromExisting (const BuildConfiguration& configToCopy)
 {
     auto configs = getConfigurations();
@@ -894,33 +917,40 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      librarySearchPathValue        (config, Ids::libraryPath,              getUndoManager()),
      userNotesValue                (config, Ids::userNotes,                getUndoManager()),
      usePrecompiledHeaderFileValue (config, Ids::usePrecompiledHeaderFile, getUndoManager(), false),
-     precompiledHeaderFileValue    (config, Ids::precompiledHeaderFile,    getUndoManager())
+     precompiledHeaderFileValue    (config, Ids::precompiledHeaderFile,    getUndoManager()),
+     configCompilerFlagsValue      (config, Ids::extraCompilerFlags,       getUndoManager()),
+     configLinkerFlagsValue        (config, Ids::extraLinkerFlags,         getUndoManager())
 {
     auto& llvmFlags = recommendedCompilerWarningFlags[CompilerNames::llvm] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
-    llvmFlags.common.addArray ({
-        "-Wshorten-64-to-32", "-Wconversion", "-Wint-conversion",
-        "-Wconditional-uninitialized", "-Wconstant-conversion", "-Wbool-conversion",
-        "-Wextra-semi", "-Wshift-sign-overflow",
-        "-Wshadow-all", "-Wnullable-to-nonnull-conversion",
-        "-Wmissing-prototypes"
-    });
-    llvmFlags.cpp.addArray ({
-        "-Wunused-private-field", "-Winconsistent-missing-destructor-override"
-    });
-    llvmFlags.objc.addArray ({
-        "-Wunguarded-availability", "-Wunguarded-availability-new"
-    });
+
+    llvmFlags.common.addArray ({ "-Wshadow-all",
+                                 "-Wshorten-64-to-32",
+                                 "-Wconversion",
+                                 "-Wint-conversion",
+                                 "-Wconditional-uninitialized",
+                                 "-Wconstant-conversion",
+                                 "-Wbool-conversion",
+                                 "-Wextra-semi",
+                                 "-Wshift-sign-overflow",
+                                 "-Wmissing-prototypes",
+                                 "-Wnullable-to-nonnull-conversion",
+                                 "-Wpedantic",
+                                 "-Wdeprecated" });
+
+    llvmFlags.cpp.addArray ({ "-Wunused-private-field",
+                              "-Winconsistent-missing-destructor-override" });
+
+    llvmFlags.objc.addArray ({ "-Wunguarded-availability",
+                               "-Wunguarded-availability-new" });
 
     auto& gccFlags = recommendedCompilerWarningFlags[CompilerNames::gcc] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
-    gccFlags.common.addArray ({
-        "-Wextra", "-Wsign-compare", "-Wno-implicit-fallthrough", "-Wno-maybe-uninitialized",
-        "-Wredundant-decls", "-Wno-strict-overflow",
-        "-Wshadow"
-    });
-}
-
-ProjectExporter::BuildConfiguration::~BuildConfiguration()
-{
+    gccFlags.common.addArray ({ "-Wextra",
+                                "-Wsign-compare",
+                                "-Wno-implicit-fallthrough",
+                                "-Wno-maybe-uninitialized",
+                                "-Wredundant-decls",
+                                "-Wno-strict-overflow",
+                                "-Wshadow" });
 }
 
 String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
@@ -1007,6 +1037,12 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
+    props.add (new TextPropertyComponent (configCompilerFlagsValue, "Configuration-specific Compiler Flags", 8192, true),
+               "Compiler flags that are only to be used in this configuration.");
+
+    props.add (new TextPropertyComponent (configLinkerFlagsValue, "Configuration-specific Linker Flags", 8192, true),
+               "Linker flags that are only to be used in this configuration.");
+
     props.add (new ChoicePropertyComponent (linkTimeOptimisationValue, "Link-Time Optimisation"),
                "Enable this to perform link-time code optimisation. This is recommended for release builds.");
 
@@ -1036,28 +1072,6 @@ StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() co
 {
     return mergePreprocessorDefs (project.getPreprocessorDefs(),
                                   parsePreprocessorDefs (getBuildConfigPreprocessorDefsString()));
-}
-
-StringPairArray ProjectExporter::BuildConfiguration::getUniquePreprocessorDefs() const
-{
-    auto perConfigurationDefs = parsePreprocessorDefs (getBuildConfigPreprocessorDefsString());
-    auto globalDefs = project.getPreprocessorDefs();
-
-    for (int i = 0; i < globalDefs.size(); ++i)
-    {
-        auto globalKey = globalDefs.getAllKeys()[i];
-
-        int idx = perConfigurationDefs.getAllKeys().indexOf (globalKey);
-        if (idx >= 0)
-        {
-            auto globalValue = globalDefs.getAllValues()[i];
-
-            if (globalValue == perConfigurationDefs.getAllValues()[idx])
-                perConfigurationDefs.remove (idx);
-        }
-    }
-
-    return perConfigurationDefs;
 }
 
 StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
@@ -1115,4 +1129,116 @@ String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& confi
         return replacePreprocessorTokens (config, "-l" + libraries.joinIntoString (" -l")).trim();
 
     return {};
+}
+
+//==============================================================================
+LinuxSubprocessHelperProperties::LinuxSubprocessHelperProperties (ProjectExporter& projectExporter)
+    : owner (projectExporter)
+{}
+
+bool LinuxSubprocessHelperProperties::shouldUseLinuxSubprocessHelper() const
+{
+    const auto& project = owner.getProject();
+    const auto& projectType = project.getProjectType();
+
+    return    owner.isLinux()
+           && isWebBrowserComponentEnabled (project)
+           && ! (projectType.isCommandLineApp())
+           && ! (projectType.isGUIApplication());
+}
+
+void LinuxSubprocessHelperProperties::deployLinuxSubprocessHelperSourceFilesIfNecessary() const
+{
+    if (shouldUseLinuxSubprocessHelper())
+    {
+        const auto deployHelperSourceFile = [] (auto& sourcePath, auto& contents)
+        {
+            if (! sourcePath.isRoot() && ! sourcePath.getParentDirectory().exists())
+            {
+                sourcePath.getParentDirectory().createDirectory();
+            }
+
+            build_tools::overwriteFileIfDifferentOrThrow (sourcePath, contents);
+        };
+
+        const std::pair<File, const char*> sources[]
+        {
+            { owner.resolveRelativePath (getSimpleBinaryBuilderSource()),   BinaryData::juce_SimpleBinaryBuilder_cpp   },
+            { owner.resolveRelativePath (getLinuxSubprocessHelperSource()), BinaryData::juce_LinuxSubprocessHelper_cpp }
+        };
+
+        for (const auto& [path, source] : sources)
+        {
+            deployHelperSourceFile (path, source);
+        }
+    }
+}
+
+build_tools::RelativePath LinuxSubprocessHelperProperties::getLinuxSubprocessHelperSource() const
+{
+    return build_tools::RelativePath { "make_helpers", build_tools::RelativePath::buildTargetFolder }
+        .getChildFile ("juce_LinuxSubprocessHelper.cpp");
+}
+
+void LinuxSubprocessHelperProperties::setCompileDefinitionIfNecessary (StringPairArray& defs) const
+{
+    if (shouldUseLinuxSubprocessHelper())
+        defs.set (useLinuxSubprocessHelperCompileDefinition, "1");
+}
+
+build_tools::RelativePath LinuxSubprocessHelperProperties::getSimpleBinaryBuilderSource() const
+{
+    return build_tools::RelativePath { "make_helpers", build_tools::RelativePath::buildTargetFolder }
+                            .getChildFile ("juce_SimpleBinaryBuilder.cpp");
+}
+
+build_tools::RelativePath LinuxSubprocessHelperProperties::getLinuxSubprocessHelperBinaryDataSource() const
+{
+    return build_tools::RelativePath ("pre_build", juce::build_tools::RelativePath::buildTargetFolder)
+                            .getChildFile ("juce_LinuxSubprocessHelperBinaryData.cpp");
+}
+
+void LinuxSubprocessHelperProperties::addToExtraSearchPathsIfNecessary() const
+{
+    if (shouldUseLinuxSubprocessHelper())
+    {
+        const auto subprocessHelperBinaryDir = getLinuxSubprocessHelperBinaryDataSource().getParentDirectory();
+        owner.addToExtraSearchPaths (owner.rebaseFromBuildTargetToProjectFolder (subprocessHelperBinaryDir));
+    }
+}
+
+std::optional<String> LinuxSubprocessHelperProperties::getParentDirectoryRelativeToBuildTargetFolder (build_tools::RelativePath rp)
+{
+    jassert (rp.getRoot() == juce::build_tools::RelativePath::buildTargetFolder);
+    const auto parentDir = rp.getParentDirectory().toUnixStyle();
+    return parentDir == rp.toUnixStyle() ? std::nullopt : std::make_optional (parentDir);
+}
+
+String LinuxSubprocessHelperProperties::makeSnakeCase (const String& s)
+{
+    String result;
+    result.preallocateBytes (128);
+
+    bool previousCharacterUnderscore = false;
+
+    for (const auto c : s)
+    {
+        if (   CharacterFunctions::isUpperCase (c)
+            && result.length() != 0
+            && ! (previousCharacterUnderscore))
+        {
+            result << "_";
+        }
+
+        result << CharacterFunctions::toLowerCase (c);
+
+        previousCharacterUnderscore = c == '_';
+    }
+
+    return result;
+}
+
+String LinuxSubprocessHelperProperties::getBinaryNameFromSource (const build_tools::RelativePath& rp)
+{
+    return makeSnakeCase (rp.getFileNameWithoutExtension());
 }

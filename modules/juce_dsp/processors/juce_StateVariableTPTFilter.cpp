@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -133,5 +131,4 @@ void StateVariableTPTFilter<SampleType>::update()
 template class StateVariableTPTFilter<float>;
 template class StateVariableTPTFilter<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

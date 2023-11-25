@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename Element>
@@ -72,7 +70,7 @@ private:
     std::vector<Element> storage;
 };
 
-class BackgroundMessageQueue  : private Thread
+class BackgroundMessageQueue : private Thread
 {
 public:
     explicit BackgroundMessageQueue (int entries)
@@ -647,7 +645,7 @@ static AudioBuffer<float> resampleImpulseResponse (const AudioBuffer<float>& buf
                                                    const double srcSampleRate,
                                                    const double destSampleRate)
 {
-    if (srcSampleRate == destSampleRate)
+    if (approximatelyEqual (srcSampleRate, destSampleRate))
         return buf;
 
     const auto factorReading = srcSampleRate / destSampleRate;
@@ -845,7 +843,7 @@ static void setImpulseResponse (ConvolutionEngineFactory& factory,
 // this object when adding commands to the background message queue.
 // That way, we can avoid dangling references in the background thread in the case
 // that a Convolution instance is deleted before the background message queue.
-class ConvolutionEngineQueue  : public std::enable_shared_from_this<ConvolutionEngineQueue>
+class ConvolutionEngineQueue final : public std::enable_shared_from_this<ConvolutionEngineQueue>
 {
 public:
     ConvolutionEngineQueue (BackgroundMessageQueue& queue,
@@ -1293,5 +1291,4 @@ int Convolution::getCurrentIRSize() const { return pimpl->getCurrentIRSize(); }
 
 int Convolution::getLatency() const { return pimpl->getLatency(); }
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

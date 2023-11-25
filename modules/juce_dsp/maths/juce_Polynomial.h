@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -94,7 +92,7 @@ public:
         FloatingType y (0);
 
         for (int i = coeffs.size(); --i >= 0;)
-            y = (x * y) + coeffs.getUnchecked(i);
+            y = (x * y) + coeffs.getUnchecked (i);
 
         return y;
     }
@@ -164,5 +162,4 @@ private:
     JUCE_LEAK_DETECTOR (Polynomial)
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

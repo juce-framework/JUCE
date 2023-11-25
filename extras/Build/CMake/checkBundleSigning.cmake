@@ -33,5 +33,5 @@ execute_process(
 
 if(result)
     message(STATUS "Replacing invalid signature with ad-hoc signature")
-    execute_process(COMMAND "${JUCE_XCRUN}" codesign -s - "${src}")
+    execute_process(COMMAND "${JUCE_XCRUN}" codesign -f -s - "${src}")
 endif()

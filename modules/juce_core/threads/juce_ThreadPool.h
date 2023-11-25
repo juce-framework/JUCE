@@ -140,6 +140,51 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob)
 };
 
+//==============================================================================
+/**
+    A set of threads that will run a list of jobs.
+
+    When a ThreadPoolJob object is added to the ThreadPool's list, its runJob() method
+    will be called by the next pooled thread that becomes free.
+
+    @see ThreadPoolJob, Thread
+
+    @tags{Core}
+*/
+struct ThreadPoolOptions
+{
+    /** The name to give each thread in the pool. */
+    [[nodiscard]] ThreadPoolOptions withThreadName (String newThreadName) const
+    {
+        return withMember (*this, &ThreadPoolOptions::threadName, newThreadName);
+    }
+
+    /** The number of threads to run.
+        These will be started when a pool is created, and run until the pool is destroyed.
+    */
+    [[nodiscard]] ThreadPoolOptions withNumberOfThreads (int newNumberOfThreads) const
+    {
+        return withMember (*this, &ThreadPoolOptions::numberOfThreads, newNumberOfThreads);
+    }
+
+    /** The size of the stack of each thread in the pool. */
+    [[nodiscard]] ThreadPoolOptions withThreadStackSizeBytes (size_t newThreadStackSizeBytes) const
+    {
+        return withMember (*this, &ThreadPoolOptions::threadStackSizeBytes, newThreadStackSizeBytes);
+    }
+
+    /** The desired priority of each thread in the pool. */
+    [[nodiscard]] ThreadPoolOptions withDesiredThreadPriority (Thread::Priority newDesiredThreadPriority) const
+    {
+        return withMember (*this, &ThreadPoolOptions::desiredThreadPriority, newDesiredThreadPriority);
+    }
+
+    String threadName { "Pool" };
+    int numberOfThreads { SystemStats::getNumCpus() };
+    size_t threadStackSizeBytes { Thread::osDefaultStackSize };
+    Thread::Priority desiredThreadPriority { Thread::Priority::normal };
+};
+
 
 //==============================================================================
 /**
@@ -155,25 +200,38 @@ private:
 class JUCE_API  ThreadPool
 {
 public:
+    using Options = ThreadPoolOptions;
+
     //==============================================================================
+    /** Creates a thread pool based on the provided options.
+        Once you've created a pool, you can give it some jobs by calling addJob().
+
+        @see ThreadPool::ThreadPoolOptions
+    */
+    explicit ThreadPool (const Options& options);
+
+    /** Creates a thread pool based using the default arguments provided by
+        ThreadPoolOptions.
+
+        Once you've created a pool, you can give it some jobs by calling addJob().
+
+        @see ThreadPoolOptions
+    */
+    ThreadPool() : ThreadPool { Options{} } {}
+
     /** Creates a thread pool.
         Once you've created a pool, you can give it some jobs by calling addJob().
 
-        @param numberOfThreads  the number of threads to run. These will be started
-                                immediately, and will run until the pool is deleted.
-        @param threadStackSize  the size of the stack of each thread. If this value
-                                is zero then the default stack size of the OS will
-                                be used.
+        @param numberOfThreads       the number of threads to run. These will be started
+                                     immediately, and will run until the pool is deleted.
+        @param threadStackSizeBytes  the size of the stack of each thread. If this value
+                                     is zero then the default stack size of the OS will
+                                     be used.
+        @param desiredThreadPriority the desired priority of each thread in the pool.
     */
-    ThreadPool (int numberOfThreads, size_t threadStackSize = 0);
-
-    /** Creates a thread pool with one thread per CPU core.
-        Once you've created a pool, you can give it some jobs by calling addJob().
-        If you want to specify the number of threads, use the other constructor; this
-        one creates a pool which has one thread for each CPU core.
-        @see SystemStats::getNumCpus()
-    */
-    ThreadPool();
+    ThreadPool (int numberOfThreads,
+                size_t threadStackSizeBytes = Thread::osDefaultStackSize,
+                Thread::Priority desiredThreadPriority = Thread::Priority::normal);
 
     /** Destructor.
 
@@ -309,13 +367,6 @@ public:
     */
     StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
 
-    /** Changes the priority of all the threads.
-        This will call Thread::setPriority() for each thread in the pool.
-        May return false if for some reason the priority can't be changed.
-    */
-    bool setThreadPriorities (int newPriority);
-
-
 private:
     //==============================================================================
     Array<ThreadPoolJob*> jobs;
@@ -330,7 +381,6 @@ private:
     bool runNextJob (ThreadPoolThread&);
     ThreadPoolJob* pickNextJobToRun();
     void addToDeleteList (OwnedArray<ThreadPoolJob>&, ThreadPoolJob*) const;
-    void createThreads (int numThreads, size_t threadStackSize = 0);
     void stopThreads();
 
     // Note that this method has changed, and no longer has a parameter to indicate

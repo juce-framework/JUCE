@@ -48,7 +48,7 @@
 
 
 //==============================================================================
-class HelloWorldDemo  : public Component
+class HelloWorldDemo final : public Component
 {
 public:
     //==============================================================================
@@ -99,8 +99,8 @@ public:
 
 private:
     //==============================================================================
-    Label helloWorldLabel { {}, TRANS("Hello World!") };
-    TextButton quitButton { TRANS("Quit") };
+    Label helloWorldLabel { {}, TRANS ("Hello World!") };
+    TextButton quitButton { TRANS ("Quit") };
     Path internalPath;
 
     //==============================================================================

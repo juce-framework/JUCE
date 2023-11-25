@@ -144,8 +144,8 @@ public:
         int lineWrapLength = 60;           /**< A maximum line length before wrapping is done. (If newLineChars is nullptr, this is ignored) */
         const char* newLineChars = "\r\n"; /**< Allows the newline characters to be set. If you set this to nullptr, then the whole XML document will be placed on a single line. */
 
-        JUCE_NODISCARD TextFormat singleLine() const;     /**< returns a copy of this format with newLineChars set to nullptr. */
-        JUCE_NODISCARD TextFormat withoutHeader() const;  /**< returns a copy of this format with the addDefaultHeader flag set to false. */
+        [[nodiscard]] TextFormat singleLine() const;     /**< returns a copy of this format with newLineChars set to nullptr. */
+        [[nodiscard]] TextFormat withoutHeader() const;  /**< returns a copy of this format with the addDefaultHeader flag set to false. */
     };
 
     /** Returns a text version of this XML element.
@@ -206,7 +206,7 @@ public:
     /** Returns the name of one of the elements attributes.
 
         E.g. for an element such as \<MOOSE legs="4" antlers="2">, then
-        getAttributeName(1) would return "antlers".
+        getAttributeName (1) would return "antlers".
 
         @see getAttributeValue, getStringAttribute
     */
@@ -215,7 +215,7 @@ public:
     /** Returns the value of one of the elements attributes.
 
         E.g. for an element such as \<MOOSE legs="4" antlers="2">, then
-        getAttributeName(1) would return "2".
+        getAttributeName (1) would return "2".
 
         @see getAttributeName, getStringAttribute
     */
@@ -689,7 +689,7 @@ private:
             return *this;
         }
 
-        Iterator operator++(int)
+        Iterator operator++ (int)
         {
             auto copy = *this;
             ++(*this);
@@ -790,7 +790,7 @@ private:
     void reorderChildElements (XmlElement**, int) noexcept;
     XmlAttributeNode* getAttribute (StringRef) const noexcept;
 
-    // Sigh.. L"" or _T("") string literals are problematic in general, and really inappropriate
+    // Sigh.. L"" or _T ("") string literals are problematic in general, and really inappropriate
     // for XML tags. Use a UTF-8 encoded literal instead, or if you're really determined to use
     // UTF-16, cast it to a String and use the other constructor.
     XmlElement (const wchar_t*) = delete;

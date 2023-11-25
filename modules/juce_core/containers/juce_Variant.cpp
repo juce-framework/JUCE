@@ -201,7 +201,7 @@ struct var::VariantType
     static int64  doubleToInt64  (const ValueUnion& data) noexcept   { return (int64) data.doubleValue; }
     static double doubleToDouble (const ValueUnion& data) noexcept   { return data.doubleValue; }
     static String doubleToString (const ValueUnion& data)            { return serialiseDouble (data.doubleValue); }
-    static bool   doubleToBool   (const ValueUnion& data) noexcept   { return data.doubleValue != 0.0; }
+    static bool   doubleToBool   (const ValueUnion& data) noexcept   { return ! exactlyEqual (data.doubleValue, 0.0); }
 
     static bool doubleEquals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) noexcept
     {
@@ -314,7 +314,7 @@ struct var::VariantType
     static var objectClone (const var& original)
     {
         if (auto* d = original.getDynamicObject())
-            return d->clone().get();
+            return d->clone().release();
 
         jassertfalse; // can only clone DynamicObjects!
         return {};
@@ -401,7 +401,7 @@ struct var::VariantType
         }
     }
 
-    struct RefCountedArray  : public ReferenceCountedObject
+    struct RefCountedArray final : public ReferenceCountedObject
     {
         RefCountedArray (const Array<var>& a)  : array (a)  { incReferenceCount(); }
         RefCountedArray (Array<var>&& a)  : array (std::move (a)) { incReferenceCount(); }
@@ -492,18 +492,6 @@ struct var::Instance
     static constexpr VariantType attributesBinary         { VariantType::BinaryTag{} };
     static constexpr VariantType attributesObject         { VariantType::ObjectTag{} };
 };
-
-constexpr var::VariantType var::Instance::attributesVoid;
-constexpr var::VariantType var::Instance::attributesUndefined;
-constexpr var::VariantType var::Instance::attributesInt;
-constexpr var::VariantType var::Instance::attributesInt64;
-constexpr var::VariantType var::Instance::attributesBool;
-constexpr var::VariantType var::Instance::attributesDouble;
-constexpr var::VariantType var::Instance::attributesMethod;
-constexpr var::VariantType var::Instance::attributesArray;
-constexpr var::VariantType var::Instance::attributesString;
-constexpr var::VariantType var::Instance::attributesBinary;
-constexpr var::VariantType var::Instance::attributesObject;
 
 //==============================================================================
 var::var() noexcept : type (&Instance::attributesVoid) {}
@@ -657,7 +645,7 @@ static int compare (const var& v1, const var& v2)
         return v1.toString().compare (v2.toString());
 
     auto diff = static_cast<double> (v1) - static_cast<double> (v2);
-    return diff == 0 ? 0 : (diff < 0 ? -1 : 1);
+    return exactlyEqual (diff, 0.0) ? 0 : (diff < 0 ? -1 : 1);
 }
 
 bool operator== (const var& v1, const var& v2)     { return v1.equals (v2); }

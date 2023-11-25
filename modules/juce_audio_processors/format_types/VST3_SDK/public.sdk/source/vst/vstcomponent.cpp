@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -70,7 +70,7 @@ BusList* Component::getBusList (MediaType type, BusDirection dir)
 {
 	if (type == kAudio)
 		return dir == kInput ? &audioInputs : &audioOutputs;
-	else if (type == kEvent)
+	if (type == kEvent)
 		return dir == kInput ? &eventInputs : &eventOutputs;
 	return nullptr;
 }

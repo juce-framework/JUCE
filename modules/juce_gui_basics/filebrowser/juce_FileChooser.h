@@ -46,7 +46,7 @@ namespace juce
             File mooseFile (chooser.getResult());
 
             loadMoose (mooseFile);
-        }
+        });
     }
     @endcode
 
@@ -292,6 +292,19 @@ public:
         have installed the iCloud app on their device and used the app at least once.
     */
     static bool isPlatformDialogAvailable();
+
+    /** Associate a particular file-extension to a mime-type
+
+        On Android, JUCE needs to convert common file extensions to mime-types when using
+        wildcard filters in native file chooser dialog boxes. JUCE has an extensive conversion
+        table to convert between the most common file-types and mime-types transparently, but
+        some more obscure file-types may be missing. Use this method to register your own
+        mime-type to file extension conversions. Please contact the JUCE team if you think
+        that a common mime-type/file-extension entry is missing in JUCE's internal tables.
+        Does nothing on other platforms.
+    */
+    static void registerCustomMimeTypeForFileExtension (const String& mimeType,
+                                                        const String& fileExtension);
 
     //==============================================================================
    #ifndef DOXYGEN

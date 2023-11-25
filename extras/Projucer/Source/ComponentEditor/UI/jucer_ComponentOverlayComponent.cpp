@@ -47,7 +47,7 @@ ComponentOverlayComponent::ComponentOverlayComponent (Component* const target_,
 
     target->addComponentListener (this);
 
-    changeListenerCallback (nullptr);
+    updateSelected();
     layout.getSelectedSet().addChangeListener (this);
 
     setRepaintsOnMouseActivity (true);
@@ -62,7 +62,7 @@ ComponentOverlayComponent::~ComponentOverlayComponent()
         target->removeComponentListener (this);
 }
 
-void ComponentOverlayComponent::changeListenerCallback (ChangeBroadcaster*)
+void ComponentOverlayComponent::updateSelected()
 {
     const bool nowSelected = layout.getSelectedSet().isSelected (target);
 
@@ -72,6 +72,11 @@ void ComponentOverlayComponent::changeListenerCallback (ChangeBroadcaster*)
         border->setVisible (nowSelected);
         repaint();
     }
+}
+
+void ComponentOverlayComponent::changeListenerCallback (ChangeBroadcaster*)
+{
+    updateSelected();
 }
 
 void ComponentOverlayComponent::paint (Graphics& g)

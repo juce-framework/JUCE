@@ -104,9 +104,9 @@ public:
         {
             for (int i = selectedItems.size(); --i >= 0;)
             {
-                if (selectedItems.getUnchecked(i) != item)
+                if (selectedItems.getUnchecked (i) != item)
                 {
-                    deselect (selectedItems.getUnchecked(i));
+                    deselect (selectedItems.getUnchecked (i));
                     i = jmin (i, selectedItems.size());
                 }
             }

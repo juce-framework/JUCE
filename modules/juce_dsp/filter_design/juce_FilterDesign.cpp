@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename FloatType>
@@ -145,6 +143,11 @@ typename FIR::Coefficients<FloatType>::Ptr
     auto* result = new typename FIR::Coefficients<FloatType> (static_cast<size_t> (N));
     auto* c = result->getRawCoefficients();
 
+    auto sinc = [] (double x)
+    {
+        return approximatelyEqual (x, 0.0) ? 1 : std::sin (x * MathConstants<double>::pi) / (MathConstants<double>::pi * x);
+    };
+
     if (N % 2 == 1)
     {
         // Type I
@@ -152,9 +155,6 @@ typename FIR::Coefficients<FloatType>::Ptr
 
         Matrix<double> b (M + 1, 1),
                        q (2 * M + 1, 1);
-
-        auto sinc = [] (double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
-                                                          / (MathConstants<double>::pi * x); };
 
         auto factorp = wp / MathConstants<double>::pi;
         auto factors = ws / MathConstants<double>::pi;
@@ -190,9 +190,6 @@ typename FIR::Coefficients<FloatType>::Ptr
         Matrix<double> b (M, 1);
         Matrix<double> qp (2 * M, 1);
         Matrix<double> qs (2 * M, 1);
-
-        auto sinc = [] (double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
-                                                          / (MathConstants<double>::pi * x); };
 
         auto factorp = wp / MathConstants<double>::pi;
         auto factors = ws / MathConstants<double>::pi;
@@ -470,7 +467,7 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
         auto v0 = std::asinh (epss) / (N * halfPi);
 
         if (r == 1)
-            pa.add(-1.0 / (k / omegap * std::sinh (v0 * halfPi)));
+            pa.add (-1.0 / (k / omegap * std::sinh (v0 * halfPi)));
 
         for (int i = 1; i <= L; ++i)
         {
@@ -698,5 +695,4 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
 template struct FilterDesign<float>;
 template struct FilterDesign<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

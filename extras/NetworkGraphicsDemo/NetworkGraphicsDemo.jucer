@@ -19,10 +19,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" bigIcon="Ww6bQw" applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxCompatibility="10.9 SDK" isDebug="1" targetName="JUCE Network Graphics Demo"
-                       macOSDeploymentTarget="10.9"/>
-        <CONFIGURATION name="Release" osxCompatibility="10.9 SDK" isDebug="0" targetName="JUCE Network Graphics Demo"
-                       macOSDeploymentTarget="10.9"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -111,8 +109,8 @@
                    androidCpp11="1" targetFolder="Builds/Android" bigIcon="Ww6bQw"
                    gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" androidArchitectures="armeabi-v7a x86" isDebug="1"
-                       optimisation="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="6" targetName="JUCE Network Graphics Demo"
+                       defines="JUCE_DEBUG=0"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

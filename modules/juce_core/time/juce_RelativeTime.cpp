@@ -54,8 +54,16 @@ RelativeTime RelativeTime::operator-= (double secs) noexcept        { numSeconds
 JUCE_API RelativeTime JUCE_CALLTYPE operator+ (RelativeTime t1, RelativeTime t2) noexcept  { return t1 += t2; }
 JUCE_API RelativeTime JUCE_CALLTYPE operator- (RelativeTime t1, RelativeTime t2) noexcept  { return t1 -= t2; }
 
-JUCE_API bool JUCE_CALLTYPE operator== (RelativeTime t1, RelativeTime t2) noexcept       { return t1.inSeconds() == t2.inSeconds(); }
-JUCE_API bool JUCE_CALLTYPE operator!= (RelativeTime t1, RelativeTime t2) noexcept       { return t1.inSeconds() != t2.inSeconds(); }
+JUCE_API bool JUCE_CALLTYPE operator== (RelativeTime t1, RelativeTime t2) noexcept
+{
+    return exactlyEqual (t1.inSeconds(), t2.inSeconds());
+}
+
+JUCE_API bool JUCE_CALLTYPE operator!= (RelativeTime t1, RelativeTime t2) noexcept
+{
+    return ! (t1 == t2);
+}
+
 JUCE_API bool JUCE_CALLTYPE operator>  (RelativeTime t1, RelativeTime t2) noexcept       { return t1.inSeconds() >  t2.inSeconds(); }
 JUCE_API bool JUCE_CALLTYPE operator<  (RelativeTime t1, RelativeTime t2) noexcept       { return t1.inSeconds() <  t2.inSeconds(); }
 JUCE_API bool JUCE_CALLTYPE operator>= (RelativeTime t1, RelativeTime t2) noexcept       { return t1.inSeconds() >= t2.inSeconds(); }
@@ -67,13 +75,13 @@ static String translateTimeField (int n, const char* singular, const char* plura
     return TRANS (n == 1 ? singular : plural).replace (n == 1 ? "1" : "2", String (n));
 }
 
-static String describeYears   (int n)      { return translateTimeField (n, NEEDS_TRANS("1 year"),  NEEDS_TRANS("2 years")); }
-static String describeMonths  (int n)      { return translateTimeField (n, NEEDS_TRANS("1 month"), NEEDS_TRANS("2 months")); }
-static String describeWeeks   (int n)      { return translateTimeField (n, NEEDS_TRANS("1 week"),  NEEDS_TRANS("2 weeks")); }
-static String describeDays    (int n)      { return translateTimeField (n, NEEDS_TRANS("1 day"),   NEEDS_TRANS("2 days")); }
-static String describeHours   (int n)      { return translateTimeField (n, NEEDS_TRANS("1 hr"),    NEEDS_TRANS("2 hrs")); }
-static String describeMinutes (int n)      { return translateTimeField (n, NEEDS_TRANS("1 min"),   NEEDS_TRANS("2 mins")); }
-static String describeSeconds (int n)      { return translateTimeField (n, NEEDS_TRANS("1 sec"),   NEEDS_TRANS("2 secs")); }
+static String describeYears   (int n)      { return translateTimeField (n, NEEDS_TRANS ("1 year"),  NEEDS_TRANS ("2 years")); }
+static String describeMonths  (int n)      { return translateTimeField (n, NEEDS_TRANS ("1 month"), NEEDS_TRANS ("2 months")); }
+static String describeWeeks   (int n)      { return translateTimeField (n, NEEDS_TRANS ("1 week"),  NEEDS_TRANS ("2 weeks")); }
+static String describeDays    (int n)      { return translateTimeField (n, NEEDS_TRANS ("1 day"),   NEEDS_TRANS ("2 days")); }
+static String describeHours   (int n)      { return translateTimeField (n, NEEDS_TRANS ("1 hr"),    NEEDS_TRANS ("2 hrs")); }
+static String describeMinutes (int n)      { return translateTimeField (n, NEEDS_TRANS ("1 min"),   NEEDS_TRANS ("2 mins")); }
+static String describeSeconds (int n)      { return translateTimeField (n, NEEDS_TRANS ("1 sec"),   NEEDS_TRANS ("2 secs")); }
 
 String RelativeTime::getApproximateDescription() const
 {
@@ -86,7 +94,7 @@ String RelativeTime::getApproximateDescription() const
     if (weeks > 8)    return describeMonths ((weeks * 12) / 52);
     if (weeks > 1)    return describeWeeks (weeks);
 
-    auto days = (int) inWeeks();
+    auto days = (int) inDays();
 
     if (days > 1)
         return describeDays (days);

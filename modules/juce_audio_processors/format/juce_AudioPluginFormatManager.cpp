@@ -64,10 +64,8 @@ void AudioPluginFormatManager::addDefaultFormats()
 
    #if JUCE_DEBUG
     // you should only call this method once!
-    for (auto* format : formats)
+    for (auto* format [[maybe_unused]] : formats)
     {
-        ignoreUnused (format);
-
        #if HAS_VST
         jassert (dynamic_cast<VSTPluginFormat*> (format) == nullptr);
        #endif
@@ -161,7 +159,7 @@ void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescriptio
     if (auto* format = findFormatForDescription (description, error))
         return format->createPluginInstanceAsync (description, initialSampleRate, initialBufferSize, std::move (callback));
 
-    struct DeliverError  : public CallbackMessage
+    struct DeliverError final : public CallbackMessage
     {
         DeliverError (AudioPluginFormat::PluginCreationCallback c, const String& e)
             : call (std::move (c)), error (e)

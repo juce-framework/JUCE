@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -77,5 +75,4 @@ struct ProcessorWrapper  : public ProcessorBase
     ProcessorType processor;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

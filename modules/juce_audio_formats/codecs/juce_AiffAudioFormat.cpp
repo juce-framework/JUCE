@@ -382,7 +382,7 @@ namespace AiffFileHelpers
 }
 
 //==============================================================================
-class AiffAudioFormatReader  : public AudioFormatReader
+class AiffAudioFormatReader final : public AudioFormatReader
 {
 public:
     AiffAudioFormatReader (InputStream* in)
@@ -573,7 +573,7 @@ public:
     }
 
     //==============================================================================
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
@@ -640,7 +640,7 @@ private:
 };
 
 //==============================================================================
-class AiffAudioFormatWriter  : public AudioFormatWriter
+class AiffAudioFormatWriter final : public AudioFormatWriter
 {
 public:
     AiffAudioFormatWriter (OutputStream* out, double rate,
@@ -721,8 +721,7 @@ private:
     {
         using namespace AiffFileHelpers;
 
-        const bool couldSeekOk = output->setPosition (headerPosition);
-        ignoreUnused (couldSeekOk);
+        [[maybe_unused]] const bool couldSeekOk = output->setPosition (headerPosition);
 
         // if this fails, you've given it an output stream that can't seek! It needs
         // to be able to seek back to write the header
@@ -819,7 +818,7 @@ private:
 };
 
 //==============================================================================
-class MemoryMappedAiffReader   : public MemoryMappedAudioFormatReader
+class MemoryMappedAiffReader final : public MemoryMappedAudioFormatReader
 {
 public:
     MemoryMappedAiffReader (const File& f, const AiffAudioFormatReader& reader)
@@ -829,11 +828,14 @@ public:
     {
     }
 
-    bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
+    bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
+
+        if (numSamples <= 0)
+            return true;
 
         if (map == nullptr || ! mappedSection.contains (Range<int64> (startSampleInFile, startSampleInFile + numSamples)))
         {

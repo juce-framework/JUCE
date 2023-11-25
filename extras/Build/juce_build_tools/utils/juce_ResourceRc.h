@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     class ResourceRcOptions final
     {
     public:
@@ -39,5 +38,5 @@ namespace build_tools
         String projectName;
         File icon;
     };
-}
-}
+
+} // namespace juce::build_tools

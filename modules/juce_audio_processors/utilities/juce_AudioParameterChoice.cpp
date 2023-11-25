@@ -84,7 +84,7 @@ AudioParameterChoice& AudioParameterChoice::operator= (int newValue)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct AudioParameterChoiceTests  : public UnitTest
+struct AudioParameterChoiceTests final : public UnitTest
 {
     AudioParameterChoiceTests()
         : UnitTest ("AudioParameterChoice", UnitTestCategories::audioProcessorParameters)

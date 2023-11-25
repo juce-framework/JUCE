@@ -50,7 +50,7 @@ public:
         @param priority     the process priority, where
                             0=low, 1=normal, 2=high, 3=realtime
     */
-    static void JUCE_CALLTYPE setPriority (const ProcessPriority priority);
+    static void JUCE_CALLTYPE setPriority (ProcessPriority priority);
 
     /** Kills the current process immediately.
 
@@ -134,7 +134,7 @@ public:
    #endif
 
     //==============================================================================
-   #if (JUCE_MAC && JUCE_MODULE_AVAILABLE_juce_gui_basics) || DOXYGEN
+   #if JUCE_MAC || DOXYGEN
     /** OSX ONLY - Shows or hides the OSX dock icon for this app. */
     static void setDockIconVisible (bool isVisible);
    #endif

@@ -27,8 +27,8 @@ namespace juce
 {
 
 //==============================================================================
-class ChoiceRemapperValueSource  : public Value::ValueSource,
-                                   private Value::Listener
+class ChoiceRemapperValueSource final : public Value::ValueSource,
+                                        private Value::Listener
 {
 public:
     ChoiceRemapperValueSource (const Value& source, const Array<var>& map)
@@ -68,8 +68,8 @@ protected:
 };
 
 //==============================================================================
-class ChoiceRemapperValueSourceWithDefault  : public Value::ValueSource,
-                                              private Value::Listener
+class ChoiceRemapperValueSourceWithDefault final : public Value::ValueSource,
+                                                   private Value::Listener
 {
 public:
     ChoiceRemapperValueSourceWithDefault (const ValueTreePropertyWithDefault& v, const Array<var>& map)
@@ -136,13 +136,13 @@ ChoicePropertyComponent::ChoicePropertyComponent (const String& name)
 
 ChoicePropertyComponent::ChoicePropertyComponent (const String& name,
                                                   const StringArray& choiceList,
-                                                  const Array<var>& correspondingValues)
+                                                  [[maybe_unused]] const Array<var>& correspondingValues)
     : PropertyComponent (name),
       choices (choiceList)
 {
     // The array of corresponding values must contain one value for each of the items in
     // the choices array!
-    jassertquiet (correspondingValues.size() == choices.size());
+    jassert (correspondingValues.size() == choices.size());
 }
 
 ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
