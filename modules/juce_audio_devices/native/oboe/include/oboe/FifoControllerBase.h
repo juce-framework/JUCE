@@ -34,9 +34,11 @@ namespace oboe {
 class FifoControllerBase {
 
 public:
-    /**
-     * @param totalFrames capacity of the circular buffer in frames.
-     */
+   /**
+	 * Construct a `FifoControllerBase`.
+	 *
+	 * @param totalFrames capacity of the circular buffer in frames
+	 */
     FifoControllerBase(uint32_t totalFrames);
 
     virtual ~FifoControllerBase() = default;
@@ -45,35 +47,53 @@ public:
      * The frames available to read will be calculated from the read and write counters.
      * The result will be clipped to the capacity of the buffer.
      * If the buffer has underflowed then this will return zero.
+     *
      * @return number of valid frames available to read.
      */
     uint32_t getFullFramesAvailable() const;
 
-    /**
+	/**
      * The index in a circular buffer of the next frame to read.
+     *
+     * @return read index position
      */
     uint32_t getReadIndex() const;
 
-    /**
-     * @param numFrames number of frames to advance the read index
-     */
+   /**
+	* Advance read index from a number of frames.
+	* Equivalent of incrementReadCounter(numFrames).
+	*
+	* @param numFrames number of frames to advance the read index
+	*/
     void advanceReadIndex(uint32_t numFrames);
 
-    /**
-     * @return maximum number of frames that can be written without exceeding the threshold.
-     */
+	/**
+	 * Get the number of frame that are not written yet.
+	 *
+	 * @return maximum number of frames that can be written without exceeding the threshold
+	 */
     uint32_t getEmptyFramesAvailable() const;
 
     /**
-     * The index in a circular buffer of the next frame to write.
-     */
+	 * The index in a circular buffer of the next frame to write.
+	 *
+	 * @return index of the next frame to write
+	 */
     uint32_t getWriteIndex() const;
 
-    /**
+	/**
+     * Advance write index from a number of frames.
+     * Equivalent of incrementWriteCounter(numFrames).
+     *
      * @param numFrames number of frames to advance the write index
      */
     void advanceWriteIndex(uint32_t numFrames);
 
+	/**
+	 * Get the frame capacity of the fifo.
+	 *
+	 * @return frame capacity
+	 */
     uint32_t getFrameCapacity() const { return mTotalFrames; }
 
     virtual uint64_t getReadCounter() const = 0;

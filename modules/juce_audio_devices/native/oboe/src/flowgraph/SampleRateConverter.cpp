@@ -17,9 +17,10 @@
 #include "SampleRateConverter.h"
 
 using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
-using namespace resampler;
+using namespace RESAMPLER_OUTER_NAMESPACE::resampler;
 
-SampleRateConverter::SampleRateConverter(int32_t channelCount, MultiChannelResampler &resampler)
+SampleRateConverter::SampleRateConverter(int32_t channelCount,
+                                         MultiChannelResampler &resampler)
         : FlowGraphFilter(channelCount)
         , mResampler(resampler) {
     setDataPulledAutomatically(false);

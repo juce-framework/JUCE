@@ -20,6 +20,7 @@
 #include <SLES/OpenSLES_Android.h>
 #include <common/AudioClock.h>
 
+#include "common/OboeDebug.h"
 #include "oboe/AudioStreamBuilder.h"
 #include "AudioOutputStreamOpenSLES.h"
 #include "AudioStreamOpenSLES.h"
@@ -140,9 +141,10 @@ Result AudioOutputStreamOpenSLES::open() {
     SLuint32 bitsPerSample = static_cast<SLuint32>(getBytesPerSample() * kBitsPerByte);
 
     // configure audio source
+    mBufferQueueLength = calculateOptimalBufferQueueLength();
     SLDataLocator_AndroidSimpleBufferQueue loc_bufq = {
             SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,    // locatorType
-            static_cast<SLuint32>(kBufferQueueLength)};   // numBuffers
+            static_cast<SLuint32>(mBufferQueueLength)};   // numBuffers
 
     // Define the audio data format.
     SLDataFormat_PCM format_pcm = {
@@ -213,27 +215,16 @@ Result AudioOutputStreamOpenSLES::open() {
         goto error;
     }
 
-    result = AudioStreamOpenSLES::registerBufferQueueCallback();
+    result = finishCommonOpen(configItf);
     if (SL_RESULT_SUCCESS != result) {
         goto error;
     }
-
-    result = updateStreamParameters(configItf);
-    if (SL_RESULT_SUCCESS != result) {
-        goto error;
-    }
-
-    oboeResult = configureBufferSizes(mSampleRate);
-    if (Result::OK != oboeResult) {
-        goto error;
-    }
-
-    allocateFifo();
 
     setState(StreamState::Open);
     return Result::OK;
 
 error:
+    close();  // Clean up various OpenSL objects and prevent resource leaks.
     return Result::ErrorInternal; // TODO convert error from SLES to OBOE
 }
 
@@ -249,7 +240,10 @@ Result AudioOutputStreamOpenSLES::close() {
     if (getState() == StreamState::Closed){
         result = Result::ErrorClosed;
     } else {
-        requestPause_l();
+        (void) requestPause_l();
+        if (OboeGlobals::areWorkaroundsEnabled()) {
+            sleepBeforeClose();
+        }
         // invalidate any interfaces
         mPlayInterface = nullptr;
         result = AudioStreamOpenSLES::close_l();
@@ -297,15 +291,27 @@ Result AudioOutputStreamOpenSLES::requestStart() {
     setDataCallbackEnabled(true);
 
     setState(StreamState::Starting);
+    closePerformanceHint();
+
+    if (getBufferDepth(mSimpleBufferQueueInterface) == 0) {
+        // Enqueue the first buffer if needed to start the streaming.
+        // We may need to stop the current stream.
+        bool shouldStopStream = processBufferCallback(mSimpleBufferQueueInterface);
+        if (shouldStopStream) {
+            LOGD("Stopping the current stream.");
+            if (requestStop_l() != Result::OK) {
+                LOGW("Failed to flush the stream. Error %s", convertToText(flush()));
+            }
+            setState(initialState);
+            mLock.unlock();
+            return Result::ErrorClosed;
+        }
+    }
+
     Result result = setPlayState_l(SL_PLAYSTATE_PLAYING);
     if (result == Result::OK) {
         setState(StreamState::Started);
         mLock.unlock();
-        if (getBufferDepth(mSimpleBufferQueueInterface) == 0) {
-            // Enqueue the first buffer if needed to start the streaming.
-            // This might call requestStop() so try to avoid a recursive lock.
-            processBufferCallback(mSimpleBufferQueueInterface);
-        }
     } else {
         setState(initialState);
         mLock.unlock();
@@ -326,6 +332,7 @@ Result AudioOutputStreamOpenSLES::requestPause_l() {
         case StreamState::Pausing:
         case StreamState::Paused:
             return Result::OK;
+        case StreamState::Uninitialized:
         case StreamState::Closed:
             return Result::ErrorClosed;
         default:
@@ -375,14 +382,19 @@ Result AudioOutputStreamOpenSLES::requestFlush_l() {
 }
 
 Result AudioOutputStreamOpenSLES::requestStop() {
-    LOGD("AudioOutputStreamOpenSLES(): %s() called", __func__);
     std::lock_guard<std::mutex> lock(mLock);
+    return requestStop_l();
+}
+
+Result AudioOutputStreamOpenSLES::requestStop_l() {
+    LOGD("AudioOutputStreamOpenSLES(): %s() called", __func__);
 
     StreamState initialState = getState();
     switch (initialState) {
         case StreamState::Stopping:
         case StreamState::Stopped:
             return Result::OK;
+        case StreamState::Uninitialized:
         case StreamState::Closed:
             return Result::ErrorClosed;
         default:

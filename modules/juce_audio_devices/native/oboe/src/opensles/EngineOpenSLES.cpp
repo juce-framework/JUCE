@@ -14,11 +14,46 @@
  * limitations under the License.
  */
 
+#include <dlfcn.h>
 #include "common/OboeDebug.h"
 #include "EngineOpenSLES.h"
 #include "OpenSLESUtilities.h"
 
 using namespace oboe;
+
+// OpenSL ES is deprecated in SDK 30.
+// So we use custom dynamic linking to access the library.
+#define LIB_OPENSLES_NAME "libOpenSLES.so"
+typedef SLresult  (*prototype_slCreateEngine)(
+        SLObjectItf             *pEngine,
+        SLuint32                numOptions,
+        const SLEngineOption    *pEngineOptions,
+        SLuint32                numInterfaces,
+        const SLInterfaceID     *pInterfaceIds,
+        const SLboolean         *pInterfaceRequired
+);
+static prototype_slCreateEngine gFunction_slCreateEngine = nullptr;
+static void *gLibOpenSlesLibraryHandle = nullptr;
+
+// Load the OpenSL ES library and the one primary entry point.
+// @return true if linked OK
+static bool linkOpenSLES() {
+    if (gLibOpenSlesLibraryHandle == nullptr && gFunction_slCreateEngine == nullptr) {
+        // Use RTLD_NOW to avoid the unpredictable behavior that RTLD_LAZY can cause.
+        // Also resolving all the links now will prevent a run-time penalty later.
+        gLibOpenSlesLibraryHandle = dlopen(LIB_OPENSLES_NAME, RTLD_NOW);
+        if (gLibOpenSlesLibraryHandle == nullptr) {
+            LOGE("linkOpenSLES() could not find " LIB_OPENSLES_NAME);
+        } else {
+            gFunction_slCreateEngine = (prototype_slCreateEngine) dlsym(
+                    gLibOpenSlesLibraryHandle,
+                    "slCreateEngine");
+            LOGD("linkOpenSLES(): dlsym(%s) returned %p", "slCreateEngine",
+                 gFunction_slCreateEngine);
+        }
+    }
+    return gFunction_slCreateEngine != nullptr;
+}
 
 EngineOpenSLES &EngineOpenSLES::getInstance() {
     static EngineOpenSLES sInstance;
@@ -30,9 +65,14 @@ SLresult EngineOpenSLES::open() {
 
     SLresult result = SL_RESULT_SUCCESS;
     if (mOpenCount++ == 0) {
+        // load the library and link to it
+        if (!linkOpenSLES()) {
+            result = SL_RESULT_FEATURE_UNSUPPORTED;
+            goto error;
+        };
 
         // create engine
-        result = slCreateEngine(&mEngineObject, 0, NULL, 0, NULL, NULL);
+        result = (*gFunction_slCreateEngine)(&mEngineObject, 0, NULL, 0, NULL, NULL);
         if (SL_RESULT_SUCCESS != result) {
             LOGE("EngineOpenSLES - slCreateEngine() result:%s", getSLErrStr(result));
             goto error;

@@ -22,6 +22,7 @@
 #include <mutex>
 #include <thread>
 
+#include <common/AdpfWrapper.h>
 #include "oboe/AudioStreamBuilder.h"
 #include "oboe/AudioStream.h"
 #include "oboe/Definitions.h"
@@ -51,6 +52,7 @@ public:
     // These functions override methods in AudioStream.
     // See AudioStream for documentation.
     Result open() override;
+    Result release() override;
     Result close() override;
 
     Result requestStart() override;
@@ -91,7 +93,12 @@ public:
                                                    void *audioData,
                                                    int32_t numFrames);
 
-    bool                 isMMapUsed();
+    bool isMMapUsed();
+
+    void closePerformanceHint() override {
+        mAdpfWrapper.close();
+        mAdpfOpenAttempted = false;
+    }
 
 protected:
     static void internalErrorCallback(
@@ -108,6 +115,14 @@ protected:
 
     void logUnsupportedAttributes();
 
+    void beginPerformanceHintInCallback() override;
+
+    void endPerformanceHintInCallback(int32_t numFrames) override;
+
+    // set by callback (or app when idle)
+    std::atomic<bool>    mAdpfOpenAttempted{false};
+    AdpfWrapper          mAdpfWrapper;
+
 private:
     // Must call under mLock. And stream must NOT be nullptr.
     Result requestStop_l(AAudioStream *stream);
@@ -117,9 +132,7 @@ private:
      */
     void launchStopThread();
 
-    // Time to sleep in order to prevent a race condition with a callback after a close().
-    // Two milliseconds may be enough but 10 msec is even safer.
-    static constexpr int kDelayBeforeCloseMillis = 10;
+private:
 
     std::atomic<bool>    mCallbackThreadEnabled;
     std::atomic<bool>    mStopThreadAllowed{false};

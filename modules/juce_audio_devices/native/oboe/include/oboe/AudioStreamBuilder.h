@@ -19,6 +19,7 @@
 
 #include "oboe/Definitions.h"
 #include "oboe/AudioStreamBase.h"
+#include "oboe/Utilities.h"
 #include "ResultWithValue.h"
 
 namespace oboe {
@@ -42,11 +43,35 @@ public:
      *
      * Default is kUnspecified. If the value is unspecified then
      * the application should query for the actual value after the stream is opened.
+     *
+     * As the channel count here may be different from the corresponding channel count of
+     * provided channel mask used in setChannelMask(). The last called will be respected
+     * if this function and setChannelMask() are called.
      */
     AudioStreamBuilder *setChannelCount(int channelCount) {
         mChannelCount = channelCount;
+        mChannelMask = ChannelMask::Unspecified;
         return this;
     }
+
+    /**
+     * Request a specific channel mask.
+     *
+     * Default is kUnspecified. If the value is unspecified then the application
+     * should query for the actual value after the stream is opened.
+     *
+     * As the corresponding channel count of provided channel mask here may be different
+     * from the channel count used in setChannelCount(). The last called will be respected
+     * if this function and setChannelCount() are called.
+     *
+     * As the setChannelMask API is available on Android 32+, this call will only take effects
+     * on Android 32+.
+     */
+     AudioStreamBuilder *setChannelMask(ChannelMask channelMask) {
+         mChannelMask = channelMask;
+         mChannelCount = getChannelCountFromChannelMask(channelMask);
+         return this;
+     }
 
     /**
      * Request the direction for a stream. The default is Direction::Output.
@@ -91,6 +116,14 @@ public:
      * leaving this unspecified. This allow the underlying API to optimize
      * the callbacks. But if your application is, for example, doing FFTs or other block
      * oriented operations, then call this function to get the sizes you need.
+     *
+     * Calling setFramesPerDataCallback() does not guarantee anything about timing.
+     * This just collects the data into a the number of frames that your app requires.
+     * We encourage leaving this unspecified in most cases.
+     *
+     * If this number is larger than the burst size, some bursts will not receive a callback.
+     * If this number is smaller than the burst size, there may be multiple callbacks in a single
+     * burst.
      *
      * @param framesPerCallback
      * @return pointer to the builder so calls can be chained
@@ -295,11 +328,14 @@ public:
      * In most cases, the primary device will be the appropriate device to use, and the
      * deviceId can be left kUnspecified.
      *
-     * On Android, for example, the ID could be obtained from the Java AudioManager.
-     * AudioManager.getDevices() returns an array of AudioDeviceInfo[], which contains
-     * a getId() method (as well as other type information), that should be passed
-     * to this method.
+     * The ID could be obtained from the Java AudioManager.
+     * AudioManager.getDevices() returns an array of AudioDeviceInfo,
+     * which contains a getId() method. That ID can be passed to this function.
      *
+     * It is possible that you may not get the device that you requested.
+     * So if it is important to you, you should call
+     * stream->getDeviceId() after the stream is opened to
+     * verify the actual ID.
      *
      * Note that when using OpenSL ES, this will be ignored and the created
      * stream will have deviceId kUnspecified.
@@ -313,16 +349,114 @@ public:
     }
 
     /**
+     * Specify whether this stream audio may or may not be captured by other apps or the system.
+     *
+     * The default is AllowedCapturePolicy::Unspecified which maps to AAUDIO_ALLOW_CAPTURE_BY_ALL.
+     *
+     * Note that an application can also set its global policy, in which case the most restrictive
+     * policy is always applied. See android.media.AudioAttributes.setAllowedCapturePolicy.
+     *
+     * Added in API level 29 to AAudio.
+     *
+     * @param inputPreset the desired level of opt-out from being captured.
+     * @return pointer to the builder so calls can be chained
+     */
+    AudioStreamBuilder *setAllowedCapturePolicy(AllowedCapturePolicy allowedCapturePolicy) {
+        mAllowedCapturePolicy = allowedCapturePolicy;
+        return this;
+    }
+
+    /** Indicates whether this input stream must be marked as privacy sensitive or not.
+     *
+     * When PrivacySensitiveMode::Enabled, this input stream is privacy sensitive and any
+     * concurrent capture is not permitted.
+     *
+     * This is off (PrivacySensitiveMode::Disabled) by default except when the input preset is
+     * InputPreset::VoiceRecognition or InputPreset::Camcorder
+     *
+     * Always takes precedence over default from input preset when set explicitly.
+     *
+     * Only relevant if the stream direction is Direction::Input and AAudio is used.
+     *
+     * Added in API level 30 to AAudio.
+     *
+     * @param privacySensitive PrivacySensitiveMode::Enabled if capture from this stream must be
+     * marked as privacy sensitive, PrivacySensitiveMode::Disabled if stream should be marked as
+     * not sensitive.
+     * @return pointer to the builder so calls can be chained
+     */
+    AudioStreamBuilder *setPrivacySensitiveMode(PrivacySensitiveMode privacySensitiveMode) {
+        mPrivacySensitiveMode = privacySensitiveMode;
+        return this;
+    }
+
+    /**
+     * Specifies whether the audio data of this output stream has already been processed for spatialization.
+     *
+     * If the stream has been processed for spatialization, setting this to true will prevent issues such as
+     * double-processing on platforms that will spatialize audio data.
+     *
+     * This is false by default.
+     *
+     * Available since API level 32.
+     *
+     * @param isContentSpatialized whether the content is already spatialized
+     * @return pointer to the builder so calls can be chained
+     */
+    AudioStreamBuilder *setIsContentSpatialized(bool isContentSpatialized) {
+        mIsContentSpatialized = isContentSpatialized;
+        return this;
+    }
+
+    /**
+     * Sets the behavior affecting whether spatialization will be used.
+     *
+     * The AAudio system will use this information to select whether the stream will go through a
+     * spatializer effect or not when the effect is supported and enabled.
+     *
+     * This is SpatializationBehavior::Never by default.
+     *
+     * Available since API level 32.
+     *
+     * @param spatializationBehavior the desired spatialization behavior
+     * @return pointer to the builder so calls can be chained
+     */
+    AudioStreamBuilder *setSpatializationBehavior(SpatializationBehavior spatializationBehavior) {
+        mSpatializationBehavior = spatializationBehavior;
+        return this;
+    }
+
+    /**
      * Specifies an object to handle data related callbacks from the underlying API.
      *
      * <strong>Important: See AudioStreamCallback for restrictions on what may be called
      * from the callback methods.</strong>
      *
-     * @param dataCallback
+     * We pass a shared_ptr so that the sharedDataCallback object cannot be deleted
+     * before the stream is deleted.
+     *
+     * @param sharedDataCallback
      * @return pointer to the builder so calls can be chained
      */
-    AudioStreamBuilder *setDataCallback(oboe::AudioStreamDataCallback *dataCallback) {
+    AudioStreamBuilder *setDataCallback(std::shared_ptr<AudioStreamDataCallback> sharedDataCallback) {
+        // Use this raw pointer in the rest of the code to retain backwards compatibility.
+        mDataCallback = sharedDataCallback.get();
+        // Hold a shared_ptr to protect the raw pointer for the lifetime of the stream.
+        mSharedDataCallback = sharedDataCallback;
+        return this;
+    }
+
+    /**
+    * Pass a raw pointer to a data callback. This is not recommended because the dataCallback
+    * object might get deleted by the app while it is being used.
+    *
+    * @deprecated Call setDataCallback(std::shared_ptr<AudioStreamDataCallback>) instead.
+    * @param dataCallback
+    * @return pointer to the builder so calls can be chained
+    */
+    AudioStreamBuilder *setDataCallback(AudioStreamDataCallback *dataCallback) {
         mDataCallback = dataCallback;
+        mSharedDataCallback = nullptr;
         return this;
     }
 
@@ -338,11 +472,32 @@ public:
      * <strong>When an error callback occurs, the associated stream must be stopped and closed
      * in a separate thread.</strong>
      *
-     * @param errorCallback
+     * We pass a shared_ptr so that the errorCallback object cannot be deleted before the stream is deleted.
+     * If the stream was created using a shared_ptr then the stream cannot be deleted before the
+     * error callback has finished running.
+     *
+     * @param sharedErrorCallback
      * @return pointer to the builder so calls can be chained
      */
-    AudioStreamBuilder *setErrorCallback(oboe::AudioStreamErrorCallback *errorCallback) {
+    AudioStreamBuilder *setErrorCallback(std::shared_ptr<AudioStreamErrorCallback> sharedErrorCallback) {
+        // Use this raw pointer in the rest of the code to retain backwards compatibility.
+        mErrorCallback = sharedErrorCallback.get();
+        // Hold a shared_ptr to protect the raw pointer for the lifetime of the stream.
+        mSharedErrorCallback = sharedErrorCallback;
+        return this;
+    }
+
+    /**
+    * Pass a raw pointer to an error callback. This is not recommended because the errorCallback
+    * object might get deleted by the app while it is being used.
+    *
+    * @deprecated Call setErrorCallback(std::shared_ptr<AudioStreamErrorCallback>) instead.
+    * @param errorCallback
+    * @return pointer to the builder so calls can be chained
+    */
+    AudioStreamBuilder *setErrorCallback(AudioStreamErrorCallback *errorCallback) {
         mErrorCallback = errorCallback;
+        mSharedErrorCallback = nullptr;
         return this;
     }
 
@@ -354,18 +509,8 @@ public:
      * <strong>Important: See AudioStreamCallback for restrictions on what may be called
      * from the callback methods.</strong>
      *
-     * When an error callback occurs, the associated stream will be stopped and closed in a separate thread.
-     *
-     * A note on why the streamCallback parameter is a raw pointer rather than a smart pointer:
-     *
-     * The caller should retain ownership of the object streamCallback points to. At first glance weak_ptr may seem like
-     * a good candidate for streamCallback as this implies temporary ownership. However, a weak_ptr can only be created
-     * from a shared_ptr. A shared_ptr incurs some performance overhead. The callback object is likely to be accessed
-     * every few milliseconds when the stream requires new data so this overhead is something we want to avoid.
-     *
-     * This leaves a raw pointer as the logical type choice. The only caveat being that the caller must not destroy
-     * the callback before the stream has been closed.
-     *
+     * @deprecated Call setDataCallback(std::shared_ptr<AudioStreamDataCallback>) and
+     *     setErrorCallback(std::shared_ptr<AudioStreamErrorCallback>) instead.
      * @param streamCallback
      * @return pointer to the builder so calls can be chained
      */
@@ -383,7 +528,7 @@ public:
      * On some devices, mono streams might be broken, so a stereo stream might be opened
      * and converted to mono.
      *
-     * Default is true.
+     * Default is false.
      */
     AudioStreamBuilder *setChannelConversionAllowed(bool allowed) {
         mChannelConversionAllowed = allowed;
@@ -419,32 +564,37 @@ public:
     }
 
     /**
-     * Declare the name of the package creating the stream.
-     *
-     * This is usually Context#getPackageName()
-     *
-     * The default, if you do not call this function, is a random package in the calling uid.
-     *
-     * Added in API level 31.
-     *
-     * @param packageName packageName of the calling app.
-     */
+    * Declare the name of the package creating the stream.
+    *
+    * This is usually {@code Context#getPackageName()}.
+    *
+    * The default, if you do not call this function, is a random package in the calling uid.
+    * The vast majority of apps have only one package per calling UID.
+    * If an invalid package name is set, input streams may not be given permission to
+    * record when started.
+    *
+    * The package name is usually the applicationId in your app's build.gradle file.
+    *
+    * Available since API level 31.
+    *
+    * @param packageName packageName of the calling app.
+    */
     AudioStreamBuilder *setPackageName(std::string packageName) {
         mPackageName = packageName;
         return this;
     }
 
     /**
-     * Declare the attribution tag of the context creating the stream.
-     *
-     * This is usually Context#getAttributionTag()
-     *
-     * The default, if you do not call this function, is the default attribution tag.
-     *
-     * Added in API level 31.
-     *
-     * @param attributionTag attributionTag of the calling context.
-     */
+    * Declare the attribution tag of the context creating the stream.
+    *
+    * This is usually {@code Context#getAttributionTag()}.
+    *
+    * The default, if you do not call this function, is null.
+    *
+    * Available since API level 31.
+    *
+    * @param attributionTag attributionTag of the calling context.
+    */
     AudioStreamBuilder *setAttributionTag(std::string attributionTag) {
         mAttributionTag = attributionTag;
         return this;
