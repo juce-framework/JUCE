@@ -40,7 +40,7 @@ public:
         cancelPendingUpdate();
         signalThreadShouldExit();
         callbackArrived.signal();
-        stopThread (4000);
+        stopThread (-1);
     }
 
     void run() override
