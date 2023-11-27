@@ -1975,6 +1975,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\memory\juce_MemoryBlock.cpp">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\memory\juce_SharedResourcePointer_test.cpp">
+      <Filter>JUCE Modules\juce_core\memory</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_ConsoleApplication.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClCompile>
