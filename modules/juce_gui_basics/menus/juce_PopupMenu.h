@@ -562,6 +562,13 @@ public:
         */
         [[nodiscard]] Options withInitiallySelectedItem (int idOfItemToBeSelected) const;
 
+        /** Returns a copy of these options with the target component set to null. The value of the
+            top-level target component will not be changed.
+
+            @see getTargetComponent(), getTopLevelTargetComponent()
+        */
+        [[nodiscard]] Options forSubmenu() const;
+
         //==============================================================================
         /** Gets the parent component. This may be nullptr if the Component has been deleted.
 
@@ -574,6 +581,14 @@ public:
             @see withTargetComponent
         */
         Component* getTargetComponent() const noexcept               { return targetComponent; }
+
+        /** Gets the target component that was set for the top-level menu.
+
+            When querying the options of a submenu, getTargetComponent() will always return
+            nullptr, while getTopLevelTargetComponent() will return the target passed to
+            withTargetComponent() when creating the top-level menu.
+        */
+        Component* getTopLevelTargetComponent() const noexcept       { return topLevelTarget; }
 
         /** Returns true if the menu was watching a component, and that component has been deleted, and false otherwise.
 
@@ -632,7 +647,7 @@ public:
     private:
         //==============================================================================
         Rectangle<int> targetArea;
-        WeakReference<Component> targetComponent, parentComponent, componentToWatchForDeletion;
+        WeakReference<Component> targetComponent, parentComponent, componentToWatchForDeletion, topLevelTarget;
         int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0, initiallySelectedItemId = 0;
         bool isWatchingForDeletion = false;
         PopupDirection preferredPopupDirection = PopupDirection::downwards;

@@ -1195,22 +1195,19 @@ struct MenuWindow final : public Component
     {
         activeSubMenu.reset();
 
-        if (childComp != nullptr
-             && hasActiveSubMenu (childComp->item))
-        {
-            activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
-                                                                options.withTargetScreenArea (childComp->getScreenBounds())
-                                                                       .withMinimumWidth (0)
-                                                                       .withTargetComponent (nullptr),
-                                                                false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
+        if (childComp == nullptr || ! hasActiveSubMenu (childComp->item))
+            return false;
 
-            activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
-            activeSubMenu->enterModalState (false);
-            activeSubMenu->toFront (false);
-            return true;
-        }
+        activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
+                                                            options.forSubmenu()
+                                                                   .withTargetScreenArea (childComp->getScreenBounds())
+                                                                   .withMinimumWidth (0),
+                                                            false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
 
-        return false;
+        activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
+        activeSubMenu->enterModalState (false);
+        activeSubMenu->toFront (false);
+        return true;
     }
 
     void triggerCurrentlyHighlightedItem()
@@ -1975,7 +1972,7 @@ static PopupMenu::Options with (PopupMenu::Options options, Member&& member, Ite
 
 PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
 {
-    auto o = with (*this, &Options::targetComponent, comp);
+    auto o = with (with (*this, &Options::targetComponent, comp), &Options::topLevelTarget, comp);
 
     if (comp != nullptr)
         o.targetArea = comp->getScreenBounds();
@@ -2043,6 +2040,11 @@ PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirecti
 PopupMenu::Options PopupMenu::Options::withInitiallySelectedItem (int idOfItemToBeSelected) const
 {
     return with (*this, &Options::initiallySelectedItemId, idOfItemToBeSelected);
+}
+
+PopupMenu::Options PopupMenu::Options::forSubmenu() const
+{
+    return with (*this, &Options::targetComponent, nullptr);
 }
 
 Component* PopupMenu::createWindow (const Options& options,
