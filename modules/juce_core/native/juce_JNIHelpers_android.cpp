@@ -167,7 +167,7 @@ void JNIClassBase::initialise (JNIEnv* env, jobject context)
 
     if (sdkVersion >= minSDK)
     {
-        LocalRef<jstring> classNameAndPackage (javaString (String (classPath).replaceCharacter (L'/', L'.')));
+        const auto classNameAndPackage = javaString (String (classPath).replaceCharacter (L'/', L'.'));
         static Array<GlobalRef> byteCodeLoaders;
 
         if (! SystemJavaClassComparator::isSystemClass (this))
@@ -175,8 +175,9 @@ void JNIClassBase::initialise (JNIEnv* env, jobject context)
             // We use the context's class loader, rather than the 'system' class loader, because we
             // may need to load classes from our library dependencies (such as the BillingClient
             // library), and the system class loader is not aware of those libraries.
+            const LocalRef<jclass> contextClass { env->FindClass ("android/content/Context") };
             const LocalRef<jobject> defaultClassLoader { env->CallObjectMethod (context,
-                                                                                env->GetMethodID (env->FindClass ("android/content/Context"),
+                                                                                env->GetMethodID (contextClass,
                                                                                                   "getClassLoader",
                                                                                                   "()Ljava/lang/ClassLoader;")) };
 
@@ -347,12 +348,12 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
     // you need to override at least one interface
     jassert (interfaceNames.size() > 0);
 
-    auto classArray = LocalRef<jobject> (env->NewObjectArray (interfaceNames.size(), JavaClass, nullptr));
+    LocalRef<jobject> classArray { env->NewObjectArray (interfaceNames.size(), JavaClass, nullptr) };
     LocalRef<jobject> classLoader;
 
     for (auto i = 0; i < interfaceNames.size(); ++i)
     {
-        auto aClass = LocalRef<jobject> (env->FindClass (interfaceNames[i].toRawUTF8()));
+        LocalRef<jobject> aClass { env->FindClass (interfaceNames[i].toRawUTF8()) };
 
         if (aClass != nullptr)
         {
@@ -368,8 +369,8 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
         }
     }
 
-    auto invocationHandler = LocalRef<jobject> (env->NewObject (JuceInvocationHandler, JuceInvocationHandler.constructor,
-                                                                reinterpret_cast<jlong> (implementer)));
+    LocalRef<jobject> invocationHandler { env->NewObject (JuceInvocationHandler, JuceInvocationHandler.constructor,
+                                                          reinterpret_cast<jlong> (implementer)) };
 
     // CreateJavaInterface() is expected to be called just once for a given implementer
     jassert (implementer->invocationHandler == nullptr);
@@ -490,7 +491,7 @@ int getAndroidSDKVersion()
         // when this method is used
         auto* env = getEnv();
 
-        auto buildVersion = env->FindClass ("android/os/Build$VERSION");
+        LocalRef<jclass> buildVersion { env->FindClass ("android/os/Build$VERSION") };
         jassert (buildVersion != nullptr);
 
         auto sdkVersionField = env->GetStaticFieldID (buildVersion, "SDK_INT", "I");
@@ -684,19 +685,17 @@ String audioManagerGetProperty (const String& property)
     LocalRef<jobject> audioManager (env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService,
                                                            javaString ("audio").get()));
 
-    if (audioManager != nullptr)
-    {
-        LocalRef<jstring> jProperty (javaString (property));
+    if (audioManager == nullptr)
+        return {};
 
-        auto methodID = env->GetMethodID (AndroidAudioManager, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;");
+    auto methodID = env->GetMethodID (AndroidAudioManager, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;");
 
-        if (methodID != nullptr)
-            return juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (audioManager.get(),
-                                                                                   methodID,
-                                                                                   javaString (property).get())));
-    }
+    if (methodID == nullptr)
+        return {};
 
-    return {};
+    return juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (audioManager.get(),
+                                                                           methodID,
+                                                                           javaString (property).get())));
 }
 
 }

@@ -84,7 +84,7 @@ extern "C" jint JNIEXPORT JNI_OnLoad (JavaVM* vm, void*)
     auto* env = getEnv();
 
     // register the initialisation function
-    auto juceJavaClass = env->FindClass ("com/rmsl/juce/Java");
+    LocalRef<jclass> juceJavaClass { env->FindClass ("com/rmsl/juce/Java") };
 
     if (juceJavaClass != nullptr)
     {
@@ -111,7 +111,7 @@ class JuceActivityWatcher final : public ActivityLifecycleCallbacks
 public:
     JuceActivityWatcher()
     {
-        LocalRef<jobject> appContext (getAppContext());
+        auto appContext = getAppContext();
 
         if (appContext != nullptr)
         {
@@ -126,7 +126,7 @@ public:
 
     ~JuceActivityWatcher() override
     {
-        LocalRef<jobject> appContext (getAppContext());
+        auto appContext = getAppContext();
 
         if (appContext != nullptr && myself != nullptr)
         {
@@ -219,7 +219,7 @@ private:
 
         if (mainActivity == nullptr)
         {
-            LocalRef<jobject> appContext (getAppContext());
+            auto appContext = getAppContext();
             auto mainActivityPath = getMainActivityClassPath();
 
             if (mainActivityPath.isNotEmpty())
@@ -241,7 +241,7 @@ private:
 
         if (mainActivityClassPath.isEmpty())
         {
-            LocalRef<jobject> appContext (getAppContext());
+            auto appContext = getAppContext();
 
             if (appContext != nullptr)
             {

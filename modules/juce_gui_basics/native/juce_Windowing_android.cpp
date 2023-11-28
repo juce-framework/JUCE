@@ -1332,7 +1332,7 @@ public:
 
             // we don't know if the user is holding on to a local ref to this, so
             // explicitly create a new one
-            auto nativeView = LocalRef<jobject> (env->NewLocalRef (static_cast<jobject> (nativeViewHandle)));
+            LocalRef<jobject> nativeView { env->NewLocalRef (static_cast<jobject> (nativeViewHandle)) };
 
             if (env->IsInstanceOf (nativeView.get(), AndroidActivity))
             {
@@ -1765,7 +1765,7 @@ public:
 
         if (! handled)
         {
-            LocalRef<jobject> activity (getCurrentActivity());
+            auto activity = getCurrentActivity();
 
             if (activity != nullptr)
             {
@@ -1930,7 +1930,7 @@ public:
     }
 
     //==============================================================================
-    static void handleDoFrameCallback (JNIEnv*, AndroidComponentPeer& t, [[maybe_unused]] int64 frameTimeNanos)
+    static void handleDoFrameCallback (JNIEnv*, AndroidComponentPeer& t, [[maybe_unused]] jlong frameTimeNanos)
     {
         const auto timestampSec = (double) frameTimeNanos / (double) 1'000'000'000;
         t.callVBlankListeners (timestampSec);
@@ -1938,12 +1938,14 @@ public:
 
     static void handlePaintCallback (JNIEnv* env, AndroidComponentPeer& t, jobject canvas, jobject paint)
     {
-        jobject rect = env->CallObjectMethod (canvas, AndroidCanvas.getClipBounds);
-        auto left   = env->GetIntField (rect, AndroidRect.left);
-        auto top    = env->GetIntField (rect, AndroidRect.top);
-        auto right  = env->GetIntField (rect, AndroidRect.right);
-        auto bottom = env->GetIntField (rect, AndroidRect.bottom);
-        env->DeleteLocalRef (rect);
+        const auto [left, top, right, bottom] = std::invoke ([&]
+        {
+            LocalRef<jobject> rect { env->CallObjectMethod (canvas, AndroidCanvas.getClipBounds) };
+            return std::tuple (env->GetIntField (rect, AndroidRect.left),
+                               env->GetIntField (rect, AndroidRect.top),
+                               env->GetIntField (rect, AndroidRect.right),
+                               env->GetIntField (rect, AndroidRect.bottom));
+        });
 
         auto clip = Rectangle<int>::leftTopRightBottom (left, top, right, bottom);
 
@@ -2563,13 +2565,13 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     };
 
     JNIEnv* env = getEnv();
-    LocalRef<jstring> windowServiceString (javaString ("window"));
+    const auto windowServiceString = javaString ("window");
 
-    LocalRef<jobject> windowManager = LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService, windowServiceString.get()));
+    LocalRef<jobject> windowManager { env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService, windowServiceString.get()) };
 
     if (windowManager.get() != nullptr)
     {
-        LocalRef<jobject> display = LocalRef<jobject> (env->CallObjectMethod (windowManager, AndroidWindowManager.getDefaultDisplay));
+        LocalRef<jobject> display { env->CallObjectMethod (windowManager, AndroidWindowManager.getDefaultDisplay) };
 
         if (display.get() != nullptr)
         {
@@ -2620,7 +2622,7 @@ bool KeyPress::isKeyCurrentlyDown (int /*keyCode*/)
 JUCE_API void JUCE_CALLTYPE Process::hide()
 {
     auto* env = getEnv();
-    LocalRef<jobject> currentActivity (getCurrentActivity().get());
+    auto currentActivity = getCurrentActivity();
 
     if (env->CallBooleanMethod (currentActivity.get(), AndroidActivity.moveTaskToBack, true) == 0)
     {
@@ -2683,7 +2685,7 @@ public:
 
         if (methodName == "onCancel" || methodName == "onClick")
         {
-            auto* dialog = env->GetObjectArrayElement (args, 0);
+            LocalRef<jobject> dialog { env->GetObjectArrayElement (args, 0) };
             env->CallVoidMethod (dialog, AndroidDialogInterface.dismiss);
 
             NullCheckedInvocation::invoke (callback);
@@ -2785,8 +2787,7 @@ void Displays::findDisplays (float masterScale)
 {
     auto* env = getEnv();
 
-    LocalRef<jstring> windowServiceString (javaString ("window"));
-
+    const auto windowServiceString = javaString ("window");
     LocalRef<jobject> windowManager (env->CallObjectMethod (getAppContext(), AndroidContext.getSystemService, windowServiceString.get()));
     LocalRef<jobject> display (env->CallObjectMethod (windowManager, AndroidWindowManager.getDefaultDisplay));
 
