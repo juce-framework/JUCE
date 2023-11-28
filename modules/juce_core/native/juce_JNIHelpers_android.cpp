@@ -248,7 +248,7 @@ struct SystemJavaClassComparator
 
 //==============================================================================
 JNIClassBase::JNIClassBase (const char* cp, int classMinSDK, const uint8* bc, size_t n)
-    : classPath (cp), byteCode (bc), byteCodeSize (n), minSDK (classMinSDK), classRef (nullptr)
+    : classPath (cp), byteCode (bc), byteCodeSize (n), minSDK (classMinSDK)
 {
     SystemJavaClassComparator comparator;
 
@@ -375,7 +375,7 @@ void JNIClassBase::initialise (JNIEnv* env, jobject context)
         }
 
         if (classRef == nullptr)
-            classRef = (jclass) env->NewGlobalRef (LocalRef<jobject> (env->FindClass (classPath)));
+            classRef = GlobalRefImpl { LocalRef { env->FindClass (classPath) } };
 
         jassert (classRef != nullptr);
         initialiseFields (env);
@@ -388,23 +388,22 @@ void JNIClassBase::tryLoadingClassWithClassLoader (JNIEnv* env, jobject classLoa
 
     // Android SDK <= 19 has a bug where the class loader might throw an exception but still return
     // a non-nullptr. So don't assign the result of this call to a jobject just yet...
-    auto classObj = env->CallObjectMethod (classLoader, JavaClassLoader.loadClass, classNameAndPackage.get(), (jboolean) true);
+    LocalRef classObj { (jclass) env->CallObjectMethod (classLoader, JavaClassLoader.loadClass, classNameAndPackage.get(), (jboolean) true) };
 
     if (jthrowable exception = env->ExceptionOccurred())
     {
         env->ExceptionClear();
-        classObj = nullptr;
+        classObj = {};
     }
 
     // later versions of Android don't throw at all, so re-check the object
     if (classObj != nullptr)
-        classRef = (jclass) env->NewGlobalRef (LocalRef<jobject> (classObj));
+        classRef = GlobalRefImpl { classObj };
 }
 
 void JNIClassBase::release (JNIEnv* env)
 {
-    if (classRef != nullptr)
-        env->DeleteGlobalRef (classRef);
+    classRef.clear (env);
 }
 
 void JNIClassBase::initialiseAllClasses (JNIEnv* env, jobject context)

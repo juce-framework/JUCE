@@ -270,7 +270,7 @@ private:
     size_t byteCodeSize;
 
     int minSDK;
-    jclass classRef = nullptr;
+    GlobalRefImpl<jclass> classRef;
 
     static Array<JNIClassBase*>& getClasses();
     void initialise (JNIEnv*, jobject context);
