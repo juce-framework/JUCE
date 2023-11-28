@@ -1146,7 +1146,7 @@ public:
 
         auto* env = getEnv();
 
-        jclass audioManagerClass = env->FindClass ("android/media/AudioManager");
+        LocalRef<jclass> audioManagerClass { env->FindClass ("android/media/AudioManager") };
 
         // We should be really entering here only if API supports it.
         jassert (audioManagerClass != nullptr);
@@ -1202,7 +1202,7 @@ public:
 
     void addDevice (const LocalRef<jobject>& device, JNIEnv* env)
     {
-        auto deviceClass = LocalRef<jclass> ((jclass) env->FindClass ("android/media/AudioDeviceInfo"));
+        LocalRef<jclass> deviceClass { env->FindClass ("android/media/AudioDeviceInfo") };
 
         jmethodID getProductNameMethod = env->GetMethodID (deviceClass, "getProductName",
                                                            "()Ljava/lang/CharSequence;");

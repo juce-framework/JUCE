@@ -375,8 +375,8 @@ private:
 
         const auto context = getAppContext();
 
-        auto* klass = env->FindClass ("com/rmsl/juce/Receiver");
-        const LocalRef<jobject> replyIntent (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), klass));
+        LocalRef<jclass> klass { env->FindClass ("com/rmsl/juce/Receiver") };
+        const LocalRef<jobject> replyIntent (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), klass.get()));
         getEnv()->CallObjectMethod (replyIntent, AndroidIntent.putExtraInt, javaString ("com.rmsl.juce.JUCE_REQUEST_CODE").get(), request);
 
         const auto flags = FLAG_UPDATE_CURRENT | FLAG_IMMUTABLE;

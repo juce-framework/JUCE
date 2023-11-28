@@ -337,7 +337,7 @@ struct PushNotifications::Impl
     void notifyListenersAboutLocalNotification (const LocalRef<jobject>& intent)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getMainActivity());
+        auto context = getMainActivity();
 
         auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
 
@@ -575,7 +575,7 @@ struct PushNotifications::Impl
     static LocalRef<jobject> getNotificationManager()
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getMainActivity());
+        auto context = getMainActivity();
 
         return LocalRef<jobject> (env->CallObjectMethod (context.get(),
                                                          AndroidContext.getSystemService,
@@ -601,9 +601,9 @@ struct PushNotifications::Impl
     static LocalRef<jobject> createNotificationBuilder (const Notification& n)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getMainActivity());
+        auto context = getMainActivity();
 
-        jclass builderClass = env->FindClass ("android/app/Notification$Builder");
+        LocalRef<jclass> builderClass { env->FindClass ("android/app/Notification$Builder") };
         jassert (builderClass != nullptr);
 
         if (builderClass == nullptr)
@@ -621,7 +621,7 @@ struct PushNotifications::Impl
         jassert (builderConstructor != nullptr);
 
         if (builderConstructor == nullptr)
-            return LocalRef<jobject> (nullptr);
+            return LocalRef<jobject>();
 
         if (apiAtLeast26)
             return LocalRef<jobject> (env->NewObject (builderClass, builderConstructor,
@@ -638,7 +638,7 @@ struct PushNotifications::Impl
             return notificationBuilder;
 
         auto* env = getEnv();
-        LocalRef<jobject> context (getMainActivity());
+        auto context = getMainActivity();
 
         auto activityClass = LocalRef<jobject> (env->CallObjectMethod (context.get(), JavaObject.getClass));
         auto notifyIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), activityClass.get()));
@@ -875,7 +875,7 @@ struct PushNotifications::Impl
             return notificationBuilder;
 
         auto* env = getEnv();
-        LocalRef<jobject> context (getMainActivity());
+        auto context = getMainActivity();
 
         auto activityClass = LocalRef<jobject> (env->CallObjectMethod (context.get(), JavaObject.getClass));
         auto deleteIntent  = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructorWithContextAndClass, context.get(), activityClass.get()));
@@ -905,7 +905,7 @@ struct PushNotifications::Impl
             return notificationBuilder;
 
         auto* env = getEnv();
-        LocalRef<jobject> context (getMainActivity());
+        auto context = getMainActivity();
 
         for (const auto [actionIndex, action] : enumerate (n.actions))
         {
@@ -998,7 +998,7 @@ struct PushNotifications::Impl
     static LocalRef<jobject> juceUrlToAndroidUri (const URL& url)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getMainActivity());
+        auto context = getMainActivity();
 
         auto packageNameString = LocalRef<jstring> ((jstring) (env->CallObjectMethod (context.get(), AndroidContext.getPackageName)));
 
@@ -1462,7 +1462,7 @@ struct PushNotifications::Impl
     static bool intentActionContainsAnyOf (jobject intent, const StringArray& strings, bool includePackageName)
     {
         auto* env = getEnv();
-        LocalRef<jobject> context (getMainActivity());
+        auto context = getMainActivity();
 
         String packageName = includePackageName ? juceString ((jstring) env->CallObjectMethod (context.get(),
                                                                                                AndroidContext.getPackageName))
