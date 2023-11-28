@@ -26,8 +26,8 @@
 namespace juce
 {
 
-class NativeScopedContentSharerInterface : public detail::ScopedContentSharerInterface,
-                                           public detail::NativeModalWrapperComponent
+class NativeScopedContentSharerInterface final : public detail::ScopedContentSharerInterface,
+                                                 public detail::NativeModalWrapperComponent
 {
 public:
     NativeScopedContentSharerInterface (Component* parentIn, NSUniquePtr<NSArray> itemsIn)

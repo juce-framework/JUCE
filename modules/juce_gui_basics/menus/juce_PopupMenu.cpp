@@ -57,7 +57,7 @@ static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept
 }
 
 //==============================================================================
-struct HeaderItemComponent  : public PopupMenu::CustomComponent
+struct HeaderItemComponent final : public PopupMenu::CustomComponent
 {
     HeaderItemComponent (const String& name, const Options& opts)
         : CustomComponent (false), options (opts)
@@ -96,7 +96,7 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
 };
 
 //==============================================================================
-struct ItemComponent  : public Component
+struct ItemComponent final : public Component
 {
     ItemComponent (const PopupMenu::Item& i, const PopupMenu::Options& o, MenuWindow& parent)
         : item (i), parentWindow (parent), options (o), customComp (i.customComponent)
@@ -188,7 +188,7 @@ struct ItemComponent  : public Component
 
 private:
     //==============================================================================
-    class ItemAccessibilityHandler  : public AccessibilityHandler
+    class ItemAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         explicit ItemAccessibilityHandler (ItemComponent& itemComponentToWrap)
@@ -322,7 +322,7 @@ private:
 };
 
 //==============================================================================
-struct MenuWindow  : public Component
+struct MenuWindow final : public Component
 {
     MenuWindow (const PopupMenu& menu,
                 MenuWindow* parentWindow,
@@ -822,7 +822,7 @@ struct MenuWindow  : public Component
             targetPoint = relativeTo->localPointToGlobal (targetPoint);
 
         auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (targetPoint * scaleFactor);
-        auto parentArea = display->safeAreaInsets.subtractedFrom (display->totalArea);
+        auto parentArea = display->userArea.getIntersection (display->safeAreaInsets.subtractedFrom (display->totalArea));
 
         if (auto* pc = options.getParentComponent())
         {
@@ -1331,7 +1331,7 @@ struct MenuWindow  : public Component
 };
 
 //==============================================================================
-class MouseSourceState  : public Timer
+class MouseSourceState final : public Timer
 {
 public:
     MouseSourceState (MenuWindow& w, MouseInputSource s)
@@ -1574,7 +1574,7 @@ private:
 };
 
 //==============================================================================
-struct NormalComponentWrapper : public PopupMenu::CustomComponent
+struct NormalComponentWrapper final : public PopupMenu::CustomComponent
 {
     NormalComponentWrapper (Component& comp, int w, int h, bool triggerMenuItemAutomaticallyWhenClicked)
         : PopupMenu::CustomComponent (triggerMenuItemAutomaticallyWhenClicked),
@@ -2068,7 +2068,7 @@ Component* PopupMenu::createWindow (const Options& options,
 
 //==============================================================================
 // This invokes any command manager commands and deletes the menu window when it is dismissed
-struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
+struct PopupMenuCompletionCallback final : public ModalComponentManager::Callback
 {
     PopupMenuCompletionCallback() = default;
 

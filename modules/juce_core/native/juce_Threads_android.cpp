@@ -94,7 +94,7 @@ extern "C" jint JNIEXPORT JNI_OnLoad (JavaVM* vm, void*)
 }
 
 //==============================================================================
-class JuceActivityWatcher   : public ActivityLifecycleCallbacks
+class JuceActivityWatcher final : public ActivityLifecycleCallbacks
 {
 public:
     JuceActivityWatcher()

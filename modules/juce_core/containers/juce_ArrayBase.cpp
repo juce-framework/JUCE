@@ -99,7 +99,7 @@ static bool operator== (const ArrayBaseTestsHelpers::NonTriviallyCopyableType& n
     return tct == ntct;
 }
 
-class ArrayBaseTests  : public UnitTest
+class ArrayBaseTests final : public UnitTest
 {
     using CopyableType    = ArrayBaseTestsHelpers::TriviallyCopyableType;
     using NoncopyableType = ArrayBaseTestsHelpers::NonTriviallyCopyableType;
@@ -545,7 +545,7 @@ private:
         virtual ~Base() = default;
     };
 
-    struct Derived : Base
+    struct Derived final : public Base
     {
     };
 

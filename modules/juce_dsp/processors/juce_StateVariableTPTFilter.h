@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 enum class StateVariableTPTFilterType
@@ -162,5 +160,4 @@ private:
                resonance       = static_cast<SampleType> (1.0 / std::sqrt (2.0));
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

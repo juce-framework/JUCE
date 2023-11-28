@@ -1087,7 +1087,7 @@ private:
       #endif
     }
 
-    struct ParamsView   : public Component
+    struct ParamsView final : public Component
     {
         ParamsView()
         {

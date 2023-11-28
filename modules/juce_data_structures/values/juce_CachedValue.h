@@ -118,9 +118,7 @@ public:
     template <typename OtherType>
     bool operator== (const OtherType& other) const
     {
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfloat-equal")
         return cachedValue == other;
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     /** Returns true if the current value of the property (or the fallback value)

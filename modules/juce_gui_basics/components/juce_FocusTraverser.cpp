@@ -77,7 +77,7 @@ std::vector<Component*> FocusTraverser::getAllComponents (Component* parentCompo
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct FocusTraverserTests  : public UnitTest
+struct FocusTraverserTests final : public UnitTest
 {
     FocusTraverserTests()
         : UnitTest ("FocusTraverser", UnitTestCategories::gui)
@@ -207,7 +207,7 @@ struct FocusTraverserTests  : public UnitTest
     }
 
 private:
-    struct TestComponent  : public Component
+    struct TestComponent final : public Component
     {
         TestComponent()
         {

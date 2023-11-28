@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class TableHeaderComponent::DragOverlayComp   : public Component
+class TableHeaderComponent::DragOverlayComp final : public Component
 {
 public:
     DragOverlayComp (const Image& i) : image (i)

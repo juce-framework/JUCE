@@ -29,7 +29,7 @@
 #include "DemoContentComponent.h"
 
 //==============================================================================
-class MainComponent    : public Component
+class MainComponent final : public Component
 {
 public:
     //==============================================================================

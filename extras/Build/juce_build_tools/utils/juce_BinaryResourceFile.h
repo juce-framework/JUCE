@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     class ResourceFile
     {
     public:
@@ -70,5 +69,5 @@ namespace build_tools
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)
     };
-}
-}
+
+} // namespace juce::build_tools

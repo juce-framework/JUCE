@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)
     {
         if (! overwriteFileWithNewDataIfDifferent (file, newData))
@@ -355,5 +354,5 @@ namespace build_tools
         writer (mo);
         overwriteFileIfDifferentOrThrow (file, mo);
     }
-}
-}
+
+} // namespace juce::build_tools

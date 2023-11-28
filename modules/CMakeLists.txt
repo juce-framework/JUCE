@@ -40,6 +40,7 @@ juce_add_modules(
     juce_graphics
     juce_gui_basics
     juce_gui_extra
+    juce_midi_ci
     juce_opengl
     juce_osc
     juce_product_unlocking

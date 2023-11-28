@@ -32,7 +32,7 @@ extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelM
                              int topLevelIndex, bool addDelegate);
 
 //==============================================================================
-struct StatusItemContainer   : public Timer
+struct StatusItemContainer : public Timer
 {
     //==============================================================================
     StatusItemContainer (SystemTrayIconComponent& iconComp, const Image& im)
@@ -87,7 +87,7 @@ struct StatusItemContainer   : public Timer
 };
 
 //==============================================================================
-struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem : public StatusItemContainer
+struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem  final : public StatusItemContainer
 {
     //==============================================================================
     ButtonBasedStatusItem (SystemTrayIconComponent& iconComp, const Image& im)
@@ -178,7 +178,7 @@ struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem : public StatusItemCo
     }
 
     //==============================================================================
-    class ButtonEventForwarderClass   : public ObjCClass<NSObject>
+    class ButtonEventForwarderClass final : public ObjCClass<NSObject>
     {
     public:
         ButtonEventForwarderClass() : ObjCClass<NSObject> ("JUCEButtonEventForwarderClass_")
@@ -206,7 +206,7 @@ struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem : public StatusItemCo
 };
 
 //==============================================================================
-struct ViewBasedStatusItem   : public StatusItemContainer
+struct ViewBasedStatusItem final : public StatusItemContainer
 {
     //==============================================================================
     ViewBasedStatusItem (SystemTrayIconComponent& iconComp, const Image& im)
@@ -305,7 +305,7 @@ struct ViewBasedStatusItem   : public StatusItemContainer
     }
 
     //==============================================================================
-    struct SystemTrayViewClass : public ObjCClass<NSControl>
+    struct SystemTrayViewClass final : public ObjCClass<NSControl>
     {
         SystemTrayViewClass()  : ObjCClass<NSControl> ("JUCESystemTrayView_")
         {

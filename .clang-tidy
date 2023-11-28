@@ -3,6 +3,7 @@ Checks: >
     -clang-analyzer-optin.performance.Padding,
     -clang-analyzer-security.FloatLoopCounter,
     -clang-analyzer-security.insecureAPI.strcpy,
+    modernize-concat-nested-namespaces,
 
 WarningsAsErrors: '*'
 

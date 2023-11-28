@@ -186,9 +186,9 @@ struct AndroidBluetoothMidiDevice
 };
 
 //==============================================================================
-class AndroidBluetoothMidiDevicesListBox   : public ListBox,
-                                             private ListBoxModel,
-                                             private Timer
+class AndroidBluetoothMidiDevicesListBox final : public ListBox,
+                                                 private ListBoxModel,
+                                                 private Timer
 {
 public:
     //==============================================================================
@@ -302,8 +302,8 @@ private:
     }
 
     //==============================================================================
-    struct PairDeviceThread  : public Thread,
-                               private AsyncUpdater
+    struct PairDeviceThread final : public Thread,
+                                    private AsyncUpdater
     {
         PairDeviceThread (const String& bluetoothAddressOfDeviceToPair,
                           AndroidBluetoothMidiDevicesListBox& ownerListBox)
@@ -394,7 +394,7 @@ private:
 };
 
 //==============================================================================
-class BluetoothMidiSelectorOverlay  : public Component
+class BluetoothMidiSelectorOverlay final : public Component
 {
 public:
     BluetoothMidiSelectorOverlay (ModalComponentManager::Callback* exitCallbackToUse,

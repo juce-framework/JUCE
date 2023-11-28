@@ -25,13 +25,11 @@
 
 #if ! TARGET_IPHONE_SIMULATOR
 
-#include <CoreAudioKit/CoreAudioKit.h>
-
 namespace juce
 {
 
 //==============================================================================
-class BluetoothMidiSelectorOverlay  : public Component
+class BluetoothMidiSelectorOverlay final : public Component
 {
 public:
     BluetoothMidiSelectorOverlay (ModalComponentManager::Callback* exitCallbackToUse,

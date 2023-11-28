@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -150,5 +148,4 @@ void Phaser<SampleType>::update()
 template class Phaser<float>;
 template class Phaser<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

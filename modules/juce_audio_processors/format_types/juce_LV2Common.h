@@ -74,9 +74,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include <map>
 #include <type_traits>
 
-namespace juce
-{
-namespace lv2_shared
+namespace juce::lv2_shared
 {
 
 class AtomForge
@@ -664,7 +662,6 @@ static inline String sanitiseStringAsTtlName (const String& input)
     return String (CharPointer_UTF32 { sanitised.data() }, sanitised.size());
 }
 
-}
-}
+} // namespace juce::lv2_shared
 
 #endif

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename ElementType>
@@ -313,5 +311,4 @@ String Matrix<ElementType>::toString() const
 template class Matrix<float>;
 template class Matrix<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

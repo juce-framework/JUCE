@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 #ifndef DOXYGEN
@@ -392,9 +390,4 @@ private:
     }
 };
 
-} // namespace dsp
-} // namespace juce
-
-#ifndef DOXYGEN
- #include "juce_SIMDRegister_Impl.h"
-#endif
+} // namespace juce::dsp

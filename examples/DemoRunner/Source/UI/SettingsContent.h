@@ -28,7 +28,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-class SettingsContent    : public Component
+class SettingsContent final : public Component
 {
 public:
     SettingsContent (MainComponent& topLevelComponent)
@@ -67,8 +67,8 @@ private:
     static constexpr int itemHeight = 30;
     static constexpr int itemSpacing = 7;
 
-    class GraphicsSettingsGroup  : public Component,
-                                   private ComponentMovementWatcher
+    class GraphicsSettingsGroup final : public Component,
+                                        private ComponentMovementWatcher
     {
     public:
         GraphicsSettingsGroup (MainComponent& comp)
@@ -179,7 +179,7 @@ private:
         OwnedArray<LookAndFeel> lookAndFeels;
     };
 
-    class AudioSettingsGroup  : public Component
+    class AudioSettingsGroup final : public Component
     {
     public:
         AudioSettingsGroup()
@@ -211,7 +211,7 @@ private:
     };
 
     //==============================================================================
-    class InnerContent    : public Component
+    class InnerContent final : public Component
     {
     public:
         InnerContent (MainComponent& mainComponent)

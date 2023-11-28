@@ -23,15 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
-{
-
 /**
     Classes for state variable filter processing.
 */
-namespace StateVariableFilter
+namespace juce::dsp::StateVariableFilter
 {
     template <typename NumericType>
     struct Parameters;
@@ -254,7 +249,5 @@ namespace StateVariableFilter
         NumericType R2  = static_cast<NumericType> (MathConstants<double>::sqrt2);
         NumericType h   = static_cast<NumericType> (1.0 / (1.0 + R2 * g + g * g));
     };
-}
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp::StateVariableFilter

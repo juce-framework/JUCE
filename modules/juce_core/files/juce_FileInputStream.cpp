@@ -81,7 +81,7 @@ bool FileInputStream::setPosition (int64 pos)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct FileInputStreamTests   : public UnitTest
+struct FileInputStreamTests final : public UnitTest
 {
     FileInputStreamTests()
         : UnitTest ("FileInputStream", UnitTestCategories::streams)

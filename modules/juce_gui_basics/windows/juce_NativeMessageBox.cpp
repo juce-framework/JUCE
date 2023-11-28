@@ -37,7 +37,7 @@ enum class ResultCodeMappingMode
 static std::unique_ptr<detail::ScopedMessageBoxInterface> makeNativeMessageBoxWithMappedResult (const MessageBoxOptions& opts,
                                                                                                 ResultCodeMappingMode mode)
 {
-    class Adapter : public detail::ScopedMessageBoxInterface
+    class Adapter final : public detail::ScopedMessageBoxInterface
     {
     public:
         explicit Adapter (const MessageBoxOptions& options)

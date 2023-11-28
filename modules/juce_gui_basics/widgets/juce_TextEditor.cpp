@@ -741,7 +741,7 @@ private:
 
 
 //==============================================================================
-struct TextEditor::InsertAction  : public UndoableAction
+struct TextEditor::InsertAction final : public UndoableAction
 {
     InsertAction (TextEditor& ed, const String& newText, int insertPos,
                   const Font& newFont, Colour newColour, int oldCaret, int newCaret)
@@ -783,7 +783,7 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::RemoveAction  : public UndoableAction
+struct TextEditor::RemoveAction final : public UndoableAction
 {
     RemoveAction (TextEditor& ed, Range<int> rangeToRemove, int oldCaret, int newCaret,
                   const Array<UniformTextSection*>& oldSections)
@@ -828,9 +828,9 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::TextHolderComponent  : public Component,
-                                          public Timer,
-                                          public Value::Listener
+struct TextEditor::TextHolderComponent final : public Component,
+                                               public Timer,
+                                               public Value::Listener
 {
     TextHolderComponent (TextEditor& ed)  : owner (ed)
     {
@@ -878,7 +878,7 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::TextEditorViewport  : public Viewport
+struct TextEditor::TextEditorViewport final : public Viewport
 {
     TextEditorViewport (TextEditor& ed) : owner (ed) {}
 
@@ -2690,7 +2690,7 @@ void TextEditor::coalesceSimilarSections()
 }
 
 //==============================================================================
-class TextEditor::EditorAccessibilityHandler  : public AccessibilityHandler
+class TextEditor::EditorAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit EditorAccessibilityHandler (TextEditor& textEditorToWrap)
@@ -2705,7 +2705,7 @@ public:
     String getHelp() const override  { return textEditor.getTooltip(); }
 
 private:
-    class TextEditorTextInterface  : public AccessibilityTextInterface
+    class TextEditorTextInterface final : public AccessibilityTextInterface
     {
     public:
         explicit TextEditorTextInterface (TextEditor& editor)

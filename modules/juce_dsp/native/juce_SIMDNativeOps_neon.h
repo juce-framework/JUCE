@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 #ifndef DOXYGEN
@@ -538,5 +536,4 @@ struct SIMDNativeOps<double>
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

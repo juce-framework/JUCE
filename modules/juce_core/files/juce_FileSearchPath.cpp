@@ -190,7 +190,7 @@ bool FileSearchPath::isFileInPath (const File& fileToCheck,
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class FileSearchPathTests : public UnitTest
+class FileSearchPathTests final : public UnitTest
 {
 public:
     FileSearchPathTests() : UnitTest ("FileSearchPath", UnitTestCategories::files) {}

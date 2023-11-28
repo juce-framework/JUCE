@@ -23,11 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
-{
-namespace IIR
+namespace juce::dsp::IIR
 {
 
 #ifndef DOXYGEN
@@ -241,6 +237,4 @@ void Filter<SampleType>::check()
 
 #endif
 
-} // namespace IIR
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp::IIR

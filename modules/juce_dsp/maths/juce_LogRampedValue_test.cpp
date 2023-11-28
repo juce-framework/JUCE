@@ -23,14 +23,12 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 static CommonSmoothedValueTests <LogRampedValue <float>> commonLogRampedValueTests;
 
-class LogRampedValueTests  : public UnitTest
+class LogRampedValueTests final : public UnitTest
 {
 public:
     LogRampedValueTests()
@@ -92,5 +90,4 @@ public:
 
 static LogRampedValueTests LogRampedValueTests;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

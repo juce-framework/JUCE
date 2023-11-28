@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -185,5 +183,4 @@ private:
     AudioBlockType& outputBlock;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

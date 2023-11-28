@@ -40,7 +40,7 @@ struct AccessibleObjCClassDeleter
 };
 
 template <typename Base>
-class AccessibleObjCClass  : public ObjCClass<Base>
+class AccessibleObjCClass : public ObjCClass<Base>
 {
 public:
     using Holder = std::unique_ptr<Base, AccessibleObjCClassDeleter>;

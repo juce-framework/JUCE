@@ -396,7 +396,7 @@ public:
     WebBrowserComponent& owner;
 
 private:
-    class ConnectionThread  : private Thread
+    class ConnectionThread final : private Thread
     {
     public:
         struct Result

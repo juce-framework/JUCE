@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -165,5 +163,4 @@ private:
                                 maximumDelayModulation = 20.0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

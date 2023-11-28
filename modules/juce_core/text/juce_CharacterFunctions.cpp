@@ -379,7 +379,7 @@ void withAllPrefixesAndSuffixes (const std::vector<MemoryBlock>& prefixes,
 }
 
 template <typename CharPointerType>
-class CharacterFunctionsTests  : public UnitTest
+class CharacterFunctionsTests final : public UnitTest
 {
 public:
     using CharType = typename CharPointerType::CharType;

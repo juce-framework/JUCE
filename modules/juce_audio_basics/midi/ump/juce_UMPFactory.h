@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -57,10 +55,8 @@ struct Factory
 
             std::array<uint32_t, 2> words;
 
-            size_t index = 0;
-
-            for (auto& word : words)
-                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index++);
+            for (const auto [index, word] : enumerate (words))
+                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index);
 
             return PacketX2 { words };
         }
@@ -81,10 +77,8 @@ struct Factory
 
             std::array<uint32_t, 4> words;
 
-            size_t index = 0;
-
-            for (auto& word : words)
-                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index++);
+            for (const auto [index, word] : enumerate (words))
+                word = ByteOrder::bigEndianInt (bytes.data() + 4 * index);
 
             return PacketX4 { words };
         }
@@ -532,7 +526,6 @@ struct Factory
     }
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

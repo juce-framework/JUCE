@@ -282,7 +282,7 @@ public:
         Group* parent = nullptr;
     };
 
-    struct Param  : public Base
+    struct Param final : public Base
     {
         int paramID;
         juce::String expr, name, label;
@@ -292,7 +292,7 @@ public:
         float defaultValue;
     };
 
-    struct Group  : public Base
+    struct Group final : public Base
     {
         juce::String name;
         juce::OwnedArray<Base> paramTree;
@@ -582,7 +582,7 @@ private:
 };
 
 //==============================================================================
-struct ModuleHandle    : public ReferenceCountedObject
+struct ModuleHandle final : public ReferenceCountedObject
 {
     File file;
     MainCall moduleMain, customMain = {};
@@ -1257,7 +1257,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
 
     void getExtensions (ExtensionsVisitor& visitor) const override
     {
-        struct Extensions : public ExtensionsVisitor::VSTClient
+        struct Extensions final : public ExtensionsVisitor::VSTClient
         {
             explicit Extensions (const VSTPluginInstance* instanceIn) : instance (instanceIn) {}
 
@@ -2761,11 +2761,11 @@ struct VSTPluginWindow;
 static Array<VSTPluginWindow*> activeVSTWindows;
 
 //==============================================================================
-struct VSTPluginWindow   : public AudioProcessorEditor,
-                          #if ! JUCE_MAC
-                           private ComponentMovementWatcher,
-                          #endif
-                           private Timer
+struct VSTPluginWindow final : public AudioProcessorEditor,
+                              #if ! JUCE_MAC
+                               private ComponentMovementWatcher,
+                              #endif
+                               private Timer
 {
 public:
     VSTPluginWindow (VSTPluginInstance& plug)
@@ -3384,7 +3384,7 @@ private:
     NativeScaleFactorNotifier scaleNotifier { this, ScaleNotifierCallback { *this } };
 
     #if JUCE_WINDOWS
-     struct ViewComponent : public HWNDComponent
+     struct ViewComponent final : public HWNDComponent
      {
          ViewComponent()
          {
@@ -3398,7 +3398,7 @@ private:
          void paint (Graphics& g) override { g.fillAll (Colours::black); }
 
      private:
-         struct Inner : public Component
+         struct Inner final : public Component
          {
              Inner() { setOpaque (true); }
              void paint (Graphics& g) override { g.fillAll (Colours::black); }

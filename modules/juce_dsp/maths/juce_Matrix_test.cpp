@@ -23,12 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
-struct LinearAlgebraUnitTest  : public UnitTest
+struct LinearAlgebraUnitTest final : public UnitTest
 {
     LinearAlgebraUnitTest()
         : UnitTest ("Linear Algebra UnitTests", UnitTestCategories::dsp)
@@ -169,5 +167,4 @@ struct LinearAlgebraUnitTest  : public UnitTest
 
 static LinearAlgebraUnitTest linearAlgebraUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

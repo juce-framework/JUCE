@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce:: build_tools
 {
-namespace build_tools
-{
+
     String EntitlementOptions::getEntitlementsFileContent() const
     {
         String content =
@@ -124,6 +123,17 @@ namespace build_tools
                     paths += "\n\t</array>";
                     entitlements.set (option.key, paths);
                 }
+
+                if (! appSandboxExceptionIOKit.isEmpty())
+                {
+                    String ioKitClasses = "<array>";
+
+                    for (const auto& c : appSandboxExceptionIOKit)
+                        ioKitClasses += "\n\t\t<string>" + c + "</string>";
+
+                    ioKitClasses += "\n\t</array>";
+                    entitlements.set ("com.apple.security.temporary-exception.iokit-user-client-class", ioKitClasses);
+                }
             }
         }
 
@@ -132,5 +142,5 @@ namespace build_tools
 
         return entitlements;
     }
-}
-}
+
+} // namespace juce::build_tools

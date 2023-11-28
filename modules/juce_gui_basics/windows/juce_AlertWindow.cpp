@@ -243,7 +243,7 @@ ComboBox* AlertWindow::getComboBoxComponent (const String& nameOfList) const
 }
 
 //==============================================================================
-class AlertTextComp  : public TextEditor
+class AlertTextComp final : public TextEditor
 {
 public:
     AlertTextComp (AlertWindow& owner, const String& message, const Font& font)

@@ -61,9 +61,9 @@ bool AudioDeviceManager::AudioDeviceSetup::operator!= (const AudioDeviceManager:
 }
 
 //==============================================================================
-class AudioDeviceManager::CallbackHandler  : public AudioIODeviceCallback,
-                                             public MidiInputCallback,
-                                             public AudioIODeviceType::Listener
+class AudioDeviceManager::CallbackHandler final : public AudioIODeviceCallback,
+                                                  public MidiInputCallback,
+                                                  public AudioIODeviceType::Listener
 {
 public:
     CallbackHandler (AudioDeviceManager& adm) noexcept  : owner (adm) {}
@@ -1379,7 +1379,7 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& name)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AudioDeviceManagerTests : public UnitTest
+class AudioDeviceManagerTests final : public UnitTest
 {
 public:
     AudioDeviceManagerTests() : UnitTest ("AudioDeviceManager", UnitTestCategories::audio) {}
@@ -1757,8 +1757,8 @@ private:
         virtual void restart (double newSr, int newBs) = 0;
     };
 
-    class MockDevice : public AudioIODevice,
-                       private Restartable
+    class MockDevice final : public AudioIODevice,
+                             private Restartable
     {
     public:
         MockDevice (ListenerList<Restartable>& l, String typeNameIn, String outNameIn, String inNameIn)
@@ -1836,7 +1836,7 @@ private:
         bool on = false, playing = false;
     };
 
-    class MockDeviceType : public AudioIODeviceType
+    class MockDeviceType final : public AudioIODeviceType
     {
     public:
         explicit MockDeviceType (String kind)
@@ -1891,7 +1891,7 @@ private:
         ListenerList<Restartable> listeners;
     };
 
-    class MockCallback : public AudioIODeviceCallback
+    class MockCallback final : public AudioIODeviceCallback
     {
     public:
         std::function<void()> callback;

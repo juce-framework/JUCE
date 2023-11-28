@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class DocumentWindow::ButtonListenerProxy  : public Button::Listener
+class DocumentWindow::ButtonListenerProxy final : public Button::Listener
 {
 public:
     ButtonListenerProxy (DocumentWindow& w) : owner (w) {}

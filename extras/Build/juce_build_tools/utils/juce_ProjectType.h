@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     //==============================================================================
     class ProjectType
     {
@@ -198,7 +197,7 @@ namespace build_tools
     };
 
     //==============================================================================
-    struct ProjectType_GUIApp  : public ProjectType
+    struct ProjectType_GUIApp final : public ProjectType
     {
         ProjectType_GUIApp()  : ProjectType (getTypeName(), "GUI Application") {}
 
@@ -207,7 +206,7 @@ namespace build_tools
         bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::GUIApp); }
     };
 
-    struct ProjectType_ConsoleApp  : public ProjectType
+    struct ProjectType_ConsoleApp final : public ProjectType
     {
         ProjectType_ConsoleApp()  : ProjectType (getTypeName(), "Console Application") {}
 
@@ -216,7 +215,7 @@ namespace build_tools
         bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::ConsoleApp); }
     };
 
-    struct ProjectType_StaticLibrary  : public ProjectType
+    struct ProjectType_StaticLibrary final : public ProjectType
     {
         ProjectType_StaticLibrary()  : ProjectType (getTypeName(), "Static Library") {}
 
@@ -234,7 +233,7 @@ namespace build_tools
         bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::DynamicLibrary); }
     };
 
-    struct ProjectType_AudioPlugin  : public ProjectType
+    struct ProjectType_AudioPlugin final : public ProjectType
     {
         ProjectType_AudioPlugin()  : ProjectType (getTypeName(), "Audio Plug-in") {}
 
@@ -271,7 +270,7 @@ namespace build_tools
         }
     };
 
-    struct ProjectType_ARAAudioPlugin : public ProjectType
+    struct ProjectType_ARAAudioPlugin final : public ProjectType
     {
         ProjectType_ARAAudioPlugin() : ProjectType (getTypeName(), "ARA Audio Plug-in") {}
 
@@ -292,6 +291,7 @@ namespace build_tools
                 case Target::UnityPlugIn:
                 case Target::SharedCodeTarget:
                 case Target::AggregateTarget:
+                case Target::VST3Helper:
                     return true;
 
                 case Target::GUIApp:
@@ -301,7 +301,6 @@ namespace build_tools
                 case Target::unspecified:
                 case Target::LV2PlugIn:
                 case Target::LV2Helper:
-                case Target::VST3Helper:
                     break;
             }
 
@@ -321,5 +320,5 @@ namespace build_tools
 
         return Array<ProjectType*> (&guiApp, &consoleApp, &staticLib, &dll, &plugin, &araplugin);
     }
-}
-}
+
+} // namespace juce::build_tools

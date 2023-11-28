@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -260,5 +258,4 @@ struct FastMathApproximations
     }
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -196,10 +196,10 @@ struct AbletonLiveHostSpecific
 /**
     This is an AudioEffectX object that holds and wraps our AudioProcessor...
 */
-class JuceVSTWrapper  : public AudioProcessorListener,
-                        public AudioPlayHead,
-                        private Timer,
-                        private AudioProcessorParameter::Listener
+class JuceVSTWrapper final : public AudioProcessorListener,
+                             public AudioPlayHead,
+                             private Timer,
+                             private AudioProcessorParameter::Listener
 {
 private:
     //==============================================================================
@@ -933,7 +933,7 @@ public:
     //==============================================================================
     // A component to hold the AudioProcessorEditor, and cope with some housekeeping
     // chores when it changes or repaints.
-    struct EditorCompWrapper  : public Component
+    struct EditorCompWrapper final : public Component
                              #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
                               , public Timer
                              #endif
@@ -1272,7 +1272,7 @@ public:
 
     //==============================================================================
 private:
-    struct HostChangeUpdater  : private AsyncUpdater
+    struct HostChangeUpdater final : private AsyncUpdater
     {
         explicit HostChangeUpdater (JuceVSTWrapper& o)  : owner (o) {}
         ~HostChangeUpdater() override  { cancelPendingUpdate(); }
@@ -1370,7 +1370,7 @@ private:
             {
                 MessageManager::getInstance()->setCurrentThreadAsMessageThread();
 
-                struct MessageThreadCallback  : public CallbackMessage
+                struct MessageThreadCallback final : public CallbackMessage
                 {
                     MessageThreadCallback (bool& tr) : triggered (tr) {}
                     void messageCallback() override     { triggered = true; }

@@ -420,7 +420,7 @@ DWORD performScsiPassThroughCommand (SRB_ExecSCSICmd* const srb, const char driv
 //==============================================================================
 // Controller types..
 
-class ControllerType1  : public CDController
+class ControllerType1 final : public CDController
 {
 public:
     ControllerType1() {}
@@ -454,7 +454,7 @@ public:
 };
 
 //==============================================================================
-class ControllerType2  : public CDController
+class ControllerType2 final : public CDController
 {
 public:
     ControllerType2() {}
@@ -557,7 +557,7 @@ public:
 };
 
 //==============================================================================
-class ControllerType3  : public CDController
+class ControllerType3 final : public CDController
 {
 public:
     ControllerType3() {}
@@ -596,7 +596,7 @@ public:
 };
 
 //==============================================================================
-class ControllerType4  : public CDController
+class ControllerType4 final : public CDController
 {
 public:
     ControllerType4() {}

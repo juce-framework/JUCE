@@ -101,7 +101,6 @@ public:
     virtual bool canCopeWithDuplicateFiles() = 0;
     virtual bool supportsUserDefinedConfigurations() const = 0; // false if exporter only supports two configs Debug and Release
     virtual void updateDeprecatedSettings()               {}
-    virtual void updateDeprecatedSettingsInteractively()  {}
     virtual void initialiseDependencyPathValues()         {}
 
     // IDE targeted by exporter

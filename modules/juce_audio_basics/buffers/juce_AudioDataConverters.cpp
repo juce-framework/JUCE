@@ -454,7 +454,7 @@ void AudioDataConverters::deinterleaveSamples (const float* source, float** dest
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AudioConversionTests  : public UnitTest
+class AudioConversionTests final : public UnitTest
 {
 public:
     AudioConversionTests()

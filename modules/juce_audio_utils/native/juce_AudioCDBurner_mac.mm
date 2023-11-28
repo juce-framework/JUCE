@@ -28,7 +28,7 @@ namespace juce
 
 const int kilobytesPerSecond1x = 176;
 
-struct AudioTrackProducerClass  : public ObjCClass<NSObject>
+struct AudioTrackProducerClass final : public ObjCClass<NSObject>
 {
     AudioTrackProducerClass()  : ObjCClass<NSObject> ("JUCEAudioTrackProducer_")
     {

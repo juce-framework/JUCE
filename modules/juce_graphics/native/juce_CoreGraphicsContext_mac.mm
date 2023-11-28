@@ -30,7 +30,7 @@ namespace juce
 // This class has been renamed from CoreGraphicsImage to avoid a symbol
 // collision in Pro Tools 2019.12 and possibly 2020 depending on the Pro Tools
 // release schedule.
-class CoreGraphicsPixelData   : public ImagePixelData
+class CoreGraphicsPixelData final : public ImagePixelData
 {
 public:
     CoreGraphicsPixelData (const Image::PixelFormat format, int w, int h, bool clearImage)
@@ -140,7 +140,7 @@ public:
     detail::ContextPtr context;
     detail::ImagePtr cachedImageRef;
 
-    struct ImageDataContainer   : public ReferenceCountedObject
+    struct ImageDataContainer final : public ReferenceCountedObject
     {
         ImageDataContainer() = default;
 
@@ -813,7 +813,7 @@ void CoreGraphicsContext::applyTransform (const AffineTransform& transform) cons
 #if USE_COREGRAPHICS_RENDERING && JUCE_USE_COREIMAGE_LOADER
 Image juce_loadWithCoreImage (InputStream& input)
 {
-    struct MemoryBlockHolder   : public ReferenceCountedObject
+    struct MemoryBlockHolder final : public ReferenceCountedObject
     {
         using Ptr = ReferenceCountedObjectPtr<MemoryBlockHolder>;
         MemoryBlock block;

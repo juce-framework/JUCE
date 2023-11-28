@@ -20,10 +20,6 @@
   ==============================================================================
 */
 
-#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
-#include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
-
-
 namespace juce
 {
 
@@ -197,10 +193,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 @end
 
 //==============================================================================
-#if JUCE_MODULE_AVAILABLE_juce_graphics
- #include <juce_graphics/native/juce_CoreGraphicsHelpers_mac.h>
-#endif
-
 namespace juce {
 
 #ifndef JUCE_IOS_AUDIO_LOGGING
@@ -225,8 +217,8 @@ static void logNSError (NSError* e)
 #define JUCE_NSERROR_CHECK(X)     { NSError* error = nil; X; logNSError (error); }
 
 //==============================================================================
-class iOSAudioIODeviceType  : public AudioIODeviceType,
-                              public AsyncUpdater
+class iOSAudioIODeviceType final : public AudioIODeviceType,
+                                   public AsyncUpdater
 {
 public:
     iOSAudioIODeviceType();
@@ -254,7 +246,7 @@ private:
 };
 
 //==============================================================================
-struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
+struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 {
     Pimpl (iOSAudioIODeviceType* ioDeviceType, iOSAudioIODevice& ioDevice)
         : deviceType (ioDeviceType),
@@ -284,7 +276,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
 
     static void setAudioSessionCategory (NSString* category)
     {
-        NSUInteger options = AVAudioSessionCategoryOptionAllowAirPlay;
+        NSUInteger options = 0;
 
        #if ! JUCE_DISABLE_AUDIO_MIXING_WITH_OTHER_APPS
         options |= AVAudioSessionCategoryOptionMixWithOthers; // Alternatively AVAudioSessionCategoryOptionDuckOthers
@@ -293,7 +285,8 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
         if (category == AVAudioSessionCategoryPlayAndRecord)
         {
             options |= AVAudioSessionCategoryOptionDefaultToSpeaker
-                     | AVAudioSessionCategoryOptionAllowBluetooth;
+                     | AVAudioSessionCategoryOptionAllowBluetooth
+                     | AVAudioSessionCategoryOptionAllowAirPlay;
 
             if (@available (iOS 10.0, *))
                 options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
@@ -565,7 +558,7 @@ struct iOSAudioIODevice::Pimpl      : public AsyncUpdater
     }
 
     //==============================================================================
-    class PlayHead : public AudioPlayHead
+    class PlayHead final : public AudioPlayHead
     {
     public:
         explicit PlayHead (Pimpl& implIn) : impl (implIn) {}

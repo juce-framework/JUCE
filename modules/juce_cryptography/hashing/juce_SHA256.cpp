@@ -215,7 +215,7 @@ bool SHA256::operator!= (const SHA256& other) const noexcept  { return ! operato
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class SHA256Tests  : public UnitTest
+class SHA256Tests final : public UnitTest
 {
 public:
     SHA256Tests()

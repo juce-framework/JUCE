@@ -28,7 +28,7 @@ namespace juce::detail
 
 std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (const MessageBoxOptions& options)
 {
-    class OSXMessageBox  : public ScopedMessageBoxInterface
+    class OSXMessageBox final : public ScopedMessageBoxInterface
     {
     public:
         explicit OSXMessageBox (const MessageBoxOptions& opts)

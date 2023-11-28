@@ -167,7 +167,7 @@ private:
 
     //==============================================================================
    #if JUCE_MAC
-    class AppleMenuRebuildListener  : private MenuBarModel::Listener
+    class AppleMenuRebuildListener final : private MenuBarModel::Listener
     {
     public:
         AppleMenuRebuildListener()

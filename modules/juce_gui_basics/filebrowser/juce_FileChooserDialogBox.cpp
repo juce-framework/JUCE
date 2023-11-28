@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class FileChooserDialogBox::ContentComponent  : public Component
+class FileChooserDialogBox::ContentComponent final : public Component
 {
 public:
     ContentComponent (const String& name, const String& desc, FileBrowserComponent& chooser)

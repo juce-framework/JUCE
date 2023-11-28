@@ -31,7 +31,6 @@ namespace juce::detail
 // Implemented in juce_Messaging_linux.cpp
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
-/** @internal */
 class MessageThread : public Thread
 {
 public:
@@ -84,7 +83,6 @@ private:
 };
 
 //==============================================================================
-/** @internal */
 class HostDrivenEventLoop
 {
 public:

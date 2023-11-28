@@ -95,9 +95,7 @@ typedef void ( *GLVULKANPROCNV)(void);
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-namespace juce
-{
-namespace gl
+namespace juce::gl
 {
 
 #ifndef GL_ES_VERSION_2_0
@@ -5266,5 +5264,4 @@ void loadFunctions();
 */
 void loadExtensions();
 
-}
-}
+} // namespace juce::gl

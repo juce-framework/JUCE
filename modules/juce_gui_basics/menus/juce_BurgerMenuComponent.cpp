@@ -27,7 +27,7 @@ namespace juce
 {
 
 //==============================================================================
-struct CustomMenuBarItemHolder    : public Component
+struct CustomMenuBarItemHolder final : public Component
 {
     CustomMenuBarItemHolder (const ReferenceCountedObjectPtr<PopupMenu::CustomComponent>& customComponent)
     {

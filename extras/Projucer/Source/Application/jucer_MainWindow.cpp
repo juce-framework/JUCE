@@ -385,8 +385,6 @@ void MainWindow::openFile (const File& file, std::function<void (bool)> callback
 
                     parent->createProjectContentCompIfNeeded();
                     parent->getProjectContentComponent()->reloadLastOpenDocuments();
-
-                    parent->currentProject->updateDeprecatedProjectSettingsInteractively();
                 }
 
                 NullCheckedInvocation::invoke (callback, saveResult);

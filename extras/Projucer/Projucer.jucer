@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              version="7.0.7" bundleIdentifier="com.juce.theprojucer" splashScreenColour="Dark"
+              version="7.0.9" bundleIdentifier="com.juce.theprojucer" splashScreenColour="Dark"
               displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" documentExtensions=".jucer" bigIcon="Zrx1Gl"
-               extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime"
                microphonePermissionNeeded="1" cameraPermissionNeeded="1" smallIcon="Zrx1Gl"
-               applicationCategory="public.app-category.developer-tools">
+               applicationCategory="public.app-category.developer-tools" extraLinkerFlags="-Wl,-weak_reference_mismatches,weak"
+               extraDefs="JUCE_SILENCE_XCODE_15_LINKER_WARNING=1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" cppLibType="libc++"
                        recommendedWarnings="LLVM"/>
@@ -242,6 +242,12 @@
               compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.cpp"/>
         <FILE id="nEnvoi" name="jucer_AudioPluginARADocumentControllerTemplate.h"
               compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.h"/>
+        <FILE id="iwCmfX" name="jucer_AudioPluginARAEditorTemplate.cpp" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.cpp"/>
+        <FILE id="Sg3E7I" name="jucer_AudioPluginARAEditorTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.h"/>
+        <FILE id="GiKUFl" name="jucer_AudioPluginARAFilterTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAFilterTemplate.h"/>
         <FILE id="H2uvhd" name="jucer_AudioPluginARAPlaybackRendererTemplate.cpp"
               compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.cpp"/>
         <FILE id="U7eXlD" name="jucer_AudioPluginARAPlaybackRendererTemplate.h"

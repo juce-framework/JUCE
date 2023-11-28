@@ -199,7 +199,7 @@ private:
     {
         if (data != nullptr && data->dwData == broadcastMessageMagicNumber)
         {
-            struct BroadcastMessage  : public CallbackMessage
+            struct BroadcastMessage final : public CallbackMessage
             {
                 BroadcastMessage (CharPointer_UTF32 text, size_t length) : message (text, length) {}
                 void messageCallback() override { MessageManager::getInstance()->deliverBroadcastMessage (message); }

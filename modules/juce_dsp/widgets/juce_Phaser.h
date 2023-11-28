@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -202,5 +200,4 @@ private:
     static constexpr int numStages = 6;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

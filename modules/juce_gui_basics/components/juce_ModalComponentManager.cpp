@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct ModalComponentManager::ModalItem  : public ComponentMovementWatcher
+struct ModalComponentManager::ModalItem final : public ComponentMovementWatcher
 {
     ModalItem (Component* comp, bool shouldAutoDelete)
         : ComponentMovementWatcher (comp),

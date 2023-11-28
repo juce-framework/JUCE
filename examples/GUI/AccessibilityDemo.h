@@ -221,16 +221,15 @@ private:
         {
             RadioButtonsGroupComponent()
             {
-                int index = 1;
-                for (auto& b : radioButtons)
+                for (const auto [n, b] : enumerate (radioButtons, 1))
                 {
                     b.setRadioGroupId (1);
-                    b.setButtonText ("Button " + String (index++));
+                    b.setButtonText ("Button " + String (n));
                     b.setHasFocusOutline (true);
                     addAndMakeVisible (b);
                 }
 
-                radioButtons[(size_t) Random::getSystemRandom().nextInt (numRadioButtons)].setToggleState (true, dontSendNotification);
+                radioButtons[(size_t) Random::getSystemRandom().nextInt ((int) radioButtons.size())].setToggleState (true, dontSendNotification);
 
                 setTitle ("Radio Buttons Group");
                 setFocusContainerType (FocusContainerType::focusContainer);
@@ -239,14 +238,13 @@ private:
             void resized() override
             {
                 auto bounds = getLocalBounds();
-                const auto height = bounds.getHeight() / numRadioButtons;
+                const auto height = bounds.getHeight() / (int) radioButtons.size();
 
                 for (auto& b : radioButtons)
                     b.setBounds (bounds.removeFromTop (height).reduced (2));
             }
 
-            static constexpr int numRadioButtons = 3;
-            std::array<ToggleButton, numRadioButtons> radioButtons;
+            std::array<ToggleButton, 3> radioButtons;
         };
 
         //==============================================================================
@@ -339,7 +337,7 @@ private:
         {
             RootItem()
             {
-                struct Item  : public TreeViewItem
+                struct Item final : public TreeViewItem
                 {
                     Item (int index, int depth, int numSubItems)
                         : textToDisplay ("Item " + String (index)
@@ -511,7 +509,7 @@ private:
                 and accessibility clients. This derived class represents the properties
                 set via the demo UI.
             */
-            struct CustomAccessibilityHandler  : public AccessibilityHandler
+            struct CustomAccessibilityHandler final : public AccessibilityHandler
             {
                 explicit CustomAccessibilityHandler (CustomWidgetComponent& comp)
                     : AccessibilityHandler (comp.accessibleComponent,
@@ -821,7 +819,7 @@ private:
 
         std::unique_ptr<AccessibilityValueInterface> getValueInterface()
         {
-            struct Numeric  : public AccessibilityNumericValueInterface
+            struct Numeric final : public AccessibilityNumericValueInterface
             {
                 explicit Numeric (ValueInterfaceComponent& o)
                     : owner (o)
@@ -835,7 +833,7 @@ private:
                 ValueInterfaceComponent& owner;
             };
 
-            struct Ranged  : public AccessibilityRangedNumericValueInterface
+            struct Ranged final : public AccessibilityRangedNumericValueInterface
             {
                 explicit Ranged (ValueInterfaceComponent& o)
                     : owner (o)
@@ -857,7 +855,7 @@ private:
                 ValueInterfaceComponent& owner;
             };
 
-            struct Text  : public AccessibilityTextValueInterface
+            struct Text final : public AccessibilityTextValueInterface
             {
                 explicit Text (ValueInterfaceComponent& o)
                     : owner (o)

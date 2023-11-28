@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -134,5 +132,4 @@ template class DelayLine<double, DelayLineInterpolationTypes::Lagrange3rd>;
 template class DelayLine<float,  DelayLineInterpolationTypes::Thiran>;
 template class DelayLine<double, DelayLineInterpolationTypes::Thiran>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

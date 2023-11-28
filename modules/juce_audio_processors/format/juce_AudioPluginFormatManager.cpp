@@ -159,7 +159,7 @@ void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescriptio
     if (auto* format = findFormatForDescription (description, error))
         return format->createPluginInstanceAsync (description, initialSampleRate, initialBufferSize, std::move (callback));
 
-    struct DeliverError  : public CallbackMessage
+    struct DeliverError final : public CallbackMessage
     {
         DeliverError (AudioPluginFormat::PluginCreationCallback c, const String& e)
             : call (std::move (c)), error (e)

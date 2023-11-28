@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     Array<Drawable*> asArray (const Icons& icons)
     {
         Array<Drawable*> result;
@@ -495,5 +494,5 @@ namespace build_tools
 
         return { assets, targetFolder, RelativePath::buildTargetFolder };
     }
-}
-}
+
+} // namespace juce::build_tools

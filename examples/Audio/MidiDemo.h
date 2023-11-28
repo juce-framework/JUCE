@@ -233,8 +233,8 @@ public:
 
 private:
     //==============================================================================
-    struct MidiDeviceListBox : private ListBoxModel,
-                               public ListBox
+    struct MidiDeviceListBox final : private ListBoxModel,
+                                     public ListBox
     {
         MidiDeviceListBox (const String& name,
                            MidiDemo& contentComponent,

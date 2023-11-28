@@ -70,6 +70,8 @@ template <typename Fn> ScopeGuard (Fn) -> ScopeGuard<Fn>;
     - Moving a unique_ptr transfers the responsibility of destroying the managed object
       to another unique_ptr instance; moving an ErasedScopeGuard transfers the
       responsibility of calling the callback to another Guard instance.
+
+    @tags{Core}
 */
 class [[nodiscard]] ErasedScopeGuard
 {

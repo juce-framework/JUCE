@@ -368,6 +368,14 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
                                                          std::move (values) });
     }
 
+    {
+        juce::StringArray values;
+        updateField ("APP_SANDBOX_EXCEPTION_IOKIT", values);
+
+        if (! values.isEmpty())
+            result.appSandboxExceptionIOKit = values;
+    }
+
     result.type = type;
 
     return result;
@@ -554,6 +562,13 @@ int main (int argc, char** argv)
         if (it == commands.cend())
             juce::ConsoleApplication::fail ("No matching mode", 1);
 
-        return it->second (std::move (argumentList));
+        try
+        {
+            return it->second (std::move (argumentList));
+        }
+        catch (const juce::build_tools::SaveError& error)
+        {
+            juce::ConsoleApplication::fail (error.message);
+        }
     });
 }

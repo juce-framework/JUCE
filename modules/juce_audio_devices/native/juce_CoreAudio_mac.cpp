@@ -20,9 +20,6 @@
   ==============================================================================
 */
 
-#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
-#include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
-
 namespace juce
 {
 
@@ -42,7 +39,7 @@ constexpr auto juceAudioObjectPropertyElementMain =
        #endif
 
 //==============================================================================
-class ManagedAudioBufferList : public AudioBufferList
+class ManagedAudioBufferList final : public AudioBufferList
 {
 public:
     struct Deleter
@@ -293,8 +290,8 @@ class CoreAudioIODeviceType;
 class CoreAudioIODevice;
 
 //==============================================================================
-class CoreAudioInternal  : private Timer,
-                           private AsyncUpdater
+class CoreAudioInternal final : private Timer,
+                                private AsyncUpdater
 {
 private:
     // members with deduced return types need to be defined before they
@@ -1207,8 +1204,8 @@ private:
 
 
 //==============================================================================
-class CoreAudioIODevice   : public AudioIODevice,
-                            private Timer
+class CoreAudioIODevice final : public AudioIODevice,
+                                private Timer
 {
 public:
     CoreAudioIODevice (CoreAudioIODeviceType* dt,
@@ -1438,9 +1435,9 @@ private:
 
 
 //==============================================================================
-class AudioIODeviceCombiner    : public AudioIODevice,
-                                 private AsyncRestarter,
-                                 private Timer
+class AudioIODeviceCombiner final : public AudioIODevice,
+                                    private AsyncRestarter,
+                                    private Timer
 {
 public:
     AudioIODeviceCombiner (const String& deviceName, CoreAudioIODeviceType* deviceType,
@@ -1465,6 +1462,12 @@ public:
     auto getDeviceWrappers()       { return std::array<      DeviceWrapper*, 2> { { &inputWrapper, &outputWrapper } }; }
     auto getDeviceWrappers() const { return std::array<const DeviceWrapper*, 2> { { &inputWrapper, &outputWrapper } }; }
 
+    int getIndexOfDevice (bool asInput) const
+    {
+        return asInput ? inputWrapper.getIndexOfDevice (true)
+                       : outputWrapper.getIndexOfDevice (false);
+    }
+
     StringArray getOutputChannelNames() override        { return outputWrapper.getChannelNames(); }
     StringArray getInputChannelNames()  override        { return inputWrapper .getChannelNames(); }
     BigInteger getActiveOutputChannels() const override { return outputWrapper.getActiveChannels(); }
@@ -1472,46 +1475,16 @@ public:
 
     Array<double> getAvailableSampleRates() override
     {
-        Array<double> commonRates;
-        bool first = true;
-
-        for (auto& d : getDeviceWrappers())
-        {
-            auto rates = d->getAvailableSampleRates();
-
-            if (first)
-            {
-                first = false;
-                commonRates = rates;
-            }
-            else
-            {
-                commonRates.removeValuesNotIn (rates);
-            }
-        }
+        auto commonRates = inputWrapper.getAvailableSampleRates();
+        commonRates.removeValuesNotIn (outputWrapper.getAvailableSampleRates());
 
         return commonRates;
     }
 
     Array<int> getAvailableBufferSizes() override
     {
-        Array<int> commonSizes;
-        bool first = true;
-
-        for (auto& d : getDeviceWrappers())
-        {
-            auto sizes = d->getAvailableBufferSizes();
-
-            if (first)
-            {
-                first = false;
-                commonSizes = sizes;
-            }
-            else
-            {
-                commonSizes.removeValuesNotIn (sizes);
-            }
-        }
+        auto commonSizes = inputWrapper.getAvailableBufferSizes();
+        commonSizes.removeValuesNotIn (outputWrapper.getAvailableBufferSizes());
 
         return commonSizes;
     }
@@ -1523,22 +1496,12 @@ public:
 
     int getCurrentBitDepth() override
     {
-        int depth = 32;
-
-        for (auto& d : getDeviceWrappers())
-            depth = jmin (depth, d->getCurrentBitDepth());
-
-        return depth;
+        return jmin (32, inputWrapper.getCurrentBitDepth(), outputWrapper.getCurrentBitDepth());
     }
 
     int getDefaultBufferSize() override
     {
-        int size = 0;
-
-        for (auto& d : getDeviceWrappers())
-            size = jmax (size, d->getDefaultBufferSize());
-
-        return size;
+        return jmax (0, inputWrapper.getDefaultBufferSize(), outputWrapper.getDefaultBufferSize());
     }
 
     AudioWorkgroup getWorkgroup() const override
@@ -1973,7 +1936,7 @@ private:
     void handleAudioDeviceError (const String& errorMessage)   { shutdown (errorMessage.isNotEmpty() ? errorMessage : String ("unknown")); }
 
     //==============================================================================
-    struct DeviceWrapper  : public AudioIODeviceCallback
+    struct DeviceWrapper final : public AudioIODeviceCallback
     {
         DeviceWrapper (AudioIODeviceCombiner& cd, std::unique_ptr<CoreAudioIODevice> d, bool shouldBeInput)
             : owner (cd),
@@ -2072,7 +2035,7 @@ private:
     /* If the current AudioIODeviceCombiner::callback is nullptr, it sets itself as the callback
        and forwards error related callbacks to the provided callback
     */
-    class ScopedErrorForwarder  : public AudioIODeviceCallback
+    class ScopedErrorForwarder final : public AudioIODeviceCallback
     {
     public:
         ScopedErrorForwarder (AudioIODeviceCombiner& ownerIn, AudioIODeviceCallback* cb)
@@ -2130,8 +2093,8 @@ private:
 
 
 //==============================================================================
-class CoreAudioIODeviceType  : public AudioIODeviceType,
-                               private AsyncUpdater
+class CoreAudioIODeviceType final : public AudioIODeviceType,
+                                    private AsyncUpdater
 {
 public:
     CoreAudioIODeviceType()  : AudioIODeviceType ("CoreAudio")
@@ -2241,9 +2204,7 @@ public:
             return d->getIndexOfDevice (asInput);
 
         if (auto* d = dynamic_cast<AudioIODeviceCombiner*> (device))
-            for (auto* dev : d->getDeviceWrappers())
-                if (const auto index = dev->getIndexOfDevice (asInput); index >= 0)
-                    return index;
+            return d->getIndexOfDevice (asInput);
 
         return -1;
     }

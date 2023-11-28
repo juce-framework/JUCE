@@ -82,7 +82,7 @@ OSCColour OSCArgument::getColour() const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class OSCArgumentTests  : public UnitTest
+class OSCArgumentTests final : public UnitTest
 {
 public:
     OSCArgumentTests()

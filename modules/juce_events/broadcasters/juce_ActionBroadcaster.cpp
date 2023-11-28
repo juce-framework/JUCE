@@ -23,7 +23,7 @@
 namespace juce
 {
 
-class ActionBroadcaster::ActionMessage  : public MessageManager::MessageBase
+class ActionBroadcaster::ActionMessage final : public MessageManager::MessageBase
 {
 public:
     ActionMessage (const ActionBroadcaster* ab,

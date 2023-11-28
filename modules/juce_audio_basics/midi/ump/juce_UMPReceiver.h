@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -40,7 +38,6 @@ struct Receiver
     virtual void packetReceived (const View& packet, double time) = 0;
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

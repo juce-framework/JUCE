@@ -142,7 +142,7 @@ private:
 };
 
 //==============================================================================
-class WindowsDirectWriteTypeface  : public Typeface
+class WindowsDirectWriteTypeface final : public Typeface
 {
 public:
     WindowsDirectWriteTypeface (const Font& font, IDWriteFontCollection* fontCollection)
@@ -285,7 +285,7 @@ private:
     AffineTransform pathTransform;
     BOOL fontFound = false;
 
-    struct PathGeometrySink  : public ComBaseClassHelper<IDWriteGeometrySink>
+    struct PathGeometrySink final : public ComBaseClassHelper<IDWriteGeometrySink>
     {
         PathGeometrySink() : ComBaseClassHelper (0) {}
 

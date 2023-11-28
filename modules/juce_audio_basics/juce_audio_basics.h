@@ -32,7 +32,7 @@
 
   ID:                 juce_audio_basics
   vendor:             juce
-  version:            7.0.7
+  version:            7.0.9
   name:               JUCE audio and MIDI data classes
   description:        Classes for audio buffer manipulation, midi message handling, synthesis, etc.
   website:            http://www.juce.com/juce
@@ -124,3 +124,10 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "synthesisers/juce_Synthesiser.h"
 #include "audio_play_head/juce_AudioPlayHead.h"
 #include "utilities/juce_AudioWorkgroup.h"
+#include "midi/ump/juce_UMPBytesOnGroup.h"
+#include "midi/ump/juce_UMPDeviceInfo.h"
+
+namespace juce
+{
+    namespace ump = universal_midi_packets;
+}

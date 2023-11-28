@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT name="DemoRunner" projectType="guiapp" defines="JUCE_DEMO_RUNNER=1&#10;JUCE_UNIT_TESTS=1"
-              bundleIdentifier="com.rmsl.jucedemorunner" version="7.0.7" companyName="Raw Material Software Limited"
+              bundleIdentifier="com.rmsl.jucedemorunner" version="7.0.9" companyName="Raw Material Software Limited"
               companyCopyright="Copyright (c) 2020 - Raw Material Software Limited"
               companyWebsite="https://www.juce.com/" companyEmail="info@juce.com"
               id="yj7xMM" reportAppUsage="0" useAppConfig="0" addUsingNamespaceToJuceHeader="1"
@@ -34,7 +34,8 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="YyqWd2" bigIcon="YyqWd2"
                customXcodeResourceFolders="../Assets&#10;../Audio &#10;../DSP &#10;../GUI &#10;../Utilities"
                microphonePermissionNeeded="1" cameraPermissionNeeded="1" applicationCategory="public.app-category.developer-tools"
-               iosBluetoothPermissionNeeded="1">
+               iosBluetoothPermissionNeeded="1" extraDefs="JUCE_SILENCE_XCODE_15_LINKER_WARNING=1"
+               extraLinkerFlags="-Wl,-weak_reference_mismatches,weak">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM"/>
         <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM"/>
@@ -126,7 +127,8 @@
                   customXcodeResourceFolders="../Assets" smallIcon="YyqWd2" bigIcon="YyqWd2"
                   iosBluetoothPermissionNeeded="1" iosScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait,UIInterfaceOrientationPortraitUpsideDown"
                   iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait,UIInterfaceOrientationPortraitUpsideDown"
-                  UIRequiresFullScreen="0">
+                  UIRequiresFullScreen="0" extraDefs="JUCE_SILENCE_XCODE_15_LINKER_WARNING=1"
+                  extraLinkerFlags="-Wl,-weak_reference_mismatches,weak">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM"/>
         <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM"/>

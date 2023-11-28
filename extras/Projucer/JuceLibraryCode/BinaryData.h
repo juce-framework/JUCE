@@ -122,6 +122,15 @@ namespace BinaryData
     extern const char*   jucer_AudioPluginARADocumentControllerTemplate_h;
     const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1445;
 
+    extern const char*   jucer_AudioPluginARAEditorTemplate_cpp;
+    const int            jucer_AudioPluginARAEditorTemplate_cppSize = 1593;
+
+    extern const char*   jucer_AudioPluginARAEditorTemplate_h;
+    const int            jucer_AudioPluginARAEditorTemplate_hSize = 1142;
+
+    extern const char*   jucer_AudioPluginARAFilterTemplate_h;
+    const int            jucer_AudioPluginARAFilterTemplate_hSize = 2462;
+
     extern const char*   jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
     const int            jucer_AudioPluginARAPlaybackRendererTemplate_cppSize = 5322;
 
@@ -138,7 +147,7 @@ namespace BinaryData
     const int            jucer_AudioPluginFilterTemplate_cppSize = 6218;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2462;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2299;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2147;
@@ -213,7 +222,7 @@ namespace BinaryData
     const int            juce_SimpleBinaryBuilder_cppSize = 12344;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 68;
+    const int namedResourceListSize = 71;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

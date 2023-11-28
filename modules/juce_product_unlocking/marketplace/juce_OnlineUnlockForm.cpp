@@ -26,8 +26,8 @@
 namespace juce
 {
 
-struct Spinner  : public Component,
-                  private Timer
+struct Spinner final : public Component,
+                       private Timer
 {
     Spinner()                       { startTimer (1000 / 50); }
     void timerCallback() override   { repaint(); }
@@ -38,10 +38,10 @@ struct Spinner  : public Component,
     }
 };
 
-struct OnlineUnlockForm::OverlayComp  : public Component,
-                                        private Thread,
-                                        private Timer,
-                                        private Button::Listener
+struct OnlineUnlockForm::OverlayComp final : public Component,
+                                             private Thread,
+                                             private Timer,
+                                             private Button::Listener
 {
     OverlayComp (OnlineUnlockForm& f, bool hasCancelButton = false)
         : Thread (String()), form (f)

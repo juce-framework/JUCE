@@ -185,7 +185,7 @@ static bool isSilent (const AudioBuffer<float>& b)
     return true;
 }
 
-struct TestAudioFormatReader  : public AudioFormatReader
+struct TestAudioFormatReader : public AudioFormatReader
 {
     explicit TestAudioFormatReader (const AudioBuffer<float>* b)
         : AudioFormatReader (nullptr, {}),
@@ -204,6 +204,9 @@ struct TestAudioFormatReader  : public AudioFormatReader
     {
         clearSamplesBeyondAvailableLength (destChannels, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
+
+        if (numSamples <= 0)
+            return true;
 
         for (int j = 0; j < numDestChannels; ++j)
         {
@@ -238,7 +241,7 @@ static AudioBuffer<float> generateTestBuffer (Random& random, int bufferSize)
     return buffer;
 }
 
-class BufferingAudioReaderTests  : public UnitTest
+class BufferingAudioReaderTests final : public UnitTest
 {
 public:
     BufferingAudioReaderTests()  : UnitTest ("BufferingAudioReader", UnitTestCategories::audio)  {}
@@ -250,7 +253,7 @@ public:
 
         beginTest ("Reading samples from a blocked reader should produce silence");
         {
-            struct BlockingReader  : public TestAudioFormatReader
+            struct BlockingReader final : public TestAudioFormatReader
             {
                 explicit BlockingReader (const AudioBuffer<float>* b)
                     : TestAudioFormatReader (b)

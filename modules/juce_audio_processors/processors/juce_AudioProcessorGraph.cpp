@@ -569,7 +569,7 @@ struct GraphRenderSequence
 
     void addClearChannelOp (int index)
     {
-        struct ClearOp : public RenderOp
+        struct ClearOp final : public RenderOp
         {
             explicit ClearOp (int indexIn) : index (indexIn) {}
 
@@ -592,7 +592,7 @@ struct GraphRenderSequence
 
     void addCopyChannelOp (int srcIndex, int dstIndex)
     {
-        struct CopyOp : public RenderOp
+        struct CopyOp final : public RenderOp
         {
             explicit CopyOp (int fromIn, int toIn) : from (fromIn), to (toIn) {}
 
@@ -617,7 +617,7 @@ struct GraphRenderSequence
 
     void addAddChannelOp (int srcIndex, int dstIndex)
     {
-        struct AddOp : public RenderOp
+        struct AddOp final : public RenderOp
         {
             explicit AddOp (int fromIn, int toIn) : from (fromIn), to (toIn) {}
 
@@ -644,7 +644,7 @@ struct GraphRenderSequence
 
     void addClearMidiBufferOp (int index)
     {
-        struct ClearOp : public RenderOp
+        struct ClearOp final : public RenderOp
         {
             explicit ClearOp (int indexIn) : index (indexIn) {}
 
@@ -667,7 +667,7 @@ struct GraphRenderSequence
 
     void addCopyMidiBufferOp (int srcIndex, int dstIndex)
     {
-        struct CopyOp : public RenderOp
+        struct CopyOp final : public RenderOp
         {
             explicit CopyOp (int fromIn, int toIn) : from (fromIn), to (toIn) {}
 
@@ -692,7 +692,7 @@ struct GraphRenderSequence
 
     void addAddMidiBufferOp (int srcIndex, int dstIndex)
     {
-        struct AddOp : public RenderOp
+        struct AddOp final : public RenderOp
         {
             explicit AddOp (int fromIn, int toIn) : from (fromIn), to (toIn) {}
 
@@ -717,7 +717,7 @@ struct GraphRenderSequence
 
     void addDelayChannelOp (int chan, int delaySize)
     {
-        struct DelayChannelOp : public RenderOp
+        struct DelayChannelOp final : public RenderOp
         {
             DelayChannelOp (int chan, int delaySize)
                 : buffer ((size_t) (delaySize + 1), (FloatType) 0),
@@ -887,7 +887,7 @@ private:
         const int midiBufferToUse;
     };
 
-    struct ProcessOp : public NodeOp
+    struct ProcessOp final : public NodeOp
     {
         using NodeOp::NodeOp;
 
@@ -936,7 +936,7 @@ private:
         AudioBuffer<float> tempBufferFloat, tempBufferDouble;
     };
 
-    struct MidiInOp : public NodeOp
+    struct MidiInOp final : public NodeOp
     {
         using NodeOp::NodeOp;
 
@@ -947,7 +947,7 @@ private:
         }
     };
 
-    struct MidiOutOp : public NodeOp
+    struct MidiOutOp final : public NodeOp
     {
         using NodeOp::NodeOp;
 
@@ -958,7 +958,7 @@ private:
         }
     };
 
-    struct AudioInOp : public NodeOp
+    struct AudioInOp final : public NodeOp
     {
         using NodeOp::NodeOp;
 
@@ -972,7 +972,7 @@ private:
         }
     };
 
-    struct AudioOutOp : public NodeOp
+    struct AudioOutOp final : public NodeOp
     {
         using NodeOp::NodeOp;
 
@@ -1591,7 +1591,7 @@ private:
     At the top of the audio callback, RenderSequenceExchange::updateAudioThreadState will
     attempt to install the most-recently-baked graph, if there's one waiting.
 */
-class RenderSequenceExchange : private Timer
+class RenderSequenceExchange final : private Timer
 {
 public:
     RenderSequenceExchange()
@@ -2103,7 +2103,7 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorG
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AudioProcessorGraphTests : public UnitTest
+class AudioProcessorGraphTests final : public UnitTest
 {
 public:
     AudioProcessorGraphTests()
@@ -2239,7 +2239,7 @@ private:
     enum class MidiIn  { no, yes };
     enum class MidiOut { no, yes };
 
-    class BasicProcessor  : public AudioProcessor
+    class BasicProcessor final : public AudioProcessor
     {
     public:
         explicit BasicProcessor (const AudioProcessor::BusesProperties& layout, MidiIn mIn, MidiOut mOut)

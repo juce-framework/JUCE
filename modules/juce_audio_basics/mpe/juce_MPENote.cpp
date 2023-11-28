@@ -89,7 +89,7 @@ bool MPENote::operator!= (const MPENote& other) const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MPENoteTests : public UnitTest
+class MPENoteTests final : public UnitTest
 {
 public:
     MPENoteTests()

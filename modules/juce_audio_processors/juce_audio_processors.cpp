@@ -108,8 +108,8 @@ void callOnMessageThread (Callback&& callback)
     request that the editor bounds are updated. We can call `setSize` on this
     component from inside those dedicated callbacks.
 */
-struct NSViewComponentWithParent  : public NSViewComponent,
-                                    private AsyncUpdater
+struct NSViewComponentWithParent : public NSViewComponent,
+                                   private AsyncUpdater
 {
     enum class WantsNudge { no, yes };
 
@@ -156,29 +156,28 @@ private:
         }
     }
 
-    struct InnerNSView : public ObjCClass<NSView>
+    struct InnerNSView final : public ObjCClass<NSView>
     {
         InnerNSView()
             : ObjCClass ("JuceInnerNSView_")
         {
             addIvar<NSViewComponentWithParent*> ("owner");
 
-            addMethod (@selector (isOpaque),       isOpaque);
-            addMethod (@selector (didAddSubview:), didAddSubview);
+            addMethod (@selector (isOpaque), [] (id, SEL) { return YES; });
+
+            addMethod (@selector (didAddSubview:), [] (id self, SEL, NSView*)
+            {
+                if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
+                    if (owner->wantsNudge == WantsNudge::yes)
+                        owner->triggerAsyncUpdate();
+            });
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (clipsToBounds), [] (id, SEL) { return YES; });
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();
         }
-
-        static BOOL isOpaque  (id, SEL) { return YES; }
-
-        static void nudge (id self)
-        {
-            if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
-                if (owner->wantsNudge == WantsNudge::yes)
-                    owner->triggerAsyncUpdate();
-        }
-
-        static void didAddSubview (id self, SEL, NSView*)      { nudge (self); }
     };
 
     static InnerNSView& getViewClass()

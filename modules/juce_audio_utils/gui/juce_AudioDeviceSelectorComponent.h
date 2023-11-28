@@ -89,11 +89,13 @@ public:
     /** @internal */
     void resized() override;
 
+    /** @internal */
+    void childBoundsChanged (Component* child) override;
+
 private:
     //==============================================================================
     void handleBluetoothButton();
     void updateDeviceType();
-    void updateMidiOutput();
     void changeListenerCallback (ChangeBroadcaster*) override;
     void updateAllControls();
 
@@ -107,9 +109,11 @@ private:
     const bool hideAdvancedOptionsWithButton;
 
     class MidiInputSelectorComponentListBox;
+    class MidiOutputSelector;
+
     Array<MidiDeviceInfo> currentMidiOutputs;
     std::unique_ptr<MidiInputSelectorComponentListBox> midiInputsList;
-    std::unique_ptr<ComboBox> midiOutputSelector;
+    std::unique_ptr<MidiOutputSelector> midiOutputSelector;
     std::unique_ptr<Label> midiInputsLabel, midiOutputLabel;
     std::unique_ptr<TextButton> bluetoothButton;
 

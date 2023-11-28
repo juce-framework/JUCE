@@ -308,8 +308,8 @@ class ASIOAudioIODeviceType;
 static void sendASIODeviceChangeToListeners (ASIOAudioIODeviceType*);
 
 //==============================================================================
-class ASIOAudioIODevice  : public AudioIODevice,
-                           private Timer
+class ASIOAudioIODevice final : public AudioIODevice,
+                                private Timer
 {
 public:
     ASIOAudioIODevice (ASIOAudioIODeviceType* ownerType, const String& devName,
@@ -1438,7 +1438,7 @@ struct ASIOAudioIODevice::ASIOCallbackFunctions<maxNumASIODevices>
 };
 
 //==============================================================================
-class ASIOAudioIODeviceType  : public AudioIODeviceType
+class ASIOAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     ASIOAudioIODeviceType() : AudioIODeviceType ("ASIO") {}

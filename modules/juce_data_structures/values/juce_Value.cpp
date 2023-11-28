@@ -64,7 +64,7 @@ void Value::ValueSource::sendChangeMessage (const bool synchronous)
 }
 
 //==============================================================================
-class SimpleValueSource  : public Value::ValueSource
+class SimpleValueSource final : public Value::ValueSource
 {
 public:
     SimpleValueSource()

@@ -2954,7 +2954,7 @@ private:
 static const char* const mp3FormatName = "MP3 file";
 
 //==============================================================================
-class MP3Reader : public AudioFormatReader
+class MP3Reader final : public AudioFormatReader
 {
 public:
     MP3Reader (InputStream* const in)

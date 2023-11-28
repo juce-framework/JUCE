@@ -481,7 +481,7 @@ private:
 };
 
 //==============================================================================
-class ALSAThread  : public Thread
+class ALSAThread final : public Thread
 {
 public:
     ALSAThread (const String& inputDeviceID, const String& outputDeviceID)
@@ -838,7 +838,7 @@ private:
 
 
 //==============================================================================
-class ALSAAudioIODevice   : public AudioIODevice
+class ALSAAudioIODevice final : public AudioIODevice
 {
 public:
     ALSAAudioIODevice (const String& deviceName,
@@ -967,7 +967,7 @@ private:
 
 
 //==============================================================================
-class ALSAAudioIODeviceType  : public AudioIODeviceType
+class ALSAAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     ALSAAudioIODeviceType (bool onlySoundcards, const String& deviceTypeName)

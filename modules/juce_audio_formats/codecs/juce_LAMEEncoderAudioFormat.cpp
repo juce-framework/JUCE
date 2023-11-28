@@ -28,7 +28,7 @@ namespace juce
 
 #if JUCE_USE_LAME_AUDIO_FORMAT
 
-class LAMEEncoderAudioFormat::Writer   : public AudioFormatWriter
+class LAMEEncoderAudioFormat::Writer final : public AudioFormatWriter
 {
 public:
     Writer (OutputStream* destStream, const String& formatName,

@@ -621,12 +621,12 @@ struct AndroidDocument::Utils
     public:
         static String getMimeTypeFromExtension (const String& str)
         {
-            return MimeTypeTable::getMimeTypesForFileExtension (str)[0];
+            return detail::MimeTypeTable::getMimeTypesForFileExtension (str)[0];
         }
 
         static String getExtensionFromMimeType (const String& str)
         {
-            return MimeTypeTable::getFileExtensionsForMimeType (str)[0];
+            return detail::MimeTypeTable::getFileExtensionsForMimeType (str)[0];
         }
     };
    #endif

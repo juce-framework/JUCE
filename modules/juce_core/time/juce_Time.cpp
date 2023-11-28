@@ -611,7 +611,7 @@ Time Time::getCompilationDate()
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class TimeTests  : public UnitTest
+class TimeTests final : public UnitTest
 {
 public:
     TimeTests()

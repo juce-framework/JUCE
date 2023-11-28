@@ -26,7 +26,7 @@
 #include "MainComponent.h"
 
 //==============================================================================
-struct SidePanelHeader    : public Component
+struct SidePanelHeader final : public Component
 {
     SidePanelHeader (MainComponent& o)
         : owner (o)
@@ -132,8 +132,8 @@ struct SidePanelHeader    : public Component
 };
 
 //==============================================================================
-class DemoList    : public Component,
-                    public ListBoxModel
+class DemoList final : public Component,
+                       public ListBoxModel
 {
 public:
     DemoList (DemoContentComponent& holder)
@@ -214,7 +214,7 @@ public:
 
 private:
     //==============================================================================
-    class CategoryListHeaderComponent  : public Button
+    class CategoryListHeaderComponent final : public Button
     {
     public:
         explicit CategoryListHeaderComponent (DemoList& o)

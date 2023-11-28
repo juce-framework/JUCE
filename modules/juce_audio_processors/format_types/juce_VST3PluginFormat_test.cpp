@@ -29,7 +29,7 @@
 namespace juce
 {
 
-class VST3PluginFormatTests : public UnitTest
+class VST3PluginFormatTests final : public UnitTest
 {
 public:
     VST3PluginFormatTests()
@@ -592,10 +592,8 @@ private:
 
         void init()
         {
-            auto index = 1;
-
-            for (auto& channel : buffers)
-                std::fill (channel.begin(), channel.end(), (float) index++);
+            for (const auto [index, channel] : enumerate (buffers, 1))
+                std::fill (channel.begin(), channel.end(), (float) index);
         }
 
         bool allMatch (int channel, float value) const

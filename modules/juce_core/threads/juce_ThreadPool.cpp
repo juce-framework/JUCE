@@ -23,7 +23,7 @@
 namespace juce
 {
 
-struct ThreadPool::ThreadPoolThread  : public Thread
+struct ThreadPool::ThreadPoolThread final : public Thread
 {
     ThreadPoolThread (ThreadPool& p, const Options& options)
        : Thread { options.threadName, options.threadStackSizeBytes },
@@ -154,7 +154,7 @@ void ThreadPool::addJob (ThreadPoolJob* job, bool deleteJobWhenFinished)
 
 void ThreadPool::addJob (std::function<ThreadPoolJob::JobStatus()> jobToRun)
 {
-    struct LambdaJobWrapper  : public ThreadPoolJob
+    struct LambdaJobWrapper final : public ThreadPoolJob
     {
         LambdaJobWrapper (std::function<ThreadPoolJob::JobStatus()> j) : ThreadPoolJob ("lambda"), job (j) {}
         JobStatus runJob() override      { return job(); }
@@ -167,7 +167,7 @@ void ThreadPool::addJob (std::function<ThreadPoolJob::JobStatus()> jobToRun)
 
 void ThreadPool::addJob (std::function<void()> jobToRun)
 {
-    struct LambdaJobWrapper  : public ThreadPoolJob
+    struct LambdaJobWrapper final : public ThreadPoolJob
     {
         LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (std::move (j)) {}
         JobStatus runJob() override      { job(); return ThreadPoolJob::jobHasFinished; }

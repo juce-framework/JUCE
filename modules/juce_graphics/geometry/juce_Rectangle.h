@@ -741,7 +741,7 @@ public:
     */
     bool enlargeIfAdjacent (Rectangle other) noexcept
     {
-        if (pos.x == other.pos.x && getRight() == other.getRight()
+        if (exactlyEqual (pos.x, other.pos.x) && exactlyEqual (getRight(), other.getRight())
              && (other.getBottom() >= pos.y && other.pos.y <= getBottom()))
         {
             auto newY = jmin (pos.y, other.pos.y);
@@ -750,7 +750,7 @@ public:
             return true;
         }
 
-        if (pos.y == other.pos.y && getBottom() == other.getBottom()
+        if (exactlyEqual (pos.y, other.pos.y) && exactlyEqual (getBottom(), other.getBottom())
              && (other.getRight() >= pos.x && other.pos.x <= getRight()))
         {
             auto newX = jmin (pos.x, other.pos.x);

@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct MarkerListScope  : public Expression::Scope
+struct MarkerListScope final : public Expression::Scope
 {
     MarkerListScope (Component& comp) : component (comp) {}
 
@@ -156,7 +156,7 @@ Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponen
 }
 
 //==============================================================================
-class RelativeCoordinatePositionerBase::DependencyFinderScope  : public ComponentScope
+class RelativeCoordinatePositionerBase::DependencyFinderScope final : public ComponentScope
 {
 public:
     DependencyFinderScope (Component& comp, RelativeCoordinatePositionerBase& p, bool& result)

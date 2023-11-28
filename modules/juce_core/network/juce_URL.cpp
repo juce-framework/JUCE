@@ -23,8 +23,8 @@
 namespace juce
 {
 
-struct FallbackDownloadTask  : public URL::DownloadTask,
-                               public Thread
+struct FallbackDownloadTask final : public URL::DownloadTask,
+                                    public Thread
 {
     FallbackDownloadTask (std::unique_ptr<FileOutputStream> outputStreamToUse,
                           size_t bufferSizeToUse,
@@ -598,7 +598,7 @@ template <typename Stream> struct iOSFileStreamWrapperFlush    { static void flu
 template <> struct iOSFileStreamWrapperFlush<FileOutputStream> { static void flush (OutputStream* o) { o->flush(); } };
 
 template <typename Stream>
-class iOSFileStreamWrapper : public Stream
+class iOSFileStreamWrapper final : public Stream
 {
 public:
     iOSFileStreamWrapper (URL& urlToUse)
@@ -769,7 +769,7 @@ std::unique_ptr<InputStream> URL::createInputStream (const InputStreamOptions& o
         return stream;
     }();
 
-    struct ProgressCallbackCaller  : public WebInputStream::Listener
+    struct ProgressCallbackCaller final : public WebInputStream::Listener
     {
         ProgressCallbackCaller (std::function<bool (int, int)> progressCallbackToUse)
             : callback (std::move (progressCallbackToUse))

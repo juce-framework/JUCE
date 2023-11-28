@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class IntroScreen   : public Component
+class IntroScreen final : public Component
 {
 public:
     IntroScreen()
@@ -70,8 +70,8 @@ private:
     HyperlinkButton linkButton { "www.juce.com", { "http://www.juce.com" } };
 
     //==============================================================================
-    struct LogoDrawComponent  : public Component,
-                                private Timer
+    struct LogoDrawComponent final : public Component,
+                                     private Timer
     {
         LogoDrawComponent()
         {

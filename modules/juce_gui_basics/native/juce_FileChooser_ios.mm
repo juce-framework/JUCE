@@ -40,10 +40,10 @@ namespace juce
 #endif
 
 //==============================================================================
-class FileChooser::Native  : public FileChooser::Pimpl,
-                             public detail::NativeModalWrapperComponent,
-                             public AsyncUpdater,
-                             public std::enable_shared_from_this<Native>
+class FileChooser::Native final : public FileChooser::Pimpl,
+                                  public detail::NativeModalWrapperComponent,
+                                  public AsyncUpdater,
+                                  public std::enable_shared_from_this<Native>
 {
 public:
     static std::shared_ptr<Native> make (FileChooser& fileChooser, int flags)

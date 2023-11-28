@@ -34,7 +34,11 @@ if(JUCE_BUILD_HELPER_TOOLS)
 
     target_compile_definitions(juceaide PRIVATE
         JUCE_DISABLE_JUCE_VERSION_PRINTING=1
-        JUCE_USE_CURL=0)
+        JUCE_USE_CURL=0
+        # This is a temporary workaround to allow builds to complete on Xcode 15.
+        # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
+        # deploy to older versions of macOS.
+        JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
 
     target_link_libraries(juceaide PRIVATE
         juce::juce_build_tools

@@ -439,7 +439,7 @@ namespace NumberToStringConverters
         return printDigits (t, v);
     }
 
-    struct StackArrayStream  : public std::basic_streambuf<char, std::char_traits<char>>
+    struct StackArrayStream final : public std::basic_streambuf<char, std::char_traits<char>>
     {
         explicit StackArrayStream (char* d)
         {
@@ -2319,7 +2319,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)
 
-class StringTests  : public UnitTest
+class StringTests final : public UnitTest
 {
 public:
     StringTests()

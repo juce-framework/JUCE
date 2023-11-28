@@ -68,7 +68,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullability-completeness")
 
 using namespace juce;
 
-struct AudioProcessorHolder  : public ReferenceCountedObject
+struct AudioProcessorHolder final : public ReferenceCountedObject
 {
     AudioProcessorHolder() = default;
     explicit AudioProcessorHolder (std::unique_ptr<AudioProcessor> p) : processor (std::move (p)) {}
@@ -103,9 +103,9 @@ private:
 //==============================================================================
 //=========================== The actual AudioUnit =============================
 //==============================================================================
-class JuceAudioUnitv3  : public AudioProcessorListener,
-                         public AudioPlayHead,
-                         private AudioProcessorParameter::Listener
+class JuceAudioUnitv3 final : public AudioProcessorListener,
+                              public AudioPlayHead,
+                              private AudioProcessorParameter::Listener
 {
 public:
     JuceAudioUnitv3 (const AudioProcessorHolder::Ptr& processor,
@@ -741,7 +741,7 @@ public:
     AUAudioUnit* getAudioUnit() const { return au; }
 
 private:
-    struct Class  : public ObjCClass<AUAudioUnit>
+    struct Class final : public ObjCClass<AUAudioUnit>
     {
         Class() : ObjCClass<AUAudioUnit> ("AUAudioUnit_")
         {
@@ -789,7 +789,7 @@ private:
                 {
                     WaitableEvent deletionEvent;
 
-                    struct AUDeleter  : public CallbackMessage
+                    struct AUDeleter final : public CallbackMessage
                     {
                         AUDeleter (id selfToDelete, WaitableEvent& event)
                             : parentSelf (selfToDelete), parentDeletionEvent (event)

@@ -105,20 +105,32 @@ private:
     Here's an example of how you might use this class:
 
     @code
+    Constructor()
+    {
+        startRealtimeThread (RealtimeThreadOptions{}.withApproximateAudioProcessingTime (samplesPerFrame, sampleRate));
+        or
+        startRealtimeThread (RealtimeThreadOptions{}.withProcessingTimeMs (10));
+    }
+
     void Thread::run() override
     {
         WorkgroupToken token;
 
         getWorkgroup().join (token);
 
-        while (! threadShouldExit())
+        while (wait (-1) && ! threadShouldExit())
         {
-            // If the workgroup has changed, rejoin the workgroup with the same token
+            // If the workgroup has changed, rejoin the workgroup with the same token.
             if (workgroupChanged())
                 getWorkgroup().join (token);
 
             // Perform the work here
         }
+    }
+
+    void AudioProcessor::processBlock()
+    {
+        workerThread->notify();
     }
     @endcode
 
@@ -190,6 +202,13 @@ public:
         After this call, operator bool() will return false.
     */
     void reset() { erased = nullptr; }
+
+    /** Returns the recommended maximum number of parallel threads that should join this workgroup.
+
+        This recommendation is based on the workgroup attributes and current hardware, but not on
+        system load. On a very busy system, it may be more effective to use fewer parallel threads.
+    */
+    size_t getMaxParallelThreadCount() const;
 
 private:
     const WorkgroupProvider* getWorkgroupProvider() const { return erased != nullptr ? erased() : nullptr; }

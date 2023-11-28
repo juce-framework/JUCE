@@ -477,7 +477,7 @@ void MidiMessageSequence::createControllerUpdatesForTime (int channel, double ti
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct MidiMessageSequenceTest  : public UnitTest
+struct MidiMessageSequenceTest final : public UnitTest
 {
     MidiMessageSequenceTest()
         : UnitTest ("MidiMessageSequence", UnitTestCategories::midi)

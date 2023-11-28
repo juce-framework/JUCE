@@ -23,7 +23,7 @@
 namespace juce
 {
 
-class MidiDeviceListConnectionBroadcaster : private AsyncUpdater
+class MidiDeviceListConnectionBroadcaster final : private AsyncUpdater
 {
 public:
     ~MidiDeviceListConnectionBroadcaster() override

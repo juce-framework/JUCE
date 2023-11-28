@@ -26,13 +26,10 @@
 #ifndef DOXYGEN
 
 // Forward declarations to avoid leaking implementation details.
-namespace Steinberg
+namespace Steinberg::Vst
 {
-    namespace Vst
-    {
-        class IComponent;
-    }
-} // namespace Steinberg
+    class IComponent;
+} // namespace Steinberg::Vst
 
 #endif
 

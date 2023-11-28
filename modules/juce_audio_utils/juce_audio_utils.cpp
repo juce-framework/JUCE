@@ -41,8 +41,10 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 
 #if JUCE_MAC
-  #import <DiscRecording/DiscRecording.h>
-  #import <CoreAudioKit/CABTLEMIDIWindowController.h>
+ #import <DiscRecording/DiscRecording.h>
+ #import <CoreAudioKit/CABTLEMIDIWindowController.h>
+#elif JUCE_IOS
+ #import <CoreAudioKit/CoreAudioKit.h>
 #elif JUCE_WINDOWS
  #if JUCE_USE_CDBURNER
   /* You'll need the Platform SDK for these headers - if you don't have it and don't

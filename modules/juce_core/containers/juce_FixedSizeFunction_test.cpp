@@ -65,7 +65,7 @@ String& operator<< (String& str, const ConstructCounts& c)
                << " }";
 }
 
-class FixedSizeFunctionTest  : public UnitTest
+class FixedSizeFunctionTest final : public UnitTest
 {
     static void toggleBool (bool& b) { b = ! b; }
 
@@ -360,5 +360,5 @@ public:
 FixedSizeFunctionTest fixedSizedFunctionTest;
 
 }
-}
+} // namespace juce
 #undef JUCE_FAIL_ON_ALLOCATION_IN_SCOPE

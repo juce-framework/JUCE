@@ -1705,7 +1705,7 @@ private:
         }
 
     private:
-        struct ComboWithItems : public ComboBox
+        struct ComboWithItems final : public ComboBox
         {
             explicit ComboWithItems (RangedAudioParameter& param)
             {

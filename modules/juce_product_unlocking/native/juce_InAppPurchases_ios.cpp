@@ -632,7 +632,7 @@ private:
                              [&] (const auto& pending) { return pending->request.get() == request; });
     }
 
-    struct Class : public ObjCClass<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>>
+    struct Class final : public ObjCClass<NSObject<SKProductsRequestDelegate, SKPaymentTransactionObserver>>
     {
         //==============================================================================
         Class()

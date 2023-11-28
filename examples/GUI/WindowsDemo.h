@@ -442,8 +442,8 @@ private:
         }), true);
     }
 
-    class AlertWindowCustomComponent : public Component,
-                                       private Slider::Listener
+    class AlertWindowCustomComponent final : public Component,
+                                             private Slider::Listener
     {
     public:
         AlertWindowCustomComponent()

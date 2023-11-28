@@ -65,8 +65,8 @@ enum
 const char* const javaAudioTypeName = "Android Audio";
 
 //==============================================================================
-class AndroidAudioIODevice  : public AudioIODevice,
-                              public Thread
+class AndroidAudioIODevice final : public AudioIODevice,
+                                   public Thread
 {
 public:
     //==============================================================================
@@ -429,10 +429,10 @@ private:
 };
 
 //==============================================================================
-class AndroidAudioIODeviceType  : public AudioIODeviceType
+class AndroidAudioIODeviceType final : public AudioIODeviceType
 {
 public:
-    AndroidAudioIODeviceType()  : AudioIODeviceType (javaAudioTypeName) {}
+    AndroidAudioIODeviceType() : AudioIODeviceType (javaAudioTypeName) {}
 
     //==============================================================================
     void scanForDevices() {}

@@ -552,8 +552,8 @@ private:
     }
 
     //==============================================================================
-    ConcertinaPanel concertinaPanel;
     std::vector<std::unique_ptr<ConcertinaHeader>> headers;
+    ConcertinaPanel concertinaPanel;
     Project* project = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Sidebar)

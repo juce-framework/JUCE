@@ -39,7 +39,7 @@ DECLARE_JNI_CLASS (ClipData, "android/content/ClipData")
 DECLARE_JNI_CLASS (ClipDataItem, "android/content/ClipData$Item")
 #undef JNI_CLASS_MEMBERS
 
-class FileChooser::Native     : public FileChooser::Pimpl
+class FileChooser::Native final : public FileChooser::Pimpl
 {
 public:
     //==============================================================================
@@ -240,7 +240,7 @@ public:
             {
                 auto extension = wildcard.fromLastOccurrenceOf (".", false, false);
 
-                result.addArray (MimeTypeTable::getMimeTypesForFileExtension (extension));
+                result.addArray (detail::MimeTypeTable::getMimeTypesForFileExtension (extension));
             }
         }
 
@@ -280,7 +280,7 @@ bool FileChooser::isPlatformDialogAvailable()
 void FileChooser::registerCustomMimeTypeForFileExtension (const String& mimeType,
                                                           const String& fileExtension)
 {
-    MimeTypeTable::registerCustomMimeTypeForFileExtension (mimeType, fileExtension);
+    detail::MimeTypeTable::registerCustomMimeTypeForFileExtension (mimeType, fileExtension);
 }
 
 } // namespace juce

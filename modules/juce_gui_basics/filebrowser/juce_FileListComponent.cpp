@@ -99,10 +99,10 @@ void FileListComponent::changeListenerCallback (ChangeBroadcaster*)
 }
 
 //==============================================================================
-class FileListComponent::ItemComponent  : public Component,
-                                          public TooltipClient,
-                                          private TimeSliceClient,
-                                          private AsyncUpdater
+class FileListComponent::ItemComponent final : public Component,
+                                               public TooltipClient,
+                                               private TimeSliceClient,
+                                               private AsyncUpdater
 {
 public:
     ItemComponent (FileListComponent& fc, TimeSliceThread& t)

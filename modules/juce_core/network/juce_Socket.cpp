@@ -794,7 +794,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct SocketTests : public UnitTest
+struct SocketTests final : public UnitTest
 {
     SocketTests()
         : UnitTest ("Sockets", UnitTestCategories::networking)

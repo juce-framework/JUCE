@@ -23,7 +23,7 @@
 
 cmake_minimum_required(VERSION 3.22)
 
-project(JUCE VERSION 7.0.7 LANGUAGES C CXX)
+project(JUCE VERSION 7.0.9 LANGUAGES C CXX)
 
 include(CMakeDependentOption)
 

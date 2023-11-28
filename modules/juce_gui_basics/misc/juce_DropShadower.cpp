@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class DropShadower::ShadowWindow  : public Component
+class DropShadower::ShadowWindow final : public Component
 {
 public:
     ShadowWindow (Component* comp, const DropShadow& ds)
@@ -170,7 +170,7 @@ private:
     JUCE_DECLARE_WEAK_REFERENCEABLE (VirtualDesktopWatcher)
 };
 
-class DropShadower::ParentVisibilityChangedListener  : public ComponentListener
+class DropShadower::ParentVisibilityChangedListener final : public ComponentListener
 {
 public:
     ParentVisibilityChangedListener (Component& r, ComponentListener& l)

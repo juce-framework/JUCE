@@ -52,8 +52,8 @@ static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
 }
 
 //==============================================================================
-class FileChooser::Native     : public Component,
-                                public FileChooser::Pimpl
+class FileChooser::Native final : public Component,
+                                  public FileChooser::Pimpl
 {
 public:
     Native (FileChooser& fileChooser, int flags, FilePreviewComponent* previewComponent)
@@ -371,7 +371,7 @@ private:
     };
 
     //==============================================================================
-    struct DelegateClass : public ObjCClass<DelegateType>
+    struct DelegateClass final : public ObjCClass<DelegateType>
     {
         DelegateClass() : ObjCClass<DelegateType> ("JUCEFileChooser_")
         {

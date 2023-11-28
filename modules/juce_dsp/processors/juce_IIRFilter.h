@@ -23,15 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
-{
-
 /**
     Classes for IIR filter processing.
 */
-namespace IIR
+namespace juce::dsp::IIR
 {
     /** A set of coefficients for use in an Filter object.
 
@@ -396,8 +391,4 @@ namespace IIR
 
         JUCE_LEAK_DETECTOR (Filter)
     };
-} // namespace IIR
-} // namespace dsp
-} // namespace juce
-
-#include "juce_IIRFilter_Impl.h"
+} // namespace juce::dsp::IIR

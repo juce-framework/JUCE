@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -139,5 +137,4 @@ void Panner<SampleType>::update()
 template class Panner<float>;
 template class Panner<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

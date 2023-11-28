@@ -209,6 +209,7 @@
  #include "native/juce_SystemStats_mac.mm"
  #include "native/juce_Threads_mac.mm"
  #include "native/juce_PlatformTimer_generic.cpp"
+ #include "native/juce_Process_mac.mm"
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -279,10 +280,14 @@
 #if JUCE_UNIT_TESTS
  #include "containers/juce_HashMap_test.cpp"
  #include "containers/juce_Optional_test.cpp"
+ #include "containers/juce_Enumerate_test.cpp"
  #include "maths/juce_MathsFunctions_test.cpp"
  #include "misc/juce_EnumHelpers_test.cpp"
  #include "containers/juce_FixedSizeFunction_test.cpp"
  #include "javascript/juce_JSONSerialisation_test.cpp"
+ #if JUCE_MAC || JUCE_IOS
+  #include "native/juce_ObjCHelpers_mac_test.mm"
+ #endif
 #endif
 
 //==============================================================================

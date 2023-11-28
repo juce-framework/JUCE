@@ -281,9 +281,9 @@ struct Grid::Helpers
             const auto lines = getArrayOfLinesFromTracks (tracks);
             int count = 0;
 
-            for (int i = 0; i < lines.size(); i++)
+            for (const auto [index, line] : enumerate (lines))
             {
-                for (const auto& name : lines.getReference (i).lineNames)
+                for (const auto& name : line.lineNames)
                 {
                     if (prop.getName() == name)
                     {
@@ -293,7 +293,7 @@ struct Grid::Helpers
                 }
 
                 if (count == prop.getNumber())
-                    return i + 1;
+                    return (int) index + 1;
             }
 
             jassertfalse;
@@ -328,9 +328,11 @@ struct Grid::Helpers
             const auto lines = getArrayOfLinesFromTracks (tracks);
             int count = 0;
 
-            for (int i = startLineNumber; i < lines.size(); i++)
+            const auto enumerated = enumerate (lines);
+
+            for (const auto [index, line] : makeRange (enumerated.begin() + startLineNumber, enumerated.end()))
             {
-                for (const auto& name : lines.getReference (i).lineNames)
+                for (const auto& name : line.lineNames)
                 {
                     if (propertyWithSpan.getName() == name)
                     {
@@ -340,7 +342,7 @@ struct Grid::Helpers
                 }
 
                 if (count == propertyWithSpan.getNumber())
-                    return i + 1;
+                    return (int) index + 1;
             }
 
             jassertfalse;
@@ -1158,7 +1160,7 @@ void Grid::performLayout (Rectangle<int> targetArea)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct GridTests  : public UnitTest
+struct GridTests final : public UnitTest
 {
     GridTests()
         : UnitTest ("Grid", UnitTestCategories::gui)

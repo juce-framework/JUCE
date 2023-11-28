@@ -29,7 +29,7 @@ namespace juce
 namespace DragAndDropHelpers
 {
     //==============================================================================
-    struct JuceDropSource   : public ComBaseClassHelper<IDropSource>
+    struct JuceDropSource final : public ComBaseClassHelper<IDropSource>
     {
         JuceDropSource() {}
 
@@ -51,7 +51,7 @@ namespace DragAndDropHelpers
     };
 
     //==============================================================================
-    struct JuceEnumFormatEtc   : public ComBaseClassHelper<IEnumFORMATETC>
+    struct JuceEnumFormatEtc final : public ComBaseClassHelper<IEnumFORMATETC>
     {
         JuceEnumFormatEtc (const FORMATETC* f)  : format (f) {}
 
@@ -123,7 +123,7 @@ namespace DragAndDropHelpers
     };
 
     //==============================================================================
-    class JuceDataObject  : public ComBaseClassHelper <IDataObject>
+    class JuceDataObject final : public ComBaseClassHelper <IDataObject>
     {
     public:
         JuceDataObject (const FORMATETC* f, const STGMEDIUM* m)
@@ -251,7 +251,7 @@ namespace DragAndDropHelpers
         return static_cast<HDROP> (hDrop.release());
     }
 
-    struct DragAndDropJob   : public ThreadPoolJob
+    struct DragAndDropJob final : public ThreadPoolJob
     {
         DragAndDropJob (FORMATETC f, STGMEDIUM m, DWORD d, std::function<void()>&& cb)
             : ThreadPoolJob ("DragAndDrop"),
@@ -288,7 +288,7 @@ namespace DragAndDropHelpers
         std::function<void()> completionCallback;
     };
 
-    class ThreadPoolHolder   : private DeletedAtShutdown
+    class ThreadPoolHolder final : private DeletedAtShutdown
     {
     public:
         ThreadPoolHolder() = default;

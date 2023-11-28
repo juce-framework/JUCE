@@ -26,7 +26,7 @@ namespace juce
 //==============================================================================
 namespace Android
 {
-    class Runnable  : public juce::AndroidInterfaceImplementer
+    class Runnable : public juce::AndroidInterfaceImplementer
     {
     public:
         virtual void run() = 0;
@@ -67,7 +67,7 @@ namespace Android
 }
 
 //==============================================================================
-struct AndroidMessageQueue     : private Android::Runnable
+struct AndroidMessageQueue final : private Android::Runnable
 {
     JUCE_DECLARE_SINGLETON_SINGLETHREADED (AndroidMessageQueue, true)
 
@@ -134,7 +134,7 @@ void MessageManager::runDispatchLoop()
 
 void MessageManager::stopDispatchLoop()
 {
-    struct QuitCallback  : public CallbackMessage
+    struct QuitCallback final : public CallbackMessage
     {
         QuitCallback() {}
 
@@ -169,7 +169,7 @@ void MessageManager::stopDispatchLoop()
 }
 
 //==============================================================================
-class JuceAppLifecycle   : public ActivityLifecycleCallbacks
+class JuceAppLifecycle final : public ActivityLifecycleCallbacks
 {
 public:
     JuceAppLifecycle (juce::JUCEApplicationBase* (*initSymbolAddr)())

@@ -26,8 +26,8 @@
 namespace juce
 {
 
-class NSViewAttachment  : public ReferenceCountedObject,
-                          public ComponentMovementWatcher
+class NSViewAttachment final : public ReferenceCountedObject,
+                               public ComponentMovementWatcher
 {
 public:
     NSViewAttachment (NSView* v, Component& comp)

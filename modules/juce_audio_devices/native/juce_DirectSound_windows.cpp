@@ -739,8 +739,8 @@ private:
 };
 
 //==============================================================================
-class DSoundAudioIODevice  : public AudioIODevice,
-                             public Thread
+class DSoundAudioIODevice final : public AudioIODevice,
+                                  public Thread
 {
 public:
     DSoundAudioIODevice (const String& deviceName,
@@ -1214,7 +1214,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 }
 
 //==============================================================================
-class DSoundAudioIODeviceType  : public AudioIODeviceType
+class DSoundAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     DSoundAudioIODeviceType()

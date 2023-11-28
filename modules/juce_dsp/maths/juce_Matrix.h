@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -250,5 +248,4 @@ private:
     JUCE_LEAK_DETECTOR (Matrix)
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

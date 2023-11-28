@@ -50,6 +50,8 @@
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
+ #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
+ #include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
  #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
  #include <juce_audio_basics/midi/ump/juce_UMP.h>
  #include "midi_io/ump/juce_UMPBytestreamInputHandler.h"
@@ -75,6 +77,10 @@
 
  #if TARGET_OS_SIMULATOR
   #import <CoreMIDI/MIDINetworkSession.h>
+ #endif
+
+ #if JUCE_MODULE_AVAILABLE_juce_graphics
+  #include <juce_graphics/native/juce_CoreGraphicsHelpers_mac.h>
  #endif
 
  #include "native/juce_Audio_ios.cpp"

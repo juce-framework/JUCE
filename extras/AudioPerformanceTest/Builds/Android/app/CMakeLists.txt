@@ -25,9 +25,9 @@ include_directories( AFTER
 enable_language(ASM)
 
 if(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
-    add_definitions([[-DJUCE_DISPLAY_SPLASH_SCREEN=0]] [[-DJUCE_USE_DARK_SPLASH_SCREEN=1]] [[-DJUCE_PROJUCER_VERSION=0x70007]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DDEBUG=1]] [[-D_DEBUG=1]])
+    add_definitions([[-DJUCE_DISPLAY_SPLASH_SCREEN=0]] [[-DJUCE_USE_DARK_SPLASH_SCREEN=1]] [[-DJUCE_PROJUCER_VERSION=0x70009]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DDEBUG=1]] [[-D_DEBUG=1]])
 elseif(JUCE_BUILD_CONFIGURATION MATCHES "RELEASE")
-    add_definitions([[-DJUCE_DISPLAY_SPLASH_SCREEN=0]] [[-DJUCE_USE_DARK_SPLASH_SCREEN=1]] [[-DJUCE_PROJUCER_VERSION=0x70007]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DNDEBUG=1]])
+    add_definitions([[-DJUCE_DISPLAY_SPLASH_SCREEN=0]] [[-DJUCE_USE_DARK_SPLASH_SCREEN=1]] [[-DJUCE_PROJUCER_VERSION=0x70009]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DNDEBUG=1]])
 else()
     message( FATAL_ERROR "No matching build-configuration found." )
 endif()
@@ -53,8 +53,10 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMP_test.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPacket.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPackets.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPBytesOnGroup.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConversion.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConverters.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDeviceInfo.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDispatcher.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPFactory.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPIterator.cpp"
@@ -839,6 +841,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/containers/juce_DynamicObject.cpp"
     "../../../../../modules/juce_core/containers/juce_DynamicObject.h"
     "../../../../../modules/juce_core/containers/juce_ElementComparator.h"
+    "../../../../../modules/juce_core/containers/juce_Enumerate.h"
+    "../../../../../modules/juce_core/containers/juce_Enumerate_test.cpp"
     "../../../../../modules/juce_core/containers/juce_FixedSizeFunction.h"
     "../../../../../modules/juce_core/containers/juce_FixedSizeFunction_test.cpp"
     "../../../../../modules/juce_core/containers/juce_HashMap.h"
@@ -962,9 +966,11 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/native/juce_Network_mac.mm"
     "../../../../../modules/juce_core/native/juce_Network_windows.cpp"
     "../../../../../modules/juce_core/native/juce_ObjCHelpers_mac.h"
+    "../../../../../modules/juce_core/native/juce_ObjCHelpers_mac_test.mm"
     "../../../../../modules/juce_core/native/juce_PlatformTimer_generic.cpp"
     "../../../../../modules/juce_core/native/juce_PlatformTimer_windows.cpp"
     "../../../../../modules/juce_core/native/juce_PlatformTimerListener.h"
+    "../../../../../modules/juce_core/native/juce_Process_mac.mm"
     "../../../../../modules/juce_core/native/juce_Registry_windows.cpp"
     "../../../../../modules/juce_core/native/juce_RuntimePermissions_android.cpp"
     "../../../../../modules/juce_core/native/juce_SharedCode_intel.h"
@@ -1821,8 +1827,10 @@ set_source_files_properties(
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMP_test.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPacket.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPackets.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPBytesOnGroup.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConversion.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConverters.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDeviceInfo.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDispatcher.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPFactory.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPIterator.cpp"
@@ -2607,6 +2615,8 @@ set_source_files_properties(
     "../../../../../modules/juce_core/containers/juce_DynamicObject.cpp"
     "../../../../../modules/juce_core/containers/juce_DynamicObject.h"
     "../../../../../modules/juce_core/containers/juce_ElementComparator.h"
+    "../../../../../modules/juce_core/containers/juce_Enumerate.h"
+    "../../../../../modules/juce_core/containers/juce_Enumerate_test.cpp"
     "../../../../../modules/juce_core/containers/juce_FixedSizeFunction.h"
     "../../../../../modules/juce_core/containers/juce_FixedSizeFunction_test.cpp"
     "../../../../../modules/juce_core/containers/juce_HashMap.h"
@@ -2730,9 +2740,11 @@ set_source_files_properties(
     "../../../../../modules/juce_core/native/juce_Network_mac.mm"
     "../../../../../modules/juce_core/native/juce_Network_windows.cpp"
     "../../../../../modules/juce_core/native/juce_ObjCHelpers_mac.h"
+    "../../../../../modules/juce_core/native/juce_ObjCHelpers_mac_test.mm"
     "../../../../../modules/juce_core/native/juce_PlatformTimer_generic.cpp"
     "../../../../../modules/juce_core/native/juce_PlatformTimer_windows.cpp"
     "../../../../../modules/juce_core/native/juce_PlatformTimerListener.h"
+    "../../../../../modules/juce_core/native/juce_Process_mac.mm"
     "../../../../../modules/juce_core/native/juce_Registry_windows.cpp"
     "../../../../../modules/juce_core/native/juce_RuntimePermissions_android.cpp"
     "../../../../../modules/juce_core/native/juce_SharedCode_intel.h"

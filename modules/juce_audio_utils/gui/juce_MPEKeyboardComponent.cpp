@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct MPEKeyboardComponent::MPENoteComponent : public Component
+struct MPEKeyboardComponent::MPENoteComponent final : public Component
 {
     MPENoteComponent (MPEKeyboardComponent& o, uint16 sID, uint8 initial, float noteOnVel, float press)
        : owner (o),

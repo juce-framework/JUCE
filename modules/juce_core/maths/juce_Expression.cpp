@@ -23,7 +23,7 @@
 namespace juce
 {
 
-class Expression::Term  : public SingleThreadedReferenceCountedObject
+class Expression::Term : public SingleThreadedReferenceCountedObject
 {
 public:
     Term() {}
@@ -92,7 +92,7 @@ struct Expression::Helpers
 
     //==============================================================================
     /** An exception that can be thrown by Expression::evaluate(). */
-    class EvaluationError  : public std::exception
+    class EvaluationError final : public std::exception
     {
     public:
         EvaluationError (const String& desc)  : description (desc)
@@ -104,7 +104,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Constant  : public Term
+    class Constant final : public Term
     {
     public:
         Constant (double val, bool resolutionTarget)
@@ -193,7 +193,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class SymbolTerm  : public Term
+    class SymbolTerm final : public Term
     {
     public:
         explicit SymbolTerm (const String& sym) : symbol (sym) {}
@@ -226,7 +226,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Function  : public Term
+    class Function final : public Term
     {
     public:
         explicit Function (const String& name)  : functionName (name) {}
@@ -297,7 +297,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class DotOperator  : public BinaryTerm
+    class DotOperator final : public BinaryTerm
     {
     public:
         DotOperator (SymbolTerm* l, TermPtr r)  : BinaryTerm (TermPtr (l), r) {}
@@ -347,7 +347,7 @@ struct Expression::Helpers
 
     private:
         //==============================================================================
-        class EvaluationVisitor  : public Scope::Visitor
+        class EvaluationVisitor final : public Scope::Visitor
         {
         public:
             EvaluationVisitor (const TermPtr& t, const int recursion)
@@ -363,7 +363,7 @@ struct Expression::Helpers
             JUCE_DECLARE_NON_COPYABLE (EvaluationVisitor)
         };
 
-        class SymbolVisitingVisitor  : public Scope::Visitor
+        class SymbolVisitingVisitor final : public Scope::Visitor
         {
         public:
             SymbolVisitingVisitor (const TermPtr& t, SymbolVisitor& v, const int recursion)
@@ -379,7 +379,7 @@ struct Expression::Helpers
             JUCE_DECLARE_NON_COPYABLE (SymbolVisitingVisitor)
         };
 
-        class SymbolRenamingVisitor   : public Scope::Visitor
+        class SymbolRenamingVisitor final : public Scope::Visitor
         {
         public:
             SymbolRenamingVisitor (const TermPtr& t, const Expression::Symbol& symbol_, const String& newName_, const int recursionCount_)
@@ -402,7 +402,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Negate  : public Term
+    class Negate final : public Term
     {
     public:
         explicit Negate (const TermPtr& t) : input (t)
@@ -447,7 +447,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Add  : public BinaryTerm
+    class Add final : public BinaryTerm
     {
     public:
         Add (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
@@ -471,7 +471,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Subtract  : public BinaryTerm
+    class Subtract final : public BinaryTerm
     {
     public:
         Subtract (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
@@ -500,7 +500,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Multiply  : public BinaryTerm
+    class Multiply final : public BinaryTerm
     {
     public:
         Multiply (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
@@ -523,7 +523,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class Divide  : public BinaryTerm
+    class Divide final : public BinaryTerm
     {
     public:
         Divide (TermPtr l, TermPtr r) : BinaryTerm (l, r) {}
@@ -621,7 +621,7 @@ struct Expression::Helpers
     }
 
     //==============================================================================
-    class SymbolCheckVisitor  : public Term::SymbolVisitor
+    class SymbolCheckVisitor final : public Term::SymbolVisitor
     {
     public:
         SymbolCheckVisitor (const Symbol& s) : symbol (s) {}
@@ -636,7 +636,7 @@ struct Expression::Helpers
     };
 
     //==============================================================================
-    class SymbolListVisitor  : public Term::SymbolVisitor
+    class SymbolListVisitor final : public Term::SymbolVisitor
     {
     public:
         SymbolListVisitor (Array<Symbol>& list_) : list (list_) {}

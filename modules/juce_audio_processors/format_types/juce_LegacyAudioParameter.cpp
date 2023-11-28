@@ -29,7 +29,7 @@ namespace juce
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
-class LegacyAudioParameter :   public HostedAudioProcessorParameter
+class LegacyAudioParameter final : public HostedAudioProcessorParameter
 {
 public:
     LegacyAudioParameter (AudioProcessor& audioProcessorToUse, int audioParameterIndex)

@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce:: build_tools
 {
-namespace build_tools
-{
+
     uint64 calculateStreamHashCode (InputStream& in);
     uint64 calculateFileHashCode (const File& file);
     uint64 calculateMemoryHashCode (const void* data, size_t numBytes);
@@ -34,5 +33,5 @@ namespace build_tools
     bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, size_t numBytes);
     bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData);
     bool overwriteFileWithNewDataIfDifferent (const File& file, const String& newData);
-}
-}
+
+} // namespace juce::build_tools

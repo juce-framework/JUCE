@@ -547,8 +547,8 @@ namespace AAXClasses
     //==============================================================================
     class JuceAAX_Processor;
 
-    class JuceAAX_GUI   : public AAX_CEffectGUI,
-                          public ModifierKeyProvider
+    class JuceAAX_GUI final : public AAX_CEffectGUI,
+                              public ModifierKeyProvider
     {
     public:
         JuceAAX_GUI() = default;
@@ -668,7 +668,7 @@ namespace AAXClasses
         }
 
         //==============================================================================
-        struct ContentWrapperComponent  : public Component
+        struct ContentWrapperComponent final : public Component
         {
             ContentWrapperComponent (JuceAAX_GUI& gui, AudioProcessor& plugin)
                 : owner (gui)
@@ -805,10 +805,10 @@ namespace AAXClasses
     static Array<JuceAAX_Processor*> activeProcessors;
 
     //==============================================================================
-    class JuceAAX_Processor   : public AAX_CEffectParameters,
-                                public juce::AudioPlayHead,
-                                public AudioProcessorListener,
-                                private AsyncUpdater
+    class JuceAAX_Processor final : public AAX_CEffectParameters,
+                                    public juce::AudioPlayHead,
+                                    public AudioProcessorListener,
+                                    private AsyncUpdater
     {
     public:
         JuceAAX_Processor()
@@ -1054,7 +1054,7 @@ namespace AAXClasses
             return AAX_SUCCESS;
         }
 
-        AAX_Result GetParameterNumberofSteps (AAX_CParamID paramID, int32_t* result) const
+        AAX_Result GetParameterNumberOfSteps (AAX_CParamID paramID, int32_t* result) const override
         {
             if (auto* param = getParameterFromID (paramID))
                 *result = getSafeNumberOfParameterSteps (*param);
@@ -1759,18 +1759,16 @@ namespace AAXClasses
             if (! bypassPartOfRegularParams)
                 juceParameters.addNonOwning (bypassParameter);
 
-            int parameterIndex = 0;
-
-            for (auto* juceParam : juceParameters)
+            for (const auto [parameterIndex, juceParam] : enumerate (juceParameters))
             {
                 auto isBypassParameter = (juceParam == bypassParameter);
 
                 auto category = juceParam->getCategory();
                 auto paramID  = isBypassParameter ? String (cDefaultMasterBypassID)
-                                                  : juceParameters.getParamID (audioProcessor, parameterIndex);
+                                                  : juceParameters.getParamID (audioProcessor, (int) parameterIndex);
 
                 aaxParamIDs.add (paramID);
-                auto* aaxParamID = aaxParamIDs.getReference (parameterIndex++).toRawUTF8();
+                auto* aaxParamID = aaxParamIDs.getReference ((int) parameterIndex).toRawUTF8();
 
                 paramMap.set (AAXClasses::getAAXParamHash (aaxParamID), juceParam);
 

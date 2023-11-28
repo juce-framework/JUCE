@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     StringArray getVersionSegments (StringRef p)
     {
         auto segments = StringArray::fromTokens (p, ",.", "");
@@ -56,5 +55,5 @@ namespace build_tools
     {
         return "0x" + String::toHexString (getVersionAsHexInteger (versionString));
     }
-}
-}
+
+} // namespace juce::build_tools

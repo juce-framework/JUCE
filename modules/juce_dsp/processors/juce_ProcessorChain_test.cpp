@@ -23,12 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
-class ProcessorChainTest : public UnitTest
+class ProcessorChainTest final : public UnitTest
 {
     template <int AddValue>
     struct MockProcessor
@@ -163,5 +161,4 @@ public:
 
 static ProcessorChainTest processorChainUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

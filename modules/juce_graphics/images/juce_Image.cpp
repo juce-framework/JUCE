@@ -78,7 +78,7 @@ Image ImageType::convert (const Image& source) const
 }
 
 //==============================================================================
-class SoftwarePixelData  : public ImagePixelData
+class SoftwarePixelData final : public ImagePixelData
 {
 public:
     SoftwarePixelData (Image::PixelFormat formatToUse, int w, int h, bool clearImage)
@@ -154,7 +154,7 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 #endif
 
 //==============================================================================
-class SubsectionPixelData  : public ImagePixelData
+class SubsectionPixelData final : public ImagePixelData
 {
 public:
     SubsectionPixelData (ImagePixelData::Ptr source, Rectangle<int> r)

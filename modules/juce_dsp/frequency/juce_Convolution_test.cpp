@@ -29,14 +29,12 @@
 #define JUCE_FAIL_ON_ALLOCATION_IN_SCOPE
 #endif
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 namespace
 {
 
-class ConvolutionTest  : public UnitTest
+class ConvolutionTest final : public UnitTest
 {
     template <typename Callback>
     static void nTimes (int n, Callback&& callback)
@@ -575,7 +573,6 @@ public:
 ConvolutionTest convolutionUnitTest;
 
 }
-}
-}
+} // namespace juce::dsp
 
 #undef JUCE_FAIL_ON_ALLOCATION_IN_SCOPE

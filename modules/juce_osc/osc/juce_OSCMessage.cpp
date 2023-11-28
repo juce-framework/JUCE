@@ -100,7 +100,7 @@ void OSCMessage::addArgument (OSCArgument arg)      { arguments.add (arg); }
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class OSCMessageTests  : public UnitTest
+class OSCMessageTests final : public UnitTest
 {
 public:
     OSCMessageTests()

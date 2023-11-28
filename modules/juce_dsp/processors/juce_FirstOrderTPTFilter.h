@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 enum class FirstOrderTPTFilterType
@@ -147,5 +145,4 @@ private:
     SampleType cutoffFrequency = 1000.0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename FloatType>
@@ -697,5 +695,4 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
 template struct FilterDesign<float>;
 template struct FilterDesign<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

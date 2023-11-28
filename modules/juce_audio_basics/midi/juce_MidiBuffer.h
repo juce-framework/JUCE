@@ -33,7 +33,7 @@ namespace juce
 
     @tags{Audio}
 */
-struct MidiMessageMetadata final
+struct MidiMessageMetadata
 {
     MidiMessageMetadata() noexcept = default;
 

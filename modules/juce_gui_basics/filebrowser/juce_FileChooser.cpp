@@ -27,8 +27,8 @@ namespace juce
 {
 
 //==============================================================================
-class FileChooser::NonNative    : public std::enable_shared_from_this<NonNative>,
-                                  public FileChooser::Pimpl
+class FileChooser::NonNative final : public std::enable_shared_from_this<NonNative>,
+                                     public FileChooser::Pimpl
 {
 public:
     NonNative (FileChooser& fileChooser, int flags, FilePreviewComponent* preview)

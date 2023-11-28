@@ -151,7 +151,7 @@ const float referenceFontSize = 256.0f;
 const float referenceFontToUnits = 1.0f / referenceFontSize;
 
 //==============================================================================
-class AndroidTypeface   : public Typeface
+class AndroidTypeface final : public Typeface
 {
 public:
     AndroidTypeface (const Font& font)

@@ -56,9 +56,7 @@
  #error "You need to define the JucePlugin_LV2URI value! If you're using the Projucer/CMake, the definition will be written into JuceLV2Defines.h automatically."
 #endif
 
-namespace juce
-{
-namespace lv2_client
+namespace juce::lv2_client
 {
 
 constexpr bool startsWithValidScheme (const std::string_view str)
@@ -116,7 +114,7 @@ static const LV2_Options_Option* findMatchingOption (const LV2_Options_Option* o
     return nullptr;
 }
 
-class ParameterStorage : private AudioProcessorListener
+class ParameterStorage final : private AudioProcessorListener
 {
 public:
     ParameterStorage (AudioProcessor& proc, LV2_URID_Map map)
@@ -253,10 +251,9 @@ private:
     const std::map<LV2_URID, size_t> uridToIndexMap = [&]
     {
         std::map<LV2_URID, size_t> result;
-        size_t index = 0;
 
-        for (const auto& urid : indexToUridMap)
-            result.emplace (urid, index++);
+        for (const auto [index, urid] : enumerate (indexToUridMap))
+            result.emplace (urid, index);
 
         return result;
     }();
@@ -292,7 +289,7 @@ struct PortIndices
 };
 
 //==============================================================================
-class PlayHead : public AudioPlayHead
+class PlayHead final : public AudioPlayHead
 {
 public:
     PlayHead (LV2_URID_Map mapFeatureIn, double sampleRateIn)
@@ -490,7 +487,7 @@ private:
     JUCE_LEAK_DETECTOR (Ports)
 };
 
-class LV2PluginInstance : private AudioProcessorListener
+class LV2PluginInstance final : private AudioProcessorListener
 {
 public:
     LV2PluginInstance (double sampleRate,
@@ -1081,11 +1078,11 @@ private:
                       "\tlv2:portProperty lv2:enumeration " << (param.isBoolean() ? ", lv2:toggled " : "") << ";\n"
                       "\tlv2:scalePoint ";
 
-                auto counter = 0;
+                const auto strings = param.getAllValueStrings();
 
-                for (const auto& string : param.getAllValueStrings())
+                for (const auto& [counter, string] : enumerate (strings))
                 {
-                    const auto value = jmap ((float) counter++, 0.0f, (float) numSteps - 1.0f, min, max);
+                    const auto value = jmap ((float) counter, 0.0f, (float) numSteps - 1.0f, min, max);
 
                     os << (counter != 0 ? ", " : "") << "[\n"
                           "\t\trdfs:label \"" << string << "\" ;\n"
@@ -1516,8 +1513,8 @@ static Optional<float> findScaleFactor (const LV2_URID_Map* symap, const LV2_Opt
     return parser.parseNumericOption<float> (scaleFactorOption);
 }
 
-class LV2UIInstance : private Component,
-                      private ComponentListener
+class LV2UIInstance final : private Component,
+                            private ComponentListener
 {
 public:
     LV2UIInstance (const char*,
@@ -1829,7 +1826,6 @@ LV2_SYMBOL_EXPORT const LV2UI_Descriptor* lv2ui_descriptor (uint32_t index)
     return &descriptor;
 }
 
-}
-}
+} // namespace juce::lv2_client
 
 #endif

@@ -30,7 +30,7 @@ constexpr uint8 whiteNotes[] = { 0, 2, 4, 5, 7, 9, 11 };
 constexpr uint8 blackNotes[] = { 1, 3, 6, 8, 10 };
 
 //==============================================================================
-struct KeyboardComponentBase::UpDownButton  : public Button
+struct KeyboardComponentBase::UpDownButton final : public Button
 {
     UpDownButton (KeyboardComponentBase& c, int d)
         : Button ({}), owner (c), delta (d)

@@ -9,7 +9,8 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="c97aUr" bigIcon="c97aUr"
                microphonePermissionNeeded="1" sendAppleEventsPermissionNeeded="1"
                sendAppleEventsPermissionText="This is required for some third-party plug-ins to function correctly."
-               customXcodeResourceFolders="../../examples/Assets" applicationCategory="public.app-category.developer-tools">
+               customXcodeResourceFolders="../../examples/Assets" applicationCategory="public.app-category.developer-tools"
+               extraDefs="JUCE_SILENCE_XCODE_15_LINKER_WARNING=1" extraLinkerFlags="-Wl,-weak_reference_mismatches,weak">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" recommendedWarnings="LLVM"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"
@@ -125,12 +126,13 @@
     </VS2022>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="" iPadScreenOrientation=""
                   iosDeviceFamily="1,2" microphonePermissionNeeded="1" iosBackgroundAudio="1"
-                  iosBackgroundBle="1" smallIcon="c97aUr" bigIcon="c97aUr" customXcodeResourceFolders="../../examples/Assets">
+                  iosBackgroundBle="1" smallIcon="c97aUr" bigIcon="c97aUr" customXcodeResourceFolders="../../examples/Assets"
+                  extraDefs="JUCE_SILENCE_XCODE_15_LINKER_WARNING=1" extraLinkerFlags="-Wl,-weak_reference_mismatches,weak">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" enablePluginBinaryCopyStep="1" isDebug="1" optimisation="1"
                        linkTimeOptimisation="0" targetName="Plugin Host" recommendedWarnings="LLVM"/>
         <CONFIGURATION name="Release" enablePluginBinaryCopyStep="1" isDebug="0" optimisation="3"
-                       linkTimeOptimisation="1" targetName="Plugin Host" recommendedWarnings="LLVM"/>
+                       targetName="Plugin Host" recommendedWarnings="LLVM"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../modules"/>

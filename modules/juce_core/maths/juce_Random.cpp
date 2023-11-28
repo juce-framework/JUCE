@@ -164,7 +164,7 @@ void Random::fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numB
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class RandomTests  : public UnitTest
+class RandomTests final : public UnitTest
 {
 public:
     RandomTests()

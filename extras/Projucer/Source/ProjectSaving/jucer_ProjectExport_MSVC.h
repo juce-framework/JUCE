@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include "jucer_ProjectSaver.h"
+
 inline String msBuildEscape (String str)
 {
     // see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-special-characters?view=vs-2019

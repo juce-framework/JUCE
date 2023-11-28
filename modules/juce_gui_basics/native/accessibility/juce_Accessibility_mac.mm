@@ -49,7 +49,7 @@ public:
 
 private:
     //==============================================================================
-    class API_AVAILABLE (macos (10.10)) AccessibilityElement  : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
+    class API_AVAILABLE (macos (10.10)) AccessibilityElement final : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
     {
     public:
         static Holder create (AccessibilityHandler& handler)
@@ -269,10 +269,18 @@ private:
             {
                 if (auto* handler = getHandler (self))
                 {
-                    if (handler->getCurrentState().isCheckable())
-                        return juceStringToNS (handler->getCurrentState().isChecked() ? TRANS ("On") : TRANS ("Off"));
+                    if (! handler->getCurrentState().isCheckable())
+                        return getAccessibilityValueFromInterfaces (*handler);
 
-                    return getAccessibilityValueFromInterfaces (*handler);
+                    const auto checked = handler->getCurrentState().isChecked();
+
+                    if (   handler->getRole() == AccessibilityRole::toggleButton
+                        || handler->getRole() == AccessibilityRole::radioButton)
+                    {
+                        return checked ? @YES : @NO;
+                    }
+
+                    return juceStringToNS (checked ? TRANS ("On") : TRANS ("Off"));
                 }
 
                 return nil;
@@ -784,8 +792,18 @@ private:
                 for (auto* childHandler : children)
                     [accessibleChildren addObject: static_cast<id> (childHandler->getNativeImplementation())];
 
-                if (auto* nativeChild = AccessibilityHandler::getNativeChildForComponent (handler->getComponent()))
-                    [accessibleChildren addObject: static_cast<id> (nativeChild)];
+                if (id nativeChild = static_cast<id> (AccessibilityHandler::getNativeChildForComponent (handler->getComponent())))
+                {
+                    // Having both native and non-native children would require implementing an
+                    // ordering. However, this situation doesn't occur with any of our current
+                    // use-cases.
+                    jassert ([accessibleChildren count] == 0);
+
+                    if ([nativeChild isAccessibilityElement])
+                        [accessibleChildren addObject:nativeChild];
+                    else if (auto* childrenOfChild = [nativeChild accessibilityChildren]; childrenOfChild != nil)
+                        [accessibleChildren addObjectsFromArray:(NSArray* _Nonnull) childrenOfChild];
+                }
 
                 return accessibleChildren;
             }

@@ -123,7 +123,7 @@ String Base64::toBase64 (const String& text)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class Base64Tests  : public UnitTest
+class Base64Tests final : public UnitTest
 {
 public:
     Base64Tests()

@@ -28,8 +28,8 @@ namespace juce
 
 using ViewportDragPosition = AnimatedPosition<AnimatedPositionBehaviours::ContinuousWithMomentum>;
 
-struct Viewport::DragToScrollListener   : private MouseListener,
-                                          private ViewportDragPosition::Listener
+struct Viewport::DragToScrollListener final : private MouseListener,
+                                              private ViewportDragPosition::Listener
 {
     DragToScrollListener (Viewport& v)  : viewport (v)
     {

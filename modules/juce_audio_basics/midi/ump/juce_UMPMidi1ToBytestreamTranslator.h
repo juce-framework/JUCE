@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -212,7 +210,6 @@ private:
     double pendingSysExTime = 0.0;
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

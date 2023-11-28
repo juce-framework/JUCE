@@ -685,6 +685,11 @@ MidiMessage MidiMessage::createSysExMessage (const void* sysexData, const int da
     return MidiMessage (m, dataSize + 2);
 }
 
+MidiMessage MidiMessage::createSysExMessage (Span<const std::byte> data)
+{
+    return createSysExMessage (data.data(), (int) data.size());
+}
+
 const uint8* MidiMessage::getSysExData() const noexcept
 {
     return isSysEx() ? getRawData() + 1 : nullptr;
@@ -1164,7 +1169,7 @@ const char* MidiMessage::getControllerName (const int n)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct MidiMessageTest  : public UnitTest
+struct MidiMessageTest final : public UnitTest
 {
     MidiMessageTest()
         : UnitTest ("MidiMessage", UnitTestCategories::midi)

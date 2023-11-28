@@ -137,10 +137,10 @@ void Drawable::setBoundsToEnclose (Rectangle<float> area)
     if (auto* parent = getParent())
         parentOrigin = parent->originRelativeToComponent;
 
-    auto newBounds = area.getSmallestIntegerContainer() + parentOrigin;
-    originRelativeToComponent = parentOrigin - newBounds.getPosition();
+    const auto smallestIntegerContainer = area.getSmallestIntegerContainer();
+    auto newBounds = smallestIntegerContainer + parentOrigin;
+    originRelativeToComponent = -smallestIntegerContainer.getPosition();
     setBounds (newBounds);
-    updateTransform();
 }
 
 //==============================================================================

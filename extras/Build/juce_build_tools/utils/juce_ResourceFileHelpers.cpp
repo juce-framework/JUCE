@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     uint64 calculateStreamHashCode (InputStream& in)
     {
         uint64 t = 0;
@@ -87,5 +86,5 @@ namespace build_tools
         const char* const utf8 = newData.toUTF8();
         return overwriteFileWithNewDataIfDifferent (file, utf8, strlen (utf8));
     }
-}
-}
+
+} // namespace juce::build_tools

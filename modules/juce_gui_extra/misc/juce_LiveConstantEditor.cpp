@@ -23,17 +23,14 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 #if JUCE_ENABLE_LIVE_CONSTANT_EDITOR
 
-namespace LiveConstantEditor
+namespace juce::LiveConstantEditor
 {
 
 //==============================================================================
-class AllComponentRepainter  : private Timer,
-                               private DeletedAtShutdown
+class AllComponentRepainter final : private Timer,
+                                    private DeletedAtShutdown
 {
 public:
     AllComponentRepainter()  {}
@@ -257,7 +254,7 @@ void LivePropertyEditorBase::findOriginalValueInCode()
 }
 
 //==============================================================================
-class ValueListHolderComponent  : public Component
+class ValueListHolderComponent final : public Component
 {
 public:
     ValueListHolderComponent (ValueList& l) : valueList (l)
@@ -292,8 +289,8 @@ public:
 };
 
 //==============================================================================
-class ValueList::EditorWindow  : public DocumentWindow,
-                                 private DeletedAtShutdown
+class ValueList::EditorWindow final : public DocumentWindow,
+                                      private DeletedAtShutdown
 {
 public:
     EditorWindow (ValueList& list)
@@ -384,8 +381,8 @@ CodeDocument& ValueList::getDocument (const File& file)
 }
 
 //==============================================================================
-struct ColourEditorComp  : public Component,
-                           private ChangeListener
+struct ColourEditorComp final : public Component,
+                                private ChangeListener
 {
     ColourEditorComp (LivePropertyEditorBase& e)  : editor (e)
     {
@@ -433,7 +430,7 @@ Component* createColourEditor (LivePropertyEditorBase& editor)
 }
 
 //==============================================================================
-struct SliderComp   : public Component
+struct SliderComp : public Component
 {
     SliderComp (LivePropertyEditorBase& e, bool useFloat)
         : editor (e), isFloat (useFloat)
@@ -471,7 +468,7 @@ struct SliderComp   : public Component
 };
 
 //==============================================================================
-struct BoolSliderComp  : public SliderComp
+struct BoolSliderComp final : public SliderComp
 {
     BoolSliderComp (LivePropertyEditorBase& e)
         : SliderComp (e, false)
@@ -490,8 +487,6 @@ Component* createIntegerSlider (LivePropertyEditorBase& editor)  { return new Sl
 Component* createFloatSlider   (LivePropertyEditorBase& editor)  { return new SliderComp (editor, true);  }
 Component* createBoolSlider    (LivePropertyEditorBase& editor)  { return new BoolSliderComp (editor); }
 
-}
+} // namespace juce::LiveConstantEditor
 
 #endif
-
-} // namespace juce

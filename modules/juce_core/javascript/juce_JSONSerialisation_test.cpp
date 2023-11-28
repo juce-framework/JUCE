@@ -377,7 +377,7 @@ struct TypeWithInnerVar
     }
 };
 
-class JSONSerialisationTest : public UnitTest
+class JSONSerialisationTest final : public UnitTest
 {
 public:
     JSONSerialisationTest() : UnitTest ("JSONSerialisation", UnitTestCategories::json) {}

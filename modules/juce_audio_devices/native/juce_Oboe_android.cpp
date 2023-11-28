@@ -124,7 +124,7 @@ static String getOboeString (const Type& value)
 }
 
 //==============================================================================
-class OboeAudioIODevice  : public AudioIODevice
+class OboeAudioIODevice final : public AudioIODevice
 {
 public:
     //==============================================================================
@@ -370,7 +370,7 @@ private:
 
         // providing a callback is required on some devices to get a FAST track, so we pass an
         // empty one to the temp stream to get the best available buffer size
-        struct DummyCallback  : public oboe::AudioStreamCallback
+        struct DummyCallback final : public oboe::AudioStreamCallback
         {
             oboe::DataCallbackResult onAudioReady (oboe::AudioStream*, void*, int32_t) override  { return oboe::DataCallbackResult::Stop; }
         };
@@ -609,7 +609,7 @@ private:
     };
 
     //==============================================================================
-    class OboeSessionBase   : protected oboe::AudioStreamCallback
+    class OboeSessionBase : protected oboe::AudioStreamCallback
     {
     public:
         static OboeSessionBase* create (OboeAudioIODevice& owner,
@@ -730,7 +730,7 @@ private:
 
     //==============================================================================
     template <typename SampleType>
-    class OboeSessionImpl   : public OboeSessionBase
+    class OboeSessionImpl final : public OboeSessionBase
     {
     public:
         OboeSessionImpl (OboeAudioIODevice& ownerToUse,
@@ -1038,7 +1038,7 @@ OboeAudioIODevice::OboeSessionBase* OboeAudioIODevice::OboeSessionBase::create (
 }
 
 //==============================================================================
-class OboeAudioIODeviceType  : public AudioIODeviceType
+class OboeAudioIODeviceType final : public AudioIODeviceType
 {
 public:
     OboeAudioIODeviceType()
@@ -1302,7 +1302,7 @@ const char* const OboeAudioIODevice::oboeTypeName = "Android Oboe";
 bool isOboeAvailable()  { return OboeAudioIODeviceType::isOboeAvailable(); }
 
 //==============================================================================
-class OboeRealtimeThread    : private oboe::AudioStreamCallback
+class OboeRealtimeThread final : private oboe::AudioStreamCallback
 {
     using OboeStream = OboeAudioIODevice::OboeStream;
 

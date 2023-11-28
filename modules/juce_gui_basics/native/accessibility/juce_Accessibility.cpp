@@ -27,7 +27,11 @@ namespace juce
 {
 
 #if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED
- class AccessibilityHandler::AccessibilityNativeImpl { public: AccessibilityNativeImpl (AccessibilityHandler&) {} };
+ class AccessibilityHandler::AccessibilityNativeImpl
+ {
+ public:
+     AccessibilityNativeImpl (AccessibilityHandler&) {}
+ };
 #endif
 
 } // namespace juce

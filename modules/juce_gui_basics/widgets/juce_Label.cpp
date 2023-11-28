@@ -397,7 +397,7 @@ void Label::setMinimumHorizontalScale (const float newScale)
 //==============================================================================
 // We'll use a custom focus traverser here to make sure focus goes from the
 // text editor to another component rather than back to the label itself.
-class LabelKeyboardFocusTraverser   : public KeyboardFocusTraverser
+class LabelKeyboardFocusTraverser final : public KeyboardFocusTraverser
 {
 public:
     explicit LabelKeyboardFocusTraverser (Label& l)  : owner (l)  {}
@@ -518,7 +518,7 @@ void Label::textEditorFocusLost (TextEditor& ed)
 }
 
 //==============================================================================
-class LabelAccessibilityHandler  : public AccessibilityHandler
+class LabelAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit LabelAccessibilityHandler (Label& labelToWrap)
@@ -542,7 +542,7 @@ public:
     }
 
 private:
-    class LabelValueInterface  : public AccessibilityTextValueInterface
+    class LabelValueInterface final : public AccessibilityTextValueInterface
     {
     public:
         explicit LabelValueInterface (Label& labelToWrap)

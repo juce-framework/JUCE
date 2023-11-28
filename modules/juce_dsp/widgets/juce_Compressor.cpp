@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -117,5 +115,4 @@ void Compressor<SampleType>::update()
 template class Compressor<float>;
 template class Compressor<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

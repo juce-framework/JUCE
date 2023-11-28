@@ -148,7 +148,7 @@ public:
     {
         transportSource = newSource;
 
-        struct ResetCallback  : public CallbackMessage
+        struct ResetCallback final : public CallbackMessage
         {
             ResetCallback (AudioThumbnailComponent& o) : owner (o) {}
             void messageCallback() override    { owner.reset(); }

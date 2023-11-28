@@ -487,7 +487,7 @@ private:
 };
 
 //==============================================================================
-struct AndroidContentUriOutputStream :  public OutputStream
+struct AndroidContentUriOutputStream final :  public OutputStream
 {
     explicit AndroidContentUriOutputStream (LocalRef<jobject>&& streamIn)
         : stream (std::move (streamIn)) {}
@@ -572,7 +572,7 @@ struct AndroidStreamHelpers
 };
 
 //==============================================================================
-struct AndroidContentUriInputStream :  public InputStream
+struct AndroidContentUriInputStream final :  public InputStream
 {
     explicit AndroidContentUriInputStream (const GlobalRef& uriIn)
         : uri (uriIn),
@@ -824,7 +824,7 @@ void File::revealToUser() const
 }
 
 //==============================================================================
-class SingleMediaScanner : public MediaScannerConnectionClient
+class SingleMediaScanner final : public MediaScannerConnectionClient
 {
 public:
     SingleMediaScanner (const String& filename)

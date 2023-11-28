@@ -292,7 +292,7 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
 
 #if JUCE_UNIT_TESTS
 
-class UniqueHardwareIDTest  : public UnitTest
+class UniqueHardwareIDTest final : public UnitTest
 {
 public:
     //==============================================================================

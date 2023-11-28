@@ -242,7 +242,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
         sendAccessibilityAutomationEvent (*this, event);
 }
 
-struct SpVoiceWrapper  : public DeletedAtShutdown
+struct SpVoiceWrapper final : public DeletedAtShutdown
 {
     SpVoiceWrapper()
     {

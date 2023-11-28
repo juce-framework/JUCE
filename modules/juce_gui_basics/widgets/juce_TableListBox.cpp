@@ -29,8 +29,8 @@ namespace juce
 static const Identifier tableColumnProperty { "_tableColumnId" };
 static const Identifier tableAccessiblePlaceholderProperty { "_accessiblePlaceholder" };
 
-class TableListBox::RowComp   : public TooltipClient,
-                                public ComponentWithListRowMouseBehaviours<RowComp>
+class TableListBox::RowComp final : public TooltipClient,
+                                    public ComponentWithListRowMouseBehaviours<RowComp>
 {
 public:
     explicit RowComp (TableListBox& tlb)
@@ -223,7 +223,7 @@ public:
 
 private:
     //==============================================================================
-    class RowAccessibilityHandler  : public AccessibilityHandler
+    class RowAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         RowAccessibilityHandler (RowComp& rowComp)
@@ -265,7 +265,7 @@ private:
         }
 
     private:
-        class RowComponentCellInterface  : public AccessibilityCellInterface
+        class RowComponentCellInterface final : public AccessibilityCellInterface
         {
         public:
             RowComponentCellInterface (RowAccessibilityHandler& handler)
@@ -313,7 +313,7 @@ private:
 
 
 //==============================================================================
-class TableListBox::Header  : public TableHeaderComponent
+class TableListBox::Header final : public TableHeaderComponent
 {
 public:
     Header (TableListBox& tlb)  : owner (tlb) {}
@@ -568,7 +568,7 @@ Optional<AccessibilityTableInterface::Span> findRecursively (const Accessibility
 
 std::unique_ptr<AccessibilityHandler> TableListBox::createAccessibilityHandler()
 {
-    class TableInterface  : public AccessibilityTableInterface
+    class TableInterface final : public AccessibilityTableInterface
     {
     public:
         explicit TableInterface (TableListBox& tableListBoxToWrap)

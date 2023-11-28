@@ -94,7 +94,7 @@ std::vector<Component*> KeyboardFocusTraverser::getAllComponents (Component* par
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct KeyboardFocusTraverserTests  : public UnitTest
+struct KeyboardFocusTraverserTests final : public UnitTest
 {
     KeyboardFocusTraverserTests()
         : UnitTest ("KeyboardFocusTraverser", UnitTestCategories::gui)
@@ -253,7 +253,7 @@ struct KeyboardFocusTraverserTests  : public UnitTest
     }
 
 private:
-    struct TestComponent  : public Component
+    struct TestComponent final : public Component
     {
         TestComponent()
         {

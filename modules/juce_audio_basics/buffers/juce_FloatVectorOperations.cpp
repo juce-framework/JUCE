@@ -1555,7 +1555,7 @@ ScopedNoDenormals::~ScopedNoDenormals() noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class FloatVectorOperationsTests  : public UnitTest
+class FloatVectorOperationsTests final : public UnitTest
 {
 public:
     FloatVectorOperationsTests()

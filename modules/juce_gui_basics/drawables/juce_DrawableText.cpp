@@ -194,7 +194,7 @@ Path DrawableText::getOutlineAsPath() const
         pathOfAllGlyphs.addPath (gylphPath);
     }
 
-    pathOfAllGlyphs.applyTransform (getTextTransform (w, h).followedBy (getTransform()));
+    pathOfAllGlyphs.applyTransform (getTextTransform (w, h).followedBy (drawableTransform));
 
     return pathOfAllGlyphs;
 }
@@ -211,7 +211,7 @@ bool DrawableText::replaceColour (Colour originalColour, Colour replacementColou
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> DrawableText::createAccessibilityHandler()
 {
-    class DrawableTextAccessibilityHandler  : public AccessibilityHandler
+    class DrawableTextAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         DrawableTextAccessibilityHandler (DrawableText& drawableTextToWrap)
