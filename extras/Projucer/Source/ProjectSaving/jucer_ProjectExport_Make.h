@@ -128,7 +128,7 @@ public:
     class MakefileTarget final : public build_tools::ProjectType::Target
     {
     public:
-        MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
+        MakefileTarget (Type targetType, const MakefileProjectExporter& exporter)
             : Target (targetType), owner (exporter)
         {}
 
@@ -163,7 +163,7 @@ public:
         StringPairArray getDefines (const BuildConfiguration& config) const
         {
             StringPairArray result;
-            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified).getAllKeys();
+            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, unspecified).getAllKeys();
             auto targetSpecific = owner.getAllPreprocessorDefs (config, type);
 
             for (auto& key : targetSpecific.getAllKeys())
