@@ -831,47 +831,51 @@ private:
         out << " $(LDFLAGS)" << newLine;
     }
 
+    void writeLinesForAggregateTarget (OutputStream& out) const
+    {
+        const auto isPartOfAggregate = [&] (const MakefileTarget* x)
+        {
+            return x != nullptr
+                   && x->type != build_tools::ProjectType::Target::AggregateTarget
+                   && x->type != build_tools::ProjectType::Target::SharedCodeTarget;
+        };
+
+        std::vector<MakefileTarget*> dependencies;
+        std::copy_if (targets.begin(), targets.end(), std::back_inserter (dependencies), isPartOfAggregate);
+
+        out << "all :";
+
+        for (const auto& d : dependencies)
+            out << ' ' << d->getPhonyName();
+
+        out << newLine << newLine;
+
+        for (const auto& d : dependencies)
+            out << d->getPhonyName() << " : " << d->getBuildProduct() << newLine;
+
+        out << newLine << newLine;
+    }
+
+    void writeLinesForTarget (OutputStream& out, const StringArray& packages, MakefileTarget& target) const
+    {
+        if (target.type == build_tools::ProjectType::Target::AggregateTarget)
+        {
+            writeLinesForAggregateTarget (out);
+        }
+        else
+        {
+            if (! getProject().isAudioPluginProject())
+                out << "all : " << target.getBuildProduct() << newLine << newLine;
+
+            target.writeTargetLine (out, packages);
+        }
+    }
+
     void writeTargetLines (OutputStream& out, const StringArray& packages) const
     {
-        auto n = targets.size();
-
-        for (int i = 0; i < n; ++i)
-        {
-            if (auto* target = targets.getUnchecked (i))
-            {
-                if (target->type == build_tools::ProjectType::Target::AggregateTarget)
-                {
-                    StringArray dependencies;
-                    MemoryOutputStream subTargetLines;
-
-                    for (int j = 0; j < n; ++j)
-                    {
-                        if (i == j) continue;
-
-                        if (auto* dependency = targets.getUnchecked (j))
-                        {
-                            if (dependency->type != build_tools::ProjectType::Target::SharedCodeTarget)
-                            {
-                                auto phonyName = dependency->getPhonyName();
-
-                                subTargetLines << phonyName << " : " << dependency->getBuildProduct() << newLine;
-                                dependencies.add (phonyName);
-                            }
-                        }
-                    }
-
-                    out << "all : " << dependencies.joinIntoString (" ") << newLine << newLine;
-                    out << subTargetLines.toString()                     << newLine << newLine;
-                }
-                else
-                {
-                    if (! getProject().isAudioPluginProject())
-                        out << "all : " << target->getBuildProduct() << newLine << newLine;
-
-                    target->writeTargetLine (out, packages);
-                }
-            }
-        }
+        for (const auto& target : targets)
+            if (target != nullptr)
+                writeLinesForTarget (out, packages, *target);
     }
 
     void writeConfig (OutputStream& out, const MakeBuildConfiguration& config) const
