@@ -949,7 +949,18 @@ private:
             return "";
         }();
 
-        out << "  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)" << preBuildDirectory << newLine
+        const auto targetsToClean = [&]
+        {
+            StringArray result;
+
+            for (const auto& target : targets)
+                if (target->type != build_tools::ProjectType::Target::AggregateTarget)
+                    result.add (target->getBuildProduct());
+
+            return result;
+        }();
+
+        out << "  CLEANCMD = rm -rf " << targetsToClean.joinIntoString (" ") << " $(JUCE_OBJDIR)" << preBuildDirectory << newLine
             << "endif" << newLine
             << newLine;
     }
@@ -1248,10 +1259,19 @@ private:
             << "\t$(V_AT)$(CLEANCMD)"             << newLine
             << newLine;
 
-        out << "strip:"                                                       << newLine
-            << "\t@echo Stripping " << projectName                            << newLine
-            << "\t-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)" << newLine
-            << newLine;
+        out << "strip:"                                                            << newLine
+            << "\t@echo Stripping " << projectName                                 << newLine;
+
+        for (const auto& target : targets)
+        {
+            if (target->type != build_tools::ProjectType::Target::AggregateTarget
+                && target->type != build_tools::ProjectType::Target::SharedCodeTarget)
+            {
+                out << "\t-$(V_AT)$(STRIP) --strip-unneeded " << target->getBuildProduct() << newLine;
+            }
+        }
+
+        out << newLine;
 
         writeIncludeLines (out);
     }
@@ -1273,6 +1293,7 @@ private:
     String getPhonyTargetLine() const
     {
         MemoryOutputStream phonyTargetLine;
+        phonyTargetLine.setNewLineString (getNewLineString());
 
         phonyTargetLine << ".PHONY: clean all strip";
 
@@ -1280,9 +1301,13 @@ private:
             return phonyTargetLine.toString();
 
         for (auto target : targets)
+        {
             if (target->type != build_tools::ProjectType::Target::SharedCodeTarget
                 && target->type != build_tools::ProjectType::Target::AggregateTarget)
+            {
                 phonyTargetLine << " " << target->getPhonyName();
+            }
+        }
 
         return phonyTargetLine.toString();
     }
