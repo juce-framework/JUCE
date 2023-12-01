@@ -153,7 +153,7 @@ private:
             if (auto locked = ptr.lock())
                 return locked;
 
-            auto shared = std::make_shared<SharedObjectType>();
+            const std::shared_ptr<SharedObjectType> shared (new SharedObjectType());
             ptr = shared;
             return shared;
         }

@@ -79,6 +79,18 @@ public:
 
             expect (SharedResourcePointer<Object>::getSharedObjectWithoutCreating() == std::nullopt);
         }
+
+        beginTest ("Create objects with private constructors");
+        {
+            class ObjectWithPrivateConstructor
+            {
+            private:
+                ObjectWithPrivateConstructor() = default;
+                friend SharedResourcePointer<ObjectWithPrivateConstructor>;
+            };
+
+            SharedResourcePointer<ObjectWithPrivateConstructor> instance;
+        }
     }
 };
 
