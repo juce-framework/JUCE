@@ -85,10 +85,10 @@ namespace SocketHelpers
     static std::optional<int> getBufferSize (SocketHandle handle, int property)
     {
         int result;
-        socklen_t outParamSize = sizeof (result);
+        auto outParamSize = (socklen_t) sizeof (result);
 
         if (getsockopt (handle, SOL_SOCKET, property, reinterpret_cast<char*> (&result), &outParamSize) != 0
-            || outParamSize != sizeof (result))
+            || outParamSize != (socklen_t) sizeof (result))
         {
             return std::nullopt;
         }
