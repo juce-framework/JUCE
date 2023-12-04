@@ -93,7 +93,7 @@ namespace FlacNamespace
 #if JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE)
 
  #undef PACKAGE_VERSION
- #define PACKAGE_VERSION "1.3.4"
+ #define PACKAGE_VERSION "1.4.3"
 
  #define FLAC__NO_DLL 1
 
@@ -132,6 +132,15 @@ namespace FlacNamespace
   #define FLAC__HAS_X86INTRIN 1
  #endif
 
+ #if JUCE_ARM && JUCE_64BIT
+  #define FLAC__CPU_ARM64 1
+
+  #if JUCE_USE_ARM_NEON
+    #define FLAC__HAS_NEONINTRIN 1
+    #define FLAC__HAS_A64NEONINTRIN 1
+  #endif
+ #endif
+
  #define flac_max jmax
  #define flac_min jmin
 
@@ -153,6 +162,7 @@ namespace FlacNamespace
  #include "flac/libFLAC/float.c"
  #include "flac/libFLAC/format.c"
  #include "flac/libFLAC/lpc_flac.c"
+ #include "flac/libFLAC/lpc_intrin_neon.c"
  #include "flac/libFLAC/md5.c"
  #include "flac/libFLAC/memory.c"
  #include "flac/libFLAC/stream_decoder.c"

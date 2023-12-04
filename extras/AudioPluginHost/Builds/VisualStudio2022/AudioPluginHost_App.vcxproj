@@ -531,6 +531,15 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\juce_audio_devices.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\deduplication\bitreader_read_rice_signed_block.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\deduplication\lpc_compute_autocorrelation_intrin.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\deduplication\lpc_compute_autocorrelation_intrin_neon.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\bitmath.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -556,6 +565,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\lpc_flac.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\lpc_intrin_neon.c">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\md5.c">
@@ -2752,7 +2764,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\sources\juce_AudioSourcePlayer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\sources\juce_AudioTransportSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\juce_audio_devices.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\all.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\bitmath.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\bitreader.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\bitwriter.h"/>
@@ -2764,11 +2775,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\lpc.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\md5.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\memory.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\metadata.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\stream_encoder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\stream_encoder_framing.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\private\window.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\protected\all.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\protected\stream_decoder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\libFLAC\include\protected\stream_encoder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\all.h"/>
@@ -2781,6 +2790,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\format.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\metadata.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\ordinals.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\private.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\stream_decoder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\stream_encoder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\lib\books\coupled\res_books_51.h"/>
@@ -3646,6 +3656,7 @@
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>
+    <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\JUCE_CHANGES.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\libvorbis-1.3.7\README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\LV2_SDK\README.md"/>

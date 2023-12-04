@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,9 +34,9 @@
 #  include <config.h>
 #endif
 
-//#ifdef HAVE_STDINT_H
-//#include <stdint.h>
-//#endif
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 
 #include "include/private/memory.h"
 #include "../assert.h"
@@ -118,6 +118,35 @@ FLAC__bool FLAC__memory_alloc_aligned_uint32_array(size_t elements, FLAC__uint32
 	}
 }
 
+FLAC__bool FLAC__memory_alloc_aligned_int64_array(size_t elements, FLAC__int64 **unaligned_pointer, FLAC__int64 **aligned_pointer)
+{
+	FLAC__int64 *pu; /* unaligned pointer */
+	union { /* union needed to comply with C99 pointer aliasing rules */
+		FLAC__int64 *pa; /* aligned pointer */
+		void         *pv; /* aligned pointer alias */
+	} u;
+
+	FLAC__ASSERT(elements > 0);
+	FLAC__ASSERT(0 != unaligned_pointer);
+	FLAC__ASSERT(0 != aligned_pointer);
+	FLAC__ASSERT(unaligned_pointer != aligned_pointer);
+
+	if(elements > SIZE_MAX / sizeof(*pu)) /* overflow check */
+		return false;
+
+	pu = (FLAC__int64*) FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
+	if(0 == pu) {
+		return false;
+	}
+	else {
+		if(*unaligned_pointer != 0)
+			free(*unaligned_pointer);
+		*unaligned_pointer = pu;
+		*aligned_pointer = u.pa;
+		return true;
+	}
+}
+
 FLAC__bool FLAC__memory_alloc_aligned_uint64_array(size_t elements, FLAC__uint64 **unaligned_pointer, FLAC__uint64 **aligned_pointer)
 {
 	FLAC__uint64 *pu; /* unaligned pointer */
@@ -135,35 +164,6 @@ FLAC__bool FLAC__memory_alloc_aligned_uint64_array(size_t elements, FLAC__uint64
 		return false;
 
 	pu = (FLAC__uint64*) FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
-	if(0 == pu) {
-		return false;
-	}
-	else {
-		if(*unaligned_pointer != 0)
-			free(*unaligned_pointer);
-		*unaligned_pointer = pu;
-		*aligned_pointer = u.pa;
-		return true;
-	}
-}
-
-FLAC__bool FLAC__memory_alloc_aligned_unsigned_array(size_t elements, uint32_t **unaligned_pointer, uint32_t **aligned_pointer)
-{
-	uint32_t *pu; /* unaligned pointer */
-	union { /* union needed to comply with C99 pointer aliasing rules */
-		uint32_t *pa; /* aligned pointer */
-		void     *pv; /* aligned pointer alias */
-	} u;
-
-	FLAC__ASSERT(elements > 0);
-	FLAC__ASSERT(0 != unaligned_pointer);
-	FLAC__ASSERT(0 != aligned_pointer);
-	FLAC__ASSERT(unaligned_pointer != aligned_pointer);
-
-	if(elements > SIZE_MAX / sizeof(*pu)) /* overflow check */
-		return false;
-
-	pu = (uint32_t*) FLAC__memory_alloc_aligned(sizeof(*pu) * elements, &u.pv);
 	if(0 == pu) {
 		return false;
 	}
