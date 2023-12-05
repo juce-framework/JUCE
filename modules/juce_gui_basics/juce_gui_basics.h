@@ -292,6 +292,7 @@ namespace juce
 #include "windows/juce_TooltipWindow.h"
 #include "windows/juce_VBlankAttachment.h"
 #include "windows/juce_WindowUtils.h"
+#include "windows/juce_NativeScaleFactorNotifier.h"
 #include "layout/juce_MultiDocumentPanel.h"
 #include "layout/juce_SidePanel.h"
 #include "filebrowser/juce_FileBrowserListener.h"

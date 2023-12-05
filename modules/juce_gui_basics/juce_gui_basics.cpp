@@ -355,3 +355,4 @@
 #include "windows/juce_TooltipWindow.cpp"
 #include "windows/juce_TopLevelWindow.cpp"
 #include "windows/juce_VBlankAttachment.cpp"
+#include "windows/juce_NativeScaleFactorNotifier.cpp"
