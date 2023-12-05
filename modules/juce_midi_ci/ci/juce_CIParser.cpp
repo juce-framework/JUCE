@@ -165,7 +165,7 @@ private:
         const auto json = ToVar::convert (body, opts);
 
         if (json.has_value())
-            *result = String (getDescription (body)) + ": " + JSON::toString (*json, true);
+            *result = String (getDescription (body)) + ": " + JSON::toString (*json, JSON::FormatOptions{}.withSpacing (JSON::Spacing::none));
     }
 
     const Message::Parsed* msg = nullptr;

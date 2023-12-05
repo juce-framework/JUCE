@@ -118,7 +118,7 @@ public:
         never need to call it directly, but it's virtual so that custom object types
         can stringify themselves appropriately.
     */
-    virtual void writeAsJSON (OutputStream&, int indentLevel, bool allOnOneLine, int maximumDecimalPlaces);
+    virtual void writeAsJSON (OutputStream&, const JSON::FormatOptions&);
 
 private:
     //==============================================================================

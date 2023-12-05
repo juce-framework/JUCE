@@ -1077,7 +1077,7 @@ struct PushNotifications::Pimpl
 
         auto bundle = LocalRef<jobject> (env->NewObject (AndroidBundle, AndroidBundle.constructor));
         env->CallVoidMethod (bundle, AndroidBundle.putString, javaString ("properties").get(),
-                             javaString (JSON::toString (varToParse, false)).get());
+                             javaString (JSON::toString (varToParse)).get());
 
         return bundle;
     }

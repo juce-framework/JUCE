@@ -835,7 +835,7 @@ struct JavascriptEngine::RootObject final : public DynamicObject
 
         std::unique_ptr<DynamicObject> clone() const override    { return std::make_unique<FunctionObject> (*this); }
 
-        void writeAsJSON (OutputStream& out, int /*indentLevel*/, bool /*allOnOneLine*/, int /*maximumDecimalPlaces*/) override
+        void writeAsJSON (OutputStream& out, const JSON::FormatOptions&) override
         {
             out << "function " << functionCode;
         }

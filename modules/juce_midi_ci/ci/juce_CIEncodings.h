@@ -53,7 +53,7 @@ struct Encodings
     /** Converts a JSON object to a list of bytes in 7-bit ASCII format. */
     static std::vector<std::byte> jsonTo7BitText (const var& v)
     {
-        return stringTo7BitText (JSON::toString (v, true));
+        return stringTo7BitText (JSON::toString (v, JSON::FormatOptions{}.withSpacing (JSON::Spacing::none)));
     }
 
     /** Each group of seven stored bytes is transmitted as eight bytes.

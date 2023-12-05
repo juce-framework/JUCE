@@ -597,7 +597,10 @@ public:
 private:
     void expectDeepEqual (const std::optional<var>& a, const std::optional<var>& b)
     {
-        expect (deepEqual (a, b), a.has_value() && b.has_value() ? JSON::toString (*a) + " != " + JSON::toString (*b) : String());
+        const auto text = a.has_value() && b.has_value()
+                        ? JSON::toString (*a) + " != " + JSON::toString (*b)
+                        : String();
+        expect (deepEqual (a, b), text);
     }
 
     static bool deepEqual (const std::optional<var>& a, const std::optional<var>& b)

@@ -1,5 +1,30 @@
 # JUCE breaking changes
 
+# develop
+
+## Change
+
+The signature of DynamicObject::writeAsJSON() has been changed to accept a
+more extensible JSON::FormatOptions argument.
+
+**Possible Issues**
+
+Code that overrides this function will fail to compile.
+
+**Workaround**
+
+Update the signatures of overriding functions. Use Formatter::getIndentLevel()
+and Formatter::getMaxDecimalPlaces() as necessary. To find whether the output
+should be multi-line, compare the result of Formatter::getSpacing() with
+JSON::Spacing::multiLine.
+
+**Rationale**
+
+The previous signature made it impossible to add new formatting options. Now,
+if we need to add further options in the future, these can be added to the
+FormatOptions type, which will not be a breaking change.
+
+
 # Version 7.0.9
 
 ## Change
