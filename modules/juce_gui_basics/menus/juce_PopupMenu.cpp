@@ -2357,6 +2357,16 @@ bool PopupMenu::MenuItemIterator::next()
     return true;
 }
 
+PopupMenu::Options PopupMenu::Options::withSelectableAreaLeftInset (int xInsetAmount) const
+{
+    return with (*this, &Options::selectableAreaLeftInset, xInsetAmount);
+}
+
+PopupMenu::Options PopupMenu::Options::withSelectableAreaRightInset (int xInsetAmount) const
+{
+    return with (*this, &Options::selectableAreaRightInset, xInsetAmount);
+}
+
 PopupMenu::Item& PopupMenu::MenuItemIterator::getItem() const
 {
     jassert (currentItem != nullptr);
