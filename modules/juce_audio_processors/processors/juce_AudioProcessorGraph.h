@@ -252,7 +252,7 @@ public:
 
         If this succeeds, it returns a pointer to the newly-created node.
     */
-    Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, NodeID nodeId = {}, UpdateKind = UpdateKind::sync);
+    Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, std::optional<NodeID> nodeId = std::nullopt, UpdateKind = UpdateKind::sync);
 
     /** Deletes a node within the graph which has the specified ID.
         This will also delete any connections that are attached to this node.

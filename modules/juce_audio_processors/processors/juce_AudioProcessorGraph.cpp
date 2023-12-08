@@ -1694,7 +1694,7 @@ public:
     }
 
     Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor,
-                       const NodeID nodeID,
+                       std::optional<NodeID> nodeID,
                        UpdateKind updateKind)
     {
         if (newProcessor.get() == owner)
@@ -1703,7 +1703,7 @@ public:
             return nullptr;
         }
 
-        const auto idToUse = nodeID == NodeID() ? NodeID { ++(lastNodeID.uid) } : nodeID;
+        const auto idToUse = nodeID.value_or (NodeID { lastNodeID.uid + 1 });
 
         auto added = nodes.addNode (std::move (newProcessor), idToUse);
 
@@ -1957,7 +1957,7 @@ bool AudioProcessorGraph::isAnInputTo (const Node& source, const Node& destinati
 bool AudioProcessorGraph::isAnInputTo (NodeID source, NodeID destination) const noexcept                    { return pimpl->isAnInputTo (source, destination); }
 
 AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (std::unique_ptr<AudioProcessor> newProcessor,
-                                                             NodeID nodeId,
+                                                             std::optional<NodeID> nodeId,
                                                              UpdateKind updateKind)
 {
     return pimpl->addNode (std::move (newProcessor), nodeId, updateKind);

@@ -4,6 +4,30 @@
 
 ## Change
 
+The NodeID argument to AudioProcessorGraph::addNode() has been changed to take
+a std::optional<NodeID>.
+
+**Possible Issues**
+
+The behavior of any code calling AudioProcessorGraph::addNode(), that explicitly
+passes a default constructed NodeID or a NodeID constructed with a value of 0,
+will change. Previously these values would have been treated as a null value
+resulting in the actual NodeID being automatically determined. These will now
+be treated as requests for an explicit value.
+
+**Workaround**
+
+Either remove the explicit NodeID argument and rely on the default argument or
+pass a std::nullopt instead.
+
+**Rationale**
+
+The previous version prevented users from specifying a NodeID of 0 and resulted
+in unexpected behavior.
+
+
+## Change
+
 The signature of DynamicObject::writeAsJSON() has been changed to accept a
 more extensible JSON::FormatOptions argument.
 
