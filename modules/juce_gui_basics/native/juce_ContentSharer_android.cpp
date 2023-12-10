@@ -274,8 +274,18 @@ public:
                                AndroidIntent.setType,
                                javaString (getCommonMimeType (mimeTypes)).get());
 
-        constexpr int grantReadPermission = 1;
-        env->CallObjectMethod (intent, AndroidIntent.setFlags, grantReadPermission);
+        const auto permissions = [&]
+        {
+            constexpr int grantReadUriPermission   = 1;
+            constexpr int grantPrefixUriPermission = 128;
+
+            if (getAndroidSDKVersion() < 21)
+                return grantReadUriPermission;
+
+            return grantReadUriPermission | grantPrefixUriPermission;
+        };
+
+        env->CallObjectMethod (intent, AndroidIntent.setFlags, permissions);
 
         env->CallObjectMethod (intent,
                                AndroidIntent.putParcelableArrayListExtra,
