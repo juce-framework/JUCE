@@ -52,7 +52,8 @@ struct ModalComponentManager::ModalItem final : public ComponentMovementWatcher
 
     void componentVisibilityChanged() override
     {
-        if (! component->isShowing())
+        const auto peer = component->getPeer();
+        if (! component->isShowing() && !(peer && peer->isMinimised()))
             cancel();
     }
 
