@@ -33,14 +33,24 @@ more extensible JSON::FormatOptions argument.
 
 **Possible Issues**
 
-Code that overrides this function will fail to compile.
+Code that overrides or calls this function will fail to compile.
 
 **Workaround**
 
-Update the signatures of overriding functions. Use Formatter::getIndentLevel()
-and Formatter::getMaxDecimalPlaces() as necessary. To find whether the output
-should be multi-line, compare the result of Formatter::getSpacing() with
+Update the signatures of overriding functions. Use FormatOptions::getIndentLevel()
+and FormatOptions::getMaxDecimalPlaces() as necessary. To find whether the output
+should be multi-line, compare the result of FormatOptions::getSpacing() with
 JSON::Spacing::multiLine.
+
+Callers of the function can construct the new argument type using the old 
+arguments accordingly
+
+```
+JSON::FormatOptions{}.withIndentLevel (indentLevel)
+                     .withSpacing (allOnOneLine ? JSON::Spacing::singleLine 
+                                                : JSON::Spacing::multiLine)
+                     .withMaxDecimalPlaces (maximumDecimalPlaces);
+```
 
 **Rationale**
 
