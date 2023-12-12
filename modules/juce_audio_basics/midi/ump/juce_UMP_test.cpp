@@ -989,21 +989,11 @@ private:
         }
     }
 
-   #if JUCE_WINDOWS && ! JUCE_MINGW
-    #define JUCE_CHECKED_ITERATOR(msg, size) \
-        stdext::checked_array_iterator<std::remove_reference_t<decltype (msg)>> ((msg), (size_t) (size))
-   #else
-    #define JUCE_CHECKED_ITERATOR(msg, size) (msg)
-   #endif
-
     static bool equal (const MidiMessage& a, const MidiMessage& b) noexcept
     {
         return a.getRawDataSize() == b.getRawDataSize()
-               && std::equal (a.getRawData(), a.getRawData() + a.getRawDataSize(),
-                              JUCE_CHECKED_ITERATOR (b.getRawData(), b.getRawDataSize()));
+               && std::equal (a.getRawData(), a.getRawData() + a.getRawDataSize(), b.getRawData());
     }
-
-    #undef JUCE_CHECKED_ITERATOR
 
     static bool equal (const MidiBuffer& a, const MidiBuffer& b) noexcept
     {
