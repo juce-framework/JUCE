@@ -570,5 +570,13 @@ int main (int argc, char** argv)
         {
             juce::ConsoleApplication::fail (error.message);
         }
+        catch (const std::exception& ex)
+        {
+            juce::ConsoleApplication::fail (ex.what());
+        }
+        catch (...)
+        {
+            juce::ConsoleApplication::fail ("Unhandled exception");
+        }
     });
 }
