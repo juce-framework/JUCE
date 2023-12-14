@@ -20,12 +20,9 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
 
-namespace SystemStatsHelpers
+namespace juce::SystemStatsHelpers
 {
 
 static void doCPUID (uint32& a, uint32& b, uint32& c, uint32& d, uint32 type)
@@ -101,8 +98,6 @@ static void getCPUInfo (bool& hasMMX,
     hasAVX512VPOPCNTDQ = (c & (1u << 14)) != 0;
 }
 
-} // namespace SystemStatsHelpers
+} // namespace juce::SystemStatsHelpers
 
 #endif
-
-} // namespace juce
