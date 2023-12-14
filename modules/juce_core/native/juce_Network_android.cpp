@@ -212,30 +212,25 @@ DECLARE_JNI_CLASS (AndroidMulticastLock, "android/net/wifi/WifiManager$Multicast
 DECLARE_JNI_CLASS (AndroidWifiManager, "android/net/wifi/WifiManager")
 #undef JNI_CLASS_MEMBERS
 
-static LocalRef<jobject> getMulticastLock()
+static jobject getMulticastLock()
 {
-    static LocalRef<jobject> multicastLock;
-    static bool hasChecked = false;
-
-    if (! hasChecked)
+    static GlobalRef multicastLock = [&]
     {
-        hasChecked = true;
-
         auto* env = getEnv();
 
         LocalRef<jobject> wifiManager (env->CallObjectMethod (getAppContext().get(),
                                                               AndroidContext.getSystemService,
                                                               javaString ("wifi").get()));
 
-        if (wifiManager != nullptr)
-        {
-            multicastLock = LocalRef<jobject> (env->CallObjectMethod (wifiManager.get(),
-                                                                      AndroidWifiManager.createMulticastLock,
-                                                                      javaString ("JUCE_MulticastLock").get()));
-        }
-    }
+        if (wifiManager == nullptr)
+            return GlobalRef{};
 
-    return multicastLock;
+        return GlobalRef (LocalRef<jobject> (env->CallObjectMethod (wifiManager.get(),
+                                                                    AndroidWifiManager.createMulticastLock,
+                                                                    javaString ("JUCE_MulticastLock").get())));
+    }();
+
+    return multicastLock.get();
 }
 
 JUCE_API void JUCE_CALLTYPE acquireMulticastLock();
@@ -244,7 +239,7 @@ JUCE_API void JUCE_CALLTYPE acquireMulticastLock()
     auto multicastLock = getMulticastLock();
 
     if (multicastLock != nullptr)
-        getEnv()->CallVoidMethod (multicastLock.get(), AndroidMulticastLock.acquire);
+        getEnv()->CallVoidMethod (multicastLock, AndroidMulticastLock.acquire);
 }
 
 JUCE_API void JUCE_CALLTYPE releaseMulticastLock();
@@ -253,7 +248,7 @@ JUCE_API void JUCE_CALLTYPE releaseMulticastLock()
     auto multicastLock = getMulticastLock();
 
     if (multicastLock != nullptr)
-        getEnv()->CallVoidMethod (multicastLock.get(), AndroidMulticastLock.release);
+        getEnv()->CallVoidMethod (multicastLock, AndroidMulticastLock.release);
 }
 
 //==============================================================================
