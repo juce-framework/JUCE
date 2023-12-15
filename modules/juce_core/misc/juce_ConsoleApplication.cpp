@@ -308,7 +308,7 @@ int ConsoleApplication::invokeCatchingFailures (std::function<int()>&& f)
     }
     catch (const ConsoleAppFailureCode& error)
     {
-        std::cerr << error.errorMessage << std::endl << std::flush;
+        std::cerr << error.errorMessage << std::endl;
         returnCode = error.returnCode;
     }
 
