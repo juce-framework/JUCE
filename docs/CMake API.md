@@ -2,7 +2,7 @@
 
 ## System Requirements
 
-- All project types require CMake 3.15 or higher.
+- All project types require CMake 3.22 or higher.
 - Android targets are not currently supported.
 - WebView2 on Windows via JUCE_USE_WIN_WEBVIEW2 flag in juce_gui_extra is not currently supported.
 
@@ -144,11 +144,10 @@ you can configure a Clang-cl build by passing "-T ClangCL" on your configuration
 If you wish to use Clang with GNU-like command-line instead, you can pass
 `-DCMAKE_CXX_COMPILER=clang++` and `-DCMAKE_C_COMPILER=clang` on your configuration commandline.
 clang++ and clang must be on your `PATH` for this to work. Only more recent versions of CMake
-support Clang's GNU-like command-line on Windows. CMake 3.12 is not supported, CMake 3.15 has
-support, CMake 3.20 or higher is recommended.  Note that CMake doesn't seem to automatically link a
-runtime library when building in this configuration, but this can be remedied by setting the
-`MSVC_RUNTIME_LIBRARY` property. See the [official
-documentation](https://cmake.org/cmake/help/v3.15/prop_tgt/MSVC_RUNTIME_LIBRARY.html) of this
+support Clang's GNU-like command-line on Windows.   Note that CMake doesn't seem to automatically
+link a runtime library when building in this configuration, but this can be remedied by setting
+the `MSVC_RUNTIME_LIBRARY` property. See the [official
+documentation](https://cmake.org/cmake/help/v3.22/prop_tgt/MSVC_RUNTIME_LIBRARY.html) of this
 property for usage recommendations.
 
 ### A note about compile definitions

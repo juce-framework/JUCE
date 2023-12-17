@@ -35,7 +35,7 @@ For further help getting started, please refer to the JUCE
 
 ### CMake
 
-Version 3.15 or higher is required. To use CMake, you will need to install it,
+Version 3.22 or higher is required. To use CMake, you will need to install it,
 either from your system package manager or from the [official download
 page](https://cmake.org/download/). For comprehensive documentation on JUCE's
 CMake API, see the [JUCE CMake documentation](/docs/CMake%20API.md). For
