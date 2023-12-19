@@ -1060,7 +1060,7 @@ public:
     bool isSymbolicLink() const;
 
     /** If this file is a link or alias, this returns the file that it points to.
-        If the file isn't actually link, it'll just return itself.
+        If the file isn't actually a link, it'll just return itself.
     */
     File getLinkedTarget() const;
 
