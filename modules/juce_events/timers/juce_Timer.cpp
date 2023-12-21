@@ -344,18 +344,24 @@ void JUCE_CALLTYPE Timer::callPendingTimersSynchronously()
         (*instance)->callTimersSynchronously();
 }
 
-struct LambdaInvoker final : private Timer
+struct LambdaInvoker final : private Timer,
+                             private DeletedAtShutdown
 {
-    LambdaInvoker (int milliseconds, std::function<void()> f)  : function (f)
+    LambdaInvoker (int milliseconds, std::function<void()> f)
+        : function (std::move (f))
     {
         startTimer (milliseconds);
     }
 
-    void timerCallback() override
+    ~LambdaInvoker() final
     {
-        auto f = function;
+        stopTimer();
+    }
+
+    void timerCallback() final
+    {
+        NullCheckedInvocation::invoke (function);
         delete this;
-        f();
     }
 
     std::function<void()> function;
@@ -365,7 +371,7 @@ struct LambdaInvoker final : private Timer
 
 void JUCE_CALLTYPE Timer::callAfterDelay (int milliseconds, std::function<void()> f)
 {
-    new LambdaInvoker (milliseconds, f);
+    new LambdaInvoker (milliseconds, std::move (f));
 }
 
 } // namespace juce
