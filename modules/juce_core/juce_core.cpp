@@ -115,6 +115,9 @@
 #if JUCE_ANDROID
  #include <ifaddrs.h>
  #include <android/log.h>
+ #include <unwind.h>
+ #include <dlfcn.h>
+ #include <cxxabi.h>
 #endif
 
 #undef check

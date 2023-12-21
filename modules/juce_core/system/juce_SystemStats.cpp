@@ -178,7 +178,7 @@ String SystemStats::getStackBacktrace()
 {
     String result;
 
-   #if JUCE_ANDROID || JUCE_MINGW || JUCE_WASM
+   #if JUCE_MINGW || JUCE_WASM
     jassertfalse; // sorry, not implemented yet!
 
    #elif JUCE_WINDOWS
@@ -210,6 +210,63 @@ String SystemStats::getStackBacktrace()
 
             result << symbol->Name << " + 0x" << String::toHexString ((int64) displacement) << newLine;
         }
+    }
+
+   #elif JUCE_ANDROID
+
+    struct AndroidBacktraceState
+    {
+        void** current;
+        void** end;
+    };
+
+    auto androidUnwindCallback = [] (_Unwind_Context* context, void* arg) -> _Unwind_Reason_Code
+    {
+        auto* state = (AndroidBacktraceState*) arg;
+        if (auto pc = _Unwind_GetIP(context))
+        {
+            if (state->current == state->end)
+                return _URC_END_OF_STACK;
+
+            *state->current++ = reinterpret_cast<void*> (pc);
+        }
+
+        return _URC_NO_REASON;
+    };
+
+    const int max = 100;
+    void* buffer[max];
+
+    AndroidBacktraceState state;
+    state.current = buffer;
+    state.end = buffer + max;
+    _Unwind_Backtrace (androidUnwindCallback, &state);
+
+    const auto count = (int) (state.current - buffer);
+
+    for (int i = 0; i < count; ++i)
+    {
+        const void* addr = buffer[i];
+        result << i << " " << String::toHexString ((intptr_t) addr);
+
+        Dl_info info;
+        if (dladdr (addr, &info) != 0 && info.dli_sname != nullptr)
+        {
+            const char* symbol = info.dli_sname;
+
+            int status = 0; // NB: '0' means success
+            auto* demangled = abi::__cxa_demangle(symbol, nullptr, nullptr, &status);
+
+            if (demangled != nullptr && status == 0)
+                result << demangled;
+            else
+                result << symbol;
+
+            if (demangled != nullptr)
+                free (demangled);
+        }
+
+        result << newLine;
     }
 
    #else
