@@ -325,14 +325,13 @@ Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 	{
 		filesystem::path p (png);
 		auto filename = p.filename ().generic_string ();
-		std::string decodedFilename = filename;
-		auto uid = Snapshot::decodeUID(decodedFilename);
+		auto uid = Snapshot::decodeUID(filename);
+
 
 		if (!uid)
 			continue;
 		auto scaleFactor = 1.;
-		std::string decodedFilename = filename;
-		if (auto decodedScaleFactor = Snapshot::decodeScaleFactor(decodedFilename))
+		if (auto decodedScaleFactor = Snapshot::decodeScaleFactor(filename))
 			scaleFactor = *decodedScaleFactor;
 
 		Module::Snapshot::ImageDesc desc;
