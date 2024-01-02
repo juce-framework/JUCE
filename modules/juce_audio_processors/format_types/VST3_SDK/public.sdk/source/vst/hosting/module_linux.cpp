@@ -164,8 +164,10 @@ public:
 		if (!filesystem::is_directory (modulePath))
 			return {};
 
-		stem.replace_extension (".so");
-		modulePath /= stem;
+		auto newStem = stem;
+		newStem.replace_extension(".so");
+		modulePath /= newStem;
+
 		return Optional<Path> (std::move (modulePath));
 	}
 
@@ -323,11 +325,13 @@ Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 	{
 		filesystem::path p (png);
 		auto filename = p.filename ().generic_string ();
-		auto uid = Snapshot::decodeUID (filename);
+		auto uid = Snapshot::decodeUID(filename.generic_string());
+
 		if (!uid)
 			continue;
 		auto scaleFactor = 1.;
-		if (auto decodedScaleFactor = Snapshot::decodeScaleFactor (filename))
+		auto decodedFilename = filename.generic_string();
+		if (auto decodedScaleFactor = Snapshot::decodeScaleFactor(decodedFilename))
 			scaleFactor = *decodedScaleFactor;
 
 		Module::Snapshot::ImageDesc desc;
