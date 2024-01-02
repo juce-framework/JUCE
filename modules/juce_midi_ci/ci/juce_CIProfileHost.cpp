@@ -136,11 +136,11 @@ private:
                                                  .withChannel (output->getIncomingHeader().deviceID);
         if (auto* state = host->states.getStateForDestination (destination))
         {
-            if (state->get (request.profile).isSupported())
+            const auto previousState = state->get (request.profile);
+
+            if (previousState.isSupported())
             {
-                const auto address = ChannelAddress{}.withGroup (output->getIncomingGroup())
-                                                     .withChannel (output->getIncomingHeader().deviceID);
-                const ProfileAtAddress profileAtAddress { request.profile, address };
+                const ProfileAtAddress profileAtAddress { request.profile, destination };
 
                 {
                     const ScopedValueSetter scope { host->currentEnablementMessage,
@@ -167,10 +167,16 @@ private:
                     detail::MessageTypeUtils::send (*output, profileAtAddress.address.getGroup(), header, response);
                 };
 
+                const auto numIndividualChannels = (std::is_same_v<Message::ProfileOn, Body> ? currentState : previousState).active;
+
+                const auto numChannelsToSend = destination.isSingleChannel()
+                                             ? numIndividualChannels
+                                             : uint16_t{};
+
                 if (currentState.isActive())
-                    sendResponse (Message::ProfileEnabledReport { profileAtAddress.profile, currentState.active });
+                    sendResponse (Message::ProfileEnabledReport { profileAtAddress.profile, numChannelsToSend });
                 else
-                    sendResponse (Message::ProfileDisabledReport { profileAtAddress.profile, 0 });
+                    sendResponse (Message::ProfileDisabledReport { profileAtAddress.profile, numChannelsToSend });
 
                 host->isResponder = true;
                 return true;
@@ -196,6 +202,14 @@ private:
     bool* handled = nullptr;
 };
 
+void ProfileHost::setProfileEnablement (ProfileAtAddress profileAtAddress, int numChannels)
+{
+    if (numChannels > 0)
+        enableProfileImpl (profileAtAddress, numChannels);
+    else
+        disableProfileImpl (profileAtAddress);
+}
+
 void ProfileHost::addProfile (ProfileAtAddress profileAtAddress, int maxNumChannels)
 {
     auto* state = states.getStateForDestination (profileAtAddress.address);
@@ -206,7 +220,7 @@ void ProfileHost::addProfile (ProfileAtAddress profileAtAddress, int maxNumChann
     // There are only 256 channels on a UMP endpoint, so requesting more probably doesn't make sense!
     jassert (maxNumChannels <= 256);
 
-    state->set (profileAtAddress.profile, { (uint16_t) maxNumChannels, 0 });
+    state->set (profileAtAddress.profile, { (uint16_t) jmax (1, maxNumChannels), 0 });
 
     if (! isResponder || profileAtAddress == currentEnablementMessage)
         return;
@@ -233,7 +247,7 @@ void ProfileHost::removeProfile (ProfileAtAddress profileAtAddress)
     if (state == nullptr)
         return;
 
-    disableProfile (profileAtAddress);
+    setProfileEnablement (profileAtAddress, 0);
 
     if (! state->get (profileAtAddress.profile).isSupported())
         return;
@@ -258,7 +272,7 @@ void ProfileHost::removeProfile (ProfileAtAddress profileAtAddress)
                                     Message::ProfileRemoved { profileAtAddress.profile });
 }
 
-void ProfileHost::enableProfile (ProfileAtAddress profileAtAddress, int numChannels)
+void ProfileHost::enableProfileImpl (ProfileAtAddress profileAtAddress, int numChannels)
 {
     auto* state = states.getStateForDestination (profileAtAddress.address);
 
@@ -273,7 +287,7 @@ void ProfileHost::enableProfile (ProfileAtAddress profileAtAddress, int numChann
     // There are only 256 channels on a UMP endpoint, so requesting more probably doesn't make sense!
     jassert (numChannels <= 256);
 
-    const auto enabledChannels = jmin (old.supported, (uint16_t) numChannels);
+    const auto enabledChannels = jmax ((uint16_t) 1, jmin (old.supported, (uint16_t) numChannels));
     state->set (profileAtAddress.profile, { old.supported, enabledChannels });
 
     if (! isResponder || profileAtAddress == currentEnablementMessage)
@@ -288,13 +302,15 @@ void ProfileHost::enableProfile (ProfileAtAddress profileAtAddress, int numChann
         MUID::getBroadcast(),
     };
 
+    const auto numChannelsToSend = profileAtAddress.address.isSingleChannel() ? enabledChannels : uint16_t{};
+
     detail::MessageTypeUtils::send (output,
                                     profileAtAddress.address.getGroup(),
                                     header,
-                                    Message::ProfileEnabledReport { profileAtAddress.profile, enabledChannels });
+                                    Message::ProfileEnabledReport { profileAtAddress.profile, numChannelsToSend });
 }
 
-void ProfileHost::disableProfile (ProfileAtAddress profileAtAddress)
+void ProfileHost::disableProfileImpl (ProfileAtAddress profileAtAddress)
 {
     auto* state = states.getStateForDestination (profileAtAddress.address);
 
@@ -320,10 +336,12 @@ void ProfileHost::disableProfile (ProfileAtAddress profileAtAddress)
         MUID::getBroadcast(),
     };
 
+    const auto numChannelsToSend = profileAtAddress.address.isSingleChannel() ? old.active : uint16_t{};
+
     detail::MessageTypeUtils::send (output,
                                     profileAtAddress.address.getGroup(),
                                     header,
-                                    Message::ProfileDisabledReport { profileAtAddress.profile, old.active });
+                                    Message::ProfileDisabledReport { profileAtAddress.profile, numChannelsToSend });
 }
 
 bool ProfileHost::tryRespond (ResponderOutput& responderOutput, const Message::Parsed& message)

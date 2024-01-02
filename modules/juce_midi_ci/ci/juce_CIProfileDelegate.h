@@ -47,6 +47,10 @@ struct ProfileDelegate
         is enabled with zero channels active - in this situation, it is
         recommended that you use ProfileHost::enableProfile to enable the
         default number of channels for that profile.
+
+        Additionally, profiles for entire groups or function blocks may be enabled with zero
+        active channels. In this case, the profile should be enabled on the entire group or
+        function block.
     */
     virtual void profileEnablementRequested ([[maybe_unused]] MUID x,
                                              [[maybe_unused]] ProfileAtAddress profileAtAddress,

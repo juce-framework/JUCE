@@ -4,6 +4,26 @@
 
 ## Change
 
+ProfileHost::enableProfile and ProfileHost::disableProfile have been combined
+into a single function, ProfileHost::setProfileEnablement.
+
+**Possible Issues**
+
+Code that calls this function will fail to compile until it is updated.
+
+**Workaround**
+
+To enable a profile, call setProfileEnablement with a positive number of
+channels. To disable a profile, call setProfileEnablement with zero channels.
+
+**Rationale**
+
+The new API is simpler, more compact, and more consistent, as it now mirrors
+the signature of Device::sendProfileEnablement.
+
+
+## Change
+
 OpenGLContext::getRenderingScale() has been changed to include the effects of
 AffineTransforms on all platforms.
 
@@ -98,12 +118,12 @@ and FormatOptions::getMaxDecimalPlaces() as necessary. To find whether the outpu
 should be multi-line, compare the result of FormatOptions::getSpacing() with
 JSON::Spacing::multiLine.
 
-Callers of the function can construct the new argument type using the old 
+Callers of the function can construct the new argument type using the old
 arguments accordingly
 
 ```
 JSON::FormatOptions{}.withIndentLevel (indentLevel)
-                     .withSpacing (allOnOneLine ? JSON::Spacing::singleLine 
+                     .withSpacing (allOnOneLine ? JSON::Spacing::singleLine
                                                 : JSON::Spacing::multiLine)
                      .withMaxDecimalPlaces (maximumDecimalPlaces);
 ```
@@ -119,7 +139,7 @@ FormatOptions type, which will not be a breaking change.
 
 ## Change
 
-CachedValue::operator==() will now emit floating point comparison warnings if 
+CachedValue::operator==() will now emit floating point comparison warnings if
 they are enabled for the project.
 
 **Possible Issues**
@@ -135,7 +155,7 @@ CachedValue::get().
 
 **Rationale**
 
-The JUCE Framework now offers the free-standing exactlyEqual() and 
+The JUCE Framework now offers the free-standing exactlyEqual() and
 approximatelyEqual() functions to clearly express the desired semantics when
 comparing floating point values. These functions are intended to eliminate
 the ambiguity in code-bases regarding these types. However, when such a value

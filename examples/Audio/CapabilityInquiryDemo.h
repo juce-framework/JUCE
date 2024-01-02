@@ -4088,10 +4088,7 @@ private:
             else
                 h->addProfile (profileAtAddress, state.supported);
 
-            if (state.active == 0)
-                h->disableProfile (profileAtAddress);
-            else
-                h->enableProfile (profileAtAddress, state.active);
+            h->setProfileEnablement (profileAtAddress, state.active);
         }
     }
 
@@ -4589,12 +4586,9 @@ private:
 
             if (auto* host = demo.getProfileHost())
             {
-                if (enabled)
-                    host->enableProfile (profileAtAddress, numChannels);
-                else
-                    host->disableProfile (profileAtAddress);
-
-                profiles.channels[profileAtAddress].active = (uint16_t) numChannels;
+                const auto count = enabled ? jmax (1, numChannels) : 0;
+                host->setProfileEnablement (profileAtAddress, count);
+                profiles.channels[profileAtAddress].active = (uint16_t) count;
 
                 state = profiles;
             }

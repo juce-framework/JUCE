@@ -151,11 +151,15 @@ public:
 
         if (numChannels > 0)
         {
+            const auto channelsToSend = address == ChannelInGroup::wholeBlock || address == ChannelInGroup::wholeGroup
+                                      ? 0
+                                      : numChannels;
+
             detail::MessageTypeUtils::send (concreteBufferOutput,
                                             options.getFunctionBlock().firstGroup,
                                             m,
                                             address,
-                                            Message::ProfileOn { profile, (uint16_t) numChannels });
+                                            Message::ProfileOn { profile, (uint16_t) channelsToSend });
         }
         else
         {
@@ -1045,7 +1049,7 @@ private:
             return iter != device.discovered.end() ? jmin (defaultResult, (int) iter->second.discovery.maximumSysexSize) : defaultResult;
         }
 
-    public:
+    private:
         Impl& device;
     };
 
@@ -1062,13 +1066,10 @@ private:
             if (! device.profileHost.has_value())
                 return;
 
-            if (enabled)
-                device.profileHost->enableProfile (profileAtAddress, numChannels);
-            else
-                device.profileHost->disableProfile (profileAtAddress);
+            device.profileHost->setProfileEnablement (profileAtAddress, enabled ? jmax (1, numChannels) : 0);
         }
 
-    public:
+    private:
         Impl& device;
     };
 
@@ -1127,7 +1128,7 @@ private:
                 d->subscriptionWillEnd (m, subscription);
         }
 
-    public:
+    private:
         Impl& device;
     };
 
@@ -1755,8 +1756,7 @@ public:
 
             beginTest ("If a device has previously acted as a responder to profile inquiry, then modifying profiles emits events");
             {
-                const auto numChannels = 0;
-                device.getProfileHost()->enableProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, numChannels);
+                device.getProfileHost()->setProfileEnablement ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 1);
 
                 expect (output.messages.size() == 2);
                 expect (output.messages.back().bytes == getMessageBytes ({ ChannelInGroup::wholeBlock,
@@ -1764,7 +1764,7 @@ public:
                                                                            detail::MessageMeta::implementationVersion,
                                                                            device.getMuid(),
                                                                            MUID::getBroadcast() },
-                                                                         Message::ProfileEnabledReport { profile, numChannels }));
+                                                                         Message::ProfileEnabledReport { profile, 0 }));
             }
         }
 
@@ -1834,7 +1834,7 @@ public:
                                                            detail::MessageMeta::implementationVersion,
                                                            inquiryMUID,
                                                            device.getMuid() },
-                                                         Message::ProfileOn { profile, 1 }) });
+                                                         Message::ProfileOn { profile, 0 }) });
 
             expect (output.messages.size() == 1);
             expect (output.messages.back().bytes == getMessageBytes ({ ChannelInGroup::wholeBlock,
@@ -1842,7 +1842,7 @@ public:
                                                                        detail::MessageMeta::implementationVersion,
                                                                        device.getMuid(),
                                                                        MUID::getBroadcast() },
-                                                                     Message::ProfileEnabledReport { profile, 1 }));
+                                                                     Message::ProfileEnabledReport { profile, 0 }));
         }
 
         struct DoNothingProfileDelegate : public ProfileDelegate
@@ -1950,7 +1950,7 @@ public:
                                     std::byte { 0x05 } };
 
             device.getProfileHost()->addProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) });
-            device.getProfileHost()->enableProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 0);
+            device.getProfileHost()->setProfileEnablement ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 0);
 
             const auto inquiryMUID = MUID::makeRandom (random);
 
@@ -1991,7 +1991,7 @@ public:
                                     std::byte { 0x05 } };
 
             device.getProfileHost()->addProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) });
-            device.getProfileHost()->enableProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 1);
+            device.getProfileHost()->setProfileEnablement ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 1);
 
             const auto inquiryMUID = MUID::makeRandom (random);
 
@@ -2008,7 +2008,7 @@ public:
                                                                        detail::MessageMeta::implementationVersion,
                                                                        device.getMuid(),
                                                                        MUID::getBroadcast() },
-                                                                     Message::ProfileEnabledReport { profile, 1 }));
+                                                                     Message::ProfileEnabledReport { profile, 0 }));
         }
 
         beginTest ("If a device receives a set profile off for an unsupported profile, NAK is emitted");

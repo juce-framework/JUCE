@@ -58,18 +58,14 @@ public:
     */
     void removeProfile  (ProfileAtAddress);
 
-    /** Activates a profile on the specified group/channel with the provided
-        number of channels.
+    /** Activates or deactivates a profile on the specified group/channel.
 
-        The profile should previously have been added with addProfile(), and
-        numChannels should be in the closed range between 1 and the maximum
-        number of channels allowed for that profile.
+        The profile should previously have been added with addProfile().
+        A positive value of numChannels will enable the profile, and a non-positive value
+        will disable it. This includes group and function-block profiles; passing any positive
+        value will enable the profile on the entire group or block.
     */
-    void enableProfile  (ProfileAtAddress, int numChannels);
-
-    /** Deactivates a profile on the specified group/channel.
-    */
-    void disableProfile (ProfileAtAddress);
+    void setProfileEnablement (ProfileAtAddress, int numChannels);
 
     /** Returns the profile states (supported/active) for all groups and channels.
     */
@@ -97,6 +93,9 @@ public:
 
 private:
     class Visitor;
+
+    void enableProfileImpl (ProfileAtAddress, int);
+    void disableProfileImpl (ProfileAtAddress);
 
     template <typename Body>
     bool profileEnablementReceived (ResponderOutput&, const Body&);

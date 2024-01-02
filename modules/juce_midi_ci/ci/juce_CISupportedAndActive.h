@@ -34,8 +34,15 @@ namespace juce::midi_ci
 */
 struct SupportedAndActive
 {
-    uint16_t supported{};   ///< The maximum number of member channels for a profile. 0 indicates that the profile is unsupported.
-    uint16_t active{};      ///< The number of member channels currently active for a profile. 0 indicates that the profile is inactive.
+    uint16_t supported{};   ///< The maximum number of member channels for a profile.
+                            ///< 0 indicates that the profile is unsupported.
+                            ///< For group/block profiles, 1/0 indicates that the
+                            ///< profile is supported/unsupported respectively.
+
+    uint16_t active{};      ///< The number of member channels currently active for a profile.
+                            ///< 0 indicates that the profile is inactive.
+                            ///< For group/block profiles, 1/0 indicates that the
+                            ///< profile is supported/unsupported respectively.
 
     /** Returns true if supported is non-zero. */
     bool isSupported()  const { return supported != 0; }
