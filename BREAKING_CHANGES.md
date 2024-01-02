@@ -4,6 +4,31 @@
 
 ## Change
 
+OpenGLContext::getRenderingScale() has been changed to include the effects of
+AffineTransforms on all platforms.
+
+**Possible Issues**
+
+Applications that use OpenGLContext::getRenderingScale() and also have scaling
+transformations that affect the context component's size may render incorrectly.
+
+**Workaround**
+
+Adjust rendering code by dividing the reported scale with the user specified
+transformation scale, if necessary.
+
+**Rationale**
+
+The previous implementation resulted in inconsistent behaviour between Windows
+and the other platforms. The main intended use-case for getRenderingScale() is
+to help determine the number of physical pixels covered by the context
+component. Since plugin windows will often use AffineTransforms to set up the
+correct rendering scale, it makes sense to include these in the result of
+getRenderingScale().
+
+
+## Change
+
 Components that have setMouseClickGrabsKeyboardFocus() set to false will not
 accept or propagate keyboard focus to parent components due to a mouse click
 event. This is now true even if the mouse click event happens in a child

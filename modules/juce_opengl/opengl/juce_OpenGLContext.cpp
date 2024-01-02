@@ -459,17 +459,22 @@ public:
             const auto localBounds = component.getLocalBounds();
             const auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
 
-            const auto newScale = [&]
-            {
-               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                // Some hosts (Pro Tools 2022.7) do not take the window scaling into account when sizing
-                // plugin editor windows. The displayScale however seems to be correctly reported even in
-                // such cases.
-                return (float) displayScale * Desktop::getInstance().getGlobalScaleFactor();
-               #else
-                return (float) displayScale;
-               #endif
-            }();
+            // On Windows some hosts (Pro Tools 2022.7) do not take the current DPI into account
+            // when sizing plugin editor windows.
+            //
+            // Also in plugins on Windows, the plugin HWND's DPI settings generally don't reflect
+            // the desktop scaling setting and Displays::Display::scale will return an incorrect 1.0
+            // value. Our plugin wrappers will use a combination of querying the plugin HWND's
+            // parent HWND (the host HWND), and utilising the scale factor reported by the host
+            // through the plugin API. This scale is then added as a transformation to the
+            // AudioProcessorEditor.
+            //
+            // Hence, instead of querying the OS for the DPI of the editor window,
+            // we approximate based on the physical size of the window that was actually provided
+            // for the context to draw into. This may break if the OpenGL context's component is
+            // scaled differently in its width and height - but in this case, a single scale factor
+            // isn't that helpful anyway.
+            const auto newScale = (float) newArea.getWidth() / (float) localBounds.getWidth();
 
             areaAndScale.set ({ newArea, newScale }, [&]
             {
