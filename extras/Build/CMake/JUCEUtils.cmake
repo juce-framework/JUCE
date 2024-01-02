@@ -405,6 +405,8 @@ function(juce_add_binary_data target)
 
     add_library(${target} STATIC)
 
+    set_target_properties(${target} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
     set(juce_binary_data_folder "${CMAKE_CURRENT_BINARY_DIR}/juce_binarydata_${target}/JuceLibraryCode")
 
     set(binary_file_names)
