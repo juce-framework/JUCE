@@ -324,14 +324,14 @@ Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 	for (auto& png : pngList)
 	{
 		filesystem::path p (png);
-		auto filename = p.filename ().generic_string ();
-		auto uid = Snapshot::decodeUID(filename);
-
+		auto filename = p.filename ().string ();
+		auto uid = Snapshot::decodeUID(filename.string());
 
 		if (!uid)
 			continue;
 		auto scaleFactor = 1.;
-		if (auto decodedScaleFactor = Snapshot::decodeScaleFactor(filename))
+		auto decodedFilename = filename.string();
+		if (auto decodedScaleFactor = Snapshot::decodeScaleFactor(decodedFilename))
 			scaleFactor = *decodedScaleFactor;
 
 		Module::Snapshot::ImageDesc desc;
