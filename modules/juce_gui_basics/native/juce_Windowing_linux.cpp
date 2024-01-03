@@ -399,10 +399,9 @@ public:
 
     void clearWindowAssociation() { association = {}; }
 
-    void startHostManagedResize (Point<int> mouseDownPosition,
-                                 ResizableBorderComponent::Zone zone) override
+    void startHostManagedResize (Point<int>, ResizableBorderComponent::Zone zone) override
     {
-        XWindowSystem::getInstance()->startHostManagedResize (windowH, mouseDownPosition, zone);
+        XWindowSystem::getInstance()->startHostManagedResize (windowH, zone);
     }
 
     //==============================================================================
