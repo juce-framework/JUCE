@@ -2244,7 +2244,7 @@ public:
         for (const auto* item : queues)
         {
             auto* ptr = item->ptr.get();
-            callback (ptr->getParameterId(), ptr->get());
+            callback (ptr->getParameterIndex(), ptr->getParameterId(), ptr->get());
         }
     }
 
@@ -2753,8 +2753,12 @@ public:
 
         processor->process (data);
 
-        outputParameterChanges->forEach ([&] (Vst::ParamID id, float value)
+        outputParameterChanges->forEach ([&] (Steinberg::int32 vstParamIndex, Vst::ParamID id, float value)
         {
+            // Send the parameter value from the processor to the editor
+            parameterDispatcher.push (vstParamIndex, value);
+
+            // Update the host's parameter value
             if (auto* param = getParameterForID (id))
                 param->setValueWithoutUpdatingProcessor (value);
         });
