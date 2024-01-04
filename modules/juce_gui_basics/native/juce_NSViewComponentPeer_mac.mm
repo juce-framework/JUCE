@@ -1712,7 +1712,7 @@ public:
     NSWindow* window = nil;
     NSView* view = nil;
     WeakReference<Component> safeComponent;
-    bool isSharedWindow = false;
+    const bool isSharedWindow = false;
    #if USE_COREGRAPHICS_RENDERING
     bool usingCoreGraphics = true;
    #else
@@ -1998,9 +1998,38 @@ private:
        #endif
     }
 
+    void modalComponentManagerChanged()
+    {
+        if (isSharedWindow)
+            return;
+
+        auto style = [window styleMask];
+
+        if (ModalComponentManager::getInstance()->getNumModalComponents() > 0)
+        {
+            style &= ~NSWindowStyleMaskMiniaturizable;
+            style &= ~NSWindowStyleMaskClosable;
+        }
+        else
+        {
+            const auto flags = getStyleFlags();
+
+            if ((flags & windowHasMinimiseButton) != 0)  style |= NSWindowStyleMaskMiniaturizable;
+            if ((flags & windowHasCloseButton) != 0)     style |= NSWindowStyleMaskClosable;
+        }
+
+        [window setStyleMask: style];
+    }
+
     //==============================================================================
     std::vector<ScopedNotificationCenterObserver> scopedObservers;
     std::vector<ScopedNotificationCenterObserver> windowObservers;
+
+    ErasedScopeGuard modalChangeListenerScope =
+        detail::ComponentHelpers::ModalComponentManagerChangeNotifier::getInstance().addListener ([this]
+                                                                                                  {
+                                                                                                      modalComponentManagerChanged();
+                                                                                                  });
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };

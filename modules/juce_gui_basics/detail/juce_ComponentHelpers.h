@@ -250,6 +250,31 @@ struct ComponentHelpers
                 if (modalWouldBlockComponent (*c, &modal))
                     (c->*function) (ms, SH::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
     }
+
+    class ModalComponentManagerChangeNotifier
+    {
+    public:
+        static auto& getInstance()
+        {
+            static ModalComponentManagerChangeNotifier instance;
+            return instance;
+        }
+
+        ErasedScopeGuard addListener (std::function<void()> l)
+        {
+            return listeners.addListener (std::move (l));
+        }
+
+        void modalComponentManagerChanged()
+        {
+            listeners.call();
+        }
+
+    private:
+        ModalComponentManagerChangeNotifier() = default;
+
+        detail::CallbackListenerList<> listeners;
+    };
 };
 
 } // namespace juce::detail
