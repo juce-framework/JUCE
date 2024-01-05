@@ -215,7 +215,7 @@ public:
     bool sendMessageToSlave (const MemoryBlock& mb) { return sendMessageToWorker (mb); }
 
 private:
-    std::unique_ptr<ChildProcess> childProcess;
+    std::shared_ptr<ChildProcess> childProcess;
 
     struct Connection;
     std::unique_ptr<Connection> connection;

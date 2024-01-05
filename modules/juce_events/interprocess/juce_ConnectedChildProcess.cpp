@@ -164,9 +164,20 @@ bool ChildProcessCoordinator::launchWorkerProcess (const File& executable, const
     args.add (executable.getFullPathName());
     args.add (getCommandLinePrefix (commandLineUniqueID) + pipeName);
 
-    childProcess.reset (new ChildProcess());
+    childProcess = [&]() -> std::shared_ptr<ChildProcess>
+    {
+        if ((SystemStats::getOperatingSystemType() & SystemStats::Linux) != 0)
+            return ChildProcessManager::getInstance()->createAndStartManagedChildProcess (args, streamFlags);
 
-    if (childProcess->start (args, streamFlags))
+        auto p = std::make_shared<ChildProcess>();
+
+        if (p->start (args, streamFlags))
+            return p;
+
+        return nullptr;
+    }();
+
+    if (childProcess != nullptr)
     {
         connection.reset (new Connection (*this, pipeName, timeoutMs <= 0 ? defaultTimeoutMs : timeoutMs));
 
