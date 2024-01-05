@@ -11,6 +11,9 @@
     <Filter Include="JUCE Modules\juce_core\containers">
       <UniqueIdentifier>{42F7BE9D-3C8A-AE26-289B-8F355C068036}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_core\detail">
+      <UniqueIdentifier>{4C5ED3D6-28D2-8BFF-F891-96201A9DE159}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_core\files">
       <UniqueIdentifier>{7868764A-6572-381A-906C-9C26792A4C29}</UniqueIdentifier>
     </Filter>
@@ -530,6 +533,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Variant.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\detail\juce_CallbackListenerList.h">
+      <Filter>JUCE Modules\juce_core\detail</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_AndroidDocument.h">
       <Filter>JUCE Modules\juce_core\files</Filter>

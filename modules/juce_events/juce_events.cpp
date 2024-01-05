@@ -64,6 +64,7 @@
 #include "broadcasters/juce_ChangeBroadcaster.cpp"
 #include "timers/juce_MultiTimer.cpp"
 #include "timers/juce_Timer.cpp"
+#include "interprocess/juce_ChildProcessManager.cpp"
 #include "interprocess/juce_InterprocessConnection.cpp"
 #include "interprocess/juce_InterprocessConnectionServer.cpp"
 #include "interprocess/juce_ConnectedChildProcess.cpp"
