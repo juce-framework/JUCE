@@ -358,7 +358,10 @@ void MPEInstrument::noteOn (int midiChannel,
         // pathological case: second note-on received for same note -> retrigger it
         alreadyPlayingNote->keyState = MPENote::off;
         alreadyPlayingNote->noteOffVelocity = MPEValue::from7BitInt (64); // some reasonable number
-        listeners.call ([=] (Listener& l) { l.noteReleased (*alreadyPlayingNote); });
+
+        // This is commented out so that we can legato mods correctly between voices that share the same note.
+        // listeners.call ([=] (Listener& l) { l.noteReleased (*alreadyPlayingNote); });
+
         notes.remove (alreadyPlayingNote);
     }
 
