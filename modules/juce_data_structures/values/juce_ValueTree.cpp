@@ -766,6 +766,7 @@ ValueTree& ValueTree::setProperty (const Identifier& name, const var& newValue, 
 ValueTree& ValueTree::setPropertyExcludingListener (Listener* listenerToExclude, const Identifier& name,
                                                     const var& newValue, UndoManager* undoManager)
 {
+    jassert (XmlElement::isValidXmlName(name.toString()));
     jassert (name.toString().isNotEmpty()); // Must have a valid property name!
     jassert (object != nullptr); // Trying to add a property to a null ValueTree will fail!
 
