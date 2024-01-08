@@ -927,7 +927,6 @@ private:
                         device->listeners.call ([source, &data] (auto& l) { l.propertySubscriptionDataReceived (source, data); });
 
                     PropertyReplyHeader header;
-                    header.extended["subscribeId"] = subscribeId;
                     const auto headerBytes = Encodings::jsonTo7BitText (header.toVarCondensed());
 
                     detail::MessageTypeUtils::send (device->concreteBufferOutput,
@@ -1191,6 +1190,9 @@ private:
 
         if (! primed.isValid())
             return;
+
+        // TODO(reuk) this isn't ideal, make subscription/request handling more robust
+        primed.token.release();
 
         detail::PropertyHostUtils::send (concreteBufferOutput,
                                          options.getFunctionBlock().firstGroup,
