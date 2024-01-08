@@ -89,7 +89,7 @@ class DescriptionVisitor : public detail::MessageTypeUtils::MessageVisitor
 public:
     DescriptionVisitor (const Message::Parsed* m, String* str) : msg (m), result (str) {}
 
-    void visit (const std::monostate&)                                        const override { *result = "!! Unrecognised !!"; }
+    void visit (const std::monostate&)                                        const override {}
     void visit (const Message::Discovery& body)                               const override { visitImpl (body); }
     void visit (const Message::DiscoveryResponse& body)                       const override { visitImpl (body); }
     void visit (const Message::InvalidateMUID& body)                          const override { visitImpl (body); }
@@ -174,7 +174,7 @@ private:
 
 String Parser::getMessageDescription (const Message::Parsed& message)
 {
-    String result;
+    String result { "!! Unrecognised !!" };
     detail::MessageTypeUtils::visit (message, DescriptionVisitor { &message, &result });
     return result;
 }
