@@ -4,6 +4,77 @@
 
 ## Change
 
+The signatures of some member functions of ci::Device have been changed:
+- sendPropertyGetInquiry
+- sendPropertySetInquiry
+
+The signature of ci::PropertyHost::sendSubscriptionUpdate has also changed.
+
+The following member functions of ci::Device have been replaced with new
+alternatives:
+- sendPropertySubscriptionStart
+- sendPropertySubscriptionEnd
+- getOngoingSubscriptionsForMuid
+- countOngoingPropertyTransactions
+
+The enum field PropertyExchangeResult::Error::invalidPayload has been removed.
+
+**Possible Issues**
+
+Code that uses any of these symbols will fail to compile until it is updated.
+
+**Workaround**
+
+Device::sendPropertyGetInquiry, Device::sendPropertySetInquiry, and
+PropertyHost::sendSubscriptionUpdate all now return an optional RequestKey
+instead of an ErasedScopeGuard. Requests started via any of these functions may
+be cancelled by the request's RequestKey to the new function
+Device::abortPropertyRequest. The returned RequestKey may be null, indicating a
+failure to send the request.
+
+countOngoingPropertyTransactions has been replaced by getOngoingRequests,
+which returns the RequestKeys of all ongoing requests. To find the number of
+transactions, use the size of the returned container.
+
+sendPropertySubscriptionStart has been replaced by beginSubscription.
+sendPropertySubscriptionEnd has been replaced by endSubscription.
+The new functions no longer take callbacks. Instead, to receive notifications
+when a subscription starts or ends, override
+DeviceListener::propertySubscriptionChanged.
+
+getOngoingSubscriptionsForMuid is replaced by multiple functions.
+getOngoingSubscriptions returns SubscriptionKeys for all of the subscriptions
+currently in progress, which may be filtered based on SubscriptionKey::getMuid.
+The subscribeId assigned to a particular SubscriptionKey can be found using
+getSubscribeIdForKey, and the subscribed resource can be found using
+getResourceForKey.
+
+It's possible that the initial call to beginSubscription may not be able to
+start the subscription, e.g. if the remote device is busy and request a retry.
+In this case, the request is cached. If you use subscriptions, then you
+should call sendPendingMessages periodically to flush any messages that may
+need to be retried.
+
+There is no need to check for the invalidPayload error when processing
+property exchange results.
+
+**Rationale**
+
+Keeping track of subscriptions is quite involved, as the initial request to
+begin a subscription might not be accepted straight away. The device may not
+initially have enough vacant slots to send the request, or responder might
+request a retry if it is too busy to process the request. The ci::Device now
+caches requests when necessary, allowing them to be retried in the future.
+This functionality couldn't be implemented without modifying the old interface.
+
+Replacing ErasedScopeGuards with Keys makes lifetime handling a bit easier.
+It's no longer necessary to store or manually release scope guards for requests
+that don't need to be cancelled. The new Key types are also a bit more
+typesafe, and allow for simple queries of the transaction that created the key.
+
+
+## Change
+
 The ListenerList::Iterator class has been removed.
 
 **Possible Issues**
@@ -45,6 +116,7 @@ fixed white colour was inappropriate for most user interfaces.
 
 ## Change
 
+>>>>>>> c74b2b1058 (CIDevice: Improve robustness of subscription API)
 ProfileHost::enableProfile and ProfileHost::disableProfile have been combined
 into a single function, ProfileHost::setProfileEnablement.
 

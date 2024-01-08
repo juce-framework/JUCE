@@ -76,6 +76,7 @@
 #include <juce_midi_ci/ci/juce_CIDeviceFeatures.h>
 #include <juce_midi_ci/ci/juce_CIDeviceMessageHandler.h>
 #include <juce_midi_ci/ci/juce_CIDeviceOptions.h>
+#include <juce_midi_ci/ci/juce_CISubscriptionManager.h>
 #include <juce_midi_ci/ci/juce_CIDeviceListener.h>
 #include <juce_midi_ci/ci/juce_CIDevice.h>
 

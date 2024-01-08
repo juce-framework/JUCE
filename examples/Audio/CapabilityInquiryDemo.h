@@ -740,14 +740,7 @@ struct Model
         DeviceInfo info;
         Profiles profiles;
         Properties properties;
-        std::map<String, String> subscribeIdForResource;
-
-        std::optional<String> getSubscriptionId (const String& resource) const
-        {
-            const auto iter = subscribeIdForResource.find (resource);
-            return iter != subscribeIdForResource.end() ? std::optional (iter->second)
-                                                        : std::nullopt;
-        }
+        std::map<ci::SubscriptionKey, ci::Subscription> subscriptions;
 
         template <typename Archive, typename This>
         static auto serialise (Archive& archive, This& t)
@@ -761,7 +754,7 @@ struct Model
 
         auto tie() const
         {
-            return std::tie (muid, info, profiles, properties, subscribeIdForResource);
+            return std::tie (muid, info, profiles, properties, subscriptions);
         }
         JUCE_TUPLE_RELATIONAL_OPS (Device)
     };
@@ -2472,7 +2465,7 @@ public:
     explicit PropertyValuePanel (State<Model::Properties> s)
         : PropertyValuePanel (s, {}) {}
 
-    PropertyValuePanel (State<Model::Properties> s, State<std::map<String, String>> subState)
+    PropertyValuePanel (State<Model::Properties> s, State<std::map<ci::SubscriptionKey, ci::Subscription>> subState)
         : state (s), subscriptions (subState)
     {
         addAndMakeVisible (value);
@@ -2590,13 +2583,13 @@ private:
 
         if (const auto* selectedProp = state->properties.getSelected())
         {
-            const auto text = sub.count (selectedProp->name) != 0 ? "Unsubscribe" : "Subscribe";
+            const auto text = std::any_of (sub.begin(), sub.end(), [&] (const auto& p) { return p.second.resource == selectedProp->name; }) ? "Unsubscribe" : "Subscribe";
             subscribe.setButtonText (text);
         }
     }
 
     State<Model::Properties> state;
-    State<std::map<String, String>> subscriptions;
+    State<std::map<ci::SubscriptionKey, ci::Subscription>> subscriptions;
 
     MonospaceEditor value;
     TextField<editable> format;
@@ -2970,9 +2963,9 @@ private:
     {
         const auto selected = (size_t) state->transient.devices.selection;
         return state[&Model::App::transient]
-        [&Model::Transient::devices]
-        [&Model::ListWithSelection<Model::Device>::items]
-        [selected];
+                    [&Model::Transient::devices]
+                    [&Model::ListWithSelection<Model::Device>::items]
+                    [selected];
     }
 
     State<Model::App> state;
@@ -2980,7 +2973,7 @@ private:
     PropertyValuePanel<Editable::no> value
     {
         getDeviceState()[&Model::Device::properties],
-        getDeviceState()[&Model::Device::subscribeIdForResource]
+        getDeviceState()[&Model::Device::subscriptions]
     };
     TabbedComponent tabs { TabbedButtonBar::Orientation::TabsAtTop };
 };
@@ -3613,7 +3606,8 @@ private:
     });
 };
 
-class CapabilityInquiryDemo : public Component
+class CapabilityInquiryDemo : public Component,
+                              private Timer
 {
 public:
     CapabilityInquiryDemo()
@@ -3667,10 +3661,14 @@ public:
         {
             setPropertyPartial (bytes);
         };
+
+        startTimer (2'000);
     }
 
     ~CapabilityInquiryDemo() override
     {
+        stopTimer();
+
         // In a production app, it'd be a bit risky to write to a file from a destructor as it's
         // bad karma to throw an exception inside a destructor!
         if (auto* userSettings = applicationProperties.getUserSettings())
@@ -3691,6 +3689,12 @@ public:
     }
 
 private:
+    void timerCallback() override
+    {
+        if (device.has_value())
+            device->sendPendingMessages();
+    }
+
     std::optional<std::tuple<ci::MUID, String>> getPropertyRequestInfo() const
     {
         auto* selectedDevice = appState->transient.devices.getSelected();
@@ -3860,58 +3864,37 @@ private:
 
         const auto& [muid, propName] = *details;
 
-        const auto subId = [&, propNameCopy = propName]
+        // Find the subscription for this resource, if any
+        const auto existingToken = [&, propNameCopy = propName]() -> std::optional<ci::SubscriptionKey>
         {
-            const auto ongoing = device->getOngoingSubscriptionsForMuid (selectedDevice->muid);
-            const auto iter = std::find_if (ongoing.begin(), ongoing.end(), [&] (const auto& sub)
-            {
-                return sub.resource == propNameCopy;
-            });
+            const auto ongoing = device->getOngoingSubscriptions();
 
-            return iter != ongoing.end() ? iter->subscribeId : String();
+            for (const auto& o : ongoing)
+                if (propNameCopy == device->getResourceForKey (o))
+                    return o;
+
+            return std::nullopt;
         }();
 
-        ci::PropertySubscriptionHeader header;
-        header.resource = propName;
-        header.command = subId.isEmpty() ? ci::PropertySubscriptionCommand::start : ci::PropertySubscriptionCommand::end;
-        header.subscribeId = subId;
-
-        auto callback = [this,
-                         target = muid,
-                         propertyName = propName,
-                         existingSubscription = subId.isNotEmpty()] (const ci::PropertyExchangeResult& response)
+        // If we're already subscribed, end that subscription.
+        // Otherwise, begin a new subscription to this resource.
+        const auto changedToken = [this, propName = propName, muid = muid, existingToken = existingToken]() -> std::optional<ci::SubscriptionKey>
         {
-            if (response.getError().has_value())
-                return;
-
-            auto updated = *appState;
-
-            auto& knownDevices = updated.transient.devices.items;
-            const auto deviceIter = std::find_if (knownDevices.begin(),
-                                                  knownDevices.end(),
-                                                  [target] (const auto& d) { return d.muid == target; });
-
-            if (deviceIter == knownDevices.end())
+            // We're not subscribed, so begin a new subscription
+            if (! existingToken.has_value())
             {
-                // The device has gone away?
-                jassertfalse;
-                return;
+                ci::PropertySubscriptionHeader header;
+                header.resource = propName;
+                header.command = ci::PropertySubscriptionCommand::start;
+                return device->beginSubscription (muid, header);
             }
 
-            const auto parsedHeader = response.getHeaderAsSubscriptionHeader();
+            device->endSubscription (*existingToken);
+            return existingToken;
+        }();
 
-            if (parsedHeader.subscribeId.isNotEmpty() && ! existingSubscription)
-                deviceIter->subscribeIdForResource.emplace (propertyName, parsedHeader.subscribeId);
-            else
-                deviceIter->subscribeIdForResource.erase (propertyName);
-
-            appState = std::move (updated);
-        };
-
-        if (subId.isEmpty())
-            device->sendPropertySubscriptionStart (muid, header, callback);
-        else
-            device->sendPropertySubscriptionEnd (muid, subId, callback);
+        if (changedToken.has_value())
+            deviceListener.propertySubscriptionChanged (*changedToken);
     }
 
     template <typename Transient>
@@ -3973,11 +3956,8 @@ private:
         header.resource = propertyName;
         header.mutualEncoding = *encodingToUse;
 
-        const auto it = ongoingGetInquiries.insert (ongoingGetInquiries.end(), ErasedScopeGuard{});
-        *it = device->sendPropertyGetInquiry (target, header, [this, it, target, propertyName] (const auto& response)
+        device->sendPropertyGetInquiry (target, header, [this, target, propertyName] (const auto& response)
         {
-            ongoingGetInquiries.erase (it);
-
             if (response.getError().has_value())
                 return;
 
@@ -4113,7 +4093,7 @@ private:
                     header.command = ci::PropertySubscriptionCommand::notify;
                     header.subscribeId = subId;
                     header.resource = propertyName;
-                    host->sendSubscriptionUpdate (receiver, header, {}, {}).release();
+                    host->sendSubscriptionUpdate (receiver, header, {}, {});
                 }
             }
         }
@@ -4348,9 +4328,13 @@ private:
         {
             const auto resource = [&]
             {
-                for (const auto& [subId, res] : demo.device->getOngoingSubscriptionsForMuid (muid))
-                    if (subId == subscription.header.subscribeId)
-                        return res;
+                const auto ongoing = demo.device->getOngoingSubscriptions();
+
+                for (const auto& o : ongoing)
+                {
+                    if (subscription.header.subscribeId == demo.device->getSubscribeIdForKey (o))
+                        return demo.device->getResourceForKey (o).value_or (String{});
+                }
 
                 return String{};
             }();
@@ -4425,10 +4409,7 @@ private:
                 }
 
                 case ci::PropertySubscriptionCommand::end:
-                {
-                    matchingDevice->subscribeIdForResource.erase (resource);
                     break;
-                }
 
                 case ci::PropertySubscriptionCommand::start:
                     jassertfalse;
@@ -4436,6 +4417,35 @@ private:
             }
 
             devicesState = std::move (copiedDevices);
+        }
+
+        void propertySubscriptionChanged (ci::SubscriptionKey key, const std::optional<String>&) override
+        {
+            propertySubscriptionChanged (key);
+        }
+
+        void propertySubscriptionChanged (ci::SubscriptionKey key)
+        {
+            auto updated = *demo.appState;
+
+            auto& knownDevices = updated.transient.devices.items;
+            const auto deviceIter = std::find_if (knownDevices.begin(),
+                                                  knownDevices.end(),
+                                                  [target = key.getMuid()] (const auto& d) { return d.muid == target; });
+
+            if (deviceIter == knownDevices.end())
+            {
+                // The device has gone away?
+                jassertfalse;
+                return;
+            }
+
+            if (const auto resource = demo.device->getResourceForKey (key))
+                deviceIter->subscriptions.emplace (key, ci::Subscription { demo.device->getSubscribeIdForKey (key).value_or (String{}), *resource });
+            else
+                deviceIter->subscriptions.erase (key);
+
+            demo.appState = std::move (updated);
         }
 
     private:
@@ -4843,7 +4853,6 @@ private:
     std::unique_ptr<MidiInput> input;
     std::unique_ptr<MidiOutput> output;
     std::optional<ci::Device> device;
-    std::list<ErasedScopeGuard> ongoingGetInquiries;
 
     FileChooser fileChooser { "Pick State JSON File", {}, "*.json", true, false, this };
 
@@ -4875,7 +4884,6 @@ private:
                     .withPropertyDelegate (&propertyDelegate)
                     .withProfileDelegate (&profileDelegate);
 
-            ongoingGetInquiries.clear();
             device.emplace (options);
             device->addListener (deviceListener);
 

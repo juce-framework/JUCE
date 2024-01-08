@@ -141,6 +141,14 @@ struct DeviceListener
     */
     virtual void propertySubscriptionDataReceived ([[maybe_unused]] MUID x,
                                                    [[maybe_unused]] const PropertySubscriptionData& data) {}
+
+    /** Called when a remote device updates a subscription by accepting or terminating it.
+
+        If the subscription was accepted, the subscribeId will be non-null. Otherwise, a null
+        subscribeId indicates that the subscription was terminated.
+    */
+    virtual void propertySubscriptionChanged ([[maybe_unused]] SubscriptionKey subscription,
+                                              [[maybe_unused]] const std::optional<String>& subscribeId) {}
 };
 
 } // namespace juce::midi_ci

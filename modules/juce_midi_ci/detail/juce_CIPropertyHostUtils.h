@@ -51,28 +51,5 @@ struct PropertyHostUtils
 
         std::for_each (chunker.begin(), chunker.end(), [&] (auto) { output.send (group); });
     }
-
-    static auto getTerminator (BufferOutput& output, FunctionBlock fb, MUID them)
-    {
-        const auto us = output.getMuid();
-        return [&output, fb, us, them] (std::byte id)
-        {
-            const Message::Header notifyHeader
-            {
-                ChannelInGroup::wholeBlock,
-                detail::MessageMeta::Meta<Message::PropertyNotify>::subID2,
-                detail::MessageMeta::implementationVersion,
-                us,
-                them,
-            };
-
-            const auto jsonHeader = Encodings::jsonTo7BitText (JSONUtils::makeObjectWithKeyFirst ({ { "status", 144 } }, "status"));
-            detail::MessageTypeUtils::send (output,
-                                            fb.firstGroup,
-                                            notifyHeader,
-                                            Message::PropertyNotify { { id, jsonHeader, 1, 1, {} } });
-        };
-    }
-
 };
 } // namespace juce::midi_ci::detail

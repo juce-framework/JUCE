@@ -53,3 +53,4 @@
 #include <juce_midi_ci/ci/juce_CIPropertyExchangeCache.cpp>
 #include <juce_midi_ci/ci/juce_CIPropertyHost.cpp>
 #include <juce_midi_ci/ci/juce_CIResponderOutput.cpp>
+#include <juce_midi_ci/ci/juce_CISubscriptionManager.cpp>

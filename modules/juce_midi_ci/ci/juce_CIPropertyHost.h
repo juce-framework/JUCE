@@ -27,6 +27,39 @@ namespace juce::midi_ci
 {
 
 /**
+    A key used to uniquely identify ongoing transactions initiated by a ci::Device.
+
+    @tags{Audio}
+*/
+class RequestKey
+{
+    auto tie() const { return std::tuple (m, v); }
+
+public:
+    /** Constructor. */
+    RequestKey (MUID muid, Token64 key) : m (muid), v (key) {}
+
+    /** Returns the muid of the device to which we are subscribed. */
+    MUID getMuid() const { return m; }
+
+    /** Returns an identifier unique to this subscription. */
+    Token64 getKey() const { return v; }
+
+    /** Equality operator. */
+    bool operator== (const RequestKey& other) const { return tie() == other.tie(); }
+
+    /** Inequality operator. */
+    bool operator!= (const RequestKey& other) const { return tie() != other.tie(); }
+
+    /** Less-than operator. */
+    bool operator<  (const RequestKey& other) const { return tie() <  other.tie(); }
+
+private:
+    MUID m;
+    Token64 v{};
+};
+
+/**
     Acting as a ResponderListener, instances of this class can formulate
     appropriate replies to property transactions initiated by remote devices.
 
@@ -67,13 +100,12 @@ public:
         The provided callback will be called once the remote device has confirmed
         receipt of the subscription update. If the state of your application
         changes such that you no longer need to respond/wait for confirmation,
-        you can allow the returned Guard to fall out of scope, or reset it
-        manually.
+        you can pass the request key to Device::abortPropertyRequest().
     */
-    ErasedScopeGuard sendSubscriptionUpdate (MUID device,
-                                             const PropertySubscriptionHeader& header,
-                                             Span<const std::byte> body,
-                                             std::function<void (const PropertyExchangeResult&)> callback);
+    std::optional<RequestKey> sendSubscriptionUpdate (MUID device,
+                                                      const PropertySubscriptionHeader& header,
+                                                      Span<const std::byte> body,
+                                                      std::function<void (const PropertyExchangeResult&)> callback);
 
     /** Terminates a subscription that was started by a remote device.
 

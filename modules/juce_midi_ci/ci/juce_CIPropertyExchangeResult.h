@@ -49,10 +49,6 @@ public:
         tooManyTransactions,      ///< Unable to send the request because doing so would
                                   ///< exceed the number of simultaneous inquiries that were declared.
                                   ///< @see PropertyDelegate::getNumSimultaneousRequestsSupported().
-
-        invalidPayload,           ///< The payload couldn't be encoded for transmission. If you're
-                                  ///< using the ASCII encoding, maybe some bytes have their most
-                                  ///< significant bit set.
     };
 
     /** Creates a result denoting an error state. */
