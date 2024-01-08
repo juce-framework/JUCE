@@ -66,7 +66,7 @@ struct PropertyHostUtils
                 them,
             };
 
-            const auto jsonHeader = Encodings::jsonTo7BitText (JSONUtils::makeObjectWithKeyFirst ({ { "status", 104 } }, "status"));
+            const auto jsonHeader = Encodings::jsonTo7BitText (JSONUtils::makeObjectWithKeyFirst ({ { "status", 144 } }, "status"));
             detail::MessageTypeUtils::send (output,
                                             fb.firstGroup,
                                             notifyHeader,
