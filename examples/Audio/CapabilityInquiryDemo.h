@@ -4363,8 +4363,8 @@ private:
             }
 
             auto devicesState = demo.appState[&Model::App::transient]
-            [&Model::Transient::devices]
-            [&Model::ListWithSelection<Model::Device>::items];
+                                             [&Model::Transient::devices]
+                                             [&Model::ListWithSelection<Model::Device>::items];
             auto copiedDevices = *devicesState;
 
             const auto matchingDevice = [&]
