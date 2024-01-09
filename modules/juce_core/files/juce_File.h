@@ -510,6 +510,10 @@ public:
         Also note that on some OSes (e.g. Windows), moving files between different
         volumes may not be possible.
 
+        This function will often fail to move directories because of the ambiguities
+        about merging existing directories. Use copyDirectoryTo() and deleteRecursively()
+        in these situations.
+
         @returns    true if the operation succeeds
     */
     bool moveFileTo (const File& targetLocation) const;
@@ -1150,6 +1154,7 @@ private:
 
     static String parseAbsolutePath (const String&);
     String getPathUpToLastSlash() const;
+    bool isNonEmptyDirectory() const;
 
     Result createDirectoryInternal (const String&) const;
     bool copyInternal (const File&) const;
