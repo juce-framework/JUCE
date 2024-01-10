@@ -1438,23 +1438,6 @@ private:
 };
 
 //==============================================================================
-class LambdaTimer final : private Timer
-{
-public:
-    explicit LambdaTimer (std::function<void()> c) : callback (c) {}
-
-    ~LambdaTimer() noexcept override { stopTimer(); }
-
-    using Timer::startTimer;
-    using Timer::startTimerHz;
-    using Timer::stopTimer;
-
-private:
-    void timerCallback() override { callback(); }
-
-    std::function<void()> callback;
-};
-
 struct UiEventListener : public MessageBufferInterface<MessageHeader>
 {
     virtual int idle() = 0;
@@ -1482,7 +1465,7 @@ public:
 private:
     Messages<UiMessageHeader, RealtimeWriteTrait> processorToUi;
     std::set<UiEventListener*> activeUis;
-    LambdaTimer timer { [this]
+    TimedCallback timer { [this]
     {
         for (auto* l : activeUis)
             if (l->idle() != 0)
@@ -4335,7 +4318,7 @@ private:
     Component::SafePointer<Editor> editorPointer = nullptr;
     String uiBundleUri;
     UiDescriptor uiDescriptor;
-    LambdaTimer changedParameterFlusher;
+    TimedCallback changedParameterFlusher;
 };
 
 template <>

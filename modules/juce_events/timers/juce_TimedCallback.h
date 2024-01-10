@@ -53,6 +53,7 @@ public:
     using Timer::startTimerHz;
     using Timer::stopTimer;
     using Timer::isTimerRunning;
+    using Timer::getTimerInterval;
 
 private:
     void timerCallback() override { callback(); }

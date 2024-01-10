@@ -1654,31 +1654,6 @@ private:
 JUCE_IMPLEMENT_SINGLETON (VBlankDispatcher)
 
 //==============================================================================
-class SimpleTimer final : private Timer
-{
-public:
-    SimpleTimer (int intervalMs, std::function<void()> callbackIn)
-        : callback (std::move (callbackIn))
-    {
-        jassert (callback);
-        startTimer (intervalMs);
-    }
-
-    ~SimpleTimer() override
-    {
-        stopTimer();
-    }
-
-private:
-    void timerCallback() override
-    {
-        callback();
-    }
-
-    std::function<void()> callback;
-};
-
-//==============================================================================
 class HWNDComponentPeer final : public ComponentPeer,
                                 private VBlankListener,
                                 private Timer
@@ -1722,7 +1697,10 @@ public:
         updateCurrentMonitorAndRefreshVBlankDispatcher();
 
         if (parentToAddTo != nullptr)
-            monitorUpdateTimer.emplace (1000, [this] { updateCurrentMonitorAndRefreshVBlankDispatcher(); });
+        {
+            monitorUpdateTimer.emplace ([this] { updateCurrentMonitorAndRefreshVBlankDispatcher(); });
+            monitorUpdateTimer->startTimer (1000);
+        }
 
         suspendResumeRegistration = ScopedSuspendResumeNotificationRegistration { hwnd };
     }
@@ -4727,7 +4705,7 @@ private:
 
     RectangleList<int> deferredRepaints;
     ScopedSuspendResumeNotificationRegistration suspendResumeRegistration;
-    std::optional<SimpleTimer> monitorUpdateTimer;
+    std::optional<TimedCallback> monitorUpdateTimer;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)

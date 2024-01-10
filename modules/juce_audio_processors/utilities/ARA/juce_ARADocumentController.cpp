@@ -26,30 +26,6 @@
 namespace juce
 {
 
-class SimpleTimer final : private Timer
-{
-public:
-    SimpleTimer (int frequencyHz, std::function<void()> callbackIn)
-        : callback (std::move (callbackIn))
-    {
-        jassert (callback);
-        startTimerHz (frequencyHz);
-    }
-
-    ~SimpleTimer() override
-    {
-        stopTimer();
-    }
-
-private:
-    void timerCallback() override
-    {
-        callback();
-    }
-
-    std::function<void()> callback;
-};
-
 class ARADocumentControllerSpecialisation::ARADocumentControllerImpl  : public ARADocumentController
 {
 public:
@@ -267,7 +243,7 @@ private:
     std::atomic<bool> internalAnalysisProgressIsSynced { true };
     ScopedJuceInitialiser_GUI libraryInitialiser;
     int activeAudioSourcesCount = 0;
-    std::optional<SimpleTimer> analysisTimer;
+    std::optional<TimedCallback> analysisTimer;
 
     void analysisTimerCallback();
 
@@ -386,9 +362,14 @@ void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::didEndEditi
     notifyListeners (&ARADocument::Listener::didEndEditing, static_cast<ARADocument*> (getDocument()));
 
     if (activeAudioSourcesCount == 0)
+    {
         analysisTimer.reset();
+    }
     else if (! analysisTimer.has_value() && (activeAudioSourcesCount > 0))
-        analysisTimer.emplace (20, [this] { analysisTimerCallback(); });
+    {
+        analysisTimer.emplace ([this] { analysisTimerCallback(); });
+        analysisTimer->startTimerHz (20);
+    }
 }
 
 void ARADocumentControllerSpecialisation::ARADocumentControllerImpl::willNotifyModelUpdates() noexcept
