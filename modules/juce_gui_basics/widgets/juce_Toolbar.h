@@ -246,8 +246,10 @@ public:
         labelTextColourId           = 0x1003240,        /**< A colour to use for drawing the text under buttons
                                                              when the style is set to iconsWithText or textOnly. */
 
-        editingModeOutlineColourId  = 0x1003250   /**< A colour to use for an outline around buttons when
+        editingModeOutlineColourId  = 0x1003250,  /**< A colour to use for an outline around buttons when
                                                        the customisation dialog is active and the mouse moves over them. */
+
+        customisationDialogBackgroundColourId = 0x1003260 /**< A colour used to paint the background of the CustomisationDialog. */
     };
 
     //==============================================================================

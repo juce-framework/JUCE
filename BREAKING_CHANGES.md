@@ -4,6 +4,27 @@
 
 ## Change
 
+The background colour of the Toolbar::CustomisationDialog has been changed from
+white to a new, customisable value, that matches Toolbar::backgroundColourId by
+default.
+
+**Possible Issues**
+
+User interfaces that use Toolbar::CustomisationDialog will render differently.
+
+**Workaround**
+
+You can customise the new colour using LookAndFeel::setColour() using
+Toolbar::customisationDialogBackgroundColourId.
+
+**Rationale**
+
+Previously there was no way to customise the dialog's background colour and the
+fixed white colour was inappropriate for most user interfaces.
+
+
+## Change
+
 ProfileHost::enableProfile and ProfileHost::disableProfile have been combined
 into a single function, ProfileHost::setProfileEnablement.
 

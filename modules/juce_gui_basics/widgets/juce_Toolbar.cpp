@@ -660,7 +660,10 @@ class Toolbar::CustomisationDialog final : public DialogWindow
 {
 public:
     CustomisationDialog (ToolbarItemFactory& factory, Toolbar& bar, int optionFlags)
-        : DialogWindow (TRANS ("Add/remove items from toolbar"), Colours::white, true, true),
+        : DialogWindow (TRANS ("Add/remove items from toolbar"),
+                        bar.findColour (Toolbar::customisationDialogBackgroundColourId),
+                        true,
+                        true),
           toolbar (bar)
     {
         setContentOwned (new CustomiserPanel (factory, toolbar, optionFlags), true);

@@ -131,6 +131,7 @@ LookAndFeel_V2::LookAndFeel_V2()
         Toolbar::buttonMouseDownBackgroundColourId, 0x800000ff,
         Toolbar::labelTextColourId,                 0xff000000,
         Toolbar::editingModeOutlineColourId,        0xffff0000,
+        Toolbar::customisationDialogBackgroundColourId, 0xfff6f8f9,
 
         DrawableButton::textColourId,               0xff000000,
         DrawableButton::textColourOnId,             0xff000000,
