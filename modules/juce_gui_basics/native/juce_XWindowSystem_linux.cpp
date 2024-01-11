@@ -2514,7 +2514,7 @@ ModifierKeys XWindowSystem::getNativeRealtimeModifiers() const
     ::Window root, child;
     int x, y, winx, winy;
     unsigned int mask;
-    int mouseMods = 0;
+    int mouseMods = 0, keyboardMods = 0, keyboardClearMods = 0;
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
@@ -2526,9 +2526,15 @@ ModifierKeys XWindowSystem::getNativeRealtimeModifiers() const
         if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
         if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
         if ((mask & Button3Mask) != 0)  mouseMods |= ModifierKeys::rightButtonModifier;
+
+        ((mask & ShiftMask)     != 0 ? keyboardMods : keyboardClearMods) |= ModifierKeys::shiftModifier;
+        ((mask & ControlMask)   != 0 ? keyboardMods : keyboardClearMods) |= ModifierKeys::ctrlModifier;
     }
 
-    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+    ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons()
+                                                                   .withFlags (mouseMods)
+                                                                   .withoutFlags (keyboardClearMods)
+                                                                   .withFlags (keyboardMods);
 
     // We are keeping track of the state of modifier keys and mouse buttons with the assumption that
     // for every mouse down we are going to receive a mouse up etc.
