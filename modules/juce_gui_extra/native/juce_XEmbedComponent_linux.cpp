@@ -234,13 +234,25 @@ public:
         }
     }
 
-    void focusGained (FocusChangeType changeType)
+    void focusGained (FocusChangeType changeType, FocusChangeDirection direction)
     {
         if (client != 0 && supportsXembed && wantsFocus)
         {
             updateKeyFocus();
+
+            const auto xembedDirection = [&]
+            {
+                if (direction == FocusChangeDirection::forward)
+                    return XEMBED_FOCUS_FIRST;
+
+                if (direction == FocusChangeDirection::backward)
+                    return XEMBED_FOCUS_LAST;
+
+                return XEMBED_FOCUS_CURRENT;
+            }();
+
             sendXEmbedEvent (CurrentTime, XEMBED_FOCUS_IN,
-                             (changeType == focusChangedByTabKey ? XEMBED_FOCUS_FIRST : XEMBED_FOCUS_CURRENT));
+                             (changeType == focusChangedByTabKey ? xembedDirection : XEMBED_FOCUS_CURRENT));
         }
     }
 
@@ -516,6 +528,9 @@ private:
     //==============================================================================
     void handleXembedCmd (const ::Time& /*xTime*/, long opcode, long /*detail*/, long /*data1*/, long /*data2*/)
     {
+        if (auto* peer = owner.getPeer())
+            peer->getCurrentModifiersRealtime();
+
         switch (opcode)
         {
             case XEMBED_REQUEST_FOCUS:
@@ -699,7 +714,11 @@ void XEmbedComponent::paint (Graphics& g)
     g.fillAll (Colours::lightgrey);
 }
 
-void XEmbedComponent::focusGained (FocusChangeType changeType)     { pimpl->focusGained (changeType); }
+void XEmbedComponent::focusGainedWithDirection (FocusChangeType changeType, FocusChangeDirection direction)
+{
+    pimpl->focusGained (changeType, direction);
+}
+
 void XEmbedComponent::focusLost   (FocusChangeType changeType)     { pimpl->focusLost   (changeType); }
 void XEmbedComponent::broughtToFront()                             { pimpl->broughtToFront(); }
 unsigned long XEmbedComponent::getHostWindowID()                   { return pimpl->getHostWindowID(); }

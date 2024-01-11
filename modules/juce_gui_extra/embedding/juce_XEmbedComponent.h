@@ -112,7 +112,7 @@ protected:
     //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
-    void focusGained (FocusChangeType) override;
+    void focusGainedWithDirection (FocusChangeType, FocusChangeDirection) override;
     void focusLost (FocusChangeType) override;
     void broughtToFront() override;
 
