@@ -413,6 +413,34 @@ public:
             expect (listeners == nullptr);
             expect (TestCriticalSection::numOutOfScopeCalls() == 0);
         }
+
+        beginTest ("Adding a listener during a callback when one has already been removed");
+        {
+            struct Listener{};
+
+            ListenerList<Listener> listeners;
+            expect (listeners.size() == 0);
+
+            Listener listener;
+            listeners.add (&listener);
+            expect (listeners.size() == 1);
+
+            bool listenerCalled = false;
+
+            listeners.call ([&] (auto& l)
+            {
+                listeners.remove (&l);
+                expect (listeners.size() == 0);
+
+                listeners.add (&l);
+                expect (listeners.size() == 1);
+
+                listenerCalled = true;
+            });
+
+            expect (listenerCalled);
+            expect (listeners.size() == 1);
+        }
     }
 
 private:

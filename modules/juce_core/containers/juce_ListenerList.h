@@ -118,9 +118,15 @@ public:
         const ScopedLockType lock (listeners->getLock());
 
         if (const auto index = listeners->removeFirstMatchingValue (listenerToRemove); index >= 0)
-            for (auto* indexPtr : *indices)
-                if (index <= *indexPtr)
-                    --*indexPtr;
+        {
+            for (auto* it : *iterators)
+            {
+                --it->end;
+
+                if (index <= it->index)
+                    --it->index;
+            }
+        }
     }
 
     /** Adds a listener that will be automatically removed again when the Guard is destroyed.
@@ -146,7 +152,15 @@ public:
         If the ListenerList is cleared during a callback, it is guaranteed that
         no more listeners will be called.
     */
-    void clear()                                             { listeners->clear(); }
+    void clear()
+    {
+        const ScopedLockType lock (listeners->getLock());
+
+        listeners->clear();
+
+        for (auto* it : *iterators)
+            it->end = 0;
+    }
 
     /** Returns true if the specified listener has been added to the list. */
     bool contains (ListenerClass* listener) const noexcept   { return listeners->contains (listener); }
@@ -211,20 +225,22 @@ public:
         const auto localListeners = listeners;
         const ScopedLockType lock { localListeners->getLock() };
 
-        int index{};
+        Iterator it{};
+        it.end = localListeners->size();
 
-        indices->push_back (&index);
-        const ScopeGuard scope { [i = indices, &index]
+        iterators->push_back (&it);
+
+        const ScopeGuard scope { [i = iterators, &it]
         {
-            i->erase (std::remove (i->begin(), i->end(), &index), i->end());
+            i->erase (std::remove (i->begin(), i->end(), &it), i->end());
         } };
 
-        for (const auto end = localListeners->size(); index < jmin (end, localListeners->size()); ++index)
+        for (; it.index < it.end; ++it.index)
         {
             if (bailOutChecker.shouldBailOut())
                 return;
 
-            auto* listener = localListeners->getUnchecked (index);
+            auto* listener = localListeners->getUnchecked (it.index);
 
             if (listener == listenerToExclude)
                 continue;
@@ -313,9 +329,15 @@ private:
     using SharedListeners = std::shared_ptr<ArrayType>;
     const SharedListeners listeners = std::make_shared<ArrayType>();
 
-    using SafeIndices = std::vector<int*>;
-    using SharedIndices = std::shared_ptr<SafeIndices>;
-    const SharedIndices indices = std::make_shared<SafeIndices>();
+    struct Iterator
+    {
+        int index{};
+        int end{};
+    };
+
+    using SafeIterators = std::vector<Iterator*>;
+    using SharedIterators = std::shared_ptr<SafeIterators>;
+    const SharedIterators iterators = std::make_shared<SafeIterators>();
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE (ListenerList)
