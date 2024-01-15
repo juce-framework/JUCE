@@ -626,6 +626,57 @@ attributes directly to these creation functions, rather than adding them later.
   Unlike the other `COPY_DIR` arguments, this argument does not have a default value so be sure
   to set it if you have enabled `COPY_PLUGIN_AFTER_BUILD` and the `Unity` format.
 
+`CREATE_INSTALL_RULES`
+- Whether or not to add install rules for the plugin. False by default. If true, this is equivalent
+  to calling `juce_install_plugin(<target>)`. If you want to generate install rules for all the
+  plugins in a subdirectory, you can set the `JUCE_CREATE_INSTALL_RULES` property on the directory
+  before adding the plugin targets, rather than setting this argument on each individual target.
+
+`VST_INSTALL_DIR`
+- The location to which VST2 (legacy) plugins will be copied by the install rules created by
+  `juce_install_plugin` (or the `CREATE_INSTALL_RULES` option). If you want to install all of the 
+  VST2 plugins in a subdirectory to a non-default location, you can set the `JUCE_VST_INSTALL_DIR` 
+  property on the directory before adding the plugin targets, rather than setting this argument on 
+  each individual target.
+
+`AAX_INSTALL_DIR`
+- The location to which AAX plugins will be copied by the install rules created by `juce_install_plugin` 
+  (or the `CREATE_INSTALL_RULES` option). If you want to install all of the AAX plugins in a subdirectory 
+  to a non-default location, you can set the `JUCE_AAX_INSTALL_DIR` property on the directory before 
+  adding the plugin targets, rather than setting this argument on each individual target.
+
+`AU_INSTALL_DIR`
+- The location to which AU plugins will be copied by the install rules created by `juce_install_plugin` 
+  (or the `CREATE_INSTALL_RULES` option). If you want to install all of the AU plugins in a subdirectory 
+  to a non-default location, you can set the `JUCE_AU_INSTALL_DIR` property on the directory before 
+  adding the plugin targets, rather than setting this argument on each individual target.
+
+`UNITY_INSTALL_DIR`
+- The location to which Unity plugins will be copied by the install rules created by `juce_install_plugin` 
+  (or the `CREATE_INSTALL_RULES` option). If you want to install all of the Unity plugins in a subdirectory 
+  to a non-default location, you can set the `JUCE_UNITY_INSTALL_DIR` property on the directory before 
+  adding the plugin targets, rather than setting this argument on each individual target.
+
+`LV2_INSTALL_DIR`
+- The location to which LV2 plugins will be copied by the install rules created by `juce_install_plugin` 
+  (or the `CREATE_INSTALL_RULES` option). If you want to install all of the LV2 plugins in a subdirectory 
+  to a non-default location, you can set the `JUCE_LV2_INSTALL_DIR` property on the directory before 
+  adding the plugin targets, rather than setting this argument on each individual target.
+
+`STANDALONE_INSTALL_DIR`
+- The location to which standalone plugins will be copied by the install rules created by 
+  `juce_install_plugin` (or the `CREATE_INSTALL_RULES` option). If you want to install all of the 
+  standalone plugins in a subdirectory to a non-default location, you can set the `JUCE_STANDALONE_INSTALL_DIR` 
+  property on the directory before adding the plugin targets, rather than setting this argument on each 
+  individual target.
+
+`VST3_INSTALL_DIR`
+- The location to which VST3 plugins will be copied by the install rules created by 
+  `juce_install_plugin` (or the `CREATE_INSTALL_RULES` option). If you want to install all of the 
+  VST3 plugins in a subdirectory to a non-default location, you can set the `JUCE_VST3_INSTALL_DIR` 
+  property on the directory before adding the plugin targets, rather than setting this argument on 
+  each individual target.
+
 `IS_ARA_EFFECT`
 - May be either TRUE or FALSE (defaults to FALSE). If TRUE it enables additional codepaths in the
   VST3 and AU plugin wrappers allowing compatible hosts to load the plugin with additional ARA
@@ -670,6 +721,43 @@ attributes directly to these creation functions, rather than adding them later.
   `juce_enable_vst3_manifest_step` function. It is strongly recommended to generate a manifest for
   your plugin, as this allows compatible hosts to scan the plugin much more quickly, leading to
   an improved experience for users.
+
+#### `juce_install_plugin`
+
+    juce_install_plugin(<name>
+        [COMPONENT_PREFIX ...]
+        [GROUP_NAME ...])
+
+Adds install rules for all formats of the specified plugin. 
+
+Each format of the plugin will be installed to a platform-specific directory, each of which can be
+controlled using the following target properties:
+
+`JUCE_STANDALONE_INSTALL_DEST`
+- Specifies the installation directory for standalone plugins. Defaults to `Applications` on Mac and 
+`Program Files` on Windows.
+
+`JUCE_AAX_INSTALL_DEST`
+- Specifies the installation directory for AAX plugins. Defaults to 
+`Library/Application Support/Avid/Audio/Plug-Ins` on Mac and `Program Files/Common Files/Avid/Audio/Plug-Ins`
+on Windows.
+
+`JUCE_VST3_INSTALL_DEST`
+- Specifies the installation directory for VST3 plugins. Defaults to `Library/Audio/Plug-Ins/VST3` on 
+Mac and `Program Files/Common Files/VST3` on Windows.
+
+`JUCE_VST_INSTALL_DEST`
+- Specifies the installation directory for VST2 plugins. Defaults to `Library/Audio/Plug-Ins/VST` on 
+Mac and `Program Files/Common Files/VST` on Windows.
+
+`JUCE_AU_INSTALL_DEST`
+- Specifies the installation directory for AU plugins. Defaults to `Library/Audio/Plug-Ins/Components`
+(Mac-only).
+
+Each plugin format will be added to a CPack component named `<COMPONENT_PREFIX>_<FORMAT>`, where
+`<COMPONENT_PREFIX>` defaults to the name of the plugin if not specified in the `COMPONENT_PREFIX`
+argument. Each of these CPack components will be added to a component group; the name of the group
+can be specified using the `GROUP_NAME` argument, or it will default to the name of the plugin.
 
 #### `juce_add_binary_data`
 

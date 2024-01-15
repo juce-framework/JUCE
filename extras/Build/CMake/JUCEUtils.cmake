@@ -56,33 +56,61 @@ define_property(TARGET PROPERTY JUCE_COMPANY_COPYRIGHT INHERITED
 set_property(GLOBAL PROPERTY JUCE_COMPANY_COPYRIGHT "")
 
 define_property(TARGET PROPERTY JUCE_VST_COPY_DIR INHERITED
-    BRIEF_DOCS "Install location for VST2 plugins"
+    BRIEF_DOCS "Copy location for VST2 plugins"
     FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
 
 define_property(TARGET PROPERTY JUCE_VST3_COPY_DIR INHERITED
-    BRIEF_DOCS "Install location for VST3 plugins"
+    BRIEF_DOCS "Copy location for VST3 plugins"
     FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
 
 define_property(TARGET PROPERTY JUCE_AU_COPY_DIR INHERITED
-    BRIEF_DOCS "Install location for AU plugins"
+    BRIEF_DOCS "Copy location for AU plugins"
     FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
 
 define_property(TARGET PROPERTY JUCE_AAX_COPY_DIR INHERITED
-    BRIEF_DOCS "Install location for AAX plugins"
+    BRIEF_DOCS "Copy location for AAX plugins"
     FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
 
 define_property(TARGET PROPERTY JUCE_UNITY_COPY_DIR INHERITED
-    BRIEF_DOCS "Install location for Unity plugins"
+    BRIEF_DOCS "Copy location for Unity plugins"
     FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
 
 define_property(TARGET PROPERTY JUCE_LV2_COPY_DIR INHERITED
-    BRIEF_DOCS "Install location for LV2 plugins"
+    BRIEF_DOCS "Copy location for LV2 plugins"
     FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
 
 define_property(TARGET PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD INHERITED
     BRIEF_DOCS "Whether or not plugins should be copied after building"
     FULL_DOCS "Whether or not plugins should be copied after building")
 set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
+
+define_property(TARGET PROPERTY JUCE_STANDALONE_INSTALL_DIR INHERITED
+    BRIEF_DOCS "Install location for standalone plugins"
+    FULL_DOCS "This is where the standalone app build of the plugin will be copied to by the installer configured using juce_install_plugin")
+
+define_property(TARGET PROPERTY JUCE_VST_INSTALL_DIR INHERITED
+    BRIEF_DOCS "Install location for VST2 plugins"
+    FULL_DOCS "This is where the VST2 format will be copied to by the installer configured using juce_install_plugin")
+
+define_property(TARGET PROPERTY JUCE_VST3_INSTALL_DIR INHERITED
+    BRIEF_DOCS "Install location for VST3 plugins"
+    FULL_DOCS "This is where the VST3 format will be copied to by the installer configured using juce_install_plugin")
+
+define_property(TARGET PROPERTY JUCE_AU_INSTALL_DIR INHERITED
+    BRIEF_DOCS "Install location for AU plugins"
+    FULL_DOCS "This is where the AU format will be copied to by the installer configured using juce_install_plugin")
+
+define_property(TARGET PROPERTY JUCE_AAX_INSTALL_DIR INHERITED
+    BRIEF_DOCS "Install location for AAX plugins"
+    FULL_DOCS "This is where the AAX format will be copied to by the installer configured using juce_install_plugin")
+
+define_property(TARGET PROPERTY JUCE_UNITY_INSTALL_DIR INHERITED
+    BRIEF_DOCS "Install location for Unity plugins"
+    FULL_DOCS "This is where the Unity format will be copied to by the installer configured using juce_install_plugin")
+
+define_property(TARGET PROPERTY JUCE_LV2_INSTALL_DIR INHERITED
+    BRIEF_DOCS "Install location for LV2 plugins"
+    FULL_DOCS "This is where the LV2 format will be copied to by the installer configured using juce_install_plugin")
 
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
@@ -101,6 +129,14 @@ function(_juce_set_default_properties)
         set_property(GLOBAL PROPERTY JUCE_AU_COPY_DIR     "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
         set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR  "$ENV{HOME}/Library/Audio/Plug-Ins/Unity")
         set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR    "/Library/Application Support/Avid/Audio/Plug-Ins")
+
+        set_property(GLOBAL PROPERTY JUCE_STANDALONE_INSTALL_DIR "Applications")
+        set_property(GLOBAL PROPERTY JUCE_VST_INSTALL_DIR   "Library/Audio/Plug-Ins/VST")
+        set_property(GLOBAL PROPERTY JUCE_VST3_INSTALL_DIR  "Library/Audio/Plug-Ins/VST3")
+        set_property(GLOBAL PROPERTY JUCE_AU_INSTALL_DIR    "Library/Audio/Plug-Ins/Components")
+        set_property(GLOBAL PROPERTY JUCE_AAX_INSTALL_DIR   "Library/Application Support/Avid/Audio/Plug-Ins")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_INSTALL_DIR "Library/Audio/Plug-Ins/Unity")
+        set_property(GLOBAL PROPERTY JUCE_LV2_INSTALL_DIR   "Library/Audio/Plug-Ins/LV2")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
             set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR "$ENV{ProgramW6432}/Steinberg/Vstplugins")
@@ -114,11 +150,24 @@ function(_juce_set_default_properties)
         set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR    "${prefix}/Avid/Audio/Plug-Ins")
         set_property(GLOBAL PROPERTY JUCE_LV2_COPY_DIR    "$ENV{APPDATA}/LV2")
         set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR  "$ENV{APPDATA}/Unity")
+
+        set_property(GLOBAL PROPERTY JUCE_STANDALONE_INSTALL_DIR "Program Files")
+        set_property(GLOBAL PROPERTY JUCE_VST_INSTALL_DIR   "Program Files/Common Files/VST")
+        set_property(GLOBAL PROPERTY JUCE_VST3_INSTALL_DIR  "Program Files/Common Files/VST3")
+        set_property(GLOBAL PROPERTY JUCE_AAX_INSTALL_DIR   "Program Files/Common Files/Avid/Audio/Plug-Ins")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_INSTALL_DIR "") # TODO
+        set_property(GLOBAL PROPERTY JUCE_LV2_INSTALL_DIR   "") # TODO
     elseif((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
         set_property(GLOBAL PROPERTY JUCE_LV2_COPY_DIR   "$ENV{HOME}/.lv2")
         set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR   "$ENV{HOME}/.vst")
         set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR  "$ENV{HOME}/.vst3")
         set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR "$ENV{HOME}/.unity")
+
+        set_property(GLOBAL PROPERTY JUCE_STANDALONE_INSTALL_DIR "bin")
+        set_property(GLOBAL PROPERTY JUCE_VST_INSTALL_DIR ".vst")
+        set_property(GLOBAL PROPERTY JUCE_VST3_INSTALL_DIR ".vst3")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_INSTALL_DIR ".unity")
+        set_property(GLOBAL PROPERTY JUCE_LV2_INSTALL_DIR ".lv2")
     endif()
 endfunction()
 
@@ -952,6 +1001,72 @@ function(juce_enable_copy_plugin_step shared_code_target)
     endforeach()
 endfunction()
 
+function(_juce_get_format_install_dest_property_name format out)
+    if("${format}" STREQUAL "Unity")
+        set (${out} JUCE_UNITY_INSTALL_DEST PARENT_SCOPE)
+        return()
+    endif()
+    if("${format}" STREQUAL "Standalone")
+        set (${out} JUCE_STANDALONE_INSTALL_DEST PARENT_SCOPE)
+        return()
+    endif()
+    set (${out} "JUCE_${format}_INSTALL_DEST" PARENT_SCOPE)
+endfunction()
+
+function(juce_install_plugin shared_code_target)
+    get_target_property (install_added "${shared_code_target}" _JUCE_PLUGIN_INSTALL_ADDED)
+
+    if(install_added)
+        message(WARNING "juce_install_plugin called multiple times for ${shared_code_target}")
+        return()
+    endif()
+
+    set_target_properties(${shared_code_target} PROPERTIES _JUCE_PLUGIN_INSTALL_ADDED TRUE)
+
+    set (one_val_args COMPONENT_PREFIX GROUP_NAME)
+    cmake_parse_arguments(JUCE_ARG "" "${one_val_args}" "" ${ARGN})
+
+    get_target_property (plugin_name "${shared_code_target}" JUCE_PRODUCT_NAME)
+
+    if(NOT JUCE_ARG_GROUP_NAME)
+        set (JUCE_ARG_GROUP_NAME "${plugin_name}")
+    endif()
+
+    if(NOT JUCE_ARG_COMPONENT_PREFIX)
+        set (JUCE_ARG_COMPONENT_PREFIX "${plugin_name}")
+    endif()
+
+    include (CPackComponent)
+
+    get_target_property (active_targets "${shared_code_target}" JUCE_ACTIVE_PLUGIN_TARGETS)
+
+    foreach(target IN LISTS active_targets)
+        get_target_property (target_kind "${target}" JUCE_TARGET_KIND_STRING)
+
+        _juce_get_format_install_dest_property_name ("${target_kind}" prop_name)
+
+        get_target_property (dest_dir "${target}" "${prop_name}")
+
+        set (component_name "${JUCE_ARG_COMPONENT_PREFIX}_${target_kind}")
+
+        install (TARGETS "${target}"
+                 DESTINATION "${dest_dir}"
+                 COMPONENT "${component_name}")
+
+        cpack_add_component("${component_name}"
+                DISPLAY_NAME "${plugin_name} - ${target_kind} format"
+                DESCRIPTION "Install the ${target_kind} format of the ${plugin_name} plugin"
+                GROUP "${JUCE_ARG_GROUP_NAME}")
+    endforeach()
+
+    get_target_property (plugin_description "${shared_code_target}" JUCE_DESCRIPTION)
+
+    cpack_add_component_group("${JUCE_ARG_GROUP_NAME}"
+        DISPLAY_NAME "${plugin_name}"
+        DESCRIPTION "${plugin_description}"
+        EXPANDED BOLD_TITLE)
+endfunction()
+
 # ==================================================================================================
 
 function(_juce_add_lv2_manifest_helper_target)
@@ -1485,6 +1600,12 @@ function(_juce_configure_plugin_targets target)
     if(wants_copy)
         juce_enable_copy_plugin_step("${target}")
     endif()
+
+    get_target_property(wants_install "${target}" JUCE_CREATE_INSTALL_RULES)
+
+    if(wants_install)
+        juce_install_plugin("${target}")
+    endif()
 endfunction()
 
 # ==================================================================================================
@@ -1882,7 +2003,16 @@ function(_juce_initialise_target target)
         AAX_COPY_DIR
         AU_COPY_DIR
         UNITY_COPY_DIR
-        COPY_PLUGIN_AFTER_BUILD)
+        COPY_PLUGIN_AFTER_BUILD
+
+        VST_INSTALL_DIR
+        VST3_INSTALL_DIR
+        AAX_INSTALL_DIR
+        AU_INSTALL_DIR
+        UNITY_INSTALL_DIR
+        LV2_INSTALL_DIR
+        STANDALONE_INSTALL_DIR
+        CREATE_INSTALL_RULES)
 
     set(multi_value_args
         FORMATS
@@ -1934,7 +2064,15 @@ function(_juce_initialise_target target)
         AU_COPY_DIR
         AAX_COPY_DIR
         UNITY_COPY_DIR
-        COPY_PLUGIN_AFTER_BUILD)
+        COPY_PLUGIN_AFTER_BUILD
+        VST_INSTALL_DIR
+        VST3_INSTALL_DIR
+        AAX_INSTALL_DIR
+        AU_INSTALL_DIR
+        UNITY_INSTALL_DIR
+        LV2_INSTALL_DIR
+        STANDALONE_INSTALL_DIR
+        CREATE_INSTALL_RULES)
 
     # Overwrite any properties that might be inherited
     foreach(prop_string IN LISTS inherited_properties)
