@@ -1140,7 +1140,7 @@
     X (void        , glDebugMessageEnableAMD, (GLenum category, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled)) \
     X (void        , glDebugMessageInsertAMD, (GLenum category, GLenum severity, GLuint id, GLsizei length, const GLchar *buf)) \
     X (void        , glDebugMessageCallbackAMD, (GLDEBUGPROCAMD callback, void *userParam)) \
-    X (GLuint      , glGetDebugMessageLogAMD, (GLuint count, GLsizei bufSize, GLenum *categories, GLuint *severities, GLuint *ids, GLsizei *lengths, GLchar *message))
+    X (GLuint      , glGetDebugMessageLogAMD, (GLuint count, GLsizei bufSize, GLenum *categories, GLenum *severities, GLuint *ids, GLsizei *lengths, GLchar *message))
 
 #define JUCE_GL_FUNCTIONS_GL_AMD_draw_buffers_blend \
     X (void        , glBlendFuncIndexedAMD, (GLuint buf, GLenum src, GLenum dst)) \
@@ -2189,6 +2189,10 @@
 #define JUCE_GL_FUNCTIONS_GL_EXT_framebuffer_blit \
     X (void        , glBlitFramebufferEXT, (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter))
 
+#define JUCE_GL_FUNCTIONS_GL_EXT_framebuffer_blit_layers \
+    X (void        , glBlitFramebufferLayersEXT, (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter)) \
+    X (void        , glBlitFramebufferLayerEXT, (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint srcLayer, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLint dstLayer, GLbitfield mask, GLenum filter))
+
 #define JUCE_GL_FUNCTIONS_GL_EXT_framebuffer_multisample \
     X (void        , glRenderbufferStorageMultisampleEXT, (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height))
 
@@ -2384,7 +2388,7 @@
     X (GLuint      , glCreateShaderProgramEXT, (GLenum type, const GLchar *string)) \
     X (void        , glActiveShaderProgramEXT, (GLuint pipeline, GLuint program)) \
     X (void        , glBindProgramPipelineEXT, (GLuint pipeline)) \
-    X (GLuint      , glCreateShaderProgramvEXT, (GLenum type, GLsizei count, const GLchar **strings)) \
+    X (GLuint      , glCreateShaderProgramvEXT, (GLenum type, GLsizei count, const GLchar *const*strings)) \
     X (void        , glDeleteProgramPipelinesEXT, (GLsizei n, const GLuint *pipelines)) \
     X (void        , glGenProgramPipelinesEXT, (GLsizei n, GLuint *pipelines)) \
     X (void        , glGetProgramPipelineInfoLogEXT, (GLuint pipeline, GLsizei bufSize, GLsizei *length, GLchar *infoLog)) \
@@ -2438,6 +2442,11 @@
 
 #define JUCE_GL_FUNCTIONS_GL_EXT_texture_perturb_normal \
     X (void        , glTextureNormalEXT, (GLenum mode))
+
+#define JUCE_GL_FUNCTIONS_GL_EXT_texture_storage \
+    X (void        , glTexStorage1DEXT, (GLenum target, GLsizei levels, GLenum internalformat, GLsizei width)) \
+    X (void        , glTexStorage2DEXT, (GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)) \
+    X (void        , glTexStorage3DEXT, (GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth))
 
 #define JUCE_GL_FUNCTIONS_GL_NV_timeline_semaphore \
     X (void        , glCreateSemaphoresNV, (GLsizei n, GLuint *semaphores)) \
@@ -2850,12 +2859,6 @@
     X (void        , glMultiTexCoord3hvNV, (GLenum target, const GLhalfNV *v)) \
     X (void        , glMultiTexCoord4hNV, (GLenum target, GLhalfNV s, GLhalfNV t, GLhalfNV r, GLhalfNV q)) \
     X (void        , glMultiTexCoord4hvNV, (GLenum target, const GLhalfNV *v)) \
-    X (void        , glFogCoordhNV, (GLhalfNV fog)) \
-    X (void        , glFogCoordhvNV, (const GLhalfNV *fog)) \
-    X (void        , glSecondaryColor3hNV, (GLhalfNV red, GLhalfNV green, GLhalfNV blue)) \
-    X (void        , glSecondaryColor3hvNV, (const GLhalfNV *v)) \
-    X (void        , glVertexWeighthNV, (GLhalfNV weight)) \
-    X (void        , glVertexWeighthvNV, (const GLhalfNV *weight)) \
     X (void        , glVertexAttrib1hNV, (GLuint index, GLhalfNV x)) \
     X (void        , glVertexAttrib1hvNV, (GLuint index, const GLhalfNV *v)) \
     X (void        , glVertexAttrib2hNV, (GLuint index, GLhalfNV x, GLhalfNV y)) \
@@ -2867,7 +2870,13 @@
     X (void        , glVertexAttribs1hvNV, (GLuint index, GLsizei n, const GLhalfNV *v)) \
     X (void        , glVertexAttribs2hvNV, (GLuint index, GLsizei n, const GLhalfNV *v)) \
     X (void        , glVertexAttribs3hvNV, (GLuint index, GLsizei n, const GLhalfNV *v)) \
-    X (void        , glVertexAttribs4hvNV, (GLuint index, GLsizei n, const GLhalfNV *v))
+    X (void        , glVertexAttribs4hvNV, (GLuint index, GLsizei n, const GLhalfNV *v)) \
+    X (void        , glFogCoordhNV, (GLhalfNV fog)) \
+    X (void        , glFogCoordhvNV, (const GLhalfNV *fog)) \
+    X (void        , glSecondaryColor3hNV, (GLhalfNV red, GLhalfNV green, GLhalfNV blue)) \
+    X (void        , glSecondaryColor3hvNV, (const GLhalfNV *v)) \
+    X (void        , glVertexWeighthNV, (GLhalfNV weight)) \
+    X (void        , glVertexWeighthvNV, (const GLhalfNV *weight))
 
 #define JUCE_GL_FUNCTIONS_GL_NV_internalformat_sample_query \
     X (void        , glGetInternalformatSampleivNV, (GLenum target, GLenum internalformat, GLsizei samples, GLenum pname, GLsizei count, GLint *params))
@@ -3880,6 +3889,7 @@
     JUCE_GL_FUNCTIONS_GL_EXT_external_buffer \
     JUCE_GL_FUNCTIONS_GL_EXT_fog_coord \
     JUCE_GL_FUNCTIONS_GL_EXT_framebuffer_blit \
+    JUCE_GL_FUNCTIONS_GL_EXT_framebuffer_blit_layers \
     JUCE_GL_FUNCTIONS_GL_EXT_framebuffer_multisample \
     JUCE_GL_FUNCTIONS_GL_EXT_framebuffer_object \
     JUCE_GL_FUNCTIONS_GL_EXT_geometry_shader4 \
@@ -3917,6 +3927,7 @@
     JUCE_GL_FUNCTIONS_GL_EXT_texture_integer \
     JUCE_GL_FUNCTIONS_GL_EXT_texture_object \
     JUCE_GL_FUNCTIONS_GL_EXT_texture_perturb_normal \
+    JUCE_GL_FUNCTIONS_GL_EXT_texture_storage \
     JUCE_GL_FUNCTIONS_GL_NV_timeline_semaphore \
     JUCE_GL_FUNCTIONS_GL_EXT_timer_query \
     JUCE_GL_FUNCTIONS_GL_EXT_transform_feedback \
