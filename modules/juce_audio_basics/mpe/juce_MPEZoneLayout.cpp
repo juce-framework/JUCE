@@ -113,6 +113,7 @@ void MPEZoneLayout::processNextMidiEvent (const MidiMessage& message)
                                             message.getControllerValue()))
     {
         processRpnMessage (*parsed);
+        rpnDetector.reset();
     }
 }
 
