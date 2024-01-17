@@ -381,6 +381,17 @@ public:
             expectEquals (layout.getLowerZone().numMemberChannels, 3);
             expectEquals (layout.getLowerZone().perNotePitchbendRange, 48);
             expectEquals (layout.getLowerZone().masterPitchbendRange, 2);
+
+            const auto masterPitchBend = 0x0c;
+            layout.processNextMidiEvent ({ 0xb0, 0x64, 0x00 });
+            layout.processNextMidiEvent ({ 0xb0, 0x06, masterPitchBend });
+
+            expectEquals (layout.getLowerZone().masterPitchbendRange, masterPitchBend);
+
+            const auto newPitchBend = 0x0d;
+            layout.processNextMidiEvent ({ 0xb0, 0x06, newPitchBend });
+
+            expectEquals (layout.getLowerZone().masterPitchbendRange, newPitchBend);
         }
     }
 };
