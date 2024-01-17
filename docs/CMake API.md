@@ -168,10 +168,10 @@ appropriate:
 
     target_compile_definitions(my_target PUBLIC NAME_OF_KEY=<value>)
 
-The `JucePlugin_PreferredChannelConfig` preprocessor definition for plugins is difficult to specify
-in a portable way due to its use of curly braces, which may be misinterpreted in Linux/Mac builds
-using the Ninja/Makefile generators. It is recommended to avoid this option altogether, and to use
-the newer buses API to specify the desired plugin inputs and outputs.
+The `JucePlugin_PreferredChannelConfigurations` preprocessor definition for plugins is difficult to
+specify in a portable way due to its use of curly braces, which may be misinterpreted in Linux/Mac
+builds using the Ninja/Makefile generators. It is recommended to avoid this option altogether, and
+to use the newer buses API to specify the desired plugin inputs and outputs.
 
 ## API Reference
 
