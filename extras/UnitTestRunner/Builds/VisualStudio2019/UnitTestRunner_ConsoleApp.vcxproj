@@ -2585,6 +2585,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIResponderOutput.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISubscriptionManager.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\detail\juce_CIPropertyDataMessageChunker.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -3737,6 +3740,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIResponderDelegate.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIResponderOutput.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISubscription.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISubscriptionManager.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISupportedAndActive.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_midi_ci\detail\juce_CIMarshalling.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_midi_ci\detail\juce_CIMessageMeta.h"/>

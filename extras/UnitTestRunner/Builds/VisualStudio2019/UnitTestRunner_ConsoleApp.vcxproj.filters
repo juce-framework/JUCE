@@ -3271,6 +3271,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CIResponderOutput.cpp">
       <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISubscriptionManager.cpp">
+      <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_midi_ci\detail\juce_CIPropertyDataMessageChunker.cpp">
       <Filter>JUCE Modules\juce_midi_ci\detail</Filter>
     </ClCompile>
@@ -6523,6 +6526,9 @@
       <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISubscription.h">
+      <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISubscriptionManager.h">
       <Filter>JUCE Modules\juce_midi_ci\ci</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_midi_ci\ci\juce_CISupportedAndActive.h">
