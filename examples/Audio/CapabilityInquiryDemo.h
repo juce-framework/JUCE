@@ -3878,19 +3878,22 @@ private:
 
         // If we're already subscribed, end that subscription.
         // Otherwise, begin a new subscription to this resource.
-        const auto changedToken = [this, propName = propName, muid = muid, existingToken = existingToken]() -> std::optional<ci::SubscriptionKey>
+        const auto changedToken = [this,
+                                   propNameCopy = propName,
+                                   muidCopy = muid,
+                                   existingTokenCopy = existingToken]() -> std::optional<ci::SubscriptionKey>
         {
             // We're not subscribed, so begin a new subscription
-            if (! existingToken.has_value())
+            if (! existingTokenCopy.has_value())
             {
                 ci::PropertySubscriptionHeader header;
-                header.resource = propName;
+                header.resource = propNameCopy;
                 header.command = ci::PropertySubscriptionCommand::start;
-                return device->beginSubscription (muid, header);
+                return device->beginSubscription (muidCopy, header);
             }
 
-            device->endSubscription (*existingToken);
-            return existingToken;
+            device->endSubscription (*existingTokenCopy);
+            return existingTokenCopy;
         }();
 
         if (changedToken.has_value())
