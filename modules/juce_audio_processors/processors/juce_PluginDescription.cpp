@@ -28,12 +28,21 @@ namespace juce
 
 bool PluginDescription::isDuplicateOf (const PluginDescription& other) const noexcept
 {
-    const auto tie = [] (const PluginDescription& d)
+    if ((other.fileOrIdentifier == fileOrIdentifier) &&
+        (other.deprecatedUid == deprecatedUid))
     {
-        return std::tie (d.fileOrIdentifier, d.deprecatedUid, d.uniqueId);
-    };
+        // Only compare uniqueId field if it is set in both descriptions
+        if ((other.uniqueId > 0) && (uniqueId > 0))
+        {
+            return (other.uniqueId == uniqueId);
+        }
+        else
+        {
+            return true;
+        }
+    }
 
-    return tie (*this) == tie (other);
+    return false;
 }
 
 static String getPluginDescSuffix (const PluginDescription& d, int uid)
