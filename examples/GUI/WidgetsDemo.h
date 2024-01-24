@@ -690,7 +690,7 @@ struct MenuPage final : public Component
     {
         void drawPopupMenuColumnSeparatorWithOptions (Graphics& g,
                                                       const Rectangle<int>& bounds,
-                                                      const PopupMenu::Options& opt)
+                                                      const PopupMenu::Options& opt) override
         {
             if (auto* target = opt.getTargetComponent())
             {
@@ -708,7 +708,7 @@ struct MenuPage final : public Component
             }
         }
 
-        void drawPopupMenuBackgroundWithOptions (Graphics& g, int, int, const PopupMenu::Options& opt)
+        void drawPopupMenuBackgroundWithOptions (Graphics& g, int, int, const PopupMenu::Options& opt) override
         {
             if (auto* target = opt.getTargetComponent())
             {
@@ -717,7 +717,7 @@ struct MenuPage final : public Component
         }
 
         // Return the amount of space that should be left between popup menu columns.
-        int getPopupMenuColumnSeparatorWidthWithOptions (const PopupMenu::Options&)
+        int getPopupMenuColumnSeparatorWidthWithOptions (const PopupMenu::Options&) override
         {
             return 10;
         }

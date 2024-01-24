@@ -168,13 +168,13 @@ private:
         {
         }
 
-        void setState (bool newState)
+        void setState (bool newState) override
         {
             document.perform (new TreeviewRootChangeAction (component, *document.getComponentLayout(), newState),
                               "Change TreeView root item");
         }
 
-        bool getState() const
+        bool getState() const override
         {
             return component->isRootItemVisible();
         }
@@ -190,7 +190,7 @@ private:
                 oldState = comp->isRootItemVisible();
             }
 
-            bool perform()
+            bool perform() override
             {
                 showCorrectTab();
                 getComponent()->setRootItemVisible (newState);
@@ -198,7 +198,7 @@ private:
                 return true;
             }
 
-            bool undo()
+            bool undo() override
             {
                 showCorrectTab();
                 getComponent()->setRootItemVisible (oldState);
@@ -221,13 +221,13 @@ private:
             choices.add ("Items closed by default");
         }
 
-        void setIndex (int newIndex)
+        void setIndex (int newIndex) override
         {
             document.perform (new TreeviewOpennessChangeAction (component, *document.getComponentLayout(), newIndex == 0),
                               "Change TreeView openness");
         }
 
-        int getIndex() const
+        int getIndex() const override
         {
             return component->areItemsOpenByDefault() ? 0 : 1;
         }
@@ -243,7 +243,7 @@ private:
                 oldState = comp->areItemsOpenByDefault();
             }
 
-            bool perform()
+            bool perform() override
             {
                 showCorrectTab();
                 getComponent()->setDefaultOpenness (newState);
@@ -251,7 +251,7 @@ private:
                 return true;
             }
 
-            bool undo()
+            bool undo() override
             {
                 showCorrectTab();
                 getComponent()->setDefaultOpenness (oldState);

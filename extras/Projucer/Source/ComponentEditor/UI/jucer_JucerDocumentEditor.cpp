@@ -294,8 +294,8 @@ private:
             choices.add ("Keep component size fixed");
         }
 
-        void setIndex (int newIndex)        { document.setFixedSize (newIndex != 0); }
-        int getIndex() const                { return document.isFixedSize() ? 1 : 0; }
+        void setIndex (int newIndex) override        { document.setFixedSize (newIndex != 0); }
+        int getIndex() const override                { return document.isFixedSize() ? 1 : 0; }
     };
 
     //==============================================================================

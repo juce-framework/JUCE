@@ -41,17 +41,17 @@ public:
     {
     }
 
-    ~ComponentLayoutPanel()
+    ~ComponentLayoutPanel() override
     {
         deleteAllChildren();
     }
 
-    void updatePropertiesList()
+    void updatePropertiesList() override
     {
         ((LayoutPropsPanel*) propsPanel)->updateList();
     }
 
-    Rectangle<int> getComponentArea() const
+    Rectangle<int> getComponentArea() const override
     {
         return ((ComponentLayoutEditor*) editor)->getComponentArea();
     }

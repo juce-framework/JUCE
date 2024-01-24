@@ -670,7 +670,7 @@ public:
         : UnitTest ("OSCInputStream class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("reading OSC addresses");
         {

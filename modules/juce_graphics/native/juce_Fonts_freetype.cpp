@@ -335,7 +335,7 @@ public:
                             L' ');
     }
 
-    bool loadGlyphIfPossible (const juce_wchar character)
+    bool loadGlyphIfPossible (const juce_wchar character) override
     {
         if (faceWrapper != nullptr)
         {

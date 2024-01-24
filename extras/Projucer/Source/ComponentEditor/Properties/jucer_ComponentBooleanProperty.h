@@ -44,12 +44,12 @@ public:
         document.addChangeListener (this);
     }
 
-    ~ComponentBooleanProperty()
+    ~ComponentBooleanProperty() override
     {
         document.removeChangeListener (this);
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }

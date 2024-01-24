@@ -979,7 +979,7 @@ public:
        #endif
     }
 
-    ~ALSAAudioIODeviceType()
+    ~ALSAAudioIODeviceType() override
     {
        #if ! JUCE_ALSA_LOGGING
         snd_lib_error_set_handler (nullptr);
@@ -989,7 +989,7 @@ public:
     }
 
     //==============================================================================
-    void scanForDevices()
+    void scanForDevices() override
     {
         if (hasScanned)
             return;
@@ -1011,14 +1011,14 @@ public:
         outputNames.appendNumbersToDuplicates (false, true);
     }
 
-    StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         return wantInputNames ? inputNames : outputNames;
     }
 
-    int getDefaultDeviceIndex (bool forInput) const
+    int getDefaultDeviceIndex (bool forInput) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1026,9 +1026,9 @@ public:
         return idx >= 0 ? idx : 0;
     }
 
-    bool hasSeparateInputsAndOutputs() const    { return true; }
+    bool hasSeparateInputsAndOutputs() const override { return true; }
 
-    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1040,7 +1040,7 @@ public:
     }
 
     AudioIODevice* createDevice (const String& outputDeviceName,
-                                 const String& inputDeviceName)
+                                 const String& inputDeviceName) override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 

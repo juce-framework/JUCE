@@ -83,7 +83,7 @@ public:
         : UnitTest ("OSCTimeTag class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Basics");
 

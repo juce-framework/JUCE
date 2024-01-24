@@ -158,12 +158,12 @@ private:
         {
         }
 
-        void buttonClicked()
+        void buttonClicked() override
         {
             element->convertToPath();
         }
 
-        String getButtonText() const
+        String getButtonText() const override
         {
             return "convert to a path";
         }

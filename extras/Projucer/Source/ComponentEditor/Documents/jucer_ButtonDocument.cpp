@@ -233,23 +233,23 @@ public:
         document.addChangeListener (this);
     }
 
-    ~ButtonStatePaintEnabledProperty()
+    ~ButtonStatePaintEnabledProperty() override
     {
         document.removeChangeListener (this);
     }
 
-    void setState (bool newState)
+    void setState (bool newState) override
     {
         document.setStatePaintRoutineEnabled (stateMethod, newState);
     }
 
-    bool getState() const
+    bool getState() const override
     {
         return document.isStatePaintRoutineEnabled (stateMethod);
     }
 
 private:
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }

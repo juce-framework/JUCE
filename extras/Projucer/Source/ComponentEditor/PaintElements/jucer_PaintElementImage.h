@@ -58,8 +58,8 @@ public:
     public:
         SetResourceAction (PaintElementImage* const, const String&);
 
-        bool perform();
-        bool undo();
+        bool perform() override;
+        bool undo() override;
 
     private:
         String newResource, oldResource;
@@ -75,8 +75,8 @@ public:
     public:
         SetOpacityAction (PaintElementImage* const, double);
 
-        bool perform();
-        bool undo();
+        bool perform() override;
+        bool undo() override;
 
     private:
         double newOpacity, oldOpacity;
@@ -96,8 +96,8 @@ public:
     public:
         SetStretchModeAction (PaintElementImage* const, StretchMode);
 
-        bool perform();
-        bool undo();
+        bool perform() override;
+        bool undo() override;
 
     private:
         StretchMode newValue, oldValue;
@@ -124,8 +124,8 @@ private:
     public:
         ImageElementResourceProperty (PaintElementImage* const);
 
-        void setResource (const String&);
-        String getResource() const;
+        void setResource (const String&) override;
+        String getResource() const override;
     };
 
     //==============================================================================
@@ -134,8 +134,8 @@ private:
     public:
         OpacityProperty (PaintElementImage* const);
 
-        void setValue (double);
-        double getValue() const;
+        void setValue (double) override;
+        double getValue() const override;
 
         ElementListener<PaintElementImage> listener;
     };
@@ -145,8 +145,8 @@ private:
     public:
         StretchModeProperty (PaintElementImage* const);
 
-        void setIndex (int);
-        int getIndex() const;
+        void setIndex (int) override;
+        int getIndex() const override;
 
         ElementListener<PaintElementImage> listener;
     };
@@ -156,8 +156,8 @@ private:
     public:
         ResetSizeProperty (PaintElementImage* const);
 
-        void buttonClicked();
-        String getButtonText() const;
+        void buttonClicked() override;
+        String getButtonText() const override;
 
     private:
         PaintElementImage* const element;

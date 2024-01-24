@@ -175,7 +175,7 @@ public:
         }
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }
@@ -392,7 +392,7 @@ public:
         });
     }
 
-    void resized()
+    void resized() override
     {
         const Rectangle<int> r (getLookAndFeel().getPropertyComponentContentPosition (*this));
 
@@ -402,7 +402,7 @@ public:
         textEditor->setBounds (r.getX(), r.getY(), button.getX() - r.getX(), r.getHeight());
     }
 
-    void refresh()
+    void refresh() override
     {
         textEditor->setText (getText(), dontSendNotification);
     }

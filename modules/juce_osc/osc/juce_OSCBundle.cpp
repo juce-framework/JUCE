@@ -119,7 +119,7 @@ public:
         : UnitTest ("OSCBundle class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Construction");
         {
@@ -224,7 +224,7 @@ public:
         : UnitTest ("OSCBundle::Element class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Construction from OSCMessage");
         {

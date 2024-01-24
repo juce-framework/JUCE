@@ -63,7 +63,7 @@ public:
     virtual String getTypefaceName() const = 0;
 
     //==============================================================================
-    void setIndex (int newIndex)
+    void setIndex (int newIndex) override
     {
         String type (choices [newIndex]);
 
@@ -74,7 +74,7 @@ public:
             setTypefaceName (type);
     }
 
-    int getIndex() const
+    int getIndex() const override
     {
         return choices.indexOf (getTypefaceName());
     }

@@ -179,12 +179,12 @@ public:
         {
         }
 
-        void setResource (const String& newName)
+        void setResource (const String& newName) override
         {
             setImageResource (layout, element, role, newName, true);
         }
 
-        String getResource() const
+        String getResource() const override
         {
             return getImageResource (element, role);
         }
@@ -314,12 +314,12 @@ public:
         {
         }
 
-        void setState (bool newState)
+        void setState (bool newState) override
         {
             setImageKeepProportions (layout, component, newState, true);
         }
 
-        bool getState() const
+        bool getState() const override
         {
             return doesImageKeepProportions (component);
         }

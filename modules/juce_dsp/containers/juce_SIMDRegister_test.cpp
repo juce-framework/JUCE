@@ -845,7 +845,7 @@ public:
         TheTest::run (*this, random, Tag<int64_t>{});
     }
 
-    void runTest()
+    void runTest() override
     {
         runTestForAllTypes ("InitializationTest", InitializationTest{});
 

@@ -78,7 +78,7 @@ public:
         }
     }
 
-    int getSizeInUnits()    { return 2; }
+    int getSizeInUnits() override    { return 2; }
 
 protected:
     PaintRoutine& routine;

@@ -113,7 +113,7 @@ private:
     {
         PIPCreatorLookAndFeel()    {}
 
-        Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component)
+        Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component) override
         {
             auto textW = jmin (200, component.getWidth() / 3);
             return { textW, 0, component.getWidth() - textW, component.getHeight() - 1 };

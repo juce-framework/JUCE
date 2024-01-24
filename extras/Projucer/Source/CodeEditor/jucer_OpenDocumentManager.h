@@ -138,7 +138,7 @@ class RecentDocumentList final : private OpenDocumentManager::DocumentCloseListe
 {
 public:
     RecentDocumentList();
-    ~RecentDocumentList();
+    ~RecentDocumentList() override;
 
     void clear();
 
@@ -160,7 +160,7 @@ public:
     std::unique_ptr<XmlElement> createXML() const;
 
 private:
-    bool documentAboutToClose (OpenDocumentManager::Document*);
+    bool documentAboutToClose (OpenDocumentManager::Document*) override;
 
     Array<OpenDocumentManager::Document*> previousDocs, nextDocs;
 };

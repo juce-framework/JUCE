@@ -318,7 +318,7 @@ class TableListBox::Header final : public TableHeaderComponent
 public:
     Header (TableListBox& tlb)  : owner (tlb) {}
 
-    void addMenuItems (PopupMenu& menu, int columnIdClicked)
+    void addMenuItems (PopupMenu& menu, int columnIdClicked) override
     {
         if (owner.isAutoSizeMenuOptionShown())
         {
@@ -330,7 +330,7 @@ public:
         TableHeaderComponent::addMenuItems (menu, columnIdClicked);
     }
 
-    void reactToMenuItem (int menuReturnId, int columnIdClicked)
+    void reactToMenuItem (int menuReturnId, int columnIdClicked) override
     {
         switch (menuReturnId)
         {

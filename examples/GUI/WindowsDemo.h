@@ -57,7 +57,7 @@ public:
         : DocumentWindow (name, backgroundColour, buttonsNeeded)
     {}
 
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         delete this;
     }
@@ -81,12 +81,12 @@ public:
         setContentOwned (&selector, false);
     }
 
-    ~ColourSelectorWindow()
+    ~ColourSelectorWindow() override
     {
         selector.removeChangeListener (this);
     }
 
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         delete this;
     }
@@ -96,7 +96,7 @@ private:
                              | ColourSelector::showSliders
                              | ColourSelector::showColourspace };
 
-    void changeListenerCallback (ChangeBroadcaster* source)
+    void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (source == &selector)
             setBackgroundColour (selector.getCurrentColour());

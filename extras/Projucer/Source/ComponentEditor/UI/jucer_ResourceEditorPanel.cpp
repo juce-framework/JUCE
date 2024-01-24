@@ -49,7 +49,7 @@ public:
         reloadButton.setVisible (document.getResources() [row] != nullptr);
     }
 
-    void resized()
+    void resized() override
     {
         reloadButton.setBoundsInset (BorderSize<int> (2));
     }

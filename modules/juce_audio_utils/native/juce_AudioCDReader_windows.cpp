@@ -324,9 +324,9 @@ void findCDDevices (Array<CDDeviceDescription>& list)
 
             if (h != INVALID_HANDLE_VALUE)
             {
-                char buffer[100] = { 0 };
+                char buffer[100]{};
 
-                SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER p = { 0 };
+                SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER p{};
                 p.spt.Length             = sizeof (SCSI_PASS_THROUGH);
                 p.spt.CdbLength          = 6;
                 p.spt.SenseInfoLength    = 24;
@@ -348,7 +348,7 @@ void findCDDevices (Array<CDDeviceDescription>& list)
                     dev.scsiDriveLetter = driveLetter;
                     dev.createDescription (buffer);
 
-                    SCSI_ADDRESS scsiAddr = { 0 };
+                    SCSI_ADDRESS scsiAddr{};
                     scsiAddr.Length = sizeof (scsiAddr);
 
                     if (DeviceIoControl (h, IOCTL_SCSI_GET_ADDRESS,
@@ -371,7 +371,7 @@ void findCDDevices (Array<CDDeviceDescription>& list)
 DWORD performScsiPassThroughCommand (SRB_ExecSCSICmd* const srb, const char driveLetter,
                                      HANDLE& deviceHandle, const bool retryOnFailure)
 {
-    SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER s = { 0 };
+    SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER s{};
     s.spt.Length = sizeof (SCSI_PASS_THROUGH);
     s.spt.CdbLength = srb->SRB_CDBLen;
 
@@ -798,7 +798,7 @@ int CDController::getLastIndex()
 //==============================================================================
 bool CDDeviceHandle::readTOC (TOC* lpToc)
 {
-    SRB_ExecSCSICmd s = { 0 };
+    SRB_ExecSCSICmd s{};
     s.SRB_Cmd = SC_EXEC_SCSI_CMD;
     s.SRB_HaID = info.ha;
     s.SRB_Target = info.tgt;
@@ -872,7 +872,7 @@ void CDDeviceHandle::openDrawer (bool shouldBeOpen)
         }
     }
 
-    SRB_ExecSCSICmd s = { 0 };
+    SRB_ExecSCSICmd s{};
     s.SRB_Cmd = SC_EXEC_SCSI_CMD;
     s.SRB_HaID = info.ha;
     s.SRB_Target = info.tgt;
@@ -1134,7 +1134,7 @@ bool AudioCDReader::readSamples (int* const* destSamples, int numDestChannels, i
 bool AudioCDReader::isCDStillPresent() const
 {
     using namespace CDReaderHelpers;
-    TOC toc = { 0 };
+    TOC toc{};
     return static_cast<CDDeviceWrapper*> (handle)->deviceHandle.readTOC (&toc);
 }
 
@@ -1144,7 +1144,7 @@ void AudioCDReader::refreshTrackLengths()
     trackStartSamples.clear();
     zeromem (audioTracks, sizeof (audioTracks));
 
-    TOC toc = { 0 };
+    TOC toc{};
 
     if (static_cast<CDDeviceWrapper*> (handle)->deviceHandle.readTOC (&toc))
     {

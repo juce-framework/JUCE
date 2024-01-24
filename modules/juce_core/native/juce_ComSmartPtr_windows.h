@@ -167,13 +167,13 @@ public:
     ComBaseClassHelperBase (unsigned int initialRefCount)  : refCount (initialRefCount) {}
     virtual ~ComBaseClassHelperBase() = default;
 
-    ULONG STDMETHODCALLTYPE AddRef()    { return ++refCount; }
-    ULONG STDMETHODCALLTYPE Release()   { auto r = --refCount; if (r == 0) delete this; return r; }
+    ULONG STDMETHODCALLTYPE AddRef()    override { return ++refCount; }
+    ULONG STDMETHODCALLTYPE Release()   override { auto r = --refCount; if (r == 0) delete this; return r; }
 
 protected:
     ULONG refCount;
 
-    JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
+    JUCE_COMRESULT QueryInterface (REFIID refId, void** result) override
     {
         if (refId == __uuidof (IUnknown))
             return castToType<First> (result);
@@ -203,7 +203,7 @@ public:
     explicit ComBaseClassHelper (unsigned int initialRefCount = 1)
         : ComBaseClassHelperBase<ComClasses...> (initialRefCount) {}
 
-    JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
+    JUCE_COMRESULT QueryInterface (REFIID refId, void** result) override
     {
         const std::tuple<IID, void*> bases[]
         {

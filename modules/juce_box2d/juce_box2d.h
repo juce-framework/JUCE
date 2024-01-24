@@ -61,7 +61,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                      "-Wmaybe-uninitialized",
                                      "-Wshadow-field",
                                      "-Wsign-conversion",
-                                     "-Wzero-as-null-pointer-constant")
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wsuggest-override")
 
 #include <climits>
 #include <cfloat>

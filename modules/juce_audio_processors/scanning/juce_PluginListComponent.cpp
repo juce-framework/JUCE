@@ -613,7 +613,7 @@ private:
     {
         ScanJob (Scanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
 
-        JobStatus runJob()
+        JobStatus runJob() override
         {
             while (scanner.doNextScan() && ! shouldExit())
             {}

@@ -131,7 +131,7 @@ public:
         virtual void canCreateMessageBox (CreatorFunction) = 0;
     };
 
-    void handleAsyncUpdate()
+    void handleAsyncUpdate() override
     {
         schedule();
     }

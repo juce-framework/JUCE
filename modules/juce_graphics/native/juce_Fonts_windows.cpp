@@ -334,7 +334,7 @@ public:
         loadFont();
     }
 
-    ~WindowsTypeface()
+    ~WindowsTypeface() override
     {
         SelectObject (dc, previousFontH); // Replacing the previous font before deleting the DC avoids a warning in BoundsChecker
         DeleteDC (dc);
@@ -346,11 +346,11 @@ public:
             RemoveFontMemResourceEx (memoryFont);
     }
 
-    float getAscent() const                 { return ascent; }
-    float getDescent() const                { return 1.0f - ascent; }
-    float getHeightToPointsFactor() const   { return heightToPointsFactor; }
+    float getAscent() const                 override { return ascent; }
+    float getDescent() const                override { return 1.0f - ascent; }
+    float getHeightToPointsFactor() const   override { return heightToPointsFactor; }
 
-    float getStringWidth (const String& text)
+    float getStringWidth (const String& text) override
     {
         auto utf16 = text.toUTF16();
         auto numChars = utf16.length();
@@ -367,7 +367,7 @@ public:
         return x;
     }
 
-    void getGlyphPositions (const String& text, Array<int>& resultGlyphs, Array<float>& xOffsets)
+    void getGlyphPositions (const String& text, Array<int>& resultGlyphs, Array<float>& xOffsets) override
     {
         auto utf16 = text.toUTF16();
         auto numChars = utf16.length();
@@ -391,7 +391,7 @@ public:
         xOffsets.add (x);
     }
 
-    bool getOutlineForGlyph (int glyphNumber, Path& glyphPath)
+    bool getOutlineForGlyph (int glyphNumber, Path& glyphPath) override
     {
         if (glyphNumber < 0)
             glyphNumber = defaultGlyph;

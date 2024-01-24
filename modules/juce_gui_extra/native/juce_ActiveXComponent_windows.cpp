@@ -37,23 +37,23 @@ namespace ActiveXHelpers
     //==============================================================================
     struct JuceIStorage final : public ComBaseClassHelper<IStorage>
     {
-        JuceIStorage() {}
+        JuceIStorage() = default;
 
-        JUCE_COMRESULT CreateStream (const WCHAR*, DWORD, DWORD, DWORD, IStream**)           { return E_NOTIMPL; }
-        JUCE_COMRESULT OpenStream (const WCHAR*, void*, DWORD, DWORD, IStream**)             { return E_NOTIMPL; }
-        JUCE_COMRESULT CreateStorage (const WCHAR*, DWORD, DWORD, DWORD, IStorage**)         { return E_NOTIMPL; }
-        JUCE_COMRESULT OpenStorage (const WCHAR*, IStorage*, DWORD, SNB, DWORD, IStorage**)  { return E_NOTIMPL; }
-        JUCE_COMRESULT CopyTo (DWORD, IID const*, SNB, IStorage*)                            { return E_NOTIMPL; }
-        JUCE_COMRESULT MoveElementTo (const OLECHAR*,IStorage*, const OLECHAR*, DWORD)       { return E_NOTIMPL; }
-        JUCE_COMRESULT Commit (DWORD)                                                        { return E_NOTIMPL; }
-        JUCE_COMRESULT Revert()                                                              { return E_NOTIMPL; }
-        JUCE_COMRESULT EnumElements (DWORD, void*, DWORD, IEnumSTATSTG**)                    { return E_NOTIMPL; }
-        JUCE_COMRESULT DestroyElement (const OLECHAR*)                                       { return E_NOTIMPL; }
-        JUCE_COMRESULT RenameElement (const WCHAR*, const WCHAR*)                            { return E_NOTIMPL; }
-        JUCE_COMRESULT SetElementTimes (const WCHAR*, FILETIME const*, FILETIME const*, FILETIME const*)    { return E_NOTIMPL; }
-        JUCE_COMRESULT SetClass (REFCLSID)                                                   { return S_OK; }
-        JUCE_COMRESULT SetStateBits (DWORD, DWORD)                                           { return E_NOTIMPL; }
-        JUCE_COMRESULT Stat (STATSTG*, DWORD)                                                { return E_NOTIMPL; }
+        JUCE_COMRESULT CreateStream (const WCHAR*, DWORD, DWORD, DWORD, IStream**)                        override { return E_NOTIMPL; }
+        JUCE_COMRESULT OpenStream (const WCHAR*, void*, DWORD, DWORD, IStream**)                          override { return E_NOTIMPL; }
+        JUCE_COMRESULT CreateStorage (const WCHAR*, DWORD, DWORD, DWORD, IStorage**)                      override { return E_NOTIMPL; }
+        JUCE_COMRESULT OpenStorage (const WCHAR*, IStorage*, DWORD, SNB, DWORD, IStorage**)               override { return E_NOTIMPL; }
+        JUCE_COMRESULT CopyTo (DWORD, IID const*, SNB, IStorage*)                                         override { return E_NOTIMPL; }
+        JUCE_COMRESULT MoveElementTo (const OLECHAR*,IStorage*, const OLECHAR*, DWORD)                    override { return E_NOTIMPL; }
+        JUCE_COMRESULT Commit (DWORD)                                                                     override { return E_NOTIMPL; }
+        JUCE_COMRESULT Revert()                                                                           override { return E_NOTIMPL; }
+        JUCE_COMRESULT EnumElements (DWORD, void*, DWORD, IEnumSTATSTG**)                                 override { return E_NOTIMPL; }
+        JUCE_COMRESULT DestroyElement (const OLECHAR*)                                                    override { return E_NOTIMPL; }
+        JUCE_COMRESULT RenameElement (const WCHAR*, const WCHAR*)                                         override { return E_NOTIMPL; }
+        JUCE_COMRESULT SetElementTimes (const WCHAR*, FILETIME const*, FILETIME const*, FILETIME const*)  override { return E_NOTIMPL; }
+        JUCE_COMRESULT SetClass (REFCLSID)                                                                override { return S_OK; }
+        JUCE_COMRESULT SetStateBits (DWORD, DWORD)                                                        override { return E_NOTIMPL; }
+        JUCE_COMRESULT Stat (STATSTG*, DWORD)                                                             override { return E_NOTIMPL; }
     };
 
     //==============================================================================
@@ -61,18 +61,18 @@ namespace ActiveXHelpers
     {
         JuceOleInPlaceFrame (HWND hwnd)   : window (hwnd) {}
 
-        JUCE_COMRESULT GetWindow (HWND* lphwnd)                                 { *lphwnd = window; return S_OK; }
-        JUCE_COMRESULT ContextSensitiveHelp (BOOL)                              { return E_NOTIMPL; }
-        JUCE_COMRESULT GetBorder (LPRECT)                                       { return E_NOTIMPL; }
-        JUCE_COMRESULT RequestBorderSpace (LPCBORDERWIDTHS)                     { return E_NOTIMPL; }
-        JUCE_COMRESULT SetBorderSpace (LPCBORDERWIDTHS)                         { return E_NOTIMPL; }
-        JUCE_COMRESULT SetActiveObject (IOleInPlaceActiveObject* a, LPCOLESTR)  { activeObject = a; return S_OK; }
-        JUCE_COMRESULT InsertMenus (HMENU, LPOLEMENUGROUPWIDTHS)                { return E_NOTIMPL; }
-        JUCE_COMRESULT SetMenu (HMENU, HOLEMENU, HWND)                          { return S_OK; }
-        JUCE_COMRESULT RemoveMenus (HMENU)                                      { return E_NOTIMPL; }
-        JUCE_COMRESULT SetStatusText (LPCOLESTR)                                { return S_OK; }
-        JUCE_COMRESULT EnableModeless (BOOL)                                    { return S_OK; }
-        JUCE_COMRESULT TranslateAccelerator (LPMSG, WORD)                       { return E_NOTIMPL; }
+        JUCE_COMRESULT GetWindow (HWND* lphwnd)                                 override { *lphwnd = window; return S_OK; }
+        JUCE_COMRESULT ContextSensitiveHelp (BOOL)                              override { return E_NOTIMPL; }
+        JUCE_COMRESULT GetBorder (LPRECT)                                       override { return E_NOTIMPL; }
+        JUCE_COMRESULT RequestBorderSpace (LPCBORDERWIDTHS)                     override { return E_NOTIMPL; }
+        JUCE_COMRESULT SetBorderSpace (LPCBORDERWIDTHS)                         override { return E_NOTIMPL; }
+        JUCE_COMRESULT SetActiveObject (IOleInPlaceActiveObject* a, LPCOLESTR)  override { activeObject = a; return S_OK; }
+        JUCE_COMRESULT InsertMenus (HMENU, LPOLEMENUGROUPWIDTHS)                override { return E_NOTIMPL; }
+        JUCE_COMRESULT SetMenu (HMENU, HOLEMENU, HWND)                          override { return S_OK; }
+        JUCE_COMRESULT RemoveMenus (HMENU)                                      override { return E_NOTIMPL; }
+        JUCE_COMRESULT SetStatusText (LPCOLESTR)                                override { return S_OK; }
+        JUCE_COMRESULT EnableModeless (BOOL)                                    override { return S_OK; }
+        JUCE_COMRESULT TranslateAccelerator (LPMSG, WORD)                       override { return E_NOTIMPL; }
 
         HRESULT OfferKeyTranslation (LPMSG lpmsg)
         {
@@ -94,18 +94,18 @@ namespace ActiveXHelpers
               frame (new JuceOleInPlaceFrame (window))
         {}
 
-        ~JuceIOleInPlaceSite()
+        ~JuceIOleInPlaceSite() override
         {
             frame->Release();
         }
 
-        JUCE_COMRESULT GetWindow (HWND* lphwnd)      { *lphwnd = window; return S_OK; }
-        JUCE_COMRESULT ContextSensitiveHelp (BOOL)   { return E_NOTIMPL; }
-        JUCE_COMRESULT CanInPlaceActivate()          { return S_OK; }
-        JUCE_COMRESULT OnInPlaceActivate()           { return S_OK; }
-        JUCE_COMRESULT OnUIActivate()                { return S_OK; }
+        JUCE_COMRESULT GetWindow (HWND* lphwnd)      override { *lphwnd = window; return S_OK; }
+        JUCE_COMRESULT ContextSensitiveHelp (BOOL)   override { return E_NOTIMPL; }
+        JUCE_COMRESULT CanInPlaceActivate()          override { return S_OK; }
+        JUCE_COMRESULT OnInPlaceActivate()           override { return S_OK; }
+        JUCE_COMRESULT OnUIActivate()                override { return S_OK; }
 
-        JUCE_COMRESULT GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo)
+        JUCE_COMRESULT GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo) override
         {
             /* Note: If you call AddRef on the frame here, then some types of object (e.g. web browser control) cause leaks..
                If you don't call AddRef then others crash (e.g. QuickTime).. Bit of a catch-22, so letting it leak is probably preferable.
@@ -119,12 +119,12 @@ namespace ActiveXHelpers
             return S_OK;
         }
 
-        JUCE_COMRESULT Scroll (SIZE)                 { return E_NOTIMPL; }
-        JUCE_COMRESULT OnUIDeactivate (BOOL)         { return S_OK; }
-        JUCE_COMRESULT OnInPlaceDeactivate()         { return S_OK; }
-        JUCE_COMRESULT DiscardUndoState()            { return E_NOTIMPL; }
-        JUCE_COMRESULT DeactivateAndUndo()           { return E_NOTIMPL; }
-        JUCE_COMRESULT OnPosRectChange (LPCRECT)     { return S_OK; }
+        JUCE_COMRESULT Scroll (SIZE)                 override { return E_NOTIMPL; }
+        JUCE_COMRESULT OnUIDeactivate (BOOL)         override { return S_OK; }
+        JUCE_COMRESULT OnInPlaceDeactivate()         override { return S_OK; }
+        JUCE_COMRESULT DiscardUndoState()            override { return E_NOTIMPL; }
+        JUCE_COMRESULT DeactivateAndUndo()           override { return E_NOTIMPL; }
+        JUCE_COMRESULT OnPosRectChange (LPCRECT)     override { return S_OK; }
 
         LRESULT offerEventToActiveXControl (::MSG& msg)
         {
@@ -144,7 +144,7 @@ namespace ActiveXHelpers
         JuceIOleClientSite (HWND window)  : inplaceSite (new JuceIOleInPlaceSite (window))
         {}
 
-        ~JuceIOleClientSite()
+        ~JuceIOleClientSite() override
         {
             inplaceSite->Release();
 
@@ -155,7 +155,7 @@ namespace ActiveXHelpers
             }
         }
 
-        JUCE_COMRESULT QueryInterface (REFIID type, void** result)
+        JUCE_COMRESULT QueryInterface (REFIID type, void** result) override
         {
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
@@ -177,12 +177,12 @@ namespace ActiveXHelpers
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
-        JUCE_COMRESULT SaveObject()                                  { return E_NOTIMPL; }
-        JUCE_COMRESULT GetMoniker (DWORD, DWORD, IMoniker**)         { return E_NOTIMPL; }
-        JUCE_COMRESULT GetContainer (LPOLECONTAINER* ppContainer)    { *ppContainer = nullptr; return E_NOINTERFACE; }
-        JUCE_COMRESULT ShowObject()                                  { return S_OK; }
-        JUCE_COMRESULT OnShowWindow (BOOL)                           { return E_NOTIMPL; }
-        JUCE_COMRESULT RequestNewObjectLayout()                      { return E_NOTIMPL; }
+        JUCE_COMRESULT SaveObject()                                  override { return E_NOTIMPL; }
+        JUCE_COMRESULT GetMoniker (DWORD, DWORD, IMoniker**)         override { return E_NOTIMPL; }
+        JUCE_COMRESULT GetContainer (LPOLECONTAINER* ppContainer)    override { *ppContainer = nullptr; return E_NOINTERFACE; }
+        JUCE_COMRESULT ShowObject()                                  override { return S_OK; }
+        JUCE_COMRESULT OnShowWindow (BOOL)                           override { return E_NOTIMPL; }
+        JUCE_COMRESULT RequestNewObjectLayout()                      override { return E_NOTIMPL; }
 
         LRESULT offerEventToActiveXControl (::MSG& msg)
         {

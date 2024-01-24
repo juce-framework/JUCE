@@ -670,7 +670,7 @@ public:
             : originalWorker (std::move (workerToUse))
         {}
 
-        void operator() (OpenGLContext& calleeContext)
+        void operator() (OpenGLContext& calleeContext) override
         {
             if (originalWorker != nullptr)
                 (*originalWorker) (calleeContext);
