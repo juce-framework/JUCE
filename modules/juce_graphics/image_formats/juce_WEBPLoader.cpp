@@ -22,7 +22,7 @@
 
   ==============================================================================
 */
-#include <JuceHeader.h>
+
 namespace juce
 {
 
@@ -89,16 +89,7 @@ Image WEBPImageFormat::decodeImage (InputStream& in)
     out->flush();
 
     // use dwebp to convert to png file
-    ChildProcess childProcess;
-    StringArray args;
-    args.add("dwebp");
-    args.add(webpFile.getFullPathName());
-    args.add("-mt"); // multithreaded
-    args.add("-o");
-    args.add(pngFile.getFullPathName());
-    childProcess.start(args);
-    auto result = childProcess.readAllProcessOutput();
-    DBG(result);
+    convertToPNG(webpFile, pngFile);
 
     // load png file
     Image image = PNGImageFormat::loadFrom(pngFile);
@@ -127,21 +118,11 @@ bool WEBPImageFormat::writeImageToStream (const Image& sourceImage, OutputStream
     }
 
     // use cwebp to convert to webp file
-    ChildProcess childProcess;
-    StringArray args;
-    args.add("cwebp");
-    args.add("-lossless");
-    args.add("-mt"); // multithreaded
-    args.add(pngFile.getFullPathName());
-    args.add("-o");
-    args.add(webpFile.getFullPathName());
-    childProcess.start(args);
-    auto result = childProcess.readAllProcessOutput();
-    DBG(result);
-
-    if (!result.contains("Saving file "))
+    if(!convertFromPNG(pngFile, webpFile))
     {
         jassertfalse;
+        pngFile.deleteFile();
+        webpFile.deleteFile();
         return false;
     }
 
@@ -155,6 +136,97 @@ bool WEBPImageFormat::writeImageToStream (const Image& sourceImage, OutputStream
 
     // return successfulness 
     return bytesWritten > 0;
+}
+
+Image WEBPImageFormat::loadFrom(File& webpFile)
+{
+    // create temp files
+    auto pngFile = File::createTempFile(".png");
+
+    // use dwebp to convert to png file
+    WEBPImageFormat fmt;
+    fmt.convertToPNG(webpFile, pngFile);
+
+    // load png file
+    Image image = PNGImageFormat::loadFrom(pngFile);
+
+    // delete temp files
+    pngFile.deleteFile();
+
+    // return loaded image
+    return image;
+}
+
+bool juce::WEBPImageFormat::writeTo(const Image& sourceImage, File& webpFile)
+{
+    // create temp files
+    auto pngFile = File::createTempFile(".png");
+
+    // write to temp.png file
+    PNGImageFormat pngFmt;
+    auto out = pngFile.createOutputStream();
+    if (!pngFmt.writeImageToStream(sourceImage, *out))
+    {
+        jassertfalse;
+        pngFile.deleteFile();
+        return false;
+    }
+
+    // use cwebp to convert to webp file
+    WEBPImageFormat webpFmt;
+    bool success = webpFmt.convertFromPNG(pngFile, webpFile);
+
+    // delete temp file
+    pngFile.deleteFile();
+
+    // return successfulness 
+    return success;
+}
+
+bool WEBPImageFormat::convertToPNG(File webpFile, File pngFile)
+{
+    // use dwebp to convert to png file
+    ChildProcess childProcess;
+    StringArray args;
+
+    args.add("dwebp");
+    args.add(webpFile.getFullPathName());
+    args.add("-mt"); // multithreaded
+    args.add("-o");
+    args.add(pngFile.getFullPathName());
+
+    childProcess.start(args);
+
+    auto result = childProcess.readAllProcessOutput();
+    DBG(result);
+
+    return result.startsWith("Decoded ");
+}
+
+bool WEBPImageFormat::convertFromPNG(File pngFile, File webpFile)
+{
+    // use cwebp to convert to webp file
+    ChildProcess childProcess;
+    StringArray args;
+
+    args.add("cwebp");
+    args.add("-lossless");
+    args.add("-mt"); // multithreaded
+    args.add(pngFile.getFullPathName());
+    args.add("-o");
+    args.add(webpFile.getFullPathName());
+
+    childProcess.start(args);
+    auto result = childProcess.readAllProcessOutput();
+    DBG(result);
+
+    if (!result.contains("Saving file "))
+    {
+        jassertfalse;
+        return false;
+    }
+    else 
+        return true;
 }
 
 } // namespace juce
