@@ -220,4 +220,26 @@ public:
     bool writeImageToStream (const Image&, OutputStream&) override;
 };
 
+//==============================================================================
+/**
+    A subclass of ImageFileFormat for reading and writing WEBP files.
+    Currently just a wrapper for executing dwebp
+
+    @see ImageFileFormat, WEBPImageFormat
+*/
+class JUCE_API  WEBPImageFormat : public ImageFileFormat
+{
+public:
+    //==============================================================================
+    WEBPImageFormat();
+    ~WEBPImageFormat() override;
+
+    //==============================================================================
+    String getFormatName() override;
+    bool usesFileExtension(const File&) override;
+    bool canUnderstand(InputStream&) override;
+    Image decodeImage(InputStream&) override;
+    bool writeImageToStream(const Image&, OutputStream&) override;
+};
+
 } // namespace juce

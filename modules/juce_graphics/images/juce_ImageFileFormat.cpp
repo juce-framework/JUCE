@@ -40,14 +40,16 @@ private:
         formats[0] = &png;
         formats[1] = &jpg;
         formats[2] = &gif;
-        formats[3] = nullptr;
+        formats[3] = &webp;
+        formats[4] = nullptr;
     }
 
     PNGImageFormat  png;
     JPEGImageFormat jpg;
     GIFImageFormat  gif;
+    WEBPImageFormat webp;
 
-    ImageFileFormat* formats[4];
+    ImageFileFormat* formats[6];
 };
 
 ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)

@@ -125,6 +125,7 @@
 #include "image_formats/juce_GIFLoader.cpp"
 #include "image_formats/juce_JPEGLoader.cpp"
 #include "image_formats/juce_PNGLoader.cpp"
+#include "image_formats/juce_WEBPLoader.cpp"
 #include "fonts/juce_AttributedString.cpp"
 #include "fonts/juce_Typeface.cpp"
 #include "fonts/juce_CustomTypeface.cpp"
