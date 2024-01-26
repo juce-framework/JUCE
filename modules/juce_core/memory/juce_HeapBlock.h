@@ -294,6 +294,8 @@ public:
         data = nullptr;
     }
 
+#ifndef JUCE_NO_DEPRECATED_HEAPBLOCK_METHODS
+
     template <typename SizeType>
     [[deprecated]] void malloc(SizeType newNumElements, size_t elementSize = sizeof(ElementType)) {
         return jmalloc(newNumElements, elementSize);
@@ -325,6 +327,8 @@ public:
     [[deprecated]] void free() noexcept {
         jfree();
     }
+
+#endif
 
     /** Swaps this object's data with the data of another HeapBlock.
         The two objects simply exchange their data pointers.
