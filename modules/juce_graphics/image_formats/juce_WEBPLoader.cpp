@@ -33,6 +33,14 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wcomma",
     "-Wtautological-constant-out-of-range-compare",
     "-Wzero-as-null-pointer-constant")
 
+#if JUCE_WINDOWS
+#pragma warning( push )
+#pragma warning( disable : 4310 )
+#pragma warning( disable : 4127 )
+#pragma warning( disable : 4244 )
+#pragma warning( disable : 4005 )
+#endif
+
 #include "webplib/webp/decode.h"
 #include "webplib/dec/webp_dec.c"
 #include "webplib/dec/buffer_dec.c"
@@ -75,6 +83,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wcomma",
 #include "webplib/dsp/cpu.c"
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+#if JUCE_WINDOWS
+#pragma warning( pop )
+#endif
 
 #endif
 
