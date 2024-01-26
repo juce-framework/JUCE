@@ -22,6 +22,61 @@
 
   ==============================================================================
 */
+#if JUCE_INCLUDE_WEBPLIB_CODE
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wcomma",
+    "-Wfloat-equal",
+    "-Wimplicit-fallthrough",
+    "-Wmaybe-uninitialized",
+    "-Wnull-pointer-subtraction",
+    "-Wsign-conversion",
+    "-Wtautological-constant-out-of-range-compare",
+    "-Wzero-as-null-pointer-constant")
+
+#include "webplib/webp/decode.h"
+#include "webplib/dec/webp_dec.c"
+#include "webplib/dec/buffer_dec.c"
+#include "webplib/dec/vp8_dec.c"
+#include "webplib/dec/vp8l_dec.c" 
+#include "webplib/dec/io_dec.c"
+#include "webplib/utils/rescaler_utils.c"
+#include "webplib/utils/bit_reader_utils.c"
+#include "webplib/dsp/yuv.c"
+#include "webplib/dsp/upsampling.c"
+#include "webplib/dsp/dec.c"
+#include "webplib/dsp/dec_clip_tables.c"
+#include "webplib/dsp/rescaler.c"
+#include "webplib/dsp/alpha_processing.c"
+#include "webplib/utils/color_cache_utils.c"
+#include "webplib/utils/huffman_utils.c"
+#include "webplib/utils/thread_utils.c"
+#include "webplib/dec/tree_dec.c"
+#include "webplib/dec/quant_dec.c"
+#include "webplib/dec/frame_dec.c"
+#include "webplib/utils/random_utils.c"
+#include "webplib/dec/alpha_dec.c"
+#include "webplib/dsp/filters.c"
+#include "webplib/utils/utils.c"
+#include "webplib/dsp/lossless.c"
+#include "webplib/dsp/yuv_sse2.c"
+#include "webplib/dsp/yuv_sse41.c"
+#include "webplib/dsp/upsampling_sse2.c"
+#include "webplib/dsp/upsampling_sse41.c"
+#include "webplib/dsp/dec_sse2.c"
+#include "webplib/dsp/dec_sse41.c"
+#include "webplib/dsp/rescaler_sse2.c"
+#include "webplib/dsp/alpha_processing_sse2.c"
+#include "webplib/dsp/alpha_processing_sse41.c"
+#include "webplib/utils/quant_levels_dec_utils.c"
+#include "webplib/dsp/filters_sse2.c"
+#include "webplib/utils/palette.c"
+#include "webplib/dsp/lossless_sse2.c"
+#include "webplib/dsp/lossless_sse41.c"
+#include "webplib/dsp/cpu.c"
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+#endif
 
 namespace juce
 {
@@ -57,176 +112,72 @@ bool WEBPImageFormat::usesFileExtension (const File& f)  { return f.hasFileExten
 
 bool WEBPImageFormat::canUnderstand (InputStream& in)
 {
-    // write inputstream to temp file
-    auto tempFile = File::createTempFile(".webp");
-    auto out = tempFile.createOutputStream();
-    out->writeFromInputStream(in,-1);
-    out->flush();
+#if JUCE_INCLUDE_WEBPLIB_CODE
+    int bytes = 1024;
+    juce::MemoryBlock data(bytes);
+    bytes = in.read(data.getData(), bytes);
+    int width, height = 0;
+    
 
-    // now ask dwebp if the file can be decoded
-    ChildProcess childProcess;
-    StringArray args;
-    args.add("dwebp");
-    args.add(tempFile.getFullPathName());
-    childProcess.start(args);
-    auto result = childProcess.readAllProcessOutput();
-    DBG(result);
-
-    // delete temp file and return result
-    tempFile.deleteFile();
-    return result.contains("can be decoded");
+    bool canUnderstand = WebPGetInfo((uint8_t*)data.getData(), bytes, &width, &height);
+    return canUnderstand;
+#else
+    jassertfalse;
+    return false;
+#endif
 }
 
 Image WEBPImageFormat::decodeImage (InputStream& in)
 {
-    // create temp files
-    auto webpFile = File::createTempFile(".webp");
-    auto pngFile = File::createTempFile(".png");
+#if JUCE_INCLUDE_WEBPLIB_CODE
+    Image image;
 
-    // write inputstream to temp.webp file
-    auto out = webpFile.createOutputStream();
-    out->writeFromInputStream(in, -1);
-    out->flush();
+    WebPBitstreamFeatures features;
 
-    // use dwebp to convert to png file
-    convertToPNG(webpFile, pngFile);
+    // read whole file from input stream
+    size_t streamSize = in.getTotalLength();
+    size_t bytesRead = 0;
+    juce::MemoryBlock data(streamSize);
+    bytesRead = in.read(data.getData(), streamSize);
+    if (bytesRead != streamSize)
+    {
+        // did not ready expected amount of data
+        jassertfalse;
+        return image;
+    }
 
-    // load png file
-    Image image = PNGImageFormat::loadFrom(pngFile);
+    auto statusCode = WebPGetFeatures((uint8_t*)data.getData(), bytesRead, &features);
+    if (statusCode != VP8_STATUS_OK)
+    {
+        jassertfalse;
+        return image;
+    }
 
-    // delete temp files
-    webpFile.deleteFile();
-    pngFile.deleteFile();
-
-    // return loaded image
+    image = Image(features.has_alpha ? Image::ARGB : Image::RGB, features.width, features.height, true);
+    Image::BitmapData destData(image, Image::BitmapData::writeOnly);
+    uint8* p = destData.getPixelPointer(0, 0);
+    
+    if (features.has_alpha)
+        WebPDecodeBGRAInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride);
+    else WebPDecodeBGRInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride);
+        
     return image;
+#else
+    jassertfalse;
+    return false;
+#endif
 }
 
 bool WEBPImageFormat::writeImageToStream (const Image& sourceImage, OutputStream& destStream)
 {
-    // create temp files
-    auto webpFile = File::createTempFile(".webp");
-    auto pngFile = File::createTempFile(".png");
-
-    // write to temp.png file
-    PNGImageFormat pngFormat;
-    auto out = pngFile.createOutputStream();
-    if (!pngFormat.writeImageToStream(sourceImage, *out))
-    {
-        jassertfalse;
-        return false;
-    }
-
-    // use cwebp to convert to webp file
-    if(!convertFromPNG(pngFile, webpFile))
-    {
-        jassertfalse;
-        pngFile.deleteFile();
-        webpFile.deleteFile();
-        return false;
-    }
-
-    // write webp file to output stream
-    auto in = webpFile.createInputStream();
-    auto bytesWritten = destStream.writeFromInputStream(*in, -1);
-
-    // delete temp files
-    webpFile.deleteFile();
-    pngFile.deleteFile();
-
-    // return successfulness 
-    return bytesWritten > 0;
+    jassertfalse;
+    return false;
 }
 
-Image WEBPImageFormat::loadFrom(File& webpFile)
-{
-    // create temp files
-    auto pngFile = File::createTempFile(".png");
 
-    // use dwebp to convert to png file
-    WEBPImageFormat fmt;
-    fmt.convertToPNG(webpFile, pngFile);
 
-    // load png file
-    Image image = PNGImageFormat::loadFrom(pngFile);
 
-    // delete temp files
-    pngFile.deleteFile();
 
-    // return loaded image
-    return image;
-}
 
-bool juce::WEBPImageFormat::writeTo(const Image& sourceImage, File& webpFile)
-{
-    // create temp files
-    auto pngFile = File::createTempFile(".png");
-
-    // write to temp.png file
-    PNGImageFormat pngFmt;
-    auto out = pngFile.createOutputStream();
-    if (!pngFmt.writeImageToStream(sourceImage, *out))
-    {
-        jassertfalse;
-        pngFile.deleteFile();
-        return false;
-    }
-
-    // use cwebp to convert to webp file
-    WEBPImageFormat webpFmt;
-    bool success = webpFmt.convertFromPNG(pngFile, webpFile);
-
-    // delete temp file
-    pngFile.deleteFile();
-
-    // return successfulness 
-    return success;
-}
-
-bool WEBPImageFormat::convertToPNG(File webpFile, File pngFile)
-{
-    // use dwebp to convert to png file
-    ChildProcess childProcess;
-    StringArray args;
-
-    args.add("dwebp");
-    args.add(webpFile.getFullPathName());
-    args.add("-mt"); // multithreaded
-    args.add("-o");
-    args.add(pngFile.getFullPathName());
-
-    childProcess.start(args);
-
-    auto result = childProcess.readAllProcessOutput();
-    DBG(result);
-
-    return result.startsWith("Decoded ");
-}
-
-bool WEBPImageFormat::convertFromPNG(File pngFile, File webpFile)
-{
-    // use cwebp to convert to webp file
-    ChildProcess childProcess;
-    StringArray args;
-
-    args.add("cwebp");
-    args.add("-lossless");
-    args.add("-mt"); // multithreaded
-    args.add(pngFile.getFullPathName());
-    args.add("-o");
-    args.add(webpFile.getFullPathName());
-
-    childProcess.start(args);
-    auto result = childProcess.readAllProcessOutput();
-    DBG(result);
-
-    if (!result.contains("Saving file "))
-    {
-        jassertfalse;
-        return false;
-    }
-    else 
-        return true;
-}
 
 } // namespace juce

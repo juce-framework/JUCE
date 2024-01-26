@@ -240,11 +240,6 @@ public:
     bool canUnderstand(InputStream&) override;
     Image decodeImage(InputStream&) override;
     bool writeImageToStream(const Image& sourceImage, OutputStream& destStream) override;
-    static Image loadFrom(File& webpFile);
-    static bool writeTo(const Image& sourceImage, File& webpFile);
-private:
-    bool convertToPNG(File webpFile, File pngFile);
-    bool convertFromPNG(File pngFile, File webpFile);
 };
 
 } // namespace juce
