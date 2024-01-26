@@ -246,7 +246,7 @@ public:
         call free() or any of the allocation methods.
     */
     template <typename SizeType>
-    void malloc (SizeType newNumElements, size_t elementSize = sizeof (ElementType))
+    void jmalloc (SizeType newNumElements, size_t elementSize = sizeof (ElementType))
     {
         std::free (data);
         data = mallocWrapper (static_cast<size_t> (newNumElements) * elementSize);
@@ -256,7 +256,7 @@ public:
         This does the same job as the malloc() method, but clears the memory that it allocates.
     */
     template <typename SizeType>
-    void calloc (SizeType newNumElements, const size_t elementSize = sizeof (ElementType))
+    void jcalloc (SizeType newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         std::free (data);
         data = callocWrapper (static_cast<size_t> (newNumElements), elementSize);
@@ -280,7 +280,7 @@ public:
         uses realloc() to keep as much of the existing data as possible.
     */
     template <typename SizeType>
-    void realloc (SizeType newNumElements, size_t elementSize = sizeof (ElementType))
+    void jrealloc (SizeType newNumElements, size_t elementSize = sizeof (ElementType))
     {
         data = reallocWrapper (data, static_cast<size_t> (newNumElements) * elementSize);
     }
@@ -288,10 +288,42 @@ public:
     /** Frees any currently-allocated data.
         This will free the data and reset this object to be a null pointer.
     */
-    void free() noexcept
+    void jfree() noexcept
     {
         std::free (data);
         data = nullptr;
+    }
+
+    template <typename SizeType>
+    [[deprecated]] void malloc(SizeType newNumElements, size_t elementSize = sizeof(ElementType)) {
+        return jmalloc(newNumElements, elementSize);
+    }
+
+    /** Allocates a specified amount of memory and clears it.
+        This does the same job as the malloc() method, but clears the memory that it
+       allocates.
+    */
+    template <typename SizeType>
+    [[deprecated]] void calloc(SizeType newNumElements,
+                 const size_t elementSize = sizeof(ElementType)) {
+        return jcalloc(newNumElements, elementSize);
+    }
+
+    /** Re-allocates a specified amount of memory.
+
+        The semantics of this method are the same as malloc() and calloc(), but it
+        uses realloc() to keep as much of the existing data as possible.
+    */
+    template <typename SizeType>
+    [[deprecated]] void realloc(SizeType newNumElements, size_t elementSize = sizeof(ElementType)) {
+        return jrealloc(newNumElements, elementSize);
+    }
+
+    /** Frees any currently-allocated data.
+        This will free the data and reset this object to be a null pointer.
+    */
+    [[deprecated]] void free() noexcept {
+        jfree();
     }
 
     /** Swaps this object's data with the data of another HeapBlock.
