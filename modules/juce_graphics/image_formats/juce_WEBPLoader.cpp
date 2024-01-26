@@ -164,12 +164,13 @@ Image WEBPImageFormat::decodeImage (InputStream& in)
     return image;
 #else
     jassertfalse;
-    return false;
+    return Image();
 #endif
 }
 
-bool WEBPImageFormat::writeImageToStream (const Image& sourceImage, OutputStream& destStream)
+bool WEBPImageFormat::writeImageToStream (const Image& /*sourceImage*/, OutputStream& /*destStream*/)
 {
+    // Not yet implemented
     jassertfalse;
     return false;
 }
