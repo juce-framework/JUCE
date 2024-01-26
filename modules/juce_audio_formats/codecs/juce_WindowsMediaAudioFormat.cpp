@@ -289,7 +289,7 @@ private:
                         hr = wmMediaProperties->GetMediaType (nullptr, &sizeMediaType);
 
                         HeapBlock<WM_MEDIA_TYPE> mediaType;
-                        mediaType.malloc (sizeMediaType, 1);
+                        mediaType.jmalloc (sizeMediaType, 1);
                         hr = wmMediaProperties->GetMediaType (mediaType, &sizeMediaType);
 
                         if (mediaType->majortype == WMMEDIATYPE_Audio)

@@ -435,7 +435,7 @@ public:
 
                 if (status == noErr && sizeOfLayout >= (sizeof (AudioChannelLayout) - sizeof (AudioChannelDescription)))
                 {
-                    caLayout.malloc (1, static_cast<size_t> (sizeOfLayout));
+                    caLayout.jmalloc (1, static_cast<size_t> (sizeOfLayout));
 
                     status = AudioFileGetProperty (audioFileID, kAudioFilePropertyChannelLayout,
                                                    &sizeOfLayout, caLayout.get());
@@ -467,9 +467,9 @@ public:
                                                   &destinationAudioFormat);
                 if (status == noErr)
                 {
-                    bufferList.malloc (1, sizeof (AudioBufferList) + numChannels * sizeof (::AudioBuffer));
+                    bufferList.jmalloc (1, sizeof (AudioBufferList) + numChannels * sizeof (::AudioBuffer));
                     bufferList->mNumberBuffers = numChannels;
-                    channelMap.malloc (numChannels);
+                    channelMap.jmalloc (numChannels);
 
                     if (hasLayout && caLayout != nullptr)
                     {

@@ -2161,7 +2161,7 @@ private:
         ImagePixelData::Ptr clone() override
         {
             auto s = new PreallocatedImage (width, height, nullptr, hasAlpha);
-            s->allocatedData.malloc (sizeof (jint) * static_cast<size_t> (width * height));
+            s->allocatedData.jmalloc (sizeof (jint) * static_cast<size_t> (width * height));
             s->data = s->allocatedData;
             memcpy (s->data, data, sizeof (jint) * static_cast<size_t> (width * height));
             return s;

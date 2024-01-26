@@ -579,7 +579,7 @@ static Array<InterfaceInfo> findIPAddresses (int dummySocket)
     do
     {
         bufferSize *= 2;
-        buffer.calloc (bufferSize);
+        buffer.jcalloc (bufferSize);
 
         cfg.ifc_len = bufferSize;
         cfg.ifc_buf = buffer;

@@ -4529,7 +4529,7 @@ private:
             if (stringSizeBytes > 0)
             {
                 HeapBlock<TCHAR> buffer;
-                buffer.calloc ((size_t) stringSizeBytes / sizeof (TCHAR) + 1);
+                buffer.jcalloc ((size_t) stringSizeBytes / sizeof (TCHAR) + 1);
                 ImmGetCompositionString (hImc, type, buffer, (DWORD) stringSizeBytes);
                 return String (buffer.get());
             }

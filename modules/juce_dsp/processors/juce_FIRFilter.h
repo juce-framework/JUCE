@@ -92,7 +92,7 @@ namespace juce::dsp::FIR
 
                 if (newSize != size)
                 {
-                    memory.malloc (1 + jmax (newSize, size, static_cast<size_t> (128)));
+                    memory.jmalloc (1 + jmax (newSize, size, static_cast<size_t> (128)));
 
                     fifo = snapPointerToAlignment (memory.getData(), sizeof (SampleType));
                     size = newSize;

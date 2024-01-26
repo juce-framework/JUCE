@@ -63,7 +63,7 @@ namespace HeapBlockHelper
     @code
         HeapBlock<int> temp (1024);
         memcpy (temp, xyz, 1024 * sizeof (int));
-        temp.calloc (2048);
+        temp.jcalloc (2048);
         temp[0] = 1234;
         memcpy (foobar, temp, 2048 * sizeof (int));
     @endcode
@@ -165,7 +165,7 @@ public:
     template <class OtherElementType, bool otherThrowOnFailure, typename = AllowConversion<OtherElementType>>
     HeapBlock& operator= (HeapBlock<OtherElementType, otherThrowOnFailure>&& other) noexcept
     {
-        free();
+        jfree();
         data = reinterpret_cast<ElementType*> (other.data);
         other.data = nullptr;
         return *this;

@@ -32,7 +32,7 @@ namespace juce::build_tools
 
         const int bufferSize = 4096;
         HeapBlock<uint8> buffer;
-        buffer.malloc (bufferSize);
+        buffer.jmalloc (bufferSize);
 
         for (;;)
         {

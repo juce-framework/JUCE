@@ -227,7 +227,7 @@ private:
             if (size != bufferSize)
             {
                 bufferIndex = 0;
-                buffer.malloc (size);
+                buffer.jmalloc (size);
                 bufferSize = size;
             }
 
@@ -272,7 +272,7 @@ private:
             if (size != bufferSize)
             {
                 bufferIndex = 0;
-                buffer.malloc (size);
+                buffer.jmalloc (size);
                 bufferSize = size;
             }
 

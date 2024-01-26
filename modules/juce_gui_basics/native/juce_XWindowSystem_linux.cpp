@@ -943,7 +943,7 @@ public:
                 int pixStride = 2;
                 auto stride = ((w * pixStride + 3) & ~3);
 
-                imageData16Bit.malloc (stride * h);
+                imageData16Bit.jmalloc (stride * h);
                 xImage->data = imageData16Bit;
                 xImage->bitmap_pad = 16;
                 xImage->depth = pixStride * 8;
@@ -1266,7 +1266,7 @@ namespace PixmapHelpers
         auto height = (unsigned int) image.getHeight();
         auto stride = (width + 7) >> 3;
         HeapBlock<char> mask;
-        mask.calloc (stride * height);
+        mask.jcalloc (stride * height);
 
         auto msbfirst = (X11Symbols::getInstance()->xBitmapBitOrder (display) == MSBFirst);
 
@@ -1380,7 +1380,7 @@ namespace ClipboardHelpers
                 // Translate to utf8
                 numDataItems = localContent.getNumBytesAsUTF8();
                 auto numBytesRequiredToStore = numDataItems + 1;
-                data.calloc (numBytesRequiredToStore);
+                data.jcalloc (numBytesRequiredToStore);
                 localContent.copyToUTF8 (data, numBytesRequiredToStore);
                 propertyFormat = 8;   // bits per item
             }
@@ -1389,7 +1389,7 @@ namespace ClipboardHelpers
                 // Another application wants to know what we are able to send
 
                 numDataItems = 2;
-                data.calloc (numDataItems * sizeof (Atom));
+                data.jcalloc (numDataItems * sizeof (Atom));
 
                 // Atoms are flagged as 32-bit irrespective of sizeof (Atom)
                 propertyFormat = 32;
@@ -2354,8 +2354,8 @@ Cursor XWindowSystem::createCustomMouseCursorInfo (const Image& image, Point<int
 
     auto stride = (cursorW + 7) >> 3;
     HeapBlock<char> maskPlane, sourcePlane;
-    maskPlane.calloc (stride * cursorH);
-    sourcePlane.calloc (stride * cursorH);
+    maskPlane.jcalloc (stride * cursorH);
+    sourcePlane.jcalloc (stride * cursorH);
 
     auto msbfirst = (X11Symbols::getInstance()->xBitmapBitOrder (display) == MSBFirst);
 

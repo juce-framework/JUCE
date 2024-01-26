@@ -1173,7 +1173,7 @@ void WebBrowserComponent::clearCookies()
 
     if (urlCacheHandle == nullptr && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
     {
-        entry.realloc (1, entrySize);
+        entry.jrealloc (1, entrySize);
         urlCacheHandle = ::FindFirstUrlCacheEntryA ("cookie:", entry.getData(), &entrySize);
     }
 
@@ -1187,7 +1187,7 @@ void WebBrowserComponent::clearCookies()
             {
                 if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
                 {
-                    entry.realloc (1, entrySize);
+                    entry.jrealloc (1, entrySize);
 
                     if (::FindNextUrlCacheEntryA (urlCacheHandle, entry.getData(), &entrySize) != 0)
                         continue;

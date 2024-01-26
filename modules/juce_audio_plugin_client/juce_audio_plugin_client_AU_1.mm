@@ -190,7 +190,7 @@ public:
             return err;
 
         mapper.alloc (*juceFilter);
-        pulledSucceeded.calloc (static_cast<size_t> (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, true)));
+        pulledSucceeded.jcalloc (static_cast<size_t> (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, true)));
 
         prepareToPlay();
 
@@ -201,7 +201,7 @@ public:
     {
         MusicDeviceBase::Cleanup();
 
-        pulledSucceeded.free();
+        pulledSucceeded.jfree();
         mapper.release();
 
         if (juceFilter != nullptr)

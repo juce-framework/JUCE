@@ -71,7 +71,7 @@ namespace TTFNameExtractor
         {
             auto numChars = stringLength / 2 + 1;
             HeapBlock<uint16> buffer;
-            buffer.calloc (numChars + 1);
+            buffer.jcalloc (numChars + 1);
             input.read (buffer, stringLength);
 
             for (int i = 0; i < numChars; ++i)
@@ -83,7 +83,7 @@ namespace TTFNameExtractor
         else
         {
             HeapBlock<char> buffer;
-            buffer.calloc (stringLength + 1);
+            buffer.jcalloc (stringLength + 1);
             input.read (buffer, stringLength);
             result = CharPointer_UTF8 (buffer.getData());
         }
@@ -527,7 +527,7 @@ private:
     {
         HeapBlock<KERNINGPAIR> rawKerning;
         auto numKPs = GetKerningPairs (hdc, 0, nullptr);
-        rawKerning.calloc (numKPs);
+        rawKerning.jcalloc (numKPs);
         GetKerningPairs (hdc, numKPs, rawKerning);
 
         std::unordered_map<int, int> widthsForGlyphs;
