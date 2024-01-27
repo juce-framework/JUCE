@@ -79,7 +79,9 @@
 #include "widgets/juce_Chorus.cpp"
 
 #if JUCE_USE_SIMD
- #if JUCE_INTEL
+ #if JUCE_USE_SIMD_FALLBACK
+  // no extra includes needed for fallback implementation
+ #elif JUCE_INTEL
   #ifdef __AVX2__
    #include "native/juce_SIMDNativeOps_avx.cpp"
   #else
