@@ -25,14 +25,8 @@
 #if JUCE_INCLUDE_WEBPLIB_CODE
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005)
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wcomma",
-    "-Wfloat-equal",
-    "-Wimplicit-fallthrough",
-    "-Wmaybe-uninitialized",
-    "-Wnull-pointer-subtraction",
-    "-Wsign-conversion",
-    "-Wtautological-constant-out-of-range-compare",
-    "-Wzero-as-null-pointer-constant")
+
+#undef MULTIPLIER
 
 #include "webplib/webp/decode.h"
 #include "webplib/dec/webp_dec.c"
@@ -75,7 +69,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wcomma",
 #include "webplib/dsp/lossless_sse41.c"
 #include "webplib/dsp/cpu.c"
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif
@@ -160,8 +153,9 @@ Image WEBPImageFormat::decodeImage (InputStream& in)
     uint8* p = destData.getPixelPointer(0, 0);
     
     if (features.has_alpha)
-        WebPDecodeBGRAInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride);
-    else WebPDecodeBGRInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride);
+        jassert(NULL!=WebPDecodeBGRAInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride));
+    else 
+        jassert(NULL!=WebPDecodeBGRInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride));
         
     return image;
 #else
