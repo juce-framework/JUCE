@@ -147,6 +147,13 @@ private:
 WEBPImageFormat::WEBPImageFormat() {}
 WEBPImageFormat::~WEBPImageFormat() {}
 
+
+void WEBPImageFormat::setQuality(bool shouldBeLossless, float newQuality)
+{
+    lossless = shouldBeLossless;
+    quality = newQuality;
+}
+
 String WEBPImageFormat::getFormatName()                  { return "WEBP"; }
 bool WEBPImageFormat::usesFileExtension (const File& f)  { return f.hasFileExtension ("webp"); }
 
@@ -219,14 +226,36 @@ bool WEBPImageFormat::writeImageToStream (const Image& image, OutputStream& dest
     size_t bytesEncoded = 0;
     uint8_t* encodedData = nullptr;
 
-    if (image.getFormat() == Image::RGB)
-        bytesEncoded = WebPEncodeLosslessBGR(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, &encodedData);
-    else if (image.getFormat() == Image::ARGB)
-        bytesEncoded = WebPEncodeLosslessBGRA(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, &encodedData);
+    if (lossless)
+    {
+        if (image.getFormat() == Image::RGB)
+            bytesEncoded = WebPEncodeLosslessBGR(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, &encodedData);
+        else if (image.getFormat() == Image::ARGB)
+            bytesEncoded = WebPEncodeLosslessBGRA(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, &encodedData);
+        else
+        {
+            jassertfalse;
+            return false;
+        }
+    }
     else
     {
-        jassertfalse;
-        return false;
+        auto webpQuality = quality * 100.0;
+        if (quality < 0)
+            webpQuality = 85.0;
+        else if (quality > 1.0)
+            webpQuality = 100.0;
+
+
+        if (image.getFormat() == Image::RGB)
+            bytesEncoded = WebPEncodeBGR(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, quality, &encodedData);
+        else if (image.getFormat() == Image::ARGB)
+            bytesEncoded = WebPEncodeBGRA(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, quality, &encodedData);
+        else
+        {
+            jassertfalse;
+            return false;
+        }
     }
 
     destStream.write(encodedData, bytesEncoded);

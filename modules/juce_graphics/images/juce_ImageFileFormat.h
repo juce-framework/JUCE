@@ -235,11 +235,24 @@ public:
     ~WEBPImageFormat() override;
 
     //==============================================================================
+    /** Specifies the quality to be used when writing a WEBP file.
+
+        @param shouldBeLossless         boolean true for lossless encoding.
+        @param newQuality               a value 0 to 1.0, where 0 is low quality, 1.0 is best, or
+                                        any negative value is "default" quality.  Ignored if lossless.
+    */
+    void setQuality(bool shouldBeLossless, float newQuality = 0.85);
+
+    //==============================================================================
     String getFormatName() override;
     bool usesFileExtension(const File&) override;
     bool canUnderstand(InputStream&) override;
     Image decodeImage(InputStream&) override;
     bool writeImageToStream(const Image& sourceImage, OutputStream& destStream) override;
+
+private:
+    bool lossless = true;
+    float quality;
 };
 
 } // namespace juce
