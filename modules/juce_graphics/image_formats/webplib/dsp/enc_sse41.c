@@ -41,9 +41,9 @@ static void CollectHistogram_SSE41(const uint8_t* ref, const uint8_t* pred,
       const __m128i out0 = _mm_loadu_si128((__m128i*)&out[0]);
       const __m128i out1 = _mm_loadu_si128((__m128i*)&out[8]);
       // v = abs(out) >> 3
-      const __m128i abs0 = _mm_abs_epi16(out0);
+      const __m128i abs0_enc_sse41 = _mm_abs_epi16(out0);
       const __m128i abs1 = _mm_abs_epi16(out1);
-      const __m128i v0 = _mm_srai_epi16(abs0, 3);
+      const __m128i v0 = _mm_srai_epi16(abs0_enc_sse41, 3);
       const __m128i v1 = _mm_srai_epi16(abs1, 3);
       // bin = min(v, MAX_COEFF_THRESH)
       const __m128i bin0 = _mm_min_epi16(v0, max_coeff_thresh);

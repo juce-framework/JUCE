@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "sharpyuv/sharpyuv.h"
-#include "sharpyuv/sharpyuv_csp.h"
+#include "../sharpyuv/sharpyuv.h"
+#include "../sharpyuv/sharpyuv_csp.h"
 #include "../enc/vp8i_enc.h"
 #include "../utils/random_utils.h"
 #include "../utils/utils.h"

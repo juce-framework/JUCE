@@ -123,15 +123,15 @@ static void PrintBlockInfo(const VP8EncIterator* const it,
 
 //------------------------------------------------------------------------------
 
-static WEBP_INLINE int clip(int v, int m, int M) {
+static WEBP_INLINE int clip_quant_enc(int v, int m, int M) {
   return v < m ? m : v > M ? M : v;
 }
 
-static const uint8_t kZigzag[16] = {
+static const uint8_t kZigzag_quant_enc[16] = {
   0, 1, 4, 8, 5, 2, 3, 6, 9, 12, 13, 10, 7, 11, 14, 15
 };
 
-static const uint8_t kDcTable[128] = {
+static const uint8_t kDcTable_quant_enc[128] = {
   4,     5,   6,   7,   8,   9,  10,  10,
   11,   12,  13,  14,  15,  16,  17,  17,
   18,   19,  20,  20,  21,  21,  22,  22,
@@ -150,7 +150,7 @@ static const uint8_t kDcTable[128] = {
   138, 140, 143, 145, 148, 151, 154, 157
 };
 
-static const uint16_t kAcTable[128] = {
+static const uint16_t kAcTable_quant_enc[128] = {
   4,     5,   6,   7,   8,   9,  10,  11,
   12,   13,  14,  15,  16,  17,  18,  19,
   20,   21,  22,  23,  24,  25,  26,  27,
@@ -247,14 +247,14 @@ static void SetupMatrices(VP8Encoder* enc) {
     VP8SegmentInfo* const m = &enc->dqm_[i];
     const int q = m->quant_;
     int q_i4, q_i16, q_uv;
-    m->y1_.q_[0] = kDcTable[clip(q + enc->dq_y1_dc_, 0, 127)];
-    m->y1_.q_[1] = kAcTable[clip(q,                  0, 127)];
+    m->y1_.q_[0] = kDcTable_quant_enc[clip_quant_enc(q + enc->dq_y1_dc_, 0, 127)];
+    m->y1_.q_[1] = kAcTable_quant_enc[clip_quant_enc(q,                  0, 127)];
 
-    m->y2_.q_[0] = kDcTable[ clip(q + enc->dq_y2_dc_, 0, 127)] * 2;
-    m->y2_.q_[1] = kAcTable2[clip(q + enc->dq_y2_ac_, 0, 127)];
+    m->y2_.q_[0] = kDcTable_quant_enc[ clip_quant_enc(q + enc->dq_y2_dc_, 0, 127)] * 2;
+    m->y2_.q_[1] = kAcTable2[clip_quant_enc(q + enc->dq_y2_ac_, 0, 127)];
 
-    m->uv_.q_[0] = kDcTable[clip(q + enc->dq_uv_dc_, 0, 117)];
-    m->uv_.q_[1] = kAcTable[clip(q + enc->dq_uv_ac_, 0, 127)];
+    m->uv_.q_[0] = kDcTable_quant_enc[clip_quant_enc(q + enc->dq_uv_dc_, 0, 117)];
+    m->uv_.q_[1] = kAcTable_quant_enc[clip_quant_enc(q + enc->dq_uv_ac_, 0, 127)];
 
     q_i4  = ExpandMatrix(&m->y1_, 0);
     q_i16 = ExpandMatrix(&m->y2_, 1);
@@ -300,7 +300,7 @@ static void SetupFilterStrength(VP8Encoder* const enc) {
   for (i = 0; i < NUM_MB_SEGMENTS; ++i) {
     VP8SegmentInfo* const m = &enc->dqm_[i];
     // We focus on the quantization of AC coeffs.
-    const int qstep = kAcTable[clip(m->quant_, 0, 127)] >> 2;
+    const int qstep = kAcTable_quant_enc[clip_quant_enc(m->quant_, 0, 127)] >> 2;
     const int base_strength =
         VP8FilterStrengthFromDelta(enc->filter_hdr_.sharpness_, qstep);
     // Segments with lower complexity ('beta') will be less filtered.
@@ -415,7 +415,7 @@ void VP8SetSegmentParams(VP8Encoder* const enc, float quality) {
     const double c = pow(c_base, expn);
     const int q = (int)(127. * (1. - c));
     assert(expn > 0.);
-    enc->dqm_[i].quant_ = clip(q, 0, 127);
+    enc->dqm_[i].quant_ = clip_quant_enc(q, 0, 127);
   }
 
   // purely indicative in the bitstream (except for the 1-segment case)
@@ -434,12 +434,12 @@ void VP8SetSegmentParams(VP8Encoder* const enc, float quality) {
   // we rescale by the user-defined strength of adaptation
   dq_uv_ac = dq_uv_ac * enc->config_->sns_strength / 100;
   // and make it safe.
-  dq_uv_ac = clip(dq_uv_ac, MIN_DQ_UV, MAX_DQ_UV);
+  dq_uv_ac = clip_quant_enc(dq_uv_ac, MIN_DQ_UV, MAX_DQ_UV);
   // We also boost the dc-uv-quant a little, based on sns-strength, since
   // U/V channels are quite more reactive to high quants (flat DC-blocks
   // tend to appear, and are unpleasant).
   dq_uv_dc = -4 * enc->config_->sns_strength / 100;
-  dq_uv_dc = clip(dq_uv_dc, -15, 15);   // 4bit-signed max allowed
+  dq_uv_dc = clip_quant_enc(dq_uv_dc, -15, 15);   // 4bit-signed max allowed
 
   enc->dq_y1_dc_ = 0;       // TODO(skal): dq-lum
   enc->dq_y2_dc_ = 0;
@@ -615,7 +615,7 @@ static int TrellisQuantizeBlock(const VP8Encoder* WEBP_RESTRICT const enc,
     // compute the position of the last interesting coefficient
     last = first - 1;
     for (n = 15; n >= first; --n) {
-      const int j = kZigzag[n];
+      const int j = kZigzag_quant_enc[n];
       const int err = in[j] * in[j];
       if (err > thresh) {
         last = n;
@@ -640,7 +640,7 @@ static int TrellisQuantizeBlock(const VP8Encoder* WEBP_RESTRICT const enc,
 
   // traverse trellis.
   for (n = first; n <= last; ++n) {
-    const int j = kZigzag[n];
+    const int j = kZigzag_quant_enc[n];
     const uint32_t Q  = mtx->q_[j];
     const uint32_t iQ = mtx->iq_[j];
     const uint32_t B = BIAS(0x00);     // neutral bias
@@ -752,7 +752,7 @@ static int TrellisQuantizeBlock(const VP8Encoder* WEBP_RESTRICT const enc,
 
     for (; n >= first; --n) {
       const Node* const node = &NODE(n, best_node);
-      const int j = kZigzag[n];
+      const int j = kZigzag_quant_enc[n];
       out[n] = node->sign ? -node->level : node->level;
       nz |= node->level;
       in[j] = out[n] * mtx->q_[j];

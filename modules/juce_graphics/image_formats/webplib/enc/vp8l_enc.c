@@ -1420,7 +1420,7 @@ static WebPEncodingError EncodePalette(VP8LBitWriter* const bw, int low_effort,
     tmp_palette[i] = VP8LSubPixels(palette[i], palette[i - 1]);
   }
   tmp_palette[0] = palette[0];
-  return EncodeImageNoHuffman(bw, tmp_palette, &enc->hash_chain_,
+  return (WebPEncodingError)EncodeImageNoHuffman(bw, tmp_palette, &enc->hash_chain_,
                               &enc->refs_[0], palette_size, 1, /*quality=*/20,
                               low_effort, enc->pic_, percent_range, percent);
 }

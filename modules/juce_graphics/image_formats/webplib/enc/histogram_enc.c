@@ -1181,7 +1181,7 @@ int VP8LGetHistoImageSymbols(int xsize, int ysize,
   const int entropy_combine_num_bins = low_effort ? NUM_PARTITIONS : BIN_SIZE;
   int entropy_combine;
   uint16_t* const map_tmp =
-      WebPSafeMalloc(2 * image_histo_raw_size, sizeof(*map_tmp));
+      (uint16_t*)WebPSafeMalloc(2 * image_histo_raw_size, sizeof(*map_tmp));
   uint16_t* const cluster_mappings = map_tmp + image_histo_raw_size;
   int num_used = image_histo_raw_size;
   if (orig_histo == NULL || map_tmp == NULL) {

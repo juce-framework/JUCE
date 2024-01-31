@@ -413,7 +413,7 @@ static void BundleColorMap_SSE2(const uint8_t* const row, int width, int xbits,
 //------------------------------------------------------------------------------
 // Batch version of Predictor Transform subtraction
 
-static WEBP_INLINE void Average2_m128i(const __m128i* const a0,
+static WEBP_INLINE void Average2_m128i_lossless_enc_sse2(const __m128i* const a0,
                                        const __m128i* const a1,
                                        __m128i* const avg) {
   // (a + b) >> 1 = ((a + b + 1) >> 1) - ((a ^ b) & 1)
@@ -472,8 +472,8 @@ static void PredictorSub5_SSE2(const uint32_t* in, const uint32_t* upper,
     const __m128i TR = _mm_loadu_si128((const __m128i*)&upper[i + 1]);
     const __m128i src = _mm_loadu_si128((const __m128i*)&in[i]);
     __m128i avg, pred, res;
-    Average2_m128i(&L, &TR, &avg);
-    Average2_m128i(&avg, &T, &pred);
+    Average2_m128i_lossless_enc_sse2(&L, &TR, &avg);
+    Average2_m128i_lossless_enc_sse2(&avg, &T, &pred);
     res = _mm_sub_epi8(src, pred);
     _mm_storeu_si128((__m128i*)&out[i], res);
   }
@@ -491,7 +491,7 @@ static void PredictorSub##X##_SSE2(const uint32_t* in, const uint32_t* upper, \
     const __m128i tB = _mm_loadu_si128((const __m128i*)&(B));                 \
     const __m128i src = _mm_loadu_si128((const __m128i*)&in[i]);              \
     __m128i pred, res;                                                        \
-    Average2_m128i(&tA, &tB, &pred);                                          \
+    Average2_m128i_lossless_enc_sse2(&tA, &tB, &pred);                                          \
     res = _mm_sub_epi8(src, pred);                                            \
     _mm_storeu_si128((__m128i*)&out[i], res);                                 \
   }                                                                           \
@@ -517,9 +517,9 @@ static void PredictorSub10_SSE2(const uint32_t* in, const uint32_t* upper,
     const __m128i T = _mm_loadu_si128((const __m128i*)&upper[i]);
     const __m128i TR = _mm_loadu_si128((const __m128i*)&upper[i + 1]);
     __m128i avgTTR, avgLTL, avg, res;
-    Average2_m128i(&T, &TR, &avgTTR);
-    Average2_m128i(&L, &TL, &avgLTL);
-    Average2_m128i(&avgTTR, &avgLTL, &avg);
+    Average2_m128i_lossless_enc_sse2(&T, &TR, &avgTTR);
+    Average2_m128i_lossless_enc_sse2(&L, &TL, &avgLTL);
+    Average2_m128i_lossless_enc_sse2(&avgTTR, &avgLTL, &avg);
     res = _mm_sub_epi8(src, avg);
     _mm_storeu_si128((__m128i*)&out[i], res);
   }

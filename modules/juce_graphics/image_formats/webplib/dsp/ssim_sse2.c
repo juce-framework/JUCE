@@ -98,7 +98,7 @@ static uint32_t HorizontalAdd32b_SSE2(const __m128i* const m) {
   return (uint32_t)_mm_cvtsi128_si32(c);
 }
 
-static const uint16_t kWeight[] = { 1, 2, 3, 4, 3, 2, 1, 0 };
+static const uint16_t kWeight_sim_sse2[] = { 1, 2, 3, 4, 3, 2, 1, 0 };
 
 #define ACCUMULATE_ROW(WEIGHT) do {                         \
   /* compute row weight (Wx * Wy) */                        \
@@ -128,7 +128,7 @@ static double SSIMGet_SSE2(const uint8_t* src1, int stride1,
   const __m128i zero = _mm_setzero_si128();
   __m128i xm = zero, ym = zero;                // 16b accums
   __m128i xxm = zero, yym = zero, xym = zero;  // 32b accum
-  const __m128i Wx = _mm_loadu_si128((const __m128i*)kWeight);
+  const __m128i Wx = _mm_loadu_si128((const __m128i*)kWeight_sim_sse2);
   assert(2 * VP8_SSIM_KERNEL + 1 == 7);
   ACCUMULATE_ROW(1);
   ACCUMULATE_ROW(2);

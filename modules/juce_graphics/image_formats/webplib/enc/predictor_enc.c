@@ -524,7 +524,7 @@ static WEBP_INLINE void MultipliersClear(VP8LMultipliers* const m) {
   m->red_to_blue_ = 0;
 }
 
-static WEBP_INLINE void ColorCodeToMultipliers(uint32_t color_code,
+static WEBP_INLINE void ColorCodeToMultipliers_predictor_enc(uint32_t color_code,
                                                VP8LMultipliers* const m) {
   m->green_to_red_  = (color_code >>  0) & 0xff;
   m->green_to_blue_ = (color_code >>  8) & 0xff;
@@ -748,7 +748,7 @@ int VP8LColorSpaceTransform(int width, int height, int bits, int quality,
       const int all_y_max = GetMin(tile_y_offset + max_tile_size, height);
       const int offset = tile_y * tile_xsize + tile_x;
       if (tile_y != 0) {
-        ColorCodeToMultipliers(image[offset - tile_xsize], &prev_y);
+        ColorCodeToMultipliers_predictor_enc(image[offset - tile_xsize], &prev_y);
       }
       prev_x = GetBestColorTransformForTile(tile_x, tile_y, bits,
                                             prev_x, prev_y,

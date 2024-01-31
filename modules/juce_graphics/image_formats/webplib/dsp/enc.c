@@ -17,7 +17,7 @@
 #include "../dsp/dsp.h"
 #include "../enc/vp8i_enc.h"
 
-static WEBP_INLINE uint8_t clip_8b(int v) {
+static WEBP_INLINE uint8_t clip_8b_enc(int v) {
   return (!(v & ~0xff)) ? v : (v < 0) ? 0 : 255;
 }
 
@@ -84,7 +84,7 @@ static void CollectHistogram_C(const uint8_t* ref, const uint8_t* pred,
 //------------------------------------------------------------------------------
 // run-time tables (~4k)
 
-static uint8_t clip1[255 + 510 + 1];    // clips [-255,510] to [0,255]
+static uint8_t clip1_enc[255 + 510 + 1];    // clips [-255,510] to [0,255]
 
 // We declare this variable 'volatile' to prevent instruction reordering
 // and make sure it's set to true _last_ (so as to be thread-safe)
@@ -94,7 +94,7 @@ static WEBP_TSAN_IGNORE_FUNCTION void InitTables(void) {
   if (!tables_ok) {
     int i;
     for (i = -255; i <= 255 + 255; ++i) {
-      clip1[255 + i] = clip_8b(i);
+      clip1_enc[255 + i] = clip_8b_enc(i);
     }
     tables_ok = 1;
   }
@@ -107,7 +107,7 @@ static WEBP_TSAN_IGNORE_FUNCTION void InitTables(void) {
 #if !WEBP_NEON_OMIT_C_CODE
 
 #define STORE(x, y, v) \
-  dst[(x) + (y) * BPS] = clip_8b(ref[(x) + (y) * BPS] + ((v) >> 3))
+  dst[(x) + (y) * BPS] = clip_8b_enc(ref[(x) + (y) * BPS] + ((v) >> 3))
 
 static const int kC1 = 20091 + (1 << 16);
 static const int kC2 = 35468;
@@ -262,7 +262,7 @@ static WEBP_INLINE void TrueMotion(uint8_t* dst, const uint8_t* left,
   int y;
   if (left != NULL) {
     if (top != NULL) {
-      const uint8_t* const clip = clip1 + 255 - left[-1];
+      const uint8_t* const clip = clip1_enc + 255 - left[-1];
       for (y = 0; y < size; ++y) {
         const uint8_t* const clip_table = clip + left[y];
         int x;
@@ -501,7 +501,7 @@ static void HD4(uint8_t* dst, const uint8_t* top) {
 
 static void TM4(uint8_t* dst, const uint8_t* top) {
   int x, y;
-  const uint8_t* const clip = clip1 + 255 - top[-1];
+  const uint8_t* const clip = clip1_enc + 255 - top[-1];
   for (y = 0; y < 4; ++y) {
     const uint8_t* const clip_table = clip + top[-2 - y];
     for (x = 0; x < 4; ++x) {
@@ -645,7 +645,7 @@ static int Disto16x16_C(const uint8_t* const a, const uint8_t* const b,
 // Quantization
 //
 
-static const uint8_t kZigzag[16] = {
+static const uint8_t kZigzag_enc[16] = {
   0, 1, 4, 8, 5, 2, 3, 6, 9, 12, 13, 10, 7, 11, 14, 15
 };
 
@@ -655,7 +655,7 @@ static int QuantizeBlock_C(int16_t in[16], int16_t out[16],
   int last = -1;
   int n;
   for (n = 0; n < 16; ++n) {
-    const int j = kZigzag[n];
+    const int j = kZigzag_enc[n];
     const int sign = (in[j] < 0);
     const uint32_t coeff = (sign ? -in[j] : in[j]) + mtx->sharpen_[j];
     if (coeff > mtx->zthresh_[j]) {

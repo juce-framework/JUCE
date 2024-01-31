@@ -24,18 +24,19 @@
 */
 #if JUCE_INCLUDE_WEBPLIB_CODE
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005 4245 4701)
 
 #undef MULTIPLIER
-
+#include "webplib/sharpyuv/sharpyuv_cpu.c"
 #include "webplib/webp/decode.h"
 #include "webplib/dec/webp_dec.c"
 #include "webplib/dec/buffer_dec.c"
 #include "webplib/dec/vp8_dec.c"
-#include "webplib/dec/vp8l_dec.c" 
+#include "webplib/dec/vp8l_dec.c"
 #include "webplib/dec/io_dec.c"
 #include "webplib/utils/rescaler_utils.c"
 #include "webplib/utils/bit_reader_utils.c"
+#include "webplib/dsp/cost.c"
 #include "webplib/dsp/yuv.c"
 #include "webplib/dsp/upsampling.c"
 #include "webplib/dsp/dec.c"
@@ -67,7 +68,48 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005)
 #include "webplib/utils/palette.c"
 #include "webplib/dsp/lossless_sse2.c"
 #include "webplib/dsp/lossless_sse41.c"
-#include "webplib/dsp/cpu.c"
+#include "webplib/enc/picture_enc.c"
+#include "webplib/enc/picture_csp_enc.c"
+#include "webplib/dsp/enc.c"
+#include "webplib/enc/config_enc.c"
+#include "webplib/enc/webp_enc.c"
+#include "webplib/enc/picture_tools_enc.c"
+#include "webplib/enc/token_enc.c"
+#include "webplib/utils/bit_writer_utils.c"
+#include "webplib/enc/tree_enc.c"
+#include "webplib/enc/iterator_enc.c"
+#include "webplib/enc/syntax_enc.c"
+#include "webplib/enc/frame_enc.c"
+#include "webplib/enc/analysis_enc.c"
+#include "webplib/enc/quant_enc.c"
+#include "webplib/enc/cost_enc.c"
+#include "webplib/enc/alpha_enc.c"
+#include "webplib/utils/filters_utils.c"
+#include "webplib/enc/filter_enc.c"
+#include "webplib/dsp/ssim.c"
+#include "webplib/dsp/ssim_sse2.c"
+#include "webplib/dsp/cost_sse2.c"
+#include "webplib/sharpyuv/sharpyuv.c"
+#include "webplib/sharpyuv/sharpyuv_csp.c"
+#include "webplib/dsp/enc_sse2.c"
+#include "webplib/dsp/enc_sse41.c"
+#include "webplib/enc/vp8l_enc.c"
+#include "webplib/enc/picture_psnr_enc.c"
+#include "webplib/enc/picture_rescale_enc.c"
+#include "webplib/enc/backward_references_enc.c"
+#include "webplib/enc/histogram_enc.c"
+#include "webplib/dsp/lossless_enc.c"
+#include "webplib/dsp/lossless_enc_sse2.c"
+#include "webplib/dsp/lossless_enc_sse41.c"
+#include "webplib/sharpyuv/sharpyuv_gamma.c"
+#include "webplib/enc/predictor_enc.c"
+#include "webplib/enc/near_lossless_enc.c"
+#include "webplib/utils/quant_levels_utils.c"
+#include "webplib/sharpyuv/sharpyuv_dsp.c"
+#include "webplib/sharpyuv/sharpyuv_sse2.c"
+#include "webplib/utils/huffman_encode_utils.c"
+#include "webplib/enc/backward_references_cost_enc.c"
+
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 
@@ -89,7 +131,7 @@ public:
     Image image;
 
 private:
- 
+
 
     JUCE_DECLARE_NON_COPYABLE (WEBPLoader)
 };
@@ -112,7 +154,7 @@ bool WEBPImageFormat::canUnderstand (InputStream& in)
     juce::MemoryBlock data(bytes);
     bytes = in.read(data.getData(), bytes);
     int width, height = 0;
-    
+
 
     bool canUnderstand = WebPGetInfo((uint8_t*)data.getData(), bytes, &width, &height);
     return canUnderstand;
@@ -151,12 +193,12 @@ Image WEBPImageFormat::decodeImage (InputStream& in)
     image = Image(features.has_alpha ? Image::ARGB : Image::RGB, features.width, features.height, true);
     Image::BitmapData destData(image, Image::BitmapData::writeOnly);
     uint8* p = destData.getPixelPointer(0, 0);
-    
+
     if (features.has_alpha)
         jassert(NULL!=WebPDecodeBGRAInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride));
-    else 
+    else
         jassert(NULL!=WebPDecodeBGRInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride));
-        
+
     return image;
 #else
     jassertfalse;
@@ -164,11 +206,37 @@ Image WEBPImageFormat::decodeImage (InputStream& in)
 #endif
 }
 
-bool WEBPImageFormat::writeImageToStream (const Image& /*sourceImage*/, OutputStream& /*destStream*/)
+bool WEBPImageFormat::writeImageToStream (const Image& image, OutputStream& destStream)
 {
-    // Not yet implemented
+#if JUCE_INCLUDE_WEBPLIB_CODE
+
+
+
+    Image::BitmapData imageData(image, Image::BitmapData::readOnly);
+    auto imagePtr = imageData.getPixelPointer(0, 0);
+
+    size_t bytesEncoded = 0;
+    uint8_t* encodedData = nullptr;
+
+    if (image.getFormat() == Image::RGB)
+        bytesEncoded = WebPEncodeLosslessBGR(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, &encodedData);
+    else if (image.getFormat() == Image::ARGB)
+        bytesEncoded = WebPEncodeLosslessBGRA(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, &encodedData);
+    else
+    {
+        jassertfalse;
+        return false;
+    }
+
+    destStream.write(encodedData, bytesEncoded);
+
+    WebPFree(encodedData);
+
+    return bytesEncoded>0;
+#else
     jassertfalse;
     return false;
+#endif
 }
 
 

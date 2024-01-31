@@ -164,7 +164,7 @@ void VP8DefaultProbas(VP8Encoder* const enc) {
 }
 
 // Paragraph 11.5.  900bytes.
-static const uint8_t kBModesProba[NUM_BMODES][NUM_BMODES][NUM_BMODES - 1] = {
+static const uint8_t kBModesProba_enc[NUM_BMODES][NUM_BMODES][NUM_BMODES - 1] = {
   { { 231, 120, 48, 89, 115, 113, 120, 152, 112 },
     { 152, 179, 64, 126, 170, 118, 46, 70, 95 },
     { 175, 69, 143, 80, 85, 82, 72, 155, 103 },
@@ -332,7 +332,7 @@ void VP8CodeIntraModes(VP8Encoder* const enc) {
       for (y = 0; y < 4; ++y) {
         int left = preds[-1];
         for (x = 0; x < 4; ++x) {
-          const uint8_t* const probas = kBModesProba[top_pred[x]][left];
+          const uint8_t* const probas = kBModesProba_enc[top_pred[x]][left];
           left = PutI4Mode(bw, preds[x], probas);
         }
         top_pred = preds;

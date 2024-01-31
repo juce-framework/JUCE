@@ -586,10 +586,10 @@ static void CollectHistogram_SSE2(const uint8_t* ref, const uint8_t* pred,
       const __m128i out1 = _mm_loadu_si128((__m128i*)&out[8]);
       const __m128i d0 = _mm_sub_epi16(zero, out0);
       const __m128i d1 = _mm_sub_epi16(zero, out1);
-      const __m128i abs0 = _mm_max_epi16(out0, d0);   // abs(v), 16b
+      const __m128i abs0_enc_sse2 = _mm_max_epi16(out0, d0);   // abs(v), 16b
       const __m128i abs1 = _mm_max_epi16(out1, d1);
       // v = abs(out) >> 3
-      const __m128i v0 = _mm_srai_epi16(abs0, 3);
+      const __m128i v0 = _mm_srai_epi16(abs0_enc_sse2, 3);
       const __m128i v1 = _mm_srai_epi16(abs1, 3);
       // bin = min(v, MAX_COEFF_THRESH)
       const __m128i bin0 = _mm_min_epi16(v0, max_coeff_thresh);
@@ -611,7 +611,7 @@ static void CollectHistogram_SSE2(const uint8_t* ref, const uint8_t* pred,
 // Intra predictions
 
 // helper for chroma-DC predictions
-static WEBP_INLINE void Put8x8uv_SSE2(uint8_t v, uint8_t* dst) {
+static WEBP_INLINE void Put8x8uv_SSE2_enc(uint8_t v, uint8_t* dst) {
   int j;
   const __m128i values = _mm_set1_epi8((char)v);
   for (j = 0; j < 8; ++j) {
@@ -619,7 +619,7 @@ static WEBP_INLINE void Put8x8uv_SSE2(uint8_t v, uint8_t* dst) {
   }
 }
 
-static WEBP_INLINE void Put16_SSE2(uint8_t v, uint8_t* dst) {
+static WEBP_INLINE void Put16_SSE2_enc(uint8_t v, uint8_t* dst) {
   int j;
   const __m128i values = _mm_set1_epi8((char)v);
   for (j = 0; j < 16; ++j) {
@@ -634,9 +634,9 @@ static WEBP_INLINE void Fill_SSE2(uint8_t* dst, int value, int size) {
       memset(dst + j * BPS, value, 4);
     }
   } else if (size == 8) {
-    Put8x8uv_SSE2(value, dst);
+    Put8x8uv_SSE2_enc(value, dst);
   } else {
-    Put16_SSE2(value, dst);
+    Put16_SSE2_enc(value, dst);
   }
 }
 
@@ -755,7 +755,7 @@ static WEBP_INLINE void DC8uv_SSE2(uint8_t* dst, const uint8_t* left,
   const __m128i left_values = _mm_loadl_epi64((const __m128i*)left);
   const __m128i combined = _mm_unpacklo_epi64(top_values, left_values);
   const int DC = VP8HorizontalAdd8b(&combined) + 8;
-  Put8x8uv_SSE2(DC >> 4, dst);
+  Put8x8uv_SSE2_enc(DC >> 4, dst);
 }
 
 static WEBP_INLINE void DC8uvNoLeft_SSE2(uint8_t* dst, const uint8_t* top) {
@@ -763,7 +763,7 @@ static WEBP_INLINE void DC8uvNoLeft_SSE2(uint8_t* dst, const uint8_t* top) {
   const __m128i top_values = _mm_loadl_epi64((const __m128i*)top);
   const __m128i sum = _mm_sad_epu8(top_values, zero);
   const int DC = _mm_cvtsi128_si32(sum) + 4;
-  Put8x8uv_SSE2(DC >> 3, dst);
+  Put8x8uv_SSE2_enc(DC >> 3, dst);
 }
 
 static WEBP_INLINE void DC8uvNoTop_SSE2(uint8_t* dst, const uint8_t* left) {
@@ -771,8 +771,8 @@ static WEBP_INLINE void DC8uvNoTop_SSE2(uint8_t* dst, const uint8_t* left) {
   DC8uvNoLeft_SSE2(dst, left);
 }
 
-static WEBP_INLINE void DC8uvNoTopLeft_SSE2(uint8_t* dst) {
-  Put8x8uv_SSE2(0x80, dst);
+static WEBP_INLINE void DC8uvNoTopLeft_SSE2_enc(uint8_t* dst) {
+  Put8x8uv_SSE2_enc(0x80, dst);
 }
 
 static WEBP_INLINE void DC8uvMode_SSE2(uint8_t* dst, const uint8_t* left,
@@ -786,7 +786,7 @@ static WEBP_INLINE void DC8uvMode_SSE2(uint8_t* dst, const uint8_t* left,
   } else if (left != NULL) {  // left but no top
     DC8uvNoTop_SSE2(dst, left);
   } else {  // no top, no left, nothing.
-    DC8uvNoTopLeft_SSE2(dst);
+    DC8uvNoTopLeft_SSE2_enc(dst);
   }
 }
 
@@ -796,13 +796,13 @@ static WEBP_INLINE void DC16_SSE2(uint8_t* dst, const uint8_t* left,
   const __m128i left_row = _mm_load_si128((const __m128i*)left);
   const int DC =
       VP8HorizontalAdd8b(&top_row) + VP8HorizontalAdd8b(&left_row) + 16;
-  Put16_SSE2(DC >> 5, dst);
+  Put16_SSE2_enc(DC >> 5, dst);
 }
 
 static WEBP_INLINE void DC16NoLeft_SSE2(uint8_t* dst, const uint8_t* top) {
   const __m128i top_row = _mm_load_si128((const __m128i*)top);
   const int DC = VP8HorizontalAdd8b(&top_row) + 8;
-  Put16_SSE2(DC >> 4, dst);
+  Put16_SSE2_enc(DC >> 4, dst);
 }
 
 static WEBP_INLINE void DC16NoTop_SSE2(uint8_t* dst, const uint8_t* left) {
@@ -810,8 +810,8 @@ static WEBP_INLINE void DC16NoTop_SSE2(uint8_t* dst, const uint8_t* left) {
   DC16NoLeft_SSE2(dst, left);
 }
 
-static WEBP_INLINE void DC16NoTopLeft_SSE2(uint8_t* dst) {
-  Put16_SSE2(0x80, dst);
+static WEBP_INLINE void DC16NoTopLeft_SSE2_enc(uint8_t* dst) {
+  Put16_SSE2_enc(0x80, dst);
 }
 
 static WEBP_INLINE void DC16Mode_SSE2(uint8_t* dst, const uint8_t* left,
@@ -825,7 +825,7 @@ static WEBP_INLINE void DC16Mode_SSE2(uint8_t* dst, const uint8_t* left,
   } else if (left != NULL) {  // left but no top
     DC16NoTop_SSE2(dst, left);
   } else {  // no top, no left, nothing.
-    DC16NoTopLeft_SSE2(dst);
+    DC16NoTopLeft_SSE2_enc(dst);
   }
 }
 
