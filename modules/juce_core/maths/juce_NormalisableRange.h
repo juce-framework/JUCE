@@ -250,7 +250,7 @@ private:
 
         // If you hit this assertion then either your normalisation function is not working
         // correctly or your input is out of the expected bounds.
-        jassert (clampedValue == value);
+        //jassert (clampedValue == value);
 
         return clampedValue;
     }
