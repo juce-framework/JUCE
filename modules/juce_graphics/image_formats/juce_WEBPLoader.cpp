@@ -81,6 +81,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005 4245 4701)
 #include "webplib/enc/syntax_enc.c"
 #include "webplib/enc/frame_enc.c"
 #include "webplib/enc/analysis_enc.c"
+#undef MAX_ALPHA
 #include "webplib/enc/quant_enc.c"
 #include "webplib/enc/cost_enc.c"
 #include "webplib/enc/alpha_enc.c"
@@ -101,6 +102,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005 4245 4701)
 #include "webplib/dsp/lossless_enc.c"
 #include "webplib/dsp/lossless_enc_sse2.c"
 #include "webplib/dsp/lossless_enc_sse41.c"
+#undef MIN
+#undef MAX
 #include "webplib/sharpyuv/sharpyuv_gamma.c"
 #include "webplib/enc/predictor_enc.c"
 #include "webplib/enc/near_lossless_enc.c"
@@ -210,8 +213,6 @@ bool WEBPImageFormat::writeImageToStream (const Image& image, OutputStream& dest
 {
 #if JUCE_INCLUDE_WEBPLIB_CODE
 
-
-
     Image::BitmapData imageData(image, Image::BitmapData::readOnly);
     auto imagePtr = imageData.getPixelPointer(0, 0);
 
@@ -238,11 +239,5 @@ bool WEBPImageFormat::writeImageToStream (const Image& image, OutputStream& dest
     return false;
 #endif
 }
-
-
-
-
-
-
 
 } // namespace juce
