@@ -428,6 +428,9 @@ public:
     [[deprecated]] void setSelectedItemIndex (int, bool);
     [[deprecated]] void setText (const String&, bool);
    #endif
+    
+    //GB 31/1/24 Changed to public
+    PopupMenu::Item* getItemForId (int) const noexcept;
 
 private:
     //==============================================================================
