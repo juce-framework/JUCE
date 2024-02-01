@@ -97,10 +97,12 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005 4245 4701)
 #include "webplib/dsp/ssim.c"
 #include "webplib/dsp/ssim_sse2.c"
 #include "webplib/dsp/cost_sse2.c"
+#include "webplib/dsp/cost_neon.c"
 #include "webplib/sharpyuv/sharpyuv.c"
 #include "webplib/sharpyuv/sharpyuv_csp.c"
 #include "webplib/dsp/enc_sse2.c"
 #include "webplib/dsp/enc_sse41.c"
+#include "webplib/dsp/enc_neon.c"
 #include "webplib/enc/vp8l_enc.c"
 #include "webplib/enc/picture_psnr_enc.c"
 #include "webplib/enc/picture_rescale_enc.c"
@@ -109,6 +111,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005 4245 4701)
 #include "webplib/dsp/lossless_enc.c"
 #include "webplib/dsp/lossless_enc_sse2.c"
 #include "webplib/dsp/lossless_enc_sse41.c"
+#include "webplib/dsp/lossless_enc_neon.c"
 #undef MIN
 #undef MAX
 #include "webplib/sharpyuv/sharpyuv_gamma.c"
@@ -117,6 +120,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005 4245 4701)
 #include "webplib/utils/quant_levels_utils.c"
 #include "webplib/sharpyuv/sharpyuv_dsp.c"
 #include "webplib/sharpyuv/sharpyuv_sse2.c"
+#include "webplib/sharpyuv/sharpyuv_neon.c"
 #include "webplib/utils/huffman_encode_utils.c"
 #include "webplib/enc/backward_references_cost_enc.c"
 

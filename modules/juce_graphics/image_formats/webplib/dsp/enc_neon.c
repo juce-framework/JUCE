@@ -27,8 +27,8 @@
 // This code is pretty much the same as TransformOne in the dec_neon.c, except
 // for subtraction to *ref. See the comments there for algorithmic explanations.
 
-static const int16_t kC1 = 20091;
-static const int16_t kC2 = 17734;  // half of kC2, actually. See comment above.
+static const int16_t kC1_NEON_ENC = 20091;
+static const int16_t kC2_NEON_ENC = 17734;  // half of kC2, actually. See comment above.
 
 // This code works but is *slower* than the inlined-asm version below
 // (with gcc-4.6). So we disable it for now. Later, it'll be conditional to
@@ -43,7 +43,7 @@ static WEBP_INLINE int16x8_t ConvertU8ToS16_NEON(uint32x2_t v) {
 
 // Performs unsigned 8b saturation on 'dst01' and 'dst23' storing the result
 // to the corresponding rows of 'dst'.
-static WEBP_INLINE void SaturateAndStore4x4_NEON(uint8_t* const dst,
+static WEBP_INLINE void SaturateAndStore4x4_NEON_ENC(uint8_t* const dst,
                                                  const int16x8_t dst01,
                                                  const int16x8_t dst23) {
   // Unsigned saturate to 8b.
@@ -79,11 +79,11 @@ static WEBP_INLINE void Add4x4_NEON(const int16x8_t row01,
     const int16x8_t out01 = vrsraq_n_s16(dst01_s16, row01, 3);
     const int16x8_t out23 = vrsraq_n_s16(dst23_s16, row23, 3);
     // Add the inverse transform.
-    SaturateAndStore4x4_NEON(dst, out01, out23);
+    SaturateAndStore4x4_NEON_ENC(dst, out01, out23);
   }
 }
 
-static WEBP_INLINE void Transpose8x2_NEON(const int16x8_t in0,
+static WEBP_INLINE void Transpose8x2_NEON_ENC(const int16x8_t in0,
                                           const int16x8_t in1,
                                           int16x8x2_t* const out) {
   // a0 a1 a2 a3 | b0 b1 b2 b3   => a0 b0 c0 d0 | a1 b1 c1 d1
@@ -93,7 +93,7 @@ static WEBP_INLINE void Transpose8x2_NEON(const int16x8_t in0,
   *out = vzipq_s16(tmp0.val[0], tmp0.val[1]);
 }
 
-static WEBP_INLINE void TransformPass_NEON(int16x8x2_t* const rows) {
+static WEBP_INLINE void TransformPass_NEON_ENC(int16x8x2_t* const rows) {
   // {rows} = in0 | in4
   //          in8 | in12
   // B1 = in4 | in12
@@ -101,8 +101,8 @@ static WEBP_INLINE void TransformPass_NEON(int16x8x2_t* const rows) {
       vcombine_s16(vget_high_s16(rows->val[0]), vget_high_s16(rows->val[1]));
   // C0 = kC1 * in4 | kC1 * in12
   // C1 = kC2 * in4 | kC2 * in12
-  const int16x8_t C0 = vsraq_n_s16(B1, vqdmulhq_n_s16(B1, kC1), 1);
-  const int16x8_t C1 = vqdmulhq_n_s16(B1, kC2);
+  const int16x8_t C0 = vsraq_n_s16(B1, vqdmulhq_n_s16(B1, kC1_NEON_ENC), 1);
+  const int16x8_t C1 = vqdmulhq_n_s16(B1, kC2_NEON_ENC);
   const int16x4_t a = vqadd_s16(vget_low_s16(rows->val[0]),
                                 vget_low_s16(rows->val[1]));   // in0 + in8
   const int16x4_t b = vqsub_s16(vget_low_s16(rows->val[0]),
@@ -116,15 +116,15 @@ static WEBP_INLINE void TransformPass_NEON(int16x8x2_t* const rows) {
   const int16x8_t E0 = vqaddq_s16(D0, D1);      // a+d | b+c
   const int16x8_t E_tmp = vqsubq_s16(D0, D1);   // a-d | b-c
   const int16x8_t E1 = vcombine_s16(vget_high_s16(E_tmp), vget_low_s16(E_tmp));
-  Transpose8x2_NEON(E0, E1, rows);
+  Transpose8x2_NEON_ENC(E0, E1, rows);
 }
 
 static void ITransformOne_NEON(const uint8_t* ref,
                                const int16_t* in, uint8_t* dst) {
   int16x8x2_t rows;
   INIT_VECTOR2(rows, vld1q_s16(in + 0), vld1q_s16(in + 8));
-  TransformPass_NEON(&rows);
-  TransformPass_NEON(&rows);
+  TransformPass_NEON_ENC(&rows);
+  TransformPass_NEON_ENC(&rows);
   Add4x4_NEON(rows.val[0], rows.val[1], ref, dst);
 }
 
@@ -133,7 +133,7 @@ static void ITransformOne_NEON(const uint8_t* ref,
 static void ITransformOne_NEON(const uint8_t* ref,
                                const int16_t* in, uint8_t* dst) {
   const int kBPS = BPS;
-  const int16_t kC1C2[] = { kC1, kC2, 0, 0 };
+  const int16_t kC1C2[] = { kC1_NEON_ENC, kC2_NEON_ENC, 0, 0 };
 
   __asm__ volatile (
     "vld1.16         {q1, q2}, [%[in]]           \n"
