@@ -142,7 +142,7 @@ static void VerticalFilter_NEON(const uint8_t* data, int width, int height,
 //------------------------------------------------------------------------------
 // Gradient filter.
 
-static WEBP_INLINE int GradientPredictor_C(uint8_t a, uint8_t b, uint8_t c) {
+static WEBP_INLINE int GradientPredictor_C_neon(uint8_t a, uint8_t b, uint8_t c) {
   const int g = a + b - c;
   return ((g & ~0xff) == 0) ? g : (g < 0) ? 0 : 255;  // clip to 8bit
 }
@@ -161,7 +161,7 @@ static void GradientPredictDirect_NEON(const uint8_t* const row,
     vst1_u8(&out[i], vsub_u8(F, E));
   }
   for (; i < length; ++i) {
-    out[i] = row[i] - GradientPredictor_C(row[i - 1], top[i], top[i - 1]);
+    out[i] = row[i] - GradientPredictor_C_neon(row[i - 1], top[i], top[i - 1]);
   }
 }
 
@@ -287,7 +287,7 @@ static void GradientPredictInverse_NEON(const uint8_t* const in,
       vst1_u8(&row[i], out);
     }
     for (; i < length; ++i) {
-      row[i] = in[i] + GradientPredictor_C(row[i - 1], top[i], top[i - 1]);
+      row[i] = in[i] + GradientPredictor_C_neon(row[i - 1], top[i], top[i - 1]);
     }
   }
 }
