@@ -77,19 +77,19 @@ void SharpYuvInitGammaTables(void) {
   }
 }
 
-static WEBP_INLINE int Shift_sharpyuv_gamma(int v, int shift) {
+static WEBP_INLINE int Shift_SHARPYUV_GAMMA(int v, int shift) {
   return (shift >= 0) ? (v << shift) : (v >> -shift);
 }
 
 static WEBP_INLINE uint32_t FixedPointInterpolation(int v, uint32_t* tab,
                                                     int tab_pos_shift_right,
                                                     int tab_value_shift) {
-  const uint32_t tab_pos = Shift_sharpyuv_gamma(v, -tab_pos_shift_right);
+  const uint32_t tab_pos = Shift_SHARPYUV_GAMMA(v, -tab_pos_shift_right);
   // fractional part, in 'tab_pos_shift' fixed-point precision
   const uint32_t x = v - (tab_pos << tab_pos_shift_right);  // fractional part
   // v0 / v1 are in kGammaToLinearBits fixed-point precision (range [0..1])
-  const uint32_t v0 = Shift_sharpyuv_gamma(tab[tab_pos + 0], tab_value_shift);
-  const uint32_t v1 = Shift_sharpyuv_gamma(tab[tab_pos + 1], tab_value_shift);
+  const uint32_t v0 = Shift_SHARPYUV_GAMMA(tab[tab_pos + 0], tab_value_shift);
+  const uint32_t v1 = Shift_SHARPYUV_GAMMA(tab[tab_pos + 1], tab_value_shift);
   // Final interpolation.
   const uint32_t v2 = (v1 - v0) * x;  // note: v1 >= v0.
   const int half =

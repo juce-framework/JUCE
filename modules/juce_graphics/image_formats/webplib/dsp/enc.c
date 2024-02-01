@@ -17,7 +17,7 @@
 #include "../dsp/dsp.h"
 #include "../enc/vp8i_enc.h"
 
-static WEBP_INLINE uint8_t clip_8b_enc(int v) {
+static WEBP_INLINE uint8_t clip_8b_ENC(int v) {
   return (!(v & ~0xff)) ? v : (v < 0) ? 0 : 255;
 }
 
@@ -94,7 +94,7 @@ static WEBP_TSAN_IGNORE_FUNCTION void InitTables(void) {
   if (!tables_ok) {
     int i;
     for (i = -255; i <= 255 + 255; ++i) {
-      clip1_enc[255 + i] = clip_8b_enc(i);
+      clip1_enc[255 + i] = clip_8b_ENC(i);
     }
     tables_ok = 1;
   }
@@ -107,7 +107,7 @@ static WEBP_TSAN_IGNORE_FUNCTION void InitTables(void) {
 #if !WEBP_NEON_OMIT_C_CODE
 
 #define STORE(x, y, v) \
-  dst[(x) + (y) * BPS] = clip_8b_enc(ref[(x) + (y) * BPS] + ((v) >> 3))
+  dst[(x) + (y) * BPS] = clip_8b_ENC(ref[(x) + (y) * BPS] + ((v) >> 3))
 
 static const int kC1 = 20091 + (1 << 16);
 static const int kC2 = 35468;

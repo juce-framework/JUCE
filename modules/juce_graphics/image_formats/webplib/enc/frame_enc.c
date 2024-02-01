@@ -551,7 +551,7 @@ static void ResetSideInfo(const VP8EncIterator* const it) {
 }
 #endif  // !defined(WEBP_DISABLE_STATS)
 
-static double GetPSNR_frame_enc(uint64_t mse, uint64_t size) {
+static double GetPSNR_FRAME_ENC(uint64_t mse, uint64_t size) {
   return (mse > 0 && size > 0) ? 10. * log10(255. * 255. * size / mse) : 99;
 }
 
@@ -606,7 +606,7 @@ static uint64_t OneStatPass(VP8Encoder* const enc, VP8RDLevel rd_opt,
     size = ((size + size_p0 + 1024) >> 11) + HEADER_SIZE_ESTIMATE;
     s->value = (double)size;
   } else {
-    s->value = GetPSNR_frame_enc(distortion, pixel_count);
+    s->value = GetPSNR_FRAME_ENC(distortion, pixel_count);
   }
   return size_p0;
 }
@@ -857,7 +857,7 @@ int VP8EncTokenLoop(VP8Encoder* const enc) {
       size += HEADER_SIZE_ESTIMATE;
       stats.value = (double)size;
     } else {  // compute and store PSNR
-      stats.value = GetPSNR_frame_enc(distortion, pixel_count);
+      stats.value = GetPSNR_FRAME_ENC(distortion, pixel_count);
     }
 
 #if (DEBUG_SEARCH > 0)

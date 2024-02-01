@@ -586,10 +586,10 @@ static void CollectHistogram_SSE2(const uint8_t* ref, const uint8_t* pred,
       const __m128i out1 = _mm_loadu_si128((__m128i*)&out[8]);
       const __m128i d0 = _mm_sub_epi16(zero, out0);
       const __m128i d1 = _mm_sub_epi16(zero, out1);
-      const __m128i abs0_enc_sse2 = _mm_max_epi16(out0, d0);   // abs(v), 16b
+      const __m128i abs0_ENC_SSE2 = _mm_max_epi16(out0, d0);   // abs(v), 16b
       const __m128i abs1 = _mm_max_epi16(out1, d1);
       // v = abs(out) >> 3
-      const __m128i v0 = _mm_srai_epi16(abs0_enc_sse2, 3);
+      const __m128i v0 = _mm_srai_epi16(abs0_ENC_SSE2, 3);
       const __m128i v1 = _mm_srai_epi16(abs1, 3);
       // bin = min(v, MAX_COEFF_THRESH)
       const __m128i bin0 = _mm_min_epi16(v0, max_coeff_thresh);

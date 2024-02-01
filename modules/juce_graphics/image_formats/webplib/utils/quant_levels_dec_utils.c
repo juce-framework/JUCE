@@ -71,7 +71,7 @@ typedef struct {
 
 //------------------------------------------------------------------------------
 #define CLIP_8b_MASK (int)(~0U << (8 + DFIX))
-static WEBP_INLINE uint8_t clip_8b_quant_levels(int v) {
+static WEBP_INLINE uint8_t clip_8b_QUANT_DEC(int v) {
   return (!(v & CLIP_8b_MASK)) ? (uint8_t)(v >> DFIX) : (v < 0) ? 0u : 255u;
 }
 #undef CLIP_8b_MASK
@@ -145,9 +145,9 @@ static void ApplyFilter(SmoothParams* const p) {
     if (v < p->max_ && v > p->min_) {
       const int c = (v << DFIX) + correction[average[x] - (v << LFIX)];
 #if defined(USE_DITHERING)
-      dst[x] = clip_8b_quant_levels(c + dither[x % DSIZE]);
+      dst[x] = clip_8b_QUANT_DEC(c + dither[x % DSIZE]);
 #else
-      dst[x] = clip_8b_quant_levels(c);
+      dst[x] = clip_8b_QUANT_DEC(c);
 #endif
     }
   }
