@@ -241,7 +241,7 @@ public:
         @param newQuality               a value 0 to 1.0, where 0 is low quality, 1.0 is best, or
                                         any negative value is "default" quality.  Ignored if lossless.
     */
-    void setQuality(bool shouldBeLossless, float newQuality = 0.85);
+    void setQuality(bool shouldBeLossless, float newQuality = 0.85f);
 
     //==============================================================================
     String getFormatName() override;

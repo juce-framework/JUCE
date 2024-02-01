@@ -26,6 +26,21 @@
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005 4245 4701)
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfloat-equal",
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wconversion",
+                                     "-Wcast-align",
+                                     "-Wno-sign-conversion",
+                                     "-Wconditional-uninitialized",
+                                     "-Wc++98-compat-extra-semi",
+                                     "-Wswitch-enum",
+                                     "-Wunused-function",
+                                     "-Wshadow")
+
+#if (JUCE_MAC || JUCE_IOS)
+#define DISABLE_TOKEN_BUFFER
+#endif
+
 #undef MULTIPLIER
 #include "webplib/sharpyuv/sharpyuv_cpu.c"
 #include "webplib/webp/decode.h"
@@ -124,7 +139,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC(4310 4127 4244 4005 4245 4701)
 #include "webplib/utils/huffman_encode_utils.c"
 #include "webplib/enc/backward_references_cost_enc.c"
 
-
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif
@@ -171,11 +186,10 @@ bool WEBPImageFormat::usesFileExtension (const File& f)  { return f.hasFileExten
 bool WEBPImageFormat::canUnderstand (InputStream& in)
 {
 #if JUCE_INCLUDE_WEBPLIB_CODE
-    int bytes = 1024;
-    juce::MemoryBlock data(bytes);
-    bytes = in.read(data.getData(), bytes);
+    
+    juce::MemoryBlock data(1024);
+    auto bytes = (size_t)in.read(data.getData(), data.getSize());
     int width, height = 0;
-
 
     bool canUnderstand = WebPGetInfo((uint8_t*)data.getData(), bytes, &width, &height);
     return canUnderstand;
@@ -193,10 +207,10 @@ Image WEBPImageFormat::decodeImage (InputStream& in)
     WebPBitstreamFeatures features;
 
     // read whole file from input stream
-    size_t streamSize = in.getTotalLength();
+    size_t streamSize = (size_t)in.getTotalLength();
     size_t bytesRead = 0;
     juce::MemoryBlock data(streamSize);
-    bytesRead = in.read(data.getData(), streamSize);
+    bytesRead = (size_t)in.read(data.getData(), streamSize);
     if (bytesRead != streamSize)
     {
         // did not ready expected amount of data
@@ -251,7 +265,7 @@ bool WEBPImageFormat::writeImageToStream (const Image& image, OutputStream& dest
     }
     else
     {
-        auto webpQuality = quality * 100.0;
+        auto webpQuality = quality * 100.0f;
         if (quality < 0)
             webpQuality = 85.0;
         else if (quality > 1.0)
@@ -259,9 +273,9 @@ bool WEBPImageFormat::writeImageToStream (const Image& image, OutputStream& dest
 
 
         if (image.getFormat() == Image::RGB)
-            bytesEncoded = WebPEncodeBGR(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, quality, &encodedData);
+            bytesEncoded = WebPEncodeBGR(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, webpQuality, &encodedData);
         else if (image.getFormat() == Image::ARGB)
-            bytesEncoded = WebPEncodeBGRA(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, quality, &encodedData);
+            bytesEncoded = WebPEncodeBGRA(imagePtr, image.getWidth(), image.getHeight(), imageData.lineStride, webpQuality, &encodedData);
         else
         {
             jassertfalse;
