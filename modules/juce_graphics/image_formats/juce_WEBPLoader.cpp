@@ -187,11 +187,11 @@ bool WEBPImageFormat::canUnderstand (InputStream& in)
 {
 #if JUCE_INCLUDE_WEBPLIB_CODE
     
-    juce::MemoryBlock data(1024);
-    auto bytes = (size_t)in.read(data.getData(), data.getSize());
+    uint8_t data[1024];
+    auto bytes = (size_t)in.read(data, sizeof(data));
     int width, height = 0;
 
-    bool canUnderstand = WebPGetInfo((uint8_t*)data.getData(), bytes, &width, &height);
+    bool canUnderstand = WebPGetInfo(data, bytes, &width, &height);
     return canUnderstand;
 #else
     jassertfalse;
