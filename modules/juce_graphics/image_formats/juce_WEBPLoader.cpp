@@ -230,9 +230,19 @@ Image WEBPImageFormat::decodeImage (InputStream& in)
     uint8* p = destData.getPixelPointer(0, 0);
 
     if (features.has_alpha)
-        jassert(NULL!=WebPDecodeBGRAInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride));
+    {
+        if (!WebPDecodeBGRAInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride))
+        {
+            jassertfalse;
+        }
+    }
     else
-        jassert(NULL!=WebPDecodeBGRInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride));
+    {
+        if (!WebPDecodeBGRInto((uint8_t*)data.getData(), bytesRead, p, destData.size, destData.lineStride))
+        {
+            jassertfalse;
+        }
+    }
 
     return image;
 #else
