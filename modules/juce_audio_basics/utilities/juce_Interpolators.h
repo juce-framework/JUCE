@@ -158,7 +158,8 @@ public:
     Note that the resampler is stateful, so when there's a break in the continuity
     of the input stream you're feeding it, you should call reset() before feeding
     it any new data. And like with any other stateful filter, if you're resampling
-    multiple channels, make sure each one uses its own LinearInterpolator object.
+    multiple channels, make sure each one uses its own WindowedSincInterpolator
+    object.
 
     @see GenericInterpolator
 
