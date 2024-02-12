@@ -3,6 +3,19 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 7.0.10
+
+  - Fixed multiple issues selecting devices in AudioDeviceSelector
+  - Updated the bundled Oboe version
+  - Fixed multiple issues with Timer
+  - Updated the bundled version of FLAC
+  - Added configuration options for sockets
+  - Added new JSON::Formatter
+  - Added support for Xcode 15.1
+  - Update OpenGL compatibility headers
+  - Added ChildProcessManager
+  - Fixed multiple MIDI-CI issues
+
 ## Version 7.0.9
 
   - Added MIDI-CI support
