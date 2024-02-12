@@ -551,6 +551,37 @@ public:
 
         /** Sets the direction of the popup menu relative to the target screen area. */
         [[nodiscard]] Options withPreferredPopupDirection (PopupDirection direction) const;
+        
+        
+        /** Provide an X value from the left edge of any PopupMenu item such
+        that clicks to the left of the X value will NOT select the Popup
+        menu item, but clicks to the right will select the Popup men item.
+
+        This is useful for blocking off area for extra UI in a
+        PopupMenu::CustomComponent that you do not want to be used for
+        selecting a menu item.
+
+        @note Added by Tim for FAW SampleComboBox.h so that we could prevent
+              the sample audio preview buttons in the SamplePopMenuItem
+              from selecting the item.
+     */
+        [[nodiscard]] Options withSelectableAreaLeftInset (int xInsetAmount) const;
+
+
+        /** Provide an X value from the right edge of any PopupMenu item such
+        that clicks to the right of the X value will NOT select the Popup
+        menu item, but clicks to the left will select the Popup men item.
+
+        This is useful for blocking off area for extra UI in a
+        PopupMenu::CustomComponent that you do not want to be used for
+        selecting a menu item.
+
+        @note Added by Tim for FAW SampleComboBox.h so that we could prevent
+              the favorite buttons in the SamplePopMenuItem from selecting
+              the item.
+    */
+        [[nodiscard]] Options withSelectableAreaRightInset (int xInsetAmount) const;
+        
 
         /** Sets an item to select in the menu.
 
