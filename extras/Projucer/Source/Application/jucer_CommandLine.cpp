@@ -873,17 +873,17 @@ namespace
                   << std::endl
                   << "Usage: " << std::endl
                   << std::endl
-                  << " " << appName << " --clear-maingroup project_file" << std::endl
-                  << "    Removes all resource file references from a project." << std::endl
-                  << std::endl
-                  << " " << appName << " --add-file project_file path_to_file_to_add" << std::endl
-                  << "    Adds an existing file or directory to a project." << std::endl
-                  << std::endl
                   << " " << appName << " --resave project_file" << std::endl
                   << "    Resaves all files and resources in a project. Add the \"--fix-missing-dependencies\" option to automatically fix any missing module dependencies." << std::endl
                   << std::endl
                   << " " << appName << " --resave-resources project_file" << std::endl
                   << "    Resaves just the binary resources for a project." << std::endl
+                  << std::endl
+                  << " " << appName << " --clear-maingroup project_file" << std::endl
+                  << "    Removes all resource file references from a project." << std::endl
+                  << std::endl
+                  << " " << appName << " --add-file project_file path_to_file_to_add" << std::endl
+                  << "    Adds an existing file or directory to a project." << std::endl
                   << std::endl
                   << " " << appName << " --get-version project_file" << std::endl
                   << "    Returns the version number of a project." << std::endl
