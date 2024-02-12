@@ -51,6 +51,28 @@ struct ZipFile::ZipEntryHolder
         entry.isSymbolicLink = (fileType == 0xA);
 
         entry.filename = String::fromUTF8 (buffer + 46, fileNameLen);
+
+        auto const extraFieldLength = ByteOrder::littleEndianShort(buffer + 30);
+        if (extraFieldLength != 0)
+        {
+            auto extraFieldOffset = 0;
+            auto* extraHeaderPtr = buffer + 46 + fileNameLen;
+            auto* extraSectionPtr = extraHeaderPtr;
+            while (extraFieldOffset < extraFieldLength) {
+                auto extraHeaderTag = ByteOrder::littleEndianShort(extraSectionPtr);
+                auto extraFieldSectionLength = ByteOrder::littleEndianShort(extraSectionPtr + 2);
+                if (extraHeaderTag == 0x0001) // Zip64 Tag
+                {
+                    entry.uncompressedSize = (int64)ByteOrder::littleEndianInt64(extraSectionPtr + 4);
+                    if (extraFieldSectionLength > 8)
+                        compressedSize = (int64)ByteOrder::littleEndianInt64(extraHeaderPtr + 12);
+                    if (extraFieldSectionLength > 16)
+                        streamOffset = (int64)ByteOrder::littleEndianInt64(extraHeaderPtr + 20);
+                }
+                extraFieldOffset += extraFieldSectionLength + 4;
+                extraSectionPtr = extraHeaderPtr + extraFieldOffset;
+            }
+        }
     }
 
     static Time parseFileTime (uint32 time, uint32 date) noexcept
