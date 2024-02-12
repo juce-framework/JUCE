@@ -355,7 +355,7 @@ String::String (CharPointer_UTF32 start, CharPointer_UTF32 end)  : text (StringH
 
 String::String (const std::string& s) : text (StringHolderUtils::createFromFixedLength (s.data(), s.size())) {}
 String::String (StringRef s)          : text (StringHolderUtils::createFromCharPointer (s.text)) {}
-
+String::String(std::string_view s) : String(s.data(), s.size()) {}
 String String::charToString (juce_wchar character)
 {
     String result (PreallocationBytes (CharPointerType::getBytesRequiredFor (character)));
@@ -2137,6 +2137,10 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
     }
 
     return {};
+}
+String String::fromUTF8 (std::string_view buffer)
+{
+    return fromUTF8(buffer.data(), buffer.size());
 }
 
 JUCE_END_IGNORE_WARNINGS_MSVC
