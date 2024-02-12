@@ -152,6 +152,17 @@ namespace
                 modules.tryToFixMissingDependencies (m);
         }
 
+        void clearMainGroup()
+        {
+            auto mainGroup = project->getMainGroup();
+            auto mainGrouID = mainGroup.getID();
+
+            mainGroup.removeItemFromProject();
+            Project::Item cleanMainGroup (*project, ValueTree ("MAINGROUP"), false);
+            cleanMainGroup.setID(mainGrouID);
+            project->getProjectRoot().addChild (cleanMainGroup.state, 0, nullptr);
+        }
+
         void addFile (const File& file)
         {
             project->getMainGroup().addFileRetainingSortOrder (file, true);
@@ -174,6 +185,22 @@ namespace
                   << proj.project->getFile().getFullPathName() << std::endl;
 
         proj.save (justSaveResources, args.containsOption ("--fix-missing-dependencies"));
+    }
+
+    static void clearMainGroup (const ArgumentList& args)
+    {
+        args.checkMinNumArguments (2);
+        LoadedProject proj (args[1]);
+
+        std::cout << "Clearing MAINGROUP: "
+                  << std::endl;
+
+        proj.clearMainGroup ();
+
+        std::cout << "Re-saving file: "
+                  << proj.project->getFile().getFullPathName() << std::endl;
+
+        proj.save (true, args.containsOption ("--fix-missing-dependencies"));
     }
 
     static void addFile (const ArgumentList& args)
@@ -846,8 +873,12 @@ namespace
                   << std::endl
                   << "Usage: " << std::endl
                   << std::endl
+                  << " " << appName << " --clear-maingroup project_file" << std::endl
+                  << "    Removes all resource file references from a project." << std::endl
+                  << std::endl
                   << " " << appName << " --add-file project_file path_to_file_to_add" << std::endl
                   << "    Adds an existing file or directory to a project." << std::endl
+                  << std::endl
                   << " " << appName << " --resave project_file" << std::endl
                   << "    Resaves all files and resources in a project. Add the \"--fix-missing-dependencies\" option to automatically fix any missing module dependencies." << std::endl
                   << std::endl
@@ -930,6 +961,7 @@ int performCommandLine (const ArgumentList& args)
         if (matchCommand ("help"))                     { showHelp();                            return 0; }
         if (matchCommand ("h"))                        { showHelp();                            return 0; }
         if (matchCommand ("resave"))                   { resaveProject (args, false);           return 0; }
+        if (matchCommand ("clear-maingroup"))          { clearMainGroup (args);                 return 0; }
         if (matchCommand ("add-file"))                 { addFile (args);                        return 0; }
         if (matchCommand ("resave-resources"))         { resaveProject (args, true);            return 0; }
         if (matchCommand ("get-version"))              { getVersion (args);                     return 0; }
