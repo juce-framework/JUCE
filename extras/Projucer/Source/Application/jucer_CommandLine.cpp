@@ -200,7 +200,7 @@ namespace
         std::cout << "Re-saving file: "
                   << proj.project->getFile().getFullPathName() << std::endl;
 
-        proj.save (true, args.containsOption ("--fix-missing-dependencies"));
+        proj.save (false, args.containsOption ("--fix-missing-dependencies"));
     }
 
     static void addFile (const ArgumentList& args)
@@ -217,7 +217,7 @@ namespace
         std::cout << "Re-saving file: "
                   << proj.project->getFile().getFullPathName() << std::endl;
 
-        proj.save (true, args.containsOption ("--fix-missing-dependencies"));
+        proj.save (false, args.containsOption ("--fix-missing-dependencies"));
     }
 
     //==============================================================================
