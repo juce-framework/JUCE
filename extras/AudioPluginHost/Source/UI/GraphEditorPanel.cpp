@@ -33,8 +33,8 @@
  class AUScanner
  {
  public:
-     AUScanner (KnownPluginList& list)
-         : knownPluginList (list), pool (5)
+     explicit AUScanner (KnownPluginList& list)
+         : knownPluginList (list)
      {
          knownPluginList.clearBlacklistedFiles();
          paths = formatToScan.getDefaultLocationsToSearch();
@@ -49,7 +49,8 @@
      std::unique_ptr<PluginDirectoryScanner> scanner;
      FileSearchPath paths;
 
-     ThreadPool pool;
+     static constexpr auto numJobs = 5;
+     ThreadPool pool { ThreadPoolOptions{}.withNumberOfThreads (numJobs) };
 
      void startScan()
      {
@@ -59,24 +60,21 @@
          scanner.reset (new PluginDirectoryScanner (knownPluginList, formatToScan, paths,
                                                     true, deadMansPedalFile, true));
 
-         for (int i = 5; --i >= 0;)
+         for (int i = numJobs; --i >= 0;)
              pool.addJob (new ScanJob (*this), true);
      }
 
      bool doNextScan()
      {
          String pluginBeingScanned;
-         if (scanner->scanNextFile (true, pluginBeingScanned))
-             return true;
-
-         return false;
+         return scanner->scanNextFile (true, pluginBeingScanned);
      }
 
-     struct ScanJob  : public ThreadPoolJob
+     struct ScanJob final : public ThreadPoolJob
      {
          ScanJob (AUScanner& s)  : ThreadPoolJob ("pluginscan"), scanner (s) {}
 
-         JobStatus runJob()
+         JobStatus runJob() override
          {
              while (scanner.doNextScan() && ! shouldExit())
              {}
@@ -94,8 +92,8 @@
 #endif
 
 //==============================================================================
-struct GraphEditorPanel::PinComponent   : public Component,
-                                          public SettableTooltipClient
+struct GraphEditorPanel::PinComponent final : public Component,
+                                              public SettableTooltipClient
 {
     PinComponent (GraphEditorPanel& p, AudioProcessorGraph::NodeAndChannel pinToUse, bool isIn)
         : panel (p), graph (p.graph), pin (pinToUse), isInput (isIn)
@@ -172,10 +170,10 @@ struct GraphEditorPanel::PinComponent   : public Component,
 };
 
 //==============================================================================
-struct GraphEditorPanel::PluginComponent   : public Component,
-                                             public Timer,
-                                             private AudioProcessorParameter::Listener,
-                                             private AsyncUpdater
+struct GraphEditorPanel::PluginComponent final : public Component,
+                                                 public Timer,
+                                                 private AudioProcessorParameter::Listener,
+                                                 private AsyncUpdater
 {
     PluginComponent (GraphEditorPanel& p, AudioProcessorGraph::NodeID id)  : panel (p), graph (p.graph), pluginID (id)
     {
@@ -556,8 +554,8 @@ struct GraphEditorPanel::PluginComponent   : public Component,
 
 
 //==============================================================================
-struct GraphEditorPanel::ConnectorComponent   : public Component,
-                                                public SettableTooltipClient
+struct GraphEditorPanel::ConnectorComponent final : public Component,
+                                                    public SettableTooltipClient
 {
     explicit ConnectorComponent (GraphEditorPanel& p)
         : panel (p), graph (p.graph)
@@ -849,11 +847,11 @@ void GraphEditorPanel::changeListenerCallback (ChangeBroadcaster*)
 void GraphEditorPanel::updateComponents()
 {
     for (int i = nodes.size(); --i >= 0;)
-        if (graph.graph.getNodeForId (nodes.getUnchecked(i)->pluginID) == nullptr)
+        if (graph.graph.getNodeForId (nodes.getUnchecked (i)->pluginID) == nullptr)
             nodes.remove (i);
 
     for (int i = connectors.size(); --i >= 0;)
-        if (! graph.graph.isConnected (connectors.getUnchecked(i)->connection))
+        if (! graph.graph.isConnected (connectors.getUnchecked (i)->connection))
             connectors.remove (i);
 
     for (auto* fc : nodes)
@@ -896,9 +894,9 @@ void GraphEditorPanel::showPopupMenu (Point<int> mousePos)
         menu->showMenuAsync ({},
                              ModalCallbackFunction::create ([this, mousePos] (int r)
                                                             {
-                                                                if (r > 0)
-                                                                    if (auto* mainWin = findParentComponentOfClass<MainHostWindow>())
-                                                                        createNewPlugin (mainWin->getChosenType (r), mousePos);
+                                                                if (auto* mainWin = findParentComponentOfClass<MainHostWindow>())
+                                                                    if (const auto chosen = mainWin->getChosenType (r))
+                                                                        createNewPlugin (*chosen, mousePos);
                                                             }));
     }
 }
@@ -1003,8 +1001,8 @@ void GraphEditorPanel::timerCallback()
 }
 
 //==============================================================================
-struct GraphDocumentComponent::TooltipBar   : public Component,
-                                              private Timer
+struct GraphDocumentComponent::TooltipBar final : public Component,
+                                                  private Timer
 {
     TooltipBar()
     {
@@ -1040,8 +1038,8 @@ struct GraphDocumentComponent::TooltipBar   : public Component,
 };
 
 //==============================================================================
-class GraphDocumentComponent::TitleBarComponent    : public Component,
-                                                     private Button::Listener
+class GraphDocumentComponent::TitleBarComponent final : public Component,
+                                                        private Button::Listener
 {
 public:
     explicit TitleBarComponent (GraphDocumentComponent& graphDocumentComponent)
@@ -1136,9 +1134,9 @@ private:
 };
 
 //==============================================================================
-struct GraphDocumentComponent::PluginListBoxModel    : public ListBoxModel,
-                                                       public ChangeListener,
-                                                       public MouseListener
+struct GraphDocumentComponent::PluginListBoxModel final : public ListBoxModel,
+                                                          public ChangeListener,
+                                                          public MouseListener
 {
     PluginListBoxModel (ListBox& lb, KnownPluginList& kpl)
         : owner (lb),
@@ -1285,7 +1283,7 @@ void GraphDocumentComponent::resized()
     const int statusHeight = 20;
 
     if (isOnTouchDevice())
-        titleBarComponent->setBounds (r.removeFromTop(titleBarHeight));
+        titleBarComponent->setBounds (r.removeFromTop (titleBarHeight));
 
     keyboardComp->setBounds (r.removeFromBottom (keysHeight));
     statusBar->setBounds (r.removeFromBottom (statusHeight));

@@ -49,7 +49,7 @@ public:
 
 private:
     //==============================================================================
-    struct SaveThreadWithProgressWindow  : public ThreadWithProgressWindow
+    struct SaveThreadWithProgressWindow final : public ThreadWithProgressWindow
     {
     public:
         SaveThreadWithProgressWindow (ProjectSaver& ps,

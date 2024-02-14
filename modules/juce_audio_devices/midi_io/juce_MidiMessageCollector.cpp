@@ -56,7 +56,7 @@ void MidiMessageCollector::addMessageToQueue (const MidiMessage& message)
 
     // the messages that come in here need to be time-stamped correctly - see MidiInput
     // for details of what the number should be.
-    jassert (message.getTimeStamp() != 0);
+    jassert (! approximatelyEqual (message.getTimeStamp(), 0.0));
 
     auto sampleNumber = (int) ((message.getTimeStamp() - 0.001 * lastCallbackTime) * sampleRate);
 

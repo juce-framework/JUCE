@@ -17,12 +17,12 @@
 #include <algorithm>
 #include <unistd.h>
 
+#include "FlowGraphNode.h"
+#include "SourceI32.h"
+
 #if FLOWGRAPH_ANDROID_INTERNAL
 #include <audio_utils/primitives.h>
 #endif
-
-#include "FlowGraphNode.h"
-#include "SourceI32.h"
 
 using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
 

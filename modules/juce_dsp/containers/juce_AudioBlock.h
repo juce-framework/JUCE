@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 #ifndef DOXYGEN
@@ -891,5 +889,4 @@ private:
     friend class AudioBlock;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

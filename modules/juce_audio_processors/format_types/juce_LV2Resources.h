@@ -33,9 +33,7 @@
 
 #include <vector>
 
-namespace juce
-{
-namespace lv2
+namespace juce::lv2
 {
 
 struct BundleResource
@@ -52,8 +50,7 @@ struct Bundle
     static std::vector<Bundle> getAllBundles();
 };
 
-}
-}
+} // namespace juce::lv2
 
 std::vector<juce::lv2::Bundle> juce::lv2::Bundle::getAllBundles()
 {

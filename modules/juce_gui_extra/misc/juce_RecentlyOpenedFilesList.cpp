@@ -70,7 +70,7 @@ void RecentlyOpenedFilesList::removeFile (const File& file)
 void RecentlyOpenedFilesList::removeNonExistentFiles()
 {
     for (int i = getNumFiles(); --i >= 0;)
-        if (! getFile(i).exists())
+        if (! getFile (i).exists())
             files.remove (i);
 }
 
@@ -85,7 +85,7 @@ int RecentlyOpenedFilesList::createPopupMenuItems (PopupMenu& menuToAddTo,
 
     for (int i = 0; i < getNumFiles(); ++i)
     {
-        const File f (getFile(i));
+        const File f (getFile (i));
 
         if ((! dontAddNonExistentFiles) || f.exists())
         {

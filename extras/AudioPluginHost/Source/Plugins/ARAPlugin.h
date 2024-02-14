@@ -213,7 +213,7 @@ private:
 };
 
 //==============================================================================
-class AudioAccessController : public ARA::Host::AudioAccessControllerInterface
+class AudioAccessController final : public ARA::Host::AudioAccessControllerInterface
 {
 public:
     ARA::ARAAudioReaderHostRef createAudioReaderForSource (ARA::ARAAudioSourceHostRef audioSourceHostRef,
@@ -264,7 +264,7 @@ private:
     std::map<AudioReader*, std::unique_ptr<AudioReader>> audioReaders;
 };
 
-class ArchivingController : public ARA::Host::ArchivingControllerInterface
+class ArchivingController final : public ARA::Host::ArchivingControllerInterface
 {
 public:
     using ReaderConverter = ARAHostModel::ConversionFunctions<MemoryBlock*, ARA::ARAArchiveReaderHostRef>;
@@ -316,7 +316,7 @@ public:
     }
 };
 
-class ContentAccessController : public ARA::Host::ContentAccessControllerInterface
+class ContentAccessController final : public ARA::Host::ContentAccessControllerInterface
 {
 public:
     using Converter = ARAHostModel::ConversionFunctions<ARA::ARAContentType, ARA::ARAContentReaderHostRef>;
@@ -433,7 +433,7 @@ public:
     ARA::ARAContentBarSignature barSignature;
 };
 
-class ModelUpdateController : public ARA::Host::ModelUpdateControllerInterface
+class ModelUpdateController final : public ARA::Host::ModelUpdateControllerInterface
 {
 public:
     void notifyAudioSourceAnalysisProgress (ARA::ARAAudioSourceHostRef audioSourceHostRef,
@@ -465,7 +465,7 @@ public:
     }
 };
 
-class PlaybackController : public ARA::Host::PlaybackControllerInterface
+class PlaybackController final : public ARA::Host::PlaybackControllerInterface
 {
 public:
     void requestStartPlayback() noexcept override {}
@@ -484,7 +484,7 @@ public:
     void requestEnableCycle (bool enable) noexcept override { ignoreUnused (enable); }
 };
 
-struct SimplePlayHead  : public juce::AudioPlayHead
+struct SimplePlayHead final : public juce::AudioPlayHead
 {
     Optional<PositionInfo> getPosition() const override
     {
@@ -509,9 +509,9 @@ struct HostPlaybackController
     virtual void clearAudioSource() = 0;
 };
 
-class AudioSourceComponent  : public Component,
-                              public FileDragAndDropTarget,
-                              public ChangeListener
+class AudioSourceComponent final : public Component,
+                                   public FileDragAndDropTarget,
+                                   public ChangeListener
 {
 public:
     explicit AudioSourceComponent (HostPlaybackController& controller, juce::ChangeBroadcaster& bc)
@@ -607,8 +607,8 @@ public:
     }
 
 private:
-    class WaveformComponent  : public Component,
-                               public ChangeListener
+    class WaveformComponent final : public Component,
+                                    public ChangeListener
     {
     public:
         WaveformComponent (AudioSourceComponent& p)
@@ -701,14 +701,14 @@ private:
     TextButton playButton, goToStartButton;
 };
 
-class ARAPluginInstanceWrapper  : public AudioPluginInstance
+class ARAPluginInstanceWrapper final : public AudioPluginInstance
 {
 public:
-    class ARATestHost  : public HostPlaybackController,
-                         public juce::ChangeBroadcaster
+    class ARATestHost final : public HostPlaybackController,
+                              public juce::ChangeBroadcaster
     {
     public:
-        class Editor  : public AudioProcessorEditor
+        class Editor final : public AudioProcessorEditor
         {
         public:
             explicit Editor (ARATestHost& araTestHost)

@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData);
     void overwriteFileIfDifferentOrThrow (const File& file, const String& newData);
 
@@ -70,7 +69,7 @@ namespace build_tools
                               const String& utf8PointerVariable,
                               const StringArray& strings,
                               const StringArray& codeToExecute,
-                              const int indentLevel);
+                              int indentLevel);
 
     String unixStylePath (const String& path);
     String windowsStylePath (const String& path);
@@ -82,5 +81,5 @@ namespace build_tools
     String getRelativePathFrom (const File& file, const File& sourceFolder);
 
     void writeStreamToFile (const File& file, const std::function<void (MemoryOutputStream&)>& writer);
-}
-}
+
+} // namespace juce::build_tools

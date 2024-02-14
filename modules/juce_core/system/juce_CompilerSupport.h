@@ -63,6 +63,15 @@
   #endif
  #endif
 
+ #if ! defined (JUCE_SILENCE_XCODE_15_LINKER_WARNING)                          \
+     && defined (__apple_build_version__)                                      \
+     && __apple_build_version__ >= 15000000                                    \
+     && __apple_build_version__ <  15000100
+
+  // Due to known issues, the linker in Xcode 15.0 may produce broken binaries.
+  #error Please upgrade to Xcode 15.1 or higher
+ #endif
+
  #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
 

@@ -48,7 +48,7 @@ namespace juce
                 copySomeData (myBuffer + scope.startIndex1, someData, scope.blockSize1);
 
             if (scope.blockSize2 > 0)
-                copySomeData (myBuffer + scope.startIndex2, someData, scope.blockSize2);
+                copySomeData (myBuffer + scope.startIndex2, someData + scope.blockSize1, scope.blockSize2);
         }
 
         void readFromFifo (int* someData, int numItems)
@@ -172,7 +172,7 @@ public:
         }
         @endcode
 
-        @param numWanted        indicates how many items you'd like to add to the buffer
+        @param numWanted        indicates how many items you'd like to read from the buffer
         @param startIndex1      on exit, this will contain the start index in your buffer at which your data should be written
         @param blockSize1       on exit, this indicates how many items can be written to the block starting at startIndex1
         @param startIndex2      on exit, this will contain the start index in your buffer at which any data that didn't fit into

@@ -89,7 +89,7 @@ public:
 
                 if (! CharacterFunctions::isWhitespace (lastAtom.atomText.getLastCharacter()))
                 {
-                    auto& first = other.atoms.getReference(0);
+                    auto& first = other.atoms.getReference (0);
 
                     if (! CharacterFunctions::isWhitespace (first.atomText[0]))
                     {
@@ -105,7 +105,7 @@ public:
 
             while (i < other.atoms.size())
             {
-                atoms.add (other.atoms.getReference(i));
+                atoms.add (other.atoms.getReference (i));
                 ++i;
             }
         }
@@ -118,7 +118,7 @@ public:
 
         for (int i = 0; i < atoms.size(); ++i)
         {
-            auto& atom = atoms.getReference(i);
+            auto& atom = atoms.getReference (i);
             auto nextIndex = index + atom.numChars;
 
             if (index == indexToBreakAt)
@@ -587,7 +587,7 @@ struct TextEditor::Iterator
         int j;
         for (j = 0; j < numGlyphs; ++j)
         {
-            auto& pg = g.getGlyph(j);
+            auto& pg = g.getGlyph (j);
 
             if ((pg.getLeft() + pg.getRight()) / 2 > xToFind)
                 break;
@@ -741,7 +741,7 @@ private:
 
 
 //==============================================================================
-struct TextEditor::InsertAction  : public UndoableAction
+struct TextEditor::InsertAction final : public UndoableAction
 {
     InsertAction (TextEditor& ed, const String& newText, int insertPos,
                   const Font& newFont, Colour newColour, int oldCaret, int newCaret)
@@ -783,7 +783,7 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::RemoveAction  : public UndoableAction
+struct TextEditor::RemoveAction final : public UndoableAction
 {
     RemoveAction (TextEditor& ed, Range<int> rangeToRemove, int oldCaret, int newCaret,
                   const Array<UniformTextSection*>& oldSections)
@@ -828,9 +828,9 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::TextHolderComponent  : public Component,
-                                          public Timer,
-                                          public Value::Listener
+struct TextEditor::TextHolderComponent final : public Component,
+                                               public Timer,
+                                               public Value::Listener
 {
     TextHolderComponent (TextEditor& ed)  : owner (ed)
     {
@@ -878,7 +878,7 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::TextEditorViewport  : public Viewport
+struct TextEditor::TextEditorViewport final : public Viewport
 {
     TextEditorViewport (TextEditor& ed) : owner (ed) {}
 
@@ -948,8 +948,6 @@ TextEditor::TextEditor (const String& name, juce_wchar passwordChar)
 
 TextEditor::~TextEditor()
 {
-    giveAwayKeyboardFocus();
-
     if (auto* peer = getPeer())
         peer->refreshTextInputTarget();
 
@@ -1122,7 +1120,6 @@ void TextEditor::lookAndFeelChanged()
 {
     caret.reset();
     recreateCaret();
-    repaint();
 }
 
 void TextEditor::parentHierarchyChanged()
@@ -1810,20 +1807,20 @@ void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
 
     if (passwordCharacter == 0)
     {
-        m.addItem (StandardApplicationCommandIDs::cut,   TRANS("Cut"), writable);
-        m.addItem (StandardApplicationCommandIDs::copy,  TRANS("Copy"), ! selection.isEmpty());
+        m.addItem (StandardApplicationCommandIDs::cut,   TRANS ("Cut"), writable);
+        m.addItem (StandardApplicationCommandIDs::copy,  TRANS ("Copy"), ! selection.isEmpty());
     }
 
-    m.addItem (StandardApplicationCommandIDs::paste,     TRANS("Paste"), writable);
-    m.addItem (StandardApplicationCommandIDs::del,       TRANS("Delete"), writable);
+    m.addItem (StandardApplicationCommandIDs::paste,     TRANS ("Paste"), writable);
+    m.addItem (StandardApplicationCommandIDs::del,       TRANS ("Delete"), writable);
     m.addSeparator();
-    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS("Select All"));
+    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS ("Select All"));
     m.addSeparator();
 
     if (getUndoManager() != nullptr)
     {
-        m.addItem (StandardApplicationCommandIDs::undo, TRANS("Undo"), undoManager.canUndo());
-        m.addItem (StandardApplicationCommandIDs::redo, TRANS("Redo"), undoManager.canRedo());
+        m.addItem (StandardApplicationCommandIDs::undo, TRANS ("Undo"), undoManager.canUndo());
+        m.addItem (StandardApplicationCommandIDs::redo, TRANS ("Redo"), undoManager.canRedo());
     }
 }
 
@@ -2074,7 +2071,7 @@ bool TextEditor::moveCaretToTop (bool selecting)
 bool TextEditor::moveCaretToStartOfLine (bool selecting)
 {
     const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
-    return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getY()), selecting);
+    return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getCentreY()), selecting);
 }
 
 bool TextEditor::moveCaretToEnd (bool selecting)
@@ -2085,7 +2082,7 @@ bool TextEditor::moveCaretToEnd (bool selecting)
 bool TextEditor::moveCaretToEndOfLine (bool selecting)
 {
     const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
-    return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()), selecting);
+    return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getCentreY()), selecting);
 }
 
 bool TextEditor::deleteBackwards (bool moveInWholeWordSteps)
@@ -2392,7 +2389,7 @@ void TextEditor::reinsert (int insertIndex, const OwnedArray<UniformTextSection>
         if (insertIndex == index)
         {
             for (int j = sectionsToInsert.size(); --j >= 0;)
-                sections.insert (i, new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
+                sections.insert (i, new UniformTextSection (*sectionsToInsert.getUnchecked (j)));
 
             break;
         }
@@ -2402,7 +2399,7 @@ void TextEditor::reinsert (int insertIndex, const OwnedArray<UniformTextSection>
             splitSection (i, insertIndex - index);
 
             for (int j = sectionsToInsert.size(); --j >= 0;)
-                sections.insert (i + 1, new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
+                sections.insert (i + 1, new UniformTextSection (*sectionsToInsert.getUnchecked (j)));
 
             break;
         }
@@ -2427,7 +2424,7 @@ void TextEditor::remove (Range<int> range, UndoManager* const um, const int care
 
         for (int i = 0; i < sections.size(); ++i)
         {
-            auto nextIndex = index + sections.getUnchecked(i)->getTotalLength();
+            auto nextIndex = index + sections.getUnchecked (i)->getTotalLength();
 
             if (range.getStart() > index && range.getStart() < nextIndex)
             {
@@ -2693,7 +2690,7 @@ void TextEditor::coalesceSimilarSections()
 }
 
 //==============================================================================
-class TextEditor::EditorAccessibilityHandler  : public AccessibilityHandler
+class TextEditor::EditorAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit EditorAccessibilityHandler (TextEditor& textEditorToWrap)
@@ -2708,7 +2705,7 @@ public:
     String getHelp() const override  { return textEditor.getTooltip(); }
 
 private:
-    class TextEditorTextInterface  : public AccessibilityTextInterface
+    class TextEditorTextInterface final : public AccessibilityTextInterface
     {
     public:
         explicit TextEditorTextInterface (TextEditor& editor)

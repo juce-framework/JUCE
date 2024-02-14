@@ -30,7 +30,7 @@
 constexpr const char* scanModeKey = "pluginScanMode";
 
 //==============================================================================
-class Superprocess  : private ChildProcessCoordinator
+class Superprocess final : private ChildProcessCoordinator
 {
 public:
     Superprocess()
@@ -94,8 +94,8 @@ private:
 };
 
 //==============================================================================
-class CustomPluginScanner  : public KnownPluginList::CustomScanner,
-                             private ChangeListener
+class CustomPluginScanner final : public KnownPluginList::CustomScanner,
+                                  private ChangeListener
 {
 public:
     CustomPluginScanner()
@@ -103,7 +103,7 @@ public:
         if (auto* file = getAppProperties().getUserSettings())
             file->addChangeListener (this);
 
-        changeListenerCallback (nullptr);
+        handleChange();
     }
 
     ~CustomPluginScanner() override
@@ -183,10 +183,15 @@ private:
         }
     }
 
-    void changeListenerCallback (ChangeBroadcaster*) override
+    void handleChange()
     {
         if (auto* file = getAppProperties().getUserSettings())
             scanInProcess = (file->getIntValue (scanModeKey) == 0);
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        handleChange();
     }
 
     std::unique_ptr<Superprocess> superprocess;
@@ -197,7 +202,7 @@ private:
 };
 
 //==============================================================================
-class CustomPluginListComponent  : public PluginListComponent
+class CustomPluginListComponent final : public PluginListComponent
 {
 public:
     CustomPluginListComponent (AudioPluginFormatManager& manager,
@@ -226,10 +231,16 @@ public:
             getAppProperties().getUserSettings()->setValue (scanModeKey, validationModeBox.getSelectedItemIndex());
         };
 
-        resized();
+        handleResize();
     }
 
     void resized() override
+    {
+        handleResize();
+    }
+
+private:
+    void handleResize()
     {
         PluginListComponent::resized();
 
@@ -237,7 +248,7 @@ public:
         validationModeBox.setBounds (buttonBounds.withWidth (130).withRightX (getWidth() - buttonBounds.getX()));
     }
 
-private:
+
     Label validationModeLabel { {}, "Scan mode" };
     ComboBox validationModeBox;
 
@@ -245,7 +256,7 @@ private:
 };
 
 //==============================================================================
-class MainHostWindow::PluginListWindow  : public DocumentWindow
+class MainHostWindow::PluginListWindow final : public DocumentWindow
 {
 public:
     PluginListWindow (MainHostWindow& mw, AudioPluginFormatManager& pluginFormatManager)
@@ -386,7 +397,7 @@ void MainHostWindow::closeButtonPressed()
     tryToQuitApplication();
 }
 
-struct AsyncQuitRetrier  : private Timer
+struct AsyncQuitRetrier final : private Timer
 {
     AsyncQuitRetrier()   { startTimer (500); }
 
@@ -602,9 +613,9 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        if (getIndexChosenByMenu (menuItemID) >= 0)
-            createPlugin (getChosenType (menuItemID), { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
-                                                        proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
+        if (const auto chosen = getChosenType (menuItemID))
+            createPlugin (*chosen, { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
+                                     proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
 }
 
@@ -697,18 +708,19 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
     addToMenu (*tree, m, pluginDescriptions, pluginDescriptionsAndPreference);
 }
 
-int MainHostWindow::getIndexChosenByMenu (int menuID) const
+std::optional<PluginDescriptionAndPreference> MainHostWindow::getChosenType (const int menuID) const
 {
-    const auto i = menuID - menuIDBase;
-    return isPositiveAndBelow (i, pluginDescriptionsAndPreference.size()) ? i : -1;
-}
+    const auto internalIndex = menuID - 1;
 
-PluginDescriptionAndPreference MainHostWindow::getChosenType (const int menuID) const
-{
-    if (menuID >= 1 && menuID < (int) (1 + internalTypes.size()))
-        return PluginDescriptionAndPreference { internalTypes[(size_t) (menuID - 1)] };
+    if (isPositiveAndBelow (internalIndex, internalTypes.size()))
+        return PluginDescriptionAndPreference { internalTypes[(size_t) internalIndex] };
 
-    return pluginDescriptionsAndPreference[getIndexChosenByMenu (menuID)];
+    const auto externalIndex = menuID - menuIDBase;
+
+    if (isPositiveAndBelow (externalIndex, pluginDescriptionsAndPreference.size()))
+        return pluginDescriptionsAndPreference[externalIndex];
+
+    return {};
 }
 
 //==============================================================================
@@ -747,7 +759,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
    #if ! (JUCE_IOS || JUCE_ANDROID)
     case CommandIDs::newFile:
         result.setInfo ("New", "Creates a new filter graph file", category, 0);
-        result.defaultKeypresses.add(KeyPress('n', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('n', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::open:
@@ -990,7 +1002,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
             auto pos = graphHolder->getLocalPoint (this, Point<int> (x, y));
 
             for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-                if (auto* desc = typesFound.getUnchecked(i))
+                if (auto* desc = typesFound.getUnchecked (i))
                     createPlugin (PluginDescriptionAndPreference { *desc }, pos);
         }
     }

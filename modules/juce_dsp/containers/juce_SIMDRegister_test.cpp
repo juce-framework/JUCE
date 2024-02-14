@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 namespace SIMDRegister_test_internal
@@ -103,7 +101,7 @@ namespace SIMDRegister_test_internal
 // These tests need to be strictly run on all platforms supported by JUCE as the
 // SIMD code is highly platform dependent.
 
-class SIMDRegisterUnitTests   : public UnitTest
+class SIMDRegisterUnitTests final : public UnitTest
 {
 public:
     template <typename> struct Tag {};
@@ -117,19 +115,12 @@ public:
     template <typename type>
     static bool allValuesEqualTo (const SIMDRegister<type>& vec, const type scalar)
     {
-       #ifdef _MSC_VER
-        __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
-       #else
-        type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
-       #endif
+        alignas (sizeof (SIMDRegister<type>)) type elements[SIMDRegister<type>::SIMDNumElements];
 
         vec.copyToRawArray (elements);
 
         // as we do not want to rely on the access operator we cast this to a primitive pointer
-        for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
-            if (elements[i] != scalar) return false;
-
-        return true;
+        return std::all_of (std::begin (elements), std::end (elements), [scalar] (const auto x) { return exactlyEqual (x, scalar); });
     }
 
     template <typename type>
@@ -269,9 +260,9 @@ public:
 
             {
                #ifdef _MSC_VER
-                __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
+                __declspec (align (sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
                #else
-                type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
+                type elements[SIMDRegister<type>::SIMDNumElements] __attribute__ ((aligned (sizeof (SIMDRegister<type>))));
                #endif
                 SIMDRegister_test_internal::fillVec (elements, random);
                 SIMDRegister<type> a (SIMDRegister<type>::fromRawArray (elements));
@@ -307,7 +298,7 @@ public:
             const SIMDRegister<type>& b = a;
 
             for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
-                u.expect (b[i] == array[i]);
+                u.expect (exactlyEqual (b[i], array[i]));
         }
     };
 
@@ -419,9 +410,9 @@ public:
                     Operation::template inplace<vMaskType, vMaskType> (b.intVersion, bitmask);
 
                    #ifdef _MSC_VER
-                    __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
+                    __declspec (align (sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
                    #else
-                    type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
+                    type elements[SIMDRegister<type>::SIMDNumElements] __attribute__ ((aligned (sizeof (SIMDRegister<type>))));
                    #endif
                     b.floatVersion.copyToRawArray (elements);
 
@@ -539,8 +530,8 @@ public:
                 // do check
                 for (size_t j = 0; j < SIMDRegister<type>::SIMDNumElements; ++j)
                 {
-                    array_eq  [j] = (array_a[j] == array_b[j]) ? static_cast<MaskType> (-1) : 0;
-                    array_neq [j] = (array_a[j] != array_b[j]) ? static_cast<MaskType> (-1) : 0;
+                    array_eq  [j] = (  exactlyEqual (array_a[j], array_b[j])) ? static_cast<MaskType> (-1) : 0;
+                    array_neq [j] = (! exactlyEqual (array_a[j], array_b[j])) ? static_cast<MaskType> (-1) : 0;
                     array_lt  [j] = (array_a[j] <  array_b[j]) ? static_cast<MaskType> (-1) : 0;
                     array_le  [j] = (array_a[j] <= array_b[j]) ? static_cast<MaskType> (-1) : 0;
                     array_gt  [j] = (array_a[j] >  array_b[j]) ? static_cast<MaskType> (-1) : 0;
@@ -854,7 +845,7 @@ public:
         TheTest::run (*this, random, Tag<int64_t>{});
     }
 
-    void runTest()
+    void runTest() override
     {
         runTestForAllTypes ("InitializationTest", InitializationTest{});
 
@@ -883,5 +874,4 @@ public:
 
 static SIMDRegisterUnitTests SIMDRegisterUnitTests;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

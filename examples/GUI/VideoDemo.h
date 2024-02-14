@@ -51,9 +51,9 @@
 #if JUCE_MAC || JUCE_WINDOWS
 //==============================================================================
 // so that we can easily have two video windows each with a file browser, wrap this up as a class..
-class MovieComponentWithFileBrowser  : public Component,
-                                       public DragAndDropTarget,
-                                       private FilenameComponentListener
+class MovieComponentWithFileBrowser final : public Component,
+                                            public DragAndDropTarget,
+                                            private FilenameComponentListener
 {
 public:
     MovieComponentWithFileBrowser()
@@ -134,19 +134,22 @@ private:
         }
         else
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              "Couldn't load the file!",
-                                              result.getErrorMessage());
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "Couldn't load the file!",
+                                                             result.getErrorMessage());
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
     }
+
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MovieComponentWithFileBrowser)
 };
 
 //==============================================================================
-class VideoDemo   : public Component,
-                    public DragAndDropContainer,
-                    private FileBrowserListener
+class VideoDemo final : public Component,
+                        public DragAndDropContainer,
+                        private FileBrowserListener
 {
 public:
     VideoDemo()
@@ -266,8 +269,8 @@ private:
 };
 #elif JUCE_IOS || JUCE_ANDROID
 //==============================================================================
-class VideoDemo   : public Component,
-                    private Timer
+class VideoDemo final : public Component,
+                        private Timer
 {
 public:
     VideoDemo()
@@ -540,7 +543,7 @@ private:
 
             curVideoComp->onPlaybackStarted = [this]() { processPlaybackStarted(); };
             curVideoComp->onPlaybackStopped = [this]() { processPlaybackPaused(); };
-            curVideoComp->onErrorOccurred   = [this](const String& errorMessage) { errorOccurred (errorMessage); };
+            curVideoComp->onErrorOccurred   = [this] (const String& errorMessage) { errorOccurred (errorMessage); };
             curVideoComp->setVisible (true);
 
            #if JUCE_SYNC_VIDEO_VOLUME_WITH_OS_MEDIA_VOLUME
@@ -627,7 +630,7 @@ private:
         currentPositionLabel.setText (getPositionString (position, duration), sendNotification);
 
         if (! positionSliderDragging)
-            positionSlider.setValue (duration != 0 ? (position / duration) : 0.0, dontSendNotification);
+            positionSlider.setValue (approximatelyEqual (duration, 0.0) ? 0.0 : (position / duration), dontSendNotification);
     }
 
     void seekVideoToStart()

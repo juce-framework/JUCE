@@ -59,7 +59,7 @@ public:
         document.addChangeListener (this);
     }
 
-    ~ImageResourceProperty()
+    ~ImageResourceProperty() override
     {
         document.removeChangeListener (this);
     }
@@ -70,7 +70,7 @@ public:
     virtual String getResource() const = 0;
 
     //==============================================================================
-    void setIndex (int newIndex)
+    void setIndex (int newIndex) override
     {
         if (newIndex == 0)
         {
@@ -94,7 +94,7 @@ public:
         }
     }
 
-    int getIndex() const
+    int getIndex() const override
     {
         if (getResource().isEmpty())
             return -1;
@@ -102,7 +102,7 @@ public:
         return choices.indexOf (getResource());
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }
@@ -127,9 +127,9 @@ public:
 
             for (int i = 0; i < resourceFile.getNumFiles(); ++i)
             {
-                const File& file = resourceFile.getFile(i);
+                const File& file = resourceFile.getFile (i);
 
-                if (ImageFileFormat::findImageFormatForFileExtension(file))
+                if (ImageFileFormat::findImageFormatForFileExtension (file))
                     choices.add (resourceFile.getClassName() + "::" + resourceFile.getDataVariableFor (file));
             }
         }

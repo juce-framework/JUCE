@@ -32,8 +32,39 @@
 
 class ProjectSaver;
 
+class LinuxSubprocessHelperProperties
+{
+public:
+    explicit LinuxSubprocessHelperProperties (ProjectExporter& projectExporter);
+
+    bool shouldUseLinuxSubprocessHelper() const;
+
+    void deployLinuxSubprocessHelperSourceFilesIfNecessary() const;
+
+    build_tools::RelativePath getLinuxSubprocessHelperSource() const;
+
+    void setCompileDefinitionIfNecessary (StringPairArray& defs) const;
+
+    build_tools::RelativePath getSimpleBinaryBuilderSource() const;
+
+    build_tools::RelativePath getLinuxSubprocessHelperBinaryDataSource() const;
+
+    void addToExtraSearchPathsIfNecessary() const;
+
+    static std::optional<String> getParentDirectoryRelativeToBuildTargetFolder (build_tools::RelativePath rp);
+
+    static String makeSnakeCase (const String& s);
+
+    static String getBinaryNameFromSource (const build_tools::RelativePath& rp);
+
+    static constexpr const char* useLinuxSubprocessHelperCompileDefinition = "JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS";
+
+private:
+    ProjectExporter& owner;
+};
+
 //==============================================================================
-class ProjectExporter  : private Value::Listener
+class ProjectExporter : private Value::Listener
 {
 public:
     ProjectExporter (Project&, const ValueTree& settings);
@@ -70,7 +101,6 @@ public:
     virtual bool canCopeWithDuplicateFiles() = 0;
     virtual bool supportsUserDefinedConfigurations() const = 0; // false if exporter only supports two configs Debug and Release
     virtual void updateDeprecatedSettings()               {}
-    virtual void updateDeprecatedSettingsInteractively()  {}
     virtual void initialiseDependencyPathValues()         {}
 
     // IDE targeted by exporter
@@ -164,6 +194,8 @@ public:
     void updateOldModulePaths();
 
     build_tools::RelativePath rebaseFromProjectFolderToBuildTarget (const build_tools::RelativePath& path) const;
+    build_tools::RelativePath rebaseFromBuildTargetToProjectFolder (const build_tools::RelativePath& path) const;
+    File resolveRelativePath (const build_tools::RelativePath&) const;
     void addToExtraSearchPaths (const build_tools::RelativePath& pathFromProjectFolder, int index = -1);
     void addToModuleLibPaths   (const build_tools::RelativePath& pathFromProjectFolder);
 
@@ -183,11 +215,19 @@ public:
     void createPropertyEditors (PropertyListBuilder&);
     void addSettingsForProjectType (const build_tools::ProjectType&);
 
-    build_tools::RelativePath getLV2TurtleDumpProgramSource() const
+    build_tools::RelativePath getLV2HelperProgramSource() const
     {
         return getModuleFolderRelativeToProject ("juce_audio_plugin_client")
                .getChildFile ("LV2")
-               .getChildFile ("juce_LV2TurtleDumpProgram.cpp");
+               .getChildFile ("juce_LV2ManifestHelper.cpp");
+    }
+
+    build_tools::RelativePath getVST3HelperProgramSource() const
+    {
+        const auto suffix = isOSX() ? "mm" : "cpp";
+        return getModuleFolderRelativeToProject ("juce_audio_plugin_client")
+               .getChildFile ("VST3")
+               .getChildFile (String ("juce_VST3ManifestHelper.") + suffix);
     }
 
     //==============================================================================
@@ -220,7 +260,10 @@ public:
     StringArray moduleLibSearchPaths;
 
     //==============================================================================
-    class BuildConfiguration  : public ReferenceCountedObject
+    const LinuxSubprocessHelperProperties linuxSubprocessHelperProperties { *this };
+
+    //==============================================================================
+    class BuildConfiguration : public ReferenceCountedObject
     {
     public:
         BuildConfiguration (Project& project, const ValueTree& configNode, const ProjectExporter&);
@@ -284,10 +327,26 @@ public:
             static CompilerWarningFlags getRecommendedForGCCAndLLVM()
             {
                 CompilerWarningFlags result;
-                result.common = { "-Wall", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter",
-                                  "-Wswitch-enum", "-Wsign-conversion", "-Wsign-compare",
-                                  "-Wunreachable-code", "-Wcast-align", "-Wno-ignored-qualifiers" };
-                result.cpp = { "-Woverloaded-virtual", "-Wreorder", "-Wzero-as-null-pointer-constant" };
+                result.common = {
+                    "-Wall",
+                    "-Wcast-align",
+                    "-Wfloat-equal",
+                    "-Wno-ignored-qualifiers",
+                    "-Wsign-compare",
+                    "-Wsign-conversion",
+                    "-Wstrict-aliasing",
+                    "-Wswitch-enum",
+                    "-Wuninitialized",
+                    "-Wunreachable-code",
+                    "-Wunused-parameter",
+                    "-Wmissing-field-initializers"
+                };
+
+                result.cpp = {
+                    "-Woverloaded-virtual",
+                    "-Wreorder",
+                    "-Wzero-as-null-pointer-constant"
+                };
 
                 return result;
             }

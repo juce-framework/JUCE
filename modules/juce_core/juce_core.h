@@ -32,7 +32,7 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            7.0.5
+  version:            7.0.10
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
@@ -40,7 +40,7 @@
   minimumCppStandard: 17
 
   dependencies:
-  OSXFrameworks:      Cocoa Foundation IOKit
+  OSXFrameworks:      Cocoa Foundation IOKit Security
   iOSFrameworks:      Foundation
   linuxLibs:          rt dl pthread
   mingwLibs:          uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
@@ -219,6 +219,7 @@ namespace juce
     extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
 }
 
+#include "misc/juce_EnumHelpers.h"
 #include "memory/juce_Memory.h"
 #include "maths/juce_MathsFunctions.h"
 #include "memory/juce_ByteOrder.h"
@@ -245,6 +246,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_ScopedPointer.h"
 #include "memory/juce_OptionalScopedPointer.h"
 #include "containers/juce_Optional.h"
+#include "containers/juce_Enumerate.h"
 #include "containers/juce_ScopedValueSetter.h"
 #include "memory/juce_Singleton.h"
 #include "memory/juce_WeakReference.h"
@@ -258,6 +260,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "containers/juce_ArrayBase.h"
 #include "containers/juce_Array.h"
 #include "containers/juce_LinkedListPointer.h"
+#include "misc/juce_ScopeGuard.h"
 #include "containers/juce_ListenerList.h"
 #include "containers/juce_OwnedArray.h"
 #include "containers/juce_ReferenceCountedArray.h"
@@ -276,13 +279,16 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "text/juce_LocalisedStrings.h"
 #include "text/juce_Base64.h"
 #include "misc/juce_Functional.h"
+#include "containers/juce_Span.h"
 #include "misc/juce_Result.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_ConsoleApplication.h"
 #include "containers/juce_Variant.h"
 #include "containers/juce_NamedValueSet.h"
+#include "javascript/juce_JSON.h"
 #include "containers/juce_DynamicObject.h"
 #include "containers/juce_HashMap.h"
+#include "containers/juce_FixedSizeFunction.h"
 #include "time/juce_RelativeTime.h"
 #include "time/juce_Time.h"
 #include "streams/juce_InputStream.h"
@@ -304,7 +310,9 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "files/juce_WildcardFileFilter.h"
 #include "streams/juce_FileInputSource.h"
 #include "logging/juce_FileLogger.h"
-#include "javascript/juce_JSON.h"
+#include "javascript/juce_JSONUtils.h"
+#include "serialisation/juce_Serialisation.h"
+#include "javascript/juce_JSONSerialisation.h"
 #include "javascript/juce_Javascript.h"
 #include "maths/juce_BigInteger.h"
 #include "maths/juce_Expression.h"
@@ -313,12 +321,12 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "misc/juce_WindowsRegistry.h"
 #include "threads/juce_ChildProcess.h"
 #include "threads/juce_DynamicLibrary.h"
-#include "threads/juce_HighResolutionTimer.h"
 #include "threads/juce_InterProcessLock.h"
 #include "threads/juce_Process.h"
 #include "threads/juce_SpinLock.h"
 #include "threads/juce_WaitableEvent.h"
 #include "threads/juce_Thread.h"
+#include "threads/juce_HighResolutionTimer.h"
 #include "threads/juce_ThreadLocalValue.h"
 #include "threads/juce_ThreadPool.h"
 #include "threads/juce_TimeSliceThread.h"
@@ -346,17 +354,20 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "files/juce_AndroidDocument.h"
 #include "streams/juce_AndroidDocumentInputSource.h"
 
+#include "detail/juce_CallbackListenerList.h"
+
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
- #include "native/juce_mac_ObjCHelpers.h"
+ #include "native/juce_CFHelpers_mac.h"
+ #include "native/juce_ObjCHelpers_mac.h"
 #endif
 
 #if JUCE_CORE_INCLUDE_COM_SMART_PTR && JUCE_WINDOWS
- #include "native/juce_win32_ComSmartPtr.h"
+ #include "native/juce_ComSmartPtr_windows.h"
 #endif
 
 #if JUCE_CORE_INCLUDE_JNI_HELPERS && JUCE_ANDROID
  #include <jni.h>
- #include "native/juce_android_JNIHelpers.h"
+ #include "native/juce_JNIHelpers_android.h"
 #endif
 
 #if JUCE_UNIT_TESTS

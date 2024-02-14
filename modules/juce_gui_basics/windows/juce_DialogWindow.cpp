@@ -73,7 +73,7 @@ void DialogWindow::resized()
 }
 
 //==============================================================================
-class DefaultDialogWindow   : public DialogWindow
+class DefaultDialogWindow final : public DialogWindow
 {
 public:
     DefaultDialogWindow (LaunchOptions& options)
@@ -92,7 +92,7 @@ public:
         setResizable (options.resizable, options.useBottomRightCornerResizer);
 
         setUsingNativeTitleBar (options.useNativeTitleBar);
-        setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
+        setAlwaysOnTop (WindowUtils::areThereAnyAlwaysOnTopWindows());
     }
 
     void closeButtonPressed() override

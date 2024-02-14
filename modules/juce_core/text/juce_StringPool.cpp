@@ -149,7 +149,7 @@ void StringPool::garbageCollect()
     const ScopedLock sl (lock);
 
     for (int i = strings.size(); --i >= 0;)
-        if (strings.getReference(i).getReferenceCount() == 1)
+        if (strings.getReference (i).getReferenceCount() == 1)
             strings.remove (i);
 
     lastGarbageCollectionTime = Time::getApproximateMillisecondCounter();

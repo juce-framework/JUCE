@@ -91,7 +91,7 @@ double ARARegionSequence::getCommonSampleRate() const
     const auto range = getPlaybackRegions();
     const auto sampleRate = range.size() > 0 ? getSampleRate (range.front()) : 0.0;
 
-    if (std::any_of (range.begin(), range.end(), [&] (auto& x) { return getSampleRate (x) != sampleRate; }))
+    if (std::any_of (range.begin(), range.end(), [&] (auto& x) { return ! exactlyEqual (getSampleRate (x), sampleRate); }))
         return 0.0;
 
     return sampleRate;

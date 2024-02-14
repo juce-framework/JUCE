@@ -33,8 +33,8 @@
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
 
 //==============================================================================
-class ProjucerApplication   : public JUCEApplication,
-                              private AsyncUpdater
+class ProjucerApplication final : public JUCEApplication,
+                                  private AsyncUpdater
 {
 public:
     ProjucerApplication() = default;
@@ -167,7 +167,7 @@ private:
 
     //==============================================================================
    #if JUCE_MAC
-    class AppleMenuRebuildListener  : private MenuBarModel::Listener
+    class AppleMenuRebuildListener final : private MenuBarModel::Listener
     {
     public:
         AppleMenuRebuildListener()
@@ -217,6 +217,7 @@ private:
     int selectedColourSchemeIndex = 0, selectedEditorColourSchemeIndex = 0;
 
     std::unique_ptr<FileChooser> chooser;
+    ScopedMessageBox messageBox;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjucerApplication)

@@ -162,6 +162,8 @@ BigInteger& BigInteger::operator= (const BigInteger& other)
     return *this;
 }
 
+BigInteger::~BigInteger() = default;
+
 uint32* BigInteger::getValues() const noexcept
 {
     jassert (heapAllocation != nullptr || allocatedSize <= numPreallocatedInts);
@@ -1003,7 +1005,7 @@ void BigInteger::montgomeryMultiplication (const BigInteger& other, const BigInt
 void BigInteger::extendedEuclidean (const BigInteger& a, const BigInteger& b,
                                     BigInteger& x, BigInteger& y)
 {
-    BigInteger p(a), q(b), gcd(1);
+    BigInteger p (a), q (b), gcd (1);
     Array<BigInteger> tempValues;
 
     while (! q.isZero())
@@ -1294,7 +1296,7 @@ uint32 readLittleEndianBitsInBuffer (const void* buffer, uint32 startBit, uint32
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class BigIntegerTests  : public UnitTest
+class BigIntegerTests final : public UnitTest
 {
 public:
     BigIntegerTests()
@@ -1319,12 +1321,12 @@ public:
             Random r = getRandom();
 
             expect (BigInteger().isZero());
-            expect (BigInteger(1).isOne());
+            expect (BigInteger (1).isOne());
 
             for (int j = 10000; --j >= 0;)
             {
-                BigInteger b1 (getBigRandom(r)),
-                           b2 (getBigRandom(r));
+                BigInteger b1 (getBigRandom (r)),
+                           b2 (getBigRandom (r));
 
                 BigInteger b3 = b1 + b2;
                 expect (b3 > b1 && b3 > b2);

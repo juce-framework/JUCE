@@ -26,9 +26,9 @@
 namespace juce
 {
 
-class ParameterListener   : private AudioProcessorParameter::Listener,
-                            private AudioProcessorListener,
-                            private Timer
+class ParameterListener : private AudioProcessorParameter::Listener,
+                          private AudioProcessorListener,
+                          private Timer
 {
 public:
     ParameterListener (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -107,7 +107,7 @@ public:
 };
 
 //==============================================================================
-class BooleanParameterComponent : public ParameterComponent
+class BooleanParameterComponent final : public ParameterComponent
 {
 public:
     BooleanParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -154,7 +154,7 @@ private:
 };
 
 //==============================================================================
-class SwitchParameterComponent : public ParameterComponent
+class SwitchParameterComponent final : public ParameterComponent
 {
 public:
     SwitchParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -256,7 +256,7 @@ private:
 };
 
 //==============================================================================
-class ChoiceParameterComponent : public ParameterComponent
+class ChoiceParameterComponent final : public ParameterComponent
 {
 public:
     ChoiceParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -293,7 +293,7 @@ private:
             index = roundToInt (getParameter().getValue() * (float) (parameterValues.size() - 1));
         }
 
-        box.setSelectedItemIndex (index);
+        box.setSelectedItemIndex (index, dontSendNotification);
     }
 
     void boxChanged()
@@ -318,7 +318,7 @@ private:
 };
 
 //==============================================================================
-class SliderParameterComponent : public ParameterComponent
+class SliderParameterComponent final : public ParameterComponent
 {
 public:
     SliderParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -378,7 +378,7 @@ private:
     {
         auto newVal = (float) slider.getValue();
 
-        if (getParameter().getValue() != newVal)
+        if (! approximatelyEqual (getParameter().getValue(), newVal))
         {
             if (! isDragging)
                 getParameter().beginChangeGesture();
@@ -411,9 +411,9 @@ private:
 };
 
 //==============================================================================
-class ParameterDisplayComponent   : public Component,
-                                    private AudioProcessorListener,
-                                    private AsyncUpdater
+class ParameterDisplayComponent final : public Component,
+                                        private AudioProcessorListener,
+                                        private AsyncUpdater
 {
 public:
     ParameterDisplayComponent (AudioProcessorEditor& editorIn, AudioProcessorParameter& param)
@@ -515,7 +515,7 @@ private:
 };
 
 //==============================================================================
-struct ParamControlItem : public TreeViewItem
+struct ParamControlItem final : public TreeViewItem
 {
     ParamControlItem (AudioProcessorEditor& editorIn, AudioProcessorParameter& paramIn)
         : editor (editorIn), param (paramIn) {}
@@ -533,7 +533,7 @@ struct ParamControlItem : public TreeViewItem
     AudioProcessorParameter& param;
 };
 
-struct ParameterGroupItem : public TreeViewItem
+struct ParameterGroupItem final : public TreeViewItem
 {
     ParameterGroupItem (AudioProcessorEditor& editor, const AudioProcessorParameterGroup& group)
         : name (group.getName())

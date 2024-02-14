@@ -25,6 +25,8 @@ namespace juce
 
 /**
     Helper functions for managing buffered readers.
+
+    @tags{Audio}
 */
 struct Reservoir
 {

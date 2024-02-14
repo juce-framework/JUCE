@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class UTF8Component  : public Component
+class UTF8Component final : public Component
 {
 public:
     UTF8Component()

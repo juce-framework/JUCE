@@ -258,6 +258,16 @@ public:
     */
     void setConstrainer (ComponentBoundsConstrainer* newConstrainer) noexcept;
 
+    /** Asks the window-manager to begin resizing this window, on platforms where this is useful
+        (currently just Linux/X11).
+
+        @param mouseDownPosition    The position of the mouse event that started the resize in
+                                    unscaled peer coordinates
+        @param zone                 The edges of the window that may be moved during the resize
+    */
+    virtual void startHostManagedResize ([[maybe_unused]] Point<int> mouseDownPosition,
+                                         [[maybe_unused]] ResizableBorderComponent::Zone zone) {}
+
     /** Returns the current constrainer, if one has been set. */
     ComponentBoundsConstrainer* getConstrainer() const noexcept             { return constrainer; }
 

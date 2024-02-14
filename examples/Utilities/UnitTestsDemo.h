@@ -33,7 +33,8 @@
                    juce_audio_formats, juce_audio_processors, juce_audio_utils,
                    juce_core, juce_cryptography, juce_data_structures, juce_dsp,
                    juce_events, juce_graphics, juce_gui_basics, juce_gui_extra,
-                   juce_opengl, juce_osc, juce_product_unlocking, juce_video
+                   juce_opengl, juce_osc, juce_product_unlocking, juce_video,
+                   juce_midi_ci
  exporters:        xcode_mac, vs2022, linux_make, androidstudio, xcode_iphone
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1,JUCE_PLUGINHOST_VST3=1,JUCE_PLUGINHOST_LV2=1
@@ -53,7 +54,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class UnitTestsDemo  : public Component
+class UnitTestsDemo final : public Component
 {
 public:
     UnitTestsDemo()
@@ -146,8 +147,8 @@ public:
 
 private:
     //==============================================================================
-    class TestRunnerThread  : public Thread,
-                              private Timer
+    class TestRunnerThread final : public Thread,
+                                   private Timer
     {
     public:
         TestRunnerThread (UnitTestsDemo& utd, const String& ctg)
@@ -190,7 +191,7 @@ private:
         //==============================================================================
         // This subclass of UnitTestRunner is used to redirect the test output to our
         // TextBox, and to interrupt the running tests when our thread is asked to stop..
-        class CustomTestRunner  : public UnitTestRunner
+        class CustomTestRunner final : public UnitTestRunner
         {
         public:
             CustomTestRunner (TestRunnerThread& trt)  : owner (trt) {}

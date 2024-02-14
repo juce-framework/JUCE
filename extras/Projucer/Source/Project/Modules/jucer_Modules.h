@@ -59,7 +59,6 @@ public:
 
         bool isNeededForExporter (ProjectExporter&) const;
         String getFilenameForProxyFile() const;
-        static bool hasSuffix (const File&, const char*);
     };
 
     Array<CompileUnit> getAllCompileUnits (build_tools::ProjectType::Target::Type forTarget =
@@ -143,6 +142,7 @@ private:
     ValueTree state;
 
     std::unique_ptr<FileChooser> chooser;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModulesList)
 };

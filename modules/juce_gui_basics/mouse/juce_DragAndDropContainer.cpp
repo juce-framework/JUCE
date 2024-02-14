@@ -31,8 +31,8 @@ bool juce_performDragDropText (const String&, bool& shouldStop);
 
 
 //==============================================================================
-class DragAndDropContainer::DragImageComponent  : public Component,
-                                                  private Timer
+class DragAndDropContainer::DragImageComponent final : public Component,
+                                                       private Timer
 {
 public:
     DragImageComponent (const ScaledImage& im,
@@ -98,12 +98,12 @@ public:
             // (note: use a local copy of this in case the callback runs
             // a modal loop and deletes this object before the method completes)
             auto details = sourceDetails;
-            DragAndDropTarget* finalTarget = nullptr;
 
             auto wasVisible = isVisible();
             setVisible (false);
-            Component* unused;
-            finalTarget = findTarget (e.getScreenPosition(), details.localPosition, unused);
+            const auto [finalTarget, unused, localPosition] = findTarget (e.getScreenPosition());
+            ignoreUnused (unused);
+            details.localPosition = localPosition;
 
             if (wasVisible) // fade the component and remove it - it'll be deleted later by the timer callback
                 dismissWithAnimation (finalTarget == nullptr);
@@ -133,8 +133,8 @@ public:
 
         setNewScreenPos (screenPos);
 
-        Component* newTargetComp;
-        auto* newTarget = findTarget (screenPos, details.localPosition, newTargetComp);
+        const auto [newTarget, newTargetComp, localPosition] = findTarget (screenPos);
+        details.localPosition = localPosition;
 
         setVisible (newTarget == nullptr || newTarget->shouldDrawDragImageWhenOver());
 
@@ -288,8 +288,7 @@ private:
         return getLocalPoint (sourceComponent, offsetInSource) - getLocalPoint (sourceComponent, Point<int>());
     }
 
-    DragAndDropTarget* findTarget (Point<int> screenPos, Point<int>& relativePos,
-                                   Component*& resultComponent) const
+    std::tuple<DragAndDropTarget*, Component*, Point<int>> findTarget (Point<int> screenPos) const
     {
         auto* hit = getParentComponent();
 
@@ -305,20 +304,13 @@ private:
         while (hit != nullptr)
         {
             if (auto* ddt = dynamic_cast<DragAndDropTarget*> (hit))
-            {
                 if (ddt->isInterestedInDragSource (details))
-                {
-                    relativePos = hit->getLocalPoint (nullptr, screenPos);
-                    resultComponent = hit;
-                    return ddt;
-                }
-            }
+                    return std::tuple (ddt, hit, hit->getLocalPoint (nullptr, screenPos));
 
             hit = hit->getParentComponent();
         }
 
-        resultComponent = nullptr;
-        return nullptr;
+        return {};
     }
 
     void setNewScreenPos (Point<int> screenPos)

@@ -95,7 +95,7 @@ private:
 };
 
 //==============================================================================
-class MPESetupComponent : public Component
+class MPESetupComponent final : public Component
 {
 public:
     //==============================================================================
@@ -279,13 +279,14 @@ private:
         return legacyStartChannel.getText().getIntValue() <= legacyEndChannel.getText().getIntValue();
     }
 
-    void handleInvalidLegacyModeParameters() const
+    void handleInvalidLegacyModeParameters()
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "Invalid legacy mode channel layout",
-                                          "Cannot set legacy mode start/end channel:\n"
-                                          "The end channel must not be less than the start channel!",
-                                          "Got it");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "Invalid legacy mode channel layout",
+                                                         "Cannot set legacy mode start/end channel:\n"
+                                                         "The end channel must not be less than the start channel!",
+                                                         "Got it");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
 
     Range<int> getLegacyModeChannelRange() const
@@ -338,6 +339,8 @@ private:
     ComboBox numberOfVoices;
     Label numberOfVoicesLabel { {}, "Number of synth voices"};
 
+    ScopedMessageBox messageBox;
+
     static constexpr int defaultMemberChannels       = 15,
                          defaultMasterPitchbendRange = 2,
                          defaultNotePitchbendRange   = 48;
@@ -346,8 +349,8 @@ private:
 };
 
 //==============================================================================
-class ZoneLayoutComponent : public Component,
-                            private MPEInstrument::Listener
+class ZoneLayoutComponent final : public Component,
+                                  private MPEInstrument::Listener
 {
 public:
     //==============================================================================
@@ -463,7 +466,7 @@ private:
 };
 
 //==============================================================================
-class MPEDemoSynthVoice : public MPESynthesiserVoice
+class MPEDemoSynthVoice final : public MPESynthesiserVoice
 {
 public:
     //==============================================================================
@@ -496,8 +499,8 @@ public:
             // start a tail-off by setting this flag. The render callback will pick up on
             // this and do a fade out, calling clearCurrentNote() when it's finished.
 
-            if (tailOff == 0.0) // we only need to begin a tail-off if it's not already doing so - the
-                                // stopNote method could be called more than once.
+            if (approximatelyEqual (tailOff, 0.0)) // we only need to begin a tail-off if it's not already doing so - the
+                                                   // stopNote method could be called more than once.
                 tailOff = 1.0;
         }
         else
@@ -527,7 +530,7 @@ public:
 
     void setCurrentSampleRate (double newRate) override
     {
-        if (currentSampleRate != newRate)
+        if (! approximatelyEqual (currentSampleRate, newRate))
         {
             noteStopped (false);
             currentSampleRate = newRate;
@@ -543,7 +546,7 @@ public:
                                   int startSample,
                                   int numSamples) override
     {
-        if (phaseDelta != 0.0)
+        if (! approximatelyEqual (phaseDelta, 0.0))
         {
             if (tailOff > 0.0)
             {
@@ -619,10 +622,10 @@ private:
 };
 
 //==============================================================================
-class MPEDemo : public Component,
-                private AudioIODeviceCallback,
-                private MidiInputCallback,
-                private MPEInstrument::Listener
+class MPEDemo final : public Component,
+                      private AudioIODeviceCallback,
+                      private MidiInputCallback,
+                      private MPEInstrument::Listener
 {
 public:
     //==============================================================================

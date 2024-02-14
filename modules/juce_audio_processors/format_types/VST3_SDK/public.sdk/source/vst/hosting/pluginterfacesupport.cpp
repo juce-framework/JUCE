@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -43,12 +43,14 @@
 
 #include <algorithm>
 
+//-----------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
 
 //-----------------------------------------------------------------------------
 PlugInterfaceSupport::PlugInterfaceSupport ()
 {
+	FUNKNOWN_CTOR
 	// add minimum set
 
 	//---VST 3.0.0--------------------------------
@@ -117,9 +119,16 @@ void PlugInterfaceSupport::addPlugInterfaceSupported (const TUID _iid)
 //-----------------------------------------------------------------------------
 bool PlugInterfaceSupport::removePlugInterfaceSupported (const TUID _iid)
 {
-	return std::remove (mFUIDArray.begin (), mFUIDArray.end (), FUID::fromTUID (_iid)) !=
-	       mFUIDArray.end ();
+	auto uid = FUID::fromTUID (_iid);
+	auto it = std::find (mFUIDArray.begin (), mFUIDArray.end (), uid);
+	if (it  == mFUIDArray.end ())
+		return false;
+	mFUIDArray.erase (it);
+	return true;
 }
 
-}
-} // namespace
+IMPLEMENT_FUNKNOWN_METHODS (PlugInterfaceSupport, IPlugInterfaceSupport, IPlugInterfaceSupport::iid)
+
+//-----------------------------------------------------------------------------
+} // Vst
+} // Steinberg

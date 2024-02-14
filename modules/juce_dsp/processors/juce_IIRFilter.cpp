@@ -23,12 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::dsp::IIR
 {
-namespace dsp
-{
-namespace IIR
-{
+
+constexpr auto minimumDecibels = -300.0;
 
 template <typename NumericType>
 std::array<NumericType, 4> ArrayCoefficients<NumericType>::makeFirstOrderLowPass (double sampleRate,
@@ -37,7 +35,7 @@ std::array<NumericType, 4> ArrayCoefficients<NumericType>::makeFirstOrderLowPass
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
 
-    auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
+    const auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
 
     return { { n, n, n + 1, n - 1 } };
 }
@@ -49,7 +47,7 @@ std::array<NumericType, 4> ArrayCoefficients<NumericType>::makeFirstOrderHighPas
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
 
-    auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
+    const auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
 
     return { { 1, -1, n + 1, n - 1 } };
 }
@@ -61,7 +59,7 @@ std::array<NumericType, 4> ArrayCoefficients<NumericType>::makeFirstOrderAllPass
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
 
-    auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
+    const auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
 
     return { { n - 1, n + 1, n + 1, n - 1 } };
 }
@@ -82,10 +80,10 @@ std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeLowPass (double s
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
     jassert (Q > 0.0);
 
-    auto n = 1 / std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
-    auto nSquared = n * n;
-    auto invQ = 1 / Q;
-    auto c1 = 1 / (1 + invQ * n + nSquared);
+    const auto n = 1 / std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
+    const auto nSquared = n * n;
+    const auto invQ = 1 / Q;
+    const auto c1 = 1 / (1 + invQ * n + nSquared);
 
     return { { c1, c1 * 2, c1,
                1, c1 * 2 * (1 - nSquared),
@@ -108,10 +106,10 @@ std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeHighPass (double 
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
     jassert (Q > 0.0);
 
-    auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
-    auto nSquared = n * n;
-    auto invQ = 1 / Q;
-    auto c1 = 1 / (1 + invQ * n + nSquared);
+    const auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
+    const auto nSquared = n * n;
+    const auto invQ = 1 / Q;
+    const auto c1 = 1 / (1 + invQ * n + nSquared);
 
     return { { c1, c1 * -2, c1,
                1, c1 * 2 * (nSquared - 1),
@@ -134,10 +132,10 @@ std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeBandPass (double 
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
     jassert (Q > 0.0);
 
-    auto n = 1 / std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
-    auto nSquared = n * n;
-    auto invQ = 1 / Q;
-    auto c1 = 1 / (1 + invQ * n + nSquared);
+    const auto n = 1 / std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
+    const auto nSquared = n * n;
+    const auto invQ = 1 / Q;
+    const auto c1 = 1 / (1 + invQ * n + nSquared);
 
     return { { c1 * n * invQ, 0,
                -c1 * n * invQ, 1,
@@ -161,12 +159,12 @@ std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeNotch (double sam
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
     jassert (Q > 0.0);
 
-    auto n = 1 / std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
-    auto nSquared = n * n;
-    auto invQ = 1 / Q;
-    auto c1 = 1 / (1 + n * invQ + nSquared);
-    auto b0 = c1 * (1 + nSquared);
-    auto b1 = 2 * c1 * (1 - nSquared);
+    const auto n = 1 / std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
+    const auto nSquared = n * n;
+    const auto invQ = 1 / Q;
+    const auto c1 = 1 / (1 + n * invQ + nSquared);
+    const auto b0 = c1 * (1 + nSquared);
+    const auto b1 = 2 * c1 * (1 - nSquared);
 
     return { { b0, b1, b0, 1, b1, c1 * (1 - n * invQ + nSquared) } };
 }
@@ -187,12 +185,12 @@ std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeAllPass (double s
     jassert (frequency > 0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0);
 
-    auto n = 1 / std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
-    auto nSquared = n * n;
-    auto invQ = 1 / Q;
-    auto c1 = 1 / (1 + invQ * n + nSquared);
-    auto b0 = c1 * (1 - n * invQ + nSquared);
-    auto b1 = c1 * 2 * (1 - nSquared);
+    const auto n = 1 / std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
+    const auto nSquared = n * n;
+    const auto invQ = 1 / Q;
+    const auto c1 = 1 / (1 + invQ * n + nSquared);
+    const auto b0 = c1 * (1 - n * invQ + nSquared);
+    const auto b1 = c1 * 2 * (1 - nSquared);
 
     return { { b0, b1, 1, 1, b1, b0 } };
 }
@@ -207,13 +205,13 @@ std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeLowShelf (double 
     jassert (cutOffFrequency > 0.0 && cutOffFrequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto A = jmax (static_cast<NumericType> (0.0), std::sqrt (gainFactor));
-    auto aminus1 = A - 1;
-    auto aplus1 = A + 1;
-    auto omega = (2 * MathConstants<NumericType>::pi * jmax (cutOffFrequency, static_cast<NumericType> (2.0))) / static_cast<NumericType> (sampleRate);
-    auto coso = std::cos (omega);
-    auto beta = std::sin (omega) * std::sqrt (A) / Q;
-    auto aminus1TimesCoso = aminus1 * coso;
+    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, (NumericType) minimumDecibels));
+    const auto aminus1 = A - 1;
+    const auto aplus1 = A + 1;
+    const auto omega = (2 * MathConstants<NumericType>::pi * jmax (cutOffFrequency, static_cast<NumericType> (2.0))) / static_cast<NumericType> (sampleRate);
+    const auto coso = std::cos (omega);
+    const auto beta = std::sin (omega) * std::sqrt (A) / Q;
+    const auto aminus1TimesCoso = aminus1 * coso;
 
     return { { A * (aplus1 - aminus1TimesCoso + beta),
                A * 2 * (aminus1 - aplus1 * coso),
@@ -233,13 +231,13 @@ std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeHighShelf (double
     jassert (cutOffFrequency > 0 && cutOffFrequency <= static_cast<NumericType> (sampleRate * 0.5));
     jassert (Q > 0);
 
-    auto A = jmax (static_cast<NumericType> (0.0), std::sqrt (gainFactor));
-    auto aminus1 = A - 1;
-    auto aplus1 = A + 1;
-    auto omega = (2 * MathConstants<NumericType>::pi * jmax (cutOffFrequency, static_cast<NumericType> (2.0))) / static_cast<NumericType> (sampleRate);
-    auto coso = std::cos (omega);
-    auto beta = std::sin (omega) * std::sqrt (A) / Q;
-    auto aminus1TimesCoso = aminus1 * coso;
+    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, (NumericType) minimumDecibels));
+    const auto aminus1 = A - 1;
+    const auto aplus1 = A + 1;
+    const auto omega = (2 * MathConstants<NumericType>::pi * jmax (cutOffFrequency, static_cast<NumericType> (2.0))) / static_cast<NumericType> (sampleRate);
+    const auto coso = std::cos (omega);
+    const auto beta = std::sin (omega) * std::sqrt (A) / Q;
+    const auto aminus1TimesCoso = aminus1 * coso;
 
     return { { A * (aplus1 + aminus1TimesCoso + beta),
                A * -2 * (aminus1 + aplus1 * coso),
@@ -260,12 +258,12 @@ std::array<NumericType, 6> ArrayCoefficients<NumericType>::makePeakFilter (doubl
     jassert (Q > 0);
     jassert (gainFactor > 0);
 
-    auto A = jmax (static_cast<NumericType> (0.0), std::sqrt (gainFactor));
-    auto omega = (2 * MathConstants<NumericType>::pi * jmax (frequency, static_cast<NumericType> (2.0))) / static_cast<NumericType> (sampleRate);
-    auto alpha = std::sin (omega) / (Q * 2);
-    auto c2 = -2 * std::cos (omega);
-    auto alphaTimesA = alpha * A;
-    auto alphaOverA = alpha / A;
+    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, (NumericType) minimumDecibels));
+    const auto omega = (2 * MathConstants<NumericType>::pi * jmax (frequency, static_cast<NumericType> (2.0))) / static_cast<NumericType> (sampleRate);
+    const auto alpha = std::sin (omega) / (Q * 2);
+    const auto c2 = -2 * std::cos (omega);
+    const auto alphaTimesA = alpha * A;
+    const auto alphaOverA = alpha / A;
 
     return { { 1 + alphaTimesA, c2, 1 - alphaTimesA, 1 + alphaOverA, c2, 1 - alphaOverA } };
 }
@@ -496,7 +494,7 @@ void Coefficients<NumericType>::getMagnitudeForFrequencyArray (const double* fre
             factor *= jw;
         }
 
-        magnitudes[i] = std::abs(numerator / denominator);
+        magnitudes[i] = std::abs (numerator / denominator);
     }
 }
 
@@ -572,6 +570,4 @@ void Coefficients<NumericType>::getPhaseForFrequencyArray (double* frequencies, 
 template struct Coefficients<float>;
 template struct Coefficients<double>;
 
-} // namespace IIR
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp::IIR

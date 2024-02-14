@@ -22,6 +22,87 @@
 
 namespace juce
 {
+
+class MidiDeviceListConnectionBroadcaster;
+
+/**
+    To find out when the available MIDI devices change, call MidiDeviceListConnection::make(),
+    passing a lambda that will be called on each configuration change.
+
+    To stop the lambda receiving callbacks, destroy the MidiDeviceListConnection instance returned
+    from make(), or call reset() on it.
+
+    @code
+    // Start listening for configuration changes
+    auto connection = MidiDeviceListConnection::make ([]
+    {
+        // This will print a message when devices are connected/disconnected
+        DBG ("MIDI devices changed");
+    });
+
+    // Stop listening
+    connection.reset();
+    @endcode
+
+    @tags{Audio}
+*/
+class MidiDeviceListConnection
+{
+public:
+    using Key = uint64_t;
+
+    /** Constructs an inactive connection.
+    */
+    MidiDeviceListConnection() = default;
+
+    MidiDeviceListConnection (const MidiDeviceListConnection&) = delete;
+    MidiDeviceListConnection (MidiDeviceListConnection&& other) noexcept
+        : broadcaster (std::exchange (other.broadcaster, nullptr)),
+          key (std::exchange (other.key, Key{}))
+    {
+    }
+
+    MidiDeviceListConnection& operator= (const MidiDeviceListConnection&) = delete;
+    MidiDeviceListConnection& operator= (MidiDeviceListConnection&& other) noexcept
+    {
+        MidiDeviceListConnection (std::move (other)).swap (*this);
+        return *this;
+    }
+
+    ~MidiDeviceListConnection() noexcept;
+
+    /** Clears this connection.
+
+        If this object had an active connection, that connection will be deactivated, and the
+        corresponding callback will be removed from the MidiDeviceListConnectionBroadcaster.
+    */
+    void reset() noexcept
+    {
+        MidiDeviceListConnection().swap (*this);
+    }
+
+    /** Registers a function to be called whenever the midi device list changes.
+
+        The callback will only be active for as long as the return MidiDeviceListConnection remains
+        alive. To stop receiving device change notifications, destroy the Connection object, e.g.
+        by allowing it to fall out of scope.
+    */
+    static MidiDeviceListConnection make (std::function<void()>);
+
+private:
+    MidiDeviceListConnection (MidiDeviceListConnectionBroadcaster* b, const Key k)
+        : broadcaster (b), key (k) {}
+
+    void swap (MidiDeviceListConnection& other) noexcept
+    {
+        std::swap (other.broadcaster, broadcaster);
+        std::swap (other.key, key);
+    }
+
+    MidiDeviceListConnectionBroadcaster* broadcaster = nullptr;
+    Key key = {};
+};
+
 //==============================================================================
 /**
     This struct contains information about a MIDI input or output device.
@@ -61,8 +142,9 @@ struct MidiDeviceInfo
     String identifier;
 
     //==============================================================================
-    bool operator== (const MidiDeviceInfo& other) const noexcept   { return name == other.name && identifier == other.identifier; }
-    bool operator!= (const MidiDeviceInfo& other) const noexcept   { return ! operator== (other); }
+    auto tie() const { return std::tie (name, identifier); }
+    bool operator== (const MidiDeviceInfo& other) const noexcept   { return tie() == other.tie(); }
+    bool operator!= (const MidiDeviceInfo& other) const noexcept   { return tie() != other.tie(); }
 };
 
 class MidiInputCallback;

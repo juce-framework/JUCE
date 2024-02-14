@@ -89,7 +89,7 @@ public:
     {
     }
 
-    bool perform()
+    bool perform() override
     {
         showCorrectTab();
         PaintElement* newElement = routine.addElementFromXml (*xml, -1, false);
@@ -100,14 +100,14 @@ public:
         return indexAdded >= 0;
     }
 
-    bool undo()
+    bool undo() override
     {
         showCorrectTab();
         routine.removeElement (routine.getElement (indexAdded), false);
         return true;
     }
 
-    int getSizeInUnits()    { return 10; }
+    int getSizeInUnits() override    { return 10; }
 
     int indexAdded;
 
@@ -172,21 +172,21 @@ public:
         oldIndex = routine.indexOfElement (element);
     }
 
-    bool perform()
+    bool perform() override
     {
         showCorrectTab();
         routine.removeElement (getElement(), false);
         return true;
     }
 
-    bool undo()
+    bool undo() override
     {
         PaintElement* newElement = routine.addElementFromXml (*xml, oldIndex, false);
         showCorrectTab();
         return newElement != nullptr;
     }
 
-    int getSizeInUnits()    { return 10; }
+    int getSizeInUnits() override    { return 10; }
 
 private:
     std::unique_ptr<XmlElement> xml;
@@ -228,7 +228,7 @@ public:
         oldIndex = routine.indexOfElement (element);
     }
 
-    bool perform()
+    bool perform() override
     {
         showCorrectTab();
 
@@ -238,7 +238,7 @@ public:
         return true;
     }
 
-    bool undo()
+    bool undo() override
     {
         showCorrectTab();
         routine.moveElementZOrder (newIndex, oldIndex);
@@ -361,7 +361,7 @@ void PaintRoutine::selectedToFront()
     const SelectedItemSet<PaintElement*> temp (selectedElements);
 
     for (int i = temp.getNumSelected(); --i >= 0;)
-        elementToFront (temp.getSelectedItem(i), true);
+        elementToFront (temp.getSelectedItem (i), true);
 }
 
 void PaintRoutine::selectedToBack()
@@ -369,7 +369,7 @@ void PaintRoutine::selectedToBack()
     const SelectedItemSet<PaintElement*> temp (selectedElements);
 
     for (int i = 0; i < temp.getNumSelected(); ++i)
-        elementToBack (temp.getSelectedItem(i), true);
+        elementToBack (temp.getSelectedItem (i), true);
 }
 
 void PaintRoutine::alignTop()

@@ -399,14 +399,14 @@ String OSCAddressPattern::toString() const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class OSCAddressTests : public UnitTest
+class OSCAddressTests final : public UnitTest
 {
 public:
     OSCAddressTests()
         : UnitTest ("OSCAddress class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("construction and parsing");
         {
@@ -445,14 +445,14 @@ static OSCAddressTests OSCAddressUnitTests;
 
 //==============================================================================
 
-class OSCAddressPatternTests  : public UnitTest
+class OSCAddressPatternTests final : public UnitTest
 {
 public:
     OSCAddressPatternTests()
         : UnitTest ("OSCAddressPattern class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("construction and parsing");
         {
@@ -586,14 +586,14 @@ static OSCAddressPatternTests OSCAddressPatternUnitTests;
 
 //==============================================================================
 
-class OSCPatternMatcherTests : public UnitTest
+class OSCPatternMatcherTests final : public UnitTest
 {
 public:
     OSCPatternMatcherTests()
         : UnitTest ("OSCAddress class / pattern matching", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("basic string matching");
         {

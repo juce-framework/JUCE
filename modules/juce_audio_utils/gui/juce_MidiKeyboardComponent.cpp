@@ -32,11 +32,11 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& stateToUse, Ori
 {
     state.addListener (this);
 
-    // initialise with a default set of qwerty key-mappings..
-    int note = 0;
+    // initialise with a default set of qwerty key-mappings.
+    const std::string_view keys { "awsedftgyhujkolp;" };
 
-    for (char c : "awsedftgyhujkolp;")
-        setKeyPressForNote ({ c, 0, 0 }, note++);
+    for (const char& c : keys)
+        setKeyPressForNote ({c, 0, 0}, (int) std::distance (keys.data(), &c));
 
     mouseOverNotes.insertMultiple (0, -1, 32);
     mouseDownNotes.insertMultiple (0, -1, 32);
@@ -259,7 +259,7 @@ bool MidiKeyboardComponent::keyStateChanged (bool /*isKeyDown*/)
     {
         auto note = 12 * keyMappingOctave + keyPressNotes.getUnchecked (i);
 
-        if (keyPresses.getReference(i).isCurrentlyDown())
+        if (keyPresses.getReference (i).isCurrentlyDown())
         {
             if (! keysPressed[note])
             {

@@ -86,7 +86,7 @@ private:
 
 //==============================================================================
 template <typename T>
-class AudioBufferReader  : public AudioFormatReader
+class AudioBufferReader final : public AudioFormatReader
 {
 public:
     AudioBufferReader (const AudioBuffer<T>* bufferIn, double rate)
@@ -144,7 +144,7 @@ private:
 };
 
 //==============================================================================
-class AudioThumbnail::LevelDataSource   : public TimeSliceClient
+class AudioThumbnail::LevelDataSource final : public TimeSliceClient
 {
 public:
     LevelDataSource (AudioThumbnail& thumb, AudioFormatReader* newReader, int64 hash)
@@ -501,8 +501,8 @@ private:
 
         if (numSamples == numSamplesCached
              && numChannelsCached == numChans
-             && startTime == cachedStart
-             && timePerPixel == cachedTimePerPixel
+             && approximatelyEqual (startTime, cachedStart)
+             && approximatelyEqual (timePerPixel, cachedTimePerPixel)
              && ! cacheNeedsRefilling)
         {
             return ! cacheNeedsRefilling;
@@ -672,7 +672,7 @@ bool AudioThumbnail::loadFrom (InputStream& rawInput)
 
     for (int i = 0; i < numThumbnailSamples; ++i)
         for (int chan = 0; chan < numChannels; ++chan)
-            channels.getUnchecked(chan)->getData(i)->read (input);
+            channels.getUnchecked (chan)->getData (i)->read (input);
 
     return true;
 }
@@ -681,7 +681,7 @@ void AudioThumbnail::saveTo (OutputStream& output) const
 {
     const ScopedLock sl (lock);
 
-    const int numThumbnailSamples = channels.size() == 0 ? 0 : channels.getUnchecked(0)->getSize();
+    const int numThumbnailSamples = channels.size() == 0 ? 0 : channels.getUnchecked (0)->getSize();
 
     output.write ("jatm", 4);
     output.writeInt (samplesPerThumbSample);
@@ -695,7 +695,7 @@ void AudioThumbnail::saveTo (OutputStream& output) const
 
     for (int i = 0; i < numThumbnailSamples; ++i)
         for (int chan = 0; chan < numChannels; ++chan)
-            channels.getUnchecked(chan)->getData(i)->write (output);
+            channels.getUnchecked (chan)->getData (i)->write (output);
 }
 
 //==============================================================================

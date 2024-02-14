@@ -52,8 +52,8 @@
 #include "../Assets/AudioLiveScrollingDisplay.h"
 
 //==============================================================================
-class LatencyTester  : public AudioIODeviceCallback,
-                       private Timer
+class LatencyTester final : public AudioIODeviceCallback,
+                            private Timer
 {
 public:
     LatencyTester (TextEditor& editorBox)
@@ -304,7 +304,7 @@ private:
 };
 
 //==============================================================================
-class AudioLatencyDemo  : public Component
+class AudioLatencyDemo final : public Component
 {
 public:
     AudioLatencyDemo()

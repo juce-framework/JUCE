@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     static const char* resourceFileIdentifierString = "JUCER_BINARY_RESOURCE";
 
     //==============================================================================
@@ -90,7 +89,7 @@ namespace build_tools
 
         for (int i = 0; i < files.size(); ++i)
         {
-            auto& file = files.getReference(i);
+            auto& file = files.getReference (i);
 
             if (! file.existsAsFile())
                 return Result::fail ("Can't open resource file: " + file.getFullPathName());
@@ -142,7 +141,7 @@ namespace build_tools
 
         while (i < files.size())
         {
-            auto& file = files.getReference(i);
+            auto& file = files.getReference (i);
             auto variableName = variableNames[i];
 
             FileInputStream fileStream (file);
@@ -285,5 +284,5 @@ namespace build_tools
 
         return { Result::ok(), std::move (filesCreated) };
     }
-}
-}
+
+} // namespace juce::build_tools

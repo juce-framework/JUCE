@@ -91,7 +91,7 @@ void JUCEApplicationBase::sendUnhandledException (const std::exception* const e,
 #endif
 
 #if JUCE_HANDLE_MULTIPLE_INSTANCES
-struct JUCEApplicationBase::MultipleInstanceHandler  : public ActionListener
+struct JUCEApplicationBase::MultipleInstanceHandler final : public ActionListener
 {
     MultipleInstanceHandler (const String& appName)
         : appLock ("juceAppLock_" + appName)
@@ -183,8 +183,8 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
  extern void initialiseNSApplication();
 #endif
 
-#if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
- extern int juce_gtkWebkitMain (int argc, const char* argv[]);
+#if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined (JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+ extern "C" int juce_gtkWebkitMain (int argc, const char* const* argv);
 #endif
 
 #if JUCE_WINDOWS
@@ -231,7 +231,7 @@ int JUCEApplicationBase::main (int argc, const char* argv[])
         initialiseNSApplication();
        #endif
 
-       #if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+       #if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined (JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
         if (argc >= 2 && String (argv[1]) == "--juce-gtkwebkitfork-child")
             return juce_gtkWebkitMain (argc, argv);
        #endif
@@ -290,9 +290,9 @@ bool JUCEApplicationBase::initialiseApp()
         // a redirect or similar.
         FILE* ignore;
 
-        if (_fileno(stdout) < 0) freopen_s (&ignore, "CONOUT$", "w", stdout);
-        if (_fileno(stderr) < 0) freopen_s (&ignore, "CONOUT$", "w", stderr);
-        if (_fileno(stdin)  < 0) freopen_s (&ignore, "CONIN$",  "r", stdin);
+        if (_fileno (stdout) < 0) freopen_s (&ignore, "CONOUT$", "w", stdout);
+        if (_fileno (stderr) < 0) freopen_s (&ignore, "CONOUT$", "w", stderr);
+        if (_fileno (stdin)  < 0) freopen_s (&ignore, "CONIN$",  "r", stdin);
     }
    #endif
 

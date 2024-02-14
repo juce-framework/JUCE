@@ -234,6 +234,32 @@ build_tools::RelativePath ProjectExporter::rebaseFromProjectFolderToBuildTarget 
     return path.rebased (project.getProjectFolder(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
 }
 
+build_tools::RelativePath ProjectExporter::rebaseFromBuildTargetToProjectFolder (const build_tools::RelativePath& path) const
+{
+    jassert (path.getRoot() == build_tools::RelativePath::buildTargetFolder);
+    return path.rebased (getTargetFolder(), project.getProjectFolder(), build_tools::RelativePath::projectFolder);
+}
+
+File ProjectExporter::resolveRelativePath (const build_tools::RelativePath& path) const
+{
+    if (path.isAbsolute())
+        return path.toUnixStyle();
+
+    switch (path.getRoot())
+    {
+        case build_tools::RelativePath::buildTargetFolder:
+            return getTargetFolder().getChildFile (path.toUnixStyle());
+
+        case build_tools::RelativePath::projectFolder:
+            return project.getProjectFolder().getChildFile (path.toUnixStyle());
+
+        case build_tools::RelativePath::unknown:
+            jassertfalse;
+    }
+
+    return path.toUnixStyle();
+}
+
 bool ProjectExporter::shouldFileBeCompiledByDefault (const File& file) const
 {
     return file.hasFileExtension (cOrCppFileExtensions)
@@ -497,6 +523,8 @@ void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, 
     {
         defs.set ("JucePlugin_Enable_ARA", "1");
     }
+
+    linuxSubprocessHelperProperties.setCompileDefinitionIfNecessary (defs);
 }
 
 void ProjectExporter::addDefaultPreprocessorDefs (StringPairArray& defs) const
@@ -545,7 +573,7 @@ Project::Item& ProjectExporter::getModulesGroup()
 }
 
 //==============================================================================
-static bool isWebBrowserComponentEnabled (Project& project)
+static bool isWebBrowserComponentEnabled (const Project& project)
 {
     static String guiExtrasModule ("juce_gui_extra");
 
@@ -608,6 +636,7 @@ void ProjectExporter::addToModuleLibPaths (const build_tools::RelativePath& path
 
 void ProjectExporter::addToExtraSearchPaths (const build_tools::RelativePath& pathFromProjectFolder, int index)
 {
+    jassert (pathFromProjectFolder.getRoot() == build_tools::RelativePath::projectFolder);
     addProjectPathToBuildPathList (extraSearchPaths, pathFromProjectFolder, index);
 }
 
@@ -893,17 +922,35 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      configLinkerFlagsValue        (config, Ids::extraLinkerFlags,         getUndoManager())
 {
     auto& llvmFlags = recommendedCompilerWarningFlags[CompilerNames::llvm] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
-    llvmFlags.common.addArray ({ "-Wshorten-64-to-32", "-Wconversion", "-Wint-conversion",
-                                 "-Wconditional-uninitialized", "-Wconstant-conversion", "-Wbool-conversion",
-                                 "-Wextra-semi", "-Wshift-sign-overflow",
-                                 "-Wshadow-all", "-Wnullable-to-nonnull-conversion",
-                                 "-Wmissing-prototypes" });
-    llvmFlags.cpp.addArray ({ "-Wunused-private-field", "-Winconsistent-missing-destructor-override" });
-    llvmFlags.objc.addArray ({ "-Wunguarded-availability", "-Wunguarded-availability-new" });
+
+    llvmFlags.common.addArray ({ "-Wshadow-all",
+                                 "-Wshorten-64-to-32",
+                                 "-Wconversion",
+                                 "-Wint-conversion",
+                                 "-Wconditional-uninitialized",
+                                 "-Wconstant-conversion",
+                                 "-Wbool-conversion",
+                                 "-Wextra-semi",
+                                 "-Wshift-sign-overflow",
+                                 "-Wmissing-prototypes",
+                                 "-Wnullable-to-nonnull-conversion",
+                                 "-Wpedantic",
+                                 "-Wdeprecated" });
+
+    llvmFlags.cpp.addArray ({ "-Wunused-private-field",
+                              "-Winconsistent-missing-destructor-override" });
+
+    llvmFlags.objc.addArray ({ "-Wunguarded-availability",
+                               "-Wunguarded-availability-new" });
 
     auto& gccFlags = recommendedCompilerWarningFlags[CompilerNames::gcc] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
-    gccFlags.common.addArray ({ "-Wextra", "-Wsign-compare", "-Wno-implicit-fallthrough", "-Wno-maybe-uninitialized",
-                                "-Wredundant-decls", "-Wno-strict-overflow", "-Wshadow" });
+    gccFlags.common.addArray ({ "-Wextra",
+                                "-Wsign-compare",
+                                "-Wno-implicit-fallthrough",
+                                "-Wno-maybe-uninitialized",
+                                "-Wredundant-decls",
+                                "-Wno-strict-overflow",
+                                "-Wshadow" });
 }
 
 String ProjectExporter::BuildConfiguration::getGCCOptimisationFlag() const
@@ -1082,4 +1129,116 @@ String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& confi
         return replacePreprocessorTokens (config, "-l" + libraries.joinIntoString (" -l")).trim();
 
     return {};
+}
+
+//==============================================================================
+LinuxSubprocessHelperProperties::LinuxSubprocessHelperProperties (ProjectExporter& projectExporter)
+    : owner (projectExporter)
+{}
+
+bool LinuxSubprocessHelperProperties::shouldUseLinuxSubprocessHelper() const
+{
+    const auto& project = owner.getProject();
+    const auto& projectType = project.getProjectType();
+
+    return    owner.isLinux()
+           && isWebBrowserComponentEnabled (project)
+           && ! (projectType.isCommandLineApp())
+           && ! (projectType.isGUIApplication());
+}
+
+void LinuxSubprocessHelperProperties::deployLinuxSubprocessHelperSourceFilesIfNecessary() const
+{
+    if (shouldUseLinuxSubprocessHelper())
+    {
+        const auto deployHelperSourceFile = [] (auto& sourcePath, auto& contents)
+        {
+            if (! sourcePath.isRoot() && ! sourcePath.getParentDirectory().exists())
+            {
+                sourcePath.getParentDirectory().createDirectory();
+            }
+
+            build_tools::overwriteFileIfDifferentOrThrow (sourcePath, contents);
+        };
+
+        const std::pair<File, const char*> sources[]
+        {
+            { owner.resolveRelativePath (getSimpleBinaryBuilderSource()),   BinaryData::juce_SimpleBinaryBuilder_cpp   },
+            { owner.resolveRelativePath (getLinuxSubprocessHelperSource()), BinaryData::juce_LinuxSubprocessHelper_cpp }
+        };
+
+        for (const auto& [path, source] : sources)
+        {
+            deployHelperSourceFile (path, source);
+        }
+    }
+}
+
+build_tools::RelativePath LinuxSubprocessHelperProperties::getLinuxSubprocessHelperSource() const
+{
+    return build_tools::RelativePath { "make_helpers", build_tools::RelativePath::buildTargetFolder }
+        .getChildFile ("juce_LinuxSubprocessHelper.cpp");
+}
+
+void LinuxSubprocessHelperProperties::setCompileDefinitionIfNecessary (StringPairArray& defs) const
+{
+    if (shouldUseLinuxSubprocessHelper())
+        defs.set (useLinuxSubprocessHelperCompileDefinition, "1");
+}
+
+build_tools::RelativePath LinuxSubprocessHelperProperties::getSimpleBinaryBuilderSource() const
+{
+    return build_tools::RelativePath { "make_helpers", build_tools::RelativePath::buildTargetFolder }
+                            .getChildFile ("juce_SimpleBinaryBuilder.cpp");
+}
+
+build_tools::RelativePath LinuxSubprocessHelperProperties::getLinuxSubprocessHelperBinaryDataSource() const
+{
+    return build_tools::RelativePath ("pre_build", juce::build_tools::RelativePath::buildTargetFolder)
+                            .getChildFile ("juce_LinuxSubprocessHelperBinaryData.cpp");
+}
+
+void LinuxSubprocessHelperProperties::addToExtraSearchPathsIfNecessary() const
+{
+    if (shouldUseLinuxSubprocessHelper())
+    {
+        const auto subprocessHelperBinaryDir = getLinuxSubprocessHelperBinaryDataSource().getParentDirectory();
+        owner.addToExtraSearchPaths (owner.rebaseFromBuildTargetToProjectFolder (subprocessHelperBinaryDir));
+    }
+}
+
+std::optional<String> LinuxSubprocessHelperProperties::getParentDirectoryRelativeToBuildTargetFolder (build_tools::RelativePath rp)
+{
+    jassert (rp.getRoot() == juce::build_tools::RelativePath::buildTargetFolder);
+    const auto parentDir = rp.getParentDirectory().toUnixStyle();
+    return parentDir == rp.toUnixStyle() ? std::nullopt : std::make_optional (parentDir);
+}
+
+String LinuxSubprocessHelperProperties::makeSnakeCase (const String& s)
+{
+    String result;
+    result.preallocateBytes (128);
+
+    bool previousCharacterUnderscore = false;
+
+    for (const auto c : s)
+    {
+        if (   CharacterFunctions::isUpperCase (c)
+            && result.length() != 0
+            && ! (previousCharacterUnderscore))
+        {
+            result << "_";
+        }
+
+        result << CharacterFunctions::toLowerCase (c);
+
+        previousCharacterUnderscore = c == '_';
+    }
+
+    return result;
+}
+
+String LinuxSubprocessHelperProperties::getBinaryNameFromSource (const build_tools::RelativePath& rp)
+{
+    return makeSnakeCase (rp.getFileNameWithoutExtension());
 }

@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -278,6 +278,11 @@ public:
 
 	bool isNormalized (UnicodeNormalization = kUnicodeNormC); ///< On PC only kUnicodeNormC is working
 
+#if SMTG_OS_WINDOWS
+	ConstString (const wchar_t* str, int32 length = -1) : ConstString (wscast (str), length) {}
+	operator const wchar_t* () const { return wscast (text16 ());}
+#endif
+
 #if SMTG_OS_MACOS
 	virtual void* toCFStringRef (uint32 encoding = 0xFFFF, bool mutableCFString = false) const;	///< CFString conversion
 #endif
@@ -317,7 +322,7 @@ public:
 	String (const ConstString& str, int32 n = -1);		///< assign n characters of str (-1: all)
 	String (const FVariant& var);						///< assign from FVariant
 	String (IString* str);						///< assign from IString
-	~String ();
+	~String () SMTG_OVERRIDE;
 
 #if SMTG_CPP11_STDLIBSUPPORT
 	String (String&& str);
@@ -416,7 +421,15 @@ public:
 
 	// numbers-----------------------------------------------------------------
 	String& printInt64 (int64 value);
-	String& printFloat (double value);
+
+	/**
+	* @brief				print a float into a string, trailing zeros will be trimmed
+	* @param value			the floating value to be printed
+	* @param maxPrecision	(optional) the max precision allowed for this, num of significant digits after the comma
+	*						For instance printFloat (1.234, 2) => 1.23
+	*  @return				the resulting string.
+	*/
+	String& printFloat (double value, uint32 maxPrecision = 6);
 	/** Increment the trailing number if present else start with minNumber, width specifies the string width format (width 2 for number 3 is 03),
 		applyOnlyFormat set to true will only format the string to the given width without incrementing the founded trailing number */
 	bool incrementTrailingNumber (uint32 width = 2, tchar separator = STR (' '), uint32 minNumber = 1, bool applyOnlyFormat = false);
@@ -448,6 +461,11 @@ public:
 	void fromUTF8 (const char8* utf8String);				///< Assigns from UTF8 string
 	bool normalize (UnicodeNormalization = kUnicodeNormC);	///< On PC only kUnicodeNormC is working
 
+#if SMTG_OS_WINDOWS
+	String (const wchar_t* str, int32 length = -1, bool isTerminated = true) : String (wscast (str), length, isTerminated) {}
+	String& operator= (const wchar_t* str) {return String::operator= (wscast (str)); }
+#endif
+
 #if SMTG_OS_MACOS
 	virtual bool fromCFStringRef (const void*, uint32 encoding = 0xFFFF);	///< CFString conversion
 #endif
@@ -458,6 +476,7 @@ protected:
 	bool resize (uint32 newSize, bool wide, bool fill = false);
 
 private:
+	bool _toWideString (const char8* src, int32 length, uint32 sourceCodePage = kCP_Default);
 	void tryFreeBuffer ();
 	bool checkToMultiByte (uint32 destCodePage = kCP_Default) const; // to remove debug code from inline - const_cast inside!!!
 };

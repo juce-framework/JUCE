@@ -117,7 +117,7 @@ void SourceCodeDocument::saveAsync (std::function<void (bool)> callback)
 
 void SourceCodeDocument::saveAsAsync (std::function<void (bool)> callback)
 {
-    chooser = std::make_unique<FileChooser> (TRANS("Save As..."), getFile(), "*");
+    chooser = std::make_unique<FileChooser> (TRANS ("Save As..."), getFile(), "*");
     auto flags = FileBrowserComponent::saveMode
                | FileBrowserComponent::canSelectFiles
                | FileBrowserComponent::warnAboutOverwriting;
@@ -375,7 +375,7 @@ void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Lis
 }
 
 //==============================================================================
-class GenericCodeEditorComponent::FindPanel  : public Component
+class GenericCodeEditorComponent::FindPanel final : public Component
 {
 public:
     FindPanel()
@@ -643,7 +643,7 @@ void CppCodeEditorComponent::addPopupMenuItems (PopupMenu& menu, const MouseEven
     GenericCodeEditorComponent::addPopupMenuItems (menu, e);
 
     menu.addSeparator();
-    menu.addItem (insertComponentID, TRANS("Insert code for a new Component class..."));
+    menu.addItem (insertComponentID, TRANS ("Insert code for a new Component class..."));
 }
 
 void CppCodeEditorComponent::performPopupMenuAction (int menuItemID)

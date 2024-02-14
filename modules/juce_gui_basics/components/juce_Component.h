@@ -1168,14 +1168,14 @@ public:
 
         Calling this method will also invoke the sendLookAndFeelChange() method.
 
-        @see getLookAndFeel, lookAndFeelChanged
+        @see getLookAndFeel, lookAndFeelChanged, sendLookAndFeelChange
     */
     void setLookAndFeel (LookAndFeel* newLookAndFeel);
 
     /** Called to let the component react to a change in the look-and-feel setting.
 
-        When the look-and-feel is changed for a component, this will be called in
-        all its child components, recursively.
+        When the look-and-feel is changed for a component, this method, repaint(), and
+        colourChanged() are called on the original component and all its children recursively.
 
         It can also be triggered manually by the sendLookAndFeelChange() method, in case
         an application uses a LookAndFeel class that might have changed internally.
@@ -1184,10 +1184,8 @@ public:
     */
     virtual void lookAndFeelChanged();
 
-    /** Calls the lookAndFeelChanged() method in this component and all its children.
-
-        This will recurse through the children and their children, calling lookAndFeelChanged()
-        on them all.
+    /** Calls the methods repaint(), lookAndFeelChanged(), and colourChanged() in this
+        component and all its children recursively.
 
         @see lookAndFeelChanged
     */
@@ -1893,10 +1891,27 @@ public:
         focusChangedDirectly        /**< Means that the focus was changed by a call to grabKeyboardFocus(). */
     };
 
+    /** Enumeration used by the focusGainedWithDirection() method. */
+    enum class FocusChangeDirection
+    {
+        unknown,
+        forward,
+        backward
+    };
+
     /** Called to indicate that this component has just acquired the keyboard focus.
         @see focusLost, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
     */
     virtual void focusGained (FocusChangeType cause);
+
+    /** Called to indicate that this component has just acquired the keyboard focus.
+
+        This function is called every time focusGained() is called but it has an additional change
+        direction parameter.
+
+        @see focusLost, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
+    */
+    virtual void focusGainedWithDirection (FocusChangeType cause, FocusChangeDirection direction);
 
     /** Called to indicate that this component has just lost the keyboard focus.
         @see focusGained, setWantsKeyboardFocus, getCurrentlyFocusedComponent, hasKeyboardFocus
@@ -2113,13 +2128,14 @@ public:
         The callback is an optional object which will receive a callback when the modal
         component loses its modal status, either by being hidden or when exitModalState()
         is called. If you pass an object in here, the system will take care of deleting it
-        later, after making the callback
+        later, after making the callback.
 
         If deleteWhenDismissed is true, then when it is dismissed, the component will be
         deleted and then the callback will be called. (This will safely handle the situation
         where the component is deleted before its exitModalState() method is called).
 
-        @see exitModalState, runModalLoop, ModalComponentManager::attachCallback
+        @see exitModalState, runModalLoop, ModalComponentManager::attachCallback,
+             ModalCallbackFunction
     */
     void enterModalState (bool takeKeyboardFocus = true,
                           ModalComponentManager::Callback* callback = nullptr,
@@ -2236,6 +2252,8 @@ public:
         method, which your component can override if it needs to do something when
         colours are altered.
 
+        Note repaint() is not automatically called when a colour is changed.
+
         For more details about colour IDs, see the comments for findColour().
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
@@ -2257,8 +2275,11 @@ public:
     */
     void copyAllExplicitColoursTo (Component& target) const;
 
-    /** This method is called when a colour is changed by the setColour() method.
-        @see setColour, findColour
+    /** This method is called when a colour is changed by the setColour() method,
+        or when the look-and-feel is changed by the setLookAndFeel() or
+        sendLookAndFeelChanged() methods.
+
+        @see setColour, findColour, setLookAndFeel, sendLookAndFeelChanged
     */
     virtual void colourChanged();
 
@@ -2479,6 +2500,9 @@ public:
     /** Returns the accessibility handler for this component, or nullptr if this component is not
         accessible.
 
+        To customise the accessibility handler for a component, override
+        createAccessibilityHandler().
+
         @see setAccessible
     */
     AccessibilityHandler* getAccessibilityHandler();
@@ -2490,6 +2514,30 @@ public:
         createAccessibilityHandler().
     */
     void invalidateAccessibilityHandler();
+
+    //==============================================================================
+    /** Override this method to return a custom AccessibilityHandler for this component.
+
+        The default implementation creates and returns a AccessibilityHandler object with an
+        unspecified role, meaning that it will be visible to accessibility clients but
+        without a specific role, action callbacks or interfaces. To control how accessibility
+        clients see and interact with your component subclass AccessibilityHandler, implement
+        the desired behaviours, and return an instance of it from this method in your
+        component subclass.
+
+        The accessibility handler you return here is guaranteed to be destroyed before
+        its Component, so it's safe to store and use a reference back to the Component
+        inside the AccessibilityHandler if necessary.
+
+        This function should rarely be called directly. If you need to query a component's
+        accessibility handler, it's normally better to call getAccessibilityHandler().
+        The exception to this rule is derived implementations of createAccessibilityHandler(),
+        which may find it useful to call the base class implementation, and then wrap or
+        modify the result.
+
+        @see getAccessibilityHandler
+    */
+    virtual std::unique_ptr<AccessibilityHandler> createAccessibilityHandler();
 
     //==============================================================================
    #ifndef DOXYGEN
@@ -2505,27 +2553,10 @@ public:
    #endif
 
 private:
-    //==============================================================================
-    /** Override this method to return a custom AccessibilityHandler for this component.
-
-        The default implementation creates and returns a AccessibilityHandler object with an
-        unspecified role, meaning that it will be visible to accessibility clients but
-        without a specific role, action callbacks or interfaces. To control how accessibility
-        clients see and interact with your component subclass AccessibilityHandler, implement
-        the desired behaviours, and return an instance of it from this method in your
-        component subclass.
-
-        The accessibility handler you return here is guaranteed to be destroyed before
-        its Component, so it's safe to store and use a reference back to the Component
-        inside the AccessibilityHandler if necessary.
-
-        @see getAccessibilityHandler
-    */
-    virtual std::unique_ptr<AccessibilityHandler> createAccessibilityHandler();
 
     //==============================================================================
     friend class ComponentPeer;
-    friend class MouseInputSourceInternal;
+    friend class detail::MouseInputSourceImpl;
 
    #ifndef DOXYGEN
     static Component* currentlyFocusedComponent;
@@ -2594,14 +2625,14 @@ private:
     //==============================================================================
     void internalMouseEnter (MouseInputSource, Point<float>, Time);
     void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, const PointerState&, Time);
-    void internalMouseUp    (MouseInputSource, const PointerState&, Time, const ModifierKeys oldModifiers);
-    void internalMouseDrag  (MouseInputSource, const PointerState&, Time);
+    void internalMouseDown  (MouseInputSource, const detail::PointerState&, Time);
+    void internalMouseUp    (MouseInputSource, const detail::PointerState&, Time, ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, const detail::PointerState&, Time);
     void internalMouseMove  (MouseInputSource, Point<float>, Time);
     void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
     void internalBroughtToFront();
-    void internalKeyboardFocusGain (FocusChangeType, const WeakReference<Component>&);
+    void internalKeyboardFocusGain (FocusChangeType, const WeakReference<Component>&, FocusChangeDirection);
     void internalKeyboardFocusGain (FocusChangeType);
     void internalKeyboardFocusLoss (FocusChangeType);
     void internalChildKeyboardFocusChange (FocusChangeType, const WeakReference<Component>&);
@@ -2619,14 +2650,13 @@ private:
     void sendMovedResizedMessagesIfPending();
     void repaintParent();
     void sendFakeMouseMove() const;
-    void takeKeyboardFocus (FocusChangeType);
-    void grabKeyboardFocusInternal (FocusChangeType, bool canTryParent);
+    void takeKeyboardFocus (FocusChangeType, FocusChangeDirection);
+    void grabKeyboardFocusInternal (FocusChangeType, bool canTryParent, FocusChangeDirection);
     void giveAwayKeyboardFocusInternal (bool sendFocusLossEvent);
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
 
-    struct ComponentHelpers;
-    friend struct ComponentHelpers;
+    friend struct detail::ComponentHelpers;
 
     /* Components aren't allowed to have copy constructors, as this would mess up parent hierarchies.
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.

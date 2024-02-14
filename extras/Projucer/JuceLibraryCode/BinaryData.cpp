@@ -6874,8 +6874,168 @@ static const unsigned char temp_binary_data_37[] =
 
 const char* jucer_AudioPluginARADocumentControllerTemplate_h = (const char*) temp_binary_data_37;
 
-//================== jucer_AudioPluginARAPlaybackRendererTemplate.cpp ==================
+//================== jucer_AudioPluginARAEditorTemplate.cpp ==================
 static const unsigned char temp_binary_data_38[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file contains the basic framework code for a JUCE plugin editor.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"%%editor_cpp_headers%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%editor_class_name%%::%%editor_class_name%% (%%filter_class_name%%& p)\r\n"
+"    : AudioProcessorEditor (&p),\r\n"
+"     #if JucePlugin_Enable_ARA\r\n"
+"      AudioProcessorEditorARAExtension (&p),\r\n"
+"     #endif\r\n"
+"      audioProcessor (p)\r\n"
+"{\r\n"
+"   #if JucePlugin_Enable_ARA\r\n"
+"    // ARA plugins must be resizable for proper view embedding\r\n"
+"    setResizable (true, false);\r\n"
+"   #endif\r\n"
+"\r\n"
+"    // Make sure that before the constructor has finished, you've set the\r\n"
+"    // editor's size to whatever you need it to be.\r\n"
+"    setSize (400, 300);\r\n"
+"}\r\n"
+"\r\n"
+"%%editor_class_name%%::~%%editor_class_name%%()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%editor_class_name%%::paint (juce::Graphics& g)\r\n"
+"{\r\n"
+"    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
+"    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
+"\r\n"
+"    g.setColour (juce::Colours::white);\r\n"
+"    g.setFont (15.0f);\r\n"
+"    g.drawFittedText (\"Hello World!\", getLocalBounds(), juce::Justification::centred, 1);\r\n"
+"}\r\n"
+"\r\n"
+"void %%editor_class_name%%::resized()\r\n"
+"{\r\n"
+"    // This is generally where you'll want to lay out the positions of any\r\n"
+"    // subcomponents in your editor..\r\n"
+"}\r\n";
+
+const char* jucer_AudioPluginARAEditorTemplate_cpp = (const char*) temp_binary_data_38;
+
+//================== jucer_AudioPluginARAEditorTemplate.h ==================
+static const unsigned char temp_binary_data_39[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file contains the basic framework code for a JUCE plugin editor.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%editor_headers%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/**\r\n"
+"*/\r\n"
+"class %%editor_class_name%%  : public juce::AudioProcessorEditor\r\n"
+"                            #if JucePlugin_Enable_ARA\r\n"
+"                             , public juce::AudioProcessorEditorARAExtension\r\n"
+"                            #endif\r\n"
+"{\r\n"
+"public:\r\n"
+"    %%editor_class_name%% (%%filter_class_name%%&);\r\n"
+"    ~%%editor_class_name%%() override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void paint (juce::Graphics&) override;\r\n"
+"    void resized() override;\r\n"
+"\r\n"
+"private:\r\n"
+"    // This reference is provided as a quick way for your editor to\r\n"
+"    // access the processor object that created it.\r\n"
+"    %%filter_class_name%%& audioProcessor;\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%editor_class_name%%)\r\n"
+"};\r\n";
+
+const char* jucer_AudioPluginARAEditorTemplate_h = (const char*) temp_binary_data_39;
+
+//================== jucer_AudioPluginARAFilterTemplate.h ==================
+static const unsigned char temp_binary_data_40[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file contains the basic framework code for a JUCE plugin processor.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%app_headers%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/**\r\n"
+"*/\r\n"
+"class %%filter_class_name%%  : public juce::AudioProcessor\r\n"
+"                            #if JucePlugin_Enable_ARA\r\n"
+"                             , public juce::AudioProcessorARAExtension\r\n"
+"                            #endif\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%filter_class_name%%();\r\n"
+"    ~%%filter_class_name%%() override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void prepareToPlay (double sampleRate, int samplesPerBlock) override;\r\n"
+"    void releaseResources() override;\r\n"
+"\r\n"
+"   #ifndef JucePlugin_PreferredChannelConfigurations\r\n"
+"    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;\r\n"
+"   #endif\r\n"
+"\r\n"
+"    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    juce::AudioProcessorEditor* createEditor() override;\r\n"
+"    bool hasEditor() const override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    const juce::String getName() const override;\r\n"
+"\r\n"
+"    bool acceptsMidi() const override;\r\n"
+"    bool producesMidi() const override;\r\n"
+"    bool isMidiEffect() const override;\r\n"
+"    double getTailLengthSeconds() const override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    int getNumPrograms() override;\r\n"
+"    int getCurrentProgram() override;\r\n"
+"    void setCurrentProgram (int index) override;\r\n"
+"    const juce::String getProgramName (int index) override;\r\n"
+"    void changeProgramName (int index, const juce::String& newName) override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void getStateInformation (juce::MemoryBlock& destData) override;\r\n"
+"    void setStateInformation (const void* data, int sizeInBytes) override;\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%filter_class_name%%)\r\n"
+"};\r\n";
+
+const char* jucer_AudioPluginARAFilterTemplate_h = (const char*) temp_binary_data_40;
+
+//================== jucer_AudioPluginARAPlaybackRendererTemplate.cpp ==================
+static const unsigned char temp_binary_data_41[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6991,10 +7151,10 @@ static const unsigned char temp_binary_data_38[] =
 "    return success;\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginARAPlaybackRendererTemplate_cpp = (const char*) temp_binary_data_38;
+const char* jucer_AudioPluginARAPlaybackRendererTemplate_cpp = (const char*) temp_binary_data_41;
 
 //================== jucer_AudioPluginARAPlaybackRendererTemplate.h ==================
-static const unsigned char temp_binary_data_39[] =
+static const unsigned char temp_binary_data_42[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7041,10 +7201,10 @@ static const unsigned char temp_binary_data_39[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%araplaybackrenderer_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginARAPlaybackRendererTemplate_h = (const char*) temp_binary_data_39;
+const char* jucer_AudioPluginARAPlaybackRendererTemplate_h = (const char*) temp_binary_data_42;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_binary_data_40[] =
+static const unsigned char temp_binary_data_43[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7085,10 +7245,10 @@ static const unsigned char temp_binary_data_40[] =
 "    // subcomponents in your editor..\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_40;
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_43;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_binary_data_41[] =
+static const unsigned char temp_binary_data_44[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7122,10 +7282,10 @@ static const unsigned char temp_binary_data_41[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%editor_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_41;
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_44;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_binary_data_42[] =
+static const unsigned char temp_binary_data_45[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7317,10 +7477,10 @@ static const unsigned char temp_binary_data_42[] =
 "    return new %%filter_class_name%%();\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_42;
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_45;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_binary_data_43[] =
+static const unsigned char temp_binary_data_46[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7337,9 +7497,6 @@ static const unsigned char temp_binary_data_43[] =
 "/**\r\n"
 "*/\r\n"
 "class %%filter_class_name%%  : public juce::AudioProcessor\r\n"
-"                            #if JucePlugin_Enable_ARA\r\n"
-"                             , public juce::AudioProcessorARAExtension\r\n"
-"                            #endif\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
@@ -7384,10 +7541,10 @@ static const unsigned char temp_binary_data_43[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%filter_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_43;
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_46;
 
 //================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_44[] =
+static const unsigned char temp_binary_data_47[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7463,10 +7620,10 @@ static const unsigned char temp_binary_data_44[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_44;
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_47;
 
 //================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_binary_data_45[] =
+static const unsigned char temp_binary_data_48[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7529,10 +7686,10 @@ static const unsigned char temp_binary_data_45[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_45;
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_48;
 
 //================== jucer_ContentCompSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_46[] =
+static const unsigned char temp_binary_data_49[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -7582,10 +7739,10 @@ static const unsigned char temp_binary_data_46[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_46;
+const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_49;
 
 //================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_binary_data_47[] =
+static const unsigned char temp_binary_data_50[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -7616,10 +7773,10 @@ static const unsigned char temp_binary_data_47[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_47;
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_50;
 
 //================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_binary_data_48[] =
+static const unsigned char temp_binary_data_51[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -7648,10 +7805,10 @@ static const unsigned char temp_binary_data_48[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_48;
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_51;
 
 //================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_49[] =
+static const unsigned char temp_binary_data_52[] =
 "//==============================================================================\r\n"
 "class %%component_class%%  : public juce::Component\r\n"
 "{\r\n"
@@ -7693,10 +7850,10 @@ static const unsigned char temp_binary_data_49[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_49;
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_52;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_binary_data_50[] =
+static const unsigned char temp_binary_data_53[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7717,10 +7874,10 @@ static const unsigned char temp_binary_data_50[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_50;
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_53;
 
 //================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_binary_data_51[] =
+static const unsigned char temp_binary_data_54[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7773,10 +7930,10 @@ static const unsigned char temp_binary_data_51[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_51;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_54;
 
 //================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_binary_data_52[] =
+static const unsigned char temp_binary_data_55[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7882,10 +8039,10 @@ static const unsigned char temp_binary_data_52[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_52;
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_55;
 
 //================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_53[] =
+static const unsigned char temp_binary_data_56[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7938,10 +8095,10 @@ static const unsigned char temp_binary_data_53[] =
 "\r\n"
 "}\r\n";
 
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_53;
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_56;
 
 //================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_binary_data_54[] =
+static const unsigned char temp_binary_data_57[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7972,10 +8129,10 @@ static const unsigned char temp_binary_data_54[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_54;
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_57;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_binary_data_55[] =
+static const unsigned char temp_binary_data_58[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7988,10 +8145,10 @@ static const unsigned char temp_binary_data_55[] =
 "\r\n"
 "%%include_corresponding_header%%\r\n";
 
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_55;
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_58;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_binary_data_56[] =
+static const unsigned char temp_binary_data_59[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -8004,10 +8161,10 @@ static const unsigned char temp_binary_data_56[] =
 "\r\n"
 "#pragma once\r\n";
 
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_56;
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_59;
 
 //================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_57[] =
+static const unsigned char temp_binary_data_60[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -8070,10 +8227,10 @@ static const unsigned char temp_binary_data_57[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_57;
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_60;
 
 //================== jucer_OpenGLComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_58[] =
+static const unsigned char temp_binary_data_61[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -8142,10 +8299,10 @@ static const unsigned char temp_binary_data_58[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_58;
+const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_61;
 
 //================== jucer_OpenGLComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_59[] =
+static const unsigned char temp_binary_data_62[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -8195,10 +8352,10 @@ static const unsigned char temp_binary_data_59[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_59;
+const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_62;
 
 //================== jucer_OpenGLComponentTemplate.h ==================
-static const unsigned char temp_binary_data_60[] =
+static const unsigned char temp_binary_data_63[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -8232,10 +8389,10 @@ static const unsigned char temp_binary_data_60[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_60;
+const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_63;
 
 //================== jucer_PIPAudioProcessorTemplate.h ==================
-static const unsigned char temp_binary_data_61[] =
+static const unsigned char temp_binary_data_64[] =
 "class %%class_name%%  : public juce::AudioProcessor\r\n"
 "{\r\n"
 "public:\r\n"
@@ -8344,10 +8501,10 @@ static const unsigned char temp_binary_data_61[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_61;
+const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_64;
 
 //================== jucer_PIPTemplate.h ==================
-static const unsigned char temp_binary_data_62[] =
+static const unsigned char temp_binary_data_65[] =
 "/*******************************************************************************\r\n"
 " The block below describes the properties of this PIP. A PIP is a short snippet\r\n"
 " of code that can be read by the Projucer and used to generate a JUCE project.\r\n"
@@ -8366,10 +8523,10 @@ static const unsigned char temp_binary_data_62[] =
 "//==============================================================================\r\n"
 "%%pip_code%%\r\n";
 
-const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_62;
+const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_65;
 
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_63[] =
+static const unsigned char temp_binary_data_66[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -8394,10 +8551,10 @@ static const unsigned char temp_binary_data_63[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_63;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_66;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_64[] =
+static const unsigned char temp_binary_data_67[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -8422,10 +8579,10 @@ static const unsigned char temp_binary_data_64[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_64;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_67;
 
 //================== juce_runtime_arch_detection.cpp ==================
-static const unsigned char temp_binary_data_65[] =
+static const unsigned char temp_binary_data_68[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -8511,7 +8668,434 @@ static const unsigned char temp_binary_data_65[] =
 "\r\n"
 "#endif\r\n";
 
-const char* juce_runtime_arch_detection_cpp = (const char*) temp_binary_data_65;
+const char* juce_runtime_arch_detection_cpp = (const char*) temp_binary_data_68;
+
+//================== juce_LinuxSubprocessHelper.cpp ==================
+static const unsigned char temp_binary_data_69[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"   This file is part of the JUCE library.\r\n"
+"   Copyright (c) 2022 - Raw Material Software Limited\r\n"
+"\r\n"
+"   JUCE is an open source library subject to commercial or open-source\r\n"
+"   licensing.\r\n"
+"\r\n"
+"   By using JUCE, you agree to the terms of both the JUCE 7 End-User License\r\n"
+"   Agreement and JUCE Privacy Policy.\r\n"
+"\r\n"
+"   End User License Agreement: www.juce.com/juce-7-licence\r\n"
+"   Privacy Policy: www.juce.com/juce-privacy-policy\r\n"
+"\r\n"
+"   Or: You may also use this code under the terms of the GPL v3 (see\r\n"
+"   www.gnu.org/licenses).\r\n"
+"\r\n"
+"   JUCE IS PROVIDED \"AS IS\" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER\r\n"
+"   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE\r\n"
+"   DISCLAIMED.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#include <dlfcn.h>\r\n"
+"\r\n"
+"int main (int argc, const char* const* argv)\r\n"
+"{\r\n"
+"    if (argc >= 3)\r\n"
+"        if (auto* handle = dlopen (argv[1], RTLD_LAZY))\r\n"
+"            if (auto* function = reinterpret_cast<int (*) (int, const char* const*)> (dlsym (handle, argv[2])))\r\n"
+"                return function (argc - 3, argv + 3);\r\n"
+"\r\n"
+"    return 1;\r\n"
+"}\r\n";
+
+const char* juce_LinuxSubprocessHelper_cpp = (const char*) temp_binary_data_69;
+
+//================== juce_SimpleBinaryBuilder.cpp ==================
+static const unsigned char temp_binary_data_70[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"   This file is part of the JUCE library.\r\n"
+"   Copyright (c) 2022 - Raw Material Software Limited\r\n"
+"\r\n"
+"   JUCE is an open source library subject to commercial or open-source\r\n"
+"   licensing.\r\n"
+"\r\n"
+"   By using JUCE, you agree to the terms of both the JUCE 7 End-User License\r\n"
+"   Agreement and JUCE Privacy Policy.\r\n"
+"\r\n"
+"   End User License Agreement: www.juce.com/juce-7-licence\r\n"
+"   Privacy Policy: www.juce.com/juce-privacy-policy\r\n"
+"\r\n"
+"   Or: You may also use this code under the terms of the GPL v3 (see\r\n"
+"   www.gnu.org/licenses).\r\n"
+"\r\n"
+"   JUCE IS PROVIDED \"AS IS\" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER\r\n"
+"   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE\r\n"
+"   DISCLAIMED.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#include <sys/stat.h>\r\n"
+"#include <unistd.h>\r\n"
+"\r\n"
+"#include <algorithm>\r\n"
+"#include <cstdint>\r\n"
+"#include <fstream>\r\n"
+"#include <iomanip>\r\n"
+"#include <iostream>\r\n"
+"#include <optional>\r\n"
+"#include <vector>\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"struct FileHelpers\r\n"
+"{\r\n"
+"    static std::string getCurrentWorkingDirectory()\r\n"
+"    {\r\n"
+"        std::vector<char> buffer (1024);\r\n"
+"\r\n"
+"        while (getcwd (buffer.data(), buffer.size() - 1) == nullptr && errno == ERANGE)\r\n"
+"            buffer.resize (buffer.size() * 2 / 3);\r\n"
+"\r\n"
+"        return { buffer.data() };\r\n"
+"    }\r\n"
+"\r\n"
+"    static bool endsWith (const std::string& s, char c)\r\n"
+"    {\r\n"
+"        if (s.length() == 0)\r\n"
+"            return false;\r\n"
+"\r\n"
+"        return *s.rbegin() == c;\r\n"
+"    }\r\n"
+"\r\n"
+"    static std::string appendedPaths (const std::string& first, const std::string& second)\r\n"
+"    {\r\n"
+"        return endsWith (first, '/') ? first + second : first + \"/\" + second;\r\n"
+"    }\r\n"
+"\r\n"
+"    static bool exists (const std::string& path)\r\n"
+"    {\r\n"
+"        return ! path.empty() && access (path.c_str(), F_OK) == 0;\r\n"
+"    }\r\n"
+"\r\n"
+"    static bool deleteFile (const std::string& path)\r\n"
+"    {\r\n"
+"        if (! exists (path))\r\n"
+"            return true;\r\n"
+"\r\n"
+"        return remove (path.c_str()) == 0;\r\n"
+"    }\r\n"
+"\r\n"
+"    static std::string getFilename (const std::string& path)\r\n"
+"    {\r\n"
+"        return { std::find_if (path.rbegin(), path.rend(), [] (auto c) { return c == '/'; }).base(),\r\n"
+"                 path.end() };\r\n"
+"    }\r\n"
+"\r\n"
+"    static bool isDirectory (const std::string& path)\r\n"
+"    {\r\n"
+"       #if defined (__FreeBSD__) || defined (__OpenBSD__)\r\n"
+"        #define JUCE_STAT stat\r\n"
+"       #else\r\n"
+"        #define JUCE_STAT stat64\r\n"
+"       #endif\r\n"
+"\r\n"
+"        struct JUCE_STAT info;\r\n"
+"\r\n"
+"        return    ! path.empty()\r\n"
+"               && JUCE_STAT (path.c_str(), &info) == 0\r\n"
+"               && ((info.st_mode & S_IFDIR) != 0);\r\n"
+"    }\r\n"
+"\r\n"
+"    static std::string getParentDirectory (const std::string& path)\r\n"
+"    {\r\n"
+"        std::string p { path.begin(),\r\n"
+"                        std::find_if (path.rbegin(),\r\n"
+"                                      path.rend(),\r\n"
+"                                      [] (auto c) { return c == '/'; }).base() };\r\n"
+"\r\n"
+"        // Trim the ending slash, but only if not root\r\n"
+"        if (endsWith (p, '/') && p.length() > 1)\r\n"
+"            return { p.begin(), p.end() - 1 };\r\n"
+"\r\n"
+"        return p;\r\n"
+"    }\r\n"
+"\r\n"
+"    static bool createDirectory (const std::string& path)\r\n"
+"    {\r\n"
+"        if (isDirectory (path))\r\n"
+"            return true;\r\n"
+"\r\n"
+"        const auto parentDir = getParentDirectory (path);\r\n"
+"\r\n"
+"        if (path == parentDir)\r\n"
+"            return false;\r\n"
+"\r\n"
+"        if (createDirectory (parentDir))\r\n"
+"            return mkdir (path.c_str(), 0777) != -1;\r\n"
+"\r\n"
+"        return false;\r\n"
+"    }\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"struct StringHelpers\r\n"
+"{\r\n"
+"    static bool isQuoteCharacter (char c)\r\n"
+"    {\r\n"
+"        return c == '\"' || c == '\\'';\r\n"
+"    }\r\n"
+"\r\n"
+"    static std::string unquoted (const std::string& str)\r\n"
+"    {\r\n"
+"        if (str.length() == 0 || (! isQuoteCharacter (str[0])))\r\n"
+"            return str;\r\n"
+"\r\n"
+"        return str.substr (1, str.length() - (isQuoteCharacter (str[str.length() - 1]) ? 1 : 0));\r\n"
+"    }\r\n"
+"\r\n"
+"    static void ltrim (std::string& s)\r\n"
+"    {\r\n"
+"        s.erase (s.begin(), std::find_if (s.begin(), s.end(), [] (int c) { return ! std::isspace (c); }));\r\n"
+"    }\r\n"
+"\r\n"
+"    static void rtrim (std::string& s)\r\n"
+"    {\r\n"
+"        s.erase (std::find_if (s.rbegin(), s.rend(), [] (int c) { return ! std::isspace (c); }).base(), s.end());\r\n"
+"    }\r\n"
+"\r\n"
+"    static std::string trimmed (const std::string& str)\r\n"
+"    {\r\n"
+"        auto result = str;\r\n"
+"        ltrim (result);\r\n"
+"        rtrim (result);\r\n"
+"        return result;\r\n"
+"    }\r\n"
+"\r\n"
+"    static std::string replaced (const std::string& str, char charToReplace, char replaceWith)\r\n"
+"    {\r\n"
+"        auto result = str;\r\n"
+"        std::replace (result.begin(), result.end(), charToReplace, replaceWith);\r\n"
+"        return result;\r\n"
+"    }\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"static bool addFile (const std::string& filePath,\r\n"
+"                     const std::string& binaryNamespace,\r\n"
+"                     std::ofstream& headerStream,\r\n"
+"                     std::ofstream& cppStream,\r\n"
+"                     bool verbose)\r\n"
+"{\r\n"
+"    std::ifstream fileStream (filePath, std::ios::in | std::ios::binary | std::ios::ate);\r\n"
+"\r\n"
+"    if (! fileStream.is_open())\r\n"
+"    {\r\n"
+"        std::cerr << \"Failed to open input file \" << filePath << std::endl;\r\n"
+"        return false;\r\n"
+"    }\r\n"
+"\r\n"
+"    std::vector<char> buffer ((size_t) fileStream.tellg());\r\n"
+"    fileStream.seekg (0);\r\n"
+"    fileStream.read (buffer.data(), static_cast<std::streamsize> (buffer.size()));\r\n"
+"\r\n"
+"    const auto variableName = StringHelpers::replaced (StringHelpers::replaced (FileHelpers::getFilename (filePath),\r\n"
+"                                                                                ' ',\r\n"
+"                                                                                '_'),\r\n"
+"                                                       '.',\r\n"
+"                                                       '_');\r\n"
+"\r\n"
+"    if (verbose)\r\n"
+"    {\r\n"
+"        std::cout << \"Adding \" << variableName << \": \"\r\n"
+"                  << buffer.size() << \" bytes\" << std::endl;\r\n"
+"    }\r\n"
+"\r\n"
+"    headerStream << \"    extern const char*  \" << variableName << \";\" << std::endl\r\n"
+"                 << \"    const int           \" << variableName << \"Size = \"\r\n"
+"                 << buffer.size() << \";\" << std::endl;\r\n"
+"\r\n"
+"    cppStream << \"static const unsigned char temp0[] = {\";\r\n"
+"\r\n"
+"    auto* data = (const uint8_t*) buffer.data();\r\n"
+"\r\n"
+"    for (size_t i = 0; i < buffer.size() - 1; ++i)\r\n"
+"    {\r\n"
+"        cppStream << (int) data[i] << \",\";\r\n"
+"\r\n"
+"        if ((i % 40) == 39)\r\n"
+"            cppStream << std::endl << \"  \";\r\n"
+"    }\r\n"
+"\r\n"
+"    cppStream << (int) data[buffer.size() - 1] << \",0,0};\" << std::endl;\r\n"
+"    cppStream << \"const char* \" << binaryNamespace << \"::\" << variableName\r\n"
+"              << \" = (const char*) temp0\" << \";\" << std::endl << std::endl;\r\n"
+"\r\n"
+"    return true;\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"class Arguments\r\n"
+"{\r\n"
+"public:\r\n"
+"    enum class PositionalArguments\r\n"
+"    {\r\n"
+"        sourceFile = 0,\r\n"
+"        targetDirectory,\r\n"
+"        targetFilename,\r\n"
+"        binaryNamespace\r\n"
+"    };\r\n"
+"\r\n"
+"    static std::optional<Arguments> create (int argc, char* argv[])\r\n"
+"    {\r\n"
+"        std::vector<std::string> arguments;\r\n"
+"        bool verbose = false;\r\n"
+"\r\n"
+"        for (int i = 1; i < argc; ++i)\r\n"
+"        {\r\n"
+"            std::string arg { argv[i] };\r\n"
+"\r\n"
+"            if (arg == \"-v\" || arg == \"--verbose\")\r\n"
+"                verbose = true;\r\n"
+"            else\r\n"
+"                arguments.emplace_back (std::move (arg));\r\n"
+"        }\r\n"
+"\r\n"
+"        if (arguments.size() != static_cast<size_t> (PositionalArguments::binaryNamespace) + 1)\r\n"
+"            return std::nullopt;\r\n"
+"\r\n"
+"        return Arguments { std::move (arguments), verbose };\r\n"
+"    }\r\n"
+"\r\n"
+"    std::string get (PositionalArguments argument) const\r\n"
+"    {\r\n"
+"        return arguments[static_cast<size_t> (argument)];\r\n"
+"    }\r\n"
+"\r\n"
+"    bool isVerbose() const\r\n"
+"    {\r\n"
+"        return verbose;\r\n"
+"    }\r\n"
+"\r\n"
+"private:\r\n"
+"    Arguments (std::vector<std::string> args, bool verboseIn)\r\n"
+"        : arguments (std::move (args)), verbose (verboseIn)\r\n"
+"    {\r\n"
+"    }\r\n"
+"\r\n"
+"    std::vector<std::string> arguments;\r\n"
+"    bool verbose = false;\r\n"
+"};\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"int main (int argc, char* argv[])\r\n"
+"{\r\n"
+"    const auto arguments = Arguments::create (argc, argv);\r\n"
+"\r\n"
+"    if (! arguments.has_value())\r\n"
+"    {\r\n"
+"        std::cout << \" Usage: SimpleBinaryBuilder  [-v | --verbose] sourcefile targetdirectory targetfilename namespace\"\r\n"
+"                                                                                                        << std::endl << std::endl\r\n"
+"                  << \" SimpleBinaryBuilder will encode the provided source file into\"                   << std::endl\r\n"
+"                  << \" two files called (targetfilename).cpp and (targetfilename).h,\"                   << std::endl\r\n"
+"                  << \" which it will write into the specified target directory.\"                        << std::endl\r\n"
+"                  << \" The target directory will be automatically created if necessary. The binary\"     << std::endl\r\n"
+"                  << \" resource will be available in the given namespace.\"                              << std::endl << std::endl;\r\n"
+"\r\n"
+"        return 0;\r\n"
+"    }\r\n"
+"\r\n"
+"    const auto currentWorkingDirectory = FileHelpers::getCurrentWorkingDirectory();\r\n"
+"\r\n"
+"    using ArgType = Arguments::PositionalArguments;\r\n"
+"\r\n"
+"    const auto sourceFile = FileHelpers::appendedPaths (currentWorkingDirectory,\r\n"
+"                                                        StringHelpers::unquoted (arguments->get (ArgType::sourceFile)));\r\n"
+"\r\n"
+"    if (! FileHelpers::exists (sourceFile))\r\n"
+"    {\r\n"
+"        std::cerr << \"Source file doesn't exist: \"\r\n"
+"                  << sourceFile\r\n"
+"                  << std::endl << std::endl;\r\n"
+"\r\n"
+"        return 1;\r\n"
+"    }\r\n"
+"\r\n"
+"    const auto targetDirectory = FileHelpers::appendedPaths (currentWorkingDirectory,\r\n"
+"                                                             StringHelpers::unquoted (arguments->get (ArgType::targetDirectory)));\r\n"
+"\r\n"
+"    if (! FileHelpers::exists (targetDirectory))\r\n"
+"    {\r\n"
+"        if (! FileHelpers::createDirectory (targetDirectory))\r\n"
+"        {\r\n"
+"            std::cerr << \"Failed to create target directory: \" << targetDirectory << std::endl;\r\n"
+"            return 1;\r\n"
+"        }\r\n"
+"    }\r\n"
+"\r\n"
+"    const auto className = StringHelpers::trimmed (arguments->get (ArgType::targetFilename));\r\n"
+"    const auto binaryNamespace = StringHelpers::trimmed (arguments->get (ArgType::binaryNamespace));\r\n"
+"\r\n"
+"    const auto headerFilePath = FileHelpers::appendedPaths (targetDirectory, className + \".h\");\r\n"
+"    const auto cppFilePath    = FileHelpers::appendedPaths (targetDirectory, className + \".cpp\");\r\n"
+"\r\n"
+"    if (arguments->isVerbose())\r\n"
+"    {\r\n"
+"        std::cout << \"Creating \" << headerFilePath\r\n"
+"                  << \" and \" << cppFilePath\r\n"
+"                  << \" from file \" << sourceFile\r\n"
+"                  << \"...\" << std::endl << std::endl;\r\n"
+"    }\r\n"
+"\r\n"
+"    if (! FileHelpers::deleteFile (headerFilePath))\r\n"
+"    {\r\n"
+"        std::cerr << \"Failed to remove old header file: \" << headerFilePath << std::endl;\r\n"
+"        return 1;\r\n"
+"    }\r\n"
+"\r\n"
+"    if (! FileHelpers::deleteFile (cppFilePath))\r\n"
+"    {\r\n"
+"        std::cerr << \"Failed to remove old source file: \" << cppFilePath << std::endl;\r\n"
+"        return 1;\r\n"
+"    }\r\n"
+"\r\n"
+"    std::ofstream header (headerFilePath);\r\n"
+"\r\n"
+"    if (! header.is_open())\r\n"
+"    {\r\n"
+"        std::cerr << \"Failed to open \" << headerFilePath << std::endl;\r\n"
+"\r\n"
+"        return 1;\r\n"
+"    }\r\n"
+"\r\n"
+"    std::ofstream cpp (cppFilePath);\r\n"
+"\r\n"
+"    if (! cpp.is_open())\r\n"
+"    {\r\n"
+"        std::cerr << \"Failed to open \" << headerFilePath << std::endl;\r\n"
+"\r\n"
+"        return 1;\r\n"
+"    }\r\n"
+"\r\n"
+"    header << \"/* (Auto-generated binary data file). */\" << std::endl << std::endl\r\n"
+"           << \"#pragma once\" << std::endl << std::endl\r\n"
+"           << \"namespace \" << binaryNamespace << std::endl\r\n"
+"           << \"{\" << std::endl;\r\n"
+"\r\n"
+"    cpp << \"/* (Auto-generated binary data file). */\" << std::endl << std::endl\r\n"
+"        << \"#include \" << std::quoted (className + \".h\") << std::endl << std::endl;\r\n"
+"\r\n"
+"    if (! addFile (sourceFile, binaryNamespace, header, cpp, arguments->isVerbose()))\r\n"
+"        return 1;\r\n"
+"\r\n"
+"    header << \"}\" << std::endl << std::endl;\r\n"
+"\r\n"
+"    return 0;\r\n"
+"}\r\n";
+
+const char* juce_SimpleBinaryBuilder_cpp = (const char*) temp_binary_data_70;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes);
@@ -8563,12 +9147,15 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
         case 0x744d44d6:  numBytes = 1916; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
         case 0x3eb8f45b:  numBytes = 1445; return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0x851ac3ac:  numBytes = 1593; return jucer_AudioPluginARAEditorTemplate_cpp;
+        case 0x4d6430b1:  numBytes = 1142; return jucer_AudioPluginARAEditorTemplate_h;
+        case 0x48e808fc:  numBytes = 2462; return jucer_AudioPluginARAFilterTemplate_h;
         case 0xea35a37d:  numBytes = 5322; return jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
         case 0x78a6d0c2:  numBytes = 1757; return jucer_AudioPluginARAPlaybackRendererTemplate_h;
         case 0x27c5a93a:  numBytes = 1355; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 973; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6218; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2462; return jucer_AudioPluginFilterTemplate_h;
+        case 0x488afa0a:  numBytes = 2299; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2147; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2065; return jucer_ComponentTemplate_h;
         case 0x1657b643:  numBytes = 1524; return jucer_ContentCompSimpleTemplate_h;
@@ -8591,6 +9178,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
         case 0x7c03d519:  numBytes = 3005; return juce_runtime_arch_detection_cpp;
+        case 0x295b6f43:  numBytes = 1212; return juce_LinuxSubprocessHelper_cpp;
+        case 0xef269d3a:  numBytes = 12344; return juce_SimpleBinaryBuilder_cpp;
         default: break;
     }
 
@@ -8638,6 +9227,9 @@ const char* namedResourceList[] =
     "jucer_AudioComponentTemplate_h",
     "jucer_AudioPluginARADocumentControllerTemplate_cpp",
     "jucer_AudioPluginARADocumentControllerTemplate_h",
+    "jucer_AudioPluginARAEditorTemplate_cpp",
+    "jucer_AudioPluginARAEditorTemplate_h",
+    "jucer_AudioPluginARAFilterTemplate_h",
     "jucer_AudioPluginARAPlaybackRendererTemplate_cpp",
     "jucer_AudioPluginARAPlaybackRendererTemplate_h",
     "jucer_AudioPluginEditorTemplate_cpp",
@@ -8665,7 +9257,9 @@ const char* namedResourceList[] =
     "jucer_PIPTemplate_h",
     "colourscheme_dark_xml",
     "colourscheme_light_xml",
-    "juce_runtime_arch_detection_cpp"
+    "juce_runtime_arch_detection_cpp",
+    "juce_LinuxSubprocessHelper_cpp",
+    "juce_SimpleBinaryBuilder_cpp"
 };
 
 const char* originalFilenames[] =
@@ -8708,6 +9302,9 @@ const char* originalFilenames[] =
     "jucer_AudioComponentTemplate.h",
     "jucer_AudioPluginARADocumentControllerTemplate.cpp",
     "jucer_AudioPluginARADocumentControllerTemplate.h",
+    "jucer_AudioPluginARAEditorTemplate.cpp",
+    "jucer_AudioPluginARAEditorTemplate.h",
+    "jucer_AudioPluginARAFilterTemplate.h",
     "jucer_AudioPluginARAPlaybackRendererTemplate.cpp",
     "jucer_AudioPluginARAPlaybackRendererTemplate.h",
     "jucer_AudioPluginEditorTemplate.cpp",
@@ -8735,7 +9332,9 @@ const char* originalFilenames[] =
     "jucer_PIPTemplate.h",
     "colourscheme_dark.xml",
     "colourscheme_light.xml",
-    "juce_runtime_arch_detection.cpp"
+    "juce_runtime_arch_detection.cpp",
+    "juce_LinuxSubprocessHelper.cpp",
+    "juce_SimpleBinaryBuilder.cpp"
 };
 
 const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8);

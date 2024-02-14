@@ -209,6 +209,8 @@
  #include <sys/types.h>
  #include <sys/vfs.h>
  #include <sys/wait.h>
+ #include <sys/timerfd.h>
+ #include <sys/eventfd.h>
  #include <utime.h>
  #include <poll.h>
 
@@ -265,11 +267,13 @@
  #include <dirent.h>
  #include <fnmatch.h>
  #include <sys/wait.h>
+ #include <sys/timerfd.h>
+ #include <sys/eventfd.h>
  #include <android/api-level.h>
  #include <poll.h>
 
- // If you are getting include errors here, then you to re-build the Projucer
- // and re-save your .jucer file.
+ // If you are getting include errors here, then you need to re-build
+ // the Projucer and re-save your .jucer file.
  #include <cpu-features.h>
 #endif
 

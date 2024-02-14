@@ -336,14 +336,14 @@ bool OSCSender::sendToIPAddress (const String& host, int port, const OSCBundle& 
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class OSCBinaryWriterTests  : public UnitTest
+class OSCBinaryWriterTests final : public UnitTest
 {
 public:
     OSCBinaryWriterTests()
         : UnitTest ("OSCBinaryWriter class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("writing OSC addresses");
         {
@@ -665,14 +665,14 @@ public:
 static OSCBinaryWriterTests OSCBinaryWriterUnitTests;
 
 //==============================================================================
-class OSCRoundTripTests  : public UnitTest
+class OSCRoundTripTests final : public UnitTest
 {
 public:
     OSCRoundTripTests()
         : UnitTest ("OSCRoundTripTests class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Empty OSC message");
         {

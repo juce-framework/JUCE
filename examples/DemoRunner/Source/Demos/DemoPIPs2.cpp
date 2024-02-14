@@ -104,7 +104,9 @@ void registerDemos_Two() noexcept
    #if ! (JUCE_LINUX || JUCE_BSD)
     REGISTER_DEMO (VideoDemo,                 GUI, true)
    #endif
+   #if JUCE_WEB_BROWSER
     REGISTER_DEMO (WebBrowserDemo,            GUI, true)
+   #endif
     REGISTER_DEMO (WidgetsDemo,               GUI, false)
     REGISTER_DEMO (WindowsDemo,               GUI, false)
 }

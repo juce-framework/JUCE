@@ -51,6 +51,7 @@ namespace ProjectMessages
         DECLARE_ID (newVersionAvailable);
         DECLARE_ID (pluginCodeInvalid);
         DECLARE_ID (manufacturerCodeInvalid);
+        DECLARE_ID (deprecatedExporter);
 
         DECLARE_ID (notification);
         DECLARE_ID (warning);
@@ -64,7 +65,8 @@ namespace ProjectMessages
     {
         static Identifier warnings[] = { Ids::incompatibleLicense, Ids::cppStandard, Ids::moduleNotFound,
                                          Ids::jucePath, Ids::jucerFileModified, Ids::missingModuleDependencies,
-                                         Ids::oldProjucer, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid };
+                                         Ids::oldProjucer, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid,
+                                         Ids::deprecatedExporter };
 
         if (std::find (std::begin (warnings), std::end (warnings), message) != std::end (warnings))
             return Ids::warning;
@@ -88,6 +90,7 @@ namespace ProjectMessages
         if (message == Ids::newVersionAvailable)        return "New Version Available";
         if (message == Ids::pluginCodeInvalid)          return "Invalid Plugin Code";
         if (message == Ids::manufacturerCodeInvalid)    return "Invalid Manufacturer Code";
+        if (message == Ids::deprecatedExporter)         return "Deprecated Exporter";
 
         jassertfalse;
         return {};
@@ -105,6 +108,7 @@ namespace ProjectMessages
         if (message == Ids::newVersionAvailable)        return "A new version of JUCE is available to download.";
         if (message == Ids::pluginCodeInvalid)          return "The plugin code should be exactly four characters in length.";
         if (message == Ids::manufacturerCodeInvalid)    return "The manufacturer code should be exactly four characters in length.";
+        if (message == Ids::deprecatedExporter)         return "The project includes a deprecated exporter.";
 
         jassertfalse;
         return {};
@@ -113,14 +117,73 @@ namespace ProjectMessages
     using MessageAction = std::pair<String, std::function<void()>>;
 }
 
+// Can be shared between multiple classes wanting to create a MessageBox. Ensures that there is one
+// MessageBox active at a given time.
+class MessageBoxQueue : private AsyncUpdater
+{
+public:
+    struct Listener
+    {
+        using CreatorFunction = std::function<ScopedMessageBox (MessageBoxOptions, std::function<void (int)>)>;
+
+        virtual ~Listener() = default;
+
+        virtual void canCreateMessageBox (CreatorFunction) = 0;
+    };
+
+    void handleAsyncUpdate() override
+    {
+        schedule();
+    }
+
+    auto addListener (Listener& l)
+    {
+        triggerAsyncUpdate();
+        return listeners.addScoped (l);
+    }
+
+private:
+    ScopedMessageBox create (MessageBoxOptions options, std::function<void (int)> callback)
+    {
+        hasActiveMessageBox = true;
+
+        return AlertWindow::showScopedAsync (options, [this, cb = std::move (callback)] (int result)
+                                             {
+                                                 cb (result);
+                                                 hasActiveMessageBox = false;
+                                                 triggerAsyncUpdate();
+                                             });
+    }
+
+    void schedule()
+    {
+        if (hasActiveMessageBox)
+            return;
+
+        auto& currentListeners = listeners.getListeners();
+
+        if (! currentListeners.isEmpty())
+        {
+            currentListeners[0]->canCreateMessageBox ([this] (auto o, auto c)
+                                                              {
+                                                                  return create (o, c);
+                                                              });
+        }
+    }
+
+    ListenerList<Listener> listeners;
+    bool hasActiveMessageBox = false;
+};
+
 enum class Async { no, yes };
 
 //==============================================================================
-class Project  : public FileBasedDocument,
-                 private ValueTree::Listener,
-                 private LicenseController::LicenseStateListener,
-                 private ChangeListener,
-                 private AvailableModulesList::Listener
+class Project final : public FileBasedDocument,
+                      private ValueTree::Listener,
+                      private LicenseController::LicenseStateListener,
+                      private ChangeListener,
+                      private AvailableModulesList::Listener,
+                      private MessageBoxQueue::Listener
 {
 public:
     //==============================================================================
@@ -159,6 +222,7 @@ public:
     static String getJuceSourceHFilename()                      { return "JuceHeader.h"; }
     static String getJuceLV2DefinesFilename()                   { return "JuceLV2Defines.h"; }
     static String getLV2FileWriterName()                        { return "juce_lv2_helper"; }
+    static String getVST3FileWriterName()                       { return "juce_vst3_helper"; }
 
     //==============================================================================
     template <class FileType>
@@ -339,19 +403,17 @@ public:
     String getLV2URI() const        { return pluginLV2URIValue.get(); }
 
     //==============================================================================
-    bool isAUPluginHost();
-    bool isVSTPluginHost();
-    bool isVST3PluginHost();
-    bool isLV2PluginHost();
-    bool isARAPluginHost();
+    bool isAUPluginHost()   const;
+    bool isVSTPluginHost()  const;
+    bool isVST3PluginHost() const;
+    bool isLV2PluginHost()  const;
+    bool isARAPluginHost()  const;
 
     //==============================================================================
     bool shouldBuildTargetType (build_tools::ProjectType::Target::Type targetType) const noexcept;
     static build_tools::ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
 
     //==============================================================================
-    void updateDeprecatedProjectSettingsInteractively();
-
     StringPairArray getAppConfigDefs();
     StringPairArray getAudioPluginFlags() const;
 
@@ -494,7 +556,10 @@ public:
     bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
-    EnabledModulesList& getEnabledModules();
+    void createEnabledModulesList();
+
+          EnabledModulesList& getEnabledModules();
+    const EnabledModulesList& getEnabledModules() const;
 
     AvailableModulesList& getExporterPathsModulesList()  { return exporterPathsModulesList; }
     void rescanExporterPathModules (bool async = false);
@@ -540,6 +605,8 @@ public:
     bool isFileModificationCheckPending() const;
     bool isSaveAndExportDisabled() const;
 
+    MessageBoxQueue messageBoxQueue;
+
 private:
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
@@ -547,8 +614,17 @@ private:
     void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override;
     void valueTreeChildOrderChanged (ValueTree&, int, int) override;
 
+    void valueTreeChildAddedOrRemoved (ValueTree&, ValueTree&);
+
     //==============================================================================
-    struct ProjectFileModificationPoller  : private Timer
+    void canCreateMessageBox (CreatorFunction) override;
+
+    //==============================================================================
+    template <typename This>
+    static auto& getEnabledModulesImpl (This&);
+
+    //==============================================================================
+    struct ProjectFileModificationPoller final : private Timer
     {
         ProjectFileModificationPoller (Project& p);
         bool isCheckPending() const noexcept  { return pending; }
@@ -638,6 +714,7 @@ private:
     void updateJUCEPathWarning();
 
     void updateModuleWarnings();
+    void updateExporterWarnings();
     void updateCppStandardWarning (bool showWarning);
     void updateMissingModuleDependenciesWarning (bool showWarning);
     void updateOldProjucerWarning (bool showWarning);
@@ -652,6 +729,10 @@ private:
 
     std::unique_ptr<FileChooser> chooser;
     std::unique_ptr<ProjectSaver> saver;
+
+    std::optional<MessageBoxOptions> exporterRemovalMessageBoxOptions;
+    ErasedScopeGuard messageBoxQueueListenerScope;
+    ScopedMessageBox messageBox;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)

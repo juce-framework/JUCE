@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename FloatType>
@@ -192,5 +190,4 @@ const char* WindowingFunction<FloatType>::getWindowingMethodName (WindowingMetho
 template class WindowingFunction<float>;
 template class WindowingFunction<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

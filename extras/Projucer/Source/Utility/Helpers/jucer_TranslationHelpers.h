@@ -173,7 +173,7 @@ struct TranslationHelpers
             const auto file = i.getFile();
 
             if (file.hasFileExtension (sourceOrHeaderFileExtensions))
-                scanFileForTranslations(strings, file);
+                scanFileForTranslations (strings, file);
          }
     }
 
@@ -186,13 +186,13 @@ struct TranslationHelpers
 
         for (int j = 0; j < modules.size(); ++j)
         {
-            const File localFolder (modules.getUnchecked(j)->getFolder());
+            const File localFolder (modules.getUnchecked (j)->getFolder());
 
             Array<File> files;
-            modules.getUnchecked(j)->findBrowseableFiles (localFolder, files);
+            modules.getUnchecked (j)->findBrowseableFiles (localFolder, files);
 
             for (int i = 0; i < files.size(); ++i)
-                scanFileForTranslations (strings, files.getReference(i));
+                scanFileForTranslations (strings, files.getReference (i));
         }
     }
 

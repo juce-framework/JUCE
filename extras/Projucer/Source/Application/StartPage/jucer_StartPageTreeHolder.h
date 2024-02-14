@@ -26,7 +26,7 @@
 #pragma once
 
 //==============================================================================
-class StartPageTreeHolder  : public Component
+class StartPageTreeHolder final : public Component
 {
 public:
     enum class Open { no, yes };
@@ -82,7 +82,7 @@ public:
 
 private:
     //==============================================================================
-    class TreeSubItem  : public TreeViewItem
+    class TreeSubItem final : public TreeViewItem
     {
     public:
         TreeSubItem (StartPageTreeHolder& o, const String& n, const StringArray& subItemsIn)
@@ -153,7 +153,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeSubItem)
     };
 
-    struct TreeRootItem  : public TreeViewItem
+    struct TreeRootItem final : public TreeViewItem
     {
         explicit TreeRootItem (StartPageTreeHolder& o)
             : owner (o)

@@ -116,8 +116,8 @@ void TooltipWindow::displayTipInternal (Point<int> screenPos, const String& tip,
         }
         else
         {
-            const auto physicalPos = ScalingHelpers::scaledScreenPosToUnscaled (screenPos);
-            const auto scaledPos = ScalingHelpers::unscaledScreenPosToScaled (*this, physicalPos);
+            const auto physicalPos = detail::ScalingHelpers::scaledScreenPosToUnscaled (screenPos);
+            const auto scaledPos = detail::ScalingHelpers::unscaledScreenPosToScaled (*this, physicalPos);
             updatePosition (tip, scaledPos, Desktop::getInstance().getDisplays().getDisplayForPoint (screenPos)->userArea);
 
             addToDesktop (ComponentPeer::windowHasDropShadow
@@ -151,7 +151,7 @@ void TooltipWindow::displayTipInternal (Point<int> screenPos, const String& tip,
 
 String TooltipWindow::getTipFor (Component& c)
 {
-    if (isForegroundOrEmbeddedProcess (&c)
+    if (detail::WindowingHelpers::isForegroundOrEmbeddedProcess (&c)
          && ! ModifierKeys::currentModifiers.isAnyMouseButtonDown())
     {
         if (auto* ttc = dynamic_cast<TooltipClient*> (&c))

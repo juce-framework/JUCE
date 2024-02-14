@@ -340,7 +340,7 @@ public:
             using Vst3Fn = decltype (vst3Fn);
             using AuFn = decltype (auFn);
 
-            struct Visitor : ExtensionsVisitor, Vst3Fn, AuFn
+            struct Visitor final : public ExtensionsVisitor, Vst3Fn, AuFn
             {
                 explicit Visitor (Vst3Fn vst3Fn, AuFn auFn) : Vst3Fn (std::move (vst3Fn)), AuFn (std::move (auFn)) {}
                 void visitVST3Client (const VST3Client& x) override { Vst3Fn::operator() (x); }
@@ -458,7 +458,7 @@ void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (A
     if (! instance.getPluginDescription().hasARAExtension)
         cb (ARAFactoryWrapper{});
 
-    struct Extensions : public ExtensionsVisitor
+    struct Extensions final : public ExtensionsVisitor
     {
         Extensions (std::function<void (ARAFactoryWrapper)> callbackIn)
             : callback (std::move (callbackIn))
@@ -472,7 +472,7 @@ void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (A
         std::function<void (ARAFactoryWrapper)> callback;
     };
 
-    Extensions extensions { std::move(cb) };
+    Extensions extensions { std::move (cb) };
     instance.getExtensions (extensions);
 }
 

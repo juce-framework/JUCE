@@ -46,7 +46,7 @@ InputStream* URLInputSource::createInputStreamFor (const String& relatedItemPath
 {
     auto sub = u.getSubPath();
     auto parent = sub.containsChar (L'/') ? sub.upToLastOccurrenceOf ("/", false, false)
-                                          : String ();
+                                          : String();
 
     return u.withNewSubPath (parent)
             .getChildURL (relatedItemPath)

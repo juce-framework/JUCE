@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 This license applies only to files referencing this license,
 for other files of the Software Development Kit the respective embedded license text
@@ -38,4 +38,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 b) General Public License (GPL) Version 3
 Details of these licenses can be found at: www.gnu.org/licenses/gpl-3.0.html
+Please refer to the Steinberg VST usage guidelines for the use of VST, VST logo and VST 
+compatible logos:
+https://steinbergmedia.github.io/vst3_dev_portal/pages/VST+3+Licensing/Usage+guidelines.html
 //----------------------------------------------------------------------------------

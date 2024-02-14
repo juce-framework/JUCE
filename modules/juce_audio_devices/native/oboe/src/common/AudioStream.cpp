@@ -33,6 +33,7 @@ AudioStream::AudioStream(const AudioStreamBuilder &builder)
 }
 
 Result AudioStream::close() {
+    closePerformanceHint();
     // Update local counters so they can be read after the close.
     updateFramesWritten();
     updateFramesRead();
@@ -58,6 +59,9 @@ DataCallbackResult AudioStream::fireDataCallback(void *audioData, int32_t numFra
         return DataCallbackResult::Stop; // Should not be getting called
     }
 
+    beginPerformanceHintInCallback();
+
+    // Call the app to do the work.
     DataCallbackResult result;
     if (mDataCallback) {
         result = mDataCallback->onAudioReady(this, audioData, numFrames);
@@ -67,6 +71,8 @@ DataCallbackResult AudioStream::fireDataCallback(void *audioData, int32_t numFra
     // On Oreo, we might get called after returning stop.
     // So block that here.
     setDataCallbackEnabled(result == DataCallbackResult::Continue);
+
+    endPerformanceHintInCallback(numFrames);
 
     return result;
 }
@@ -166,6 +172,14 @@ ResultWithValue<int32_t> AudioStream::waitForAvailableFrames(int32_t numFrames,
     if (numFrames == 0) return Result::OK;
     if (numFrames < 0) return Result::ErrorOutOfRange;
 
+    // Make sure we don't try to wait for more frames than the buffer can hold.
+    // Subtract framesPerBurst because this is often called from a callback
+    // and we don't want to be sleeping if the buffer is close to overflowing.
+    const int32_t maxAvailableFrames = getBufferCapacityInFrames() - getFramesPerBurst();
+    numFrames = std::min(numFrames, maxAvailableFrames);
+    // The capacity should never be less than one burst. But clip to zero just in case.
+    numFrames = std::max(0, numFrames);
+
     int64_t framesAvailable = 0;
     int64_t burstInNanos = getFramesPerBurst() * kNanosPerSecond / getSampleRate();
     bool ready = false;
@@ -194,6 +208,15 @@ ResultWithValue<FrameTimestamp> AudioStream::getTimestamp(clockid_t clockId) {
     } else {
         return ResultWithValue<FrameTimestamp>(static_cast<Result>(result));
     }
+}
+
+void AudioStream::calculateDefaultDelayBeforeCloseMillis() {
+    // Calculate delay time before close based on burst duration.
+    // Start with a burst duration then add 1 msec as a safety margin.
+    mDelayBeforeCloseMillis = std::max(kMinDelayBeforeCloseMillis,
+                                       1 + ((mFramesPerBurst * 1000) / getSampleRate()));
+    LOGD("calculateDefaultDelayBeforeCloseMillis() default = %d",
+         static_cast<int>(mDelayBeforeCloseMillis));
 }
 
 } // namespace oboe

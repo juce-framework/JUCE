@@ -68,7 +68,7 @@ std::unique_ptr<AudioPluginInstance> AudioPluginFormat::createInstanceFromDescri
     return instance;
 }
 
-struct AudioPluginFormat::AsyncCreateMessage  : public Message
+struct AudioPluginFormat::AsyncCreateMessage final : public Message
 {
     AsyncCreateMessage (const PluginDescription& d, double sr, int size, PluginCreationCallback call)
         : desc (d), sampleRate (sr), bufferSize (size), callbackToUse (std::move (call))

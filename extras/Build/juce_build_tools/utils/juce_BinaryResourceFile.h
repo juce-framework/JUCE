@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::build_tools
 {
-namespace build_tools
-{
+
     class ResourceFile
     {
     public:
@@ -42,7 +41,7 @@ namespace build_tools
 
         String getSizeVariableFor (const File& file) const;
 
-        int getNumFiles() const { return files.size (); }
+        int getNumFiles() const { return files.size(); }
 
         const File& getFile (int index) const { return files.getReference (index); }
 
@@ -70,5 +69,5 @@ namespace build_tools
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResourceFile)
     };
-}
-}
+
+} // namespace juce::build_tools

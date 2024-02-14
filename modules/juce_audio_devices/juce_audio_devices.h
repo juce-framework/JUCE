@@ -32,7 +32,7 @@
 
   ID:                 juce_audio_devices
   vendor:             juce
-  version:            7.0.5
+  version:            7.0.10
   name:               JUCE audio and MIDI I/O device classes
   description:        Classes to play and record from audio and MIDI I/O devices
   website:            http://www.juce.com/juce
@@ -186,5 +186,5 @@ namespace juce
 #include "audio_io/juce_AudioDeviceManager.h"
 
 #if JUCE_IOS
- #include "native/juce_ios_Audio.h"
+ #include "native/juce_Audio_ios.h"
 #endif

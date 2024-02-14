@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -101,5 +99,4 @@ private:
     SampleType thresholddB = -10.0, releaseTime = 100.0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

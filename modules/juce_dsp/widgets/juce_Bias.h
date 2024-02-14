@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -64,7 +62,7 @@ public:
     /** Sets the length of the ramp used for smoothing gain changes. */
     void setRampDurationSeconds (double newDurationSeconds) noexcept
     {
-        if (rampDurationSeconds != newDurationSeconds)
+        if (! approximatelyEqual (rampDurationSeconds, newDurationSeconds))
         {
             rampDurationSeconds = newDurationSeconds;
             updateRamp();
@@ -155,5 +153,4 @@ private:
     }
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

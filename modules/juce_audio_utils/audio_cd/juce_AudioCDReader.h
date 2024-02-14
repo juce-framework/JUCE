@@ -61,7 +61,7 @@ public:
         @returns        a new AudioCDReader object, or nullptr if it couldn't be created. The
                         caller will be responsible for deleting the object returned.
     */
-    static AudioCDReader* createReaderForCD (const int index);
+    static AudioCDReader* createReaderForCD (int index);
 
     //==============================================================================
     /** Destructor. */
@@ -126,7 +126,7 @@ public:
         @returns    an array of sample positions of any index points found (not including
                     the index that marks the start of the track)
     */
-    Array<int> findIndexesInTrack (const int trackNumber);
+    Array<int> findIndexesInTrack (int trackNumber);
 
     /** Returns the CDDB id number for the CD.
         It's not a great way of identifying a disc, but it's traditional.

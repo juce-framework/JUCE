@@ -118,7 +118,7 @@ void StretchableLayoutManager::setItemPosition (const int itemIndex,
 {
     for (int i = items.size(); --i >= 0;)
     {
-        auto* layout = items.getUnchecked(i);
+        auto* layout = items.getUnchecked (i);
 
         if (layout->itemIndex == itemIndex)
         {
@@ -291,7 +291,7 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
     // ..and calculate the end position
     for (int i = startIndex; i < endIndex; ++i)
     {
-        auto* layout = items.getUnchecked(i);
+        auto* layout = items.getUnchecked (i);
         startPos += layout->currentSize;
     }
 
@@ -336,7 +336,7 @@ int StretchableLayoutManager::sizeToRealSize (double size, int totalSpace)
     if (size < 0)
         size *= -totalSpace;
 
-    return roundToInt (size);
+    return roundToInt (jmax (1.0, size));
 }
 
 } // namespace juce

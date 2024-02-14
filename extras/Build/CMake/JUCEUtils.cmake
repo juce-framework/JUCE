@@ -33,7 +33,7 @@
 # ==================================================================================================
 
 include_guard(GLOBAL)
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 
 define_property(TARGET PROPERTY JUCE_COMPANY_NAME INHERITED
     BRIEF_DOCS "The company name for a particular target"
@@ -147,6 +147,86 @@ endfunction()
 
 # ==================================================================================================
 
+function(_juce_create_linux_subprocess_helper_target)
+    if(TARGET juce_linux_subprocess_helper)
+        return()
+    endif()
+
+    set(source "${JUCE_CMAKE_UTILS_DIR}/juce_LinuxSubprocessHelper.cpp")
+
+    add_executable(juce_linux_subprocess_helper ${source})
+    add_executable(juce::juce_linux_subprocess_helper ALIAS juce_linux_subprocess_helper)
+    target_compile_features(juce_linux_subprocess_helper PRIVATE cxx_std_17)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    target_link_libraries(juce_linux_subprocess_helper PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
+endfunction()
+
+function(_juce_create_embedded_linux_subprocess_target output_target_name target)
+    # This library needs to be created in every directory where a target wants to link against it.
+    # Pre CMake 3.20 the GENERATED property is only visible in the directory of the current target,
+    # and even post 3.20, CMake will not know how to generate the sources outside this directory.
+    set(target_directory_key JUCE_EMBEDDED_LINUX_SUBPROCESS_TARGET)
+    get_directory_property(embedded_linux_subprocess_target ${target_directory_key})
+
+    if(embedded_linux_subprocess_target)
+        set(${output_target_name} juce::${embedded_linux_subprocess_target} PARENT_SCOPE)
+        return()
+    endif()
+
+    set(prefix "_juce_directory_prefix")
+    set(embedded_linux_subprocess_target ${prefix}_embedded_linux_subprocess)
+
+    while(TARGET ${embedded_linux_subprocess_target})
+        set(embedded_linux_subprocess_target ${prefix}_${embedded_linux_subprocess_target})
+    endwhile()
+
+    _juce_create_linux_subprocess_helper_target()
+
+    get_target_property(generated_sources_directory ${target} JUCE_GENERATED_SOURCES_DIRECTORY)
+
+    if(generated_sources_directory)
+        set(juce_linux_subprocess_helper_binary_dir "${generated_sources_directory}")
+    else()
+        set(juce_linux_subprocess_helper_binary_dir "${CMAKE_CURRENT_BINARY_DIR}/juce_LinuxSubprocessHelper")
+    endif()
+
+    set(binary_header_file  "${juce_linux_subprocess_helper_binary_dir}/juce_LinuxSubprocessHelperBinaryData.h")
+    set(binary_source_file  "${juce_linux_subprocess_helper_binary_dir}/juce_LinuxSubprocessHelperBinaryData.cpp")
+    set(juceaide_input_file "${juce_linux_subprocess_helper_binary_dir}/input_file_list")
+
+    file(GENERATE OUTPUT ${juceaide_input_file} CONTENT "$<TARGET_FILE:juce_linux_subprocess_helper>")
+    file(MAKE_DIRECTORY ${juce_linux_subprocess_helper_binary_dir})
+
+    add_custom_command(
+        OUTPUT
+            ${binary_header_file}
+            ${binary_source_file}
+        COMMAND juce::juceaide binarydata "LinuxSubprocessHelperBinaryData" "${binary_header_file}"
+            ${juce_linux_subprocess_helper_binary_dir} "${juceaide_input_file}"
+        COMMAND
+            ${CMAKE_COMMAND} -E rename "${juce_linux_subprocess_helper_binary_dir}/BinaryData1.cpp" "${binary_source_file}"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+        DEPENDS juce_linux_subprocess_helper
+        VERBATIM)
+
+    add_library(${embedded_linux_subprocess_target} INTERFACE)
+    target_sources(${embedded_linux_subprocess_target} INTERFACE ${binary_source_file})
+    target_include_directories(${embedded_linux_subprocess_target} INTERFACE ${juce_linux_subprocess_helper_binary_dir})
+    target_compile_definitions(${embedded_linux_subprocess_target} INTERFACE JUCE_USE_EXTERNAL_TEMPORARY_SUBPROCESS=1)
+    add_library(juce::${embedded_linux_subprocess_target} ALIAS ${embedded_linux_subprocess_target})
+
+    set_directory_properties(PROPERTIES ${target_directory_key} ${embedded_linux_subprocess_target})
+    set(${output_target_name} juce::${embedded_linux_subprocess_target} PARENT_SCOPE)
+endfunction()
+
+function(juce_link_with_embedded_linux_subprocess target)
+    _juce_create_embedded_linux_subprocess_target(embedded_linux_subprocess_target ${target})
+    target_link_libraries(${target} PRIVATE ${embedded_linux_subprocess_target})
+endfunction()
+
+# ==================================================================================================
+
 # Ideally, we'd check the preprocessor defs on the target to see whether
 # JUCE_USE_CURL, JUCE_WEB_BROWSER, or JUCE_IN_APP_PURCHASES have been explicitly turned off,
 # and then link libraries as appropriate.
@@ -167,6 +247,12 @@ function(_juce_link_optional_libraries target)
 
         if(needs_browser)
             target_link_libraries(${target} PRIVATE juce::pkgconfig_JUCE_BROWSER_LINUX_DEPS)
+
+            get_target_property(is_plugin ${target} JUCE_IS_PLUGIN)
+
+            if(is_plugin)
+                juce_link_with_embedded_linux_subprocess(${target})
+            endif()
         endif()
     elseif(APPLE)
         get_target_property(needs_storekit ${target} JUCE_NEEDS_STORE_KIT)
@@ -266,10 +352,12 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_HOME_RW      ${target} JUCE_APP_SANDBOX_FILE_ACCESS_HOME_RW)
     _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_ABS_RO       ${target} JUCE_APP_SANDBOX_FILE_ACCESS_ABS_RO)
     _juce_append_target_property(file_content APP_SANDBOX_FILE_ACCESS_ABS_RW       ${target} JUCE_APP_SANDBOX_FILE_ACCESS_ABS_RW)
+    _juce_append_target_property(file_content APP_SANDBOX_EXCEPTION_IOKIT          ${target} JUCE_APP_SANDBOX_EXCEPTION_IOKIT)
     _juce_append_target_property(file_content APP_GROUPS_ENABLED                   ${target} JUCE_APP_GROUPS_ENABLED)
     _juce_append_target_property(file_content APP_GROUP_IDS                        ${target} JUCE_APP_GROUP_IDS)
     _juce_append_target_property(file_content IS_PLUGIN                            ${target} JUCE_IS_PLUGIN)
     _juce_append_target_property(file_content ICLOUD_PERMISSIONS_ENABLED           ${target} JUCE_ICLOUD_PERMISSIONS_ENABLED)
+    _juce_append_target_property(file_content IS_AU_PLUGIN_HOST                    ${target} JUCE_PLUGINHOST_AU)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         _juce_append_record(file_content IS_IOS 1)
@@ -317,6 +405,8 @@ function(juce_add_binary_data target)
 
     add_library(${target} STATIC)
 
+    set_target_properties(${target} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
     set(juce_binary_data_folder "${CMAKE_CURRENT_BINARY_DIR}/juce_binarydata_${target}/JuceLibraryCode")
 
     set(binary_file_names)
@@ -340,7 +430,7 @@ function(juce_add_binary_data target)
     set(newline_delimited_input)
 
     foreach(name IN LISTS JUCE_ARG_SOURCES)
-        _juce_make_absolute_and_check(name)
+        _juce_make_absolute(name)
         set(newline_delimited_input "${newline_delimited_input}${name}\n")
     endforeach()
 
@@ -351,7 +441,7 @@ function(juce_add_binary_data target)
         COMMAND juce::juceaide binarydata "${JUCE_ARG_NAMESPACE}" "${JUCE_ARG_HEADER_NAME}"
             ${juce_binary_data_folder} "${input_file_list}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        DEPENDS "${input_file_list}"
+        DEPENDS "${input_file_list}" ${JUCE_ARG_SOURCES}
         VERBATIM)
 
     target_sources(${target} PRIVATE "${binary_file_names}")
@@ -456,7 +546,7 @@ function(_juce_execute_juceaide)
         ERROR_VARIABLE output)
 
     if(result_variable)
-        message(FATAL_ERROR "Running juceaide failed:\n${output}")
+        message(FATAL_ERROR "Running juceaide failed:\ncommand: ${juceaide_location} ${ARGN}\noutput: ${output}")
     endif()
 endfunction()
 
@@ -648,22 +738,17 @@ function(_juce_configure_bundle source_target dest_target)
 
     if(CMAKE_GENERATOR STREQUAL "Xcode")
         get_target_property(product_name ${source_target} JUCE_PRODUCT_NAME)
-
+        set(skip_install NO)
         set(install_path "$(LOCAL_APPS_DIR)")
 
         if(juce_kind_string STREQUAL "AUv3 AppExtension")
-            set(install_path "${install_path}/${product_name}.app")
-
-            if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-                set(install_path "${install_path}/PlugIns")
-            else()
-                set(install_path "${install_path}/Contents/PlugIns")
-            endif()
+            set(skip_install YES)
+            set(install_path "")
         endif()
 
         set_target_properties(${dest_target} PROPERTIES
             XCODE_ATTRIBUTE_INSTALL_PATH "${install_path}"
-            XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
+            XCODE_ATTRIBUTE_SKIP_INSTALL "${skip_install}")
     endif()
 endfunction()
 
@@ -672,24 +757,38 @@ function(_juce_add_resources_rc source_target dest_target)
         return()
     endif()
 
-    get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
-    set(input_info_file "$<TARGET_PROPERTY:${source_target},JUCE_INFO_FILE>")
+    if(NOT TARGET ${source_target}_rc_lib)
+        get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
+        get_target_property(input_info_file ${source_target} JUCE_INFO_FILE)
 
-    get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
-    set(dependency)
+        get_target_property(generated_icon ${source_target} JUCE_ICON_FILE)
+        set(dependency)
 
-    if(generated_icon)
-        set(dependency DEPENDS "${generated_icon}")
+        if(generated_icon)
+            set(dependency DEPENDS "${generated_icon}")
+        endif()
+
+        set(resource_rc_file "${juce_library_code}/${source_target}_resources.rc")
+
+        add_custom_command(OUTPUT "${resource_rc_file}"
+            COMMAND juce::juceaide rcfile "${input_info_file}" "${resource_rc_file}"
+            ${dependency}
+            VERBATIM)
+
+        add_library(${source_target}_rc_lib OBJECT ${resource_rc_file})
+
+        set(compile_defs $<TARGET_GENEX_EVAL:${source_target},$<TARGET_PROPERTY:${source_target},COMPILE_DEFINITIONS>>)
+        set(include_dirs $<TARGET_GENEX_EVAL:${source_target},$<TARGET_PROPERTY:${source_target},INCLUDE_DIRECTORIES>>)
+        set(filtered $<FILTER:${compile_defs},INCLUDE,JUCE_USER_DEFINED_RC_FILE=>)
+        set(has_custom_rc_include $<BOOL:${filtered}>)
+
+        target_include_directories(${source_target}_rc_lib
+            PRIVATE $<${has_custom_rc_include}:${include_dirs}>)
+        set_source_files_properties(${resource_rc_file} PROPERTIES
+            COMPILE_DEFINITIONS $<${has_custom_rc_include}:${compile_defs}>)
     endif()
 
-    set(resource_rc_file "${juce_library_code}/resources.rc")
-
-    add_custom_command(OUTPUT "${resource_rc_file}"
-        COMMAND juce::juceaide rcfile "${input_info_file}" "${resource_rc_file}"
-        ${dependency}
-        VERBATIM)
-
-    target_sources(${dest_target} PRIVATE "${resource_rc_file}")
+    target_link_libraries(${dest_target} PRIVATE ${source_target}_rc_lib)
 endfunction()
 
 function(_juce_configure_app_bundle source_target dest_target)
@@ -697,8 +796,6 @@ function(_juce_configure_app_bundle source_target dest_target)
         JUCE_TARGET_KIND_STRING "App"
         MACOSX_BUNDLE TRUE
         WIN32_EXECUTABLE TRUE)
-
-    _juce_add_resources_rc(${source_target} ${dest_target})
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(nib_path "${JUCE_CMAKE_UTILS_DIR}/RecentFilesMenuTemplate.nib")
@@ -800,7 +897,36 @@ function(_juce_set_copy_properties shared_code target from to_property)
     set_target_properties("${target}" PROPERTIES JUCE_PLUGIN_ARTEFACT_FILE "${from}")
 endfunction()
 
+function(_juce_adhoc_sign target)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        return()
+    endif()
+
+    get_target_property(bundle "${target}" BUNDLE)
+
+    set(src "$<TARGET_FILE:${target}>")
+
+    if(bundle)
+        set(src "$<TARGET_BUNDLE_DIR:${target}>")
+    endif()
+
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}"
+            "-Dsrc=${src}"
+            "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
+        VERBATIM)
+endfunction()
+
 function(juce_enable_copy_plugin_step shared_code_target)
+    get_target_property(step_added ${shared_code_target} _JUCE_PLUGIN_COPY_STEP_ADDED)
+
+    if(step_added)
+        message(WARNING "Plugin copy step requested multiple times for ${shared_code_target}")
+        return()
+    endif()
+
+    set_target_properties(${shared_code_target} PROPERTIES _JUCE_PLUGIN_COPY_STEP_ADDED TRUE)
+
     get_target_property(active_targets "${shared_code_target}" JUCE_ACTIVE_PLUGIN_TARGETS)
 
     foreach(target IN LISTS active_targets)
@@ -810,24 +936,20 @@ function(juce_enable_copy_plugin_step shared_code_target)
             continue()
         endif()
 
+        _juce_adhoc_sign("${target}")
+
         get_target_property(source "${target}" JUCE_PLUGIN_ARTEFACT_FILE)
 
-        if(source)
-            if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-                add_custom_command(TARGET ${target} POST_BUILD
-                    COMMAND "${CMAKE_COMMAND}"
-                        "-Dsrc=${source}"
-                        "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
-                    VERBATIM)
-            endif()
+        if(NOT source)
+            continue()
+        endif()
 
-            get_target_property(dest "${target}" JUCE_PLUGIN_COPY_DIR)
+        get_target_property(dest "${target}" JUCE_PLUGIN_COPY_DIR)
 
-            if(dest)
-                _juce_copy_dir("${target}" "${source}" "$<GENEX_EVAL:${dest}>")
-            else()
-                message(WARNING "Target '${target}' requested copy but no destination is set")
-            endif()
+        if(dest)
+            _juce_copy_dir("${target}" "${source}" "$<GENEX_EVAL:${dest}>")
+        else()
+            message(WARNING "Target '${target}' requested copy but no destination is set")
         endif()
     endforeach()
 endfunction()
@@ -840,15 +962,112 @@ function(_juce_add_lv2_manifest_helper_target)
     endif()
 
     get_target_property(module_path juce::juce_audio_plugin_client INTERFACE_JUCE_MODULE_PATH)
-    set(source "${module_path}/juce_audio_plugin_client/LV2/juce_LV2TurtleDumpProgram.cpp")
+    set(source "${module_path}/juce_audio_plugin_client/LV2/juce_LV2ManifestHelper.cpp")
     add_executable(juce_lv2_helper "${source}")
     add_executable(juce::juce_lv2_helper ALIAS juce_lv2_helper)
     target_compile_features(juce_lv2_helper PRIVATE cxx_std_17)
     set_target_properties(juce_lv2_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
-    target_link_libraries(juce_lv2_helper PRIVATE ${CMAKE_DL_LIBS})
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
-    target_link_libraries(juce_lv2_helper PRIVATE Threads::Threads)
+    target_link_libraries(juce_lv2_helper PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
+endfunction()
+
+# ==================================================================================================
+
+function(_juce_add_vst3_manifest_helper_target)
+    if(TARGET juce_vst3_helper
+       OR (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+       OR (CMAKE_SYSTEM_NAME STREQUAL "Android")
+       OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
+        return()
+    endif()
+
+    get_target_property(module_path juce::juce_audio_processors INTERFACE_JUCE_MODULE_PATH)
+    set(vst3_dir "${module_path}/juce_audio_processors/format_types/VST3_SDK")
+
+    set(extension "cpp")
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        set(extension "mm")
+    endif()
+
+    set(source "${module_path}/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.${extension}")
+
+    add_executable(juce_vst3_helper "${source}")
+    add_executable(juce::juce_vst3_helper ALIAS juce_vst3_helper)
+
+    target_include_directories(juce_vst3_helper PRIVATE "${vst3_dir}" "${module_path}")
+
+    add_library(juce_interface_definitions INTERFACE)
+    _juce_add_standard_defs(juce_interface_definitions)
+    target_link_libraries(juce_vst3_helper PRIVATE juce_interface_definitions)
+    target_compile_features(juce_vst3_helper PRIVATE cxx_std_17)
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        _juce_link_frameworks(juce_vst3_helper PRIVATE Cocoa)
+        target_compile_options(juce_vst3_helper PRIVATE -fobjc-arc)
+    endif()
+
+    if(MSYS OR MINGW)
+        target_link_options(juce_vst3_helper PRIVATE -municode)
+    endif()
+
+    set_target_properties(juce_vst3_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+    target_link_libraries(juce_vst3_helper PRIVATE Threads::Threads ${CMAKE_DL_LIBS} juce_recommended_config_flags)
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+        target_link_libraries(juce_vst3_helper PRIVATE stdc++fs)
+    endif()
+endfunction()
+
+function(juce_enable_vst3_manifest_step shared_code_target)
+    get_target_property(manifest_step_added ${shared_code_target} _JUCE_VST3_MANIFEST_STEP_ADDED)
+
+    if(manifest_step_added)
+        message(WARNING "VST3 manifest generation has already been enabled for target ${shared_code_target}. "
+            "You may need to set VST3_AUTO_MANIFEST FALSE in juce_add_plugin, and/or check that you're "
+            "not calling juce_enable_vst3_manifest_step multiple times.")
+        return()
+    endif()
+
+    get_target_property(copy_step_added ${shared_code_target} _JUCE_PLUGIN_COPY_STEP_ADDED)
+
+    if(copy_step_added)
+        message(FATAL_ERROR "VST3 manifest generation would run after plugin copy step, so it has been disabled. "
+            "If you're manually calling juce_enable_vst3_manifest_step, then you probably need to call "
+            "juce_enable_copy_plugin_step too.")
+    endif()
+
+    if((MSYS OR MINGW) AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+        message(WARNING "VST3 manifest generation is disabled for ${shared_code_target} because the compiler is not supported.")
+        return()
+    endif()
+
+    set(target_name ${shared_code_target}_VST3)
+    get_target_property(product ${target_name} JUCE_PLUGIN_ARTEFACT_FILE)
+
+    if(NOT product)
+        message(FATAL_ERROR "Property JUCE_PLUGIN_ARTEFACT_FILE not set for ${target_name}")
+    endif()
+
+    # Add a target for the helper tool
+    _juce_add_vst3_manifest_helper_target()
+
+    get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
+
+    # Use the helper tool to write out the moduleinfo.json
+    add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${product}/Contents/Resources"
+        COMMAND juce_vst3_helper
+            -create
+            -version "${target_version_string}"
+            -path "${product}"
+            -output "${product}/Contents/Resources/moduleinfo.json"
+        VERBATIM)
+
+    set_target_properties(${shared_code_target} PROPERTIES _JUCE_VST3_MANIFEST_STEP_ADDED TRUE)
 endfunction()
 
 # ==================================================================================================
@@ -893,6 +1112,20 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
         endif()
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_VST3_COPY_DIR)
+
+        _juce_adhoc_sign(${target_name})
+
+        get_target_property(vst3_auto_manifest ${shared_code_target} JUCE_VST3_AUTO_MANIFEST)
+
+        add_custom_command(TARGET ${target_name} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "removing moduleinfo.json"
+            COMMAND ${CMAKE_COMMAND} -E remove -f
+                "${output_path}/Contents/moduleinfo.json"
+                "${output_path}/Contents/Resources/moduleinfo.json")
+
+        if(vst3_auto_manifest)
+            juce_enable_vst3_manifest_step(${shared_code_target})
+        endif()
     elseif(kind STREQUAL "VST")
         set_target_properties(${target_name} PROPERTIES
             BUNDLE_EXTENSION vst
@@ -977,9 +1210,9 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         get_target_property(JUCE_LV2URI "${shared_code_target}" JUCE_LV2URI)
 
-        if(NOT JUCE_LV2URI MATCHES "https?://.*")
+        if(NOT JUCE_LV2URI MATCHES "https?://.*|urn:.*")
             message(WARNING
-                "LV2URI should be well-formed with an 'http' prefix. "
+                "LV2URI should be well-formed with an 'http' or 'urn' prefix. "
                 "Check the LV2URI argument to juce_add_plugin.")
         endif()
 
@@ -989,6 +1222,8 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         set(output_path "${products_folder}/${product_name}.lv2")
         set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${output_path}")
+
+        _juce_adhoc_sign(${target_name})
 
         _juce_add_lv2_manifest_helper_target()
 
@@ -1086,9 +1321,12 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
 
     if(NOT kind STREQUAL "LV2")
         _juce_configure_bundle(${shared_code_target} ${target_name})
+    else()
+        _juce_write_configure_time_info(${shared_code_target})
     endif()
 
     _juce_set_plugin_target_properties(${shared_code_target} ${kind})
+    _juce_add_resources_rc(${shared_code_target} ${target_name})
 endfunction()
 
 # ==================================================================================================
@@ -1125,7 +1363,7 @@ endfunction()
 function(_juce_configure_plugin_targets target)
     _juce_set_output_name(${target} $<TARGET_PROPERTY:${target},JUCE_PRODUCT_NAME>_SharedCode)
 
-    target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client_utils)
+    target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client)
 
     get_target_property(enabled_formats ${target} JUCE_FORMATS)
 
@@ -1245,10 +1483,8 @@ function(_juce_configure_plugin_targets target)
 
     if((TARGET ${target}_AUv3) AND (TARGET ${target}_Standalone))
         add_dependencies(${target}_Standalone ${target}_AUv3)
-        # Copy the AUv3 into the Standalone app bundle
-        _juce_copy_dir(${target}_Standalone
-            "$<TARGET_BUNDLE_DIR:${target}_AUv3>"
-            "$<TARGET_BUNDLE_CONTENT_DIR:${target}_Standalone>/PlugIns")
+        set_target_properties(${target}_Standalone PROPERTIES
+            XCODE_EMBED_APP_EXTENSIONS ${target}_AUv3)
     endif()
 
     get_target_property(wants_copy "${target}" JUCE_COPY_PLUGIN_AFTER_BUILD)
@@ -1296,6 +1532,12 @@ function(_juce_set_fallback_properties target)
 
     get_target_property(real_company_name ${target} JUCE_COMPANY_NAME)
     _juce_set_property_if_not_set(${target} BUNDLE_ID "com.${real_company_name}.${target}")
+
+    get_target_property(applied_bundle_id ${target} JUCE_BUNDLE_ID)
+
+    if("${applied_bundle_id}" MATCHES ".* .*")
+        message(WARNING "Target ${target} has JUCE_BUNDLE_ID '${applied_bundle_id}', which contains spaces. Use the BUNDLE_ID option to specify a valid ID.")
+    endif()
 
     _juce_set_property_if_not_set(${target} VERSION ${PROJECT_VERSION})
 
@@ -1355,9 +1597,11 @@ function(_juce_set_fallback_properties target)
 
     _juce_set_property_if_not_set(${target} SUPPRESS_AU_PLIST_RESOURCE_USAGE FALSE)
 
-    _juce_set_property_if_not_set(${target} HARDENED_RUNTIME_ENABLED NO)
-    _juce_set_property_if_not_set(${target} APP_SANDBOX_ENABLED NO)
-    _juce_set_property_if_not_set(${target} APP_SANDBOX_INHERIT NO)
+    _juce_set_property_if_not_set(${target} HARDENED_RUNTIME_ENABLED FALSE)
+    _juce_set_property_if_not_set(${target} APP_SANDBOX_ENABLED FALSE)
+    _juce_set_property_if_not_set(${target} APP_SANDBOX_INHERIT FALSE)
+
+    _juce_set_property_if_not_set(${target} VST3_AUTO_MANIFEST TRUE)
 
     get_target_property(is_synth ${target} JUCE_IS_SYNTH)
 
@@ -1612,6 +1856,7 @@ function(_juce_initialise_target target)
         HARDENED_RUNTIME_ENABLED
         APP_SANDBOX_ENABLED
         APP_SANDBOX_INHERIT
+        VST3_AUTO_MANIFEST
 
         PLUGIN_NAME
         PLUGIN_MANUFACTURER_CODE
@@ -1655,6 +1900,7 @@ function(_juce_initialise_target target)
         APP_SANDBOX_FILE_ACCESS_HOME_RW
         APP_SANDBOX_FILE_ACCESS_ABS_RO
         APP_SANDBOX_FILE_ACCESS_ABS_RW
+        APP_SANDBOX_EXCEPTION_IOKIT
         DOCUMENT_EXTENSIONS
         AAX_CATEGORY
         IPHONE_SCREEN_ORIENTATIONS      # iOS only
@@ -1738,6 +1984,10 @@ endfunction()
 # ==================================================================================================
 
 function(juce_add_console_app target)
+    # The _NO_RESOURCERC option is private, and is only intended for use when building juceaide.
+    # We can't add a resources.rc to juceaide because we need juceaide to generate the resources.rc!
+    cmake_parse_arguments(JUCE_ARG "_NO_RESOURCERC" "" "" ${ARGN})
+
     add_executable(${target})
     target_compile_definitions(${target} PRIVATE JUCE_STANDALONE_APPLICATION=1)
 
@@ -1746,6 +1996,11 @@ function(juce_add_console_app target)
     endif()
 
     _juce_initialise_target(${target} ${ARGN})
+
+    if(NOT JUCE_ARG__NO_RESOURCERC)
+        _juce_write_configure_time_info(${target})
+        _juce_add_resources_rc(${target} ${target})
+    endif()
 endfunction()
 
 function(juce_add_gui_app target)
@@ -1761,6 +2016,7 @@ function(juce_add_gui_app target)
     set_target_properties(${target} PROPERTIES JUCE_TARGET_KIND_STRING "App")
     _juce_configure_bundle(${target} ${target})
     _juce_configure_app_bundle(${target} ${target})
+    _juce_add_resources_rc(${target} ${target})
 endfunction()
 
 function(juce_add_plugin target)
@@ -1892,11 +2148,15 @@ function(juce_add_pip header)
                 list(APPEND extra_formats VST)
             endif()
 
+            if(NOT (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
+                list(APPEND extra_formats VST3)
+            endif()
+
             # Standalone plugins might want to access the mic
             list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
 
             juce_add_plugin(${JUCE_PIP_NAME}
-                FORMATS AU AUv3 LV2 Standalone Unity VST3 ${extra_formats}
+                FORMATS AU AUv3 LV2 Standalone Unity ${extra_formats}
                 ${extra_target_args})
         endif()
     elseif(pip_kind STREQUAL "Component")
@@ -1978,6 +2238,10 @@ function(juce_add_pip header)
                 endif()
             endforeach()
         endif()
+
+        if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
+            target_compile_options(${JUCE_PIP_NAME} PRIVATE /bigobj)
+        endif()
     endif()
 endfunction()
 
@@ -1996,12 +2260,7 @@ function(juce_set_aax_sdk_path path)
         message(FATAL_ERROR "Could not find AAX SDK at the specified path: ${path}")
     endif()
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        add_library(juce_aax_sdk STATIC IMPORTED GLOBAL)
-        set_target_properties(juce_aax_sdk PROPERTIES
-            IMPORTED_LOCATION_DEBUG "${path}/Libs/Debug/libAAXLibrary_libcpp.a"
-            IMPORTED_LOCATION "${path}/Libs/Release/libAAXLibrary_libcpp.a")
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") OR (CMAKE_SYSTEM_NAME STREQUAL "Windows"))
         add_library(juce_aax_sdk INTERFACE IMPORTED GLOBAL)
     else()
         return()
@@ -2011,7 +2270,6 @@ function(juce_set_aax_sdk_path path)
         "${path}"
         "${path}/Interfaces"
         "${path}/Interfaces/ACF")
-    target_compile_definitions(juce_aax_sdk INTERFACE JucePlugin_AAXLibs_path="${path}/Libs")
     set_target_properties(juce_aax_sdk PROPERTIES INTERFACE_JUCE_AAX_DEFAULT_ICON "${path}/Utilities/PlugIn.ico")
 endfunction()
 

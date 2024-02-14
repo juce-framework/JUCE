@@ -52,7 +52,7 @@ void ResizableEdgeComponent::paint (Graphics& g)
                                                       isMouseOver(), isMouseButtonDown());
 }
 
-void ResizableEdgeComponent::mouseDown (const MouseEvent&)
+void ResizableEdgeComponent::mouseDown (const MouseEvent& e)
 {
     if (component == nullptr)
     {
@@ -61,6 +61,25 @@ void ResizableEdgeComponent::mouseDown (const MouseEvent&)
     }
 
     originalBounds = component->getBounds();
+
+    using Zone = ResizableBorderComponent::Zone;
+
+    const Zone zone { [&]
+    {
+        switch (edge)
+        {
+            case Edge::leftEdge:    return Zone::left;
+            case Edge::rightEdge:   return Zone::right;
+            case Edge::topEdge:     return Zone::top;
+            case Edge::bottomEdge:  return Zone::bottom;
+        }
+
+        return Zone::centre;
+    }() };
+
+    if (auto* peer = component->getPeer())
+        if (&peer->getComponent() == component)
+            peer->startHostManagedResize (peer->globalToLocal (localPointToGlobal (e.getPosition())), zone);
 
     if (constrainer != nullptr)
         constrainer->resizeStart();

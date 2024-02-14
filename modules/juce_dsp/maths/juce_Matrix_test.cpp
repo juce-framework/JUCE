@@ -23,12 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
-struct LinearAlgebraUnitTest  : public UnitTest
+struct LinearAlgebraUnitTest final : public UnitTest
 {
     LinearAlgebraUnitTest()
         : UnitTest ("Linear Algebra UnitTests", UnitTestCategories::dsp)
@@ -47,7 +45,7 @@ struct LinearAlgebraUnitTest  : public UnitTest
             Matrix<ElementType> mat2 (2, 4, data2);
             Matrix<ElementType> mat3 (2, 4, data3);
 
-            u.expect((mat1 + mat2) == mat3);
+            u.expect ((mat1 + mat2) == mat3);
         }
     };
 
@@ -64,7 +62,7 @@ struct LinearAlgebraUnitTest  : public UnitTest
             Matrix<ElementType> mat2 (2, 4, data2);
             Matrix<ElementType> mat3 (2, 4, data3);
 
-            u.expect((mat1 - mat2) == mat3);
+            u.expect ((mat1 - mat2) == mat3);
         }
     };
 
@@ -114,7 +112,7 @@ struct LinearAlgebraUnitTest  : public UnitTest
             Matrix<ElementType> mat2 (4, 2, data2);
             Matrix<ElementType> mat3 (2, 2, data3);
 
-            u.expect((mat1 * mat2) == mat3);
+            u.expect ((mat1 * mat2) == mat3);
         }
     };
 
@@ -169,5 +167,4 @@ struct LinearAlgebraUnitTest  : public UnitTest
 
 static LinearAlgebraUnitTest linearAlgebraUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

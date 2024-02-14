@@ -29,7 +29,7 @@ namespace juce
 namespace WindowsMediaCodec
 {
 
-class JuceIStream   : public ComBaseClassHelper<IStream>
+class JuceIStream final : public ComBaseClassHelper<IStream>
 {
 public:
     JuceIStream (InputStream& in) noexcept
@@ -37,15 +37,15 @@ public:
     {
     }
 
-    JUCE_COMRESULT Commit (DWORD)                        { return S_OK; }
-    JUCE_COMRESULT Write (const void*, ULONG, ULONG*)    { return E_NOTIMPL; }
-    JUCE_COMRESULT Clone (IStream**)                     { return E_NOTIMPL; }
-    JUCE_COMRESULT SetSize (ULARGE_INTEGER)              { return E_NOTIMPL; }
-    JUCE_COMRESULT Revert()                              { return E_NOTIMPL; }
-    JUCE_COMRESULT LockRegion (ULARGE_INTEGER, ULARGE_INTEGER, DWORD)    { return E_NOTIMPL; }
-    JUCE_COMRESULT UnlockRegion (ULARGE_INTEGER, ULARGE_INTEGER, DWORD)  { return E_NOTIMPL; }
+    JUCE_COMRESULT Commit (DWORD)                                        override { return S_OK; }
+    JUCE_COMRESULT Write (const void*, ULONG, ULONG*)                    override { return E_NOTIMPL; }
+    JUCE_COMRESULT Clone (IStream**)                                     override { return E_NOTIMPL; }
+    JUCE_COMRESULT SetSize (ULARGE_INTEGER)                              override { return E_NOTIMPL; }
+    JUCE_COMRESULT Revert()                                              override { return E_NOTIMPL; }
+    JUCE_COMRESULT LockRegion (ULARGE_INTEGER, ULARGE_INTEGER, DWORD)    override { return E_NOTIMPL; }
+    JUCE_COMRESULT UnlockRegion (ULARGE_INTEGER, ULARGE_INTEGER, DWORD)  override { return E_NOTIMPL; }
 
-    JUCE_COMRESULT Read (void* dest, ULONG numBytes, ULONG* bytesRead)
+    JUCE_COMRESULT Read (void* dest, ULONG numBytes, ULONG* bytesRead) override
     {
         auto numRead = source.read (dest, (size_t) numBytes);
 
@@ -55,7 +55,7 @@ public:
         return (numRead == (int) numBytes) ? S_OK : S_FALSE;
     }
 
-    JUCE_COMRESULT Seek (LARGE_INTEGER position, DWORD origin, ULARGE_INTEGER* resultPosition)
+    JUCE_COMRESULT Seek (LARGE_INTEGER position, DWORD origin, ULARGE_INTEGER* resultPosition) override
     {
         auto newPos = (int64) position.QuadPart;
 
@@ -80,7 +80,7 @@ public:
     }
 
     JUCE_COMRESULT CopyTo (IStream* destStream, ULARGE_INTEGER numBytesToDo,
-                           ULARGE_INTEGER* bytesRead, ULARGE_INTEGER* bytesWritten)
+                           ULARGE_INTEGER* bytesRead, ULARGE_INTEGER* bytesWritten) override
     {
         uint64 totalCopied = 0;
         auto numBytes = (int64) numBytesToDo.QuadPart;
@@ -105,7 +105,7 @@ public:
         return S_OK;
     }
 
-    JUCE_COMRESULT Stat (STATSTG* stat, DWORD)
+    JUCE_COMRESULT Stat (STATSTG* stat, DWORD) override
     {
         if (stat == nullptr)
             return STG_E_INVALIDPOINTER;
@@ -127,7 +127,7 @@ static const char* wmFormatName = "Windows Media";
 static const char* const extensions[] = { ".mp3", ".wmv", ".asf", ".wm", ".wma", nullptr };
 
 //==============================================================================
-class WMAudioReader   : public AudioFormatReader
+class WMAudioReader final : public AudioFormatReader
 {
 public:
     WMAudioReader (InputStream* const input_)
@@ -319,7 +319,7 @@ WindowsMediaAudioFormat::WindowsMediaAudioFormat()
 {
 }
 
-WindowsMediaAudioFormat::~WindowsMediaAudioFormat() {}
+WindowsMediaAudioFormat::~WindowsMediaAudioFormat() = default;
 
 Array<int> WindowsMediaAudioFormat::getPossibleSampleRates()    { return {}; }
 Array<int> WindowsMediaAudioFormat::getPossibleBitDepths()      { return {}; }

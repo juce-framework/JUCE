@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -84,10 +84,10 @@ public:
 	bool writeChar16 (char16 c); 
 	bool readChar16 (char16& c); 
 
-	bool writeInt8 (int8 c){return writeChar8 (c);}   
-	bool readInt8 (int8& c){return readChar8 (c);}
-	bool writeInt8u (uint8 c){return writeUChar8 (c);}   
-	bool readInt8u (uint8& c){return readUChar8 (c);}
+	bool writeInt8 (int8 c);   
+	bool readInt8 (int8& c);
+	bool writeInt8u (uint8 c);   
+	bool readInt8u (uint8& c);
 	///@}
 
 	/** @name read and write int16. */

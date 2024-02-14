@@ -66,7 +66,7 @@ void PluginGraph::changeListenerCallback (ChangeBroadcaster*)
     changed();
 
     for (int i = activePluginWindows.size(); --i >= 0;)
-        if (! graph.getNodes().contains (activePluginWindows.getUnchecked(i)->node))
+        if (! graph.getNodes().contains (activePluginWindows.getUnchecked (i)->node))
             activePluginWindows.remove (i);
 }
 
@@ -100,9 +100,10 @@ void PluginGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instan
 {
     if (instance == nullptr)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          TRANS("Couldn't create plugin"),
-                                          error);
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         TRANS ("Couldn't create plugin"),
+                                                         error);
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
     else
     {

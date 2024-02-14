@@ -84,7 +84,7 @@ void ParameterAttachment::callIfParameterValueChanged (float newDenormalisedValu
 {
     const auto newValue = normalise (newDenormalisedValue);
 
-    if (parameter.getValue() != newValue)
+    if (! approximatelyEqual (parameter.getValue(), newValue))
         callback (newValue);
 }
 
@@ -105,8 +105,7 @@ void ParameterAttachment::parameterValueChanged (int, float newValue)
 
 void ParameterAttachment::handleAsyncUpdate()
 {
-    if (setValue != nullptr)
-        setValue (parameter.convertFrom0to1 (lastValue));
+    NullCheckedInvocation::invoke (setValue, parameter.convertFrom0to1 (lastValue));
 }
 
 //==============================================================================

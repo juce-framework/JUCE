@@ -50,24 +50,32 @@
 
 
 //==============================================================================
-struct MidiDeviceListEntry : ReferenceCountedObject
+struct MidiDeviceListEntry final : ReferenceCountedObject
 {
-    MidiDeviceListEntry (MidiDeviceInfo info) : deviceInfo (info) {}
+    explicit MidiDeviceListEntry (MidiDeviceInfo info) : deviceInfo (info) {}
 
     MidiDeviceInfo deviceInfo;
     std::unique_ptr<MidiInput> inDevice;
     std::unique_ptr<MidiOutput> outDevice;
 
     using Ptr = ReferenceCountedObjectPtr<MidiDeviceListEntry>;
+
+    void stopAndReset()
+    {
+        if (inDevice != nullptr)
+            inDevice->stop();
+
+        inDevice .reset();
+        outDevice.reset();
+    }
 };
 
 
 //==============================================================================
-class MidiDemo  : public Component,
-                  private Timer,
-                  private MidiKeyboardState::Listener,
-                  private MidiInputCallback,
-                  private AsyncUpdater
+class MidiDemo final : public Component,
+                       private MidiKeyboardState::Listener,
+                       private MidiInputCallback,
+                       private AsyncUpdater
 {
 public:
     //==============================================================================
@@ -113,12 +121,11 @@ public:
 
         setSize (732, 520);
 
-        startTimer (500);
+        updateDeviceLists();
     }
 
     ~MidiDemo() override
     {
-        stopTimer();
         midiInputs .clear();
         midiOutputs.clear();
         keyboardState.removeListener (this);
@@ -128,12 +135,6 @@ public:
     }
 
     //==============================================================================
-    void timerCallback() override
-    {
-        updateDeviceList (true);
-        updateDeviceList (false);
-    }
-
     void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override
     {
         MidiMessage m (MidiMessage::noteOn (midiChannel, midiNoteNumber, velocity));
@@ -211,17 +212,8 @@ public:
 
     void closeDevice (bool isInput, int index)
     {
-        if (isInput)
-        {
-            jassert (midiInputs[index]->inDevice.get() != nullptr);
-            midiInputs[index]->inDevice->stop();
-            midiInputs[index]->inDevice.reset();
-        }
-        else
-        {
-            jassert (midiOutputs[index]->outDevice.get() != nullptr);
-            midiOutputs[index]->outDevice.reset();
-        }
+        auto& list = isInput ? midiInputs : midiOutputs;
+        list[index]->stopAndReset();
     }
 
     int getNumMidiInputs() const noexcept
@@ -241,8 +233,8 @@ public:
 
 private:
     //==============================================================================
-    struct MidiDeviceListBox : private ListBoxModel,
-                               public ListBox
+    struct MidiDeviceListBox final : private ListBoxModel,
+                                     public ListBox
     {
         MidiDeviceListBox (const String& name,
                            MidiDemo& contentComponent,
@@ -319,7 +311,7 @@ private:
         {
             SparseSet<int> selectedRows;
             for (auto i = 0; i < midiDevices.size(); ++i)
-                if (midiDevices[i]->inDevice.get() != nullptr || midiDevices[i]->outDevice.get() != nullptr)
+                if (midiDevices[i]->inDevice != nullptr || midiDevices[i]->outDevice != nullptr)
                     selectedRows.addRange (Range<int> (i, i + 1));
 
             lastSelectedItems = selectedRows;
@@ -364,7 +356,7 @@ private:
     void sendToOutputs (const MidiMessage& msg)
     {
         for (auto midiOutput : midiOutputs)
-            if (midiOutput->outDevice.get() != nullptr)
+            if (midiOutput->outDevice != nullptr)
                 midiOutput->outDevice->sendMessageNow (msg);
     }
 
@@ -423,7 +415,6 @@ private:
 
         if (hasDeviceListChanged (availableDevices, isInputDeviceList))
         {
-
             ReferenceCountedArray<MidiDeviceListEntry>& midiDevices
                 = isInputDeviceList ? midiInputs : midiOutputs;
 
@@ -463,6 +454,12 @@ private:
         addAndMakeVisible (label);
     }
 
+    void updateDeviceLists()
+    {
+        for (const auto isInput : { true, false })
+            updateDeviceList (isInput);
+    }
+
     //==============================================================================
     Label midiInputLabel    { "Midi Input Label",  "MIDI Input:" };
     Label midiOutputLabel   { "Midi Output Label", "MIDI Output:" };
@@ -473,11 +470,16 @@ private:
     TextEditor midiMonitor  { "MIDI Monitor" };
     TextButton pairButton   { "MIDI Bluetooth devices..." };
 
-    std::unique_ptr<MidiDeviceListBox> midiInputSelector, midiOutputSelector;
     ReferenceCountedArray<MidiDeviceListEntry> midiInputs, midiOutputs;
+    std::unique_ptr<MidiDeviceListBox> midiInputSelector, midiOutputSelector;
 
     CriticalSection midiMonitorLock;
     Array<MidiMessage> incomingMessages;
+
+    MidiDeviceListConnection connection = MidiDeviceListConnection::make ([this]
+    {
+        updateDeviceLists();
+    });
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiDemo)

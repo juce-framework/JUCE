@@ -81,12 +81,12 @@
 #if JUCE_USE_SIMD
  #if JUCE_INTEL
   #ifdef __AVX2__
-   #include "native/juce_avx_SIMDNativeOps.cpp"
+   #include "native/juce_SIMDNativeOps_avx.cpp"
   #else
-   #include "native/juce_sse_SIMDNativeOps.cpp"
+   #include "native/juce_SIMDNativeOps_sse.cpp"
   #endif
  #elif JUCE_ARM
-  #include "native/juce_neon_SIMDNativeOps.cpp"
+  #include "native/juce_SIMDNativeOps_neon.cpp"
  #else
   #error "SIMD register support not implemented for this platform"
  #endif
@@ -101,7 +101,6 @@
  #endif
 
  #include "containers/juce_AudioBlock_test.cpp"
- #include "containers/juce_FixedSizeFunction_test.cpp"
  #include "frequency/juce_Convolution_test.cpp"
  #include "frequency/juce_FFT_test.cpp"
  #include "processors/juce_FIRFilter_test.cpp"

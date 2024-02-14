@@ -93,7 +93,7 @@ namespace FlacNamespace
 #if JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE)
 
  #undef PACKAGE_VERSION
- #define PACKAGE_VERSION "1.3.4"
+ #define PACKAGE_VERSION "1.4.3"
 
  #define FLAC__NO_DLL 1
 
@@ -111,15 +111,16 @@ namespace FlacNamespace
  #endif
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
-                                      "-Wshadow",
                                       "-Wdeprecated-register",
-                                      "-Wswitch-enum",
-                                      "-Wswitch-default",
+                                      "-Wfloat-equal",
                                       "-Wimplicit-fallthrough",
-                                      "-Wzero-as-null-pointer-constant",
-                                      "-Wsign-conversion",
+                                      "-Wlanguage-extension-token",
                                       "-Wredundant-decls",
-                                      "-Wlanguage-extension-token")
+                                      "-Wshadow",
+                                      "-Wsign-conversion",
+                                      "-Wswitch-default",
+                                      "-Wswitch-enum",
+                                      "-Wzero-as-null-pointer-constant")
 
  #if JUCE_INTEL
   #if JUCE_32BIT
@@ -129,6 +130,15 @@ namespace FlacNamespace
    #define FLAC__CPU_X86_64 1
   #endif
   #define FLAC__HAS_X86INTRIN 1
+ #endif
+
+ #if JUCE_ARM && JUCE_64BIT
+  #define FLAC__CPU_ARM64 1
+
+  #if JUCE_USE_ARM_NEON
+    #define FLAC__HAS_NEONINTRIN 1
+    #define FLAC__HAS_A64NEONINTRIN 1
+  #endif
  #endif
 
  #define flac_max jmax
@@ -152,6 +162,7 @@ namespace FlacNamespace
  #include "flac/libFLAC/float.c"
  #include "flac/libFLAC/format.c"
  #include "flac/libFLAC/lpc_flac.c"
+ #include "flac/libFLAC/lpc_intrin_neon.c"
  #include "flac/libFLAC/md5.c"
  #include "flac/libFLAC/memory.c"
  #include "flac/libFLAC/stream_decoder.c"
@@ -182,7 +193,7 @@ template <typename Item>
 auto emptyRange (Item item) { return Range<Item>::emptyRange (item); }
 
 //==============================================================================
-class FlacReader  : public AudioFormatReader
+class FlacReader final : public AudioFormatReader
 {
 public:
     FlacReader (InputStream* in)  : AudioFormatReader (in, flacFormatName)
@@ -385,7 +396,7 @@ private:
 
 
 //==============================================================================
-class FlacWriter  : public AudioFormatWriter
+class FlacWriter final : public AudioFormatWriter
 {
 public:
     FlacWriter (OutputStream* out, double rate, uint32 numChans, uint32 bits, int qualityOptionIndex)

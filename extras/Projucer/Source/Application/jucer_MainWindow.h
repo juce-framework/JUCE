@@ -35,12 +35,12 @@ class ProjectContentComponent;
 /**
     The big top-level window where everything happens.
 */
-class MainWindow  : public DocumentWindow,
-                    public ApplicationCommandTarget,
-                    public FileDragAndDropTarget,
-                    public DragAndDropContainer,
-                    private Value::Listener,
-                    private ChangeListener
+class MainWindow final : public DocumentWindow,
+                         public ApplicationCommandTarget,
+                         public FileDragAndDropTarget,
+                         public DragAndDropContainer,
+                         private Value::Listener,
+                         private ChangeListener
 {
 public:
     //==============================================================================
@@ -103,6 +103,8 @@ private:
 
     std::unique_ptr<Component> blurOverlayComponent;
     bool loginFormOpen = false;
+
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
 };

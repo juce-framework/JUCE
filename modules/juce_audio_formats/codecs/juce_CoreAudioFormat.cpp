@@ -25,8 +25,8 @@
 
 #if JUCE_MAC || JUCE_IOS
 
-#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
-#include <juce_core/native/juce_mac_CFHelpers.h>
+#include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
+#include <juce_core/native/juce_CFHelpers_mac.h>
 
 namespace juce
 {
@@ -267,7 +267,7 @@ struct CoreAudioFormatMetatdata
         for (int i = 0; i < numTimeSigEvents; ++i)
         {
             int numerator, denominator;
-            timeSigEvents.getEventPointer(i)->message.getTimeSignatureInfo (numerator, denominator);
+            timeSigEvents.getEventPointer (i)->message.getTimeSignatureInfo (numerator, denominator);
 
             String timeSigString;
             timeSigString << numerator << '/' << denominator;
@@ -384,7 +384,7 @@ struct CoreAudioFormatMetatdata
 };
 
 //==============================================================================
-class CoreAudioReader : public AudioFormatReader
+class CoreAudioReader final : public AudioFormatReader
 {
 public:
     using StreamKind = CoreAudioFormat::StreamKind;
@@ -664,7 +664,7 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
 #define DEFINE_CHANNEL_LAYOUT_DFL_ENTRY(x) CoreAudioChannelLayoutTag { x, #x, AudioChannelSet() }
 #define DEFINE_CHANNEL_LAYOUT_TAG_ENTRY(x, y) CoreAudioChannelLayoutTag { x, #x, y }
 
-class CoreAudioLayoutsUnitTest  : public UnitTest
+class CoreAudioLayoutsUnitTest final : public UnitTest
 {
 public:
     CoreAudioLayoutsUnitTest()

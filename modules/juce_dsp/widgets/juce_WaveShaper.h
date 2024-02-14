@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -79,5 +77,4 @@ template <typename Functor>
 static WaveShaper<typename std::result_of<Functor>, Functor> CreateWaveShaper (Functor functionToUse)   { return {functionToUse}; }
 #endif
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

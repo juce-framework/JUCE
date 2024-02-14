@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-struct DemoFlexPanel   : public Component
+struct DemoFlexPanel final : public Component
 {
     DemoFlexPanel (Colour col, FlexItem& item)
         : flexItem (item), colour (col)
@@ -163,7 +163,7 @@ struct DemoFlexPanel   : public Component
 };
 
 //==============================================================================
-struct FlexBoxDemo   : public juce::Component
+struct FlexBoxDemo final : public juce::Component
 {
     FlexBoxDemo()
     {

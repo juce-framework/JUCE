@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -108,7 +106,7 @@ public:
     */
     void setTargetValue (FloatType newValue) noexcept
     {
-        if (newValue == this->target)
+        if (approximatelyEqual (newValue, this->target))
             return;
 
         if (stepsToTarget <= 0)
@@ -185,5 +183,4 @@ private:
     FloatType temp = 0, source = 0, r = 0, d = 1;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

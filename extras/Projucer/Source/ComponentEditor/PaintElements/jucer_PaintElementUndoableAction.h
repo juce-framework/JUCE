@@ -60,7 +60,7 @@ public:
 
             for (int i = 1; i < containerGroups.size(); ++i)
             {
-                group = dynamic_cast<PaintElementGroup*> (group->getElement (containerGroups.getUnchecked(i)));
+                group = dynamic_cast<PaintElementGroup*> (group->getElement (containerGroups.getUnchecked (i)));
 
                 if (group == nullptr)
                     return nullptr;
@@ -78,7 +78,7 @@ public:
         }
     }
 
-    int getSizeInUnits()    { return 2; }
+    int getSizeInUnits() override    { return 2; }
 
 protected:
     PaintRoutine& routine;

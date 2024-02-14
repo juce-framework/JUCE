@@ -37,9 +37,9 @@ String SystemStats::getJUCEVersion()
     static_assert (sizeof (int64) == 8,                          "Basic sanity test failed: please report!");
     static_assert (sizeof (uint64) == 8,                         "Basic sanity test failed: please report!");
 
-    return "JUCE v" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
-                "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
-                "." JUCE_STRINGIFY(JUCE_BUILDNUMBER);
+    return "JUCE v" JUCE_STRINGIFY (JUCE_MAJOR_VERSION)
+                "." JUCE_STRINGIFY (JUCE_MINOR_VERSION)
+                "." JUCE_STRINGIFY (JUCE_BUILDNUMBER);
 }
 
 #if JUCE_ANDROID && ! defined (JUCE_DISABLE_JUCE_VERSION_PRINTING)
@@ -217,7 +217,7 @@ String SystemStats::getStackBacktrace()
     auto frames = backtrace (stack, numElementsInArray (stack));
     char** frameStrings = backtrace_symbols (stack, frames);
 
-    for (int i = 0; i < frames; ++i)
+    for (auto i = (decltype (frames)) 0; i < frames; ++i)
         result << frameStrings[i] << newLine;
 
     ::free (frameStrings);
@@ -270,13 +270,8 @@ void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)
 bool SystemStats::isRunningInAppExtensionSandbox() noexcept
 {
    #if JUCE_MAC || JUCE_IOS
-    static bool firstQuery = true;
-    static bool isRunningInAppSandbox = false;
-
-    if (firstQuery)
+    static bool isRunningInAppSandbox = [&]
     {
-        firstQuery = false;
-
         File bundle = File::getSpecialLocation (File::invokedExecutableFile).getParentDirectory();
 
        #if JUCE_MAC
@@ -284,8 +279,10 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
        #endif
 
         if (bundle.isDirectory())
-            isRunningInAppSandbox = (bundle.getFileExtension() == ".appex");
-    }
+            return bundle.getFileExtension() == ".appex";
+
+        return false;
+    }();
 
     return isRunningInAppSandbox;
    #else
@@ -295,7 +292,7 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
 
 #if JUCE_UNIT_TESTS
 
-class UniqueHardwareIDTest  : public UnitTest
+class UniqueHardwareIDTest final : public UnitTest
 {
 public:
     //==============================================================================

@@ -54,7 +54,7 @@
     is enabled. It contains an icon that can be used to show the side panel containing
     the menu.
 */
-struct BurgerMenuHeader  : public Component
+struct BurgerMenuHeader final : public Component
 {
     BurgerMenuHeader (SidePanel& sp)
         : sidePanel (sp)
@@ -120,9 +120,9 @@ private:
 };
 
 //==============================================================================
-class MenusDemo    : public Component,
-                     public ApplicationCommandTarget,
-                     public MenuBarModel
+class MenusDemo final : public Component,
+                        public ApplicationCommandTarget,
+                        public MenuBarModel
 {
 public:
     //==============================================================================
@@ -341,8 +341,8 @@ private:
         Command messages that aren't handled in the main component will be passed
         to this class to respond to.
     */
-    class OuterCommandTarget    : public Component,
-                                  public ApplicationCommandTarget
+    class OuterCommandTarget final : public Component,
+                                     public ApplicationCommandTarget
     {
     public:
         OuterCommandTarget (ApplicationCommandManager& m)
@@ -430,8 +430,8 @@ private:
             Command messages that aren't handled in the OuterCommandTarget will be passed
             to this class to respond to.
         */
-        struct InnerCommandTarget    : public Component,
-                                       public ApplicationCommandTarget
+        struct InnerCommandTarget final : public Component,
+                                          public ApplicationCommandTarget
         {
             InnerCommandTarget (ApplicationCommandManager& m)
                 : commandManager (m)

@@ -26,7 +26,7 @@
 namespace juce
 {
 
-class DropShadower::ShadowWindow  : public Component
+class DropShadower::ShadowWindow final : public Component
 {
 public:
     ShadowWindow (Component* comp, const DropShadow& ds)
@@ -131,17 +131,25 @@ private:
     //==============================================================================
     void update()
     {
-        const auto newHasReasonToHide = [this]()
-        {
-            if (! component.wasObjectDeleted() && isWindows && component->isOnDesktop())
-            {
-                startTimerHz (5);
-                return ! isWindowOnCurrentVirtualDesktop (component->getWindowHandle());
-            }
+        bool newHasReasonToHide = false;
 
+        if (! component.wasObjectDeleted() && isWindows && component->isOnDesktop())
+        {
+            startTimerHz (5);
+
+            WeakReference<VirtualDesktopWatcher> weakThis (this);
+
+            // During scaling changes this call can trigger a call to HWNDComponentPeer::handleDPIChanging()
+            // which deletes this VirtualDesktopWatcher.
+            newHasReasonToHide = ! detail::WindowingHelpers::isWindowOnCurrentVirtualDesktop (component->getWindowHandle());
+
+            if (weakThis == nullptr)
+                return;
+        }
+        else
+        {
             stopTimer();
-            return false;
-        }();
+        }
 
         if (std::exchange (hasReasonToHide, newHasReasonToHide) != newHasReasonToHide)
             for (auto& l : listeners)
@@ -158,9 +166,11 @@ private:
     const bool isWindows = (SystemStats::getOperatingSystemType() & SystemStats::Windows) != 0;
     bool hasReasonToHide = false;
     std::map<void*, std::function<void()>> listeners;
+
+    JUCE_DECLARE_WEAK_REFERENCEABLE (VirtualDesktopWatcher)
 };
 
-class DropShadower::ParentVisibilityChangedListener  : public ComponentListener
+class DropShadower::ParentVisibilityChangedListener final : public ComponentListener
 {
 public:
     ParentVisibilityChangedListener (Component& r, ComponentListener& l)

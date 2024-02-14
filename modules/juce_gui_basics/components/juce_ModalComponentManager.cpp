@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct ModalComponentManager::ModalItem  : public ComponentMovementWatcher
+struct ModalComponentManager::ModalItem final : public ComponentMovementWatcher
 {
     ModalItem (Component* comp, bool shouldAutoDelete)
         : ComponentMovementWatcher (comp),
@@ -106,7 +106,10 @@ JUCE_IMPLEMENT_SINGLETON (ModalComponentManager)
 void ModalComponentManager::startModal (Component* component, bool autoDelete)
 {
     if (component != nullptr)
+    {
         stack.add (new ModalItem (component, autoDelete));
+        detail::ComponentHelpers::ModalComponentManagerChangeNotifier::getInstance().modalComponentManagerChanged();
+    }
 }
 
 void ModalComponentManager::attachCallback (Component* component, Callback* callback)
@@ -210,6 +213,8 @@ void ModalComponentManager::handleAsyncUpdate()
                 item->callbacks.getUnchecked (j)->modalStateFinished (item->returnValue);
 
             compToDelete.deleteAndZero();
+
+            detail::ComponentHelpers::ModalComponentManagerChangeNotifier::getInstance().modalComponentManagerChanged();
         }
     }
 }
@@ -269,7 +274,7 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 
     if (auto* currentlyModal = getModalComponent (0))
     {
-        FocusRestorer focusRestorer;
+        detail::FocusRestorer focusRestorer;
         bool finished = false;
 
         attachCallback (currentlyModal, ModalCallbackFunction::create ([&] (int r) { returnValue = r; finished = true; }));

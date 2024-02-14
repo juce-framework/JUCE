@@ -52,8 +52,8 @@ public:
     void clear();
     bool add (const String& name, const File& file);
     void add (const String& name, const String& originalFileName, const MemoryBlock& data);
-    void remove (const int index);
-    bool reload (const int index);
+    void remove (int index);
+    bool reload (int index);
     void browseForResource (const String& title, const String& wildcard,
                             const File& fileToStartFrom, const String& resourceToReplace,
                             std::function<void (String)> callback);
@@ -93,6 +93,7 @@ private:
     JucerDocument* document;
     OwnedArray<BinaryResource> resources;
     std::unique_ptr<FileChooser> chooser;
+    ScopedMessageBox messageBox;
 
     //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (BinaryResources)

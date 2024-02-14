@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct PropertyPanel::SectionComponent  : public Component
+struct PropertyPanel::SectionComponent final : public Component
 {
     SectionComponent (const String& sectionTitle,
                       const Array<PropertyComponent*>& newProperties,
@@ -136,7 +136,7 @@ struct PropertyPanel::SectionComponent  : public Component
 };
 
 //==============================================================================
-struct PropertyPanel::PropertyHolderComponent  : public Component
+struct PropertyPanel::PropertyHolderComponent final : public Component
 {
     PropertyHolderComponent() {}
 
@@ -200,7 +200,7 @@ PropertyPanel::PropertyPanel (const String& name)  : Component (name)
 
 void PropertyPanel::init()
 {
-    messageWhenEmpty = TRANS("(nothing selected)");
+    messageWhenEmpty = TRANS ("(nothing selected)");
 
     addAndMakeVisible (viewport);
     viewport.setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());

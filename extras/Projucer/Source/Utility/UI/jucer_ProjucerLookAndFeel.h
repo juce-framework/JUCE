@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class ProjucerLookAndFeel   : public LookAndFeel_V4
+class ProjucerLookAndFeel : public LookAndFeel_V4
 {
 public:
     ProjucerLookAndFeel();
@@ -74,11 +74,11 @@ public:
     void drawTreeviewPlusMinusBox (Graphics&, const Rectangle<float>& area,
                                    Colour backgroundColour, bool isItemOpen, bool isMouseOver) override;
 
-    void drawProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String& textToShow) override;
+    ProgressBar::Style getDefaultProgressBarStyle (const ProgressBar&) override;
 
     //==============================================================================
-    static Path getArrowPath (Rectangle<float> arrowZone, const int direction,
-                              const bool filled, const Justification justification);
+    static Path getArrowPath (Rectangle<float> arrowZone, int direction,
+                              bool filled, Justification justification);
     static Path getChoiceComponentArrowPath (Rectangle<float> arrowZone);
 
     static Font getPropertyComponentFont()                                       { return { 14.0f, Font::FontStyleFlags::bold }; }

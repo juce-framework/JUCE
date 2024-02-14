@@ -134,7 +134,7 @@ double CharacterFunctions::mulexp10 (const double value, int exponent) noexcept
     if (exponent == 0)
         return value;
 
-    if (value == 0.0)
+    if (exactlyEqual (value, 0.0))
         return 0;
 
     const bool negative = (exponent < 0);
@@ -379,7 +379,7 @@ void withAllPrefixesAndSuffixes (const std::vector<MemoryBlock>& prefixes,
 }
 
 template <typename CharPointerType>
-class CharacterFunctionsTests  : public UnitTest
+class CharacterFunctionsTests final : public UnitTest
 {
 public:
     using CharType = typename CharPointerType::CharType;

@@ -42,9 +42,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
 #include <CoreAudioKit/AUViewController.h>
 
-#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
-#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
-#include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
+#include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
+#include <juce_audio_basics/native/juce_CoreAudioLayouts_mac.h>
 #include "juce_AU_Shared.h"
 
 namespace juce
@@ -201,7 +200,7 @@ namespace AudioUnitFormatHelpers
         {
             if (auto bundleRef = CFUniquePtr<CFBundleRef> (CFBundleCreate (kCFAllocatorDefault, url.get())))
             {
-                CFTypeRef bundleName = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleName"));
+                CFTypeRef bundleName = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleName"));
 
                 if (bundleName != nullptr && CFGetTypeID (bundleName) == CFStringGetTypeID())
                     name = String::fromCFString ((CFStringRef) bundleName);
@@ -209,12 +208,12 @@ namespace AudioUnitFormatHelpers
                 if (name.isEmpty())
                     name = file.getFileNameWithoutExtension();
 
-                CFTypeRef versionString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleVersion"));
+                CFTypeRef versionString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleVersion"));
 
                 if (versionString != nullptr && CFGetTypeID (versionString) == CFStringGetTypeID())
                     version = String::fromCFString ((CFStringRef) versionString);
 
-                CFTypeRef manuString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR("CFBundleGetInfoString"));
+                CFTypeRef manuString = CFBundleGetValueForInfoDictionaryKey (bundleRef.get(), CFSTR ("CFBundleGetInfoString"));
 
                 if (manuString != nullptr && CFGetTypeID (manuString) == CFStringGetTypeID())
                     manufacturer = String::fromCFString ((CFStringRef) manuString);
@@ -333,8 +332,8 @@ namespace AudioUnitFormatHelpers
     using ViewComponentBaseClass = NSViewComponent;
    #endif
 
-    struct AutoResizingNSViewComponent  : public ViewComponentBaseClass,
-                                          private AsyncUpdater
+    struct AutoResizingNSViewComponent final : public ViewComponentBaseClass,
+                                               private AsyncUpdater
     {
         void childBoundsChanged (Component*) override  { triggerAsyncUpdate(); }
         void handleAsyncUpdate() override              { resizeToFitView(); }
@@ -507,40 +506,16 @@ using AudioUnitCreationCallback = std::function<void (AudioUnit, OSStatus)>;
 
 static void createAudioUnit (VersionedAudioComponent versionedComponent, AudioUnitCreationCallback callback)
 {
-    struct AUAsyncInitializationCallback
-    {
-        typedef void (^AUCompletionCallbackBlock)(AudioComponentInstance, OSStatus);
-
-        explicit AUAsyncInitializationCallback (AudioUnitCreationCallback inOriginalCallback)
-            : originalCallback (std::move (inOriginalCallback))
-        {
-            block = CreateObjCBlock (this, &AUAsyncInitializationCallback::completion);
-        }
-
-        AUCompletionCallbackBlock getBlock() noexcept       { return block; }
-
-        void completion (AudioComponentInstance audioUnit, OSStatus err)
-        {
-            originalCallback (audioUnit, err);
-
-            delete this;
-        }
-
-        double sampleRate;
-        int framesPerBuffer;
-        AudioUnitCreationCallback originalCallback;
-
-        ObjCBlock<AUCompletionCallbackBlock> block;
-    };
-
-    auto callbackBlock = new AUAsyncInitializationCallback (std::move (callback));
-
     if (versionedComponent.isAUv3)
     {
         if (@available (macOS 10.11, *))
         {
-            AudioComponentInstantiate (versionedComponent.audioComponent, kAudioComponentInstantiation_LoadOutOfProcess,
-                                       callbackBlock->getBlock());
+            AudioComponentInstantiate (versionedComponent.audioComponent,
+                                       kAudioComponentInstantiation_LoadOutOfProcess,
+                                       ^(AudioComponentInstance audioUnit, OSStatus err)
+                                       {
+                                           callback (audioUnit, err);
+                                       });
 
             return;
         }
@@ -548,7 +523,7 @@ static void createAudioUnit (VersionedAudioComponent versionedComponent, AudioUn
 
     AudioComponentInstance audioUnit;
     auto err = AudioComponentInstanceNew (versionedComponent.audioComponent, &audioUnit);
-    callbackBlock->completion (err != noErr ? nullptr : audioUnit, err);
+    callback (err != noErr ? nullptr : audioUnit, err);
 }
 
 struct AudioComponentResult
@@ -700,7 +675,7 @@ public:
         {
             if (! auValueStrings.isEmpty())
             {
-                auto index = roundToInt (jlimit (0.0f, 1.0f, value) * (auValueStrings.size() - 1));
+                auto index = roundToInt (jlimit (0.0f, 1.0f, value) * (float) (auValueStrings.size() - 1));
                 return auValueStrings[index];
             }
 
@@ -739,7 +714,7 @@ public:
                 auto index = auValueStrings.indexOf (text);
 
                 if (index != -1)
-                    return ((float) index) / (auValueStrings.size() - 1);
+                    return ((float) index) / (float) (auValueStrings.size() - 1);
             }
 
             if (valuesHaveStrings)
@@ -863,7 +838,7 @@ public:
 
         if (audioUnit != nullptr)
         {
-            struct AUDeleter : public CallbackMessage
+            struct AUDeleter final : public CallbackMessage
             {
                 AUDeleter (AudioUnitPluginInstance& inInstance, WaitableEvent& inEvent)
                     : auInstance (inInstance), completionSignal (inEvent)
@@ -1026,12 +1001,11 @@ public:
 
             if (getElementCount (scope) != n && isBusCountWritable (isInput))
             {
-                OSStatus err;
                 auto newCount = static_cast<UInt32> (n);
                 layoutHasChanged = true;
 
-                err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount));
-                jassertquiet (err == noErr);
+                [[maybe_unused]] auto err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount));
+                jassert (err == noErr);
             }
 
             for (int i = 0; i < n; ++i)
@@ -1191,7 +1165,7 @@ public:
 
     void getExtensions (ExtensionsVisitor& visitor) const override
     {
-        struct Extensions : public ExtensionsVisitor::AudioUnitClient
+        struct Extensions final : public ExtensionsVisitor::AudioUnitClient
         {
             explicit Extensions (const AudioUnitPluginInstance* instanceIn) : instance (instanceIn) {}
 
@@ -1203,7 +1177,7 @@ public:
         visitor.visitAudioUnitClient (Extensions { this });
 
        #ifdef JUCE_PLUGINHOST_ARA
-        struct ARAExtensions  : public ExtensionsVisitor::ARAClient
+        struct ARAExtensions final : public ExtensionsVisitor::ARAClient
         {
             explicit ARAExtensions (const AudioUnitPluginInstance* instanceIn) : instance (instanceIn) {}
 
@@ -1272,7 +1246,7 @@ public:
 
                     AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sampleRate, &sampleRateSize);
 
-                    if (sampleRate != sr)
+                    if (! approximatelyEqual (sampleRate, sr))
                     {
                         if (isAUv3) // setting kAudioUnitProperty_SampleRate fails on AUv3s
                         {
@@ -1316,8 +1290,6 @@ public:
 
             setRateAndBufferSizeDetails ((double) newSampleRate, estimatedSamplesPerBlock);
 
-            updateLatency();
-
             zerostruct (timeStamp);
             timeStamp.mSampleTime = 0;
             timeStamp.mHostTime = mach_absolute_time();
@@ -1332,19 +1304,23 @@ public:
             if (! syncBusLayouts (getBusesLayout(), false, ignore))
                 return;
 
-            prepared = (AudioUnitInitialize (audioUnit) == noErr);
-
-            if (prepared)
+            prepared = [&]
             {
+                if (AudioUnitInitialize (audioUnit) != noErr)
+                    return false;
+
                 if (! haveParameterList)
                     refreshParameterList();
 
                 if (! syncBusLayouts (getBusesLayout(), true, ignore))
                 {
-                    prepared = false;
                     AudioUnitUninitialize (audioUnit);
+                    return false;
                 }
-            }
+
+                updateLatency();
+                return true;
+            }();
 
             inMapping .setUpMapping (audioUnit, true);
             outMapping.setUpMapping (audioUnit, false);
@@ -1629,7 +1605,7 @@ public:
         {
             AUPreset current;
             current.presetNumber = -1;
-            current.presetName = CFSTR("");
+            current.presetName = CFSTR ("");
 
             UInt32 prstsz = sizeof (AUPreset);
 
@@ -1963,7 +1939,7 @@ private:
 
         float getDefaultValue() const override                              { return 0.0f; }
         String getName (int /*maximumStringLength*/) const override         { return "Bypass"; }
-        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS("On") : TRANS("Off")); }
+        String getText (float value, int) const override                    { return (value != 0.0f ? TRANS ("On") : TRANS ("Off")); }
         bool isAutomatable() const override                                 { return true; }
         bool isDiscrete() const override                                    { return true; }
         bool isBoolean() const override                                     { return true; }
@@ -1974,9 +1950,9 @@ private:
         String getParameterID() const override                              { return {}; }
 
         AudioUnitPluginInstance& parent;
-        const StringArray auOnStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
-        const StringArray auOffStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
-        const StringArray values { TRANS("Off"), TRANS("On") };
+        const StringArray auOnStrings  { TRANS ("on"),  TRANS ("yes"), TRANS ("true") };
+        const StringArray auOffStrings { TRANS ("off"), TRANS ("no"),  TRANS ("false") };
+        const StringArray values { TRANS ("Off"), TRANS ("On") };
 
         bool currentValue = false;
     };
@@ -2324,8 +2300,8 @@ private:
         setIfNotNull (outCurrentMeasureDownBeat, getFromPlayHead (&AudioPlayHead::PositionInfo::getPpqPositionOfLastBarStart).orFallback (0.0));
 
         const auto signature = getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeSignature).orFallback (AudioPlayHead::TimeSignature{});
-        setIfNotNull (outTimeSig_Numerator,   (UInt32) signature.numerator);
-        setIfNotNull (outTimeSig_Denominator, (UInt32) signature.denominator);
+        setIfNotNull (outTimeSig_Numerator,   (Float32) signature.numerator);
+        setIfNotNull (outTimeSig_Denominator, (UInt32)  signature.denominator);
 
         return noErr;
     }
@@ -2337,7 +2313,7 @@ private:
         const auto nowPlaying = getFromPlayHead (&AudioPlayHead::PositionInfo::getIsPlaying);
         setIfNotNull (outIsPlaying, nowPlaying);
         setIfNotNull (outTransportStateChanged, std::exchange (wasPlaying, nowPlaying) != nowPlaying);
-        setIfNotNull (outCurrentSampleInTimeLine, getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeInSamples).orFallback (0));
+        setIfNotNull (outCurrentSampleInTimeLine, (double) getFromPlayHead (&AudioPlayHead::PositionInfo::getTimeInSamples).orFallback (0));
         setIfNotNull (outIsCycling, getFromPlayHead (&AudioPlayHead::PositionInfo::getIsLooping));
 
         const auto loopPoints = getFromPlayHead (&AudioPlayHead::PositionInfo::getLoopPoints).orFallback (AudioPlayHead::LoopPoints{});
@@ -2607,7 +2583,7 @@ private:
 };
 
 //==============================================================================
-class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
+class AudioUnitPluginWindowCocoa final : public AudioProcessorEditor
 {
 public:
     AudioUnitPluginWindowCocoa (AudioUnitPluginInstance& p, bool createGenericViewIfNeeded)
@@ -2615,9 +2591,6 @@ public:
           plugin (p)
     {
         addAndMakeVisible (wrapper);
-
-        viewControllerCallback =
-            CreateObjCBlock (this, &AudioUnitPluginWindowCocoa::requestViewControllerCallback);
 
         setOpaque (true);
         setVisible (true);
@@ -2674,7 +2647,6 @@ private:
     AudioUnitFormatHelpers::AutoResizingNSViewComponent wrapper;
 
     typedef void (^ViewControllerCallbackBlock)(AUViewControllerBase *);
-    ObjCBlock<ViewControllerCallbackBlock> viewControllerCallback;
 
     bool waitingForViewCallback = false;
 
@@ -2728,12 +2700,9 @@ private:
                 && dataSize == sizeof (ViewControllerCallbackBlock))
         {
             waitingForViewCallback = true;
-            ViewControllerCallbackBlock callback;
-            callback = viewControllerCallback;
+            auto callback = ^(AUViewControllerBase* controller) { this->requestViewControllerCallback (controller); };
 
-            ViewControllerCallbackBlock* info = &callback;
-
-            if (noErr == AudioUnitSetProperty (plugin.audioUnit, kAudioUnitProperty_RequestViewController, kAudioUnitScope_Global, 0, info, dataSize))
+            if (noErr == AudioUnitSetProperty (plugin.audioUnit, kAudioUnitProperty_RequestViewController, kAudioUnitScope_Global, 0, &callback, dataSize))
                 return true;
 
             waitingForViewCallback = false;
@@ -2771,7 +2740,7 @@ private:
             if (@available (macOS 10.11, *))
                 size = [controller preferredContentSize];
 
-            if (size.width == 0 || size.height == 0)
+            if (approximatelyEqual (size.width, 0.0) || approximatelyEqual (size.height, 0.0))
                 size = controller.view.frame.size;
 
             return CGSizeMake (jmax ((CGFloat) 20.0f, size.width),
@@ -2780,7 +2749,7 @@ private:
 
         if (! MessageManager::getInstance()->isThisTheMessageThread())
         {
-            struct AsyncViewControllerCallback : public CallbackMessage
+            struct AsyncViewControllerCallback final : public CallbackMessage
             {
                 AudioUnitPluginWindowCocoa* owner;
                 JUCE_IOS_MAC_VIEW* controllerView;

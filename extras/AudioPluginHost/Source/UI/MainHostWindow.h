@@ -74,11 +74,11 @@ void addPluginAutoScaleOptionsSubMenu (AudioPluginInstance*, PopupMenu&);
 constexpr const char* processUID = "juceaudiopluginhost";
 
 //==============================================================================
-class MainHostWindow    : public DocumentWindow,
-                          public MenuBarModel,
-                          public ApplicationCommandTarget,
-                          public ChangeListener,
-                          public FileDragAndDropTarget
+class MainHostWindow final : public DocumentWindow,
+                             public MenuBarModel,
+                             public ApplicationCommandTarget,
+                             public ChangeListener,
+                             public FileDragAndDropTarget
 {
 public:
     //==============================================================================
@@ -110,7 +110,7 @@ public:
     void createPlugin (const PluginDescriptionAndPreference&, Point<int> pos);
 
     void addPluginsToMenu (PopupMenu&);
-    PluginDescriptionAndPreference getChosenType (int menuID) const;
+    std::optional<PluginDescriptionAndPreference> getChosenType (int menuID) const;
 
     std::unique_ptr<GraphDocumentComponent> graphHolder;
 
@@ -123,8 +123,6 @@ private:
     static void updateAutoScaleMenuItem (ApplicationCommandInfo& info);
 
     void showAudioSettings();
-
-    int getIndexChosenByMenu (int menuID) const;
 
     //==============================================================================
     AudioDeviceManager deviceManager;

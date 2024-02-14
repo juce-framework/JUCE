@@ -85,19 +85,17 @@ typedef khronos_uint64_t GLuint64EXT;
 typedef struct __GLsync *GLsync;
 struct _cl_context;
 struct _cl_event;
-typedef void ( *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
-typedef void ( *GLDEBUGPROCARB)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
-typedef void ( *GLDEBUGPROCKHR)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
-typedef void ( *GLDEBUGPROCAMD)(GLuint id,GLenum category,GLenum severity,GLsizei length,const GLchar *message,void *userParam);
+typedef void (KHRONOS_APIENTRY *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
+typedef void (KHRONOS_APIENTRY *GLDEBUGPROCARB)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
+typedef void (KHRONOS_APIENTRY *GLDEBUGPROCKHR)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
+typedef void (KHRONOS_APIENTRY *GLDEBUGPROCAMD)(GLuint id,GLenum category,GLenum severity,GLsizei length,const GLchar *message,void *userParam);
 typedef unsigned short GLhalfNV;
 typedef GLintptr GLvdpauSurfaceNV;
-typedef void ( *GLVULKANPROCNV)(void);
+typedef void (KHRONOS_APIENTRY *GLVULKANPROCNV)(void);
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-namespace juce
-{
-namespace gl
+namespace juce::gl
 {
 
 #ifndef GL_ES_VERSION_2_0
@@ -1792,6 +1790,21 @@ enum : GLenum
 #define GL_ARM_rgba8 1
 #endif
 
+#ifndef GL_ARM_shader_core_properties
+#define GL_ARM_shader_core_properties 1
+enum : GLenum
+{
+    GL_SHADER_CORE_COUNT_ARM                                = 0x96F0,
+    GL_SHADER_CORE_ACTIVE_COUNT_ARM                         = 0x96F1,
+    GL_SHADER_CORE_PRESENT_MASK_ARM                         = 0x96F2,
+    GL_SHADER_CORE_MAX_WARP_COUNT_ARM                       = 0x96F3,
+    GL_SHADER_CORE_PIXEL_RATE_ARM                           = 0x96F4,
+    GL_SHADER_CORE_TEXEL_RATE_ARM                           = 0x96F5,
+    GL_SHADER_CORE_FMA_RATE_ARM                             = 0x96F6,
+};
+extern void         (KHRONOS_APIENTRY* const& glMaxActiveShaderCoresARM) (GLuint count);
+#endif
+
 #ifndef GL_ARM_shader_framebuffer_fetch
 #define GL_ARM_shader_framebuffer_fetch 1
 enum : GLenum
@@ -1839,6 +1852,16 @@ enum : GLenum
 #define GL_EXT_EGL_image_storage 1
 extern void         (KHRONOS_APIENTRY* const& glEGLImageTargetTexStorageEXT) (GLenum target, GLeglImageOES image, const GLint* attrib_list);
 extern void         (KHRONOS_APIENTRY* const& glEGLImageTargetTextureStorageEXT) (GLuint texture, GLeglImageOES image, const GLint* attrib_list);
+#endif
+
+#ifndef GL_EXT_EGL_image_storage_compression
+#define GL_EXT_EGL_image_storage_compression 1
+enum : GLenum
+{
+    GL_SURFACE_COMPRESSION_EXT                              = 0x96C0,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_NONE_EXT              = 0x96C1,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_DEFAULT_EXT           = 0x96C2,
+};
 #endif
 
 #ifndef GL_EXT_YUV_target
@@ -2117,6 +2140,49 @@ extern void         (KHRONOS_APIENTRY* const& glNamedBufferStorageExternalEXT) (
 
 #ifndef GL_EXT_float_blend
 #define GL_EXT_float_blend 1
+#endif
+
+#ifndef GL_EXT_fragment_shading_rate
+#define GL_EXT_fragment_shading_rate 1
+enum : GLenum
+{
+    GL_SHADING_RATE_1X1_PIXELS_EXT                          = 0x96A6,
+    GL_SHADING_RATE_1X2_PIXELS_EXT                          = 0x96A7,
+    GL_SHADING_RATE_2X1_PIXELS_EXT                          = 0x96A8,
+    GL_SHADING_RATE_2X2_PIXELS_EXT                          = 0x96A9,
+    GL_SHADING_RATE_1X4_PIXELS_EXT                          = 0x96AA,
+    GL_SHADING_RATE_4X1_PIXELS_EXT                          = 0x96AB,
+    GL_SHADING_RATE_4X2_PIXELS_EXT                          = 0x96AC,
+    GL_SHADING_RATE_2X4_PIXELS_EXT                          = 0x96AD,
+    GL_SHADING_RATE_4X4_PIXELS_EXT                          = 0x96AE,
+    GL_SHADING_RATE_EXT                                     = 0x96D0,
+    GL_SHADING_RATE_ATTACHMENT_EXT                          = 0x96D1,
+    GL_FRAGMENT_SHADING_RATE_COMBINER_OP_KEEP_EXT           = 0x96D2,
+    GL_FRAGMENT_SHADING_RATE_COMBINER_OP_REPLACE_EXT        = 0x96D3,
+    GL_FRAGMENT_SHADING_RATE_COMBINER_OP_MIN_EXT            = 0x96D4,
+    GL_FRAGMENT_SHADING_RATE_COMBINER_OP_MAX_EXT            = 0x96D5,
+    GL_FRAGMENT_SHADING_RATE_COMBINER_OP_MUL_EXT            = 0x96D6,
+    GL_MIN_FRAGMENT_SHADING_RATE_ATTACHMENT_TEXEL_WIDTH_EXT = 0x96D7,
+    GL_MAX_FRAGMENT_SHADING_RATE_ATTACHMENT_TEXEL_WIDTH_EXT = 0x96D8,
+    GL_MIN_FRAGMENT_SHADING_RATE_ATTACHMENT_TEXEL_HEIGHT_EXT = 0x96D9,
+    GL_MAX_FRAGMENT_SHADING_RATE_ATTACHMENT_TEXEL_HEIGHT_EXT = 0x96DA,
+    GL_MAX_FRAGMENT_SHADING_RATE_ATTACHMENT_TEXEL_ASPECT_RATIO_EXT = 0x96DB,
+    GL_MAX_FRAGMENT_SHADING_RATE_ATTACHMENT_LAYERS_EXT      = 0x96DC,
+    GL_FRAGMENT_SHADING_RATE_WITH_SHADER_DEPTH_STENCIL_WRITES_SUPPORTED_EXT = 0x96DD,
+    GL_FRAGMENT_SHADING_RATE_WITH_SAMPLE_MASK_SUPPORTED_EXT = 0x96DE,
+    GL_FRAGMENT_SHADING_RATE_ATTACHMENT_WITH_DEFAULT_FRAMEBUFFER_SUPPORTED_EXT = 0x96DF,
+    GL_FRAGMENT_SHADING_RATE_NON_TRIVIAL_COMBINERS_SUPPORTED_EXT = 0x8F6F,
+};
+extern void         (KHRONOS_APIENTRY* const& glGetFragmentShadingRatesEXT) (GLsizei samples, GLsizei maxCount, GLsizei *count, GLenum *shadingRates);
+extern void         (KHRONOS_APIENTRY* const& glShadingRateEXT) (GLenum rate);
+extern void         (KHRONOS_APIENTRY* const& glShadingRateCombinerOpsEXT) (GLenum combinerOp0, GLenum combinerOp1);
+extern void         (KHRONOS_APIENTRY* const& glFramebufferShadingRateEXT) (GLenum target, GLenum attachment, GLuint texture, GLint baseLayer, GLsizei numLayers, GLsizei texelWidth, GLsizei texelHeight);
+#endif
+
+#ifndef GL_EXT_framebuffer_blit_layers
+#define GL_EXT_framebuffer_blit_layers 1
+extern void         (KHRONOS_APIENTRY* const& glBlitFramebufferLayersEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
+extern void         (KHRONOS_APIENTRY* const& glBlitFramebufferLayerEXT) (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint srcLayer, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLint dstLayer, GLbitfield mask, GLenum filter);
 #endif
 
 #ifndef GL_EXT_geometry_point_size
@@ -2483,6 +2549,10 @@ enum : GLenum
 };
 #endif
 
+#ifndef GL_EXT_separate_depth_stencil
+#define GL_EXT_separate_depth_stencil 1
+#endif
+
 #ifndef GL_EXT_separate_shader_objects
 #define GL_EXT_separate_shader_objects 1
 enum : GLenum
@@ -2499,7 +2569,7 @@ extern void         (KHRONOS_APIENTRY* const& glActiveProgramEXT) (GLuint progra
 extern GLuint       (KHRONOS_APIENTRY* const& glCreateShaderProgramEXT) (GLenum type, const GLchar *string);
 extern void         (KHRONOS_APIENTRY* const& glActiveShaderProgramEXT) (GLuint pipeline, GLuint program);
 extern void         (KHRONOS_APIENTRY* const& glBindProgramPipelineEXT) (GLuint pipeline);
-extern GLuint       (KHRONOS_APIENTRY* const& glCreateShaderProgramvEXT) (GLenum type, GLsizei count, const GLchar **strings);
+extern GLuint       (KHRONOS_APIENTRY* const& glCreateShaderProgramvEXT) (GLenum type, GLsizei count, const GLchar *const*strings);
 extern void         (KHRONOS_APIENTRY* const& glDeleteProgramPipelinesEXT) (GLsizei n, const GLuint *pipelines);
 extern void         (KHRONOS_APIENTRY* const& glGenProgramPipelinesEXT) (GLsizei n, GLuint *pipelines);
 extern void         (KHRONOS_APIENTRY* const& glGetProgramPipelineInfoLogEXT) (GLuint pipeline, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
@@ -2597,6 +2667,10 @@ enum : GLenum
 extern void         (KHRONOS_APIENTRY* const& glFramebufferPixelLocalStorageSizeEXT) (GLuint target, GLsizei size);
 extern GLsizei      (KHRONOS_APIENTRY* const& glGetFramebufferPixelLocalStorageSizeEXT) (GLuint target);
 extern void         (KHRONOS_APIENTRY* const& glClearPixelLocalStorageuiEXT) (GLsizei offset, GLsizei n, const GLuint *values);
+#endif
+
+#ifndef GL_EXT_shader_samples_identical
+#define GL_EXT_shader_samples_identical 1
 #endif
 
 #ifndef GL_EXT_shader_texture_lod
@@ -2898,6 +2972,10 @@ enum : GLenum
 };
 #endif
 
+#ifndef GL_EXT_texture_shadow_lod
+#define GL_EXT_texture_shadow_lod 1
+#endif
+
 #ifndef GL_EXT_texture_storage
 #define GL_EXT_texture_storage 1
 enum : GLenum
@@ -2925,6 +3003,28 @@ extern void         (KHRONOS_APIENTRY* const& glTexStorage3DEXT) (GLenum target,
 extern void         (KHRONOS_APIENTRY* const& glTextureStorage1DEXT) (GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width);
 extern void         (KHRONOS_APIENTRY* const& glTextureStorage2DEXT) (GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
 extern void         (KHRONOS_APIENTRY* const& glTextureStorage3DEXT) (GLuint texture, GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
+#endif
+
+#ifndef GL_EXT_texture_storage_compression
+#define GL_EXT_texture_storage_compression 1
+enum : GLenum
+{
+    GL_NUM_SURFACE_COMPRESSION_FIXED_RATES_EXT              = 0x8F6E,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_1BPC_EXT              = 0x96C4,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_2BPC_EXT              = 0x96C5,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_3BPC_EXT              = 0x96C6,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_4BPC_EXT              = 0x96C7,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_5BPC_EXT              = 0x96C8,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_6BPC_EXT              = 0x96C9,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_7BPC_EXT              = 0x96CA,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_8BPC_EXT              = 0x96CB,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_9BPC_EXT              = 0x96CC,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_10BPC_EXT             = 0x96CD,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_11BPC_EXT             = 0x96CE,
+    GL_SURFACE_COMPRESSION_FIXED_RATE_12BPC_EXT             = 0x96CF,
+};
+extern void         (KHRONOS_APIENTRY* const& glTexStorageAttribs2DEXT) (GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, const GLint* attrib_list);
+extern void         (KHRONOS_APIENTRY* const& glTexStorageAttribs3DEXT) (GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, const GLint* attrib_list);
 #endif
 
 #ifndef GL_EXT_texture_type_2_10_10_10_REV
@@ -3395,6 +3495,10 @@ enum : GLenum
 {
     GL_PROGRAM_BINARY_FORMAT_MESA                           = 0x875F,
 };
+#endif
+
+#ifndef GL_MESA_sampler_objects
+#define GL_MESA_sampler_objects 1
 #endif
 
 #ifndef GL_MESA_shader_integer_functions
@@ -4472,6 +4576,16 @@ enum : GLenum
 extern void         (KHRONOS_APIENTRY* const& glViewportSwizzleNV) (GLuint index, GLenum swizzlex, GLenum swizzley, GLenum swizzlez, GLenum swizzlew);
 #endif
 
+#ifndef GL_NV_pack_subimage
+#define GL_NV_pack_subimage 1
+enum : GLenum
+{
+    GL_PACK_ROW_LENGTH_NV                                   = 0x0D02,
+    GL_PACK_SKIP_ROWS_NV                                    = 0x0D03,
+    GL_PACK_SKIP_PIXELS_NV                                  = 0x0D04,
+};
+#endif
+
 #ifndef GL_OES_EGL_image
 #define GL_OES_EGL_image 1
 extern void         (KHRONOS_APIENTRY* const& glEGLImageTargetTexture2DOES) (GLenum target, GLeglImageOES image);
@@ -5119,6 +5233,10 @@ extern void         (KHRONOS_APIENTRY* const& glExtrapolateTex2DQCOM) (GLuint sr
 #define GL_QCOM_render_shared_exponent 1
 #endif
 
+#ifndef GL_QCOM_render_sRGB_R8_RG8
+#define GL_QCOM_render_sRGB_R8_RG8 1
+#endif
+
 #ifndef GL_QCOM_texture_foveated
 #define GL_QCOM_texture_foveated 1
 enum : GLenum
@@ -5146,6 +5264,14 @@ enum : GLenum
 {
     GL_FOVEATION_SUBSAMPLED_LAYOUT_METHOD_BIT_QCOM          = 0x00000004,
     GL_MAX_SHADER_SUBSAMPLED_IMAGE_UNITS_QCOM               = 0x8FA1,
+};
+#endif
+
+#ifndef GL_QCOM_texture_lod_bias
+#define GL_QCOM_texture_lod_bias 1
+enum : GLenum
+{
+    GL_TEXTURE_LOD_BIAS_QCOM                                = 0x8C96,
 };
 #endif
 
@@ -5247,10 +5373,6 @@ enum : GLenum
 };
 #endif
 
-#ifndef GL_EXT_texture_shadow_lod
-#define GL_EXT_texture_shadow_lod 1
-#endif
-
 
 /** Load all available functions from the OpenGL core API.
 
@@ -5266,5 +5388,4 @@ void loadFunctions();
 */
 void loadExtensions();
 
-}
-}
+} // namespace juce::gl

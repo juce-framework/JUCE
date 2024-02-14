@@ -11,7 +11,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -107,6 +107,8 @@ bool AmIBeingDebugged ()
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
+#include <mutex>
 
 #if SMTG_OS_WINDOWS
 #ifndef _WIN32_WINNT
@@ -140,6 +142,20 @@ DebugPrintLogger gDebugPrintLogger = nullptr;
 //--------------------------------------------------------------------------
 static const int kDebugPrintfBufferSize = 10000;
 static bool neverDebugger = false; // so I can switch it off in the debugger...
+
+static std::once_flag neverDebuggerEnvCheckFlag {};
+
+//--------------------------------------------------------------------------
+static void initNeverDebugger ()
+{
+	std::call_once (neverDebuggerEnvCheckFlag, [] () {
+		// add this environment variable to not stop in the debugger on ASSERT
+		if (std::getenv ("SMTG_DEBUG_IGNORE_ASSERT"))
+		{
+			neverDebugger = true;
+		}
+	});
+}
 
 //--------------------------------------------------------------------------
 static void printDebugString (const char* string)
@@ -193,6 +209,7 @@ void FDebugBreak (const char* format, ...)
 		gPreAssertionHook (string);
 	}
 
+	initNeverDebugger ();
 	if (neverDebugger)
 		return;
 	if (AmIBeingDebugged ())
@@ -228,7 +245,7 @@ void FDebugBreak (const char* format, ...)
 void FPrintLastError (const char* file, int line)
 {
 #if SMTG_OS_WINDOWS
-	LPVOID lpMessageBuffer;
+	LPVOID lpMessageBuffer = nullptr;
 	FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
 	                GetLastError (), MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
 	                (LPSTR)&lpMessageBuffer, 0, nullptr);
@@ -291,12 +308,16 @@ void* operator new[] (size_t size, int, const char* file, int line)
 //------------------------------------------------------------------------
 void operator delete (void* p, int, const char* file, int line)
 {
+	(void)file;
+	(void)line;
 	::operator delete (p);
 }
 
 //------------------------------------------------------------------------
 void operator delete[] (void* p, int, const char* file, int line)
 {
+	(void)file;
+	(void)line;
 	::operator delete[] (p);
 }
 

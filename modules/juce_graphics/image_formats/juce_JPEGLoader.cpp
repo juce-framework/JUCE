@@ -179,7 +179,7 @@ namespace JPEGHelpers
     //==============================================================================
     const int jpegBufferSize = 512;
 
-    struct JuceJpegDest  : public jpeg_destination_mgr
+    struct JuceJpegDest final : public jpeg_destination_mgr
     {
         OutputStream* output;
         char* buffer;

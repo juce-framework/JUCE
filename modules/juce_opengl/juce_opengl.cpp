@@ -240,22 +240,6 @@ private:
     OpenGLTargetSaver& operator= (const OpenGLTargetSaver&);
 };
 
-static bool contextRequiresTexture2DEnableDisable()
-{
-   #if JUCE_OPENGL_ES
-    return false;
-   #else
-    clearGLError();
-    GLint mask = 0;
-    glGetIntegerv (GL_CONTEXT_PROFILE_MASK, &mask);
-
-    if (glGetError() == GL_INVALID_ENUM)
-        return true;
-
-    return (mask & (GLint) GL_CONTEXT_CORE_PROFILE_BIT) == 0;
-   #endif
-}
-
 } // namespace juce
 
 //==============================================================================
@@ -271,14 +255,14 @@ static bool contextRequiresTexture2DEnableDisable()
 #if JUCE_MAC || JUCE_IOS
 
  #if JUCE_MAC
-  #include "native/juce_OpenGL_osx.h"
+  #include "native/juce_OpenGL_mac.h"
  #else
   #include "native/juce_OpenGL_ios.h"
  #endif
 
 #elif JUCE_WINDOWS
  #include "opengl/juce_wgl.h"
- #include "native/juce_OpenGL_win32.h"
+ #include "native/juce_OpenGL_windows.h"
 
 #define JUCE_IMPL_WGL_EXTENSION_FUNCTION(name) \
     decltype (juce::OpenGLContext::NativeContext::name) juce::OpenGLContext::NativeContext::name = nullptr;
@@ -291,8 +275,8 @@ JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB)
 #undef JUCE_IMPL_WGL_EXTENSION_FUNCTION
 
 #elif JUCE_LINUX || JUCE_BSD
- #include <juce_gui_basics/native/x11/juce_linux_ScopedWindowAssociation.h>
- #include "native/juce_OpenGL_linux_X11.h"
+ #include <juce_gui_basics/native/juce_ScopedWindowAssociation_linux.h>
+ #include "native/juce_OpenGL_linux.h"
 
 #elif JUCE_ANDROID
  #include "native/juce_OpenGL_android.h"

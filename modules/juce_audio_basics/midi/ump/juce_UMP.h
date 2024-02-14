@@ -20,8 +20,6 @@
   ==============================================================================
 */
 
-#include "../juce_MidiDataConcatenator.h"
-
 #include "juce_UMPProtocols.h"
 #include "juce_UMPUtils.h"
 #include "juce_UMPacket.h"

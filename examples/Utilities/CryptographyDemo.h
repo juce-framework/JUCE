@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class RSAComponent  : public Component
+class RSAComponent final : public Component
 {
 public:
     RSAComponent()
@@ -141,7 +141,7 @@ private:
 };
 
 //==============================================================================
-class HashesComponent  : public Component
+class HashesComponent final : public Component
 {
 public:
     HashesComponent()
@@ -238,7 +238,7 @@ private:
 };
 
 //==============================================================================
-class CryptographyDemo  : public Component
+class CryptographyDemo final : public Component
 {
 public:
     CryptographyDemo()

@@ -32,38 +32,38 @@ class ButtonDocument   : public JucerDocument
 {
 public:
     ButtonDocument (SourceCodeDocument* cpp);
-    ~ButtonDocument();
+    ~ButtonDocument() override;
 
     //==============================================================================
-    String getTypeName() const;
+    String getTypeName() const override;
 
-    JucerDocument* createCopy();
-    Component* createTestComponent (const bool alwaysFillBackground);
+    JucerDocument* createCopy() override;
+    Component* createTestComponent (bool alwaysFillBackground) override;
 
-    int getNumPaintRoutines() const;
-    StringArray getPaintRoutineNames() const;
-    PaintRoutine* getPaintRoutine (const int index) const;
+    int getNumPaintRoutines() const override;
+    StringArray getPaintRoutineNames() const override;
+    PaintRoutine* getPaintRoutine (int index) const override;
 
-    void setStatePaintRoutineEnabled (const int index, bool b);
-    bool isStatePaintRoutineEnabled (const int index) const;
+    void setStatePaintRoutineEnabled (int index, bool b);
+    bool isStatePaintRoutineEnabled (int index) const;
 
     int chooseBestEnabledPaintRoutine (int paintRoutineWanted) const;
 
-    ComponentLayout* getComponentLayout() const                 { return nullptr; }
+    ComponentLayout* getComponentLayout() const override { return nullptr; }
 
-    void addExtraClassProperties (PropertyPanel&);
+    void addExtraClassProperties (PropertyPanel&) override;
 
     //==============================================================================
-    std::unique_ptr<XmlElement> createXml() const;
-    bool loadFromXml (const XmlElement&);
+    std::unique_ptr<XmlElement> createXml() const override;
+    bool loadFromXml (const XmlElement&) override;
 
-    void fillInGeneratedCode (GeneratedCode& code) const;
-    void fillInPaintCode (GeneratedCode& code) const;
+    void fillInGeneratedCode (GeneratedCode& code) const override;
+    void fillInPaintCode (GeneratedCode& code) const override;
 
     void getOptionalMethods (StringArray& baseClasses,
                              StringArray& returnValues,
                              StringArray& methods,
-                             StringArray& initialContents) const;
+                             StringArray& initialContents) const override;
 
     //==============================================================================
     std::unique_ptr<PaintRoutine> paintRoutines[7];

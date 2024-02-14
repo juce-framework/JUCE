@@ -105,24 +105,27 @@ public:
     Type get() const noexcept                        { return cachedValue; }
 
     /** Dereference operator. Provides direct access to the property.  */
-    Type& operator*() noexcept                       { return cachedValue; }
+    const Type& operator*() const noexcept           { return cachedValue; }
 
     /** Dereference operator. Provides direct access to members of the property
         if it is of object type.
     */
-    Type* operator->() noexcept                      { return &cachedValue; }
+    const Type* operator->() const noexcept          { return &cachedValue; }
 
     /** Returns true if the current value of the property (or the fallback value)
         is equal to other.
     */
     template <typename OtherType>
-    bool operator== (const OtherType& other) const   { return cachedValue == other; }
+    bool operator== (const OtherType& other) const
+    {
+        return cachedValue == other;
+    }
 
     /** Returns true if the current value of the property (or the fallback value)
         is not equal to other.
      */
     template <typename OtherType>
-    bool operator!= (const OtherType& other) const   { return cachedValue != other; }
+    bool operator!= (const OtherType& other) const   { return ! operator== (other); }
 
     //==============================================================================
     /** Returns the current property as a Value object. */
@@ -245,7 +248,7 @@ inline CachedValue<Type>& CachedValue<Type>::operator= (const Type& newValue)
 template <typename Type>
 inline void CachedValue<Type>::setValue (const Type& newValue, UndoManager* undoManagerToUse)
 {
-    if (cachedValue != newValue || isUsingDefault())
+    if (! exactlyEqual (cachedValue, newValue) || isUsingDefault())
     {
         cachedValue = newValue;
         targetTree.setProperty (targetProperty, VariantConverter<Type>::toVar (newValue), undoManagerToUse);

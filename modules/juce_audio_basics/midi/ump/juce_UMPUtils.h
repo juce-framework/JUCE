@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -35,9 +33,12 @@ namespace universal_midi_packets
 struct Utils
 {
     /** Joins 4 bytes into a single 32-bit word. */
-    static constexpr uint32_t bytesToWord (uint8_t a, uint8_t b, uint8_t c, uint8_t d)
+    static constexpr uint32_t bytesToWord (std::byte a, std::byte b, std::byte c, std::byte d)
     {
-        return uint32_t (a << 0x18 | b << 0x10 | c << 0x08 | d << 0x00);
+        return uint32_t (a) << 0x18
+             | uint32_t (b) << 0x10
+             | uint32_t (c) << 0x08
+             | uint32_t (d) << 0x00;
     }
 
     /** Returns the expected number of 32-bit words in a Universal MIDI Packet, given
@@ -111,7 +112,6 @@ struct Utils
     static constexpr uint8_t getChannel     (uint32_t w) noexcept { return U4<3>::get (w); }
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
 
 #endif

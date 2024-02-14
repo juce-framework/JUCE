@@ -26,7 +26,7 @@
 #include <JuceHeader.h>
 
 //==============================================================================
-class ConsoleLogger : public Logger
+class ConsoleLogger final : public Logger
 {
     void logMessage (const String& message) override
     {
@@ -39,7 +39,7 @@ class ConsoleLogger : public Logger
 };
 
 //==============================================================================
-class ConsoleUnitTestRunner : public UnitTestRunner
+class ConsoleUnitTestRunner final : public UnitTestRunner
 {
     void logMessage (const String& message) override
     {
@@ -55,7 +55,7 @@ int main (int argc, char **argv)
 
     if (args.containsOption ("--help|-h"))
     {
-        std::cout << argv[0] << " [--help|-h] [--list-categories] [--category category] [--seed seed]" << std::endl;
+        std::cout << argv[0] << " [--help|-h] [--list-categories] [--category=category] [--seed=seed]" << std::endl;
         return 0;
     }
 

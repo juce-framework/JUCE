@@ -244,7 +244,7 @@ void PaintElementImage::setOpacity (double newOpacity, const bool undoable)
 {
     newOpacity = jlimit (0.0, 1.0, newOpacity);
 
-    if (opacity != newOpacity)
+    if (! approximatelyEqual (opacity, newOpacity))
     {
         if (undoable)
         {

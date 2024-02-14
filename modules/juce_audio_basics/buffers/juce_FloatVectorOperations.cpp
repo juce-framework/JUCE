@@ -1555,7 +1555,7 @@ ScopedNoDenormals::~ScopedNoDenormals() noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class FloatVectorOperationsTests  : public UnitTest
+class FloatVectorOperationsTests final : public UnitTest
 {
 public:
     FloatVectorOperationsTests()
@@ -1676,7 +1676,7 @@ public:
         static bool areAllValuesEqual (const ValueType* d, int num, ValueType target)
         {
             while (--num >= 0)
-                if (*d++ != target)
+                if (! exactlyEqual (*d++, target))
                     return false;
 
             return true;

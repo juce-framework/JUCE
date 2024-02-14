@@ -43,8 +43,8 @@ static String getCommandLinePrefix (const String& commandLineUniqueID)
 //==============================================================================
 // This thread sends and receives ping messages every second, so that it
 // can find out if the other process has stopped running.
-struct ChildProcessPingThread  : public Thread,
-                                 private AsyncUpdater
+struct ChildProcessPingThread : public Thread,
+                                private AsyncUpdater
 {
     ChildProcessPingThread (int timeout)  : Thread ("IPC ping"), timeoutMs (timeout)
     {
@@ -86,8 +86,8 @@ private:
 };
 
 //==============================================================================
-struct ChildProcessCoordinator::Connection  : public InterprocessConnection,
-                                              private ChildProcessPingThread
+struct ChildProcessCoordinator::Connection final : public InterprocessConnection,
+                                                   private ChildProcessPingThread
 {
     Connection (ChildProcessCoordinator& m, const String& pipeName, int timeout)
         : InterprocessConnection (false, magicCoordWorkerConnectionHeader),
@@ -164,9 +164,20 @@ bool ChildProcessCoordinator::launchWorkerProcess (const File& executable, const
     args.add (executable.getFullPathName());
     args.add (getCommandLinePrefix (commandLineUniqueID) + pipeName);
 
-    childProcess.reset (new ChildProcess());
+    childProcess = [&]() -> std::shared_ptr<ChildProcess>
+    {
+        if ((SystemStats::getOperatingSystemType() & SystemStats::Linux) != 0)
+            return ChildProcessManager::getInstance()->createAndStartManagedChildProcess (args, streamFlags);
 
-    if (childProcess->start (args, streamFlags))
+        auto p = std::make_shared<ChildProcess>();
+
+        if (p->start (args, streamFlags))
+            return p;
+
+        return nullptr;
+    }();
+
+    if (childProcess != nullptr)
     {
         connection.reset (new Connection (*this, pipeName, timeoutMs <= 0 ? defaultTimeoutMs : timeoutMs));
 
@@ -196,8 +207,8 @@ void ChildProcessCoordinator::killWorkerProcess()
 }
 
 //==============================================================================
-struct ChildProcessWorker::Connection  : public InterprocessConnection,
-                                         private ChildProcessPingThread
+struct ChildProcessWorker::Connection final : public InterprocessConnection,
+                                              private ChildProcessPingThread
 {
     Connection (ChildProcessWorker& p, const String& pipeName, int timeout)
         : InterprocessConnection (false, magicCoordWorkerConnectionHeader),

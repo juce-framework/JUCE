@@ -26,8 +26,8 @@
 namespace juce
 {
 
-struct Spinner  : public Component,
-                  private Timer
+struct Spinner final : public Component,
+                       private Timer
 {
     Spinner()                       { startTimer (1000 / 50); }
     void timerCallback() override   { repaint(); }
@@ -38,10 +38,10 @@ struct Spinner  : public Component,
     }
 };
 
-struct OnlineUnlockForm::OverlayComp  : public Component,
-                                        private Thread,
-                                        private Timer,
-                                        private Button::Listener
+struct OnlineUnlockForm::OverlayComp final : public Component,
+                                             private Thread,
+                                             private Timer,
+                                             private Button::Listener
 {
     OverlayComp (OnlineUnlockForm& f, bool hasCancelButton = false)
         : Thread (String()), form (f)
@@ -73,7 +73,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
         g.setColour (Colours::black);
         g.setFont (15.0f);
 
-        g.drawFittedText (TRANS("Contacting XYZ...").replace ("XYZ", form.status.getWebsiteName()),
+        g.drawFittedText (TRANS ("Contacting XYZ...").replace ("XYZ", form.status.getWebsiteName()),
                           getLocalBounds().reduced (20, 0).removeFromTop (proportionOfHeight (0.6f)),
                           Justification::centred, 5);
     }
@@ -100,15 +100,21 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 
         if (result.errorMessage.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              TRANS("Registration Failed"),
-                                              result.errorMessage);
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             TRANS ("Registration Failed"),
+                                                             result.errorMessage,
+                                                             {},
+                                                             &form);
+            form.messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else if (result.informativeMessage.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
-                                              TRANS("Registration Complete!"),
-                                              result.informativeMessage);
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::InfoIcon,
+                                                             TRANS ("Registration Complete!"),
+                                                             result.informativeMessage,
+                                                             {},
+                                                             &form);
+            form.messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else if (result.urlToLaunch.isNotEmpty())
         {
@@ -164,7 +170,7 @@ OnlineUnlockForm::OnlineUnlockForm (OnlineUnlockStatus& s,
                                     bool overlayHasCancelButton)
     : message (String(), userInstructions),
       passwordBox (String(), getDefaultPasswordChar()),
-      registerButton (TRANS("Register")),
+      registerButton (TRANS ("Register")),
       cancelButton (TRANS ("Cancel")),
       status (s),
       showOverlayCancelButton (overlayHasCancelButton)
@@ -261,8 +267,8 @@ void OnlineUnlockForm::lookAndFeelChanged()
 {
     Colour labelCol (findColour (TextEditor::backgroundColourId).contrasting (0.5f));
 
-    emailBox.setTextToShowWhenEmpty (TRANS("Email Address"), labelCol);
-    passwordBox.setTextToShowWhenEmpty (TRANS("Password"), labelCol);
+    emailBox.setTextToShowWhenEmpty (TRANS ("Email Address"), labelCol);
+    passwordBox.setTextToShowWhenEmpty (TRANS ("Password"), labelCol);
 }
 
 void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)

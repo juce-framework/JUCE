@@ -62,7 +62,7 @@ void DeletedAtShutdown::deleteAll()
     {
         JUCE_TRY
         {
-            auto* deletee = localCopy.getUnchecked(i);
+            auto* deletee = localCopy.getUnchecked (i);
 
             // double-check that it's not already been deleted during another object's destructor.
             {

@@ -146,6 +146,39 @@ void AudioStreamAAudio::internalErrorCallback(
     }
 }
 
+void AudioStreamAAudio::beginPerformanceHintInCallback() {
+    if (isPerformanceHintEnabled()) {
+        if (!mAdpfOpenAttempted) {
+            int64_t targetDurationNanos = (mFramesPerBurst * 1e9) / getSampleRate();
+            // This has to be called from the callback thread so we get the right TID.
+            int adpfResult = mAdpfWrapper.open(gettid(), targetDurationNanos);
+            if (adpfResult < 0) {
+                LOGW("WARNING ADPF not supported, %d\n", adpfResult);
+            } else {
+                LOGD("ADPF is now active\n");
+            }
+            mAdpfOpenAttempted = true;
+        }
+        mAdpfWrapper.onBeginCallback();
+    } else if (!isPerformanceHintEnabled() && mAdpfOpenAttempted) {
+        LOGD("ADPF closed\n");
+        mAdpfWrapper.close();
+        mAdpfOpenAttempted = false;
+    }
+}
+
+void AudioStreamAAudio::endPerformanceHintInCallback(int32_t numFrames) {
+    if (mAdpfWrapper.isOpen()) {
+        // Scale the measured duration based on numFrames so it is normalized to a full burst.
+        double durationScaler = static_cast<double>(mFramesPerBurst) / numFrames;
+        // Skip this callback if numFrames is very small.
+        // This can happen when buffers wrap around, particularly when doing sample rate conversion.
+        if (durationScaler < 2.0) {
+            mAdpfWrapper.onEndCallback(durationScaler);
+        }
+    }
+}
+
 void AudioStreamAAudio::logUnsupportedAttributes() {
     int sdkVersion = getSdkVersion();
 
@@ -205,7 +238,32 @@ Result AudioStreamAAudio::open() {
     }
     mLibLoader->builder_setBufferCapacityInFrames(aaudioBuilder, capacity);
 
-    mLibLoader->builder_setChannelCount(aaudioBuilder, mChannelCount);
+    if (mLibLoader->builder_setSessionId != nullptr) {
+        mLibLoader->builder_setSessionId(aaudioBuilder,
+                                         static_cast<aaudio_session_id_t>(mSessionId));
+        // Output effects do not support PerformanceMode::LowLatency.
+        if (OboeGlobals::areWorkaroundsEnabled()
+                && mSessionId != SessionId::None
+                && mDirection == oboe::Direction::Output
+                && mPerformanceMode == PerformanceMode::LowLatency) {
+                    mPerformanceMode = PerformanceMode::None;
+                    LOGD("AudioStreamAAudio.open() performance mode changed to None when session "
+                         "id is requested");
+        }
+    }
+
+    // Channel mask was added in SC_V2. Given the corresponding channel count of selected channel
+    // mask may be different from selected channel count, the last set value will be respected.
+    // If channel count is set after channel mask, the previously set channel mask will be cleared.
+    // If channel mask is set after channel count, the channel count will be automatically
+    // calculated from selected channel mask. In that case, only set channel mask when the API
+    // is available and the channel mask is specified.
+    if (mLibLoader->builder_setChannelMask != nullptr && mChannelMask != ChannelMask::Unspecified) {
+        mLibLoader->builder_setChannelMask(aaudioBuilder,
+                                           static_cast<aaudio_channel_mask_t>(mChannelMask));
+    } else {
+        mLibLoader->builder_setChannelCount(aaudioBuilder, mChannelCount);
+    }
     mLibLoader->builder_setDeviceId(aaudioBuilder, mDeviceId);
     mLibLoader->builder_setDirection(aaudioBuilder, static_cast<aaudio_direction_t>(mDirection));
     mLibLoader->builder_setFormat(aaudioBuilder, static_cast<aaudio_format_t>(mFormat));
@@ -236,11 +294,6 @@ Result AudioStreamAAudio::open() {
                                            static_cast<aaudio_input_preset_t>(inputPreset));
     }
 
-    if (mLibLoader->builder_setSessionId != nullptr) {
-        mLibLoader->builder_setSessionId(aaudioBuilder,
-                                         static_cast<aaudio_session_id_t>(mSessionId));
-    }
-
     // These were added in S so we have to check for the function pointer.
     if (mLibLoader->builder_setPackageName != nullptr && !mPackageName.empty()) {
         mLibLoader->builder_setPackageName(aaudioBuilder,
@@ -250,6 +303,33 @@ Result AudioStreamAAudio::open() {
     if (mLibLoader->builder_setAttributionTag != nullptr && !mAttributionTag.empty()) {
         mLibLoader->builder_setAttributionTag(aaudioBuilder,
                                            mAttributionTag.c_str());
+    }
+
+    // This was added in Q so we have to check for the function pointer.
+    if (mLibLoader->builder_setAllowedCapturePolicy != nullptr && mDirection == oboe::Direction::Output) {
+        mLibLoader->builder_setAllowedCapturePolicy(aaudioBuilder,
+                                           static_cast<aaudio_allowed_capture_policy_t>(mAllowedCapturePolicy));
+    }
+
+    if (mLibLoader->builder_setPrivacySensitive != nullptr && mDirection == oboe::Direction::Input
+            && mPrivacySensitiveMode != PrivacySensitiveMode::Unspecified) {
+        mLibLoader->builder_setPrivacySensitive(aaudioBuilder,
+                mPrivacySensitiveMode == PrivacySensitiveMode::Enabled);
+    }
+
+    if (mLibLoader->builder_setIsContentSpatialized != nullptr) {
+        mLibLoader->builder_setIsContentSpatialized(aaudioBuilder, mIsContentSpatialized);
+    }
+
+    if (mLibLoader->builder_setSpatializationBehavior != nullptr) {
+        // Override Unspecified as Never to reduce latency.
+        if (mSpatializationBehavior == SpatializationBehavior::Unspecified) {
+            mSpatializationBehavior = SpatializationBehavior::Never;
+        }
+        mLibLoader->builder_setSpatializationBehavior(aaudioBuilder,
+                static_cast<aaudio_spatialization_behavior_t>(mSpatializationBehavior));
+    } else {
+        mSpatializationBehavior = SpatializationBehavior::Never;
     }
 
     if (isDataCallbackSpecified()) {
@@ -309,15 +389,90 @@ Result AudioStreamAAudio::open() {
         mSessionId = SessionId::None;
     }
 
+    // This was added in Q so we have to check for the function pointer.
+    if (mLibLoader->stream_getAllowedCapturePolicy != nullptr && mDirection == oboe::Direction::Output) {
+        mAllowedCapturePolicy = static_cast<AllowedCapturePolicy>(mLibLoader->stream_getAllowedCapturePolicy(mAAudioStream));
+    } else {
+        mAllowedCapturePolicy = AllowedCapturePolicy::Unspecified;
+    }
+
+    if (mLibLoader->stream_isPrivacySensitive != nullptr && mDirection == oboe::Direction::Input) {
+        bool isPrivacySensitive = mLibLoader->stream_isPrivacySensitive(mAAudioStream);
+        mPrivacySensitiveMode = isPrivacySensitive ? PrivacySensitiveMode::Enabled :
+                PrivacySensitiveMode::Disabled;
+    } else {
+        mPrivacySensitiveMode = PrivacySensitiveMode::Unspecified;
+    }
+
+    if (mLibLoader->stream_getChannelMask != nullptr) {
+        mChannelMask = static_cast<ChannelMask>(mLibLoader->stream_getChannelMask(mAAudioStream));
+    }
+
+    if (mLibLoader->stream_isContentSpatialized != nullptr) {
+        mIsContentSpatialized = mLibLoader->stream_isContentSpatialized(mAAudioStream);
+    }
+
+    if (mLibLoader->stream_getSpatializationBehavior != nullptr) {
+        mSpatializationBehavior = static_cast<SpatializationBehavior>(
+                mLibLoader->stream_getSpatializationBehavior(mAAudioStream));
+    }
+
+    if (mLibLoader->stream_getHardwareChannelCount != nullptr) {
+        mHardwareChannelCount = mLibLoader->stream_getHardwareChannelCount(mAAudioStream);
+    }
+    if (mLibLoader->stream_getHardwareSampleRate != nullptr) {
+        mHardwareSampleRate = mLibLoader->stream_getHardwareSampleRate(mAAudioStream);
+    }
+    if (mLibLoader->stream_getHardwareFormat != nullptr) {
+        mHardwareFormat = static_cast<AudioFormat>(mLibLoader->stream_getHardwareFormat(mAAudioStream));
+    }
+
     LOGD("AudioStreamAAudio.open() format=%d, sampleRate=%d, capacity = %d",
             static_cast<int>(mFormat), static_cast<int>(mSampleRate),
             static_cast<int>(mBufferCapacityInFrames));
 
+    calculateDefaultDelayBeforeCloseMillis();
+
 error2:
     mLibLoader->builder_delete(aaudioBuilder);
-    LOGD("AudioStreamAAudio.open: AAudioStream_Open() returned %s",
-         mLibLoader->convertResultToText(static_cast<aaudio_result_t>(result)));
+    if (static_cast<int>(result) > 0) {
+        // Possibly due to b/267531411
+        LOGW("AudioStreamAAudio.open: AAudioStream_Open() returned positive error = %d",
+             static_cast<int>(result));
+        if (OboeGlobals::areWorkaroundsEnabled()) {
+            result = Result::ErrorInternal; // Coerce to negative error.
+        }
+    } else {
+        LOGD("AudioStreamAAudio.open: AAudioStream_Open() returned %s = %d",
+             mLibLoader->convertResultToText(static_cast<aaudio_result_t>(result)),
+             static_cast<int>(result));
+    }
     return result;
+}
+
+Result AudioStreamAAudio::release() {
+    if (getSdkVersion() < __ANDROID_API_R__) {
+        return Result::ErrorUnimplemented;
+    }
+
+    // AAudioStream_release() is buggy on Android R.
+    if (OboeGlobals::areWorkaroundsEnabled() && getSdkVersion() == __ANDROID_API_R__) {
+        LOGW("Skipping release() on Android R");
+        return Result::ErrorUnimplemented;
+    }
+
+    std::lock_guard<std::mutex> lock(mLock);
+    AAudioStream *stream = mAAudioStream.load();
+    if (stream != nullptr) {
+        if (OboeGlobals::areWorkaroundsEnabled()) {
+            // Make sure we are really stopped. Do it under mLock
+            // so another thread cannot call requestStart() right before the close.
+            requestStop_l(stream);
+        }
+        return static_cast<Result>(mLibLoader->stream_release(stream));
+    } else {
+        return Result::ErrorClosed;
+    }
 }
 
 Result AudioStreamAAudio::close() {
@@ -340,12 +495,7 @@ Result AudioStreamAAudio::close() {
             // Make sure we are really stopped. Do it under mLock
             // so another thread cannot call requestStart() right before the close.
             requestStop_l(stream);
-            // Sometimes a callback can occur shortly after a stream has been stopped and
-            // even after a close! If the stream has been closed then the callback
-            // can access memory that has been freed. That causes a crash.
-            // This seems to be more likely in Android P or earlier.
-            // But it can also occur in later versions.
-            usleep(kDelayBeforeCloseMillis * 1000);
+            sleepBeforeClose();
         }
         return static_cast<Result>(mLibLoader->stream_close(stream));
     } else {
@@ -407,6 +557,7 @@ Result AudioStreamAAudio::requestStart() {
             setDataCallbackEnabled(true);
         }
         mStopThreadAllowed = true;
+        closePerformanceHint();
         return static_cast<Result>(mLibLoader->stream_requestStart(stream));
     } else {
         return Result::ErrorClosed;
@@ -472,6 +623,7 @@ Result AudioStreamAAudio::requestStop_l(AAudioStream *stream) {
 ResultWithValue<int32_t>   AudioStreamAAudio::write(const void *buffer,
                                      int32_t numFrames,
                                      int64_t timeoutNanoseconds) {
+    std::shared_lock<std::shared_mutex> lock(mAAudioStreamLock);
     AAudioStream *stream = mAAudioStream.load();
     if (stream != nullptr) {
         int32_t result = mLibLoader->stream_write(mAAudioStream, buffer,
@@ -485,6 +637,7 @@ ResultWithValue<int32_t>   AudioStreamAAudio::write(const void *buffer,
 ResultWithValue<int32_t>   AudioStreamAAudio::read(void *buffer,
                                  int32_t numFrames,
                                  int64_t timeoutNanoseconds) {
+    std::shared_lock<std::shared_mutex> lock(mAAudioStreamLock);
     AAudioStream *stream = mAAudioStream.load();
     if (stream != nullptr) {
         int32_t result = mLibLoader->stream_read(mAAudioStream, buffer,

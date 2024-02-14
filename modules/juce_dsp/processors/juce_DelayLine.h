@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -125,7 +123,7 @@ public:
         For very short delay times, the result of getMaximumDelayInSamples() may
         differ from the last value passed to setMaximumDelayInSamples().
     */
-    int getMaximumDelayInSamples() const noexcept       { return totalSize - 1; }
+    int getMaximumDelayInSamples() const noexcept       { return totalSize - 2; }
 
     /** Resets the internal state variables of the processor. */
     void reset();
@@ -271,7 +269,7 @@ private:
             auto value1 = bufferData.getSample (channel, index1);
             auto value2 = bufferData.getSample (channel, index2);
 
-            auto output = delayFrac == 0 ? value1 : value2 + alpha * (value1 - v[(size_t) channel]);
+            auto output = approximatelyEqual (delayFrac, (SampleType) 0) ? value1 : value2 + alpha * (value1 - v[(size_t) channel]);
             v[(size_t) channel] = output;
 
             return output;
@@ -283,7 +281,7 @@ private:
     {
         if constexpr (std::is_same_v<InterpolationType, DelayLineInterpolationTypes::Lagrange3rd>)
         {
-            if (delayInt >= 1)
+            if (delayFrac < (SampleType) 2.0 && delayInt >= 1)
             {
                 delayFrac++;
                 delayInt--;
@@ -313,5 +311,4 @@ private:
     SampleType alpha = 0.0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

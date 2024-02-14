@@ -251,7 +251,7 @@ void BlowFish::encrypt (uint32& data1, uint32& data2) const noexcept
     for (int i = 0; i < 16; ++i)
     {
         l ^= p[i];
-        r ^= F(l);
+        r ^= F (l);
         std::swap (l, r);
     }
 
@@ -267,7 +267,7 @@ void BlowFish::decrypt (uint32& data1, uint32& data2) const noexcept
     for (int i = 17; i > 1; --i)
     {
         l ^= p[i];
-        r ^= F(l);
+        r ^= F (l);
         std::swap (l, r);
     }
 
@@ -317,7 +317,7 @@ bool BlowFish::apply (void* data, size_t size, void (BlowFish::*op) (uint32&, ui
 {
     union AlignedAccessHelper
     {
-        int8 byte[sizeof(uint32) * 2];
+        int8 byte[sizeof (uint32) * 2];
         uint32 data[2];
     };
 
@@ -356,7 +356,7 @@ int BlowFish::unpad (const void* data, size_t size) noexcept
         return -1;
 
     // remove padding according to https://tools.ietf.org/html/rfc2898#section-6.1.1
-    auto paddingSize = reinterpret_cast<const uint8*>(data)[size - 1u];
+    auto paddingSize = reinterpret_cast<const uint8*> (data)[size - 1u];
 
     if (paddingSize == 0 || paddingSize > 8 || paddingSize > size)
         return -1;
@@ -369,7 +369,7 @@ int BlowFish::unpad (const void* data, size_t size) noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class BlowFishTests  : public UnitTest
+class BlowFishTests final : public UnitTest
 {
 public:
     BlowFishTests()
@@ -382,7 +382,7 @@ public:
         auto* dst = reinterpret_cast<uint8*> (block.getData());
 
         for (size_t i = 0; i < n; ++i)
-            dst[i] = static_cast<uint8> (random.nextInt(255));
+            dst[i] = static_cast<uint8> (random.nextInt (255));
     }
 
     void expectEqualData (const void* dataA, const void* dataB, size_t size, const String& failureMessage)
@@ -437,7 +437,7 @@ public:
 
         for (int i = 0; i < 100; ++i)
         {
-            const int keySize = (random.nextInt(17) + 1) * static_cast<int> (sizeof (uint32));
+            const int keySize = (random.nextInt (17) + 1) * static_cast<int> (sizeof (uint32));
             MemoryBlock key (static_cast<size_t> (keySize));
             fillMemoryBlockWithRandomData (key, random);
 
@@ -459,7 +459,7 @@ public:
             {
                 // Test unaligned data encryption/decryption. This will be flagged up by a check for
                 // undefined behaviour!
-                auto nudge = static_cast<uintptr_t> (random.nextInt (sizeof(void*) - 1));
+                auto nudge = static_cast<uintptr_t> (random.nextInt (sizeof (void*) - 1));
                 auto unalignedData = (void*) (reinterpret_cast<uintptr_t> (data.getData()) + nudge);
                 size_t newSize = data.getSize() - nudge;
 

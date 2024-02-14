@@ -160,7 +160,7 @@ ComponentBuilder::TypeHandler* ComponentBuilder::getHandlerForState (const Value
 
     for (int i = 0; i < types.size(); ++i)
     {
-        TypeHandler* const t = types.getUnchecked(i);
+        TypeHandler* const t = types.getUnchecked (i);
 
         if (t->type == targetType)
             return t;
@@ -279,7 +279,7 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
         componentsInOrder.getLast()->toFront (false);
 
         for (int i = componentsInOrder.size() - 1; --i >= 0;)
-            componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
+            componentsInOrder.getUnchecked (i)->toBehind (componentsInOrder.getUnchecked (i + 1));
     }
 }
 

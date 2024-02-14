@@ -83,7 +83,7 @@ void ImageComponent::paint (Graphics& g)
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> ImageComponent::createAccessibilityHandler()
 {
-    class ImageComponentAccessibilityHandler  : public AccessibilityHandler
+    class ImageComponentAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         explicit ImageComponentAccessibilityHandler (ImageComponent& imageComponentToWrap)

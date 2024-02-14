@@ -24,6 +24,7 @@ package com.rmsl.juce;
 
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -43,6 +44,7 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.BluetoothDevice;
 import android.media.midi.MidiOutputPort;
 import android.media.midi.MidiReceiver;
+import android.os.Build;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.util.Pair;
@@ -56,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static android.content.Context.MIDI_SERVICE;
+import static android.content.Context.BLUETOOTH_SERVICE;
 
 public class JuceMidiSupport
 {
@@ -77,10 +80,18 @@ public class JuceMidiSupport
         String getName ();
     }
 
-    //==============================================================================
-    public static class BluetoothManager extends ScanCallback
+    static BluetoothAdapter getDefaultBluetoothAdapter (Context ctx)
     {
-        BluetoothManager (Context contextToUse)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2)
+            return BluetoothAdapter.getDefaultAdapter();
+
+        return ((BluetoothManager) ctx.getSystemService (BLUETOOTH_SERVICE)).getAdapter();
+    }
+
+    //==============================================================================
+    public static class BluetoothMidiManager extends ScanCallback
+    {
+        BluetoothMidiManager (Context contextToUse)
         {
             appContext = contextToUse;
         }
@@ -92,7 +103,7 @@ public class JuceMidiSupport
 
         public String getHumanReadableStringForBluetoothAddress (String address)
         {
-            BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter ().getRemoteDevice (address);
+            BluetoothDevice btDevice = getDefaultBluetoothAdapter (appContext).getRemoteDevice (address);
             return btDevice.getName ();
         }
 
@@ -103,11 +114,11 @@ public class JuceMidiSupport
 
         public void startStopScan (boolean shouldStart)
         {
-            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter ();
+            BluetoothAdapter bluetoothAdapter = getDefaultBluetoothAdapter (appContext);
 
             if (bluetoothAdapter == null)
             {
-                Log.d ("JUCE", "BluetoothManager error: could not get default Bluetooth adapter");
+                Log.d ("JUCE", "BluetoothMidiManager error: could not get default Bluetooth adapter");
                 return;
             }
 
@@ -115,7 +126,7 @@ public class JuceMidiSupport
 
             if (bluetoothLeScanner == null)
             {
-                Log.d ("JUCE", "BluetoothManager error: could not get Bluetooth LE scanner");
+                Log.d ("JUCE", "BluetoothMidiManager error: could not get Bluetooth LE scanner");
                 return;
             }
 
@@ -140,7 +151,7 @@ public class JuceMidiSupport
 
         public boolean pairBluetoothMidiDevice (String address)
         {
-            BluetoothDevice btDevice = BluetoothAdapter.getDefaultAdapter ().getRemoteDevice (address);
+            BluetoothDevice btDevice = getDefaultBluetoothAdapter (appContext).getRemoteDevice (address);
 
             if (btDevice == null)
             {
@@ -543,12 +554,8 @@ public class JuceMidiSupport
                 return;
             }
 
-            openPorts = new HashMap<MidiPortPath, WeakReference<JuceMidiPort>> ();
-            midiDevices = new ArrayList<Pair<MidiDevice, BluetoothGatt>> ();
-            openTasks = new HashMap<Integer, MidiDeviceOpenTask> ();
-            btDevicesPairing = new HashMap<String, BluetoothGatt> ();
-
             MidiDeviceInfo[] foundDevices = manager.getDevices ();
+
             for (MidiDeviceInfo info : foundDevices)
                 onDeviceAdded (info);
 
@@ -810,6 +817,7 @@ public class JuceMidiSupport
             openPorts.remove (path);
         }
 
+        @Override
         public void onDeviceAdded (MidiDeviceInfo info)
         {
             // only add standard midi devices
@@ -819,6 +827,7 @@ public class JuceMidiSupport
             manager.openDevice (info, this, null);
         }
 
+        @Override
         public void onDeviceRemoved (MidiDeviceInfo info)
         {
             synchronized (MidiDeviceManager.class)
@@ -856,8 +865,11 @@ public class JuceMidiSupport
                     midiDevices.remove (devicePair);
                 }
             }
+
+            handleDevicesChanged();
         }
 
+        @Override
         public void onDeviceStatusChanged (MidiDeviceStatus status)
         {
         }
@@ -933,6 +945,7 @@ public class JuceMidiSupport
                         BluetoothGatt gatt = openTasks.get (deviceID).getGatt ();
                         openTasks.remove (deviceID);
                         midiDevices.add (new Pair<MidiDevice, BluetoothGatt> (theDevice, gatt));
+                        handleDevicesChanged();
                     }
                 } else
                 {
@@ -973,7 +986,6 @@ public class JuceMidiSupport
             {
                 for (MidiDeviceInfo info : deviceInfos)
                 {
-                    int localIndex = 0;
                     if (info.getId () == path.deviceId)
                     {
                         for (MidiDeviceInfo.PortInfo portInfo : info.getPorts ())
@@ -1048,11 +1060,11 @@ public class JuceMidiSupport
         }
 
         private MidiManager manager;
-        private HashMap<String, BluetoothGatt> btDevicesPairing;
-        private HashMap<Integer, MidiDeviceOpenTask> openTasks;
-        private ArrayList<Pair<MidiDevice, BluetoothGatt>> midiDevices;
+        private HashMap<String, BluetoothGatt> btDevicesPairing = new HashMap<String, BluetoothGatt>();
+        private HashMap<Integer, MidiDeviceOpenTask> openTasks = new HashMap<Integer, MidiDeviceOpenTask>();
+        private ArrayList<Pair<MidiDevice, BluetoothGatt>> midiDevices = new ArrayList<Pair<MidiDevice, BluetoothGatt>>();
         private MidiDeviceInfo[] deviceInfos;
-        private HashMap<MidiPortPath, WeakReference<JuceMidiPort>> openPorts;
+        private HashMap<MidiPortPath, WeakReference<JuceMidiPort>> openPorts = new HashMap<MidiPortPath, WeakReference<JuceMidiPort>>();
         private Context appContext = null;
     }
 
@@ -1070,9 +1082,9 @@ public class JuceMidiSupport
         return midiDeviceManager;
     }
 
-    public static BluetoothManager getAndroidBluetoothManager (Context context)
+    public static BluetoothMidiManager getAndroidBluetoothManager (Context context)
     {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter ();
+        BluetoothAdapter adapter = getDefaultBluetoothAdapter (context);
 
         if (adapter == null)
             return null;
@@ -1083,12 +1095,15 @@ public class JuceMidiSupport
         synchronized (JuceMidiSupport.class)
         {
             if (bluetoothManager == null)
-                bluetoothManager = new BluetoothManager (context);
+                bluetoothManager = new BluetoothMidiManager (context);
         }
 
         return bluetoothManager;
     }
 
+    // To be called when devices become (un)available
+    private native static void handleDevicesChanged();
+
     private static MidiDeviceManager midiDeviceManager = null;
-    private static BluetoothManager bluetoothManager = null;
+    private static BluetoothMidiManager bluetoothManager = null;
 }

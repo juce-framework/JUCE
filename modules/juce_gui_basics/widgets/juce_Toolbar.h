@@ -246,8 +246,10 @@ public:
         labelTextColourId           = 0x1003240,        /**< A colour to use for drawing the text under buttons
                                                              when the style is set to iconsWithText or textOnly. */
 
-        editingModeOutlineColourId  = 0x1003250   /**< A colour to use for an outline around buttons when
+        editingModeOutlineColourId  = 0x1003250,  /**< A colour to use for an outline around buttons when
                                                        the customisation dialog is active and the mouse moves over them. */
+
+        customisationDialogBackgroundColourId = 0x1003260 /**< A colour used to paint the background of the CustomisationDialog. */
     };
 
     //==============================================================================
@@ -310,6 +312,8 @@ public:
     static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);
     /** @internal */
     static const char* const toolbarDragDescriptor;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -322,7 +326,6 @@ private:
     class Spacer;
     class CustomisationDialog;
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void initMissingItemButton();
     void showMissingItems();
     void addItemInternal (ToolbarItemFactory& factory, int itemId, int insertIndex);

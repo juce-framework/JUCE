@@ -323,9 +323,9 @@ void FileBrowserComponent::setFileFilter (const FileFilter* const newFileFilter)
 
 String FileBrowserComponent::getActionVerb() const
 {
-    return isSaveMode() ? ((flags & canSelectDirectories) != 0 ? TRANS("Choose")
-                                                               : TRANS("Save"))
-                        : TRANS("Open");
+    return isSaveMode() ? ((flags & canSelectDirectories) != 0 ? TRANS ("Choose")
+                                                               : TRANS ("Save"))
+                        : TRANS ("Open");
 }
 
 void FileBrowserComponent::setFilenameBoxLabel (const String& name)
@@ -371,7 +371,6 @@ void FileBrowserComponent::lookAndFeelChanged()
     filenameBox.applyColourToAllText (findColour (filenameBoxTextColourId));
 
     resized();
-    repaint();
 }
 
 //==============================================================================
@@ -530,7 +529,7 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
 
     for (int i = 0; i < roots.size(); ++i)
     {
-        const File& drive = roots.getReference(i);
+        const File& drive = roots.getReference (i);
 
         String name (drive.getFullPathName());
         rootPaths.add (name);
@@ -540,13 +539,13 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
             String volume (drive.getVolumeLabel());
 
             if (volume.isEmpty())
-                volume = TRANS("Hard Drive");
+                volume = TRANS ("Hard Drive");
 
             name << " [" << volume << ']';
         }
         else if (drive.isOnCDRomDrive())
         {
-            name << " [" << TRANS("CD/DVD drive") << ']';
+            name << " [" << TRANS ("CD/DVD drive") << ']';
         }
 
         rootNames.add (name);
@@ -556,25 +555,25 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootNames.add ({});
 
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add (TRANS("Documents"));
+    rootNames.add (TRANS ("Documents"));
     rootPaths.add (File::getSpecialLocation (File::userMusicDirectory).getFullPathName());
-    rootNames.add (TRANS("Music"));
+    rootNames.add (TRANS ("Music"));
     rootPaths.add (File::getSpecialLocation (File::userPicturesDirectory).getFullPathName());
-    rootNames.add (TRANS("Pictures"));
+    rootNames.add (TRANS ("Pictures"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
 
    #elif JUCE_MAC
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add (TRANS("Home folder"));
+    rootNames.add (TRANS ("Home folder"));
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
-    rootNames.add (TRANS("Documents"));
+    rootNames.add (TRANS ("Documents"));
     rootPaths.add (File::getSpecialLocation (File::userMusicDirectory).getFullPathName());
-    rootNames.add (TRANS("Music"));
+    rootNames.add (TRANS ("Music"));
     rootPaths.add (File::getSpecialLocation (File::userPicturesDirectory).getFullPathName());
-    rootNames.add (TRANS("Pictures"));
+    rootNames.add (TRANS ("Pictures"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
 
     rootPaths.add ({});
     rootNames.add ({});
@@ -592,9 +591,9 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add ("/");
     rootNames.add ("/");
     rootPaths.add (File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    rootNames.add (TRANS("Home folder"));
+    rootNames.add (TRANS ("Home folder"));
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
-    rootNames.add (TRANS("Desktop"));
+    rootNames.add (TRANS ("Desktop"));
    #endif
 }
 
@@ -605,7 +604,7 @@ void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPa
 
 void FileBrowserComponent::timerCallback()
 {
-    const auto isProcessActive = isForegroundOrEmbeddedProcess (this);
+    const auto isProcessActive = detail::WindowingHelpers::isForegroundOrEmbeddedProcess (this);
 
     if (wasProcessActive != isProcessActive)
     {

@@ -49,7 +49,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class XmlTreeItem  : public TreeViewItem
+class XmlTreeItem final : public TreeViewItem
 {
 public:
     XmlTreeItem (XmlElement& x)  : xml (x)    {}
@@ -115,7 +115,7 @@ private:
 };
 
 //==============================================================================
-class JsonTreeItem  : public TreeViewItem
+class JsonTreeItem final : public TreeViewItem
 {
 public:
     JsonTreeItem (Identifier i, var value)
@@ -228,8 +228,8 @@ private:
 };
 
 //==============================================================================
-class XMLandJSONDemo   : public Component,
-                         private CodeDocument::Listener
+class XMLandJSONDemo final : public Component,
+                             private CodeDocument::Listener
 {
 public:
     /** The type of database to parse. */
@@ -292,7 +292,7 @@ public:
         auto area = getLocalBounds();
 
         typeBox.setBounds (area.removeFromTop (36).removeFromRight (150).reduced (8));
-        codeDocumentComponent.setBounds (area.removeFromTop(area.getHeight() / 2).reduced (8));
+        codeDocumentComponent.setBounds (area.removeFromTop (area.getHeight() / 2).reduced (8));
         resultsTree          .setBounds (area.reduced (8));
         errorMessage         .setBounds (resultsTree.getBounds());
     }
@@ -312,12 +312,12 @@ private:
     {
         std::unique_ptr<XmlElement> openness;
 
-        if (rootItem.get() != nullptr)
+        if (rootItem != nullptr)
             openness = rootItem->getOpennessState();
 
         createNewRootNode();
 
-        if (openness.get() != nullptr && rootItem.get() != nullptr)
+        if (openness != nullptr && rootItem != nullptr)
             rootItem->restoreOpennessState (*openness);
     }
 
@@ -336,7 +336,7 @@ private:
         }
 
         // if we have a valid TreeViewItem hide any old error messages and set our TreeView to use it
-        if (rootItem.get() != nullptr)
+        if (rootItem != nullptr)
             errorMessage.clear();
 
         errorMessage.setVisible (! errorMessage.isEmpty());

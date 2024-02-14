@@ -34,13 +34,12 @@ public:
     explicit MagnifierComponent (Component* c) : content (c)
     {
         addAndMakeVisible (content.get());
-        childBoundsChanged (content.get());
+        updateBounds (content.get());
     }
 
-    void childBoundsChanged (Component* child)
+    void childBoundsChanged (Component* child) override
     {
-        auto childArea = getLocalArea (child, child->getLocalBounds());
-        setSize (childArea.getWidth(), childArea.getHeight());
+        updateBounds (child);
     }
 
     double getScaleFactor() const   { return scaleFactor; }
@@ -52,6 +51,12 @@ public:
     }
 
 private:
+    void updateBounds (Component* child)
+    {
+        auto childArea = getLocalArea (child, child->getLocalBounds());
+        setSize (childArea.getWidth(), childArea.getHeight());
+    }
+
     double scaleFactor = 1.0;
     std::unique_ptr<Component> content;
 };
@@ -64,7 +69,7 @@ public:
     {
     }
 
-    void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
+    void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel) override
     {
         if (e.mods.isCtrlDown() || e.mods.isAltDown() || e.mods.isCommandDown())
             mouseMagnify (e, 1.0f / (1.0f - wheel.deltaY));
@@ -72,7 +77,7 @@ public:
             Viewport::mouseWheelMove (e, wheel);
     }
 
-    void mouseMagnify (const MouseEvent& e, float factor)
+    void mouseMagnify (const MouseEvent& e, float factor) override
     {
         panel->setZoom (panel->getZoom() * factor, e.x, e.y);
     }
@@ -111,7 +116,7 @@ private:
             setAlwaysOnTop (true);
         }
 
-        void mouseDown (const MouseEvent&)
+        void mouseDown (const MouseEvent&) override
         {
             if (Viewport* viewport = findParentComponentOfClass<Viewport>())
             {
@@ -120,7 +125,7 @@ private:
             }
         }
 
-        void mouseDrag (const MouseEvent& e)
+        void mouseDrag (const MouseEvent& e) override
         {
             if (Viewport* viewport = findParentComponentOfClass<Viewport>())
                 viewport->setViewPosition (jlimit (0, jmax (0, viewport->getViewedComponent()->getWidth() - viewport->getViewWidth()),

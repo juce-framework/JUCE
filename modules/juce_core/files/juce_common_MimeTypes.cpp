@@ -206,6 +206,7 @@ private:
         { "fdf",      "application/vnd.fdf" },
         { "fif",      "application/fractals" },
         { "fif",      "image/fif" },
+        { "flac",     "audio/flac" },
         { "fli",      "video/fli" },
         { "fli",      "video/x-fli" },
         { "flo",      "image/florian" },
@@ -745,6 +746,9 @@ private:
 
 } // namespace
 
+namespace detail
+{
+
 void MimeTypeTable::registerCustomMimeTypeForFileExtension (const String& mimeType, const String& fileExtension)
 {
     Table::get().addEntry ({ fileExtension.toRawUTF8(), mimeType.toRawUTF8() });
@@ -759,5 +763,7 @@ StringArray MimeTypeTable::getFileExtensionsForMimeType (const String& mimeType)
 {
     return Table::get().getExtensionsForType (mimeType);
 }
+
+} // namespace detail
 
 } // namespace juce

@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,7 @@
 #ifndef FLAC__STREAM_ENCODER_H
 #define FLAC__STREAM_ENCODER_H
 
+#include <stdio.h> /* for FILE */
 #include "export.h"
 #include "format.h"
 #include "stream_decoder.h"
@@ -128,8 +129,8 @@ extern "C" {
  * Unlike the decoders, the stream encoder has many options that can
  * affect the speed and compression ratio.  When setting these parameters
  * you should have some basic knowledge of the format (see the
- * <A HREF="../documentation_format_overview.html">user-level documentation</A>
- * or the <A HREF="../format.html">formal description</A>).  The
+ * <A HREF="https://xiph.org/flac/documentation_format_overview.html">user-level documentation</A>
+ * or the <A HREF="https://xiph.org/flac/format.html">formal description</A>).  The
  * FLAC__stream_encoder_set_*() functions themselves do not validate the
  * values as many are interdependent.  The FLAC__stream_encoder_init_*()
  * functions will do this, so make sure to pay attention to the state
@@ -310,8 +311,7 @@ typedef enum {
 
 	FLAC__STREAM_ENCODER_INIT_STATUS_INVALID_BITS_PER_SAMPLE,
 	/**< The encoder has an invalid setting for bits-per-sample.
-	 * FLAC supports 4-32 bps but the reference encoder currently supports
-	 * only up to 24 bps.
+	 * FLAC supports 4-32 bps.
 	 */
 
 	FLAC__STREAM_ENCODER_INIT_STATUS_INVALID_SAMPLE_RATE,
@@ -330,7 +330,7 @@ typedef enum {
 	/**< The specified block size is less than the maximum LPC order. */
 
 	FLAC__STREAM_ENCODER_INIT_STATUS_NOT_STREAMABLE,
-	/**< The encoder is bound to the <A HREF="../format.html#subset">Subset</A> but other settings violate it. */
+	/**< The encoder is bound to the <A HREF="https://xiph.org/flac/format.html#subset">Subset</A> but other settings violate it. */
 
 	FLAC__STREAM_ENCODER_INIT_STATUS_INVALID_METADATA,
 	/**< The metadata input to the encoder is invalid, in one of the following ways:
@@ -742,7 +742,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_ogg_serial_number(FLAC__StreamEncod
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_set_verify(FLAC__StreamEncoder *encoder, FLAC__bool value);
 
-/** Set the <A HREF="../format.html#subset">Subset</A> flag.  If \c true,
+/** Set the <A HREF="https://xiph.org/flac/format.html#subset">Subset</A> flag.  If \c true,
  *  the encoder will comply with the Subset and will check the
  *  settings during FLAC__stream_encoder_init_*() to see if all settings
  *  comply.  If \c false, the settings may take advantage of the full
@@ -842,15 +842,15 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_sample_rate(FLAC__StreamEncoder *en
  *  <td>max residual partition order</td>
  *  <td>rice parameter search dist</td>
  * </tr>
- * <tr>  <td><b>0</b></td> <td>false</td> <td>false</td> <td>tukey(0.5)<td>                                     <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
- * <tr>  <td><b>1</b></td> <td>true</td>  <td>true</td>  <td>tukey(0.5)<td>                                     <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
- * <tr>  <td><b>2</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)<td>                                     <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
- * <tr>  <td><b>3</b></td> <td>false</td> <td>false</td> <td>tukey(0.5)<td>                                     <td>6</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>4</td> <td>0</td> </tr>
- * <tr>  <td><b>4</b></td> <td>true</td>  <td>true</td>  <td>tukey(0.5)<td>                                     <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>4</td> <td>0</td> </tr>
- * <tr>  <td><b>5</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)<td>                                     <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>5</td> <td>0</td> </tr>
- * <tr>  <td><b>6</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5);partial_tukey(2)<td>                    <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
- * <tr>  <td><b>7</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5);partial_tukey(2)<td>                    <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
- * <tr>  <td><b>8</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5);partial_tukey(2);punchout_tukey(3)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
+ * <tr>  <td><b>0</b></td> <td>false</td> <td>false</td> <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
+ * <tr>  <td><b>1</b></td> <td>true</td>  <td>true</td>  <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
+ * <tr>  <td><b>2</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)</td>         <td>0</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>3</td> <td>0</td> </tr>
+ * <tr>  <td><b>3</b></td> <td>false</td> <td>false</td> <td>tukey(0.5)</td>         <td>6</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>4</td> <td>0</td> </tr>
+ * <tr>  <td><b>4</b></td> <td>true</td>  <td>true</td>  <td>tukey(0.5)</td>         <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>4</td> <td>0</td> </tr>
+ * <tr>  <td><b>5</b></td> <td>true</td>  <td>false</td> <td>tukey(0.5)</td>         <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>5</td> <td>0</td> </tr>
+ * <tr>  <td><b>6</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>8</td>  <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
+ * <tr>  <td><b>7</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(2)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
+ * <tr>  <td><b>8</b></td> <td>true</td>  <td>false</td> <td>subdivide_tukey(3)</td> <td>12</td> <td>0</td> <td>false</td> <td>false</td> <td>false</td> <td>0</td> <td>6</td> <td>0</td> </tr>
  * </table>
  *
  * \default \c 5
@@ -920,7 +920,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_loose_mid_side_stereo(FLAC__StreamE
  * \c blackman, \c blackman_harris_4term_92db, \c connes, \c flattop,
  * \c gauss(STDDEV), \c hamming, \c hann, \c kaiser_bessel, \c nuttall,
  * \c rectangle, \c triangle, \c tukey(P), \c partial_tukey(n[/ov[/P]]),
- * \c punchout_tukey(n[/ov[/P]]), \c welch.
+ * \c punchout_tukey(n[/ov[/P]]), \c subdivide_tukey(n[/P]), \c welch.
  *
  * For \c gauss(STDDEV), STDDEV specifies the standard deviation
  * (0<STDDEV<=0.5).
@@ -947,6 +947,20 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_loose_mid_side_stereo(FLAC__StreamE
  * and partial_tukey(3/0.3/0.5) are all valid. ov should be smaller than 1
  * and can be negative.
  *
+ * subdivide_tukey(n) is a more efficient reimplementation of
+ * partial_tukey and punchout_tukey taken together, recycling as much data
+ * as possible. It combines all possible non-redundant partial_tukey(n)
+ * and punchout_tukey(n) up to the n specified. Specifying
+ * subdivide_tukey(3) is equivalent to specifying tukey, partial_tukey(2),
+ * partial_tukey(3) and punchout_tukey(3), specifying subdivide_tukey(5)
+ * equivalently adds partial_tukey(4), punchout_tukey(4), partial_tukey(5)
+ * and punchout_tukey(5). To be able to reuse data as much as possible,
+ * the tukey taper is taken equal for all windows, and the P specified is
+ * applied for the smallest used window. In other words,
+ * subdivide_tukey(2/0.5) results in a taper equal to that of tukey(0.25)
+ * and subdivide_tukey(5) in a taper equal to that of tukey(0.1). The
+ * default P for subdivide_tukey when none is specified is 0.5.
+ *
  * Example specifications are \c "blackman" or
  * \c "hann;triangle;tukey(0.5);tukey(0.25);tukey(0.125)"
  *
@@ -962,6 +976,8 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_loose_mid_side_stereo(FLAC__StreamE
  * floating point array in which to store the window. Also note that the
  * values of P, STDDEV and ov are locale-specific, so if the comma
  * separator specified by the locale is a comma, a comma should be used.
+ * A locale-independent way is to specify using scientific notation,
+ * e.g. 5e-1 instad of 0.5 or 0,5.
  *
  * \default \c "tukey(0.5)"
  * \param  encoder        An encoder instance to set.
@@ -989,10 +1005,6 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_max_lpc_order(FLAC__StreamEncoder *
 /** Set the precision, in bits, of the quantized linear predictor
  *  coefficients, or \c 0 to let the encoder select it based on the
  *  blocksize.
- *
- * \note
- * In the current implementation, qlp_coeff_precision + bits_per_sample must
- * be less than 32.
  *
  * \default \c 0
  * \param  encoder  An encoder instance to set.
@@ -1201,6 +1213,24 @@ FLAC_API FLAC__bool FLAC__stream_encoder_set_total_samples_estimate(FLAC__Stream
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_set_metadata(FLAC__StreamEncoder *encoder, FLAC__StreamMetadata **metadata, uint32_t num_blocks);
 
+/** Set to \c true to make the encoder not output frames which contain
+ *  only constant subframes. This is beneficial for streaming
+ *  applications: very small frames can cause problems with buffering
+ *  as bitrates can drop as low 1kbit/s for CDDA audio encoded within
+ *  subset. The minimum bitrate for a FLAC file encoded with this
+ *  function used is raised to 1bit/sample (i.e. 48kbit/s for 48kHz
+ *  material).
+ *
+ * \default \c false
+ * \param  encoder  An encoder instance to set.
+ * \param  value    Flag value (see above).
+ * \assert
+ *    \code encoder != NULL \endcode
+ * \retval FLAC__bool
+ *    \c false if the encoder is already initialized, else \c true.
+ */
+FLAC_API FLAC__bool FLAC__stream_encoder_set_limit_min_bitrate(FLAC__StreamEncoder *encoder, FLAC__bool value);
+
 /** Get the current encoder state.
  *
  * \param  encoder  An encoder instance to query.
@@ -1265,7 +1295,7 @@ FLAC_API void FLAC__stream_encoder_get_verify_decoder_error_stats(const FLAC__St
  */
 FLAC_API FLAC__bool FLAC__stream_encoder_get_verify(const FLAC__StreamEncoder *encoder);
 
-/** Get the <A HREF="../format.html#subset>Subset</A> flag.
+/** Get the <A HREF="https://xiph.org/flac/format.html#subset">Subset</A> flag.
  *
  * \param  encoder  An encoder instance to query.
  * \assert
@@ -1427,6 +1457,16 @@ FLAC_API uint32_t FLAC__stream_encoder_get_rice_parameter_search_dist(const FLAC
  *    See FLAC__stream_encoder_get_total_samples_estimate().
  */
 FLAC_API FLAC__uint64 FLAC__stream_encoder_get_total_samples_estimate(const FLAC__StreamEncoder *encoder);
+
+/** Get the "limit_min_bitrate" flag.
+ *
+ * \param  encoder  An encoder instance to query.
+ * \assert
+ *    \code encoder != NULL \endcode
+ * \retval FLAC__bool
+ *    See FLAC__stream_encoder_set_limit_min_bitrate().
+ */
+FLAC_API FLAC__bool FLAC__stream_encoder_get_limit_min_bitrate(const FLAC__StreamEncoder *encoder);
 
 /** Initialize the encoder instance to encode native FLAC streams.
  *
@@ -1632,10 +1672,14 @@ FLAC_API FLAC__StreamEncoderInitStatus FLAC__stream_encoder_init_ogg_FILE(FLAC__
 /** Initialize the encoder instance to encode native FLAC files.
  *
  *  This flavor of initialization sets up the encoder to encode to a plain
- *  FLAC file.  If POSIX fopen() semantics are not sufficient (for example,
- *  with Unicode filenames on Windows), you must use
+ *  FLAC file.  If POSIX fopen() semantics are not sufficient you must use
  *  FLAC__stream_encoder_init_FILE(), or FLAC__stream_encoder_init_stream()
  *  and provide callbacks for the I/O.
+ *
+ *  On Windows, filename must be a UTF-8 encoded filename, which libFLAC
+ *  internally translates to an appropriate representation to use with
+ *  _wfopen. On all other systems, filename is passed to fopen without
+ *  any translation.
  *
  *  This function should be called after FLAC__stream_encoder_new() and
  *  FLAC__stream_encoder_set_*() but before FLAC__stream_encoder_process()
@@ -1664,10 +1708,14 @@ FLAC_API FLAC__StreamEncoderInitStatus FLAC__stream_encoder_init_file(FLAC__Stre
 /** Initialize the encoder instance to encode Ogg FLAC files.
  *
  *  This flavor of initialization sets up the encoder to encode to a plain
- *  Ogg FLAC file.  If POSIX fopen() semantics are not sufficient (for example,
- *  with Unicode filenames on Windows), you must use
+ *  Ogg FLAC file.  If POSIX fopen() semantics are not sufficient, you must use
  *  FLAC__stream_encoder_init_ogg_FILE(), or FLAC__stream_encoder_init_ogg_stream()
  *  and provide callbacks for the I/O.
+ *
+ *  On Windows, filename must be a UTF-8 encoded filename, which libFLAC
+ *  internally translates to an appropriate representation to use with
+ *  _wfopen. On all other systems, filename is passed to fopen without
+ *  any translation.
  *
  *  This function should be called after FLAC__stream_encoder_new() and
  *  FLAC__stream_encoder_set_*() but before FLAC__stream_encoder_process()
@@ -1733,7 +1781,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_finish(FLAC__StreamEncoder *encoder);
  *
  *  For applications where channel order is important, channels must
  *  follow the order as described in the
- *  <A HREF="../format.html#frame_header">frame header</A>.
+ *  <A HREF="https://xiph.org/flac/format.html#frame_header">frame header</A>.
  *
  * \param  encoder  An initialized encoder instance in the OK state.
  * \param  buffer   An array of pointers to each channel's signal.
@@ -1762,7 +1810,7 @@ FLAC_API FLAC__bool FLAC__stream_encoder_process(FLAC__StreamEncoder *encoder, c
  *
  *  For applications where channel order is important, channels must
  *  follow the order as described in the
- *  <A HREF="../format.html#frame_header">frame header</A>.
+ *  <A HREF="https://xiph.org/flac/format.html#frame_header">frame header</A>.
  *
  * \param  encoder  An initialized encoder instance in the OK state.
  * \param  buffer   An array of channel-interleaved data (see above).

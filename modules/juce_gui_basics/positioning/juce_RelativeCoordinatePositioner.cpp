@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct MarkerListScope  : public Expression::Scope
+struct MarkerListScope final : public Expression::Scope
 {
     MarkerListScope (Component& comp) : component (comp) {}
 
@@ -156,7 +156,7 @@ Component* RelativeCoordinatePositionerBase::ComponentScope::findSiblingComponen
 }
 
 //==============================================================================
-class RelativeCoordinatePositionerBase::DependencyFinderScope  : public ComponentScope
+class RelativeCoordinatePositionerBase::DependencyFinderScope final : public ComponentScope
 {
 public:
     DependencyFinderScope (Component& comp, RelativeCoordinatePositionerBase& p, bool& result)
@@ -323,10 +323,10 @@ void RelativeCoordinatePositionerBase::registerMarkerListListener (MarkerList* c
 void RelativeCoordinatePositionerBase::unregisterListeners()
 {
     for (int i = sourceComponents.size(); --i >= 0;)
-        sourceComponents.getUnchecked(i)->removeComponentListener (this);
+        sourceComponents.getUnchecked (i)->removeComponentListener (this);
 
     for (int i = sourceMarkerLists.size(); --i >= 0;)
-        sourceMarkerLists.getUnchecked(i)->removeListener (this);
+        sourceMarkerLists.getUnchecked (i)->removeListener (this);
 
     sourceComponents.clear();
     sourceMarkerLists.clear();

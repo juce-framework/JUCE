@@ -2,12 +2,12 @@
 
 Here are located:
 
-- helper classes implementing VST3 Interfaces
-- samples of VST3 Hosting and VST3 Plug-Ins
-- AAX Wrapper
-- AU Wrapper
-- AUv3 Wrapper
-- VST2 Wrapper
+- helper classes implementing **VST 3** Interfaces
+- samples of **VST 3** Hosting and **VST 3** plug-ins
+- **AAX** Wrapper
+- **AU** Wrapper
+- **AUv3** Wrapper
+- **VST 2** Wrapper
 - InterAppAudio
 
 ## License & Usage guidelines

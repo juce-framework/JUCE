@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-struct ColourPropertyComponent  : public PropertyComponent
+struct ColourPropertyComponent final : public PropertyComponent
 {
     ColourPropertyComponent (UndoManager* undoManager, const String& name, const Value& colour,
                              Colour defaultColour, bool canResetToDefault)
@@ -49,8 +49,8 @@ private:
         A component that shows a colour swatch with hex ARGB value, and which pops up
         a colour selector when you click it.
     */
-    struct ColourEditorComponent    : public Component,
-                                      private Value::Listener
+    struct ColourEditorComponent final : public Component,
+                                         private Value::Listener
     {
         ColourEditorComponent (UndoManager* um, const Value& colour,
                                Colour defaultCol, const bool canReset)
@@ -139,9 +139,9 @@ private:
     };
 
     //==============================================================================
-    struct PopupColourSelector   : public Component,
-                                   private ChangeListener,
-                                   private Value::Listener
+    struct PopupColourSelector final : public Component,
+                                       private ChangeListener,
+                                       private Value::Listener
     {
         PopupColourSelector (const Value& colour,
                              Colour defaultCol,

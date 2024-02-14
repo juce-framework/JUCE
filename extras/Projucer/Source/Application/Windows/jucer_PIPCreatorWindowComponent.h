@@ -57,8 +57,8 @@ static String getWidthLimitedStringFromVarArray (const var& varArray) noexcept
 }
 
 //==============================================================================
-class PIPCreatorWindowComponent    : public Component,
-                                     private ValueTree::Listener
+class PIPCreatorWindowComponent final : public Component,
+                                        private ValueTree::Listener
 {
 public:
     PIPCreatorWindowComponent()
@@ -109,11 +109,11 @@ public:
 
 private:
     //==============================================================================
-    struct PIPCreatorLookAndFeel    : public ProjucerLookAndFeel
+    struct PIPCreatorLookAndFeel final : public ProjucerLookAndFeel
     {
         PIPCreatorLookAndFeel()    {}
 
-        Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component)
+        Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component) override
         {
             auto textW = jmin (200, component.getWidth() / 3);
             return { textW, 0, component.getWidth() - textW, component.getHeight() - 1 };

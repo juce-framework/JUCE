@@ -52,17 +52,15 @@ bool AudioProcessorValueTreeState::Parameter::isBoolean() const         { return
 
 void AudioProcessorValueTreeState::Parameter::valueChanged (float newValue)
 {
-    if (lastValue == newValue)
+    if (approximatelyEqual ((float) lastValue, newValue))
         return;
 
     lastValue = newValue;
-
-    if (onValueChanged != nullptr)
-        onValueChanged();
+    NullCheckedInvocation::invoke (onValueChanged);
 }
 
 //==============================================================================
-class AudioProcessorValueTreeState::ParameterAdapter   : private AudioProcessorParameter::Listener
+class AudioProcessorValueTreeState::ParameterAdapter final : private AudioProcessorParameter::Listener
 {
 private:
     using Listener = AudioProcessorValueTreeState::Listener;
@@ -93,10 +91,8 @@ public:
 
     void setDenormalisedValue (float value)
     {
-        if (value == unnormalisedValue)
-            return;
-
-        setNormalisedValue (normalise (value));
+        if (! approximatelyEqual (value, (float) unnormalisedValue))
+            setNormalisedValue (normalise (value));
     }
 
     float getDenormalisedValueForText (const String& text) const
@@ -119,9 +115,9 @@ public:
         if (! needsUpdate.compare_exchange_strong (needsUpdateTestValue, false))
             return false;
 
-        if (auto valueProperty = tree.getPropertyPointer (key))
+        if (auto* valueProperty = tree.getPropertyPointer (key))
         {
-            if ((float) *valueProperty != unnormalisedValue)
+            if (! approximatelyEqual ((float) *valueProperty, unnormalisedValue.load()))
             {
                 ScopedValueSetter<bool> svs (ignoreParameterChangedCallbacks, true);
                 tree.setProperty (key, unnormalisedValue.load(), um);
@@ -144,7 +140,7 @@ private:
     {
         const auto newValue = denormalise (parameter.getValue());
 
-        if (unnormalisedValue == newValue && ! listenersNeedCalling)
+        if (! listenersNeedCalling && approximatelyEqual ((float) unnormalisedValue, newValue))
             return;
 
         unnormalisedValue = newValue;
@@ -212,7 +208,7 @@ AudioProcessorValueTreeState::AudioProcessorValueTreeState (AudioProcessor& proc
                                                             ParameterLayout parameterLayout)
     : AudioProcessorValueTreeState (processorToConnectTo, undoManagerToUse)
 {
-    struct PushBackVisitor : ParameterLayout::Visitor
+    struct PushBackVisitor final : ParameterLayout::Visitor
     {
         explicit PushBackVisitor (AudioProcessorValueTreeState& stateIn)
             : state (&stateIn) {}
@@ -510,7 +506,7 @@ AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessor
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-struct ParameterAdapterTests  : public UnitTest
+struct ParameterAdapterTests final : public UnitTest
 {
     ParameterAdapterTests()
         : UnitTest ("Parameter Adapter", UnitTestCategories::audioProcessorParameters)
@@ -604,7 +600,7 @@ inline bool operator!= (const NormalisableRange<ValueType>& a,
 }
 } // namespace
 
-class AudioProcessorValueTreeStateTests  : public UnitTest
+class AudioProcessorValueTreeStateTests final : public UnitTest
 {
 private:
     using Parameter = AudioProcessorValueTreeState::Parameter;
@@ -612,7 +608,7 @@ private:
     using ParameterLayout = AudioProcessorValueTreeState::ParameterLayout;
     using Attributes = AudioProcessorValueTreeStateParameterAttributes;
 
-    class TestAudioProcessor : public AudioProcessor
+    class TestAudioProcessor final : public AudioProcessor
     {
     public:
         TestAudioProcessor() = default;

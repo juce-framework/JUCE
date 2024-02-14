@@ -50,7 +50,7 @@
 
 
 //==============================================================================
-class NoiseGate  : public AudioProcessor
+class NoiseGate final : public AudioProcessor
 {
 public:
     //==============================================================================

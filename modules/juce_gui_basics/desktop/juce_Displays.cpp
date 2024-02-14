@@ -26,15 +26,6 @@
 namespace juce
 {
 
-template <typename This>
-auto* getPrimaryDisplayImpl (This& t)
-{
-    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
-
-    const auto iter = std::find_if (t.displays.begin(), t.displays.end(), [] (auto& d) { return d.isMain; });
-    return iter != t.displays.end() ? std::addressof (*iter) : nullptr;
-}
-
 Displays::Displays (Desktop& desktop)
 {
     init (desktop);
@@ -171,7 +162,10 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
 
 const Displays::Display* Displays::getPrimaryDisplay() const noexcept
 {
-    return getPrimaryDisplayImpl (*this);
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+    const auto iter = std::find_if (displays.begin(), displays.end(), [] (auto& d) { return d.isMain; });
+    return iter != displays.end() ? iter : nullptr;
 }
 
 RectangleList<int> Displays::getRectangleList (bool userAreasOnly) const
@@ -266,10 +260,10 @@ static void processDisplay (DisplayNode* currentNode, Array<DisplayNode>& allNod
 
         Rectangle<double> logicalArea (0.0, 0.0, logicalWidth, logicalHeight);
 
-        if      (physicalArea.getRight() == physicalParentArea.getX())     logicalArea.setPosition ({ logicalParentArea.getX() - logicalWidth, physicalArea.getY() / parentScale });  // on left
-        else if (physicalArea.getX() == physicalParentArea.getRight())     logicalArea.setPosition ({ logicalParentArea.getRight(),  physicalArea.getY() / parentScale });            // on right
-        else if (physicalArea.getBottom() == physicalParentArea.getY())    logicalArea.setPosition ({ physicalArea.getX() / parentScale, logicalParentArea.getY() - logicalHeight }); // on top
-        else if (physicalArea.getY() == physicalParentArea.getBottom())    logicalArea.setPosition ({ physicalArea.getX() / parentScale, logicalParentArea.getBottom() });            // on bottom
+        if      (approximatelyEqual (physicalArea.getRight(), physicalParentArea.getX()))     logicalArea.setPosition ({ logicalParentArea.getX() - logicalWidth, physicalArea.getY() / parentScale });  // on left
+        else if (approximatelyEqual (physicalArea.getX(), physicalParentArea.getRight()))     logicalArea.setPosition ({ logicalParentArea.getRight(),  physicalArea.getY() / parentScale });            // on right
+        else if (approximatelyEqual (physicalArea.getBottom(), physicalParentArea.getY()))    logicalArea.setPosition ({ physicalArea.getX() / parentScale, logicalParentArea.getY() - logicalHeight }); // on top
+        else if (approximatelyEqual (physicalArea.getY(), physicalParentArea.getBottom()))    logicalArea.setPosition ({ physicalArea.getX() / parentScale, logicalParentArea.getBottom() });            // on bottom
         else                                                               jassertfalse;
 
         currentNode->logicalArea = logicalArea;
@@ -292,8 +286,8 @@ static void processDisplay (DisplayNode* currentNode, Array<DisplayNode>& allNod
         const auto otherPhysicalArea = node.display->totalArea.toDouble();
 
         // If the displays are touching on any side
-        if (otherPhysicalArea.getX() == physicalArea.getRight()  || otherPhysicalArea.getRight() == physicalArea.getX()
-            || otherPhysicalArea.getY() == physicalArea.getBottom() || otherPhysicalArea.getBottom() == physicalArea.getY())
+        if (approximatelyEqual (otherPhysicalArea.getX(), physicalArea.getRight())  || approximatelyEqual (otherPhysicalArea.getRight(),  physicalArea.getX())
+         || approximatelyEqual (otherPhysicalArea.getY(), physicalArea.getBottom()) || approximatelyEqual (otherPhysicalArea.getBottom(), physicalArea.getY()))
         {
             node.parent = currentNode;
             children.add (&node);

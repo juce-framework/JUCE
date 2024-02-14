@@ -31,8 +31,8 @@
 //==============================================================================
 #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
  // Just add a simple icon to the Window system tray area or Mac menu bar..
- struct DemoTaskbarComponent  : public SystemTrayIconComponent,
-                                private Timer
+ struct DemoTaskbarComponent final : public SystemTrayIconComponent,
+                                     private Timer
  {
      DemoTaskbarComponent()
      {
@@ -76,7 +76,7 @@
 std::unique_ptr<AudioDeviceManager> sharedAudioDeviceManager;
 
 //==============================================================================
-class DemoRunnerApplication  : public JUCEApplication
+class DemoRunnerApplication final : public JUCEApplication
 {
 public:
     //==============================================================================
@@ -117,7 +117,7 @@ public:
     ApplicationCommandManager& getGlobalCommandManager()  { return commandManager; }
 
 private:
-    class MainAppWindow    : public DocumentWindow
+    class MainAppWindow final : public DocumentWindow
     {
     public:
         MainAppWindow (const String& name)

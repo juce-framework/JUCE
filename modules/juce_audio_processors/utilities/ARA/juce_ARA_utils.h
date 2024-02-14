@@ -27,7 +27,8 @@
 
 // Include ARA SDK headers
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments",
-                                     "-Wunused-parameter")
+                                     "-Wunused-parameter",
+                                     "-Wfloat-equal")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387)
 
 #include <ARA_Library/PlugIn/ARAPlug.h>

@@ -84,6 +84,8 @@ public:
     void alphaChanged() override;
     /** @internal */
     static ReferenceCountedObject* attachViewToComponent (Component&, void*);
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     ReferenceCountedObjectPtr<ReferenceCountedObject> attachment;

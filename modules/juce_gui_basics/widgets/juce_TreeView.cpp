@@ -40,8 +40,8 @@ static int getItemDepth (const TreeViewItem* item)
 }
 
 //==============================================================================
-class TreeView::ItemComponent  : public Component,
-                                 public TooltipClient
+class TreeView::ItemComponent final : public Component,
+                                      public TooltipClient
 {
 public:
     explicit ItemComponent (TreeViewItem& itemToRepresent)
@@ -86,7 +86,7 @@ public:
 
 private:
     //==============================================================================
-    class ItemAccessibilityHandler  : public AccessibilityHandler
+    class ItemAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         explicit ItemAccessibilityHandler (ItemComponent& comp)
@@ -138,7 +138,7 @@ private:
             return state;
         }
 
-        class ItemCellInterface  : public AccessibilityCellInterface
+        class ItemCellInterface final : public AccessibilityCellInterface
         {
         public:
             explicit ItemCellInterface (ItemComponent& c)  : itemComponent (c)  {}
@@ -265,9 +265,9 @@ private:
 };
 
 //==============================================================================
-class TreeView::ContentComponent  : public Component,
-                                    public TooltipClient,
-                                    public AsyncUpdater
+class TreeView::ContentComponent final : public Component,
+                                         public TooltipClient,
+                                         public AsyncUpdater
 {
 public:
     ContentComponent (TreeView& tree)  : owner (tree)
@@ -647,7 +647,7 @@ private:
             auto* i = owner.rootItemVisible ? owner.rootItem
                                             : owner.rootItem->subItems.getFirst();
 
-            while (i != nullptr && i->y < visibleTop)
+            while (i != nullptr && i->y + i->getItemHeight() < visibleTop)
                 i = getNextVisibleItem (i, true);
 
             return i;
@@ -714,8 +714,8 @@ private:
 };
 
 //==============================================================================
-class TreeView::TreeViewport  : public Viewport,
-                                private AsyncUpdater
+class TreeView::TreeViewport final : public Viewport,
+                                     private AsyncUpdater
 {
 public:
     explicit TreeViewport (TreeView& treeView)  : owner (treeView)  {}
@@ -1291,7 +1291,7 @@ struct TreeView::InsertPoint
 };
 
 //==============================================================================
-class TreeView::InsertPointHighlight   : public Component
+class TreeView::InsertPointHighlight final : public Component
 {
 public:
     InsertPointHighlight()
@@ -1330,7 +1330,7 @@ private:
 };
 
 //==============================================================================
-class TreeView::TargetGroupHighlight   : public Component
+class TreeView::TargetGroupHighlight final : public Component
 {
 public:
     TargetGroupHighlight()
@@ -1483,7 +1483,7 @@ void TreeView::itemDropped (const SourceDetails& dragSourceDetails)
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> TreeView::createAccessibilityHandler()
 {
-    class TableInterface  : public AccessibilityTableInterface
+    class TableInterface final : public AccessibilityTableInterface
     {
     public:
         explicit TableInterface (TreeView& treeViewToWrap)  : treeView (treeViewToWrap) {}

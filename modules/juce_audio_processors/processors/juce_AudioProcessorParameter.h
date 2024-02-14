@@ -276,7 +276,7 @@ public:
     virtual StringArray getAllValueStrings() const;
 
     //==============================================================================
-    /** @see AudioProcessorParameter(int) */
+    /** @see AudioProcessorParameter (int) */
     int getVersionHint() const                      { return version; }
 
     //==============================================================================

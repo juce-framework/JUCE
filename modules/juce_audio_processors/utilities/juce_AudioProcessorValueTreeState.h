@@ -32,6 +32,8 @@ namespace juce
     AudioParameterFloatAttributes.
 
     @see AudioParameterFloatAttributes, RangedAudioParameterAttributes
+
+    @tags{Audio}
 */
 class AudioProcessorValueTreeStateParameterAttributes
 {
@@ -512,7 +514,7 @@ public:
             if (func == nullptr)
                 return nullptr;
 
-            return [func = std::move (func)] (float v, int) { return func (v); };
+            return [f = std::move (func)] (float v, int) { return f (v); };
         }
 
         void valueChanged (float) override;

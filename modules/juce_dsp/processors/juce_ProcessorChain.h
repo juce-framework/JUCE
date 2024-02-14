@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -120,7 +118,7 @@ private:
     }
 
     std::tuple<Processors...> processors;
-    std::array<bool, sizeof...(Processors)> bypassed { {} };
+    std::array<bool, sizeof... (Processors)> bypassed { {} };
 };
 
 /** Non-member equivalent of ProcessorChain::get which avoids awkward
@@ -159,8 +157,7 @@ inline bool isBypassed (const ProcessorChain<Processors...>& chain) noexcept
     return chain.template isBypassed<Index>();
 }
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp
 
 #ifndef DOXYGEN
 namespace std

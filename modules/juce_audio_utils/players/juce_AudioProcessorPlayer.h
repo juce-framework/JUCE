@@ -139,6 +139,9 @@ private:
     MidiOutput* midiOutput = nullptr;
     uint64_t sampleCount = 0;
 
+    AudioIODevice* currentDevice = nullptr;
+    AudioWorkgroup currentWorkgroup;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorPlayer)
 };
 

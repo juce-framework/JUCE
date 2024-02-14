@@ -76,8 +76,8 @@ static String valueTreeToString (const ValueTree& v)
 }
 
 //==============================================================================
-class ChildProcessDemo   : public Component,
-                           private MessageListener
+class ChildProcessDemo final : public Component,
+                               private MessageListener
 {
 public:
     ChildProcessDemo()
@@ -155,7 +155,7 @@ public:
     // invoked by the 'ping' button.
     void pingChildProcess()
     {
-        if (coordinatorProcess.get() != nullptr)
+        if (coordinatorProcess != nullptr)
             coordinatorProcess->sendPingMessageToWorker();
         else
             logMessage ("Child process is not running!");
@@ -174,9 +174,9 @@ public:
     //==============================================================================
     // This class is used by the main process, acting as the coordinator and receiving messages
     // from the worker process.
-    class DemoCoordinatorProcess  : public ChildProcessCoordinator,
-                                    private DeletedAtShutdown,
-                                    private AsyncUpdater
+    class DemoCoordinatorProcess final : public ChildProcessCoordinator,
+                                         private DeletedAtShutdown,
+                                         private AsyncUpdater
     {
     public:
         DemoCoordinatorProcess (ChildProcessDemo& d) : demo (d) {}
@@ -231,7 +231,7 @@ private:
 
     TextEditor testResultsBox;
 
-    struct LogMessage  : public Message
+    struct LogMessage final : public Message
     {
         LogMessage (const String& m) : message (m) {}
 
@@ -257,8 +257,8 @@ private:
 /*  This class gets instantiated in the child process, and receives messages from
     the coordinator process.
 */
-class DemoWorkerProcess  : public ChildProcessWorker,
-                           private DeletedAtShutdown
+class DemoWorkerProcess final : public ChildProcessWorker,
+                                private DeletedAtShutdown
 {
 public:
     DemoWorkerProcess() = default;
@@ -322,7 +322,7 @@ inline bool invokeChildProcessDemo (const String& commandLine)
  // based on the command line parameters, we can't just use the normal auto-generated Main.cpp.
  // Instead, we don't do anything in Main.cpp and create a JUCEApplication subclass here with
  // the necessary modifications.
- class Application    : public JUCEApplication
+ class Application final : public JUCEApplication
  {
  public:
      //==============================================================================
@@ -343,7 +343,7 @@ inline bool invokeChildProcessDemo (const String& commandLine)
      void shutdown() override                                { mainWindow = nullptr; }
 
  private:
-     class MainWindow    : public DocumentWindow
+     class MainWindow final : public DocumentWindow
      {
      public:
          MainWindow (const String& name, std::unique_ptr<Component> c)

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -118,5 +116,4 @@ void FirstOrderTPTFilter<SampleType>::update()
 template class FirstOrderTPTFilter<float>;
 template class FirstOrderTPTFilter<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -74,8 +74,8 @@ AudioThumbnailCache::~AudioThumbnailCache()
 AudioThumbnailCache::ThumbnailCacheEntry* AudioThumbnailCache::findThumbFor (const int64 hash) const
 {
     for (int i = thumbs.size(); --i >= 0;)
-        if (thumbs.getUnchecked(i)->hash == hash)
-            return thumbs.getUnchecked(i);
+        if (thumbs.getUnchecked (i)->hash == hash)
+            return thumbs.getUnchecked (i);
 
     return nullptr;
 }
@@ -87,7 +87,7 @@ int AudioThumbnailCache::findOldestThumb() const
 
     for (int i = thumbs.size(); --i >= 0;)
     {
-        const ThumbnailCacheEntry* const te = thumbs.getUnchecked(i);
+        const ThumbnailCacheEntry* const te = thumbs.getUnchecked (i);
 
         if (te->lastUsed < oldestTime)
         {
@@ -150,7 +150,7 @@ void AudioThumbnailCache::removeThumb (const int64 hashCode)
     const ScopedLock sl (lock);
 
     for (int i = thumbs.size(); --i >= 0;)
-        if (thumbs.getUnchecked(i)->hash == hashCode)
+        if (thumbs.getUnchecked (i)->hash == hashCode)
             thumbs.remove (i);
 }
 
@@ -182,7 +182,7 @@ void AudioThumbnailCache::writeToStream (OutputStream& out)
     out.writeInt (thumbs.size());
 
     for (int i = 0; i < thumbs.size(); ++i)
-        thumbs.getUnchecked(i)->write (out);
+        thumbs.getUnchecked (i)->write (out);
 }
 
 void AudioThumbnailCache::saveNewlyFinishedThumbnail (const AudioThumbnailBase&, int64)

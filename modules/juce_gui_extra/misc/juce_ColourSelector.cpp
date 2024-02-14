@@ -26,7 +26,7 @@
 namespace juce
 {
 
-struct ColourComponentSlider  : public Slider
+struct ColourComponentSlider final : public Slider
 {
     ColourComponentSlider (const String& name)  : Slider (name)
     {
@@ -45,7 +45,7 @@ struct ColourComponentSlider  : public Slider
 };
 
 //==============================================================================
-class ColourSelector::ColourSpaceView  : public Component
+class ColourSelector::ColourSpaceView final : public Component
 {
 public:
     ColourSpaceView (ColourSelector& cs, float& hue, float& sat, float& val, int edgeSize)
@@ -100,7 +100,7 @@ public:
 
     void updateIfNeeded()
     {
-        if (lastHue != h)
+        if (! approximatelyEqual (lastHue, h))
         {
             lastHue = h;
             colours = {};
@@ -125,7 +125,7 @@ private:
     const int edge;
     Image colours;
 
-    struct ColourSpaceMarker  : public Component
+    struct ColourSpaceMarker final : public Component
     {
         ColourSpaceMarker()
         {
@@ -156,7 +156,7 @@ private:
 };
 
 //==============================================================================
-class ColourSelector::HueSelectorComp  : public Component
+class ColourSelector::HueSelectorComp final : public Component
 {
 public:
     HueSelectorComp (ColourSelector& cs, float& hue, int edgeSize)
@@ -208,7 +208,7 @@ private:
     float& h;
     const int edge;
 
-    struct HueSelectorMarker  : public Component
+    struct HueSelectorMarker final : public Component
     {
         HueSelectorMarker()
         {
@@ -243,7 +243,7 @@ private:
 };
 
 //==============================================================================
-class ColourSelector::SwatchComponent   : public Component
+class ColourSelector::SwatchComponent final : public Component
 {
 public:
     SwatchComponent (ColourSelector& cs, int itemIndex)
@@ -263,9 +263,9 @@ public:
     void mouseDown (const MouseEvent&) override
     {
         PopupMenu m;
-        m.addItem (1, TRANS("Use this swatch as the current colour"));
+        m.addItem (1, TRANS ("Use this swatch as the current colour"));
         m.addSeparator();
-        m.addItem (2, TRANS("Set this swatch to the current colour"));
+        m.addItem (2, TRANS ("Set this swatch to the current colour"));
 
         m.showMenuAsync (PopupMenu::Options().withTargetComponent (this),
                          ModalCallbackFunction::forComponent (menuStaticCallback, this));
@@ -302,7 +302,7 @@ private:
 };
 
 //==============================================================================
-class ColourSelector::ColourPreviewComp  : public Component
+class ColourSelector::ColourPreviewComp final : public Component
 {
 public:
     ColourPreviewComp (ColourSelector& cs, bool isEditable)
@@ -454,7 +454,7 @@ void ColourSelector::setHue (float newH)
 {
     newH = jlimit (0.0f, 1.0f, newH);
 
-    if (h != newH)
+    if (! approximatelyEqual (h, newH))
     {
         h = newH;
         colour = Colour (h, s, v, colour.getFloatAlpha());
@@ -467,7 +467,7 @@ void ColourSelector::setSV (float newS, float newV)
     newS = jlimit (0.0f, 1.0f, newS);
     newV = jlimit (0.0f, 1.0f, newV);
 
-    if (s != newS || v != newV)
+    if (! approximatelyEqual (s, newS) || ! approximatelyEqual (v, newV))
     {
         s = newS;
         v = newV;
@@ -598,7 +598,7 @@ void ColourSelector::resized()
 
         for (int i = 0; i < swatchComponents.size(); ++i)
         {
-            auto* sc = swatchComponents.getUnchecked(i);
+            auto* sc = swatchComponents.getUnchecked (i);
 
             sc->setBounds (x + xGap / 2,
                            y + yGap / 2,

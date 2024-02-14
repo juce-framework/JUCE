@@ -22,9 +22,7 @@
 
 #ifndef DOXYGEN
 
-namespace juce
-{
-namespace universal_midi_packets
+namespace juce::universal_midi_packets
 {
 
 /**
@@ -82,9 +80,9 @@ struct U32ToBytestreamHandler : public U32InputHandler
 
     void pushMidiData (const uint32_t* begin, const uint32_t* end, double time) override
     {
-        dispatcher.dispatch (begin, end, time, [this] (const MidiMessage& m)
+        dispatcher.dispatch (begin, end, time, [this] (const BytestreamMidiView& m)
         {
-            callback.handleIncomingMidiMessage (&input, m);
+            callback.handleIncomingMidiMessage (&input, m.getMessage());
         });
     }
 
@@ -149,7 +147,7 @@ struct U32ToUMPHandler : public U32InputHandler
     GenericUMPConverter converter;
 };
 
-}
-}
+} // namespace juce::universal_midi_packets
+
 
 #endif

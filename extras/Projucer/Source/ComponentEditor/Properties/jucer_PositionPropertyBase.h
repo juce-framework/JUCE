@@ -175,7 +175,7 @@ public:
         }
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         refresh();
     }
@@ -392,7 +392,7 @@ public:
         });
     }
 
-    void resized()
+    void resized() override
     {
         const Rectangle<int> r (getLookAndFeel().getPropertyComponentContentPosition (*this));
 
@@ -402,7 +402,7 @@ public:
         textEditor->setBounds (r.getX(), r.getY(), button.getX() - r.getX(), r.getHeight());
     }
 
-    void refresh()
+    void refresh() override
     {
         textEditor->setText (getText(), dontSendNotification);
     }
@@ -422,15 +422,13 @@ public:
 protected:
     class PositionPropLabel  : public Label
     {
-        PositionPropertyBase& owner;
-
     public:
         PositionPropLabel (PositionPropertyBase& owner_)
             : Label (String(), String()),
               owner (owner_)
         {
             setEditable (true, true, false);
-            lookAndFeelChanged();
+            updateLookAndFeel();
         }
 
         TextEditor* createEditorComponent() override
@@ -448,9 +446,17 @@ protected:
 
         void lookAndFeelChanged() override
         {
+            updateLookAndFeel();
+        }
+
+    private:
+        void updateLookAndFeel()
+        {
             setColour (backgroundColourId, findColour (widgetBackgroundColourId));
             setColour (textColourId, findColour (widgetTextColourId));
         }
+
+        PositionPropertyBase& owner;
     };
 
     ComponentLayout* layout;

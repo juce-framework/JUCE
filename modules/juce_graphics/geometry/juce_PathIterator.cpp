@@ -138,9 +138,9 @@ bool PathFlatteningIterator::next()
 
             closesSubPath = stackPos == stackBase.get()
                              && source != path.data.end()
-                             && *source == Path::closeSubPathMarker
-                             && x2 == subPathCloseX
-                             && y2 == subPathCloseY;
+                             && isMarker (*source, Path::closeSubPathMarker)
+                             && approximatelyEqual (x2, subPathCloseX)
+                             && approximatelyEqual (y2, subPathCloseY);
 
             return true;
         }
@@ -167,8 +167,8 @@ bool PathFlatteningIterator::next()
             auto errorY = m3y - y2;
 
             auto outsideTolerance = errorX * errorX + errorY * errorY > toleranceSquared;
-            auto canBeSubdivided = (m3x != m1x && m3x != m2x)
-                                || (m3y != m1y && m3y != m2y);
+            auto canBeSubdivided = (! approximatelyEqual (m3x, m1x) && ! approximatelyEqual (m3x, m2x))
+                                || (! approximatelyEqual (m3y, m1y) && ! approximatelyEqual (m3y, m2y));
 
             if (outsideTolerance && canBeSubdivided)
             {
@@ -226,10 +226,10 @@ bool PathFlatteningIterator::next()
 
             auto outsideTolerance = error1X * error1X + error1Y * error1Y > toleranceSquared
                                  || error2X * error2X + error2Y * error2Y > toleranceSquared;
-            auto canBeSubdivided = (m4x != m1x && m4x != m2x)
-                                || (m4y != m1y && m4y != m2y)
-                                || (m5x != m3x && m5x != m2x)
-                                || (m5y != m3y && m5y != m2y);
+            auto canBeSubdivided = (! approximatelyEqual (m4x, m1x) && ! approximatelyEqual (m4x, m2x))
+                                || (! approximatelyEqual (m4y, m1y) && ! approximatelyEqual (m4y, m2y))
+                                || (! approximatelyEqual (m5x, m3x) && ! approximatelyEqual (m5x, m2x))
+                                || (! approximatelyEqual (m5y, m3y) && ! approximatelyEqual (m5y, m2y));
 
             if (outsideTolerance && canBeSubdivided)
             {
@@ -266,7 +266,7 @@ bool PathFlatteningIterator::next()
         }
         else if (isMarker (type, Path::closeSubPathMarker))
         {
-            if (x2 != subPathCloseX || y2 != subPathCloseY)
+            if (! approximatelyEqual (x2, subPathCloseX) || ! approximatelyEqual (y2, subPathCloseY))
             {
                 x1 = x2;
                 y1 = y2;

@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /** Abstract class for the provided oversampling stages used internally in
@@ -70,7 +68,7 @@ struct Oversampling<SampleType>::OversamplingStage
     signal, which could be equivalent to a "one time" oversampling processing.
 */
 template <typename SampleType>
-struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
+struct OversamplingDummy final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
@@ -110,7 +108,7 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
     leading to specific processing optimizations.
 */
 template <typename SampleType>
-struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::OversamplingStage
+struct Oversampling2TimesEquirippleFIR final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
@@ -262,7 +260,7 @@ private:
     phase, and provided with a method to get the exact resulting latency.
 */
 template <typename SampleType>
-struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::OversamplingStage
+struct Oversampling2TimesPolyphaseIIR final : public Oversampling<SampleType>::OversamplingStage
 {
     using ParentType = typename Oversampling<SampleType>::OversamplingStage;
 
@@ -729,11 +727,11 @@ void Oversampling<SampleType>::processSamplesDown (AudioBlock<SampleType>& outpu
     auto currentNumSamples = outputBlock.getNumSamples();
 
     for (int n = 0; n < stages.size() - 1; ++n)
-        currentNumSamples *= stages.getUnchecked(n)->factor;
+        currentNumSamples *= stages.getUnchecked (n)->factor;
 
     for (int n = stages.size() - 1; n > 0; --n)
     {
-        auto& stage = *stages.getUnchecked(n);
+        auto& stage = *stages.getUnchecked (n);
         auto audioBlock = stages.getUnchecked (n - 1)->getProcessedSamples (currentNumSamples);
         stage.processSamplesDown (audioBlock);
 
@@ -755,7 +753,7 @@ void Oversampling<SampleType>::updateDelayLine()
     auto latency = getUncompensatedLatency();
     fractionalDelay = static_cast<SampleType> (1.0) - (latency - std::floor (latency));
 
-    if (fractionalDelay == static_cast<SampleType> (1.0))
+    if (approximatelyEqual (fractionalDelay, static_cast<SampleType> (1.0)))
         fractionalDelay = static_cast<SampleType> (0.0);
     else if (fractionalDelay < static_cast<SampleType> (0.618))
         fractionalDelay += static_cast<SampleType> (1.0);
@@ -766,5 +764,4 @@ void Oversampling<SampleType>::updateDelayLine()
 template class Oversampling<float>;
 template class Oversampling<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

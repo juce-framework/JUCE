@@ -37,20 +37,21 @@ namespace OggVorbisNamespace
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459 6297 6011 6001 6308 6255 6386 6385 6246 6387 6263 6262 28182)
 
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
-                                      "-Wshadow",
-                                      "-Wfloat-conversion",
-                                      "-Wdeprecated-register",
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-align",
+                                      "-Wconversion",
                                       "-Wdeprecated-declarations",
-                                      "-Wswitch-enum",
-                                      "-Wzero-as-null-pointer-constant",
-                                      "-Wsign-conversion",
-                                      "-Wswitch-default",
-                                      "-Wredundant-decls",
+                                      "-Wdeprecated-register",
+                                      "-Wfloat-conversion",
+                                      "-Wfloat-equal",
+                                      "-Wmaybe-uninitialized",
                                       "-Wmisleading-indentation",
                                       "-Wmissing-prototypes",
-                                      "-Wcast-align",
-                                      "-Wmaybe-uninitialized")
+                                      "-Wredundant-decls",
+                                      "-Wshadow",
+                                      "-Wsign-conversion",
+                                      "-Wswitch-default",
+                                      "-Wswitch-enum",
+                                      "-Wzero-as-null-pointer-constant")
  JUCE_BEGIN_NO_SANITIZE ("undefined")
 
  #include "oggvorbis/vorbisenc.h"
@@ -108,7 +109,7 @@ const char* const OggVorbisAudioFormat::id3trackNumber = "id3trackNumber";
 
 
 //==============================================================================
-class OggReader : public AudioFormatReader
+class OggReader final : public AudioFormatReader
 {
 public:
     OggReader (InputStream* inp)  : AudioFormatReader (inp, oggFormatName)
@@ -261,7 +262,7 @@ private:
 };
 
 //==============================================================================
-class OggWriter  : public AudioFormatWriter
+class OggWriter final : public AudioFormatWriter
 {
 public:
     OggWriter (OutputStream* out, double rate,

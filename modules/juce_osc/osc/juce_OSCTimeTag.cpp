@@ -76,14 +76,14 @@ bool OSCTimeTag::isImmediately() const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class OSCTimeTagTests  : public UnitTest
+class OSCTimeTagTests final : public UnitTest
 {
 public:
     OSCTimeTagTests()
         : UnitTest ("OSCTimeTag class", UnitTestCategories::osc)
     {}
 
-    void runTest()
+    void runTest() override
     {
         beginTest ("Basics");
 

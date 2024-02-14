@@ -28,7 +28,7 @@ namespace juce
 
 ComboBox::ComboBox (const String& name)
     : Component (name),
-      noChoicesMessage (TRANS("(no choices)"))
+      noChoicesMessage (TRANS ("(no choices)"))
 {
     setRepaintsOnMouseActivity (true);
     lookAndFeelChanged();
@@ -392,7 +392,14 @@ void ComboBox::enablementChanged()
 
 void ComboBox::colourChanged()
 {
-    lookAndFeelChanged();
+    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
+    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
+
+    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
+    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
+    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
+    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+    repaint();
 }
 
 void ComboBox::parentHierarchyChanged()
@@ -402,8 +409,6 @@ void ComboBox::parentHierarchyChanged()
 
 void ComboBox::lookAndFeelChanged()
 {
-    repaint();
-
     {
         std::unique_ptr<Label> newLabel (getLookAndFeel().createComboBoxTextBox (*this));
         jassert (newLabel != nullptr);
@@ -433,14 +438,7 @@ void ComboBox::lookAndFeelChanged()
     label->addMouseListener (this, false);
     label->setAccessible (labelEditableState == labelIsEditable);
 
-    label->setColour (Label::backgroundColourId, Colours::transparentBlack);
-    label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
-
-    label->setColour (TextEditor::textColourId, findColour (ComboBox::textColourId));
-    label->setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-    label->setColour (TextEditor::highlightColourId, findColour (TextEditor::highlightColourId));
-    label->setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-
+    colourChanged();
     resized();
 }
 
@@ -588,7 +586,7 @@ void ComboBox::mouseUp (const MouseEvent& e2)
 
 void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0.0f)
+    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && ! approximatelyEqual (wheel.deltaY, 0.0f))
     {
         mouseWheelAccumulator += wheel.deltaY * 5.0f;
 
@@ -627,8 +625,7 @@ void ComboBox::handleAsyncUpdate()
     if (checker.shouldBailOut())
         return;
 
-    if (onChange != nullptr)
-        onChange();
+    NullCheckedInvocation::invoke (onChange);
 
     if (checker.shouldBailOut())
         return;
@@ -653,7 +650,7 @@ void ComboBox::setSelectedId (const int newItemId, const bool dontSendChange)   
 void ComboBox::setText (const String& newText, const bool dontSendChange)        { setText (newText, dontSendChange ? dontSendNotification : sendNotification); }
 
 //==============================================================================
-class ComboBoxAccessibilityHandler  : public AccessibilityHandler
+class ComboBoxAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit ComboBoxAccessibilityHandler (ComboBox& comboBoxToWrap)
@@ -676,7 +673,7 @@ public:
     String getHelp() const override   { return comboBox.getTooltip(); }
 
 private:
-    class ComboBoxValueInterface  : public AccessibilityTextValueInterface
+    class ComboBoxValueInterface final : public AccessibilityTextValueInterface
     {
     public:
         explicit ComboBoxValueInterface (ComboBox& comboBoxToWrap)

@@ -99,7 +99,7 @@ bool MPEValue::operator!= (const MPEValue& other) const noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MPEValueTests  : public UnitTest
+class MPEValueTests final : public UnitTest
 {
 public:
     MPEValueTests()

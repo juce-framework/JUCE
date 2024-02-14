@@ -23,13 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce::RenderingHelpers
 {
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127)
-
-namespace RenderingHelpers
-{
 
 //==============================================================================
 /** Holds either a simple integer translation, or an affine transform.
@@ -86,8 +83,10 @@ public:
 
         complexTransform = getTransformWith (t);
         isOnlyTranslated = false;
-        isRotated = (complexTransform.mat01 != 0.0f || complexTransform.mat10 != 0.0f
-                      || complexTransform.mat00 < 0 || complexTransform.mat11 < 0);
+        isRotated = (! approximatelyEqual (complexTransform.mat01, 0.0f)
+                     || ! approximatelyEqual (complexTransform.mat10, 0.0f)
+                     || complexTransform.mat00 < 0
+                     || complexTransform.mat11 < 0);
     }
 
     float getPhysicalPixelScaleFactor() const noexcept
@@ -2734,8 +2733,6 @@ protected:
     RenderingHelpers::SavedStateStack<SavedStateType> stack;
 };
 
-}
-
 JUCE_END_IGNORE_WARNINGS_MSVC
 
-} // namespace juce
+} // namespace juce::RenderingHelpers

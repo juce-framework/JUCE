@@ -65,6 +65,7 @@ public:
         MacOS_11        = MacOSX | 16,
         MacOS_12        = MacOSX | 17,
         MacOS_13        = MacOSX | 18,
+        MacOS_14        = MacOSX | 19,
 
         Win2000         = Windows | 1,
         WinXP           = Windows | 2,
@@ -153,7 +154,13 @@ public:
         changes.
 
         This ID will be invalidated by changes to the motherboard and CPU on non-mobile
-        platforms, or resetting an Android device.
+        platforms, or performing a system restore on an Android device.
+
+        There are some extra caveats on iOS: The returned ID is unique to the vendor part of
+        your  'Bundle Identifier' and is stable for all associated apps. The key is invalidated
+        once all associated apps are uninstalled. This function can return an empty string
+        under certain conditions, for example, If the device has not been unlocked since a
+        restart.
     */
     static String getUniqueDeviceID();
 
@@ -253,7 +260,7 @@ public:
     /** A function type for use in setApplicationCrashHandler().
         When called, its void* argument will contain platform-specific data about the crash.
     */
-    using CrashHandlerFunction = void(*)(void*);
+    using CrashHandlerFunction = void (*) (void*);
 
     /** Sets up a global callback function that will be called if the application
         executes some kind of illegal instruction.
@@ -267,6 +274,10 @@ public:
         This function will always return false on windows, linux and android.
     */
     static bool isRunningInAppExtensionSandbox() noexcept;
+
+   #if JUCE_MAC
+    static bool isAppSandboxEnabled();
+   #endif
 
     //==============================================================================
    #ifndef DOXYGEN

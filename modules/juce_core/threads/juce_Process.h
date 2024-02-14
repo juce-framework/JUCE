@@ -134,7 +134,7 @@ public:
    #endif
 
     //==============================================================================
-   #if (JUCE_MAC && JUCE_MODULE_AVAILABLE_juce_gui_basics) || DOXYGEN
+   #if JUCE_MAC || DOXYGEN
     /** OSX ONLY - Shows or hides the OSX dock icon for this app. */
     static void setDockIconVisible (bool isVisible);
    #endif

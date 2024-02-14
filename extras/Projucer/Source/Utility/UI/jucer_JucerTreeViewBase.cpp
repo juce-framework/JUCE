@@ -125,7 +125,7 @@ std::unique_ptr<Component> JucerTreeViewBase::createItemComponent()
 }
 
 //==============================================================================
-class RenameTreeItemCallback  : public ModalComponentManager::Callback
+class RenameTreeItemCallback final : public ModalComponentManager::Callback
 {
 public:
     RenameTreeItemCallback (JucerTreeViewBase& ti, Component& parent, const Rectangle<int>& bounds)
@@ -152,7 +152,7 @@ public:
     }
 
 private:
-    struct RenameEditor   : public TextEditor
+    struct RenameEditor final : public TextEditor
     {
         void inputAttemptWhenModal() override   { exitModalState (0); }
     };
@@ -209,7 +209,7 @@ ProjectContentComponent* JucerTreeViewBase::getProjectContentComponent() const
 }
 
 //==============================================================================
-class JucerTreeViewBase::ItemSelectionTimer  : public Timer
+class JucerTreeViewBase::ItemSelectionTimer final : public Timer
 {
 public:
     explicit ItemSelectionTimer (JucerTreeViewBase& tvb)  : owner (tvb) {}

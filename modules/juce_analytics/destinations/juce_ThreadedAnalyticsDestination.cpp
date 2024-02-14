@@ -148,7 +148,7 @@ void ThreadedAnalyticsDestination::EventDispatcher::addToQueue (const AnalyticsE
 namespace DestinationTestHelpers
 {
     //==============================================================================
-    struct BasicDestination   : public ThreadedAnalyticsDestination
+    struct BasicDestination final : public ThreadedAnalyticsDestination
     {
         BasicDestination (std::deque<AnalyticsEvent>& loggedEvents,
                           std::deque<AnalyticsEvent>& unloggedEvents)
@@ -211,7 +211,7 @@ namespace DestinationTestHelpers
 }
 
 //==============================================================================
-struct ThreadedAnalyticsDestinationTests   : public UnitTest
+struct ThreadedAnalyticsDestinationTests final : public UnitTest
 {
     ThreadedAnalyticsDestinationTests()
         : UnitTest ("ThreadedAnalyticsDestination", UnitTestCategories::analytics)

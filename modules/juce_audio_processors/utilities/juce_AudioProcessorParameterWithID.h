@@ -28,6 +28,8 @@ namespace juce
 
 /**
     Combines a parameter ID and a version hint.
+
+    @tags{Audio}
 */
 class ParameterID
 {
@@ -42,7 +44,7 @@ public:
         @param versionHint      Influences parameter ordering in Audio Unit plugins.
                                 Used to provide backwards compatibility of Audio Unit plugins in
                                 Logic and GarageBand.
-                                @see AudioProcessorParameter(int)
+                                @see AudioProcessorParameter (int)
     */
     template <typename StringLike, typename = DisableIfSameOrDerived<ParameterID, StringLike>>
     ParameterID (StringLike&& identifier, int versionHint = 0)
@@ -51,7 +53,7 @@ public:
     /** @see AudioProcessorParameterWithID::paramID */
     auto getParamID()               const { return paramID; }
 
-    /** @see AudioProcessorParameter(int) */
+    /** @see AudioProcessorParameter (int) */
     auto getVersionHint()           const { return version; }
 
 private:
@@ -62,6 +64,8 @@ private:
 /**
     An instance of this class may be passed to the constructor of an AudioProcessorParameterWithID
     to set optional characteristics of that parameter.
+
+    @tags{Audio}
 */
 class AudioProcessorParameterWithIDAttributes
 {

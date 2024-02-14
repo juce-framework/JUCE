@@ -23,10 +23,9 @@
   ==============================================================================
 */
 
-namespace juce
+namespace juce:: build_tools
 {
-namespace build_tools
-{
+
     String EntitlementOptions::getEntitlementsFileContent() const
     {
         String content =
@@ -49,7 +48,10 @@ namespace build_tools
 
         if (isiOS)
         {
-            if (isAudioPluginProject && shouldEnableIAA)
+            // The Inter-App Audio entitlement is currently deprecated, but it
+            // also "provides access to Audio Unit extensions". Without the
+            // entitlement iOS apps are unable to access AUv3 plug-ins.
+            if ((isAudioPluginProject && shouldEnableIAA) || isAUPluginHost)
                 entitlements.set ("inter-app-audio", "<true/>");
 
             if (isiCloudPermissionsEnabled)
@@ -121,6 +123,17 @@ namespace build_tools
                     paths += "\n\t</array>";
                     entitlements.set (option.key, paths);
                 }
+
+                if (! appSandboxExceptionIOKit.isEmpty())
+                {
+                    String ioKitClasses = "<array>";
+
+                    for (const auto& c : appSandboxExceptionIOKit)
+                        ioKitClasses += "\n\t\t<string>" + c + "</string>";
+
+                    ioKitClasses += "\n\t</array>";
+                    entitlements.set ("com.apple.security.temporary-exception.iokit-user-client-class", ioKitClasses);
+                }
             }
         }
 
@@ -129,5 +142,5 @@ namespace build_tools
 
         return entitlements;
     }
-}
-}
+
+} // namespace juce::build_tools

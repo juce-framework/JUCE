@@ -54,6 +54,7 @@ target_sources(DemoRunner PRIVATE
 target_compile_definitions(DemoRunner PRIVATE
     PIP_JUCE_EXAMPLES_DIRECTORY_STRING="${JUCE_SOURCE_DIR}/examples"
     JUCE_ALLOW_STATIC_NULL_VARIABLES=0
+    JUCE_CONTENT_SHARING=1
     JUCE_DEMO_RUNNER=1
     JUCE_PLUGINHOST_LV2=1
     JUCE_PLUGINHOST_VST3=1
@@ -62,7 +63,11 @@ target_compile_definitions(DemoRunner PRIVATE
     JUCE_USE_CAMERA=1
     JUCE_USE_CURL=1
     JUCE_USE_MP3AUDIOFORMAT=1
-    JUCE_WEB_BROWSER=1)
+    JUCE_WEB_BROWSER=1
+    # This is a temporary workaround to allow builds to complete on Xcode 15.
+    # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
+    # deploy to older versions of macOS/iOS.
+    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
 
 target_link_libraries(DemoRunner PRIVATE
     juce::juce_analytics

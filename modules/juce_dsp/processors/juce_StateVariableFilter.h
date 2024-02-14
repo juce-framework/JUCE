@@ -23,15 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
-{
-
 /**
     Classes for state variable filter processing.
 */
-namespace StateVariableFilter
+namespace juce::dsp::StateVariableFilter
 {
     template <typename NumericType>
     struct Parameters;
@@ -224,7 +219,7 @@ namespace StateVariableFilter
 
             Note: The bandwidth of the resonance increases with the value of the
             parameter. To have a standard 12 dB/octave filter, the value must be set
-            at 1 / sqrt(2).
+            at 1 / sqrt (2).
         */
         void setCutOffFrequency (double sampleRate, NumericType frequency,
                                  NumericType resonance = static_cast<NumericType> (1.0 / MathConstants<double>::sqrt2)) noexcept
@@ -254,7 +249,5 @@ namespace StateVariableFilter
         NumericType R2  = static_cast<NumericType> (MathConstants<double>::sqrt2);
         NumericType h   = static_cast<NumericType> (1.0 / (1.0 + R2 * g + g * g));
     };
-}
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp::StateVariableFilter

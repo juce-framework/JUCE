@@ -27,11 +27,11 @@
 
 
 //==============================================================================
-class MakefileProjectExporter  : public ProjectExporter
+class MakefileProjectExporter final : public ProjectExporter
 {
 protected:
     //==============================================================================
-    class MakeBuildConfiguration  : public BuildConfiguration
+    class MakeBuildConfiguration final : public BuildConfiguration
     {
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -125,18 +125,18 @@ protected:
 
 public:
     //==============================================================================
-    class MakefileTarget : public build_tools::ProjectType::Target
+    class MakefileTarget final : public build_tools::ProjectType::Target
     {
     public:
-        MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
-            : build_tools::ProjectType::Target (targetType), owner (exporter)
+        MakefileTarget (Type targetType, const MakefileProjectExporter& exporter)
+            : Target (targetType), owner (exporter)
         {}
 
         StringArray getCompilerFlags() const
         {
             StringArray result;
 
-            if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle)
+            if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle || type == SharedCodeTarget)
             {
                 result.add ("-fPIC");
                 result.add ("-fvisibility=hidden");
@@ -163,7 +163,7 @@ public:
         StringPairArray getDefines (const BuildConfiguration& config) const
         {
             StringPairArray result;
-            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified).getAllKeys();
+            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, unspecified).getAllKeys();
             auto targetSpecific = owner.getAllPreprocessorDefs (config, type);
 
             for (auto& key : targetSpecific.getAllKeys())
@@ -221,9 +221,13 @@ public:
                 s.add ("JUCE_LV2DIR := " + escapeQuotesAndSpaces (targetName) + ".lv2");
                 targetName = "$(JUCE_LV2DIR)/" + targetName + ".so";
             }
-            else if (type == LV2TurtleProgram)
+            else if (type == LV2Helper)
             {
                 targetName = Project::getLV2FileWriterName();
+            }
+            else if (type == VST3Helper)
+            {
+                targetName = Project::getVST3FileWriterName();
             }
 
             s.add ("JUCE_TARGET_" + getTargetVarName() + String (" := ") + escapeQuotesAndSpaces (targetName));
@@ -295,8 +299,27 @@ public:
 
             for (auto& [path, flags] : filesToCompile)
             {
-                out << "$(JUCE_OBJDIR)/" << escapeQuotesAndSpaces (owner.getObjectFileFor (path)) << ": " << escapeQuotesAndSpaces (path.toUnixStyle()) << newLine
-                    << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)"                                                                                              << newLine
+                const auto additionalTargetDependencies = [&p = path, this]
+                {
+                    if (   owner.linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper()
+                        && p.getFileName().contains ("include_juce_gui_extra.cpp"))
+                    {
+                        return owner.linuxSubprocessHelperProperties
+                            .getLinuxSubprocessHelperBinaryDataSource()
+                            .toUnixStyle();
+                    }
+
+                    return String{};
+                }();
+
+                const auto prependedWithSpaceIfNotEmpty = [] (auto s)
+                {
+                    return s.isEmpty() ? s : " " + s;
+                };
+
+                out << "$(JUCE_OBJDIR)/" << escapeQuotesAndSpaces (owner.getObjectFileFor (path)) << ": " << escapeQuotesAndSpaces (path.toUnixStyle())
+                    << prependedWithSpaceIfNotEmpty (additionalTargetDependencies)                                                                      << newLine
+                    << "\t-$(V_AT)mkdir -p $(@D)"                                                                                                       << newLine
                     << "\t@echo \"Compiling " << path.getFileName() << "\""                                                                             << newLine
                     << (path.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
                     << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ")"
@@ -312,8 +335,11 @@ public:
 
         String getPhonyName() const
         {
-            if (type == LV2TurtleProgram)
+            if (type == LV2Helper)
                 return "LV2_MANIFEST_HELPER";
+
+            if (type == VST3Helper)
+                return "VST3_MANIFEST_HELPER";
 
             return String (getName()).upToFirstOccurrenceOf (" ", false, false);
         }
@@ -323,13 +349,17 @@ public:
             jassert (type != AggregateTarget);
 
             out << getBuildProduct() << " : "
-                << "$(OBJECTS_" << getTargetVarName() << ") $(RESOURCES)";
+                << "$(OBJECTS_" << getTargetVarName() << ") $(JUCE_OBJDIR)/execinfo.cmd $(RESOURCES)";
 
             if (type != SharedCodeTarget && owner.shouldBuildTargetType (SharedCodeTarget))
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE)";
 
             if (type == LV2PlugIn)
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER)";
+            else if (type == VST3PlugIn)
+                out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER)";
+            else if (type == VST3Helper)
+                out << " $(JUCE_OBJDIR)/cxxfs.cmd";
 
             out << newLine;
 
@@ -369,7 +399,10 @@ public:
                 if (owner.shouldBuildTargetType (SharedCodeTarget))
                     out << "$(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE) ";
 
-                out << "$(JUCE_LDFLAGS) ";
+                out << "$(JUCE_LDFLAGS) $(shell cat $(JUCE_OBJDIR)/execinfo.cmd) ";
+
+                if (type == VST3Helper)
+                    out << "$(shell cat $(JUCE_OBJDIR)/cxxfs.cmd) ";
 
                 if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle
                         || type == GUIApp || type == StandalonePlugIn)
@@ -380,7 +413,14 @@ public:
 
             if (type == VST3PlugIn)
             {
-                out << "\t-$(V_AT)[ ! \"$(JUCE_VST3DESTDIR)\" ] || (mkdir -p $(JUCE_VST3DESTDIR) && cp -R $(JUCE_COPYCMD_VST3))" << newLine;
+                out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/Resources" << newLine
+                    << "\t-$(V_AT)rm -f $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/moduleinfo.json" << newLine
+                    << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER) "
+                       "-create "
+                       "-version " << owner.project.getVersionString().quoted() << " "
+                       "-path $(JUCE_OUTDIR)/$(JUCE_VST3DIR) "
+                       "-output $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/Resources/moduleinfo.json" << newLine
+                    << "\t-$(V_AT)[ ! \"$(JUCE_VST3DESTDIR)\" ] || (mkdir -p $(JUCE_VST3DESTDIR) && cp -R $(JUCE_COPYCMD_VST3))" << newLine;
             }
             else if (type == VSTPlugIn)
             {
@@ -467,11 +507,12 @@ public:
             case Target::AggregateTarget:
             case Target::VSTPlugIn:
             case Target::VST3PlugIn:
+            case Target::VST3Helper:
             case Target::StandalonePlugIn:
             case Target::DynamicLibrary:
             case Target::UnityPlugIn:
             case Target::LV2PlugIn:
-            case Target::LV2TurtleProgram:
+            case Target::LV2Helper:
                 return true;
             case Target::AAXPlugIn:
             case Target::AudioUnitPlugIn:
@@ -530,11 +571,15 @@ public:
             build_tools::overwriteFileIfDifferentOrThrow (helperDir.getChildFile ("arch_detection.cpp"),
                                                           BinaryData::juce_runtime_arch_detection_cpp);
         }
+
+        linuxSubprocessHelperProperties.deployLinuxSubprocessHelperSourceFilesIfNecessary();
     }
 
     //==============================================================================
     void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) override
     {
+        linuxSubprocessHelperProperties.addToExtraSearchPathsIfNecessary();
+
         callForAllSupportedTargets ([this] (build_tools::ProjectType::Target::Type targetType)
                                     {
                                         targets.insert (targetType == build_tools::ProjectType::Target::AggregateTarget ? 0 : -1,
@@ -786,47 +831,51 @@ private:
         out << " $(LDFLAGS)" << newLine;
     }
 
+    void writeLinesForAggregateTarget (OutputStream& out) const
+    {
+        const auto isPartOfAggregate = [&] (const MakefileTarget* x)
+        {
+            return x != nullptr
+                   && x->type != build_tools::ProjectType::Target::AggregateTarget
+                   && x->type != build_tools::ProjectType::Target::SharedCodeTarget;
+        };
+
+        std::vector<MakefileTarget*> dependencies;
+        std::copy_if (targets.begin(), targets.end(), std::back_inserter (dependencies), isPartOfAggregate);
+
+        out << "all :";
+
+        for (const auto& d : dependencies)
+            out << ' ' << d->getPhonyName();
+
+        out << newLine << newLine;
+
+        for (const auto& d : dependencies)
+            out << d->getPhonyName() << " : " << d->getBuildProduct() << newLine;
+
+        out << newLine << newLine;
+    }
+
+    void writeLinesForTarget (OutputStream& out, const StringArray& packages, MakefileTarget& target) const
+    {
+        if (target.type == build_tools::ProjectType::Target::AggregateTarget)
+        {
+            writeLinesForAggregateTarget (out);
+        }
+        else
+        {
+            if (! getProject().isAudioPluginProject())
+                out << "all : " << target.getBuildProduct() << newLine << newLine;
+
+            target.writeTargetLine (out, packages);
+        }
+    }
+
     void writeTargetLines (OutputStream& out, const StringArray& packages) const
     {
-        auto n = targets.size();
-
-        for (int i = 0; i < n; ++i)
-        {
-            if (auto* target = targets.getUnchecked (i))
-            {
-                if (target->type == build_tools::ProjectType::Target::AggregateTarget)
-                {
-                    StringArray dependencies;
-                    MemoryOutputStream subTargetLines;
-
-                    for (int j = 0; j < n; ++j)
-                    {
-                        if (i == j) continue;
-
-                        if (auto* dependency = targets.getUnchecked (j))
-                        {
-                            if (dependency->type != build_tools::ProjectType::Target::SharedCodeTarget)
-                            {
-                                auto phonyName = dependency->getPhonyName();
-
-                                subTargetLines << phonyName << " : " << dependency->getBuildProduct() << newLine;
-                                dependencies.add (phonyName);
-                            }
-                        }
-                    }
-
-                    out << "all : " << dependencies.joinIntoString (" ") << newLine << newLine;
-                    out << subTargetLines.toString()                     << newLine << newLine;
-                }
-                else
-                {
-                    if (! getProject().isAudioPluginProject())
-                        out << "all : " << target->getBuildProduct() << newLine << newLine;
-
-                    target->writeTargetLine (out, packages);
-                }
-            }
-        }
+        for (const auto& target : targets)
+            if (target != nullptr)
+                writeLinesForTarget (out, packages, *target);
     }
 
     void writeConfig (OutputStream& out, const MakeBuildConfiguration& config) const
@@ -886,7 +935,32 @@ private:
 
         out << newLine;
 
-        out << "  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)" << newLine
+        const auto preBuildDirectory = [&]() -> String
+        {
+            if (linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())
+            {
+                using LSHP = LinuxSubprocessHelperProperties;
+                const auto dataSource = linuxSubprocessHelperProperties.getLinuxSubprocessHelperBinaryDataSource();
+
+                if (auto preBuildDir = LSHP::getParentDirectoryRelativeToBuildTargetFolder (dataSource))
+                    return " " + *preBuildDir;
+            }
+
+            return "";
+        }();
+
+        const auto targetsToClean = [&]
+        {
+            StringArray result;
+
+            for (const auto& target : targets)
+                if (target->type != build_tools::ProjectType::Target::AggregateTarget)
+                    result.add (target->getBuildProduct());
+
+            return result;
+        }();
+
+        out << "  CLEANCMD = rm -rf " << targetsToClean.joinIntoString (" ") << " $(JUCE_OBJDIR)" << preBuildDirectory << newLine
             << "endif" << newLine
             << newLine;
     }
@@ -960,6 +1034,94 @@ private:
         for (const auto& s : schemesToWrite)
             if (const auto flags = getCompilerFlagsForFileCompilerFlagScheme (s); flags.isNotEmpty())
                 out << getCompilerFlagSchemeVariableName (s) << " := " << flags << newLine;
+
+        out << newLine;
+    }
+
+    /*  These targets are responsible for building the juce_linux_subprocess_helper, the
+        juce_simple_binary_builder, and then using the binary builder to create embeddable .h and .cpp
+        files from the linux subprocess helper.
+    */
+    void writeSubprocessHelperTargets (OutputStream& out) const
+    {
+        using LSHP = LinuxSubprocessHelperProperties;
+
+        const auto ensureDirs = [] (auto& outStream, std::vector<String> dirs)
+        {
+            for (const auto& dir : dirs)
+                outStream << "\t-$(V_AT)mkdir -p " << dir << newLine;
+        };
+
+        const auto makeTarget = [&ensureDirs] (auto& outStream, String input, String output)
+        {
+            const auto isObjectTarget = output.endsWith (".o");
+            const auto isSourceInput  = input.endsWith (".cpp");
+
+            const auto targetOutput = isObjectTarget ? "$(JUCE_OBJDIR)/" + output : output;
+
+            outStream << (isObjectTarget ? "$(JUCE_OBJDIR)/" : "") << output << ": " << input << newLine;
+
+            const auto createBuildTargetRelative = [] (auto path)
+            {
+                return build_tools::RelativePath { path, build_tools::RelativePath::buildTargetFolder };
+            };
+
+            if (isObjectTarget)
+                ensureDirs (outStream, { "$(JUCE_OBJDIR)" });
+            else if (auto outputParentFolder = LSHP::getParentDirectoryRelativeToBuildTargetFolder (createBuildTargetRelative (output)))
+                ensureDirs (outStream, { *outputParentFolder });
+
+            outStream << (isObjectTarget ? "\t@echo \"Compiling " : "\t@echo \"Linking ")
+                      << (isObjectTarget ? input : output) << "\"" << newLine
+                      << "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) -o " << targetOutput.quoted()
+                      << " " << (isSourceInput ? "-c \"$<\"" : input.quoted());
+
+            if (! isObjectTarget)
+                outStream << " $(JUCE_LDFLAGS)";
+
+            outStream << " $(TARGET_ARCH)" << newLine << newLine;
+
+            return targetOutput;
+        };
+
+        const auto subprocessHelperSource = linuxSubprocessHelperProperties.getLinuxSubprocessHelperSource();
+
+        const auto subprocessHelperObj = makeTarget (out,
+                                                     subprocessHelperSource.toUnixStyle(),
+                                                     getObjectFileFor (subprocessHelperSource));
+
+        const auto subprocessHelperPath = makeTarget (out,
+                                                      subprocessHelperObj,
+                                                      "$(JUCE_BINDIR)/" + LSHP::getBinaryNameFromSource (subprocessHelperSource));
+
+        const auto binaryBuilderSource = linuxSubprocessHelperProperties.getSimpleBinaryBuilderSource();
+
+        const auto binaryBuilderObj = makeTarget (out,
+                                                 binaryBuilderSource.toUnixStyle(),
+                                                 getObjectFileFor (binaryBuilderSource));
+
+        const auto binaryBuilderPath = makeTarget (out,
+                                                   binaryBuilderObj,
+                                                   "$(JUCE_BINDIR)/" + LSHP::getBinaryNameFromSource (binaryBuilderSource));
+
+        const auto binaryDataSource = linuxSubprocessHelperProperties.getLinuxSubprocessHelperBinaryDataSource();
+        jassert (binaryDataSource.getRoot() == build_tools::RelativePath::buildTargetFolder);
+
+        out << binaryDataSource.toUnixStyle() << ": " << subprocessHelperPath
+                                              << " " << binaryBuilderPath
+                                              << newLine;
+
+        const auto binarySourceDir = [&]() -> String
+        {
+            if (const auto p = LSHP::getParentDirectoryRelativeToBuildTargetFolder (binaryDataSource))
+                return *p;
+
+            return ".";
+        }();
+
+        out << "\t$(V_AT)" << binaryBuilderPath.quoted() << " " << subprocessHelperPath.quoted()
+            << " " << binarySourceDir.quoted() << " " << binaryDataSource.getFileNameWithoutExtension().quoted()
+            << " LinuxSubprocessHelperBinaryData" << newLine;
 
         out << newLine;
     }
@@ -1039,11 +1201,26 @@ private:
                 }
             }
 
-            if (targetType == MakefileTarget::LV2TurtleProgram)
+            if ((      targetType == MakefileTarget::SharedCodeTarget
+                    || targetType == MakefileTarget::StaticLibrary
+                    || targetType == MakefileTarget::DynamicLibrary)
+                && linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())
             {
-                targetFiles.emplace_back (getLV2TurtleDumpProgramSource().rebased (projectFolder,
-                                                                                   getTargetFolder(),
-                                                                                   build_tools::RelativePath::buildTargetFolder),
+                targetFiles.emplace_back (linuxSubprocessHelperProperties.getLinuxSubprocessHelperBinaryDataSource(), "");
+            }
+
+            if (targetType == MakefileTarget::LV2Helper)
+            {
+                targetFiles.emplace_back (getLV2HelperProgramSource().rebased (projectFolder,
+                                                                               getTargetFolder(),
+                                                                               build_tools::RelativePath::buildTargetFolder),
+                                          String{});
+            }
+            else if (targetType == MakefileTarget::VST3Helper)
+            {
+                targetFiles.emplace_back (getVST3HelperProgramSource().rebased (projectFolder,
+                                                                                getTargetFolder(),
+                                                                                build_tools::RelativePath::buildTargetFolder),
                                           String{});
             }
 
@@ -1060,15 +1237,41 @@ private:
         for (auto target : targets)
             target->addFiles (out, getFilesForTarget (filesToCompile, target, project));
 
+        // libexecinfo is a separate library on BSD
+        out << "$(JUCE_OBJDIR)/execinfo.cmd:" << newLine
+            << "\t-$(V_AT)mkdir -p $(@D)" << newLine
+            << "\t-@if [ -z \"$(V_AT)\" ]; then echo \"Checking if we need to link libexecinfo\"; fi" << newLine
+            << "\t$(V_AT)printf \"int main() { return 0; }\" | $(CXX) -x c++ -o $(@D)/execinfo.x -lexecinfo - >/dev/null 2>&1 && printf -- \"-lexecinfo\" > \"$@\" || touch \"$@\"" << newLine
+            << newLine;
+
+        // stdc++fs is only needed for some compilers
+        out << "$(JUCE_OBJDIR)/cxxfs.cmd:" << newLine
+            << "\t-$(V_AT)mkdir -p $(@D)" << newLine
+            << "\t-@if [ -z \"$(V_AT)\" ]; then echo \"Checking if we need to link stdc++fs\"; fi" << newLine
+            << "\t$(V_AT)printf \"int main() { return 0; }\" | $(CXX) -x c++ -o $(@D)/cxxfs.x -lstdc++fs - >/dev/null 2>&1 && printf -- \"-lstdc++fs\" > \"$@\" || touch \"$@\"" << newLine
+            << newLine;
+
+        if (linuxSubprocessHelperProperties.shouldUseLinuxSubprocessHelper())
+            writeSubprocessHelperTargets (out);
+
         out << "clean:"                           << newLine
             << "\t@echo Cleaning " << projectName << newLine
             << "\t$(V_AT)$(CLEANCMD)"             << newLine
             << newLine;
 
-        out << "strip:"                                                       << newLine
-            << "\t@echo Stripping " << projectName                            << newLine
-            << "\t-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)" << newLine
-            << newLine;
+        out << "strip:"                                                            << newLine
+            << "\t@echo Stripping " << projectName                                 << newLine;
+
+        for (const auto& target : targets)
+        {
+            if (target->type != build_tools::ProjectType::Target::AggregateTarget
+                && target->type != build_tools::ProjectType::Target::SharedCodeTarget)
+            {
+                out << "\t-$(V_AT)$(STRIP) --strip-unneeded " << target->getBuildProduct() << newLine;
+            }
+        }
+
+        out << newLine;
 
         writeIncludeLines (out);
     }
@@ -1090,6 +1293,7 @@ private:
     String getPhonyTargetLine() const
     {
         MemoryOutputStream phonyTargetLine;
+        phonyTargetLine.setNewLineString (getNewLineString());
 
         phonyTargetLine << ".PHONY: clean all strip";
 
@@ -1097,9 +1301,13 @@ private:
             return phonyTargetLine.toString();
 
         for (auto target : targets)
+        {
             if (target->type != build_tools::ProjectType::Target::SharedCodeTarget
                 && target->type != build_tools::ProjectType::Target::AggregateTarget)
+            {
                 phonyTargetLine << " " << target->getPhonyName();
+            }
+        }
 
         return phonyTargetLine.toString();
     }

@@ -85,7 +85,7 @@ String ChildProcess::readAllProcessOutput()
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class ChildProcessTests  : public UnitTest
+class ChildProcessTests final : public UnitTest
 {
 public:
     ChildProcessTests()

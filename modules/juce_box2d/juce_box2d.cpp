@@ -35,15 +35,17 @@
 #include "juce_box2d.h"
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
-                                     "-Wsign-conversion",
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-align",
+                                     "-Wconversion",
                                      "-Wfloat-conversion",
-                                     "-Wcast-align",
-                                     "-Wswitch-enum",
+                                     "-Wfloat-equal",
+                                     "-Wmaybe-uninitialized",
+                                     "-Wsign-conversion",
                                      "-Wswitch-default",
+                                     "-Wswitch-enum",
                                      "-Wunused-but-set-variable",
                                      "-Wzero-as-null-pointer-constant",
-                                     "-Wmaybe-uninitialized")
+                                     "-Wsuggest-override")
 
 #include <cstdarg>
 

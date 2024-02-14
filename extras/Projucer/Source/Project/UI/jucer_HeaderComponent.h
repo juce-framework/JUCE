@@ -34,11 +34,11 @@ class ProjectContentComponent;
 class ProjectExporter;
 
 //==============================================================================
-class HeaderComponent    : public Component,
-                           private ValueTree::Listener,
-                           private ChangeListener,
-                           private Value::Listener,
-                           private Timer
+class HeaderComponent final : public Component,
+                              private ValueTree::Listener,
+                              private ChangeListener,
+                              private Value::Listener,
+                              private Timer
 {
 public:
     HeaderComponent (ProjectContentComponent* projectContentComponent);

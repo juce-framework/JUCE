@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class LabelPropertyComponent  : public PropertyComponent
+class LabelPropertyComponent final : public PropertyComponent
 {
 public:
     LabelPropertyComponent (const String& labelText, int propertyHeight = 25,
@@ -57,9 +57,9 @@ public:
 
 private:
     //==============================================================================
-    struct LabelLookAndFeel : public ProjucerLookAndFeel
+    struct LabelLookAndFeel final : public ProjucerLookAndFeel
     {
-        void drawPropertyComponentLabel (Graphics&, int, int, PropertyComponent&) {}
+        void drawPropertyComponentLabel (Graphics&, int, int, PropertyComponent&) override {}
     };
 
     void lookAndFeelChanged() override

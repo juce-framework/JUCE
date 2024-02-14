@@ -186,7 +186,7 @@ struct ConvolutionDemoDSP
     std::vector<DSPDemoParameterBase*> parameters { &cabinetParam };
 };
 
-struct ConvolutionDemo    : public Component
+struct ConvolutionDemo final : public Component
 {
     ConvolutionDemo()
     {

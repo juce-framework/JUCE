@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 template <typename NumericType>
@@ -157,5 +155,4 @@ void FIR::Coefficients<NumericType>::Coefficients::normalise() noexcept
 template struct FIR::Coefficients<float>;
 template struct FIR::Coefficients<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

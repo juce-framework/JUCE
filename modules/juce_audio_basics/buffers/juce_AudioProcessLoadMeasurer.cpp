@@ -60,7 +60,7 @@ void AudioProcessLoadMeasurer::registerRenderTime (double milliseconds, int numS
 
 void AudioProcessLoadMeasurer::registerRenderTimeLocked (double milliseconds, int numSamples)
 {
-    if (msPerSample == 0)
+    if (approximatelyEqual (msPerSample, 0.0))
         return;
 
     const auto maxMilliseconds = numSamples * msPerSample;

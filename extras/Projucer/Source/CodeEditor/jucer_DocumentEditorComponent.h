@@ -28,8 +28,8 @@
 #include "jucer_OpenDocumentManager.h"
 
 //==============================================================================
-class DocumentEditorComponent  : public Component,
-                                 private OpenDocumentManager::DocumentCloseListener
+class DocumentEditorComponent : public Component,
+                                private OpenDocumentManager::DocumentCloseListener
 {
 public:
     //==============================================================================

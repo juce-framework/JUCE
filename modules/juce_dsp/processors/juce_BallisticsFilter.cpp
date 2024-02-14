@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -126,5 +124,4 @@ SampleType BallisticsFilter<SampleType>::calculateLimitedCte (SampleType timeMs)
 template class BallisticsFilter<float>;
 template class BallisticsFilter<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

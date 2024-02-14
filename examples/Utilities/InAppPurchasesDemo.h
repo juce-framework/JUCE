@@ -67,7 +67,7 @@
 */
 
 //==============================================================================
-class VoicePurchases      : private InAppPurchases::Listener
+class VoicePurchases final : private InAppPurchases::Listener
 {
 public:
     //==============================================================================
@@ -156,12 +156,13 @@ private:
                 voiceProduct.purchasePrice = "In-App purchases unavailable";
             }
 
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              "In-app purchase is unavailable!",
-                                              "In-App purchases are not available. This either means you are trying "
-                                              "to use IAP on a platform that does not support IAP or you haven't setup "
-                                              "your app correctly to work with IAP.",
-                                              "OK");
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "In-app purchase is unavailable!",
+                                                             "In-App purchases are not available. This either means you are trying "
+                                                             "to use IAP on a platform that does not support IAP or you haven't setup "
+                                                             "your app correctly to work with IAP.",
+                                                             "OK");
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
         else
         {
@@ -178,17 +179,18 @@ private:
                 }
             }
 
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              "Your credit card will be charged!",
-                                              "You are running the sample code for JUCE In-App purchases. "
-                                              "Although this is only sample code, it will still CHARGE YOUR CREDIT CARD!",
-                                              "Understood!");
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                             "Your credit card will be charged!",
+                                                             "You are running the sample code for JUCE In-App purchases. "
+                                                             "Although this is only sample code, it will still CHARGE YOUR CREDIT CARD!",
+                                                             "Understood!");
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
 
         guiUpdater.triggerAsyncUpdate();
     }
 
-    void productPurchaseFinished (const PurchaseInfo& info, bool success, const String&) override
+    void productPurchaseFinished (const PurchaseInfo& info, bool success, const String& error) override
     {
         purchaseInProgress = false;
 
@@ -209,6 +211,12 @@ private:
                 for (auto& voiceProduct : voiceProducts)
                     voiceProduct.purchaseInProgress = false;
             }
+        }
+
+        if (! success)
+        {
+            auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon, "Purchase failed", error);
+            messageBox = AlertWindow::showScopedAsync (options, nullptr);
         }
 
         guiUpdater.triggerAsyncUpdate();
@@ -264,12 +272,13 @@ private:
     AsyncUpdater& guiUpdater;
     bool havePurchasesBeenRestored = false, havePricesBeenFetched = false, purchaseInProgress = false;
     Array<VoiceProduct> voiceProducts;
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VoicePurchases)
 };
 
 //==============================================================================
-class PhraseModel : public ListBoxModel
+class PhraseModel final : public ListBoxModel
 {
 public:
     PhraseModel() {}
@@ -299,12 +308,12 @@ private:
 };
 
 //==============================================================================
-class VoiceModel  : public ListBoxModel
+class VoiceModel final : public ListBoxModel
 {
 public:
     //==============================================================================
-    class VoiceRow  : public Component,
-                      private Timer
+    class VoiceRow final : public Component,
+                           private Timer
     {
     public:
         VoiceRow (VoicePurchases& voicePurchases) : purchases (voicePurchases)
@@ -482,8 +491,8 @@ private:
 };
 
 //==============================================================================
-class InAppPurchasesDemo : public Component,
-                           private AsyncUpdater
+class InAppPurchasesDemo final : public Component,
+                                 private AsyncUpdater
 {
 public:
     InAppPurchasesDemo()

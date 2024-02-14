@@ -32,7 +32,7 @@
 #include "jucer_NewProjectWizard.h"
 
 //==============================================================================
-class ItemHeader  : public Component
+class ItemHeader final : public Component
 {
 public:
     ItemHeader (StringRef name, StringRef description, const char* iconSvgData)
@@ -88,7 +88,7 @@ private:
 };
 
 //==============================================================================
-class TemplateComponent  : public Component
+class TemplateComponent final : public Component
 {
 public:
     TemplateComponent (const NewProjectTemplates::ProjectTemplate& temp,
@@ -110,19 +110,20 @@ public:
                     return;
 
                 SafePointer<TemplateComponent> safeThis { this };
-                NewProjectWizard::createNewProject (projectTemplate,
-                                                    dir.getChildFile (projectNameValue.get().toString()),
-                                                    projectNameValue.get(),
-                                                    modulesValue.get(),
-                                                    exportersValue.get(),
-                                                    fileOptionsValue.get(),
-                                                    modulePathValue.getCurrentValue(),
-                                                    modulePathValue.getWrappedValueTreePropertyWithDefault().isUsingDefault(),
-                                                    [safeThis, dir] (std::unique_ptr<Project> project)
+                messageBox = NewProjectWizard::createNewProject (projectTemplate,
+                                                                 dir.getChildFile (projectNameValue.get().toString()),
+                                                                 projectNameValue.get(),
+                                                                 modulesValue.get(),
+                                                                 exportersValue.get(),
+                                                                 fileOptionsValue.get(),
+                                                                 modulePathValue.getCurrentValue(),
+                                                                 modulePathValue.getWrappedValueTreePropertyWithDefault().isUsingDefault(),
+                                                                 [safeThis, dir] (ScopedMessageBox mb, std::unique_ptr<Project> project)
                 {
                     if (safeThis == nullptr)
                         return;
 
+                    safeThis->messageBox = std::move (mb);
                     safeThis->projectCreatedCallback (std::move (project));
                     getAppSettings().lastWizardFolder = dir;
                 });
@@ -249,12 +250,14 @@ private:
         return builder.components;
     }
 
+    ScopedMessageBox messageBox;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemplateComponent)
 };
 
 //==============================================================================
-class ExampleComponent  : public Component
+class ExampleComponent final : public Component
 {
 public:
     ExampleComponent (const File& f, std::function<void (const File&)> selectedCallback)

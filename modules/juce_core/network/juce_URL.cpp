@@ -23,8 +23,8 @@
 namespace juce
 {
 
-struct FallbackDownloadTask  : public URL::DownloadTask,
-                               public Thread
+struct FallbackDownloadTask final : public URL::DownloadTask,
+                                    public Thread
 {
     FallbackDownloadTask (std::unique_ptr<FileOutputStream> outputStreamToUse,
                           size_t bufferSizeToUse,
@@ -598,7 +598,7 @@ template <typename Stream> struct iOSFileStreamWrapperFlush    { static void flu
 template <> struct iOSFileStreamWrapperFlush<FileOutputStream> { static void flush (OutputStream* o) { o->flush(); } };
 
 template <typename Stream>
-class iOSFileStreamWrapper : public Stream
+class iOSFileStreamWrapper final : public Stream
 {
 public:
     iOSFileStreamWrapper (URL& urlToUse)
@@ -769,7 +769,7 @@ std::unique_ptr<InputStream> URL::createInputStream (const InputStreamOptions& o
         return stream;
     }();
 
-    struct ProgressCallbackCaller  : public WebInputStream::Listener
+    struct ProgressCallbackCaller final : public WebInputStream::Listener
     {
         ProgressCallbackCaller (std::function<bool (int, int)> progressCallbackToUse)
             : callback (std::move (progressCallbackToUse))
@@ -947,7 +947,7 @@ String URL::removeEscapeChars (const String& s)
 
     for (int i = 0; i < utf8.size(); ++i)
     {
-        if (utf8.getUnchecked(i) == '%')
+        if (utf8.getUnchecked (i) == '%')
         {
             auto hexDigit1 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 1]);
             auto hexDigit2 = CharacterFunctions::getHexDigitValue ((juce_wchar) (uint8) utf8 [i + 2]);
@@ -975,7 +975,7 @@ String URL::addEscapeChars (const String& s, bool isParameter, bool roundBracket
 
     for (int i = 0; i < utf8.size(); ++i)
     {
-        auto c = utf8.getUnchecked(i);
+        auto c = utf8.getUnchecked (i);
 
         if (! (CharacterFunctions::isLetterOrDigit (c)
                  || legalChars.containsChar ((juce_wchar) c)))
@@ -1022,7 +1022,7 @@ std::unique_ptr<InputStream> URL::createInputStream (bool usePostCommand,
                                 .withConnectionTimeoutMs (timeOutMs)
                                 .withResponseHeaders (responseHeaders)
                                 .withStatusCode (statusCode)
-                                .withNumRedirectsToFollow(numRedirectsToFollow)
+                                .withNumRedirectsToFollow (numRedirectsToFollow)
                                 .withHttpRequestCmd (httpRequestCmd));
 }
 

@@ -25,21 +25,16 @@
 
 #pragma once
 
-namespace juce
+namespace juce::detail
 {
 
 struct MimeTypeTable
 {
+    static void registerCustomMimeTypeForFileExtension (const String& mimeType, const String& fileExtension);
 
-/*  @internal */
-static void registerCustomMimeTypeForFileExtension (const String& mimeType, const String& fileExtension);
+    static StringArray getMimeTypesForFileExtension (const String& fileExtension);
 
-/*  @internal */
-static StringArray getMimeTypesForFileExtension (const String& fileExtension);
-
-/*  @internal */
-static StringArray getFileExtensionsForMimeType (const String& mimeType);
-
+    static StringArray getFileExtensionsForMimeType (const String& mimeType);
 };
 
-} // namespace juce
+} // namespace juce::detail

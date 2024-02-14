@@ -104,7 +104,7 @@ int writeBinaryData (juce::ArgumentList&& args)
     return 0;
 }
 
-struct IconParseResults final
+struct IconParseResults
 {
     juce::build_tools::Icons icons;
     juce::File output;
@@ -191,7 +191,7 @@ bool getBoolValue (const std::unordered_map<juce::String, juce::String>& dict, j
         || str.equalsIgnoreCase ("on");
 }
 
-struct UpdateField final
+struct UpdateField
 {
     const std::unordered_map<juce::String, juce::String>& dict;
 
@@ -333,6 +333,7 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
 
     updateField ("IS_IOS",                          result.isiOS);
     updateField ("IS_PLUGIN",                       result.isAudioPluginProject);
+    updateField ("IS_AU_PLUGIN_HOST",               result.isAUPluginHost);
     updateField ("ICLOUD_PERMISSIONS_ENABLED",      result.isiCloudPermissionsEnabled);
     updateField ("PUSH_NOTIFICATIONS_ENABLED",      result.isPushNotificationsEnabled);
     updateField ("APP_GROUPS_ENABLED",              result.isAppGroupsEnabled);
@@ -365,6 +366,14 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
         if (! values.isEmpty())
             result.appSandboxTemporaryPaths.push_back ({ "com.apple.security.temporary-exception.files." + entry.key,
                                                          std::move (values) });
+    }
+
+    {
+        juce::StringArray values;
+        updateField ("APP_SANDBOX_EXCEPTION_IOKIT", values);
+
+        if (! values.isEmpty())
+            result.appSandboxExceptionIOKit = values;
     }
 
     result.type = type;
@@ -553,6 +562,21 @@ int main (int argc, char** argv)
         if (it == commands.cend())
             juce::ConsoleApplication::fail ("No matching mode", 1);
 
-        return it->second (std::move (argumentList));
+        try
+        {
+            return it->second (std::move (argumentList));
+        }
+        catch (const juce::build_tools::SaveError& error)
+        {
+            juce::ConsoleApplication::fail (error.message);
+        }
+        catch (const std::exception& ex)
+        {
+            juce::ConsoleApplication::fail (ex.what());
+        }
+        catch (...)
+        {
+            juce::ConsoleApplication::fail ("Unhandled exception");
+        }
     });
 }

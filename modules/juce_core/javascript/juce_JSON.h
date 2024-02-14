@@ -88,6 +88,47 @@ public:
     */
     static var parse (InputStream& input);
 
+    enum class Spacing
+    {
+        none,           ///< All optional whitespace should be omitted
+        singleLine,     ///< All output should be on a single line, but with some additional spacing, e.g. after commas and colons
+        multiLine,      ///< Newlines and spaces will be included in the output, in order to make it easy to read for humans
+    };
+
+    /**
+        Allows formatting var objects as JSON with various configurable options.
+    */
+    class [[nodiscard]] FormatOptions
+    {
+    public:
+        /** Returns a copy of this Formatter with the specified spacing. */
+        FormatOptions withSpacing (Spacing x)      const { return withMember (*this, &FormatOptions::spacing, x); }
+
+        /** Returns a copy of this Formatter with the specified maximum number of decimal places.
+            This option determines the precision of floating point numbers in scientific notation.
+        */
+        FormatOptions withMaxDecimalPlaces (int x) const { return withMember (*this, &FormatOptions::maxDecimalPlaces, x); }
+
+        /** Returns a copy of this Formatter with the specified indent level.
+            This should only be necessary when serialising multiline nested types.
+        */
+        FormatOptions withIndentLevel (int x)      const { return withMember (*this, &FormatOptions::indent, x); }
+
+        /** Returns the spacing used by this Formatter. */
+        Spacing getSpacing()      const { return spacing; }
+
+        /** Returns the maximum number of decimal places used by this Formatter. */
+        int getMaxDecimalPlaces() const { return maxDecimalPlaces; }
+
+        /** Returns the indent level of this Formatter. */
+        int getIndentLevel()      const { return indent; }
+
+    private:
+        Spacing spacing = Spacing::multiLine;
+        int maxDecimalPlaces = 15;
+        int indent = 0;
+    };
+
     //==============================================================================
     /** Returns a string which contains a JSON-formatted representation of the var object.
         If allOnOneLine is true, the result will be compacted into a single line of text
@@ -99,6 +140,13 @@ public:
     static String toString (const var& objectToFormat,
                             bool allOnOneLine = false,
                             int maximumDecimalPlaces = 15);
+
+    /** Returns a string which contains a JSON-formatted representation of the var object, using
+        formatting described by the FormatOptions parameter.
+        @see writeToStream
+    */
+    static String toString (const var& objectToFormat,
+                            const FormatOptions& formatOptions);
 
     /** Parses a string that was created with the toString() method.
         This is slightly different to the parse() methods because they will reject primitive
@@ -118,6 +166,14 @@ public:
                                const var& objectToFormat,
                                bool allOnOneLine = false,
                                int maximumDecimalPlaces = 15);
+
+    /** Writes a JSON-formatted representation of the var object to the given stream, using
+        formatting described by the FormatOptions parameter.
+        @see toString
+    */
+    static void writeToStream (OutputStream& output,
+                               const var& objectToFormat,
+                               const FormatOptions& formatOptions);
 
     /** Returns a version of a string with any extended characters escaped. */
     static String escapeString (StringRef);

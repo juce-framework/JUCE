@@ -23,12 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
-struct FFTUnitTest  : public UnitTest
+struct FFTUnitTest final : public UnitTest
 {
     FFTUnitTest()
         : UnitTest ("FFT", UnitTestCategories::dsp)
@@ -63,7 +61,7 @@ struct FFTUnitTest  : public UnitTest
                                                / static_cast<float> (n));
 
         for (size_t i = 0; i < n; ++i)
-            out[i] = freqConvolution (in, static_cast<float>(i) * base_freq, n);
+            out[i] = freqConvolution (in, static_cast<float> (i) * base_freq, n);
     }
 
     static void performReferenceFourier (const float* in, Complex<float>* out,
@@ -78,7 +76,7 @@ struct FFTUnitTest  : public UnitTest
                                                 / static_cast<float> (n));
 
         for (size_t i = 0; i < n; ++i)
-            out[i] = freqConvolution (buffer.getData(), static_cast<float>(i) * base_freq, n);
+            out[i] = freqConvolution (buffer.getData(), static_cast<float> (i) * base_freq, n);
     }
 
 
@@ -167,7 +165,7 @@ struct FFTUnitTest  : public UnitTest
 
     struct ComplexTest
     {
-        static void run(FFTUnitTest& u)
+        static void run (FFTUnitTest& u)
         {
             Random random (378272);
 
@@ -214,5 +212,4 @@ struct FFTUnitTest  : public UnitTest
 
 static FFTUnitTest fftUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

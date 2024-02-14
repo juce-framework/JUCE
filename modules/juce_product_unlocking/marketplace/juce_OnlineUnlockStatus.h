@@ -163,13 +163,25 @@ public:
     /** Returns the user's email address if known. */
     String getUserEmail() const;
 
+    /** The possible error strings that can applyKeyFile() can return on failure. */
+    struct LicenseResult
+    {
+        static constexpr auto notReady       = "ID generator is not ready, try again later.";
+        static constexpr auto badCredentials = "Credentials are invalid.";
+        static constexpr auto badProductID   = "ProductID is incorrect.";
+        static constexpr auto licenseExpired = "License has expired.";
+        static constexpr auto unlockFailed   = "Generic unlock failure.";
+    };
+
     /** Attempts to perform an unlock using a block of key-file data provided.
         You may wish to use this as a way of allowing a user to unlock your app
         by drag-and-dropping a file containing the key data, or by letting them
         select such a file. This is often needed for allowing registration on
         machines without internet access.
+
+        You can find the possible string values Result can return in LicenseResult.
     */
-    bool applyKeyFile (String keyFileContent);
+    Result applyKeyFile (const String& keyFileContent);
 
     /** This provides some details about the reply that the server gave in a call
         to attemptWebserverUnlock().

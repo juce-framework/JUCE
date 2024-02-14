@@ -291,6 +291,26 @@ public:
     AccessibilityNativeHandle* getNativeImplementation() const;
     /** @internal */
     std::type_index getTypeIndex() const  { return typeIndex; }
+    /** @internal */
+    static void clearCurrentlyFocusedHandler() { currentlyFocusedHandler = nullptr; }
+
+    /** @internal
+
+        The following functions provide the means to associate JUCE Components with OS specific
+        types that provide their own accessibility mechanisms. This way accessibility navigation
+        can move from a JUCE Component to a native, embedded window and back.
+
+        These functions assume that the concrete types behind the void* are
+        - Windows: HWND
+        - MacOS: NSView*
+        - iOS: UIView*
+        - Android: GlobalRef that points to an android.view.View
+    */
+    static void*      getNativeChildForComponent (Component& component);
+    /** @internal */
+    static void       setNativeChildForComponent (Component& component, void* nativeChild);
+    /** @internal */
+    static Component* getComponentForNativeChild (void* nativeChild);
 
 private:
     //==============================================================================

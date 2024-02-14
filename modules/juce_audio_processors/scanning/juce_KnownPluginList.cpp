@@ -420,7 +420,7 @@ struct PluginTreeUtils
     {
         for (int i = tree.subFolders.size(); --i >= 0;)
         {
-            auto& sub = *tree.subFolders.getUnchecked(i);
+            auto& sub = *tree.subFolders.getUnchecked (i);
             optimiseFolders (sub, concatenateName || (tree.subFolders.size() > 1));
 
             if (sub.plugins.isEmpty())

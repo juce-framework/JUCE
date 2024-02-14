@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -56,7 +56,6 @@ using Steinberg::Base::Thread::FGuard;
 namespace Steinberg {
 
 DEF_CLASS_IID (IUpdateManager)
-bool UpdateHandler::lockUpdates = false;
 
 namespace Update {
 const uint32 kHashSize = (1 << 8); // must be power of 2 (16 bytes * 256 == 4096)
@@ -243,10 +242,17 @@ tresult PLUGIN_API UpdateHandler::addDependent (FUnknown* u, IDependent* _depend
 
 	return kResultTrue;
 }
-
 //------------------------------------------------------------------------
 tresult PLUGIN_API UpdateHandler::removeDependent (FUnknown* u, IDependent* dependent)
 {
+	size_t eraseCount;
+	return removeDependent (u, dependent, eraseCount);
+}
+
+//------------------------------------------------------------------------
+tresult PLUGIN_API UpdateHandler::removeDependent (FUnknown* u, IDependent* dependent, size_t& eraseCount)
+{
+	eraseCount = 0;
 	IPtr<FUnknown> unknown = Update::getUnknownBase (u);
 	if (unknown == nullptr && dependent == nullptr)
 		return kResultFalse;
@@ -287,13 +293,16 @@ tresult PLUGIN_API UpdateHandler::removeDependent (FUnknown* u, IDependent* depe
 					if ((*iterList) == dependent)
 #endif
 					{
+						eraseCount = list.size ();
 						if (list.size () == 1u)
 						{
 							listIsEmpty = true;
 							break;
 						}
 						else
+						{
 							iterList = list.erase (iterList);
+						}
 					}
 					else
 					{
@@ -322,11 +331,11 @@ tresult PLUGIN_API UpdateHandler::removeDependent (FUnknown* u, IDependent* depe
 		{
 			if (dependent == nullptr) // Remove all dependents of object
 			{
+				eraseCount  = iterList->second.size ();
 				map.erase (iterList);
 			}
 			else // Remove one dependent
 			{
-				int32 eraseCount = 0;
 				Update::DependentList& dependentlist = (*iterList).second;
 				Update::DependentListIter iterDependentlist = dependentlist.begin ();
 				while (iterDependentlist != dependentlist.end ())
@@ -363,8 +372,6 @@ tresult PLUGIN_API UpdateHandler::removeDependent (FUnknown* u, IDependent* depe
 //------------------------------------------------------------------------
 tresult UpdateHandler::doTriggerUpdates (FUnknown* u, int32 message, bool suppressUpdateDone)
 {
-	if (lockUpdates)
-		return kResultFalse;
 	IPtr<FUnknown> unknown = Update::getUnknownBase (u);
 	if (!unknown)
 		return kResultFalse;

@@ -27,7 +27,7 @@ namespace juce
 {
 
 // This is an AudioTransportSource which will own it's assigned source
-struct AudioSourceOwningTransportSource  : public AudioTransportSource
+struct AudioSourceOwningTransportSource final : public AudioTransportSource
 {
     AudioSourceOwningTransportSource (PositionableAudioSource* s, double sr)  : source (s)
     {
@@ -48,8 +48,8 @@ private:
 //==============================================================================
 // An AudioSourcePlayer which will remove itself from the AudioDeviceManager's
 // callback list once it finishes playing its source
-struct AutoRemovingTransportSource  : public AudioTransportSource,
-                                      private Timer
+struct AutoRemovingTransportSource final : public AudioTransportSource,
+                                           private Timer
 {
     AutoRemovingTransportSource (MixerAudioSource& mixerToUse, AudioTransportSource* ts, bool ownSource,
                                  int samplesPerBlock, double requiredSampleRate)
@@ -85,7 +85,7 @@ private:
 };
 
 // An AudioSource which simply outputs a buffer
-class AudioBufferSource  : public PositionableAudioSource
+class AudioBufferSource final : public PositionableAudioSource
 {
 public:
     AudioBufferSource (AudioBuffer<float>* audioBuffer, bool ownBuffer, bool playOnAllChannels)

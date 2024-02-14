@@ -63,7 +63,12 @@ int FileSearchPath::getNumPaths() const
 
 File FileSearchPath::operator[] (int index) const
 {
-    return File (directories[index]);
+    return File (getRawString (index));
+}
+
+String FileSearchPath::getRawString (int index) const
+{
+    return directories[index];
 }
 
 String FileSearchPath::toString() const
@@ -110,21 +115,30 @@ void FileSearchPath::addPath (const FileSearchPath& other)
 
 void FileSearchPath::removeRedundantPaths()
 {
-    for (int i = directories.size(); --i >= 0;)
+    std::vector<String> reduced;
+
+    for (const auto& directory : directories)
     {
-        const File d1 (directories[i]);
-
-        for (int j = directories.size(); --j >= 0;)
+        const auto checkedIsChildOf = [&] (const auto& a, const auto& b)
         {
-            const File d2 (directories[j]);
+            return File::isAbsolutePath (a) && File::isAbsolutePath (b) && File (a).isAChildOf (b);
+        };
 
-            if (i != j && (d1.isAChildOf (d2) || d1 == d2))
-            {
-                directories.remove (i);
-                break;
-            }
-        }
+        const auto fContainsDirectory = [&] (const auto& f)
+        {
+            return f == directory || checkedIsChildOf (directory, f);
+        };
+
+        if (std::find_if (reduced.begin(), reduced.end(), fContainsDirectory) != reduced.end())
+            continue;
+
+        const auto directoryContainsF = [&] (const auto& f) { return checkedIsChildOf (f, directory); };
+
+        reduced.erase (std::remove_if (reduced.begin(), reduced.end(), directoryContainsF), reduced.end());
+        reduced.push_back (directory);
     }
+
+    directories = StringArray (reduced.data(), (int) reduced.size());
 }
 
 void FileSearchPath::removeNonExistentPaths()
@@ -171,5 +185,55 @@ bool FileSearchPath::isFileInPath (const File& fileToCheck,
 
     return false;
 }
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class FileSearchPathTests final : public UnitTest
+{
+public:
+    FileSearchPathTests() : UnitTest ("FileSearchPath", UnitTestCategories::files) {}
+
+    void runTest() override
+    {
+        beginTest ("removeRedundantPaths");
+        {
+           #if JUCE_WINDOWS
+            const String prefix = "C:";
+           #else
+            const String prefix = "";
+           #endif
+
+            {
+                FileSearchPath fsp { prefix + "/a/b/c/d;" + prefix + "/a/b/c/e;" + prefix + "/a/b/c" };
+                fsp.removeRedundantPaths();
+                expectEquals (fsp.toString(), prefix + "/a/b/c");
+            }
+
+            {
+                FileSearchPath fsp { prefix + "/a/b/c;" + prefix + "/a/b/c/d;" + prefix + "/a/b/c/e" };
+                fsp.removeRedundantPaths();
+                expectEquals (fsp.toString(), prefix + "/a/b/c");
+            }
+
+            {
+                FileSearchPath fsp { prefix + "/a/b/c/d;" + prefix + "/a/b/c;" + prefix + "/a/b/c/e" };
+                fsp.removeRedundantPaths();
+                expectEquals (fsp.toString(), prefix + "/a/b/c");
+            }
+
+            {
+                FileSearchPath fsp { "%FOO%;" + prefix + "/a/b/c;%FOO%;" + prefix + "/a/b/c/d" };
+                fsp.removeRedundantPaths();
+                expectEquals (fsp.toString(), "%FOO%;" + prefix + "/a/b/c");
+            }
+        }
+    }
+};
+
+static FileSearchPathTests fileSearchPathTests;
+
+#endif
 
 } // namespace juce

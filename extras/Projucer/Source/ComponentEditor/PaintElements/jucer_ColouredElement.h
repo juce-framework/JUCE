@@ -39,8 +39,8 @@ class ColouredElement   : public PaintElement
 public:
     ColouredElement (PaintRoutine* owner,
                      const String& name,
-                     const bool showOutline_,
-                     const bool showJointAndEnd_);
+                     bool showOutline_,
+                     bool showJointAndEnd_);
 
     ~ColouredElement() override;
 
@@ -50,18 +50,18 @@ public:
 
     //==============================================================================
     const JucerFillType& getFillType() noexcept;
-    void setFillType (const JucerFillType& newType, const bool undoable);
+    void setFillType (const JucerFillType& newType, bool undoable);
 
     bool isStrokeEnabled() const noexcept;
-    void enableStroke (bool enable, const bool undoable);
+    void enableStroke (bool enable, bool undoable);
 
     const StrokeType& getStrokeType() noexcept;
-    void setStrokeType (const PathStrokeType& newType, const bool undoable);
-    void setStrokeFill (const JucerFillType& newType, const bool undoable);
+    void setStrokeType (const PathStrokeType& newType, bool undoable);
+    void setStrokeFill (const JucerFillType& newType, bool undoable);
 
     //==============================================================================
     Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const override;
-    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable) override;
+    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, bool undoable) override;
 
     void createSiblingComponents() override;
 

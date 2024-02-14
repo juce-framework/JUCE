@@ -41,7 +41,7 @@ public:
         return PaintElement::getCurrentBounds (parentArea); // bypass the ColouredElement implementation
     }
 
-    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable) override
+    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, bool undoable) override
     {
         PaintElement::setCurrentBounds (newBounds, parentArea, undoable); // bypass the ColouredElement implementation
     }
@@ -168,12 +168,12 @@ private:
         {
         }
 
-        void buttonClicked()
+        void buttonClicked() override
         {
             element->convertToPath();
         }
 
-        String getButtonText() const
+        String getButtonText() const override
         {
             return "convert to a path";
         }

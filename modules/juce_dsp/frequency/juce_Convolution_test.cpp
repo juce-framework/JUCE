@@ -29,14 +29,12 @@
 #define JUCE_FAIL_ON_ALLOCATION_IN_SCOPE
 #endif
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 namespace
 {
 
-class ConvolutionTest  : public UnitTest
+class ConvolutionTest final : public UnitTest
 {
     template <typename Callback>
     static void nTimes (int n, Callback&& callback)
@@ -97,7 +95,7 @@ class ConvolutionTest  : public UnitTest
 
             expect (std::any_of (channel, channel + block.getNumSamples(), [] (float sample)
             {
-                return sample != 0.0f;
+                return ! approximatelyEqual (sample, 0.0f);
             }));
         }
     }
@@ -193,7 +191,7 @@ class ConvolutionTest  : public UnitTest
                 processBlocksWithDiracImpulse();
 
                 // Check if the impulse response was loaded
-                if (block.getSample (0, 1) != 0.0f)
+                if (! approximatelyEqual (block.getSample (0, 1), 0.0f))
                     break;
             }
         }
@@ -470,7 +468,7 @@ public:
                              Convolution::Stereo::no,
                              Convolution::Trim::yes,
                              Convolution::Normalise::no,
-                             AudioBlock<const float> (channels, numElementsInArray (channels), length));
+                             AudioBlock<const float> (channels, numElementsInArray (channels), (size_t) length));
         }
 
         beginTest ("IRs with extra silence are trimmed appropriately");
@@ -575,7 +573,6 @@ public:
 ConvolutionTest convolutionUnitTest;
 
 }
-}
-}
+} // namespace juce::dsp
 
 #undef JUCE_FAIL_ON_ALLOCATION_IN_SCOPE

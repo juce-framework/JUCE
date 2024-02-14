@@ -80,38 +80,11 @@ using DisableIfSameOrDerived = std::enable_if_t<! std::is_base_of_v<A, std::remo
 
 /** Copies an object, sets one of the copy's members to the specified value, and then returns the copy. */
 template <typename Object, typename OtherObject, typename Member, typename Other>
-Object withMember (Object copy, Member OtherObject::* member, Other&& value)
+[[nodiscard]] Object withMember (Object copy, Member OtherObject::* member, Other&& value)
 {
     copy.*member = std::forward<Other> (value);
     return copy;
 }
-
-/** An easy way to ensure that a function is called at the end of the current
-    scope.
-
-    Usage:
-    @code
-    {
-        if (flag == true)
-            return;
-
-        // While this code executes, flag is true e.g. to prevent reentrancy
-        flag = true;
-        // When we exit this scope, flag must be false
-        const ScopeGuard scope { [&] { flag = false; } };
-
-        if (checkInitialCondition())
-            return; // Scope's lambda will fire here...
-
-        if (checkCriticalCondition())
-            throw std::runtime_error{}; // ...or here...
-
-        doWorkHavingEstablishedPreconditions();
-    } // ...or here!
-    @endcode
-*/
-template <typename Fn> struct ScopeGuard : Fn { ~ScopeGuard() { Fn::operator()(); } };
-template <typename Fn> ScopeGuard (Fn) -> ScopeGuard<Fn>;
 
 #ifndef DOXYGEN
 namespace detail

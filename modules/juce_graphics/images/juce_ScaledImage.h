@@ -40,6 +40,8 @@ namespace juce
     The ScaledImage class is designed to store an image alongside a scale
     factor that informs a renderer how to convert between the image's pixels
     and points.
+
+    @tags{GUI}
 */
 class JUCE_API  ScaledImage
 {

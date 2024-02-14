@@ -43,7 +43,9 @@
 
 //==============================================================================
 #if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && (JUCE_LINUX || JUCE_BSD)
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wvariadic-macros")
  #include <X11/Xlib.h>
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include <X11/Xutil.h>
  #include <sys/utsname.h>
  #undef KeyPress
@@ -106,8 +108,8 @@ void callOnMessageThread (Callback&& callback)
     request that the editor bounds are updated. We can call `setSize` on this
     component from inside those dedicated callbacks.
 */
-struct NSViewComponentWithParent  : public NSViewComponent,
-                                    private AsyncUpdater
+struct NSViewComponentWithParent : public NSViewComponent,
+                                   private AsyncUpdater
 {
     enum class WantsNudge { no, yes };
 
@@ -154,29 +156,28 @@ private:
         }
     }
 
-    struct InnerNSView : public ObjCClass<NSView>
+    struct InnerNSView final : public ObjCClass<NSView>
     {
         InnerNSView()
             : ObjCClass ("JuceInnerNSView_")
         {
             addIvar<NSViewComponentWithParent*> ("owner");
 
-            addMethod (@selector (isOpaque),       isOpaque);
-            addMethod (@selector (didAddSubview:), didAddSubview);
+            addMethod (@selector (isOpaque), [] (id, SEL) { return YES; });
+
+            addMethod (@selector (didAddSubview:), [] (id self, SEL, NSView*)
+            {
+                if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
+                    if (owner->wantsNudge == WantsNudge::yes)
+                        owner->triggerAsyncUpdate();
+            });
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (clipsToBounds), [] (id, SEL) { return YES; });
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();
         }
-
-        static BOOL isOpaque  (id, SEL) { return YES; }
-
-        static void nudge (id self)
-        {
-            if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
-                if (owner->wantsNudge == WantsNudge::yes)
-                    owner->triggerAsyncUpdate();
-        }
-
-        static void didAddSubview (id self, SEL, NSView*)      { nudge (self); }
     };
 
     static InnerNSView& getViewClass()
@@ -219,8 +220,8 @@ private:
 #include "utilities/juce_ParameterAttachments.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
 #include "utilities/juce_PluginHostType.cpp"
-#include "utilities/juce_NativeScaleFactorNotifier.cpp"
-#include "utilities/juce_VSTCallbackHandler.cpp"
+#include "utilities/juce_AAXClientExtensions.cpp"
+#include "utilities/juce_VST2ClientExtensions.cpp"
 #include "utilities/ARA/juce_ARA_utils.cpp"
 
 #include "format_types/juce_LV2PluginFormat.cpp"

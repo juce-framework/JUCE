@@ -23,10 +23,6 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
-//==============================================================================
 /**
     Contains a set of predefined named colours (mostly standard HTML colours)
 
@@ -34,7 +30,7 @@ namespace juce
 
     @tags{Graphics}
 */
-namespace Colours
+namespace juce::Colours
 {
 
     const Colour transparentBlack     { 0 };
@@ -191,6 +187,5 @@ namespace Colours
     */
     JUCE_API Colour findColourForName (const String& colourName,
                                        Colour defaultColour);
-} // namespace Colours
 
-} // namespace juce
+} // namespace juce::Colours

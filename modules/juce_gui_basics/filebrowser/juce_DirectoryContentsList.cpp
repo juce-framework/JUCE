@@ -158,7 +158,7 @@ bool DirectoryContentsList::contains (const File& targetFile) const
     const ScopedLock sl (fileListLock);
 
     for (int i = files.size(); --i >= 0;)
-        if (root.getChildFile (files.getUnchecked(i)->filename) == targetFile)
+        if (root.getChildFile (files.getUnchecked (i)->filename) == targetFile)
             return true;
 
     return false;
@@ -246,7 +246,7 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
         info->isReadOnly       = isReadOnly;
 
         for (int i = files.size(); --i >= 0;)
-            if (files.getUnchecked(i)->filename == info->filename)
+            if (files.getUnchecked (i)->filename == info->filename)
                 return false;
 
         files.add (std::move (info));

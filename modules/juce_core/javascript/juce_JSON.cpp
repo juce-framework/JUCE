@@ -306,60 +306,6 @@ struct JSONParser
 //==============================================================================
 struct JSONFormatter
 {
-    static void write (OutputStream& out, const var& v,
-                       int indentLevel, bool allOnOneLine, int maximumDecimalPlaces)
-    {
-        if (v.isString())
-        {
-            out << '"';
-            writeString (out, v.toString().getCharPointer());
-            out << '"';
-        }
-        else if (v.isVoid())
-        {
-            out << "null";
-        }
-        else if (v.isUndefined())
-        {
-            out << "undefined";
-        }
-        else if (v.isBool())
-        {
-            out << (static_cast<bool> (v) ? "true" : "false");
-        }
-        else if (v.isDouble())
-        {
-            auto d = static_cast<double> (v);
-
-            if (juce_isfinite (d))
-            {
-                out << serialiseDouble (d);
-            }
-            else
-            {
-                out << "null";
-            }
-        }
-        else if (v.isArray())
-        {
-            writeArray (out, *v.getArray(), indentLevel, allOnOneLine, maximumDecimalPlaces);
-        }
-        else if (v.isObject())
-        {
-            if (auto* object = v.getDynamicObject())
-                object->writeAsJSON (out, indentLevel, allOnOneLine, maximumDecimalPlaces);
-            else
-                jassertfalse; // Only DynamicObjects can be converted to JSON!
-        }
-        else
-        {
-            // Can't convert these other types of object to JSON!
-            jassert (! (v.isMethod() || v.isBinaryData()));
-
-            out << v.toString();
-        }
-    }
-
     static void writeEscapedChar (OutputStream& out, const unsigned short value)
     {
         out << "\\u" << String::toHexString ((int) value).paddedLeft ('0', 4);
@@ -416,36 +362,39 @@ struct JSONFormatter
         out.writeRepeatedByte (' ', (size_t) numSpaces);
     }
 
-    static void writeArray (OutputStream& out, const Array<var>& array,
-                            int indentLevel, bool allOnOneLine, int maximumDecimalPlaces)
+    static void writeArray (OutputStream& out, const Array<var>& array, const JSON::FormatOptions& format)
     {
         out << '[';
 
         if (! array.isEmpty())
         {
-            if (! allOnOneLine)
+            if (format.getSpacing() == JSON::Spacing::multiLine)
                 out << newLine;
 
             for (int i = 0; i < array.size(); ++i)
             {
-                if (! allOnOneLine)
-                    writeSpaces (out, indentLevel + indentSize);
+                if (format.getSpacing() == JSON::Spacing::multiLine)
+                    writeSpaces (out, format.getIndentLevel() + indentSize);
 
-                write (out, array.getReference(i), indentLevel + indentSize, allOnOneLine, maximumDecimalPlaces);
+                JSON::writeToStream (out, array.getReference (i), format.withIndentLevel (format.getIndentLevel() + indentSize));
 
                 if (i < array.size() - 1)
                 {
-                    if (allOnOneLine)
-                        out << ", ";
-                    else
-                        out << ',' << newLine;
+                    out << ",";
+
+                    switch (format.getSpacing())
+                    {
+                        case JSON::Spacing::none: break;
+                        case JSON::Spacing::singleLine: out << ' '; break;
+                        case JSON::Spacing::multiLine: out << newLine; break;
+                    }
                 }
-                else if (! allOnOneLine)
+                else if (format.getSpacing() == JSON::Spacing::multiLine)
                     out << newLine;
             }
 
-            if (! allOnOneLine)
-                writeSpaces (out, indentLevel);
+            if (format.getSpacing() == JSON::Spacing::multiLine)
+                writeSpaces (out, format.getIndentLevel());
         }
 
         out << ']';
@@ -453,6 +402,67 @@ struct JSONFormatter
 
     enum { indentSize = 2 };
 };
+
+
+void JSON::writeToStream (OutputStream& out, const var& v, const FormatOptions& opt)
+{
+    if (v.isString())
+    {
+        out << '"';
+        JSONFormatter::writeString (out, v.toString().getCharPointer());
+        out << '"';
+    }
+    else if (v.isVoid())
+    {
+        out << "null";
+    }
+    else if (v.isUndefined())
+    {
+        out << "undefined";
+    }
+    else if (v.isBool())
+    {
+        out << (static_cast<bool> (v) ? "true" : "false");
+    }
+    else if (v.isDouble())
+    {
+        auto d = static_cast<double> (v);
+
+        if (juce_isfinite (d))
+        {
+            out << serialiseDouble (d);
+        }
+        else
+        {
+            out << "null";
+        }
+    }
+    else if (v.isArray())
+    {
+        JSONFormatter::writeArray (out, *v.getArray(), opt);
+    }
+    else if (v.isObject())
+    {
+        if (auto* object = v.getDynamicObject())
+            object->writeAsJSON (out, opt);
+        else
+            jassertfalse; // Only DynamicObjects can be converted to JSON!
+    }
+    else
+    {
+        // Can't convert these other types of object to JSON!
+        jassert (! (v.isMethod() || v.isBinaryData()));
+
+        out << v.toString();
+    }
+}
+
+String JSON::toString (const var& v, const FormatOptions& opt)
+{
+    MemoryOutputStream mo { 1024 };
+    writeToStream (mo, v, opt);
+    return mo.toUTF8();
+}
 
 //==============================================================================
 var JSON::parse (const String& text)
@@ -502,14 +512,14 @@ Result JSON::parse (const String& text, var& result)
 
 String JSON::toString (const var& data, const bool allOnOneLine, int maximumDecimalPlaces)
 {
-    MemoryOutputStream mo (1024);
-    JSONFormatter::write (mo, data, 0, allOnOneLine, maximumDecimalPlaces);
-    return mo.toUTF8();
+    return toString (data, FormatOptions{}.withSpacing (allOnOneLine ? Spacing::singleLine : Spacing::multiLine)
+                                          .withMaxDecimalPlaces (maximumDecimalPlaces));
 }
 
 void JSON::writeToStream (OutputStream& output, const var& data, const bool allOnOneLine, int maximumDecimalPlaces)
 {
-    JSONFormatter::write (output, data, 0, allOnOneLine, maximumDecimalPlaces);
+    writeToStream (output, data, FormatOptions{}.withSpacing (allOnOneLine ? Spacing::singleLine : Spacing::multiLine)
+                                                .withMaxDecimalPlaces (maximumDecimalPlaces));
 }
 
 String JSON::escapeString (StringRef s)
@@ -545,7 +555,7 @@ Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class JSONTests  : public UnitTest
+class JSONTests final : public UnitTest
 {
 public:
     JSONTests()
@@ -653,10 +663,10 @@ public:
                 if (i > 0)
                     v = createRandomVar (r, 0);
 
-                const bool oneLine = r.nextBool();
-                String asString (JSON::toString (v, oneLine));
-                var parsed = JSON::parse ("[" + asString + "]")[0];
-                String parsedString (JSON::toString (parsed, oneLine));
+                const auto oneLine = r.nextBool();
+                const auto asString = JSON::toString (v, oneLine);
+                const auto parsed = JSON::parse ("[" + asString + "]")[0];
+                const auto parsedString = JSON::toString (parsed, oneLine);
                 expect (asString.isNotEmpty() && parsedString == asString);
             }
         }

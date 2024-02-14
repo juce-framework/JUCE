@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -125,5 +123,4 @@ void NoiseGate<SampleType>::update()
 template class NoiseGate<float>;
 template class NoiseGate<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

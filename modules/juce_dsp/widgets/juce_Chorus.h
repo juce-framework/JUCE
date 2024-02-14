@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 /**
@@ -103,7 +101,7 @@ public:
             return;
         }
 
-        auto delayValuesBlock = AudioBlock<SampleType>(bufferDelayTimes).getSubBlock (0, numSamples);
+        auto delayValuesBlock = AudioBlock<SampleType> (bufferDelayTimes).getSubBlock (0, numSamples);
         auto contextDelay = ProcessContextReplacing<SampleType> (delayValuesBlock);
         delayValuesBlock.clear();
 
@@ -165,5 +163,4 @@ private:
                                 maximumDelayModulation = 20.0;
 };
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

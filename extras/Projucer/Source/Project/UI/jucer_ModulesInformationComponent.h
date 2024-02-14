@@ -27,9 +27,9 @@
 
 
 //==============================================================================
-class ModulesInformationComponent  : public Component,
-                                     private ListBoxModel,
-                                     private ValueTree::Listener
+class ModulesInformationComponent final : public Component,
+                                          private ListBoxModel,
+                                          private ValueTree::Listener
 {
 public:
     ModulesInformationComponent (Project& p)

@@ -67,26 +67,26 @@ void ARAAudioSourceReader::willUpdateAudioSourceProperties (ARAAudioSource* audi
                                                             ARAAudioSource::PropertiesPtr newProperties)
 {
     if (audioSource->getSampleCount() != newProperties->sampleCount
-        || audioSource->getSampleRate() != newProperties->sampleRate
+        || ! exactlyEqual (audioSource->getSampleRate(), newProperties->sampleRate)
         || audioSource->getChannelCount() != newProperties->channelCount)
     {
         invalidate();
     }
 }
 
-void ARAAudioSourceReader::doUpdateAudioSourceContent (ARAAudioSource* audioSource,
+void ARAAudioSourceReader::doUpdateAudioSourceContent ([[maybe_unused]] ARAAudioSource* audioSource,
                                                        ARAContentUpdateScopes scopeFlags)
 {
-    jassertquiet (audioSourceBeingRead == audioSource);
+    jassert (audioSourceBeingRead == audioSource);
 
     // Don't invalidate if the audio signal is unchanged
     if (scopeFlags.affectSamples())
         invalidate();
 }
 
-void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess ([[maybe_unused]] ARAAudioSource* audioSource, bool enable)
 {
-    jassertquiet (audioSourceBeingRead == audioSource);
+    jassert (audioSourceBeingRead == audioSource);
 
     // Invalidate our reader if sample access is disabled
     if (! enable)
@@ -96,9 +96,9 @@ void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* a
     }
 }
 
-void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* audioSource, bool enable)
+void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess ([[maybe_unused]] ARAAudioSource* audioSource, bool enable)
 {
-    jassertquiet (audioSourceBeingRead == audioSource);
+    jassert (audioSourceBeingRead == audioSource);
 
     // Recreate our reader if sample access is enabled
     if (enable && isValid())
@@ -108,9 +108,9 @@ void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* au
     }
 }
 
-void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource)
+void ARAAudioSourceReader::willDestroyAudioSource ([[maybe_unused]] ARAAudioSource* audioSource)
 {
-    jassertquiet (audioSourceBeingRead == audioSource);
+    jassert (audioSourceBeingRead == audioSource);
 
     invalidate();
 }
@@ -277,10 +277,10 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
 {
     jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
 
-    if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime)
-        || (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime)
-        || (playbackRegion->getStartInPlaybackTime() != newProperties->startInPlaybackTime)
-        || (playbackRegion->getDurationInPlaybackTime() != newProperties->durationInPlaybackTime)
+    if ((! exactlyEqual (playbackRegion->getStartInAudioModificationTime(), newProperties->startInModificationTime))
+        || ! exactlyEqual (playbackRegion->getDurationInAudioModificationTime(), newProperties->durationInModificationTime)
+        || ! exactlyEqual (playbackRegion->getStartInPlaybackTime(), newProperties->startInPlaybackTime)
+        || ! exactlyEqual (playbackRegion->getDurationInPlaybackTime(), newProperties->durationInPlaybackTime)
         || (playbackRegion->isTimestretchEnabled() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretch) != 0))
         || (playbackRegion->isTimeStretchReflectingTempo() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationTimestretchReflectingTempo) != 0))
         || (playbackRegion->hasContentBasedFadeAtHead() != ((newProperties->transformationFlags & ARA::kARAPlaybackTransformationContentBasedFadeAtHead) != 0))
@@ -290,19 +290,19 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
     }
 }
 
-void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion,
+void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent ([[maybe_unused]] ARAPlaybackRegion* playbackRegion,
                                                               ARAContentUpdateScopes scopeFlags)
 {
-    jassertquiet (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
 
     // Invalidate if the audio signal is changed
     if (scopeFlags.affectSamples())
         invalidate();
 }
 
-void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion)
+void ARAPlaybackRegionReader::willDestroyPlaybackRegion ([[maybe_unused]] ARAPlaybackRegion* playbackRegion)
 {
-    jassertquiet (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (playbackRenderer->getPlaybackRegions(), playbackRegion));
 
     invalidate();
 }

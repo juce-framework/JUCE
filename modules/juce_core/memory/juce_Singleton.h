@@ -128,10 +128,10 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
 /**
     Macro to generate the appropriate methods and boilerplate for a singleton class.
 
-    To use this, add the line JUCE_DECLARE_SINGLETON(MyClass, doNotRecreateAfterDeletion)
+    To use this, add the line JUCE_DECLARE_SINGLETON (MyClass, doNotRecreateAfterDeletion)
     to the class's definition.
 
-    Then put a macro JUCE_IMPLEMENT_SINGLETON(MyClass) along with the class's
+    Then put a macro JUCE_IMPLEMENT_SINGLETON (MyClass) along with the class's
     implementation code.
 
     It's also a very good idea to also add the call clearSingletonInstance() in your class's

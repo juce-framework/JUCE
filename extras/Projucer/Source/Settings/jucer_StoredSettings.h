@@ -29,7 +29,7 @@
 #include "jucer_AppearanceSettings.h"
 
 //==============================================================================
-class StoredSettings   : private ValueTree::Listener
+class StoredSettings final : private ValueTree::Listener
 {
 public:
     StoredSettings();
@@ -50,7 +50,7 @@ public:
     //==============================================================================
     Array<Colour> swatchColours;
 
-    struct ColourSelectorWithSwatches   : public ColourSelector
+    struct ColourSelectorWithSwatches final : public ColourSelector
     {
         ColourSelectorWithSwatches();
         ~ColourSelectorWithSwatches() override;

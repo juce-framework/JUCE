@@ -27,7 +27,7 @@
 
 
 //==============================================================================
-class AndroidProjectExporter  : public ProjectExporter
+class AndroidProjectExporter final : public ProjectExporter
 {
 public:
     //==============================================================================
@@ -105,7 +105,7 @@ public:
                                  androidReadMediaVideoPermission, androidExternalWritePermission,
                                  androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
                                  androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, gradleClangTidy, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -151,6 +151,7 @@ public:
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
           gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.5.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
+          gradleClangTidy                      (settings, Ids::gradleClangTidy,                      getUndoManager(), false),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.3.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
@@ -171,6 +172,9 @@ public:
                                                 { "clang", "gcc" },
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
+
+        props.add (new ChoicePropertyComponent (gradleClangTidy, "Use Clang-Tidy"),
+                   "If enabled and the toolchain is clang this will run clang-tidy when compiling.");
     }
 
     //==============================================================================
@@ -272,7 +276,7 @@ public:
 
 protected:
     //==============================================================================
-    class AndroidBuildConfiguration  : public BuildConfiguration
+    class AndroidBuildConfiguration final : public BuildConfiguration
     {
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -389,7 +393,7 @@ private:
             mo << "# Automatically generated CMakeLists, created by the Projucer" << newLine
                << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
                << newLine
-               << "cmake_minimum_required(VERSION 3.4.1)" << newLine
+               << "cmake_minimum_required(VERSION 3.22)" << newLine
                << newLine
                << "project(juce_jni_project)" << newLine
                << newLine;
@@ -533,7 +537,7 @@ private:
 
                 if (! first)
                 {
-                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration(0));
+                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration (0));
 
                     if (config)
                     {
@@ -608,7 +612,6 @@ private:
                 mo << newLine;
             }
 
-            libraries.addArray (userLibraries);
             mo << "target_link_libraries( ${BINARY_NAME}";
             if (libraries.size() > 0)
             {
@@ -622,6 +625,9 @@ private:
 
             if (useOboe)
                 mo << "    \"oboe\"" << newLine;
+
+            for (auto& lib : userLibraries)
+                mo << "    [[" << lib << "]]" << newLine;
 
             mo << ")" << newLine;
         });
@@ -678,12 +684,34 @@ private:
 
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
+        // CMake 3.22 will fail to build Android projects that set ANDROID_ARM_MODE unless NDK 24+ is used
+        mo << "def ndkVersionString = \"25.2.9519653\"" << newLine << newLine;
+
+        if (gradleClangTidy.get() && gradleToolchain.get().toString() == "clang")
+            mo << "def sdkDir = {" << newLine
+               << "    def androidHome = System.getenv('ANDROID_HOME')" << newLine
+               << "    if (androidHome) {" << newLine
+               << "        return androidHome" << newLine
+               << "    }" << newLine
+               << "    Properties properties = new Properties()" << newLine
+               << "    properties.load(project.rootProject.file(\"local.properties\").newDataInputStream())" << newLine
+               << "    return properties.getProperty('sdk.dir')" << newLine
+               << "}()" << newLine
+               << "def llvmDir = \"${sdkDir}/ndk/${ndkVersionString}/toolchains/llvm\"" << newLine
+               << "def clangTidySearch = fileTree(llvmDir).filter { file -> file.name.matches('^clang-tidy(.exe)?$') }" << newLine
+               << "if (clangTidySearch.size() != 1) {" << newLine
+               << "    throw new GradleException(\"Could not locate a unique clang-tidy in ${llvmDir}\")" << newLine
+               << "}" << newLine
+               << "def clangTidy = clangTidySearch.getSingleFile().getAbsolutePath()" << newLine << newLine;
+
         mo << "android {"                                                                    << newLine;
         mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
+        mo << "    ndkVersion ndkVersionString"                                              << newLine;
         mo << "    namespace " << project.getBundleIdentifierString().toLowerCase().quoted() << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
         mo << "            path \"CMakeLists.txt\""                                          << newLine;
+        mo << "            version \"3.22.1\""                                               << newLine;
         mo << "        }"                                                                    << newLine;
         mo << "    }"                                                                        << newLine;
 
@@ -808,7 +836,7 @@ private:
         auto numConfigs = getNumConfigurations();
         for (int i = 0; i < numConfigs; ++i)
         {
-            auto config = getConfiguration(i);
+            auto config = getConfiguration (i);
 
             if (config->isDebug()) numDebugConfigs++;
 
@@ -926,7 +954,7 @@ private:
         return mo.toString();
     }
 
-    void addModuleJavaFolderToSourceSet(StringArray& javaSourceSets, const File& source) const
+    void addModuleJavaFolderToSourceSet (StringArray& javaSourceSets, const File& source) const
     {
         if (source.isDirectory())
         {
@@ -1465,7 +1493,7 @@ private:
                           Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
-            addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild, extraCompilerFlags);
+            addCompileUnits (getAllGroups().getReference (i), mo, excludeFromBuild, extraCompilerFlags);
     }
 
     //==============================================================================
@@ -1482,6 +1510,9 @@ private:
         cmakeArgs.add ("\"-DANDROID_CPP_FEATURES=exceptions rtti\"");
         cmakeArgs.add ("\"-DANDROID_ARM_MODE=arm\"");
         cmakeArgs.add ("\"-DANDROID_ARM_NEON=TRUE\"");
+
+        if (isClang && gradleClangTidy.get())
+            cmakeArgs.add ("\"-DCMAKE_CXX_CLANG_TIDY=${clangTidy}\"");
 
         auto cppStandard = [this]
         {
@@ -1672,6 +1703,10 @@ private:
         {
             auto* app = createApplicationElement (*manifest);
 
+            auto* receiver = getOrCreateChildWithName (*app, "receiver");
+            setAttributeIfNotPresent (*receiver, "android:name", "com.rmsl.juce.Receiver");
+            setAttributeIfNotPresent (*receiver, "android:exported", "false");
+
             auto* act = createActivityElement (*app);
             createIntentElement (*act);
 
@@ -1740,9 +1775,14 @@ private:
             if (permission == "android.permission.READ_EXTERNAL_STORAGE")
                 usesPermission->setAttribute ("android:maxSdkVersion", "32");
 
+            if (permission == "android.permission.BLUETOOTH_SCAN")
+                usesPermission->setAttribute ("android:usesPermissionFlags", "neverForLocation");
+
             // These permissions are obsoleted by new more fine-grained permissions in API level 31
             if (permission == "android.permission.BLUETOOTH"
-                || permission == "android.permission.BLUETOOTH_ADMIN")
+                || permission == "android.permission.BLUETOOTH_ADMIN"
+                || permission == "android.permission.ACCESS_FINE_LOCATION"
+                || permission == "android.permission.ACCESS_COARSE_LOCATION")
             {
                 usesPermission->setAttribute ("android:maxSdkVersion", "30");
             }

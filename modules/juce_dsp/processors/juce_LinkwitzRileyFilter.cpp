@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -145,5 +143,4 @@ void LinkwitzRileyFilter<SampleType>::update()
 template class LinkwitzRileyFilter<float>;
 template class LinkwitzRileyFilter<double>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

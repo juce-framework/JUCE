@@ -133,7 +133,16 @@ public:
     /** Returns true if non-power-of-two textures are supported in this context. */
     bool isTextureNpotSupported() const;
 
-    /** OpenGL versions, used by setOpenGLVersionRequired(). */
+    /** OpenGL versions, used by setOpenGLVersionRequired().
+
+        The Core profile doesn't include some legacy functionality, including the
+        fixed-function pipeline.
+
+        The Compatibility profile is backwards-compatible, and includes functionality
+        deprecated in the Core profile. However, not all implementations provide
+        compatibility profiles targeting later versions of OpenGL. To run on the
+        broadest range of hardware, using the 3.2 Core profile is recommended.
+    */
     enum OpenGLVersion
     {
         defaultGLVersion = 0, ///< Whatever the device decides to give us, normally a compatibility profile
@@ -262,9 +271,12 @@ public:
     void executeOnGLThread (T&& functor, bool blockUntilFinished);
 
     //==============================================================================
-    /** Returns the scale factor used by the display that is being rendered.
+    /** Returns a scale factor that relates the context component's size to the number
+        of physical pixels it covers on the screen.
 
-        The scale is that of the display - see Displays::Display::scale
+        In special cases it will be the same as Displays::Display::scale, but it also
+        includes AffineTransforms that affect the rendered area, and will be correctly
+        reported not just in standalone applications but plugins as well.
 
         Note that this should only be called during an OpenGLRenderer::renderOpenGL()
         callback - at other times the value it returns is undefined.
@@ -284,6 +296,12 @@ public:
         native code is probably the best way to find out what it is.
     */
     void* getRawContext() const noexcept;
+
+    /** Returns true if this context is using the core profile.
+
+        @see OpenGLVersion
+    */
+    bool isCoreProfile() const;
 
     /** This structure holds a set of dynamically loaded GL functions for use on this context. */
     OpenGLExtensionFunctions extensions;

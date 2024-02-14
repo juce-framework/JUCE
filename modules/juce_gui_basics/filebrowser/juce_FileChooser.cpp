@@ -27,8 +27,8 @@ namespace juce
 {
 
 //==============================================================================
-class FileChooser::NonNative    : public std::enable_shared_from_this<NonNative>,
-                                  public FileChooser::Pimpl
+class FileChooser::NonNative final : public std::enable_shared_from_this<NonNative>,
+                                     public FileChooser::Pimpl
 {
 public:
     NonNative (FileChooser& fileChooser, int flags, FilePreviewComponent* preview)
@@ -165,7 +165,7 @@ bool FileChooser::browseForDirectory()
 
 bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp)
 {
-    FocusRestorer focusRestorer;
+    detail::FocusRestorer focusRestorer;
 
     pimpl = createPimpl (flags, previewComp);
     pimpl->runModally();
@@ -259,15 +259,14 @@ URL FileChooser::getURLResult() const
 
 void FileChooser::finished (const Array<URL>& asyncResults)
 {
-     std::function<void (const FileChooser&)> callback;
-     std::swap (callback, asyncCallback);
+    const auto callback = std::exchange (asyncCallback, nullptr);
 
-     results = asyncResults;
+    results = asyncResults;
 
-     pimpl.reset();
+    pimpl.reset();
 
-     if (callback)
-         callback (*this);
+    if (callback)
+        callback (*this);
 }
 
 #if ! JUCE_ANDROID

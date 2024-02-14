@@ -74,7 +74,7 @@ public:
     String& getCallbackCode (const String& requiredParentClass,
                              const String& returnType,
                              const String& prototype,
-                             const bool hasPrePostUserSections);
+                             bool hasPrePostUserSections);
 
     void removeCallback (const String& returnType, const String& prototype);
 

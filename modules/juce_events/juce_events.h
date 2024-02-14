@@ -32,7 +32,7 @@
 
   ID:                 juce_events
   vendor:             juce
-  version:            7.0.5
+  version:            7.0.10
   name:               JUCE message and event handling classes
   description:        Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:            http://www.juce.com/juce
@@ -82,10 +82,13 @@
 #include "broadcasters/juce_ActionBroadcaster.h"
 #include "broadcasters/juce_ActionListener.h"
 #include "broadcasters/juce_AsyncUpdater.h"
+#include "broadcasters/juce_LockingAsyncUpdater.h"
 #include "broadcasters/juce_ChangeListener.h"
 #include "broadcasters/juce_ChangeBroadcaster.h"
 #include "timers/juce_Timer.h"
+#include "timers/juce_TimedCallback.h"
 #include "timers/juce_MultiTimer.h"
+#include "interprocess/juce_ChildProcessManager.h"
 #include "interprocess/juce_InterprocessConnection.h"
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "interprocess/juce_ConnectedChildProcess.h"
@@ -93,14 +96,14 @@
 #include "native/juce_ScopedLowPowerModeDisabler.h"
 
 #if JUCE_LINUX || JUCE_BSD
- #include "native/juce_linux_EventLoop.h"
+ #include "native/juce_EventLoop_linux.h"
 #endif
 
 #if JUCE_WINDOWS
  #if JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW
-  #include "native/juce_win32_HiddenMessageWindow.h"
+  #include "native/juce_HiddenMessageWindow_windows.h"
  #endif
  #if JUCE_EVENTS_INCLUDE_WINRT_WRAPPER
-  #include "native/juce_win32_WinRTWrapper.h"
+  #include "native/juce_WinRTWrapper_windows.h"
  #endif
 #endif

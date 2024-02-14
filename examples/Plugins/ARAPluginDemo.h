@@ -53,7 +53,7 @@
 #include <ARA_Library/Utilities/ARATimelineConversion.h>
 
 //==============================================================================
-class ARADemoPluginAudioModification  : public ARAAudioModification
+class ARADemoPluginAudioModification final : public ARAAudioModification
 {
 public:
     ARADemoPluginAudioModification (ARAAudioSource* audioSource,
@@ -79,7 +79,7 @@ struct PreviewState
     std::atomic<ARAPlaybackRegion*> previewedRegion { nullptr };
 };
 
-class SharedTimeSliceThread  : public TimeSliceThread
+class SharedTimeSliceThread final : public TimeSliceThread
 {
 public:
     SharedTimeSliceThread()
@@ -89,7 +89,7 @@ public:
     }
 };
 
-class AsyncConfigurationCallback  : private AsyncUpdater
+class AsyncConfigurationCallback final : private AsyncUpdater
 {
 public:
     explicit AsyncConfigurationCallback (std::function<void()> callbackIn)
@@ -296,11 +296,18 @@ private:
     std::unique_ptr<AudioFormatReader> reader;
 };
 
+struct ProcessingLockInterface
+{
+    virtual ~ProcessingLockInterface() = default;
+    virtual ScopedTryReadLock getProcessingLock() = 0;
+};
+
 //==============================================================================
-class PlaybackRenderer  : public ARAPlaybackRenderer
+class PlaybackRenderer final : public ARAPlaybackRenderer
 {
 public:
-    using ARAPlaybackRenderer::ARAPlaybackRenderer;
+    PlaybackRenderer (ARA::PlugIn::DocumentController* dc, ProcessingLockInterface& lockInterfaceIn)
+        : ARAPlaybackRenderer (dc), lockInterface (lockInterfaceIn) {}
 
     void prepareToPlay (double sampleRateIn,
                         int maximumSamplesPerBlockIn,
@@ -351,6 +358,11 @@ public:
                        AudioProcessor::Realtime realtime,
                        const AudioPlayHead::PositionInfo& positionInfo) noexcept override
     {
+        const auto lock = lockInterface.getProcessingLock();
+
+        if (! lock.isLocked())
+            return true;
+
         const auto numSamples = buffer.getNumSamples();
         jassert (numSamples <= maximumSamplesPerBlock);
         jassert (numChannels == buffer.getNumChannels());
@@ -458,8 +470,7 @@ public:
 
 private:
     //==============================================================================
-    // We're subclassing here only to provide a proper default c'tor for our shared resource
-
+    ProcessingLockInterface& lockInterface;
     SharedResourcePointer<SharedTimeSliceThread> sharedTimesliceThread;
     std::map<ARAAudioSource*, PossiblyBufferedReader> audioSourceReaders;
     bool useBufferedAudioSourceReader = true;
@@ -469,12 +480,16 @@ private:
     std::unique_ptr<AudioBuffer<float>> tempBuffer;
 };
 
-class EditorRenderer  : public ARAEditorRenderer,
-                        private ARARegionSequence::Listener
+class EditorRenderer final : public ARAEditorRenderer,
+                             private ARARegionSequence::Listener
 {
 public:
-    EditorRenderer (ARA::PlugIn::DocumentController* documentController, const PreviewState* previewStateIn)
-        : ARAEditorRenderer (documentController), previewState (previewStateIn), previewBuffer()
+    EditorRenderer (ARA::PlugIn::DocumentController* documentController,
+                    const PreviewState* previewStateIn,
+                    ProcessingLockInterface& lockInterfaceIn)
+        : ARAEditorRenderer (documentController),
+          lockInterface (lockInterfaceIn),
+          previewState (previewStateIn)
     {
         jassert (previewState != nullptr);
     }
@@ -496,6 +511,13 @@ public:
         sequence->addListener (this);
         regionSequences.insert (sequence);
         asyncConfigCallback.startConfigure();
+    }
+
+    void willRemoveRegionSequence (ARA::PlugIn::RegionSequence* rs) noexcept override
+    {
+        auto* rsToRemove = static_cast<ARARegionSequence*> (rs);
+        rsToRemove->removeListener (this);
+        regionSequences.erase (rsToRemove);
     }
 
     void didAddPlaybackRegion (ARA::PlugIn::PlaybackRegion*) noexcept override
@@ -549,6 +571,11 @@ public:
     {
         ignoreUnused (realtime);
 
+        const auto lock = lockInterface.getProcessingLock();
+
+        if (! lock.isLocked())
+            return true;
+
         return asyncConfigCallback.withLock ([&] (bool locked)
         {
             if (! locked)
@@ -596,9 +623,9 @@ public:
                     const auto previewDimmed = previewedRegion->getAudioModification<ARADemoPluginAudioModification>()
                                                               ->isDimmed();
 
-                    if (lastPreviewTime != previewTime
-                        || lastPlaybackRegion != previewedRegion
-                        || lastPreviewDimmed != previewDimmed)
+                    if (! exactlyEqual (lastPreviewTime, previewTime)
+                        || ! exactlyEqual (lastPlaybackRegion, previewedRegion)
+                        || ! exactlyEqual (lastPreviewDimmed, previewDimmed))
                     {
                         Range<double> previewRangeInPlaybackTime { previewTime - 0.25, previewTime + 0.25 };
                         previewBuffer->clear();
@@ -661,6 +688,7 @@ private:
         });
     }
 
+    ProcessingLockInterface& lockInterface;
     const PreviewState* previewState = nullptr;
     AsyncConfigurationCallback asyncConfigCallback { [this] { configure(); } };
     double lastPreviewTime = 0.0;
@@ -678,7 +706,8 @@ private:
 };
 
 //==============================================================================
-class ARADemoPluginDocumentControllerSpecialisation  : public ARADocumentControllerSpecialisation
+class ARADemoPluginDocumentControllerSpecialisation final : public ARADocumentControllerSpecialisation,
+                                                            private ProcessingLockInterface
 {
 public:
     using ARADocumentControllerSpecialisation::ARADocumentControllerSpecialisation;
@@ -686,6 +715,16 @@ public:
     PreviewState previewState;
 
 protected:
+    void willBeginEditing (ARADocument*) override
+    {
+        processBlockLock.enterWrite();
+    }
+
+    void didEndEditing (ARADocument*) override
+    {
+        processBlockLock.exitWrite();
+    }
+
     ARAAudioModification* doCreateAudioModification (ARAAudioSource* audioSource,
                                                      ARA::ARAAudioModificationHostRef hostRef,
                                                      const ARAAudioModification* optionalModificationToClone) noexcept override
@@ -697,12 +736,12 @@ protected:
 
     ARAPlaybackRenderer* doCreatePlaybackRenderer() noexcept override
     {
-        return new PlaybackRenderer (getDocumentController());
+        return new PlaybackRenderer (getDocumentController(), *this);
     }
 
     EditorRenderer* doCreateEditorRenderer() noexcept override
     {
-        return new EditorRenderer (getDocumentController(), &previewState);
+        return new EditorRenderer (getDocumentController(), &previewState, *this);
     }
 
     bool doRestoreObjectsFromStream (ARAInputStream& input,
@@ -779,6 +818,14 @@ protected:
 
         return true;
     }
+
+private:
+    ScopedTryReadLock getProcessingLock() override
+    {
+        return ScopedTryReadLock { processBlockLock };
+    }
+
+    ReadWriteLock processBlockLock;
 };
 
 struct PlayHeadState
@@ -813,8 +860,8 @@ struct PlayHeadState
 };
 
 //==============================================================================
-class ARADemoPluginAudioProcessorImpl  : public AudioProcessor,
-                                         public AudioProcessorARAExtension
+class ARADemoPluginAudioProcessorImpl : public AudioProcessor,
+                                        public AudioProcessorARAExtension
 {
 public:
     //==============================================================================
@@ -945,14 +992,14 @@ private:
     ListenerList<Listener> listeners;
 };
 
-class RulersView : public Component,
-                   public SettableTooltipClient,
-                   private Timer,
-                   private TimeToViewScaling::Listener,
-                   private ARAMusicalContext::Listener
+class RulersView final : public Component,
+                         public SettableTooltipClient,
+                         private Timer,
+                         private TimeToViewScaling::Listener,
+                         private ARAMusicalContext::Listener
 {
 public:
-    class CycleMarkerComponent : public Component
+    class CycleMarkerComponent final : public Component
     {
         void paint (Graphics& g) override
         {
@@ -1062,8 +1109,8 @@ public:
                     const auto quarterPos = barSignaturesConverter.getQuarterForBeat (beat);
                     const int x = timeToViewScaling.getXForTime (tempoConverter.getTimeForQuarter (quarterPos));
                     const auto barSignature = barSignaturesConverter.getBarSignatureForQuarter (quarterPos);
-                    const int lineWidth = (quarterPos == barSignature.position) ? heavyLineWidth : lightLineWidth;
-                    const int beatsSinceBarStart = roundToInt( barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
+                    const int lineWidth = (approximatelyEqual (quarterPos, barSignature.position)) ? heavyLineWidth : lightLineWidth;
+                    const int beatsSinceBarStart = roundToInt (barSignaturesConverter.getBeatDistanceFromBarStartForQuarter (quarterPos));
                     const int lineHeight = (beatsSinceBarStart == 0) ? rulerHeight : rulerHeight / 2;
                     rects.addWithoutMerging (Rectangle<int> (x - lineWidth / 2, 2 * rulerHeight - lineHeight, lineWidth, lineHeight));
                 }
@@ -1193,7 +1240,7 @@ private:
     bool isDraggingCycle = false;
 };
 
-class RulersHeader : public Component
+class RulersHeader final : public Component
 {
 public:
     RulersHeader()
@@ -1234,7 +1281,7 @@ private:
 };
 
 //==============================================================================
-struct WaveformCache : private ARAAudioSource::Listener
+struct WaveformCache final : private ARAAudioSource::Listener
 {
     WaveformCache() : thumbnailCache (20)
     {
@@ -1285,12 +1332,12 @@ private:
     std::map<ARAAudioSource*, std::unique_ptr<AudioThumbnail>> thumbnails;
 };
 
-class PlaybackRegionView : public Component,
-                           public ChangeListener,
-                           public SettableTooltipClient,
-                           private ARAAudioSource::Listener,
-                           private ARAPlaybackRegion::Listener,
-                           private ARAEditorView::Listener
+class PlaybackRegionView final : public Component,
+                                 public ChangeListener,
+                                 public SettableTooltipClient,
+                                 private ARAAudioSource::Listener,
+                                 private ARAPlaybackRegion::Listener,
+                                 private ARAEditorView::Listener
 {
 public:
     PlaybackRegionView (ARAEditorView& editorView, ARAPlaybackRegion& region, WaveformCache& cache)
@@ -1427,7 +1474,7 @@ public:
     }
 
 private:
-    class PreviewRegionOverlay  : public Component
+    class PreviewRegionOverlay final : public Component
     {
         static constexpr auto previewLength = 0.5;
 
@@ -1482,11 +1529,11 @@ private:
     bool isSelected = false;
 };
 
-class RegionSequenceView : public Component,
-                           public ChangeBroadcaster,
-                           private TimeToViewScaling::Listener,
-                           private ARARegionSequence::Listener,
-                           private ARAPlaybackRegion::Listener
+class RegionSequenceView final : public Component,
+                                 public ChangeBroadcaster,
+                                 private TimeToViewScaling::Listener,
+                                 private ARARegionSequence::Listener,
+                                 private ARAPlaybackRegion::Listener
 {
 public:
     RegionSequenceView (ARAEditorView& editorView, TimeToViewScaling& scaling, ARARegionSequence& rs, WaveformCache& cache)
@@ -1605,7 +1652,7 @@ private:
     double playbackDuration = 0.0;
 };
 
-class ZoomControls : public Component
+class ZoomControls final : public Component
 {
 public:
     ZoomControls()
@@ -1632,8 +1679,8 @@ private:
     TextButton zoomInButton { "+" }, zoomOutButton { "-" };
 };
 
-class PlayheadPositionLabel : public Label,
-                              private Timer
+class PlayheadPositionLabel final : public Label,
+                                    private Timer
 {
 public:
     PlayheadPositionLabel (PlayHeadState& playHeadStateIn)
@@ -1729,9 +1776,9 @@ private:
     ARAMusicalContext* selectedMusicalContext = nullptr;
 };
 
-class TrackHeader : public Component,
-                    private ARARegionSequence::Listener,
-                    private ARAEditorView::Listener
+class TrackHeader final : public Component,
+                          private ARARegionSequence::Listener,
+                          private ARAEditorView::Listener
 {
 public:
     TrackHeader (ARAEditorView& editorView, ARARegionSequence& regionSequenceIn)
@@ -1808,7 +1855,7 @@ private:
 
 constexpr auto trackHeight = 60;
 
-class VerticalLayoutViewportContent : public Component
+class VerticalLayoutViewportContent final : public Component
 {
 public:
     void resized() override
@@ -1823,7 +1870,7 @@ public:
     }
 };
 
-class VerticalLayoutViewport : public Viewport
+class VerticalLayoutViewport final : public Viewport
 {
 public:
     VerticalLayoutViewport()
@@ -1847,12 +1894,12 @@ private:
     }
 };
 
-class OverlayComponent : public Component,
-                         private Timer,
-                         private TimeToViewScaling::Listener
+class OverlayComponent final : public Component,
+                               private Timer,
+                               private TimeToViewScaling::Listener
 {
 public:
-    class PlayheadMarkerComponent : public Component
+    class PlayheadMarkerComponent final : public Component
     {
         void paint (Graphics& g) override { g.fillAll (Colours::yellow.darker (0.2f)); }
     };
@@ -1941,11 +1988,11 @@ private:
     PlayheadMarkerComponent playheadMarker;
 };
 
-class DocumentView  : public Component,
-                      public ChangeListener,
-                      public ARAMusicalContext::Listener,
-                      private ARADocument::Listener,
-                      private ARAEditorView::Listener
+class DocumentView final : public Component,
+                           public ChangeListener,
+                           public ARAMusicalContext::Listener,
+                           private ARADocument::Listener,
+                           private ARAEditorView::Listener
 {
 public:
     DocumentView (ARAEditorView& editorView, PlayHeadState& playHeadState)
@@ -2156,7 +2203,7 @@ private:
 
     void addTrackViews (ARARegionSequence* regionSequence)
     {
-        const auto insertIntoMap = [](auto& map, auto key, auto value) -> auto&
+        const auto insertIntoMap = [] (auto& map, auto key, auto value) -> auto&
         {
             auto it = map.insert ({ std::move (key), std::move (value) });
             return *(it.first->second);
@@ -2247,8 +2294,8 @@ private:
 };
 
 
-class ARADemoPluginProcessorEditor  : public AudioProcessorEditor,
-                                      public AudioProcessorEditorARAExtension
+class ARADemoPluginProcessorEditor final : public AudioProcessorEditor,
+                                           public AudioProcessorEditorARAExtension
 {
 public:
     explicit ARADemoPluginProcessorEditor (ARADemoPluginAudioProcessorImpl& p)
@@ -2294,7 +2341,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADemoPluginProcessorEditor)
 };
 
-class ARADemoPluginAudioProcessor  : public ARADemoPluginAudioProcessorImpl
+class ARADemoPluginAudioProcessor final : public ARADemoPluginAudioProcessorImpl
 {
 public:
     bool hasEditor() const override               { return true; }

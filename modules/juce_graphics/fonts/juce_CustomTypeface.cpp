@@ -189,7 +189,7 @@ void CustomTypeface::addGlyph (juce_wchar character, const Path& path, float wid
 
 void CustomTypeface::addKerningPair (juce_wchar char1, juce_wchar char2, float extraAmount) noexcept
 {
-    if (extraAmount != 0.0f)
+    if (! approximatelyEqual (extraAmount, 0.0f))
     {
         if (auto* g = findGlyph (char1, true))
             g->addKerningPair (char2, extraAmount);

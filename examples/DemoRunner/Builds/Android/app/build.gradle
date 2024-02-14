@@ -1,11 +1,15 @@
 apply plugin: 'com.android.application'
 
+def ndkVersionString = "25.2.9519653"
+
 android {
     compileSdkVersion 33
+    ndkVersion ndkVersionString
     namespace "com.rmsl.jucedemorunner"
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
+            version "3.22.1"
         }
     }
     signingConfigs {

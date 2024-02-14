@@ -34,10 +34,10 @@ class Sidebar;
 struct WizardHolder;
 
 //==============================================================================
-class ProjectContentComponent  : public Component,
-                                 public ApplicationCommandTarget,
-                                 private ChangeListener,
-                                 private OpenDocumentManager::DocumentCloseListener
+class ProjectContentComponent final : public Component,
+                                      public ApplicationCommandTarget,
+                                      private ChangeListener,
+                                      private OpenDocumentManager::DocumentCloseListener
 {
 public:
     //==============================================================================
@@ -107,7 +107,7 @@ public:
     void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
     bool perform (const InvocationInfo&) override;
 
-    bool isSaveCommand (const CommandID id);
+    bool isSaveCommand (CommandID);
 
     void paint (Graphics&) override;
     void resized() override;
@@ -125,7 +125,7 @@ private:
     void showTranslationTool();
 
     //==============================================================================
-    void showProjectPanel (const int index);
+    void showProjectPanel (int index);
     bool canSelectedProjectBeLaunch();
 
     //==============================================================================
@@ -147,6 +147,7 @@ private:
     int lastViewedTab = 0;
 
     std::unique_ptr<WizardHolder> wizardHolder;
+    ScopedMessageBox messageBox;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)

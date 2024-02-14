@@ -23,6 +23,81 @@
 namespace juce
 {
 
+class MidiDeviceListConnectionBroadcaster final : private AsyncUpdater
+{
+public:
+    ~MidiDeviceListConnectionBroadcaster() override
+    {
+        cancelPendingUpdate();
+    }
+
+    MidiDeviceListConnection::Key add (std::function<void()> callback)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        return callbacks.emplace (key++, std::move (callback)).first->first;
+    }
+
+    void remove (const MidiDeviceListConnection::Key k)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD
+        callbacks.erase (k);
+    }
+
+    void notify()
+    {
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            cancelPendingUpdate();
+
+            const State newState;
+
+            if (std::exchange (lastNotifiedState, newState) != newState)
+                for (auto it = callbacks.begin(); it != callbacks.end();)
+                    NullCheckedInvocation::invoke ((it++)->second);
+        }
+        else
+        {
+            triggerAsyncUpdate();
+        }
+    }
+
+    static auto& get()
+    {
+        static MidiDeviceListConnectionBroadcaster result;
+        return result;
+    }
+
+private:
+    MidiDeviceListConnectionBroadcaster() = default;
+
+    class State
+    {
+        Array<MidiDeviceInfo> ins = MidiInput::getAvailableDevices(), outs = MidiOutput::getAvailableDevices();
+        auto tie() const { return std::tie (ins, outs); }
+
+    public:
+        bool operator== (const State& other) const { return tie() == other.tie(); }
+        bool operator!= (const State& other) const { return tie() != other.tie(); }
+    };
+
+    void handleAsyncUpdate() override
+    {
+        notify();
+    }
+
+    std::map<MidiDeviceListConnection::Key, std::function<void()>> callbacks;
+    State lastNotifiedState;
+    MidiDeviceListConnection::Key key = 0;
+};
+
+//==============================================================================
+MidiDeviceListConnection::~MidiDeviceListConnection() noexcept
+{
+    if (broadcaster != nullptr)
+        broadcaster->remove (key);
+}
+
+//==============================================================================
 void MidiInputCallback::handlePartialSysexMessage ([[maybe_unused]] MidiInput* source,
                                                    [[maybe_unused]] const uint8* messageData,
                                                    [[maybe_unused]] int numBytesSoFar,

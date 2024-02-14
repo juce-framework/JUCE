@@ -53,19 +53,19 @@ namespace TabbedComponentHelpers
 }
 
 //==============================================================================
-struct TabbedComponent::ButtonBar  : public TabbedButtonBar
+struct TabbedComponent::ButtonBar final : public TabbedButtonBar
 {
     ButtonBar (TabbedComponent& tabComp, TabbedButtonBar::Orientation o)
         : TabbedButtonBar (o), owner (tabComp)
     {
     }
 
-    void currentTabChanged (int newCurrentTabIndex, const String& newTabName)
+    void currentTabChanged (int newCurrentTabIndex, const String& newTabName) override
     {
         owner.changeCallback (newCurrentTabIndex, newTabName);
     }
 
-    void popupMenuClickOnTab (int tabIndex, const String& tabName)
+    void popupMenuClickOnTab (int tabIndex, const String& tabName) override
     {
         owner.popupMenuClickOnTab (tabIndex, tabName);
     }
@@ -75,7 +75,7 @@ struct TabbedComponent::ButtonBar  : public TabbedButtonBar
         return owner.tabs->getTabBackgroundColour (tabIndex);
     }
 
-    TabBarButton* createTabButton (const String& tabName, int tabIndex)
+    TabBarButton* createTabButton (const String& tabName, int tabIndex) override
     {
         return owner.createTabButton (tabName, tabIndex);
     }

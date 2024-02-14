@@ -82,7 +82,7 @@ struct WaveShaperTanhDemoDSP
     std::vector<DSPDemoParameterBase*> parameters { &accuracy };  // no params for this demo
 };
 
-struct WaveShaperTanhDemo    : public Component
+struct WaveShaperTanhDemo final : public Component
 {
     WaveShaperTanhDemo()
     {

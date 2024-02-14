@@ -30,7 +30,7 @@ constexpr uint8 whiteNotes[] = { 0, 2, 4, 5, 7, 9, 11 };
 constexpr uint8 blackNotes[] = { 1, 3, 6, 8, 10 };
 
 //==============================================================================
-struct KeyboardComponentBase::UpDownButton  : public Button
+struct KeyboardComponentBase::UpDownButton final : public Button
 {
     UpDownButton (KeyboardComponentBase& c, int d)
         : Button ({}), owner (c), delta (d)
@@ -79,7 +79,7 @@ void KeyboardComponentBase::setKeyWidth (float widthInPixels)
 {
     jassert (widthInPixels > 0);
 
-    if (keyWidth != widthInPixels) // Prevent infinite recursion if the width is being computed in a 'resized()' callback
+    if (! approximatelyEqual (keyWidth, widthInPixels)) // Prevent infinite recursion if the width is being computed in a 'resized()' callback
     {
         keyWidth = widthInPixels;
         resized();
@@ -130,7 +130,7 @@ void KeyboardComponentBase::setLowestVisibleKeyFloat (float noteNumber)
 {
     noteNumber = jlimit ((float) rangeStart, (float) rangeEnd, noteNumber);
 
-    if (noteNumber != firstKey)
+    if (! approximatelyEqual (noteNumber, firstKey))
     {
         bool hasMoved = (((int) firstKey) != (int) noteNumber);
         firstKey = noteNumber;
@@ -151,7 +151,7 @@ void KeyboardComponentBase::setBlackNoteLengthProportion (float ratio) noexcept
 {
     jassert (ratio >= 0.0f && ratio <= 1.0f);
 
-    if (blackNoteLengthRatio != ratio)
+    if (! approximatelyEqual (blackNoteLengthRatio, ratio))
     {
         blackNoteLengthRatio = ratio;
         resized();
@@ -168,7 +168,7 @@ void KeyboardComponentBase::setBlackNoteWidthProportion (float ratio) noexcept
 {
     jassert (ratio >= 0.0f && ratio <= 1.0f);
 
-    if (blackNoteWidthRatio != ratio)
+    if (! approximatelyEqual (blackNoteWidthRatio, ratio))
     {
         blackNoteWidthRatio = ratio;
         resized();
@@ -452,7 +452,7 @@ void KeyboardComponentBase::resized()
 //==============================================================================
 void KeyboardComponentBase::mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel)
 {
-    auto amount = (orientation == horizontalKeyboard && wheel.deltaX != 0)
+    auto amount = (orientation == horizontalKeyboard && ! approximatelyEqual (wheel.deltaX, 0.0f))
                        ? wheel.deltaX : (orientation == verticalKeyboardFacingLeft ? wheel.deltaY
                                                                                    : -wheel.deltaY);
 

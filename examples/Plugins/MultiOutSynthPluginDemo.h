@@ -53,7 +53,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class MultiOutSynth  : public AudioProcessor
+class MultiOutSynth final : public AudioProcessor
 {
 public:
     enum

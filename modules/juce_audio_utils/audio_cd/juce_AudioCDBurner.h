@@ -48,7 +48,7 @@ public:
 
         The deviceIndex is an index into the array returned by findAvailableDevices().
     */
-    static AudioCDBurner* openDevice (const int deviceIndex);
+    static AudioCDBurner* openDevice (int deviceIndex);
 
     /** Destructor. */
     ~AudioCDBurner();
@@ -158,7 +158,7 @@ public:
 
 private:
     //==============================================================================
-    AudioCDBurner (const int deviceIndex);
+    AudioCDBurner (int deviceIndex);
 
     class Pimpl;
     std::unique_ptr<Pimpl> pimpl;

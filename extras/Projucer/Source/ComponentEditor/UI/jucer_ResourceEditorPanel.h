@@ -50,10 +50,12 @@ public:
     void selectedRowsChanged (int lastRowSelected) override;
 
 private:
+    void updateLookAndFeel();
     void lookAndFeelChanged() override;
     void reloadAll();
 
     JucerDocument& document;
     std::unique_ptr<TableListBox> listBox;
     TextButton addButton, reloadAllButton, delButton;
+    ScopedMessageBox messageBox;
 };

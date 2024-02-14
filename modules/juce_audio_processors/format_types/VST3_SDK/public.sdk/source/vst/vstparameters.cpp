@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,14 +45,13 @@ namespace Vst {
 //------------------------------------------------------------------------
 // Parameter Implementation
 //------------------------------------------------------------------------
-Parameter::Parameter () : valueNormalized (0.), precision (4)
+Parameter::Parameter ()
 {
-	info = {};
 }
 
 //------------------------------------------------------------------------
 Parameter::Parameter (const ParameterInfo& info)
-: info (info), valueNormalized (info.defaultNormalizedValue), precision (4)
+: info (info), valueNormalized (info.defaultNormalizedValue)
 {
 }
 
@@ -60,10 +59,7 @@ Parameter::Parameter (const ParameterInfo& info)
 Parameter::Parameter (const TChar* title, ParamID tag, const TChar* units,
                       ParamValue defaultValueNormalized, int32 stepCount, int32 flags,
                       UnitID unitID, const TChar* shortTitle)
-: precision (4)
 {
-	info = {};
-
 	UString (info.title, str16BufferSize (String128)).assign (title);
 	if (units)
 		UString (info.units, str16BufferSize (String128)).assign (units);
@@ -302,7 +298,7 @@ bool StringListParameter::replaceString (int32 index, const String128 string)
 //------------------------------------------------------------------------
 void StringListParameter::toString (ParamValue _valueNormalized, String128 string) const
 {
-	int32 index = (int32)toPlain (_valueNormalized);
+	int32 index = static_cast<int32> (toPlain (_valueNormalized));
 	if (const TChar* valueString = strings.at (index))
 	{
 		UString (string, str16BufferSize (String128)).assign (valueString);
@@ -345,7 +341,7 @@ ParamValue StringListParameter::toNormalized (ParamValue plainValue) const
 //------------------------------------------------------------------------
 // ParameterContainer Implementation
 //------------------------------------------------------------------------
-ParameterContainer::ParameterContainer () : params (nullptr)
+ParameterContainer::ParameterContainer ()
 {
 }
 
@@ -387,6 +383,14 @@ Parameter* ParameterContainer::addParameter (const ParameterInfo& info)
 		return p;
 	p->release ();
 	return nullptr;
+}
+
+//------------------------------------------------------------------------
+Parameter* ParameterContainer::getParameterByIndex (int32 index) const
+{
+	if (!params || index < 0 || index >= static_cast<int32> (params->size ()))
+		return nullptr;
+	return params->at (index);
 }
 
 //------------------------------------------------------------------------

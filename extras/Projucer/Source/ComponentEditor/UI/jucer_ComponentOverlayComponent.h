@@ -73,6 +73,7 @@ private:
 
     void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
 
+    void updateSelected();
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     std::unique_ptr<ResizableBorderComponent> border;

@@ -37,6 +37,7 @@
 #include "../../../Audio/AudioRecordingDemo.h"
 #include "../../../Audio/AudioSettingsDemo.h"
 #include "../../../Audio/AudioSynthesiserDemo.h"
+#include "../../../Audio/AudioWorkgroupDemo.h"
 #include "../../../Audio/MidiDemo.h"
 #include "../../../Audio/MPEDemo.h"
 #include "../../../Audio/PluckedStringsDemo.h"
@@ -75,6 +76,7 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (AudioRecordingDemo,      Audio,     false)
     REGISTER_DEMO (AudioSettingsDemo,       Audio,     false)
     REGISTER_DEMO (AudioSynthesiserDemo,    Audio,     false)
+    REGISTER_DEMO (AudioWorkgroupDemo,      Audio,     false)
     REGISTER_DEMO (MidiDemo,                Audio,     false)
     REGISTER_DEMO (MPEDemo,                 Audio,     false)
     REGISTER_DEMO (PluckedStringsDemo,      Audio,     false)
@@ -86,9 +88,9 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (IIRFilterDemo,           DSP,       false)
     REGISTER_DEMO (OscillatorDemo,          DSP,       false)
     REGISTER_DEMO (OverdriveDemo,           DSP,       false)
-    #if JUCE_USE_SIMD
-     REGISTER_DEMO (SIMDRegisterDemo,       DSP,       false)
-    #endif
+   #if JUCE_USE_SIMD
+    REGISTER_DEMO (SIMDRegisterDemo,        DSP,       false)
+   #endif
     REGISTER_DEMO (StateVariableFilterDemo, DSP,       false)
     REGISTER_DEMO (WaveShaperTanhDemo,      DSP,       false)
 

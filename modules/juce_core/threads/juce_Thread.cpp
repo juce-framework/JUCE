@@ -48,7 +48,7 @@ Thread::~Thread()
 //==============================================================================
 // Use a ref-counted object to hold this shared data, so that it can outlive its static
 // shared pointer when threads are still running during static shutdown.
-struct CurrentThreadHolder   : public ReferenceCountedObject
+struct CurrentThreadHolder final : public ReferenceCountedObject
 {
     CurrentThreadHolder() noexcept {}
 
@@ -166,7 +166,7 @@ bool Thread::startRealtimeThread (const RealtimeOptions& options)
 
     if (threadHandle == nullptr)
     {
-        realtimeOptions = makeOptional (options);
+        realtimeOptions = std::make_optional (options);
 
         if (startThreadInternal (Priority::normal))
             return true;
@@ -276,7 +276,7 @@ void Thread::removeListener (Listener* listener)
 
 bool Thread::isRealtime() const
 {
-    return realtimeOptions.hasValue();
+    return realtimeOptions.has_value();
 }
 
 void Thread::setAffinityMask (const uint32 newAffinityMask)
@@ -285,7 +285,7 @@ void Thread::setAffinityMask (const uint32 newAffinityMask)
 }
 
 //==============================================================================
-bool Thread::wait (const int timeOutMilliseconds) const
+bool Thread::wait (double timeOutMilliseconds) const
 {
     return defaultEvent.wait (timeOutMilliseconds);
 }
@@ -296,7 +296,7 @@ void Thread::notify() const
 }
 
 //==============================================================================
-struct LambdaThread  : public Thread
+struct LambdaThread final : public Thread
 {
     LambdaThread (std::function<void()>&& f) : Thread ("anonymous"), fn (std::move (f)) {}
 
@@ -354,7 +354,7 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class AtomicTests  : public UnitTest
+class AtomicTests final : public UnitTest
 {
 public:
     AtomicTests()
@@ -366,9 +366,9 @@ public:
         beginTest ("Misc");
 
         char a1[7];
-        expect (numElementsInArray(a1) == 7);
+        expect (numElementsInArray (a1) == 7);
         int a2[3];
-        expect (numElementsInArray(a2) == 3);
+        expect (numElementsInArray (a2) == 3);
 
         expect (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
         expect (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);
@@ -417,7 +417,7 @@ public:
     class AtomicTester
     {
     public:
-        AtomicTester() {}
+        AtomicTester() = default;
 
         static void testInteger (UnitTest& test)
         {
@@ -460,17 +460,17 @@ public:
             /*  These are some simple test cases to check the atomics - let me know
                 if any of these assertions fail on your system!
             */
-            test.expect (a.get() == (Type) 101);
+            test.expect (exactlyEqual (a.get(), (Type) 101));
             test.expect (! a.compareAndSetBool ((Type) 300, (Type) 200));
-            test.expect (a.get() == (Type) 101);
+            test.expect (exactlyEqual (a.get(), (Type) 101));
             test.expect (a.compareAndSetBool ((Type) 200, a.get()));
-            test.expect (a.get() == (Type) 200);
+            test.expect (exactlyEqual (a.get(), (Type) 200));
 
-            test.expect (a.exchange ((Type) 300) == (Type) 200);
-            test.expect (a.get() == (Type) 300);
+            test.expect (exactlyEqual (a.exchange ((Type) 300), (Type) 200));
+            test.expect (exactlyEqual (a.get(), (Type) 300));
 
             b = a;
-            test.expect (b.get() == a.get());
+            test.expect (exactlyEqual (b.get(), a.get()));
         }
     };
 };
@@ -478,8 +478,8 @@ public:
 static AtomicTests atomicUnitTests;
 
 //==============================================================================
-class ThreadLocalValueUnitTest  : public UnitTest,
-                                  private Thread
+class ThreadLocalValueUnitTest final : public UnitTest,
+                                       private Thread
 {
 public:
     ThreadLocalValueUnitTest()

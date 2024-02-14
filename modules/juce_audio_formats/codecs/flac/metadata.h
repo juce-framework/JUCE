@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,6 +33,7 @@
 #ifndef FLAC__METADATA_H
 #define FLAC__METADATA_H
 
+#include <sys/types.h> /* for off_t */
 #include "export.h"
 #include "callback.h"
 #include "format.h"
@@ -132,6 +133,11 @@ extern "C" {
  *  The level 0 interface consists of individual routines to read the
  *  STREAMINFO, VORBIS_COMMENT, CUESHEET, and PICTURE blocks, requiring
  *  only a filename.
+ *
+ *  On Windows, filename must be a UTF-8 encoded filename, which libFLAC
+ *  internally translates to an appropriate representation to use with
+ *  _wfopen. On all other systems, filename is passed to fopen without
+ *  any translation.
  *
  *  They try to skip any ID3v2 tag at the head of the file.
  *
@@ -386,6 +392,11 @@ FLAC_API FLAC__Metadata_SimpleIteratorStatus FLAC__metadata_simple_iterator_stat
 /** Initialize the iterator to point to the first metadata block in the
  *  given FLAC file.
  *
+ *  On Windows, filename must be a UTF-8 encoded filename, which libFLAC
+ *  internally translates to an appropriate representation to use with
+ *  _wfopen. On all other systems, filename is passed to fopen without
+ *  any translation.
+ *
  * \param iterator             A pointer to an existing iterator.
  * \param filename             The path to the FLAC file.
  * \param read_only            If \c true, the FLAC file will be opened
@@ -499,7 +510,7 @@ FLAC_API FLAC__MetadataType FLAC__metadata_simple_iterator_get_block_type(const 
  * \retval uint32_t
  *    The length of the metadata block at the current iterator position.
  *    The is same length as that in the
- *    <a href="http://xiph.org/flac/format.html#metadata_block_header">metadata block header</a>,
+ *    <a href="http://xiph.org/flhttps://xiph.org/flac/format.html#metadata_block_header">metadata block header</a>,
  *    i.e. the length of the metadata body that follows the header.
  */
 FLAC_API uint32_t FLAC__metadata_simple_iterator_get_block_length(const FLAC__Metadata_SimpleIterator *iterator);
@@ -819,6 +830,11 @@ FLAC_API FLAC__Metadata_ChainStatus FLAC__metadata_chain_status(FLAC__Metadata_C
 
 /** Read all metadata from a FLAC file into the chain.
  *
+ *  On Windows, filename must be a UTF-8 encoded filename, which libFLAC
+ *  internally translates to an appropriate representation to use with
+ *  _wfopen. On all other systems, filename is passed to fopen without
+ *  any translation.
+ *
  * \param chain    A pointer to an existing chain.
  * \param filename The path to the FLAC file to read.
  * \assert
@@ -832,6 +848,11 @@ FLAC_API FLAC__Metadata_ChainStatus FLAC__metadata_chain_status(FLAC__Metadata_C
 FLAC_API FLAC__bool FLAC__metadata_chain_read(FLAC__Metadata_Chain *chain, const char *filename);
 
 /** Read all metadata from an Ogg FLAC file into the chain.
+ *
+ *  On Windows, filename must be a UTF-8 encoded filename, which libFLAC
+ *  internally translates to an appropriate representation to use with
+ *  _wfopen. On all other systems, filename is passed to fopen without
+ *  any translation.
  *
  * \note Ogg FLAC metadata data writing is not supported yet and
  * FLAC__metadata_chain_write() will fail.
@@ -1377,7 +1398,8 @@ FLAC_API FLAC__bool FLAC__metadata_object_application_set_data(FLAC__StreamMetad
 /** Resize the seekpoint array.
  *
  *  If the size shrinks, elements will truncated; if it grows, new placeholder
- *  points will be added to the end.
+ *  points will be added to the end. If this function returns false, the
+ *  object is left untouched.
  *
  * \param object          A pointer to an existing SEEKTABLE object.
  * \param new_num_points  The desired length of the array; may be \c 0.
@@ -1590,7 +1612,8 @@ FLAC_API FLAC__bool FLAC__metadata_object_vorbiscomment_set_vendor_string(FLAC__
 /** Resize the comment array.
  *
  *  If the size shrinks, elements will truncated; if it grows, new empty
- *  fields will be added to the end.
+ *  fields will be added to the end.  If this function returns false, the
+ *  object is left untouched.
  *
  * \param object            A pointer to an existing VORBIS_COMMENT object.
  * \param new_num_comments  The desired length of the array; may be \c 0.
@@ -1870,7 +1893,8 @@ FLAC_API void FLAC__metadata_object_cuesheet_track_delete(FLAC__StreamMetadata_C
 /** Resize a track's index point array.
  *
  *  If the size shrinks, elements will truncated; if it grows, new blank
- *  indices will be added to the end.
+ *  indices will be added to the end. If this function returns false, the
+ *  track object is left untouched.
  *
  * \param object           A pointer to an existing CUESHEET object.
  * \param track_num        The index of the track to modify.  NOTE: this is not
@@ -1956,7 +1980,8 @@ FLAC_API FLAC__bool FLAC__metadata_object_cuesheet_track_delete_index(FLAC__Stre
 /** Resize the track array.
  *
  *  If the size shrinks, elements will truncated; if it grows, new blank
- *  tracks will be added to the end.
+ *  tracks will be added to the end.  If this function returns false, the
+ *  object is left untouched.
  *
  * \param object            A pointer to an existing CUESHEET object.
  * \param new_num_tracks    The desired length of the array; may be \c 0.
@@ -2172,6 +2197,34 @@ FLAC_API FLAC__bool FLAC__metadata_object_picture_set_data(FLAC__StreamMetadata 
  */
 FLAC_API FLAC__bool FLAC__metadata_object_picture_is_legal(const FLAC__StreamMetadata *object, const char **violation);
 
+
+/** Get the raw (binary) representation of a FLAC__StreamMetadata objeect.
+ *  After use, free() the returned buffer. The length of the buffer is
+ *  the length of the input metadata object plus 4 bytes for the header.
+ *
+ * \param object     A pointer to metadata block to be converted.
+ * \assert
+ *    \code object != NULL \endcode
+ * \retval FLAC__byte*
+ *    \c  NULL if there was an error, else a pointer to a buffer holding
+ *        the requested data.
+ */
+FLAC_API FLAC__byte * FLAC__metadata_object_get_raw(const FLAC__StreamMetadata *object);
+
+
+/** Turn a raw (binary) representation into a FLAC__StreamMetadata objeect.
+ *  The returned object must be deleted with FLAC__metadata_object_delete()
+ *  after use.
+ *
+ * \param buffer     A pointer to a buffer containing a binary representation
+ *                   to be converted to a FLAC__StreamMetadata object
+ * \param length     The length of the supplied buffer
+ * \retval FLAC__StreamMetadata*
+ *    \c  NULL if there was an error, else a pointer to a FLAC__StreamMetadata
+ *        holding the requested data.
+ */
+
+FLAC_API FLAC__StreamMetadata * FLAC__metadata_object_set_raw(FLAC__byte *buffer, FLAC__uint32 length);
 /* \} */
 
 #ifdef __cplusplus

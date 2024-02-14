@@ -23,12 +23,10 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
-class ProcessorChainTest : public UnitTest
+class ProcessorChainTest final : public UnitTest
 {
     template <int AddValue>
     struct MockProcessor
@@ -39,7 +37,7 @@ class ProcessorChainTest : public UnitTest
         template <typename Context>
         void process (const Context& context) noexcept
         {
-            bufferWasClear = context.getInputBlock().getSample (0, 0) == 0;
+            bufferWasClear = approximatelyEqual (context.getInputBlock().getSample (0, 0), 0.0f);
 
             if (! context.isBypassed)
                 context.getOutputBlock().add (AddValue);
@@ -163,5 +161,4 @@ public:
 
 static ProcessorChainTest processorChainUnitTest;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

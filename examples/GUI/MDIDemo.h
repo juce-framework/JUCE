@@ -53,8 +53,8 @@
     also listen to changes in the text and mark the FileBasedDocument as 'dirty'. This 'dirty'
     flag is used to prompt the user to save the note when it is closed.
  */
-class Note    : public Component,
-                public FileBasedDocument
+class Note final : public Component,
+                   public FileBasedDocument
 {
 public:
     Note (const String& name, const String& contents)
@@ -133,7 +133,7 @@ private:
 //==============================================================================
 /** Simple MultiDocumentPanel that just tries to save our notes when they are closed.
  */
-class DemoMultiDocumentPanel    : public MultiDocumentPanel
+class DemoMultiDocumentPanel final : public MultiDocumentPanel
 {
 public:
     DemoMultiDocumentPanel() = default;
@@ -165,8 +165,8 @@ private:
 /** Simple multi-document panel that manages a number of notes that you can store to files.
     By default this will look for notes saved to the desktop and load them up.
  */
-class MDIDemo   : public Component,
-                  public FileDragAndDropTarget
+class MDIDemo final : public Component,
+                      public FileDragAndDropTarget
 {
 public:
     MDIDemo()

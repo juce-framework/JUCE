@@ -26,8 +26,8 @@
 #pragma once
 
 //==============================================================================
-class ConcertinaHeader    : public Component,
-                            public ChangeBroadcaster
+class ConcertinaHeader final : public Component,
+                               public ChangeBroadcaster
 {
 public:
     ConcertinaHeader (String n, Path p)
@@ -98,9 +98,9 @@ private:
 };
 
 //==============================================================================
-class FindPanel    : public Component,
-                     private Timer,
-                     private FocusChangeListener
+class FindPanel final : public Component,
+                        private Timer,
+                        private FocusChangeListener
 {
 public:
     FindPanel (std::function<void (const String&)> cb)
@@ -172,7 +172,7 @@ private:
 };
 
 //==============================================================================
-class ConcertinaTreeComponent    : public Component
+class ConcertinaTreeComponent final : public Component
 {
 public:
     class AdditionalComponents
@@ -296,8 +296,8 @@ private:
 
 
 //==============================================================================
-struct ProjectSettingsComponent  : public Component,
-                                   private ChangeListener
+struct ProjectSettingsComponent final : public Component,
+                                        private ChangeListener
 {
     ProjectSettingsComponent (Project& p)
         : project (p),
@@ -359,7 +359,7 @@ struct ProjectSettingsComponent  : public Component,
 };
 
 //==============================================================================
-struct FileTreePanel   : public TreePanelBase
+struct FileTreePanel final : public TreePanelBase
 {
     FileTreePanel (Project& p)
         : TreePanelBase (&p, "fileTreeState")
@@ -376,7 +376,7 @@ struct FileTreePanel   : public TreePanelBase
     }
 };
 
-struct ModuleTreePanel    : public TreePanelBase
+struct ModuleTreePanel final : public TreePanelBase
 {
     ModuleTreePanel (Project& p)
         : TreePanelBase (&p, "moduleTreeState")
@@ -387,7 +387,7 @@ struct ModuleTreePanel    : public TreePanelBase
     }
 };
 
-struct ExportersTreePanel    : public TreePanelBase
+struct ExportersTreePanel final : public TreePanelBase
 {
     ExportersTreePanel (Project& p)
         : TreePanelBase (&p, "exportersTreeState")
@@ -399,8 +399,8 @@ struct ExportersTreePanel    : public TreePanelBase
 };
 
 //==============================================================================
-class Sidebar    : public Component,
-                   private ChangeListener
+class Sidebar final : public Component,
+                      private ChangeListener
 {
 public:
     Sidebar (Project* p)
@@ -552,8 +552,8 @@ private:
     }
 
     //==============================================================================
-    ConcertinaPanel concertinaPanel;
     std::vector<std::unique_ptr<ConcertinaHeader>> headers;
+    ConcertinaPanel concertinaPanel;
     Project* project = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Sidebar)

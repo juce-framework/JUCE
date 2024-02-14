@@ -43,19 +43,19 @@ public:
 
     PaintElementPath* owner;
     Path::Iterator::PathElementType type;
-    RelativePositionedRectangle pos [maxRects];
+    RelativePositionedRectangle pos[maxRects] = {};
 
     int getNumPoints() const;
 
-    void changePointType (const Path::Iterator::PathElementType newType,
+    void changePointType (Path::Iterator::PathElementType newType,
                           const Rectangle<int>& parentArea,
-                          const bool undoable);
+                          bool undoable);
 
     void deleteFromPath();
     void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected);
 
 private:
-    PathPoint withChangedPointType (const Path::Iterator::PathElementType newType,
+    PathPoint withChangedPointType (Path::Iterator::PathElementType newType,
                                     const Rectangle<int>& parentArea) const;
 };
 
@@ -150,19 +150,19 @@ class PathPointComponent    : public ElementSiblingComponent
 {
 public:
     PathPointComponent (PaintElementPath* const path_,
-                        const int index, const int pointNumber);
+                        int index, int pointNumber);
 
-    ~PathPointComponent();
+    ~PathPointComponent() override;
 
-    void updatePosition();
+    void updatePosition() override;
     void showPopupMenu();
 
-    void paint (Graphics& g);
-    void mouseDown (const MouseEvent& e);
-    void mouseDrag (const MouseEvent& e);
-    void mouseUp (const MouseEvent& e);
+    void paint (Graphics& g) override;
+    void mouseDown (const MouseEvent& e) override;
+    void mouseDrag (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
 
-    void changeListenerCallback (ChangeBroadcaster*);
+    void changeListenerCallback (ChangeBroadcaster*) override;
 
 private:
     PaintElementPath* const path;

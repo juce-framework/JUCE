@@ -34,7 +34,7 @@ public:
     //==============================================================================
     TestComponent (JucerDocument* const ownerDocument,
                    JucerDocument* const loadedDocument,
-                   const bool alwaysFillBackground);
+                   bool alwaysFillBackground);
 
     ~TestComponent() override;
 
@@ -54,6 +54,8 @@ public:
 
     //==============================================================================
     void paint (Graphics&) override;
+
+    void handleResize();
     void resized() override;
 
     static void showInDialogBox (JucerDocument&);

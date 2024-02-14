@@ -26,6 +26,33 @@
 namespace juce
 {
 
+#ifndef DOXYGEN
+namespace detail
+{
+class BoundsChangeListener final : private ComponentListener
+{
+public:
+    BoundsChangeListener (Component& c, std::function<void()> cb)
+        : callback (std::move (cb)),
+          componentListenerGuard { [comp = &c, this] { comp->removeComponentListener (this); } }
+    {
+        jassert (callback != nullptr);
+
+        c.addComponentListener (this);
+    }
+
+private:
+    void componentMovedOrResized (Component&, bool, bool) override
+    {
+        callback();
+    }
+
+    std::function<void()> callback;
+    ErasedScopeGuard componentListenerGuard;
+};
+} // namespace detail
+#endif
+
 //==============================================================================
 /**
     The base class for objects which can draw themselves, e.g. polygons, images, etc.
@@ -220,11 +247,16 @@ protected:
     AffineTransform drawableTransform;
 
     void nonConstDraw (Graphics&, float opacity, const AffineTransform&);
-    void updateTransform();
 
     Drawable (const Drawable&);
     Drawable& operator= (const Drawable&);
     JUCE_LEAK_DETECTOR (Drawable)
+
+
+private:
+    void updateTransform();
+
+    detail::BoundsChangeListener boundsChangeListener { *this, [this] { updateTransform(); } };
 };
 
 } // namespace juce

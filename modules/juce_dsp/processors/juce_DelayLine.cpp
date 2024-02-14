@@ -23,9 +23,7 @@
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 //==============================================================================
@@ -86,7 +84,7 @@ template <typename SampleType, typename InterpolationType>
 void DelayLine<SampleType, InterpolationType>::setMaximumDelayInSamples (int maxDelayInSamples)
 {
     jassert (maxDelayInSamples >= 0);
-    totalSize = jmax (4, maxDelayInSamples + 1);
+    totalSize = jmax (4, maxDelayInSamples + 2);
     bufferData.setSize ((int) bufferData.getNumChannels(), totalSize, false, false, true);
     reset();
 }
@@ -114,7 +112,7 @@ template <typename SampleType, typename InterpolationType>
 SampleType DelayLine<SampleType, InterpolationType>::popSample (int channel, SampleType delayInSamples, bool updateReadPointer)
 {
     if (delayInSamples >= 0)
-        setDelay(delayInSamples);
+        setDelay (delayInSamples);
 
     auto result = interpolateSample (channel);
 
@@ -134,5 +132,4 @@ template class DelayLine<double, DelayLineInterpolationTypes::Lagrange3rd>;
 template class DelayLine<float,  DelayLineInterpolationTypes::Thiran>;
 template class DelayLine<double, DelayLineInterpolationTypes::Thiran>;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

@@ -30,7 +30,7 @@
 /**
     Wraps a ValueTreePropertyWithDefault object that has a default which depends on a global value.
 */
-class ValueTreePropertyWithDefaultWrapper  : private Value::Listener
+class ValueTreePropertyWithDefaultWrapper final : private Value::Listener
 {
 public:
     ValueTreePropertyWithDefaultWrapper() = default;

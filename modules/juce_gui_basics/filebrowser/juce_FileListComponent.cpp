@@ -26,9 +26,6 @@
 namespace juce
 {
 
-Image juce_createIconForFile (const File& file);
-
-
 //==============================================================================
 FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
     : ListBox ({}, this),
@@ -102,9 +99,10 @@ void FileListComponent::changeListenerCallback (ChangeBroadcaster*)
 }
 
 //==============================================================================
-class FileListComponent::ItemComponent  : public Component,
-                                          private TimeSliceClient,
-                                          private AsyncUpdater
+class FileListComponent::ItemComponent final : public Component,
+                                               public TooltipClient,
+                                               private TimeSliceClient,
+                                               private AsyncUpdater
 {
 public:
     ItemComponent (FileListComponent& fc, TimeSliceThread& t)
@@ -193,6 +191,11 @@ public:
         repaint();
     }
 
+    String getTooltip() override
+    {
+        return owner.getTooltipForRow (index);
+    }
+
 private:
     //==============================================================================
     FileListComponent& owner;
@@ -217,7 +220,7 @@ private:
 
             if (im.isNull() && ! onlyUpdateIfCached)
             {
-                im = juce_createIconForFile (file);
+                im = detail::WindowingHelpers::createIconForFile (file);
 
                 if (im.isValid())
                     ImageCache::addImageToCache (im, hashCode);

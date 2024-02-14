@@ -29,6 +29,8 @@ namespace juce
 /** Properties of an AudioParameterBool.
 
     @see AudioParameterBool(), RangedAudioParameterAttributes()
+
+    @tags{Audio}
 */
 class AudioParameterBoolAttributes : public RangedAudioParameterAttributes<AudioParameterBoolAttributes, bool> {};
 
