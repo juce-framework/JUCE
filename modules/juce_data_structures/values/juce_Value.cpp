@@ -174,7 +174,7 @@ Value& Value::operator= (const var& newValue)
     return *this;
 }
 
-void Value::referTo (const Value& valueToReferTo)
+void Value::referTo (const Value& valueToReferTo, bool notifyListeners)
 {
     if (valueToReferTo.value != value)
     {
@@ -185,7 +185,7 @@ void Value::referTo (const Value& valueToReferTo)
         }
 
         value = valueToReferTo.value;
-        callListeners();
+        if(notifyListeners) callListeners();
     }
 }
 
