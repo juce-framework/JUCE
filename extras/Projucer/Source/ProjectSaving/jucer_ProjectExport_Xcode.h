@@ -2081,12 +2081,17 @@ public:
 
 private:
     //==============================================================================
+    static String replaceHomeTildeInPath (const String& path)
+    {
+        return path.startsWithChar ('~') ? "$(HOME)" + path.substring (1)
+                                         : path;
+    }
+
     static String expandPath (const String& path)
     {
         if (! build_tools::isAbsolutePath (path))  return "$(SRCROOT)/" + path;
-        if (path.startsWithChar ('~'))             return "$(HOME)" + path.substring (1);
 
-        return path;
+        return replaceHomeTildeInPath (path);
     }
 
     static String addQuotesIfRequired (const String& s)
@@ -2216,28 +2221,22 @@ private:
 
             target->addMainBuildProduct();
 
-            if (target->type == XcodeTarget::LV2Helper
-                && project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
+            if (project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
-                const auto path = rebaseFromProjectFolderToBuildTarget (getLV2HelperProgramSource());
-                addFile (FileOptions().withRelativePath ({ path.toUnixStyle(), path.getRoot() })
-                                      .withSkipPCHEnabled (true)
-                                      .withCompilationEnabled (true)
-                                      .withInhibitWarningsEnabled (true)
-                                      .withCompilerFlags ("-std=c++11")
-                                      .withXcodeTarget (target));
-            }
+                auto getFileOptions = [this, target] (const build_tools::RelativePath& path)
+                {
+                    const auto rebasedPath = rebaseFromProjectFolderToBuildTarget (path);
+                    return FileOptions().withRelativePath ({ replaceHomeTildeInPath (rebasedPath.toUnixStyle()), rebasedPath.getRoot() })
+                                        .withSkipPCHEnabled (true)
+                                        .withCompilationEnabled (true)
+                                        .withInhibitWarningsEnabled (true)
+                                        .withXcodeTarget (target);
+                };
 
-            if (target->type == XcodeTarget::VST3Helper
-                && project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
-            {
-                const auto path = rebaseFromProjectFolderToBuildTarget (getVST3HelperProgramSource());
-                addFile (FileOptions().withRelativePath ({ path.toUnixStyle(), path.getRoot() })
-                                      .withSkipPCHEnabled (true)
-                                      .withCompilationEnabled (true)
-                                      .withInhibitWarningsEnabled (true)
-                                      .withCompilerFlags ("-std=c++17 -fobjc-arc")
-                                      .withXcodeTarget (target));
+                if (target->type == XcodeTarget::LV2Helper)
+                    addFile (getFileOptions (getLV2HelperProgramSource()));
+                else if (target->type == XcodeTarget::VST3Helper)
+                    addFile (getFileOptions (getVST3HelperProgramSource()).withCompilerFlags ("-fobjc-arc"));
             }
 
             auto targetName = String (target->getName());
