@@ -430,6 +430,9 @@ public:
     [[deprecated]] void setSelectedItemIndex (int, bool);
     [[deprecated]] void setText (const String&, bool);
    #endif
+    
+    //GB 31/1/24 Changed to public
+    PopupMenu::Item* getItemForId (int) const noexcept;
 
 private:
     //==============================================================================
@@ -450,7 +453,7 @@ private:
     String textWhenNothingSelected, noChoicesMessage;
     EditableState labelEditableState = editableUnknown;
 
-    PopupMenu::Item* getItemForId (int) const noexcept;
+    // std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     PopupMenu::Item* getItemForIndex (int) const noexcept;
     bool selectIfEnabled (int index);
     bool nudgeSelectedItem (int delta);

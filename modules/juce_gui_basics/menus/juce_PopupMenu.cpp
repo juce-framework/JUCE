@@ -1970,6 +1970,17 @@ static PopupMenu::Options with (PopupMenu::Options options, Member&& member, Ite
     return options;
 }
 
+PopupMenu::Options PopupMenu::Options::withSelectableAreaLeftInset (int xInsetAmount) const
+{
+    return with (*this, &Options::selectableAreaLeftInset, xInsetAmount);
+}
+
+PopupMenu::Options PopupMenu::Options::withSelectableAreaRightInset (int xInsetAmount) const
+{
+    return with (*this, &Options::selectableAreaRightInset, xInsetAmount);
+}
+
+
 PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
 {
     auto o = with (with (*this, &Options::targetComponent, comp), &Options::topLevelTarget, comp);

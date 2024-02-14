@@ -112,7 +112,7 @@ public:
         Existing listeners will still be registered after you call this method, and
         they'll continue to receive messages when the new value changes.
     */
-    void referTo (const Value& valueToReferTo);
+    void referTo (const Value& valueToReferTo, bool notifyListeners = true);
 
     /** Returns true if this object and the other one use the same underlying
         ValueSource object.
