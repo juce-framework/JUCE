@@ -525,7 +525,14 @@ private:
         if (userHeaders.isNotEmpty())
             header << "\r\n" << userHeaders;
 
-        header << "\r\n\r\n";
+        if(header.toString().endsWith("\r\n"))
+        {
+            header << "\r\n";
+        }
+        else
+        {
+            header << "\r\n\r\n";
+        }
 
         if (hasPostData)
             header << postData;

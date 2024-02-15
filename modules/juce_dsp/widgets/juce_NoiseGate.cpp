@@ -47,8 +47,6 @@ void NoiseGate<SampleType>::setThreshold (SampleType newValue)
 template <typename SampleType>
 void NoiseGate<SampleType>::setRatio (SampleType newRatio)
 {
-    jassert (newRatio >= static_cast<SampleType> (1.0));
-
     ratio = newRatio;
     update();
 }
