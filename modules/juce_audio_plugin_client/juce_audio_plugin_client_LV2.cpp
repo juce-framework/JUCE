@@ -1080,7 +1080,7 @@ private:
 
                 const auto strings = param.getAllValueStrings();
 
-                for (const auto& [counter, string] : enumerate (strings))
+                for (const auto [counter, string] : enumerate (strings))
                 {
                     const auto value = jmap ((float) counter, 0.0f, (float) numSteps - 1.0f, min, max);
 
