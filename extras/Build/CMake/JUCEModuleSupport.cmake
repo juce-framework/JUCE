@@ -618,7 +618,7 @@ function(juce_add_module module_path)
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" linuxLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-            if(module_name MATCHES "juce_gui_basics|juce_audio_processors|juce_core")
+            if(module_name MATCHES "juce_gui_basics|juce_audio_processors|juce_core|juce_graphics")
                 target_compile_options(${module_name} INTERFACE /bigobj)
             endif()
 

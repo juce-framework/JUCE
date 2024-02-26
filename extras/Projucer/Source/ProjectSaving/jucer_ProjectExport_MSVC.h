@@ -1934,7 +1934,8 @@ protected:
 
         return name.equalsIgnoreCase ("include_juce_gui_basics")
             || name.equalsIgnoreCase ("include_juce_audio_processors")
-            || name.equalsIgnoreCase ("include_juce_core");
+            || name.equalsIgnoreCase ("include_juce_core")
+            || name.equalsIgnoreCase ("include_juce_graphics");
     }
 
     StringArray getModuleLibs() const

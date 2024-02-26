@@ -221,6 +221,51 @@
     <Filter Include="JUCE Modules\juce_graphics\effects">
       <UniqueIdentifier>{A302A8DB-120F-9EBB-A3D5-2C29963AA56B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\CBDT">
+      <UniqueIdentifier>{8C9420D9-C764-CBF5-0C95-45A68722E99A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\COLR">
+      <UniqueIdentifier>{3EC3A03F-5D43-25E3-C82E-688CDEB00C86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\CPAL">
+      <UniqueIdentifier>{462DE0A0-C61F-DAEC-457C-F2C331F6BA13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\sbix">
+      <UniqueIdentifier>{DD7B3E15-B826-9CA6-34E6-AE5187A66799}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\svg">
+      <UniqueIdentifier>{924CEEDF-081A-C4B8-B6CB-6579E15F7D71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color">
+      <UniqueIdentifier>{DAD6415C-4D8D-B181-3919-C63E674F1559}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf">
+      <UniqueIdentifier>{A43A6434-A029-E35D-3205-06F6644E97E1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common">
+      <UniqueIdentifier>{F3EA5987-9668-446D-7994-E5A2307673BC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GDEF">
+      <UniqueIdentifier>{F8F5D22C-0EF0-4673-4EA7-D67B35A3EFD3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS">
+      <UniqueIdentifier>{6A1D4F6C-32A9-CCE3-AC75-2C4453748E1F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB">
+      <UniqueIdentifier>{9F968C68-CB3F-7A0E-8D3F-620C10A2713F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout">
+      <UniqueIdentifier>{D9EDBB3F-9EB4-BF65-7117-63C275BFFFE9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\name">
+      <UniqueIdentifier>{1CD94C81-9754-F2A6-0E6F-53AD2CA6F254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT">
+      <UniqueIdentifier>{E0C58D4E-D619-E6F8-E0E6-524676456033}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz">
+      <UniqueIdentifier>{37EDABAF-7289-F75A-B8D8-FF461ED0AC6B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_graphics\fonts">
       <UniqueIdentifier>{45489C2A-6E0E-CCDC-6638-0DACEEB63CCA}</UniqueIdentifier>
     </Filter>
@@ -1120,6 +1165,219 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\effects\juce_GlowEffect.cpp">
       <Filter>JUCE Modules\juce_graphics\effects</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\harfbuzz.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-map.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-blob.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-buffer-serialize.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-buffer-verify.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-buffer.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-common.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-coretext.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-directwrite.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-draw.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-face-builder.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-face.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-fallback-shape.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-font.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ft.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gdi.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-glib.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-graphite2.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-map.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-number.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-cff1-table.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-cff2-table.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-color.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-face.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-font.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-map.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-math.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-meta.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-metrics.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-name.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shape-fallback.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shape-normalize.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shape.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-arabic.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-default.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-hangul.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-hebrew.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-indic-table.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-indic.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-khmer.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-myanmar.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-syllabic.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-thai.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-use.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-vowel-constraints.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-tag.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-outline.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-paint-extents.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-paint.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-set.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shape-plan.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shape.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shaper.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-static.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-style.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-cff-common.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-cff1.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-cff2.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-input.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-solver.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-plan.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-repacker.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ucd.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-unicode.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-uniscribe.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-shape.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.cpp">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClCompile>
@@ -1409,6 +1667,9 @@
       <Filter>JUCE Modules\juce_graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics.mm">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_Harfbuzz.cpp">
       <Filter>JUCE Modules\juce_graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityHandler.cpp">
@@ -2054,6 +2315,9 @@
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_Harfbuzz.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp">
@@ -3266,6 +3530,792 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\effects\juce_ImageEffectFilter.h">
       <Filter>JUCE Modules\juce_graphics\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Color\CBDT\CBDT.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\CBDT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Color\COLR\COLR.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\COLR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Color\COLR\colrv1-closure.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\COLR</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Color\CPAL\CPAL.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\CPAL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Color\sbix\sbix.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\sbix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Color\svg\svg.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Color\svg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\composite-iter.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\CompositeGlyph.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\coord-setter.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\glyf-helpers.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\glyf.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\Glyph.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\GlyphHeader.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\loca.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\path-builder.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\SimpleGlyph.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\SubsetGlyph.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\VarCompositeGlyph.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common\Coverage.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common\CoverageFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common\CoverageFormat2.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common\RangeRecord.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GDEF\GDEF.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GDEF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\Anchor.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\AnchorFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\AnchorFormat2.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\AnchorFormat3.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\AnchorMatrix.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\ChainContextPos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\Common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\ContextPos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\CursivePos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\CursivePosFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\ExtensionPos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\GPOS.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\LigatureArray.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\MarkArray.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\MarkBasePos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\MarkBasePosFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\MarkLigPos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\MarkLigPosFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\MarkMarkPos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\MarkMarkPosFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\MarkRecord.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\PairPos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\PairPosFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\PairPosFormat2.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\PairSet.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\PairValueRecord.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\PosLookup.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\PosLookupSubTable.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\SinglePos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\SinglePosFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\SinglePosFormat2.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS\ValueFormat.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GPOS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\AlternateSet.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\AlternateSubst.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\AlternateSubstFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\ChainContextSubst.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\Common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\ContextSubst.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\ExtensionSubst.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\GSUB.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\Ligature.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\LigatureSet.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\LigatureSubst.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\LigatureSubstFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\MultipleSubst.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\MultipleSubstFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\ReverseChainSingleSubst.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\ReverseChainSingleSubstFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\Sequence.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\SingleSubst.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\SingleSubstFormat1.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\SingleSubstFormat2.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\SubstLookup.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\SubstLookupSubTable.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\types.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\name\name.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\name</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-ankr-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-bsln-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-feat-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-just-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-kerx-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-morx-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-opbd-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-trak-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-ltag-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-map.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-algs.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-array.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-atomic.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-bimap.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-bit-page.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-bit-set-invertible.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-bit-set.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-blob.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-blob.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-buffer-deserialize-json.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-buffer-deserialize-text-glyphs.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-buffer-deserialize-text-unicode.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-buffer.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-buffer.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-cache.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-cff-interp-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-cff-interp-cs-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-cff-interp-dict-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-cff1-interp-cs.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-cff2-interp-cs.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-common.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-config.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-coretext.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-cplusplus.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-debug.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-deprecated.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-directwrite.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-dispatch.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-draw.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-draw.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-face.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-face.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-font.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-font.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ft-colr.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ft.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gdi.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-glib.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-graphite2.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-iter.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-kern.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-limits.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-machinery.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-map.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-map.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-meta.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ms-feature-ranges.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-multimap.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-mutex.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-null.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-number-parser.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-number.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-object.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-open-file.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-open-type.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-cff-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-cff1-std-str.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-cff1-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-cff2-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-cmap-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-color.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-deprecated.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-face-table-list.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-face.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-font.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-gasp-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-glyf-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-hdmx-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-head-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-hhea-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-hmtx-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-kern-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout-base-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout-gdef-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout-gpos-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout-gsub-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout-gsubgpos.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout-jstf-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-layout.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-map.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-math-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-math.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-maxp-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-meta-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-meta.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-metrics.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-metrics.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-name-language-static.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-name-language.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-name-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-name.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-os2-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-os2-unicode-ranges.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-post-macroman.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-post-table-v2subset.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-post-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shape-fallback.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shape-normalize.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shape.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shape.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-arabic-fallback.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-arabic-joining-list.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-arabic-pua.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-arabic-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-arabic-win1256.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-arabic.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-indic-machine.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-indic.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-khmer-machine.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-myanmar-machine.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-syllabic.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-use-machine.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-use-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper-vowel-constraints.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-shaper.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-stat-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-tag-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-avar-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-cvar-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-fvar-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-gvar-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-hvar-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-mvar-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-vorg-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-outline.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-paint-extents.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-paint.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-paint.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-pool.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-priority-queue.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-sanitize.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-serialize.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-set-digest.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-set.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-set.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shape-plan.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shape-plan.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shape.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shaper-impl.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shaper-list.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-shaper.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-string-array.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-style.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-accelerator.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-cff-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-input.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-solver.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-plan-member-list.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-plan.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-repacker.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ucd-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-unicode-emoji-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-unicode.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-unicode.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-uniscribe.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-utf.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-vector.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-version.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>

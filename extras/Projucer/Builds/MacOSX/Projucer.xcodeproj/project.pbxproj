@@ -14,6 +14,7 @@
 		0A89E8E0E99C3B5B2B38F2E6 /* jucer_NewProjectWizard.cpp */ = {isa = PBXBuildFile; fileRef = C2835F16963B34839FC36220; };
 		0E783907C6214ADD59EC95DC /* jucer_Modules.cpp */ = {isa = PBXBuildFile; fileRef = F58B23995765C9FDBE28F871; };
 		11D42F7EC6E6539D79A7F4B1 /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = E5D6C36496F5BC84D7213BE8; };
+		13180B0F6CE42B355C90CF3C /* include_juce_graphics_Harfbuzz.cpp */ = {isa = PBXBuildFile; fileRef = 39F69DABE999E4B2CBC6041F; };
 		1321E6C1C6170B6C898AD09D /* Icon.icns */ = {isa = PBXBuildFile; fileRef = 951128CA33CCDEF570436B1C; };
 		1B988E139004D8E2850EB656 /* jucer_PaintRoutine.cpp */ = {isa = PBXBuildFile; fileRef = C187718F7B9EBA88584B43F3; };
 		209FCCC2155A1FCB7E11E20D /* jucer_JucerDocument.cpp */ = {isa = PBXBuildFile; fileRef = 269A454F1FF081DA67FFD578; };
@@ -143,6 +144,7 @@
 		36E5FBF64A89D5F2A266A5A7 /* jucer_PaintElementUndoableAction.h */ /* jucer_PaintElementUndoableAction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_PaintElementUndoableAction.h; path = ../../Source/ComponentEditor/PaintElements/jucer_PaintElementUndoableAction.h; sourceTree = SOURCE_ROOT; };
 		37C52FDE069922DFD4A938C8 /* juce_LinuxSubprocessHelper.cpp */ /* juce_LinuxSubprocessHelper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_LinuxSubprocessHelper.cpp; path = ../../../Build/CMake/juce_LinuxSubprocessHelper.cpp; sourceTree = SOURCE_ROOT; };
 		39597BD78897CB711AFA945A /* jucer_EditingPanelBase.h */ /* jucer_EditingPanelBase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_EditingPanelBase.h; path = ../../Source/ComponentEditor/UI/jucer_EditingPanelBase.h; sourceTree = SOURCE_ROOT; };
+		39F69DABE999E4B2CBC6041F /* include_juce_graphics_Harfbuzz.cpp */ /* include_juce_graphics_Harfbuzz.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_graphics_Harfbuzz.cpp; path = ../../JuceLibraryCode/include_juce_graphics_Harfbuzz.cpp; sourceTree = SOURCE_ROOT; };
 		3D36F0CEB84B27BD02FC461A /* jucer_LabelPropertyComponent.h */ /* jucer_LabelPropertyComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_LabelPropertyComponent.h; path = ../../Source/Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h; sourceTree = SOURCE_ROOT; };
 		3D6FD9C0065BF16568EC0AB7 /* jucer_SlidingPanelComponent.h */ /* jucer_SlidingPanelComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_SlidingPanelComponent.h; path = ../../Source/Utility/UI/jucer_SlidingPanelComponent.h; sourceTree = SOURCE_ROOT; };
 		3F7C5B53347A487C7FBD2223 /* jucer_OpenGLComponentTemplate.h */ /* jucer_OpenGLComponentTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_OpenGLComponentTemplate.h; path = ../../Source/BinaryData/Templates/jucer_OpenGLComponentTemplate.h; sourceTree = SOURCE_ROOT; };
@@ -532,6 +534,7 @@
 				1DE5BBC777FB64798D823002,
 				5867DC4E39DF8539B54C0D59,
 				1B9B5A37F079FE3B3CF8FAB6,
+				39F69DABE999E4B2CBC6041F,
 				0462692BAA9CD1BE6DFBCC33,
 				AECE3914F5119A3D586A5635,
 				364D1A9B113320407A7E57B9,
@@ -1090,6 +1093,7 @@
 				02E8F35A8E0D4A0DF6F38D60,
 				234B6BA2952CBC7C61EF70EF,
 				254A7C08594A152C2C646334,
+				13180B0F6CE42B355C90CF3C,
 				F15F0512666FF8CDC0D08905,
 				B18248959DDC44EF4E85320A,
 			);

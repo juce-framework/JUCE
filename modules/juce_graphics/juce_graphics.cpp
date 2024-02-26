@@ -52,32 +52,14 @@
 //==============================================================================
 #if JUCE_MAC
  #import <QuartzCore/QuartzCore.h>
+ #include <CoreText/CTFont.h>
 
 #elif JUCE_WINDOWS
   // get rid of some warnings in Window's own headers
  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4458)
 
- #if JUCE_MINGW && JUCE_USE_DIRECTWRITE
-  #warning "DirectWrite not currently implemented with mingw..."
-  #undef JUCE_USE_DIRECTWRITE
- #endif
-
- #if JUCE_USE_DIRECTWRITE || JUCE_DIRECT2D
-  /*  This is a workaround for broken-by-default function definitions
-      in the MinGW headers. If you're using a newer distribution of MinGW,
-      then your headers may substitute the broken definitions with working definitions
-      when this flag is enabled. Unfortunately, not all MinGW headers contain this
-      workaround, so Direct2D remains disabled by default when building with MinGW.
-  */
-  #define WIDL_EXPLICIT_AGGREGATE_RETURNS 1
-
-  /* If you hit a compile error trying to include these files, you may need to update
-     your version of the Windows SDK to the latest one. The DirectWrite and Direct2D
-     headers are in the version 7 SDKs.
-  */
-  #include <d2d1.h>
-  #include <dwrite.h>
- #endif
+ #include <d2d1.h>
+ #include <dwrite_3.h>
 
  #if JUCE_MINGW
   #include <malloc.h>
@@ -97,12 +79,8 @@
 #endif
 
 #if JUCE_USE_FREETYPE
- #if JUCE_USE_FREETYPE_AMALGAMATED
-  #include "native/freetype/FreeTypeAmalgam.h"
- #else
-  #include <ft2build.h>
-  #include FT_FREETYPE_H
- #endif
+ #include <ft2build.h>
+ #include FT_FREETYPE_H
 #endif
 
 #undef SIZEOF
@@ -112,6 +90,18 @@
 #else
  #define JUCE_USING_COREIMAGE_LOADER 0
 #endif
+
+#if JUCE_USE_FREETYPE
+ #include <juce_graphics/fonts/harfbuzz/hb-ft.h>
+#endif
+
+#if JUCE_WINDOWS
+ #include <juce_graphics/fonts/harfbuzz/hb-directwrite.h>
+#elif JUCE_MAC || JUCE_IOS
+ #include <juce_graphics/fonts/harfbuzz/hb-coretext.h>
+#endif
+
+#include <juce_graphics/fonts/harfbuzz/hb-ot.h>
 
 //==============================================================================
 #include "colour/juce_Colour.cpp"
@@ -136,7 +126,6 @@
 #include "image_formats/juce_PNGLoader.cpp"
 #include "fonts/juce_AttributedString.cpp"
 #include "fonts/juce_Typeface.cpp"
-#include "fonts/juce_CustomTypeface.cpp"
 #include "fonts/juce_Font.cpp"
 #include "fonts/juce_GlyphArrangement.cpp"
 #include "fonts/juce_TextLayout.cpp"
@@ -175,18 +164,4 @@
  #include "native/juce_Fonts_android.cpp"
  #include "native/juce_IconHelpers_android.cpp"
 
-#endif
-
-//==============================================================================
-#if JUCE_USE_FREETYPE && JUCE_USE_FREETYPE_AMALGAMATED
- #undef PIXEL_MASK
- #undef ZLIB_VERSION
- #undef Z_ASCII
- #undef ZEXTERN
- #undef ZEXPORT
-
- extern "C"
- {
-   #include "native/freetype/FreeTypeAmalgam.c"
- }
 #endif
