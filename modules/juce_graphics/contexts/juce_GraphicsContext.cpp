@@ -62,7 +62,10 @@ namespace
 {
     struct ConfiguredArrangement
     {
-        void draw (const Graphics& g) const { arrangement.draw (g, transform); }
+        void draw (const Graphics& g) const
+        {
+            arrangement.draw (g, transform);
+        }
 
         GlyphArrangement arrangement;
         AffineTransform transform;
@@ -80,56 +83,17 @@ namespace
         }
 
         template <typename ConfigureArrangement>
-        void draw (const Graphics& g, ArrangementArgs&& args, ConfigureArrangement&& configureArrangement)
+        [[nodiscard]] auto get (ArrangementArgs&& args, ConfigureArrangement&& configureArrangement)
         {
             const ScopedTryLock stl (lock);
-
-            if (! stl.isLocked())
-            {
-                configureArrangement (args).draw (g);
-                return;
-            }
-
-            const auto cached = [&]
-            {
-                const auto iter = cache.find (args);
-
-                if (iter != cache.end())
-                {
-                    if (iter->second.cachePosition != cacheOrder.begin())
-                        cacheOrder.splice (cacheOrder.begin(), cacheOrder, iter->second.cachePosition);
-
-                    return iter;
-                }
-
-                auto result = cache.emplace (std::move (args), CachedGlyphArrangement { configureArrangement (args), {} }).first;
-                cacheOrder.push_front (result);
-                return result;
-            }();
-
-            cached->second.cachePosition = cacheOrder.begin();
-            cached->second.configured.draw (g);
-
-            while (cache.size() > cacheSize)
-            {
-                cache.erase (cacheOrder.back());
-                cacheOrder.pop_back();
-            }
+            return stl.isLocked() ? cache.get (args, std::forward<ConfigureArrangement> (configureArrangement))
+                                  : configureArrangement (args);
         }
 
         JUCE_DECLARE_SINGLETON (GlyphArrangementCache<ArrangementArgs>, false)
 
     private:
-        struct CachedGlyphArrangement
-        {
-            using CachePtr = typename std::map<ArrangementArgs, CachedGlyphArrangement>::const_iterator;
-            ConfiguredArrangement configured;
-            typename std::list<CachePtr>::const_iterator cachePosition;
-        };
-
-        static constexpr size_t cacheSize = 128;
-        std::map<ArrangementArgs, CachedGlyphArrangement> cache;
-        std::list<typename CachedGlyphArrangement::CachePtr> cacheOrder;
+        LruCache<ArrangementArgs, ConfiguredArrangement> cache;
         CriticalSection lock;
     };
 
@@ -383,9 +347,9 @@ void Graphics::drawSingleLineText (const String& text, const int startX, const i
         return ConfiguredArrangement { std::move (arrangement), std::move (transform) };
     };
 
-    GlyphArrangementCache<ArrangementArgs>::getInstance()->draw (*this,
-                                                                 { context.getFont(), text, startX, baselineY, flags },
-                                                                 std::move (configureArrangement));
+    GlyphArrangementCache<ArrangementArgs>::getInstance()->get ({ context.getFont(), text, startX, baselineY, flags },
+                                                                std::move (configureArrangement))
+                                                          .draw (*this);
 }
 
 void Graphics::drawMultiLineText (const String& text, const int startX,
@@ -416,9 +380,9 @@ void Graphics::drawMultiLineText (const String& text, const int startX,
         return ConfiguredArrangement { std::move (arrangement), {} };
     };
 
-    GlyphArrangementCache<ArrangementArgs>::getInstance()->draw (*this,
-                                                                 { context.getFont(), text, startX, baselineY, maximumLineWidth, justification, leading },
-                                                                 std::move (configureArrangement));
+    GlyphArrangementCache<ArrangementArgs>::getInstance()->get ({ context.getFont(), text, startX, baselineY, maximumLineWidth, justification, leading },
+                                                                std::move (configureArrangement))
+                                                          .draw (*this);
 }
 
 void Graphics::drawText (const String& text, Rectangle<float> area,
@@ -451,9 +415,9 @@ void Graphics::drawText (const String& text, Rectangle<float> area,
         return ConfiguredArrangement { std::move (arrangement), {} };
     };
 
-    GlyphArrangementCache<ArrangementArgs>::getInstance()->draw (*this,
-                                                                 { context.getFont(), text, area, justificationType, useEllipsesIfTooBig },
-                                                                 std::move (configureArrangement));
+    GlyphArrangementCache<ArrangementArgs>::getInstance()->get ({ context.getFont(), text, area, justificationType, useEllipsesIfTooBig },
+                                                                std::move (configureArrangement))
+                                                          .draw (*this);
 }
 
 void Graphics::drawText (const String& text, Rectangle<int> area,
@@ -501,9 +465,9 @@ void Graphics::drawFittedText (const String& text, Rectangle<int> area,
         return ConfiguredArrangement { std::move (arrangement), {} };
     };
 
-    GlyphArrangementCache<ArrangementArgs>::getInstance()->draw (*this,
-                                                                 { context.getFont(), text, area.toFloat(), justification, maximumNumberOfLines, minimumHorizontalScale },
-                                                                 std::move (configureArrangement));
+    GlyphArrangementCache<ArrangementArgs>::getInstance()->get ({ context.getFont(), text, area.toFloat(), justification, maximumNumberOfLines, minimumHorizontalScale },
+                                                                std::move (configureArrangement))
+                                                          .draw (*this);
 }
 
 void Graphics::drawFittedText (const String& text, int x, int y, int width, int height,

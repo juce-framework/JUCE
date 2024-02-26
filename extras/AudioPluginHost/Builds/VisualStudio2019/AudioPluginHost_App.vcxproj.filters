@@ -6627,6 +6627,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_GlyphArrangement.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_LruCache.h">
+      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_TextLayout.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>

@@ -3935,6 +3935,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_Font.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FunctionPointerDestructor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_GlyphArrangement.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_LruCache.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_TextLayout.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_Typeface.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_AffineTransform.h"/>
