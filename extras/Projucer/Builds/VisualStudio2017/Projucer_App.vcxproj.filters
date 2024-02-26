@@ -1381,9 +1381,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.cpp">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_CustomTypeface.cpp">
-      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_Font.cpp">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClCompile>
@@ -1394,6 +1391,9 @@
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_Typeface.cpp">
+      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_TypefaceTestData.cpp">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\geometry\juce_AffineTransform.cpp">
@@ -1640,9 +1640,6 @@
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_Fonts_mac.mm">
-      <Filter>JUCE Modules\juce_graphics\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_Fonts_windows.cpp">
       <Filter>JUCE Modules\juce_graphics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\native\juce_GraphicsContext_android.cpp">
@@ -4318,9 +4315,6 @@
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.h">
-      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_CustomTypeface.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_Font.h">

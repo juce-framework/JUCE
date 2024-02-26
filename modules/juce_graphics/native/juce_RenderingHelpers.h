@@ -35,6 +35,49 @@
 namespace juce::RenderingHelpers
 {
 
+template <typename Context>
+void drawGlyphImpl (Context& context, int glyphNumber, const AffineTransform& trans)
+{
+    using GlyphCacheType = typename Context::GlyphCacheType;
+    using EdgeTableRegionType = typename Context::EdgeTableRegionType;
+
+    if (context.clip == nullptr)
+        return;
+
+    if (trans.isOnlyTranslation() && ! context.transform.isRotated)
+    {
+        auto& cache = GlyphCacheType::getInstance();
+        const Point pos (trans.getTranslationX(), trans.getTranslationY());
+
+        if (context.transform.isOnlyTranslated)
+        {
+            cache.drawGlyph (context, context.font, glyphNumber, pos + context.transform.offset.toFloat());
+        }
+        else
+        {
+            auto f = context.font;
+            f.setHeight (f.getHeight() * context.transform.complexTransform.mat11);
+
+            auto xScale = context.transform.complexTransform.mat00 / context.transform.complexTransform.mat11;
+
+            if (std::abs (xScale - 1.0f) > 0.01f)
+                f.setHorizontalScale (xScale);
+
+            cache.drawGlyph (context, f, glyphNumber, context.transform.transformed (pos));
+        }
+    }
+    else
+    {
+        const auto fontHeight = context.font.getHeight();
+        const auto fontTransform = AffineTransform::scale (fontHeight * context.font.getHorizontalScale(),
+                                                           fontHeight).followedBy (trans);
+        const auto fullTransform = context.transform.getTransformWith (fontTransform);
+
+        if (auto et = rawToUniquePtr (context.font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, fullTransform, fontHeight)))
+            context.fillShape (*new EdgeTableRegionType (*et), false);
+    }
+}
+
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127)
 
 //==============================================================================
@@ -190,6 +233,11 @@ public:
         }
     }
 
+private:
+    ReferenceCountedArray<CachedGlyphType> glyphs;
+    Atomic<int> accessCounter, hits, misses;
+    CriticalSection lock;
+
     ReferenceCountedObjectPtr<CachedGlyphType> findOrCreateGlyph (const Font& font, int glyphNumber)
     {
         const ScopedLock sl (lock);
@@ -206,11 +254,6 @@ public:
         g->generate (font, glyphNumber);
         return g;
     }
-
-private:
-    ReferenceCountedArray<CachedGlyphType> glyphs;
-    Atomic<int> accessCounter, hits, misses;
-    CriticalSection lock;
 
     ReferenceCountedObjectPtr<CachedGlyphType> findExistingGlyph (const Font& font, int glyphNumber) const noexcept
     {
@@ -287,9 +330,6 @@ public:
 
     void draw (RendererType& state, Point<float> pos) const
     {
-        if (snapToIntegerCoordinate)
-            pos.x = std::floor (pos.x + 0.5f);
-
         if (edgeTable != nullptr)
             state.fillEdgeTable (*edgeTable, pos.x, roundToInt (pos.y));
     }
@@ -298,7 +338,6 @@ public:
     {
         font = newFont;
         auto typeface = newFont.getTypefacePtr();
-        snapToIntegerCoordinate = typeface->isHinted();
         glyph = glyphNumber;
 
         auto fontHeight = font.getHeight();
@@ -310,7 +349,6 @@ public:
     Font font;
     std::unique_ptr<EdgeTable> edgeTable;
     int glyph = 0, lastAccessCount = 0;
-    bool snapToIntegerCoordinate = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
 };
@@ -2542,45 +2580,7 @@ public:
     //==============================================================================
     void drawGlyph (int glyphNumber, const AffineTransform& trans)
     {
-        if (clip != nullptr)
-        {
-            if (trans.isOnlyTranslation() && ! transform.isRotated)
-            {
-                auto& cache = GlyphCacheType::getInstance();
-                Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
-
-                if (transform.isOnlyTranslated)
-                {
-                    cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
-                }
-                else
-                {
-                    pos = transform.transformed (pos);
-
-                    Font f (font);
-                    f.setHeight (font.getHeight() * transform.complexTransform.mat11);
-
-                    auto xScale = transform.complexTransform.mat00 / transform.complexTransform.mat11;
-
-                    if (std::abs (xScale - 1.0f) > 0.01f)
-                        f.setHorizontalScale (xScale);
-
-                    cache.drawGlyph (*this, f, glyphNumber, pos);
-                }
-            }
-            else
-            {
-                auto fontHeight = font.getHeight();
-
-                auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                     .followedBy (trans));
-
-                std::unique_ptr<EdgeTable> et (font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
-
-                if (et != nullptr)
-                    fillShape (*new EdgeTableRegionType (*et), false);
-            }
-        }
+        drawGlyphImpl (*this, glyphNumber, trans);
     }
 
     Rectangle<int> getMaximumBounds() const     { return image.getBounds(); }
@@ -2706,34 +2706,35 @@ template <class SavedStateType>
 class StackBasedLowLevelGraphicsContext  : public LowLevelGraphicsContext
 {
 public:
-    bool isVectorDevice() const override                                         { return false; }
-    void setOrigin (Point<int> o) override                                       { stack->transform.setOrigin (o); }
-    void addTransform (const AffineTransform& t) override                        { stack->transform.addTransform (t); }
-    float getPhysicalPixelScaleFactor() override                                 { return stack->transform.getPhysicalPixelScaleFactor(); }
-    Rectangle<int> getClipBounds() const override                                { return stack->getClipBounds(); }
-    bool isClipEmpty() const override                                            { return stack->clip == nullptr; }
-    bool clipRegionIntersects (const Rectangle<int>& r) override                 { return stack->clipRegionIntersects (r); }
-    bool clipToRectangle (const Rectangle<int>& r) override                      { return stack->clipToRectangle (r); }
-    bool clipToRectangleList (const RectangleList<int>& r) override              { return stack->clipToRectangleList (r); }
-    void excludeClipRectangle (const Rectangle<int>& r) override                 { stack->excludeClipRectangle (r); }
-    void clipToPath (const Path& path, const AffineTransform& t) override        { stack->clipToPath (path, t); }
-    void clipToImageAlpha (const Image& im, const AffineTransform& t) override   { stack->clipToImageAlpha (im, t); }
-    void saveState() override                                                    { stack.save(); }
-    void restoreState() override                                                 { stack.restore(); }
-    void beginTransparencyLayer (float opacity) override                         { stack.beginTransparencyLayer (opacity); }
-    void endTransparencyLayer() override                                         { stack.endTransparencyLayer(); }
-    void setFill (const FillType& fillType) override                             { stack->setFillType (fillType); }
-    void setOpacity (float newOpacity) override                                  { stack->fillType.setOpacity (newOpacity); }
-    void setInterpolationQuality (Graphics::ResamplingQuality quality) override  { stack->interpolationQuality = quality; }
-    void fillRect (const Rectangle<int>& r, bool replace) override               { stack->fillRect (r, replace); }
-    void fillRect (const Rectangle<float>& r) override                           { stack->fillRect (r); }
-    void fillRectList (const RectangleList<float>& list) override                { stack->fillRectList (list); }
-    void fillPath (const Path& path, const AffineTransform& t) override          { stack->fillPath (path, t); }
-    void drawImage (const Image& im, const AffineTransform& t) override          { stack->drawImage (im, t); }
-    void drawGlyph (int glyphNumber, const AffineTransform& t) override          { stack->drawGlyph (glyphNumber, t); }
-    void drawLine (const Line<float>& line) override                             { stack->drawLine (line); }
-    void setFont (const Font& newFont) override                                  { stack->font = newFont; }
-    const Font& getFont() override                                               { return stack->font; }
+    bool isVectorDevice()                                              const override { return false; }
+    Rectangle<int> getClipBounds()                                     const override { return stack->getClipBounds(); }
+    bool isClipEmpty()                                                 const override { return stack->clip == nullptr; }
+
+    void setOrigin (Point<int> o)                                            override { stack->transform.setOrigin (o); }
+    void addTransform (const AffineTransform& t)                             override { stack->transform.addTransform (t); }
+    float getPhysicalPixelScaleFactor()                                      override { return stack->transform.getPhysicalPixelScaleFactor(); }
+    bool clipRegionIntersects (const Rectangle<int>& r)                      override { return stack->clipRegionIntersects (r); }
+    bool clipToRectangle (const Rectangle<int>& r)                           override { return stack->clipToRectangle (r); }
+    bool clipToRectangleList (const RectangleList<int>& r)                   override { return stack->clipToRectangleList (r); }
+    void excludeClipRectangle (const Rectangle<int>& r)                      override { stack->excludeClipRectangle (r); }
+    void clipToPath (const Path& path, const AffineTransform& t)             override { stack->clipToPath (path, t); }
+    void clipToImageAlpha (const Image& im, const AffineTransform& t)        override { stack->clipToImageAlpha (im, t); }
+    void saveState()                                                         override { stack.save(); }
+    void restoreState()                                                      override { stack.restore(); }
+    void beginTransparencyLayer (float opacity)                              override { stack.beginTransparencyLayer (opacity); }
+    void endTransparencyLayer()                                              override { stack.endTransparencyLayer(); }
+    void setFill (const FillType& fillType)                                  override { stack->setFillType (fillType); }
+    void setOpacity (float newOpacity)                                       override { stack->fillType.setOpacity (newOpacity); }
+    void setInterpolationQuality (Graphics::ResamplingQuality quality)       override { stack->interpolationQuality = quality; }
+    void fillRect (const Rectangle<int>& r, bool replace)                    override { stack->fillRect (r, replace); }
+    void fillRect (const Rectangle<float>& r)                                override { stack->fillRect (r); }
+    void fillRectList (const RectangleList<float>& list)                     override { stack->fillRectList (list); }
+    void fillPath (const Path& path, const AffineTransform& t)               override { stack->fillPath (path, t); }
+    void drawImage (const Image& im, const AffineTransform& t)               override { stack->drawImage (im, t); }
+    void drawGlyph (int i, const AffineTransform& t)                         override { stack->drawGlyph (i, t); }
+    void drawLine (const Line<float>& line)                                  override { stack->drawLine (line); }
+    void setFont (const Font& newFont)                                       override { stack->font = newFont; }
+    const Font& getFont()                                                    override { return stack->font; }
 
 protected:
     StackBasedLowLevelGraphicsContext (SavedStateType* initialState) : stack (initialState) {}

@@ -84,7 +84,6 @@ public:
     void setFont (const Font&) override;
     const Font& getFont() override;
     void drawGlyph (int glyphNumber, const AffineTransform&) override;
-    bool drawTextLayout (const AttributedString&, const Rectangle<float>&) override;
 
     void resized();
     void clear();

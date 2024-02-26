@@ -121,8 +121,7 @@ public:
     void drawLine (const Line<float>&) override;
     void setFont (const Font&) override;
     const Font& getFont() override;
-    void drawGlyph (int glyphNumber, const AffineTransform&) override;
-    bool drawTextLayout (const AttributedString&, const Rectangle<float>&) override;
+    void drawGlyph (int glyphNumber, const AffineTransform& transform) override;
 
 private:
     //==============================================================================
@@ -131,22 +130,7 @@ private:
     detail::ColorSpacePtr rgbColourSpace, greyColourSpace;
     mutable std::optional<Rectangle<int>> lastClipRect;
 
-    struct SavedState
-    {
-        SavedState();
-        SavedState (const SavedState&);
-        ~SavedState();
-
-        void setFill (const FillType&);
-
-        FillType fillType;
-        Font font;
-        CGFontRef fontRef = {};
-        CGAffineTransform textMatrix = CGAffineTransformIdentity,
-                   inverseTextMatrix = CGAffineTransformIdentity;
-        detail::GradientPtr gradient = {};
-    };
-
+    struct SavedState;
     std::unique_ptr<SavedState> state;
     OwnedArray<SavedState> stateStack;
 

@@ -584,14 +584,33 @@ struct AndroidStreamHelpers
 };
 
 //==============================================================================
-struct AndroidContentUriInputStream final :  public InputStream
+class AndroidInputStreamWrapper final : public InputStream
 {
-    explicit AndroidContentUriInputStream (const GlobalRef& uriIn)
-        : uri (uriIn),
-          stream (AndroidStreamHelpers::createStream (uri, AndroidStreamHelpers::StreamKind::input))
-    {}
+public:
+    explicit AndroidInputStreamWrapper (jobject streamIn)
+        : stream (LocalRef<jobject> { streamIn })
+    {
+    }
 
-    ~AndroidContentUriInputStream() override
+    AndroidInputStreamWrapper (AndroidInputStreamWrapper&& other) noexcept
+        : byteArray (std::exchange (other.byteArray, {})),
+          stream (std::exchange (other.stream, {})),
+          pos (std::exchange (other.pos, {})),
+          exhausted (std::exchange (other.exhausted, {}))
+    {
+    }
+
+    AndroidInputStreamWrapper (const AndroidInputStreamWrapper&) = delete;
+
+    AndroidInputStreamWrapper& operator= (AndroidInputStreamWrapper&& other) noexcept
+    {
+        std::swap (*this, other);
+        return *this;
+    }
+
+    AndroidInputStreamWrapper& operator= (const AndroidInputStreamWrapper&) = delete;
+
+    ~AndroidInputStreamWrapper() override
     {
         getEnv()->CallVoidMethod (stream.get(), AndroidInputStream.close);
         jniCheckHasExceptionOccurredAndClear();
@@ -625,24 +644,15 @@ struct AndroidContentUriInputStream final :  public InputStream
         return result;
     }
 
-    bool setPosition (int64 newPos) override
+    bool setPosition (int64) override
     {
-        if (newPos == pos)
-            return true;
-
-        if (pos < newPos)
-            return skipImpl (newPos - pos);
-
-        AndroidContentUriInputStream (uri).swap (*this);
-        return skipImpl (newPos);
+        return false;
     }
 
     int64 getPosition() override
     {
         return pos;
     }
-
-    bool openedSuccessfully() const { return stream != nullptr; }
 
     void skipNextBytes (int64 num) override
     {
@@ -664,19 +674,105 @@ private:
         return skipped == num;
     }
 
-    auto tie() { return std::tie (uri, byteArray, stream, pos, exhausted); }
-
-    void swap (AndroidContentUriInputStream& other) noexcept
-    {
-        auto toSwap = other.tie();
-        tie().swap (toSwap);
-    }
-
-    GlobalRef uri;
     CachedByteArray byteArray;
     GlobalRef stream;
     int64 pos = 0;
     bool exhausted = false;
+};
+
+std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (jobject stream);
+std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (jobject stream)
+{
+    return std::make_unique<AndroidInputStreamWrapper> (stream);
+}
+
+//==============================================================================
+struct AndroidContentUriInputStream final : public InputStream
+{
+    AndroidContentUriInputStream (AndroidContentUriInputStream&& other) noexcept
+        : stream (std::move (other.stream)),
+          uri (std::exchange (other.uri, {}))
+    {
+    }
+
+    AndroidContentUriInputStream (const AndroidContentUriInputStream&) = delete;
+
+    AndroidContentUriInputStream& operator= (AndroidContentUriInputStream&& other) noexcept
+    {
+        std::swap (*this, other);
+        return *this;
+    }
+
+    AndroidContentUriInputStream& operator= (const AndroidContentUriInputStream&) = delete;
+
+    int64 getTotalLength() override
+    {
+        return stream.getTotalLength();
+    }
+
+    bool isExhausted() override
+    {
+        return stream.isExhausted();
+    }
+
+    int read (void* destBuffer, int maxBytesToRead) override
+    {
+        return stream.read (destBuffer, maxBytesToRead);
+    }
+
+    bool setPosition (int64 newPos) override
+    {
+        if (newPos == getPosition())
+            return true;
+
+        if (getPosition() < newPos)
+            return skipImpl (newPos - getPosition());
+
+        auto newStream = fromUri (uri);
+
+        if (! newStream.has_value())
+            return false;
+
+        *this = std::move (*newStream);
+        return skipImpl (newPos);
+    }
+
+    int64 getPosition() override
+    {
+        return stream.getPosition();
+    }
+
+    void skipNextBytes (int64 num) override
+    {
+        stream.skipNextBytes (num);
+    }
+
+    static std::optional<AndroidContentUriInputStream> fromUri (const GlobalRef& uriIn)
+    {
+        const auto nativeStream = AndroidStreamHelpers::createStream (uriIn, AndroidStreamHelpers::StreamKind::input);
+
+        if (nativeStream == nullptr)
+            return {};
+
+        return AndroidContentUriInputStream { AndroidInputStreamWrapper { nativeStream }, uriIn };
+    }
+
+private:
+    AndroidContentUriInputStream (AndroidInputStreamWrapper streamIn, const GlobalRef& uriIn)
+        : stream (std::move (streamIn)),
+          uri (uriIn)
+    {
+    }
+
+    bool skipImpl (int64 num)
+    {
+        const auto oldPosition = getPosition();
+        skipNextBytes (num);
+        return getPosition() == oldPosition + num;
+    }
+
+    AndroidInputStreamWrapper stream;
+    GlobalRef uri;
 };
 
 //==============================================================================

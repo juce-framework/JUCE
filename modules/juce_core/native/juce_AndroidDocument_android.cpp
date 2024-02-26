@@ -430,8 +430,10 @@ struct AndroidDocument::Utils
 
         std::unique_ptr<InputStream> createInputStream() const override
         {
-            auto result = std::make_unique<AndroidContentUriInputStream> (uri);
-            return result->openedSuccessfully() ? std::move (result) : nullptr;
+            if (auto opened = AndroidContentUriInputStream::fromUri (uri))
+                return std::make_unique<AndroidContentUriInputStream> (std::move (*opened));
+
+            return {};
         }
 
         std::unique_ptr<OutputStream> createOutputStream() const override

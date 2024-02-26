@@ -35,8 +35,76 @@
 namespace juce
 {
 
+struct TypefaceLegacyMetrics
+{
+    float ascent{};  // in em units
+    float descent{}; // in em units
+
+    float getScaledAscent()  const { return ascent  * getHeightToPointsFactor(); }
+    float getScaledDescent() const { return descent * getHeightToPointsFactor(); }
+
+    float getPointsToHeightFactor() const { return ascent + descent; }
+    float getHeightToPointsFactor() const { return 1.0f / getPointsToHeightFactor(); }
+};
+
+using HbFont   = std::unique_ptr<hb_font_t, FunctionPointerDestructor<hb_font_destroy>>;
+using HbFace   = std::unique_ptr<hb_face_t, FunctionPointerDestructor<hb_face_destroy>>;
+using HbBuffer = std::unique_ptr<hb_buffer_t, FunctionPointerDestructor<hb_buffer_destroy>>;
+
+class Typeface::Native
+{
+public:
+    explicit Native (hb_font_t* fontRef)
+        : Native (fontRef, findLegacyMetrics (fontRef)) {}
+
+    Native (hb_font_t* fontRef, TypefaceLegacyMetrics metrics)
+        : font (fontRef), legacyMetrics (metrics) {}
+
+    auto* getFont() const { return font; }
+
+    auto getLegacyMetrics() const { return legacyMetrics; }
+
+private:
+    static TypefaceLegacyMetrics findLegacyMetrics (hb_font_t* f)
+    {
+        hb_font_extents_t extents{};
+
+        if (! hb_font_get_h_extents (f, &extents))
+        {
+            // jassertfalse;
+            return { 0.5f, 0.5f };
+        }
+
+        const auto ascent  = std::abs ((float) extents.ascender);
+        const auto descent = std::abs ((float) extents.descender);
+        const auto upem    = (float) hb_face_get_upem (hb_font_get_face (f));
+
+        TypefaceLegacyMetrics result;
+        result.ascent  = ascent  / upem;
+        result.descent = descent / upem;
+        return result;
+    }
+
+    hb_font_t* font = nullptr;
+    TypefaceLegacyMetrics legacyMetrics;
+};
+
 struct FontStyleHelpers
 {
+    static void initSynthetics (hb_font_t* hb, const Font& font)
+    {
+        const auto styles = Font::findAllTypefaceStyles (font.getTypefaceName());
+
+        if (styles.contains (font.getTypefaceStyle()))
+            return;
+
+        if (font.isItalic())
+            hb_font_set_synthetic_slant (hb, 0.1f);
+
+        if (font.isBold())
+            hb_font_set_synthetic_bold (hb, 0.04f, 0.04f, true);
+    }
+
     static const char* getStyleName (const bool bold,
                                      const bool italic) noexcept
     {
@@ -60,7 +128,7 @@ struct FontStyleHelpers
     static bool isItalic (const String& style) noexcept
     {
         return style.containsWholeWordIgnoreCase ("Italic")
-            || style.containsWholeWordIgnoreCase ("Oblique");
+               || style.containsWholeWordIgnoreCase ("Oblique");
     }
 
     static bool isPlaceholderFamilyName (const String& family)
@@ -91,7 +159,7 @@ struct FontStyleHelpers
     private:
         static String findName (const String& placeholder)
         {
-            const Font f (placeholder, Font::getDefaultStyle(), 15.0f);
+            const Font f (placeholder, 15.0f, Font::plain);
             return Font::getDefaultTypefaceForFont (f)->getName();
         }
 
@@ -111,162 +179,223 @@ struct FontStyleHelpers
         return isPlaceholderFamilyName (family) ? getConcreteFamilyNameFromPlaceholder (family)
                                                 : family;
     }
+
+    static HbFace getFaceForBlob (Span<const char> bytes, unsigned int index)
+    {
+        auto* blob = hb_blob_create_or_fail (bytes.data(),
+                                             (unsigned int) bytes.size(),
+                                             HB_MEMORY_MODE_DUPLICATE,
+                                             nullptr,
+                                             nullptr);
+        const ScopeGuard scope { [&] { hb_blob_destroy (blob); } };
+
+        const auto count = hb_face_count (blob);
+
+        if (count < 1)
+        {
+            // Attempted to create a font from invalid data. Perhaps the font format was unrecognised.
+            jassertfalse;
+            return {};
+        }
+
+        return HbFace { hb_face_create (blob, index) };
+    }
 };
 
 //==============================================================================
-Typeface::Typeface (const String& faceName, const String& styleName) noexcept
-    : name (faceName), style (styleName)
+Typeface::Typeface (const String& faceName, const String& faceStyle) noexcept
+    : name (faceName),
+      style (faceStyle)
 {
 }
 
 Typeface::~Typeface() = default;
 
-Typeface::Ptr Typeface::getFallbackTypeface()
+using HbDrawFuncs = std::unique_ptr<hb_draw_funcs_t, FunctionPointerDestructor<hb_draw_funcs_destroy>>;
+
+static HbDrawFuncs getPathDrawFuncs()
 {
-    const Font fallbackFont (Font::getFallbackFontName(), Font::getFallbackFontStyle(), 10.0f);
-    return fallbackFont.getTypefacePtr();
+    HbDrawFuncs funcs { hb_draw_funcs_create() };
+
+    hb_draw_funcs_set_move_to_func (funcs.get(), [] (auto*, void* data, auto*, float x, float y, auto*)
+    {
+        auto& path = *static_cast<Path*> (data);
+        path.startNewSubPath ({ x, y });
+    }, nullptr, nullptr);
+    hb_draw_funcs_set_line_to_func (funcs.get(), [] (auto*, void* data, auto*, float x, float y, auto*)
+    {
+        auto& path = *static_cast<Path*> (data);
+        path.lineTo ({ x, y });
+    }, nullptr, nullptr);
+    hb_draw_funcs_set_quadratic_to_func (funcs.get(), [] (auto*, void* data, auto*, float ctlX, float ctlY, float toX, float toY, auto*)
+    {
+        auto& path = *static_cast<Path*> (data);
+        path.quadraticTo ({ ctlX, ctlY }, { toX, toY });
+    }, nullptr, nullptr);
+    hb_draw_funcs_set_cubic_to_func (funcs.get(), [] (auto*, void* data, auto*, float ctlX1, float ctlY1, float ctlX2, float ctlY2, float toX, float toY, auto*)
+    {
+        auto& path = *static_cast<Path*> (data);
+        path.cubicTo ({ ctlX1, ctlY1 }, { ctlX2, ctlY2 }, { toX, toY });
+    }, nullptr, nullptr);
+    hb_draw_funcs_set_close_path_func (funcs.get(), [] (auto*, void* data, auto*, auto*)
+    {
+        auto& path = *static_cast<Path*> (data);
+        path.closeSubPath();
+    }, nullptr, nullptr);
+
+    return funcs;
 }
 
-EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight)
+static Path getTypefaceGlyph (const Typeface& typeface, int glyphNumber)
+{
+    static const auto funcs = getPathDrawFuncs();
+
+    auto* font = typeface.getNativeDetails().getFont();
+
+    Path result;
+    hb_font_draw_glyph (font, (hb_codepoint_t) glyphNumber, funcs.get(), &result);
+
+    // Convert to em units
+    result.applyTransform (AffineTransform::scale (1.0f / (float) hb_face_get_upem (hb_font_get_face (font))).scaled (1.0f, -1.0f));
+
+    return result;
+}
+
+bool Typeface::getOutlineForGlyph (int glyphNumber, Path& path)
+{
+    const auto metrics = getNativeDetails().getLegacyMetrics();
+
+    // getTypefaceGlyph returns glyphs in em space, getOutlineForGlyph returns glyphs in "special JUCE units" space
+    path = getTypefaceGlyph (*this, glyphNumber);
+    path.applyTransform (AffineTransform::scale (metrics.getHeightToPointsFactor()));
+
+    return true;
+}
+
+void Typeface::applyVerticalHintingTransform (float, Path&)
+{
+    jassertfalse;
+}
+
+EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float)
 {
     Path path;
 
-    if (getOutlineForGlyph (glyphNumber, path) && ! path.isEmpty())
-    {
-        applyVerticalHintingTransform (fontHeight, path);
+    if (! getOutlineForGlyph (glyphNumber, path) || path.isEmpty())
+        return nullptr;
 
-        return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
-                              path, transform);
-    }
+    return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
+                          path, transform);
+}
 
-    return nullptr;
+float Typeface::getAscent()               const { return getNativeDetails().getLegacyMetrics().getScaledAscent(); }
+float Typeface::getDescent()              const { return getNativeDetails().getLegacyMetrics().getScaledDescent(); }
+float Typeface::getHeightToPointsFactor() const { return getNativeDetails().getLegacyMetrics().getHeightToPointsFactor(); }
+
+Typeface::Ptr Typeface::createSystemTypefaceFor (const void* fontFileData, size_t fontFileDataSize)
+{
+    return createSystemTypefaceFor (Span (static_cast<const std::byte*> (fontFileData), fontFileDataSize));
 }
 
 //==============================================================================
-struct Typeface::HintingParams
+std::optional<uint32_t> Typeface::getNominalGlyphForCodepoint (juce_wchar cp) const
 {
-    HintingParams (Typeface& t)
-    {
-        Font font (t);
-        font = font.withHeight ((float) standardHeight);
+    auto* font = getNativeDetails().getFont();
 
-        top = getAverageY (font, "BDEFPRTZOQ", true);
-        middle = getAverageY (font, "acegmnopqrsuvwxy", true);
-        bottom = getAverageY (font, "BDELZOC", false);
+    if (font == nullptr)
+        return {};
+
+    hb_codepoint_t result{};
+
+    if (! hb_font_get_nominal_glyph (font, static_cast<hb_codepoint_t> (cp), &result))
+        return {};
+
+    return result;
+}
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class TypefaceTests : public UnitTest
+{
+public:
+    TypefaceTests() : UnitTest ("Typeface", UnitTestCategories::graphics) {}
+
+    void runTest() override
+    {
+        // If we're running these tests standalone, we want singletons to be cleared before the app
+        // exists, so as not to alarm th leak detector.
+        const ScopedJuceInitialiser_GUI scope;
+
+        const auto systemNames = getFontFamilyNamesAsSet();
+
+        auto ptr = loadTypeface (FontBinaryData::Karla_Regular_Typo_On_Offsets_Off);
+        const auto ptrName = ptr->getName();
+
+        // These tests assume that you don't have a font named "karla" installed.
+        beginTest ("Setup");
+        {
+            expect (systemNames.count (ptr->getName()) == 0);
+        }
+
+        beginTest ("Creating a font from memory allows it to be discovered by Font::findAllTypefaceNames()");
+        {
+            const auto newNames = getFontFamilyNamesAsSet();
+
+            expect (newNames.size() == systemNames.size() + 1);
+            expect (newNames.count (ptr->getName()) == 1);
+        }
+
+        beginTest ("The available styles of memory fonts can be found");
+        {
+            const auto styles = Font::findAllTypefaceStyles (ptr->getName());
+            expect (styles == StringArray { ptr->getStyle() });
+        }
+
+        beginTest ("Typefaces loaded from memory are found when creating font instances by name");
+        {
+            Font font (ptr->getName(), ptr->getStyle(), 12.0f);
+
+            expect (font.getTypefacePtr() != nullptr);
+            expect (font.getTypefacePtr()->getName() == ptr->getName());
+            expect (font.getTypefacePtr()->getStyle() == ptr->getStyle());
+        }
+
+        // Unload font
+        ptr = nullptr;
+
+        beginTest ("After a memory font is no longer referenced, it is not returned from Font::findAllTypefaceNames()");
+        {
+            const auto newNames = getFontFamilyNamesAsSet();
+            expect (newNames == systemNames);
+        }
+
+        beginTest ("After a memory font is no longer referenced, it has no styles");
+        {
+            const auto styles = Font::findAllTypefaceStyles (ptrName);
+            expect (styles.isEmpty());
+        }
     }
 
-    void applyVerticalHintingTransform (float fontSize, Path& path)
+    static std::set<String> getFontFamilyNamesAsSet()
     {
-        if (! approximatelyEqual (cachedSize, fontSize))
-        {
-            cachedSize = fontSize;
-            cachedScale = Scaling (top, middle, bottom, fontSize);
-        }
+        std::set<String> result;
 
-        if (bottom < top + 3.0f / fontSize)
-            return;
+        for (const auto& name : Font::findAllTypefaceNames())
+            result.insert (name);
 
-        Path result;
-
-        for (Path::Iterator i (path); i.next();)
-        {
-            switch (i.elementType)
-            {
-                case Path::Iterator::startNewSubPath:  result.startNewSubPath (i.x1, cachedScale.apply (i.y1)); break;
-                case Path::Iterator::lineTo:           result.lineTo (i.x1, cachedScale.apply (i.y1)); break;
-                case Path::Iterator::quadraticTo:      result.quadraticTo (i.x1, cachedScale.apply (i.y1),
-                                                                           i.x2, cachedScale.apply (i.y2)); break;
-                case Path::Iterator::cubicTo:          result.cubicTo (i.x1, cachedScale.apply (i.y1),
-                                                                       i.x2, cachedScale.apply (i.y2),
-                                                                       i.x3, cachedScale.apply (i.y3)); break;
-                case Path::Iterator::closePath:        result.closeSubPath(); break;
-                default:                               jassertfalse; break;
-            }
-        }
-
-        result.swapWithPath (path);
+        return result;
     }
 
-private:
-    struct Scaling
+    static Typeface::Ptr loadTypeface (Span<const unsigned char> data)
     {
-        Scaling() noexcept : middle(), upperScale(), upperOffset(), lowerScale(), lowerOffset() {}
-
-        Scaling (float t, float m, float b, float fontSize) noexcept  : middle (m)
-        {
-            const float newT = std::floor (fontSize * t + 0.5f) / fontSize;
-            const float newB = std::floor (fontSize * b + 0.5f) / fontSize;
-            const float newM = std::floor (fontSize * m + 0.3f) / fontSize; // this is slightly biased so that lower-case letters
-                                                                            // are more likely to become taller than shorter.
-            upperScale  = jlimit (0.9f, 1.1f, (newM - newT) / (m - t));
-            lowerScale  = jlimit (0.9f, 1.1f, (newB - newM) / (b - m));
-
-            upperOffset = newM - m * upperScale;
-            lowerOffset = newB - b * lowerScale;
-        }
-
-        float apply (float y) const noexcept
-        {
-            return y < middle ? (y * upperScale + upperOffset)
-                              : (y * lowerScale + lowerOffset);
-        }
-
-        float middle, upperScale, upperOffset, lowerScale, lowerOffset;
-    };
-
-    float cachedSize = 0;
-    Scaling cachedScale;
-
-    static float getAverageY (const Font& font, const char* chars, bool getTop)
-    {
-        GlyphArrangement ga;
-        ga.addLineOfText (font, chars, 0, 0);
-
-        Array<float> yValues;
-
-        for (auto& glyph : ga)
-        {
-            Path p;
-            glyph.createPath (p);
-            auto bounds = p.getBounds();
-
-            if (! p.isEmpty())
-                yValues.add (getTop ? bounds.getY() : bounds.getBottom());
-        }
-
-        std::sort (yValues.begin(), yValues.end());
-
-        auto median = yValues[yValues.size() / 2];
-        float total = 0;
-        int num = 0;
-
-        for (auto y : yValues)
-        {
-            if (std::abs (median - y) < 0.05f * (float) standardHeight)
-            {
-                total += y;
-                ++num;
-            }
-        }
-
-        return num < 4 ? 0.0f : total / ((float) num * (float) standardHeight);
+        return Typeface::createSystemTypefaceFor (data.data(), data.size());
     }
-
-    enum { standardHeight = 100 };
-    float top = 0, middle = 0, bottom = 0;
 };
 
-void Typeface::applyVerticalHintingTransform (float fontSize, Path& path)
-{
-    if (fontSize > 3.0f && fontSize < 25.0f)
-    {
-        ScopedLock sl (hintingLock);
+static TypefaceTests typefaceTests;
 
-        if (hintingParams == nullptr)
-            hintingParams.reset (new HintingParams (*this));
-
-        return hintingParams->applyVerticalHintingTransform (fontSize, path);
-    }
-}
+#endif
 
 } // namespace juce

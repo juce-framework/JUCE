@@ -81,6 +81,7 @@
 #if JUCE_USE_FREETYPE
  #include <ft2build.h>
  #include FT_FREETYPE_H
+ #include FT_ADVANCES_H
 #endif
 
 #undef SIZEOF
@@ -102,6 +103,10 @@
 #endif
 
 #include <juce_graphics/fonts/harfbuzz/hb-ot.h>
+
+#if JUCE_UNIT_TESTS
+ #include "fonts/juce_TypefaceTestData.cpp"
+#endif
 
 //==============================================================================
 #include "fonts/juce_FunctionPointerDestructor.h"
@@ -151,8 +156,6 @@
 
 #elif JUCE_WINDOWS
  #include "native/juce_DirectWriteTypeface_windows.cpp"
- #include "native/juce_DirectWriteTypeLayout_windows.cpp"
- #include "native/juce_Fonts_windows.cpp"
  #include "native/juce_IconHelpers_windows.cpp"
  #if JUCE_DIRECT2D
   #include "native/juce_Direct2DGraphicsContext_windows.cpp"

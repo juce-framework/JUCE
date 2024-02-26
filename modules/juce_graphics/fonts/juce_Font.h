@@ -478,12 +478,23 @@ public:
     */
     static Font fromString (const String& fontDescription);
 
+    /** @internal */
+    class Native;
+
+    /** @internal
+
+        At the moment, this is a way to get at the hb_font_t that backs this font.
+        The typeface's hb_font_t is sized appropriately for this font instance.
+        The font may also have synthetic slant and bold applied.
+        This is only for internal use!
+    */
+    Native getNativeDetails() const;
+
 private:
     //==============================================================================
     static bool compare (const Font&, const Font&) noexcept;
 
     void dupeInternalIfShared();
-    void checkTypefaceSuitability();
     float getHeightToPointsFactor() const;
 
     friend struct GraphicsFontHelpers;

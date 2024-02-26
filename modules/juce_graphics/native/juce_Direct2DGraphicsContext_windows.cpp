@@ -773,17 +773,4 @@ void Direct2DLowLevelGraphicsContext::drawGlyph (int glyphNumber, const AffineTr
     pimpl->renderingTarget->SetTransform (D2D1::IdentityMatrix());
 }
 
-bool Direct2DLowLevelGraphicsContext::drawTextLayout (const AttributedString& text, const Rectangle<float>& area)
-{
-    pimpl->renderingTarget->SetTransform (transformToMatrix (currentState->transform));
-
-    DirectWriteTypeLayout::drawToD2DContext (text, area,
-                                             *(pimpl->renderingTarget),
-                                             *(pimpl->factories->directWriteFactory),
-                                             *(pimpl->factories->systemFonts));
-
-    pimpl->renderingTarget->SetTransform (D2D1::IdentityMatrix());
-    return true;
-}
-
 } // namespace juce

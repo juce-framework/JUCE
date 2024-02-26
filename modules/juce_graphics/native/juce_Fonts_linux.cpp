@@ -89,16 +89,6 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
     return fontDirs;
 }
 
-Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
-{
-    return new FreeTypeTypeface (font);
-}
-
-Typeface::Ptr Typeface::createSystemTypefaceFor (const void* data, size_t dataSize)
-{
-    return new FreeTypeTypeface (data, dataSize);
-}
-
 void Typeface::scanFolderForFonts (const File& folder)
 {
     FTTypefaceList::getInstance()->scanFontPaths (StringArray (folder.getFullPathName()));
@@ -216,11 +206,6 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     const auto name = font.getTypefaceName();
     const auto realName = defaultInfo.getRealFontName (name);
     f.setTypefaceName (realName);
-
-    const auto styles = findAllTypefaceStyles (realName);
-
-    if (! styles.contains (font.getTypefaceStyle()))
-        f.setTypefaceStyle (styles[0]);
 
     return Typeface::createSystemTypefaceFor (f);
 }

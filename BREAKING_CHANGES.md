@@ -4,6 +4,30 @@
 
 ## Change
 
+CustomTypeface has been removed.
+
+**Possible Issues**
+
+Code that interacts with CustomTypeface will fail to compile.
+
+**Workaround**
+
+There is currently no workaround. If you were using CustomTypeface to
+implement typeface fallback, there is a new API,
+Font::findSuitableFontForText, that you can use to locate fonts capable
+of rendering given strings.
+
+**Rationale**
+
+The CustomTypeface class is difficult/impossible to support with the new
+HarfBuzz Typeface implementation. New support for automatic font fallback
+will be introduced in JUCE 8, and this will obviate much of the need for
+CustomTypeface.
+
+>>>>>>> 94454123d6 (Typeface: Implement platform typefaces using Harfbuzz hb_font_t)
+
+## Change
+
 The Android implementations of Typeface::getStringWidth(), getGlyphPositions(),
 and getEdgeTableForGlyph() have been updated to return correctly-normalised
 results. The effect of this change is to change (in practice, slightly reduce)
