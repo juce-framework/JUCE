@@ -594,5 +594,9 @@ int main (int argc, char** argv)
         {
             juce::ConsoleApplication::fail ("Unhandled exception");
         }
+
+        return 1;
     });
+
+    return 0;
 }
