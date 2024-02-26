@@ -3933,6 +3933,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_CustomTypeface.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_Font.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FunctionPointerDestructor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_GlyphArrangement.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_TextLayout.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_Typeface.h"/>

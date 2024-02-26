@@ -104,6 +104,8 @@
 #include <juce_graphics/fonts/harfbuzz/hb-ot.h>
 
 //==============================================================================
+#include "fonts/juce_FunctionPointerDestructor.h"
+
 #include "colour/juce_Colour.cpp"
 #include "colour/juce_ColourGradient.cpp"
 #include "colour/juce_Colours.cpp"

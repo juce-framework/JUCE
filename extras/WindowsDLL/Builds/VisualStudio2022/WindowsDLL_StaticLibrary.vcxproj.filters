@@ -6315,6 +6315,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_Font.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_FunctionPointerDestructor.h">
+      <Filter>JUCE Modules\juce_graphics\fonts</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_GlyphArrangement.h">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClInclude>
