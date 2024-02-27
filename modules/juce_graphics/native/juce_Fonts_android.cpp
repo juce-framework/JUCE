@@ -267,54 +267,7 @@ public:
                 c->remove ({ getName(), getStyle() });
     }
 
-    float getStringWidth (const String& text) override
-    {
-        const auto heightToPoints = getNativeDetails().getLegacyMetrics().getHeightToPointsFactor();
-        const auto upem = hb_face_get_upem (hb_font_get_face (hbFont.get()));
-
-        hb_position_t x{};
-        doSimpleShape (text, [&] (const auto&, const auto& position)
-        {
-            x += position.x_advance;
-        });
-        return heightToPoints * (float) x / (float) upem;
-    }
-
-    void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) override
-    {
-        const auto heightToPoints = getNativeDetails().getLegacyMetrics().getHeightToPointsFactor();
-        const auto upem = hb_face_get_upem (hb_font_get_face (hbFont.get()));
-
-        Point<hb_position_t> cursor{};
-
-        doSimpleShape (text, [&] (const auto& info, const auto& position)
-        {
-            glyphs.add ((int) info.codepoint);
-            xOffsets.add (heightToPoints * ((float) cursor.x + (float) position.x_offset) / (float) upem);
-            cursor += Point { position.x_advance, position.y_advance };
-        });
-
-        xOffsets.add (heightToPoints * (float) cursor.x / (float) upem);
-    }
-
 private:
-    template <typename Consumer>
-    void doSimpleShape (const String& text, Consumer&& consumer)
-    {
-        HbBuffer buffer { hb_buffer_create() };
-        hb_buffer_add_utf8 (buffer.get(), text.toRawUTF8(), -1, 0, -1);
-        hb_buffer_guess_segment_properties (buffer.get());
-
-        hb_shape (hbFont.get(), buffer.get(), nullptr, 0);
-
-        unsigned int numGlyphs{};
-        auto* infos = hb_buffer_get_glyph_infos (buffer.get(), &numGlyphs);
-        auto* positions = hb_buffer_get_glyph_positions (buffer.get(), &numGlyphs);
-
-        for (auto i = decltype (numGlyphs){}; i < numGlyphs; ++i)
-            consumer (infos[i], positions[i]);
-    }
-
     static Typeface::Ptr fromMemory (DoCache cache, Span<const std::byte> blob, unsigned int index = 0)
     {
         auto face = FontStyleHelpers::getFaceForBlob ({ reinterpret_cast<const char*> (blob.data()), blob.size() }, index);

@@ -482,49 +482,6 @@ public:
             factories->getFonts().removeCollection (collection);
     }
 
-    float getStringWidth (const String& text) override
-    {
-        auto utf32 = text.toUTF32();
-        auto numChars = utf32.length();
-        std::vector<UINT16> results (numChars);
-
-        if (FAILED (dwFontFace->GetGlyphIndices (utf32, (UINT32) numChars, results.data())))
-            return {};
-
-        float x = 0;
-
-        for (size_t i = 0; i < numChars; ++i)
-            x += getKerning (results[i], (i + 1) < numChars ? results[i + 1] : -1);
-
-        const auto heightToPoints = getNativeDetails().getLegacyMetrics().getHeightToPointsFactor();
-        return x * heightToPoints;
-    }
-
-    void getGlyphPositions (const String& text, Array<int>& resultGlyphs, Array<float>& xOffsets) override
-    {
-        auto utf32 = text.toUTF32();
-        auto numChars = utf32.length();
-        std::vector<UINT16> results (numChars);
-        float x = 0;
-
-        const auto heightToPoints = getNativeDetails().getLegacyMetrics().getHeightToPointsFactor();
-
-        if (SUCCEEDED (dwFontFace->GetGlyphIndices (utf32, (UINT32) numChars, results.data())))
-        {
-            resultGlyphs.ensureStorageAllocated ((int) numChars);
-            xOffsets.ensureStorageAllocated ((int) numChars + 1);
-
-            for (size_t i = 0; i < numChars; ++i)
-            {
-                resultGlyphs.add (results[i]);
-                xOffsets.add (x * heightToPoints);
-                x += getKerning (results[i], (i + 1) < numChars ? results[i + 1] : -1);
-            }
-        }
-
-        xOffsets.add (x * heightToPoints);
-    }
-
     static Typeface::Ptr from (const Font& f)
     {
         const auto name = f.getTypefaceName();

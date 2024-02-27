@@ -431,44 +431,6 @@ public:
                 list->removeMemoryFace (ftFace);
     }
 
-    float getStringWidth (const String& text) override
-    {
-        const auto heightToPoints = getNativeDetails().getLegacyMetrics().getHeightToPointsFactor();
-
-        float x = 0;
-
-        for (auto iter = text.begin(), end = text.end(); iter != end; ++iter)
-        {
-            const auto currentChar = *iter;
-            const auto nextIter = iter + 1;
-            const auto nextChar = nextIter == end ? 0 : *nextIter;
-
-            x += getSpacingForGlyphs (getNominalGlyphForCharacter (currentChar),
-                                      getNominalGlyphForCharacter (nextChar));
-        }
-
-        return x * heightToPoints;
-    }
-
-    void getGlyphPositions (const String& text, Array<int>& resultGlyphs, Array<float>& xOffsets) override
-    {
-        for (auto c : text)
-            resultGlyphs.add ((int) getNominalGlyphForCharacter (c));
-
-        const auto heightToPoints = getNativeDetails().getLegacyMetrics().getHeightToPointsFactor();
-
-        xOffsets.add (0);
-
-        for (auto iter = resultGlyphs.begin(); iter != resultGlyphs.end(); ++iter)
-        {
-            const auto currentGlyph = *iter;
-            const auto nextIter = iter + 1;
-            const auto nextGlyph = nextIter == resultGlyphs.end() ? 0 : *nextIter;
-
-            xOffsets.add (xOffsets.getLast() + getSpacingForGlyphs ((FT_UInt) currentGlyph, (FT_UInt) nextGlyph) * heightToPoints);
-        }
-    }
-
 private:
     FreeTypeTypeface (DoCache cache,
                       FTFaceWrapper::Ptr ftFaceIn,
@@ -483,31 +445,6 @@ private:
         if (doCache == DoCache::yes)
             if (auto* list = FTTypefaceList::getInstance())
                 list->addMemoryFace (ftFace);
-    }
-
-    float getKerningForGlyphs (FT_UInt a, FT_UInt b) const
-    {
-        FT_Vector kerning{};
-
-        if (FT_Get_Kerning (ftFace->face, a, b, FT_KERNING_UNSCALED, &kerning) != 0)
-            return {};
-
-        return ((float) kerning.x / (float) ftFace->face->units_per_EM);
-    }
-
-    float getSpacingForGlyphs (FT_UInt a, FT_UInt b) const
-    {
-        FT_Fixed advance{};
-
-        if (FT_Get_Advance (ftFace->face, a, FT_LOAD_ADVANCE_ONLY | FT_LOAD_NO_SCALE, &advance) != 0)
-            return {};
-
-        return getKerningForGlyphs (a, b) + ((float) advance / (float) ftFace->face->units_per_EM);
-    }
-
-    FT_UInt getNominalGlyphForCharacter (juce_wchar c) const
-    {
-        return FT_Get_Char_Index (ftFace->face, (FT_ULong) c);
     }
 
     FTFaceWrapper::Ptr ftFace;

@@ -136,7 +136,7 @@ public:
         The distance returned is based on the font having an normalised height of 1.0.
         You should never need to call this!
     */
-    virtual float getStringWidth (const String& text) = 0;
+    float getStringWidth (const String& text);
 
     /** @deprecated
         This function has several shortcomings:
@@ -159,7 +159,7 @@ public:
         The distances returned are based on the font having an normalised height of 1.0.
         You should never need to call this!
     */
-    virtual void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) = 0;
+    void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets);
 
     /** Returns the outline for a glyph.
         The path returned will be normalised to a font height of 1.0.

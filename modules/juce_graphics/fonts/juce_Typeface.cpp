@@ -312,6 +312,79 @@ std::optional<uint32_t> Typeface::getNominalGlyphForCodepoint (juce_wchar cp) co
     return result;
 }
 
+static constexpr auto hbTag (const char (&arr)[5])
+{
+    return HB_TAG (arr[0], arr[1], arr[2], arr[3]);
+}
+
+template <typename Consumer>
+static void doSimpleShape (const Typeface& typeface, const String& text, Consumer&& consumer)
+{
+    HbBuffer buffer { hb_buffer_create() };
+    hb_buffer_add_utf8 (buffer.get(), text.toRawUTF8(), -1, 0, -1);
+    hb_buffer_set_cluster_level (buffer.get(), HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS);
+    hb_buffer_guess_segment_properties (buffer.get());
+
+    const auto& native = typeface.getNativeDetails();
+    auto* font = native.getFont();
+
+    // Disable ligatures, because TextEditor requires a 1:1 codepoint/glyph mapping for caret
+    // positioning to work as expected.
+    // Use an alternative method if you require shaping with ligature support.
+    static const std::vector<hb_feature_t> features = []
+    {
+        std::vector<hb_feature_t> result;
+
+        for (const auto key : { hbTag ("liga"), hbTag ("clig"), hbTag ("hlig"), hbTag ("dlig"), hbTag ("calt") })
+            result.push_back (hb_feature_t { key, 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END });
+
+        return result;
+    }();
+
+    hb_shape (font, buffer.get(), features.data(), (unsigned int) features.size());
+
+    unsigned int numGlyphs{};
+    auto* infos = hb_buffer_get_glyph_infos (buffer.get(), &numGlyphs);
+    auto* positions = hb_buffer_get_glyph_positions (buffer.get(), &numGlyphs);
+
+    const auto heightToPoints = native.getLegacyMetrics().getHeightToPointsFactor();
+    const auto upem = hb_face_get_upem (hb_font_get_face (font));
+
+    Point<hb_position_t> cursor{};
+
+    for (auto i = decltype (numGlyphs){}; i < numGlyphs; ++i)
+    {
+        const auto& info = infos[i];
+        const auto& position = positions[i];
+        consumer (std::make_optional (info.codepoint),
+                  heightToPoints * ((float) cursor.x + (float) position.x_offset) / (float) upem);
+        cursor += Point { position.x_advance, position.y_advance };
+    }
+
+    consumer (std::optional<hb_codepoint_t>{}, heightToPoints * (float) cursor.x / (float) upem);
+}
+
+float Typeface::getStringWidth (const String& text)
+{
+    float x{};
+    doSimpleShape (*this, text, [&] (auto, auto xOffset)
+    {
+        x = xOffset;
+    });
+    return x;
+}
+
+void Typeface::getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets)
+{
+    doSimpleShape (*this, text, [&] (auto codepoint, auto xOffset)
+    {
+        if (codepoint.has_value())
+            glyphs.add ((int) *codepoint);
+
+        xOffsets.add (xOffset);
+    });
+}
+
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
