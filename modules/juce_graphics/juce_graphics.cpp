@@ -76,12 +76,22 @@
  #ifndef JUCE_USE_FREETYPE
   #define JUCE_USE_FREETYPE 1
  #endif
+
+ #ifndef JUCE_USE_FONTCONFIG
+  #define JUCE_USE_FONTCONFIG 1
+ #endif
+#elif JUCE_ANDROID
+ #include <android/font_matcher.h>
 #endif
 
 #if JUCE_USE_FREETYPE
  #include <ft2build.h>
  #include FT_FREETYPE_H
  #include FT_ADVANCES_H
+#endif
+
+#if JUCE_USE_FONTCONFIG
+ #include <fontconfig/fontconfig.h>
 #endif
 
 #undef SIZEOF
@@ -145,6 +155,7 @@
 #endif
 
 #if JUCE_USE_FREETYPE
+ #include "fonts/juce_TypefaceFileCache.h"
  #include "native/juce_Fonts_freetype.cpp"
 #endif
 
@@ -166,6 +177,7 @@
  #include "native/juce_IconHelpers_linux.cpp"
 
 #elif JUCE_ANDROID
+ #include "fonts/juce_TypefaceFileCache.h"
  #include "native/juce_GraphicsContext_android.cpp"
  #include "native/juce_Fonts_android.cpp"
  #include "native/juce_IconHelpers_android.cpp"

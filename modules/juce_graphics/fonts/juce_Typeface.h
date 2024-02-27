@@ -204,6 +204,34 @@ public:
     */
     virtual Native getNativeDetails() const = 0;
 
+    /** Attempts to locate a font with a similar style that is capable of displaying the requested
+        string.
+
+        This uses system facilities, so will produce different results depending on the operating
+        system and installed fonts. If it's important that your app uses the same fonts on all
+        platforms, then you probably shouldn't use the results of this function.
+
+        Note that this accepts a _string_ instead of a single codepoint because the OS may take
+        combining marks and variation selectors into account when selecting an appropriate font.
+        As an example, many fonts include a 'text'/'outline' version of the smiley face emoji.
+        macOS may return Helvetica if the smiley emoji codepoint is passed on its own, but will
+        return the emoji font if the emoji codepoint is followed by the variation-selector-16
+        codepoint.
+
+        To specify your own fallback fonts:
+        - ensure your preferred fonts provide coverage of all languages/scripts/codepoints that you may
+          need to display
+        - bundle the fonts in your product, e.g. as binary data and register them when your product starts
+        - use Font::setPreferredFallbackFamilies() to specify that the bundled fonts should be used before
+          requesting a fallback font from the system
+
+        @param text         the returned font will normally be capable of displaying the majority
+                            of codepoints in this string
+        @param language     BCP 47 language code of the text that includes this codepoint
+        @returns nullptr if no fallback could be created
+    */
+    virtual Typeface::Ptr createSystemFallback (const String& text, const String& language) const = 0;
+
 private:
     //==============================================================================
     String name;

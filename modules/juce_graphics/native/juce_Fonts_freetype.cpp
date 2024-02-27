@@ -39,6 +39,11 @@
 namespace juce
 {
 
+using FcConfigPtr  = std::unique_ptr<FcConfig,  FunctionPointerDestructor<FcConfigDestroy>>;
+using FcPatternPtr = std::unique_ptr<FcPattern, FunctionPointerDestructor<FcPatternDestroy>>;
+using FcCharSetPtr = std::unique_ptr<FcCharSet, FunctionPointerDestructor<FcCharSetDestroy>>;
+using FcLangSetPtr = std::unique_ptr<FcLangSet, FunctionPointerDestructor<FcLangSetDestroy>>;
+
 struct FTLibWrapper final : public ReferenceCountedObject
 {
     FTLibWrapper()
@@ -56,6 +61,7 @@ struct FTLibWrapper final : public ReferenceCountedObject
             FT_Done_FreeType (library);
     }
 
+    const FcConfigPtr fcConfig { FcInitLoadConfigAndFonts() };
     FT_Library library = {};
 
     using Ptr = ReferenceCountedObjectPtr<FTLibWrapper>;
@@ -422,6 +428,87 @@ public:
     Native getNativeDetails() const override
     {
         return Native { hb.get() };
+    }
+
+    Typeface::Ptr createSystemFallback ([[maybe_unused]] const String& text,
+                                        [[maybe_unused]] const String& language) const override
+    {
+       #if JUCE_USE_FONTCONFIG
+        auto* cache = TypefaceFileCache::getInstance();
+
+        if (cache == nullptr)
+            return {};
+
+        auto* config = ftFace->library->fcConfig.get();
+        FcPatternPtr pattern { FcPatternCreate() };
+
+        {
+            FcValue value{};
+            value.type = FcTypeString;
+            value.u.s = unalignedPointerCast<const FcChar8*> (ftFace->face->family_name);
+            FcPatternAddWeak (pattern.get(), FC_FAMILY, value, FcFalse);
+        }
+
+        {
+            FcValue value{};
+            value.type = FcTypeString;
+            value.u.s = unalignedPointerCast<const FcChar8*> (ftFace->face->style_name);
+            FcPatternAddWeak (pattern.get(), FC_STYLE, value, FcFalse);
+        }
+
+        {
+            const FcCharSetPtr charset { FcCharSetCreate() };
+            for (const auto& character : text)
+                FcCharSetAddChar (charset.get(), (FcChar32) character);
+            FcPatternAddCharSet (pattern.get(), FC_CHARSET, charset.get());
+        }
+
+        if (language.isNotEmpty())
+        {
+            const FcLangSetPtr langset { FcLangSetCreate() };
+            FcLangSetAdd (langset.get(), unalignedPointerCast<const FcChar8*> (language.toRawUTF8()));
+            FcPatternAddLangSet (pattern.get(), FC_LANG, langset.get());
+        }
+
+        FcConfigSubstitute (config, pattern.get(), FcMatchPattern);
+        FcDefaultSubstitute (pattern.get());
+
+        FcResult result{};
+        const FcPatternPtr matched { FcFontMatch (config, pattern.get(), &result) };
+
+        if (result != FcResultMatch)
+            return {};
+
+        FcChar8* fileString{};
+        if (FcPatternGetString (matched.get(), FC_FILE, 0, &fileString) != FcResultMatch)
+            return {};
+
+        int index{};
+        if (FcPatternGetInteger (matched.get(), FC_INDEX, 0, &index) != FcResultMatch)
+            return {};
+
+        const File file { String { CharPointer_UTF8 { unalignedPointerCast<const char*> (fileString) } } };
+
+        return cache->get ({ file, index }, [] (const TypefaceFileAndIndex& f) -> Typeface::Ptr
+        {
+            auto face = FTTypefaceList::getInstance()->createFace (f.file, f.index);
+
+            if (face == nullptr)
+                return {};
+
+            const HbFace hbFace { hb_ft_face_create_referenced (face->face) };
+            HbFont cachedFont { hb_font_create (hbFace.get()) };
+
+            if (cachedFont == nullptr)
+                return {};
+
+            return new FreeTypeTypeface (DoCache::no, face, std::move (cachedFont), face->face->family_name, face->face->style_name);
+        });
+       #else
+        // Font substitution will not work unless fontconfig is enabled.
+        jassertfalse;
+        return nullptr;
+       #endif
     }
 
     ~FreeTypeTypeface() override

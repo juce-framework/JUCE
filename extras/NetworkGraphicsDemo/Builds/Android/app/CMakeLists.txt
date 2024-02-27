@@ -14,7 +14,7 @@ add_subdirectory (${OBOE_DIR} ./oboe)
 add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
 set_source_files_properties("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c" PROPERTIES COMPILE_FLAGS "-Wno-sign-conversion -Wno-gnu-statement-expression")
 
-add_definitions([[-DJUCE_ANDROID=1]] [[-DJUCE_ANDROID_API_VERSION=16]] [[-DJUCE_PUSH_NOTIFICATIONS=1]] [[-DJUCE_PUSH_NOTIFICATIONS_ACTIVITY="com/rmsl/juce/JuceActivity"]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]])
+add_definitions([[-DJUCE_ANDROID=1]] [[-DJUCE_ANDROID_API_VERSION=21]] [[-DJUCE_PUSH_NOTIFICATIONS=1]] [[-DJUCE_PUSH_NOTIFICATIONS_ACTIVITY="com/rmsl/juce/JuceActivity"]] [[-DJUCE_ANDROID_GL_ES_VERSION_3_0=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]])
 
 include_directories( AFTER
     "../../../JuceLibraryCode"
@@ -1605,6 +1605,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_graphics/fonts/juce_TextLayout.h"
     "../../../../../modules/juce_graphics/fonts/juce_Typeface.cpp"
     "../../../../../modules/juce_graphics/fonts/juce_Typeface.h"
+    "../../../../../modules/juce_graphics/fonts/juce_TypefaceFileCache.h"
     "../../../../../modules/juce_graphics/fonts/juce_TypefaceTestData.cpp"
     "../../../../../modules/juce_graphics/geometry/juce_AffineTransform.cpp"
     "../../../../../modules/juce_graphics/geometry/juce_AffineTransform.h"
@@ -3829,6 +3830,7 @@ set_source_files_properties(
     "../../../../../modules/juce_graphics/fonts/juce_TextLayout.h"
     "../../../../../modules/juce_graphics/fonts/juce_Typeface.cpp"
     "../../../../../modules/juce_graphics/fonts/juce_Typeface.h"
+    "../../../../../modules/juce_graphics/fonts/juce_TypefaceFileCache.h"
     "../../../../../modules/juce_graphics/fonts/juce_TypefaceTestData.cpp"
     "../../../../../modules/juce_graphics/geometry/juce_AffineTransform.cpp"
     "../../../../../modules/juce_graphics/geometry/juce_AffineTransform.h"
@@ -4476,14 +4478,14 @@ endif()
 
 find_library(log "log")
 find_library(android "android")
-find_library(glesv2 "GLESv2")
+find_library(glesv3 "GLESv3")
 find_library(egl "EGL")
 
 target_link_libraries( ${BINARY_NAME}
 
     ${log}
     ${android}
-    ${glesv2}
+    ${glesv3}
     ${egl}
     "cpufeatures"
     "oboe"

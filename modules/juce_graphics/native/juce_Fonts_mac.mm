@@ -461,6 +461,12 @@ namespace CoreTextTypeLayout
     }
 }
 
+// This symbol is available on all the platforms we support, but not declared in the CoreText headers on older platforms.
+extern "C" CTFontRef CTFontCreateForStringWithLanguage (CTFontRef currentFont,
+                                                        CFStringRef string,
+                                                        CFRange range,
+                                                        CFStringRef language);
+
 class CoreTextTypeface final : public Typeface
 {
     static auto& getRegistered()
@@ -611,6 +617,39 @@ public:
     Native getNativeDetails() const override
     {
         return Native { hb.get() };
+    }
+
+    Typeface::Ptr createSystemFallback (const String& c, const String& language) const override
+    {
+        const CFUniquePtr<CFStringRef> cfText { c.toCFString() };
+        const CFUniquePtr<CFStringRef> cfLanguage { language.toCFString() };
+
+        auto* old = ctFont.get();
+        const CFUniquePtr<CFStringRef> oldName { CTFontCopyFamilyName (old) };
+        const CFUniquePtr<CTFontDescriptorRef> oldDescriptor { CTFontCopyFontDescriptor (old) };
+        const CFUniquePtr<CFStringRef> oldStyle { (CFStringRef) CTFontDescriptorCopyAttribute (oldDescriptor.get(),
+                                                                                               kCTFontStyleNameAttribute) };
+
+        CFUniquePtr<CTFontRef> newFont { CTFontCreateForStringWithLanguage (old,
+                                                                            cfText.get(),
+                                                                            CFRangeMake (0, CFStringGetLength (cfText.get())),
+                                                                            cfLanguage.get()) };
+
+        const CFUniquePtr<CFStringRef> newName { CTFontCopyFamilyName (newFont.get()) };
+        const CFUniquePtr<CTFontDescriptorRef> descriptor { CTFontCopyFontDescriptor (newFont.get()) };
+        const CFUniquePtr<CFStringRef> newStyle { (CFStringRef) CTFontDescriptorCopyAttribute (descriptor.get(),
+                                                                                               kCTFontStyleNameAttribute) };
+
+        HbFont result { hb_coretext_font_create (newFont.get()) };
+
+        if (result == nullptr)
+            return {};
+
+        return new CoreTextTypeface { std::move (newFont),
+                                      std::move (result),
+                                      String::fromCFString (newName.get()),
+                                      String::fromCFString (newStyle.get()),
+                                      {} };
     }
 
     static std::set<String> getRegisteredFamilies()

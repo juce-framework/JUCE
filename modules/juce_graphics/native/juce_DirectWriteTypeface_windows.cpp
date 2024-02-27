@@ -523,6 +523,47 @@ public:
         return Native { hbFont.get() };
     }
 
+    Typeface::Ptr createSystemFallback (const String& c, const String& language) const override
+    {
+        auto factory = factories->getDWriteFactory().getInterface<IDWriteFactory2>();
+
+        if (factory == nullptr)
+        {
+            // System font fallback is unavailable before Windows 8.1
+            jassertfalse;
+            return {};
+        }
+
+        ComSmartPtr<IDWriteFontFallback> fallback;
+        if (FAILED (factory->GetSystemFontFallback (fallback.resetAndGetPointerAddress())) || fallback == nullptr)
+            return {};
+
+        auto analysisSource = becomeComSmartPtrOwner (new AnalysisSource (c, language));
+        const auto originalName = getLocalisedFamilyName (*dwFont);
+
+        const auto mapped = factories->getFonts().mapCharacters (fallback,
+                                                                 analysisSource,
+                                                                 0,
+                                                                 numUtf16Words (c.toUTF16()),
+                                                                 originalName.toWideCharPointer(),
+                                                                 dwFont->GetWeight(),
+                                                                 dwFont->GetStyle(),
+                                                                 dwFont->GetStretch());
+
+        if (mapped.font == nullptr)
+            return {};
+
+        ComSmartPtr<IDWriteFontFace> mappedFace;
+        if (FAILED (mapped.font->CreateFontFace (mappedFace.resetAndGetPointerAddress())) || mappedFace == nullptr)
+            return {};
+
+        const HbFace hbFace { hb_directwrite_face_create (mappedFace) };
+
+        const auto mappedName = getLocalisedFamilyName (*mapped.font);
+        const auto mappedStyle = getLocalisedStyle (*mapped.font);
+        return new WindowsDirectWriteTypeface (mappedName, mappedStyle, mapped.font, mappedFace, HbFont { hb_font_create (hbFace.get()) }, {});
+    }
+
     IDWriteFontFace* getIDWriteFontFace() const { return dwFontFace; }
 
 private:

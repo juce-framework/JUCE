@@ -260,6 +260,16 @@ public:
         return Native { hbFont.get() };
     }
 
+    Typeface::Ptr createSystemFallback (const String& text, const String& language) const override
+    {
+        if (__builtin_available (android 29, *))
+            return matchWithAFontMatcher (text, language);
+
+        // The font-fallback API is only available on Android API level 29+
+        jassertfalse;
+        return {};
+    }
+
     ~AndroidTypeface() override
     {
         if (doCache == DoCache::yes)
@@ -268,6 +278,58 @@ public:
     }
 
 private:
+    __INTRODUCED_IN (29) Typeface::Ptr matchWithAFontMatcher (const String& text, const String& language) const
+    {
+        using AFontMatcherPtr = std::unique_ptr<AFontMatcher, FunctionPointerDestructor<AFontMatcher_destroy>>;
+        const AFontMatcherPtr matcher { AFontMatcher_create() };
+
+        const auto weight = hb_style_get_value (hbFont.get(), HB_STYLE_TAG_WEIGHT);
+        const auto italic = hb_style_get_value (hbFont.get(), HB_STYLE_TAG_ITALIC) != 0.0f;
+        AFontMatcher_setStyle (matcher.get(), (uint16_t) weight, italic);
+
+        AFontMatcher_setLocales (matcher.get(), language.toRawUTF8());
+
+        const auto utf16 = text.toUTF16();
+
+        using AFontPtr = std::unique_ptr<AFont, FunctionPointerDestructor<AFont_close>>;
+        const AFontPtr matched { AFontMatcher_match (matcher.get(),
+                                                     readFontName (hb_font_get_face (hbFont.get()),
+                                                                   HB_OT_NAME_ID_FONT_FAMILY,
+                                                                   nullptr).toRawUTF8(),
+                                                     unalignedPointerCast<const uint16_t*> (utf16.getAddress()),
+                                                     (uint32_t) (utf16.findTerminatingNull().getAddress() - utf16.getAddress()),
+                                                     nullptr) };
+
+        if (matched == nullptr)
+        {
+            // Unable to find any matching fonts. This should never happen - in the worst case,
+            // we should at least get a font with the tofu character.
+            jassertfalse;
+            return {};
+        }
+
+        const File matchedFile { AFont_getFontFilePath (matched.get()) };
+        const auto matchedIndex = AFont_getCollectionIndex (matched.get());
+
+        auto* cache = TypefaceFileCache::getInstance();
+
+        if (cache == nullptr)
+            return {}; // Perhaps we're shutting down
+
+        return cache->get ({ matchedFile, (int) matchedIndex }, [] (const TypefaceFileAndIndex& info) -> Typeface::Ptr
+        {
+            FileInputStream stream { info.file };
+
+            if (! stream.openedOk())
+                return {};
+
+            MemoryBlock mb;
+            stream.readIntoMemoryBlock (mb);
+
+            return fromMemory (DoCache::no, { static_cast<const std::byte*> (mb.getData()), mb.getSize() }, (unsigned int) info.index);
+        });
+    }
+
     static Typeface::Ptr fromMemory (DoCache cache, Span<const std::byte> blob, unsigned int index = 0)
     {
         auto face = FontStyleHelpers::getFaceForBlob ({ reinterpret_cast<const char*> (blob.data()), blob.size() }, index);

@@ -54,7 +54,7 @@
   dependencies:       juce_events
   OSXFrameworks:      Cocoa QuartzCore
   iOSFrameworks:      CoreGraphics CoreImage CoreText QuartzCore
-  linuxPackages:      freetype2
+  linuxPackages:      freetype2 fontconfig
 
  END_JUCE_MODULE_DECLARATION
 
