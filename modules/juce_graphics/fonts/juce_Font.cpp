@@ -50,8 +50,6 @@ namespace FontValues
 
     const float defaultFontHeight = 14.0f;
     float minimumHorizontalScale = 0.7f;
-    String fallbackFont;
-    String fallbackFontStyle;
 }
 
 class HbScale
@@ -455,12 +453,14 @@ public:
         instance referencing the shared state.
     */
 
+    StringArray getFallbackFamilies() const { return fallbacks; }
     String getTypefaceName() const          { return typefaceName; }
     String getTypefaceStyle() const         { return typefaceStyle; }
     float getHeight() const                 { return height; }
     float getHorizontalScale() const        { return horizontalScale; }
     float getKerning() const                { return kerning; }
     bool getUnderline() const               { return underline; }
+    bool getFallbackEnabled() const         { return fallback; }
 
     /*  This shared state may be shared between two or more Font instances that are being
         read/modified from multiple threads.
@@ -469,10 +469,16 @@ public:
         during the modification.
     */
 
-    void setTypeface (Typeface::Ptr x)
+    void setTypeface (Typeface::Ptr newTypeface)
     {
         jassert (getReferenceCount() == 1);
-        typeface = std::move (x);
+        typeface = newTypeface;
+
+        if (newTypeface != nullptr)
+        {
+            typefaceName = typeface->getName();
+            typefaceStyle = typeface->getStyle();
+        }
     }
 
     void setTypefaceName (String x)
@@ -517,6 +523,18 @@ public:
         underline = x;
     }
 
+    void setFallbackFamilies (const StringArray& x)
+    {
+        jassert (getReferenceCount() == 1);
+        fallbacks = x;
+    }
+
+    void setFallback (bool x)
+    {
+        jassert (getReferenceCount() == 1);
+        fallback = x;
+    }
+
 private:
     static float legacyHeightToPoints (Typeface::Ptr p, float h)
     {
@@ -524,9 +542,11 @@ private:
     }
 
     Typeface::Ptr typeface;
+    StringArray fallbacks;
     String typefaceName, typefaceStyle;
     float height = 0.0f, horizontalScale = 1.0f, kerning = 0.0f, ascent = 0.0f;
     bool underline = false;
+    bool fallback = true;
 
     CriticalSection mutex;
 };
@@ -659,43 +679,37 @@ StringArray Font::getAvailableStyles() const
     return findAllTypefaceStyles (getTypefacePtr()->getName());
 }
 
+void Font::setPreferredFallbackFamilies (const StringArray& fallbacks)
+{
+    if (getPreferredFallbackFamilies() != fallbacks)
+    {
+        dupeInternalIfShared();
+        font->setFallbackFamilies (fallbacks);
+    }
+}
+
+StringArray Font::getPreferredFallbackFamilies() const
+{
+    return font->getFallbackFamilies();
+}
+
+void Font::setFallbackEnabled (bool enabled)
+{
+    if (getFallbackEnabled() != enabled)
+    {
+        dupeInternalIfShared();
+        font->setFallback (enabled);
+    }
+}
+
+bool Font::getFallbackEnabled() const
+{
+    return font->getFallbackEnabled();
+}
+
 Typeface::Ptr Font::getTypefacePtr() const
 {
     return font->getTypefacePtr (*this);
-}
-
-Typeface* Font::getTypeface() const
-{
-    return getTypefacePtr().get();
-}
-
-//==============================================================================
-const String& Font::getFallbackFontName()
-{
-    return FontValues::fallbackFont;
-}
-
-void Font::setFallbackFontName (const String& name)
-{
-    FontValues::fallbackFont = name;
-
-   #if JUCE_MAC || JUCE_IOS
-    jassertfalse; // Note that use of a fallback font isn't currently implemented in OSX..
-   #endif
-}
-
-const String& Font::getFallbackFontStyle()
-{
-    return FontValues::fallbackFontStyle;
-}
-
-void Font::setFallbackFontStyle (const String& style)
-{
-    FontValues::fallbackFontStyle = style;
-
-   #if JUCE_MAC || JUCE_IOS
-    jassertfalse; // Note that use of a fallback font isn't currently implemented in OSX..
-   #endif
 }
 
 //==============================================================================
@@ -942,6 +956,71 @@ void Font::findFonts (Array<Font>& destArray)
 
         destArray.add (Font (name, style, FontValues::defaultFontHeight));
     }
+}
+
+static bool characterNotRendered (uint32_t c)
+{
+    constexpr uint32_t points[]
+    {
+        // Control points
+        0x0000, 0x0007, 0x0008, 0x0009, 0x000A, 0x000B, 0x000C, 0x000D, 0x001A, 0x001B, 0x0085,
+
+        // BIDI control points
+        0x061C, 0x200E, 0x200F, 0x202A, 0x202B, 0x202C, 0x202D, 0x202E, 0x2066, 0x2067, 0x2068, 0x2069
+    };
+
+    return std::find (std::begin (points), std::end (points), c) != std::end (points);
+}
+
+static bool isFontSuitableForCodepoint (const Font& font, juce_wchar c)
+{
+    const auto& hbFont = font.getNativeDetails().font;
+    hb_codepoint_t glyph{};
+
+    return characterNotRendered ((uint32_t) c)
+           || hb_font_get_nominal_glyph (hbFont.get(), (hb_codepoint_t) c, &glyph);
+}
+
+static bool isFontSuitableForText (const Font& font, const String& str)
+{
+    for (const auto c : str)
+        if (! isFontSuitableForCodepoint (font, c))
+            return false;
+
+    return true;
+}
+
+Font Font::findSuitableFontForText (const String& text, const String& language) const
+{
+    if (! getFallbackEnabled() || isFontSuitableForText (*this, text))
+        return *this;
+
+    for (const auto& fallback : getPreferredFallbackFamilies())
+    {
+        auto copy = *this;
+        copy.setTypefaceName (fallback);
+
+        if (isFontSuitableForText (copy, text))
+            return copy;
+    }
+
+    if (auto current = getTypefacePtr())
+    {
+        if (auto suggested = current->createSystemFallback (text, language))
+        {
+            auto copy = *this;
+
+            if (copy.getTypefacePtr() != suggested)
+            {
+                copy.dupeInternalIfShared();
+                copy.font->setTypeface (suggested);
+            }
+
+            return copy;
+        }
+    }
+
+    return *this;
 }
 
 //==============================================================================
