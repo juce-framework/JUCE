@@ -53,6 +53,7 @@ namespace juce
 #endif
 {
     UIBackgroundTaskIdentifier appSuspendTask;
+    std::optional<ScopedJuceInitialiser_GUI> initialiser;
 }
 
 @property (strong, nonatomic) UIWindow *window;
@@ -137,7 +138,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
     ignoreUnused (application);
-    initialiseJuce_GUI();
+    initialiser.emplace();
 
     if (auto* app = JUCEApplicationBase::createInstance())
     {
