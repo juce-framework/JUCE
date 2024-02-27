@@ -458,7 +458,7 @@ public:
     GlyphsDemo (ControllersComponent& cc)
         : GraphicsDemoBase (cc, "Glyphs")
     {
-        glyphs.addFittedText ({ 20.0f }, "The Quick Brown Fox Jumped Over The Lazy Dog",
+        glyphs.addFittedText ({ 20.0f }, "The Quick Brown Fox Jumps Over The Lazy Dog",
                               -120, -50, 240, 100, Justification::centred, 2, 1.0f);
     }
 
