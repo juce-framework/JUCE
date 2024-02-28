@@ -35,11 +35,6 @@
 namespace juce
 {
 
-struct GraphicsFontHelpers
-{
-    static auto compareFont (const Font& a, const Font& b) { return Font::compare (a, b); }
-};
-
 static auto operator< (const Font& a, const Font& b)
 {
     return GraphicsFontHelpers::compareFont (a, b);

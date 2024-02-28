@@ -40,7 +40,7 @@ class LruCache
 {
 public:
     template <typename Fn>
-    Value get (Key key, Fn&& fn)
+    const Value& get (Key key, Fn&& fn)
     {
         if (const auto iter = map.find (key); iter != map.end())
         {

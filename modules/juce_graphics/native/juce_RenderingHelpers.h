@@ -32,6 +32,14 @@
   ==============================================================================
 */
 
+namespace juce
+{
+    struct GraphicsFontHelpers
+    {
+        static auto compareFont (const Font& a, const Font& b) { return Font::compare (a, b); }
+    };
+}
+
 namespace juce::RenderingHelpers
 {
 
@@ -143,43 +151,6 @@ public:
 };
 
 //==============================================================================
-/** Caches a glyph as an edge-table.
-
-    @tags{Graphics}
-*/
-class CachedGlyphEdgeTable  : public ReferenceCountedObject
-{
-public:
-    CachedGlyphEdgeTable() = default;
-
-    template <class RendererType>
-    void draw (RendererType& state, Point<float> pos) const
-    {
-        if (edgeTable != nullptr)
-            state.fillEdgeTable (*edgeTable, pos.x, roundToInt (pos.y));
-    }
-
-    void generate (const Font& newFont, int glyphNumber)
-    {
-        font = newFont;
-        glyph = glyphNumber;
-
-        auto fontHeight = font.getHeight();
-        auto typeface = newFont.getTypefacePtr();
-        edgeTable.reset (typeface->getEdgeTableForGlyph (glyphNumber,
-                                                         AffineTransform::scale (fontHeight * font.getHorizontalScale(),
-                                                                                 fontHeight),
-                                                         fontHeight));
-    }
-
-    Font font;
-    std::unique_ptr<EdgeTable> edgeTable;
-    int glyph = 0, lastAccessCount = 0;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
-};
-
-//==============================================================================
 /** Holds a cache of recently-used glyph objects of some type.
 
     @tags{Graphics}
@@ -187,10 +158,7 @@ public:
 class GlyphCache  : private DeletedAtShutdown
 {
 public:
-    GlyphCache()
-    {
-        reset();
-    }
+    GlyphCache() = default;
 
     ~GlyphCache() override
     {
@@ -210,97 +178,48 @@ public:
     //==============================================================================
     void reset()
     {
-        const ScopedLock sl (lock);
-        glyphs.clear();
-        addNewGlyphSlots (120);
-        hits = 0;
-        misses = 0;
+        const ScopedLock sl { lock };
+        cache = {};
     }
 
     template <class RenderTargetType>
     void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
     {
-        if (auto glyph = findOrCreateGlyph (font, glyphNumber))
+        const ScopedLock sl { lock };
+        const auto& table = cache.get (Key { font, glyphNumber }, [] (const auto& key)
         {
-            glyph->lastAccessCount = ++accessCounter;
-            glyph->draw (target, pos);
-        }
+            auto fontHeight = key.font.getHeight();
+            auto typeface = key.font.getTypefacePtr();
+            return rawToUniquePtr (typeface->getEdgeTableForGlyph (key.glyph,
+                                                                   AffineTransform::scale (fontHeight * key.font.getHorizontalScale(),
+                                                                                           fontHeight),
+                                                                   fontHeight));
+        });
+
+        if (table != nullptr)
+            target.fillEdgeTable (*table, pos.x, roundToInt (pos.y));
     }
 
 private:
-    ReferenceCountedArray<CachedGlyphEdgeTable> glyphs;
-    Atomic<int> accessCounter, hits, misses;
+    struct Key
+    {
+        Font font;
+        int glyph;
+
+        bool operator< (const Key& other) const
+        {
+            if (glyph < other.glyph)
+                return true;
+
+            if (other.glyph < glyph)
+                return false;
+
+            return GraphicsFontHelpers::compareFont (font, other.font);
+        }
+    };
+
+    LruCache<Key, std::unique_ptr<EdgeTable>> cache;
     CriticalSection lock;
-
-    ReferenceCountedObjectPtr<CachedGlyphEdgeTable> findOrCreateGlyph (const Font& font, int glyphNumber)
-    {
-        const ScopedLock sl (lock);
-
-        if (auto g = findExistingGlyph (font, glyphNumber))
-        {
-            ++hits;
-            return g;
-        }
-
-        ++misses;
-        auto g = getGlyphForReuse();
-        jassert (g != nullptr);
-        g->generate (font, glyphNumber);
-        return g;
-    }
-
-    ReferenceCountedObjectPtr<CachedGlyphEdgeTable> findExistingGlyph (const Font& font, int glyphNumber) const noexcept
-    {
-        for (auto g : glyphs)
-            if (g->glyph == glyphNumber && g->font == font)
-                return *g;
-
-        return {};
-    }
-
-    ReferenceCountedObjectPtr<CachedGlyphEdgeTable> getGlyphForReuse()
-    {
-        if (hits.get() + misses.get() > glyphs.size() * 16)
-        {
-            if (misses.get() * 2 > hits.get())
-                addNewGlyphSlots (32);
-
-            hits = 0;
-            misses = 0;
-        }
-
-        if (auto g = findLeastRecentlyUsedGlyph())
-            return *g;
-
-        addNewGlyphSlots (32);
-        return glyphs.getLast();
-    }
-
-    void addNewGlyphSlots (int num)
-    {
-        glyphs.ensureStorageAllocated (glyphs.size() + num);
-
-        while (--num >= 0)
-            glyphs.add (new CachedGlyphEdgeTable());
-    }
-
-    CachedGlyphEdgeTable* findLeastRecentlyUsedGlyph() const noexcept
-    {
-        CachedGlyphEdgeTable* oldest = nullptr;
-        auto oldestCounter = std::numeric_limits<int>::max();
-
-        for (auto* g : glyphs)
-        {
-            if (g->lastAccessCount <= oldestCounter
-                 && g->getReferenceCount() == 1)
-            {
-                oldestCounter = g->lastAccessCount;
-                oldest = g;
-            }
-        }
-
-        return oldest;
-    }
 
     static GlyphCache*& getSingletonPointer() noexcept
     {

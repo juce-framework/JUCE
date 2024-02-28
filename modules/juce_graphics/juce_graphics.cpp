@@ -120,7 +120,6 @@
 
 //==============================================================================
 #include "fonts/juce_FunctionPointerDestructor.h"
-#include "fonts/juce_LruCache.h"
 
 #include "colour/juce_Colour.cpp"
 #include "colour/juce_ColourGradient.cpp"
