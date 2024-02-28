@@ -35,49 +35,6 @@
 namespace juce::RenderingHelpers
 {
 
-template <typename Context>
-void drawGlyphImpl (Context& context, int glyphNumber, const AffineTransform& trans)
-{
-    using GlyphCacheType = typename Context::GlyphCacheType;
-    using EdgeTableRegionType = typename Context::EdgeTableRegionType;
-
-    if (context.clip == nullptr)
-        return;
-
-    if (trans.isOnlyTranslation() && ! context.transform.isRotated)
-    {
-        auto& cache = GlyphCacheType::getInstance();
-        const Point pos (trans.getTranslationX(), trans.getTranslationY());
-
-        if (context.transform.isOnlyTranslated)
-        {
-            cache.drawGlyph (context, context.font, glyphNumber, pos + context.transform.offset.toFloat());
-        }
-        else
-        {
-            auto f = context.font;
-            f.setHeight (f.getHeight() * context.transform.complexTransform.mat11);
-
-            auto xScale = context.transform.complexTransform.mat00 / context.transform.complexTransform.mat11;
-
-            if (std::abs (xScale - 1.0f) > 0.01f)
-                f.setHorizontalScale (xScale);
-
-            cache.drawGlyph (context, f, glyphNumber, context.transform.transformed (pos));
-        }
-    }
-    else
-    {
-        const auto fontHeight = context.font.getHeight();
-        const auto fontTransform = AffineTransform::scale (fontHeight * context.font.getHorizontalScale(),
-                                                           fontHeight).followedBy (trans);
-        const auto fullTransform = context.transform.getTransformWith (fontTransform);
-
-        if (auto et = rawToUniquePtr (context.font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, fullTransform, fontHeight)))
-            context.fillShape (*new EdgeTableRegionType (*et), false);
-    }
-}
-
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127)
 
 //==============================================================================
@@ -186,11 +143,47 @@ public:
 };
 
 //==============================================================================
+/** Caches a glyph as an edge-table.
+
+    @tags{Graphics}
+*/
+class CachedGlyphEdgeTable  : public ReferenceCountedObject
+{
+public:
+    CachedGlyphEdgeTable() = default;
+
+    template <class RendererType>
+    void draw (RendererType& state, Point<float> pos) const
+    {
+        if (edgeTable != nullptr)
+            state.fillEdgeTable (*edgeTable, pos.x, roundToInt (pos.y));
+    }
+
+    void generate (const Font& newFont, int glyphNumber)
+    {
+        font = newFont;
+        glyph = glyphNumber;
+
+        auto fontHeight = font.getHeight();
+        auto typeface = newFont.getTypefacePtr();
+        edgeTable.reset (typeface->getEdgeTableForGlyph (glyphNumber,
+                                                         AffineTransform::scale (fontHeight * font.getHorizontalScale(),
+                                                                                 fontHeight),
+                                                         fontHeight));
+    }
+
+    Font font;
+    std::unique_ptr<EdgeTable> edgeTable;
+    int glyph = 0, lastAccessCount = 0;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
+};
+
+//==============================================================================
 /** Holds a cache of recently-used glyph objects of some type.
 
     @tags{Graphics}
 */
-template <class CachedGlyphType, class RenderTargetType>
 class GlyphCache  : private DeletedAtShutdown
 {
 public:
@@ -224,6 +217,7 @@ public:
         misses = 0;
     }
 
+    template <class RenderTargetType>
     void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
     {
         if (auto glyph = findOrCreateGlyph (font, glyphNumber))
@@ -234,11 +228,11 @@ public:
     }
 
 private:
-    ReferenceCountedArray<CachedGlyphType> glyphs;
+    ReferenceCountedArray<CachedGlyphEdgeTable> glyphs;
     Atomic<int> accessCounter, hits, misses;
     CriticalSection lock;
 
-    ReferenceCountedObjectPtr<CachedGlyphType> findOrCreateGlyph (const Font& font, int glyphNumber)
+    ReferenceCountedObjectPtr<CachedGlyphEdgeTable> findOrCreateGlyph (const Font& font, int glyphNumber)
     {
         const ScopedLock sl (lock);
 
@@ -255,7 +249,7 @@ private:
         return g;
     }
 
-    ReferenceCountedObjectPtr<CachedGlyphType> findExistingGlyph (const Font& font, int glyphNumber) const noexcept
+    ReferenceCountedObjectPtr<CachedGlyphEdgeTable> findExistingGlyph (const Font& font, int glyphNumber) const noexcept
     {
         for (auto g : glyphs)
             if (g->glyph == glyphNumber && g->font == font)
@@ -264,7 +258,7 @@ private:
         return {};
     }
 
-    ReferenceCountedObjectPtr<CachedGlyphType> getGlyphForReuse()
+    ReferenceCountedObjectPtr<CachedGlyphEdgeTable> getGlyphForReuse()
     {
         if (hits.get() + misses.get() > glyphs.size() * 16)
         {
@@ -287,12 +281,12 @@ private:
         glyphs.ensureStorageAllocated (glyphs.size() + num);
 
         while (--num >= 0)
-            glyphs.add (new CachedGlyphType());
+            glyphs.add (new CachedGlyphEdgeTable());
     }
 
-    CachedGlyphType* findLeastRecentlyUsedGlyph() const noexcept
+    CachedGlyphEdgeTable* findLeastRecentlyUsedGlyph() const noexcept
     {
-        CachedGlyphType* oldest = nullptr;
+        CachedGlyphEdgeTable* oldest = nullptr;
         auto oldestCounter = std::numeric_limits<int>::max();
 
         for (auto* g : glyphs)
@@ -317,41 +311,47 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache)
 };
 
-//==============================================================================
-/** Caches a glyph as an edge-table.
-
-    @tags{Graphics}
-*/
-class CachedGlyphEdgeTable  : public ReferenceCountedObject
+template <typename Context>
+void drawGlyphImpl (Context& context, int glyphNumber, const AffineTransform& trans)
 {
-public:
-    CachedGlyphEdgeTable() = default;
+    using EdgeTableRegionType = typename Context::EdgeTableRegionType;
 
-    template <class RendererType>
-    void draw (RendererType& state, Point<float> pos) const
+    if (context.clip == nullptr)
+        return;
+
+    if (trans.isOnlyTranslation() && ! context.transform.isRotated)
     {
-        if (edgeTable != nullptr)
-            state.fillEdgeTable (*edgeTable, pos.x, roundToInt (pos.y));
-    }
+        auto& cache = RenderingHelpers::GlyphCache::getInstance();
+        const Point pos (trans.getTranslationX(), trans.getTranslationY());
 
-    void generate (const Font& newFont, int glyphNumber)
+        if (context.transform.isOnlyTranslated)
+        {
+            cache.drawGlyph (context, context.font, glyphNumber, pos + context.transform.offset.toFloat());
+        }
+        else
+        {
+            auto f = context.font;
+            f.setHeight (f.getHeight() * context.transform.complexTransform.mat11);
+
+            auto xScale = context.transform.complexTransform.mat00 / context.transform.complexTransform.mat11;
+
+            if (std::abs (xScale - 1.0f) > 0.01f)
+                f.setHorizontalScale (xScale);
+
+            cache.drawGlyph (context, f, glyphNumber, context.transform.transformed (pos));
+        }
+    }
+    else
     {
-        font = newFont;
-        auto typeface = newFont.getTypefacePtr();
-        glyph = glyphNumber;
+        const auto fontHeight = context.font.getHeight();
+        const auto fontTransform = AffineTransform::scale (fontHeight * context.font.getHorizontalScale(),
+                                                           fontHeight).followedBy (trans);
+        const auto fullTransform = context.transform.getTransformWith (fontTransform);
 
-        auto fontHeight = font.getHeight();
-        edgeTable.reset (typeface->getEdgeTableForGlyph (glyphNumber,
-                                                         AffineTransform::scale (fontHeight * font.getHorizontalScale(),
-                                                                                 fontHeight), fontHeight));
+        if (auto et = rawToUniquePtr (context.font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, fullTransform, fontHeight)))
+            context.fillShape (*new EdgeTableRegionType (*et), false);
     }
-
-    Font font;
-    std::unique_ptr<EdgeTable> edgeTable;
-    int glyph = 0, lastAccessCount = 0;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
-};
+}
 
 //==============================================================================
 /** Calculates the alpha values and positions for rendering the edges of a
@@ -2570,11 +2570,9 @@ public:
         }
     }
 
-    using GlyphCacheType = GlyphCache<CachedGlyphEdgeTable, SoftwareRendererSavedState>;
-
     static void clearGlyphCache()
     {
-        GlyphCacheType::getInstance().reset();
+        GlyphCache::getInstance().reset();
     }
 
     //==============================================================================

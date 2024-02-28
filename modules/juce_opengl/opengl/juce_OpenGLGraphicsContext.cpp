@@ -1753,15 +1753,13 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
         }
     }
 
-    using GlyphCacheType = RenderingHelpers::GlyphCache<RenderingHelpers::CachedGlyphEdgeTable<SavedState>, SavedState>;
-
     void drawGlyph (int glyphNumber, const AffineTransform& trans)
     {
         if (clip != nullptr)
         {
             if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                auto& cache = GlyphCacheType::getInstance();
+                auto& cache = RenderingHelpers::GlyphCache::getInstance();
                 Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
 
                 if (transform.isOnlyTranslated)
@@ -1937,7 +1935,7 @@ private:
 
 static void clearOpenGLGlyphCacheCallback()
 {
-    SavedState::GlyphCacheType::getInstance().reset();
+    RenderingHelpers::GlyphCache::getInstance().reset();
 }
 
 static std::unique_ptr<LowLevelGraphicsContext> createOpenGLContext (const Target& target)
