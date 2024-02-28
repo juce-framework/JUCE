@@ -182,22 +182,18 @@ public:
         cache = {};
     }
 
-    template <class RenderTargetType>
-    void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
+    const auto& get (const Font& font, const int glyphNumber)
     {
         const ScopedLock sl { lock };
-        const auto& table = cache.get (Key { font, glyphNumber }, [] (const auto& key)
+        return cache.get (Key { font, glyphNumber }, [] (const auto& key)
         {
             auto fontHeight = key.font.getHeight();
             auto typeface = key.font.getTypefacePtr();
-            return rawToUniquePtr (typeface->getEdgeTableForGlyph (key.glyph,
-                                                                   AffineTransform::scale (fontHeight * key.font.getHorizontalScale(),
-                                                                                           fontHeight),
-                                                                   fontHeight));
+            return typeface->getLayersForGlyph (key.glyph,
+                                                AffineTransform::scale (fontHeight * key.font.getHorizontalScale(),
+                                                                        fontHeight),
+                                                fontHeight);
         });
-
-        if (table != nullptr)
-            target.fillEdgeTable (*table, pos.x, roundToInt (pos.y));
     }
 
 private:
@@ -218,7 +214,7 @@ private:
         }
     };
 
-    LruCache<Key, std::unique_ptr<EdgeTable>> cache;
+    LruCache<Key, std::vector<GlyphLayer>> cache;
     CriticalSection lock;
 
     static GlyphCache*& getSingletonPointer() noexcept
@@ -2599,22 +2595,24 @@ public:
     void setFont (const Font& newFont)                                       override { stack->font = newFont; }
     const Font& getFont()                                                    override { return stack->font; }
 
-    void drawGlyph (int glyphNumber, const AffineTransform& trans) override
+    void drawGlyph (int i, const AffineTransform& t) override
     {
         if (stack->clip == nullptr)
             return;
 
-        if (trans.isOnlyTranslation() && ! stack->transform.isRotated)
+        const auto [layers, drawPosition] = [&]
         {
-            auto& cache = RenderingHelpers::GlyphCache::getInstance();
-            const Point pos (trans.getTranslationX(), trans.getTranslationY());
+            if (t.isOnlyTranslation() && ! stack->transform.isRotated)
+            {
+                auto& cache = RenderingHelpers::GlyphCache::getInstance();
+                const Point pos (t.getTranslationX(), t.getTranslationY());
 
-            if (stack->transform.isOnlyTranslated)
-            {
-                cache.drawGlyph (*stack, stack->font, glyphNumber, pos + stack->transform.offset.toFloat());
-            }
-            else
-            {
+                if (stack->transform.isOnlyTranslated)
+                {
+                    const auto drawPos = pos + stack->transform.offset.toFloat();
+                    return std::tuple (cache.get (stack->font, i), drawPos);
+                }
+
                 auto f = stack->font;
                 f.setHeight (f.getHeight() * stack->transform.complexTransform.mat11);
 
@@ -2623,18 +2621,41 @@ public:
                 if (std::abs (xScale - 1.0f) > 0.01f)
                     f.setHorizontalScale (xScale);
 
-                cache.drawGlyph (*stack, f, glyphNumber, stack->transform.transformed (pos));
+                const auto drawPos = stack->transform.transformed (pos);
+                return std::tuple (cache.get (f, i), drawPos);
             }
-        }
-        else
-        {
+
             const auto fontHeight = stack->font.getHeight();
             const auto fontTransform = AffineTransform::scale (fontHeight * stack->font.getHorizontalScale(),
-                                                               fontHeight).followedBy (trans);
+                                                               fontHeight).followedBy (t);
             const auto fullTransform = stack->transform.getTransformWith (fontTransform);
+            return std::tuple (stack->font.getTypefacePtr()->getLayersForGlyph (i, fullTransform, fontHeight), Point<float>{});
+        }();
 
-            if (auto et = rawToUniquePtr (stack->font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, fullTransform, fontHeight)))
-                stack->fillShape (*new ClipRegions::EdgeTableRegion<SavedStateType> (*et), false);
+        const auto initialFill = stack->fillType;
+        const ScopeGuard scope { [&] { stack->setFillType (initialFill); } };
+
+        for (const auto& layer : layers)
+        {
+            if (auto* colourLayer = std::get_if<ColourLayer> (&layer.layer))
+            {
+                if (auto fill = colourLayer->colour)
+                    stack->setFillType (*fill);
+
+                stack->fillEdgeTable (colourLayer->clip, drawPosition.x, (int) drawPosition.y);
+            }
+            else if (auto* imageLayer = std::get_if<ImageLayer> (&layer.layer))
+            {
+                // The position arguments to fillEdgeTable are in physical screen-space,
+                // and do not take the current context transform into account.
+                // However, drawImage *does* apply the context transform internally.
+                // We apply the inverse context transform here so that after the
+                // real context transform is applied, the image will be painted at the
+                // physical position specified by drawPosition.
+                const auto imageTransform = imageLayer->transform.translated (drawPosition)
+                                                                 .followedBy (stack->transform.getTransform().inverted());
+                stack->drawImage (imageLayer->image, imageTransform);
+            }
         }
     }
 

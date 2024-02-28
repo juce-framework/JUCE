@@ -246,28 +246,25 @@ static HbDrawFuncs getPathDrawFuncs()
     return funcs;
 }
 
-static Path getTypefaceGlyph (const Typeface& typeface, int glyphNumber)
+[[nodiscard]] static Path getGlyphPathInGlyphUnits (hb_codepoint_t glyph, hb_font_t* font)
 {
     static const auto funcs = getPathDrawFuncs();
 
-    auto* font = typeface.getNativeDetails().getFont();
-
     Path result;
-    hb_font_draw_glyph (font, (hb_codepoint_t) glyphNumber, funcs.get(), &result);
-
-    // Convert to em units
-    result.applyTransform (AffineTransform::scale (1.0f / (float) hb_face_get_upem (hb_font_get_face (font))).scaled (1.0f, -1.0f));
-
+    hb_font_draw_glyph (font, glyph, funcs.get(), &result);
     return result;
 }
 
 void Typeface::getOutlineForGlyph (int glyphNumber, Path& path)
 {
+    const auto native = getNativeDetails();
+    auto* font = native.getFont();
     const auto metrics = getNativeDetails().getLegacyMetrics();
+    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
 
     // getTypefaceGlyph returns glyphs in em space, getOutlineForGlyph returns glyphs in "special JUCE units" space
-    path = getTypefaceGlyph (*this, glyphNumber);
-    path.applyTransform (AffineTransform::scale (metrics.getHeightToPointsFactor()));
+    path = getGlyphPathInGlyphUnits ((hb_codepoint_t) glyphNumber, getNativeDetails().getFont());
+    path.applyTransform (AffineTransform::scale (scale, -scale));
 }
 
 void Typeface::applyVerticalHintingTransform (float, Path&)
@@ -279,12 +276,402 @@ EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransfor
 {
     Path path;
     getOutlineForGlyph (glyphNumber, path);
+    path.applyTransform (transform);
 
-    if (path.isEmpty())
-        return nullptr;
+    return new EdgeTable (path.getBounds().getSmallestIntegerContainer().expanded (1, 0), std::move (path), {});
+}
 
-    return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
-                          path, transform);
+static Colour makeColour (hb_color_t c)
+{
+    return PixelARGB (hb_color_get_alpha (c),
+                      hb_color_get_red (c),
+                      hb_color_get_green (c),
+                      hb_color_get_blue (c));
+}
+
+class HbPaintGroup
+{
+public:
+    void pushClipGlyph (const AffineTransform& t, hb_codepoint_t glyph, hb_font_t* font)
+    {
+        auto path = getGlyphPathInGlyphUnits (glyph, font);
+        path.applyTransform (t);
+        pushClip (std::move (path));
+    }
+
+    void pushClipRect (const AffineTransform& t, Rectangle<float> rect)
+    {
+        Path path;
+        path.addRectangle (rect);
+        path.applyTransform (t);
+        pushClip (std::move (path));
+    }
+
+    void popClip()
+    {
+        clip.pop_back();
+    }
+
+    void fill (hb_bool_t foreground, hb_color_t c)
+    {
+        addLayerChecked (foreground, c);
+    }
+
+    void linearGradient (hb_color_line_t&, Point<float>, Point<float>, Point<float>)
+    {
+        // Support for COLRv1 glyphs is not fully implemented.
+        jassertfalse;
+    }
+
+    void radialGradient (hb_color_line_t&, Point<float>, float, Point<float>, float)
+    {
+        // Support for COLRv1 glyphs is not fully implemented.
+        jassertfalse;
+    }
+
+    void sweepGradient (hb_color_line_t&, Point<float>, float, float)
+    {
+        // Support for COLRv1 glyphs is not fully implemented.
+        jassertfalse;
+    }
+
+    bool image (const AffineTransform& t, hb_blob_t* image, unsigned int width, unsigned int height, hb_tag_t format, float, hb_glyph_extents_t* extents)
+    {
+        switch (format)
+        {
+            case HB_PAINT_IMAGE_FORMAT_BGRA:
+                // Raw bitmap-based glyphs are not currently supported.
+                // If you hit this assertion, please let the JUCE team know which font you're
+                // attempting to use.
+                // Depending on demand, support for this feature may be added in the future.
+                jassertfalse;
+                return false;
+
+            case HB_PAINT_IMAGE_FORMAT_PNG:
+            {
+                unsigned int imageDataSize{};
+                const char* imageData = hb_blob_get_data (image, &imageDataSize);
+                const auto juceImage = PNGImageFormat::loadFrom (imageData, imageDataSize);
+
+                if (juceImage.isNull())
+                    return false;
+
+                const auto transform = AffineTransform::scale ((float) extents->width / (float) width,
+                                                               (float) extents->height / (float) height)
+                        .translated ((float) extents->x_bearing,
+                                     (float) extents->y_bearing)
+                        .followedBy (t);
+                ImageLayer imageLayer { juceImage, transform };
+                layers.push_back ({ std::move (imageLayer) });
+                return true;
+            }
+
+            case HB_PAINT_IMAGE_FORMAT_SVG:
+                // SVG-based glyphs are not currently supported.
+                // If you hit this assertion, please let the JUCE team know which font you're
+                // attempting to use.
+                // Depending on demand, support for this feature may be added in the future.
+                jassertfalse;
+                return false;
+        }
+
+        jassertfalse;
+        return false;
+    }
+
+    std::vector<GlyphLayer> getLayers() &&
+    {
+        return std::move (layers);
+    }
+
+    void appendLayers (Span<GlyphLayer> l)
+    {
+        for (auto& layer : l)
+            layers.emplace_back (std::move (layer));
+    }
+
+private:
+    GlyphLayer makeLayer (hb_bool_t foreground, hb_color_t c) const
+    {
+        return { ColourLayer { clip.back(), foreground ? std::optional<Colour>() : makeColour (c) } };
+    }
+
+    void pushClip (Path path)
+    {
+        pushClip ({ path.getBounds().getSmallestIntegerContainer().expanded (1, 0), path, {} });
+    }
+
+    template <typename... Args>
+    void addLayerChecked (Args&&... args)
+    {
+        if (clip.empty())
+        {
+            jassertfalse;
+            return;
+        }
+
+        layers.push_back (makeLayer (std::forward<Args> (args)...));
+    }
+
+    void pushClip (const EdgeTable& et)
+    {
+        if (! clip.empty())
+        {
+            clip.push_back (clip.back());
+            clip.back().clipToEdgeTable (et);
+        }
+        else
+        {
+            clip.push_back (et);
+        }
+    }
+
+    std::vector<EdgeTable> clip;
+    std::vector<GlyphLayer> layers;
+};
+
+class HbPaintContext
+{
+public:
+    explicit HbPaintContext (const AffineTransform& transformIn)
+        : baseTransform (transformIn)
+    {
+    }
+
+    void addTransform (const AffineTransform& transform)
+    {
+        transforms.push_back (transforms.empty() ? transform : transform.followedBy (transforms.back()));
+    }
+
+    void popTransform()
+    {
+        transforms.pop_back();
+    }
+
+    void pushClipGlyph (hb_codepoint_t glyph, hb_font_t* font)
+    {
+        groups.back().pushClipGlyph (getTransform(), glyph, font);
+    }
+
+    void pushClipRect (Rectangle<float> rect)
+    {
+        groups.back().pushClipRect (getTransform(), rect);
+    }
+
+    void popClip()
+    {
+        groups.back().popClip();
+    }
+
+    void fill (hb_bool_t foreground, hb_color_t c)
+    {
+        groups.back().fill (foreground, c);
+    }
+
+    void linearGradient (hb_color_line_t& line, Point<float> p0, Point<float> p1, Point<float> p2)
+    {
+        groups.back().linearGradient (line, p0, p1, p2);
+    }
+
+    void radialGradient (hb_color_line_t& line, Point<float> p0, float r0, Point<float> p1, float r1)
+    {
+        groups.back().radialGradient (line, p0, r0, p1, r1);
+    }
+
+    void sweepGradient (hb_color_line_t& line, Point<float> p, float begin, float end)
+    {
+        groups.back().sweepGradient (line, p, begin, end);
+    }
+
+    bool image (hb_blob_t* image, unsigned int width, unsigned int height, hb_tag_t format, float slant, hb_glyph_extents_t* extents)
+    {
+        return groups.back().image (getTransform(), image, width, height, format, slant, extents);
+    }
+
+    void pushGroup()
+    {
+        groups.emplace_back();
+    }
+
+    void popGroup ([[maybe_unused]] hb_paint_composite_mode_t mode)
+    {
+        // There is currently extremely limited support for colour glyph blend modes
+        jassert (mode == HB_PAINT_COMPOSITE_MODE_SRC_OVER);
+
+        auto newLayers = std::move (groups.back()).getLayers();
+        groups.pop_back();
+        groups.back().appendLayers (newLayers);
+    }
+
+    std::vector<GlyphLayer> getLayers() &&
+    {
+        return std::move (groups.back()).getLayers();
+    }
+
+private:
+    AffineTransform getTransform() const
+    {
+        const auto glyphSpaceTransform = transforms.empty() ? AffineTransform{} : transforms.back();
+        return glyphSpaceTransform.followedBy (baseTransform);
+    }
+
+    AffineTransform baseTransform;
+    std::vector<AffineTransform> transforms;
+    std::vector<HbPaintGroup> groups = std::vector<HbPaintGroup> (1);
+};
+
+using HbPaintFuncs = std::unique_ptr<hb_paint_funcs_t, FunctionPointerDestructor<hb_paint_funcs_destroy>>;
+
+static HbPaintFuncs getPathPaintFuncs()
+{
+    HbPaintFuncs funcs { hb_paint_funcs_create() };
+
+    hb_paint_funcs_set_push_transform_func (funcs.get(), [] (auto*, auto* data, auto xx, auto yx, auto xy, auto yy, auto dx, auto dy, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.addTransform ({ xx, xy, dx, yx, yy, dy });
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_pop_transform_func (funcs.get(), [] (auto*, void* data, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.popTransform();
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_push_clip_glyph_func (funcs.get(), [] (auto*, void* data, auto glyph, auto* font, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.pushClipGlyph (glyph, font);
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_push_clip_rectangle_func (funcs.get(), [] (auto*, void* data, auto xmin, auto ymin, auto xmax, auto ymax, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.pushClipRect (Rectangle<float>::leftTopRightBottom (xmin, ymin, xmax, ymax));
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_pop_clip_func (funcs.get(), [] (auto*, void* data, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.popClip();
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_color_func (funcs.get(), [] (auto*, void* data, auto foreground, auto colour, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.fill (foreground, colour);
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_image_func (funcs.get(), [] (auto*, void* data, auto* image, auto w, auto h, auto format, auto slant, auto* extents, auto*) -> hb_bool_t
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        return context.image (image, w, h, format, slant, extents);
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_linear_gradient_func (funcs.get(), [] (auto*, auto* data, auto* colourLine, auto x0, auto y0, auto x1, auto y1, auto x2, auto y2, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.linearGradient (*colourLine, { x0, y0 }, { x1, y1 }, { x2, y2 });
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_radial_gradient_func (funcs.get(), [] (auto*, auto* data, auto* colourLine, auto x0, auto y0, auto r0, auto x1, auto y1, auto r1, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.radialGradient (*colourLine, { x0, y0 }, r0, { x1, y1 }, r1);
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_sweep_gradient_func (funcs.get(), [] (auto*, auto* data, auto* colourLine, auto x0, auto y0, auto begin, auto end, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.sweepGradient (*colourLine, { x0, y0 }, begin, end);
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_push_group_func (funcs.get(), [] (auto*, auto* data, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.pushGroup();
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_pop_group_func (funcs.get(), [] (auto*, auto* data, auto mode, auto*)
+    {
+        auto& context = *static_cast<HbPaintContext*> (data);
+        context.popGroup (mode);
+    }, nullptr, nullptr);
+
+    hb_paint_funcs_set_custom_palette_color_func (funcs.get(), [] (auto*, auto*, auto, auto*, auto*) -> hb_bool_t
+    {
+        return false;
+    }, nullptr, nullptr);
+
+    return funcs;
+}
+
+static std::vector<GlyphLayer> getCOLRv0Layers (const Typeface& typeface, int glyphNumber, const AffineTransform& transform)
+{
+    auto* font = typeface.getNativeDetails().getFont();
+    auto* face = hb_font_get_face (font);
+    constexpr auto palette = 0;
+
+    auto numLayers = hb_ot_color_glyph_get_layers (face, (hb_codepoint_t) glyphNumber, 0, nullptr, nullptr);
+    std::vector<hb_ot_color_layer_t> layers (numLayers);
+    hb_ot_color_glyph_get_layers (face, (hb_codepoint_t) glyphNumber, 0, &numLayers, layers.data());
+
+    if (layers.empty())
+        return {};
+
+    std::vector<GlyphLayer> result;
+
+    for (const auto& layer : layers)
+    {
+        const auto hbFillColour = layer.color_index == 0xffff ? std::optional<hb_color_t>() : [&]
+        {
+            hb_color_t colour{};
+            unsigned int numColours = 1;
+            hb_ot_color_palette_get_colors (face, palette, layer.color_index, &numColours, &colour);
+            return colour;
+        }();
+
+        const auto juceFillColour = hbFillColour.has_value() ? makeColour (*hbFillColour) : std::optional<Colour>();
+
+        auto path = getGlyphPathInGlyphUnits (layer.glyph, font);
+        path.applyTransform (transform);
+        result.push_back ({ ColourLayer
+        {
+            EdgeTable { path.getBounds().getSmallestIntegerContainer().expanded (1, 0), path, {} },
+            juceFillColour
+        } });
+    }
+
+    return result;
+}
+
+std::vector<GlyphLayer> Typeface::getLayersForGlyph (int glyphNumber, const AffineTransform& transform, float) const
+{
+    auto* font = getNativeDetails().getFont();
+    const auto metrics = getNativeDetails().getLegacyMetrics();
+    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
+    const auto combinedTransform = AffineTransform::scale (scale, -scale).followedBy (transform);
+
+    // Before calling through to the 'paint' API, which JUCE can't easily support due to complex
+    // gradients and blend modes, attempt to load COLRv0 layers for the glyph, which we'll be able
+    // to render more successfully.
+    auto basicLayers = getCOLRv0Layers (*this, glyphNumber, combinedTransform);
+
+    if (! basicLayers.empty())
+        return basicLayers;
+
+    constexpr auto palette = 0;
+
+    static const auto funcs = getPathPaintFuncs();
+
+    HbPaintContext context { combinedTransform };
+    hb_font_paint_glyph (font,
+                         (hb_codepoint_t) glyphNumber,
+                         funcs.get(),
+                         &context,
+                         palette,
+                         {});
+    return std::move (context).getLayers();
 }
 
 float Typeface::getAscent()               const { return getNativeDetails().getLegacyMetrics().getScaledAscent(); }

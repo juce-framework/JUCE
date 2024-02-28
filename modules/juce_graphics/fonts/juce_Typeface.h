@@ -35,6 +35,30 @@
 namespace juce
 {
 
+/** A single path-based layer of a colour glyph. Contains the glyph shape and the colour in which
+    the shape should be painted.
+*/
+struct ColourLayer
+{
+    EdgeTable clip;
+    std::optional<Colour> colour; ///< nullopt indicates 'foreground'
+};
+
+/** A bitmap representing (part of) a glyph, most commonly used to represent colour emoji glyphs.
+*/
+struct ImageLayer
+{
+    Image image;
+    AffineTransform transform;
+};
+
+/** A single layer that makes up part of a glyph image.
+*/
+struct GlyphLayer
+{
+    std::variant<ColourLayer, ImageLayer> layer;
+};
+
 //==============================================================================
 /**
     A typeface represents a size-independent font.
@@ -166,8 +190,35 @@ public:
     */
     void getOutlineForGlyph (int glyphNumber, Path& path);
 
-    /** Returns a new EdgeTable that contains the path for the given glyph, with the specified transform applied. */
-    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight);
+    /** @deprecated
+
+        Returns a new EdgeTable that contains the path for the given glyph, with the specified transform applied.
+
+        This is only capable of returning monochromatic glyphs. In fonts that contain multiple glyph
+        styles with fallbacks (COLRv1, COLRv0, monochromatic), this will always return the
+        monochromatic variant.
+
+        The height is specified in JUCE font-height units.
+
+        getLayersForGlyph() has better support for multilayer and bitmap glyphs, so it should be
+        preferred in new code.
+    */
+    [[deprecated ("Prefer getLayersForGlyph")]]
+    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float normalisedHeight);
+
+    /** Returns the layers that should be painted in order to display this glyph.
+
+        Layers should be painted in the same order as they are returned, i.e. layer[0], layer[1] etc.
+
+        This should generally be preferred to getEdgeTableForGlyph, as it is more flexible.
+        Currently, this only supports COLRv0 and bitmap fonts (no SVG or COLRv1).
+        Support for SVG and COLRv1 may be added in the future, depending on demand. However, this
+        would require significant additions to JUCE's rendering code, so it has been omitted for
+        now.
+
+        The height is specified in JUCE font-height units.
+    */
+    std::vector<GlyphLayer> getLayersForGlyph (int glyphNumber, const AffineTransform&, float normalisedHeight) const;
 
     //==============================================================================
     /** Changes the number of fonts that are cached in memory. */
