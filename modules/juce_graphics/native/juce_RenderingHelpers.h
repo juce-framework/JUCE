@@ -322,12 +322,12 @@ private:
 
     @tags{Graphics}
 */
-template <class RendererType>
 class CachedGlyphEdgeTable  : public ReferenceCountedObject
 {
 public:
     CachedGlyphEdgeTable() = default;
 
+    template <class RendererType>
     void draw (RendererType& state, Point<float> pos) const
     {
         if (edgeTable != nullptr)
@@ -2570,7 +2570,7 @@ public:
         }
     }
 
-    using GlyphCacheType = GlyphCache<CachedGlyphEdgeTable<SoftwareRendererSavedState>, SoftwareRendererSavedState>;
+    using GlyphCacheType = GlyphCache<CachedGlyphEdgeTable, SoftwareRendererSavedState>;
 
     static void clearGlyphCache()
     {
