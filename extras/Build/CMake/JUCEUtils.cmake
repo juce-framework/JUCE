@@ -714,6 +714,11 @@ function(_juce_configure_bundle source_target dest_target)
         endif()
     endif()
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        set_target_properties(${dest_target} PROPERTIES
+            XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp")
+    endif()
+
     set_target_properties(${dest_target} PROPERTIES
         XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME
             "$<TARGET_PROPERTY:${source_target},JUCE_HARDENED_RUNTIME_ENABLED>"

@@ -2859,6 +2859,7 @@ private:
         else
         {
             s.set ("SDKROOT", "macosx" + config.getMacOSBaseSDKString());
+            s.set ("OTHER_CODE_SIGN_FLAGS", "--timestamp");
         }
 
         s.set ("ZERO_LINK", "NO");
