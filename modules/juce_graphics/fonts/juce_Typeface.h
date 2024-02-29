@@ -164,7 +164,7 @@ public:
     /** Returns the outline for a glyph.
         The path returned will be normalised to a font height of 1.0.
     */
-    bool getOutlineForGlyph (int glyphNumber, Path& path);
+    void getOutlineForGlyph (int glyphNumber, Path& path);
 
     /** Returns a new EdgeTable that contains the path for the given glyph, with the specified transform applied. */
     EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight);

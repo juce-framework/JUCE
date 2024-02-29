@@ -4,6 +4,24 @@
 
 ## Change
 
+Typeface::getOutlineForGlyph now returns void instead of bool.
+
+**Possible Issues**
+
+Code that checks the result of this function will fail to compile.
+
+**Workaround**
+
+Omit any checks against the result of this function.
+
+**Rationale**
+
+This function can no longer fail. It may still output an empty path if the
+requested glyph isn't present in the typeface.
+
+
+## Change
+
 CustomTypeface has been removed.
 
 **Possible Issues**

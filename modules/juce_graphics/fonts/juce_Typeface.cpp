@@ -261,15 +261,13 @@ static Path getTypefaceGlyph (const Typeface& typeface, int glyphNumber)
     return result;
 }
 
-bool Typeface::getOutlineForGlyph (int glyphNumber, Path& path)
+void Typeface::getOutlineForGlyph (int glyphNumber, Path& path)
 {
     const auto metrics = getNativeDetails().getLegacyMetrics();
 
     // getTypefaceGlyph returns glyphs in em space, getOutlineForGlyph returns glyphs in "special JUCE units" space
     path = getTypefaceGlyph (*this, glyphNumber);
     path.applyTransform (AffineTransform::scale (metrics.getHeightToPointsFactor()));
-
-    return true;
 }
 
 void Typeface::applyVerticalHintingTransform (float, Path&)
@@ -280,8 +278,9 @@ void Typeface::applyVerticalHintingTransform (float, Path&)
 EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float)
 {
     Path path;
+    getOutlineForGlyph (glyphNumber, path);
 
-    if (! getOutlineForGlyph (glyphNumber, path) || path.isEmpty())
+    if (path.isEmpty())
         return nullptr;
 
     return new EdgeTable (path.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
