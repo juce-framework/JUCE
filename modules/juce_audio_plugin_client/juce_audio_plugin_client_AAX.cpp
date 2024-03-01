@@ -34,7 +34,7 @@
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4512 4996)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4512 4996 5272)
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
                                      "-Wextra-semi",
                                      "-Wfloat-equal",
@@ -2697,7 +2697,9 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 #if _MSC_VER || JUCE_MINGW
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
 extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID) { if (reason == DLL_PROCESS_ATTACH) Process::setCurrentModuleInstanceHandle (instance); return true; }
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 #endif

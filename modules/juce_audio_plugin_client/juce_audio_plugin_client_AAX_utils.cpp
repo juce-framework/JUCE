@@ -50,7 +50,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
                                      "-Wfour-char-constants",
                                      "-Wdeprecated-copy-with-user-provided-dtor",
                                      "-Wdeprecated")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6001 6053 4996 5033 4068 4996)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6001 6053 4996 5033 4068 4996 5272)
 
 #include <Libs/AAXLibrary/source/AAX_CChunkDataParser.cpp>
 #include <Libs/AAXLibrary/source/AAX_CHostServices.cpp>
