@@ -2561,7 +2561,7 @@ private:
                 && target->type == XcodeTarget::UnityPlugIn)
                 embedUnityScript();
 
-            ScriptBuilder copyPluginScript;
+            ScriptBuilder copyPluginStepScript;
 
             for (ConstConfigIterator config (*this); config.next();)
             {
@@ -2576,36 +2576,37 @@ private:
 
                 installPath = installPath.replace ("$(HOME)", "${HOME}");
 
-                const auto copyScript = [&]
-                {
-                    const auto generateCopyScript = [](String sourcePlugin, String destinationDir)
-                    {
-                        return ScriptBuilder{}
-                            .set ("destinationPlugin", destinationDir + "/$(basename " + doubleQuoted (sourcePlugin) + ")")
-                            .remove ("${destinationPlugin}")
-                            .copy (sourcePlugin, "${destinationPlugin}")
-                            .insertLine()
-                            .ifSet ("CODE_SIGN_ENTITLEMENTS",
-                                    R"(entitlementsArg=(--entitlements "${CODE_SIGN_ENTITLEMENTS}"))")
-                            .run ("codesign --verbose=4 --force --sign",
-                                  doubleQuoted ("${CODE_SIGN_IDENTITY:--}"),
-                                  "${entitlementsArg[*]-}",
-                                  "${OTHER_CODE_SIGN_ARGS-}",
-                                  doubleQuoted ("${destinationPlugin}"));
-                    };
+                const auto sourcePlugin = target->type == XcodeTarget::Target::LV2PlugIn
+                                        ? "${TARGET_BUILD_DIR}"
+                                        : "${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}";
 
-                    if (target->type == XcodeTarget::Target::LV2PlugIn)
-                        return generateCopyScript ("${TARGET_BUILD_DIR}", installPath);
+                const auto copyScript = ScriptBuilder{}
+                        .set ("destinationPlugin", installPath + "/$(basename " + doubleQuoted (sourcePlugin) + ")")
+                        .remove ("${destinationPlugin}")
+                        .copy (sourcePlugin, "${destinationPlugin}");
 
-                    return generateCopyScript ("${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}", installPath);
-                }();
+                const auto objectToSignTail = target->type == XcodeTarget::Target::LV2PlugIn
+                                            ? "/$(basename \"${TARGET_BUILD_DIR}\")/${FULL_PRODUCT_NAME}"
+                                            : "/${FULL_PRODUCT_NAME}";
 
-                copyPluginScript.ifEqual (doubleQuoted ("${CONFIGURATION}"), doubleQuoted (config->getName()),
-                                          copyScript.toString());
+                const auto codesignScript = ScriptBuilder{}
+                        .ifSet ("CODE_SIGN_ENTITLEMENTS",
+                                R"(entitlementsArg=(--entitlements "${CODE_SIGN_ENTITLEMENTS}"))")
+                        .run ("codesign --verbose=4 --force --sign",
+                              doubleQuoted ("${CODE_SIGN_IDENTITY:--}"),
+                              "${entitlementsArg[*]-}",
+                              "${OTHER_CODE_SIGN_ARGS-}",
+                              doubleQuoted (installPath + objectToSignTail));
+
+                copyPluginStepScript.ifEqual (doubleQuoted ("${CONFIGURATION}"), doubleQuoted (config->getName()),
+                                              ScriptBuilder{}.insertScript (copyScript.toString())
+                                                             .insertLine()
+                                                             .insertScript (codesignScript.toString())
+                                                             .toString());
             }
 
-            if (! copyPluginScript.isEmpty())
-                target->addShellScriptBuildPhase ("Plugin Copy Step", copyPluginScript.toStringWithDefaultShellOptions());
+            if (! copyPluginStepScript.isEmpty())
+                target->addShellScriptBuildPhase ("Plugin Copy Step", copyPluginStepScript.toStringWithDefaultShellOptions());
 
             addTargetObject (*target);
         }
