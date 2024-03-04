@@ -52,129 +52,11 @@ namespace FontValues
     float minimumHorizontalScale = 0.7f;
 }
 
-class HbScale
-{
-    static constexpr float factor = 1 << 16;
-
-public:
-    HbScale() = delete;
-
-    static constexpr hb_position_t juceToHb (float pos)
-    {
-        return (hb_position_t) (pos * factor);
-    }
-
-    static constexpr float hbToJuce (hb_position_t pos)
-    {
-        return (float) pos / (float) factor;
-    }
-};
-
 using GetTypefaceForFont = Typeface::Ptr (*)(const Font&);
 GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
 float Font::getDefaultMinimumHorizontalScaleFactor() noexcept                { return FontValues::minimumHorizontalScale; }
 void Font::setDefaultMinimumHorizontalScaleFactor (float newValue) noexcept  { FontValues::minimumHorizontalScale = newValue; }
-
-//==============================================================================
-#if JUCE_MAC || JUCE_IOS
-template <CTFontOrientation orientation>
-void getAdvancesForGlyphs (hb_font_t* hbFont, CTFontRef ctFont, Span<const CGGlyph> glyphs, Span<CGSize> advances)
-{
-    jassert (glyphs.size() == advances.size());
-
-    int x, y;
-    hb_font_get_scale (hbFont, &x, &y);
-    const auto scaleAdjustment = HbScale::hbToJuce (orientation == kCTFontOrientationHorizontal ? x : y) / CTFontGetSize (ctFont);
-
-    CTFontGetAdvancesForGlyphs (ctFont, orientation, std::data (glyphs), std::data (advances), (CFIndex) std::size (glyphs));
-
-    for (auto& advance : advances)
-        (orientation == kCTFontOrientationHorizontal ? advance.width : advance.height) *= scaleAdjustment;
-}
-
-template <CTFontOrientation orientation>
-static auto getAdvanceFn()
-{
-    return [] (hb_font_t* f, void*, hb_codepoint_t glyph, void* voidFontRef) -> hb_position_t
-    {
-        auto* fontRef = static_cast<CTFontRef> (voidFontRef);
-
-        const CGGlyph glyphs[] { (CGGlyph) glyph };
-        CGSize advances[std::size (glyphs)]{};
-        getAdvancesForGlyphs<orientation> (f, fontRef, glyphs, advances);
-
-        return HbScale::juceToHb ((float) (orientation == kCTFontOrientationHorizontal ? advances->width : advances->height));
-    };
-}
-
-template <CTFontOrientation orientation>
-static auto getAdvancesFn()
-{
-    return [] (hb_font_t* f,
-               void*,
-               unsigned int count,
-               const hb_codepoint_t* firstGlyph,
-               unsigned int glyphStride,
-               hb_position_t* firstAdvance,
-               unsigned int advanceStride,
-               void* voidFontRef)
-    {
-        auto* fontRef = static_cast<CTFontRef> (voidFontRef);
-
-        std::vector<CGGlyph> glyphs (count);
-
-        for (auto [index, glyph] : enumerate (glyphs))
-            glyph = (CGGlyph) *addBytesToPointer (firstGlyph, glyphStride * index);
-
-        std::vector<CGSize> advances (count);
-
-        getAdvancesForGlyphs<orientation> (f, fontRef, glyphs, advances);
-
-        for (auto [index, advance] : enumerate (advances))
-            *addBytesToPointer (firstAdvance, advanceStride * index) = HbScale::juceToHb ((float) (orientation == kCTFontOrientationHorizontal ? advance.width : advance.height));
-    };
-}
-
-/*  This function overrides the callbacks that fetch glyph advances for fonts on macOS.
-    The built-in OpenType glyph metric callbacks that HarfBuzz uses by default for fonts such as
-    "Apple Color Emoji" don't always return correct advances, resulting in emoji that may overlap
-    with subsequent characters. This may be to do with ignoring the 'trak' table, but I'm not an
-    expert, so I'm not sure!
-
-    In any case, using CTFontGetAdvancesForGlyphs produces much nicer advances for emoji on Apple
-    platforms, as long as the CTFont is set to the size that will eventually be rendered.
-
-    This might need a bit of testing to make sure that it correctly handles advances for
-    custom (non-Apple?) fonts.
-
-    @param hb       a hb_font_t to update with Apple-specific advances
-    @param fontRef  the CTFontRef (normally with a custom point size) that will be queried when computing advances
-*/
-static void overrideCTFontAdvances (hb_font_t* hb, CTFontRef fontRef)
-{
-    using HbFontFuncs = std::unique_ptr<hb_font_funcs_t, FunctionPointerDestructor<hb_font_funcs_destroy>>;
-    const HbFontFuncs funcs { hb_font_funcs_create() };
-
-    // We pass the CTFontRef as user data to each of these functions.
-    // We don't pass a custom destructor for the user data, as that will be handled by the custom
-    // destructor for the hb_font_funcs_t.
-    hb_font_funcs_set_glyph_h_advance_func  (funcs.get(), getAdvanceFn <kCTFontOrientationHorizontal>(), (void*) fontRef, nullptr);
-    hb_font_funcs_set_glyph_v_advance_func  (funcs.get(), getAdvanceFn <kCTFontOrientationVertical>(),   (void*) fontRef, nullptr);
-    hb_font_funcs_set_glyph_h_advances_func (funcs.get(), getAdvancesFn<kCTFontOrientationHorizontal>(), (void*) fontRef, nullptr);
-    hb_font_funcs_set_glyph_v_advances_func (funcs.get(), getAdvancesFn<kCTFontOrientationVertical>(),   (void*) fontRef, nullptr);
-
-    // We want to keep a copy of the font around so that all of our custom callbacks can query it,
-    // so retain it here and release it once the custom functions are no longer in use.
-    jassert (fontRef != nullptr);
-    CFRetain (fontRef);
-
-    hb_font_set_funcs (hb, funcs.get(), (void*) fontRef, [] (void* ptr)
-    {
-        CFRelease ((CTFontRef) ptr);
-    });
-}
-#endif
 
 //==============================================================================
 class TypefaceCache final : private DeletedAtShutdown
@@ -410,24 +292,8 @@ public:
 
     HbFont getFontPtr (const Font& f)
     {
-        const ScopedLock lock (mutex);
-
         if (auto ptr = getTypefacePtr (f))
-        {
-            if (HbFont subFont { hb_font_create_sub_font (ptr->getNativeDetails().getFont()) })
-            {
-                const auto points = legacyHeightToPoints (ptr, height);
-
-                hb_font_set_ptem (subFont.get(), points);
-                hb_font_set_scale (subFont.get(), HbScale::juceToHb (points * horizontalScale), HbScale::juceToHb (points));
-
-               #if JUCE_MAC || JUCE_IOS
-                overrideCTFontAdvances (subFont.get(), hb_coretext_font_get_ct_font (subFont.get()));
-               #endif
-
-                return subFont;
-            }
-        }
+            return ptr->getNativeDetails().getFontAtSizeAndScale (f.getHeight(), f.getHorizontalScale());
 
         return {};
     }
@@ -913,17 +779,13 @@ int Font::getStringWidth (const String& text) const
 
 float Font::getStringWidthFloat (const String& text) const
 {
-    auto w = getTypefacePtr()->getStringWidth (text);
-
-    if (! approximatelyEqual (font->getKerning(), 0.0f))
-        w += font->getKerning() * (float) text.length();
-
-    return w * font->getHeight() * font->getHorizontalScale();
+    const auto w = getTypefacePtr()->getStringWidth (text, getHeight(), getHorizontalScale());
+    return w + (font->getHeight() * font->getHorizontalScale() * font->getKerning() * (float) text.length());
 }
 
 void Font::getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) const
 {
-    getTypefacePtr()->getGlyphPositions (text, glyphs, xOffsets);
+    getTypefacePtr()->getGlyphPositions (text, glyphs, xOffsets, getHeight(), getHorizontalScale());
 
     if (auto num = xOffsets.size())
     {
@@ -931,15 +793,8 @@ void Font::getGlyphPositions (const String& text, Array<int>& glyphs, Array<floa
         auto* x = xOffsets.getRawDataPointer();
 
         if (! approximatelyEqual (font->getKerning(), 0.0f))
-        {
             for (int i = 0; i < num; ++i)
-                x[i] = (x[i] + (float) i * font->getKerning()) * scale;
-        }
-        else
-        {
-            for (int i = 0; i < num; ++i)
-                x[i] *= scale;
-        }
+                x[i] += ((float) i * font->getKerning() * scale);
     }
 }
 

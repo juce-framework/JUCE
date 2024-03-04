@@ -142,12 +142,7 @@ public:
 
     /** @deprecated
         This function has several shortcomings:
-        - The returned value is based on a font with a normalised JUCE height of 1.0,
-          which will normally differ from the value that would be expected for a font
-          with a height of 1 pt.
-        - This function is unsuitable for measuring text with spacing that doesn't
-          scale linearly with point size, which might be the case for fonts that
-          implement optical sizing.
+        - The height parameter is specified in JUCE units rather than in points.
         - The result is computed assuming that ligatures and other font features will
           not be used when rendering the string. There's also no way of specifying a
           language used for the string, which may affect the widths of CJK text.
@@ -157,19 +152,13 @@ public:
           glyphs.
 
         Measures the width of a line of text.
-        The distance returned is based on the font having an normalised height of 1.0.
         You should never need to call this!
     */
-    float getStringWidth (const String& text);
+    float getStringWidth (const String& text, float normalisedHeight = 1.0f, float horizontalScale = 1.0f);
 
     /** @deprecated
         This function has several shortcomings:
-        - The returned values are based on a font with a normalised JUCE height of 1.0,
-          which will normally differ from the value that would be expected for a font
-          with a height of 1 pt.
-        - This function is unsuitable for measuring text with spacing that doesn't
-          scale linearly with point size, which might be the case for fonts that
-          implement optical sizing.
+        - The height parameter is specified in JUCE units rather than in points.
         - Ligatures are deliberately ignored, which will lead to ugly results if the
           positions are used to paint text using latin scripts, and potentially
           illegible results for other scripts. There's also no way of specifying a
@@ -180,10 +169,13 @@ public:
           glyphs.
 
         Converts a line of text into its glyph numbers and their positions.
-        The distances returned are based on the font having an normalised height of 1.0.
         You should never need to call this!
     */
-    void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets);
+    void getGlyphPositions (const String& text,
+                            Array<int>& glyphs,
+                            Array<float>& xOffsets,
+                            float normalisedHeight = 1.0f,
+                            float horizontalScale = 1.0f);
 
     /** Returns the outline for a glyph.
         The path returned will be normalised to a font height of 1.0.

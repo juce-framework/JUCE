@@ -35,6 +35,124 @@
 namespace juce
 {
 
+class HbScale
+{
+    static constexpr float factor = 1 << 16;
+
+public:
+    HbScale() = delete;
+
+    static constexpr hb_position_t juceToHb (float pos)
+    {
+        return (hb_position_t) (pos * factor);
+    }
+
+    static constexpr float hbToJuce (hb_position_t pos)
+    {
+        return (float) pos / (float) factor;
+    }
+};
+
+//==============================================================================
+#if JUCE_MAC || JUCE_IOS
+template <CTFontOrientation orientation>
+void getAdvancesForGlyphs (hb_font_t* hbFont, CTFontRef ctFont, Span<const CGGlyph> glyphs, Span<CGSize> advances)
+{
+    jassert (glyphs.size() == advances.size());
+
+    int x, y;
+    hb_font_get_scale (hbFont, &x, &y);
+    const auto scaleAdjustment = HbScale::hbToJuce (orientation == kCTFontOrientationHorizontal ? x : y) / CTFontGetSize (ctFont);
+
+    CTFontGetAdvancesForGlyphs (ctFont, orientation, std::data (glyphs), std::data (advances), (CFIndex) std::size (glyphs));
+
+    for (auto& advance : advances)
+        (orientation == kCTFontOrientationHorizontal ? advance.width : advance.height) *= scaleAdjustment;
+}
+
+template <CTFontOrientation orientation>
+static auto getAdvanceFn()
+{
+    return [] (hb_font_t* f, void*, hb_codepoint_t glyph, void* voidFontRef) -> hb_position_t
+    {
+        auto* fontRef = static_cast<CTFontRef> (voidFontRef);
+
+        const CGGlyph glyphs[] { (CGGlyph) glyph };
+        CGSize advances[std::size (glyphs)]{};
+        getAdvancesForGlyphs<orientation> (f, fontRef, glyphs, advances);
+
+        return HbScale::juceToHb ((float) (orientation == kCTFontOrientationHorizontal ? advances->width : advances->height));
+    };
+}
+
+template <CTFontOrientation orientation>
+static auto getAdvancesFn()
+{
+    return [] (hb_font_t* f,
+               void*,
+               unsigned int count,
+               const hb_codepoint_t* firstGlyph,
+               unsigned int glyphStride,
+               hb_position_t* firstAdvance,
+               unsigned int advanceStride,
+               void* voidFontRef)
+    {
+        auto* fontRef = static_cast<CTFontRef> (voidFontRef);
+
+        std::vector<CGGlyph> glyphs (count);
+
+        for (auto [index, glyph] : enumerate (glyphs))
+            glyph = (CGGlyph) *addBytesToPointer (firstGlyph, glyphStride * index);
+
+        std::vector<CGSize> advances (count);
+
+        getAdvancesForGlyphs<orientation> (f, fontRef, glyphs, advances);
+
+        for (auto [index, advance] : enumerate (advances))
+            *addBytesToPointer (firstAdvance, advanceStride * index) = HbScale::juceToHb ((float) (orientation == kCTFontOrientationHorizontal ? advance.width : advance.height));
+    };
+}
+
+/*  This function overrides the callbacks that fetch glyph advances for fonts on macOS.
+    The built-in OpenType glyph metric callbacks that HarfBuzz uses by default for fonts such as
+    "Apple Color Emoji" don't always return correct advances, resulting in emoji that may overlap
+    with subsequent characters. This may be to do with ignoring the 'trak' table, but I'm not an
+    expert, so I'm not sure!
+
+    In any case, using CTFontGetAdvancesForGlyphs produces much nicer advances for emoji on Apple
+    platforms, as long as the CTFont is set to the size that will eventually be rendered.
+
+    This might need a bit of testing to make sure that it correctly handles advances for
+    custom (non-Apple?) fonts.
+
+    @param hb       a hb_font_t to update with Apple-specific advances
+    @param fontRef  the CTFontRef (normally with a custom point size) that will be queried when computing advances
+*/
+static void overrideCTFontAdvances (hb_font_t* hb, CTFontRef fontRef)
+{
+    using HbFontFuncs = std::unique_ptr<hb_font_funcs_t, FunctionPointerDestructor<hb_font_funcs_destroy>>;
+    const HbFontFuncs funcs { hb_font_funcs_create() };
+
+    // We pass the CTFontRef as user data to each of these functions.
+    // We don't pass a custom destructor for the user data, as that will be handled by the custom
+    // destructor for the hb_font_funcs_t.
+    hb_font_funcs_set_glyph_h_advance_func  (funcs.get(), getAdvanceFn <kCTFontOrientationHorizontal>(), (void*) fontRef, nullptr);
+    hb_font_funcs_set_glyph_v_advance_func  (funcs.get(), getAdvanceFn <kCTFontOrientationVertical>(),   (void*) fontRef, nullptr);
+    hb_font_funcs_set_glyph_h_advances_func (funcs.get(), getAdvancesFn<kCTFontOrientationHorizontal>(), (void*) fontRef, nullptr);
+    hb_font_funcs_set_glyph_v_advances_func (funcs.get(), getAdvancesFn<kCTFontOrientationVertical>(),   (void*) fontRef, nullptr);
+
+    // We want to keep a copy of the font around so that all of our custom callbacks can query it,
+    // so retain it here and release it once the custom functions are no longer in use.
+    jassert (fontRef != nullptr);
+    CFRetain (fontRef);
+
+    hb_font_set_funcs (hb, funcs.get(), (void*) fontRef, [] (void* ptr)
+    {
+        CFRelease ((CTFontRef) ptr);
+    });
+}
+#endif
+
 struct TypefaceLegacyMetrics
 {
     float ascent{};  // in em units
@@ -63,6 +181,21 @@ public:
     auto* getFont() const { return font; }
 
     auto getLegacyMetrics() const { return legacyMetrics; }
+
+    HbFont getFontAtSizeAndScale (float height, float horizontalScale) const
+    {
+        HbFont subFont { hb_font_create_sub_font (font) };
+        const auto points = height * getLegacyMetrics().getHeightToPointsFactor();
+
+        hb_font_set_ptem (subFont.get(), points);
+        hb_font_set_scale (subFont.get(), HbScale::juceToHb (points * horizontalScale), HbScale::juceToHb (points));
+
+       #if JUCE_MAC || JUCE_IOS
+        overrideCTFontAdvances (subFont.get(), hb_coretext_font_get_ct_font (subFont.get()));
+       #endif
+
+        return subFont;
+    }
 
 private:
     static TypefaceLegacyMetrics findLegacyMetrics (hb_font_t* f)
@@ -705,7 +838,11 @@ static constexpr auto hbTag (const char (&arr)[5])
 }
 
 template <typename Consumer>
-static void doSimpleShape (const Typeface& typeface, const String& text, Consumer&& consumer)
+static void doSimpleShape (const Typeface& typeface,
+                           const String& text,
+                           float height,
+                           float horizontalScale,
+                           Consumer&& consumer)
 {
     HbBuffer buffer { hb_buffer_create() };
     hb_buffer_add_utf8 (buffer.get(), text.toRawUTF8(), -1, 0, -1);
@@ -713,7 +850,8 @@ static void doSimpleShape (const Typeface& typeface, const String& text, Consume
     hb_buffer_guess_segment_properties (buffer.get());
 
     const auto& native = typeface.getNativeDetails();
-    auto* font = native.getFont();
+    const auto sized = native.getFontAtSizeAndScale (height, horizontalScale);
+    auto* font = sized.get();
 
     // Disable ligatures, because TextEditor requires a 1:1 codepoint/glyph mapping for caret
     // positioning to work as expected.
@@ -734,36 +872,32 @@ static void doSimpleShape (const Typeface& typeface, const String& text, Consume
     auto* infos = hb_buffer_get_glyph_infos (buffer.get(), &numGlyphs);
     auto* positions = hb_buffer_get_glyph_positions (buffer.get(), &numGlyphs);
 
-    const auto heightToPoints = native.getLegacyMetrics().getHeightToPointsFactor();
-    const auto upem = hb_face_get_upem (hb_font_get_face (font));
-
     Point<hb_position_t> cursor{};
 
     for (auto i = decltype (numGlyphs){}; i < numGlyphs; ++i)
     {
         const auto& info = infos[i];
         const auto& position = positions[i];
-        consumer (std::make_optional (info.codepoint),
-                  heightToPoints * ((float) cursor.x + (float) position.x_offset) / (float) upem);
+        consumer (std::make_optional (info.codepoint), HbScale::hbToJuce (cursor.x + position.x_offset));
         cursor += Point { position.x_advance, position.y_advance };
     }
 
-    consumer (std::optional<hb_codepoint_t>{}, heightToPoints * (float) cursor.x / (float) upem);
+    consumer (std::optional<hb_codepoint_t>{}, HbScale::hbToJuce (cursor.x));
 }
 
-float Typeface::getStringWidth (const String& text)
+float Typeface::getStringWidth (const String& text, float height, float horizontalScale)
 {
     float x{};
-    doSimpleShape (*this, text, [&] (auto, auto xOffset)
+    doSimpleShape (*this, text, height, horizontalScale, [&] (auto, auto xOffset)
     {
         x = xOffset;
     });
     return x;
 }
 
-void Typeface::getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets)
+void Typeface::getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets, float height, float horizontalScale)
 {
-    doSimpleShape (*this, text, [&] (auto codepoint, auto xOffset)
+    doSimpleShape (*this, text, height, horizontalScale, [&] (auto codepoint, auto xOffset)
     {
         if (codepoint.has_value())
             glyphs.add ((int) *codepoint);

@@ -668,18 +668,6 @@ public:
     }
 
 private:
-    CFUniquePtr<CFDictionaryRef> getAttributedStringAtts() const
-    {
-        const short zero = 0;
-        CFUniquePtr<CFNumberRef> numberRef (CFNumberCreate (nullptr, kCFNumberShortType, &zero));
-
-        CFStringRef keys[] = { kCTFontAttributeName, kCTLigatureAttributeName };
-        CFTypeRef values[] = { ctFont.get(), numberRef.get() };
-        return CFUniquePtr<CFDictionaryRef> (CFDictionaryCreate (nullptr, (const void**) &keys,
-                                                                 (const void**) &values, numElementsInArray (keys),
-                                                                 &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
-    }
-
     CoreTextTypeface (CFUniquePtr<CTFontRef> nativeFont,
                       HbFont fontIn,
                       const String& name,
