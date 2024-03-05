@@ -327,6 +327,42 @@ public:
         return this->currentValue;
     }
 
+    //============================================================================== MA MODIFICATIONS (setRampLength)
+
+    /**
+     * Set the ramp length in seconds, without changing the current target value.
+     * The current progress of the ramp will be preserved.
+     * @param sampleRate sample rate in Hz
+     * @param rampLengthInSeconds New ramp length in seconds
+     */
+    void setRampLength(double sampleRate, double rampLengthInSeconds)
+    {
+        jassert(sampleRate > 0 && rampLengthInSeconds >= 0);
+        setRampLength((int)std::floor(rampLengthInSeconds * sampleRate));
+    }
+
+    /**
+     * Set the ramp length in samples, without changing the current target value.
+     * The current progress of the ramp will be preserved.
+     * @param inNumSteps New ramp length in samples
+     */
+    void setRampLength(int inNumSteps)
+    {
+        jassert(inNumSteps >= 0);
+
+        if (stepsToTarget == inNumSteps) {
+            return;
+        }
+
+        double fractional_countdown = stepsToTarget > 0 ? (double)this->countdown / (double)stepsToTarget : 0.0;
+
+        stepsToTarget = inNumSteps;
+        this->countdown = jlimit(0, stepsToTarget, (int)std::round(fractional_countdown * stepsToTarget));
+        setStepSize();
+    }
+
+    //==============================================================================
+
     //==============================================================================
    #ifndef DOXYGEN
     /** Using the new methods:
