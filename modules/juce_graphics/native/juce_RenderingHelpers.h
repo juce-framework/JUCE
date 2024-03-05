@@ -1552,9 +1552,9 @@ namespace EdgeTableFillers
 }
 
 //==============================================================================
-template <class SavedStateType>
-struct ClipRegions
+namespace ClipRegions
 {
+    template <typename SavedStateType>
     struct Base  : public SingleThreadedReferenceCountedObject
     {
         Base() = default;
@@ -1585,7 +1585,8 @@ struct ClipRegions
     };
 
     //==============================================================================
-    struct EdgeTableRegion  : public Base
+    template <typename SavedStateType>
+    struct EdgeTableRegion  : public Base<SavedStateType>
     {
         EdgeTableRegion (const EdgeTable& e)            : edgeTable (e) {}
         EdgeTableRegion (Rectangle<int> r)              : edgeTable (r) {}
@@ -1594,10 +1595,10 @@ struct ClipRegions
         EdgeTableRegion (const RectangleList<float>& r) : edgeTable (r) {}
         EdgeTableRegion (Rectangle<int> bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
 
-        EdgeTableRegion (const EdgeTableRegion& other)  : Base(), edgeTable (other.edgeTable) {}
+        EdgeTableRegion (const EdgeTableRegion& other)  : edgeTable (other.edgeTable) {}
         EdgeTableRegion& operator= (const EdgeTableRegion&) = delete;
 
-        using Ptr = typename Base::Ptr;
+        using Ptr = typename Base<SavedStateType>::Ptr;
 
         Ptr clone() const override                           { return *new EdgeTableRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const override   { return target->clipToEdgeTable (edgeTable); }
@@ -1771,14 +1772,15 @@ struct ClipRegions
     };
 
     //==============================================================================
-    class RectangleListRegion  : public Base
+    template <typename SavedStateType>
+    class RectangleListRegion  : public Base<SavedStateType>
     {
     public:
         RectangleListRegion (Rectangle<int> r) : clip (r) {}
         RectangleListRegion (const RectangleList<int>& r)  : clip (r) {}
-        RectangleListRegion (const RectangleListRegion& other) : Base(), clip (other.clip) {}
+        RectangleListRegion (const RectangleListRegion& other) : clip (other.clip) {}
 
-        using Ptr = typename Base::Ptr;
+        using Ptr = typename Base<SavedStateType>::Ptr;
 
         Ptr clone() const override                           { return *new RectangleListRegion (*this); }
         Ptr applyClipTo (const Ptr& target) const override   { return target->clipToRectangleList (clip); }
@@ -1997,20 +1999,20 @@ struct ClipRegions
             JUCE_DECLARE_NON_COPYABLE (SubRectangleIteratorFloat)
         };
 
-        Ptr toEdgeTable() const   { return *new EdgeTableRegion (clip); }
+        Ptr toEdgeTable() const   { return *new EdgeTableRegion<SavedStateType> (clip); }
 
         RectangleListRegion& operator= (const RectangleListRegion&) = delete;
     };
-};
+}
 
 //==============================================================================
 template <class SavedStateType>
 class SavedStateBase
 {
 public:
-    using BaseRegionType           = typename ClipRegions<SavedStateType>::Base;
-    using EdgeTableRegionType      = typename ClipRegions<SavedStateType>::EdgeTableRegion;
-    using RectangleListRegionType  = typename ClipRegions<SavedStateType>::RectangleListRegion;
+    using BaseRegionType           = typename ClipRegions::Base<SavedStateType>;
+    using EdgeTableRegionType      = typename ClipRegions::EdgeTableRegion<SavedStateType>;
+    using RectangleListRegionType  = typename ClipRegions::RectangleListRegion<SavedStateType>;
 
     SavedStateBase (Rectangle<int> initialClip)
         : clip (new RectangleListRegionType (initialClip)),
