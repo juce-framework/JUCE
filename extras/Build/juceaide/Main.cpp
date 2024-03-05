@@ -526,6 +526,12 @@ int writeHeader (juce::ArgumentList&& args)
     return createAndWrite (output.resolveAsFile(), headerText);
 }
 
+int printJUCEVersion (juce::ArgumentList&&)
+{
+    std::cout << juce::SystemStats::getJUCEVersion() << std::endl;
+    return 0;
+}
+
 } // namespace
 
 int main (int argc, char** argv)
@@ -561,6 +567,7 @@ int main (int argc, char** argv)
             { "pkginfo",         writePkgInfo },
             { "plist",           writePlist },
             { "rcfile",          writeRcFile },
+            { "version",         printJUCEVersion },
             { "winicon",         writeWinIcon }
         };
 

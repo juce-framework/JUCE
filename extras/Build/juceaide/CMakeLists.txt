@@ -161,4 +161,17 @@ else()
 
     get_filename_component(binary_name "${imported_location}" NAME)
     set(JUCE_JUCEAIDE_NAME "${binary_name}" CACHE INTERNAL "The name of the juceaide program")
+
+    message(STATUS "Testing juceaide")
+
+    execute_process(COMMAND "${imported_location}" version
+        RESULT_VARIABLE result_variable
+        OUTPUT_VARIABLE output
+        ERROR_VARIABLE output)
+
+    if(result_variable)
+        message(FATAL_ERROR "Testing juceaide failed:\noutput: ${output}")
+    endif()
+
+    message(STATUS "Finished setting up juceaide")
 endif()
