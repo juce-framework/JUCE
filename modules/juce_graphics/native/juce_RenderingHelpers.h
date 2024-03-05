@@ -2304,14 +2304,6 @@ public:
             auto* edgeTableClip = new EdgeTableRegionType (edgeTable);
             edgeTableClip->edgeTable.translate (x, y);
 
-            if (fillType.isColour())
-            {
-                auto brightness = fillType.colour.getBrightness() - 0.5f;
-
-                if (brightness > 0.0f)
-                    edgeTableClip->edgeTable.multiplyLevels (1.0f + 1.6f * brightness);
-            }
-
             fillShape (*edgeTableClip, false);
         }
     }
