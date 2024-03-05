@@ -230,48 +230,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphCache)
 };
 
-template <typename Context>
-void drawGlyphImpl (Context& context, int glyphNumber, const AffineTransform& trans)
-{
-    using EdgeTableRegionType = typename Context::EdgeTableRegionType;
-
-    if (context.clip == nullptr)
-        return;
-
-    if (trans.isOnlyTranslation() && ! context.transform.isRotated)
-    {
-        auto& cache = RenderingHelpers::GlyphCache::getInstance();
-        const Point pos (trans.getTranslationX(), trans.getTranslationY());
-
-        if (context.transform.isOnlyTranslated)
-        {
-            cache.drawGlyph (context, context.font, glyphNumber, pos + context.transform.offset.toFloat());
-        }
-        else
-        {
-            auto f = context.font;
-            f.setHeight (f.getHeight() * context.transform.complexTransform.mat11);
-
-            auto xScale = context.transform.complexTransform.mat00 / context.transform.complexTransform.mat11;
-
-            if (std::abs (xScale - 1.0f) > 0.01f)
-                f.setHorizontalScale (xScale);
-
-            cache.drawGlyph (context, f, glyphNumber, context.transform.transformed (pos));
-        }
-    }
-    else
-    {
-        const auto fontHeight = context.font.getHeight();
-        const auto fontTransform = AffineTransform::scale (fontHeight * context.font.getHorizontalScale(),
-                                                           fontHeight).followedBy (trans);
-        const auto fullTransform = context.transform.getTransformWith (fontTransform);
-
-        if (auto et = rawToUniquePtr (context.font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, fullTransform, fontHeight)))
-            context.fillShape (*new EdgeTableRegionType (*et), false);
-    }
-}
-
 //==============================================================================
 /** Calculates the alpha values and positions for rendering the edges of a
     non-pixel-aligned rectangle.
@@ -2489,11 +2447,6 @@ public:
     }
 
     //==============================================================================
-    void drawGlyph (int glyphNumber, const AffineTransform& trans)
-    {
-        drawGlyphImpl (*this, glyphNumber, trans);
-    }
-
     Rectangle<int> getMaximumBounds() const     { return image.getBounds(); }
 
     //==============================================================================
@@ -2642,10 +2595,48 @@ public:
     void fillRectList (const RectangleList<float>& list)                     override { stack->fillRectList (list); }
     void fillPath (const Path& path, const AffineTransform& t)               override { stack->fillPath (path, t); }
     void drawImage (const Image& im, const AffineTransform& t)               override { stack->drawImage (im, t); }
-    void drawGlyph (int i, const AffineTransform& t)                         override { stack->drawGlyph (i, t); }
     void drawLine (const Line<float>& line)                                  override { stack->drawLine (line); }
     void setFont (const Font& newFont)                                       override { stack->font = newFont; }
     const Font& getFont()                                                    override { return stack->font; }
+
+    void drawGlyph (int glyphNumber, const AffineTransform& trans) override
+    {
+        if (stack->clip == nullptr)
+            return;
+
+        if (trans.isOnlyTranslation() && ! stack->transform.isRotated)
+        {
+            auto& cache = RenderingHelpers::GlyphCache::getInstance();
+            const Point pos (trans.getTranslationX(), trans.getTranslationY());
+
+            if (stack->transform.isOnlyTranslated)
+            {
+                cache.drawGlyph (*stack, stack->font, glyphNumber, pos + stack->transform.offset.toFloat());
+            }
+            else
+            {
+                auto f = stack->font;
+                f.setHeight (f.getHeight() * stack->transform.complexTransform.mat11);
+
+                auto xScale = stack->transform.complexTransform.mat00 / stack->transform.complexTransform.mat11;
+
+                if (std::abs (xScale - 1.0f) > 0.01f)
+                    f.setHorizontalScale (xScale);
+
+                cache.drawGlyph (*stack, f, glyphNumber, stack->transform.transformed (pos));
+            }
+        }
+        else
+        {
+            const auto fontHeight = stack->font.getHeight();
+            const auto fontTransform = AffineTransform::scale (fontHeight * stack->font.getHorizontalScale(),
+                                                               fontHeight).followedBy (trans);
+            const auto fullTransform = stack->transform.getTransformWith (fontTransform);
+
+            if (auto et = rawToUniquePtr (stack->font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, fullTransform, fontHeight)))
+                stack->fillShape (*new ClipRegions::EdgeTableRegion<SavedStateType> (*et), false);
+        }
+    }
 
 protected:
     StackBasedLowLevelGraphicsContext (SavedStateType* initialState) : stack (initialState) {}

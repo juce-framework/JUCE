@@ -1753,49 +1753,6 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
         }
     }
 
-    void drawGlyph (int glyphNumber, const AffineTransform& trans)
-    {
-        if (clip != nullptr)
-        {
-            if (trans.isOnlyTranslation() && ! transform.isRotated)
-            {
-                auto& cache = RenderingHelpers::GlyphCache::getInstance();
-                Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
-
-                if (transform.isOnlyTranslated)
-                {
-                    cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
-                }
-                else
-                {
-                    pos = transform.transformed (pos);
-
-                    Font f (font);
-                    f.setHeight (font.getHeight() * transform.complexTransform.mat11);
-
-                    auto xScale = transform.complexTransform.mat00 / transform.complexTransform.mat11;
-
-                    if (std::abs (xScale - 1.0f) > 0.01f)
-                        f.setHorizontalScale (xScale);
-
-                    cache.drawGlyph (*this, f, glyphNumber, pos);
-                }
-            }
-            else
-            {
-                auto fontHeight = font.getHeight();
-
-                auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                     .followedBy (trans));
-
-                const std::unique_ptr<EdgeTable> et (font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
-
-                if (et != nullptr)
-                    fillShape (*new EdgeTableRegionType (*et), false);
-            }
-        }
-    }
-
     Rectangle<int> getMaximumBounds() const     { return state->target.bounds; }
 
     void setFillType (const FillType& newFill)
