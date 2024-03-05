@@ -132,7 +132,7 @@ public:
         scanFontPaths (getDefaultFontDirectories());
     }
 
-    ~FTTypefaceList()
+    ~FTTypefaceList() override
     {
         clearSingletonInstance();
     }
@@ -337,8 +337,7 @@ private:
                     if (faceIndex == 0)
                         numFaces = (int) face->face->num_faces;
 
-                    if ((face->face->face_flags & FT_FACE_FLAG_SCALABLE) != 0)
-                        faces.push_back (std::make_unique<FileTypeface> (*face, file));
+                    faces.push_back (std::make_unique<FileTypeface> (*face, file));
                 }
             }
 
@@ -423,7 +422,6 @@ public:
 
         return new FreeTypeTypeface (DoCache::yes, face, std::move (hb), face->face->family_name, face->face->style_name);
     }
-
 
     Native getNativeDetails() const override
     {
