@@ -56,9 +56,6 @@ public:
     ImagesDemo()
     {
         setOpaque (true);
-        imageList.setDirectory (File::getSpecialLocation (File::userPicturesDirectory), true, true);
-        directoryThread.startThread (Thread::Priority::background);
-
         fileTree.setTitle ("Files");
         fileTree.addListener (this);
         fileTree.setColour (TreeView::backgroundColourId, Colours::grey);
@@ -81,6 +78,20 @@ public:
                                           -0.7);        // and its preferred size is 70% of the total available space
 
         setSize (500, 500);
+
+        RuntimePermissions::request (RuntimePermissions::readMediaImages,
+                                     [this] (bool granted)
+                                     {
+                                         if (! granted)
+                                         {
+                                             AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
+                                                                               "Permissions warning",
+                                                                               "External storage access permission not granted, some files"
+                                                                               " may be inaccessible.");
+                                         }
+                                         imageList.setDirectory (File::getSpecialLocation (File::userPicturesDirectory), true, true);
+                                         directoryThread.startThread (Thread::Priority::background);
+                                     });
     }
 
     ~ImagesDemo() override
