@@ -2592,8 +2592,9 @@ private:
                 const auto codesignScript = ScriptBuilder{}
                         .ifSet ("CODE_SIGN_ENTITLEMENTS",
                                 R"(entitlementsArg=(--entitlements "${CODE_SIGN_ENTITLEMENTS}"))")
+                        .echo ("Signing Identity: " + doubleQuoted ("${EXPANDED_CODE_SIGN_IDENTITY_NAME}") )
                         .run ("codesign --verbose=4 --force --sign",
-                              doubleQuoted ("${CODE_SIGN_IDENTITY:--}"),
+                              doubleQuoted ("${EXPANDED_CODE_SIGN_IDENTITY}"),
                               "${entitlementsArg[*]-}",
                               "${OTHER_CODE_SIGN_FLAGS-}",
                               doubleQuoted (installPath + objectToSignTail));
