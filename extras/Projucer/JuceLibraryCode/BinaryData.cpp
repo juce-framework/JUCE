@@ -6919,7 +6919,7 @@ static const unsigned char temp_binary_data_38[] =
 "    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "    g.setColour (juce::Colours::white);\r\n"
-"    g.setFont (15.0f);\r\n"
+"    g.setFont (juce::FontOptions (15.0f));\r\n"
 "    g.drawFittedText (\"Hello World!\", getLocalBounds(), juce::Justification::centred, 1);\r\n"
 "}\r\n"
 "\r\n"
@@ -7239,7 +7239,7 @@ static const unsigned char temp_binary_data_43[] =
 "    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "    g.setColour (juce::Colours::white);\r\n"
-"    g.setFont (15.0f);\r\n"
+"    g.setFont (juce::FontOptions (15.0f));\r\n"
 "    g.drawFittedText (\"Hello World!\", getLocalBounds(), juce::Justification::centred, 1);\r\n"
 "}\r\n"
 "\r\n"
@@ -7722,7 +7722,7 @@ static const unsigned char temp_binary_data_49[] =
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
 "        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
-"        g.setFont (juce::Font (16.0f));\r\n"
+"        g.setFont (juce::FontOptions (16.0f));\r\n"
 "        g.setColour (juce::Colours::white);\r\n"
 "        g.drawText (\"Hello World!\", getLocalBounds(), juce::Justification::centred, true);\r\n"
 "    }\r\n"
@@ -7765,7 +7765,7 @@ static const unsigned char temp_binary_data_50[] =
 "    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
 "    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
-"    g.setFont (juce::Font (16.0f));\r\n"
+"    g.setFont (juce::FontOptions (16.0f));\r\n"
 "    g.setColour (juce::Colours::white);\r\n"
 "    g.drawText (\"Hello World!\", getLocalBounds(), juce::Justification::centred, true);\r\n"
 "}\r\n"
@@ -7838,7 +7838,7 @@ static const unsigned char temp_binary_data_52[] =
 "        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
 "        g.setColour (juce::Colours::white);\r\n"
-"        g.setFont (14.0f);\r\n"
+"        g.setFont (juce::FontOptions (14.0f));\r\n"
 "        g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
 "                    juce::Justification::centred, true);   // draw some placeholder text\r\n"
 "    }\r\n"
@@ -8087,7 +8087,7 @@ static const unsigned char temp_binary_data_56[] =
 "    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
 "    g.setColour (juce::Colours::white);\r\n"
-"    g.setFont (14.0f);\r\n"
+"    g.setFont (juce::FontOptions (14.0f));\r\n"
 "    g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
 "                juce::Justification::centred, true);   // draw some placeholder text\r\n"
 "}\r\n"
@@ -8215,7 +8215,7 @@ static const unsigned char temp_binary_data_60[] =
 "        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
 "        g.setColour (juce::Colours::white);\r\n"
-"        g.setFont (14.0f);\r\n"
+"        g.setFont (juce::FontOptions (14.0f));\r\n"
 "        g.drawText (\"%%component_class%%\", getLocalBounds(),\r\n"
 "                    juce::Justification::centred, true);   // draw some placeholder text\r\n"
 "    }\r\n"
@@ -9178,29 +9178,29 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
         case 0x744d44d6:  numBytes = 1916; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
         case 0x3eb8f45b:  numBytes = 1445; return jucer_AudioPluginARADocumentControllerTemplate_h;
-        case 0x851ac3ac:  numBytes = 1593; return jucer_AudioPluginARAEditorTemplate_cpp;
+        case 0x851ac3ac:  numBytes = 1613; return jucer_AudioPluginARAEditorTemplate_cpp;
         case 0x4d6430b1:  numBytes = 1142; return jucer_AudioPluginARAEditorTemplate_h;
         case 0x48e808fc:  numBytes = 2462; return jucer_AudioPluginARAFilterTemplate_h;
         case 0xea35a37d:  numBytes = 5322; return jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
         case 0x78a6d0c2:  numBytes = 1757; return jucer_AudioPluginARAPlaybackRendererTemplate_h;
-        case 0x27c5a93a:  numBytes = 1355; return jucer_AudioPluginEditorTemplate_cpp;
+        case 0x27c5a93a:  numBytes = 1375; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 973; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6218; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2299; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2147; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2065; return jucer_ComponentTemplate_h;
-        case 0x1657b643:  numBytes = 1524; return jucer_ContentCompSimpleTemplate_h;
-        case 0x0b66646c:  numBytes = 1007; return jucer_ContentCompTemplate_cpp;
+        case 0x1657b643:  numBytes = 1531; return jucer_ContentCompSimpleTemplate_h;
+        case 0x0b66646c:  numBytes = 1014; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 878; return jucer_ContentCompTemplate_h;
-        case 0x28d496ad:  numBytes = 1276; return jucer_InlineComponentTemplate_h;
+        case 0x28d496ad:  numBytes = 1296; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 443; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1999; return jucer_MainTemplate_NoWindow_cpp;
         case 0x400bc026:  numBytes = 4081; return jucer_MainTemplate_Window_cpp;
-        case 0xf4842835:  numBytes = 1521; return jucer_NewComponentTemplate_cpp;
+        case 0xf4842835:  numBytes = 1541; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 665; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 278; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 258; return jucer_NewCppFileTemplate_h;
-        case 0x36e634a1:  numBytes = 1719; return jucer_NewInlineComponentTemplate_h;
+        case 0x36e634a1:  numBytes = 1739; return jucer_NewInlineComponentTemplate_h;
         case 0x6bdeb129:  numBytes = 1987; return jucer_OpenGLComponentSimpleTemplate_h;
         case 0x7fbac252:  numBytes = 1470; return jucer_OpenGLComponentTemplate_cpp;
         case 0x491fa0d7:  numBytes = 1070; return jucer_OpenGLComponentTemplate_h;

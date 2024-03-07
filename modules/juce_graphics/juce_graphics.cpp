@@ -145,6 +145,7 @@
 #include "fonts/juce_Typeface.cpp"
 #include "fonts/juce_FontOptions.cpp"
 #include "fonts/juce_Font.cpp"
+#include "detail/juce_Ranges.cpp"
 #include "fonts/juce_GlyphArrangement.cpp"
 #include "fonts/juce_TextLayout.cpp"
 #include "effects/juce_DropShadowEffect.cpp"
