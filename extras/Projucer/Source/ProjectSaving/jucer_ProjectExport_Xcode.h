@@ -2595,7 +2595,7 @@ private:
                         .run ("codesign --verbose=4 --force --sign",
                               doubleQuoted ("${CODE_SIGN_IDENTITY:--}"),
                               "${entitlementsArg[*]-}",
-                              "${OTHER_CODE_SIGN_ARGS-}",
+                              "${OTHER_CODE_SIGN_FLAGS-}",
                               doubleQuoted (installPath + objectToSignTail));
 
                 copyPluginStepScript.ifEqual (doubleQuoted ("${CONFIGURATION}"), doubleQuoted (config->getName()),
