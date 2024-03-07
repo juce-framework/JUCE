@@ -602,6 +602,9 @@
     <Filter Include="JUCE Modules\juce_graphics\placement">
       <UniqueIdentifier>{160D9882-0F68-278D-C5F9-8960FD7421D2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\unicode">
+      <UniqueIdentifier>{A4846E15-C7B2-BB61-80BA-E284529F3AAA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_graphics">
       <UniqueIdentifier>{4CED05DA-E0A2-E548-F753-1F2EF299A8E3}</UniqueIdentifier>
     </Filter>
@@ -2877,6 +2880,33 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.cpp">
       <Filter>JUCE Modules\juce_graphics\placement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_Unicode.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeBidi.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeBrackets.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeData.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeGrapheme.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeLine.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeScript.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeTestData.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeUtils.cpp">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics.cpp">
       <Filter>JUCE Modules\juce_graphics</Filter>
@@ -6770,6 +6800,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.h">
       <Filter>JUCE Modules\juce_graphics\placement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\juce_LineBreakTable.inl">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\juce_Unicode.h">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeScript.h">
+      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\juce_graphics.h">
       <Filter>JUCE Modules\juce_graphics</Filter>

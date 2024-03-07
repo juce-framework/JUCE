@@ -121,6 +121,15 @@
 //==============================================================================
 #include "fonts/juce_FunctionPointerDestructor.h"
 
+#include "unicode/juce_UnicodeScript.h"
+#include "unicode/juce_Unicode.h"
+#include "unicode/juce_UnicodeUtils.cpp"
+#include "unicode/juce_UnicodeLine.cpp"
+#include "unicode/juce_UnicodeScript.cpp"
+#include "unicode/juce_UnicodeBrackets.cpp"
+#include "unicode/juce_UnicodeBidi.cpp"
+#include "unicode/juce_UnicodeGrapheme.cpp"
+#include "unicode/juce_Unicode.cpp"
 #include "colour/juce_Colour.cpp"
 #include "colour/juce_ColourGradient.cpp"
 #include "colour/juce_Colours.cpp"
