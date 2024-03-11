@@ -247,7 +247,7 @@ public:
         for (int i = 0; i < numDone; ++i)
             x += localWidths[i];
 
-        return x * referenceFontToUnits;
+        return x * referenceFontToUnits * heightToPointsFactor;
     }
 
     void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) override
@@ -303,7 +303,7 @@ public:
 
             glyphs.add ((int) ch);
             x += local;
-            xOffsets.add (x * referenceFontToUnits);
+            xOffsets.add (x * referenceFontToUnits * heightToPointsFactor);
         }
     }
 
@@ -329,7 +329,7 @@ public:
         auto* env = getEnv();
 
         {
-            LocalRef<jobject> matrix (GraphicsHelpers::createMatrix (env, AffineTransform::scale (referenceFontToUnits).followedBy (t)));
+            LocalRef<jobject> matrix (GraphicsHelpers::createMatrix (env, AffineTransform::scale (referenceFontToUnits * heightToPointsFactor).followedBy (t)));
 
             jboolean isCopy;
             auto* buffer = env->GetCharArrayElements ((jcharArray) charArray.get(), &isCopy);

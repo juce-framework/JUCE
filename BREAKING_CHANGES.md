@@ -4,6 +4,35 @@
 
 ## Change
 
+The Android implementations of Typeface::getStringWidth(), getGlyphPositions(),
+and getEdgeTableForGlyph() have been updated to return correctly-normalised
+results. The effect of this change is to change (in practice, slightly reduce)
+the size at which many fonts will render on Android.
+
+**Possible Issues**
+
+The scale of some text on Android may change.
+
+**Workaround**
+
+For font sizes specified in 'JUCE units' by passing a value to the Font
+constructor or to Font::setHeight, instead pass the same size to
+Font::withPointHeight and use the returned Font object.
+
+**Rationale**
+
+The behaviour of the Typeface member functions did not match the documented
+behaviour, or the behaviour on other platforms. This could make it difficult to
+create interfaces that rendered as expected on multiple platforms.
+
+The upcoming unicode support work will unify much of the font-handling and
+text-shaping machinery in JUCE. Ensuring that all platforms have consistent
+behaviour before and after the unicode upgrade will make it easier to implement
+and verify those changes.
+
+
+## Change
+
 The JavascriptEngine::callFunctionObject() function has been removed.
 
 **Possible Issues**
