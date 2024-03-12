@@ -214,6 +214,9 @@ public:
     */
     void getOutlineForGlyph (TypefaceMetricsKind, int glyphNumber, Path& path) const;
 
+    /** Returns glyph bounds, normalised to a font height of 1.0. */
+    Rectangle<float> getGlyphBounds (TypefaceMetricsKind, int glyphNumber) const;
+
     /** @deprecated
 
         Returns a new EdgeTable that contains the path for the given glyph, with the specified transform applied.

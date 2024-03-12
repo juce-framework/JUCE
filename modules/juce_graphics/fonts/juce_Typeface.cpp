@@ -413,6 +413,23 @@ void Typeface::getOutlineForGlyph (TypefaceMetricsKind kind, int glyphNumber, Pa
     path.applyTransform (AffineTransform::scale (scale, -scale));
 }
 
+Rectangle<float> Typeface::getGlyphBounds (TypefaceMetricsKind kind, int glyphNumber) const
+{
+    auto* font = getNativeDetails().getFont();
+
+    hb_glyph_extents_t extents{};
+    if (! hb_font_get_glyph_extents (font, (hb_codepoint_t) glyphNumber, &extents))
+        return {};
+
+    const auto native = getNativeDetails();
+    const auto metrics = native.getMetrics (kind);
+    const auto scale = metrics.getHeightToPointsFactor() / (float) hb_face_get_upem (hb_font_get_face (font));
+
+    return Rectangle { (float) extents.width, (float) extents.height }
+            .withPosition ((float) extents.x_bearing, (float) extents.y_bearing)
+            .transformedBy (AffineTransform::scale (scale).scaled (1.0f, -1.0f));
+}
+
 void Typeface::applyVerticalHintingTransform (float, Path&)
 {
     jassertfalse;
