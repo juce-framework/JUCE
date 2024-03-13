@@ -314,7 +314,7 @@ struct ConsoleApplication
         and a return code which will be returned from main().
         @see ConsoleApplication::invokeCatchingFailures()
     */
-    static void fail (String errorMessage, int returnCode = 1);
+    [[noreturn]] static void fail (String errorMessage, int returnCode = 1);
 
     /** Invokes a function, catching any fail() calls that it might trigger, and handling
         them by printing their error message and returning their error code.
