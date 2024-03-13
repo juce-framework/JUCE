@@ -316,18 +316,36 @@ private:
         if (cache == nullptr)
             return {}; // Perhaps we're shutting down
 
-        return cache->get ({ matchedFile, (int) matchedIndex }, [] (const TypefaceFileAndIndex& info) -> Typeface::Ptr
-        {
-            FileInputStream stream { info.file };
+        return cache->get ({ matchedFile, (int) matchedIndex }, &loadCompatibleFont);
+    }
 
-            if (! stream.openedOk())
-                return {};
+    static Typeface::Ptr loadCompatibleFont (const TypefaceFileAndIndex& info)
+    {
+        FileInputStream stream { info.file };
 
-            MemoryBlock mb;
-            stream.readIntoMemoryBlock (mb);
+        if (! stream.openedOk())
+            return {};
 
-            return fromMemory (DoCache::no, { static_cast<const std::byte*> (mb.getData()), mb.getSize() }, (unsigned int) info.index);
-        });
+        MemoryBlock mb;
+        stream.readIntoMemoryBlock (mb);
+
+        auto result = fromMemory (DoCache::no,
+                                  { static_cast<const std::byte*> (mb.getData()), mb.getSize() },
+                                  (unsigned int) info.index);
+
+        if (result == nullptr)
+            return {};
+
+        const auto tech = result->getColourGlyphFormats();
+        const auto hasSupportedColours = (tech & (colourGlyphFormatCOLRv0 | colourGlyphFormatBitmap)) != 0;
+
+        // If the font only uses unsupported colour technologies, assume it's the system emoji font
+        // and try to return a compatible version of the font
+        if (tech != 0 && ! hasSupportedColours)
+            if (auto fallback = from ({ "NotoColorEmojiLegacy", FontValues::defaultFontHeight, Font::plain }); fallback != nullptr)
+                return fallback;
+
+        return result;
     }
 
     static Typeface::Ptr fromMemory (DoCache cache, Span<const std::byte> blob, unsigned int index = 0)
