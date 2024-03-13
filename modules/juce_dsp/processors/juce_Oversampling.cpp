@@ -40,6 +40,11 @@ struct Oversampling<SampleType>::OversamplingStage
     //==============================================================================
     virtual SampleType getLatencyInSamples() const = 0;
 
+    virtual SampleType getUpsamplingLatencyInSamples() const = 0;
+
+    virtual SampleType getDownsamplingLatencyInSamples() const = 0;
+
+
     virtual void initProcessing (size_t maximumNumberOfSamplesBeforeOversampling)
     {
         buffer.setSize (static_cast<int> (numChannels),
@@ -100,6 +105,14 @@ struct OversamplingDummy   : public Oversampling<SampleType>::OversamplingStage
         outputBlock.copyFrom (ParentType::getProcessedSamples (outputBlock.getNumSamples()));
     }
 
+    SampleType getUpsamplingLatencyInSamples() const override {
+        return 0;
+    }
+
+    SampleType getDownsamplingLatencyInSamples() const override {
+        return 0;
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OversamplingDummy)
 };
 
@@ -141,6 +154,15 @@ struct Oversampling2TimesEquirippleFIR  : public Oversampling<SampleType>::Overs
     SampleType getLatencyInSamples() const override
     {
         return static_cast<SampleType> (coefficientsUp.getFilterOrder() + coefficientsDown.getFilterOrder()) * 0.5f;
+    }
+
+    SampleType getUpsamplingLatencyInSamples() const override
+    {
+        return static_cast<SampleType>(coefficientsUp.getFilterOrder()) * static_cast<SampleType>(0.5);
+    }
+
+    SampleType getDownsamplingLatencyInSamples() const override {
+        return static_cast<SampleType>(coefficientsDown.getFilterOrder()) * static_cast<SampleType>(0.5);
     }
 
     void reset() override
@@ -275,11 +297,13 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
     {
         auto structureUp = FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalisedTransitionWidthUp, stopbandAmplitudedBUp);
         auto coeffsUp = getCoefficients (structureUp);
-        latency = static_cast<SampleType> (-(coeffsUp.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
+        upLatency = static_cast<SampleType> (-(coeffsUp.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
         auto structureDown = FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalisedTransitionWidthDown, stopbandAmplitudedBDown);
         auto coeffsDown = getCoefficients (structureDown);
-        latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
+        downLatency = static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
+
+        latency = upLatency + downLatency;
 
         for (auto i = 0; i < structureUp.directPath.size(); ++i)
             coefficientsUp.add (structureUp.directPath.getObjectPointer (i)->coefficients[0]);
@@ -303,6 +327,17 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
     {
         return latency;
     }
+
+    SampleType getUpsamplingLatencyInSamples() const override
+    {
+        return upLatency;
+    }
+
+    SampleType getDownsamplingLatencyInSamples() const override
+    {
+        return downLatency;
+    }
+
 
     void reset() override
     {
@@ -518,6 +553,9 @@ private:
 
     //==============================================================================
     Array<SampleType> coefficientsUp, coefficientsDown;
+
+    SampleType upLatency;
+    SampleType downLatency;
     SampleType latency;
 
     AudioBuffer<SampleType> v1Up, v1Down;
@@ -641,6 +679,34 @@ SampleType Oversampling<SampleType>::getLatencyInSamples() const noexcept
 {
     auto latency = getUncompensatedLatency();
     return shouldUseIntegerLatency ? latency + fractionalDelay : latency;
+}
+
+template <typename SampleType>
+SampleType Oversampling<SampleType>::getUncompensatedUpsamplingLatencyInSamples() const noexcept {
+    auto latency = static_cast<SampleType> (0);
+    size_t order = 1;
+
+    for (auto* stage : stages)
+    {
+        order *= stage->factor;
+        latency += stage->getUpsamplingLatencyInSamples() / static_cast<SampleType> (order);
+    }
+
+    return latency;
+}
+
+template <typename SampleType>
+SampleType Oversampling<SampleType>::getUncompensatedDownsamplingLatencyInSamples() const noexcept {
+    auto latency = static_cast<SampleType> (0);
+    size_t order = 1;
+
+    for (auto* stage : stages)
+    {
+        order *= stage->factor;
+        latency += stage->getDownsamplingLatencyInSamples() / static_cast<SampleType> (order);
+    }
+
+    return latency;
 }
 
 template <typename SampleType>

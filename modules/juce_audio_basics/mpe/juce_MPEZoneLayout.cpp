@@ -121,10 +121,15 @@ void MPEZoneLayout::processNextMidiEvent (const MidiMessage& message)
 
 void MPEZoneLayout::processRpnMessage (MidiRPNMessage rpn)
 {
-    if (rpn.parameterNumber == MPEMessages::zoneLayoutMessagesRpnNumber)
-        processZoneLayoutRpnMessage (rpn);
-    else if (rpn.parameterNumber == 0)
-        processPitchbendRangeRpnMessage (rpn);
+    // These RPN messages are coming from ableton and changing the master
+    // PB range of our instrument. We don't want the DAW to be messing with
+    // our Zone layout or pitchbend settings so I'm removing this, in my testing
+    // this brings back the expected behavior
+
+    // if (rpn.parameterNumber == MPEMessages::zoneLayoutMessagesRpnNumber)
+    //     processZoneLayoutRpnMessage (rpn);
+    // else if (rpn.parameterNumber == 0)
+    //     processPitchbendRangeRpnMessage (rpn);
 }
 
 void MPEZoneLayout::processZoneLayoutRpnMessage (MidiRPNMessage rpn)

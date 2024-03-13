@@ -115,6 +115,21 @@ public:
     */
     SampleType getLatencyInSamples() const noexcept;
 
+    /**
+     * Returns the latency in samples due to the upsampling part of the overall oversampling operation.
+     *
+     * Note: Does not account for integer latency.
+     */
+    SampleType getUncompensatedUpsamplingLatencyInSamples() const noexcept;
+
+    /**
+     * Returns the latency in samples due to the downsampling part of the overall oversampling operation.
+     *
+     * Note: Does not account for integer latency.
+     */
+    SampleType getUncompensatedDownsamplingLatencyInSamples() const noexcept;
+
+
     /** Returns the current oversampling factor. */
     size_t getOversamplingFactor() const noexcept;
 

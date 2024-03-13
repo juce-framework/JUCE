@@ -689,7 +689,16 @@ function(_juce_add_resources_rc source_target dest_target)
         ${dependency}
         VERBATIM)
 
-    target_sources(${dest_target} PRIVATE "${resource_rc_file}")
+    ###################################################################################################################
+    # Modified by minimal audio to fix standalone windows builds. The RC compiler does not support response files so
+    # we put the resource file in it's own library with no additional includes to avoid the win cmd character limit
+    if (NOT TARGET ${source_target}_rc_lib)
+        add_library(${source_target}_rc_lib OBJECT ${resource_rc_file})
+        set_target_properties(${source_target}_rc_lib PROPERTIES INCLUDE_DIRECTORIES "")
+    endif ()
+
+    target_link_libraries(${dest_target} PRIVATE ${source_target}_rc_lib)
+    ###################################################################################################################
 endfunction()
 
 function(_juce_configure_app_bundle source_target dest_target)
