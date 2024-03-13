@@ -807,6 +807,15 @@ std::vector<GlyphLayer> Typeface::getLayersForGlyph (int glyphNumber, const Affi
     return std::move (context).getLayers();
 }
 
+int Typeface::getColourGlyphFormats() const
+{
+    auto* face = hb_font_get_face (getNativeDetails().getFont());
+    return (hb_ot_color_has_png    (face) ? colourGlyphFormatBitmap : 0)
+         | (hb_ot_color_has_svg    (face) ? colourGlyphFormatSvg    : 0)
+         | (hb_ot_color_has_layers (face) ? colourGlyphFormatCOLRv0 : 0)
+         | (hb_ot_color_has_paint  (face) ? colourGlyphFormatCOLRv1 : 0);
+}
+
 float Typeface::getAscent()               const { return getNativeDetails().getLegacyMetrics().getScaledAscent(); }
 float Typeface::getDescent()              const { return getNativeDetails().getLegacyMetrics().getScaledDescent(); }
 float Typeface::getHeightToPointsFactor() const { return getNativeDetails().getLegacyMetrics().getHeightToPointsFactor(); }

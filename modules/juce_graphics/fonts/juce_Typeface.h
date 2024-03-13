@@ -212,6 +212,36 @@ public:
     */
     std::vector<GlyphLayer> getLayersForGlyph (int glyphNumber, const AffineTransform&, float normalisedHeight) const;
 
+    /** Kinds of colour glyph format that may be implemented by a particular typeface.
+        Most typefaces are monochromatic, and do not support any colour formats.
+        Emoji fonts are likely to implement one or more colour font formats.
+
+        At this time, JUCE is able to render only bitmap and COLRv0 fonts.
+        If you allow users to customise fonts, you may wish to hide or otherwise prevent users from
+        selecting fonts that use unsupported colour formats.
+    */
+    enum ColourGlyphFormat
+    {
+        colourGlyphFormatBitmap  = 1 << 0, ///< The typeface includes glyphs represented as bitmaps (normally PNGs)
+        colourGlyphFormatSvg     = 1 << 1, ///< The typeface includes glyphs represented as SVGs
+        colourGlyphFormatCOLRv0  = 1 << 2, ///< The typeface uses the COLRv0 format, with support for flat colours
+        colourGlyphFormatCOLRv1  = 1 << 3, ///< The typeface uses the COLRv1 format, with support for gradients and blending modes
+    };
+
+    /** Returns an int with bits set indicating the format of colour glyphs contained in the typeface.
+
+        If the typeface has no colour glyphs, no bits will be set. Otherwise, one or more bits will
+        be set depending on the format of the colour glyph information. You can use a bitwise-and
+        operation with the members of the ColourGlyphFormat enum to determine whether a particular
+        format is supported.
+
+        @code
+        const auto isMonochrome   = typeface->getColourGlyphFormats() == 0;
+        const auto isSvg          = (typeface->getColourGlyphFormats() & Typeface::colourGlyphFormatSvg) != 0;
+        const auto isSimpleColour = (typeface->getColourGlyphFormats() & (Typeface::colourGlyphFormatBitmap | Typeface::colourGlyphFormatCOLRv0)) != 0;
+    */
+    int getColourGlyphFormats() const;
+
     //==============================================================================
     /** Changes the number of fonts that are cached in memory. */
     static void setTypefaceCacheSize (int numFontsToCache);
