@@ -102,7 +102,7 @@
  #include <net/if.h>
  #include <sys/ioctl.h>
 
- #if ! (JUCE_ANDROID || JUCE_WASM)
+ #if ! (JUCE_ANDROID || JUCE_WASM || JUCE_MUSL)
   #include <execinfo.h>
  #endif
 #endif
