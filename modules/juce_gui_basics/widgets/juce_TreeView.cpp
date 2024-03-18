@@ -632,6 +632,29 @@ private:
                                                                                            : nextItem;
     }
 
+    template <typename Fn>
+    static void forEachDepthFirst (TreeViewItem* item, bool includeItem, Fn&& callback)
+    {
+        if (includeItem)
+            callback (item);
+
+        if (item->isOpen())
+            for (auto i = 0; i < item->getNumSubItems(); ++i)
+                forEachDepthFirst (item->getSubItem (i), true, callback);
+    }
+
+    std::vector<TreeViewItem*> collectAllItems() const
+    {
+        size_t count{};
+        forEachDepthFirst (owner.rootItem, owner.rootItemVisible, [&] (auto*) { ++count; });
+
+        std::vector<TreeViewItem*> allItems;
+        allItems.reserve (count);
+        forEachDepthFirst (owner.rootItem, owner.rootItemVisible, [&] (auto* item) { allItems.push_back (item); });
+
+        return allItems;
+    }
+
     std::vector<TreeViewItem*> getAllVisibleItems() const
     {
         if (owner.rootItem == nullptr)
@@ -639,47 +662,27 @@ private:
 
         const auto visibleTop = -getY();
         const auto visibleBottom = visibleTop + getParentHeight();
+        auto allItems = collectAllItems();
 
-        std::vector<TreeViewItem*> visibleItems;
-
-        auto* item = [&]
+        const auto lower = std::lower_bound (allItems.begin(), allItems.end(), visibleTop, [] (TreeViewItem* item, const auto y)
         {
-            auto* i = owner.rootItemVisible ? owner.rootItem
-                                            : owner.rootItem->subItems.getFirst();
+            return item->y + item->getItemHeight() < y;
+        });
 
-            while (i != nullptr && i->y + i->getItemHeight() < visibleTop)
-                i = getNextVisibleItem (i, true);
-
-            return i;
-        }();
-
-        auto addOffscreenItemBuffer = [&visibleItems] (TreeViewItem* i, int num, bool forwards)
+        const auto upper = std::upper_bound (allItems.begin(), allItems.end(), visibleBottom, [] (const auto y, TreeViewItem* item)
         {
-            while (--num >= 0)
-            {
-                i = getNextVisibleItem (i, forwards);
+            return y < item->y;
+        });
 
-                if (i == nullptr)
-                    return;
+        const std::ptrdiff_t padding = 2;
 
-                visibleItems.push_back (i);
-            }
-        };
+        const auto frontToErase = std::max (padding, std::distance (allItems.begin(), lower)) - padding;
+        const auto backToErase  = std::max (padding, std::distance (upper, allItems.end()))   - padding;
 
-        addOffscreenItemBuffer (item, 2, false);
+        allItems.erase (allItems.begin(), std::next (allItems.begin(), frontToErase));
+        allItems.erase (std::prev (allItems.end(), backToErase), allItems.end());
 
-        while (item != nullptr && item->y < visibleBottom)
-        {
-            visibleItems.push_back (item);
-            item = getNextVisibleItem (item, true);
-        }
-
-        if (item != nullptr)
-            visibleItems.push_back (item);
-
-        addOffscreenItemBuffer (item, 2, true);
-
-        return visibleItems;
+        return allItems;
     }
 
     //==============================================================================
