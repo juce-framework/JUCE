@@ -395,10 +395,10 @@ public:
                 else
                     stopTimer();
 
-                nameLabel.setFont (Font (16).withStyle (Font::bold | (hasBeenPurchased ? 0 : Font::italic)));
+                nameLabel.setFont (FontOptions { 16.0f, Font::bold | (hasBeenPurchased ? 0 : Font::italic) });
                 nameLabel.setColour (Label::textColourId, hasBeenPurchased ? Colours::white : Colours::grey);
 
-                priceLabel.setFont (Font (10).withStyle (purchase.priceIsKnown ? 0 : Font::italic));
+                priceLabel.setFont (FontOptions { 10.0f, purchase.priceIsKnown ? 0 : Font::italic });
                 priceLabel.setColour (Label::textColourId, hasBeenPurchased ? Colours::white : Colours::grey);
                 priceLabel.setText (purchase.purchasePrice, NotificationType::dontSendNotification);
 

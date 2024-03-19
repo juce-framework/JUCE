@@ -114,7 +114,7 @@ private:
     //==============================================================================
     Parallelogram<float> bounds;
     float fontHeight, fontHScale;
-    Font font, scaledFont;
+    Font font { FontOptions{} }, scaledFont { FontOptions{} };
     String text;
     Colour colour;
     Justification justification;

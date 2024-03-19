@@ -437,9 +437,7 @@ public:
         }
     }
 
-    [[nodiscard]] ComSmartPtr<ID2D1Factory> getD2D1Factory() const { return d2dFactory; }
     [[nodiscard]] ComSmartPtr<IDWriteFactory> getDWriteFactory() const { return directWriteFactory; }
-    [[nodiscard]] ComSmartPtr<ID2D1DCRenderTarget> getD2D1DCRenderTarget() const { return directWriteRenderTarget; }
     [[nodiscard]] AggregateFontCollection& getFonts() { jassert (fonts.has_value()); return *fonts; }
     [[nodiscard]] ComSmartPtr<IDWriteFontCollectionLoader> getCollectionLoader() const { return collectionLoader; }
 
@@ -510,7 +508,12 @@ public:
         HbFont hbFont { hb_font_create (hbFace.get()) };
 
         FontStyleHelpers::initSynthetics (hbFont.get(), f);
-        return new WindowsDirectWriteTypeface (name, style, dwFont, dwFontFace, std::move (hbFont));
+        return new WindowsDirectWriteTypeface (name,
+                                               style,
+                                               dwFont,
+                                               dwFontFace,
+                                               std::move (hbFont),
+                                               getDwriteMetrics (dwFontFace));
     }
 
     static Typeface::Ptr from (Span<const std::byte> blob)
@@ -520,7 +523,7 @@ public:
 
     Native getNativeDetails() const override
     {
-        return Native { hbFont.get() };
+        return Native { hbFont.get(), nonPortableMetrics };
     }
 
     Typeface::Ptr createSystemFallback (const String& c, const String& language) const override
@@ -687,8 +690,16 @@ private:
         const auto style = getLocalisedStyle (*dwFont);
 
         const HbFace hbFace { hb_directwrite_face_create (dwFontFace) };
+        HbFont font { hb_font_create (hbFace.get()) };
+        const auto metrics = getGdiMetrics (font.get()).value_or (getDwriteMetrics (dwFontFace));
 
-        return new WindowsDirectWriteTypeface (name, style, dwFont, dwFontFace, HbFont { hb_font_create (hbFace.get()) }, std::move (customFontCollection));
+        return new WindowsDirectWriteTypeface (name,
+                                               style,
+                                               dwFont,
+                                               dwFontFace,
+                                               std::move (font),
+                                               metrics,
+                                               customFontCollection);
     }
 
     static String getLocalisedFamilyName (IDWriteFont& font)
@@ -723,15 +734,37 @@ private:
                                 ComSmartPtr<IDWriteFont> font,
                                 ComSmartPtr<IDWriteFontFace> face,
                                 HbFont hbFontIn,
+                                TypefaceAscentDescent metrics,
                                 ComSmartPtr<IDWriteFontCollection> collectionIn = nullptr)
         : Typeface (name, style),
           collection (std::move (collectionIn)),
           dwFont (font),
           dwFontFace (face),
-          hbFont (std::move (hbFontIn))
+          hbFont (std::move (hbFontIn)),
+          nonPortableMetrics (metrics)
     {
         if (collection != nullptr)
             factories->getFonts().addCollection (collection);
+    }
+
+    static TypefaceAscentDescent getDwriteMetrics (ComSmartPtr<IDWriteFontFace> face)
+    {
+        DWRITE_FONT_METRICS dwriteFontMetrics{};
+        face->GetMetrics (&dwriteFontMetrics);
+        return TypefaceAscentDescent { (float) dwriteFontMetrics.ascent  / (float) dwriteFontMetrics.designUnitsPerEm,
+                                       (float) dwriteFontMetrics.descent / (float) dwriteFontMetrics.designUnitsPerEm };
+    }
+
+    static std::optional<TypefaceAscentDescent> getGdiMetrics (hb_font_t* font)
+    {
+        hb_position_t ascent{}, descent{};
+
+        if (! hb_ot_metrics_get_position (font, HB_OT_METRICS_TAG_HORIZONTAL_CLIPPING_ASCENT,  &ascent) ||
+            ! hb_ot_metrics_get_position (font, HB_OT_METRICS_TAG_HORIZONTAL_CLIPPING_DESCENT, &descent))
+            return {};
+
+        const auto upem = (float) hb_face_get_upem (hb_font_get_face (font));
+        return TypefaceAscentDescent { (float) ascent / upem, (float) descent / upem };
     }
 
     SharedResourcePointer<Direct2DFactories> factories;
@@ -739,6 +772,7 @@ private:
     ComSmartPtr<IDWriteFont> dwFont;
     ComSmartPtr<IDWriteFontFace> dwFontFace;
     HbFont hbFont;
+    TypefaceAscentDescent nonPortableMetrics;
 };
 
 struct DefaultFontNames

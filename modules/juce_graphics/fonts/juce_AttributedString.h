@@ -175,7 +175,7 @@ public:
         Range<int> range;
 
         /** The font for this range of characters. */
-        Font font;
+        Font font { FontOptions{} };
 
         /** The colour for this range of characters. */
         Colour colour { 0xff000000 };

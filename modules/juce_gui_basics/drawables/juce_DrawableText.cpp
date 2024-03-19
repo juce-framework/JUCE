@@ -40,7 +40,7 @@ DrawableText::DrawableText()
       justification (Justification::centredLeft)
 {
     setBoundingBox (Parallelogram<float> ({ 0.0f, 0.0f, 50.0f, 20.0f }));
-    setFont (Font (15.0f), true);
+    setFont (FontOptions (15.0f), true);
 }
 
 DrawableText::DrawableText (const DrawableText& other)

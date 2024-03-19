@@ -116,7 +116,7 @@ private:
             // This is unfortunately a bit slow, but will work on all platforms.
             static bool isMonospacedTypeface (const String& name)
             {
-                const Font font (name, 20.0f, Font::plain);
+                const Font font = FontOptions (name, 20.0f, Font::plain);
 
                 const auto width = font.getStringWidth ("....");
 
@@ -188,7 +188,7 @@ private:
             PropertyPanel panel;
             TextButton loadButton, saveButton;
 
-            Font codeFont;
+            Font codeFont { FontOptions{} };
             Array<var> colourValues;
 
             void saveScheme (bool isExit)

@@ -73,13 +73,13 @@ public:
         addAndMakeVisible (userAvatar);
 
         addAndMakeVisible (createAccountLabel);
-        createAccountLabel.setFont (Font (14.0f, Font::underlined));
+        createAccountLabel.setFont (FontOptions (14.0f, Font::underlined));
         createAccountLabel.addMouseListener (this, false);
         createAccountLabel.setMouseCursor (MouseCursor::PointingHandCursor);
 
         addAndMakeVisible (errorMessageLabel);
         errorMessageLabel.setMinimumHorizontalScale (1.0f);
-        errorMessageLabel.setFont (12.0f);
+        errorMessageLabel.setFont (FontOptions { 12.0f });
         errorMessageLabel.setColour (Label::textColourId, Colours::red);
         errorMessageLabel.setVisible (false);
 
@@ -119,8 +119,8 @@ public:
         passwordBox.setBounds (bounds.removeFromTop (textEditorHeight));
         bounds.removeFromTop (spacing * 2);
 
-        emailBox.setFont (Font ((float) textEditorHeight / 2.5f));
-        passwordBox.setFont (Font ((float) textEditorHeight / 2.5f));
+        emailBox.setFont (FontOptions ((float) textEditorHeight / 2.5f));
+        passwordBox.setFont (FontOptions ((float) textEditorHeight / 2.5f));
 
         logInButton.setBounds (bounds.removeFromTop (textEditorHeight));
 

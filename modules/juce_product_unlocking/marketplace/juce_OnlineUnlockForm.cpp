@@ -250,9 +250,9 @@ void OnlineUnlockForm::resized()
     r.removeFromBottom (20);
 
     // (force use of a default system font to make sure it has the password blob character)
-    Font font (Font::getDefaultTypefaceForFont (Font (Font::getDefaultSansSerifFontName(),
-                                                      Font::getDefaultStyle(),
-                                                      5.0f)));
+    Font font (FontOptions { Font::getDefaultTypefaceForFont (FontOptions (Font::getDefaultSansSerifFontName(),
+                                                                           Font::getDefaultStyle(),
+                                                                           5.0f)) });
 
     const int boxHeight = 24;
     passwordBox.setBounds (r.removeFromBottom (boxHeight));
@@ -286,7 +286,7 @@ void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)
     addChildComponent (bubble.get());
 
     AttributedString attString;
-    attString.append (text, Font (16.0f));
+    attString.append (text, FontOptions (16.0f));
 
     bubble->showAt (getLocalArea (&target, target.getLocalBounds()),
                     attString, 500,  // numMillisecondsBeforeRemoving

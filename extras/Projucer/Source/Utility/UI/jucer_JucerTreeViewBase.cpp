@@ -85,7 +85,7 @@ void JucerTreeViewBase::refreshSubItems()
 
 Font JucerTreeViewBase::getFont() const
 {
-    return Font ((float) getItemHeight() * 0.6f);
+    return FontOptions ((float) getItemHeight() * 0.6f);
 }
 
 void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour /*backgroundColour*/, bool isMouseOver)

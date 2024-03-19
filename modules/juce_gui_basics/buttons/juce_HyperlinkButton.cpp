@@ -39,7 +39,7 @@ HyperlinkButton::HyperlinkButton (const String& linkText,
                                   const URL& linkURL)
    : Button (linkText),
      url (linkURL),
-     font (14.0f, Font::underlined),
+     font (FontOptions { 14.0f, Font::underlined }),
      resizeFont (true),
      justification (Justification::centred)
 {
@@ -49,7 +49,7 @@ HyperlinkButton::HyperlinkButton (const String& linkText,
 
 HyperlinkButton::HyperlinkButton()
    : Button (String()),
-     font (14.0f, Font::underlined),
+     font (FontOptions { 14.0f, Font::underlined }),
      resizeFont (true),
      justification (Justification::centred)
 {

@@ -425,7 +425,7 @@ public:
 
     Native getNativeDetails() const override
     {
-        return Native { hb.get() };
+        return Native { hb.get(), nonPortableMetrics };
     }
 
     Typeface::Ptr createSystemFallback ([[maybe_unused]] const String& text,
@@ -535,6 +535,8 @@ private:
     FTFaceWrapper::Ptr ftFace;
     HbFont hb;
     DoCache doCache;
+    TypefaceAscentDescent nonPortableMetrics { (float) std::abs (ftFace->face->ascender)  / (float) ftFace->face->units_per_EM,
+                                               (float) std::abs (ftFace->face->descender) / (float) ftFace->face->units_per_EM };
 
     JUCE_DECLARE_NON_COPYABLE (FreeTypeTypeface)
 };

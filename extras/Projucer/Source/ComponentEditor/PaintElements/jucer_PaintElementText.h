@@ -45,7 +45,7 @@ public:
     PaintElementText (PaintRoutine* pr)
         : ColouredElement (pr, "Text", false, false),
           text ("Your text goes here"),
-          font (15.0f),
+          font (FontOptions { 15.0f }),
           typefaceName (FontPropertyComponent::getDefaultFont()),
           justification (Justification::centred)
     {

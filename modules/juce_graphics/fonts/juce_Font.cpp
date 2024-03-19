@@ -354,6 +354,11 @@ private:
 };
 
 //==============================================================================
+Font::Font (FontOptions opt)
+    : font (new SharedFontInternal (std::move (opt)))
+{
+}
+
 Font::Font()                                : font (new SharedFontInternal (FontOptions{})) {}
 Font::Font (const Typeface::Ptr& typeface)  : font (new SharedFontInternal (FontOptions { typeface })) {}
 Font::Font (const Font& other) noexcept     : font (other.font) {}
@@ -747,7 +752,7 @@ void Font::findFonts (Array<Font>& destArray)
         if (! styles.contains (style, true))
             style = styles[0];
 
-        destArray.add (Font (name, style, FontValues::defaultFontHeight));
+        destArray.add (FontOptions (name, style, FontValues::defaultFontHeight));
     }
 }
 
@@ -851,7 +856,7 @@ Font Font::fromString (const String& fontDescription)
 
     const String style (sizeAndStyle.fromFirstOccurrenceOf (" ", false, false));
 
-    return Font (name, style, height);
+    return FontOptions (name, style, height);
 }
 
 Font::Native Font::getNativeDetails() const

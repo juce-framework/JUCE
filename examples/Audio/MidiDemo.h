@@ -449,7 +449,7 @@ private:
     //==============================================================================
     void addLabelAndSetStyle (Label& label)
     {
-        label.setFont (Font (15.00f, Font::plain));
+        label.setFont (FontOptions (15.00f, Font::plain));
         label.setJustificationType (Justification::centredLeft);
         label.setEditable (false, false, false);
         label.setColour (TextEditor::textColourId, Colours::black);

@@ -130,7 +130,7 @@ void Graphics::resetToDefaultState()
 {
     saveStateIfPending();
     context.setFill (FillType());
-    context.setFont (Font());
+    context.setFont (FontOptions{});
     context.setInterpolationQuality (Graphics::mediumResamplingQuality);
 }
 

@@ -1814,7 +1814,7 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
     }
 
     //==============================================================================
-    Font font;
+    Font font { FontOptions{} };
     GLState* state;
     bool isUsingCustomShader = false;
 

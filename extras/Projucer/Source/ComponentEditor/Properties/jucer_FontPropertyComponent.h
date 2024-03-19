@@ -55,8 +55,8 @@ public:
             Array<Font> fonts;
             Font::findFonts (fonts);
 
-            for (int i = 0; i < fonts.size(); ++i)
-                fontNames.add (fonts[i].getTypefaceName());
+            for (const auto& font : fonts)
+                fontNames.add (font.getTypefaceName());
         }
 
         choices.addArray (fontNames);
@@ -90,14 +90,15 @@ public:
 
     static Font applyNameToFont (const String& typefaceName, const Font& font)
     {
-        auto extraKerning = font.getExtraKerningFactor();
+        const auto extraKerning = font.getExtraKerningFactor();
+        const auto kerned = [extraKerning] (Font f) { return f.withExtraKerningFactor (extraKerning); };
 
-        if (typefaceName == getDefaultFont())  return Font (font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
-        if (typefaceName == getDefaultSans())  return Font (Font::getDefaultSansSerifFontName(), font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
-        if (typefaceName == getDefaultSerif()) return Font (Font::getDefaultSerifFontName(), font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
-        if (typefaceName == getDefaultMono())  return Font (Font::getDefaultMonospacedFontName(), font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
+        if (typefaceName == getDefaultFont())  return kerned (FontOptions (font.getHeight(), font.getStyleFlags()));
+        if (typefaceName == getDefaultSans())  return kerned (FontOptions (Font::getDefaultSansSerifFontName(), font.getHeight(), font.getStyleFlags()));
+        if (typefaceName == getDefaultSerif()) return kerned (FontOptions (Font::getDefaultSerifFontName(), font.getHeight(), font.getStyleFlags()));
+        if (typefaceName == getDefaultMono())  return kerned (FontOptions (Font::getDefaultMonospacedFontName(), font.getHeight(), font.getStyleFlags()));
 
-        auto f = Font (typefaceName, font.getHeight(), font.getStyleFlags()).withExtraKerningFactor (extraKerning);
+        auto f = kerned (FontOptions { typefaceName, font.getHeight(), font.getStyleFlags() });
 
         if (f.getAvailableStyles().contains (font.getTypefaceStyle()))
             f.setTypefaceStyle (font.getTypefaceStyle());

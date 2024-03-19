@@ -108,7 +108,7 @@ protected:
         RectangleList<int> clip;
         int xOffset, yOffset;
         FillType fillType;
-        Font font;
+        Font font { FontOptions{} };
     };
 
     OwnedArray<SavedState> stateStack;

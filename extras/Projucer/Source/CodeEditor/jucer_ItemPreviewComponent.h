@@ -74,7 +74,7 @@ public:
                                         .getTransformToFit (contentBounds, area.toFloat()));
         }
 
-        g.setFont (Font (14.0f, Font::bold));
+        g.setFont (FontOptions (14.0f, Font::bold));
         g.setColour (findColour (defaultTextColourId));
         g.drawMultiLineText (facts.joinIntoString ("\n"), 10, 15, getWidth() - 16);
     }

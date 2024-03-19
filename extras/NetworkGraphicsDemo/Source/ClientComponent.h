@@ -164,14 +164,14 @@ private:
         if (clientArea.isEmpty())
         {
             g.setColour (Colours::red.withAlpha (0.5f));
-            g.setFont (20.0f);
+            g.setFont (FontOptions (20.0f));
             g.drawText ("Not Connected", getLocalBounds(), Justification::centred, false);
             return;
         }
 
         canvas.draw (g, getLocalBounds().toFloat(), clientArea);
 
-        g.setFont (Font (34.0f));
+        g.setFont (FontOptions (34.0f));
         g.setColour (Colours::white.withAlpha (0.6f));
 
         g.drawText (getMachineInfoToDisplay(),

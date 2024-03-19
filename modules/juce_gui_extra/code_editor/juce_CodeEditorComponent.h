@@ -416,7 +416,7 @@ private:
     //==============================================================================
     CodeDocument& document;
 
-    Font font;
+    Font font { FontOptions{} };
     int firstLineOnScreen = 0, spacesPerTab = 4;
     float charWidth = 0;
     int lineHeight = 0, linesOnScreen = 0, columnsOnScreen = 0;

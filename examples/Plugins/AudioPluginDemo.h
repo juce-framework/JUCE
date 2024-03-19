@@ -386,17 +386,17 @@ private:
 
             // add some labels for the sliders..
             gainLabel.attachToComponent (&gainSlider, false);
-            gainLabel.setFont (Font (11.0f));
+            gainLabel.setFont (FontOptions (11.0f));
 
             delayLabel.attachToComponent (&delaySlider, false);
-            delayLabel.setFont (Font (11.0f));
+            delayLabel.setFont (FontOptions (11.0f));
 
             // add the midi keyboard component..
             addAndMakeVisible (midiKeyboard);
 
             // add a label that will display the current timecode and status..
             addAndMakeVisible (timecodeDisplayLabel);
-            timecodeDisplayLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
+            timecodeDisplayLabel.setFont (FontOptions (Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
 
             // set resize limits for this plug-in
             setResizeLimits (400, 200, 1024, 700);

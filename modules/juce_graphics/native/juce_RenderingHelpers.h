@@ -2498,7 +2498,7 @@ public:
 
     //==============================================================================
     Image image;
-    Font font;
+    Font font { FontOptions{} };
 
 private:
     SoftwareRendererSavedState& operator= (const SoftwareRendererSavedState&) = delete;

@@ -89,7 +89,7 @@ public:
 
         Label defaultLabel;
 
-        Font font;
+        Font font { FontOptions{} };
         font.setHeight ((float) xml.getDoubleAttribute ("fontsize", 15.0));
         font.setBold (xml.getBoolAttribute ("bold", false));
         font.setItalic (xml.getBoolAttribute ("italic", false));
@@ -703,7 +703,7 @@ private:
                 return true;
             }
 
-            Font newState, oldState;
+            Font newState { FontOptions{} }, oldState { FontOptions{} };
         };
     };
 

@@ -406,9 +406,9 @@ namespace CoreTextTypeLayout
                         CFUniquePtr<CFStringRef> cfsFontFamily ((CFStringRef) CTFontCopyAttribute (ctRunFont, kCTFontFamilyNameAttribute));
                         CFUniquePtr<CFStringRef> cfsFontStyle ((CFStringRef) CTFontCopyAttribute (ctRunFont, kCTFontStyleNameAttribute));
 
-                        Font result (String::fromCFString (cfsFontFamily.get()),
-                                     String::fromCFString (cfsFontStyle.get()),
-                                     (float) (CTFontGetSize (ctRunFont) / fontHeightToPointsFactor));
+                        Font result (FontOptions { String::fromCFString (cfsFontFamily.get()),
+                                                   String::fromCFString (cfsFontStyle.get()),
+                                                   (float) (CTFontGetSize (ctRunFont) / fontHeightToPointsFactor) });
 
                         auto isUnderlined = [&]
                         {

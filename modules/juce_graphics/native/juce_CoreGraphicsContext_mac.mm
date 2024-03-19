@@ -212,7 +212,7 @@ struct CoreGraphicsContext::SavedState
     }
 
     FillType fillType;
-    Font font { 1.0f };
+    Font font { FontOptions { 1.0f } };
     CFUniquePtr<CTFontRef> fontRef{};
     CGAffineTransform textMatrix = CGAffineTransformIdentity,
                inverseTextMatrix = CGAffineTransformIdentity;
@@ -244,7 +244,7 @@ CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, float h)
     CGContextSetBlendMode (context.get(), kCGBlendModeNormal);
     rgbColourSpace.reset (CGColorSpaceCreateWithName (kCGColorSpaceSRGB));
     greyColourSpace.reset (CGColorSpaceCreateWithName (kCGColorSpaceGenericGrayGamma2_2));
-    setFont (Font());
+    setFont (FontOptions());
 }
 
 CoreGraphicsContext::~CoreGraphicsContext()

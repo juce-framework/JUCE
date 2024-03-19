@@ -997,7 +997,7 @@ private:
         {
             addAndMakeVisible (statusLabel);
             statusLabel.setJustificationType (Justification::topLeft);
-            statusLabel.setFont (Font (14.0f));
+            statusLabel.setFont (FontOptions (14.0f));
 
             addAndMakeVisible (sizeSlider);
             sizeSlider.setRange (0.0, 1.0, 0.001);

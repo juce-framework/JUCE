@@ -61,6 +61,9 @@ public:
         underlined  = 4     /**< underlines the font. @see setStyleFlags */
     };
 
+    /** Constructs a Font from a set of options describing the font. */
+    Font (FontOptions options);
+
     //==============================================================================
     /** Creates a sans-serif font in a given size.
 
@@ -70,6 +73,7 @@ public:
                             just Font::plain for the normal style.
         @see FontStyleFlags, getDefaultSansSerifFontName
     */
+    [[deprecated ("Use the constructor that takes a FontOptions argument")]]
     Font (float fontHeight, int styleFlags = plain);
 
     /** Creates a font with a given typeface and parameters.
@@ -81,6 +85,7 @@ public:
                             just Font::plain for the normal style.
         @see FontStyleFlags, getDefaultSansSerifFontName
     */
+    [[deprecated ("Use the constructor that takes a FontOptions argument")]]
     Font (const String& typefaceName, float fontHeight, int styleFlags);
 
     /** Creates a font with a given typeface and parameters.
@@ -89,12 +94,11 @@ public:
         @param typefaceStyle the font style of the typeface to use
         @param fontHeight    the height in pixels (can be fractional)
     */
+    [[deprecated ("Use the constructor that takes a FontOptions argument")]]
     Font (const String& typefaceName, const String& typefaceStyle, float fontHeight);
 
-    /** Creates a copy of another Font object. */
-    Font (const Font& other) noexcept;
-
     /** Creates a font for a typeface. */
+    [[deprecated ("Use the constructor that takes a FontOptions argument")]]
     Font (const Typeface::Ptr& typeface);
 
     /** Creates a basic sans-serif font at a default height.
@@ -103,7 +107,11 @@ public:
         on drawing with - this constructor is here to help initialise objects before changing
         the font's settings later.
     */
+    [[deprecated ("Use the constructor that takes a FontOptions argument")]]
     Font();
+
+    /** Creates a copy of another Font object. */
+    Font (const Font& other) noexcept;
 
     /** Move constructor */
     Font (Font&& other) noexcept;

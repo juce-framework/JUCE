@@ -467,7 +467,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
     addAndMakeVisible (horizontalScrollBar);
     horizontalScrollBar.setSingleStepSize (1.0);
 
-    Font f (12.0f);
+    Font f (FontOptions { 12.0f });
     f.setTypefaceName (Font::getDefaultMonospacedFontName());
     setFont (f);
 

@@ -139,17 +139,17 @@ public:
     UpdateDialog (const String& newVersion, const String& releaseNotes)
     {
         titleLabel.setText ("JUCE version " + newVersion, dontSendNotification);
-        titleLabel.setFont ({ 15.0f, Font::bold });
+        titleLabel.setFont (FontOptions { 15.0f, Font::bold });
         titleLabel.setJustificationType (Justification::centred);
         addAndMakeVisible (titleLabel);
 
         contentLabel.setText ("A new version of JUCE is available - would you like to download it?", dontSendNotification);
-        contentLabel.setFont (15.0f);
+        contentLabel.setFont (FontOptions { 15.0f });
         contentLabel.setJustificationType (Justification::topLeft);
         addAndMakeVisible (contentLabel);
 
         releaseNotesLabel.setText ("Release notes:", dontSendNotification);
-        releaseNotesLabel.setFont (15.0f);
+        releaseNotesLabel.setFont (FontOptions { 15.0f });
         releaseNotesLabel.setJustificationType (Justification::topLeft);
         addAndMakeVisible (releaseNotesLabel);
 

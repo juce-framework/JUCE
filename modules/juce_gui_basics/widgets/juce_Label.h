@@ -355,7 +355,7 @@ private:
     //==============================================================================
     Value textValue;
     String lastTextValue;
-    Font font { 15.0f };
+    Font font { FontOptions { 15.0f } };
     Justification justification = Justification::centredLeft;
     std::unique_ptr<TextEditor> editor;
     ListenerList<Listener> listeners;

@@ -414,7 +414,7 @@ struct FlockWithText final : public FlockDemo
         String text = String (messages[currentMessage]).replace ("NUMDEVICES", String (canvas.clients.size()));
 
         AttributedString as;
-        as.append (text, Font (textSize * scale), Colour (0x80ffffff).withMultipliedAlpha (alpha));
+        as.append (text, FontOptions (textSize * scale), Colour (0x80ffffff).withMultipliedAlpha (alpha));
 
         as.setJustification (Justification::centred);
         auto middle = canvas.clients[clientIndex % canvas.clients.size()].centre * scale;

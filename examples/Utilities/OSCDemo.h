@@ -458,7 +458,7 @@ private:
         auto textColour = isConnected() ? Colours::green : Colours::red;
 
         connectionStatusLabel.setText (text, dontSendNotification);
-        connectionStatusLabel.setFont (Font (15.00f, Font::bold));
+        connectionStatusLabel.setFont (FontOptions (15.00f, Font::bold));
         connectionStatusLabel.setColour (Label::textColourId, textColour);
         connectionStatusLabel.setJustificationType (Justification::centredRight);
     }

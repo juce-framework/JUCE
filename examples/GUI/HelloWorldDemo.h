@@ -60,7 +60,7 @@ public:
     {
         addAndMakeVisible (helloWorldLabel);
 
-        helloWorldLabel.setFont (Font (40.00f, Font::bold));
+        helloWorldLabel.setFont (FontOptions (40.00f, Font::bold));
         helloWorldLabel.setJustificationType (Justification::centred);
         helloWorldLabel.setEditable (false, false, false);
         helloWorldLabel.setColour (Label::textColourId, Colours::black);

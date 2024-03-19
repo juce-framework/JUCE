@@ -43,7 +43,7 @@ public:
     {
         addAndMakeVisible (titleLabel);
         titleLabel.setJustificationType (Justification::centred);
-        titleLabel.setFont (Font (35.0f, Font::FontStyleFlags::bold));
+        titleLabel.setFont (FontOptions (35.0f, Font::FontStyleFlags::bold));
 
         auto buildDate = Time::getCompilationDate();
         addAndMakeVisible (versionLabel);

@@ -292,7 +292,7 @@ struct FontStyleHelpers
     private:
         static String findName (const String& placeholder)
         {
-            const Font f (placeholder, 15.0f, Font::plain);
+            const Font f (FontOptions (placeholder, 15.0f, Font::plain));
             return Font::getDefaultTypefaceForFont (f)->getName();
         }
 
@@ -957,7 +957,7 @@ public:
 
         beginTest ("Typefaces loaded from memory are found when creating font instances by name");
         {
-            Font font (ptr->getName(), ptr->getStyle(), 12.0f);
+            Font font (FontOptions (ptr->getName(), ptr->getStyle(), 12.0f));
 
             expect (font.getTypefacePtr() != nullptr);
             expect (font.getTypefacePtr()->getName() == ptr->getName());

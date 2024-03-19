@@ -60,7 +60,7 @@ struct LookAndFeelHelpers
 
         AttributedString s;
         s.setJustification (Justification::centred);
-        s.append (text, Font (tooltipFontSize, Font::bold), colour);
+        s.append (text, FontOptions (tooltipFontSize, Font::bold), colour);
 
         TextLayout tl;
         tl.createLayoutWithBalancedLineLengths (s, (float) maxToolTipWidth);

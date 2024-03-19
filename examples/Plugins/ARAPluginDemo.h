@@ -1049,7 +1049,7 @@ public:
 
         const auto rulerHeight = bounds.getHeight() / 3;
         g.drawRect (drawBounds.getX(), rulerHeight, drawBounds.getRight(), rulerHeight);
-        g.setFont (Font (12.0f));
+        g.setFont (FontOptions (12.0f));
 
         const int lightLineWidth = 1;
         const int heavyLineWidth = 3;
@@ -1455,12 +1455,12 @@ public:
         }
         else
         {
-            g.setFont (Font (12.0f));
+            g.setFont (FontOptions (12.0f));
             g.drawText ("Audio Access Disabled", getLocalBounds(), Justification::centred);
         }
 
         g.setColour (Colours::white.withMultipliedAlpha (0.9f));
-        g.setFont (Font (12.0f));
+        g.setFont (FontOptions (12.0f));
         g.drawText (convertOptionalARAString (playbackRegion.getEffectiveName()),
                     getLocalBounds(),
                     Justification::topLeft);
@@ -2325,7 +2325,7 @@ public:
         if (! isARAEditorView())
         {
             g.setColour (Colours::white);
-            g.setFont (15.0f);
+            g.setFont (FontOptions (15.0f));
             g.drawFittedText ("ARA host isn't detected. This plugin only supports ARA mode",
                               getLocalBounds(),
                               Justification::centred,

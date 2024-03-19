@@ -167,7 +167,7 @@ int ResourceEditorPanel::getColumnAutoSizeWidth (int columnId)
     if (columnId == 4)
         return 0;
 
-    Font f (13.0f);
+    Font f (FontOptions { 13.0f });
     int widest = 40;
 
     for (int i = document.getResources().size(); --i >= 0;)

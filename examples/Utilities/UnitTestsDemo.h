@@ -70,7 +70,7 @@ public:
 
         addAndMakeVisible (testResultsBox);
         testResultsBox.setMultiLine (true);
-        testResultsBox.setFont (Font (Font::getDefaultMonospacedFontName(), 12.0f, Font::plain));
+        testResultsBox.setFont (FontOptions (Font::getDefaultMonospacedFontName(), 12.0f, Font::plain));
 
         addAndMakeVisible (categoriesBox);
         categoriesBox.addItem ("All Tests", 1);

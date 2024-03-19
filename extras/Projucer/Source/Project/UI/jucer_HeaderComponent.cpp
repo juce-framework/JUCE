@@ -67,7 +67,7 @@ HeaderComponent::HeaderComponent (ProjectContentComponent* pcc)
 void HeaderComponent::resized()
 {
     auto bounds = getLocalBounds();
-    configLabel.setFont ({ (float) bounds.getHeight() / 3.0f });
+    configLabel.setFont (FontOptions { (float) bounds.getHeight() / 3.0f });
 
     {
         auto headerBounds = bounds.removeFromLeft (tabsWidth);

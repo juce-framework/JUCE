@@ -221,7 +221,7 @@ public:
         s.append (newLine);
         s.append ("Click the \"Set Random Colour\" button to change the colour of one of the circles.");
         s.append (newLine);
-        s.setFont (16.0f);
+        s.setFont (FontOptions { 16.0f });
         s.setColour (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText, Colours::lightgrey));
         s.draw (g, explanationArea.reduced (10).toFloat());
     }

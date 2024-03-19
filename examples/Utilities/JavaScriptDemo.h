@@ -86,13 +86,13 @@ public:
 
         editor.reset (new CodeEditorComponent (codeDocument, nullptr));
         addAndMakeVisible (editor.get());
-        editor->setFont ({ Font::getDefaultMonospacedFontName(), 14.0f, Font::plain });
+        editor->setFont (FontOptions { Font::getDefaultMonospacedFontName(), 14.0f, Font::plain });
         editor->setTabSize (4, true);
 
         outputDisplay.setMultiLine (true);
         outputDisplay.setReadOnly (true);
         outputDisplay.setCaretVisible (false);
-        outputDisplay.setFont ({ Font::getDefaultMonospacedFontName(), 14.0f, Font::plain });
+        outputDisplay.setFont (FontOptions { Font::getDefaultMonospacedFontName(), 14.0f, Font::plain });
         addAndMakeVisible (outputDisplay);
 
         codeDocument.addListener (this);

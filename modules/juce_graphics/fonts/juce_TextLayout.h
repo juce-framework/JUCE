@@ -180,7 +180,7 @@ public:
         /** Returns the X position range which contains all the glyphs in this run. */
         Range<float> getRunBoundsX() const noexcept;
 
-        Font font;                      /**< The run's font. */
+        Font font { FontOptions{} };    /**< The run's font. */
         Colour colour { 0xff000000 };   /**< The run's colour. */
         Array<Glyph> glyphs;            /**< The glyphs in this run. */
         Range<int> stringRange;         /**< The character range that this run represents in the

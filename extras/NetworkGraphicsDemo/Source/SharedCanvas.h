@@ -404,12 +404,28 @@ public:
     const Font& getFont() override                  { return getState().font; }
     void setFont (const Font& newFont) override     { getState().font = newFont; }
 
-    void drawGlyph (int glyphNumber, const AffineTransform& transform) override
+    void drawGlyphs (Span<const uint16_t> indices,
+                     Span<const Point<float>> positions,
+                     const AffineTransform& transform) override
     {
-        Path p;
-        Font& font = getState().font;
-        font.getTypefacePtr()->getOutlineForGlyph (glyphNumber, p);
-        fillPath (p, AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight()).followedBy (transform));
+        std::unordered_map<uint16_t, Path> cache;
+
+        const auto& font = getState().font;
+
+        for (size_t i = 0; i < indices.size(); i++)
+        {
+            const auto glyphNumber = indices[i];
+            const auto pos         = positions[i];
+            auto& path             = cache[glyphNumber];
+
+            if (path.isEmpty())
+                font.getTypefacePtr()->getOutlineForGlyph (TypefaceMetricsKind::legacy, glyphNumber, path);
+
+            auto t = AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight())
+                                     .followedBy (AffineTransform::translation (pos))
+                                     .followedBy (transform);
+            fillPath (path, t);
+        }
     }
 
 private:
@@ -423,7 +439,7 @@ private:
     {
         FillType fillType;
         AffineTransform transform;
-        Font font;
+        Font font { FontOptions{} };
         ReferenceCountedObjectPtr<SharedCanvasHolder> transparencyLayer;
         float transparencyOpacity = 1.0f;
     };

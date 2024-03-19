@@ -40,7 +40,7 @@ class LabelPropertyComponent final : public PropertyComponent
 {
 public:
     LabelPropertyComponent (const String& labelText, int propertyHeight = 25,
-                            Font labelFont = Font (16.0f, Font::bold),
+                            Font labelFont = FontOptions (16.0f, Font::bold),
                             Justification labelJustification = Justification::centred)
         : PropertyComponent (labelText),
           labelToDisplay ({}, labelText)

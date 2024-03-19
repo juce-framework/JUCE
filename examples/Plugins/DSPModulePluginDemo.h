@@ -1582,10 +1582,10 @@ public:
         g.fillRect (rectChoice);
 
         g.setColour (Colours::white);
-        g.setFont (Font (20.0f).italicised().withExtraKerningFactor (0.1f));
+        g.setFont (Font (FontOptions (20.0f)).italicised().withExtraKerningFactor (0.1f));
         g.drawFittedText ("DSP MODULE DEMO", rectTop.reduced (10, 0), Justification::centredLeft, 1);
 
-        g.setFont (Font (14.0f));
+        g.setFont (FontOptions (14.0f));
         String strText = "IR length (reverb): " + String (proc.getCurrentIRSize()) + " samples";
         g.drawFittedText (strText, rectBottom.reduced (10, 0), Justification::centredRight, 1);
     }

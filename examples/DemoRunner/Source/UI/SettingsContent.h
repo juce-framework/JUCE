@@ -74,7 +74,7 @@ private:
               mainComponent (comp)
         {
             addAndMakeVisible (titleLabel);
-            titleLabel.setFont (titleLabelFontHeight);
+            titleLabel.setFont (FontOptions { titleLabelFontHeight });
 
             addLookAndFeels();
 
@@ -184,7 +184,7 @@ private:
             : deviceSelectorComp (getSharedAudioDeviceManager(), 0, 256, 0, 256, true, true, true, false)
         {
             addAndMakeVisible (titleLabel);
-            titleLabel.setFont (titleLabelFontHeight);
+            titleLabel.setFont (FontOptions { titleLabelFontHeight });
 
             addAndMakeVisible (deviceSelectorComp);
             deviceSelectorComp.setItemHeight (itemHeight);

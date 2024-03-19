@@ -144,7 +144,7 @@ LivePropertyEditorBase::LivePropertyEditorBase (LiveValueBase& v, CodeDocument& 
     findOriginalValueInCode();
     selectOriginalValue();
 
-    name.setFont (13.0f);
+    name.setFont (FontOptions { 13.0f });
     name.setText (v.name, dontSendNotification);
     valueEditor.setMultiLine (v.isString());
     valueEditor.setReturnKeyStartsNewLine (v.isString());

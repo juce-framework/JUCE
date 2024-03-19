@@ -50,7 +50,7 @@ public:
           icon (makeIcon (iconSvgData))
     {
         addAndMakeVisible (nameLabel);
-        nameLabel.setFont (18.0f);
+        nameLabel.setFont (FontOptions { 18.0f });
         nameLabel.setMinimumHorizontalScale (1.0f);
 
         addAndMakeVisible (descriptionLabel);

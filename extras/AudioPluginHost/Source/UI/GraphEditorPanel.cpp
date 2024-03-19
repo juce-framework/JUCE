@@ -553,7 +553,7 @@ struct GraphEditorPanel::PluginComponent final : public Component,
     int numInputs = 0, numOutputs = 0;
     int pinSize = 16;
     Point<int> originalPos;
-    Font font { 13.0f, Font::bold };
+    Font font = FontOptions { 13.0f, Font::bold };
     int numIns = 0, numOuts = 0;
     DropShadowEffect shadow;
     std::unique_ptr<PopupMenu> menu;
@@ -1020,7 +1020,7 @@ struct GraphDocumentComponent::TooltipBar final : public Component,
 
     void paint (Graphics& g) override
     {
-        g.setFont (Font ((float) getHeight() * 0.7f, Font::bold));
+        g.setFont (FontOptions ((float) getHeight() * 0.7f, Font::bold));
         g.setColour (Colours::black);
         g.drawFittedText (tip, 10, 0, getWidth() - 12, getHeight(), Justification::centredLeft, 1);
     }
@@ -1124,7 +1124,7 @@ private:
 
         pluginButton.setBounds (r.removeFromRight (40).withSizeKeepingCentre (20, 20));
 
-        titleLabel.setFont (Font (static_cast<float> (getHeight()) * 0.5f, Font::plain));
+        titleLabel.setFont (FontOptions (static_cast<float> (getHeight()) * 0.5f, Font::plain));
         titleLabel.setBounds (r);
     }
 

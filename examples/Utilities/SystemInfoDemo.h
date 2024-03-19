@@ -232,7 +232,7 @@ public:
         resultsBox.setReadOnly (true);
         resultsBox.setMultiLine (true);
         resultsBox.setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-        resultsBox.setFont ({ Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
+        resultsBox.setFont (FontOptions { Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
         resultsBox.setText (getAllSystemInfo());
 
         setSize (500, 500);

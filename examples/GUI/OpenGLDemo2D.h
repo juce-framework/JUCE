@@ -69,7 +69,7 @@ public:
 
         addAndMakeVisible (statusLabel);
         statusLabel.setJustificationType (Justification::topLeft);
-        statusLabel.setFont (Font (14.0f));
+        statusLabel.setFont (FontOptions (14.0f));
 
         auto presets = getPresets();
 

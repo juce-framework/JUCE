@@ -117,7 +117,7 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (Colours::black);
-        g.setFont (Font (16.0f));
+        g.setFont (FontOptions (16.0f));
         g.setColour (Colours::white);
         g.drawText ("loop iterations / audio callback",
                     getLocalBounds().withY (loopIterationsSlider.getHeight()), Justification::centred, true);

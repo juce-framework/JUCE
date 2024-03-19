@@ -179,11 +179,11 @@ private:
                 icon = (ProjectMessages::getTypeForMessage (message) == ProjectMessages::Ids::warning ? getIcons().warning : getIcons().info);
 
                 messageTitleLabel.setText (ProjectMessages::getTitleForMessage (message), dontSendNotification);
-                messageTitleLabel.setFont (Font (11.0f).boldened());
+                messageTitleLabel.setFont (FontOptions { 11.0f, Font::bold });
                 addAndMakeVisible (messageTitleLabel);
 
                 messageDescriptionLabel.setText (ProjectMessages::getDescriptionForMessage (message), dontSendNotification);
-                messageDescriptionLabel.setFont (Font (11.0f));
+                messageDescriptionLabel.setFont (FontOptions (11.0f));
                 messageDescriptionLabel.setJustificationType (Justification::topLeft);
                 addAndMakeVisible (messageDescriptionLabel);
 

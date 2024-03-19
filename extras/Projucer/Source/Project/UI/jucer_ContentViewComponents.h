@@ -54,7 +54,7 @@ struct ContentViewHeader final : public Component
         icon.withColour (Colours::white).draw (g, bounds.toFloat().removeFromRight (30), false);
 
         g.setColour (Colours::white);
-        g.setFont (Font (18.0f));
+        g.setFont (FontOptions (18.0f));
         g.drawFittedText (name, bounds, Justification::centredLeft, 1);
     }
 
@@ -206,7 +206,7 @@ public:
         {
             info = infoToDisplay;
 
-            auto stringWidth = roundToInt (Font (14.0f).getStringWidthFloat (info));
+            auto stringWidth = roundToInt (Font (FontOptions (14.0f)).getStringWidthFloat (info));
             width = jmin (300, stringWidth);
 
             numLines += static_cast<int> (stringWidth / width);
@@ -238,7 +238,7 @@ private:
             g.fillAll (findColour (secondaryBackgroundColourId));
 
             g.setColour (findColour (defaultTextColourId));
-            g.setFont (Font (14.0f));
+            g.setFont (FontOptions (14.0f));
             g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 15, 0.75f);
         }
 
@@ -265,7 +265,7 @@ public:
         clearProperties();
 
         if (description.isNotEmpty())
-            properties.push_back (std::make_unique<LabelPropertyComponent> (description, 16, Font (16.0f),
+            properties.push_back (std::make_unique<LabelPropertyComponent> (description, 16, FontOptions (16.0f),
                                                                             Justification::centredLeft));
 
         for (auto* comp : newProps.components)

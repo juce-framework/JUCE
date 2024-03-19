@@ -109,7 +109,7 @@ void MPEKeyboardComponent::drawWhiteKey (int midiNoteNumber, Graphics& g, Rectan
         auto text = MidiMessage::getMidiNoteName (midiNoteNumber, true, true, getOctaveForMiddleC());
 
         g.setColour (findColour (textLabelColourId));
-        g.setFont (Font (fontHeight).withHorizontalScale (0.8f));
+        g.setFont (Font (FontOptions { fontHeight }).withHorizontalScale (0.8f));
 
         switch (getOrientation())
         {

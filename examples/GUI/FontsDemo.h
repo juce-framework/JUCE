@@ -218,20 +218,20 @@ public:
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
 
-        auto font = fonts[rowNumber];
+        auto font = getFont (rowNumber);
 
         AttributedString s;
         s.setWordWrap (AttributedString::none);
         s.setJustification (Justification::centredLeft);
         s.append (getNameForRow (rowNumber), font.withHeight ((float) height * 0.7f), Colours::black);
-        s.append ("   " + font.getTypefaceName(), Font ((float) height * 0.5f, Font::italic), Colours::grey);
+        s.append ("   " + font.getTypefaceName(), FontOptions ((float) height * 0.5f, Font::italic), Colours::grey);
 
         s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
     }
 
     String getNameForRow (int rowNumber) override
     {
-        return fonts[rowNumber].getTypefaceName();
+        return getFont (rowNumber).getTypefaceName();
     }
 
     void selectedRowsChanged (int /*lastRowselected*/) override
@@ -240,6 +240,11 @@ public:
     }
 
 private:
+    Font getFont (int rowNumber) const
+    {
+        return isPositiveAndBelow (rowNumber, fonts.size()) ? fonts.getUnchecked (rowNumber) : FontOptions{};
+    }
+
     Array<Font> fonts;
     StringArray currentStyleList;
 
@@ -317,7 +322,7 @@ private:
         auto italic = italicToggle.getToggleState();
         auto useStyle = ! (bold || italic);
 
-        auto font = fonts[listBox.getSelectedRow()];
+        auto font = getFont (listBox.getSelectedRow());
 
         font = font.withPointHeight        ((float) heightSlider .getValue())
                    .withExtraKerningFactor ((float) kerningSlider.getValue())

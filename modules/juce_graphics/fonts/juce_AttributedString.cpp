@@ -117,7 +117,7 @@ namespace
     {
         if (atts.size() == 0)
         {
-            atts.add ({ Range<int> (0, length), f != nullptr ? *f : Font(), c != nullptr ? *c : Colour (0xff000000) });
+            atts.add ({ Range<int> (0, length), f != nullptr ? *f : FontOptions{}, c != nullptr ? *c : Colour (0xff000000) });
         }
         else
         {

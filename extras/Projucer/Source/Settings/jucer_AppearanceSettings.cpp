@@ -149,7 +149,7 @@ bool AppearanceSettings::writeToFile (const File& file) const
 
 Font AppearanceSettings::getDefaultCodeFont()
 {
-    return Font (Font::getDefaultMonospacedFontName(), Font::getDefaultStyle(), 13.0f);
+    return FontOptions (Font::getDefaultMonospacedFontName(), Font::getDefaultStyle(), 13.0f);
 }
 
 StringArray AppearanceSettings::getColourNames() const

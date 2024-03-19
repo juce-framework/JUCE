@@ -100,7 +100,7 @@ public:
 private:
     //==============================================================================
     friend class GlyphArrangement;
-    Font font;
+    Font font { FontOptions{} };
     juce_wchar character;
     int glyph;
     float x, y, w;

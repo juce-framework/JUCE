@@ -99,7 +99,7 @@ public:
 
         addAndMakeVisible (testResultsBox);
         testResultsBox.setMultiLine (true);
-        testResultsBox.setFont ({ Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
+        testResultsBox.setFont (FontOptions { Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
 
         logMessage (String ("This demo uses the ChildProcessCoordinator and ChildProcessWorker classes to launch and communicate "
                             "with a child process, sending messages in the form of serialised ValueTree objects.") + newLine

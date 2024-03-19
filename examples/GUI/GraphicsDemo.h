@@ -124,7 +124,7 @@ public:
         : Component (name),
           controls (cc)
     {
-        displayFont = Font (Font::getDefaultMonospacedFontName(), 12.0f, Font::bold);
+        displayFont = FontOptions (Font::getDefaultMonospacedFontName(), 12.0f, Font::bold);
     }
 
     AffineTransform getTransform()
@@ -278,7 +278,7 @@ public:
 
     double lastRenderStartTime = 0.0, averageTimeMs = 0.0, averageActualFPS = 0.0;
     Image clipImage;
-    Font displayFont;
+    Font displayFont { FontOptions{} };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphicsDemoBase)
 };
@@ -458,7 +458,7 @@ public:
     GlyphsDemo (ControllersComponent& cc)
         : GraphicsDemoBase (cc, "Glyphs")
     {
-        glyphs.addFittedText ({ 20.0f }, "The Quick Brown Fox Jumps Over The Lazy Dog",
+        glyphs.addFittedText (FontOptions { 20.0f }, "The Quick Brown Fox Jumps Over The Lazy Dog",
                               -120, -50, 240, 100, Justification::centred, 2, 1.0f);
     }
 

@@ -227,7 +227,7 @@ class CubicBezierSettingsComponent final : public Component
 public:
     CubicBezierSettingsComponent()
     {
-        textEditor.setFont (Font (18.0f));
+        textEditor.setFont (FontOptions (18.0f));
         textEditor.setColour (TextEditor::ColourIds::backgroundColourId, {});
         textEditor.setColour (TextEditor::ColourIds::highlightColourId, {});
         textEditor.setColour (TextEditor::ColourIds::outlineColourId, {});

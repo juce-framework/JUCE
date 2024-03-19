@@ -90,7 +90,7 @@ public:
                               bool filled, Justification justification);
     static Path getChoiceComponentArrowPath (Rectangle<float> arrowZone);
 
-    static Font getPropertyComponentFont()                                       { return { 14.0f, Font::FontStyleFlags::bold }; }
+    static Font getPropertyComponentFont()                                       { return FontOptions { 14.0f, Font::FontStyleFlags::bold }; }
     static int getTextWidthForPropertyComponent (const PropertyComponent& pc)    { return jmin (200, pc.getWidth() / 2); }
 
     static ColourScheme getProjucerDarkColourScheme()

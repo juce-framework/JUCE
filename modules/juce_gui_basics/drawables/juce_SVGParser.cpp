@@ -1225,7 +1225,7 @@ private:
 
     Font getFont (const XmlPath& xml) const
     {
-        Font f;
+        Font f { FontOptions{} };
         auto family = getStyleAttribute (xml, "font-family").unquoted();
 
         if (family.isNotEmpty())

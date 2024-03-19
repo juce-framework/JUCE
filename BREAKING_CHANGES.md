@@ -4,6 +4,35 @@
 
 ## Change
 
+Signatures of several Typeface member functions have been updated to accept a
+new TypefaceMetricsKind argument. The getAscent(), getDescent(), and
+getHeightToPointsFactor() members have been replaced by getMetrics(), which
+returns the same metrics information all at once.
+
+**Possible Issues**
+
+Code that calls any of the affected functions will fail to compile.
+
+**Workaround**
+
+Specify the kind of metrics you require when calling Typeface member functions.
+Call getMetrics() instead of the old individual getters for metrics.
+
+**Rationale**
+
+Until now, the same font data could produce different results from
+Typeface::getAscent() et al. depending on the platform. The updated interfaces
+allow the user to choose between the old-style non-portable metrics (to avoid
+layout changes in existing projects), and portable metrics (more suitable for
+new or cross-platform projects).
+Most users will fetch metrics from Font objects rather than from the Typeface.
+Font will continue to return non-portable metrics when constructed using the
+existing (deprecated) constructors. Portable metrics can be enabled by
+switching to the new Font constructor that takes a FontOptions argument.
+
+
+## Change
+
 Typeface::getOutlineForGlyph now returns void instead of bool.
 
 **Possible Issues**

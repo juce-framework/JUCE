@@ -907,7 +907,7 @@ class MonospaceEditor : public TextEditor
 public:
     MonospaceEditor()
     {
-        setFont (Font { Font::getDefaultMonospacedFontName(), 12, 0 });
+        setFont (FontOptions { Font::getDefaultMonospacedFontName(), 12, 0 });
     }
 
     void onCommit (std::function<void()> fn)
@@ -926,7 +926,7 @@ class MonospaceLabel : public Label
 public:
     MonospaceLabel()
     {
-        setFont (Font { Font::getDefaultMonospacedFontName(), 12, 0 });
+        setFont (FontOptions { Font::getDefaultMonospacedFontName(), 12, 0 });
         setMinimumHorizontalScale (1.0f);
         setInterceptsMouseClicks (false, false);
     }
@@ -1531,7 +1531,7 @@ public:
 
         const auto groupWidth = 100;
         GlyphArrangement groupArrangement;
-        groupArrangement.addJustifiedText ({},
+        groupArrangement.addJustifiedText (FontOptions{},
                                            "Group",
                                            0,
                                            0,
@@ -1571,7 +1571,7 @@ public:
             const auto bounds = buttons[(size_t) i].getBounds();
 
             GlyphArrangement channelArrangement;
-            channelArrangement.addJustifiedText ({},
+            channelArrangement.addJustifiedText (FontOptions{},
                                                  i < 16 ? String (i + 1) : "All",
                                                  0,
                                                  0,

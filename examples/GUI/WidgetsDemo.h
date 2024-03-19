@@ -1156,7 +1156,7 @@ public:
 
 private:
     TableListBox table;     // the table component itself
-    Font font  { 14.0f };
+    Font font { FontOptions { 14.0f } };
 
     std::unique_ptr<XmlElement> demoData;  // This is the XML document loaded from the embedded file "demo table data.xml"
     XmlElement* columnList = nullptr;     // A pointer to the sub-node of demoData that contains the list of columns

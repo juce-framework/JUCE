@@ -243,7 +243,7 @@ public:
         addAndMakeVisible (liveAudioScroller);
 
         addAndMakeVisible (explanationLabel);
-        explanationLabel.setFont (Font (15.0f, Font::plain));
+        explanationLabel.setFont (FontOptions (15.0f, Font::plain));
         explanationLabel.setJustificationType (Justification::topLeft);
         explanationLabel.setEditable (false, false, false);
         explanationLabel.setColour (TextEditor::textColourId, Colours::black);

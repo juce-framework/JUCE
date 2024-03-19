@@ -244,7 +244,7 @@ void LookAndFeel_V4::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
     g.setColour (getCurrentColourScheme().getUIColour (ColourScheme::widgetBackground));
     g.fillAll();
 
-    Font font ((float) h * 0.65f, Font::plain);
+    Font font (FontOptions { (float) h * 0.65f, Font::plain });
     g.setFont (font);
 
     auto textW = font.getStringWidth (window.getName());
@@ -284,7 +284,7 @@ void LookAndFeel_V4::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
 //==============================================================================
 Font LookAndFeel_V4::getTextButtonFont (TextButton&, int buttonHeight)
 {
-    return { jmin (16.0f, (float) buttonHeight * 0.6f) };
+    return FontOptions { jmin (16.0f, (float) buttonHeight * 0.6f) };
 }
 
 void LookAndFeel_V4::drawButtonBackground (Graphics& g,
@@ -384,7 +384,7 @@ void LookAndFeel_V4::changeToggleButtonWidthToFitText (ToggleButton& button)
     auto fontSize = jmin (15.0f, (float) button.getHeight() * 0.75f);
     auto tickWidth = fontSize * 1.1f;
 
-    Font font (fontSize);
+    Font font (FontOptions { fontSize });
 
     button.setSize (font.getStringWidth (button.getButtonText()) + roundToInt (tickWidth) + 14, button.getHeight());
 }
@@ -462,7 +462,7 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
         }
 
         GlyphArrangement ga;
-        ga.addFittedText ({ (float) iconRect.getHeight() * 0.9f, Font::bold },
+        ga.addFittedText (FontOptions { (float) iconRect.getHeight() * 0.9f, Font::bold },
                           String::charToString ((juce_wchar) (uint8) character),
                           static_cast<float> (iconRect.getX()), static_cast<float> (iconRect.getY()),
                           static_cast<float> (iconRect.getWidth()), static_cast<float> (iconRect.getHeight()),
@@ -485,9 +485,9 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
 }
 
 int LookAndFeel_V4::getAlertWindowButtonHeight()    { return 40; }
-Font LookAndFeel_V4::getAlertWindowTitleFont()      { return { 18.0f, Font::bold }; }
-Font LookAndFeel_V4::getAlertWindowMessageFont()    { return { 16.0f }; }
-Font LookAndFeel_V4::getAlertWindowFont()           { return { 14.0f }; }
+Font LookAndFeel_V4::getAlertWindowTitleFont()      { return FontOptions { 18.0f, Font::bold }; }
+Font LookAndFeel_V4::getAlertWindowMessageFont()    { return FontOptions { 16.0f }; }
+Font LookAndFeel_V4::getAlertWindowFont()           { return FontOptions { 14.0f }; }
 
 //==============================================================================
 void LookAndFeel_V4::drawProgressBar (Graphics& g, ProgressBar& progressBar,
@@ -629,7 +629,7 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, const ProgressBar& pr
     if (textToShow.isNotEmpty())
     {
         g.setColour (progressBar.findColour (TextButton::textColourOffId));
-        g.setFont ({ 12.0f, Font::italic });
+        g.setFont (FontOptions { 12.0f, Font::italic });
         g.drawText (textToShow, barBounds, Justification::centred, false);
     }
 }
@@ -950,7 +950,7 @@ void LookAndFeel_V4::drawComboBox (Graphics& g, int width, int height, bool,
 
 Font LookAndFeel_V4::getComboBoxFont (ComboBox& box)
 {
-    return { jmin (16.0f, (float) box.getHeight() * 0.85f) };
+    return FontOptions { jmin (16.0f, (float) box.getHeight() * 0.85f) };
 }
 
 void LookAndFeel_V4::positionComboBoxText (ComboBox& box, Label& label)
@@ -1268,7 +1268,7 @@ void LookAndFeel_V4::drawPropertyPanelSectionHeader (Graphics& g, const String& 
 
     g.setColour (findColour (PropertyComponent::labelTextColourId));
 
-    g.setFont ({ (float) height * 0.7f, Font::bold });
+    g.setFont (FontOptions { (float) height * 0.7f, Font::bold });
     g.drawText (name, textX, 0, width - textX - 4, height, Justification::centredLeft, true);
 }
 
