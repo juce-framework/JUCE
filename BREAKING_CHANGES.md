@@ -9,14 +9,24 @@ new TypefaceMetricsKind argument. The getAscent(), getDescent(), and
 getHeightToPointsFactor() members have been replaced by getMetrics(), which
 returns the same metrics information all at once.
 
+Font instances now store a metrics kind internally. Calls to Font::getAscent()
+and other functions that query font metrics will always use the Font's stored
+metrics kind. Calls to Font::operator== will take the metrics kinds into
+account, so two fonts that differ only in their stored metrics kind will
+be considered non-equal.
+
 **Possible Issues**
 
-Code that calls any of the affected functions will fail to compile.
+Code that calls any of the affected Typeface functions will fail to compile.
+Code that compares Font instances may behave differently if the compared font
+instances use mismatched metrics kinds.
 
 **Workaround**
 
 Specify the kind of metrics you require when calling Typeface member functions.
-Call getMetrics() instead of the old individual getters for metrics.
+Call getMetrics() instead of the old individual getters for metrics. Review
+calls to Font::operator==, especially where comparing against a
+default-constructed Font.
 
 **Rationale**
 
@@ -27,8 +37,9 @@ layout changes in existing projects), and portable metrics (more suitable for
 new or cross-platform projects).
 Most users will fetch metrics from Font objects rather than from the Typeface.
 Font will continue to return non-portable metrics when constructed using the
-existing (deprecated) constructors. Portable metrics can be enabled by
-switching to the new Font constructor that takes a FontOptions argument.
+old (deprecated) constructors. Portable metrics can be enabled by switching to
+the new Font constructor that takes a FontOptions argument. See the
+documentation for TypefaceMetricsKind for more details.
 
 
 ## Change

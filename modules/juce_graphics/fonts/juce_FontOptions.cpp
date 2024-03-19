@@ -92,6 +92,7 @@ auto FontOptions::tie() const
                        style,
                        typeface.get(),
                        fallbacks,
+                       metricsKind,
                        height,
                        tracking,
                        horizontalScale,

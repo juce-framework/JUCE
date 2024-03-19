@@ -696,7 +696,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
     {
         Path p;
         auto& f = state->font;
-        f.getTypefacePtr()->getOutlineForGlyph (glyphNumber, p);
+        f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyphNumber, p);
         const auto scale = f.getHeight();
 
         fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).followedBy (transform));

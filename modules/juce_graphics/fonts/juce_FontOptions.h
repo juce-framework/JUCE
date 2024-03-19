@@ -121,6 +121,9 @@ public:
     /** Returns a copy of these options with underline enabled or disabled, defaults to disabled. */
     [[nodiscard]] FontOptions withUnderline       (bool x = true)          const { return withMember (*this, &FontOptions::underlined, x); }
 
+    /** Returns a copy of these options the specified metrics kind. */
+    [[nodiscard]] FontOptions withMetricsKind     (TypefaceMetricsKind x)  const { return withMember (*this, &FontOptions::metricsKind, x); }
+
     /** @see withName() */
     [[nodiscard]] auto getName()            const { return name; }
     /** @see withStyle() */
@@ -139,6 +142,8 @@ public:
     [[nodiscard]] auto getFallbackEnabled() const { return fallbackEnabled; }
     /** @see withUnderline() */
     [[nodiscard]] auto getUnderline()       const { return underlined; }
+    /** @see withMetricsKind() */
+    [[nodiscard]] auto getMetricsKind()     const { return metricsKind; }
 
     /** Equality operator. */
     [[nodiscard]] bool operator== (const FontOptions& other) const;
@@ -159,6 +164,7 @@ private:
     String name, style;
     Typeface::Ptr typeface;
     std::vector<String> fallbacks;
+    TypefaceMetricsKind metricsKind { TypefaceMetricsKind::portable };
     float height{};
     float tracking{};
     float horizontalScale = 1.0f;

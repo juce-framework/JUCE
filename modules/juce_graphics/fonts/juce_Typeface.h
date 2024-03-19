@@ -59,6 +59,50 @@ struct GlyphLayer
     std::variant<ColourLayer, ImageLayer> layer;
 };
 
+/** Identifiers for different styles of typeface metrics.
+
+    In new projects, it's recommended to use the 'portable' metrics kind, so that fonts display
+    at a similar size on all platforms.
+    Portable metrics are enabled by default when constructing a Font using FontOptions. The old,
+    deprecated Font constructors will all request the legacy metrics kind instead.
+    JUCE components that display text will query LookAndFeel::getDefaultMetricsKind() to find the
+    kind of metrics that should be used. This function can be overridden to switch the metrics kind
+    for the entire LookAndFeel.
+
+    The 'legacy' metrics kind uses the platform font facilities to retrieve font metrics.
+    Each platform has its own idiosyncratic behaviour when computing metrics - depending on the
+    typeface data, it's possible that the 'portable' metrics will differ from the 'legacy' metrics
+    on every platform. The biggest differences between legacy and portable metrics are likely to be
+    seen on Windows, so it may be helpful to check this platform first.
+*/
+enum class TypefaceMetricsKind
+{
+    legacy,         ///< Old-style metrics that may differ for the same font file when running on different platforms.
+                    ///< This was the default behaviour prior to JUCE 8.
+    portable        ///< Where possible, will return the same font metrics on all platforms.
+                    ///< It's a good idea to use this for new JUCE projects, to keep text layout and
+                    ///< sizing consistent on all platforms.
+};
+
+/** Font metrics using JUCE conventions.
+*/
+struct TypefaceMetrics
+{
+    /** The proportion of the typeface's height that it above the baseline, as a value between 0 and 1.
+        Note that 'height' here refers to the result of adding the absolute ascent and descent values.
+        That is, the sum of the ascent and descent will equal 1.
+        The sum of the ascent and descent will normally differ from the em size of the font.
+        That is, for a font size of 14pt, there will be 14 points per em, but the sum of the ascent
+        and descent in points is unlikely to be equal to 14.
+    */
+    float ascent{};
+
+    /** The factor by which a JUCE font height should be multiplied in order to convert to a font
+        size in points.
+    */
+    float heightToPoints{};
+};
+
 //==============================================================================
 /**
     A typeface represents a size-independent font.
@@ -121,24 +165,8 @@ public:
     /** Destructor. */
     ~Typeface() override;
 
-    /** Returns the ascent of the font, as a proportion of its height.
-        The height is considered to always be normalised as 1.0, so this will be a
-        value less that 1.0, indicating the proportion of the font that lies above
-        its baseline.
-    */
-    float getAscent() const;
-
-    /** Returns the descent of the font, as a proportion of its height.
-        The height is considered to always be normalised as 1.0, so this will be a
-        value less that 1.0, indicating the proportion of the font that lies below
-        its baseline.
-    */
-    float getDescent() const;
-
-    /** Returns the value by which you should multiply a JUCE font-height value to
-        convert it to the equivalent point-size.
-    */
-    float getHeightToPointsFactor() const;
+    /** Returns information about the horizontal metrics of this font. */
+    [[nodiscard]] TypefaceMetrics getMetrics (TypefaceMetricsKind) const;
 
     /** @deprecated
         This function has several shortcomings:
@@ -154,7 +182,10 @@ public:
         Measures the width of a line of text.
         You should never need to call this!
     */
-    float getStringWidth (const String& text, float normalisedHeight = 1.0f, float horizontalScale = 1.0f);
+    float getStringWidth (TypefaceMetricsKind,
+                          const String& text,
+                          float normalisedHeight = 1.0f,
+                          float horizontalScale = 1.0f);
 
     /** @deprecated
         This function has several shortcomings:
@@ -171,7 +202,8 @@ public:
         Converts a line of text into its glyph numbers and their positions.
         You should never need to call this!
     */
-    void getGlyphPositions (const String& text,
+    void getGlyphPositions (TypefaceMetricsKind,
+                            const String& text,
                             Array<int>& glyphs,
                             Array<float>& xOffsets,
                             float normalisedHeight = 1.0f,
@@ -180,7 +212,7 @@ public:
     /** Returns the outline for a glyph.
         The path returned will be normalised to a font height of 1.0.
     */
-    void getOutlineForGlyph (int glyphNumber, Path& path);
+    void getOutlineForGlyph (TypefaceMetricsKind, int glyphNumber, Path& path) const;
 
     /** @deprecated
 
@@ -196,7 +228,10 @@ public:
         preferred in new code.
     */
     [[deprecated ("Prefer getLayersForGlyph")]]
-    EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float normalisedHeight);
+    EdgeTable* getEdgeTableForGlyph (TypefaceMetricsKind,
+                                     int glyphNumber,
+                                     const AffineTransform& transform,
+                                     float normalisedHeight);
 
     /** Returns the layers that should be painted in order to display this glyph.
 
@@ -210,7 +245,10 @@ public:
 
         The height is specified in JUCE font-height units.
     */
-    std::vector<GlyphLayer> getLayersForGlyph (int glyphNumber, const AffineTransform&, float normalisedHeight) const;
+    std::vector<GlyphLayer> getLayersForGlyph (TypefaceMetricsKind,
+                                               int glyphNumber,
+                                               const AffineTransform&,
+                                               float normalisedHeight) const;
 
     /** Kinds of colour glyph format that may be implemented by a particular typeface.
         Most typefaces are monochromatic, and do not support any colour formats.

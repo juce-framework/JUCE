@@ -616,7 +616,7 @@ public:
 
     Native getNativeDetails() const override
     {
-        return Native { hb.get() };
+        return Native { hb.get(), nonPortableMetrics };
     }
 
     Typeface::Ptr createSystemFallback (const String& c, const String& language) const override
@@ -698,6 +698,13 @@ private:
     CFUniquePtr<CTFontRef> ctFont;
     HbFont hb;
     MemoryBlock storage;
+    TypefaceAscentDescent nonPortableMetrics = [&]
+    {
+        const CFUniquePtr<CGFontRef> cgFont { CTFontCopyGraphicsFont (ctFont.get(), nullptr) };
+        const auto upem = (float) CGFontGetUnitsPerEm (cgFont.get());
+        return TypefaceAscentDescent { (float) std::abs (CGFontGetAscent (cgFont.get())  / upem),
+                                       (float) std::abs (CGFontGetDescent (cgFont.get()) / upem) };
+    }();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreTextTypeface)
 };

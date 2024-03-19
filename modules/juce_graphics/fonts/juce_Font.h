@@ -349,6 +349,9 @@ public:
     /** Returns true if the font is underlined. */
     bool isUnderlined() const noexcept;
 
+    /** Returns the kind of metrics used by this Font. */
+    TypefaceMetricsKind getMetricsKind() const noexcept;
+
     //==============================================================================
     /** Returns the font's horizontal scale.
         A value of 1.0 is the normal scale, less than this will be narrower, greater

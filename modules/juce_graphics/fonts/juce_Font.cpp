@@ -216,8 +216,20 @@ public:
 
     HbFont getFontPtr (const Font& f)
     {
+        const ScopedLock lock (mutex);
+
         if (auto ptr = getTypefacePtr (f))
-            return ptr->getNativeDetails().getFontAtSizeAndScale (f.getHeight(), f.getHorizontalScale());
+            return ptr->getNativeDetails().getFontAtSizeAndScale (f.getMetricsKind(), f.getHeight(), f.getHorizontalScale());
+
+        return {};
+    }
+
+    TypefaceMetrics getMetrics (const Font& f)
+    {
+        const ScopedLock lock (mutex);
+
+        if (auto ptr = getTypefacePtr (f))
+            return ptr->getMetrics (f.getMetricsKind());
 
         return {};
     }
@@ -226,16 +238,6 @@ public:
     {
         const ScopedLock lock (mutex);
         typeface = nullptr;
-    }
-
-    float getAscent (const Font& f)
-    {
-        const ScopedLock lock (mutex);
-
-        if (approximatelyEqual (ascent, 0.0f))
-            ascent = getTypefacePtr (f)->getAscent();
-
-        return getHeight() * ascent;
     }
 
     /*  We do not need to lock in these functions, as it's guaranteed
@@ -249,13 +251,14 @@ public:
         return StringArray (fallbacks.data(), (int) fallbacks.size());
     }
 
-    String getTypefaceName() const          { return options.getName(); }
-    String getTypefaceStyle() const         { return options.getStyle(); }
-    float getHeight() const                 { return options.getHeight(); }
-    float getHorizontalScale() const        { return options.getHorizontalScale(); }
-    float getKerning() const                { return options.getKerningFactor(); }
-    bool getUnderline() const               { return options.getUnderline(); }
-    bool getFallbackEnabled() const         { return options.getFallbackEnabled(); }
+    String getTypefaceName() const             { return options.getName(); }
+    String getTypefaceStyle() const            { return options.getStyle(); }
+    float getHeight() const                    { return options.getHeight(); }
+    float getHorizontalScale() const           { return options.getHorizontalScale(); }
+    float getKerning() const                   { return options.getKerningFactor(); }
+    bool getUnderline() const                  { return options.getUnderline(); }
+    bool getFallbackEnabled() const            { return options.getFallbackEnabled(); }
+    TypefaceMetricsKind getMetricsKind() const { return options.getMetricsKind(); }
 
     /*  This shared state may be shared between two or more Font instances that are being
         read/modified from multiple threads.
@@ -269,7 +272,7 @@ public:
         jassert (getReferenceCount() == 1);
         typeface = newTypeface;
 
-        if (typeface != nullptr)
+        if (newTypeface != nullptr)
         {
             options = options.withTypeface (typeface)
                              .withName (typeface->getName())
@@ -307,12 +310,6 @@ public:
         options = options.withKerningFactor (x);
     }
 
-    void setAscent (float x)
-    {
-        jassert (getReferenceCount() == 1);
-        ascent = x;
-    }
-
     void setUnderline (bool x)
     {
         jassert (getReferenceCount() == 1);
@@ -348,7 +345,6 @@ private:
     }
 
     Typeface::Ptr typeface;
-    float ascent{};
     FontOptions options;
     CriticalSection mutex;
 };
@@ -359,22 +355,28 @@ Font::Font (FontOptions opt)
 {
 }
 
-Font::Font()                                : font (new SharedFontInternal (FontOptions{})) {}
-Font::Font (const Typeface::Ptr& typeface)  : font (new SharedFontInternal (FontOptions { typeface })) {}
+template <typename... Args>
+auto legacyArgs (Args&&... args)
+{
+    return FontOptions { std::forward<Args> (args)... }.withMetricsKind (TypefaceMetricsKind::legacy);
+}
+
+Font::Font()                                : font (new SharedFontInternal (legacyArgs())) {}
+Font::Font (const Typeface::Ptr& typeface)  : font (new SharedFontInternal (legacyArgs (typeface))) {}
 Font::Font (const Font& other) noexcept     : font (other.font) {}
 
 Font::Font (float fontHeight, int styleFlags)
-    : font (new SharedFontInternal (FontOptions { fontHeight, styleFlags }))
+    : font (new SharedFontInternal (legacyArgs (fontHeight, styleFlags)))
 {
 }
 
 Font::Font (const String& typefaceName, float fontHeight, int styleFlags)
-    : font (new SharedFontInternal (FontOptions { typefaceName, fontHeight, styleFlags }))
+    : font (new SharedFontInternal (legacyArgs (typefaceName, fontHeight, styleFlags)))
 {
 }
 
 Font::Font (const String& typefaceName, const String& typefaceStyle, float fontHeight)
-    : font (new SharedFontInternal (FontOptions { typefaceName, typefaceStyle, fontHeight }))
+    : font (new SharedFontInternal (legacyArgs (typefaceName, typefaceStyle, fontHeight)))
 {
 }
 
@@ -461,7 +463,6 @@ void Font::setTypefaceName (const String& faceName)
         dupeInternalIfShared();
         font->setTypefaceName (faceName);
         font->setTypeface (nullptr);
-        font->setAscent (0);
     }
 }
 
@@ -472,7 +473,6 @@ void Font::setTypefaceStyle (const String& typefaceStyle)
         dupeInternalIfShared();
         font->setTypefaceStyle (typefaceStyle);
         font->setTypeface (nullptr);
-        font->setAscent (0);
     }
 }
 
@@ -531,7 +531,7 @@ Font Font::withHeight (const float newHeight) const
 
 float Font::getHeightToPointsFactor() const
 {
-    return getTypefacePtr()->getHeightToPointsFactor();
+    return getTypefacePtr()->getMetrics (getMetricsKind()).heightToPoints;
 }
 
 Font Font::withPointHeight (float heightInPoints) const
@@ -591,7 +591,6 @@ void Font::setStyleFlags (const int newFlags)
         font->setTypeface (nullptr);
         font->setTypefaceStyle (FontStyleHelpers::getStyleName (newFlags));
         font->setUnderline ((newFlags & underlined) != 0);
-        font->setAscent (0);
     }
 }
 
@@ -682,6 +681,8 @@ bool Font::isBold() const noexcept          { return FontStyleHelpers::isBold   
 bool Font::isItalic() const noexcept        { return FontStyleHelpers::isItalic (font->getTypefaceStyle()); }
 bool Font::isUnderlined() const noexcept    { return font->getUnderline(); }
 
+TypefaceMetricsKind Font::getMetricsKind() const noexcept { return font->getMetricsKind(); }
+
 void Font::setBold (const bool shouldBeBold)
 {
     auto flags = getStyleFlags();
@@ -705,7 +706,7 @@ void Font::setUnderline (const bool shouldBeUnderlined)
 
 float Font::getAscent() const
 {
-    return font->getAscent (*this);
+    return font->getMetrics (*this).ascent * getHeight();
 }
 
 float Font::getHeight() const noexcept      { return font->getHeight(); }
@@ -722,13 +723,13 @@ int Font::getStringWidth (const String& text) const
 
 float Font::getStringWidthFloat (const String& text) const
 {
-    const auto w = getTypefacePtr()->getStringWidth (text, getHeight(), getHorizontalScale());
+    const auto w = getTypefacePtr()->getStringWidth (font->getMetricsKind(), text, getHeight(), getHorizontalScale());
     return w + (font->getHeight() * font->getHorizontalScale() * font->getKerning() * (float) text.length());
 }
 
 void Font::getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) const
 {
-    getTypefacePtr()->getGlyphPositions (text, glyphs, xOffsets, getHeight(), getHorizontalScale());
+    getTypefacePtr()->getGlyphPositions (font->getMetricsKind(), text, glyphs, xOffsets, getHeight(), getHorizontalScale());
 
     if (auto num = xOffsets.size())
     {
