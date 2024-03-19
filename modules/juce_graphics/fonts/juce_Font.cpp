@@ -92,21 +92,19 @@ public:
 
     Typeface::Ptr findTypefaceFor (const Font& font)
     {
-        const auto faceName = font.getTypefaceName();
-        const auto faceStyle = font.getTypefaceStyle();
+        const Key key { font.getTypefaceName(), font.getTypefaceStyle() };
 
-        jassert (faceName.isNotEmpty());
+        jassert (key.name.isNotEmpty());
 
         {
             const ScopedReadLock slr (lock);
 
-            for (int i = faces.size(); --i >= 0;)
-            {
-                CachedFace& face = faces.getReference (i);
+            const auto range = makeRange (std::make_reverse_iterator (faces.end()),
+                                          std::make_reverse_iterator (faces.begin()));
 
-                if (face.typefaceName == faceName
-                     && face.typefaceStyle == faceStyle
-                     && face.typeface != nullptr)
+            for (auto& face : range)
+            {
+                if (face.key == key && face.typeface != nullptr)
                 {
                     face.lastUsageCount = ++counter;
                     return face.typeface;
@@ -115,33 +113,25 @@ public:
         }
 
         const ScopedWriteLock slw (lock);
-        int replaceIndex = 0;
-        auto bestLastUsageCount = std::numeric_limits<size_t>::max();
 
-        for (int i = faces.size(); --i >= 0;)
-        {
-            auto lu = faces.getReference (i).lastUsageCount;
+        const auto replaceIter = std::min_element (faces.begin(),
+                                                   faces.end(),
+                                                   [] (const auto& a, const auto& b)
+                                                   {
+                                                       return a.lastUsageCount < b.lastUsageCount;
+                                                   });
 
-            if (bestLastUsageCount > lu)
-            {
-                bestLastUsageCount = lu;
-                replaceIndex = i;
-            }
-        }
-
-        auto& face = faces.getReference (replaceIndex);
-        face.typefaceName = faceName;
-        face.typefaceStyle = faceStyle;
-        face.lastUsageCount = ++counter;
-
-        if (juce_getTypefaceForFont == nullptr)
-            face.typeface = Font::getDefaultTypefaceForFont (font);
-        else
-            face.typeface = juce_getTypefaceForFont (font);
+        jassert (replaceIter != faces.end());
+        auto& face = *replaceIter;
+        face = CachedFace { key,
+                            ++counter,
+                            juce_getTypefaceForFont != nullptr
+                                ? juce_getTypefaceForFont (font)
+                                : Font::getDefaultTypefaceForFont (font) };
 
         jassert (face.typeface != nullptr); // the look and feel must return a typeface!
 
-        if (defaultFace == nullptr && font == Font())
+        if (defaultFace == nullptr && key == Key{})
             defaultFace = face.typeface;
 
         return face.typeface;
@@ -154,15 +144,29 @@ public:
     }
 
 private:
+    struct Key
+    {
+        String name = Font::getDefaultSansSerifFontName(), style = Font::getDefaultStyle();
+
+        bool operator== (const Key& other) const
+        {
+            const auto tie = [] (const auto& x) { return std::tie (x.name, x.style); };
+            return tie (*this) == tie (other);
+        }
+
+        bool operator!= (const Key& other) const
+        {
+            return ! operator== (other);
+        }
+    };
+
     struct CachedFace
     {
-        CachedFace() noexcept {}
-
         // Although it seems a bit wacky to store the name here, it's because it may be a
         // placeholder rather than a real one, e.g. "<Sans-Serif>" vs the actual typeface name.
         // Since the typeface itself doesn't know that it may have this alias, the name under
         // which it was fetched needs to be stored separately.
-        String typefaceName, typefaceStyle;
+        Key key;
         size_t lastUsageCount = 0;
         Typeface::Ptr typeface;
     };
