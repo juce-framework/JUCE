@@ -41,17 +41,6 @@ public:
     HbFont font{};
 };
 
-namespace FontValues
-{
-    static float limitFontHeight (const float height) noexcept
-    {
-        return jlimit (0.1f, 10000.0f, height);
-    }
-
-    const float defaultFontHeight = 14.0f;
-    float minimumHorizontalScale = 0.7f;
-}
-
 using GetTypefaceForFont = Typeface::Ptr (*)(const Font&);
 GetTypefaceForFont juce_getTypefaceForFont = nullptr;
 
@@ -201,85 +190,16 @@ void Typeface::clearTypefaceCache()
 class Font::SharedFontInternal  : public ReferenceCountedObject
 {
 public:
-    SharedFontInternal() noexcept
-        : typeface (TypefaceCache::getInstance()->getDefaultFace()),
-          typefaceName (Font::getDefaultSansSerifFontName()),
-          typefaceStyle (Font::getDefaultStyle()),
-          height (FontValues::defaultFontHeight)
+    explicit SharedFontInternal (FontOptions x)
+        : options (std::move (x))
     {
     }
 
-    SharedFontInternal (int styleFlags, float fontHeight) noexcept
-        : typefaceName (Font::getDefaultSansSerifFontName()),
-          typefaceStyle (FontStyleHelpers::getStyleName (styleFlags)),
-          height (fontHeight),
-          underline ((styleFlags & underlined) != 0)
+    ReferenceCountedObjectPtr<SharedFontInternal> copy() const
     {
-        if (styleFlags == plain)
-            typeface = TypefaceCache::getInstance()->getDefaultFace();
+        const ScopedLock lock (mutex);
+        return new SharedFontInternal (typeface, options);
     }
-
-    SharedFontInternal (const String& name, int styleFlags, float fontHeight) noexcept
-        : typefaceName (name),
-          typefaceStyle (FontStyleHelpers::getStyleName (styleFlags)),
-          height (fontHeight),
-          underline ((styleFlags & underlined) != 0)
-    {
-        if (styleFlags == plain && typefaceName.isEmpty())
-            typeface = TypefaceCache::getInstance()->getDefaultFace();
-    }
-
-    SharedFontInternal (const String& name, const String& style, float fontHeight) noexcept
-        : typefaceName (name), typefaceStyle (style), height (fontHeight)
-    {
-        if (typefaceName.isEmpty())
-            typefaceName = Font::getDefaultSansSerifFontName();
-    }
-
-    explicit SharedFontInternal (const Typeface::Ptr& face) noexcept
-        : typeface (face),
-          typefaceName (face->getName()),
-          typefaceStyle (face->getStyle()),
-          height (FontValues::defaultFontHeight)
-    {
-        jassert (typefaceName.isNotEmpty());
-    }
-
-    SharedFontInternal (const SharedFontInternal& other) noexcept
-        : ReferenceCountedObject(),
-          typeface (other.typeface),
-          typefaceName (other.typefaceName),
-          typefaceStyle (other.typefaceStyle),
-          height (other.height),
-          horizontalScale (other.horizontalScale),
-          kerning (other.kerning),
-          ascent (other.ascent),
-          underline (other.underline)
-    {
-    }
-
-    auto tie() const
-    {
-        return std::tie (height, underline, horizontalScale, kerning, typefaceName, typefaceStyle);
-    }
-
-    bool operator== (const SharedFontInternal& other) const noexcept
-    {
-        return tie() == other.tie();
-    }
-
-    bool operator< (const SharedFontInternal& other) const noexcept
-    {
-        return tie() < other.tie();
-    }
-
-    /*  The typeface and ascent data members may be read/set from multiple threads
-        simultaneously, e.g. in the case that two Font instances reference the same
-        SharedFontInternal and call getTypefacePtr() simultaneously.
-
-        We lock in functions that modify the typeface or ascent in order to
-        ensure thread safety.
-    */
 
     Typeface::Ptr getTypefacePtr (const Font& f)
     {
@@ -287,7 +207,7 @@ public:
 
         if (typeface == nullptr)
         {
-            typeface = TypefaceCache::getInstance()->findTypefaceFor (f);
+            typeface = options.getTypeface() != nullptr ? options.getTypeface() : TypefaceCache::getInstance()->findTypefaceFor (f);
             jassert (typeface != nullptr);
         }
 
@@ -315,7 +235,7 @@ public:
         if (approximatelyEqual (ascent, 0.0f))
             ascent = getTypefacePtr (f)->getAscent();
 
-        return height * ascent;
+        return getHeight() * ascent;
     }
 
     /*  We do not need to lock in these functions, as it's guaranteed
@@ -323,14 +243,19 @@ public:
         instance referencing the shared state.
     */
 
-    StringArray getFallbackFamilies() const { return fallbacks; }
-    String getTypefaceName() const          { return typefaceName; }
-    String getTypefaceStyle() const         { return typefaceStyle; }
-    float getHeight() const                 { return height; }
-    float getHorizontalScale() const        { return horizontalScale; }
-    float getKerning() const                { return kerning; }
-    bool getUnderline() const               { return underline; }
-    bool getFallbackEnabled() const         { return fallback; }
+    StringArray getFallbackFamilies() const
+    {
+        const auto fallbacks = options.getFallbacks();
+        return StringArray (fallbacks.data(), (int) fallbacks.size());
+    }
+
+    String getTypefaceName() const          { return options.getName(); }
+    String getTypefaceStyle() const         { return options.getStyle(); }
+    float getHeight() const                 { return options.getHeight(); }
+    float getHorizontalScale() const        { return options.getHorizontalScale(); }
+    float getKerning() const                { return options.getKerningFactor(); }
+    bool getUnderline() const               { return options.getUnderline(); }
+    bool getFallbackEnabled() const         { return options.getFallbackEnabled(); }
 
     /*  This shared state may be shared between two or more Font instances that are being
         read/modified from multiple threads.
@@ -344,41 +269,42 @@ public:
         jassert (getReferenceCount() == 1);
         typeface = newTypeface;
 
-        if (newTypeface != nullptr)
+        if (typeface != nullptr)
         {
-            typefaceName = typeface->getName();
-            typefaceStyle = typeface->getStyle();
+            options = options.withTypeface (typeface)
+                             .withName (typeface->getName())
+                             .withStyle (typeface->getStyle());
         }
     }
 
     void setTypefaceName (String x)
     {
         jassert (getReferenceCount() == 1);
-        typefaceName = std::move (x);
+        options = options.withName (x);
     }
 
     void setTypefaceStyle (String x)
     {
         jassert (getReferenceCount() == 1);
-        typefaceStyle = std::move (x);
+        options = options.withStyle (x);
     }
 
     void setHeight (float x)
     {
         jassert (getReferenceCount() == 1);
-        height = x;
+        options = options.withHeight (x);
     }
 
     void setHorizontalScale (float x)
     {
         jassert (getReferenceCount() == 1);
-        horizontalScale = x;
+        options = options.withHorizontalScale (x);
     }
 
     void setKerning (float x)
     {
         jassert (getReferenceCount() == 1);
-        kerning = x;
+        options = options.withKerningFactor (x);
     }
 
     void setAscent (float x)
@@ -390,71 +316,79 @@ public:
     void setUnderline (bool x)
     {
         jassert (getReferenceCount() == 1);
-        underline = x;
+        options = options.withUnderline (x);
     }
 
     void setFallbackFamilies (const StringArray& x)
     {
         jassert (getReferenceCount() == 1);
-        fallbacks = x;
+        options = options.withFallbacks ({ x.begin(), x.end() });
     }
 
     void setFallback (bool x)
     {
         jassert (getReferenceCount() == 1);
-        fallback = x;
+        options = options.withFallbackEnabled (x);
+    }
+
+    bool operator== (const SharedFontInternal& other) const
+    {
+        return options == other.options;
+    }
+
+    bool operator<  (const SharedFontInternal& other) const
+    {
+        return options < other.options;
     }
 
 private:
-    static float legacyHeightToPoints (Typeface::Ptr p, float h)
+    SharedFontInternal (Typeface::Ptr t, FontOptions o)
+        : typeface (t), options (std::move (o))
     {
-        return h * p->getNativeDetails().getLegacyMetrics().getHeightToPointsFactor();
     }
 
     Typeface::Ptr typeface;
-    StringArray fallbacks;
-    String typefaceName, typefaceStyle;
-    float height = 0.0f, horizontalScale = 1.0f, kerning = 0.0f, ascent = 0.0f;
-    bool underline = false;
-    bool fallback = true;
-
+    float ascent{};
+    FontOptions options;
     CriticalSection mutex;
 };
 
 //==============================================================================
-Font::Font()                                : font (new SharedFontInternal()) {}
-Font::Font (const Typeface::Ptr& typeface)  : font (new SharedFontInternal (typeface)) {}
+Font::Font()                                : font (new SharedFontInternal (FontOptions{})) {}
+Font::Font (const Typeface::Ptr& typeface)  : font (new SharedFontInternal (FontOptions { typeface })) {}
 Font::Font (const Font& other) noexcept     : font (other.font) {}
 
 Font::Font (float fontHeight, int styleFlags)
-    : font (new SharedFontInternal (styleFlags, FontValues::limitFontHeight (fontHeight)))
+    : font (new SharedFontInternal (FontOptions { fontHeight, styleFlags }))
 {
 }
 
 Font::Font (const String& typefaceName, float fontHeight, int styleFlags)
-    : font (new SharedFontInternal (typefaceName, styleFlags, FontValues::limitFontHeight (fontHeight)))
+    : font (new SharedFontInternal (FontOptions { typefaceName, fontHeight, styleFlags }))
 {
 }
 
 Font::Font (const String& typefaceName, const String& typefaceStyle, float fontHeight)
-    : font (new SharedFontInternal (typefaceName, typefaceStyle, FontValues::limitFontHeight (fontHeight)))
+    : font (new SharedFontInternal (FontOptions { typefaceName, typefaceStyle, fontHeight }))
 {
 }
 
 Font& Font::operator= (const Font& other) noexcept
 {
-    font = other.font;
+    Font copy { other };
+    std::swap (copy.font, font);
     return *this;
 }
 
 Font::Font (Font&& other) noexcept
-    : font (std::move (other.font))
+    : font (std::exchange (other.font, {}))
 {
 }
 
 Font& Font::operator= (Font&& other) noexcept
 {
-    font = std::move (other.font);
+    Font copy { std::move (other) };
+    std::swap (copy.font, font);
     return *this;
 }
 
@@ -479,7 +413,7 @@ bool Font::compare (const Font& a, const Font& b) noexcept
 void Font::dupeInternalIfShared()
 {
     if (font->getReferenceCount() > 1)
-        font = *new SharedFontInternal (*font);
+        font = font->copy();
 }
 
 //==============================================================================

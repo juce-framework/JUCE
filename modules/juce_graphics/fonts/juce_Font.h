@@ -35,7 +35,6 @@
 namespace juce
 {
 
-//==============================================================================
 /**
     Represents a particular font, including its size, style, etc.
 

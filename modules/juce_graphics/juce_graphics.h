@@ -144,6 +144,7 @@ namespace juce
 #include "images/juce_Image.h"
 #include "colour/juce_FillType.h"
 #include "fonts/juce_Typeface.h"
+#include "fonts/juce_FontOptions.h"
 #include "fonts/juce_Font.h"
 #include "fonts/juce_AttributedString.h"
 #include "fonts/juce_GlyphArrangement.h"
