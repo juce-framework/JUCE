@@ -4734,7 +4734,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
     const auto k = [&]
     {
         if ((keyCode & extendedKeyModifier) != 0)
-            return keyCode;
+            return keyCode & (extendedKeyModifier - 1);
 
         const auto vk = BYTE (VkKeyScan ((WCHAR) keyCode) & 0xff);
         return vk != (BYTE) -1 ? vk : keyCode;
