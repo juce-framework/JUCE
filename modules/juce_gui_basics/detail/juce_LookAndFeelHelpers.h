@@ -53,14 +53,14 @@ struct LookAndFeelHelpers
         return baseColour;
     }
 
-    static TextLayout layoutTooltipText (const String& text, Colour colour) noexcept
+    static TextLayout layoutTooltipText (TypefaceMetricsKind metrics, const String& text, Colour colour) noexcept
     {
         const float tooltipFontSize = 13.0f;
         const int maxToolTipWidth = 400;
 
         AttributedString s;
         s.setJustification (Justification::centred);
-        s.append (text, FontOptions (tooltipFontSize, Font::bold), colour);
+        s.append (text, FontOptions (tooltipFontSize, Font::bold).withMetricsKind (metrics), colour);
 
         TextLayout tl;
         tl.createLayoutWithBalancedLineLengths (s, (float) maxToolTipWidth);

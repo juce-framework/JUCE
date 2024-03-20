@@ -97,7 +97,7 @@ public:
         if (keyNum < 0)
             setSize (h, h);
         else
-            setSize (jlimit (h * 4, h * 8, 6 + Font (FontOptions { (float) h * 0.6f }).getStringWidth (getName())), h);
+            setSize (jlimit (h * 4, h * 8, 6 + Font (withDefaultMetrics (FontOptions { (float) h * 0.6f })).getStringWidth (getName())), h);
     }
 
     //==============================================================================
@@ -321,7 +321,7 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        g.setFont (FontOptions ((float) height * 0.7f, Font::bold));
+        g.setFont (owner.withDefaultMetrics (FontOptions ((float) height * 0.7f, Font::bold)));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawText (TRANS (categoryName), 2, 0, width - 2, height, Justification::centredLeft, true);

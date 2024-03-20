@@ -1181,6 +1181,9 @@ public:
     */
     void setLookAndFeel (LookAndFeel* newLookAndFeel);
 
+    /** Returns a copy of the FontOptions with the default metrics kind from the component's LookAndFeel. */
+    FontOptions withDefaultMetrics (FontOptions opt) const;
+
     /** Called to let the component react to a change in the look-and-feel setting.
 
         When the look-and-feel is changed for a component, this method, repaint(), and

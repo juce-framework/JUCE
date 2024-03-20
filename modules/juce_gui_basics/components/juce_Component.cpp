@@ -1856,6 +1856,11 @@ void Component::setLookAndFeel (LookAndFeel* newLookAndFeel)
     }
 }
 
+FontOptions Component::withDefaultMetrics (FontOptions opt) const
+{
+    return getLookAndFeel().withDefaultMetrics (std::move (opt));
+}
+
 void Component::lookAndFeelChanged() {}
 void Component::colourChanged() {}
 

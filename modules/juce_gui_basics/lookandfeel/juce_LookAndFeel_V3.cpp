@@ -111,7 +111,7 @@ void LookAndFeel_V3::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int
     g.fillRect (area.withTop (area.getBottom() - 1));
 
     g.setColour (bkg.contrasting());
-    g.setFont (Font (FontOptions { (float) area.getHeight() * 0.6f }).boldened());
+    g.setFont (Font (withDefaultMetrics (FontOptions { (float) area.getHeight() * 0.6f })).boldened());
     g.drawFittedText (panel.getName(), 4, 0, area.getWidth() - 6, area.getHeight(), Justification::centredLeft, 1);
 }
 
@@ -187,7 +187,7 @@ int LookAndFeel_V3::getTabButtonSpaceAroundImage()                    { return 0
 void LookAndFeel_V3::createTabTextLayout (const TabBarButton& button, float length, float depth,
                                           Colour colour, TextLayout& textLayout)
 {
-    Font font (FontOptions { depth * 0.5f });
+    Font font (button.withDefaultMetrics (FontOptions { depth * 0.5f }));
     font.setUnderline (button.hasKeyboardFocus (false));
 
     AttributedString s;

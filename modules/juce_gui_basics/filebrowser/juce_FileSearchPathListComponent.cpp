@@ -134,7 +134,7 @@ void FileSearchPathListComponent::paintListBoxItem (int rowNumber, Graphics& g, 
         g.fillAll (findColour (TextEditor::highlightColourId));
 
     g.setColour (findColour (ListBox::textColourId));
-    Font f (FontOptions { (float) height * 0.7f });
+    Font f (withDefaultMetrics (FontOptions { (float) height * 0.7f }));
     f.setHorizontalScale (0.9f);
     g.setFont (f);
 

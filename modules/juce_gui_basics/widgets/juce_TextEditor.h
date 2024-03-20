@@ -825,7 +825,7 @@ private:
     Range<int> selection;
     int leftIndent = 4, topIndent = 4;
     unsigned int lastTransactionTime = 0;
-    Font currentFont { FontOptions { 14.0f } };
+    Font currentFont { withDefaultMetrics (FontOptions { 14.0f }) };
     mutable int totalNumChars = 0;
     int caretPosition = 0;
     OwnedArray<UniformTextSection> sections;

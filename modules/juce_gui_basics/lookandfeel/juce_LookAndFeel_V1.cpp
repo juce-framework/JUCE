@@ -371,7 +371,7 @@ void LookAndFeel_V1::drawComboBox (Graphics& g, int width, int height,
 
 Font LookAndFeel_V1::getComboBoxFont (ComboBox& box)
 {
-    Font f (FontOptions { jmin (15.0f, (float) box.getHeight() * 0.85f) });
+    Font f (withDefaultMetrics (FontOptions { jmin (15.0f, (float) box.getHeight() * 0.85f) }));
     f.setHorizontalScale (0.9f);
     return f;
 }

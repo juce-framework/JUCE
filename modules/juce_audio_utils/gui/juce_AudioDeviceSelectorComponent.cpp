@@ -82,7 +82,7 @@ static void drawTextLayout (Graphics& g, Component& owner, StringRef text, const
 
     AttributedString attributedString { text };
     attributedString.setColour (textColour);
-    attributedString.setFont (FontOptions { (float) textBounds.getHeight() * 0.6f });
+    attributedString.setFont (owner.withDefaultMetrics (FontOptions { (float) textBounds.getHeight() * 0.6f }));
     attributedString.setJustification (Justification::centredLeft);
     attributedString.setWordWrap (AttributedString::WordWrap::none);
 

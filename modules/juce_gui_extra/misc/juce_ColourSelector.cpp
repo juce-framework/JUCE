@@ -382,7 +382,7 @@ private:
     ColourSelector& owner;
 
     Colour currentColour;
-    Font labelFont { FontOptions { 14.0f, Font::bold } };
+    Font labelFont { withDefaultMetrics (FontOptions { 14.0f, Font::bold }) };
     int labelWidth = 0;
     Label colourLabel;
 

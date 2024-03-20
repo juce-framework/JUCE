@@ -770,7 +770,7 @@ private:
             }
 
             addAndMakeVisible (instructions);
-            instructions.setFont (FontOptions (13.0f));
+            instructions.setFont (withDefaultMetrics (FontOptions (13.0f)));
 
             setSize (500, 300);
         }
