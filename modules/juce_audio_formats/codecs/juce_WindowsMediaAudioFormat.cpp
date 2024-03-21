@@ -42,7 +42,7 @@ class JuceIStream final : public ComBaseClassHelper<IStream>
 {
 public:
     JuceIStream (InputStream& in) noexcept
-        : ComBaseClassHelper (0), source (in)
+        : source (in)
     {
     }
 
@@ -153,7 +153,7 @@ public:
             HRESULT hr = wmCreateSyncReader (nullptr, WMT_RIGHT_PLAYBACK, wmSyncReader.resetAndGetPointerAddress());
 
             if (SUCCEEDED (hr))
-                hr = wmSyncReader->OpenStream (new JuceIStream (*input));
+                hr = wmSyncReader->OpenStream (becomeComSmartPtrOwner (new JuceIStream (*input)));
 
             if (SUCCEEDED (hr))
             {

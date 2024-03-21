@@ -65,7 +65,7 @@ class AccessibilityHandler::AccessibilityNativeImpl
 {
 public:
     explicit AccessibilityNativeImpl (AccessibilityHandler& owner)
-        : accessibilityElement (new AccessibilityNativeHandle (owner))
+        : accessibilityElement (becomeComSmartPtrOwner (new AccessibilityNativeHandle (owner)))
     {
         ++providerCount;
     }

@@ -75,7 +75,7 @@ namespace ActiveXHelpers
         JUCE_COMRESULT GetBorder (LPRECT)                                       override { return E_NOTIMPL; }
         JUCE_COMRESULT RequestBorderSpace (LPCBORDERWIDTHS)                     override { return E_NOTIMPL; }
         JUCE_COMRESULT SetBorderSpace (LPCBORDERWIDTHS)                         override { return E_NOTIMPL; }
-        JUCE_COMRESULT SetActiveObject (IOleInPlaceActiveObject* a, LPCOLESTR)  override { activeObject = a; return S_OK; }
+        JUCE_COMRESULT SetActiveObject (IOleInPlaceActiveObject* a, LPCOLESTR)  override { activeObject = addComSmartPtrOwner (a); return S_OK; }
         JUCE_COMRESULT InsertMenus (HMENU, LPOLEMENUGROUPWIDTHS)                override { return E_NOTIMPL; }
         JUCE_COMRESULT SetMenu (HMENU, HOLEMENU, HWND)                          override { return S_OK; }
         JUCE_COMRESULT RemoveMenus (HMENU)                                      override { return E_NOTIMPL; }

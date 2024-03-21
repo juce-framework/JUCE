@@ -42,8 +42,7 @@ namespace DirectWriteTypeLayout
     {
     public:
         CustomDirectWriteTextRenderer (IDWriteFontCollection& fonts, const AttributedString& as)
-            : ComBaseClassHelper (0),
-              attributedString (as),
+            : attributedString (as),
               fontCollection (fonts)
         {
         }
@@ -432,7 +431,7 @@ namespace DirectWriteTypeLayout
         layout.ensureStorageAllocated ((int) actualLineCount);
 
         {
-            ComSmartPtr<CustomDirectWriteTextRenderer> textRenderer (new CustomDirectWriteTextRenderer (fontCollection, text));
+            auto textRenderer = becomeComSmartPtrOwner (new CustomDirectWriteTextRenderer (fontCollection, text));
             hr = dwTextLayout->Draw (&layout, textRenderer, 0, 0);
         }
 

@@ -623,9 +623,8 @@ private:
 
         if (audioSessionControl != nullptr)
         {
-            sessionEventCallback = new SessionEventCallback (*this);
+            sessionEventCallback = becomeComSmartPtrOwner (new SessionEventCallback (*this));
             audioSessionControl->RegisterAudioSessionNotification (sessionEventCallback);
-            sessionEventCallback->Release(); // (required because ComBaseClassHelper objects are constructed with a ref count of 1)
         }
     }
 
@@ -1831,7 +1830,7 @@ private:
     {
     public:
         explicit ChangeNotificationClient (WASAPIAudioIODeviceType* d)
-            : ComBaseClassHelper (0), device (d) {}
+            : device (d) {}
 
         JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             override { return notify(); }
         JUCE_COMRESULT OnDeviceRemoved (LPCWSTR)                           override { return notify(); }
@@ -1859,10 +1858,10 @@ private:
     static String getDefaultEndpoint (IMMDeviceEnumerator* enumerator, bool forCapture)
     {
         String s;
-        IMMDevice* dev = nullptr;
+        ComSmartPtr<IMMDevice> dev;
 
         if (check (enumerator->GetDefaultAudioEndpoint (forCapture ? eCapture : eRender,
-                                                        eMultimedia, &dev)))
+                                                        eMultimedia, dev.resetAndGetPointerAddress())))
         {
             WCHAR* deviceId = nullptr;
 
@@ -1871,8 +1870,6 @@ private:
                 s = deviceId;
                 CoTaskMemFree (deviceId);
             }
-
-            dev->Release();
         }
 
         return s;
@@ -1886,7 +1883,7 @@ private:
             if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
                 return {};
 
-            notifyClient = new ChangeNotificationClient (this);
+            notifyClient = becomeComSmartPtrOwner (new ChangeNotificationClient (this));
             enumerator->RegisterEndpointNotificationCallback (notifyClient);
         }
 

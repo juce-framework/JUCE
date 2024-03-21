@@ -151,8 +151,7 @@ static auto roleToControlTypeId (AccessibilityRole roleType)
 
 //==============================================================================
 AccessibilityNativeHandle::AccessibilityNativeHandle (AccessibilityHandler& handler)
-    : ComBaseClassHelper (0),
-      accessibilityHandler (handler)
+    : accessibilityHandler (handler)
 {
 }
 

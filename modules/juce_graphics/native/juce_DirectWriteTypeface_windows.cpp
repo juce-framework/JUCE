@@ -270,7 +270,7 @@ public:
     {
         jassert (path.isEmpty());  // we might need to apply a transform to the path, so this must be empty
         auto glyphIndex = (UINT16) glyphNumber;
-        ComSmartPtr<PathGeometrySink> pathGeometrySink (new PathGeometrySink());
+        auto pathGeometrySink = becomeComSmartPtrOwner (new PathGeometrySink());
 
         dwFontFace->GetGlyphRunOutline (1024.0f, &glyphIndex, nullptr, nullptr,
                                         1, false, false, pathGeometrySink);
@@ -296,7 +296,7 @@ private:
 
     struct PathGeometrySink final : public ComBaseClassHelper<IDWriteGeometrySink>
     {
-        PathGeometrySink() : ComBaseClassHelper (0) {}
+        PathGeometrySink() = default;
 
         void STDMETHODCALLTYPE AddBeziers (const D2D1_BEZIER_SEGMENT* beziers, UINT beziersCount) noexcept override
         {

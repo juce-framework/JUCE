@@ -40,7 +40,7 @@ class UIAProviderBase
 {
 public:
     explicit UIAProviderBase (AccessibilityNativeHandle* nativeHandleIn)
-        : nativeHandle (nativeHandleIn)
+        : nativeHandle (addComSmartPtrOwner (nativeHandleIn))
     {
     }
 

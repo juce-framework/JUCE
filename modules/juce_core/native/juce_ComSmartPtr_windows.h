@@ -103,30 +103,27 @@ template <class ComClass>
 class ComSmartPtr
 {
 public:
-    ComSmartPtr() noexcept {}
-    ComSmartPtr (ComClass* obj) : p (obj)                   { if (p) p->AddRef(); }
-    ComSmartPtr (const ComSmartPtr& other) : p (other.p)    { if (p) p->AddRef(); }
-    ~ComSmartPtr()                                          { release(); }
+    ComSmartPtr() noexcept = default;
+    ComSmartPtr (std::nullptr_t) noexcept {}
+
+    template <typename U>
+    ComSmartPtr (const ComSmartPtr<U>& other) : ComSmartPtr (other, true) {}
+    ComSmartPtr (const ComSmartPtr&    other) : ComSmartPtr (other, true) {}
+
+    ~ComSmartPtr() noexcept { release(); }
+
+    template <typename U>
+    ComSmartPtr& operator= (const ComSmartPtr<U>& newP) { ComSmartPtr copy { newP }; std::swap (copy.p, p); return *this; }
+    ComSmartPtr& operator= (const ComSmartPtr&    newP) { ComSmartPtr copy { newP }; std::swap (copy.p, p); return *this; }
 
     operator ComClass*() const noexcept     { return p; }
     ComClass& operator*() const noexcept    { return *p; }
     ComClass* operator->() const noexcept   { return p; }
 
-    ComSmartPtr& operator= (ComClass* const newP)
-    {
-        if (newP != nullptr)  newP->AddRef();
-        release();
-        p = newP;
-        return *this;
-    }
-
-    ComSmartPtr& operator= (const ComSmartPtr& newP)  { return operator= (newP.p); }
-
     // Releases and nullifies this pointer and returns its address
     ComClass** resetAndGetPointerAddress()
     {
         release();
-        p = nullptr;
         return &p;
     }
 
@@ -160,30 +157,70 @@ public:
         if (QueryInterface (destObject) == S_OK)
             return destObject;
 
-        return nullptr;
+        return {};
+    }
+
+    /** Increments refcount. */
+    static auto addOwner (ComClass* t)
+    {
+        return ComSmartPtr (t, true);
+    }
+
+    /** Does not initially increment refcount; assumes t has a positive refcount. */
+    static auto becomeOwner (ComClass* t)
+    {
+        return ComSmartPtr (t, false);
     }
 
 private:
-    ComClass* p = nullptr;
+    template <typename U>
+    friend class ComSmartPtr;
 
-    void release()  { if (p != nullptr) p->Release(); }
+    ComSmartPtr (ComClass* object, bool autoAddRef) noexcept
+        : p (object)
+    {
+        if (p != nullptr && autoAddRef)
+            p->AddRef();
+    }
+
+    void release()
+    {
+        if (auto* q = std::exchange (p, nullptr))
+            q->Release();
+    }
 
     ComClass** operator&() noexcept; // private to avoid it being used accidentally
+
+    ComClass* p = nullptr;
 };
+
+/** Increments refcount. */
+template <class ObjectType>
+auto addComSmartPtrOwner (ObjectType* t)
+{
+    return ComSmartPtr<ObjectType>::addOwner (t);
+}
+
+/** Does not initially increment refcount; assumes t has a positive refcount. */
+template <class ObjectType>
+auto becomeComSmartPtrOwner (ObjectType* t)
+{
+    return ComSmartPtr<ObjectType>::becomeOwner (t);
+}
 
 //==============================================================================
 template <class First, class... ComClasses>
 class ComBaseClassHelperBase   : public First, public ComClasses...
 {
 public:
-    ComBaseClassHelperBase (unsigned int initialRefCount)  : refCount (initialRefCount) {}
+    ComBaseClassHelperBase() = default;
     virtual ~ComBaseClassHelperBase() = default;
 
     ULONG STDMETHODCALLTYPE AddRef()    override { return ++refCount; }
     ULONG STDMETHODCALLTYPE Release()   override { auto r = --refCount; if (r == 0) delete this; return r; }
 
 protected:
-    ULONG refCount;
+    ULONG refCount = 1;
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result) override
     {
@@ -212,8 +249,7 @@ template <class... ComClasses>
 class ComBaseClassHelper   : public ComBaseClassHelperBase<ComClasses...>
 {
 public:
-    explicit ComBaseClassHelper (unsigned int initialRefCount = 1)
-        : ComBaseClassHelperBase<ComClasses...> (initialRefCount) {}
+    ComBaseClassHelper() = default;
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result) override
     {

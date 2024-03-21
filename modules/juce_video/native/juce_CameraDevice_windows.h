@@ -111,7 +111,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             sampleGrabber->SetMediaType (&mt);
         }
 
-        callback = new GrabberCallback (*this);
+        callback = becomeComSmartPtrOwner (new GrabberCallback (*this));
         hr = sampleGrabber->SetCallback (callback, 1);
 
         hr = graphBuilder->AddFilter (sampleGrabberBase, _T ("Sample Grabber"));
@@ -536,8 +536,8 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
     struct GrabberCallback   : public ComBaseClassHelperBase<ComTypes::ISampleGrabberCB>
     {
-        GrabberCallback (Pimpl& p)
-            : ComBaseClassHelperBase (0), owner (p) {}
+        explicit GrabberCallback (Pimpl& p)
+            : owner (p) {}
 
         JUCE_COMRESULT QueryInterface (REFIID refId, void** result) override
         {
