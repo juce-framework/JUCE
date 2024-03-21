@@ -187,12 +187,13 @@ public:
     /** Widgets can call this to find out the kind of metrics they should use when creating their
         own fonts.
 
-        The default implementation returns the legacy metrics kind, but you can override this if
-        you want to use the portable metrics kind instead. Using portable metrics may cause text
-        to render at a different size, so you should check that text in your app still renders at an
-        appropriate size, and potentially adjust font sizes where necessary after overriding this.
+        The default implementation returns the portable metrics kind, but you can override this if
+        you want to use the legacy metrics kind instead, to avoid rendering changes in existing
+        projects. Switching between metrics kinds may cause text to render at a different size, so you
+        should check that text in your app still renders at an appropriate size, and potentially adjust
+        font sizes where necessary after overriding this function.
     */
-    virtual TypefaceMetricsKind getDefaultMetricsKind() const { return TypefaceMetricsKind::legacy; }
+    virtual TypefaceMetricsKind getDefaultMetricsKind() const { return TypefaceMetricsKind::portable; }
 
     /** Returns a copy of the FontOptions with the LookAndFeel's default metrics kind set. */
     FontOptions withDefaultMetrics (FontOptions opt) const { return opt.withMetricsKind (getDefaultMetricsKind()); }

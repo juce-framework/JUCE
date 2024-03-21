@@ -4,6 +4,32 @@
 
 ## Change
 
+JUCE widgets now query the LookAndFeel to determine the TypefaceMetricsKind to
+use. By default, the LookAndFeel will specify the "portable" metrics kind,
+which may change the size of text in JUCE widgets, depending on the font and
+platform.
+
+**Possible Issues**
+
+Using "portable" metrics may cause text to render at a different scale when
+compared to the old "legacy" metrics.
+
+**Workaround**
+
+If you want to restore the old metrics, e.g. to maintain the same text scaling
+in an existing app, you can override LookAndFeel::getDefaultMetricsKind() on
+each LookAndFeel in your application, to return the "legacy" metrics kind.
+
+**Rationale**
+
+Using portable font metrics streamlines the development experience when working
+on applications that must run on multiple platforms. Using portable metrics by
+default means that new projects will benefit from this improved cross-platform
+behaviour from the outset.
+
+
+## Change
+
 Signatures of several Typeface member functions have been updated to accept a
 new TypefaceMetricsKind argument. The getAscent(), getDescent(), and
 getHeightToPointsFactor() members have been replaced by getMetrics(), which
