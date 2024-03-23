@@ -290,7 +290,7 @@ private:
             : area (et.getMaximumBounds().withSize (nextPowerOfTwo (et.getMaximumBounds().getWidth()),
                                                     nextPowerOfTwo (et.getMaximumBounds().getHeight())))
         {
-            data.calloc (area.getWidth() * area.getHeight());
+            data.jcalloc (area.getWidth() * area.getHeight());
             et.iterate (*this);
         }
 

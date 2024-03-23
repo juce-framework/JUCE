@@ -106,7 +106,7 @@ namespace WindowsFileHelpers
 
         const size_t numBytes = CharPointer_UTF16::getBytesRequiredFor (path.getCharPointer()) + 4;
         HeapBlock<WCHAR> pathCopy;
-        pathCopy.calloc (numBytes, 1);
+        pathCopy.jcalloc (numBytes, 1);
         path.copyToUTF16 (pathCopy, numBytes);
 
         if (PathStripToRoot (pathCopy))
@@ -333,7 +333,7 @@ bool File::moveToTrash() const
     // The string we pass in must be double null terminated..
     const size_t numBytes = CharPointer_UTF16::getBytesRequiredFor (fullPath.getCharPointer()) + 8;
     HeapBlock<WCHAR> doubleNullTermPath;
-    doubleNullTermPath.calloc (numBytes, 1);
+    doubleNullTermPath.jcalloc (numBytes, 1);
     fullPath.copyToUTF16 (doubleNullTermPath, numBytes);
 
     SHFILEOPSTRUCT fos = {};
@@ -770,7 +770,7 @@ String File::getVersion() const
     DWORD handle = 0;
     DWORD bufferSize = GetFileVersionInfoSize (getFullPathName().toWideCharPointer(), &handle);
     HeapBlock<char> buffer;
-    buffer.calloc (bufferSize);
+    buffer.jcalloc (bufferSize);
 
     if (GetFileVersionInfo (getFullPathName().toWideCharPointer(), 0, bufferSize, buffer))
     {
@@ -846,7 +846,7 @@ static String readWindowsShortcutOrLink (const File& shortcut, bool wantsAbsolut
         {
             HeapBlock<WindowsFileHelpers::REPARSE_DATA_BUFFER> reparseData;
 
-            reparseData.calloc (1, MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
+            reparseData.jcalloc (1, MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
             DWORD bytesReturned = 0;
 
             bool success = DeviceIoControl (h, FSCTL_GET_REPARSE_POINT, nullptr, 0,

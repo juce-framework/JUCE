@@ -1348,28 +1348,28 @@ public:
                     bwavSize = length;
 
                     HeapBlock<BWAVChunk> bwav;
-                    bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
+                    bwav.jcalloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
                     input->read (bwav, (int) length);
                     bwav->copyTo (dict, (int) length);
                 }
                 else if (chunkType == chunkName ("smpl"))
                 {
                     HeapBlock<SMPLChunk> smpl;
-                    smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
+                    smpl.jcalloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
                     input->read (smpl, (int) length);
                     smpl->copyTo (dict, (int) length);
                 }
                 else if (chunkType == chunkName ("inst") || chunkType == chunkName ("INST")) // need to check which...
                 {
                     HeapBlock<InstChunk> inst;
-                    inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
+                    inst.jcalloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                     input->read (inst, (int) length);
                     inst->copyTo (dict);
                 }
                 else if (chunkType == chunkName ("cue "))
                 {
                     HeapBlock<CueChunk> cue;
-                    cue.calloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
+                    cue.jcalloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
                     input->read (cue, (int) length);
                     cue->copyTo (dict, (int) length);
                 }

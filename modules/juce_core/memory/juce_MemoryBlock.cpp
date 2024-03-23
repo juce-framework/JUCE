@@ -44,7 +44,7 @@ MemoryBlock::MemoryBlock (const MemoryBlock& other)
     if (size > 0)
     {
         jassert (other.data != nullptr);
-        data.malloc (size);
+        data.jmalloc (size);
         memcpy (data, other.data, size);
     }
 }
@@ -58,7 +58,7 @@ MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom, const size_t s
     {
         jassert (dataToInitialiseFrom != nullptr); // non-zero size, but a zero pointer passed-in?
 
-        data.malloc (size);
+        data.jmalloc (size);
 
         if (dataToInitialiseFrom != nullptr)
             memcpy (data, dataToInitialiseFrom, size);
@@ -124,7 +124,7 @@ void MemoryBlock::setSize (const size_t newSize, const bool initialiseToZero)
         {
             if (data != nullptr)
             {
-                data.realloc (newSize);
+                data.jrealloc (newSize);
 
                 if (initialiseToZero && (newSize > size))
                     zeromem (data + size, newSize - size);
@@ -141,7 +141,7 @@ void MemoryBlock::setSize (const size_t newSize, const bool initialiseToZero)
 
 void MemoryBlock::reset()
 {
-    data.free();
+    data.jfree();
     size = 0;
 }
 

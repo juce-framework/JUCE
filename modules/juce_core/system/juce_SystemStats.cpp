@@ -189,7 +189,7 @@ String SystemStats::getStackBacktrace()
     int frames = (int) CaptureStackBackTrace (0, numElementsInArray (stack), stack, nullptr);
 
     HeapBlock<SYMBOL_INFO> symbol;
-    symbol.calloc (sizeof (SYMBOL_INFO) + 256, 1);
+    symbol.jcalloc (sizeof (SYMBOL_INFO) + 256, 1);
     symbol->MaxNameLen = 255;
     symbol->SizeOfStruct = sizeof (SYMBOL_INFO);
 

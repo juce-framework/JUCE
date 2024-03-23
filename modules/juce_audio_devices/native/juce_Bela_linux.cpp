@@ -275,8 +275,8 @@ public:
         actualNumberOfInputs  = jmin (numIns, actualNumberOfInputs);
         actualNumberOfOutputs = jmin (numOuts, actualNumberOfOutputs);
 
-        channelInBuffer.calloc (actualNumberOfInputs);
-        channelOutBuffer.calloc (actualNumberOfOutputs);
+        channelInBuffer.jcalloc (actualNumberOfInputs);
+        channelOutBuffer.jcalloc (actualNumberOfOutputs);
 
         return {};
     }
@@ -297,8 +297,8 @@ public:
             actualNumberOfInputs = 0;
             actualNumberOfOutputs = 0;
 
-            channelInBuffer.free();
-            channelOutBuffer.free();
+            channelInBuffer.jfree();
+            channelOutBuffer.jfree();
         }
     }
 

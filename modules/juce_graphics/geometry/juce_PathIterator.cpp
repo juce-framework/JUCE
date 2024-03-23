@@ -152,7 +152,7 @@ bool PathFlatteningIterator::next()
             if (offset >= stackSize - 10)
             {
                 stackSize <<= 1;
-                stackBase.realloc (stackSize);
+                stackBase.jrealloc (stackSize);
                 stackPos = stackBase + offset;
             }
 
@@ -204,7 +204,7 @@ bool PathFlatteningIterator::next()
             if (offset >= stackSize - 16)
             {
                 stackSize <<= 1;
-                stackBase.realloc (stackSize);
+                stackBase.jrealloc (stackSize);
                 stackPos = stackBase + offset;
             }
 

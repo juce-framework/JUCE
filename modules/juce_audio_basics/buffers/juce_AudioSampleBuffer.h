@@ -476,7 +476,7 @@ public:
         if (allocatedBytes != 0)
         {
             allocatedBytes = 0;
-            allocatedData.free();
+            allocatedData.jfree();
         }
 
         numChannels = newNumChannels;
@@ -1200,7 +1200,7 @@ private:
             channelListSize += requiredSampleAlignment - alignmentOverflow;
 
         allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (Type) + channelListSize + 32;
-        allocatedData.malloc (allocatedBytes);
+        allocatedData.jmalloc (allocatedBytes);
         channels = unalignedPointerCast<Type**> (allocatedData.get());
         auto chan = unalignedPointerCast<Type*> (allocatedData + channelListSize);
 
@@ -1225,7 +1225,7 @@ private:
         }
         else
         {
-            allocatedData.malloc (numChannels + 1, sizeof (Type*));
+            allocatedData.jmalloc (numChannels + 1, sizeof (Type*));
             channels = unalignedPointerCast<Type**> (allocatedData.get());
         }
 

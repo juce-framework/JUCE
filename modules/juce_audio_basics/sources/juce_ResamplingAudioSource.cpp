@@ -52,9 +52,9 @@ void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected, double s
 
     buffer.setSize (numChannels, scaledBlockSize + 32);
 
-    filterStates.calloc (numChannels);
-    srcBuffers.calloc (numChannels);
-    destBuffers.calloc (numChannels);
+    filterStates.jcalloc (numChannels);
+    srcBuffers.jcalloc (numChannels);
+    destBuffers.jcalloc (numChannels);
     createLowPass (ratio);
 
     flushBuffers();

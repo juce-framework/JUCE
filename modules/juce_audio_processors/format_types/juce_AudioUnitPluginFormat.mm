@@ -1064,7 +1064,7 @@ public:
                             minDataSize + (sizeof (AudioChannelDescription) * layout.mNumberChannelDescriptions);
 
                         HeapBlock<AudioChannelLayout> layoutBuffer;
-                        layoutBuffer.malloc (1, expectedSize);
+                        layoutBuffer.jmalloc (1, expectedSize);
                         dataSize = expectedSize;
 
                         err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope,
@@ -1848,7 +1848,7 @@ private:
     {
         AUBuffer (size_t numBuffers)
         {
-            bufferList.calloc (1, (sizeof (AudioBufferList) - sizeof (::AudioBuffer)) + (sizeof (::AudioBuffer) * numBuffers));
+            bufferList.jcalloc (1, (sizeof (AudioBufferList) - sizeof (::AudioBuffer)) + (sizeof (::AudioBuffer) * numBuffers));
             AudioBufferList& buffer = *bufferList.get();
 
             buffer.mNumberBuffers = static_cast<UInt32> (numBuffers);
@@ -2428,7 +2428,7 @@ private:
         supportedInLayouts.clear();
         supportedOutLayouts.clear();
         numChannelInfos = 0;
-        channelInfos.free();
+        channelInfos.jfree();
 
         for (int dir = 0; dir < 2; ++dir)
         {
@@ -2504,7 +2504,7 @@ private:
                 && propertySize > 0)
             {
                 numChannelInfos = propertySize / sizeof (AUChannelInfo);
-                channelInfos.malloc (static_cast<size_t> (numChannelInfos));
+                channelInfos.jmalloc (static_cast<size_t> (numChannelInfos));
                 propertySize = static_cast<UInt32> (sizeof (AUChannelInfo) * static_cast<size_t> (numChannelInfos));
 
                 if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SupportedNumChannels, kAudioUnitScope_Global, 0, channelInfos.get(), &propertySize) != noErr)
@@ -2513,7 +2513,7 @@ private:
             else
             {
                 numChannelInfos = 1;
-                channelInfos.malloc (static_cast<size_t> (numChannelInfos));
+                channelInfos.jmalloc (static_cast<size_t> (numChannelInfos));
                 channelInfos.get()->inChannels  = -1;
                 channelInfos.get()->outChannels = -1;
             }
@@ -2664,7 +2664,7 @@ private:
                                           0, &dataSize, &isWritable) == noErr)
         {
             HeapBlock<AudioUnitCocoaViewInfo> info;
-            info.calloc (dataSize, 1);
+            info.jcalloc (dataSize, 1);
 
             if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_CocoaUI, kAudioUnitScope_Global,
                                       0, info, &dataSize) == noErr)

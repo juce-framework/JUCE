@@ -541,7 +541,7 @@ public:
                     else if (type == chunkName ("INST"))
                     {
                         HeapBlock<InstChunk> inst;
-                        inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
+                        inst.jcalloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                         input->read (inst, (int) length);
                         inst->copyTo (metadataValuesMap);
                     }

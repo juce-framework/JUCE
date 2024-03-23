@@ -519,8 +519,8 @@ public:
             isProcessing = true;
 
             auto numInAndOutChannels = static_cast<size_t> (vstEffect.numInputs + vstEffect.numOutputs);
-            floatTempBuffers .channels.calloc (numInAndOutChannels);
-            doubleTempBuffers.channels.calloc (numInAndOutChannels);
+            floatTempBuffers .channels.jcalloc (numInAndOutChannels);
+            doubleTempBuffers.channels.jcalloc (numInAndOutChannels);
 
             auto currentRate = sampleRate;
             auto currentBlockSize = blockSize;
@@ -574,8 +574,8 @@ public:
             outgoingEvents.freeEvents();
 
             isProcessing = false;
-            floatTempBuffers.channels.free();
-            doubleTempBuffers.channels.free();
+            floatTempBuffers.channels.jfree();
+            doubleTempBuffers.channels.jfree();
 
             deleteTempChannels();
         }
@@ -1930,8 +1930,8 @@ private:
 
         const auto speakerBaseSize = offsetof (Vst2::VstSpeakerArrangement, speakers);
 
-        cachedInArrangement .malloc (speakerBaseSize + (static_cast<std::size_t> (inputLayout. size()) * sizeof (Vst2::VstSpeakerProperties)), 1);
-        cachedOutArrangement.malloc (speakerBaseSize + (static_cast<std::size_t> (outputLayout.size()) * sizeof (Vst2::VstSpeakerProperties)), 1);
+        cachedInArrangement .jmalloc (speakerBaseSize + (static_cast<std::size_t> (inputLayout. size()) * sizeof (Vst2::VstSpeakerProperties)), 1);
+        cachedOutArrangement.jmalloc (speakerBaseSize + (static_cast<std::size_t> (outputLayout.size()) * sizeof (Vst2::VstSpeakerProperties)), 1);
 
         *pluginInput  = cachedInArrangement. getData();
         *pluginOutput = cachedOutArrangement.getData();

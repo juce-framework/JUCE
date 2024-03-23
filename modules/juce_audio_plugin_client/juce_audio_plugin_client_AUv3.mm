@@ -950,7 +950,7 @@ private:
                           + ((numBuffers - 1) * static_cast<int> (sizeof (::AudioBuffer)));
             jassert (bytes > 0);
 
-            bufferListStorage.calloc (static_cast<size_t> (bytes));
+            bufferListStorage.jcalloc (static_cast<size_t> (bytes));
             bufferList = reinterpret_cast<AudioBufferList*> (bufferListStorage.getData());
 
             const int bufferChannels = isInterleaved ? numberOfChannels : 1;
@@ -960,7 +960,7 @@ private:
         void dealloc()
         {
             bufferList = nullptr;
-            bufferListStorage.free();
+            bufferListStorage.jfree();
             scratchBuffer.setSize (0, 0);
         }
 

@@ -1387,8 +1387,8 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
             tmpBufferFloat .setSize (maxChannels, samplesPerBlockExpected);
             tmpBufferDouble.setSize (maxChannels, samplesPerBlockExpected);
 
-            channelBufferFloat .calloc (static_cast<size_t> (maxChannels));
-            channelBufferDouble.calloc (static_cast<size_t> (maxChannels));
+            channelBufferFloat .jcalloc (static_cast<size_t> (maxChannels));
+            channelBufferDouble.jcalloc (static_cast<size_t> (maxChannels));
 
             outOfPlaceBuffer.setSize (jmax (1, vstEffect->numOutputs), samplesPerBlockExpected);
 
@@ -1420,10 +1420,10 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
             setPower (false);
         }
 
-        channelBufferFloat.free();
+        channelBufferFloat.jfree();
         tmpBufferFloat.setSize (0, 0);
 
-        channelBufferDouble.free();
+        channelBufferDouble.jfree();
         tmpBufferDouble.setSize (0, 0);
 
         outOfPlaceBuffer.setSize (1, 1);

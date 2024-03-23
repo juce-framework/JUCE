@@ -44,7 +44,7 @@ BufferedInputStream::BufferedInputStream (InputStream* sourceStream, int size, b
       position (bufferedRange.getStart()),
       bufferLength (calcBufferStreamBufferSize (size, sourceStream))
 {
-    buffer.malloc (bufferLength);
+    buffer.jmalloc (bufferLength);
 }
 
 BufferedInputStream::BufferedInputStream (InputStream& sourceStream, int size)

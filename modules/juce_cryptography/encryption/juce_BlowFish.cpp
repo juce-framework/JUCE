@@ -176,7 +176,7 @@ BlowFish::BlowFish (const void* const keyData, const int keyBytes)
 
     for (int i = 0; i < 4; ++i)
     {
-        s[i].malloc (256);
+        s[i].jmalloc (256);
         memcpy (s[i], initialSValues + i * 256, 256 * sizeof (uint32));
     }
 
@@ -220,7 +220,7 @@ BlowFish::BlowFish (const void* const keyData, const int keyBytes)
 BlowFish::BlowFish (const BlowFish& other)
 {
     for (auto& block : s)
-        block.malloc (256);
+        block.jmalloc (256);
 
     operator= (other);
 }

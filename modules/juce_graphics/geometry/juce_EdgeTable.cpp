@@ -299,7 +299,7 @@ static size_t getEdgeTableAllocationSize (int lineStride, int height) noexcept
 
 void EdgeTable::allocate()
 {
-    table.malloc (getEdgeTableAllocationSize (lineStrideElements, bounds.getHeight()));
+    table.jmalloc (getEdgeTableAllocationSize (lineStrideElements, bounds.getHeight()));
 }
 
 void EdgeTable::clearLineSizes() noexcept

@@ -126,7 +126,7 @@ public:
         auto channelListBytes = sizeof (SampleType*) * numberOfChannels;
         auto extraBytes = alignmentInBytes - 1;
 
-        heapBlockToUseForAllocation.malloc (channelListBytes + extraBytes + channelSize * numberOfChannels);
+        heapBlockToUseForAllocation.jmalloc (channelListBytes + extraBytes + channelSize * numberOfChannels);
 
         auto* chanArray = unalignedPointerCast<SampleType**> (heapBlockToUseForAllocation.getData());
         channels = chanArray;

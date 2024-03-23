@@ -346,7 +346,7 @@ public:
         auto streams = getStreams();
         const auto total = std::accumulate (streams.begin(), streams.end(), 0,
                                             [] (int n, const auto& s) { return n + (s != nullptr ? s->channels : 0); });
-        audioBuffer.calloc (total * tempBufSize);
+        audioBuffer.jcalloc (total * tempBufSize);
 
         auto channels = 0;
         for (auto* stream : streams)
@@ -868,7 +868,7 @@ public:
 
         int allocateTempBuffers (int tempBufSize, int channelCount, HeapBlock<float>& buffer)
         {
-            tempBuffers.calloc (channels + 2);
+            tempBuffers.jcalloc (channels + 2);
 
             for (int i = 0; i < channels;  ++i)
                 tempBuffers[i] = buffer + channelCount++ * tempBufSize;

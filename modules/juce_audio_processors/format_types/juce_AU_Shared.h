@@ -70,10 +70,10 @@ struct AudioUnitHelpers
         void release()
         {
             inputLayoutMap = outputLayoutMap = nullptr;
-            inputLayoutMapPtrStorage.free();
-            outputLayoutMapPtrStorage.free();
-            inputLayoutMapStorage.free();
-            outputLayoutMapStorage.free();
+            inputLayoutMapPtrStorage.jfree();
+            outputLayoutMapPtrStorage.jfree();
+            inputLayoutMapStorage.jfree();
+            outputLayoutMapStorage.jfree();
         }
 
         inline const int* get (bool input, int bus) const noexcept { return (input ? inputLayoutMap : outputLayoutMap)[bus]; }
@@ -95,8 +95,8 @@ struct AudioUnitHelpers
             const int totalInChannels  = processor.getTotalNumInputChannels();
             const int totalOutChannels = processor.getTotalNumOutputChannels();
 
-            layoutMapPtrStorage.calloc (static_cast<size_t> (numBuses));
-            layoutMapStorage.calloc (static_cast<size_t> (isInput ? totalInChannels : totalOutChannels));
+            layoutMapPtrStorage.jcalloc (static_cast<size_t> (numBuses));
+            layoutMapStorage.jcalloc (static_cast<size_t> (isInput ? totalInChannels : totalOutChannels));
 
             layoutMap = layoutMapPtrStorage.get();
 

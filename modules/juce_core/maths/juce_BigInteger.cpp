@@ -106,7 +106,7 @@ BigInteger::BigInteger (const BigInteger& other)
       negative (other.negative)
 {
     if (allocatedSize > numPreallocatedInts)
-        heapAllocation.malloc (allocatedSize);
+        heapAllocation.jmalloc (allocatedSize);
 
     memcpy (getValues(), other.getValues(), sizeof (uint32) * allocatedSize);
 }
@@ -149,9 +149,9 @@ BigInteger& BigInteger::operator= (const BigInteger& other)
         auto newAllocatedSize = (size_t) jmax ((size_t) numPreallocatedInts, sizeNeededToHold (highestBit));
 
         if (newAllocatedSize <= numPreallocatedInts)
-            heapAllocation.free();
+            heapAllocation.jfree();
         else if (newAllocatedSize != allocatedSize)
-            heapAllocation.malloc (newAllocatedSize);
+            heapAllocation.jmalloc (newAllocatedSize);
 
         allocatedSize = newAllocatedSize;
 
@@ -181,12 +181,12 @@ uint32* BigInteger::ensureSize (const size_t numVals)
 
         if (heapAllocation == nullptr)
         {
-            heapAllocation.calloc (allocatedSize);
+            heapAllocation.jcalloc (allocatedSize);
             memcpy (heapAllocation, preallocated, sizeof (uint32) * numPreallocatedInts);
         }
         else
         {
-            heapAllocation.realloc (allocatedSize);
+            heapAllocation.jrealloc (allocatedSize);
 
             for (auto* values = getValues(); oldSize < allocatedSize; ++oldSize)
                 values[oldSize] = 0;
@@ -280,7 +280,7 @@ BigInteger& BigInteger::setBitRangeAsInt (const int startBit, int numBits, uint3
 //==============================================================================
 BigInteger& BigInteger::clear() noexcept
 {
-    heapAllocation.free();
+    heapAllocation.jfree();
     allocatedSize = numPreallocatedInts;
     highestBit = -1;
     negative = false;

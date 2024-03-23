@@ -451,11 +451,11 @@ struct GetAdaptersAddressesHelper
         if (getAdaptersAddresses == nullptr)
             return false;
 
-        adaptersAddresses.malloc (1);
+        adaptersAddresses.jmalloc (1);
         ULONG len = sizeof (IP_ADAPTER_ADDRESSES);
 
         if (getAdaptersAddresses (AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, nullptr, adaptersAddresses, &len) == ERROR_BUFFER_OVERFLOW)
-            adaptersAddresses.malloc (len, 1);
+            adaptersAddresses.jmalloc (len, 1);
 
         return getAdaptersAddresses (AF_UNSPEC, GAA_FLAG_INCLUDE_PREFIX, nullptr, adaptersAddresses, &len) == NO_ERROR;
     }
@@ -636,7 +636,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
     message.lpRecips = &recip;
 
     HeapBlock<MapiFileDesc> files;
-    files.calloc (filesToAttach.size());
+    files.jcalloc (filesToAttach.size());
 
     message.nFileCount = (ULONG) filesToAttach.size();
     message.lpFiles = files;
