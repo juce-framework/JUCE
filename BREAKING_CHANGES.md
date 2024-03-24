@@ -4,6 +4,33 @@
 
 ## Change
 
+The minimum supported compilers and deployment targets have been updated, with
+the new minimums listed in the top level [README](README.md).
+
+MinGW is no longer supported.
+
+**Possible Issues**
+
+You may no longer be able to build JUCE projects or continue targeting older
+platforms.
+
+**Workaround**
+
+If you cannot build your project, update your build machine to a more modern
+operating system and compiler.
+
+There is no workaround to target platforms that predate the new minimum
+deployment targets.
+
+**Rationale**
+
+New features of JUCE require both more modern compilers and deployment targets.
+
+The amount of investment MinGW support requires is unsustainable.
+
+
+## Change
+
 The [JUCE End User Licence Agreement](https://juce.com/legal/juce-8-licence/)
 has been updated and all JUCE modules are now dual-licensed under the AGPLv3 and
 the JUCE licence. Previously the juce_audio_basics, juce_audio_devices,
