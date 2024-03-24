@@ -232,7 +232,7 @@ Here's an example block:
      name:             JUCE audio and MIDI I/O device classes
      description:      Classes to play and record from audio and MIDI I/O devices
      website:          http://www.juce.com/juce
-     license:          GPL/Commercial
+     license:          AGPLv3/Commercial
 
      dependencies:     juce_audio_basics, juce_audio_formats, juce_events
      OSXFrameworks:    CoreAudio CoreMIDI DiscRecording

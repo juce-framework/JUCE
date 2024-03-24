@@ -1,5 +1,32 @@
 # JUCE breaking changes
 
+# Version 8.0.0
+
+## Change
+
+The [JUCE End User Licence Agreement](https://juce.com/legal/juce-8-licence/)
+has been updated and all JUCE modules are now dual-licensed under the AGPLv3 and
+the JUCE licence. Previously the juce_audio_basics, juce_audio_devices,
+juce_core and juce_events modules were licensed under the ISC licence.
+
+Please read the End User Licence Agreement for full details.
+
+**Possible Issues**
+
+There may be new restrictions on how you can use JUCE.
+
+**Workaround**
+
+N/A
+
+**Rationale**
+
+The new JUCE End User Licence Agreement is much easier to understand, and has a
+much more generous personal tier. The move from ISC to AGPLv3/JUCE simplifies
+the licensing situation and encourages the creation of more open source software
+without impacting personal use of the JUCE framework.
+
+
 # Version 7.0.10
 
 ## Change

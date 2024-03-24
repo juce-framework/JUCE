@@ -1,37 +1,62 @@
-# The JUCE Library
+# The JUCE Framework
 
-**BY DOWNLOADING, INSTALLING OR USING ANY PART OF THE JUCE LIBRARY, YOU AGREE
-TO THE [JUCE 7 END-USER LICENSE AGREEMENT](https://www.juce.com/juce-7-licence)
-AND THE [JUCE PRIVACY POLICY](https://www.juce.com/juce-privacy-policy), WHICH
-ARE BINDING AGREEMENTS BETWEEN YOU AND RAW MATERIAL SOFTWARE LIMITED. IF YOU DO
-NOT AGREE TO THE TERMS, DO NOT USE THE JUCE LIBRARY.**
+The JUCE Framework is an open source framework licensed under a combination of
+open source and commercial licences.
 
-JUCE has tier-leveled license terms, with different terms for each available
-license: JUCE Personal (for developers or startup businesses with revenue under
-the 50K USD Revenue Limit; free), JUCE Indie (for small businesses with under
-500K USD Revenue Limit; $40/month), JUCE Pro (no Revenue Limit; $130/month),
-and JUCE Educational (no Revenue Limit; free for bona fide educational
-institutions). All licenses allow you to commercially release applications as
-long as you do not exceed the Revenue Limit and pay the applicable Fees. Once
-your business hits the Revenue Limit for your JUCE license tier, to continue
-distributing your Applications you will either have to upgrade your JUCE
-license, or instead release your Applications under the
-[GNU General Public License v.3](https://www.gnu.org/licenses/gpl-3.0.en.html),
-which means, amongst other things, that you must make the source code of your
-Applications available.
+The JUCE Framwork modules are dual-licensed under the
+[AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html) and the commercial [JUCE
+licence](https://juce.com/legal/juce-8-licence/).
 
-JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE, ARE DISCLAIMED.
+## The JUCE Licence
 
-The juce_audio_basics, juce_audio_devices, juce_core and juce_events modules
-are permissively licensed under the terms of the [ISC
-license](http://www.isc.org/downloads/software-support-policy/isc-license).
+If you are not licensing the JUCE Framework modules under the
+[AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html) then by downloading,
+installing, or using the JUCE Framework, or combining the JUCE Framework with
+any other source code, object code, content or any other copyrightable work, you
+agree to the terms of the the [JUCE 8 End User Licence
+Agreement](https://juce.com/legal/juce-8-licence/), and all incorporated terms
+including the [JUCE Privacy Policy](https://juce.com/legal/juce-privacy-policy/)
+and the [JUCE Website Terms of
+Service](https://juce.com/legal/juce-website-terms-of-service/), as applicable,
+which will bind you. If you do not agree to the terms of this Agreement, we will
+not license the JUCE Framework to you, and you must discontinue the installation
+or download process and cease use of the JUCE Framework.
 
-For more information, visit the website:
-[www.juce.com](https://www.juce.com)
+THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
+WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF MERCHANTABILITY OR FITNESS
+FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
-FULL JUCE TERMS:
-- [JUCE 7 END-USER LICENSE AGREEMENT](https://www.juce.com/juce-7-licence)
-- [JUCE PRIVACY POLICY](https://www.juce.com/juce-privacy-policy)
+For more information, visit the [JUCE website](https://juce.com).
 
+Full licence terms:
+- [JUCE 8 End User Licence Agreement](https://juce.com/legal/juce-8-licence/)
+- [JUCE Privacy Policy](https://juce.com/legal/juce-privacy-policy/)
+- [JUCE Website Terms of Service](https://juce.com/legal/juce-website-terms-of-service/)
+
+## The JUCE Framework Dependencies
+
+The JUCE modules contain the following dependencies:
+- [Oboe](modules/juce_audio_devices/native/oboe/) ([Apache 2.0](modules/juce_audio_devices/native/oboe/LICENSE))
+- [FLAC](modules/juce_audio_formats/codecs/flac/) ([BSD](modules/juce_audio_formats/codecs/flac/Flac%20Licence.txt))
+- [Ogg Vorbis](modules/juce_audio_formats/codecs/oggvorbis/) ([BSD](modules/juce_audio_formats/codecs/oggvorbis/Ogg%20Vorbis%20Licence.txt))
+- [AudioUnitSDK](modules/juce_audio_plugin_client/AU/AudioUnitSDK/) ([Apache 2.0](modules/juce_audio_plugin_client/AU/AudioUnitSDK/LICENSE.txt))
+- [LV2](modules/juce_audio_processors/format_types/LV2_SDK/) ([ISC](modules/juce_audio_processors/format_types/LV2_SDK/lv2/COPYING))
+- [pslextensions](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h) ([Public domain](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h))
+- [VST3](modules/juce_audio_processors/format_types/VST3_SDK/) ([Proprietary Steinberg VST3/GPLv3](modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt))
+- [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
+- [Box2D](modules/juce_box2d/box2d/) ([zlib](modules/juce_box2d/box2d/Box2D.h))
+- [jpeglib](modules/juce_graphics/image_formats/jpglib/) ([Independent JPEG Group License](modules/juce_graphics/image_formats/jpglib/README))
+- [pnglib](modules/juce_graphics/image_formats/pnglib/) ([zlib](modules/juce_graphics/image_formats/pnglib/LICENSE))
+- [GLEW](modules/juce_opengl/opengl/juce_gl.h) ([BSD](modules/juce_opengl/opengl/juce_gl.h)), including [Mesa](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h)) and [Khronos](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h))
+
+The JUCE examples are licensed under the terms of the
+[ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
+
+Dependencies in the examples:
+- [reaper-sdk](examples/Plugins/extern/) ([zlib](examples/Plugins/extern/LICENSE.md))
+
+Dependencies in the bundled applications:
+- [Projucer icons](extras/Projucer/Source/Utility/UI/jucer_Icons.cpp) ([MIT](extras/Projucer/Source/Utility/UI/jucer_Icons.cpp))
+
+Dependencies in the build system:
+- [Android Gradle](examples/DemoRunner/Builds/Android/gradle/wrapper/LICENSE-for-gradlewrapper.txt) ([Apache 2.0](examples/DemoRunner/Builds/Android/gradle/wrapper/LICENSE-for-gradlewrapper.txt))

@@ -213,13 +213,13 @@ namespace BinaryData
     const int            colourscheme_light_xmlSize = 1050;
 
     extern const char*   juce_runtime_arch_detection_cpp;
-    const int            juce_runtime_arch_detection_cppSize = 3005;
+    const int            juce_runtime_arch_detection_cppSize = 3658;
 
     extern const char*   juce_LinuxSubprocessHelper_cpp;
-    const int            juce_LinuxSubprocessHelper_cppSize = 1212;
+    const int            juce_LinuxSubprocessHelper_cppSize = 1865;
 
     extern const char*   juce_SimpleBinaryBuilder_cpp;
-    const int            juce_SimpleBinaryBuilder_cppSize = 12344;
+    const int            juce_SimpleBinaryBuilder_cppSize = 12997;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
     const int namedResourceListSize = 71;
