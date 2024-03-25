@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              version="7.0.12" bundleIdentifier="com.juce.theprojucer" splashScreenColour="Dark"
-              displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
+              version="7.0.11" bundleIdentifier="com.juce.theprojucer"
+              companyName="Raw Material Software Limited"
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
@@ -204,7 +204,7 @@
               file="Source/BinaryData/Icons/export_visualStudio.svg"/>
         <FILE id="G0oYd6" name="export_xcode.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_xcode.svg"/>
-        <FILE id="CfDTJ0" name="gpl_logo.svg" compile="0" resource="1" file="Source/BinaryData/Icons/gpl_logo.svg"/>
+        <FILE id="CfDTJ0" name="agplv3_logo.svg" compile="0" resource="1" file="Source/BinaryData/Icons/agplv3_logo.svg"/>
         <FILE id="Zrx1Gl" name="juce_icon.png" compile="0" resource="1" file="Source/BinaryData/Icons/juce_icon.png"/>
         <FILE id="iPYmG9" name="wizard_AnimatedApp.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/wizard_AnimatedApp.svg"/>

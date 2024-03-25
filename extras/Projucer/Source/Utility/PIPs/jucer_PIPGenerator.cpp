@@ -381,8 +381,6 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
                                                                          : "\"File->Global Paths...\"")
                                  + " menu item.");
         }
-
-        jucerTree.setProperty (Ids::displaySplashScreen, true, nullptr);
     }
 
     setPropertyIfNotEmpty (Ids::defines, defines);

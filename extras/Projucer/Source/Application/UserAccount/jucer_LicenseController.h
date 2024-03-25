@@ -47,9 +47,9 @@ public:
     }
 
     //==============================================================================
-    static LicenseState getGPLState()
+    static LicenseState getAGPLState()
     {
-        return { LicenseState::Type::gpl, projucerMajorVersion, {}, {} };
+        return { LicenseState::Type::agplv3, projucerMajorVersion, {}, {} };
     }
 
     LicenseState getCurrentState() const noexcept
@@ -113,7 +113,7 @@ private:
     {
         switch (type)
         {
-            case LicenseState::Type::gpl:          return "GPL";
+            case LicenseState::Type::agplv3:       return "AGPLv3";
             case LicenseState::Type::personal:     return "personal";
             case LicenseState::Type::educational:  return "edu";
             case LicenseState::Type::indie:        return "indie";
@@ -127,7 +127,7 @@ private:
 
     static LicenseState::Type getLicenseTypeFromValue (const String& d)
     {
-        if (d == getLicenseStateValue (LicenseState::Type::gpl))          return LicenseState::Type::gpl;
+        if (d == getLicenseStateValue (LicenseState::Type::agplv3))       return LicenseState::Type::agplv3;
         if (d == getLicenseStateValue (LicenseState::Type::personal))     return LicenseState::Type::personal;
         if (d == getLicenseStateValue (LicenseState::Type::educational))  return LicenseState::Type::educational;
         if (d == getLicenseStateValue (LicenseState::Type::indie))        return LicenseState::Type::indie;
@@ -188,7 +188,7 @@ private:
     //==============================================================================
     void checkLicense()
     {
-        if (state.authToken.isNotEmpty() && ! state.isGPL())
+        if (state.authToken.isNotEmpty() && ! state.isAGPL())
         {
             auto completionCallback = [this] (LicenseQueryThread::ErrorMessageAndType error,
                                               LicenseState updatedState)
@@ -218,11 +218,7 @@ private:
     }
 
     //==============================================================================
-   #if JUCER_ENABLE_GPL_MODE
-    LicenseState state = getGPLState();
-   #else
     LicenseState state = licenseStateFromSettings (getGlobalProperties());
-   #endif
 
     ListenerList<LicenseStateListener> stateListeners;
     LicenseQueryThread licenseQueryThread;

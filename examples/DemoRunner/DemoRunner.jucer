@@ -4,7 +4,7 @@
               bundleIdentifier="com.rmsl.jucedemorunner" version="7.0.12" companyName="Raw Material Software Limited"
               companyCopyright="Copyright (c) 2020 - Raw Material Software Limited"
               companyWebsite="https://www.juce.com/" companyEmail="info@juce.com"
-              id="yj7xMM" reportAppUsage="0" useAppConfig="0" addUsingNamespaceToJuceHeader="1"
+              id="yj7xMM" useAppConfig="0" addUsingNamespaceToJuceHeader="1"
               jucerFormatVersion="1">
   <MAINGROUP id="G8kbr7" name="DemoRunner">
     <GROUP id="{20E3F84A-29E9-D5FF-4559-1A9E4A70CD60}" name="Source">

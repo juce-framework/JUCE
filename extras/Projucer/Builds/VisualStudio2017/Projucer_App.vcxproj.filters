@@ -1630,9 +1630,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\misc\juce_FocusOutline.cpp">
       <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.cpp">
-      <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_ComponentDragger.cpp">
       <Filter>JUCE Modules\juce_gui_basics\mouse</Filter>
     </ClCompile>
@@ -3705,9 +3702,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\misc\juce_FocusOutline.h">
       <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.h">
-      <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_ComponentDragger.h">
       <Filter>JUCE Modules\juce_gui_basics\mouse</Filter>
     </ClInclude>
@@ -4112,7 +4106,7 @@
     <None Include="..\..\Source\BinaryData\Icons\export_xcode.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\Icons\gpl_logo.svg">
+    <None Include="..\..\Source\BinaryData\Icons\agplv3_logo.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\juce_icon.png">

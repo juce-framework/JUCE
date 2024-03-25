@@ -59,7 +59,7 @@ public:
     {
         auto bounds = getLocalBounds();
 
-        if (! isGPL)
+        if (! isAGPL)
         {
             bounds = bounds.removeFromRight (bounds.getHeight());
 
@@ -88,7 +88,7 @@ public:
         }
     }
 
-    bool isDisplaingGPLLogo() const noexcept  { return isGPL; }
+    bool isDisplaingAGPLLogo() const noexcept  { return isAGPL; }
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
@@ -101,9 +101,9 @@ public:
 
 private:
     //==============================================================================
-    static Image createGPLAvatarImage()
+    static Image createAGPLAvatarImage()
     {
-        if (auto logo = Drawable::createFromImageData (BinaryData::gpl_logo_svg, BinaryData::gpl_logo_svgSize))
+        if (auto logo = Drawable::createFromImageData (BinaryData::agplv3_logo_svg, BinaryData::agplv3_logo_svgSize))
         {
             auto bounds = logo->getDrawableBounds();
 
@@ -139,15 +139,14 @@ private:
     void licenseStateChanged() override
     {
         auto state = ProjucerApplication::getApp().getLicenseController().getCurrentState();
-
-        isGPL = ProjucerApplication::getApp().getLicenseController().getCurrentState().isGPL();
+        isAGPL = state.isAGPL();
 
         if (interactive)
         {
             auto formattedUserString = [state]() -> String
             {
                 if (state.isSignedIn())
-                    return (state.isGPL() ? "" : (state.username + " - ")) + state.getLicenseTypeString();
+                    return (state.isAGPL() ? "" : (state.username + " - ")) + state.getLicenseTypeString();
 
                 return "Not logged in";
             }();
@@ -155,8 +154,8 @@ private:
             setTooltip (formattedUserString);
         }
 
-        currentAvatar = isGPL ? gplAvatarImage
-                              : state.isSignedIn() ? standardAvatarImage : signedOutAvatarImage;
+        currentAvatar = isAGPL ? agplAvatarImage
+                               : state.isSignedIn() ? standardAvatarImage : signedOutAvatarImage;
 
         repaint();
         sendChangeMessage();
@@ -175,6 +174,6 @@ private:
     }
 
     //==============================================================================
-    Image standardAvatarImage, signedOutAvatarImage, gplAvatarImage { createGPLAvatarImage() }, currentAvatar;
-    bool isGPL = false, interactive = false;
+    Image standardAvatarImage, signedOutAvatarImage, agplAvatarImage { createAGPLAvatarImage() }, currentAvatar;
+    bool isAGPL = false, interactive = false;
 };

@@ -301,9 +301,6 @@ void Project::initialiseProjectValues()
     versionValue.referTo             (projectRoot, Ids::version,             getUndoManager(), "1.0.0");
     bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier,    getUndoManager(), getDefaultBundleIdentifierString());
 
-    displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), false);
-    splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
-
     useAppConfigValue.referTo             (projectRoot, Ids::useAppConfig,                  getUndoManager(), true);
     addUsingNamespaceToJuceHeader.referTo (projectRoot, Ids::addUsingNamespaceToJuceHeader, getUndoManager(), true);
 
@@ -806,17 +803,6 @@ Result Project::saveResourcesOnly()
     return saver->saveResourcesOnly();
 }
 
-bool Project::hasIncompatibleLicenseTypeAndSplashScreenSetting() const
-{
-    auto companyName = companyNameValue.get().toString();
-    auto isJUCEProject = (companyName == "Raw Material Software Limited"
-                       || companyName == "JUCE"
-                       || companyName == "ROLI Ltd.");
-
-    return ! ProjucerApplication::getApp().isRunningCommandLine && ! isJUCEProject && ! shouldDisplaySplashScreen()
-          && ! ProjucerApplication::getApp().getLicenseController().getCurrentState().canUnlockFullFeatures();
-}
-
 bool Project::isFileModificationCheckPending() const
 {
     return fileModificationPoller.isCheckPending();
@@ -825,28 +811,20 @@ bool Project::isFileModificationCheckPending() const
 bool Project::isSaveAndExportDisabled() const
 {
     return ! ProjucerApplication::getApp().isRunningCommandLine
-           && (hasIncompatibleLicenseTypeAndSplashScreenSetting() || isFileModificationCheckPending());
+           && isFileModificationCheckPending();
 }
 
 void Project::updateLicenseWarning()
 {
-    if (hasIncompatibleLicenseTypeAndSplashScreenSetting())
-    {
-        ProjectMessages::MessageAction action;
-        auto currentLicenseState = ProjucerApplication::getApp().getLicenseController().getCurrentState();
+    if (ProjucerApplication::getApp().isRunningCommandLine)
+        return;
 
-        if (currentLicenseState.isSignedIn() && (! currentLicenseState.canUnlockFullFeatures() || currentLicenseState.isOldLicense()))
-            action = { "Upgrade", [] { URL ("https://juce.com/get-juce").launchInDefaultBrowser(); } };
-        else
-            action = { "Sign in", [this] { ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile())->showLoginFormOverlay(); } };
+    auto currentLicenseState = ProjucerApplication::getApp().getLicenseController().getCurrentState();
 
-        addProjectMessage (ProjectMessages::Ids::incompatibleLicense,
-                           { std::move (action), { "Enable splash screen", [this] { displaySplashScreenValue = true; } } });
-    }
+    if (currentLicenseState.isPersonalOrNone() || currentLicenseState.isOldLicense())
+        addProjectMessage (ProjectMessages::Ids::personalLicense, {});
     else
-    {
-        removeProjectMessage (ProjectMessages::Ids::incompatibleLicense);
-    }
+        removeProjectMessage (ProjectMessages::Ids::personalLicense);
 }
 
 void Project::updateJUCEPathWarning()
@@ -1139,10 +1117,6 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
             if (shouldWriteLegacyPluginCharacteristicsSettings)
                 writeLegacyPluginCharacteristicsSettings();
         }
-        else if (property == Ids::displaySplashScreen)
-        {
-            updateLicenseWarning();
-        }
         else if (property == Ids::cppLanguageStandard)
         {
             updateModuleWarnings();
@@ -1404,17 +1378,6 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "If enabled, the JuceHeader.h will include a \"using namespace juce\" statement. If disabled, "
                "no such statement will be included. This setting used to be enabled by default, but it "
                "is recommended to leave it disabled for new projects.");
-
-    props.add (new ChoicePropertyComponent (displaySplashScreenValue, "Display the JUCE Splash Screen (required for closed source applications without an Indie or Pro JUCE license)"),
-                                            "This option controls the display of the standard JUCE splash screen. "
-                                            "In accordance with the terms of the JUCE 7 End-Use License Agreement (www.juce.com/juce-7-licence), "
-                                            "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
-                                            "license, or are using JUCE under the GPL v3 license.");
-
-    props.add (new ChoicePropertyComponentWithEnablement (splashScreenColourValue, displaySplashScreenValue, "Splash Screen Colour",
-                                                          { "Dark", "Light" }, { "Dark", "Light" }),
-               "Choose the colour of the JUCE splash screen.");
-
 
     {
         StringArray projectTypeNames;
@@ -2713,8 +2676,6 @@ String Project::getUniqueTargetFolderSuffixForExporter (const Identifier& export
 StringPairArray Project::getAppConfigDefs()
 {
     StringPairArray result;
-    result.set ("JUCE_DISPLAY_SPLASH_SCREEN",  shouldDisplaySplashScreen()             ? "1" : "0");
-    result.set ("JUCE_USE_DARK_SPLASH_SCREEN", getSplashScreenColourString() == "Dark" ? "1" : "0");
     result.set ("JUCE_PROJUCER_VERSION",       "0x" + String::toHexString (ProjectInfo::versionNumber));
 
     OwnedArray<LibraryModule> modules;

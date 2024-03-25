@@ -41,7 +41,7 @@ struct LicenseState
     enum class Type
     {
         none,
-        gpl,
+        agplv3,
         personal,
         educational,
         indie,
@@ -68,21 +68,17 @@ struct LicenseState
         return ! operator== (other);
     }
 
-    bool isSignedIn() const noexcept    { return isGPL() || (version > 0 && username.isNotEmpty()); }
-    bool isOldLicense() const noexcept  { return isSignedIn() && version < projucerMajorVersion; }
-    bool isGPL()       const noexcept   { return type == Type::gpl; }
-
-    bool canUnlockFullFeatures() const noexcept
-    {
-        return isGPL() || (isSignedIn() && ! isOldLicense() && (type == Type::indie || type == Type::pro));
-    }
+    bool isSignedIn() const noexcept { return isAGPL() || (version > 0 && username.isNotEmpty()); }
+    bool isOldLicense() const noexcept { return isSignedIn() && version < projucerMajorVersion; }
+    bool isAGPL() const noexcept { return type == Type::agplv3; }
+    bool isPersonalOrNone() const noexcept { return type == Type::none || type == Type::personal; }
 
     String getLicenseTypeString() const
     {
         switch (type)
         {
             case Type::none:         return "No license";
-            case Type::gpl:          return "GPL";
+            case Type::agplv3:       return "AGPLv3";
             case Type::personal:     return "Personal";
             case Type::educational:  return "Educational";
             case Type::indie:        return "Indie";

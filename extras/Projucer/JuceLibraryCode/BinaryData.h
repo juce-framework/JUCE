@@ -62,8 +62,8 @@ namespace BinaryData
     extern const char*   export_xcode_svg;
     const int            export_xcode_svgSize = 12295;
 
-    extern const char*   gpl_logo_svg;
-    const int            gpl_logo_svgSize = 27030;
+    extern const char*   agplv3_logo_svg;
+    const int            agplv3_logo_svgSize = 26610;
 
     extern const char*   juce_icon_png;
     const int            juce_icon_pngSize = 105697;

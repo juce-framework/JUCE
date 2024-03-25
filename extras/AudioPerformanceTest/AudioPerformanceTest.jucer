@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="AKfc5m" name="AudioPerformanceTest" projectType="guiapp"
-              bundleIdentifier="com.juce.AudioPerformanceTest" displaySplashScreen="0"
-              reportAppUsage="0" companyName="Raw Material Software Limited"
+              bundleIdentifier="com.juce.AudioPerformanceTest"
+              companyName="Raw Material Software Limited"
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <MAINGROUP id="b1eVTe" name="AudioPerformanceTest">

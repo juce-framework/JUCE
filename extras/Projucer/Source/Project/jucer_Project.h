@@ -50,7 +50,7 @@ namespace ProjectMessages
 
         DECLARE_ID (projectMessages);
 
-        DECLARE_ID (incompatibleLicense);
+        DECLARE_ID (personalLicense);
         DECLARE_ID (cppStandard);
         DECLARE_ID (moduleNotFound);
         DECLARE_ID (jucePath);
@@ -72,15 +72,17 @@ namespace ProjectMessages
 
     inline Identifier getTypeForMessage (const Identifier& message)
     {
-        static Identifier warnings[] = { Ids::incompatibleLicense, Ids::cppStandard, Ids::moduleNotFound,
-                                         Ids::jucePath, Ids::jucerFileModified, Ids::missingModuleDependencies,
+        static Identifier warnings[] = { Ids::cppStandard, Ids::moduleNotFound, Ids::jucePath,
+                                         Ids::jucerFileModified, Ids::missingModuleDependencies,
                                          Ids::oldProjucer, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid,
                                          Ids::deprecatedExporter };
 
         if (std::find (std::begin (warnings), std::end (warnings), message) != std::end (warnings))
             return Ids::warning;
 
-        if (message == Ids::newVersionAvailable)
+        static Identifier notifications[] = { Ids::personalLicense, Ids::newVersionAvailable };
+
+        if (std::find (std::begin (notifications), std::end (notifications), message) != std::end (notifications))
             return Ids::notification;
 
         jassertfalse;
@@ -89,7 +91,6 @@ namespace ProjectMessages
 
     inline String getTitleForMessage (const Identifier& message)
     {
-        if (message == Ids::incompatibleLicense)        return "Incompatible License and Splash Screen Setting";
         if (message == Ids::cppStandard)                return "C++ Standard";
         if (message == Ids::moduleNotFound)             return "Module Not Found";
         if (message == Ids::jucePath)                   return "JUCE Path";
@@ -100,6 +101,7 @@ namespace ProjectMessages
         if (message == Ids::pluginCodeInvalid)          return "Invalid Plugin Code";
         if (message == Ids::manufacturerCodeInvalid)    return "Invalid Manufacturer Code";
         if (message == Ids::deprecatedExporter)         return "Deprecated Exporter";
+        if (message == Ids::personalLicense)            return "Personal Licence";
 
         jassertfalse;
         return {};
@@ -107,7 +109,6 @@ namespace ProjectMessages
 
     inline String getDescriptionForMessage (const Identifier& message)
     {
-        if (message == Ids::incompatibleLicense)        return "Save and export is disabled.";
         if (message == Ids::cppStandard)                return "Module(s) have a higher C++ standard requirement than the project.";
         if (message == Ids::moduleNotFound)             return "Module(s) could not be found at the specified paths.";
         if (message == Ids::jucePath)                   return "The path to your JUCE folder is incorrect.";
@@ -118,6 +119,7 @@ namespace ProjectMessages
         if (message == Ids::pluginCodeInvalid)          return "The plugin code should be exactly four characters in length.";
         if (message == Ids::manufacturerCodeInvalid)    return "The manufacturer code should be exactly four characters in length.";
         if (message == Ids::deprecatedExporter)         return "The project includes a deprecated exporter.";
+        if (message == Ids::personalLicense)            return "You are using a Personal licence. Sign in to activate a commercial licence.";
 
         jassertfalse;
         return {};
@@ -289,9 +291,6 @@ public:
     int getMaxBinaryFileSize() const                     { return maxBinaryFileSizeValue.get(); }
     bool shouldIncludeBinaryInJuceHeader() const         { return includeBinaryDataInJuceHeaderValue.get(); }
     String getBinaryDataNamespaceString() const          { return binaryDataNamespaceValue.get(); }
-
-    bool shouldDisplaySplashScreen() const               { return displaySplashScreenValue.get(); }
-    String getSplashScreenColourString() const           { return splashScreenColourValue.get(); }
 
     static StringArray getCppStandardStrings()           { return { "C++17", "C++20", "Use Latest" }; }
     static Array<var> getCppStandardVars()               { return { "17",    "20",    "latest" }; }
@@ -610,7 +609,6 @@ public:
     std::vector<ProjectMessages::MessageAction> getMessageActions (const Identifier& message);
 
     //==============================================================================
-    bool hasIncompatibleLicenseTypeAndSplashScreenSetting() const;
     bool isFileModificationCheckPending() const;
     bool isSaveAndExportDisabled() const;
 
@@ -653,9 +651,9 @@ private:
     ValueTree projectRoot  { Ids::JUCERPROJECT };
 
     ValueTreePropertyWithDefault projectNameValue, projectUIDValue, projectLineFeedValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue,
-                                 companyCopyrightValue, companyWebsiteValue, companyEmailValue, displaySplashScreenValue, splashScreenColourValue, cppStandardValue,
-                                 headerSearchPathsValue, preprocessorDefsValue, userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInJuceHeaderValue, binaryDataNamespaceValue,
-                                 compilerFlagSchemesValue, postExportShellCommandPosixValue, postExportShellCommandWinValue, useAppConfigValue, addUsingNamespaceToJuceHeader;
+                                 companyCopyrightValue, companyWebsiteValue, companyEmailValue, cppStandardValue, headerSearchPathsValue, preprocessorDefsValue,
+                                 userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInJuceHeaderValue, binaryDataNamespaceValue, compilerFlagSchemesValue,
+                                 postExportShellCommandPosixValue, postExportShellCommandWinValue, useAppConfigValue, addUsingNamespaceToJuceHeader;
 
     ValueTreePropertyWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                                  pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,

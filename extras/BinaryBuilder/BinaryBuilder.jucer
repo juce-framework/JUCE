@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
               juceFolder="../../../juce" bundleIdentifier="com.juce.binarybuilder"
-              displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
+              companyName="Raw Material Software Limited"
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>

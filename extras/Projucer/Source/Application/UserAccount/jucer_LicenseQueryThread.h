@@ -63,7 +63,7 @@ namespace LicenseHelpers
                 case LicenseState::Type::indie:        return 3;
                 case LicenseState::Type::educational:  return 2;
                 case LicenseState::Type::personal:     return 1;
-                case LicenseState::Type::gpl:
+                case LicenseState::Type::agplv3:
                 case LicenseState::Type::none:
                 default:                               return -1;
             }

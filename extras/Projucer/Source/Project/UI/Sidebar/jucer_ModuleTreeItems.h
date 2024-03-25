@@ -79,7 +79,7 @@ public:
             {
                 if (moduleInfo.getLicense() == "ISC")
                     iconColour = Colours::lightblue;
-                else if (moduleInfo.getLicense() == "GPL/Commercial")
+                else if (moduleInfo.getLicense() == "AGPLv3/Commercial")
                     iconColour = Colours::orange;
             }
         }

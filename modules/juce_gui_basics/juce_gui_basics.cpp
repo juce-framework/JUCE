@@ -57,6 +57,15 @@
 #include <cctype>
 
 //==============================================================================
+#ifdef JUCE_DISPLAY_SPLASH_SCREEN
+ JUCE_COMPILER_WARNING ("This version of JUCE does not use the splash screen, the flag JUCE_DISPLAY_SPLASH_SCREEN is ignored")
+#endif
+
+#ifdef JUCE_USE_DARK_SPLASH_SCREEN
+ JUCE_COMPILER_WARNING ("This version of JUCE does not use the splash screen, the flag JUCE_USE_DARK_SPLASH_SCREEN is ignored")
+#endif
+
+//==============================================================================
 #if JUCE_MAC
  #import <IOKit/pwr_mgt/IOPMLib.h>
  #import <MetalKit/MetalKit.h>
@@ -314,7 +323,6 @@
 #include "misc/juce_BubbleComponent.cpp"
 #include "misc/juce_DropShadower.cpp"
 #include "misc/juce_FocusOutline.cpp"
-#include "misc/juce_JUCESplashScreen.cpp"
 #include "mouse/juce_ComponentDragger.cpp"
 #include "mouse/juce_DragAndDropContainer.cpp"
 #include "mouse/juce_MouseEvent.cpp"

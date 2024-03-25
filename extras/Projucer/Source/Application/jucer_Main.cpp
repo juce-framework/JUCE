@@ -32,6 +32,10 @@
   ==============================================================================
 */
 
+#ifdef JUCER_ENABLE_GPL_MODE
+ #warning The flag JUCER_ENABLE_GPL_MODE has been removed
+#endif
+
 #include "jucer_Headers.h"
 
 #include "jucer_Application.h"

@@ -389,28 +389,6 @@ void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<Lib
         out << newLine << CodeHelpers::createIncludeStatement (Project::getPluginDefinesFilename()) << newLine;
 
     out << newLine
-        << "/*" << newLine
-        << "  ==============================================================================" << newLine
-        << newLine
-        << "   In accordance with the terms of the JUCE 7 End-Use License Agreement, the" << newLine
-        << "   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered" << newLine
-        << "   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE" << newLine
-        << "   under the GPL v3 license." << newLine
-        << newLine
-        << "   End User License Agreement: www.juce.com/juce-7-licence" << newLine
-        << newLine
-        << "  ==============================================================================" << newLine
-        << "*/" << newLine
-        << newLine
-        << "// BEGIN SECTION A" << newLine
-        << newLine
-        << "#ifndef JUCE_DISPLAY_SPLASH_SCREEN" << newLine
-        << " #define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen() ? "1" : "0") << newLine
-        << "#endif" << newLine << newLine
-        << "// END SECTION A" << newLine
-        << newLine
-        << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.getSplashScreenColourString() == "Dark" ? "1" : "0") << newLine
-        << newLine
         << "#define JUCE_PROJUCER_VERSION 0x" << String::toHexString (ProjectInfo::versionNumber) << newLine;
 
     out << newLine

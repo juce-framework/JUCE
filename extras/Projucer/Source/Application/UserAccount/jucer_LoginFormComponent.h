@@ -63,10 +63,10 @@ public:
         addAndMakeVisible (logInButton);
         logInButton.onClick = [this] { submitDetails(); };
 
-        addAndMakeVisible (enableGPLButton);
-        enableGPLButton.onClick = [this]
+        addAndMakeVisible (enableAGPLButton);
+        enableAGPLButton.onClick = [this]
         {
-            ProjucerApplication::getApp().getLicenseController().setState (LicenseController::getGPLState());
+            ProjucerApplication::getApp().getLicenseController().setState (LicenseController::getAGPLState());
             mainWindow.hideLoginFormOverlay();
         };
 
@@ -127,7 +127,7 @@ public:
         auto slice = bounds.removeFromTop (textEditorHeight);
         createAccountLabel.setBounds (slice.removeFromLeft (createAccountLabel.getFont().getStringWidth (createAccountLabel.getText()) + 5));
         slice.removeFromLeft (15);
-        enableGPLButton.setBounds (slice.reduced (0, 5));
+        enableAGPLButton.setBounds (slice.reduced (0, 5));
 
         dismissButton.setBounds (getLocalBounds().reduced (10).removeFromTop (20).removeFromRight (20));
     }
@@ -145,7 +145,7 @@ public:
 
     void updateLookAndFeel()
     {
-        enableGPLButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+        enableAGPLButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
     }
 
     void lookAndFeelChanged() override
@@ -284,7 +284,7 @@ private:
 
     TextEditor emailBox, passwordBox;
     ProgressButton logInButton { "Sign In" };
-    TextButton enableGPLButton { "Enable GPL Mode" };
+    TextButton enableAGPLButton { "Enable AGPLv3 Mode" };
     ShapeButton dismissButton { {},
                                 findColour (treeIconColourId),
                                 findColour (treeIconColourId).overlaidWith (findColour (defaultHighlightedTextColourId).withAlpha (0.2f)),

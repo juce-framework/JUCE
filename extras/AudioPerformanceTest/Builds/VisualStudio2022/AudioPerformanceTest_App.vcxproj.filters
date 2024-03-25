@@ -2632,9 +2632,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\misc\juce_FocusOutline.cpp">
       <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.cpp">
-      <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_ComponentDragger.cpp">
       <Filter>JUCE Modules\juce_gui_basics\mouse</Filter>
     </ClCompile>
@@ -5563,9 +5560,6 @@
       <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\misc\juce_FocusOutline.h">
-      <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.h">
       <Filter>JUCE Modules\juce_gui_basics\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_ComponentDragger.h">

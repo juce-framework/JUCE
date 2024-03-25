@@ -374,10 +374,7 @@ PopupMenu ProjucerApplication::createFileMenu()
     menu.addCommandItem (commandManager.get(), CommandIDs::openInIDE);
     menu.addCommandItem (commandManager.get(), CommandIDs::saveAndOpenInIDE);
     menu.addSeparator();
-
-   #if ! JUCER_ENABLE_GPL_MODE
     menu.addCommandItem (commandManager.get(), CommandIDs::loginLogout);
-   #endif
 
    #if ! JUCE_MAC
     menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
@@ -1038,8 +1035,8 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         {
             auto licenseState = licenseController->getCurrentState();
 
-            if (licenseState.isGPL())
-                result.setInfo ("Disable GPL mode", "Disables GPL mode", CommandCategories::general, 0);
+            if (licenseState.isAGPL())
+                result.setInfo ("Disable AGPLv3 mode", "Disables AGPLv3 mode", CommandCategories::general, 0);
             else
                 result.setInfo (licenseState.isSignedIn() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
                                 "Sign out of your JUCE account",

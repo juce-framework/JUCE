@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Z2Xzcp" name="UnitTestRunner" projectType="consoleapp" bundleIdentifier="com.juce.UnitTestRunner"
-              defines="JUCE_UNIT_TESTS=1" displaySplashScreen="0" reportAppUsage="0"
+              defines="JUCE_UNIT_TESTS=1"
               companyName="Raw Material Software Limited" companyCopyright="Raw Material Software Limited"
               useAppConfig="0" addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <MAINGROUP id="GZdWCU" name="UnitTestRunner">

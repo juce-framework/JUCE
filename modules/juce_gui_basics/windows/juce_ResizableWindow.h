@@ -400,7 +400,7 @@ protected:
 
 private:
     //==============================================================================
-    Component::SafePointer<Component> contentComponent, splashScreen;
+    Component::SafePointer<Component> contentComponent;
     bool ownsContentComponent = false, resizeToFitContent = false, fullscreen = false, canDrag = true, dragStarted = false;
     ComponentDragger dragger;
     Rectangle<int> lastNonFullScreenPos;
