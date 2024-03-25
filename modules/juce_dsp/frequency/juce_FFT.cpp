@@ -131,16 +131,23 @@ struct FFTFallback final : public FFT::Instance
 
         const size_t scratchSize = 16 + (size_t) size * sizeof (Complex<float>);
 
-        if (scratchSize < maxFFTScratchSpaceToAlloca)
+        if (scratchSize * 2 < maxFFTScratchSpaceToAlloca)
         {
             JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6255)
-            performRealOnlyForwardTransform (static_cast<Complex<float>*> (alloca (scratchSize)), d);
+            performRealOnlyForwardTransform (
+                static_cast<Complex<float>*> (alloca (scratchSize)),
+                static_cast<Complex<float>*> (alloca (scratchSize)),
+                d);
             JUCE_END_IGNORE_WARNINGS_MSVC
         }
         else
         {
-            HeapBlock<char> heapSpace (scratchSize);
-            performRealOnlyForwardTransform (unalignedPointerCast<Complex<float>*> (heapSpace.getData()), d);
+            HeapBlock<char> heapSpaceA (scratchSize);
+            HeapBlock<char> heapSpaceB (scratchSize);
+            performRealOnlyForwardTransform (
+                unalignedPointerCast<Complex<float>*> (heapSpaceA.getData()),
+                unalignedPointerCast<Complex<float>*> (heapSpaceB.getData()),
+                d);
         }
     }
 
@@ -154,38 +161,45 @@ struct FFTFallback final : public FFT::Instance
         if (scratchSize < maxFFTScratchSpaceToAlloca)
         {
             JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6255)
-            performRealOnlyInverseTransform (static_cast<Complex<float>*> (alloca (scratchSize)), d);
+            performRealOnlyInverseTransform (
+                static_cast<Complex<float>*> (alloca (scratchSize)),
+                static_cast<Complex<float>*> (alloca (scratchSize)),
+                d);
             JUCE_END_IGNORE_WARNINGS_MSVC
         }
         else
         {
-            HeapBlock<char> heapSpace (scratchSize);
-            performRealOnlyInverseTransform (unalignedPointerCast<Complex<float>*> (heapSpace.getData()), d);
+            HeapBlock<char> heapSpaceA (scratchSize);
+            HeapBlock<char> heapSpaceB (scratchSize);
+            performRealOnlyInverseTransform (
+                unalignedPointerCast<Complex<float>*> (heapSpaceA.getData()),
+                unalignedPointerCast<Complex<float>*> (heapSpaceB.getData()),
+                d);
         }
     }
 
-    void performRealOnlyForwardTransform (Complex<float>* scratch, float* d) const noexcept
+    void performRealOnlyForwardTransform (Complex<float>* scratchA, Complex<float>* scratchB, float* d) const noexcept
     {
         for (int i = 0; i < size; ++i)
-            scratch[i] = { d[i], 0 };
+            scratchA[i] = { d[i], 0 };
 
-        perform (scratch, reinterpret_cast<Complex<float>*> (d), false);
+        perform (scratchA, scratchB, false);
+        memcpy (d, scratchB, sizeof(Complex<float>) * ((size_t) size / 2 + 1));
     }
 
-    void performRealOnlyInverseTransform (Complex<float>* scratch, float* d) const noexcept
+    void performRealOnlyInverseTransform (Complex<float>* scratchA, Complex<float>* scratchB, float* d) const noexcept
     {
         auto* input = reinterpret_cast<Complex<float>*> (d);
 
+        for (int i = 0; i < size >> 1; ++i)
+            scratchB[i] = input[i];
         for (int i = size >> 1; i < size; ++i)
-            input[i] = std::conj (input[size - i]);
+            scratchB[i] = std::conj (input[size - i]);
 
-        perform (input, scratch, true);
+        perform (scratchB, scratchA, true);
 
         for (int i = 0; i < size; ++i)
-        {
-            d[i] = scratch[i].real();
-            d[i + size] = scratch[i].imag();
-        }
+            d[i] = scratchA[i].real();
     }
 
     //==============================================================================
