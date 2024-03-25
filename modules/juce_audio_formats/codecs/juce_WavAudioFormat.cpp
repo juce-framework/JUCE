@@ -1214,6 +1214,8 @@ public:
         int cueNoteIndex = 0;
         int cueLabelIndex = 0;
         int cueRegionIndex = 0;
+        // SD move chunkType declaration here, add new state variable prevChunkType
+        int chunkType = 0, prevChunkType = 0;
 
         StringMap dict;
 
@@ -1255,9 +1257,14 @@ public:
 
             while ((uint64) input->getPosition() < end && ! input->isExhausted())
             {
-                auto chunkType = input->readInt();
+                // SD keep track of previous chunk type for later comparison
+                prevChunkType = chunkType;
+                chunkType = input->readInt();
                 auto length = (uint32) input->readInt();
-                auto chunkEnd = input->getPosition() + length + (length & 1);
+                // SD after any chunk except "data", advance by chunk length rounded up to next multiple of 2
+                // (some WAV files don't round up length of the data chunk)
+                auto chunkEnd = input->getPosition() + length;
+                if (chunkType != chunkName("data")) chunkEnd += (length & 1);
 
                 if (chunkType == chunkName ("fmt "))
                 {
@@ -1457,6 +1464,11 @@ public:
                     MemoryBlock tracktion;
                     input->readIntoMemoryBlock (tracktion, (ssize_t) length);
                     dict[WavAudioFormat::tracktionLoopInfo] = tracktion.toString();
+                }
+                // SD If unknown chunk type seen after "data", we might have had to advance by 1 byte after all
+                else if (prevChunkType == chunkName("data"))
+                {
+                    chunkEnd = input->getPosition() + 1;
                 }
                 else if (chunkEnd <= input->getPosition())
                 {
