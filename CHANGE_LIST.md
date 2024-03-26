@@ -3,6 +3,13 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 7.0.11
+
+  - Fixed an issue with paths containing a tilde in Xcode
+  - Multiple fixes for plug-in deployment and code signing in Xcode
+  - Fixed an issue painting an empty RectangleList
+  - Improved the performance of TreeView rendering
+
 ## Version 7.0.10
 
   - Fixed multiple issues selecting devices in AudioDeviceSelector
