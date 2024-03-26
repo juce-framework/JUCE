@@ -55,23 +55,21 @@ PositionedGlyph::PositionedGlyph (const Font& font_, juce_wchar character_, int 
 {
 }
 
-static void drawGlyphWithFont (Graphics& g, int glyph, const Font& font, AffineTransform t)
-{
-    auto& context = g.getInternalContext();
-    context.setFont (font);
-    context.drawGlyph (glyph, t);
-}
-
 void PositionedGlyph::draw (Graphics& g) const
 {
-    if (! isWhitespace())
-        drawGlyphWithFont (g, glyph, font, AffineTransform::translation (x, y));
+    draw (g, {});
 }
 
 void PositionedGlyph::draw (Graphics& g, AffineTransform transform) const
 {
-    if (! isWhitespace())
-        drawGlyphWithFont (g, glyph, font, AffineTransform::translation (x, y).followedBy (transform));
+    if (isWhitespace())
+        return;
+
+    auto& context = g.getInternalContext();
+    context.setFont (font);
+    const uint16_t glyphs[] { static_cast<uint16_t> (glyph) };
+    const Point<float> positions[] { Point { x, y } };
+    context.drawGlyphs (glyphs, positions, transform);
 }
 
 void PositionedGlyph::createPath (Path& path) const
@@ -698,10 +696,17 @@ void GlyphArrangement::splitLines (const String& text, Font font, int startIndex
 }
 
 //==============================================================================
-void GlyphArrangement::drawGlyphUnderline (const Graphics& g, const PositionedGlyph& pg,
-                                           int i, AffineTransform transform) const
+void GlyphArrangement::drawGlyphUnderline (const Graphics& g,
+                                           int i,
+                                           AffineTransform transform) const
 {
-    auto lineThickness = (pg.font.getDescent()) * 0.3f;
+    const auto pg = glyphs.getReference (i);
+
+    if (! pg.font.isUnderlined())
+        return;
+
+    const auto lineThickness = (pg.font.getDescent()) * 0.3f;
+
     auto nextX = pg.x + pg.w;
 
     if (i < glyphs.size() - 1 && approximatelyEqual (glyphs.getReference (i + 1).y, pg.y))
@@ -719,39 +724,42 @@ void GlyphArrangement::draw (const Graphics& g) const
 
 void GlyphArrangement::draw (const Graphics& g, AffineTransform transform) const
 {
-    auto& context = g.getInternalContext();
-    auto lastFont = context.getFont();
-    bool needToRestore = false;
+    std::vector<uint16_t> glyphNumbers;
+    std::vector<Point<float>> positions;
 
-    for (int i = 0; i < glyphs.size(); ++i)
+    glyphNumbers.reserve (static_cast<size_t> (glyphs.size()));
+    positions.reserve (static_cast<size_t> (glyphs.size()));
+
+    for (auto it = glyphs.begin(), end = glyphs.end(); it != end;)
     {
-        auto& pg = glyphs.getReference (i);
-
-        if (pg.font.isUnderlined())
-            drawGlyphUnderline (g, pg, i, transform);
-
-        if (! pg.isWhitespace())
+        const auto adjacent = std::adjacent_find (it, end, [] (const auto& a, const auto& b)
         {
-            if (lastFont != pg.font)
-            {
-                lastFont = pg.font;
+            return a.font != b.font;
+        });
 
-                if (! needToRestore)
-                {
-                    needToRestore = true;
-                    context.saveState();
-                }
+        const auto next = adjacent + (adjacent == end ? 0 : 1);
 
-                context.setFont (lastFont);
-            }
+        glyphNumbers.clear();
+        std::transform (it, next, std::back_inserter (glyphNumbers), [] (const PositionedGlyph& x)
+        {
+            return (uint16_t) x.glyph;
+        });
 
-            context.drawGlyph (pg.glyph, AffineTransform::translation (pg.x, pg.y)
-                                                         .followedBy (transform));
-        }
+        positions.clear();
+        std::transform (it, next, std::back_inserter (positions), [] (const PositionedGlyph& x)
+        {
+            return Point { x.x, x.y };
+        });
+
+        auto& ctx = g.getInternalContext();
+        ctx.setFont (it->font);
+        ctx.drawGlyphs (glyphNumbers, positions, transform);
+
+        it = next;
     }
 
-    if (needToRestore)
-        context.restoreState();
+    for (const auto pair : enumerate (glyphs))
+        drawGlyphUnderline (g, static_cast<int> (pair.index), transform);
 }
 
 void GlyphArrangement::createPath (Path& path) const

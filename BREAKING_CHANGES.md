@@ -4,6 +4,27 @@
 
 ## Change
 
+The virtual functions LowLevelGraphicsContext::drawGlyph() and drawTextLayout()
+have been removed.
+
+**Possible Issues**
+
+Classes overriding these functions will fail to compile.
+
+**Workaround**
+
+Replace drawGlyph() with drawGlyphs(), which draws several glyphs at once.
+Remove implementations of drawTextLayout().
+
+**Rationale**
+
+On Windows and macOS, drawing several glyphs at once is faster than drawing
+glyphs one-at-a-time. The new API is more general, and allows for more
+performant text rendering.
+
+
+## Change
+
 JUCE widgets now query the LookAndFeel to determine the TypefaceMetricsKind to
 use. By default, the LookAndFeel will specify the "portable" metrics kind,
 which may change the size of text in JUCE widgets, depending on the font and

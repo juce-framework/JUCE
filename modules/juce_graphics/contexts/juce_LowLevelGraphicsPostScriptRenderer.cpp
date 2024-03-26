@@ -511,7 +511,7 @@ void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, co
 
 
 //==============================================================================
-void LowLevelGraphicsPostScriptRenderer::drawLine (const Line <float>& line)
+void LowLevelGraphicsPostScriptRenderer::drawLine (const Line<float>& line)
 {
     Path p;
     p.addLineSegment (line, 1.0f);
@@ -529,12 +529,24 @@ const Font& LowLevelGraphicsPostScriptRenderer::getFont()
     return stateStack.getLast()->font;
 }
 
-void LowLevelGraphicsPostScriptRenderer::drawGlyph (int glyphNumber, const AffineTransform& transform)
+void LowLevelGraphicsPostScriptRenderer::drawGlyphs (Span<const uint16_t> glyphs,
+                                                     Span<const Point<float>> positions,
+                                                     const AffineTransform& transform)
 {
-    Path p;
-    Font& font = stateStack.getLast()->font;
-    font.getTypefacePtr()->getOutlineForGlyph (font.getMetricsKind(), glyphNumber, p);
-    fillPath (p, AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight()).followedBy (transform));
+    jassert (glyphs.size() == positions.size());
+
+    const auto& font = stateStack.getLast()->font;
+
+    for (const auto [index, glyph] : enumerate (glyphs, size_t{}))
+    {
+        Path p;
+        font.getTypefacePtr()->getOutlineForGlyph (font.getMetricsKind(), glyph, p);
+
+        const auto fullTransform = AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight())
+                .translated (positions[index])
+                .followedBy (transform);
+        fillPath (p, fullTransform);
+    }
 }
 
 } // namespace juce

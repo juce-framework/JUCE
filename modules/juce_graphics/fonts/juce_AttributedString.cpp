@@ -279,12 +279,9 @@ void AttributedString::draw (Graphics& g, const Rectangle<float>& area) const
     {
         jassert (text.length() == getLength (attributes));
 
-        if (! g.getInternalContext().drawTextLayout (*this, area))
-        {
-            TextLayout layout;
-            layout.createLayout (*this, area.getWidth());
-            layout.draw (g, area);
-        }
+        TextLayout layout;
+        layout.createLayout (*this, area.getWidth());
+        layout.draw (g, area);
     }
 }
 

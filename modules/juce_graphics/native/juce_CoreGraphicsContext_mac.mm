@@ -659,17 +659,6 @@ void CoreGraphicsContext::setFont (const Font& newFont)
     {
         state->font = newFont;
         state->fontRef = nullptr;
-
-        const auto hbFont = state->font.getNativeDetails().font;
-
-        state->fontRef.reset (hb_coretext_font_get_ct_font (hbFont.get()));
-        CFRetain (state->fontRef.get());
-
-        const auto slant = hb_font_get_synthetic_slant (hbFont.get());
-
-        state->textMatrix = CGAffineTransformMake (state->font.getHorizontalScale(), 0, slant * state->font.getHorizontalScale(), 1.0f, 0, 0);
-        CGContextSetTextMatrix (context.get(), state->textMatrix);
-        state->inverseTextMatrix = CGAffineTransformInvert (state->textMatrix);
     }
 }
 
@@ -678,28 +667,48 @@ const Font& CoreGraphicsContext::getFont()
     return state->font;
 }
 
-void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& transform)
+void CoreGraphicsContext::drawGlyphs (Span<const uint16_t> glyphs,
+                                      Span<const Point<float>> positions,
+                                      const AffineTransform& transform)
 {
-    if (state->fontRef != nullptr && state->fillType.isColour())
+    jassert (glyphs.size() == positions.size());
+
+    if (state->fillType.isColour())
     {
-        const CGGlyph glyphs[] { (CGGlyph) glyphNumber };
+        const auto scale = state->font.getHorizontalScale();
+
+        if (state->fontRef == nullptr)
+        {
+            const auto hbFont = state->font.getNativeDetails().font;
+            state->fontRef.reset (hb_coretext_font_get_ct_font (hbFont.get()));
+            CFRetain (state->fontRef.get());
+
+            const auto slant = hb_font_get_synthetic_slant (hbFont.get());
+
+            state->textMatrix = CGAffineTransformMake (scale, 0, slant * scale, 1.0f, 0, 0);
+            CGContextSetTextMatrix (context.get(), state->textMatrix);
+            state->inverseTextMatrix = CGAffineTransformInvert (state->textMatrix);
+        }
 
         ScopedCGContextState scopedState (context.get());
-
         flip();
         applyTransform (AffineTransform::scale (1.0f, -1.0f).followedBy (transform));
 
-        const CGPoint positions[] { { 0.0f, 0.0f } };
-        CTFontDrawGlyphs (state->fontRef.get(), glyphs, positions, std::size (glyphs), context.get());
+        std::vector<CGPoint> pos (glyphs.size());
+        std::transform (positions.begin(), positions.end(), pos.begin(), [scale] (const auto& p) { return CGPointMake (p.x / scale, -p.y); });
+
+        CTFontDrawGlyphs (state->fontRef.get(), glyphs.data(), pos.data(), glyphs.size(), context.get());
     }
     else
     {
-        Path p;
-        auto& f = state->font;
-        f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyphNumber, p);
-        const auto scale = f.getHeight();
-
-        fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).followedBy (transform));
+        for (const auto [index, glyph] : enumerate (glyphs, size_t{}))
+        {
+            Path p;
+            auto& f = state->font;
+            f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyph, p);
+            const auto scale = f.getHeight();
+            fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).translated (positions[index]).followedBy (transform));
+        }
     }
 }
 

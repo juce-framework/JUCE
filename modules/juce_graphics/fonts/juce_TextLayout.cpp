@@ -214,6 +214,9 @@ void TextLayout::draw (Graphics& g, Rectangle<float> area) const
     auto clipTop    = (float) clip.getY()      - origin.y;
     auto clipBottom = (float) clip.getBottom() - origin.y;
 
+    std::vector<uint16_t> glyphNumbers;
+    std::vector<Point<float>> positions;
+
     for (auto& line : *this)
     {
         auto lineRangeY = line.getLineBoundsY();
@@ -231,17 +234,31 @@ void TextLayout::draw (Graphics& g, Rectangle<float> area) const
             context.setFont (run->font);
             context.setFill (run->colour);
 
-            for (auto& glyph : run->glyphs)
-                context.drawGlyph (glyph.glyphCode, AffineTransform::translation (lineOrigin.x + glyph.anchor.x,
-                                                                                  lineOrigin.y + glyph.anchor.y));
+            const auto& glyphs = run->glyphs;
+
+            glyphNumbers.resize ((size_t) glyphs.size());
+            std::transform (glyphs.begin(), glyphs.end(), glyphNumbers.begin(), [&] (const Glyph& x)
+            {
+                return (uint16_t) x.glyphCode;
+            });
+
+            positions.resize ((size_t) glyphs.size());
+            std::transform (glyphs.begin(), glyphs.end(), positions.begin(), [&] (const Glyph& x)
+            {
+                return x.anchor;
+            });
+
+            context.drawGlyphs (glyphNumbers, positions, AffineTransform::translation (lineOrigin));
 
             if (run->font.isUnderlined())
             {
-                auto runExtent = run->getRunBoundsX();
-                auto lineThickness = run->font.getDescent() * 0.3f;
+                const auto runExtent = run->getRunBoundsX();
+                const auto lineThickness = run->font.getDescent() * 0.3f;
 
-                context.fillRect ({ runExtent.getStart() + lineOrigin.x, lineOrigin.y + lineThickness * 2.0f,
-                                    runExtent.getLength(), lineThickness });
+                context.fillRect ({ runExtent.getStart() + lineOrigin.x,
+                                    lineOrigin.y + lineThickness * 2.0f,
+                                    runExtent.getLength(),
+                                    lineThickness });
             }
         }
     }

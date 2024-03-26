@@ -89,7 +89,9 @@ public:
     //==============================================================================
     const Font& getFont() override;
     void setFont (const Font&) override;
-    void drawGlyph (int glyphNumber, const AffineTransform&) override;
+    void drawGlyphs (Span<const uint16_t> glyphs,
+                     Span<const Point<float>> positions,
+                     const AffineTransform&) override;
 
 protected:
     //==============================================================================

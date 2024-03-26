@@ -322,7 +322,7 @@ private:
     void splitLines (const String&, Font, int start, float x, float y, float w, float h, int maxLines,
                      float lineWidth, Justification, float minimumHorizontalScale);
     void addLinesWithLineBreaks (const String&, const Font&, float x, float y, float width, float height, Justification);
-    void drawGlyphUnderline (const Graphics&, const PositionedGlyph&, int, AffineTransform) const;
+    void drawGlyphUnderline (const Graphics&, int, AffineTransform) const;
 
     JUCE_LEAK_DETECTOR (GlyphArrangement)
 };

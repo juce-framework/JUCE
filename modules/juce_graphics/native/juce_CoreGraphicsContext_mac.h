@@ -121,7 +121,9 @@ public:
     void drawLine (const Line<float>&) override;
     void setFont (const Font&) override;
     const Font& getFont() override;
-    void drawGlyph (int glyphNumber, const AffineTransform& transform) override;
+    void drawGlyphs (Span<const uint16_t>,
+                     Span<const Point<float>>,
+                     const AffineTransform&) override;
 
 private:
     //==============================================================================

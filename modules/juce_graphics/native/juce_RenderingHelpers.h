@@ -2596,7 +2596,18 @@ public:
     void setFont (const Font& newFont)                                       override { stack->font = newFont; }
     const Font& getFont()                                                    override { return stack->font; }
 
-    void drawGlyph (int i, const AffineTransform& t) override
+    void drawGlyphs (Span<const uint16_t> glyphs,
+                     Span<const Point<float>> positions,
+                     const AffineTransform& t) override
+    {
+        jassert (glyphs.size() == positions.size());
+
+        for (const auto [index, glyph] : enumerate (glyphs))
+            drawGlyph (glyph, AffineTransform::translation (positions[(size_t) index]).followedBy (t));
+    }
+
+protected:
+    void drawGlyph (uint16_t i, const AffineTransform& t)
     {
         if (stack->clip == nullptr)
             return;
@@ -2660,8 +2671,7 @@ public:
         }
     }
 
-protected:
-    StackBasedLowLevelGraphicsContext (SavedStateType* initialState) : stack (initialState) {}
+    explicit StackBasedLowLevelGraphicsContext (SavedStateType* initialState) : stack (initialState) {}
     StackBasedLowLevelGraphicsContext() = default;
 
     RenderingHelpers::SavedStateStack<SavedStateType> stack;

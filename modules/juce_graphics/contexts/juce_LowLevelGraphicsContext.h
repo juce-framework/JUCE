@@ -105,8 +105,11 @@ public:
 
     virtual void setFont (const Font&) = 0;
     virtual const Font& getFont() = 0;
-    virtual void drawGlyph (int glyphNumber, const AffineTransform&) = 0;
-    virtual bool drawTextLayout (const AttributedString&, const Rectangle<float>&)  { return false; }
+
+    /** Uses the current font to draw the provided glyph numbers. */
+    virtual void drawGlyphs (Span<const uint16_t>,
+                             Span<const Point<float>>,
+                             const AffineTransform&) = 0;
 };
 
 } // namespace juce
