@@ -132,6 +132,7 @@
 #include "fonts/juce_GlyphArrangement.cpp"
 #include "fonts/juce_TextLayout.cpp"
 #include "effects/juce_DropShadowEffect.cpp"
+#include "effects/juce_StackShadowEffect.cpp"
 #include "effects/juce_GlowEffect.cpp"
 
 #if JUCE_UNIT_TESTS
