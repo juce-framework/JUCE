@@ -78,6 +78,14 @@ public:
                          : FloatType();
     }
 
+    /** Returns the energy of all the previously added values.
+        If no values have been added yet, this returns zero.
+    **/
+    FloatType getEnergy() const noexcept
+    {
+        return count > 0 ? sumSquares: FloatType();
+    }
+
     /** Returns the standard deviation of all previously added values.
         If no values have been added yet, this will return zero.
     */
