@@ -33,10 +33,8 @@ static AllocationHooks& getAllocationHooksForThread()
 
 void notifyAllocationHooksForThread()
 {
-    getAllocationHooksForThread().listenerList.call ([] (AllocationHooks::Listener& l)
-    {
-        l.newOrDeleteCalled();
-    });
+    if (auto* l = getAllocationHooksForThread().listener)
+        l->newOrDeleteCalled();
 }
 
 }
@@ -84,12 +82,12 @@ namespace juce
 UnitTestAllocationChecker::UnitTestAllocationChecker (UnitTest& test)
     : unitTest (test)
 {
-    getAllocationHooksForThread().addListener (this);
+    getAllocationHooksForThread().setListener (this);
 }
 
 UnitTestAllocationChecker::~UnitTestAllocationChecker() noexcept
 {
-    getAllocationHooksForThread().removeListener (this);
+    getAllocationHooksForThread().setListener (nullptr);
     unitTest.expectEquals ((int) calls, 0, "new or delete was incorrectly called while allocation checker was active");
 }
 
