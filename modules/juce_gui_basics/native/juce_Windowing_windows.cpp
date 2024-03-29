@@ -5336,19 +5336,14 @@ bool juce::detail::WindowingHelpers::isWindowOnCurrentVirtualDesktop (void* x)
     if (x == nullptr)
         return false;
 
-    static auto* desktopManager = []
-    {
-        JuceIVirtualDesktopManager* result = nullptr;
+    JuceIVirtualDesktopManager* desktopManager = nullptr;
 
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
-        if (SUCCEEDED (CoCreateInstance (__uuidof (JuceVirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
-            return result;
+    if (FAILED (CoCreateInstance (__uuidof (JuceVirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&desktopManager))))
+        return true;
 
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-        return static_cast<JuceIVirtualDesktopManager*> (nullptr);
-    }();
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     BOOL current = false;
 
