@@ -315,13 +315,7 @@ private:
     //==============================================================================
     Array<PositionedGlyph> glyphs;
 
-    int insertEllipsis (const Font&, float maxXPos, int startIndex, int endIndex);
-    int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font&,
-                          Justification, float minimumHorizontalScale);
     void spreadOutLine (int start, int numGlyphs, float targetWidth);
-    void splitLines (const String&, Font, int start, float x, float y, float w, float h, int maxLines,
-                     float lineWidth, Justification, float minimumHorizontalScale);
-    void addLinesWithLineBreaks (const String&, const Font&, float x, float y, float width, float height, Justification);
     void drawGlyphUnderline (const Graphics&, int, AffineTransform) const;
 
     JUCE_LEAK_DETECTOR (GlyphArrangement)
