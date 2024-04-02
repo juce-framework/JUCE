@@ -1515,12 +1515,12 @@ private:
 //==============================================================================
 struct DemoTabbedComponent final : public TabbedComponent
 {
-    DemoTabbedComponent (bool isRunningComponenTransformsDemo)
+    DemoTabbedComponent (bool isRunningComponentTransformsDemo)
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
         auto colour = findColour (ResizableWindow::backgroundColourId);
 
-        addTab ("Buttons",     colour, new ButtonsPage (isRunningComponenTransformsDemo), true);
+        addTab ("Buttons",     colour, new ButtonsPage (isRunningComponentTransformsDemo), true);
         addTab ("Sliders",     colour, new SlidersPage(),                                 true);
         addTab ("Toolbars",    colour, new ToolbarDemoComp(),                             true);
         addTab ("Misc",        colour, new MiscPage(),                                    true);
@@ -1528,7 +1528,7 @@ struct DemoTabbedComponent final : public TabbedComponent
         addTab ("Tables",      colour, new TableDemoComponent(),                          true);
         addTab ("Drag & Drop", colour, new DragAndDropDemo(),                             true);
 
-        getTabbedButtonBar().getTabButton (5)->setExtraComponent (new CustomTabButton (isRunningComponenTransformsDemo),
+        getTabbedButtonBar().getTabButton (5)->setExtraComponent (new CustomTabButton (isRunningComponentTransformsDemo),
                                                                   TabBarButton::afterText);
     }
 
@@ -1537,8 +1537,8 @@ struct DemoTabbedComponent final : public TabbedComponent
     class CustomTabButton final : public Component
     {
     public:
-        CustomTabButton (bool isRunningComponenTransformsDemo)
-            : runningComponenTransformsDemo (isRunningComponenTransformsDemo)
+        CustomTabButton (bool isRunningComponentTransformsDemo)
+            : runningComponentTransformsDemo (isRunningComponentTransformsDemo)
         {
             setSize (20, 20);
         }
@@ -1560,10 +1560,10 @@ struct DemoTabbedComponent final : public TabbedComponent
                                "You can use these to implement things like close-buttons "
                                "or status displays for your tabs.",
                                bubbleMessage,
-                               runningComponenTransformsDemo);
+                               runningComponentTransformsDemo);
         }
     private:
-        bool runningComponenTransformsDemo;
+        bool runningComponentTransformsDemo;
         std::unique_ptr<BubbleMessageComponent> bubbleMessage;
     };
 
