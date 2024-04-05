@@ -361,6 +361,11 @@ String::String (CharPointer_UTF16 t, size_t maxChars)   : text (StringHolderUtil
 String::String (CharPointer_UTF32 t, size_t maxChars)   : text (StringHolderUtils::createFromCharPointer (t, maxChars)) {}
 String::String (const wchar_t* t, size_t maxChars)      : text (StringHolderUtils::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
 
+#if __cpp_char8_t
+String::String (const char8_t* const t)            : String (fromUTF8 (t)) {}
+String::String (const char8_t* t, size_t maxChars) : String (fromUTF8 (t, maxChars)) {}
+#endif
+
 String::String (CharPointer_UTF8  start, CharPointer_UTF8  end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
 String::String (CharPointer_UTF16 start, CharPointer_UTF16 end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
 String::String (CharPointer_UTF32 start, CharPointer_UTF32 end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
@@ -2136,20 +2141,22 @@ size_t String::getNumBytesAsUTF8() const noexcept
 
 String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 {
-    if (buffer != nullptr)
-    {
-        if (bufferSizeBytes < 0)
-            return String (CharPointer_UTF8 (buffer));
+    if (buffer == nullptr || bufferSizeBytes == 0)
+        return {};
 
-        if (bufferSizeBytes > 0)
-        {
-            jassert (CharPointer_UTF8::isValidString (buffer, bufferSizeBytes));
-            return String (CharPointer_UTF8 (buffer), CharPointer_UTF8 (buffer + bufferSizeBytes));
-        }
-    }
+    if (bufferSizeBytes < 0)
+        return String (CharPointer_UTF8 (buffer));
 
-    return {};
+    jassert (CharPointer_UTF8::isValidString (buffer, bufferSizeBytes));
+    return String (CharPointer_UTF8 (buffer), CharPointer_UTF8 (buffer + bufferSizeBytes));
 }
+
+#if __cpp_char8_t
+String String::fromUTF8 (const char8_t* const buffer, int bufferSizeBytes)
+{
+    return fromUTF8 (reinterpret_cast<const char* const> (buffer), bufferSizeBytes);
+}
+#endif
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 
@@ -2388,9 +2395,8 @@ public:
     {
         Random r = getRandom();
 
+        beginTest ("Basics");
         {
-            beginTest ("Basics");
-
             expect (String().length() == 0);
             expect (String() == String());
             String s1, s2 ("abcd");
@@ -2421,9 +2427,8 @@ public:
             expect (String ("abc foo bar").containsWholeWord ("abc") && String ("abc foo bar").containsWholeWord ("abc"));
         }
 
+        beginTest ("Operations");
         {
-            beginTest ("Operations");
-
             String s ("012345678");
             expect (s.hashCode() != 0);
             expect (s.hashCode64() != 0);
@@ -2759,17 +2764,15 @@ public:
             expect (String::repeatedString ("xyz", 3) == L"xyzxyzxyz");
         }
 
+        beginTest ("UTF conversions");
         {
-            beginTest ("UTF conversions");
-
             TestUTFConversion <CharPointer_UTF32>::test (*this, r);
             TestUTFConversion <CharPointer_UTF8>::test (*this, r);
             TestUTFConversion <CharPointer_UTF16>::test (*this, r);
         }
 
+        beginTest ("StringArray");
         {
-            beginTest ("StringArray");
-
             StringArray s;
             s.addTokens ("4,3,2,1,0", ";,", "x");
             expectEquals (s.size(), 5);
@@ -2797,9 +2800,8 @@ public:
             expectEquals (toks.joinIntoString ("-"), String ("x-'y,z'-"));
         }
 
+        beginTest ("var");
         {
-            beginTest ("var");
-
             var v1 = 0;
             var v2 = 0.16;
             var v3 = "0.16";
@@ -2818,9 +2820,8 @@ public:
             expect (! v4.equals (v2));
         }
 
+        beginTest ("Significant figures");
         {
-            beginTest ("Significant figures");
-
             // Integers
 
             expectEquals (String::toDecimalStringWithSignificantFigures (13, 1), String ("10"));
@@ -2861,9 +2862,8 @@ public:
             expectEquals (String::toDecimalStringWithSignificantFigures (-0.0000000000019, 1), String ("-0.000000000002"));
         }
 
+        beginTest ("Float trimming");
         {
-            beginTest ("Float trimming");
-
             {
                 StringPairArray tests;
                 tests.set ("1", "1");
@@ -2926,9 +2926,8 @@ public:
             }
         }
 
+        beginTest ("Serialisation");
         {
-            beginTest ("Serialisation");
-
             std::map <double, String> tests;
 
             tests[364] = "364.0";
@@ -2959,9 +2958,8 @@ public:
             }
         }
 
+        beginTest ("Loops");
         {
-            beginTest ("Loops");
-
             String str (CharPointer_UTF8 ("\xc2\xaf\\_(\xe3\x83\x84)_/\xc2\xaf"));
             std::vector<juce_wchar> parts { 175, 92, 95, 40, 12484, 41, 95, 47, 175 };
             size_t index = 0;

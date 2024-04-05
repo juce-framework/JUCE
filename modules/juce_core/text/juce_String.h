@@ -99,13 +99,14 @@ public:
         assertion.
 
         To create strings with extended characters from UTF-8, you should explicitly call
-        String (CharPointer_UTF8 ("my utf8 string..")). It's *highly* recommended that you
+        String (CharPointer_UTF8 ("my utf8 string..")). In C++20 or later, you may alternatively
+        pass a char8_t string to indicate a UTF-8 encoding. It's *highly* recommended that you
         use UTF-8 with escape characters in your source code to represent extended characters,
         because there's no other way to represent unicode strings in a way that isn't dependent
         on the compiler, source code editor and platform.
 
-        This will use up to the first maxChars characters of the string (or less if the string
-        is actually shorter).
+        This will read up to the first maxChars bytes of the string, or until a null
+        terminator is reached, whichever happens first.
     */
     String (const char* text, size_t maxChars);
 
@@ -118,6 +119,18 @@ public:
         Depending on the platform, this may be treated as either UTF-32 or UTF-16.
     */
     String (const wchar_t* text, size_t maxChars);
+
+   #if __cpp_char8_t || DOXYGEN
+    /** Creates a string from a char8_t character string. */
+    String (const char8_t* text);
+
+    /** Creates a string from a char8_t character string.
+
+        This will read up to the first maxChars bytes of the string, or until a null
+        terminator is reached, whichever happens first.
+    */
+    String (const char8_t* text, size_t maxChars);
+   #endif
 
     //==============================================================================
     /** Creates a string from a UTF-8 character string */
@@ -1235,6 +1248,15 @@ public:
         If the size is < 0, it'll keep reading until it hits a zero.
     */
     static String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
+
+   #if __cpp_char8_t || DOXYGEN
+
+    /** Creates a String from a UTF-8 encoded buffer.
+        If the size is < 0, it'll keep reading until it hits a zero.
+    */
+    static String fromUTF8 (const char8_t* utf8buffer, int bufferSizeBytes = -1);
+
+   #endif
 
     /** Returns the number of bytes required to represent this string as UTF8.
         The number returned does NOT include the trailing zero.
