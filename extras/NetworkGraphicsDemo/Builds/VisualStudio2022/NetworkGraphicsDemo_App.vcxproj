@@ -2440,6 +2440,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_ScopedDPIAwarenessDisabler.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_VBlank_windows.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Windowing_android.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>

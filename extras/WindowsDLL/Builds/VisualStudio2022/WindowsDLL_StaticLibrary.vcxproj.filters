@@ -3112,6 +3112,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_UIViewComponentPeer_ios.mm">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_VBlank_windows.cpp">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_Windowing_android.cpp">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
