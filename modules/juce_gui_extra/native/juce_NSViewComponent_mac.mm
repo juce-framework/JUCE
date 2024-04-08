@@ -90,9 +90,6 @@ public:
                 auto peerView = (NSView*) peer->getNativeHandle();
                 [peerView addSubview: view];
 
-                if (@available (macOS 10.10, *))
-                    [view setAccessibilityParent:static_cast<id> (owner.getAccessibilityHandler()->getNativeImplementation())];
-
                 componentMovedOrResized (false, false);
             }
             else

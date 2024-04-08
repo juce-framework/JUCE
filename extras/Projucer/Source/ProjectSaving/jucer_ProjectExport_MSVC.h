@@ -844,17 +844,24 @@ public:
             }
 
             {
-                auto* importGroup = projectXml.createNewChildElement ("ImportGroup");
-                importGroup->setAttribute ("Label", "ExtensionTargets");
-
                 if (owner.shouldAddWebView2Package())
                 {
+                    auto* importGroup = projectXml.createNewChildElement ("ImportGroup");
+                    importGroup->setAttribute ("Label", "ExtensionTargets");
+
                     auto packageTargetsPath = "packages\\" + getWebView2PackageName() + "." + getWebView2PackageVersion()
                                             + "\\build\\native\\" + getWebView2PackageName() + ".targets";
 
                     auto* e = importGroup->createNewChildElement ("Import");
                     e->setAttribute ("Project", packageTargetsPath);
                     e->setAttribute ("Condition", "Exists('" + packageTargetsPath + "')");
+                }
+
+                if (owner.shouldLinkWebView2Statically())
+                {
+                    auto* propertyGroup = projectXml.createNewChildElement ("PropertyGroup");
+                    auto* loaderPref = propertyGroup->createNewChildElement ("WebView2LoaderPreference");
+                    loaderPref->addTextElement ("Static");
                 }
             }
         }
@@ -1882,11 +1889,18 @@ protected:
     bool shouldAddWebView2Package() const
     {
         return project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
-              && project.isConfigFlagEnabled ("JUCE_USE_WIN_WEBVIEW2", false);
+              && (   project.isConfigFlagEnabled ("JUCE_USE_WIN_WEBVIEW2", false)
+                  || project.isConfigFlagEnabled ("JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING", false));
+    }
+
+    bool shouldLinkWebView2Statically() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
+               && project.isConfigFlagEnabled ("JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING", false);
     }
 
     static String getWebView2PackageName()     { return "Microsoft.Web.WebView2"; }
-    static String getWebView2PackageVersion()  { return "1.0.902.49"; }
+    static String getWebView2PackageVersion()  { return "1.0.1901.177"; }
 
     void createPackagesConfigFile() const
     {

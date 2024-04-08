@@ -4,6 +4,38 @@
 
 ## Change
 
+The `WebBrowserComponent::pageAboutToLoad()` function on Android now only
+receives callbacks for entire page navigation events, as opposed to every
+resource fetch operation. Returning `false` from the function now prevents
+this operation from taking any effect, as opposed to producing potentially
+visible error messages.
+
+**Possible Issues**
+
+Code that previously depended on the ability to allow or fail resource
+requests on Android may fail to work correctly.
+
+**Workaround**
+
+Navigating to webpages can still be prevented by returning `false` from this
+function, similarly to other platforms.
+
+Resource requests sent to the domain returned by
+`WebBrowserComponent::getResourceProviderRoot()` can be served or rejected by
+using the `WebBrowserComponent::ResourceProvider` feature.
+
+Resource requests sent to other domains can not be controlled on Android
+anymore.
+
+**Rationale**
+
+Prior to this change there was no way to reject a page load operation without
+any visible effect, like there was on the other platforms. The fine grained per
+resource control was not possible on other platforms. This change makes the
+Android implementation more consistent with the other platforms.
+
+## Change
+
 The minimum supported compilers and deployment targets have been updated, with
 the new minimums listed in the top level [README](README.md).
 

@@ -123,6 +123,12 @@ if(JUCE_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
+string(CONCAT webview2_option_message "Location that overrides the default directory where our "
+                                      "FindWebView2 script is looking for the "
+                                      "*Microsoft.Web.WebView2* directory")
+
+option(JUCE_WEBVIEW2_PACKAGE_LOCATION ${webview2_option_message} "")
+
 # ==================================================================================================
 # Install configuration
 

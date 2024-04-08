@@ -128,6 +128,8 @@
  #include <gtk/gtkx.h>
  #include <glib-unix.h>
  #include <webkit2/webkit2.h>
+ #include <jsc/jsc.h>
+ #include <libsoup/soup.h>
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
@@ -150,6 +152,7 @@
 #include "misc/juce_LiveConstantEditor.cpp"
 #include "misc/juce_AnimatedAppComponent.cpp"
 #include "misc/juce_WebBrowserComponent.cpp"
+#include "misc/juce_WebControlRelays.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS

@@ -305,6 +305,9 @@
     <Filter Include="JUCE Modules\juce_gui_extra\code_editor">
       <UniqueIdentifier>{DF95D4BF-E18C-125A-5EBB-8993A06E232C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_gui_extra\detail">
+      <UniqueIdentifier>{E0FCBD5F-0B11-D78C-F786-52AB7FEE2383}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_gui_extra\documents">
       <UniqueIdentifier>{118946F2-AC24-0F09-62D5-753DF87A60CD}</UniqueIdentifier>
     </Filter>
@@ -1954,6 +1957,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_WebBrowserComponent.cpp">
       <Filter>JUCE Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_WebControlRelays.cpp">
+      <Filter>JUCE Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_ActiveXComponent_windows.cpp">
       <Filter>JUCE Modules\juce_gui_extra\native</Filter>
     </ClCompile>
@@ -2752,6 +2758,9 @@
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Functional.h">
+      <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_OptionsHelpers.h">
       <Filter>JUCE Modules\juce_core\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Result.h">
@@ -3981,6 +3990,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\code_editor\juce_XMLCodeTokeniser.h">
       <Filter>JUCE Modules\juce_gui_extra\code_editor</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\detail\juce_WebControlRelayEvents.h">
+      <Filter>JUCE Modules\juce_gui_extra\detail</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\documents\juce_FileBasedDocument.h">
       <Filter>JUCE Modules\juce_gui_extra\documents</Filter>
     </ClInclude>
@@ -4036,6 +4048,9 @@
       <Filter>JUCE Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_WebBrowserComponent.h">
+      <Filter>JUCE Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_WebControlRelays.h">
       <Filter>JUCE Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\native\juce_NSViewFrameWatcher_mac.h">

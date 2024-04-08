@@ -275,6 +275,17 @@ function(_juce_link_optional_libraries target)
         if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND needs_camera)
             _juce_link_frameworks("${target}" PRIVATE ImageIO)
         endif()
+    elseif(WIN32)
+        get_target_property(needs_webview2 ${target} JUCE_NEEDS_WEBVIEW2)
+
+        if (needs_webview2)
+            if(NOT ("${JUCE_CMAKE_UTILS_DIR}" IN_LIST CMAKE_MODULE_PATH))
+                list(APPEND CMAKE_MODULE_PATH "${JUCE_CMAKE_UTILS_DIR}")
+            endif()
+
+            find_package(WebView2 REQUIRED)
+            target_link_libraries(${target} PRIVATE juce::juce_webview2)
+        endif()
     endif()
 endfunction()
 
@@ -1864,6 +1875,7 @@ function(_juce_initialise_target target)
         COMPANY_EMAIL
         NEEDS_CURL                      # Set this true if you want to link curl on Linux
         NEEDS_WEB_BROWSER               # Set this true if you want to link webkit on Linux
+        NEEDS_WEBVIEW2                  # Set this true if you want to link WebView2 statically on Windows
         NEEDS_STORE_KIT                 # Set this true if you want in-app-purchases on Mac
         PUSH_NOTIFICATIONS_ENABLED
         NETWORK_MULTICAST_ENABLED
@@ -2128,6 +2140,10 @@ function(juce_add_pip header)
 
     if("JUCE_PLUGINHOST_AU=1" IN_LIST pip_moduleflags)
         list(APPEND extra_target_args PLUGINHOST_AU TRUE)
+    endif()
+
+    if("JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1" IN_LIST pip_moduleflags)
+        list(APPEND extra_target_args NEEDS_WEBVIEW2 TRUE)
     endif()
 
     if(pip_kind STREQUAL "AudioProcessor")

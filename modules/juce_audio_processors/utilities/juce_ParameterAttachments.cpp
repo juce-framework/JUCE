@@ -274,4 +274,160 @@ void ButtonParameterAttachment::buttonClicked (Button*)
     attachment.setValueAsCompleteGesture (button.getToggleState() ? 1.0f : 0.0f);
 }
 
+//==============================================================================
+#if JUCE_WEB_BROWSER
+WebSliderParameterAttachment::WebSliderParameterAttachment (RangedAudioParameter& parameterIn,
+                                                            WebSliderRelay& sliderStateIn,
+                                                            UndoManager* undoManager)
+    : sliderState (sliderStateIn),
+      parameter (parameterIn),
+      attachment (parameter, [this] (float newValue) { setValue (newValue); }, undoManager)
+{
+    sendInitialUpdate();
+    sliderState.addListener (this);
+}
+
+WebSliderParameterAttachment::~WebSliderParameterAttachment()
+{
+    sliderState.removeListener (this);
+}
+
+void WebSliderParameterAttachment::sendInitialUpdate()
+{
+    const auto range = parameter.getNormalisableRange();
+    DynamicObject::Ptr object { new DynamicObject };
+    object->setProperty (detail::WebSliderRelayEvents::Event::eventTypeKey, "propertiesChanged");
+    object->setProperty ("start", range.start);
+    object->setProperty ("end", range.end);
+    object->setProperty ("skew", range.skew);
+    object->setProperty ("name", parameter.getName (100));
+    object->setProperty ("label", parameter.getLabel());
+    object->setProperty ("numSteps", parameter.getNumSteps());
+    object->setProperty ("interval", range.interval);
+    sliderState.emitEvent (object.get());
+    attachment.sendInitialUpdate();
+}
+
+void WebSliderParameterAttachment::setValue (float newValue)
+{
+    const ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+    sliderState.setValue (newValue);
+}
+
+void WebSliderParameterAttachment::sliderValueChanged (WebSliderRelay* slider)
+{
+    if (ignoreCallbacks)
+    {
+        jassertfalse;
+        return;
+    }
+
+    attachment.setValueAsPartOfGesture (slider->getValue());
+}
+
+//==============================================================================
+WebToggleButtonParameterAttachment::WebToggleButtonParameterAttachment (RangedAudioParameter& parameterIn,
+                                                                        WebToggleButtonRelay& button,
+                                                                        UndoManager* undoManager)
+    : relay (button),
+      parameter (parameterIn),
+      attachment (parameter, [this] (float f) { setValue (f); }, undoManager)
+{
+    sendInitialUpdate();
+    relay.addListener (this);
+}
+
+WebToggleButtonParameterAttachment::~WebToggleButtonParameterAttachment()
+{
+    relay.removeListener (this);
+}
+
+void WebToggleButtonParameterAttachment::sendInitialUpdate()
+{
+    DynamicObject::Ptr object { new DynamicObject };
+    object->setProperty (detail::WebSliderRelayEvents::Event::eventTypeKey, "propertiesChanged");
+    object->setProperty ("name", parameter.getName (100));
+    relay.emitEvent (object.get());
+    attachment.sendInitialUpdate();
+}
+
+void WebToggleButtonParameterAttachment::setValue (float newValue)
+{
+    const ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+    relay.setToggleState (newValue >= 0.5f);
+}
+
+void WebToggleButtonParameterAttachment::toggleStateChanged (bool newValue)
+{
+    if (ignoreCallbacks)
+    {
+        jassertfalse;
+        return;
+    }
+
+    attachment.setValueAsCompleteGesture (newValue ? 1.0f : 0.0f);
+}
+
+void WebToggleButtonParameterAttachment::initialUpdateRequested()
+{
+    sendInitialUpdate();
+}
+
+//==============================================================================
+WebComboBoxParameterAttachment::WebComboBoxParameterAttachment (RangedAudioParameter& parameterIn,
+                                                                WebComboBoxRelay& combo,
+                                                                UndoManager* undoManager)
+    : relay (combo),
+      parameter (parameterIn),
+      attachment (parameter, [this] (float f) { setValue (f); }, undoManager)
+{
+    sendInitialUpdate();
+    relay.addListener (this);
+}
+
+WebComboBoxParameterAttachment::~WebComboBoxParameterAttachment()
+{
+    relay.removeListener (this);
+}
+
+void WebComboBoxParameterAttachment::sendInitialUpdate()
+{
+    DynamicObject::Ptr object { new DynamicObject };
+    object->setProperty (detail::WebSliderRelayEvents::Event::eventTypeKey, "propertiesChanged");
+    object->setProperty ("name", parameter.getName (100));
+
+    if (auto* choiceParameter = dynamic_cast<AudioParameterChoice*> (&parameter))
+        object->setProperty ("choices", choiceParameter->choices);
+    else
+        object->setProperty ("choices", StringArray{});
+
+    relay.emitEvent (object.get());
+    attachment.sendInitialUpdate();
+}
+
+void WebComboBoxParameterAttachment::setValue (float newValue)
+{
+    const auto normValue = parameter.convertTo0to1 (newValue);
+
+    const ScopedValueSetter<bool> svs (ignoreCallbacks, true);
+    relay.setValue (normValue);
+}
+
+void WebComboBoxParameterAttachment::valueChanged (float newValue)
+{
+    if (ignoreCallbacks)
+    {
+        jassertfalse;
+        return;
+    }
+
+    attachment.setValueAsCompleteGesture (parameter.convertFrom0to1 (newValue));
+}
+
+void WebComboBoxParameterAttachment::initialUpdateRequested()
+{
+    sendInitialUpdate();
+}
+#endif
+
 } // namespace juce

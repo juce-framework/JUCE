@@ -76,17 +76,43 @@
  #define JUCE_WEB_BROWSER 1
 #endif
 
+/** Config: JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING
+    Enables the use of the Microsoft Edge (Chromium) WebView2 browser on Windows.
+
+    If using the Projucer, the Microsoft.Web.WebView2 package will be added to the
+    project solution if this flag is enabled. If you are building using CMake you
+    will need to manually add the package via the NuGet package manager.
+
+    Using this flag requires statically linking against WebView2LoaderStatic.lib,
+    which at this time is only available through the NuGet package, but is missing
+    in VCPKG.
+
+    In addition to enabling this macro, you will need to use the
+    WebBrowserComponent::Options::Backend::webview2 option when instantiating the
+    WebBrowserComponent.
+*/
+#ifndef JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING
+ #define JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING 0
+#else
+ #define JUCE_USE_WIN_WEBVIEW2 1
+#endif
+
 /** Config: JUCE_USE_WIN_WEBVIEW2
-    Enables the use of the Microsoft Edge (Chromium) WebView2 browser on Windows,
-    currently in developer preview.
+    Enables the use of the Microsoft Edge (Chromium) WebView2 browser on Windows.
 
     If using the Projucer, the Microsoft.Web.WebView2 package will be added to the
     project solution if this flag is enabled. If you are building using CMake you
     will need to manually add the package via the Visual Studio package manager.
 
+    If the WITH_STATIC_LINKING variant of this flag is also set, you must statically
+    link against WebView2LoaderStatic.lib, otherwise dynamic loading will be used.
+
+    See more about dynamic linking in the documentation of
+    WebBrowserComponent::Options::WinWebView2::withDLLLocation().
+
     In addition to enabling this macro, you will need to use the
-    WindowsWebView2WebBrowserComponent wrapper - see the documentation of that
-    class for more details.
+    WebBrowserComponent::Options::Backend::webview2 option when instantiating the
+    WebBrowserComponent.
 */
 #ifndef JUCE_USE_WIN_WEBVIEW2
  #define JUCE_USE_WIN_WEBVIEW2 0
@@ -130,3 +156,5 @@
 #include "misc/juce_WebBrowserComponent.h"
 #include "misc/juce_LiveConstantEditor.h"
 #include "misc/juce_AnimatedAppComponent.h"
+#include "detail/juce_WebControlRelayEvents.h"
+#include "misc/juce_WebControlRelays.h"

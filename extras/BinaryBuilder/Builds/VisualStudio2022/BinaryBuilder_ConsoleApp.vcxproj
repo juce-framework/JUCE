@@ -568,6 +568,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_ConsoleApplication.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_EnumHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Functional.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_OptionsHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Result.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_RuntimePermissions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_ScopeGuard.h"/>
@@ -668,5 +669,4 @@
     <ResourceCompile Include=".\resources.rc"/>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
-  <ImportGroup Label="ExtensionTargets"/>
 </Project>
