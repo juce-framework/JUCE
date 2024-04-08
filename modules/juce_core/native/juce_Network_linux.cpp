@@ -522,16 +522,19 @@ private:
         if (hasPostData)
             writeValueIfNotPresent (header, userHeaders, "Content-Length:", String ((int) postDataSize));
 
+        const juce::String headerDelimiter = "\r\n";
+        
         if (userHeaders.isNotEmpty())
-            header << "\r\n" << userHeaders;
-
-        if(header.toString().endsWith("\r\n"))
+            header << headerDelimiter << userHeaders;
+        
+        //Header section needs to end with \r\n\r\n
+        if(header.toString().endsWith(headerDelimiter))
         {
-            header << "\r\n";
+            header << headerDelimiter;
         }
         else
         {
-            header << "\r\n\r\n";
+            header << headerDelimiter << headerDelimiter;
         }
 
         if (hasPostData)
