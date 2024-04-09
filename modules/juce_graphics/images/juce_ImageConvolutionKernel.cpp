@@ -42,9 +42,7 @@ ImageConvolutionKernel::ImageConvolutionKernel (int sizeToUse)
     clear();
 }
 
-ImageConvolutionKernel::~ImageConvolutionKernel()
-{
-}
+ImageConvolutionKernel::~ImageConvolutionKernel() = default;
 
 //==============================================================================
 float ImageConvolutionKernel::getKernelValue (const int x, const int y) const noexcept
@@ -144,8 +142,10 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
 
     const Image::BitmapData srcData (sourceImage, Image::BitmapData::readOnly);
 
-    if (destData.pixelStride == 4)
+    const auto applyKernel = [&] (auto stride)
     {
+        constexpr auto pixelStride = stride.value;
+
         for (int y = area.getY(); y < bottom; ++y)
         {
             uint8* dest = line;
@@ -153,10 +153,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
 
             for (int x = area.getX(); x < right; ++x)
             {
-                float c1 = 0;
-                float c2 = 0;
-                float c3 = 0;
-                float c4 = 0;
+                float sum[pixelStride]{};
 
                 for (int yy = 0; yy < size; ++yy)
                 {
@@ -165,140 +162,47 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                     if (sy >= srcData.height)
                         break;
 
-                    if (sy >= 0)
+                    if (sy < 0)
+                        continue;
+
+                    int sx = x - (size >> 1);
+                    const uint8* src = srcData.getPixelPointer (sx, sy);
+
+                    for (int xx = 0; xx < size; ++xx)
                     {
-                        int sx = x - (size >> 1);
-                        const uint8* src = srcData.getPixelPointer (sx, sy);
+                        if (sx >= srcData.width)
+                            break;
 
-                        for (int xx = 0; xx < size; ++xx)
+                        if (sx >= 0)
                         {
-                            if (sx >= srcData.width)
-                                break;
+                            const auto kernelMult = values[xx + yy * size];
 
-                            if (sx >= 0)
-                            {
-                                const float kernelMult = values [xx + yy * size];
-                                c1 += kernelMult * *src++;
-                                c2 += kernelMult * *src++;
-                                c3 += kernelMult * *src++;
-                                c4 += kernelMult * *src++;
-                            }
-                            else
-                            {
-                                src += 4;
-                            }
-
-                            ++sx;
+                            for (auto& s : sum)
+                                s += kernelMult * *src++;
                         }
+                        else
+                        {
+                            src += pixelStride;
+                        }
+
+                        ++sx;
                     }
                 }
 
-                *dest++ = (uint8) jmin (0xff, roundToInt (c1));
-                *dest++ = (uint8) jmin (0xff, roundToInt (c2));
-                *dest++ = (uint8) jmin (0xff, roundToInt (c3));
-                *dest++ = (uint8) jmin (0xff, roundToInt (c4));
+                for (const auto& s : sum)
+                    *dest++ = (uint8) jmin (0xff, roundToInt (s));
             }
         }
-    }
-    else if (destData.pixelStride == 3)
+    };
+
+    switch (destData.pixelStride)
     {
-        for (int y = area.getY(); y < bottom; ++y)
-        {
-            uint8* dest = line;
-            line += destData.lineStride;
-
-            for (int x = area.getX(); x < right; ++x)
-            {
-                float c1 = 0;
-                float c2 = 0;
-                float c3 = 0;
-
-                for (int yy = 0; yy < size; ++yy)
-                {
-                    const int sy = y + yy - (size >> 1);
-
-                    if (sy >= srcData.height)
-                        break;
-
-                    if (sy >= 0)
-                    {
-                        int sx = x - (size >> 1);
-                        const uint8* src = srcData.getPixelPointer (sx, sy);
-
-                        for (int xx = 0; xx < size; ++xx)
-                        {
-                            if (sx >= srcData.width)
-                                break;
-
-                            if (sx >= 0)
-                            {
-                                const float kernelMult = values [xx + yy * size];
-                                c1 += kernelMult * *src++;
-                                c2 += kernelMult * *src++;
-                                c3 += kernelMult * *src++;
-                            }
-                            else
-                            {
-                                src += 3;
-                            }
-
-                            ++sx;
-                        }
-                    }
-                }
-
-                *dest++ = (uint8) roundToInt (c1);
-                *dest++ = (uint8) roundToInt (c2);
-                *dest++ = (uint8) roundToInt (c3);
-            }
-        }
-    }
-    else if (destData.pixelStride == 1)
-    {
-        for (int y = area.getY(); y < bottom; ++y)
-        {
-            uint8* dest = line;
-            line += destData.lineStride;
-
-            for (int x = area.getX(); x < right; ++x)
-            {
-                float c1 = 0;
-
-                for (int yy = 0; yy < size; ++yy)
-                {
-                    const int sy = y + yy - (size >> 1);
-
-                    if (sy >= srcData.height)
-                        break;
-
-                    if (sy >= 0)
-                    {
-                        int sx = x - (size >> 1);
-                        const uint8* src = srcData.getPixelPointer (sx, sy);
-
-                        for (int xx = 0; xx < size; ++xx)
-                        {
-                            if (sx >= srcData.width)
-                                break;
-
-                            if (sx >= 0)
-                            {
-                                const float kernelMult = values [xx + yy * size];
-                                c1 += kernelMult * *src++;
-                            }
-                            else
-                            {
-                                src += 3;
-                            }
-
-                            ++sx;
-                        }
-                    }
-                }
-
-                *dest++ = (uint8) roundToInt (c1);
-            }
-        }
+        case 4:
+            return applyKernel (std::integral_constant<size_t, 4>{});
+        case 3:
+            return applyKernel (std::integral_constant<size_t, 3>{});
+        case 1:
+            return applyKernel (std::integral_constant<size_t, 1>{});
     }
 }
 
