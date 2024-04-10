@@ -318,6 +318,14 @@ struct FloatRectangleRasterisingInfo
     int topAlpha, leftAlpha, bottomAlpha, rightAlpha; // alpha of each anti-aliased edge
 };
 
+// Line::findNearestPointTo will always return a point between the line's start and end, whereas
+// this version assumes that the line is infinite.
+static Point<float> closestPointOnInfiniteLine (const Line<float>& line, const Point<float>& point)
+{
+    const Line perpendicularThroughPoint { point, point + line.getPointAlongLine (0.0f, 1.0f) - line.getStart() };
+    return line.getIntersection (perpendicularThroughPoint);
+}
+
 //==============================================================================
 /** Contains classes for calculating the colour of pixels within various types of gradient. */
 namespace GradientPixelIterators
@@ -342,7 +350,7 @@ namespace GradientPixelIterators
                 p2.applyTransform (transform);
                 p3.applyTransform (transform);
 
-                p2 = Line<float> (p2, p3).findNearestPointTo (p1);
+                p2 = closestPointOnInfiniteLine ({ p2, p3 }, p1);
             }
 
             vertical   = std::abs (p1.x - p2.x) < 0.001f;
@@ -360,8 +368,8 @@ namespace GradientPixelIterators
             }
             else
             {
-                grad = (p2.getY() - p1.y) / (double) (p1.x - p2.x);
-                yTerm = p1.getY() - p1.x / grad;
+                grad = (p2.y - p1.y) / (double) (p1.x - p2.x);
+                yTerm = p1.y - (p1.x / grad);
                 scale = roundToInt ((double) ((int64_t) numEntries << (int) numScaleBits) / (yTerm * grad - (p2.y * grad - p2.x)));
                 grad *= scale;
             }
