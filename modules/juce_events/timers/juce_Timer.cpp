@@ -23,8 +23,7 @@
 namespace juce
 {
 
-class Timer::TimerThread final : private Thread,
-                                 private AsyncUpdater
+class Timer::TimerThread final : private Thread
 {
 public:
     using LockType = CriticalSection; // (mysteriously, using a SpinLock here causes problems on some XP machines..)
@@ -32,12 +31,10 @@ public:
     TimerThread()  : Thread ("JUCE Timer")
     {
         timers.reserve (32);
-        triggerAsyncUpdate();
     }
 
     ~TimerThread() override
     {
-        cancelPendingUpdate();
         signalThreadShouldExit();
         callbackArrived.signal();
         stopThread (-1);
@@ -121,20 +118,15 @@ public:
 
     void callTimersSynchronously()
     {
-        if (! isThreadRunning())
-        {
-            // (This is relied on by some plugins in cases where the MM has
-            // had to restart and the async callback never started)
-            cancelPendingUpdate();
-            triggerAsyncUpdate();
-        }
-
         callTimers();
     }
 
     void addTimer (Timer* t)
     {
         const LockType::ScopedLockType sl (lock);
+
+        if (! isThreadRunning())
+            startThread (Thread::Priority::high);
 
         // Trying to add a timer that's already here - shouldn't get to this point,
         // so if you get this assertion, let me know!
@@ -279,11 +271,6 @@ private:
             t.countdownMs -= numMillisecsElapsed;
 
         return timers.front().countdownMs;
-    }
-
-    void handleAsyncUpdate() override
-    {
-        startThread (Priority::high);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimerThread)
