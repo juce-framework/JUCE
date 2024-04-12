@@ -1965,7 +1965,6 @@ function(_juce_initialise_target target)
 
     target_include_directories(${target} PRIVATE
         $<TARGET_PROPERTY:${target},JUCE_GENERATED_SOURCES_DIRECTORY>)
-    target_link_libraries(${target} PUBLIC $<$<TARGET_EXISTS:juce_vst2_sdk>:juce_vst2_sdk>)
 
     get_target_property(is_pluginhost_au ${target} JUCE_PLUGINHOST_AU)
 
@@ -2291,10 +2290,7 @@ function(juce_set_vst2_sdk_path path)
 
     add_library(juce_vst2_sdk INTERFACE IMPORTED GLOBAL)
 
-    # This is a bit of a hack, but we really need the VST2 paths to always follow the VST3 paths.
-    target_include_directories(juce_vst2_sdk INTERFACE
-        $<TARGET_PROPERTY:juce::juce_vst3_headers,INTERFACE_INCLUDE_DIRECTORIES>
-        "${path}")
+    target_include_directories(juce_vst2_sdk INTERFACE "${path}")
 endfunction()
 
 function(juce_set_vst3_sdk_path path)

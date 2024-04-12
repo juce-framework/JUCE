@@ -498,7 +498,8 @@ function(juce_add_module module_path)
 
         target_include_directories(juce_vst3_headers INTERFACE
             "$<$<TARGET_EXISTS:juce_vst3_sdk>:$<TARGET_PROPERTY:juce_vst3_sdk,INTERFACE_INCLUDE_DIRECTORIES>>"
-            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors/format_types/VST3_SDK>")
+            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors/format_types/VST3_SDK>"
+            "$<$<TARGET_EXISTS:juce_vst2_sdk>:$<TARGET_PROPERTY:juce_vst2_sdk,INTERFACE_INCLUDE_DIRECTORIES>>")
 
         target_link_libraries(juce_audio_processors INTERFACE juce_vst3_headers)
 
