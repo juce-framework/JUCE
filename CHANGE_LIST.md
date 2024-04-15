@@ -3,6 +3,11 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 7.0.12
+
+  - Fixed an issue with timers in Pro Tools
+  - Fixed an issue with Projucer Xcode code signing
+
 ## Version 7.0.11
 
   - Fixed an issue with paths containing a tilde in Xcode
