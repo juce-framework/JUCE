@@ -35,47 +35,6 @@
 namespace juce
 {
 
-static void blurDataTriplets (uint8* d, int num, const int delta) noexcept
-{
-    uint32 last = d[0];
-    d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);
-    d += delta;
-
-    num -= 2;
-
-    do
-    {
-        const uint32 newLast = d[0];
-        d[0] = (uint8) ((last + d[0] + d[delta] + 1) / 3);
-        d += delta;
-        last = newLast;
-    }
-    while (--num > 0);
-
-    d[0] = (uint8) ((last + d[0] + 1) / 3);
-}
-
-static void blurSingleChannelImage (uint8* const data, const int width, const int height,
-                                    const int lineStride, const int repetitions) noexcept
-{
-    jassert (width > 2 && height > 2);
-
-    for (int y = 0; y < height; ++y)
-        for (int i = repetitions; --i >= 0;)
-            blurDataTriplets (data + lineStride * y, width, 1);
-
-    for (int x = 0; x < width; ++x)
-        for (int i = repetitions; --i >= 0;)
-            blurDataTriplets (data + x, height, lineStride);
-}
-
-static void blurSingleChannelImage (Image& image, int radius)
-{
-    const Image::BitmapData bm (image, Image::BitmapData::readWrite);
-    blurSingleChannelImage (bm.data, bm.width, bm.height, bm.lineStride, 2 * radius);
-}
-
-//==============================================================================
 DropShadow::DropShadow (Colour shadowColour, const int r, Point<int> o) noexcept
     : colour (shadowColour), radius (r), offset (o)
 {
@@ -86,16 +45,15 @@ void DropShadow::drawForImage (Graphics& g, const Image& srcImage) const
 {
     jassert (radius > 0);
 
-    if (srcImage.isValid())
-    {
-        Image shadowImage (srcImage.convertedToFormat (Image::SingleChannel));
-        shadowImage.duplicateIfShared();
+    if (! srcImage.isValid())
+        return;
 
-        blurSingleChannelImage (shadowImage, radius);
+    Image blurred;
+    srcImage.convertedToFormat (Image::SingleChannel)
+            .applyGaussianBlurEffect ((float) radius, blurred);
 
-        g.setColour (colour);
-        g.drawImageAt (shadowImage, offset.x, offset.y, true);
-    }
+    g.setColour (colour);
+    g.drawImageAt (blurred, offset.x, offset.y, true);
 }
 
 void DropShadow::drawForPath (Graphics& g, const Path& path) const
@@ -103,24 +61,25 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
     jassert (radius > 0);
 
     auto area = (path.getBounds().getSmallestIntegerContainer() + offset)
-                  .expanded (radius + 1)
-                  .getIntersection (g.getClipBounds().expanded (radius + 1));
+            .expanded (radius + 1)
+            .getIntersection (g.getClipBounds().expanded (radius + 1));
 
     if (area.getWidth() > 2 && area.getHeight() > 2)
     {
-        Image renderedPath (Image::SingleChannel, area.getWidth(), area.getHeight(), true);
+        Image pathImage { Image::SingleChannel, area.getWidth(), area.getHeight(), true };
 
         {
-            Graphics g2 (renderedPath);
+            Graphics g2 (pathImage);
             g2.setColour (Colours::white);
             g2.fillPath (path, AffineTransform::translation ((float) (offset.x - area.getX()),
                                                              (float) (offset.y - area.getY())));
         }
 
-        blurSingleChannelImage (renderedPath, radius);
+        Image blurred;
+        pathImage.applyGaussianBlurEffect ((float) radius, blurred);
 
         g.setColour (colour);
-        g.drawImageAt (renderedPath, area.getX(), area.getY(), true);
+        g.drawImageAt (blurred, area.getX(), area.getY(), true);
     }
 }
 
@@ -167,8 +126,8 @@ void DropShadow::drawForRectangle (Graphics& g, const Rectangle<int>& targetArea
 }
 
 //==============================================================================
-DropShadowEffect::DropShadowEffect() {}
-DropShadowEffect::~DropShadowEffect() {}
+DropShadowEffect::DropShadowEffect() = default;
+DropShadowEffect::~DropShadowEffect() = default;
 
 void DropShadowEffect::setShadowProperties (const DropShadow& newShadow)
 {

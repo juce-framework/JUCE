@@ -153,7 +153,7 @@ public:
         The isNull() method is the opposite of isValid().
         @see isNull
     */
-    inline bool isValid() const noexcept                    { return image != nullptr; }
+    bool isValid() const noexcept;
 
     /** Returns true if this image is not valid.
         If you create an Image with the default constructor, it has no size or content, and is null
@@ -161,7 +161,7 @@ public:
         The isNull() method is the opposite of isValid().
         @see isValid
     */
-    inline bool isNull() const noexcept                     { return image == nullptr; }
+    bool isNull() const noexcept { return ! isValid(); }
 
     //==============================================================================
     /** Returns the image's width (in pixels). */
@@ -416,6 +416,13 @@ public:
     */
     int getReferenceCount() const noexcept;
 
+    /** Applies a blur to this image, placing the blurred image in the result out-parameter.
+
+        If result is already the correct size, then its storage will be reused directly.
+        Otherwise, new storage may be allocated for the blurred image.
+    */
+    void applyGaussianBlurEffect (float radius, Image& result) const;
+
     //==============================================================================
     /** @internal */
     ImagePixelData* getPixelData() const noexcept       { return image.get(); }
@@ -469,9 +476,19 @@ public:
     virtual void initialiseBitmapData (Image::BitmapData&, int x, int y, Image::BitmapData::ReadWriteMode) = 0;
     /** Returns the number of Image objects which are currently referring to the same internal
         shared image data. This is different to the reference count as an instance of ImagePixelData
-        can internally depend on another ImagePixelData via it's member variables. */
+        can internally depend on another ImagePixelData via it's member variables.
+    */
     virtual int getSharedCount() const noexcept;
 
+    /** Applies a native blur effect to this image, if available.
+
+        Implementations should attempt to re-use the storage provided in the result out-parameter
+        when possible.
+
+        If native blurs are unsupported, or if creating a blur fails for any other reason,
+        the result out-parameter will be reset to an invalid image.
+    */
+    virtual void applyGaussianBlurEffect (float radius, Image& result);
 
     /** The pixel format of the image data. */
     const Image::PixelFormat pixelFormat;

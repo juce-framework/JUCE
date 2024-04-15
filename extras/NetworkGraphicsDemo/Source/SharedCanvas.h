@@ -307,9 +307,10 @@ public:
     }
 
     //==============================================================================
-    bool isVectorDevice() const override            { return true; }
-    float getPhysicalPixelScaleFactor() override    { return 1.0f; }
-    void setOrigin (Point<int> o) override          { addTransform (AffineTransform::translation ((float) o.x, (float) o.y)); }
+    bool isVectorDevice() const override               { return true; }
+    float getPhysicalPixelScaleFactor() const override { return 1.0f; }
+    uint64_t getFrameId() const override               { return 0; }
+    void setOrigin (Point<int> o) override             { addTransform (AffineTransform::translation ((float) o.x, (float) o.y)); }
 
     void addTransform (const AffineTransform& t) override
     {

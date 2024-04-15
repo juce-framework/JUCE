@@ -124,9 +124,6 @@ public:
         return horizontal (colourLeft, (float) area.getX(), colourRight, (float) area.getRight());
     }
 
-    /** Destructor */
-    ~ColourGradient();
-
     //==============================================================================
     /** Removes any colours that have been added.
 
@@ -224,17 +221,31 @@ public:
     bool operator== (const ColourGradient&) const noexcept;
     bool operator!= (const ColourGradient&) const noexcept;
 
+    /** This comparison, and the other ordered comparisons are provided only for compatibility with
+        ordered container types like std::set and std::map.
+    */
+    bool operator<  (const ColourGradient&) const noexcept;
+    bool operator<= (const ColourGradient&) const noexcept;
+    bool operator>  (const ColourGradient&) const noexcept;
+    bool operator>= (const ColourGradient&) const noexcept;
 
 private:
     //==============================================================================
     struct ColourPoint
     {
-        bool operator== (ColourPoint) const noexcept;
-        bool operator!= (ColourPoint) const noexcept;
+        auto tie() const { return std::tuple (position, colour.getPixelARGB().getNativeARGB()); }
+
+        bool operator== (ColourPoint other) const noexcept { return tie() == other.tie(); }
+        bool operator!= (ColourPoint other) const noexcept { return tie() != other.tie(); }
+        bool operator<  (ColourPoint other) const noexcept { return tie() <  other.tie(); }
 
         double position;
         Colour colour;
     };
+
+    struct ColourPointArrayComparisons;
+
+    auto tie() const;
 
     Array<ColourPoint> colours;
 

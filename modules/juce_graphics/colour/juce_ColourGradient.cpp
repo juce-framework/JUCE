@@ -89,8 +89,6 @@ ColourGradient::ColourGradient (Colour colour1, Point<float> p1,
                  ColourPoint { 1.0, colour2 });
 }
 
-ColourGradient::~ColourGradient() {}
-
 ColourGradient ColourGradient::vertical (Colour c1, float y1, Colour c2, float y2)
 {
     return { c1, 0, y1, c2, 0, y2, false };
@@ -101,17 +99,45 @@ ColourGradient ColourGradient::horizontal (Colour c1, float x1, Colour c2, float
     return { c1, x1, 0, c2, x2, 0, false };
 }
 
-bool ColourGradient::operator== (const ColourGradient& other) const noexcept
+struct PointComparisons
 {
-    return point1 == other.point1 && point2 == other.point2
-            && isRadial == other.isRadial
-            && colours == other.colours;
+    auto tie() const { return std::tie (point->x, point->y); }
+
+    bool operator== (const PointComparisons& other) const { return tie() == other.tie(); }
+    bool operator!= (const PointComparisons& other) const { return tie() != other.tie(); }
+    bool operator<  (const PointComparisons& other) const { return tie() <  other.tie(); }
+
+    const Point<float>* point = nullptr;
+};
+
+struct ColourGradient::ColourPointArrayComparisons
+{
+    bool operator== (const ColourPointArrayComparisons& other) const { return *array == *other.array; }
+    bool operator!= (const ColourPointArrayComparisons& other) const { return *array != *other.array; }
+
+    bool operator<  (const ColourPointArrayComparisons& other) const
+    {
+        return std::lexicographical_compare (array->begin(), array->end(), other.array->begin(), other.array->end());
+    }
+
+    const Array<ColourGradient::ColourPoint>* array = nullptr;
+};
+
+auto ColourGradient::tie() const
+{
+    return std::tuple (PointComparisons { &point1 },
+                       PointComparisons { &point2 },
+                       isRadial,
+                       ColourPointArrayComparisons { &colours });
 }
 
-bool ColourGradient::operator!= (const ColourGradient& other) const noexcept
-{
-    return ! operator== (other);
-}
+bool ColourGradient::operator== (const ColourGradient& other) const noexcept { return tie() == other.tie(); }
+bool ColourGradient::operator!= (const ColourGradient& other) const noexcept { return tie() != other.tie(); }
+
+bool ColourGradient::operator<  (const ColourGradient& other) const noexcept { return tie() <  other.tie(); }
+bool ColourGradient::operator<= (const ColourGradient& other) const noexcept { return tie() <= other.tie(); }
+bool ColourGradient::operator>  (const ColourGradient& other) const noexcept { return tie() >  other.tie(); }
+bool ColourGradient::operator>= (const ColourGradient& other) const noexcept { return tie() >= other.tie(); }
 
 //==============================================================================
 void ColourGradient::clearColours()
@@ -263,17 +289,6 @@ bool ColourGradient::isInvisible() const noexcept
             return false;
 
     return true;
-}
-
-bool ColourGradient::ColourPoint::operator== (ColourPoint other) const noexcept
-{
-    const auto tie = [] (const ColourPoint& p) { return std::tie (p.position, p.colour); };
-    return tie (*this) == tie (other);
-}
-
-bool ColourGradient::ColourPoint::operator!= (ColourPoint other) const noexcept
-{
-    return ! operator== (other);
 }
 
 } // namespace juce

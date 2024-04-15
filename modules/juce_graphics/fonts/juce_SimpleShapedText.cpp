@@ -322,12 +322,12 @@ private:
 };
 
 /*  Returns glyphs in logical order as that favours wrapping. */
-static auto lowLevelShape (const String& string,
-                           Range<int64> range,
-                           const Font& font,
-                           TextScript script,
-                           const String& language,
-                           TextDirection direction)
+static std::vector<ShapedGlyph> lowLevelShape (const String& string,
+                                               Range<int64> range,
+                                               const Font& font,
+                                               TextScript script,
+                                               const String& language,
+                                               TextDirection direction)
 {
     HbBuffer buffer { hb_buffer_create() };
     hb_buffer_clear_contents (buffer.get());
@@ -430,6 +430,12 @@ static auto lowLevelShape (const String& string,
     hb_buffer_guess_segment_properties (buffer.get());
 
     auto nativeFont = font.getNativeDetails().font;
+
+    if (nativeFont == nullptr)
+    {
+        jassertfalse;
+        return {};
+    }
 
     hb_shape (nativeFont.get(), buffer.get(), features.data(), (unsigned int) features.size());
 

@@ -272,7 +272,7 @@ void CoreGraphicsContext::addTransform (const AffineTransform& transform)
     jassert (getPhysicalPixelScaleFactor() > 0.0f);
 }
 
-float CoreGraphicsContext::getPhysicalPixelScaleFactor()
+float CoreGraphicsContext::getPhysicalPixelScaleFactor() const
 {
     auto t = CGContextGetUserSpaceToDeviceSpaceTransform (context.get());
     auto determinant = (t.a * t.d) - (t.c * t.b);

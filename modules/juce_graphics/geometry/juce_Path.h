@@ -724,7 +724,6 @@ public:
     */
     bool isUsingNonZeroWinding() const                  { return useNonZeroWinding; }
 
-
     //==============================================================================
     /** Iterates the lines and curves that a path contains.
 
@@ -735,7 +734,6 @@ public:
     public:
         //==============================================================================
         Iterator (const Path& path) noexcept;
-        ~Iterator() noexcept;
 
         //==============================================================================
         /** Moves onto the next element in the path.

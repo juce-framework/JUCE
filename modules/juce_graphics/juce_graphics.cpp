@@ -55,18 +55,44 @@
  #include <CoreText/CTFont.h>
 
 #elif JUCE_WINDOWS
-  // get rid of some warnings in Window's own headers
+ // get rid of some warnings in Window's own headers
  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4458)
 
- #include <d2d1.h>
- #include <dwrite_3.h>
+ /* If you hit a compile error trying to include these files, you may need to update
+    your version of the Windows SDK to the latest one. The DirectWrite and Direct2D
+    headers are in the version 8 SDKs.
 
- #if JUCE_MINGW
-  #include <malloc.h>
-  #include <cstdio>
- #endif
+    Need Direct2D 1.3 for sprite batching
+ */
+
+ #include <d2d1_3.h>
+ #include <d3d11_2.h>
+ #include <dcomp.h>
+ #include <dwrite_3.h>
+ #include <dxgi1_3.h>
+ #include <processthreadsapi.h>
+
+ #if JUCE_ETW_TRACELOGGING
+  #include <evntrace.h>
+  #include <TraceLoggingProvider.h>
+
+  TRACELOGGING_DEFINE_PROVIDER (JUCETraceLogProvider,
+                                "JUCETraceLogProvider",
+                                // {6A612E78-284D-4DDB-877A-5F521EB33132}
+                                (0x6a612e78, 0x284d, 0x4ddb, 0x87, 0x7a, 0x5f, 0x52, 0x1e, 0xb3, 0x31, 0x32));
+
+#endif
 
  JUCE_END_IGNORE_WARNINGS_MSVC
+
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+  #pragma comment(lib, "Dwrite.lib")
+  #pragma comment(lib, "D2d1.lib")
+  #pragma comment(lib, "DXGI.lib")
+  #pragma comment(lib, "D3D11.lib")
+  #pragma comment(lib, "DComp.lib")
+  #pragma comment(lib, "dxguid.lib")
+ #endif
 
 #elif JUCE_IOS
  #import <QuartzCore/QuartzCore.h>
@@ -120,6 +146,7 @@
 
 //==============================================================================
 #include "fonts/juce_FunctionPointerDestructor.h"
+#include "native/juce_EventTracing.h"
 
 #include "unicode/juce_UnicodeScript.h"
 #include "unicode/juce_Unicode.h"
@@ -179,11 +206,18 @@
  #include "native/juce_IconHelpers_mac.cpp"
 
 #elif JUCE_WINDOWS
+ #include "native/juce_DirectX_windows.h"
  #include "native/juce_DirectWriteTypeface_windows.cpp"
  #include "native/juce_IconHelpers_windows.cpp"
- #if JUCE_DIRECT2D
-  #include "native/juce_Direct2DGraphicsContext_windows.cpp"
- #endif
+ #include "native/juce_Direct2DHelpers_windows.cpp"
+ #include "native/juce_Direct2DResources_windows.cpp"
+ #include "native/juce_Direct2DImage_windows.h"
+ #include "native/juce_Direct2DGraphicsContext_windows.cpp"
+ #include "native/juce_Direct2DHwndContext_windows.cpp"
+ #include "native/juce_Direct2DImageContext_windows.h"
+ #include "native/juce_Direct2DImageContext_windows.cpp"
+ #include "native/juce_Direct2DImage_windows.cpp"
+ #include "native/juce_Direct2DMetrics_windows.cpp"
 
 #elif JUCE_LINUX || JUCE_BSD
  #include "native/juce_Fonts_linux.cpp"

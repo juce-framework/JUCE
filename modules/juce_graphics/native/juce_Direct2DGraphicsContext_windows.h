@@ -35,23 +35,18 @@
 namespace juce
 {
 
-#ifndef _WINDEF_
-class HWND__; // Forward or never
-typedef HWND__* HWND;
-#endif
-
-class Direct2DLowLevelGraphicsContext   : public LowLevelGraphicsContext
+class Direct2DGraphicsContext : public LowLevelGraphicsContext
 {
 public:
-    Direct2DLowLevelGraphicsContext (HWND);
-    ~Direct2DLowLevelGraphicsContext();
+    Direct2DGraphicsContext();
+    ~Direct2DGraphicsContext() override;
 
     //==============================================================================
     bool isVectorDevice() const override { return false; }
 
     void setOrigin (Point<int>) override;
     void addTransform (const AffineTransform&) override;
-    float getPhysicalPixelScaleFactor() override;
+    float getPhysicalPixelScaleFactor() const override;
     bool clipToRectangle (const Rectangle<int>&) override;
     bool clipToRectangleList (const RectangleList<int>&) override;
     void excludeClipRectangle (const Rectangle<int>&) override;
@@ -83,29 +78,101 @@ public:
     void drawLine (const Line<float>&) override;
     void setFont (const Font&) override;
     const Font& getFont() override;
-    void drawGlyph (int glyphNumber, const AffineTransform&) override;
-
-    void resized();
-    void clear();
-
-    void start();
-    void end();
+    void drawGlyphs (Span<const uint16_t>,
+                     Span<const Point<float>>,
+                     const AffineTransform&) override;
 
     //==============================================================================
-private:
+    // These methods were not originally part of the LowLevelGraphicsContext; they
+    // were added because Direct2D supports these drawing primitives directly.
+    // The specialised functions are more efficient than emulating the same behaviour, e.g.
+    // by drawing paths.
+    void drawLineWithThickness (const Line<float>&, float) override;
+
+    void drawEllipse (const Rectangle<float>& area, float lineThickness) override;
+    void fillEllipse (const Rectangle<float>& area) override;
+
+    void drawRect (const Rectangle<float>&, float) override;
+    void strokePath (const Path&, const PathStrokeType& strokeType, const AffineTransform&) override;
+
+    void drawRoundedRectangle (const Rectangle<float>& area, float cornerSize, float lineThickness) override;
+    void fillRoundedRectangle (const Rectangle<float>& area, float cornerSize) override;
+
+    //==============================================================================
+    bool startFrame();
+    void endFrame();
+
+    virtual Image createSnapshot() const { return {}; }
+
+    uint64_t getFrameId() const override { return frame; }
+
+    Direct2DMetrics::Ptr metrics;
+
+    //==============================================================================
+    // Min & max frame sizes; same as Direct3D texture size limits
+    static int constexpr minFrameSize = 1;
+    static int constexpr maxFrameSize = 16384;
+
+    //==============================================================================
+    void setPhysicalPixelScaleFactor (float);
+
+protected:
     struct SavedState;
+    SavedState* currentState = nullptr;
 
-    HWND hwnd;
+    class PendingClipList
+    {
+    public:
+        void clipTo (Rectangle<float> i)
+        {
+            list.clipTo (i);
+        }
 
-    SavedState* currentState;
-    OwnedArray<SavedState> states;
+        template <typename Numeric>
+        void clipTo (const RectangleList<Numeric>& other)
+        {
+            list.clipTo (other);
+        }
 
-    Rectangle<int> bounds;
+        void subtract (Rectangle<float> i)
+        {
+            list.subtract (i);
+        }
+
+        RectangleList<float> getList() const { return list; }
+
+        void reset (Rectangle<float> maxBounds)
+        {
+            list = maxBounds;
+        }
+
+    private:
+        RectangleList<float> list;
+    };
+
+    PendingClipList pendingClipList;
 
     struct Pimpl;
-    std::unique_ptr<Pimpl> pimpl;
+    virtual Pimpl* getPimpl() const noexcept = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Direct2DLowLevelGraphicsContext)
+    void resetPendingClipList();
+    void applyPendingClipList();
+    virtual void clearTargetBuffer() = 0;
+
+    struct ScopedTransform
+    {
+        ScopedTransform (Pimpl&, SavedState*);
+        ScopedTransform (Pimpl&, SavedState*, const AffineTransform& transform);
+        ~ScopedTransform();
+
+        Pimpl& pimpl;
+        SavedState* state = nullptr;
+    };
+
+    uint64_t frame = 0;
+    float scale = 1.0f;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Direct2DGraphicsContext)
 };
 
 } // namespace juce

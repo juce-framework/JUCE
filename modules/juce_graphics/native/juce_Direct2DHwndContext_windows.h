@@ -35,25 +35,39 @@
 namespace juce
 {
 
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image)
-    : RenderingHelpers::StackBasedLowLevelGraphicsContext<RenderingHelpers::SoftwareRendererSavedState>
-        (new RenderingHelpers::SoftwareRendererSavedState (image, image.getBounds()))
+class Direct2DHwndContext : public Direct2DGraphicsContext
 {
-    JUCE_TRACE_LOG_PAINT_CALL (etw::startGDIImage, getFrameId());
-}
+public:
+    Direct2DHwndContext (void* windowHandle, bool opaque);
+    ~Direct2DHwndContext() override;
 
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, Point<int> origin,
-                                                                    const RectangleList<int>& initialClip)
-    : RenderingHelpers::StackBasedLowLevelGraphicsContext<RenderingHelpers::SoftwareRendererSavedState>
-        (new RenderingHelpers::SoftwareRendererSavedState (image, initialClip, origin))
-{
+    void* getHwnd() const noexcept;
+    void handleShowWindow();
+    void setWindowAlpha (float alpha);
 
-    JUCE_TRACE_EVENT_INT_RECT_LIST (etw::startGDIFrame, etw::softwareRendererKeyword, getFrameId(), initialClip);
-}
+    void startResizing();
+    void finishResizing();
+    void setSize (int width, int height);
+    void updateSize();
 
-LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()
-{
-    JUCE_TRACE_LOG_PAINT_CALL (etw::endGDIFrame, getFrameId());
-}
+    void addDeferredRepaint (Rectangle<int> deferredRepaint);
+    void addInvalidWindowRegionToDeferredRepaints();
+
+    Image createSnapshot() const override;
+
+    static Colour getBackgroundTransparencyKeyColour() noexcept
+    {
+        return Colour { 0xff000001 };
+    }
+
+private:
+    struct HwndPimpl;
+    std::unique_ptr<HwndPimpl> pimpl;
+
+    Pimpl* getPimpl() const noexcept override;
+    void clearTargetBuffer() override;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Direct2DHwndContext)
+};
 
 } // namespace juce

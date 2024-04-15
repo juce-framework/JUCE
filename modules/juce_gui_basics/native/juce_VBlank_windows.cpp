@@ -105,7 +105,6 @@ public:
                             [&listener] (const auto& l) { return &(l.get()) == &listener; });
     }
 
-    //==============================================================================
     static HMONITOR getMonitorFromOutput (ComSmartPtr<IDXGIOutput> output)
     {
         DXGI_OUTPUT_DESC desc = {};
@@ -219,12 +218,13 @@ public:
         if (threadWithListener != threads.end())
             removeListener (threadWithListener, listener);
 
-        for (auto adapter : adapters)
+        SharedResourcePointer<DirectX> directX;
+        for (const auto& adapter : directX->adapters.getAdapterArray())
         {
             UINT i = 0;
             ComSmartPtr<IDXGIOutput> output;
 
-            while (adapter->EnumOutputs (i, output.resetAndGetPointerAddress()) != DXGI_ERROR_NOT_FOUND)
+            while (adapter->dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress()) != DXGI_ERROR_NOT_FOUND)
             {
                 if (VBlankThread::getMonitorFromOutput (output) == monitor)
                 {
@@ -246,21 +246,8 @@ public:
 
     void reconfigureDisplays()
     {
-        adapters.clear();
-
-        ComSmartPtr<IDXGIFactory> factory;
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-        CreateDXGIFactory (__uuidof (IDXGIFactory), (void**)factory.resetAndGetPointerAddress());
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-        UINT i = 0;
-        ComSmartPtr<IDXGIAdapter> adapter;
-
-        while (factory->EnumAdapters (i, adapter.resetAndGetPointerAddress()) != DXGI_ERROR_NOT_FOUND)
-        {
-            adapters.push_back (adapter);
-            ++i;
-        }
+        SharedResourcePointer<DirectX> directX;
+        directX->adapters.updateAdapters();
 
         for (auto& thread : threads)
             thread->updateMonitor();
@@ -304,7 +291,6 @@ private:
     }
 
     //==============================================================================
-    std::vector<ComSmartPtr<IDXGIAdapter>> adapters;
     Threads threads;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VBlankDispatcher)

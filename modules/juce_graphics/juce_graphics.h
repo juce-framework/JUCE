@@ -78,15 +78,6 @@
  #define JUCE_USE_COREIMAGE_LOADER 1
 #endif
 
-/** Config: JUCE_USE_DIRECTWRITE
-
-    Enabling this flag means that DirectWrite will be used when available for font
-    management and layout.
-*/
-#ifndef JUCE_USE_DIRECTWRITE
- #define JUCE_USE_DIRECTWRITE 1
-#endif
-
 /** Config: JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
 
     Setting this flag will turn off CoreGraphics font smoothing on macOS, which some people
@@ -165,6 +156,8 @@ namespace juce
  #include "native/juce_CoreGraphicsContext_mac.h"
 #endif
 
-#if JUCE_DIRECT2D && JUCE_WINDOWS
-#include "native/juce_Direct2DGraphicsContext_windows.h"
+#if JUCE_WINDOWS
+ #include "native/juce_Direct2DMetrics_windows.h"
+ #include "native/juce_Direct2DGraphicsContext_windows.h"
+ #include "native/juce_Direct2DHwndContext_windows.h"
 #endif

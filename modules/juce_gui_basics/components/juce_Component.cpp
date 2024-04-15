@@ -505,67 +505,6 @@ bool Component::isOpaque() const noexcept
 }
 
 //==============================================================================
-struct StandardCachedComponentImage final : public CachedComponentImage
-{
-    StandardCachedComponentImage (Component& c) noexcept : owner (c)  {}
-
-    void paint (Graphics& g) override
-    {
-        scale = g.getInternalContext().getPhysicalPixelScaleFactor();
-        auto compBounds = owner.getLocalBounds();
-        auto imageBounds = compBounds * scale;
-
-        if (image.isNull() || image.getBounds() != imageBounds)
-        {
-            image = Image (owner.isOpaque() ? Image::RGB
-                                            : Image::ARGB,
-                           jmax (1, imageBounds.getWidth()),
-                           jmax (1, imageBounds.getHeight()),
-                           ! owner.isOpaque());
-
-            validArea.clear();
-        }
-
-        if (! validArea.containsRectangle (compBounds))
-        {
-            Graphics imG (image);
-            auto& lg = imG.getInternalContext();
-
-            lg.addTransform (AffineTransform::scale (scale));
-
-            for (auto& i : validArea)
-                lg.excludeClipRectangle (i);
-
-            if (! owner.isOpaque())
-            {
-                lg.setFill (Colours::transparentBlack);
-                lg.fillRect (compBounds, true);
-                lg.setFill (Colours::black);
-            }
-
-            owner.paintEntireComponent (imG, true);
-        }
-
-        validArea = compBounds;
-
-        g.setColour (Colours::black.withAlpha (owner.getAlpha()));
-        g.drawImageTransformed (image, AffineTransform::scale ((float) compBounds.getWidth()  / (float) imageBounds.getWidth(),
-                                                               (float) compBounds.getHeight() / (float) imageBounds.getHeight()), false);
-    }
-
-    bool invalidateAll() override                            { validArea.clear(); return true; }
-    bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); return true; }
-    void releaseResources() override                         { image = Image(); }
-
-private:
-    Image image;
-    RectangleList<int> validArea;
-    Component& owner;
-    float scale = 1.0f;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandardCachedComponentImage)
-};
-
 void Component::setCachedComponentImage (CachedComponentImage* newCachedImage)
 {
     if (cachedImage.get() != newCachedImage)
@@ -581,12 +520,12 @@ void Component::setBufferedToImage (bool shouldBeBuffered)
     // so by calling setBufferedToImage, you'll be deleting the custom one - this is almost certainly
     // not what you wanted to happen... If you really do know what you're doing here, and want to
     // avoid this assertion, just call setCachedComponentImage (nullptr) before setBufferedToImage().
-    jassert (cachedImage == nullptr || dynamic_cast<StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
+    jassert (cachedImage == nullptr || dynamic_cast<detail::StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
 
     if (shouldBeBuffered)
     {
         if (cachedImage == nullptr)
-            cachedImage.reset (new StandardCachedComponentImage (*this));
+            cachedImage = std::make_unique<detail::StandardCachedComponentImage> (*this);
     }
     else
     {
@@ -1673,6 +1612,20 @@ void Component::paintWithinParentContext (Graphics& g)
 
 void Component::paintComponentAndChildren (Graphics& g)
 {
+   #if JUCE_ETW_TRACELOGGING
+    {
+        int depth = 0;
+        auto parent = getParentComponent();
+        while (parent)
+        {
+            parent = parent->getParentComponent();
+            depth++;
+        }
+
+        JUCE_TRACE_LOG_PAINT_COMPONENT_AND_CHILDREN (depth);
+    }
+   #endif
+
     auto clipBounds = g.getClipBounds();
 
     if (flags.dontClipGraphicsFlag && getNumChildComponents() == 0)
@@ -1756,12 +1709,25 @@ void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
 
         auto scaledBounds = getLocalBounds() * scale;
 
-        Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                           scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag);
+        // Store the effect image in the image cache to avoid recreating it every time
+        auto imageFormat = flags.opaqueFlag ? Image::RGB : Image::ARGB;
+        int64 imageHashCode = scaledBounds.getWidth() | ((int64) scaledBounds.getHeight() << 24) | ((int64) imageFormat << 56);
+        auto effectImage = ImageCache::getFromHashCode (imageHashCode);
+
+        if (effectImage.isNull())
+        {
+            effectImage = Image { imageFormat, scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag };
+            ImageCache::addImageToCache (effectImage, imageHashCode);
+        }
+
+        effectImage.clear (effectImage.getBounds(), (imageFormat == Image::ARGB) ? Colours::transparentBlack : Colours::black);
+
         {
             Graphics g2 (effectImage);
+
             g2.addTransform (AffineTransform::scale ((float) scaledBounds.getWidth()  / (float) getWidth(),
                                                      (float) scaledBounds.getHeight() / (float) getHeight()));
+
             paintComponentAndChildren (g2);
         }
 

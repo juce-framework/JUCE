@@ -88,7 +88,7 @@ public:
 
     void setOrigin (Point<int>) override;
     void addTransform (const AffineTransform&) override;
-    float getPhysicalPixelScaleFactor() override;
+    float getPhysicalPixelScaleFactor() const override;
     bool clipToRectangle (const Rectangle<int>&) override;
     bool clipToRectangleList (const RectangleList<int>&) override;
     void excludeClipRectangle (const Rectangle<int>&) override;
@@ -124,6 +124,8 @@ public:
     void drawGlyphs (Span<const uint16_t>,
                      Span<const Point<float>>,
                      const AffineTransform&) override;
+
+    uint64_t getFrameId() const override { return 0; }
 
 private:
     //==============================================================================

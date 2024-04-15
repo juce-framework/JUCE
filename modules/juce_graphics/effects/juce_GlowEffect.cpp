@@ -35,8 +35,8 @@
 namespace juce
 {
 
-GlowEffect::GlowEffect() {}
-GlowEffect::~GlowEffect() {}
+GlowEffect::GlowEffect() = default;
+GlowEffect::~GlowEffect() = default;
 
 void GlowEffect::setGlowProperties (float newRadius, Colour newColour, Point<int> pos)
 {
@@ -47,17 +47,10 @@ void GlowEffect::setGlowProperties (float newRadius, Colour newColour, Point<int
 
 void GlowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor, float alpha)
 {
-    Image temp (image.getFormat(), image.getWidth(), image.getHeight(), true);
-
-    ImageConvolutionKernel blurKernel (roundToInt (radius * scaleFactor * 2.0f));
-
-    blurKernel.createGaussianBlur (radius);
-    blurKernel.rescaleAllValues (radius);
-
-    blurKernel.applyToImage (temp, image, image.getBounds());
+    image.applyGaussianBlurEffect (radius * scaleFactor, cachedImage);
 
     g.setColour (colour.withMultipliedAlpha (alpha));
-    g.drawImageAt (temp, offset.x, offset.y, true);
+    g.drawImageAt (cachedImage, offset.x, offset.y, true);
 
     g.setOpacity (alpha);
     g.drawImageAt (image, offset.x, offset.y, false);

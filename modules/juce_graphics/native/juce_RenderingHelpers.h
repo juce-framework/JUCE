@@ -131,18 +131,35 @@ public:
         return r + offset.toFloat();
     }
 
-    template <typename RectangleOrPoint>
-    RectangleOrPoint transformed (RectangleOrPoint r) const noexcept
+    auto boundsAfterTransform (Rectangle<float> r) const noexcept
     {
         jassert (! isOnlyTranslated);
         return r.transformedBy (complexTransform);
     }
 
-    template <typename Type>
-    Rectangle<Type> deviceSpaceToUserSpace (Rectangle<Type> r) const noexcept
+    auto transformed (Point<float> r) const noexcept
     {
-        return isOnlyTranslated ? r - offset
-                                : r.transformedBy (complexTransform.inverted());
+        jassert (! isOnlyTranslated);
+        return r.transformedBy (complexTransform);
+    }
+
+    auto boundsAfterTransform (const RectangleList<float>& r) const noexcept
+    {
+        jassert (! isOnlyTranslated);
+        return boundsAfterTransform (r.getBounds());
+    }
+
+    auto boundsAfterTransform (Line<float> r) const noexcept
+    {
+        jassert (! isOnlyTranslated);
+        return Line { transformed (r.getStart()), transformed (r.getEnd()) };
+    }
+
+    template <typename Type>
+    Rectangle<float> deviceSpaceToUserSpace (Rectangle<Type> r) const noexcept
+    {
+        return isOnlyTranslated ? r.toFloat() - offset.toFloat()
+                                : r.toFloat().transformedBy (complexTransform.inverted());
     }
 
     AffineTransform complexTransform;
@@ -2007,11 +2024,6 @@ public:
                 cloneClipIfMultiplyReferenced();
                 clip = clip->clipToRectangle (transform.translated (r));
             }
-            else if (! transform.isRotated)
-            {
-                cloneClipIfMultiplyReferenced();
-                clip = clip->clipToRectangle (transform.transformed (r));
-            }
             else
             {
                 Path p;
@@ -2041,16 +2053,6 @@ public:
                     offsetList.offsetAll (transform.offset);
                     clip = clip->clipToRectangleList (offsetList);
                 }
-            }
-            else if (! transform.isRotated)
-            {
-                cloneClipIfMultiplyReferenced();
-                RectangleList<int> scaledList;
-
-                for (auto& i : r)
-                    scaledList.add (transform.transformed (i));
-
-                clip = clip->clipToRectangleList (scaledList);
             }
             else
             {
@@ -2083,7 +2085,7 @@ public:
             }
             else if (! transform.isRotated)
             {
-                clip = clip->excludeClipRectangle (getLargestIntegerWithin (transform.transformed (r.toFloat())));
+                clip = clip->excludeClipRectangle (getLargestIntegerWithin (transform.boundsAfterTransform (r.toFloat())));
             }
             else
             {
@@ -2141,7 +2143,7 @@ public:
 
     Rectangle<int> getClipBounds() const
     {
-        return clip != nullptr ? transform.deviceSpaceToUserSpace (clip->getClipBounds())
+        return clip != nullptr ? transform.deviceSpaceToUserSpace (clip->getClipBounds()).getSmallestIntegerContainer()
                                : Rectangle<int>();
     }
 
@@ -2198,11 +2200,12 @@ public:
             }
             else if (! transform.isRotated)
             {
-                fillTargetRect (transform.transformed (r), replaceContents);
+                jassert (! replaceContents); // not implemented
+                fillTargetRect (transform.boundsAfterTransform (r.toFloat()));
             }
             else
             {
-                jassert (! replaceContents); // not implemented..
+                jassert (! replaceContents); // not implemented
                 fillRectAsPath (r);
             }
         }
@@ -2215,7 +2218,7 @@ public:
             if (transform.isOnlyTranslated)
                 fillTargetRect (transform.translated (r));
             else if (! transform.isRotated)
-                fillTargetRect (transform.transformed (r));
+                fillTargetRect (transform.boundsAfterTransform (r));
             else
                 fillRectAsPath (r);
         }
@@ -2575,13 +2578,18 @@ template <class SavedStateType>
 class StackBasedLowLevelGraphicsContext  : public LowLevelGraphicsContext
 {
 public:
+    explicit StackBasedLowLevelGraphicsContext (uint64_t frameIn)
+        : frame (frameIn)
+    {
+    }
+
     bool isVectorDevice()                                              const override { return false; }
     Rectangle<int> getClipBounds()                                     const override { return stack->getClipBounds(); }
     bool isClipEmpty()                                                 const override { return stack->clip == nullptr; }
 
     void setOrigin (Point<int> o)                                            override { stack->transform.setOrigin (o); }
     void addTransform (const AffineTransform& t)                             override { stack->transform.addTransform (t); }
-    float getPhysicalPixelScaleFactor()                                      override { return stack->transform.getPhysicalPixelScaleFactor(); }
+    float getPhysicalPixelScaleFactor() const                                override { return stack->transform.getPhysicalPixelScaleFactor(); }
     bool clipRegionIntersects (const Rectangle<int>& r)                      override { return stack->clipRegionIntersects (r); }
     bool clipToRectangle (const Rectangle<int>& r)                           override { return stack->clipToRectangle (r); }
     bool clipToRectangleList (const RectangleList<int>& r)                   override { return stack->clipToRectangleList (r); }
@@ -2603,6 +2611,7 @@ public:
     void drawLine (const Line<float>& line)                                  override { stack->drawLine (line); }
     void setFont (const Font& newFont)                                       override { stack->font = newFont; }
     const Font& getFont()                                                    override { return stack->font; }
+    uint64_t getFrameId()                                              const override { return frame; }
 
     void drawGlyphs (Span<const uint16_t> glyphs,
                      Span<const Point<float>> positions,
@@ -2627,7 +2636,7 @@ protected:
                 auto& cache = RenderingHelpers::GlyphCache::getInstance();
                 const Point pos (t.getTranslationX(), t.getTranslationY());
 
-                if (stack->transform.isOnlyTranslated)
+                if (this->stack->transform.isOnlyTranslated)
                 {
                     const auto drawPos = pos + stack->transform.offset.toFloat();
                     return std::tuple (cache.get (stack->font, i), drawPos);
@@ -2653,7 +2662,7 @@ protected:
         }();
 
         const auto initialFill = stack->fillType;
-        const ScopeGuard scope { [&] { stack->setFillType (initialFill); } };
+        const ScopeGuard scope { [&] { this->stack->setFillType (initialFill); } };
 
         for (const auto& layer : layers)
         {
@@ -2683,6 +2692,7 @@ protected:
     StackBasedLowLevelGraphicsContext() = default;
 
     RenderingHelpers::SavedStateStack<SavedStateType> stack;
+    uint64_t frame = 0;
 };
 
 JUCE_END_IGNORE_WARNINGS_MSVC

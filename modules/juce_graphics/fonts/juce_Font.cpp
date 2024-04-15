@@ -774,6 +774,10 @@ static bool characterNotRendered (uint32_t c)
 static bool isFontSuitableForCodepoint (const Font& font, juce_wchar c)
 {
     const auto& hbFont = font.getNativeDetails().font;
+
+    if (hbFont == nullptr)
+        return false;
+
     hb_codepoint_t glyph{};
 
     return characterNotRendered ((uint32_t) c)

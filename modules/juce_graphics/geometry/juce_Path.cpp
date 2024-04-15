@@ -77,9 +77,7 @@ static bool isMarker (float value, float marker) noexcept
 }
 
 //==============================================================================
-Path::PathBounds::PathBounds() noexcept
-{
-}
+Path::PathBounds::PathBounds() noexcept = default;
 
 Rectangle<float> Path::PathBounds::getRectangle() const noexcept
 {
@@ -88,7 +86,7 @@ Rectangle<float> Path::PathBounds::getRectangle() const noexcept
 
 void Path::PathBounds::reset() noexcept
 {
-    pathXMin = pathYMin = pathYMax = pathXMax = 0;
+    *this = {};
 }
 
 void Path::PathBounds::reset (float x, float y) noexcept
@@ -107,13 +105,9 @@ void Path::PathBounds::extend (float x, float y) noexcept
 }
 
 //==============================================================================
-Path::Path()
-{
-}
+Path::Path() = default;
 
-Path::~Path()
-{
-}
+Path::~Path() = default;
 
 Path::Path (const Path& other)
     : data (other.data),
@@ -124,32 +118,31 @@ Path::Path (const Path& other)
 
 Path& Path::operator= (const Path& other)
 {
-    if (this != &other)
-    {
-        data = other.data;
-        bounds = other.bounds;
-        useNonZeroWinding = other.useNonZeroWinding;
-    }
-
+    auto copy = other;
+    *this = std::move (copy);
     return *this;
 }
 
 Path::Path (Path&& other) noexcept
-    : data (std::move (other.data)),
-      bounds (other.bounds),
-      useNonZeroWinding (other.useNonZeroWinding)
+    : data (std::exchange (other.data, {})),
+      bounds (std::exchange (other.bounds, {})),
+      useNonZeroWinding (std::exchange (other.useNonZeroWinding, {}))
 {
 }
 
 Path& Path::operator= (Path&& other) noexcept
 {
-    data = std::move (other.data);
-    bounds = other.bounds;
-    useNonZeroWinding = other.useNonZeroWinding;
+    auto copy = std::move (other);
+    swapWithPath (copy);
     return *this;
 }
 
-bool Path::operator== (const Path& other) const noexcept    { return useNonZeroWinding == other.useNonZeroWinding && data == other.data; }
+bool Path::operator== (const Path& other) const noexcept
+{
+    const auto tie = [] (const auto& x) { return std::tie (x.useNonZeroWinding, x.data); };
+    return tie (*this) == tie (other);
+}
+
 bool Path::operator!= (const Path& other) const noexcept    { return ! operator== (other); }
 
 void Path::clear() noexcept
@@ -161,10 +154,7 @@ void Path::clear() noexcept
 void Path::swapWithPath (Path& other) noexcept
 {
     data.swapWith (other.data);
-    std::swap (bounds.pathXMin, other.bounds.pathXMin);
-    std::swap (bounds.pathXMax, other.bounds.pathXMax);
-    std::swap (bounds.pathYMin, other.bounds.pathYMin);
-    std::swap (bounds.pathYMax, other.bounds.pathYMax);
+    std::swap (bounds, other.bounds);
     std::swap (useNonZeroWinding, other.useNonZeroWinding);
 }
 
@@ -967,8 +957,8 @@ bool Path::contains (float x, float y, float tolerance) const
         }
     }
 
-    return useNonZeroWinding ? (negativeCrossings != positiveCrossings)
-                             : ((negativeCrossings + positiveCrossings) & 1) != 0;
+    return isUsingNonZeroWinding() ? (negativeCrossings != positiveCrossings)
+                                   : ((negativeCrossings + positiveCrossings) & 1) != 0;
 }
 
 bool Path::contains (Point<float> point, float tolerance) const
@@ -1279,11 +1269,11 @@ void Path::loadPathFromStream (InputStream& source)
             break;
 
         case 'n':
-            useNonZeroWinding = true;
+            setUsingNonZeroWinding (true);
             break;
 
         case 'z':
-            useNonZeroWinding = false;
+            setUsingNonZeroWinding (false);
             break;
 
         case 'e':
@@ -1304,7 +1294,7 @@ void Path::loadPathFromData (const void* const pathData, const size_t numberOfBy
 
 void Path::writePathToStream (OutputStream& dest) const
 {
-    dest.writeByte (useNonZeroWinding ? 'n' : 'z');
+    dest.writeByte (isUsingNonZeroWinding() ? 'n' : 'z');
 
     for (auto* i = data.begin(); i != data.end();)
     {
@@ -1352,7 +1342,7 @@ void Path::writePathToStream (OutputStream& dest) const
 String Path::toString() const
 {
     MemoryOutputStream s (2048);
-    if (! useNonZeroWinding)
+    if (! isUsingNonZeroWinding())
         s << 'a';
 
     float lastMarker = 0.0f;
@@ -1486,10 +1476,6 @@ void Path::restoreFromString (StringRef stringVersion)
 //==============================================================================
 Path::Iterator::Iterator (const Path& p) noexcept
     : elementType (startNewSubPath), path (p), index (path.data.begin())
-{
-}
-
-Path::Iterator::~Iterator() noexcept
 {
 }
 

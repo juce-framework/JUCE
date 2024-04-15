@@ -35,6 +35,96 @@
 namespace juce
 {
 
+struct BitmapDataDetail
+{
+    BitmapDataDetail() = delete;
+
+    static void convert (const Image::BitmapData& src, Image::BitmapData& dest)
+    {
+        jassert (src.width == dest.width);
+        jassert (src.height == dest.height);
+
+        if (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat)
+        {
+            for (int y = 0; y < dest.height; ++y)
+                memcpy (dest.getLinePointer (y), src.getLinePointer (y), (size_t) dest.pixelStride * (size_t) dest.width);
+        }
+        else
+        {
+            for (int y = 0; y < dest.height; ++y)
+                for (int x = 0; x < dest.width; ++x)
+                    dest.setPixelColour (x, y, src.getPixelColour (x, y));
+        }
+    }
+
+    static Image convert (const Image::BitmapData& src, const ImageType& type)
+    {
+        Image result (type.create (src.pixelFormat, src.width, src.height, false));
+
+        {
+            Image::BitmapData dest (result, Image::BitmapData::writeOnly);
+            BitmapDataDetail::convert (src, dest);
+        }
+
+        return result;
+    }
+};
+
+class SubsectionPixelData : public ImagePixelData
+{
+public:
+    SubsectionPixelData (ImagePixelData::Ptr source, Rectangle<int> r)
+        : ImagePixelData (source->pixelFormat, r.getWidth(), r.getHeight()),
+          sourceImage (std::move (source)),
+          area (r)
+    {
+    }
+
+    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
+    {
+        auto g = sourceImage->createLowLevelContext();
+        g->clipToRectangle (area);
+        g->setOrigin (area.getPosition());
+        return g;
+    }
+
+    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+    {
+        sourceImage->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
+
+        if (mode != Image::BitmapData::readOnly)
+            sendDataChangeMessage();
+    }
+
+    ImagePixelData::Ptr clone() override
+    {
+        jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
+        auto type = createType();
+
+        Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
+
+        {
+            Graphics g (newImage);
+            g.drawImageAt (Image (*this), 0, 0);
+        }
+
+        return *newImage.getPixelData();
+    }
+
+    std::unique_ptr<ImageType> createType() const override { return sourceImage->createType(); }
+
+    /* as we always hold a reference to image, don't double count */
+    int getSharedCount() const noexcept override { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
+
+private:
+    friend class Image;
+    const ImagePixelData::Ptr sourceImage;
+    const Rectangle<int> area;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubsectionPixelData)
+};
+
+//==============================================================================
 ImagePixelData::ImagePixelData (Image::PixelFormat format, int w, int h)
     : pixelFormat (format), width (w), height (h)
 {
@@ -57,9 +147,14 @@ int ImagePixelData::getSharedCount() const noexcept
     return getReferenceCount();
 }
 
+void ImagePixelData::applyGaussianBlurEffect ([[maybe_unused]] float radius, Image& result)
+{
+    result = {};
+}
+
 //==============================================================================
-ImageType::ImageType() {}
-ImageType::~ImageType() {}
+ImageType::ImageType() = default;
+ImageType::~ImageType() = default;
 
 Image ImageType::convert (const Image& source) const
 {
@@ -68,26 +163,14 @@ Image ImageType::convert (const Image& source) const
 
     const Image::BitmapData src (source, Image::BitmapData::readOnly);
 
-    Image newImage (create (src.pixelFormat, src.width, src.height, false));
-    Image::BitmapData dest (newImage, Image::BitmapData::writeOnly);
+    if (src.data == nullptr)
+        return {};
 
-    if (src.pixelStride == dest.pixelStride && src.pixelFormat == dest.pixelFormat)
-    {
-        for (int y = 0; y < dest.height; ++y)
-            memcpy (dest.getLinePointer (y), src.getLinePointer (y), (size_t) dest.lineStride);
-    }
-    else
-    {
-        for (int y = 0; y < dest.height; ++y)
-            for (int x = 0; x < dest.width; ++x)
-                dest.setPixelColour (x, y, src.getPixelColour (x, y));
-    }
-
-    return newImage;
+    return BitmapDataDetail::convert (src, *this);
 }
 
 //==============================================================================
-class SoftwarePixelData final : public ImagePixelData
+class SoftwarePixelData : public ImagePixelData
 {
 public:
     SoftwarePixelData (Image::PixelFormat formatToUse, int w, int h, bool clearImage)
@@ -133,8 +216,8 @@ private:
     JUCE_LEAK_DETECTOR (SoftwarePixelData)
 };
 
-SoftwareImageType::SoftwareImageType() {}
-SoftwareImageType::~SoftwareImageType() {}
+SoftwareImageType::SoftwareImageType() = default;
+SoftwareImageType::~SoftwareImageType() = default;
 
 ImagePixelData::Ptr SoftwareImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
@@ -147,15 +230,15 @@ int SoftwareImageType::getTypeID() const
 }
 
 //==============================================================================
-NativeImageType::NativeImageType() {}
-NativeImageType::~NativeImageType() {}
+NativeImageType::NativeImageType() = default;
+NativeImageType::~NativeImageType() = default;
 
 int NativeImageType::getTypeID() const
 {
     return 1;
 }
 
-#if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
+#if JUCE_LINUX || JUCE_BSD
 ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {
     return new SoftwarePixelData (format, width, height, clearImage);
@@ -163,58 +246,6 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 #endif
 
 //==============================================================================
-class SubsectionPixelData final : public ImagePixelData
-{
-public:
-    SubsectionPixelData (ImagePixelData::Ptr source, Rectangle<int> r)
-        : ImagePixelData (source->pixelFormat, r.getWidth(), r.getHeight()),
-          sourceImage (std::move (source)), area (r)
-    {
-    }
-
-    std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
-    {
-        auto g = sourceImage->createLowLevelContext();
-        g->clipToRectangle (area);
-        g->setOrigin (area.getPosition());
-        return g;
-    }
-
-    void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
-    {
-        sourceImage->initialiseBitmapData (bitmap, x + area.getX(), y + area.getY(), mode);
-
-        if (mode != Image::BitmapData::readOnly)
-            sendDataChangeMessage();
-    }
-
-    ImagePixelData::Ptr clone() override
-    {
-        jassert (getReferenceCount() > 0); // (This method can't be used on an unowned pointer, as it will end up self-deleting)
-        auto type = createType();
-
-        Image newImage (type->create (pixelFormat, area.getWidth(), area.getHeight(), pixelFormat != Image::RGB));
-
-        {
-            Graphics g (newImage);
-            g.drawImageAt (Image (*this), 0, 0);
-        }
-
-        return *newImage.getPixelData();
-    }
-
-    std::unique_ptr<ImageType> createType() const override          { return sourceImage->createType(); }
-
-    /* as we always hold a reference to image, don't double count */
-    int getSharedCount() const noexcept override    { return getReferenceCount() + sourceImage->getSharedCount() - 1; }
-
-private:
-    friend class Image;
-    const ImagePixelData::Ptr sourceImage;
-    const Rectangle<int> area;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SubsectionPixelData)
-};
 
 Image Image::getClippedImage (const Rectangle<int>& area) const
 {
@@ -226,14 +257,11 @@ Image Image::getClippedImage (const Rectangle<int>& area) const
     if (validArea.isEmpty())
         return {};
 
-    return Image (*new SubsectionPixelData (image, validArea));
+    return Image { ImagePixelData::Ptr { new SubsectionPixelData { image, validArea } } };
 }
-
 
 //==============================================================================
-Image::Image() noexcept
-{
-}
+Image::Image() noexcept = default;
 
 Image::Image (ReferenceCountedObjectPtr<ImagePixelData> instance) noexcept
     : image (std::move (instance))
@@ -272,11 +300,44 @@ Image& Image::operator= (Image&& other) noexcept
     return *this;
 }
 
-Image::~Image()
-{
-}
+Image::~Image() = default;
 
 int Image::getReferenceCount() const noexcept           { return image == nullptr ? 0 : image->getSharedCount(); }
+
+void Image::applyGaussianBlurEffect (float radius, Image& result) const
+{
+    if (image == nullptr)
+    {
+        result = {};
+        return;
+    }
+
+    auto copy = result;
+    image->applyGaussianBlurEffect (radius, copy);
+
+    if (copy.isValid())
+    {
+        result = std::move (copy);
+        return;
+    }
+
+    const auto tie = [] (const auto& x) { return std::tuple (x.getFormat(), x.getWidth(), x.getHeight()); };
+
+    if (tie (*this) != tie (result))
+        result = Image { getFormat(), getWidth(), getHeight(), false };
+
+    ImageConvolutionKernel blurKernel (roundToInt (radius * 2.0f));
+
+    blurKernel.createGaussianBlur (radius);
+
+    blurKernel.applyToImage (result, *this, result.getBounds());
+}
+
+bool Image::isValid() const noexcept
+{
+    return image != nullptr;
+}
+
 int Image::getWidth() const noexcept                    { return image == nullptr ? 0 : image->width; }
 int Image::getHeight() const noexcept                   { return image == nullptr ? 0 : image->height; }
 Rectangle<int> Image::getBounds() const noexcept        { return image == nullptr ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }

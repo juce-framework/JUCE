@@ -360,96 +360,93 @@ private:
     IDWriteFontFileLoader& loader;
 };
 
+//==============================================================================
 class Direct2DFactories
 {
 public:
     Direct2DFactories()
     {
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        ComSmartPtr<IDWriteFontCollection> collection;
 
-        if (direct2dDll.open ("d2d1.dll"))
-        {
-            JUCE_LOAD_WINAPI_FUNCTION (direct2dDll, D2D1CreateFactory, d2d1CreateFactory,
-                                       HRESULT, (D2D1_FACTORY_TYPE, REFIID, D2D1_FACTORY_OPTIONS*, void**))
-
-            if (d2d1CreateFactory != nullptr)
-            {
-                D2D1_FACTORY_OPTIONS options;
-                options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
-
-                d2d1CreateFactory (D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof (ID2D1Factory), &options,
-                                   (void**) d2dFactory.resetAndGetPointerAddress());
-            }
-        }
-
-        if (directWriteDll.open ("DWrite.dll"))
-        {
-            JUCE_LOAD_WINAPI_FUNCTION (directWriteDll, DWriteCreateFactory, dWriteCreateFactory,
-                                       HRESULT, (DWRITE_FACTORY_TYPE, REFIID, IUnknown**))
-
-            if (dWriteCreateFactory == nullptr)
-                return;
-
-            for (const auto uuid : { __uuidof (IDWriteFactory3), __uuidof (IDWriteFactory2), __uuidof (IDWriteFactory) })
-            {
-                dWriteCreateFactory (DWRITE_FACTORY_TYPE_SHARED, uuid,
-                                     (IUnknown**) directWriteFactory.resetAndGetPointerAddress());
-
-                if (directWriteFactory != nullptr)
-                    break;
-            }
-
-            if (directWriteFactory != nullptr)
-            {
-                directWriteFactory->RegisterFontFileLoader (fileLoader);
-                directWriteFactory->RegisterFontCollectionLoader (collectionLoader);
-
-                ComSmartPtr<IDWriteFontCollection> collection;
-
-                if (SUCCEEDED (directWriteFactory->GetSystemFontCollection (collection.resetAndGetPointerAddress(), FALSE)) && collection != nullptr)
-                    fonts.emplace (collection);
-                else
-                    jassertfalse;
-            }
-
-            if (d2dFactory != nullptr)
-            {
-                auto d2dRTProp = D2D1::RenderTargetProperties (D2D1_RENDER_TARGET_TYPE_SOFTWARE,
-                                                               D2D1::PixelFormat (DXGI_FORMAT_B8G8R8A8_UNORM,
-                                                                                  D2D1_ALPHA_MODE_IGNORE),
-                                                               0, 0,
-                                                               D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE,
-                                                               D2D1_FEATURE_LEVEL_DEFAULT);
-
-                d2dFactory->CreateDCRenderTarget (&d2dRTProp, directWriteRenderTarget.resetAndGetPointerAddress());
-            }
-        }
-
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        if (SUCCEEDED (directWriteFactory->GetSystemFontCollection (collection.resetAndGetPointerAddress(), FALSE)) && collection != nullptr)
+            fonts.emplace (collection);
+        else
+            jassertfalse;
     }
 
     ~Direct2DFactories()
     {
-        if (directWriteFactory != nullptr)
-        {
-            directWriteFactory->UnregisterFontCollectionLoader (collectionLoader);
-            directWriteFactory->UnregisterFontFileLoader (fileLoader);
-        }
+        if (directWriteFactory == nullptr)
+            return;
+
+        directWriteFactory->UnregisterFontCollectionLoader (collectionLoader);
+        directWriteFactory->UnregisterFontFileLoader (fileLoader);
     }
 
     [[nodiscard]] ComSmartPtr<IDWriteFactory> getDWriteFactory() const { return directWriteFactory; }
+    [[nodiscard]] ComSmartPtr<IDWriteFactory4> getDWriteFactory4() const { return directWriteFactory4; }
     [[nodiscard]] AggregateFontCollection& getFonts() { jassert (fonts.has_value()); return *fonts; }
     [[nodiscard]] ComSmartPtr<IDWriteFontCollectionLoader> getCollectionLoader() const { return collectionLoader; }
 
 private:
-    DynamicLibrary direct2dDll, directWriteDll;
-    ComSmartPtr<ID2D1Factory> d2dFactory;
-    ComSmartPtr<IDWriteFactory> directWriteFactory;
-    ComSmartPtr<ID2D1DCRenderTarget> directWriteRenderTarget;
-    std::optional<AggregateFontCollection> fonts;
+    DynamicLibrary direct2dDll { "d2d1.dll" }, directWriteDll { "DWrite.dll" };
 
-    ComSmartPtr<IDWriteFontFileLoader> fileLoader = becomeComSmartPtrOwner (new MemoryFontFileLoader);
-    ComSmartPtr<IDWriteFontCollectionLoader> collectionLoader = becomeComSmartPtrOwner (new DirectWriteCustomFontCollectionLoader (*fileLoader));
+    const ComSmartPtr<ID2D1Factory> d2dFactory = [&]() -> ComSmartPtr<ID2D1Factory>
+    {
+        JUCE_LOAD_WINAPI_FUNCTION (direct2dDll,
+                                   D2D1CreateFactory,
+                                   d2d1CreateFactory,
+                                   HRESULT,
+                                   (D2D1_FACTORY_TYPE, REFIID, D2D1_FACTORY_OPTIONS*, void**))
+
+        if (d2d1CreateFactory == nullptr)
+            return {};
+
+        D2D1_FACTORY_OPTIONS options;
+        options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
+
+        ComSmartPtr<ID2D1Factory> result;
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        d2d1CreateFactory (D2D1_FACTORY_TYPE_SINGLE_THREADED,
+                            __uuidof (ID2D1Factory),
+                            &options,
+                           (void**) result.resetAndGetPointerAddress());
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return result;
+    }();
+
+    const ComSmartPtr<IDWriteFontFileLoader> fileLoader = becomeComSmartPtrOwner (new MemoryFontFileLoader);
+    const ComSmartPtr<IDWriteFontCollectionLoader> collectionLoader = becomeComSmartPtrOwner (new DirectWriteCustomFontCollectionLoader (*fileLoader));
+    const ComSmartPtr<IDWriteFactory> directWriteFactory = [&]() -> ComSmartPtr<IDWriteFactory>
+    {
+        JUCE_LOAD_WINAPI_FUNCTION (directWriteDll,
+                                   DWriteCreateFactory,
+                                   dWriteCreateFactory,
+                                   HRESULT,
+                                   (DWRITE_FACTORY_TYPE, REFIID, IUnknown**))
+
+        if (dWriteCreateFactory == nullptr)
+            return {};
+
+        ComSmartPtr<IDWriteFactory> result;
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        dWriteCreateFactory (DWRITE_FACTORY_TYPE_SHARED,
+                             __uuidof (IDWriteFactory),
+                             (IUnknown**) result.resetAndGetPointerAddress());
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        result->RegisterFontFileLoader (fileLoader);
+        result->RegisterFontCollectionLoader (collectionLoader);
+
+        return result;
+    }();
+
+    const ComSmartPtr<IDWriteFactory4> directWriteFactory4 = directWriteFactory.getInterface<IDWriteFactory4>();
+
+    std::optional<AggregateFontCollection> fonts;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Direct2DFactories)
 };
@@ -567,7 +564,7 @@ public:
         return new WindowsDirectWriteTypeface (mappedName, mappedStyle, mapped.font, mappedFace, HbFont { hb_font_create (hbFace.get()) }, {});
     }
 
-    IDWriteFontFace* getIDWriteFontFace() const { return dwFontFace; }
+    ComSmartPtr<IDWriteFontFace> getIDWriteFontFace() const { return dwFontFace; }
 
 private:
     float getKerning (int glyph1, int glyph2) const

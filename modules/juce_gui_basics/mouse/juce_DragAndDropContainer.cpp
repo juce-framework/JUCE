@@ -454,24 +454,28 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
         const auto clipped = (image.getBounds().toDouble() / scaleFactor).getConstrainedPoint (relPos);
 
         Image fade (Image::SingleChannel, image.getWidth(), image.getHeight(), true);
-        Graphics fadeContext (fade);
+        {
+            Graphics fadeContext (fade);
 
-        ColourGradient gradient;
-        gradient.isRadial = true;
-        gradient.point1 = clipped.toFloat() * scaleFactor;
-        gradient.point2 = gradient.point1 + Point<float> (0.0f, scaleFactor * 400.0f);
-        gradient.addColour (0.0, Colours::white);
-        gradient.addColour (0.375, Colours::white);
-        gradient.addColour (1.0, Colours::transparentWhite);
+            ColourGradient gradient;
+            gradient.isRadial = true;
+            gradient.point1 = clipped.toFloat() * scaleFactor;
+            gradient.point2 = gradient.point1 + Point<float> (0.0f, scaleFactor * 400.0f);
+            gradient.addColour (0.0, Colours::white);
+            gradient.addColour (0.375, Colours::white);
+            gradient.addColour (1.0, Colours::transparentWhite);
 
-        fadeContext.setGradientFill (gradient);
-        fadeContext.fillAll();
+            fadeContext.setGradientFill (gradient);
+            fadeContext.fillAll();
+        }
 
         Image composite (Image::ARGB, image.getWidth(), image.getHeight(), true);
-        Graphics compositeContext (composite);
+        {
+            Graphics compositeContext (composite);
 
-        compositeContext.reduceClipRegion (fade, {});
-        compositeContext.drawImageAt (image, 0, 0);
+            compositeContext.reduceClipRegion (fade, {});
+            compositeContext.drawImageAt (image, 0, 0);
+        }
 
         return { ScaledImage (composite, scaleFactor), clipped };
     }();

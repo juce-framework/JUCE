@@ -168,6 +168,8 @@ void ComponentPeer::handlePaint (LowLevelGraphicsContext& contextToPaintTo)
         mess up a lot of the calculations that the library needs to do.
     */
     jassert (roundToInt (10.1f) == 10);
+
+    ++peerFrameNumber;
 }
 
 Component* ComponentPeer::getTargetForKeyPress()

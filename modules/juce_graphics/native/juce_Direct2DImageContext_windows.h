@@ -35,25 +35,21 @@
 namespace juce
 {
 
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image)
-    : RenderingHelpers::StackBasedLowLevelGraphicsContext<RenderingHelpers::SoftwareRendererSavedState>
-        (new RenderingHelpers::SoftwareRendererSavedState (image, image.getBounds()))
+class Direct2DImageContext : public Direct2DGraphicsContext
 {
-    JUCE_TRACE_LOG_PAINT_CALL (etw::startGDIImage, getFrameId());
-}
+public:
+    explicit Direct2DImageContext (Direct2DPixelData::Ptr);
 
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image, Point<int> origin,
-                                                                    const RectangleList<int>& initialClip)
-    : RenderingHelpers::StackBasedLowLevelGraphicsContext<RenderingHelpers::SoftwareRendererSavedState>
-        (new RenderingHelpers::SoftwareRendererSavedState (image, initialClip, origin))
-{
+    ~Direct2DImageContext() override;
 
-    JUCE_TRACE_EVENT_INT_RECT_LIST (etw::startGDIFrame, etw::softwareRendererKeyword, getFrameId(), initialClip);
-}
+private:
+    struct ImagePimpl;
+    std::unique_ptr<ImagePimpl> pimpl;
 
-LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()
-{
-    JUCE_TRACE_LOG_PAINT_CALL (etw::endGDIFrame, getFrameId());
-}
+    Pimpl* getPimpl() const noexcept override;
+    void clearTargetBuffer() override;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Direct2DImageContext)
+};
 
 } // namespace juce

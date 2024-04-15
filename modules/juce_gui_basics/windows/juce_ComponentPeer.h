@@ -322,7 +322,10 @@ public:
     virtual void handleScreenSizeChange();
 
     //==============================================================================
-    /** This is called to repaint the component into the given context. */
+    /** This is called to repaint the component into the given context.
+
+        Increments the result of getNumFramesPainted().
+    */
     void handlePaint (LowLevelGraphicsContext& contextToPaintTo);
 
     //==============================================================================
@@ -561,6 +564,13 @@ public:
     /** Returns the style requested for this app. */
     Style getAppStyle() const { return style; }
 
+    /** Returns the number of times that this peer has been painted.
+
+        This is mainly useful when debugging component painting. For example, you might use this to
+        match logging calls to specific frames.
+    */
+    uint64_t getNumFramesPainted() const { return peerFrameNumber; }
+
 protected:
     //==============================================================================
     static void forceDisplayUpdate();
@@ -603,6 +613,7 @@ private:
     Component* lastDragAndDropCompUnderMouse = nullptr;
     TextInputTarget* textInputTarget = nullptr;
     const uint32 uniqueID;
+    uint64_t peerFrameNumber = 0;
     bool isWindowMinimised = false;
 
     //==============================================================================

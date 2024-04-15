@@ -55,7 +55,7 @@ public:
     bool isVectorDevice() const override;
     void setOrigin (Point<int>) override;
     void addTransform (const AffineTransform&) override;
-    float getPhysicalPixelScaleFactor() override;
+    float getPhysicalPixelScaleFactor() const override;
 
     bool clipToRectangle (const Rectangle<int>&) override;
     bool clipToRectangleList (const RectangleList<int>&) override;

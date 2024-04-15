@@ -71,7 +71,7 @@ public:
     */
     virtual void setOrigin (Point<int>) = 0;
     virtual void addTransform (const AffineTransform&) = 0;
-    virtual float getPhysicalPixelScaleFactor() = 0;
+    virtual float getPhysicalPixelScaleFactor() const = 0;
 
     virtual bool clipToRectangle (const Rectangle<int>&) = 0;
     virtual bool clipToRectangleList (const RectangleList<int>&) = 0;
@@ -100,8 +100,34 @@ public:
     virtual void fillRect (const Rectangle<float>&) = 0;
     virtual void fillRectList (const RectangleList<float>&) = 0;
     virtual void fillPath (const Path&, const AffineTransform&) = 0;
+
+    virtual void drawRect (const Rectangle<float>& rect, float lineThickness)
+    {
+        auto r = rect;
+        RectangleList<float> rects;
+        rects.addWithoutMerging (r.removeFromTop    (lineThickness));
+        rects.addWithoutMerging (r.removeFromBottom (lineThickness));
+        rects.addWithoutMerging (r.removeFromLeft   (lineThickness));
+        rects.addWithoutMerging (r.removeFromRight  (lineThickness));
+        fillRectList (rects);
+    }
+
+    virtual void strokePath (const Path& path, const PathStrokeType& strokeType, const AffineTransform& transform)
+    {
+        Path stroke;
+        strokeType.createStrokedPath (stroke, path, transform, getPhysicalPixelScaleFactor());
+        fillPath (stroke, {});
+    }
+
     virtual void drawImage (const Image&, const AffineTransform&) = 0;
     virtual void drawLine (const Line<float>&) = 0;
+
+    virtual void drawLineWithThickness (const Line<float>& line, float lineThickness)
+    {
+        Path p;
+        p.addLineSegment (line, lineThickness);
+        fillPath (p, {});
+    }
 
     virtual void setFont (const Font&) = 0;
     virtual const Font& getFont() = 0;
@@ -110,6 +136,51 @@ public:
     virtual void drawGlyphs (Span<const uint16_t>,
                              Span<const Point<float>>,
                              const AffineTransform&) = 0;
+
+    virtual void drawRoundedRectangle (const Rectangle<float>& r, float cornerSize, float lineThickness)
+    {
+        Path p;
+        p.addRoundedRectangle (r, cornerSize);
+        strokePath (p, PathStrokeType (lineThickness), {});
+    }
+
+    virtual void fillRoundedRectangle (const Rectangle<float>& r, float cornerSize)
+    {
+        Path p;
+        p.addRoundedRectangle (r, cornerSize);
+        fillPath (p, {});
+    }
+
+    virtual void drawEllipse (const Rectangle<float>& area, float lineThickness)
+    {
+        Path p;
+
+        if (approximatelyEqual (area.getWidth(), area.getHeight()))
+        {
+            // For a circle, we can avoid having to generate a stroke
+            p.addEllipse (area.expanded (lineThickness * 0.5f));
+            p.addEllipse (area.reduced  (lineThickness * 0.5f));
+            p.setUsingNonZeroWinding (false);
+            fillPath (p, {});
+        }
+        else
+        {
+            p.addEllipse (area);
+            strokePath (p, PathStrokeType (lineThickness), {});
+        }
+    }
+
+    virtual void fillEllipse (const Rectangle<float>& area)
+    {
+        Path p;
+        p.addEllipse (area);
+        fillPath (p, {});
+    }
+
+    /** Returns an integer that uniquely identifies the current frame.
+        Useful for debugging/logging.
+    */
+    virtual uint64_t getFrameId() const = 0;
 };
 
 } // namespace juce

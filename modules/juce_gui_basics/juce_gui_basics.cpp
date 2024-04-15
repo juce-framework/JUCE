@@ -80,12 +80,19 @@
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #include <windowsx.h>
- #include <vfw.h>
- #include <commdlg.h>
  #include <commctrl.h>
+ #include <commdlg.h>
+ #include <d2d1_3.h>
+ #include <d3d11_2.h>
+ #include <dxgi1_3.h>
  #include <sapi.h>
- #include <dxgi.h>
+ #include <vfw.h>
+ #include <windowsx.h>
+
+ #if JUCE_ETW_TRACELOGGING
+  #include <TraceLoggingProvider.h>
+  #include <evntrace.h>
+ #endif
 
  #if JUCE_MINGW
   // Some MinGW headers use 'new' as a parameter name
@@ -109,21 +116,18 @@
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
   #pragma comment(lib, "comctl32.lib")
-  #pragma comment(lib, "dxgi.lib")
 
   #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")
    #pragma comment(lib, "GlU32.Lib")
   #endif
 
-  #if JUCE_DIRECT2D
-   #pragma comment (lib, "Dwrite.lib")
-   #pragma comment (lib, "D2d1.lib")
-  #endif
  #endif
 #endif
 
 //==============================================================================
+#include <juce_graphics/native/juce_EventTracing.h>
+
 #include "detail/juce_AccessibilityHelpers.h"
 #include "detail/juce_ButtonAccessibilityHandler.h"
 #include "detail/juce_ScalingHelpers.h"
@@ -144,6 +148,7 @@
 #include "detail/juce_WindowingHelpers.h"
 #include "detail/juce_AlertWindowHelpers.h"
 #include "detail/juce_TopLevelWindowManager.h"
+#include "detail/juce_StandardCachedComponentImage.h"
 
 //==============================================================================
 #if JUCE_IOS || JUCE_WINDOWS
@@ -185,9 +190,8 @@
  #include "native/juce_MouseCursor_mac.mm"
 
 #elif JUCE_WINDOWS
- #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-  #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
- #endif
+ #include <juce_graphics/native/juce_DirectX_windows.h>
+
  #include "native/accessibility/juce_ComInterfaces_windows.h"
  #include "native/accessibility/juce_WindowsUIAWrapper_windows.h"
  #include "native/accessibility/juce_AccessibilityElement_windows.h"
