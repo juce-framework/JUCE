@@ -528,6 +528,8 @@ private:
     bool triggerOnMouseDown = false;
     bool generateTooltip = false;
 
+	/** Acon Digital modification - keep track of focus change cause */
+    FocusChangeType lastFocusChangeCause = focusChangedDirectly;
     void checkToggleableState (bool wasToggleable);
 
     void repeatTimerCallback();
