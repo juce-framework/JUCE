@@ -265,21 +265,20 @@ namespace juce
 
 //==============================================================================
 #if JUCE_MSVC && ! defined (DOXYGEN)
- #define JUCE_WARNING_HELPER(file, line, mess) message(file "(" JUCE_STRINGIFY (line) ") : Warning: " #mess)
- #define JUCE_COMPILER_WARNING(message)  __pragma(JUCE_WARNING_HELPER (__FILE__, __LINE__, message))
+ #define JUCE_COMPILER_WARNING(msg) __pragma (message (__FILE__ "(" JUCE_STRINGIFY (__LINE__) ") : Warning: " msg))
 #else
- #ifndef DOXYGEN
-  #define JUCE_WARNING_HELPER(mess) message(#mess)
- #endif
 
  /** This macro allows you to emit a custom compiler warning message.
      Very handy for marking bits of code as "to-do" items, or for shaming
      code written by your co-workers in a way that's hard to ignore.
 
-     GCC and Clang provide the \#warning directive, but MSVC doesn't, so this macro
-     is a cross-compiler way to get the same functionality as \#warning.
+     GCC and Clang provide the \#warning directive, but MSVC doesn't, so this
+     macro is a cross-compiler way to get the same functionality as \#warning.
+
+     Unlike the \#warning directive in GCC and Clang this macro requires the
+     argument to passed as a quoted string.
  */
- #define JUCE_COMPILER_WARNING(message)  _Pragma(JUCE_STRINGIFY (JUCE_WARNING_HELPER (message)))
+ #define JUCE_COMPILER_WARNING(msg)  _Pragma (JUCE_STRINGIFY (message (msg)))
 #endif
 
 
