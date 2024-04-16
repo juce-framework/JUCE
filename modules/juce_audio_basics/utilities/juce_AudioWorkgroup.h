@@ -119,9 +119,9 @@ private:
     @code
     Constructor()
     {
-        startRealtimeThread (RealtimeThreadOptions{}.withApproximateAudioProcessingTime (samplesPerFrame, sampleRate));
+        startRealtimeThread (Thread::RealtimeOptions{}.withApproximateAudioProcessingTime (samplesPerFrame, sampleRate));
         or
-        startRealtimeThread (RealtimeThreadOptions{}.withProcessingTimeMs (10));
+        startRealtimeThread (Thread::RealtimeOptions{}.withProcessingTimeMs (10));
     }
 
     void Thread::run() override
