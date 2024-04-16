@@ -23,6 +23,18 @@
     <Filter Include="JUCE Modules\juce_analytics">
       <UniqueIdentifier>{97F7F593-75F8-D6B2-DC96-C946C3976226}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_animation\animation">
+      <UniqueIdentifier>{F5989655-DEF5-0837-C752-9CCB88B3C1FB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_animation\detail\chromium">
+      <UniqueIdentifier>{98B39178-8939-7749-8B88-C3B52C7EBF42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_animation\detail">
+      <UniqueIdentifier>{6ABAE878-BEE8-D294-DCBD-783AC7562B3B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_animation">
+      <UniqueIdentifier>{CBB2B5E6-0E34-A956-8FFF-B4365E57F077}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_audio_basics\audio_play_head">
       <UniqueIdentifier>{EB58F05A-A968-CEBE-40C4-107CDD8F240F}</UniqueIdentifier>
     </Filter>
@@ -750,6 +762,27 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_analytics\juce_analytics.cpp">
       <Filter>JUCE Modules\juce_analytics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_animation\animation\juce_Animator.cpp">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_animation\animation\juce_AnimatorSetBuilder.cpp">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_animation\animation\juce_AnimatorUpdater.cpp">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_animation\animation\juce_Easings.cpp">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_animation\animation\juce_ValueAnimatorBuilder.cpp">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_animation\detail\chromium\cubic_bezier.cc">
+      <Filter>JUCE Modules\juce_animation\detail\chromium</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_animation\juce_animation.cpp">
+      <Filter>JUCE Modules\juce_animation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.cpp">
       <Filter>JUCE Modules\juce_audio_basics\audio_play_head</Filter>
@@ -3547,6 +3580,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_analytics.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_animation.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -3638,6 +3674,36 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_analytics\juce_analytics.h">
       <Filter>JUCE Modules\juce_analytics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\animation\juce_Animator.h">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\animation\juce_AnimatorSetBuilder.h">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\animation\juce_AnimatorUpdater.h">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\animation\juce_Easings.h">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\animation\juce_StaticAnimationLimits.h">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\animation\juce_ValueAnimatorBuilder.h">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\animation\juce_VBlankAnimatorUpdater.h">
+      <Filter>JUCE Modules\juce_animation\animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\detail\chromium\cubic_bezier.h">
+      <Filter>JUCE Modules\juce_animation\detail\chromium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\detail\juce_ArrayAndTupleOps.h">
+      <Filter>JUCE Modules\juce_animation\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_animation\juce_animation.h">
+      <Filter>JUCE Modules\juce_animation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
       <Filter>JUCE Modules\juce_audio_basics\audio_play_head</Filter>

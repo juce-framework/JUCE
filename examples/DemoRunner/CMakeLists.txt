@@ -69,6 +69,7 @@ target_compile_definitions(DemoRunner PRIVATE
 
 target_link_libraries(DemoRunner PRIVATE
     juce::juce_analytics
+    juce::juce_animation
     juce::juce_audio_utils
     juce::juce_box2d
     juce::juce_dsp

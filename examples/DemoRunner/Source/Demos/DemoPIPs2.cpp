@@ -32,7 +32,8 @@
  #include "../../../GUI/AccessibilityDemo.h"
 #endif
 #include "../../../GUI/AnimationAppDemo.h"
-#include "../../../GUI/AnimationDemo.h"
+#include "../../../GUI/AnimationEasingDemo.h"
+#include "../../../GUI/AnimatorsDemo.h"
 #include "../../../GUI/BouncingBallWavetableDemo.h"
 #if JUCE_USE_CAMERA && ! (JUCE_LINUX || JUCE_BSD)
  #include "../../../GUI/CameraDemo.h"
@@ -72,7 +73,8 @@ void registerDemos_Two() noexcept
     REGISTER_DEMO (AccessibilityDemo,         GUI, false)
    #endif
     REGISTER_DEMO (AnimationAppDemo,          GUI, false)
-    REGISTER_DEMO (AnimationDemo,             GUI, false)
+    REGISTER_DEMO (AnimationEasingDemo,       GUI, false)
+    REGISTER_DEMO (AnimatorsDemo,             GUI, false)
     REGISTER_DEMO (BouncingBallWavetableDemo, GUI, false)
    #if JUCE_USE_CAMERA && ! (JUCE_LINUX || JUCE_BSD)
     REGISTER_DEMO (CameraDemo,                GUI, true)
