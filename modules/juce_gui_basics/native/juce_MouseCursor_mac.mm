@@ -93,8 +93,7 @@ private:
 
                 if (CGImageRef rasterCGImage = [originalImage CGImageForProposedRect: nil
                                                                              context: nil
-                                                                               hints: [NSDictionary dictionaryWithObjectsAndKeys:
-                                                                                                            NSImageHintCTM, scaleTransform, nil]])
+                                                                               hints: [NSDictionary dictionaryWithObjectsAndKeys: scaleTransform, NSImageHintCTM, nil]])
                 {
                     NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: rasterCGImage];
                     [imageRep setSize: originalSize];
