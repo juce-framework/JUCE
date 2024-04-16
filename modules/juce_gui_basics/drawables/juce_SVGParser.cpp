@@ -944,7 +944,9 @@ private:
 
         FillType type (gradient);
 
-        auto gradientTransform = parseTransform (fillXml->getStringAttribute ("gradientTransform"));
+		/** Acon Digital modification - fixed error in SVG parsing */
+		auto gradientTransform = parseTransform (fillXml->getStringAttribute ("gradientTransform"))
+			.followedBy (transform);
 
         if (gradient.isRadial)
         {

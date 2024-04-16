@@ -2796,6 +2796,72 @@ AudioUnitPluginFormat::~AudioUnitPluginFormat()
 {
 }
 
+bool AudioUnitPluginFormat::setStateFromAUPresetFile (AudioPluginInstance* api, const MemoryBlock& rawData)
+{
+    AudioUnit audioUnit = (AudioUnit) api->getPlatformSpecificData();
+    jassert (audioUnit != nullptr);
+    
+    CFReadStreamRef stream = CFReadStreamCreateWithBytesNoCopy (kCFAllocatorDefault, (const UInt8*) rawData.getData(),
+                                                                rawData.getSize(), kCFAllocatorNull);
+    CFReadStreamOpen (stream);
+
+    CFPropertyListFormat format = kCFPropertyListBinaryFormat_v1_0;
+    CFPropertyListRef propertyList = CFPropertyListCreateFromStream (kCFAllocatorDefault, stream, 0,
+                                                                        kCFPropertyListImmutable, &format, 0);
+    CFRelease (stream);
+
+    if (propertyList != 0)
+    {
+        AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global,
+                                0, &propertyList, sizeof (propertyList));
+        
+        AudioUnitParameter param;
+        param.mAudioUnit = audioUnit;
+        param.mParameterID = kAUParameterListener_AnyParameter;
+        
+        AUParameterListenerNotify (nullptr, nullptr, &param);
+
+        CFRelease (propertyList);
+		return true;
+    }
+	else
+	    return false;
+}
+
+bool AudioUnitPluginFormat::saveStateToAUPresetFile (AudioPluginInstance* api, MemoryBlock& rawData)
+{
+	AudioUnit audioUnit = (AudioUnit) api->getPlatformSpecificData();
+    jassert (audioUnit != nullptr);
+    
+	CFPropertyListRef propertyList = 0;
+    UInt32 sz = sizeof (CFPropertyListRef);
+
+    if (AudioUnitGetProperty (audioUnit,
+                                kAudioUnitProperty_ClassInfo,
+                                kAudioUnitScope_Global,
+                                0, &propertyList, &sz) == noErr)
+    {
+        CFWriteStreamRef stream = CFWriteStreamCreateWithAllocatedBuffers (kCFAllocatorDefault, kCFAllocatorDefault);
+        CFWriteStreamOpen (stream);
+
+        CFIndex bytesWritten = CFPropertyListWriteToStream (propertyList, stream, kCFPropertyListBinaryFormat_v1_0, 0);
+        CFWriteStreamClose (stream);
+
+        CFDataRef data = (CFDataRef) CFWriteStreamCopyProperty (stream, kCFStreamPropertyDataWritten);
+
+        rawData.setSize ((size_t) bytesWritten);
+        rawData.copyFrom (CFDataGetBytePtr (data), 0, bytesWritten);
+        CFRelease (data);
+
+        CFRelease (stream);
+        CFRelease (propertyList);
+
+		return true;
+    }
+	else
+	    return false;
+}
+
 void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
                                                  const String& fileOrIdentifier)
 {

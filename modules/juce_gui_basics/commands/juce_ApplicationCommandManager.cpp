@@ -59,11 +59,13 @@ void ApplicationCommandManager::registerCommand (const ApplicationCommandInfo& n
         // Trying to re-register the same command ID with different parameters can often indicate a typo.
         // This assertion is here because I've found it useful catching some mistakes, but it may also cause
         // false alarms if you're deliberately updating some flags for a command.
-        jassert (newCommand.shortName == getCommandForID (newCommand.commandID)->shortName
-                  && newCommand.categoryName == getCommandForID (newCommand.commandID)->categoryName
-                  && newCommand.defaultKeypresses == getCommandForID (newCommand.commandID)->defaultKeypresses
-                  && (newCommand.flags & (ApplicationCommandInfo::wantsKeyUpDownCallbacks | ApplicationCommandInfo::hiddenFromKeyEditor | ApplicationCommandInfo::readOnlyInKeyEditor))
-                       == (getCommandForID (newCommand.commandID)->flags & (ApplicationCommandInfo::wantsKeyUpDownCallbacks | ApplicationCommandInfo::hiddenFromKeyEditor | ApplicationCommandInfo::readOnlyInKeyEditor)));
+
+		/** Acon Digital modification - disable unnecessary assert */
+        //jassert (newCommand.shortName == getCommandForID (newCommand.commandID)->shortName
+        //          && newCommand.categoryName == getCommandForID (newCommand.commandID)->categoryName
+        //          && newCommand.defaultKeypresses == getCommandForID (newCommand.commandID)->defaultKeypresses
+        //          && (newCommand.flags & (ApplicationCommandInfo::wantsKeyUpDownCallbacks | ApplicationCommandInfo::hiddenFromKeyEditor | ApplicationCommandInfo::readOnlyInKeyEditor))
+        //               == (getCommandForID (newCommand.commandID)->flags & (ApplicationCommandInfo::wantsKeyUpDownCallbacks | ApplicationCommandInfo::hiddenFromKeyEditor | ApplicationCommandInfo::readOnlyInKeyEditor)));
 
         *command = newCommand;
     }

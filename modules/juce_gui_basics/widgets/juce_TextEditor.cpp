@@ -1839,7 +1839,19 @@ void TextEditor::performPopupMenuAction (const int menuItemID)
     }
 }
 
-//==============================================================================
+/** Acon Digital modification - allow for visual mouse over indications */
+void TextEditor::mouseEnter (const MouseEvent& e)
+{
+    Component::mouseEnter (e);
+    repaint();
+}
+
+void TextEditor::mouseExit (const MouseEvent& e)
+{
+    Component::mouseExit (e);
+    repaint();
+}
+
 void TextEditor::mouseDown (const MouseEvent& e)
 {
     beginDragAutoRepeat (100);

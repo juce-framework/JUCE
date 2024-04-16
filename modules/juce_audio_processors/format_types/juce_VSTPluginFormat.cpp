@@ -1884,14 +1884,15 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
                 auto totalLen = sizeof (fxProgramSet) + chunk.getSize() - 8;
                 dest.setSize (totalLen, true);
 
+				// Acon Digital modification - fixed errors in FXB format
                 auto set = (fxProgramSet*) dest.getData();
                 set->chunkMagic = fxbName ("CcnK");
-                set->byteSize = 0;
+                set->byteSize = fxbSwap ((int) totalLen - 8);
                 set->fxMagic = fxbName ("FPCh");
                 set->version = fxbSwap (fxbVersionNum);
                 set->fxID = fxbSwap (getUID());
                 set->fxVersion = fxbSwap (getVersionNumber());
-                set->numPrograms = fxbSwap (numPrograms);
+                set->numPrograms = fxbSwap (getNumParameters());
                 set->chunkSize = fxbSwap ((int32) chunk.getSize());
 
                 getCurrentProgramName().copyToUTF8 (set->name, sizeof (set->name) - 1);

@@ -2085,6 +2085,8 @@ public:
     void repaint (const Rectangle<int>& area) override
     {
         deferredRepaints.add ((area.toDouble() * getPlatformScaleFactor()).getSmallestIntegerContainer());
+		/** Acon Digital modification - fix issues with freezed UI */
+        dispatchDeferredRepaints();
     }
 
     void dispatchDeferredRepaints()

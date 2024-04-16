@@ -384,6 +384,10 @@ public:
     /** Returns the button's current over/down/up state. */
     ButtonState getState() const noexcept               { return buttonState; }
 
+
+	/** Acon Digital modification - keep track of focus change cause */
+    FocusChangeType getLastFocusChangeCause();
+
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
         button-drawing functionality.

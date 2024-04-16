@@ -972,7 +972,18 @@ public:
         void getEditorBounds (Vst2::ERect& bounds)
         {
             auto editorBounds = getSizeToContainChild();
-            bounds = convertToHostBounds ({ 0, 0, (int16) editorBounds.getHeight(), (int16) editorBounds.getWidth() });
+
+			// Acon Digital modification - circumvention of VST hosting error in EDIUS when runnng high-DPI mode
+            String hostPath = File::getSpecialLocation (File::hostApplicationPath).getFileNameWithoutExtension();
+			if (hostPath.containsIgnoreCase ("edius")) {
+			    auto mainDisplay          = Desktop::getInstance().getDisplays().getPrimaryDisplay();
+                float desktopScale          = mainDisplay != nullptr ? mainDisplay->dpi / 96.f : 1.f;
+                float ediusCorrectionScale  = 1.f + (desktopScale - 1.f) / desktopScale;
+                bounds = { 0, 0, (int16) roundToInt (editorBounds.getHeight() * ediusCorrectionScale),
+						   (int16) roundToInt (editorBounds.getWidth() * ediusCorrectionScale) };
+            }
+            else
+                bounds = convertToHostBounds ({ 0, 0, (int16) editorBounds.getHeight(), (int16) editorBounds.getWidth() });
         }
 
         void attachToHost (VstOpCodeArguments args)

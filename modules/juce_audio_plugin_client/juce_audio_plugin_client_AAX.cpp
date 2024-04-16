@@ -85,6 +85,11 @@ static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p4p0_REVISION, "JUCE require
 #include <AAX_Assert.h>
 #include <AAX_TransportTypes.h>
 
+#if JucePlugin_Enable_ARA
+#include <ARAAAX.h>
+#include <AAX_VARABinding.h>
+#endif
+
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
@@ -723,6 +728,12 @@ namespace AAXClasses
             void mouseUp   (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseUp); }
             void mouseDrag (const MouseEvent& e) override  { callMouseMethod (e, &AAX_IViewContainer::HandleParameterMouseDrag); }
 
+            void resized() override
+            {
+                if (pluginEditor != nullptr)
+                    pluginEditor->setBounds (getLocalBounds());
+            }
+
             void parentSizeChanged() override
             {
                 resizeHostWindow();
@@ -847,6 +858,14 @@ namespace AAXClasses
             return new JuceAAX_Processor();
         }
 
+       #if JucePlugin_Enable_ARA
+    	AAX_Result Initialize (IACFUnknown* iController) override
+        {
+        	aaxaraBinding.reset (new ARA::AAX_VARABinding (iController));
+            return AAX_CEffectParameters::Initialize (iController);
+        }
+       #endif
+
         AAX_Result Uninitialize() override
         {
             cancelPendingUpdate();
@@ -866,6 +885,36 @@ namespace AAXClasses
         AAX_Result EffectInit() override
         {
             cancelPendingUpdate();
+
+           #if JucePlugin_Enable_ARA
+	        ARA::ARAPlugInInstanceRoleFlags knownRoles = 0;
+	        auto result = aaxaraBinding->GetInstanceRoleFlags (&knownRoles, &assignedRoles);
+	
+	        // If no ARA roles provided - work as a regular AAX plug-in
+	        if (result == AAX_SUCCESS)
+	        {
+		        assignedRoles &= (ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole);
+		        if (assignedRoles)
+		        {
+			        result = aaxaraBinding->GetDocumentController (&documentControllerRef);
+			        if (result != AAX_SUCCESS)
+				        return result;
+
+			        auto araPluginExtension = dynamic_cast<AudioProcessorARAExtension*> (pluginInstance.get());
+			        if (!araPluginExtension)
+				        return AAX_ERROR_NULL_OBJECT;
+
+			        auto* const plugInEnxtensionInstance = araPluginExtension->bindToARA (documentControllerRef, knownRoles, assignedRoles);
+			        if (!plugInEnxtensionInstance)
+				        return AAX_ERROR_NULL_OBJECT;
+			
+			        result = aaxaraBinding->SetPlugInExtensionInstance (plugInEnxtensionInstance);
+			        if (result != AAX_SUCCESS)
+				        return result;
+		        }
+	        }
+           #endif      
+
             check (Controller()->GetSampleRate (&sampleRate));
             processingSidechainChange = false;
             auto err = preparePlugin();
@@ -2290,6 +2339,12 @@ namespace AAXClasses
             std::atomic<int> state { 0 };
         };
 
+       #if JucePlugin_Enable_ARA
+        std::unique_ptr<ARA::AAX_VARABinding> aaxaraBinding;
+	    ARA::ARADocumentControllerRef documentControllerRef;
+	    ARA::ARAPlugInInstanceRoleFlags assignedRoles;
+       #endif
+
         RecordingState recordingState;
 
         std::atomic<bool> processingSidechainChange, sidechainDesired;
@@ -2556,6 +2611,12 @@ namespace AAXClasses
                 check (desc.AddAuxOutputStem (0, static_cast<int32_t> (auxFormat), name.toRawUTF8()));
             }
         }
+
+       #if JucePlugin_Enable_ARA
+	    properties->AddProperty (AAX_eProperty_UsesTransport, true);
+        properties->AddProperty (AAX_eProperty_Constraint_Topology, AAX_eConstraintTopology_Monolithic);
+        properties->AddPointerProperty (ARA::AAX_eProperty_ARAFactoryPointer, createARAFactory());
+       #endif
 
         check (desc.AddProcessProc_Native (algorithmProcessCallback, properties));
     }

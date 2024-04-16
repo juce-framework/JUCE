@@ -711,6 +711,11 @@ public:
     void paint (Graphics&) override;
     /** @internal */
     void paintOverChildren (Graphics&) override;
+	/** Acon Digital modification - allow for visual mouse over indications */
+    /** @internal */
+    void mouseEnter (const MouseEvent&) override;
+    /** @internal */
+    void mouseExit (const MouseEvent&) override;
     /** @internal */
     void mouseDown (const MouseEvent&) override;
     /** @internal */
