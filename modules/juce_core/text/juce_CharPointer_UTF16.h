@@ -52,44 +52,40 @@ public:
     using CharType = int16;
    #endif
 
-    inline explicit CharPointer_UTF16 (const CharType* rawPointer) noexcept
+    explicit CharPointer_UTF16 (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {
     }
 
-    inline CharPointer_UTF16 (const CharPointer_UTF16& other) = default;
+    CharPointer_UTF16 (const CharPointer_UTF16& other) = default;
 
-    inline CharPointer_UTF16 operator= (CharPointer_UTF16 other) noexcept
-    {
-        data = other.data;
-        return *this;
-    }
+    CharPointer_UTF16& operator= (const CharPointer_UTF16& other) noexcept = default;
 
-    inline CharPointer_UTF16 operator= (const CharType* text) noexcept
+    CharPointer_UTF16& operator= (const CharType* text) noexcept
     {
         data = const_cast<CharType*> (text);
         return *this;
     }
 
     /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator== (CharPointer_UTF16 other) const noexcept     { return data == other.data; }
-    inline bool operator!= (CharPointer_UTF16 other) const noexcept     { return data != other.data; }
-    inline bool operator<= (CharPointer_UTF16 other) const noexcept     { return data <= other.data; }
-    inline bool operator<  (CharPointer_UTF16 other) const noexcept     { return data <  other.data; }
-    inline bool operator>= (CharPointer_UTF16 other) const noexcept     { return data >= other.data; }
-    inline bool operator>  (CharPointer_UTF16 other) const noexcept     { return data >  other.data; }
+    bool operator== (CharPointer_UTF16 other) const noexcept     { return data == other.data; }
+    bool operator!= (CharPointer_UTF16 other) const noexcept     { return data != other.data; }
+    bool operator<= (CharPointer_UTF16 other) const noexcept     { return data <= other.data; }
+    bool operator<  (CharPointer_UTF16 other) const noexcept     { return data <  other.data; }
+    bool operator>= (CharPointer_UTF16 other) const noexcept     { return data >= other.data; }
+    bool operator>  (CharPointer_UTF16 other) const noexcept     { return data >  other.data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline CharType* getAddress() const noexcept        { return data; }
+    CharType* getAddress() const noexcept        { return data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline operator const CharType*() const noexcept    { return data; }
+    operator const CharType*() const noexcept    { return data; }
 
     /** Returns true if this pointer is pointing to a null character. */
-    inline bool isEmpty() const noexcept                { return *data == 0; }
+    bool isEmpty() const noexcept                { return *data == 0; }
 
     /** Returns true if this pointer is not pointing to a null character. */
-    inline bool isNotEmpty() const noexcept             { return *data != 0; }
+    bool isNotEmpty() const noexcept             { return *data != 0; }
 
     /** Returns the unicode character that this pointer is pointing to. */
     juce_wchar operator*() const noexcept
@@ -103,7 +99,7 @@ public:
     }
 
     /** Moves this pointer along to the next character in the string. */
-    CharPointer_UTF16 operator++() noexcept
+    CharPointer_UTF16& operator++() noexcept
     {
         auto n = (uint32) (uint16) *data++;
 
@@ -114,7 +110,7 @@ public:
     }
 
     /** Moves this pointer back to the previous character in the string. */
-    CharPointer_UTF16 operator--() noexcept
+    CharPointer_UTF16& operator--() noexcept
     {
         auto n = (uint32) (uint16) (*--data);
 
@@ -145,7 +141,7 @@ public:
     }
 
     /** Moves this pointer forwards by the specified number of characters. */
-    void operator+= (int numToSkip) noexcept
+    CharPointer_UTF16& operator+= (int numToSkip) noexcept
     {
         if (numToSkip < 0)
         {
@@ -157,12 +153,14 @@ public:
             while (--numToSkip >= 0)
                 ++*this;
         }
+
+        return *this;
     }
 
     /** Moves this pointer backwards by the specified number of characters. */
-    void operator-= (int numToSkip) noexcept
+    CharPointer_UTF16& operator-= (int numToSkip) noexcept
     {
-        operator+= (-numToSkip);
+        return operator+= (-numToSkip);
     }
 
     /** Returns the character at a given character index from the start of the string. */
@@ -176,17 +174,13 @@ public:
     /** Returns a pointer which is moved forwards from this one by the specified number of characters. */
     CharPointer_UTF16 operator+ (int numToSkip) const noexcept
     {
-        auto p (*this);
-        p += numToSkip;
-        return p;
+        return CharPointer_UTF16 (*this) += numToSkip;
     }
 
     /** Returns a pointer which is moved backwards from this one by the specified number of characters. */
     CharPointer_UTF16 operator- (int numToSkip) const noexcept
     {
-        auto p (*this);
-        p += -numToSkip;
-        return p;
+        return CharPointer_UTF16 (*this) -= numToSkip;
     }
 
     /** Writes a unicode character to this string, and advances this pointer to point to the next position. */
@@ -205,7 +199,7 @@ public:
     }
 
     /** Writes a null character to this string (leaving the pointer's position unchanged). */
-    inline void writeNull() const noexcept
+    void writeNull() const noexcept
     {
         *data = 0;
     }

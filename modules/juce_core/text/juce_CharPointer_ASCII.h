@@ -51,57 +51,53 @@ class CharPointer_ASCII  final
 public:
     using CharType = char;
 
-    inline explicit CharPointer_ASCII (const CharType* rawPointer) noexcept
+    explicit CharPointer_ASCII (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {
     }
 
-    inline CharPointer_ASCII (const CharPointer_ASCII& other) = default;
+    CharPointer_ASCII (const CharPointer_ASCII& other) = default;
 
-    inline CharPointer_ASCII operator= (const CharPointer_ASCII other) noexcept
-    {
-        data = other.data;
-        return *this;
-    }
+    CharPointer_ASCII& operator= (const CharPointer_ASCII& other) noexcept = default;
 
-    inline CharPointer_ASCII operator= (const CharType* text) noexcept
+    CharPointer_ASCII& operator= (const CharType* text) noexcept
     {
         data = const_cast<CharType*> (text);
         return *this;
     }
 
     /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator== (CharPointer_ASCII other) const noexcept     { return data == other.data; }
-    inline bool operator!= (CharPointer_ASCII other) const noexcept     { return data != other.data; }
-    inline bool operator<= (CharPointer_ASCII other) const noexcept     { return data <= other.data; }
-    inline bool operator<  (CharPointer_ASCII other) const noexcept     { return data <  other.data; }
-    inline bool operator>= (CharPointer_ASCII other) const noexcept     { return data >= other.data; }
-    inline bool operator>  (CharPointer_ASCII other) const noexcept     { return data >  other.data; }
+    bool operator== (CharPointer_ASCII other) const noexcept     { return data == other.data; }
+    bool operator!= (CharPointer_ASCII other) const noexcept     { return data != other.data; }
+    bool operator<= (CharPointer_ASCII other) const noexcept     { return data <= other.data; }
+    bool operator<  (CharPointer_ASCII other) const noexcept     { return data <  other.data; }
+    bool operator>= (CharPointer_ASCII other) const noexcept     { return data >= other.data; }
+    bool operator>  (CharPointer_ASCII other) const noexcept     { return data >  other.data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline CharType* getAddress() const noexcept        { return data; }
+    CharType* getAddress() const noexcept        { return data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline operator const CharType*() const noexcept    { return data; }
+    operator const CharType*() const noexcept    { return data; }
 
     /** Returns true if this pointer is pointing to a null character. */
-    inline bool isEmpty() const noexcept                { return *data == 0; }
+    bool isEmpty() const noexcept                { return *data == 0; }
 
     /** Returns true if this pointer is not pointing to a null character. */
-    inline bool isNotEmpty() const noexcept             { return *data != 0; }
+    bool isNotEmpty() const noexcept             { return *data != 0; }
 
     /** Returns the unicode character that this pointer is pointing to. */
-    inline juce_wchar operator*() const noexcept        { return (juce_wchar) (uint8) *data; }
+    juce_wchar operator*() const noexcept        { return (juce_wchar) (uint8) *data; }
 
     /** Moves this pointer along to the next character in the string. */
-    inline CharPointer_ASCII operator++() noexcept
+    CharPointer_ASCII& operator++() noexcept
     {
         ++data;
         return *this;
     }
 
     /** Moves this pointer to the previous character in the string. */
-    inline CharPointer_ASCII operator--() noexcept
+    CharPointer_ASCII& operator--() noexcept
     {
         --data;
         return *this;
@@ -109,7 +105,7 @@ public:
 
     /** Returns the character that this pointer is currently pointing to, and then
         advances the pointer to point to the next character. */
-    inline juce_wchar getAndAdvance() noexcept  { return (juce_wchar) (uint8) *data++; }
+    juce_wchar getAndAdvance() noexcept  { return (juce_wchar) (uint8) *data++; }
 
     /** Moves this pointer along to the next character in the string. */
     CharPointer_ASCII operator++ (int) noexcept
@@ -120,18 +116,20 @@ public:
     }
 
     /** Moves this pointer forwards by the specified number of characters. */
-    inline void operator+= (const int numToSkip) noexcept
+    CharPointer_ASCII& operator+= (const int numToSkip) noexcept
     {
         data += numToSkip;
+        return *this;
     }
 
-    inline void operator-= (const int numToSkip) noexcept
+    CharPointer_ASCII& operator-= (const int numToSkip) noexcept
     {
         data -= numToSkip;
+        return *this;
     }
 
     /** Returns the character at a given character index from the start of the string. */
-    inline juce_wchar operator[] (const int characterIndex) const noexcept
+    juce_wchar operator[] (const int characterIndex) const noexcept
     {
         return (juce_wchar) (uint8) data [characterIndex];
     }
@@ -139,28 +137,28 @@ public:
     /** Returns a pointer which is moved forwards from this one by the specified number of characters. */
     CharPointer_ASCII operator+ (const int numToSkip) const noexcept
     {
-        return CharPointer_ASCII (data + numToSkip);
+        return CharPointer_ASCII (*this) += numToSkip;
     }
 
     /** Returns a pointer which is moved backwards from this one by the specified number of characters. */
     CharPointer_ASCII operator- (const int numToSkip) const noexcept
     {
-        return CharPointer_ASCII (data - numToSkip);
+        return CharPointer_ASCII (*this) -= numToSkip;
     }
 
     /** Writes a unicode character to this string, and advances this pointer to point to the next position. */
-    inline void write (const juce_wchar charToWrite) noexcept
+    void write (const juce_wchar charToWrite) noexcept
     {
         *data++ = (char) charToWrite;
     }
 
-    inline void replaceChar (const juce_wchar newChar) noexcept
+    void replaceChar (const juce_wchar newChar) noexcept
     {
         *data = (char) newChar;
     }
 
     /** Writes a null character to this string (leaving the pointer's position unchanged). */
-    inline void writeNull() const noexcept
+    void writeNull() const noexcept
     {
         *data = 0;
     }

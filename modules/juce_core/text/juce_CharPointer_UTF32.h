@@ -48,57 +48,53 @@ class CharPointer_UTF32  final
 public:
     using CharType = juce_wchar;
 
-    inline explicit CharPointer_UTF32 (const CharType* rawPointer) noexcept
+    explicit CharPointer_UTF32 (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {
     }
 
-    inline CharPointer_UTF32 (const CharPointer_UTF32& other) = default;
+    CharPointer_UTF32 (const CharPointer_UTF32& other) = default;
 
-    inline CharPointer_UTF32 operator= (CharPointer_UTF32 other) noexcept
-    {
-        data = other.data;
-        return *this;
-    }
+    CharPointer_UTF32& operator= (const CharPointer_UTF32& other) noexcept = default;
 
-    inline CharPointer_UTF32 operator= (const CharType* text) noexcept
+    CharPointer_UTF32& operator= (const CharType* text) noexcept
     {
         data = const_cast<CharType*> (text);
         return *this;
     }
 
     /** This is a pointer comparison, it doesn't compare the actual text. */
-    inline bool operator== (CharPointer_UTF32 other) const noexcept     { return data == other.data; }
-    inline bool operator!= (CharPointer_UTF32 other) const noexcept     { return data != other.data; }
-    inline bool operator<= (CharPointer_UTF32 other) const noexcept     { return data <= other.data; }
-    inline bool operator<  (CharPointer_UTF32 other) const noexcept     { return data <  other.data; }
-    inline bool operator>= (CharPointer_UTF32 other) const noexcept     { return data >= other.data; }
-    inline bool operator>  (CharPointer_UTF32 other) const noexcept     { return data >  other.data; }
+    bool operator== (CharPointer_UTF32 other) const noexcept     { return data == other.data; }
+    bool operator!= (CharPointer_UTF32 other) const noexcept     { return data != other.data; }
+    bool operator<= (CharPointer_UTF32 other) const noexcept     { return data <= other.data; }
+    bool operator<  (CharPointer_UTF32 other) const noexcept     { return data <  other.data; }
+    bool operator>= (CharPointer_UTF32 other) const noexcept     { return data >= other.data; }
+    bool operator>  (CharPointer_UTF32 other) const noexcept     { return data >  other.data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline CharType* getAddress() const noexcept        { return data; }
+    CharType* getAddress() const noexcept        { return data; }
 
     /** Returns the address that this pointer is pointing to. */
-    inline operator const CharType*() const noexcept    { return data; }
+    operator const CharType*() const noexcept    { return data; }
 
     /** Returns true if this pointer is pointing to a null character. */
-    inline bool isEmpty() const noexcept                { return *data == 0; }
+    bool isEmpty() const noexcept                { return *data == 0; }
 
     /** Returns true if this pointer is not pointing to a null character. */
-    inline bool isNotEmpty() const noexcept             { return *data != 0; }
+    bool isNotEmpty() const noexcept             { return *data != 0; }
 
     /** Returns the unicode character that this pointer is pointing to. */
-    inline juce_wchar operator*() const noexcept        { return *data; }
+    juce_wchar operator*() const noexcept        { return *data; }
 
     /** Moves this pointer along to the next character in the string. */
-    inline CharPointer_UTF32 operator++() noexcept
+    CharPointer_UTF32& operator++() noexcept
     {
         ++data;
         return *this;
     }
 
     /** Moves this pointer to the previous character in the string. */
-    inline CharPointer_UTF32 operator--() noexcept
+    CharPointer_UTF32& operator--() noexcept
     {
         --data;
         return *this;
@@ -106,7 +102,7 @@ public:
 
     /** Returns the character that this pointer is currently pointing to, and then
         advances the pointer to point to the next character. */
-    inline juce_wchar getAndAdvance() noexcept  { return *data++; }
+    juce_wchar getAndAdvance() noexcept  { return *data++; }
 
     /** Moves this pointer along to the next character in the string. */
     CharPointer_UTF32 operator++ (int) noexcept
@@ -117,18 +113,20 @@ public:
     }
 
     /** Moves this pointer forwards by the specified number of characters. */
-    inline void operator+= (int numToSkip) noexcept
+    CharPointer_UTF32& operator+= (int numToSkip) noexcept
     {
         data += numToSkip;
+        return *this;
     }
 
-    inline void operator-= (int numToSkip) noexcept
+    CharPointer_UTF32& operator-= (int numToSkip) noexcept
     {
         data -= numToSkip;
+        return *this;
     }
 
     /** Returns the character at a given character index from the start of the string. */
-    inline juce_wchar& operator[] (int characterIndex) const noexcept
+    juce_wchar& operator[] (int characterIndex) const noexcept
     {
         return data [characterIndex];
     }
@@ -136,28 +134,28 @@ public:
     /** Returns a pointer which is moved forwards from this one by the specified number of characters. */
     CharPointer_UTF32 operator+ (int numToSkip) const noexcept
     {
-        return CharPointer_UTF32 (data + numToSkip);
+        return CharPointer_UTF32 (*this) += numToSkip;
     }
 
     /** Returns a pointer which is moved backwards from this one by the specified number of characters. */
     CharPointer_UTF32 operator- (int numToSkip) const noexcept
     {
-        return CharPointer_UTF32 (data - numToSkip);
+        return CharPointer_UTF32 (*this) -= numToSkip;
     }
 
     /** Writes a unicode character to this string, and advances this pointer to point to the next position. */
-    inline void write (juce_wchar charToWrite) noexcept
+    void write (juce_wchar charToWrite) noexcept
     {
         *data++ = charToWrite;
     }
 
-    inline void replaceChar (juce_wchar newChar) noexcept
+    void replaceChar (juce_wchar newChar) noexcept
     {
         *data = newChar;
     }
 
     /** Writes a null character to this string (leaving the pointer's position unchanged). */
-    inline void writeNull() const noexcept
+    void writeNull() const noexcept
     {
         *data = 0;
     }

@@ -55,13 +55,9 @@ public:
 
     CharPointer_UTF8 (const CharPointer_UTF8& other) = default;
 
-    CharPointer_UTF8 operator= (CharPointer_UTF8 other) noexcept
-    {
-        data = other.data;
-        return *this;
-    }
+    CharPointer_UTF8& operator= (const CharPointer_UTF8& other) noexcept = default;
 
-    CharPointer_UTF8 operator= (const CharType* text) noexcept
+    CharPointer_UTF8& operator= (const CharType* text) noexcept
     {
         data = const_cast<CharType*> (text);
         return *this;
@@ -144,7 +140,7 @@ public:
     }
 
     /** Moves this pointer back to the previous character in the string. */
-    CharPointer_UTF8 operator--() noexcept
+    CharPointer_UTF8& operator--() noexcept
     {
         int count = 0;
 
@@ -201,7 +197,7 @@ public:
     }
 
     /** Moves this pointer forwards by the specified number of characters. */
-    void operator+= (int numToSkip) noexcept
+    CharPointer_UTF8& operator+= (int numToSkip) noexcept
     {
         if (numToSkip < 0)
         {
@@ -213,12 +209,14 @@ public:
             while (--numToSkip >= 0)
                 ++*this;
         }
+
+        return *this;
     }
 
     /** Moves this pointer backwards by the specified number of characters. */
-    void operator-= (int numToSkip) noexcept
+    CharPointer_UTF8& operator-= (int numToSkip) noexcept
     {
-        operator+= (-numToSkip);
+        return operator+= (-numToSkip);
     }
 
     /** Returns the character at a given character index from the start of the string. */
@@ -232,17 +230,13 @@ public:
     /** Returns a pointer which is moved forwards from this one by the specified number of characters. */
     CharPointer_UTF8 operator+ (int numToSkip) const noexcept
     {
-        auto p (*this);
-        p += numToSkip;
-        return p;
+        return CharPointer_UTF8 (*this) += numToSkip;
     }
 
     /** Returns a pointer which is moved backwards from this one by the specified number of characters. */
     CharPointer_UTF8 operator- (int numToSkip) const noexcept
     {
-        auto p (*this);
-        p += -numToSkip;
-        return p;
+        return CharPointer_UTF8 (*this) -= numToSkip;
     }
 
     /** Returns the number of characters in this string. */
