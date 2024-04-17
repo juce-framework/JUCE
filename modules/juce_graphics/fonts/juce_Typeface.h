@@ -346,6 +346,24 @@ public:
     */
     virtual Typeface::Ptr createSystemFallback (const String& text, const String& language) const = 0;
 
+    /** Returns the system's default UI font.
+
+        This will differ depending on the platform.
+
+        On Linux/fontconfig, this returns the typeface mapped to the name "system-ui",
+        or nullptr if no such font exists.
+
+        On Windows, this queries SystemParametersInfo with the key SPI_GETNONCLIENTMETRICS,
+        and returns the lfMessageFont that is returned, or nullptr if the font cannot be found.
+
+        On macOS and iOS, this returns the result of CTFontCreateUIFontForLanguage() for
+        the kCTFontUIFontSystem typeface.
+
+        On Android 29+, this will use AFontMatcher to return the "system-ui" font. On earlier
+        Android versions, this will attempt to return the Roboto font.
+    */
+    static Typeface::Ptr findSystemTypeface();
+
 private:
     //==============================================================================
     String name;

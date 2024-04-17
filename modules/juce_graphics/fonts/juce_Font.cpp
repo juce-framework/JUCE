@@ -39,6 +39,8 @@ class Font::Native
 {
 public:
     HbFont font{};
+
+    static Typeface::Ptr getDefaultPlatformTypefaceForFont (const Font&);
 };
 
 using GetTypefaceForFont = Typeface::Ptr (*)(const Font&);
@@ -426,10 +428,11 @@ void Font::dupeInternalIfShared()
 //==============================================================================
 struct FontPlaceholderNames
 {
-    String sans    { "<Sans-Serif>" },
-           serif   { "<Serif>" },
-           mono    { "<Monospaced>" },
-           regular { "<Regular>" };
+    String sans     = "<Sans-Serif>",
+           serif    = "<Serif>",
+           mono     = "<Monospaced>",
+           regular  = "<Regular>",
+           systemUi = "system-ui";
 };
 
 static const FontPlaceholderNames& getFontPlaceholderNames()
@@ -447,6 +450,7 @@ static FontNamePreloader fnp;
 #endif
 
 const String& Font::getDefaultSansSerifFontName()       { return getFontPlaceholderNames().sans; }
+const String& Font::getSystemUIFontName()               { return getFontPlaceholderNames().systemUi; }
 const String& Font::getDefaultSerifFontName()           { return getFontPlaceholderNames().serif; }
 const String& Font::getDefaultMonospacedFontName()      { return getFontPlaceholderNames().mono; }
 const String& Font::getDefaultStyle()                   { return getFontPlaceholderNames().regular; }
@@ -867,6 +871,32 @@ Font Font::fromString (const String& fontDescription)
 Font::Native Font::getNativeDetails() const
 {
     return { font->getFontPtr (*this) };
+}
+
+Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
+{
+    const auto systemTypeface = [&]() -> Typeface::Ptr
+    {
+        if (font.getTypefaceName() != getSystemUIFontName())
+            return {};
+
+        const auto systemTypeface = Typeface::findSystemTypeface();
+
+        if (systemTypeface == nullptr)
+            return {};
+
+        if (systemTypeface->getStyle() == font.getTypefaceStyle())
+            return systemTypeface;
+
+        auto copy = font;
+        copy.setTypefaceName (systemTypeface->getName());
+        return getDefaultTypefaceForFont (copy);
+    }();
+
+    if (systemTypeface != nullptr)
+        return systemTypeface;
+
+    return Native::getDefaultPlatformTypefaceForFont (font);
 }
 
 } // namespace juce

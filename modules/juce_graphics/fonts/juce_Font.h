@@ -212,6 +212,15 @@ public:
     */
     static const String& getDefaultSansSerifFontName();
 
+    /** Returns a typeface font family that represents the system UI font.
+
+        Note that this method just returns a generic placeholder string that means "the default
+        UI font" - it's not the actual font family of this font.
+
+        @see getDefaultSansSerifFontName, setTypefaceName
+    */
+    static const String& getSystemUIFontName();
+
     /** Returns a typeface font family that represents the default serif font.
 
         Note that this method just returns a generic placeholder string that means "the default

@@ -39,10 +39,12 @@
 namespace juce
 {
 
+#if JUCE_USE_FONTCONFIG
 using FcConfigPtr  = std::unique_ptr<FcConfig,  FunctionPointerDestructor<FcConfigDestroy>>;
 using FcPatternPtr = std::unique_ptr<FcPattern, FunctionPointerDestructor<FcPatternDestroy>>;
 using FcCharSetPtr = std::unique_ptr<FcCharSet, FunctionPointerDestructor<FcCharSetDestroy>>;
 using FcLangSetPtr = std::unique_ptr<FcLangSet, FunctionPointerDestructor<FcLangSetDestroy>>;
+#endif
 
 struct FTLibWrapper final : public ReferenceCountedObject
 {
@@ -61,7 +63,10 @@ struct FTLibWrapper final : public ReferenceCountedObject
             FT_Done_FreeType (library);
     }
 
+   #if JUCE_USE_FONTCONFIG
     const FcConfigPtr fcConfig { FcInitLoadConfigAndFonts() };
+   #endif
+
     FT_Library library = {};
 
     using Ptr = ReferenceCountedObjectPtr<FTLibWrapper>;
@@ -317,6 +322,8 @@ public:
 
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (FTTypefaceList)
 
+    FTLibWrapper::Ptr getLibrary() const { return library; }
+
 private:
     FTLibWrapper::Ptr library = new FTLibWrapper;
     std::vector<std::unique_ptr<KnownTypeface>> faces;
@@ -437,7 +444,6 @@ public:
         if (cache == nullptr)
             return {};
 
-        auto* config = ftFace->library->fcConfig.get();
         FcPatternPtr pattern { FcPatternCreate() };
 
         {
@@ -468,11 +474,47 @@ public:
             FcPatternAddLangSet (pattern.get(), FC_LANG, langset.get());
         }
 
-        FcConfigSubstitute (config, pattern.get(), FcMatchPattern);
-        FcDefaultSubstitute (pattern.get());
+        return fromPattern (pattern.get());
+       #else
+        // Font substitution will not work unless fontconfig is enabled.
+        jassertfalse;
+        return nullptr;
+       #endif
+    }
+
+    ~FreeTypeTypeface() override
+    {
+        if (doCache == DoCache::yes)
+            if (auto* list = FTTypefaceList::getInstance())
+                list->removeMemoryFace (ftFace);
+    }
+
+    static Typeface::Ptr findSystemTypeface()
+    {
+       #if JUCE_USE_FONTCONFIG
+        FcPatternPtr pattern { FcNameParse (unalignedPointerCast<const FcChar8*> ("system-ui")) };
+        return fromPattern (pattern.get());
+       #else
+        return nullptr;
+       #endif
+    }
+
+private:
+   #if JUCE_USE_FONTCONFIG
+    static Typeface::Ptr fromPattern (FcPattern* pattern)
+    {
+        auto* cache = TypefaceFileCache::getInstance();
+
+        if (cache == nullptr)
+            return {};
+
+        const auto library = FTTypefaceList::getInstance()->getLibrary();
+
+        FcConfigSubstitute (library->fcConfig.get(), pattern, FcMatchPattern);
+        FcDefaultSubstitute (pattern);
 
         FcResult result{};
-        const FcPatternPtr matched { FcFontMatch (config, pattern.get(), &result) };
+        const FcPatternPtr matched { FcFontMatch (library->fcConfig.get(), pattern, &result) };
 
         if (result != FcResultMatch)
             return {};
@@ -502,21 +544,9 @@ public:
 
             return new FreeTypeTypeface (DoCache::no, face, std::move (cachedFont), face->face->family_name, face->face->style_name);
         });
-       #else
-        // Font substitution will not work unless fontconfig is enabled.
-        jassertfalse;
-        return nullptr;
-       #endif
     }
+   #endif
 
-    ~FreeTypeTypeface() override
-    {
-        if (doCache == DoCache::yes)
-            if (auto* list = FTTypefaceList::getInstance())
-                list->removeMemoryFace (ftFace);
-    }
-
-private:
     FreeTypeTypeface (DoCache cache,
                       FTFaceWrapper::Ptr ftFaceIn,
                       HbFont hbIn,
@@ -549,6 +579,11 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 Typeface::Ptr Typeface::createSystemTypefaceFor (Span<const std::byte> data)
 {
     return FreeTypeTypeface::from (data);
+}
+
+Typeface::Ptr Typeface::findSystemTypeface()
+{
+    return FreeTypeTypeface::findSystemTypeface();
 }
 
 } // namespace juce

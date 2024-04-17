@@ -197,7 +197,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (DefaultFontInfo)
 };
 
-Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
+Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
 {
     static const DefaultFontInfo defaultInfo;
 

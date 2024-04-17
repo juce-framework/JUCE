@@ -667,6 +667,26 @@ public:
         return ctFont.get();
     }
 
+    static Typeface::Ptr findSystemTypeface()
+    {
+        CFUniquePtr<CTFontRef> defaultCtFont (CTFontCreateUIFontForLanguage (kCTFontUIFontSystem, 0.0, nullptr));
+        const CFUniquePtr<CFStringRef> newName { CTFontCopyFamilyName (defaultCtFont.get()) };
+        const CFUniquePtr<CTFontDescriptorRef> descriptor { CTFontCopyFontDescriptor (defaultCtFont.get()) };
+        const CFUniquePtr<CFStringRef> newStyle { (CFStringRef) CTFontDescriptorCopyAttribute (descriptor.get(),
+                                                                                               kCTFontStyleNameAttribute) };
+
+        HbFont result { hb_coretext_font_create (defaultCtFont.get()) };
+
+        if (result == nullptr)
+            return {};
+
+        return new CoreTextTypeface { std::move (defaultCtFont),
+                                      std::move (result),
+                                      String::fromCFString (newName.get()),
+                                      String::fromCFString (newStyle.get()),
+                                      {} };
+    }
+
 private:
     CoreTextTypeface (CFUniquePtr<CTFontRef> nativeFont,
                       HbFont fontIn,
@@ -735,6 +755,11 @@ void Typeface::scanFolderForFonts (const File& folder)
     for (auto& file : folder.findChildFiles (File::findFiles, false, "*.otf;*.ttf"))
         if (auto urlref = CFUniquePtr<CFURLRef> (CFURLCreateWithFileSystemPath (kCFAllocatorDefault, file.getFullPathName().toCFString(), kCFURLPOSIXPathStyle, true)))
             CTFontManagerRegisterFontsForURL (urlref.get(), kCTFontManagerScopeProcess, nullptr);
+}
+
+Typeface::Ptr Typeface::findSystemTypeface()
+{
+    return CoreTextTypeface::findSystemTypeface();
 }
 
 StringArray Font::findAllTypefaceNames()
@@ -807,7 +832,7 @@ struct DefaultFontNames
    #endif
 };
 
-Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
+Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
 {
     static DefaultFontNames defaultNames;
 

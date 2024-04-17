@@ -35,7 +35,7 @@
 namespace juce
 {
 
-Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
+Typeface::Ptr Font::Native::getDefaultPlatformTypefaceForFont (const Font& font)
 {
     Font f (font);
     f.setTypefaceName ([&]() -> String
@@ -285,10 +285,58 @@ public:
                 c->remove ({ getName(), getStyle() });
     }
 
+    static Typeface::Ptr findSystemTypeface()
+    {
+        if (__builtin_available (android 29, *))
+            return findSystemTypefaceWithMatcher();
+
+        return from (FontOptions{}.withName ("Roboto"));
+    }
+
 private:
+    static __INTRODUCED_IN (29) Typeface::Ptr fromMatchedFont (AFont* matched)
+    {
+        if (matched == nullptr)
+        {
+            // Unable to find any matching fonts. This should never happen - in the worst case,
+            // we should at least get a font with the tofu character.
+            jassertfalse;
+            return {};
+        }
+
+        const File matchedFile { AFont_getFontFilePath (matched) };
+        const auto matchedIndex = AFont_getCollectionIndex (matched);
+
+        auto* cache = TypefaceFileCache::getInstance();
+
+        if (cache == nullptr)
+            return {}; // Perhaps we're shutting down
+
+        return cache->get ({ matchedFile, (int) matchedIndex }, &loadCompatibleFont);
+    }
+
+    static __INTRODUCED_IN (29) Typeface::Ptr findSystemTypefaceWithMatcher()
+    {
+        using AFontMatcherPtr = std::unique_ptr<AFontMatcher, FunctionPointerDestructor<AFontMatcher_destroy>>;
+        using AFontPtr = std::unique_ptr<AFont, FunctionPointerDestructor<AFont_close>>;
+
+        constexpr uint16_t testString[] { 't', 'e', 's', 't' };
+
+        const AFontMatcherPtr matcher { AFontMatcher_create() };
+        const AFontPtr matched { AFontMatcher_match (matcher.get(),
+                                                     "system-ui",
+                                                     testString,
+                                                     std::size (testString),
+                                                     nullptr) };
+
+        return fromMatchedFont (matched.get());
+    }
+
     __INTRODUCED_IN (29) Typeface::Ptr matchWithAFontMatcher (const String& text, const String& language) const
     {
         using AFontMatcherPtr = std::unique_ptr<AFontMatcher, FunctionPointerDestructor<AFontMatcher_destroy>>;
+        using AFontPtr = std::unique_ptr<AFont, FunctionPointerDestructor<AFont_close>>;
+
         const AFontMatcherPtr matcher { AFontMatcher_create() };
 
         const auto weight = hb_style_get_value (hbFont.get(), HB_STYLE_TAG_WEIGHT);
@@ -299,7 +347,6 @@ private:
 
         const auto utf16 = text.toUTF16();
 
-        using AFontPtr = std::unique_ptr<AFont, FunctionPointerDestructor<AFont_close>>;
         const AFontPtr matched { AFontMatcher_match (matcher.get(),
                                                      readFontName (hb_font_get_face (hbFont.get()),
                                                                    HB_OT_NAME_ID_FONT_FAMILY,
@@ -308,23 +355,7 @@ private:
                                                      (uint32_t) (utf16.findTerminatingNull().getAddress() - utf16.getAddress()),
                                                      nullptr) };
 
-        if (matched == nullptr)
-        {
-            // Unable to find any matching fonts. This should never happen - in the worst case,
-            // we should at least get a font with the tofu character.
-            jassertfalse;
-            return {};
-        }
-
-        const File matchedFile { AFont_getFontFilePath (matched.get()) };
-        const auto matchedIndex = AFont_getCollectionIndex (matched.get());
-
-        auto* cache = TypefaceFileCache::getInstance();
-
-        if (cache == nullptr)
-            return {}; // Perhaps we're shutting down
-
-        return cache->get ({ matchedFile, (int) matchedIndex }, &loadCompatibleFont);
+        return fromMatchedFont (matched.get());
     }
 
     static Typeface::Ptr loadCompatibleFont (const TypefaceFileAndIndex& info)
@@ -590,6 +621,11 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 Typeface::Ptr Typeface::createSystemTypefaceFor (Span<const std::byte> data)
 {
     return AndroidTypeface::from (data);
+}
+
+Typeface::Ptr Typeface::findSystemTypeface()
+{
+    return AndroidTypeface::findSystemTypeface();
 }
 
 void Typeface::scanFolderForFonts (const File&)
