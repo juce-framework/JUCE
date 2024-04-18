@@ -4,7 +4,6 @@
 
 - All project types require CMake 3.22 or higher.
 - Android targets are not currently supported.
-- WebView2 on Windows via JUCE_USE_WIN_WEBVIEW2 flag in juce_gui_extra is not currently supported.
 
 Most system package managers have packages for CMake, but we recommend using the most recent release
 from https://cmake.org/download. You should always use a CMake that's newer than your build

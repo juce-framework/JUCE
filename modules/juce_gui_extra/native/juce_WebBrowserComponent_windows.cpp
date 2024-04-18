@@ -663,7 +663,7 @@ public:
             Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler> (
                 [&result] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
                 {
-                    result.environment = env;
+                    result.environment = addComSmartPtrOwner (env);
                     return S_OK;
                 }).Get());
 
@@ -827,7 +827,7 @@ private:
                         {
                             method = "POST";
 
-                            ComSmartPtr<IStream> content (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
+                            auto content = becomeComSmartPtrOwner (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
                                                                                       (UINT) urlRequest.postData.getSize()));
                             request->put_Content (content);
                         }
@@ -854,8 +854,8 @@ private:
                     {
                         if (auto responseData = owner.impl->handleResourceRequest (resourceRequestUri))
                         {
-                            ComSmartPtr<IStream> stream (SHCreateMemStream ((BYTE*) responseData->data.data(),
-                                                                            (UINT) responseData->data.size()));
+                            auto stream = becomeComSmartPtrOwner (SHCreateMemStream ((BYTE*) responseData->data.data(),
+                                                                                     (UINT) responseData->data.size()));
 
                             StringArray headers { "Content-Type: " + responseData->mimeType };
 
@@ -1035,7 +1035,7 @@ private:
 
                             if (controller != nullptr)
                             {
-                                weakThis->webViewController = controller;
+                                weakThis->webViewController = addComSmartPtrOwner (controller);
                                 controller->get_CoreWebView2 (weakThis->webView.resetAndGetPointerAddress());
 
                                 auto allUserScripts = weakThis->userScripts;

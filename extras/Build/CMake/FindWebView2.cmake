@@ -79,7 +79,7 @@ find_package_handle_standard_args(WebView2 DEFAULT_MSG WebView2_include_dir WebV
 
 if(WebView2_FOUND)
     set(WebView2_INCLUDE_DIRS ${WebView2_include_dir})
-    set(WebView2_LIBRARIES ${WebView2_library} )
+    set(WebView2_LIBRARIES ${WebView2_library})
 
     mark_as_advanced(WebView2_library WebView2_include_dir WebView2_root_dir)
 
