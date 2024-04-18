@@ -1107,6 +1107,44 @@ endfunction()
 
 # ==================================================================================================
 
+function(juce_set_aax_sdk_path path)
+    if(TARGET juce_aax_sdk)
+        message(FATAL_ERROR "juce_set_aax_sdk_path should only be called once")
+    endif()
+
+    _juce_make_absolute(path)
+
+    if((NOT EXISTS "${path}")
+       OR (NOT EXISTS "${path}/Interfaces")
+       OR (NOT EXISTS "${path}/Interfaces/ACF"))
+        message(FATAL_ERROR "Could not find AAX SDK at the specified path: ${path}")
+    endif()
+
+    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") OR (CMAKE_SYSTEM_NAME STREQUAL "Windows"))
+        add_library(juce_aax_sdk INTERFACE IMPORTED GLOBAL)
+    else()
+        return()
+    endif()
+
+    _juce_disable_system_includes(juce_aax_sdk)
+    target_include_directories(juce_aax_sdk INTERFACE
+        "${path}"
+        "${path}/Interfaces"
+        "${path}/Interfaces/ACF")
+    set_target_properties(juce_aax_sdk PROPERTIES INTERFACE_JUCE_AAX_DEFAULT_ICON "${path}/Utilities/PlugIn.ico")
+endfunction()
+
+function(_juce_init_bundled_aax_sdk)
+    if(TARGET juce_aax_sdk)
+        return()
+    endif()
+
+    get_target_property(module_path juce::juce_audio_plugin_client INTERFACE_JUCE_MODULE_PATH)
+    juce_set_aax_sdk_path("${module_path}/juce_audio_plugin_client/AAX/SDK")
+endfunction()
+
+# ==================================================================================================
+
 function(_juce_set_plugin_target_properties shared_code_target kind)
     set(target_name ${shared_code_target}_${kind})
 
@@ -1202,6 +1240,7 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
             XCODE_ATTRIBUTE_LIBRARY_STYLE Bundle
             XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE YES)
 
+        _juce_init_bundled_aax_sdk()
         get_target_property(default_icon juce_aax_sdk INTERFACE_JUCE_AAX_DEFAULT_ICON)
         _juce_create_windows_package(${shared_code_target} ${target_name} aaxplugin "${default_icon}" Win32 x64)
 
@@ -1413,8 +1452,6 @@ function(_juce_configure_plugin_targets target)
 
     if((VST IN_LIST active_formats) AND (NOT TARGET juce_vst2_sdk))
         message(FATAL_ERROR "Use juce_set_vst2_sdk_path to set up the VST sdk before adding VST targets")
-    elseif((AAX IN_LIST active_formats) AND (NOT TARGET juce_aax_sdk))
-        message(FATAL_ERROR "Use juce_set_aax_sdk_path to set up the AAX sdk before adding AAX targets")
     endif()
 
     _juce_add_standard_defs(${target})
@@ -1513,6 +1550,7 @@ function(_juce_configure_plugin_targets target)
     endif()
 
     if(TARGET ${target}_AAX)
+        _juce_init_bundled_aax_sdk()
         target_link_libraries(${target}_AAX PRIVATE juce_aax_sdk)
     endif()
 
@@ -2176,13 +2214,9 @@ function(juce_add_pip header)
         else()
             set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
 
-            # We add AAX/VST2 targets too, if the user has set up those SDKs
+            # We add VST2 targets too, if the user has set up those SDKs
 
             set(extra_formats)
-
-            if(TARGET juce_aax_sdk)
-                list(APPEND extra_formats AAX)
-            endif()
 
             if(TARGET juce_vst2_sdk)
                 list(APPEND extra_formats VST)
@@ -2196,7 +2230,7 @@ function(juce_add_pip header)
             list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
 
             juce_add_plugin(${JUCE_PIP_NAME}
-                FORMATS AU AUv3 LV2 Standalone Unity ${extra_formats}
+                FORMATS AU AUv3 LV2 Standalone Unity AAX ${extra_formats}
                 ${extra_target_args})
         endif()
     elseif(pip_kind STREQUAL "Component")
@@ -2286,33 +2320,6 @@ function(juce_add_pip header)
 endfunction()
 
 # ==================================================================================================
-
-function(juce_set_aax_sdk_path path)
-    if(TARGET juce_aax_sdk)
-        message(FATAL_ERROR "juce_set_aax_sdk_path should only be called once")
-    endif()
-
-    _juce_make_absolute(path)
-
-    if((NOT EXISTS "${path}")
-       OR (NOT EXISTS "${path}/Interfaces")
-       OR (NOT EXISTS "${path}/Interfaces/ACF"))
-        message(FATAL_ERROR "Could not find AAX SDK at the specified path: ${path}")
-    endif()
-
-    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") OR (CMAKE_SYSTEM_NAME STREQUAL "Windows"))
-        add_library(juce_aax_sdk INTERFACE IMPORTED GLOBAL)
-    else()
-        return()
-    endif()
-
-    _juce_disable_system_includes(juce_aax_sdk)
-    target_include_directories(juce_aax_sdk INTERFACE
-        "${path}"
-        "${path}/Interfaces"
-        "${path}/Interfaces/ACF")
-    set_target_properties(juce_aax_sdk PROPERTIES INTERFACE_JUCE_AAX_DEFAULT_ICON "${path}/Utilities/PlugIn.ico")
-endfunction()
 
 function(juce_set_vst2_sdk_path path)
     if(TARGET juce_vst2_sdk)
