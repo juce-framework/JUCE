@@ -1243,7 +1243,7 @@ public:
         //==============================================================================
         build_tools::RelativePath getAAXIconFile() const
         {
-            build_tools::RelativePath aaxSDK (owner.getAAXPathString(), build_tools::RelativePath::projectFolder);
+            const auto aaxSdk = owner.getAAXPathRelative();
             build_tools::RelativePath projectIcon ("icon.ico", build_tools::RelativePath::buildTargetFolder);
 
             if (getOwner().getTargetFolder().getChildFile ("icon.ico").existsAsFile())
@@ -1251,7 +1251,7 @@ public:
                                             getOwner().getProject().getProjectFolder(),
                                             build_tools::RelativePath::projectFolder);
 
-            return aaxSDK.getChildFile ("Utilities").getChildFile ("PlugIn.ico");
+            return aaxSdk.getChildFile ("Utilities").getChildFile ("PlugIn.ico");
         }
 
         String getExtraPostBuildSteps (const MSVCBuildConfiguration& config) const
@@ -1276,10 +1276,10 @@ public:
 
             if (type == AAXPlugIn)
             {
-                const build_tools::RelativePath aaxSDK (owner.getAAXPathString(), build_tools::RelativePath::projectFolder);
-                const build_tools::RelativePath aaxLibsFolder = aaxSDK.getChildFile ("Libs");
-                const build_tools::RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
-                const build_tools::RelativePath iconFilePath  = getAAXIconFile();
+                const auto aaxSdk = owner.getAAXPathRelative();
+                const auto aaxLibsFolder = aaxSdk.getChildFile ("Libs");
+                const auto bundleScript  = aaxSdk.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
+                const auto iconFilePath  = getAAXIconFile();
 
                 const auto segments = getAaxBundleStructure (config);
 

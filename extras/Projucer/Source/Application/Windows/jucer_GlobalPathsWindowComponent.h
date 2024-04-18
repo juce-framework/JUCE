@@ -240,7 +240,8 @@ private:
         if (getSelectedOS() != TargetOS::linux)
         {
             builder.add (new FilePathPropertyComponent (aaxPathValue, "AAX SDK", true, isThisOS),
-                         "If you are building AAX plug-ins, this should be the path to the AAX SDK folder.");
+                         "If you need to use a custom version of the AAX SDK, this should be the path to the AAX SDK folder. "
+                         "JUCE bundles a copy of the AAX SDK, so you normally shouldn't need to set this.");
         }
 
         builder.add (new FilePathPropertyComponent (androidSDKPathValue, "Android SDK", true, isThisOS),

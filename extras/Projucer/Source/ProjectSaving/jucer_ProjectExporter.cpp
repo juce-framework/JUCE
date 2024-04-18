@@ -460,16 +460,11 @@ build_tools::RelativePath ProjectExporter::getInternalVST3SDKPath()
 
 void ProjectExporter::addAAXFoldersToPath()
 {
-    auto aaxFolder = getAAXPathString();
+    const auto aaxFolder = getAAXPathRelative();
 
-    if (aaxFolder.isNotEmpty())
-    {
-        build_tools::RelativePath aaxFolderPath (aaxFolder, build_tools::RelativePath::projectFolder);
-
-        addToExtraSearchPaths (aaxFolderPath);
-        addToExtraSearchPaths (aaxFolderPath.getChildFile ("Interfaces"));
-        addToExtraSearchPaths (aaxFolderPath.getChildFile ("Interfaces").getChildFile ("ACF"));
-    }
+    addToExtraSearchPaths (aaxFolder);
+    addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces"));
+    addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces").getChildFile ("ACF"));
 }
 
 void ProjectExporter::addARAFoldersToPath()

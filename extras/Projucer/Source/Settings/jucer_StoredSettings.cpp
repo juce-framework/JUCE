@@ -356,43 +356,38 @@ bool StoredSettings::isJUCEPathIncorrect()
 static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
 {
     if (key == Ids::jucePath)
-    {
         return (os == TargetOS::windows ? "C:\\JUCE" : "~/JUCE");
-    }
-    else if (key == Ids::defaultJuceModulePath)
-    {
+
+    if (key == Ids::defaultJuceModulePath)
         return (os == TargetOS::windows ? "C:\\JUCE\\modules" : "~/JUCE/modules");
-    }
-    else if (key == Ids::defaultUserModulePath)
-    {
+
+    if (key == Ids::defaultUserModulePath)
         return (os == TargetOS::windows ? "C:\\modules" : "~/modules");
-    }
-    else if (key == Ids::vstLegacyPath)
+
+    if (key == Ids::vstLegacyPath)
+        return {};
+
+    if (key == Ids::aaxPath)
+        return {}; // Empty means "use internal SDK"
+
+    if (key == Ids::araPath)
     {
+        if (os == TargetOS::windows)  return "C:\\SDKs\\ARA_SDK";
+        if (os == TargetOS::osx)      return "~/SDKs/ARA_SDK";
         return {};
     }
-    else if (key == Ids::aaxPath)
+
+    if (key == Ids::androidSDKPath)
     {
-        if      (os == TargetOS::windows)  return "C:\\SDKs\\AAX";
-        else if (os == TargetOS::osx)      return "~/SDKs/AAX";
-        else                               return {}; // no AAX on this OS!
-    }
-    else if (key == Ids::araPath)
-    {
-        if      (os == TargetOS::windows)  return "C:\\SDKs\\ARA_SDK";
-        else if (os == TargetOS::osx)      return "~/SDKs/ARA_SDK";
-        else                               return {};
-    }
-    else if (key == Ids::androidSDKPath)
-    {
-        if      (os == TargetOS::windows)  return "${user.home}\\AppData\\Local\\Android\\Sdk";
-        else if (os == TargetOS::osx)      return "${user.home}/Library/Android/sdk";
-        else if (os == TargetOS::linux)    return "${user.home}/Android/Sdk";
+        if (os == TargetOS::windows)  return "${user.home}\\AppData\\Local\\Android\\Sdk";
+        if (os == TargetOS::osx)      return "${user.home}/Library/Android/sdk";
+        if (os == TargetOS::linux)    return "${user.home}/Android/Sdk";
 
         jassertfalse;
         return {};
     }
-    else if (key == Ids::androidStudioExePath)
+
+    if (key == Ids::androidStudioExePath)
     {
         if (os == TargetOS::windows)
         {
@@ -405,14 +400,11 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
 
             return "C:\\Program Files\\Android\\Android Studio\\bin\\studio64.exe";
         }
-        else if (os == TargetOS::osx)
-        {
+
+        if (os == TargetOS::osx)
             return "/Applications/Android Studio.app";
-        }
-        else
-        {
-            return {}; // no Android Studio on this OS!
-        }
+
+        return {}; // no Android Studio on this OS!
     }
 
     // unknown key!

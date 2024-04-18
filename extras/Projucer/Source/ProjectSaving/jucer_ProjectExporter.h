@@ -184,7 +184,16 @@ public:
     bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 
     String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.getCurrentValue(); }
-    String getAAXPathString() const                       { return aaxPathValueWrapper.getCurrentValue(); }
+
+    auto getAAXPathRelative() const
+    {
+        const String userAaxFolder = aaxPathValueWrapper.getCurrentValue();
+        return userAaxFolder.isNotEmpty()
+             ? build_tools::RelativePath (userAaxFolder, build_tools::RelativePath::projectFolder)
+             : getModuleFolderRelativeToProject ("juce_audio_plugin_client").getChildFile ("AAX")
+                                                                            .getChildFile ("SDK");
+    }
+
     String getARAPathString() const                       { return araPathValueWrapper.getCurrentValue(); }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
