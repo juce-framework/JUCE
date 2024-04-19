@@ -220,7 +220,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                                       int maximumLines,
                                       float minimumHorizontalScale)
 {
-    if (! layout.testFlags (Justification::bottom))
+    if (! layout.testFlags (Justification::bottom | Justification::top))
         layout = layout.getOnlyHorizontalFlags() | Justification::verticallyCentred;
 
     if (approximatelyEqual (minimumHorizontalScale, 0.0f))
