@@ -466,11 +466,6 @@ public:
         targetAlpha = alpha;
     }
 
-    virtual void clearBackground()
-    {
-        deviceResources.deviceContext.context->Clear (backgroundColor);
-    }
-
     virtual SavedState* startFrame (float dpiScale)
     {
         prepare();
@@ -1176,18 +1171,18 @@ void Direct2DGraphicsContext::setInterpolationQuality (Graphics::ResamplingQuali
 void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExistingContents)
 {
     if (replaceExistingContents)
-    {
-        JUCE_SCOPED_TRACE_EVENT_FRAME_RECT_I32 (etw::fillRectReplace, etw::direct2dKeyword, getFrameId(), r);
-
-        applyPendingClipList();
         clipToRectangle (r);
-        getPimpl()->clearBackground();
-        currentState->popTopLayer();
-    }
 
-    auto fill = [] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
+    const auto clearColour = currentState->fillType.colour;
+
+    auto fill = [replaceExistingContents, clearColour] (Rectangle<float> rect,
+                                                        ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+                                                        ComSmartPtr<ID2D1Brush> brush)
     {
-        deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
+        if (replaceExistingContents)
+            deviceContext->Clear (D2DUtilities::toCOLOR_F (clearColour));
+        else
+            deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
     };
 
     getPimpl()->paintPrimitive (r.toFloat(), fill);

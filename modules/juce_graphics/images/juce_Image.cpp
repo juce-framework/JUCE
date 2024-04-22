@@ -522,12 +522,12 @@ void Image::BitmapData::setPixelColour (int x, int y, Colour colour) const noexc
 //==============================================================================
 void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
 {
-    if (image != nullptr)
-    {
-        auto g = image->createLowLevelContext();
-        g->setFill (colourToClearTo);
-        g->fillRect (area, true);
-    }
+    if (image == nullptr)
+        return;
+
+    auto g = image->createLowLevelContext();
+    g->setFill (colourToClearTo);
+    g->fillRect (area, true);
 }
 
 //==============================================================================
