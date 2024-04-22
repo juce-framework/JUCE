@@ -93,7 +93,7 @@ public:
         on the compiler, source code editor and platform.
 
         This will use up to the first maxChars characters of the string (or less if the string
-        is actually shorter).
+        is actually shorter).   
     */
     String (const char* text, size_t maxChars);
 
@@ -146,6 +146,9 @@ public:
 
     /** Creates a string from a StringRef */
     String (StringRef);
+
+    /** Creates a string from a string_view */
+    String (std::string_view text);
 
     //==============================================================================
     /** Creates a string from a single character. */
@@ -1223,6 +1226,9 @@ public:
         If the size is < 0, it'll keep reading until it hits a zero.
     */
     static String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
+
+    /**  Creates a String from a UTF-8 encoded buffer. */
+    static String fromUTF8 (std::string_view utf8buffer);
 
     /** Returns the number of bytes required to represent this string as UTF8.
         The number returned does NOT include the trailing zero.
