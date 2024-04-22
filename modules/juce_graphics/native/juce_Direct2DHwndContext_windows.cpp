@@ -413,15 +413,7 @@ public:
 
     void setSize (Rectangle<int> size)
     {
-        if (size == frameSize)
-            return;
-
-        resizeSwapChain (size);
-    }
-
-    void resizeSwapChain (Rectangle<int> size)
-    {
-        if (size.isEmpty())
+        if (size == frameSize || size.isEmpty())
             return;
 
         // Require the entire window to be repainted
