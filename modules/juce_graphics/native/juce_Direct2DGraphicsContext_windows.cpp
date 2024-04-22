@@ -347,7 +347,7 @@ public:
 
     bool doesIntersectClipList (Line<float> r) const noexcept
     {
-        return doesIntersectClipList (Rectangle { r.getStart(), r.getEnd() });
+        return doesIntersectClipList (Rectangle { r.getStart(), r.getEnd() }.expanded (1.0f));
     }
 
     bool doesIntersectClipList (const RectangleList<float>& other) const noexcept
