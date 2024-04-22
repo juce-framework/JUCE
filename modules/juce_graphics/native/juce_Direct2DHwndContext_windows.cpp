@@ -699,7 +699,7 @@ void Direct2DHwndContext::startResizing()
 
 void Direct2DHwndContext::finishResizing()
 {
-    pimpl->startResizing();
+    pimpl->finishResizing();
 }
 
 void Direct2DHwndContext::setSize (int width, int height)
