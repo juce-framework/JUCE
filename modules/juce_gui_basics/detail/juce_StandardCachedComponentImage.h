@@ -50,41 +50,21 @@ struct StandardCachedComponentImage : public CachedComponentImage
 
         if (image.isNull() || image.getBounds() != imageBounds)
         {
-           #if JUCE_WINDOWS
-            auto imageType = SoftwareImageType {};
-           #else
-            auto imageType = NativeImageType {};
-           #endif
-
             image = Image (owner.isOpaque() ? Image::RGB
                                             : Image::ARGB,
                            jmax (1, imageBounds.getWidth()),
                            jmax (1, imageBounds.getHeight()),
-                           ! owner.isOpaque(),
-                           imageType);
+                           ! owner.isOpaque());
 
             validArea.clear();
         }
 
-        paintImage (compBounds, AffineTransform::scale (scale));
-
-        validArea = compBounds;
-
-        g.setColour (Colours::black.withAlpha (owner.getAlpha()));
-        g.drawImageTransformed (image,
-                                AffineTransform::scale ((float) compBounds.getWidth()  / (float) imageBounds.getWidth(),
-                                                        (float) compBounds.getHeight() / (float) imageBounds.getHeight()),
-                                false);
-    }
-
-    void paintImage (Rectangle<int> compBounds, AffineTransform transform)
-    {
         if (! validArea.containsRectangle (compBounds))
         {
             Graphics imG (image);
             auto& lg = imG.getInternalContext();
 
-            lg.addTransform (transform);
+            lg.addTransform (AffineTransform::scale (scale));
 
             for (auto& i : validArea)
                 lg.excludeClipRectangle (i);
@@ -98,26 +78,19 @@ struct StandardCachedComponentImage : public CachedComponentImage
 
             owner.paintEntireComponent (imG, true);
         }
+
+        validArea = compBounds;
+
+        g.setColour (Colours::black.withAlpha (owner.getAlpha()));
+        g.drawImageTransformed (image, AffineTransform::scale ((float) compBounds.getWidth()  / (float) imageBounds.getWidth(),
+                                                               (float) compBounds.getHeight() / (float) imageBounds.getHeight()), false);
     }
 
-    bool invalidateAll() override
-    {
-        validArea.clear();
-        return true;
-    }
+    bool invalidateAll() override                            { validArea.clear(); return true; }
+    bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); return true; }
+    void releaseResources() override                         { image = Image(); }
 
-    bool invalidate (const Rectangle<int>& area) override
-    {
-        validArea.subtract (area);
-        return true;
-    }
-
-    void releaseResources() override
-    {
-        image = Image();
-    }
-
-protected:
+private:
     Image image;
     RectangleList<int> validArea;
     Component& owner;
