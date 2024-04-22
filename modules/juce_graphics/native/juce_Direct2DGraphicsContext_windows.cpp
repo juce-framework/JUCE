@@ -699,9 +699,6 @@ public:
 
         const auto brush = owner.currentState->getBrush (fillTransform);
 
-        if (brush == nullptr)
-            return;
-
         if (transform.isOnlyTranslated)
         {
             const auto translated = shape + transform.offset.toFloat();
@@ -1181,7 +1178,7 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExi
     {
         if (replaceExistingContents)
             deviceContext->Clear (D2DUtilities::toCOLOR_F (clearColour));
-        else
+        else if (brush != nullptr)
             deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
     };
 
@@ -1192,7 +1189,8 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<float>& r)
 {
     auto fill = [] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
-        deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
+        if (brush != nullptr)
+            deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
     };
 
     getPimpl()->paintPrimitive (r, fill);
@@ -1205,8 +1203,9 @@ void Direct2DGraphicsContext::fillRectList (const RectangleList<float>& list)
 
     auto fill = [] (const RectangleList<float>& l, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
-        for (const auto& r : l)
-            deviceContext->FillRectangle (D2DUtilities::toRECT_F (r), brush);
+        if (brush != nullptr)
+            for (const auto& r : l)
+                deviceContext->FillRectangle (D2DUtilities::toRECT_F (r), brush);
     };
 
     getPimpl()->paintPrimitive (list, fill);
@@ -1222,7 +1221,8 @@ void Direct2DGraphicsContext::drawRect (const Rectangle<float>& r, float lineThi
 
     auto draw = [&] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
-        deviceContext->DrawRectangle (D2DUtilities::toRECT_F (rect), brush, lineThickness);
+        if (brush != nullptr)
+            deviceContext->DrawRectangle (D2DUtilities::toRECT_F (rect), brush, lineThickness);
     };
 
     auto reducedR = r.reduced (lineThickness * 0.5f);
@@ -1369,6 +1369,9 @@ void Direct2DGraphicsContext::drawLineWithThickness (const Line<float>& line, fl
 {
     auto draw = [&] (Line<float> l, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
+        if (brush == nullptr)
+            return;
+
         const auto makePoint = [] (const auto& x) { return D2D1::Point2F (x.getX(), x.getY()); };
         deviceContext->DrawLine (makePoint (l.getStart()),
                                  makePoint (l.getEnd()),
@@ -1405,6 +1408,9 @@ void Direct2DGraphicsContext::drawRoundedRectangle (const Rectangle<float>& area
 {
     auto draw = [&] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
+        if (brush == nullptr)
+            return;
+
         D2D1_ROUNDED_RECT roundedRect { D2DUtilities::toRECT_F (rect), cornerSize, cornerSize };
         deviceContext->DrawRoundedRectangle (roundedRect, brush, lineThickness);
     };
@@ -1416,6 +1422,9 @@ void Direct2DGraphicsContext::fillRoundedRectangle (const Rectangle<float>& area
 {
     auto fill = [&] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
+        if (brush == nullptr)
+            return;
+
         D2D1_ROUNDED_RECT roundedRect { D2DUtilities::toRECT_F (rect), cornerSize, cornerSize };
         deviceContext->FillRoundedRectangle (roundedRect, brush);
     };
@@ -1427,6 +1436,9 @@ void Direct2DGraphicsContext::drawEllipse (const Rectangle<float>& area, float l
 {
     auto draw = [&] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
+        if (brush == nullptr)
+            return;
+
         auto centre = rect.getCentre();
         D2D1_ELLIPSE ellipse { { centre.x, centre.y }, rect.proportionOfWidth (0.5f), rect.proportionOfHeight (0.5f) };
         deviceContext->DrawEllipse (ellipse, brush, lineThickness);
@@ -1439,6 +1451,9 @@ void Direct2DGraphicsContext::fillEllipse (const Rectangle<float>& area)
 {
     auto fill = [&] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
+        if (brush == nullptr)
+            return;
+
         auto centre = rect.getCentre();
         D2D1_ELLIPSE ellipse { { centre.x, centre.y }, rect.proportionOfWidth (0.5f), rect.proportionOfHeight (0.5f) };
         deviceContext->FillEllipse (ellipse, brush);
