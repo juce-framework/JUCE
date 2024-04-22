@@ -780,6 +780,8 @@ bool Direct2DGraphicsContext::startFrame()
         // Init font & brush
         setFont (currentState->font);
         currentState->updateCurrentBrush();
+
+        addTransform (AffineTransform::scale ((float) getPhysicalPixelScaleFactor()));
     }
 
     return true;

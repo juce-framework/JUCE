@@ -4778,7 +4778,6 @@ private:
 
         if (direct2DContext->startFrame())
         {
-            direct2DContext->addTransform (AffineTransform::scale ((float) peer.getPlatformScaleFactor()));
             peer.handlePaint (*direct2DContext);
             direct2DContext->endFrame();
 
