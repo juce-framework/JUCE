@@ -551,20 +551,16 @@ public:
         return chain != nullptr && buffer != nullptr && state >= State::bufferAllocated;
     }
 
-    HRESULT resize (Rectangle<int> newSize, float dpiScalingFactor, ComSmartPtr<ID2D1DeviceContext> deviceContext)
+    HRESULT resize (Rectangle<int> newSize, ComSmartPtr<ID2D1DeviceContext> deviceContext)
     {
         if (chain == nullptr)
             return E_FAIL;
 
-        auto scaledSize = newSize * dpiScalingFactor;
-        scaledSize = scaledSize.getUnion ({ Direct2DGraphicsContext::minFrameSize, Direct2DGraphicsContext::minFrameSize })
-                               .getIntersection ({ Direct2DGraphicsContext::maxFrameSize, Direct2DGraphicsContext::maxFrameSize });
+        auto scaledSize = newSize.getUnion ({ Direct2DGraphicsContext::minFrameSize, Direct2DGraphicsContext::minFrameSize })
+                                 .getIntersection ({ Direct2DGraphicsContext::maxFrameSize, Direct2DGraphicsContext::maxFrameSize });
 
         buffer = nullptr;
         state = State::chainAllocated;
-
-        auto dpi = USER_DEFAULT_SCREEN_DPI * dpiScalingFactor;
-        deviceContext->SetDpi (dpi, dpi);
 
         if (const auto hr = chain->ResizeBuffers (0, (UINT) scaledSize.getWidth(), (UINT) scaledSize.getHeight(), DXGI_FORMAT_B8G8R8A8_UNORM, swapChainFlags); FAILED (hr))
             return hr;

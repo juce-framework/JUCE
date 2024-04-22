@@ -436,7 +436,7 @@ public:
         {
             ScopedMultithread scopedMultithread { directX->getD2DMultithread() };
 
-            auto hr = swap.resize (size, (float) owner.getPhysicalPixelScaleFactor(), deviceContext);
+            auto hr = swap.resize (size * (float) owner.getPhysicalPixelScaleFactor(), deviceContext);
             jassert (SUCCEEDED (hr));
             if (FAILED (hr))
                 teardown();
