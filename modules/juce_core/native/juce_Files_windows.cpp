@@ -911,39 +911,40 @@ static String readWindowsShortcutOrLink (const File& shortcut, bool wantsAbsolut
     if (! wantsAbsolutePath)
         return readWindowsLnkFile (shortcut, false);
 
-    typedef DWORD (WINAPI* GetFinalPathNameByHandleFunc) (HANDLE, LPTSTR, DWORD, DWORD);
+    auto* h = CreateFile (shortcut.getFullPathName().toWideCharPointer(),
+                          GENERIC_READ, FILE_SHARE_READ, nullptr,
+                          OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
 
-    static GetFinalPathNameByHandleFunc getFinalPathNameByHandle
-             = (GetFinalPathNameByHandleFunc) getUser32Function ("GetFinalPathNameByHandle");
-
-    if (getFinalPathNameByHandle != nullptr)
+    const ScopeGuard scope { [&]
     {
-        HANDLE h = CreateFile (shortcut.getFullPathName().toWideCharPointer(),
-                               GENERIC_READ, FILE_SHARE_READ, nullptr,
-                               OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
-
         if (h != INVALID_HANDLE_VALUE)
-        {
-            if (DWORD requiredSize = getFinalPathNameByHandle (h, nullptr, 0, 0 /* FILE_NAME_NORMALIZED */))
-            {
-                HeapBlock<WCHAR> buffer (requiredSize + 2, true);
-
-                if (getFinalPathNameByHandle (h, buffer, requiredSize, 0 /* FILE_NAME_NORMALIZED */) > 0)
-                {
-                    CloseHandle (h);
-
-                    const StringRef prefix ("\\\\?\\");
-                    const String path (buffer.get());
-
-                    // It turns out that GetFinalPathNameByHandleW prepends \\?\ to the path.
-                    // This is not a bug, it's feature. See MSDN for more information.
-                    return path.startsWith (prefix) ? path.substring (prefix.length()) : path;
-                }
-            }
-
             CloseHandle (h);
-        }
-    }
+    } };
+
+    const auto path = [&]() -> String
+    {
+        if (h == INVALID_HANDLE_VALUE)
+            return {};
+
+        const auto requiredSize = GetFinalPathNameByHandle (h, nullptr, 0, 0 /* FILE_NAME_NORMALIZED */);
+
+        if (requiredSize == 0)
+            return {};
+
+        std::vector<WCHAR> buffer (requiredSize + 2, 0);
+
+        if (GetFinalPathNameByHandle (h, buffer.data(), requiredSize, 0 /* FILE_NAME_NORMALIZED */) <= 0)
+            return {};
+
+        return buffer.data();
+    }();
+
+    static constexpr const char* prefix ("\\\\?\\");
+
+    // It turns out that GetFinalPathNameByHandleW prepends \\?\ to the path.
+    // This is not a bug, it's a feature. See MSDN for more information.
+    if (path.isNotEmpty())
+        return path.startsWith (prefix) ? path.substring (StringRef (prefix).length()) : path;
    #endif
 
     // as last resort try the resolve method of the ShellLink
