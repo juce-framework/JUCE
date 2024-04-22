@@ -946,11 +946,6 @@ void Direct2DGraphicsContext::excludeClipRectangle (const Rectangle<int>& userSp
     }
 }
 
-void Direct2DGraphicsContext::setPhysicalPixelScaleFactor (float f)
-{
-    scale = f;
-}
-
 void Direct2DGraphicsContext::resetPendingClipList()
 {
     auto& transform = currentState->currentTransform;
@@ -1403,7 +1398,12 @@ const Font& Direct2DGraphicsContext::getFont()
 
 float Direct2DGraphicsContext::getPhysicalPixelScaleFactor() const
 {
-    return scale;
+    if (currentState != nullptr)
+        return currentState->currentTransform.getPhysicalPixelScaleFactor();
+
+    // If this is hit, there's no frame in progress, so the scale factor isn't meaningful
+    jassertfalse;
+    return 1.0f;
 }
 
 void Direct2DGraphicsContext::drawRoundedRectangle (const Rectangle<float>& area, float cornerSize, float lineThickness)
