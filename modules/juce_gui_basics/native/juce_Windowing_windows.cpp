@@ -4774,9 +4774,7 @@ private:
         //
         // Direct2DLowLevelGraphicsContext::endFrame calls ID2D1DeviceContext::EndDraw to finish painting
         // and then tells the swap chain to present the next swap chain back buffer.
-        direct2DContext->setPhysicalPixelScaleFactor ((float) peer.getPlatformScaleFactor());
-
-        if (! direct2DContext->startFrame())
+        if (! direct2DContext->startFrame ((float) peer.getPlatformScaleFactor()))
             return;
 
         peer.handlePaint (*direct2DContext);

@@ -471,7 +471,7 @@ public:
         deviceResources.deviceContext.context->Clear (backgroundColor);
     }
 
-    virtual SavedState* startFrame()
+    virtual SavedState* startFrame (float dpiScale)
     {
         prepare();
 
@@ -495,7 +495,7 @@ public:
         // Init device context transform
         deviceResources.deviceContext.resetTransform();
 
-        const auto effectiveDpi = USER_DEFAULT_SCREEN_DPI * owner.getPhysicalPixelScaleFactor();
+        const auto effectiveDpi = USER_DEFAULT_SCREEN_DPI * dpiScale;
         deviceResources.deviceContext.context->SetDpi (effectiveDpi, effectiveDpi);
 
         // Start drawing
@@ -760,10 +760,10 @@ private:
 Direct2DGraphicsContext::Direct2DGraphicsContext() = default;
 Direct2DGraphicsContext::~Direct2DGraphicsContext() = default;
 
-bool Direct2DGraphicsContext::startFrame()
+bool Direct2DGraphicsContext::startFrame (float dpiScale)
 {
     auto pimpl = getPimpl();
-    currentState = pimpl->startFrame();
+    currentState = pimpl->startFrame (dpiScale);
 
     if (currentState == nullptr)
         return false;
@@ -781,7 +781,7 @@ bool Direct2DGraphicsContext::startFrame()
         setFont (currentState->font);
         currentState->updateCurrentBrush();
 
-        addTransform (AffineTransform::scale ((float) getPhysicalPixelScaleFactor()));
+        addTransform (AffineTransform::scale (dpiScale));
     }
 
     return true;

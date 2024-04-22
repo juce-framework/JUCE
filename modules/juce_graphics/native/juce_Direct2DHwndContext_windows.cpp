@@ -486,7 +486,7 @@ public:
         }
     }
 
-    SavedState* startFrame() override
+    SavedState* startFrame (float dpiScale) override
     {
         if (resizing)
         {
@@ -494,7 +494,7 @@ public:
             setSize (getClientRect());
         }
 
-        auto savedState = Pimpl::startFrame();
+        auto savedState = Pimpl::startFrame (dpiScale);
 
         // If a new frame is starting, clear deferredAreas in case repaint is called
         // while the frame is being painted to ensure the new areas are painted on the

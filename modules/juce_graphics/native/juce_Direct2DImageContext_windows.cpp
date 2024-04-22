@@ -103,7 +103,7 @@ Direct2DImageContext::Direct2DImageContext (Direct2DPixelData::Ptr targetIn)
     metrics = Direct2DMetricsHub::getInstance()->imageContextMetrics;
    #endif
 
-    startFrame();
+    startFrame (1.0f);
 }
 
 Direct2DImageContext::~Direct2DImageContext()

@@ -99,7 +99,7 @@ public:
     void fillRoundedRectangle (const Rectangle<float>& area, float cornerSize) override;
 
     //==============================================================================
-    bool startFrame();
+    bool startFrame (float dpiScale);
     void endFrame();
 
     virtual Image createSnapshot() const { return {}; }
