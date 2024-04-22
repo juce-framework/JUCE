@@ -4776,21 +4776,21 @@ private:
         // and then tells the swap chain to present the next swap chain back buffer.
         direct2DContext->setPhysicalPixelScaleFactor ((float) peer.getPlatformScaleFactor());
 
-        if (direct2DContext->startFrame())
-        {
-            peer.handlePaint (*direct2DContext);
-            direct2DContext->endFrame();
+        if (! direct2DContext->startFrame())
+            return;
 
-           #if JUCE_DIRECT2D_METRICS
-            if (lastPaintStartTicks > 0)
-            {
-                direct2DContext->metrics->addValueTicks (Direct2DMetrics::messageThreadPaintDuration,
-                                                         Time::getHighResolutionTicks() - paintStartTicks);
-                direct2DContext->metrics->addValueTicks (Direct2DMetrics::frameInterval, paintStartTicks - lastPaintStartTicks);
-            }
-            lastPaintStartTicks = paintStartTicks;
-           #endif
+        peer.handlePaint (*direct2DContext);
+        direct2DContext->endFrame();
+
+       #if JUCE_DIRECT2D_METRICS
+        if (lastPaintStartTicks > 0)
+        {
+            direct2DContext->metrics->addValueTicks (Direct2DMetrics::messageThreadPaintDuration,
+                                                     Time::getHighResolutionTicks() - paintStartTicks);
+            direct2DContext->metrics->addValueTicks (Direct2DMetrics::frameInterval, paintStartTicks - lastPaintStartTicks);
         }
+        lastPaintStartTicks = paintStartTicks;
+       #endif
     }
 
     HWNDComponentPeer& peer;
