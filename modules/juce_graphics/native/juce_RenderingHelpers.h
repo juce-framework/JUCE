@@ -1681,28 +1681,12 @@ namespace ClipRegions
 
         void fillRectWithColour (SavedStateType& state, Rectangle<int> area, PixelARGB colour, bool replaceContents) const override
         {
-            auto totalClip = edgeTable.getMaximumBounds();
-            auto clipped = totalClip.getIntersection (area);
-
-            if (! clipped.isEmpty())
-            {
-                EdgeTableRegion et (clipped);
-                et.edgeTable.clipToEdgeTable (edgeTable);
-                state.fillWithSolidColour (et.edgeTable, colour, replaceContents);
-            }
+            fillRectWithColourImpl (state, area, colour, replaceContents);
         }
 
         void fillRectWithColour (SavedStateType& state, Rectangle<float> area, PixelARGB colour) const override
         {
-            auto totalClip = edgeTable.getMaximumBounds().toFloat();
-            auto clipped = totalClip.getIntersection (area);
-
-            if (! clipped.isEmpty())
-            {
-                EdgeTableRegion et (clipped);
-                et.edgeTable.clipToEdgeTable (edgeTable);
-                state.fillWithSolidColour (et.edgeTable, colour, false);
-            }
+            fillRectWithColourImpl (state, area, colour, false);
         }
 
         void fillAllWithColour (SavedStateType& state, PixelARGB colour, bool replaceContents) const override
@@ -1728,6 +1712,20 @@ namespace ClipRegions
         EdgeTable edgeTable;
 
     private:
+        template <typename Value>
+        void fillRectWithColourImpl (SavedStateType& state, Rectangle<Value> area, PixelARGB colour, bool replace) const
+        {
+            auto totalClip = edgeTable.getMaximumBounds().template toType<Value>();
+            auto clipped = totalClip.getIntersection (area);
+
+            if (clipped.isEmpty())
+                return;
+
+            EdgeTableRegion et (clipped);
+            et.edgeTable.clipToEdgeTable (edgeTable);
+            state.fillWithSolidColour (et.edgeTable, colour, replace);
+        }
+
         template <class SrcPixelType>
         void transformedClipImage (const Image::BitmapData& srcData, const AffineTransform& transform, Graphics::ResamplingQuality quality, const SrcPixelType*)
         {
