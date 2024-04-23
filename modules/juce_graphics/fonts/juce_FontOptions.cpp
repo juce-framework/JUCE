@@ -72,7 +72,7 @@ FontOptions::FontOptions (const String& typefaceName, float fontHeight, int styl
 }
 
 FontOptions::FontOptions (const String& typefaceName, const String& typefaceStyle, float fontHeight)
-    : name (typefaceName.isEmpty() ? Font::getDefaultSansSerifFontName() : typefaceName),
+    : name (typefaceName),
       style (typefaceStyle),
       height (FontValues::limitFontHeight (fontHeight))
 {
@@ -94,6 +94,7 @@ auto FontOptions::tie() const
                        fallbacks,
                        metricsKind,
                        height,
+                       pointHeight,
                        tracking,
                        horizontalScale,
                        fallbackEnabled,

@@ -109,8 +109,22 @@ public:
     /** Returns a copy of these options with font fallback enabled or disabled. */
     [[nodiscard]] FontOptions withFallbackEnabled (bool x = true)          const { return withMember (*this, &FontOptions::fallbackEnabled, x); }
 
-    /** Returns a copy of these options with the specified height in pixels (can be fractional). */
-    [[nodiscard]] FontOptions withHeight          (float x)                const { return withMember (*this, &FontOptions::height, x); }
+    /** Returns a copy of these options with the specified height in JUCE units (can be fractional).
+
+        FontOptions can hold either a JUCE height, set via withHeight(), or a point height, set via withPointHeight().
+        After calling withHeight(), the result of getPointHeight() will be -1.0f to indicate that the point height is unset.
+
+        For more information about how JUCE font heights work, see Font::setHeight().
+    */
+    [[nodiscard]] FontOptions withHeight          (float x)                const { jassert (x > 0); auto copy = *this; copy.height = x; copy.pointHeight = -1.0f; return copy; }
+
+    /** Returns a copy of these options with the specified height in points (can be fractional).
+
+        After calling withPointHeight(), the result of getHeight() will be -1.0f to indicate that the JUCE height is unset.
+
+        For more information about how point heights work, see Font::setPointHeight().
+    */
+    [[nodiscard]] FontOptions withPointHeight     (float x)                const { jassert (x > 0); auto copy = *this; copy.pointHeight = x; copy.height = -1.0f; return copy; }
 
     /** Returns a copy of these options with the specified extra kerning factor (also called "tracking"). */
     [[nodiscard]] FontOptions withKerningFactor   (float x)                const { return withMember (*this, &FontOptions::tracking, x); }
@@ -134,6 +148,8 @@ public:
     [[nodiscard]] auto getFallbacks()       const { return fallbacks; }
     /** @see withHeight() */
     [[nodiscard]] auto getHeight()          const { return height; }
+    /** @see withPointHeight() */
+    [[nodiscard]] auto getPointHeight()     const { return pointHeight; }
     /** @see withKerningFactor() */
     [[nodiscard]] auto getKerningFactor()   const { return tracking; }
     /** @see withHorizontalScale() */
@@ -165,7 +181,8 @@ private:
     Typeface::Ptr typeface;
     std::vector<String> fallbacks;
     TypefaceMetricsKind metricsKind { TypefaceMetricsKind::portable };
-    float height{};
+    float height = -1.0f;
+    float pointHeight = -1.0f;
     float tracking{};
     float horizontalScale = 1.0f;
     bool fallbackEnabled = true;

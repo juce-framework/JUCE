@@ -193,7 +193,7 @@ class Font::SharedFontInternal  : public ReferenceCountedObject
 {
 public:
     explicit SharedFontInternal (FontOptions x)
-        : options (std::move (x))
+        : options (x.getName().isEmpty() ? x.withName (getDefaultSansSerifFontName()) : std::move (x))
     {
     }
 
@@ -256,6 +256,7 @@ public:
     String getTypefaceName() const             { return options.getName(); }
     String getTypefaceStyle() const            { return options.getStyle(); }
     float getHeight() const                    { return options.getHeight(); }
+    float getPointHeight() const               { return options.getPointHeight(); }
     float getHorizontalScale() const           { return options.getHorizontalScale(); }
     float getKerning() const                   { return options.getKerningFactor(); }
     bool getUnderline() const                  { return options.getUnderline(); }
@@ -298,6 +299,12 @@ public:
     {
         jassert (getReferenceCount() == 1);
         options = options.withHeight (x);
+    }
+
+    void setPointHeight (float x)
+    {
+        jassert (getReferenceCount() == 1);
+        options = options.withPointHeight (x);
     }
 
     void setHorizontalScale (float x)
@@ -360,7 +367,15 @@ Font::Font (FontOptions opt)
 template <typename... Args>
 auto legacyArgs (Args&&... args)
 {
-    return FontOptions { std::forward<Args> (args)... }.withMetricsKind (TypefaceMetricsKind::legacy);
+    auto result = FontOptions { std::forward<Args> (args)... }.withMetricsKind (TypefaceMetricsKind::legacy);
+
+    if (result.getName().isEmpty())
+        result = result.withName (Font::getDefaultSansSerifFontName());
+
+    if (result.getPointHeight() > 0.0f)
+        result = result.withHeight (result.getPointHeight());
+
+    return result;
 }
 
 Font::Font()                                : font (new SharedFontInternal (legacyArgs())) {}
@@ -541,7 +556,7 @@ float Font::getHeightToPointsFactor() const
 Font Font::withPointHeight (float heightInPoints) const
 {
     Font f (*this);
-    f.setHeight (heightInPoints / getHeightToPointsFactor());
+    f.setPointHeight (heightInPoints);
     return f;
 }
 
@@ -553,6 +568,18 @@ void Font::setHeight (float newHeight)
     {
         dupeInternalIfShared();
         font->setHeight (newHeight);
+        font->resetTypeface();
+    }
+}
+
+void Font::setPointHeight (float newHeight)
+{
+    newHeight = FontValues::limitFontHeight (newHeight);
+
+    if (! approximatelyEqual (font->getPointHeight(), newHeight))
+    {
+        dupeInternalIfShared();
+        font->setPointHeight (newHeight);
         font->resetTypeface();
     }
 }
@@ -713,10 +740,22 @@ float Font::getAscent() const
     return font->getMetrics (*this).ascent * getHeight();
 }
 
-float Font::getHeight() const noexcept      { return font->getHeight(); }
+float Font::getHeight() const noexcept
+{
+    jassert ((font->getHeight() > 0.0f) != (font->getPointHeight() > 0.0f));
+    const auto height = font->getHeight();
+    return height > 0.0f ? height : font->getPointHeight() / getHeightToPointsFactor();
+}
+
 float Font::getDescent() const              { return font->getHeight() - getAscent(); }
 
-float Font::getHeightInPoints() const       { return getHeight()  * getHeightToPointsFactor(); }
+float Font::getHeightInPoints() const
+{
+    jassert ((font->getHeight() > 0.0f) != (font->getPointHeight() > 0.0f));
+    const auto pointHeight = font->getPointHeight();
+    return pointHeight > 0.0f ? pointHeight : font->getHeight() * getHeightToPointsFactor();
+}
+
 float Font::getAscentInPoints() const       { return getAscent()  * getHeightToPointsFactor(); }
 float Font::getDescentInPoints() const      { return getDescent() * getHeightToPointsFactor(); }
 
@@ -875,7 +914,7 @@ Font::Native Font::getNativeDetails() const
 
 Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 {
-    const auto systemTypeface = [&]() -> Typeface::Ptr
+    const auto resolvedTypeface = [&]() -> Typeface::Ptr
     {
         if (font.getTypefaceName() != getSystemUIFontName())
             return {};
@@ -893,8 +932,8 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
         return getDefaultTypefaceForFont (copy);
     }();
 
-    if (systemTypeface != nullptr)
-        return systemTypeface;
+    if (resolvedTypeface != nullptr)
+        return resolvedTypeface;
 
     return Native::getDefaultPlatformTypefaceForFont (font);
 }
