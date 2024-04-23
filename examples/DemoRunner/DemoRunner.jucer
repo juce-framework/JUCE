@@ -2,7 +2,7 @@
 
 <JUCERPROJECT name="DemoRunner" projectType="guiapp" defines="JUCE_DEMO_RUNNER=1&#10;JUCE_UNIT_TESTS=1"
               bundleIdentifier="com.rmsl.jucedemorunner" version="8.0.0" companyName="Raw Material Software Limited"
-              companyCopyright="Copyright (c) 2020 - Raw Material Software Limited"
+              companyCopyright="Copyright (c) - Raw Material Software Limited"
               companyWebsite="https://www.juce.com/" companyEmail="info@juce.com"
               id="yj7xMM" useAppConfig="0" addUsingNamespaceToJuceHeader="1"
               jucerFormatVersion="1">

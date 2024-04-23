@@ -16,7 +16,7 @@ BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "CompanyName",  "Raw Material Software Limited\0"
-      VALUE "LegalCopyright",  "Copyright (c) 2020 - Raw Material Software Limited\0"
+      VALUE "LegalCopyright",  "Copyright (c) - Raw Material Software Limited\0"
       VALUE "FileDescription",  "DemoRunner\0"
       VALUE "FileVersion",  "8.0.0\0"
       VALUE "ProductName",  "DemoRunner\0"
