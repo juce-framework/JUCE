@@ -49,8 +49,9 @@ void DropShadow::drawForImage (Graphics& g, const Image& srcImage) const
         return;
 
     Image blurred;
-    srcImage.convertedToFormat (Image::SingleChannel)
-            .applySingleChannelBoxBlurEffect (radius, blurred);
+    ImageEffects::applySingleChannelBoxBlurEffect (radius,
+                                                   srcImage.convertedToFormat (Image::SingleChannel),
+                                                   blurred);
 
     g.setColour (colour);
     g.drawImageAt (blurred, offset.x, offset.y, true);
@@ -76,7 +77,7 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
         }
 
         Image blurred;
-        pathImage.applySingleChannelBoxBlurEffect (radius, blurred);
+        ImageEffects::applySingleChannelBoxBlurEffect (radius, pathImage, blurred);
 
         g.setColour (colour);
         g.drawImageAt (blurred, area.getX(), area.getY(), true);

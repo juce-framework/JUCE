@@ -364,6 +364,88 @@ void Direct2DPixelData::applyGaussianBlurEffect (float radius, Image& result)
     outputDataContext->SetTarget (nullptr);
 }
 
+void Direct2DPixelData::applySingleChannelBoxBlurEffect (int radius, Image& result)
+{
+    // The result must be a separate image!
+    jassert (result.getPixelData() != this);
+
+    if (context == nullptr)
+    {
+        result = {};
+        return;
+    }
+
+    constexpr FLOAT kernel[] { 1.0f / 9.0f, 2.0f / 9.0f, 3.0f / 9.0f, 2.0f / 9.0f, 1.0f / 9.0f };
+
+    ComSmartPtr<ID2D1Effect> begin, end;
+
+    for (auto horizontal : { false, true })
+    {
+        for (auto i = 0; i < radius; ++i)
+        {
+            ComSmartPtr<ID2D1Effect> effect;
+            if (const auto hr = context->CreateEffect (CLSID_D2D1ConvolveMatrix, effect.resetAndGetPointerAddress());
+                    FAILED (hr) || effect == nullptr)
+            {
+                result = {};
+                return;
+            }
+
+            effect->SetValue (D2D1_CONVOLVEMATRIX_PROP_KERNEL_SIZE_X, (UINT32) (horizontal ? std::size (kernel) : 1));
+            effect->SetValue (D2D1_CONVOLVEMATRIX_PROP_KERNEL_SIZE_Y, (UINT32) (horizontal ? 1 : std::size (kernel)));
+            effect->SetValue (D2D1_CONVOLVEMATRIX_PROP_KERNEL_MATRIX, kernel);
+
+            if (begin == nullptr)
+            {
+                begin = effect;
+                end = effect;
+            }
+            else
+            {
+                effect->SetInputEffect (0, end);
+                end = effect;
+            }
+        }
+    }
+
+    if (begin == nullptr)
+    {
+        result = {};
+        return;
+    }
+
+    begin->SetInput (0, getAdapterD2D1Bitmap());
+
+    const auto originalPixelData = dynamic_cast<Direct2DPixelData*> (result.getPixelData());
+
+    if (originalPixelData == nullptr || std::tuple (Image::SingleChannel, width, height) != std::tuple (originalPixelData->pixelFormat, originalPixelData->width, originalPixelData->height))
+        result = Image { make (Image::SingleChannel, width, height, false, adapter) };
+
+    const auto outputPixelData = dynamic_cast<Direct2DPixelData*> (result.getPixelData());
+
+    if (outputPixelData == nullptr)
+    {
+        result = {};
+        return;
+    }
+
+    outputPixelData->createDeviceResources();
+    auto outputDataContext = outputPixelData->context;
+
+    if (outputDataContext == nullptr)
+    {
+        result = {};
+        return;
+    }
+
+    outputDataContext->SetTarget (outputPixelData->getAdapterD2D1Bitmap());
+    outputDataContext->BeginDraw();
+    outputDataContext->Clear();
+    outputDataContext->DrawImage (end);
+    outputDataContext->EndDraw();
+    outputDataContext->SetTarget (nullptr);
+}
+
 std::unique_ptr<ImageType> Direct2DPixelData::createType() const
 {
     return std::make_unique<NativeImageType>();

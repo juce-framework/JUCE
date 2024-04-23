@@ -58,6 +58,7 @@ public:
     ImagePixelData::Ptr clone() override;
 
     void applyGaussianBlurEffect (float radius, Image& result) override;
+    void applySingleChannelBoxBlurEffect (int radius, Image& result) override;
 
     std::unique_ptr<ImageType> createType() const override;
 
