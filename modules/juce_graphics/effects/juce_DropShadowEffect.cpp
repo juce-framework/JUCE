@@ -50,7 +50,7 @@ void DropShadow::drawForImage (Graphics& g, const Image& srcImage) const
 
     Image blurred;
     srcImage.convertedToFormat (Image::SingleChannel)
-            .applyGaussianBlurEffect ((float) radius, blurred);
+            .applySingleChannelBoxBlurEffect (radius, blurred);
 
     g.setColour (colour);
     g.drawImageAt (blurred, offset.x, offset.y, true);
@@ -76,7 +76,7 @@ void DropShadow::drawForPath (Graphics& g, const Path& path) const
         }
 
         Image blurred;
-        pathImage.applyGaussianBlurEffect ((float) radius, blurred);
+        pathImage.applySingleChannelBoxBlurEffect (radius, blurred);
 
         g.setColour (colour);
         g.drawImageAt (blurred, area.getX(), area.getY(), true);

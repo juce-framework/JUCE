@@ -423,6 +423,13 @@ public:
     */
     void applyGaussianBlurEffect (float radius, Image& result) const;
 
+    /** Applies a blur to this image, placing the blurred image in the result out-parameter.
+
+        If result is already the correct size, then its storage will be reused directly.
+        Otherwise, new storage may be allocated for the blurred image.
+    */
+    void applySingleChannelBoxBlurEffect (int radius, Image& result) const;
+
     //==============================================================================
     /** @internal */
     ImagePixelData* getPixelData() const noexcept       { return image.get(); }
@@ -489,6 +496,16 @@ public:
         the result out-parameter will be reset to an invalid image.
     */
     virtual void applyGaussianBlurEffect (float radius, Image& result);
+
+    /** Applies a native blur effect to this image, if available.
+
+        Implementations should attempt to re-use the storage provided in the result out-parameter
+        when possible.
+
+        If native blurs are unsupported, or if creating a blur fails for any other reason,
+        the result out-parameter will be reset to an invalid image.
+    */
+    virtual void applySingleChannelBoxBlurEffect (float radius, Image& result);
 
     /** The pixel format of the image data. */
     const Image::PixelFormat pixelFormat;

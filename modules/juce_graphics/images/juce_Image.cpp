@@ -152,6 +152,11 @@ void ImagePixelData::applyGaussianBlurEffect ([[maybe_unused]] float radius, Ima
     result = {};
 }
 
+void ImagePixelData::applySingleChannelBoxBlurEffect ([[maybe_unused]] float radius, juce::Image &result)
+{
+    result = {};
+}
+
 //==============================================================================
 ImageType::ImageType() = default;
 ImageType::~ImageType() = default;
@@ -331,6 +336,75 @@ void Image::applyGaussianBlurEffect (float radius, Image& result) const
     blurKernel.createGaussianBlur (radius);
 
     blurKernel.applyToImage (result, *this, result.getBounds());
+}
+
+static void blurDataTriplets (uint8* d, int num, const int delta) noexcept
+{
+    uint32 last = d[0];
+    d[0] = (uint8) ((d[0] + d[delta] + 1) / 3);
+    d += delta;
+
+    num -= 2;
+
+    do
+    {
+        const uint32 newLast = d[0];
+        d[0] = (uint8) ((last + d[0] + d[delta] + 1) / 3);
+        d += delta;
+        last = newLast;
+    }
+    while (--num > 0);
+
+    d[0] = (uint8) ((last + d[0] + 1) / 3);
+}
+
+static void blurSingleChannelImage (uint8* const data, const int width, const int height,
+                                    const int lineStride, const int repetitions) noexcept
+{
+    jassert (width > 2 && height > 2);
+
+    for (int y = 0; y < height; ++y)
+        for (int i = repetitions; --i >= 0;)
+            blurDataTriplets (data + lineStride * y, width, 1);
+
+    for (int x = 0; x < width; ++x)
+        for (int i = repetitions; --i >= 0;)
+            blurDataTriplets (data + x, height, lineStride);
+}
+
+static void blurSingleChannelImage (Image& image, int radius)
+{
+    const Image::BitmapData bm (image, Image::BitmapData::readWrite);
+    blurSingleChannelImage (bm.data, bm.width, bm.height, bm.lineStride, 2 * radius);
+}
+
+void Image::applySingleChannelBoxBlurEffect (int radius, Image& result) const
+{
+    if (image == nullptr)
+    {
+        result = {};
+        return;
+    }
+
+    auto copy = result;
+    image->applySingleChannelBoxBlurEffect (radius, copy);
+
+    if (copy.isValid())
+    {
+        result = std::move (copy);
+        return;
+    }
+
+    if (std::tuple (SingleChannel, getWidth(), getHeight()) != std::tuple (result.getFormat(), result.getWidth(), result.getHeight()))
+        result = Image { SingleChannel, getWidth(), getHeight(), false };
+
+    {
+        BitmapData source { *this, BitmapData::readOnly };
+        BitmapData dest { result, BitmapData::writeOnly };
+        BitmapDataDetail::convert (source, dest);
+    }
+
+    blurSingleChannelImage (result, radius);
 }
 
 bool Image::isValid() const noexcept
