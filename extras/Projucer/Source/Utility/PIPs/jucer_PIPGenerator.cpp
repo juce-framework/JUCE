@@ -79,7 +79,7 @@ static bool isJUCEExample (const File& pipFile)
                         lines.begin() + (std::min (lines.size(), numLinesToTest)),
                         [] (const auto& line)
                         {
-                            return line.contains ("This file is part of the JUCE examples.");
+                            return line.contains ("This file is part of the JUCE framework examples");
                         });
 }
 
