@@ -36,10 +36,13 @@ namespace juce
 {
 
 //==============================================================================
-class Presentation
+class alignas (MEMORY_ALLOCATION_ALIGNMENT) Presentation
 {
 public:
-    SLIST_ENTRY& getListEntry() { return listEntry; }
+    SLIST_ENTRY& getListEntry()
+    {
+        return listEntry;
+    }
 
     auto getPresentationBitmap() const
     {
@@ -90,11 +93,45 @@ public:
     }
 
 private:
-    JUCE_ALIGN (MEMORY_ALLOCATION_ALIGNMENT)
     SLIST_ENTRY listEntry;
     ComSmartPtr<ID2D1Bitmap> presentationBitmap;
     RectangleList<int> paintAreas;
     HRESULT hr = S_OK;
+};
+
+class SList
+{
+public:
+    void push (SLIST_ENTRY& item)
+    {
+        jassert ((reinterpret_cast<uintptr_t> (&item) % MEMORY_ALLOCATION_ALIGNMENT) == 0);
+        InterlockedPushEntrySList (head.get(), &item);
+    }
+
+    auto* pop()
+    {
+        return InterlockedPopEntrySList (head.get());
+    }
+
+private:
+    struct Destructor
+    {
+        void operator() (void* ptr) const
+        {
+            _aligned_free (ptr);
+        }
+    };
+
+    std::unique_ptr<SLIST_HEADER, Destructor> head { []() -> SLIST_HEADER*
+    {
+        auto* result = static_cast<SLIST_HEADER*> (_aligned_malloc (sizeof (SLIST_HEADER), MEMORY_ALLOCATION_ALIGNMENT));
+
+        if (result == nullptr)
+            return nullptr;
+
+        InitializeSListHead (result);
+        return result;
+    }() };
 };
 
 struct Direct2DHwndContext::HwndPimpl : public Direct2DGraphicsContext::Pimpl
@@ -108,39 +145,33 @@ private:
               multithread (multithreadIn),
               swapChainEventHandle (ownerIn.swap.swapChainEvent->getHandle())
         {
-            InitializeSListHead (&paintedPresentations);
-            InitializeSListHead (&retiredPresentations);
-
             for (auto& p : presentations)
-                InterlockedPushEntrySList (&retiredPresentations, &p.getListEntry());
+                retired.push (p.getListEntry());
         }
 
         ~SwapChainThread()
         {
             SetEvent (quitEvent.getHandle());
             thread.join();
-
-            InterlockedFlushSList (&paintedPresentations);
-            InterlockedFlushSList (&retiredPresentations);
         }
 
         Presentation* getFreshPresentation()
         {
-            if (auto listEntry = InterlockedPopEntrySList (&retiredPresentations))
-                return reinterpret_cast<Presentation*> (listEntry);
+            if (auto* listEntry = reinterpret_cast<Presentation*> (retired.pop()))
+                return listEntry;
 
             return nullptr;
         }
 
         void pushPaintedPresentation (Presentation* presentationIn)
         {
-            InterlockedPushEntrySList (&paintedPresentations, &presentationIn->getListEntry());
+            painted.push (presentationIn->getListEntry());
             SetEvent (wakeEvent.getHandle());
         }
 
         void retirePresentation (Presentation* presentationIn)
         {
-            InterlockedPushEntrySList (&retiredPresentations, &presentationIn->getListEntry());
+            retired.push (presentationIn->getListEntry());
         }
 
         void notify()
@@ -149,35 +180,10 @@ private:
         }
 
     private:
-        void serviceSwapChain()
-        {
-            if (swapChainReady)
-            {
-                if (auto listEntry = InterlockedPopEntrySList (&paintedPresentations))
-                {
-                    JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.owner.metrics, swapChainThreadTime);
-
-                    auto filledPresentation = reinterpret_cast<Presentation*> (listEntry);
-
-                    {
-                        ScopedMultithread scopedMultithread { multithread };
-                        owner.present (filledPresentation, 0);
-                    }
-
-                    swapChainReady = false;
-                    InterlockedPushEntrySList (&retiredPresentations, listEntry);
-                }
-            }
-        }
-
-        JUCE_ALIGN (MEMORY_ALLOCATION_ALIGNMENT)
-        SLIST_HEADER paintedPresentations;
-        JUCE_ALIGN (MEMORY_ALLOCATION_ALIGNMENT)
-        SLIST_HEADER retiredPresentations;
+        SList painted, retired;
         Direct2DHwndContext::HwndPimpl& owner;
         ComSmartPtr<ID2D1Multithread> multithread;
         HANDLE swapChainEventHandle = nullptr;
-        bool swapChainReady = false;
         std::vector<Presentation> presentations = std::vector<Presentation> (2);
 
         WindowsScopedEvent wakeEvent;
@@ -186,7 +192,30 @@ private:
 
         void threadLoop()
         {
-            Thread::setCurrentThreadName ("swapChainThread");
+            Thread::setCurrentThreadName ("JUCE D2D swap chain thread");
+
+            bool swapChainReady = false;
+
+            const auto serviceSwapChain = [&]
+            {
+                if (! swapChainReady)
+                    return;
+
+                auto* listEntry = reinterpret_cast<Presentation*> (painted.pop());
+
+                if (listEntry == nullptr)
+                    return;
+
+                JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.owner.metrics, swapChainThreadTime);
+
+                {
+                    ScopedMultithread scopedMultithread { multithread };
+                    owner.present (listEntry, 0);
+                }
+
+                retired.push (listEntry->getListEntry());
+                swapChainReady = false;
+            };
 
             for (;;)
             {

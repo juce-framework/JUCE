@@ -482,8 +482,8 @@ public:
         swapChainDescription.Height = (UINT) size.getHeight();
         swapChainDescription.SampleDesc.Count = 1;
         swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDescription.BufferCount = bufferCount;
-        swapChainDescription.SwapEffect = swapEffect;
+        swapChainDescription.BufferCount = 2;
+        swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
         swapChainDescription.Flags = swapChainFlags;
 
         swapChainDescription.Scaling = DXGI_SCALING_STRETCH;
@@ -587,11 +587,9 @@ public:
         return { (int) size.width, (int) size.height };
     }
 
-    DXGI_SWAP_EFFECT const swapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-    UINT const bufferCount = 2;
-    uint32 const swapChainFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
-    uint32 const presentSyncInterval = 1;
-    uint32 const presentFlags = 0;
+    static constexpr uint32 swapChainFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+    static constexpr uint32 presentSyncInterval = 1;
+    static constexpr uint32 presentFlags = 0;
     ComSmartPtr<IDXGISwapChain1> chain;
     ComSmartPtr<ID2D1Bitmap1> buffer;
     std::optional<WindowsScopedEvent> swapChainEvent;
