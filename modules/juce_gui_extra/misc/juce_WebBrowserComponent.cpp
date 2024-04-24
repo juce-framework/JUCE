@@ -414,8 +414,19 @@ public:
 
     void emitEvent (const Identifier& eventId, const var& object)
     {
+        // The object parameter is serialised into a string and used as a parameter to a Javascript
+        // function call. During this JS parameter substitution, control character escape sequences
+        // would be interpreted as the control characters themselves. So we need to escape anything
+        // that was escaped.
+        //
+        // We also need to escape the ' character since we use this to delimit the parameter string
+        // to emitByBackend.
+        const auto objectAsString = JSON::toString (object, true);
+        const auto escaped = objectAsString.replace ("\\", "\\\\").replace ("'", "\\'");
+
         evaluateJavascript ("window.__JUCE__.backend.emitByBackend(" + eventId.toString().quoted() + ", "
-                                + JSON::toString (object, true).quoted ('\'') + ");", evaluationHandler);
+                                + escaped.quoted ('\'')
+                                + ");", evaluationHandler);
     }
 
     void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
