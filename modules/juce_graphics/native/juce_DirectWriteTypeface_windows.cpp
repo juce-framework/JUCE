@@ -593,7 +593,9 @@ public:
 
         const HbFace hbFace { hb_directwrite_face_create (dwFontFace) };
         HbFont font { hb_font_create (hbFace.get()) };
-        const auto metrics = getGdiMetrics (font.get()).value_or (getDwriteMetrics (dwFontFace));
+        const auto gdiMetrics = getGdiMetrics (font.get());
+        const auto dwMetrics = getDwriteMetrics (dwFontFace);
+        const auto metrics = gdiMetrics.value_or (dwMetrics);
 
         return new WindowsDirectWriteTypeface (name,
                                                style,
@@ -782,7 +784,7 @@ private:
             return {};
 
         const auto upem = (float) hb_face_get_upem (hb_font_get_face (font));
-        return TypefaceAscentDescent { (float) ascent / upem, (float) descent / upem };
+        return TypefaceAscentDescent { (float) std::abs (ascent) / upem, (float) std::abs (descent) / upem };
     }
 
     SharedResourcePointer<Direct2DFactories> factories;
