@@ -1629,8 +1629,14 @@ public:
 
         ComSmartPtr<IDXGIFactory> factory;
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-        CreateDXGIFactory (__uuidof (IDXGIFactory), (void**)factory.resetAndGetPointerAddress());
+        CreateDXGIFactory (__uuidof (IDXGIFactory), (void**) factory.resetAndGetPointerAddress());
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        if (factory == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
 
         UINT i = 0;
         ComSmartPtr<IDXGIAdapter> adapter;
