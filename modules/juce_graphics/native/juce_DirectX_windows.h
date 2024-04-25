@@ -228,7 +228,7 @@ private:
         ComSmartPtr<IDXGIFactory2> result;
         if (const auto hr = CreateDXGIFactory2 (0, __uuidof (IDXGIFactory2), (void**) result.resetAndGetPointerAddress()); SUCCEEDED (hr))
             return result;
-                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         // If CreateDXGIFactory fails, check to see if this is being called in the context of DllMain.
         // CreateDXGIFactory will always fail if called from the context of DllMain. In this case, the renderer
