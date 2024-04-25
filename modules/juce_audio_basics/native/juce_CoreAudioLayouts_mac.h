@@ -118,7 +118,12 @@ struct CoreAudioLayouts
                              List { kAudioChannelLayoutTag_MPEG_5_1_D, { centre, left, right, leftSurround, rightSurround, LFE } },
                              List { kAudioChannelLayoutTag_MPEG_7_1_B, { centre, leftCentre, rightCentre, left, right, leftSurround, rightSurround, LFE } },
                              List { kAudioChannelLayoutTag_Emagic_Default_7_1, { left, right, leftSurround, rightSurround, centre, LFE, leftCentre, rightCentre } },
+
+                            // Suppressing clang-analyzer-optin.core.EnumCastOutOfRange
+                            #ifndef __clang_analyzer__
                              List { kAudioChannelLayoutTag_SMPTE_DTV, { left, right, centre, LFE, leftSurround, rightSurround, discreteChannel0 /* leftMatrixTotal */, (ChannelType) (discreteChannel0 + 1) /* rightMatrixTotal */} },
+                            #endif
+
                              List { kAudioChannelLayoutTag_ITU_2_2, { left, right, leftSurround, rightSurround } },
                              List { kAudioChannelLayoutTag_DVD_4, { left, right, LFE } },
                              List { kAudioChannelLayoutTag_DVD_5, { left, right, LFE, centreSurround } },
@@ -239,10 +244,13 @@ public:
                 for (UInt32 i = 0; i < layout.mNumberChannelDescriptions; ++i)
                     channels.addIfNotAlreadyThere (getChannelTypeFromAudioChannelLabel (layout.mChannelDescriptions[i].mChannelLabel));
 
+               // Suppressing clang-analyzer-optin.core.EnumCastOutOfRange
+               #ifndef __clang_analyzer__
                 // different speaker mappings may point to the same JUCE speaker so fill up
                 // this array with discrete channels
                 for (int j = 0; channels.size() < static_cast<int> (layout.mNumberChannelDescriptions); ++j)
                     channels.addIfNotAlreadyThere (static_cast<AudioChannelSet::ChannelType> (AudioChannelSet::discreteChannel0 + j));
+               #endif
 
                 return channels;
             }
@@ -285,8 +293,11 @@ public:
                 return AudioChannelSet::ambisonic (ambisonicOrder).getChannelTypes();
         }
 
+        // Suppressing clang-analyzer-optin.core.EnumCastOutOfRange
+       #ifndef __clang_analyzer__
         for (UInt32 i = 0; i < numChannels; ++i)
             speakers.add (static_cast<AudioChannelSet::ChannelType> (AudioChannelSet::discreteChannel0 + i));
+       #endif
 
         return speakers;
     }

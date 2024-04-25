@@ -878,9 +878,14 @@ public:
         if (const AudioProcessor::Bus* bus = juceFilter->getBus (isInput, busNr))
         {
             AudioChannelSet discreteRangeSet;
+
+           // Suppressing clang-analyzer-optin.core.EnumCastOutOfRange
+           #ifndef __clang_analyzer__
             const int n = bus->getDefaultLayout().size();
+
             for (int i = 0; i < n; ++i)
                 discreteRangeSet.addChannel ((AudioChannelSet::ChannelType) (256 + i));
+           #endif
 
             // if the audioprocessor supports this it cannot
             // really be interested in the bus layouts
