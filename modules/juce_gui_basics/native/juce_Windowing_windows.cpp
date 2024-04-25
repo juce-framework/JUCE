@@ -1442,8 +1442,16 @@ public:
 
     ~VSyncThread() override
     {
-        stopThread (-1);
         cancelPendingUpdate();
+
+        {
+            const std::scoped_lock lock { mutex };
+            threadState = ThreadState::exit;
+        }
+
+        condvar.notify_one();
+
+        stopThread (-1);
     }
 
     void updateMonitor()
@@ -1489,12 +1497,23 @@ private:
     //==============================================================================
     void run() override
     {
-        while (! threadShouldExit())
+        for (;;)
         {
             if (output->WaitForVBlank() == S_OK)
+            {
+                std::unique_lock lock { mutex };
+                condvar.wait (lock, [this] { return threadState != ThreadState::sleep; });
+
+                if (threadState == ThreadState::exit)
+                    return;
+
+                threadState = ThreadState::sleep;
                 triggerAsyncUpdate();
+            }
             else
+            {
                 Thread::sleep (1);
+            }
         }
     }
 
@@ -1502,12 +1521,32 @@ private:
     {
         for (auto& listener : listeners)
             listener.get().onVBlank();
+
+        {
+            const std::scoped_lock lock { mutex };
+
+            if (threadState == ThreadState::sleep)
+                threadState = ThreadState::paint;
+        }
+
+        condvar.notify_one();
     }
 
     //==============================================================================
     ComSmartPtr<IDXGIOutput> output;
     HMONITOR monitor = nullptr;
     std::vector<std::reference_wrapper<VBlankListener>> listeners;
+
+    enum class ThreadState
+    {
+        sleep,
+        paint,
+        exit,
+    };
+
+    ThreadState threadState = ThreadState::paint;
+    std::condition_variable condvar;
+    std::mutex mutex;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSyncThread)
     JUCE_DECLARE_NON_MOVEABLE (VSyncThread)
