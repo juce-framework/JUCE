@@ -430,9 +430,8 @@ public:
 
             error = setup.manager->setAudioDeviceSetup (config, true);
 
-            showCorrectDeviceName (inputDeviceDropDown.get(), true);
-            showCorrectDeviceName (outputDeviceDropDown.get(), false);
-
+            updateSelectedInput();
+            updateSelectedOutput();
             updateControlPanelButton();
             resized();
         }
@@ -601,18 +600,34 @@ private:
     std::unique_ptr<Component> inputLevelMeter;
     std::unique_ptr<TextButton> showUIButton, showAdvancedSettingsButton, resetDeviceButton;
 
+    int findSelectedDeviceIndex (bool isInput) const
+    {
+        const auto device = setup.manager->getAudioDeviceSetup();
+        const auto deviceName = isInput ? device.inputDeviceName : device.outputDeviceName;
+        return type.getDeviceNames (isInput).indexOf (deviceName);
+    }
+
+    void updateSelectedInput()
+    {
+        showCorrectDeviceName (inputDeviceDropDown.get(), true);
+    }
+
+    void updateSelectedOutput()
+    {
+        constexpr auto isInput = false;
+        showCorrectDeviceName (outputDeviceDropDown.get(), isInput);
+
+        if (testButton != nullptr)
+            testButton->setEnabled (findSelectedDeviceIndex (isInput) >= 0);
+    }
+
     void showCorrectDeviceName (ComboBox* box, bool isInput)
     {
-        if (box != nullptr)
-        {
-            auto* currentDevice = setup.manager->getCurrentAudioDevice();
-            auto index = type.getIndexOfDevice (currentDevice, isInput);
+        if (box == nullptr)
+            return;
 
-            box->setSelectedId (index < 0 ? index : index + 1, dontSendNotification);
-
-            if (testButton != nullptr && ! isInput)
-                testButton->setEnabled (index >= 0);
-        }
+        const auto index = findSelectedDeviceIndex (isInput);
+        box->setSelectedId (index < 0 ? index : index + 1, dontSendNotification);
     }
 
     void addNamesToDeviceBox (ComboBox& combo, bool isInputs)
@@ -702,7 +717,7 @@ private:
             addNamesToDeviceBox (*outputDeviceDropDown, false);
         }
 
-        showCorrectDeviceName (outputDeviceDropDown.get(), false);
+        updateSelectedOutput();
     }
 
     void updateInputsComboBox()
@@ -725,7 +740,7 @@ private:
             addNamesToDeviceBox (*inputDeviceDropDown, true);
         }
 
-        showCorrectDeviceName (inputDeviceDropDown.get(), true);
+        updateSelectedInput();
     }
 
     void updateSampleRateComboBox (AudioIODevice* currentDevice)
