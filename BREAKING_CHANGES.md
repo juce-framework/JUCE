@@ -233,6 +233,33 @@ and this should be reflected on the value returned.
 
 ## Change
 
+The old JavascriptEngine internals have been entirely replaced by a new
+implementation wrapping the QuickJS engine.
+
+**Possible Issues**
+
+Code that previously successfully evaluated using JavascriptEngine::evaluate()
+or JavascriptEngine::execute(), could now fail due to the rules applied by the 
+new, much more standards compliant engine. One example is object literals 
+e.g. { a: 'foo', b: 42, c: {} }. When evaluated this way the new engine will
+assume that this is a code block and fail.
+
+**Workaround**
+
+When calling JavascriptEngine::evaluate() or JavascriptEngine::execute() the 
+code may have to be updated to ensure that it's correct according to the
+Javascript language specification and in the context of that evaluation. Object
+literals standing on their own for example should be wrapped in parentheses
+e.g. ({ a: 'foo', b: 42, c: {} }).
+
+**Rationale**
+
+The new implementation uses a fully featured, performant, standards compliant
+Javascript engine, which is a significant upgrade.
+
+
+## Change
+
 The `WebBrowserComponent::pageAboutToLoad()` function on Android now only
 receives callbacks for entire page navigation events, as opposed to every
 resource fetch operation. Returning `false` from the function now prevents
