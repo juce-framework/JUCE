@@ -135,7 +135,7 @@ struct VariantConverter<choc::value::Value>
 
         if (value.isVector() || value.isArray())
         {
-            var variant;
+            var variant { Array<var>{} };
 
             for (uint32_t i = 0; i < value.size(); ++i)
             {
@@ -1167,6 +1167,15 @@ public:
         JavascriptEngine engine;
         engine.maximumExecutionTime = RelativeTime::seconds (5);
 
+        beginTest ("Basic evaluations");
+        {
+            auto result = Result::ok();
+
+            auto value = engine.evaluate ("[]", &result);
+            expect (result.wasOk() && value == var { Array<var>{} }, "An empty array literal should evaluate correctly");
+        }
+
+        //==============================================================================
         engine.evaluate (javascriptTestSource);
 
         beginTest ("JSCursor::invokeMethod");
