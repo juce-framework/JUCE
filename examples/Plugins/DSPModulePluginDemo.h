@@ -1620,6 +1620,15 @@ public:
                  ladderControls);
     }
 
+    /*  Called by VST3 and AAX hosts to determine which parameter is under the mouse. */
+    int getControlParameterIndex (Component& comp) override
+    {
+        if (auto* parent = findParentComponentWithParamMenu (&comp))
+            return parent->getParameterIndex();
+
+        return -1;
+    }
+
 private:
     class ComponentWithParamMenu : public Component
     {
@@ -1636,10 +1645,26 @@ private:
                                                                                               .withMousePosition());
         }
 
+        int getParameterIndex() const
+        {
+            return param.getParameterIndex();
+        }
+
     private:
         AudioProcessorEditor& editor;
         RangedAudioParameter& param;
     };
+
+    static ComponentWithParamMenu* findParentComponentWithParamMenu (Component* c)
+    {
+        if (c == nullptr)
+            return nullptr;
+
+        if (auto* derived = dynamic_cast<ComponentWithParamMenu*> (c))
+            return derived;
+
+        return findParentComponentWithParamMenu (c->getParentComponent());
+    }
 
     class AttachedSlider final : public ComponentWithParamMenu
     {

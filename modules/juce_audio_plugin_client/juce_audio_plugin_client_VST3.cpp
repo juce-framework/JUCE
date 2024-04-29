@@ -1740,7 +1740,8 @@ private:
 
     //==============================================================================
     class JuceVST3Editor final : public Vst::EditorView,
-                                 public Steinberg::IPlugViewContentScaleSupport,
+                                 public Vst::IParameterFinder,
+                                 public IPlugViewContentScaleSupport,
                                  private Timer
     {
     public:
@@ -1759,7 +1760,10 @@ private:
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
         {
-            const auto result = testFor (*this, targetIID, UniqueBase<IPlugViewContentScaleSupport>{});
+            const auto result = testForMultiple (*this,
+                                                 targetIID,
+                                                 UniqueBase<Vst::IParameterFinder>{},
+                                                 UniqueBase<IPlugViewContentScaleSupport>{});
 
             if (result.isOk())
                 return result.extract (obj);
@@ -2042,7 +2046,48 @@ private:
            #endif
         }
 
+        tresult PLUGIN_API findParameter (int32 xPos, int32 yPos, Vst::ParamID& resultTag) override
+        {
+            if (const auto paramId = findParameterImpl (xPos, yPos))
+            {
+                resultTag = *paramId;
+                return kResultTrue;
+            }
+
+            return kResultFalse;
+        }
+
     private:
+        std::optional<Vst::ParamID> findParameterImpl (int32 xPos, int32 yPos) const
+        {
+            auto* wrapper = component.get();
+
+            if (wrapper == nullptr)
+                return {};
+
+            auto* componentAtPosition = wrapper->getComponentAt (xPos, yPos);
+
+            if (componentAtPosition == nullptr)
+                return {};
+
+            auto* editor = wrapper->pluginEditor.get();
+
+            if (editor == nullptr)
+                return {};
+
+            const auto parameterIndex = editor->getControlParameterIndex (*componentAtPosition);
+
+            if (parameterIndex < 0)
+                return {};
+
+            auto processor = owner->audioProcessor;
+
+            if (processor == nullptr)
+                return {};
+
+            return processor->getVSTParamIDForIndex (parameterIndex);
+        }
+
         void timerCallback() override
         {
             stopTimer();
