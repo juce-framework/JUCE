@@ -387,14 +387,11 @@ void MPEKeyboardComponent::updateNoteComponentBounds (const MPENote& note, MPENo
         const auto currentNote = note.initialNote + (float) note.totalPitchbendInSemitones;
         const auto noteBend = currentNote - std::floor (currentNote);
 
+        const auto averageKeySize = (float) getTotalKeyboardWidth() / (float) (1 + getRangeEnd() - getRangeStart());
+        const auto distance = noteBend * averageKeySize;
+
         const auto noteBounds = getRectangleForKey ((int) currentNote);
-        const auto nextNoteBounds = getRectangleForKey ((int) currentNote + 1);
-
         const auto horizontal = isHorizontal();
-
-        const auto distance = noteBend * (horizontal ? nextNoteBounds.getCentreX() - noteBounds.getCentreX()
-                                                     : nextNoteBounds.getCentreY() - noteBounds.getCentreY());
-
         return (horizontal ? noteBounds.getCentreX() : noteBounds.getCentreY()) + distance;
     }();
 
