@@ -191,6 +191,7 @@
 #include "effects/juce_GlowEffect.cpp"
 
 #if JUCE_UNIT_TESTS
+ #include "geometry/juce_Parallelogram_test.cpp"
  #include "geometry/juce_Rectangle_test.cpp"
 #endif
 

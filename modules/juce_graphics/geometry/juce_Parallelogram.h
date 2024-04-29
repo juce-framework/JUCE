@@ -76,8 +76,8 @@ public:
     ~Parallelogram() = default;
 
     //==============================================================================
-    /** Returns true if the parallelogram has a width or height of more than zero. */
-    bool isEmpty() const noexcept                                   { return topLeft != topRight || topLeft != bottomLeft; }
+    /** Returns true if the parallelogram has an area of zero. */
+    bool isEmpty() const noexcept                                   { return topLeft == topRight || topLeft == bottomLeft || topRight == bottomLeft; }
 
     /** Returns true if the parallelogram's coordinates are all finite numbers, i.e. not NaN or infinity. */
     inline bool isFinite() const noexcept                           { return topLeft.isFinite() && topRight.isFinite() && bottomLeft.isFinite(); }
@@ -135,7 +135,7 @@ public:
     /** Moves this parallelogram by a given amount. */
     Parallelogram& operator-= (Point<ValueType> deltaPosition) noexcept
     {
-        return operator-= (-deltaPosition);
+        return operator+= (-deltaPosition);
     }
 
     /** Returns a parallelogram that has been scaled by the given amount, centred around the origin. */
