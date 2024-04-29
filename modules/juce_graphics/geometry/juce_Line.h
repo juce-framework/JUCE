@@ -323,7 +323,8 @@ public:
     */
     Point<ValueType> findNearestPointTo (Point<ValueType> point) const noexcept
     {
-        return getPointAlongLineProportionally (findNearestProportionalPositionTo (point));
+        using FloatType = typename Point<ValueType>::FloatType;
+        return getPointAlongLineProportionally ((FloatType) findNearestProportionalPositionTo (point));
     }
 
     /** Returns true if the given point lies above this line.
