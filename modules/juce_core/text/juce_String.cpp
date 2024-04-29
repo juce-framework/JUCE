@@ -2292,20 +2292,25 @@ static String reduceLengthOfFloatString (const String& input)
     return input;
 }
 
-static String serialiseDouble (double input)
+/*  maxDecimalPlaces <= 0 means "use as many decimal places as necessary"
+*/
+static String serialiseDouble (double input, int maxDecimalPlaces = 0)
 {
     auto absInput = std::abs (input);
 
     if (absInput >= 1.0e6 || absInput <= 1.0e-5)
-        return reduceLengthOfFloatString ({ input, 15, true });
+        return reduceLengthOfFloatString ({ input, maxDecimalPlaces > 0 ? maxDecimalPlaces : 15, true });
 
     int intInput = (int) input;
 
     if (exactlyEqual ((double) intInput, input))
         return { input, 1 };
 
-    auto numberOfDecimalPlaces = [absInput]
+    auto numberOfDecimalPlaces = [absInput, maxDecimalPlaces]
     {
+        if (maxDecimalPlaces > 0)
+            return maxDecimalPlaces;
+
         if (absInput < 1.0)
         {
             if (absInput >= 1.0e-3)
@@ -2944,7 +2949,7 @@ public:
 
         beginTest ("Serialisation");
         {
-            std::map <double, String> tests;
+            std::map<double, String> tests;
 
             tests[364] = "364.0";
             tests[1e7] = "1.0e7";
@@ -2972,6 +2977,18 @@ public:
                 expectEquals (serialiseDouble (test.first), test.second);
                 expectEquals (serialiseDouble (-test.first), "-" + test.second);
             }
+
+            expectEquals (serialiseDouble (1.0, 0), String ("1.0"));
+            expectEquals (serialiseDouble (1.0, 1), String ("1.0"));
+            expectEquals (serialiseDouble (1.0, 2), String ("1.0"));
+            expectEquals (serialiseDouble (1.0, 3), String ("1.0"));
+            expectEquals (serialiseDouble (1.0, 10), String ("1.0"));
+
+            expectEquals (serialiseDouble (4.567, 0), String ("4.567"));
+            expectEquals (serialiseDouble (4.567, 1), String ("4.6"));
+            expectEquals (serialiseDouble (4.567, 2), String ("4.57"));
+            expectEquals (serialiseDouble (4.567, 3), String ("4.567"));
+            expectEquals (serialiseDouble (4.567, 10), String ("4.567"));
         }
 
         beginTest ("Loops");

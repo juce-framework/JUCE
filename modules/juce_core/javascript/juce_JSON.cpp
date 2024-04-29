@@ -442,7 +442,7 @@ void JSON::writeToStream (OutputStream& out, const var& v, const FormatOptions& 
 
         if (juce_isfinite (d))
         {
-            out << serialiseDouble (d);
+            out << serialiseDouble (d, opt.getMaxDecimalPlaces());
         }
         else
         {
