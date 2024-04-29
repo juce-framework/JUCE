@@ -169,7 +169,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
 
 void ColourGradient::removeColour (int index)
 {
-    jassert (index > 0 && index < colours.size() - 1);
+    jassert (isPositiveAndBelow (index, colours.size()));
     colours.remove (index);
 }
 
