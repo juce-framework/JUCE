@@ -695,7 +695,7 @@ public:
     template <class Pixel>
     forcedinline void tween (const Pixel& src, uint32 amount) noexcept
     {
-        a += ((src.getAlpha() - a) * amount) >> 8;
+        a += (uint8) (((src.getAlpha() - a) * amount) >> 8);
     }
 
     //==============================================================================
