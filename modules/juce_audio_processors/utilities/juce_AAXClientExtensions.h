@@ -45,7 +45,7 @@ namespace juce
 
     @tags{Audio}
 */
-struct AAXClientExtensions
+struct JUCE_API AAXClientExtensions
 {
     virtual ~AAXClientExtensions() = default;
 

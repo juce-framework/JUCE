@@ -36,7 +36,7 @@ namespace juce::detail
 {
 
 class ConcreteScopedContentSharerImpl : public ScopedMessageBoxImpl,
-                                        private AsyncUpdater
+                                        public AsyncUpdater
 {
 public:
     static ScopedMessageBox show (std::unique_ptr<ScopedContentSharerInterface>&& native,

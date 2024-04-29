@@ -73,7 +73,7 @@ struct ScopedContentSharerInterface
 };
 
 class TemporaryFilesDecorator : public ScopedContentSharerInterface,
-                                private AsyncUpdater
+                                public AsyncUpdater
 {
 public:
     explicit TemporaryFilesDecorator (Component* parentIn)

@@ -45,7 +45,7 @@ public:
 
 //==============================================================================
 class ConcreteScopedMessageBoxImpl : public ScopedMessageBoxImpl,
-                                     private AsyncUpdater
+                                     public AsyncUpdater
 {
 public:
     static ScopedMessageBox show (std::unique_ptr<ScopedMessageBoxInterface>&& native,
