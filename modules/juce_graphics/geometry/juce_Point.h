@@ -195,6 +195,7 @@ public:
     /** Returns the point that would be reached by rotating this point clockwise
         about the origin by the specified angle.
     */
+    template <typename T = ValueType, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
     Point rotatedAboutOrigin (ValueType angleRadians) const noexcept
     {
         return Point (x * std::cos (angleRadians) - y * std::sin (angleRadians),
