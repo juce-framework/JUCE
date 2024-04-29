@@ -223,7 +223,7 @@ public:
     }
 
     /** Returns the dot-product of two points (x1 * x2 + y1 * y2). */
-    constexpr FloatType getDotProduct (Point other) const noexcept     { return x * other.x + y * other.y; }
+    constexpr FloatType getDotProduct (Point other) const noexcept     { return (FloatType) (x * other.x + y * other.y); }
 
     //==============================================================================
     /** Uses a transform to change the point's coordinates.
