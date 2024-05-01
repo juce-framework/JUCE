@@ -29,6 +29,8 @@
 #include <cwctype>
 #include "../platform/choc_Assert.h"
 
+namespace
+{
 namespace choc::text
 {
 
@@ -593,5 +595,6 @@ inline std::string percentEncodeURI (std::string_view text)
 
 
 } // namespace choc::text
+} // anonymous namespace
 
 #endif

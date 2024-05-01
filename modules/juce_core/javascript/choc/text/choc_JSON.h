@@ -31,6 +31,8 @@
 #undef max   // It's never a smart idea to include any C headers before your C++ ones, as it
 #undef min   // risks polluting your namespace with all kinds of dangerous macros like these ones.
 
+namespace
+{
 namespace choc::json
 {
 
@@ -557,5 +559,6 @@ value::Value create (Properties&&... properties)
 
 
 } // namespace choc::json
+} // anonymous namespace
 
 #endif

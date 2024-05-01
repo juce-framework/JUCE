@@ -33,6 +33,8 @@
     choc::javascript::createQuickJSContext() to create a context for running
     javascript code.
 */
+namespace
+{
 namespace choc::javascript
 {
     /// This is thrown by any javascript functions that need to report an error
@@ -171,6 +173,7 @@ namespace choc::javascript
     /// search path, and that you statically link the appropriate V8 libs.
     Context createV8Context();
 }
+} // anonymous namespace
 
 
 //==============================================================================
@@ -184,6 +187,8 @@ namespace choc::javascript
 //
 //==============================================================================
 
+namespace
+{
 namespace choc::javascript
 {
 
@@ -290,6 +295,7 @@ Context::Pimpl* Context::getPimpl() const
 }
 
 } // namespace choc::javascript
+} // anonymous namespace
 
 #endif // CHOC_JAVASCRIPT_HEADER_INCLUDED
 

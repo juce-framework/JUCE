@@ -27,6 +27,8 @@
 #include <exception>
 #include "../platform/choc_Assert.h"
 
+namespace
+{
 namespace choc::value
 {
 
@@ -3236,5 +3238,6 @@ inline std::string_view SimpleStringDictionary::getStringForHandle (Handle handl
 inline void SimpleStringDictionary::clear()     { strings.clear(); }
 
 } // namespace choc::value
+} // anonymous namespace
 
 #endif // CHOC_VALUE_POOL_HEADER_INCLUDED

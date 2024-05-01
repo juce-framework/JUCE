@@ -22,6 +22,8 @@
 #include <cstddef>
 #include "choc_StringUtilities.h"
 
+namespace
+{
 namespace choc::text
 {
 
@@ -651,5 +653,6 @@ inline std::string convertUTF8ToCESU8 (UTF8Pointer utf8)
 
 
 } // namespace choc::text
+} // anonymous namespace
 
 #endif

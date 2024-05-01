@@ -36,6 +36,8 @@
  #endif
 #endif
 
+namespace
+{
 namespace choc::math
 {
 
@@ -114,5 +116,6 @@ inline Int128 multiply128 (uint64_t a, uint64_t b)
 
 
 } // namespace choc::math
+} // anonymous namespace
 
 #endif

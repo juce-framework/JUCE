@@ -77,6 +77,8 @@
  #include <sys/time.h>
 #endif
 
+namespace
+{
 namespace choc::javascript
 {
 
@@ -64343,5 +64345,6 @@ Context createQuickJSContext()
 }
 
 } // namespace choc::javascript
+} // anonymous namespace
 
 #endif // CHOC_JAVASCRIPT_QUICKJS_HEADER_INCLUDED

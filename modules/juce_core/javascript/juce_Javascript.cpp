@@ -34,10 +34,11 @@
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-with-dtor",
                                      "-Wunused-but-set-variable",
-                                     "-Wdeprecated")
+                                     "-Wdeprecated",
+                                     "-Wunused-function")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011 6246 6255 6262 6297 6308 6323 6340 6385 6386 28182)
- #include "choc/javascript/choc_javascript_QuickJS.h"
- #include "choc/javascript/choc_javascript.h"
+#include <juce_core/javascript/choc/javascript/choc_javascript_QuickJS.h>
+#include <juce_core/javascript/choc/javascript/choc_javascript.h>
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 

@@ -8297,6 +8297,9 @@
     <None Include="..\..\..\..\modules\juce_box2d\box2d\README.txt">
       <Filter>JUCE Modules\juce_box2d\box2d</Filter>
     </None>
+    <None Include="..\..\..\..\modules\juce_core\javascript\choc\JUCE_CHANGES.txt">
+      <Filter>JUCE Modules\juce_core\javascript\choc</Filter>
+    </None>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt">
       <Filter>JUCE Modules\juce_core\native\java</Filter>
     </None>
