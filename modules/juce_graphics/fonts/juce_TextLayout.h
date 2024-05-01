@@ -53,7 +53,7 @@ private:
     class DereferencingIterator
     {
     public:
-        using value_type = std::remove_reference_t<decltype(**std::declval<Iterator>())>;
+        using value_type = std::remove_reference_t<decltype (**std::declval<Iterator>())>;
         using difference_type = typename std::iterator_traits<Iterator>::difference_type;
         using pointer = value_type*;
         using reference = value_type&;
@@ -94,7 +94,7 @@ private:
         DereferencingIterator  operator++ (int) const { DereferencingIterator copy (*this); ++(*this); return copy; }
         DereferencingIterator  operator-- (int) const { DereferencingIterator copy (*this); --(*this); return copy; }
 
-        reference operator* () const { return **iterator; }
+        reference operator*()  const { return **iterator; }
         pointer   operator->() const { return  *iterator; }
 
     private:
