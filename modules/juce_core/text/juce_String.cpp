@@ -362,8 +362,21 @@ String::String (CharPointer_UTF32 t, size_t maxChars)   : text (StringHolderUtil
 String::String (const wchar_t* t, size_t maxChars)      : text (StringHolderUtils::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
 
 #if __cpp_char8_t
-String::String (const char8_t* const t)            : String (fromUTF8 (t)) {}
-String::String (const char8_t* t, size_t maxChars) : String (fromUTF8 (t, maxChars)) {}
+String::String (const char8_t* const t) : String (CharPointer_UTF8 (reinterpret_cast<const char*> (t)))
+{
+    /*  If you get an assertion here, then you're trying to create a string using the standard C++
+        type for UTF-8 character representation, but the data consists of invalid UTF-8 characters!
+    */
+    jassert (t == nullptr || CharPointer_UTF8::isValidString (reinterpret_cast<const char*> (t), std::numeric_limits<int>::max()));
+}
+
+String::String (const char8_t* t, size_t maxChars) : String (CharPointer_UTF8 (reinterpret_cast<const char*> (t)), maxChars)
+{
+    /*  If you get an assertion here, then you're trying to create a string using the standard C++
+        type for UTF-8 character representation, but the data consists of invalid UTF-8 characters!
+    */
+    jassert (t == nullptr || CharPointer_UTF8::isValidString (reinterpret_cast<const char*> (t), (int) maxChars));
+}
 #endif
 
 String::String (CharPointer_UTF8  start, CharPointer_UTF8  end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
@@ -2145,16 +2158,19 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
         return {};
 
     if (bufferSizeBytes < 0)
-        return String (CharPointer_UTF8 (buffer));
+    {
+        jassert (CharPointer_UTF8::isValidString (buffer, std::numeric_limits<int>::max()));
+        return { CharPointer_UTF8 (buffer) };
+    }
 
     jassert (CharPointer_UTF8::isValidString (buffer, bufferSizeBytes));
-    return String (CharPointer_UTF8 (buffer), CharPointer_UTF8 (buffer + bufferSizeBytes));
+    return { CharPointer_UTF8 (buffer), (size_t) bufferSizeBytes };
 }
 
 #if __cpp_char8_t
 String String::fromUTF8 (const char8_t* const buffer, int bufferSizeBytes)
 {
-    return fromUTF8 (reinterpret_cast<const char* const> (buffer), bufferSizeBytes);
+    return { buffer, (size_t) bufferSizeBytes };
 }
 #endif
 
