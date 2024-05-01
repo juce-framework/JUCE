@@ -1097,6 +1097,16 @@ endfunction()
 
 # ==================================================================================================
 
+function(_juce_disable_system_includes target)
+    if(CMAKE_VERSION VERSION_GREATER "3.25")
+        set_target_properties("${target}" PROPERTIES SYSTEM FALSE)
+    elseif(CMAKE_VERSION VERSION_GREATER "3.23")
+        set_target_properties("${target}" PROPERTIES IMPORTED_NO_SYSTEM TRUE)
+    endif()
+endfunction()
+
+# ==================================================================================================
+
 function(_juce_set_plugin_target_properties shared_code_target kind)
     set(target_name ${shared_code_target}_${kind})
 
@@ -2296,6 +2306,7 @@ function(juce_set_aax_sdk_path path)
         return()
     endif()
 
+    _juce_disable_system_includes(juce_aax_sdk)
     target_include_directories(juce_aax_sdk INTERFACE
         "${path}"
         "${path}/Interfaces"
@@ -2316,6 +2327,7 @@ function(juce_set_vst2_sdk_path path)
 
     add_library(juce_vst2_sdk INTERFACE IMPORTED GLOBAL)
 
+    _juce_disable_system_includes(juce_vst2_sdk)
     # This is a bit of a hack, but we really need the VST2 paths to always follow the VST3 paths.
     target_include_directories(juce_vst2_sdk INTERFACE
         $<TARGET_PROPERTY:juce::juce_vst3_headers,INTERFACE_INCLUDE_DIRECTORIES>
@@ -2335,6 +2347,7 @@ function(juce_set_vst3_sdk_path path)
 
     add_library(juce_vst3_sdk INTERFACE IMPORTED GLOBAL)
 
+    _juce_disable_system_includes(juce_vst3_sdk)
     target_include_directories(juce_vst3_sdk INTERFACE "${path}")
 endfunction()
 
@@ -2351,6 +2364,7 @@ function(juce_set_ara_sdk_path path)
 
     add_library(juce_ara_sdk INTERFACE IMPORTED GLOBAL)
 
+    _juce_disable_system_includes(juce_ara_sdk)
     target_include_directories(juce_ara_sdk INTERFACE "${path}")
 endfunction()
 
