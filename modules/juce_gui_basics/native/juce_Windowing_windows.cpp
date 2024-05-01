@@ -5520,25 +5520,19 @@ bool juce::detail::WindowingHelpers::isWindowOnCurrentVirtualDesktop (void* x)
     if (x == nullptr)
         return false;
 
-    static auto* desktopManager = []
-    {
-        JuceIVirtualDesktopManager* result = nullptr;
+    ComSmartPtr<JuceIVirtualDesktopManager> manager;
 
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+    manager.CoCreateInstance (__uuidof (JuceVirtualDesktopManager), CLSCTX_ALL);
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        if (SUCCEEDED (CoCreateInstance (__uuidof (JuceVirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
-            return result;
-
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-        return static_cast<JuceIVirtualDesktopManager*> (nullptr);
-    }();
+    if (manager == nullptr)
+        return true;
 
     BOOL current = false;
 
-    if (auto* dm = desktopManager)
-        if (SUCCEEDED (dm->IsWindowOnCurrentVirtualDesktop (static_cast<HWND> (x), &current)))
-            return current != false;
+    if (FAILED (manager->IsWindowOnCurrentVirtualDesktop (static_cast<HWND> (x), &current)))
+        return true;
 
-    return true;
+    return current != false;
 }
