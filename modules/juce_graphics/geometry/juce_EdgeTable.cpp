@@ -485,13 +485,13 @@ void EdgeTable::multiplyLevels (float amount)
     for (int y = 0; y < bounds.getHeight(); ++y)
     {
         auto numPoints = lineStart[0];
-        auto* item = reinterpret_cast<LineItem*> (lineStart + 1);
-        lineStart += lineStrideElements;
 
-        while (--numPoints > 0)
+        for (auto i = 0; i < numPoints; ++i)
         {
-            item->level = jmin (255, (item->level * multiplier) / scale);
-            ++item;
+            auto* ptr = lineStart + 1 + (2 * i);
+            auto item = readUnaligned<LineItem> (ptr);
+            item.level = jmin (255, (item.level * multiplier) / scale);
+            writeUnaligned (ptr, item);
         }
     }
 }
