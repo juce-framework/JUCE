@@ -301,16 +301,6 @@ void EdgeTable::clearLineSizes() noexcept
     }
 }
 
-void EdgeTable::copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) noexcept
-{
-    while (--numLines >= 0)
-    {
-        memcpy (dest, src, (size_t) (src[0] * 2 + 1) * sizeof (int));
-        src += srcLineStride;
-        dest += destLineStride;
-    }
-}
-
 void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) noexcept
 {
     // Convert the table from relative windings to absolute levels..
@@ -375,18 +365,35 @@ void EdgeTable::sanitiseLevels (const bool useNonZeroWinding) noexcept
     }
 }
 
+static void copyEdgeTableData (int* dest,
+                               size_t destLineStride,
+                               const int* src,
+                               size_t srcLineStride,
+                               size_t numLines) noexcept
+{
+    for (size_t line = 0; line < numLines; ++line)
+    {
+        const auto* srcLine = src + line * srcLineStride;
+        std::copy (srcLine, srcLine + *srcLine * 2 + 1, dest + line * destLineStride);
+    }
+}
+
 void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine)
 {
     if (newNumEdgesPerLine != maxEdgesPerLine)
     {
+        jassert (newNumEdgesPerLine > maxEdgesPerLine);
         maxEdgesPerLine = newNumEdgesPerLine;
 
         jassert (bounds.getHeight() > 0);
         auto newLineStrideElements = maxEdgesPerLine * 2 + 1;
 
         std::vector<int> newTable (getEdgeTableAllocationSize (newLineStrideElements, bounds.getHeight()));
-
-        copyEdgeTableData (newTable.data(), newLineStrideElements, table.data(), lineStrideElements, bounds.getHeight());
+        copyEdgeTableData (newTable.data(),
+                           (size_t) newLineStrideElements,
+                           table.data(),
+                           (size_t) lineStrideElements,
+                           (size_t) bounds.getHeight());
 
         table = std::move (newTable);
         lineStrideElements = newLineStrideElements;
@@ -494,12 +501,12 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
     jassert (y >= 0 && y < bounds.getHeight());
 
     auto* srcLine = table.data() + lineStrideElements * y;
-    auto srcNum1 = *srcLine;
+    const auto srcNum1 = *srcLine;
 
     if (srcNum1 == 0)
         return;
 
-    auto srcNum2 = *otherLine;
+    const auto srcNum2 = *otherLine;
 
     if (srcNum2 == 0)
     {
@@ -507,29 +514,44 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
         return;
     }
 
-    auto right = bounds.getRight() * scale;
+    Span srcLine1 { srcLine   + 1, (size_t) srcNum1 * 2 };
+    Span srcLine2 { otherLine + 1, (size_t) srcNum2 * 2 };
+
+    const auto popHead = [] (auto& s)
+    {
+        if (s.empty())
+            return 0;
+
+        const auto result = s.front();
+        s = Span { s.data() + 1, s.size() - 1 };
+        return result;
+    };
+
+    const auto reseat = [] (auto& s, auto* ptr)
+    {
+        s = Span { ptr, s.size() };
+    };
+
+    const auto right = bounds.getRight() * scale;
 
     // optimise for the common case where our line lies entirely within a
     // single pair of points, as happens when clipping to a simple rect.
-    if (srcNum2 == 2 && otherLine[2] >= 255)
+    if (srcLine2.size() == 4 && srcLine2[1] >= 255)
     {
-        clipEdgeTableLineToRange (srcLine, otherLine[1], jmin (right, otherLine[3]));
+        clipEdgeTableLineToRange (srcLine, srcLine2[0], jmin (right, srcLine2[2]));
         return;
     }
 
     bool isUsingTempSpace = false;
 
-    const int* src1 = srcLine + 1;
-    auto x1 = *src1++;
-
-    const int* src2 = otherLine + 1;
-    auto x2 = *src2++;
+    auto x1 = popHead (srcLine1);
+    auto x2 = popHead (srcLine2);
 
     int destIndex = 0, destTotal = 0;
     int level1 = 0, level2 = 0;
     int lastX = std::numeric_limits<int>::min(), lastLevel = 0;
 
-    while (srcNum1 > 0 && srcNum2 > 0)
+    while (! srcLine1.empty() && ! srcLine2.empty())
     {
         int nextX;
 
@@ -537,27 +559,24 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
         {
             if (x1 == x2)
             {
-                level2 = *src2++;
-                x2 = *src2++;
-                --srcNum2;
+                level2 = popHead (srcLine2);
+                x2 = popHead (srcLine2);
             }
 
             nextX = x1;
-            level1 = *src1++;
-            x1 = *src1++;
-            --srcNum1;
+            level1 = popHead (srcLine1);
+            x1 = popHead (srcLine1);
         }
         else
         {
             nextX = x2;
-            level2 = *src2++;
-            x2 = *src2++;
-            --srcNum2;
+            level2 = popHead (srcLine2);
+            x2 = popHead (srcLine2);
         }
 
-        if (nextX > lastX)
+        if (lastX < nextX)
         {
-            if (nextX >= right)
+            if (right <= nextX)
                 break;
 
             lastX = nextX;
@@ -573,16 +592,14 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
 
                     if (isUsingTempSpace)
                     {
-                        auto tempSize = (size_t) srcNum1 * 2 * sizeof (int);
-                        auto oldTemp = static_cast<int*> (alloca (tempSize));
-                        memcpy (oldTemp, src1, tempSize);
+                        auto* stackBuffer = static_cast<int*> (alloca (sizeof (int) * srcLine1.size()));
+                        std::copy (srcLine1.begin(), srcLine1.end(), stackBuffer);
 
                         remapTableForNumEdges (jmax (256, destTotal * 2));
                         srcLine = table.data() + lineStrideElements * y;
 
-                        auto* newTemp = table.data() + lineStrideElements * bounds.getHeight();
-                        memcpy (newTemp, oldTemp, tempSize);
-                        src1 = newTemp;
+                        reseat (srcLine1, table.data() + lineStrideElements * bounds.getHeight());
+                        std::copy (stackBuffer, stackBuffer + srcLine1.size(), srcLine1.data());
                     }
                     else
                     {
@@ -598,8 +615,8 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
                 {
                     isUsingTempSpace = true;
                     auto* temp = table.data() + lineStrideElements * bounds.getHeight();
-                    memcpy (temp, src1, (size_t) srcNum1 * 2 * sizeof (int));
-                    src1 = temp;
+                    std::copy (srcLine1.begin(), srcLine1.end(), temp);
+                    reseat (srcLine1, temp);
                 }
 
                 srcLine[++destIndex] = nextX;

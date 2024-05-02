@@ -218,7 +218,6 @@ private:
     void intersectWithEdgeTableLine (int y, const int* otherLine);
     void clipEdgeTableLineToRange (int* line, int x1, int x2) noexcept;
     void sanitiseLevels (bool useNonZeroWinding) noexcept;
-    static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) noexcept;
 
     JUCE_LEAK_DETECTOR (EdgeTable)
 };
