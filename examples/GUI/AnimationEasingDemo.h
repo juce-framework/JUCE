@@ -810,7 +810,7 @@ public:
         animationSettings.shouldAnimateSize = false;
         animationSettings.shouldAnimateAlpha = false;
 
-        animationSettingsComponent.onAnimate = [=]
+        animationSettingsComponent.onAnimate = [&]
         {
             animationView1.animate();
             animationView2.animate();
