@@ -72,15 +72,6 @@ public:
     /** Creates an edge table containing a rectangle list. */
     explicit EdgeTable (const RectangleList<float>& rectanglesToAdd);
 
-    /** Creates a copy of another edge table. */
-    EdgeTable (const EdgeTable&);
-
-    /** Copies from another edge table. */
-    EdgeTable& operator= (const EdgeTable&);
-
-    /** Destructor. */
-    ~EdgeTable();
-
     //==============================================================================
     void clipToRectangle (Rectangle<int> r);
     void excludeRectangle (Rectangle<int> r);
@@ -120,7 +111,7 @@ public:
     template <class EdgeTableIterationCallback>
     void iterate (EdgeTableIterationCallback& iterationCallback) const noexcept
     {
-        const int* lineStart = table;
+        const int* lineStart = table.data();
 
         for (int y = 0; y < bounds.getHeight(); ++y)
         {
@@ -213,7 +204,7 @@ private:
         bool operator< (const LineItem& other) const noexcept   { return x < other.x; }
     };
 
-    HeapBlock<int> table;
+    std::vector<int> table;
     Rectangle<int> bounds;
     int maxEdgesPerLine, lineStrideElements;
     bool needToCheckEmptiness = true;
