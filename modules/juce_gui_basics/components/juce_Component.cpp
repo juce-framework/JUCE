@@ -1689,6 +1689,50 @@ void Component::paintComponentAndChildren (Graphics& g)
     paintOverChildren (g);
 }
 
+class Component::EffectState
+{
+public:
+    explicit EffectState (ImageEffectFilter& i) : effect (&i) {}
+
+    ImageEffectFilter& getEffect() const
+    {
+        return *effect;
+    }
+
+    bool setEffect (ImageEffectFilter& i)
+    {
+        return std::exchange (effect, &i) != &i;
+    }
+
+    void paint (Graphics& g, Component& c, bool ignoreAlphaLevel)
+    {
+        auto scale = g.getInternalContext().getPhysicalPixelScaleFactor();
+        auto scaledBounds = c.getLocalBounds() * scale;
+
+        if (effectImage.getBounds() != scaledBounds)
+            effectImage = Image { c.isOpaque() ? Image::RGB : Image::ARGB, scaledBounds.getWidth(), scaledBounds.getHeight(), false };
+
+        if (! c.isOpaque())
+            effectImage.clear (effectImage.getBounds());
+
+        {
+            Graphics g2 (effectImage);
+            g2.addTransform (AffineTransform::scale ((float) scaledBounds.getWidth()  / (float) c.getWidth(),
+                                                     (float) scaledBounds.getHeight() / (float) c.getHeight()));
+            c.paintComponentAndChildren (g2);
+        }
+
+        Graphics::ScopedSaveState ss (g);
+
+        g.addTransform (AffineTransform::scale (1.0f / scale));
+        effect->applyEffect (effectImage, g, scale, ignoreAlphaLevel ? 1.0f : c.getAlpha());
+    }
+
+private:
+    Image effectImage;
+    ImageEffectFilter* effect;
+};
+
 void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
 {
     // If sizing a top-level-window and the OS paint message is delivered synchronously
@@ -1703,38 +1747,9 @@ void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
     flags.isInsidePaintCall = true;
    #endif
 
-    if (effect != nullptr)
+    if (effectState != nullptr)
     {
-        auto scale = g.getInternalContext().getPhysicalPixelScaleFactor();
-
-        auto scaledBounds = getLocalBounds() * scale;
-
-        // Store the effect image in the image cache to avoid recreating it every time
-        auto imageFormat = flags.opaqueFlag ? Image::RGB : Image::ARGB;
-        int64 imageHashCode = scaledBounds.getWidth() | ((int64) scaledBounds.getHeight() << 24) | ((int64) imageFormat << 56);
-        auto effectImage = ImageCache::getFromHashCode (imageHashCode);
-
-        if (effectImage.isNull())
-        {
-            effectImage = Image { imageFormat, scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag };
-            ImageCache::addImageToCache (effectImage, imageHashCode);
-        }
-
-        effectImage.clear (effectImage.getBounds(), (imageFormat == Image::ARGB) ? Colours::transparentBlack : Colours::black);
-
-        {
-            Graphics g2 (effectImage);
-
-            g2.addTransform (AffineTransform::scale ((float) scaledBounds.getWidth()  / (float) getWidth(),
-                                                     (float) scaledBounds.getHeight() / (float) getHeight()));
-
-            paintComponentAndChildren (g2);
-        }
-
-        Graphics::ScopedSaveState ss (g);
-
-        g.addTransform (AffineTransform::scale (1.0f / scale));
-        effect->applyEffect (effectImage, g, scale, ignoreAlphaLevel ? 1.0f : getAlpha());
+        effectState->paint (g, *this, ignoreAlphaLevel);
     }
     else if (componentTransparency > 0 && ! ignoreAlphaLevel)
     {
@@ -1794,13 +1809,35 @@ Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
     return image;
 }
 
+ImageEffectFilter* Component::getComponentEffect() const noexcept
+{
+    return effectState != nullptr ? &effectState->getEffect() : nullptr;
+}
+
 void Component::setComponentEffect (ImageEffectFilter* newEffect)
 {
-    if (effect != newEffect)
+    if (newEffect == nullptr && effectState == nullptr)
+        return;
+
+    const auto needsRepaint = [&]
     {
-        effect = newEffect;
+        if (newEffect == nullptr)
+        {
+            effectState.reset();
+            return true;
+        }
+
+        if (effectState == nullptr)
+        {
+            effectState = std::make_unique<EffectState> (*newEffect);
+            return true;
+        }
+
+        return effectState->setEffect (*newEffect);
+    }();
+
+    if (needsRepaint)
         repaint();
-    }
 }
 
 //==============================================================================
