@@ -1335,16 +1335,6 @@ public:
         stopAndGetLastCallback();
     }
 
-    AudioIODeviceCallback* stopAndGetLastCallback() const
-    {
-        auto* lastCallback = internal->stop (true);
-
-        if (lastCallback != nullptr)
-            lastCallback->audioDeviceStopped();
-
-        return lastCallback;
-    }
-
     AudioIODeviceCallback* stopInternal()
     {
         restartDevice = true;
@@ -1412,6 +1402,16 @@ private:
     AsyncRestarter* restarter = nullptr;
     BigInteger inputChannelsRequested, outputChannelsRequested;
     CriticalSection closeLock;
+
+    AudioIODeviceCallback* stopAndGetLastCallback() const
+    {
+        auto* lastCallback = internal->stop (true);
+
+        if (lastCallback != nullptr)
+            lastCallback->audioDeviceStopped();
+
+        return lastCallback;
+    }
 
     void timerCallback() override
     {
