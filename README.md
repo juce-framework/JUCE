@@ -1,23 +1,26 @@
 ![alt text](https://assets.juce.com/juce/JUCE_banner_github.png "JUCE")
 
 JUCE is an open-source cross-platform C++ application framework for creating
-desktop and mobile applications, including VST, VST3, AU, AUv3, AAX and LV2 audio plug-ins
-and plug-in hosts. JUCE can be easily integrated with existing projects via CMake, or can
-be used as a project generation tool via the [Projucer](#the-projucer), which supports
-exporting projects for Xcode (macOS and iOS), Visual Studio, Android Studio,
-and Linux Makefiles as well as containing a source code editor.
+desktop and mobile applications, including VST, VST3, AU, AUv3, AAX and LV2
+audio plug-ins and plug-in hosts. JUCE can be easily integrated with existing
+projects via CMake, or can be used as a project generation tool via the
+[Projucer](#the-projucer), which supports exporting projects for Xcode (macOS
+and iOS), Visual Studio, Android Studio, and Linux Makefiles as well as
+containing a source code editor.
 
 ## Getting Started
 
-The JUCE repository contains a [master](https://github.com/juce-framework/JUCE/tree/master)
-and [develop](https://github.com/juce-framework/JUCE/tree/develop) branch. The develop branch
-contains the latest bug fixes and features and is periodically merged into the master
-branch in stable [tagged releases](https://github.com/juce-framework/JUCE/releases)
-(the latest release containing pre-built binaries can be also downloaded from the
-[JUCE website](https://juce.com/get-juce)).
+The JUCE repository contains a
+[master](https://github.com/juce-framework/JUCE/tree/master) and
+[develop](https://github.com/juce-framework/JUCE/tree/develop) branch. The
+develop branch contains the latest bug fixes and features and is periodically
+merged into the master branch in stable [tagged
+releases](https://github.com/juce-framework/JUCE/releases) (the latest release
+containing pre-built binaries can be also downloaded from the [JUCE
+website](https://juce.com/get-juce)).
 
-JUCE projects can be managed with either the Projucer (JUCE's own project-configuration
-tool) or with CMake.
+JUCE projects can be managed with either the Projucer (JUCE's own
+project-configuration tool) or with CMake.
 
 ### The Projucer
 
@@ -26,8 +29,8 @@ for your platform - Xcode, Visual Studio and Linux Makefile projects are located
 in [extras/Projucer/Builds](/extras/Projucer/Builds) (the minimum system
 requirements are listed in the [minimum system
 requirements](#minimum-system-requirements) section below). The Projucer can
-then be used to create new JUCE projects, view tutorials and run examples. It
-is also possible to include the JUCE modules source code in an existing project
+then be used to create new JUCE projects, view tutorials and run examples. It is
+also possible to include the JUCE modules source code in an existing project
 directly, or build them into a static or dynamic library which can be linked
 into a project.
 
@@ -80,3 +83,36 @@ Please see our [contribution guidelines](.github/contributing.md).
 ## Licensing
 
 See [LICENSE.md](LICENSE.md) for licensing and dependency information.
+
+## AAX Plug-Ins
+
+AAX plug-ins need to be digitally signed using PACE Anti-Piracy's signing tools
+before they will run in commercially available versions of Pro Tools. These
+tools are provided free of charge by Avid. Before obtaining the signing tools,
+you will need to use a special build of Pro Tools, called Pro Tools Developer,
+to test your unsigned plug-ins. The steps to obtain Pro Tools Developer are:
+
+1. Sign up as an AAX Developer [here](https://developer.avid.com/aax/).
+2. Request a Pro Tools Developer Bundle activation code by sending an email to
+   [devauth@avid.com](mailto:devauth@avid.com).
+3. Download the latest Pro Tools Developer build from your Avid Developer
+   account.
+
+When your plug-ins have been tested and debugged in Pro Tools Developer, and you
+are ready to digitally sign them, please send an email to
+[audiosdk@avid.com](mailto:audiosdk@avid.com) with the subject "PACE Eden
+Signing Tools Request". You need to include an overview of each plug-in along
+with a screen recording showing the plug-in running in Pro Tools Developer, with
+audio if possible.
+
+Please also include the following information:
+
+- Company name
+- Admin full name
+- Telephone number
+
+Once the request is submitted, PACE Anti-Piracy will contact you directly with
+information about signing your plug-ins. When the plug-ins have been signed, you
+are free to sell and distribute them. If you are interested in selling your
+plug-ins on the Avid Marketplace, please send an email to
+[audiosdk@avid.com](mailto:audiosdk@avid.com).
