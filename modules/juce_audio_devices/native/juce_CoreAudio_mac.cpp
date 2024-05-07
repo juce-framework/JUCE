@@ -1124,8 +1124,8 @@ private:
         auto oldBufferSize = bufferSize;
 
         if (! updateDetailsFromDevice())
-            owner.stopInternal();
-        else if ((oldBufferSize != bufferSize || ! approximatelyEqual (oldSampleRate, sampleRate)) && owner.shouldRestartDevice())
+            owner.stopWithPendingCallback();
+        else if (oldBufferSize != bufferSize || ! approximatelyEqual (oldSampleRate, sampleRate))
             owner.restart();
     }
 
@@ -1326,19 +1326,21 @@ public:
     void start (AudioIODeviceCallback* callback) override
     {
         if (internal->start (callback))
-            previousCallback = callback;
+            pendingCallback = nullptr;
     }
 
     void stop() override
     {
-        restartDevice = false;
         stopAndGetLastCallback();
+        pendingCallback = nullptr;
     }
 
-    AudioIODeviceCallback* stopInternal()
+    void stopWithPendingCallback()
     {
-        restartDevice = true;
-        return stopAndGetLastCallback();
+        const ScopedLock sl (closeLock);
+
+        if (pendingCallback == nullptr)
+            pendingCallback = stopAndGetLastCallback();
     }
 
     AudioWorkgroup getWorkgroup() const override
@@ -1371,11 +1373,7 @@ public:
             return;
         }
 
-        {
-            const ScopedLock sl (closeLock);
-            previousCallback = stopInternal();
-        }
-
+        stopWithPendingCallback();
         startTimer (100);
     }
 
@@ -1389,16 +1387,16 @@ public:
         restarter = restarterIn;
     }
 
-    bool shouldRestartDevice() const noexcept    { return restartDevice; }
-
     WeakReference<CoreAudioIODeviceType> deviceType;
     bool hadDiscontinuity;
 
 private:
     std::unique_ptr<CoreAudioInternal> internal;
-    bool isOpen_ = false, restartDevice = true;
+    bool isOpen_ = false;
     String lastError;
-    AudioIODeviceCallback* previousCallback = nullptr;
+    //  When non-null, this indicates that the device has been stopped with the intent to restart
+    //  using the same callback. That is, this should only be non-null when the device is stopped.
+    AudioIODeviceCallback* pendingCallback = nullptr;
     AsyncRestarter* restarter = nullptr;
     BigInteger inputChannelsRequested, outputChannelsRequested;
     CriticalSection closeLock;
@@ -1417,13 +1415,16 @@ private:
     {
         stopTimer();
 
-        stopInternal();
+        stopWithPendingCallback();
 
         internal->updateDetailsFromDevice();
 
-        open (inputChannelsRequested, outputChannelsRequested,
-              getCurrentSampleRate(), getCurrentBufferSizeSamples());
-        start (previousCallback);
+        open (inputChannelsRequested,
+              outputChannelsRequested,
+              getCurrentSampleRate(),
+              getCurrentBufferSizeSamples());
+
+        start (pendingCallback);
     }
 
     static OSStatus hardwareListenerProc (AudioDeviceID /*inDevice*/,
@@ -1736,7 +1737,7 @@ private:
         }
 
         for (auto& d : getDeviceWrappers())
-            d->stopInternal();
+            d->stop();
 
         if (lastCallback != nullptr)
         {
@@ -2002,7 +2003,7 @@ private:
         int getCurrentBitDepth()                                  const { return device->getCurrentBitDepth(); }
         int getDefaultBufferSize()                                const { return device->getDefaultBufferSize(); }
         void start (AudioIODeviceCallback* callbackToNotify)      const { return device->start (callbackToNotify); }
-        AudioIODeviceCallback* stopInternal()                     const { return device->stopInternal(); }
+        void stop()                                               const { return device->stop(); }
         void close()                                              const { return device->close(); }
         AudioWorkgroup getWorkgroup()                             const { return device->getWorkgroup(); }
 
