@@ -81,7 +81,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                      "-Wunused-parameter",
                                      "-Wdeprecated-writable-strings",
                                      "-Wnon-virtual-dtor",
-                                     "-Wzero-as-null-pointer-constant")
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wlanguage-extension-token")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4458)
 
 #define VST_FORCE_DEPRECATED 0

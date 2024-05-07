@@ -56,7 +56,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
                                      "-Wtautological-overlap-compare",
                                      "-Wzero-as-null-pointer-constant",
                                      "-Wdeprecated-copy-with-user-provided-dtor",
-                                     "-Wdeprecated")
+                                     "-Wdeprecated",
+                                     "-Wlanguage-extension-token",
+                                     "-Wmicrosoft-enum-value")
 
 #include <AAX_Version.h>
 
