@@ -32,7 +32,6 @@
   ==============================================================================
 */
 
-#pragma pack(push, 8)
 struct UnicodeEntry
 {
     LineBreakType         bt;
@@ -42,8 +41,9 @@ struct UnicodeEntry
     VerticalTransformType vertical;
     EmojiType             emoji;
 };
-#pragma pack(pop)
 
+static_assert (alignof (UnicodeEntry) == 1);
+static_assert (sizeof  (UnicodeEntry) == 6);
 
 static const int uncompressedUnicodeDataSize = 6684666;
 static const uint8_t compressedUnicodeData[] =
