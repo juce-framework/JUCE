@@ -148,6 +148,9 @@ public:
     SimpleShapedText (const String* data,
                       const ShapedTextOptions& options);
 
+    /*  The returned container associates line numbers with the range of glyphs (not input codepoints)
+        that make up the line.
+    */
     const auto& getLineNumbers() const { return lineNumbers; }
 
     const auto& getResolvedFonts() const { return resolvedFonts; }
@@ -615,6 +618,12 @@ struct ShapingParams
     Font resolvedFont;
 };
 
+struct LineAdvance
+{
+    float includingTrailingWhitespace;
+    float maybeIgnoringWhitespace;
+};
+
 struct ConsumableGlyphs
 {
 public:
@@ -683,12 +692,9 @@ public:
     /*  If this function returns a value that also means that it's safe to break before the provided
         codepoint. Otherwise, we couldn't meaningfully calculate the requested value.
     */
-    std::optional<float> getAdvanceXUpToBreakPointIfSafe (int64 breakBefore,
-                                                          bool whitespaceShouldFitInLine) const
+    std::optional<LineAdvance> getAdvanceXUpToBreakPointIfSafe (int64 breakBefore,
+                                                                bool whitespaceShouldFitInLine) const
     {
-        if (breakBefore == range.getEnd())
-            return cumulativeAdvanceX.back();
-
         const auto breakBeforeGlyphIndex = [&]() -> std::optional<size_t>
         {
             if (breakBefore == range.getEnd())
@@ -703,16 +709,18 @@ public:
         if (! breakBeforeGlyphIndex.has_value())
             return std::nullopt;
 
+        const auto includingTrailingWhitespace = cumulativeAdvanceX [*breakBeforeGlyphIndex];
+
         if (! whitespaceShouldFitInLine)
         {
             for (auto i = (int64) *breakBeforeGlyphIndex; --i >= 0;)
             {
                 if (! glyphs[(size_t) i].whitespace)
-                    return cumulativeAdvanceX[(size_t) i + 1];
+                    return LineAdvance { includingTrailingWhitespace, cumulativeAdvanceX[(size_t) i + 1] };
             }
         }
 
-        return cumulativeAdvanceX [*breakBeforeGlyphIndex];
+        return LineAdvance { includingTrailingWhitespace, includingTrailingWhitespace };
     }
 
     auto isEmpty() const
@@ -996,7 +1004,12 @@ void SimpleShapedText::shape (const String& data,
             struct BestMatch
             {
                 int64 breakBefore{};
-                float advance{};
+
+                // We need to use maybeIgnoringWhitespace in comparisions, but
+                // includingTrailingWhitespace when using subtraction to calculate the remaining
+                // space.
+                LineAdvance advance{};
+
                 bool unsafe{};
                 std::vector<ShapedGlyph> unsafeGlyphs;
             };
@@ -1011,7 +1024,7 @@ void SimpleShapedText::shape (const String& data,
                 if (auto safeAdvance = glyphsToConsume.getAdvanceXUpToBreakPointIfSafe (*breakBefore,
                                                                                         options.getTrailingWhitespacesShouldFit()))
                 {
-                    if (*safeAdvance < remainingWidth || ! bestMatch.has_value())
+                    if (safeAdvance->maybeIgnoringWhitespace < remainingWidth || ! bestMatch.has_value())
                         bestMatch = BestMatch { *breakBefore, *safeAdvance, false, std::vector<ShapedGlyph> {} };
                     else
                         break;  // We found a safe break that is too large to fit. Anything beyond
@@ -1048,7 +1061,7 @@ void SimpleShapedText::shape (const String& data,
                                                           [] (auto acc, const auto& elem) { return acc + elem.advance.getX(); });
 
                     if (advance < remainingWidth || ! bestMatch.has_value())
-                        bestMatch = BestMatch { *breakBefore, advance, true, std::move (glyphs) };
+                        bestMatch = BestMatch { *breakBefore, { advance, advance }, true, std::move (glyphs) };
                 }
             }
 
@@ -1086,12 +1099,12 @@ void SimpleShapedText::shape (const String& data,
                 numGlyphsInLine += (int64) glyphs.size();
 
                 if (remainingWidth.has_value())
-                    remainingWidth = *remainingWidth - bestMatch->advance;
+                    remainingWidth = *remainingWidth - bestMatch->advance.includingTrailingWhitespace;
 
                 glyphsToConsume.breakBeforeAndConsume (bestMatch->breakBefore);
             };
 
-            if (bestMatch->advance >= remainingWidth)
+            if (bestMatch->advance.maybeIgnoringWhitespace >= remainingWidth)
             {
                 // Even an empty line is too short to fit any of the text
                 if (numGlyphsInLine == 0 && exactlyEqual (remainingWidth, options.getMaxWidth()))
