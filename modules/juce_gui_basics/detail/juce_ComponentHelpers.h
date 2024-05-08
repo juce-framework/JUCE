@@ -191,36 +191,38 @@ struct ComponentHelpers
         return convertFromDistantParentSpace (topLevelComp, *target, p);
     }
 
-    static bool clipObscuredRegions (const Component& comp, Graphics& g,
-                                     const Rectangle<int> clipRect, Point<int> delta)
+    static bool clipChildComponent (const Component& child,
+                                    Graphics& g,
+                                    const Rectangle<int> clipRect,
+                                    Point<int> delta)
     {
-        bool wasClipped = false;
+        if (! child.isVisible() || child.isTransformed())
+            return false;
+
+        const auto newClip = clipRect.getIntersection (child.boundsRelativeToParent);
+
+        if (newClip.isEmpty())
+            return false;
+
+        if (child.isOpaque() && child.componentTransparency == 0)
+        {
+            g.excludeClipRegion (newClip + delta);
+            return true;
+        }
+
+        const auto childPos = child.getPosition();
+        return clipObscuredRegions (child, g, newClip - childPos, childPos + delta);
+    }
+
+    static bool clipObscuredRegions (const Component& comp,
+                                     Graphics& g,
+                                     const Rectangle<int> clipRect,
+                                     Point<int> delta)
+    {
+        auto wasClipped = false;
 
         for (int i = comp.childComponentList.size(); --i >= 0;)
-        {
-            auto& child = *comp.childComponentList.getUnchecked (i);
-
-            if (child.isVisible() && ! child.isTransformed())
-            {
-                auto newClip = clipRect.getIntersection (child.boundsRelativeToParent);
-
-                if (! newClip.isEmpty())
-                {
-                    if (child.isOpaque() && child.componentTransparency == 0)
-                    {
-                        g.excludeClipRegion (newClip + delta);
-                        wasClipped = true;
-                    }
-                    else
-                    {
-                        auto childPos = child.getPosition();
-
-                        if (clipObscuredRegions (child, g, newClip - childPos, childPos + delta))
-                            wasClipped = true;
-                    }
-                }
-            }
-        }
+            wasClipped |= clipChildComponent (*comp.childComponentList.getUnchecked (i), g, clipRect, delta);
 
         return wasClipped;
     }
