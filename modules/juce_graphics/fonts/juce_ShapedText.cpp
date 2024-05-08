@@ -196,6 +196,8 @@ public:
 
     auto& getJustifiedText() const { return shapedText.impl->getJustifiedText(); }
 
+    auto& getSimpleShapedText() const { return shapedText.impl->getSimpleShapedText(); }
+
 private:
     const ShapedText& shapedText;
 };
