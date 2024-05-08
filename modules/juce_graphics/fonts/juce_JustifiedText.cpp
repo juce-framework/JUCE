@@ -342,7 +342,10 @@ JustifiedText::JustifiedText (const SimpleShapedText& t, const ShapedTextOptions
         whitespaceStretch.set (stretchRange,
                                lineInfo.mainAxisLineAlignment.extraWhitespaceAdvance);
 
-        y += (1.0f + leading) * lineInfo.lineHeight;
+        const auto maxDescent = lineInfo.lineHeight - lineInfo.maxAscent;
+        const auto nextLineMaxAscent = lineIndex < (int) lineInfos.size() - 1 ? lineInfos[(size_t) lineIndex + 1].maxAscent : 0.0f;
+
+        y += (1.0f + leading) * (maxDescent + nextLineMaxAscent);
     }
 
     rangesToDraw.set ({ 0, (int64) shapedText.getGlyphs().size() }, DrawType::normal);
