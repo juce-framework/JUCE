@@ -298,7 +298,7 @@ bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)
     return ! isClipEmpty();
 }
 
-bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<int>& clipRegion)
+bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<float>& clipRegion)
 {
     if (clipRegion.isEmpty())
     {
@@ -307,27 +307,48 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<in
         return false;
     }
 
-    auto numRects = (size_t) clipRegion.getNumRectangles();
-    HeapBlock<CGRect> rects (numRects);
+    std::vector<CGRect> rects ((size_t) clipRegion.getNumRectangles());
+    std::transform (clipRegion.begin(), clipRegion.end(), rects.begin(), [this] (const auto& r)
+    {
+        return CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
+    });
 
-    int i = 0;
-    for (auto& r : clipRegion)
-        rects[i++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
-
-    CGContextClipToRects (context.get(), rects, numRects);
+    CGContextClipToRects (context.get(), rects.data(), rects.size());
     lastClipRect.reset();
     return true;
 }
 
 bool CoreGraphicsContext::clipToRectangleList (const RectangleList<int>& clipRegion)
 {
-    return clipToRectangleListWithoutTest (clipRegion) && ! isClipEmpty();
+    RectangleList<float> converted;
+
+    for (auto& rect : clipRegion)
+        converted.add (rect.toFloat());
+
+    return clipToRectangleListWithoutTest (converted) && ! isClipEmpty();
 }
 
 void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
 {
-    RectangleList<int> remaining (getClipBounds());
-    remaining.subtract (r);
+    const auto cgTransform = CGContextGetUserSpaceToDeviceSpaceTransform (context.get());
+    const auto transform = AffineTransform { (float) cgTransform.a,
+                                             (float) cgTransform.c,
+                                             (float) cgTransform.tx,
+                                             (float) cgTransform.b,
+                                             (float) cgTransform.d,
+                                             (float) cgTransform.ty };
+
+    const auto flip = [this] (auto rect) { return rect.withY ((float) (flipHeight - rect.getBottom())); };
+    const auto flipped = flip (r.toFloat());
+
+    const auto snapped = flipped.toFloat().transformedBy (transform).getLargestIntegerWithin().toFloat();
+
+    const auto correctedRect = transform.isOnlyTranslationOrScale()
+                             ? snapped.transformedBy (transform.inverted())
+                             : flipped.toFloat();
+
+    RectangleList<float> remaining (getClipBounds().toFloat());
+    remaining.subtract (flip (correctedRect));
     clipToRectangleListWithoutTest (remaining);
 }
 

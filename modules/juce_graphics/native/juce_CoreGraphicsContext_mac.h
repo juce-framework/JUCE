@@ -144,7 +144,7 @@ private:
     void flip() const;
     void applyTransform (const AffineTransform&) const;
     void drawImage (const Image&, const AffineTransform&, bool fillEntireClipAsTiles);
-    bool clipToRectangleListWithoutTest (const RectangleList<int>&);
+    bool clipToRectangleListWithoutTest (const RectangleList<float>&);
     void fillCGRect (const CGRect&, bool replaceExistingContents);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsContext)

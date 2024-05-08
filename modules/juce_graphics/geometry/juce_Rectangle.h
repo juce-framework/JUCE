@@ -848,7 +848,7 @@ public:
 
     /** Returns the smallest integer-aligned rectangle that completely contains this one.
         This is only relevant for floating-point rectangles, of course.
-        @see toFloat(), toNearestInt(), toNearestIntEdges()
+        @see toFloat(), toNearestInt(), toNearestIntEdges(), getLargestIntegerWithin()
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
@@ -856,6 +856,22 @@ public:
                                                    detail::floorAsInt (pos.y),
                                                    detail::ceilAsInt  (pos.x + w),
                                                    detail::ceilAsInt  (pos.y + h));
+    }
+
+    /** Returns the largest integer-aligned rectangle that is completely contained by this one.
+        Returns an empty rectangle, outside the original rectangle, if no integer-aligned rectangle
+        is contained by this one.
+        This is only relevant for floating-point rectangles, of course.
+        @see toFloat(), toNearestInt(), toNearestIntEdges(), getSmallestIntegerContainer()
+    */
+    Rectangle<int> getLargestIntegerWithin() const noexcept
+    {
+        const auto l = detail::ceilAsInt  (pos.x);
+        const auto t = detail::ceilAsInt  (pos.y);
+        const auto r = detail::floorAsInt (pos.x + w);
+        const auto b = detail::floorAsInt (pos.y + h);
+
+        return { l, t, jmax (0, r - l), jmax (0, b - t) };
     }
 
     /** Casts this rectangle to a Rectangle<int>.
