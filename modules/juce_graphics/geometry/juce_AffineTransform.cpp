@@ -239,6 +239,11 @@ bool AffineTransform::isOnlyTranslation() const noexcept
         && exactlyEqual (mat11, 1.0f);
 }
 
+bool AffineTransform::isOnlyTranslationOrScale() const noexcept
+{
+    return exactlyEqual (mat01, 0.0f) && exactlyEqual (mat10, 0.0f);
+}
+
 float AffineTransform::getDeterminant() const noexcept
 {
     return (mat00 * mat11) - (mat01 * mat10);
