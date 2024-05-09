@@ -2180,6 +2180,9 @@ public:
 
     void fillRect (Rectangle<int> r, bool replaceContents)
     {
+        if (r.isEmpty())
+            return;
+
         if (clip != nullptr)
         {
             if (transform.isOnlyTranslated)
@@ -2201,6 +2204,9 @@ public:
 
     void fillRect (Rectangle<float> r)
     {
+        if (r.isEmpty())
+            return;
+
         if (clip != nullptr)
         {
             if (transform.isOnlyTranslated)

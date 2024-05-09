@@ -1167,6 +1167,9 @@ void Direct2DGraphicsContext::setInterpolationQuality (Graphics::ResamplingQuali
 
 void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExistingContents)
 {
+    if (r.isEmpty())
+        return;
+
     if (replaceExistingContents)
         clipToRectangle (r);
 
@@ -1187,6 +1190,9 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExi
 
 void Direct2DGraphicsContext::fillRect (const Rectangle<float>& r)
 {
+    if (r.isEmpty())
+        return;
+
     auto fill = [] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
         if (brush != nullptr)

@@ -524,6 +524,9 @@ void CoreGraphicsContext::fillRect (const Rectangle<float>& r)
 
 void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExistingContents)
 {
+    if (CGRectIsEmpty (cgRect))
+        return;
+
     if (replaceExistingContents)
     {
         CGContextSetBlendMode (context.get(), kCGBlendModeCopy);
