@@ -266,7 +266,7 @@ void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap, int x, 
 
     // If the user doesn't want to read from the image, then we may need to create a blank image that they can write to.
     if (! backup.isValid())
-        backup = Image { SoftwareImageType{}.create (pixelFormat, width, height, false) };
+        backup = Image { SoftwareImageType{}.create (pixelFormat, width, height, clearImage) };
 
     // Redirect the BitmapData to our backup software image.
     backup.getPixelData()->initialiseBitmapData (bitmap, x, y, mode);
