@@ -1078,12 +1078,21 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
     // to the sourceImage bounds
     auto brushTransform = currentState->currentTransform.getTransformWith (transform);
     {
-        D2D1_RECT_F sourceImageRectF = D2DUtilities::toRECT_F (sourceImage.getBounds());
-        ComSmartPtr<ID2D1RectangleGeometry> geometry;
-        getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (sourceImageRectF, geometry.resetAndGetPointerAddress());
+        if (D2DHelpers::isTransformAxisAligned (brushTransform))
+        {
+            currentState->pushAliasedAxisAlignedClipLayer (sourceImage.getBounds().toFloat().transformedBy (brushTransform));
+        }
+        else
+        {
+            const auto sourceImageRectF = D2DUtilities::toRECT_F (sourceImage.getBounds());
+            ComSmartPtr<ID2D1RectangleGeometry> geometry;
 
-        if (geometry)
-            currentState->pushTransformedRectangleGeometryClipLayer (geometry, brushTransform);
+            if (const auto hr = getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (sourceImageRectF, geometry.resetAndGetPointerAddress());
+                SUCCEEDED (hr) && geometry != nullptr)
+            {
+                currentState->pushTransformedRectangleGeometryClipLayer (geometry, brushTransform);
+            }
+        }
     }
 
     // Set the clip list to the full size of the frame to match
