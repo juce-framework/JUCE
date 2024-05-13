@@ -112,7 +112,7 @@ JUCE_IMPLEMENT_SINGLETON (ModalComponentManager)
 
 
 //==============================================================================
-void ModalComponentManager::startModal (Component* component, bool autoDelete)
+void ModalComponentManager::startModal (Key, Component* component, bool autoDelete)
 {
     if (component != nullptr)
     {
@@ -141,18 +141,7 @@ void ModalComponentManager::attachCallback (Component* component, Callback* call
     }
 }
 
-void ModalComponentManager::endModal (Component* component)
-{
-    for (int i = stack.size(); --i >= 0;)
-    {
-        auto* item = stack.getUnchecked (i);
-
-        if (item->component == component)
-            item->cancel();
-    }
-}
-
-void ModalComponentManager::endModal (Component* component, int returnValue)
+void ModalComponentManager::endModal (Key, Component* component, int returnValue)
 {
     for (int i = stack.size(); --i >= 0;)
     {

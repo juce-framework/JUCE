@@ -1384,7 +1384,7 @@ void Component::enterModalState (bool shouldTakeKeyboardFocus,
         }
 
         auto& mcm = *ModalComponentManager::getInstance();
-        mcm.startModal (this, deleteWhenDismissed);
+        mcm.startModal ({}, this, deleteWhenDismissed);
         mcm.attachCallback (this, callback);
 
         setVisible (true);
@@ -1408,7 +1408,7 @@ void Component::exitModalState (int returnValue)
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             auto& mcm = *ModalComponentManager::getInstance();
-            mcm.endModal (this, returnValue);
+            mcm.endModal ({}, this, returnValue);
             mcm.bringModalComponentsToFront();
 
             // While this component is in modal state it may block other components from receiving

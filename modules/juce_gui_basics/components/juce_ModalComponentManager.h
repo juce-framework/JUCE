@@ -135,6 +135,19 @@ public:
     int runEventLoopForCurrentComponent();
    #endif
 
+    /** @internal Only friends of Key can call startModal and endModal. */
+    class Key
+    {
+        friend Component;
+        Key() {}
+    };
+
+    /** @internal */
+    void startModal (Key, Component*, bool autoDelete);
+
+    /** @internal */
+    void endModal (Key, Component*, int returnValue);
+
 protected:
     /** Creates a ModalComponentManager.
         You shouldn't ever call the constructor - it's a singleton, so use ModalComponentManager::getInstance()
@@ -149,14 +162,8 @@ protected:
 
 private:
     //==============================================================================
-    friend class Component;
-
     struct ModalItem;
     OwnedArray<ModalItem> stack;
-
-    void startModal (Component*, bool autoDelete);
-    void endModal (Component*, int returnValue);
-    void endModal (Component*);
 
     JUCE_DECLARE_NON_COPYABLE (ModalComponentManager)
 };
