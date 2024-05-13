@@ -853,6 +853,8 @@ void Direct2DGraphicsContext::setOrigin (Point<int> o)
     applyPendingClipList();
 
     currentState->currentTransform.setOrigin (o);
+
+    resetPendingClipList();
 }
 
 void Direct2DGraphicsContext::addTransform (const AffineTransform& transform)
