@@ -1456,8 +1456,7 @@ struct RenderContext
     virtual void dispatchDeferredRepaints() = 0;
     virtual void performAnyPendingRepaintsNow() = 0;
     virtual void onVBlank() = 0;
-    virtual void beginResize() = 0;
-    virtual void endResize() = 0;
+    virtual void setResizing (bool) = 0;
     virtual void handleNcCalcSize (WPARAM wParam, LPARAM lParam) = 0;
     virtual void handleShowWindow() = 0;
     virtual std::optional<LRESULT> getNcHitTestResult() = 0;
@@ -3676,20 +3675,19 @@ private:
 
                 break;
 
-            case WM_ENTERSIZEMOVE:
-                if (renderContext != nullptr)
-                    renderContext->beginResize();
-
-                break;
-
             case WM_EXITSIZEMOVE:
                 if (renderContext != nullptr)
-                    renderContext->endResize();
+                    renderContext->setResizing (false);
 
                 break;
 
             //==============================================================================
-            case WM_SIZING:                  return handleSizeConstraining (*(RECT*) lParam, wParam);
+            case WM_SIZING:
+                if (renderContext != nullptr)
+                    renderContext->setResizing (true);
+
+                return handleSizeConstraining (*(RECT*) lParam, wParam);
+
             case WM_WINDOWPOSCHANGING:       return handlePositionChanging (*(WINDOWPOS*) lParam);
             case 0x2e0: /* WM_DPICHANGED */  return handleDPIChanging ((int) HIWORD (wParam), *(RECT*) lParam);
 
@@ -4469,8 +4467,7 @@ public:
         return {};
     }
 
-    void beginResize() override {}
-    void endResize() override {}
+    void setResizing (bool) override {}
     void handleNcCalcSize (WPARAM, LPARAM) override {}
     void handleShowWindow() override {}
 
@@ -4728,14 +4725,9 @@ public:
 
     std::optional<LRESULT> getNcHitTestResult() override { return {}; }
 
-    void beginResize() override
+    void setResizing (bool x) override
     {
-        direct2DContext->startResizing();
-    }
-
-    void endResize() override
-    {
-        direct2DContext->finishResizing();
+        direct2DContext->setResizing (x);
     }
 
     void handleNcCalcSize (WPARAM, LPARAM lParam) override

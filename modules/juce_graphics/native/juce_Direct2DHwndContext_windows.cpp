@@ -401,14 +401,9 @@ public:
         return {};
     }
 
-    void startResizing()
+    void setResizing (bool x)
     {
-        resizing = true;
-    }
-
-    void finishResizing()
-    {
-        resizing = false;
+        resizing = x;
     }
 
     void setSize (Rectangle<int> size)
@@ -692,14 +687,9 @@ void Direct2DHwndContext::setWindowAlpha (float alpha)
     pimpl->setTargetAlpha (alpha);
 }
 
-void Direct2DHwndContext::startResizing()
+void Direct2DHwndContext::setResizing (bool x)
 {
-    pimpl->startResizing();
-}
-
-void Direct2DHwndContext::finishResizing()
-{
-    pimpl->finishResizing();
+    pimpl->setResizing (x);
 }
 
 void Direct2DHwndContext::setSize (int width, int height)
