@@ -372,9 +372,6 @@ auto legacyArgs (Args&&... args)
     if (result.getName().isEmpty())
         result = result.withName (Font::getDefaultSansSerifFontName());
 
-    if (result.getPointHeight() > 0.0f)
-        result = result.withHeight (result.getPointHeight());
-
     return result;
 }
 
