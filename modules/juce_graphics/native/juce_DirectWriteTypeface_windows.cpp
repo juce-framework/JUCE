@@ -260,11 +260,14 @@ private:
 class MemoryFontFileStream final : public ComBaseClassHelper<IDWriteFontFileStream>
 {
 public:
-    explicit MemoryFontFileStream (MemoryBlock d) : rawData (std::move (d)) {}
+    explicit MemoryFontFileStream (std::shared_ptr<const MemoryBlock> blockIn)
+        : block (std::move (blockIn))
+    {
+    }
 
     JUCE_COMRESULT GetFileSize (UINT64* fileSize) noexcept override
     {
-        *fileSize = rawData.getSize();
+        *fileSize = block->getSize();
         return S_OK;
     }
 
@@ -279,14 +282,14 @@ public:
                                      UINT64 fragmentSize,
                                      void** fragmentContext) noexcept override
     {
-        if (fileOffset + fragmentSize > rawData.getSize())
+        if (fileOffset + fragmentSize > block->getSize())
         {
             *fragmentStart   = nullptr;
             *fragmentContext = nullptr;
             return E_INVALIDARG;
         }
 
-        *fragmentStart   = addBytesToPointer (rawData.getData(), fileOffset);
+        *fragmentStart   = addBytesToPointer (block->getData(), fileOffset);
         *fragmentContext = this;
         return S_OK;
     }
@@ -294,26 +297,49 @@ public:
     void WINAPI ReleaseFileFragment (void*) noexcept override {}
 
 private:
-    MemoryBlock rawData;
+    std::shared_ptr<const MemoryBlock> block;
 };
 
 class MemoryFontFileLoader final : public ComBaseClassHelper<IDWriteFontFileLoader>
 {
 public:
+    explicit MemoryFontFileLoader (MemoryBlock blob)
+        : block (std::make_shared<const MemoryBlock> (std::move (blob)))
+    {
+    }
+
     HRESULT WINAPI CreateStreamFromKey (const void* fontFileReferenceKey,
                                         UINT32 keySize,
                                         IDWriteFontFileStream** fontFileStream) noexcept override
     {
-        *fontFileStream = new MemoryFontFileStream { MemoryBlock { fontFileReferenceKey, keySize } };
-        return S_OK;
+        if (keySize != Uuid::size())
+            return E_INVALIDARG;
+
+        Uuid requestedKey { static_cast<const uint8*> (fontFileReferenceKey) };
+
+        if (requestedKey == uuid)
+        {
+            *fontFileStream = new MemoryFontFileStream { block };
+            return S_OK;
+        }
+
+        return E_INVALIDARG;
     }
+
+    Uuid getUuid() const { return uuid; }
+
+private:
+    std::shared_ptr<const MemoryBlock> block;
+    Uuid uuid;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryFontFileLoader)
 };
 
 class FontFileEnumerator final : public ComBaseClassHelper<IDWriteFontFileEnumerator>
 {
 public:
-    FontFileEnumerator (IDWriteFactory& factoryIn, IDWriteFontFileLoader& loaderIn, MemoryBlock keyIn)
-        : factory (factoryIn), loader (loaderIn), key (keyIn) {}
+    FontFileEnumerator (IDWriteFactory& factoryIn, ComSmartPtr<MemoryFontFileLoader> loaderIn)
+        : factory (factoryIn), loader (loaderIn) {}
 
     HRESULT WINAPI GetCurrentFontFile (IDWriteFontFile** fontFile) noexcept override
     {
@@ -322,9 +348,10 @@ public:
         if (! isPositiveAndBelow (rawDataIndex, 1))
             return E_FAIL;
 
-        return factory.CreateCustomFontFileReference (key.getData(),
-                                                      (UINT32) key.getSize(),
-                                                      &loader,
+        const auto uuid = loader->getUuid();
+        return factory.CreateCustomFontFileReference (uuid.getRawData(),
+                                                      (UINT32) uuid.size(),
+                                                      loader,
                                                       fontFile);
     }
 
@@ -335,29 +362,64 @@ public:
         return S_OK;
     }
 
+private:
     IDWriteFactory& factory;
-    IDWriteFontFileLoader& loader;
-    MemoryBlock key;
+    ComSmartPtr<MemoryFontFileLoader> loader;
     size_t rawDataIndex = std::numeric_limits<size_t>::max();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FontFileEnumerator)
 };
 
 class DirectWriteCustomFontCollectionLoader final : public ComBaseClassHelper<IDWriteFontCollectionLoader>
 {
 public:
-    explicit DirectWriteCustomFontCollectionLoader (IDWriteFontFileLoader& loaderIn)
-        : loader (loaderIn) {}
+    explicit DirectWriteCustomFontCollectionLoader (IDWriteFactory& factoryIn)
+        : factory (factoryIn)
+    {
+    }
 
-    HRESULT WINAPI CreateEnumeratorFromKey (IDWriteFactory* factory,
+    ~DirectWriteCustomFontCollectionLoader() override
+    {
+        for (const auto& loader : fileLoaders)
+            factory.UnregisterFontFileLoader (loader);
+    }
+
+    Uuid addRawFontData (Span<const std::byte> blob)
+    {
+        const auto loader = becomeComSmartPtrOwner (new MemoryFontFileLoader { { blob.data(), blob.size() } });
+
+        factory.RegisterFontFileLoader (loader);
+
+        fileLoaders.push_back (loader);
+
+        return fileLoaders.back()->getUuid();
+    }
+
+    HRESULT WINAPI CreateEnumeratorFromKey (IDWriteFactory* factoryIn,
                                             const void* collectionKey,
                                             UINT32 collectionKeySize,
                                             IDWriteFontFileEnumerator** fontFileEnumerator) noexcept override
     {
-        *fontFileEnumerator = new FontFileEnumerator { *factory, loader, MemoryBlock { collectionKey, collectionKeySize } };
-        return S_OK;
+        if (collectionKeySize != Uuid::size())
+            return E_INVALIDARG;
+
+        const Uuid requestedCollectionKey { static_cast<const uint8*> (collectionKey) };
+
+        for (const auto& loader : fileLoaders)
+        {
+            if (loader->getUuid() != requestedCollectionKey)
+                continue;
+
+            *fontFileEnumerator = new FontFileEnumerator { *factoryIn, loader };
+            return S_OK;
+        }
+
+        return E_INVALIDARG;
     }
 
 private:
-    IDWriteFontFileLoader& loader;
+    IDWriteFactory& factory;
+    std::vector<ComSmartPtr<MemoryFontFileLoader>> fileLoaders;
 };
 
 //==============================================================================
@@ -380,13 +442,12 @@ public:
             return;
 
         directWriteFactory->UnregisterFontCollectionLoader (collectionLoader);
-        directWriteFactory->UnregisterFontFileLoader (fileLoader);
     }
 
     [[nodiscard]] ComSmartPtr<IDWriteFactory> getDWriteFactory() const { return directWriteFactory; }
     [[nodiscard]] ComSmartPtr<IDWriteFactory4> getDWriteFactory4() const { return directWriteFactory4; }
     [[nodiscard]] AggregateFontCollection& getFonts() { jassert (fonts.has_value()); return *fonts; }
-    [[nodiscard]] ComSmartPtr<IDWriteFontCollectionLoader> getCollectionLoader() const { return collectionLoader; }
+    [[nodiscard]] ComSmartPtr<DirectWriteCustomFontCollectionLoader> getCollectionLoader() const { return collectionLoader; }
 
 private:
     DynamicLibrary direct2dDll { "d2d1.dll" }, directWriteDll { "DWrite.dll" };
@@ -417,8 +478,6 @@ private:
         return result;
     }();
 
-    const ComSmartPtr<IDWriteFontFileLoader> fileLoader = becomeComSmartPtrOwner (new MemoryFontFileLoader);
-    const ComSmartPtr<IDWriteFontCollectionLoader> collectionLoader = becomeComSmartPtrOwner (new DirectWriteCustomFontCollectionLoader (*fileLoader));
     const ComSmartPtr<IDWriteFactory> directWriteFactory = [&]() -> ComSmartPtr<IDWriteFactory>
     {
         JUCE_LOAD_WINAPI_FUNCTION (directWriteDll,
@@ -438,8 +497,13 @@ private:
                              (IUnknown**) result.resetAndGetPointerAddress());
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        result->RegisterFontFileLoader (fileLoader);
-        result->RegisterFontCollectionLoader (collectionLoader);
+        return result;
+    }();
+
+    const ComSmartPtr<DirectWriteCustomFontCollectionLoader> collectionLoader = [&]() -> ComSmartPtr<DirectWriteCustomFontCollectionLoader>
+    {
+        auto result = becomeComSmartPtrOwner (new DirectWriteCustomFontCollectionLoader { *directWriteFactory });
+        directWriteFactory->RegisterFontCollectionLoader (result);
 
         return result;
     }();
@@ -515,7 +579,56 @@ public:
 
     static Typeface::Ptr from (Span<const std::byte> blob)
     {
-        return from (MemoryBlock { blob.data(), blob.size() });
+        SharedResourcePointer<Direct2DFactories> factories;
+
+        const auto dwFactory = factories->getDWriteFactory();
+
+        if (dwFactory == nullptr)
+            return {};
+
+        const auto collectionLoader = factories->getCollectionLoader();
+        const auto collectionKey = collectionLoader->addRawFontData ({ blob.data(), blob.size() });
+
+        ComSmartPtr<IDWriteFontCollection> customFontCollection;
+
+        if (FAILED (dwFactory->CreateCustomFontCollection (factories->getCollectionLoader(),
+                                                           collectionKey.getRawData(),
+                                                           (UINT32) collectionKey.size(),
+                                                           customFontCollection.resetAndGetPointerAddress())))
+            return {};
+
+        if (customFontCollection == nullptr)
+            return {};
+
+        ComSmartPtr<IDWriteFontFamily> fontFamily;
+
+        if (FAILED (customFontCollection->GetFontFamily (0, fontFamily.resetAndGetPointerAddress())) || fontFamily == nullptr)
+            return {};
+
+        ComSmartPtr<IDWriteFont> dwFont;
+
+        if (FAILED (fontFamily->GetFont (0, dwFont.resetAndGetPointerAddress())) || dwFont == nullptr)
+            return {};
+
+        ComSmartPtr<IDWriteFontFace> dwFontFace;
+
+        if (FAILED (dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress())) || dwFontFace == nullptr)
+            return {};
+
+        const auto name = getLocalisedFamilyName (*fontFamily);
+        const auto style = getLocalisedStyle (*dwFont);
+
+        const HbFace hbFace { hb_directwrite_face_create (dwFontFace) };
+        HbFont font { hb_font_create (hbFace.get()) };
+        const auto metrics = getGdiMetrics (font.get()).value_or (getDwriteMetrics (dwFontFace));
+
+        return new WindowsDirectWriteTypeface (name,
+                                               style,
+                                               dwFont,
+                                               dwFontFace,
+                                               std::move (font),
+                                               metrics,
+                                               customFontCollection);
     }
 
     Native getNativeDetails() const override
@@ -670,57 +783,6 @@ private:
         String character;
         String language;
     };
-
-    static Typeface::Ptr from (MemoryBlock blob)
-    {
-        SharedResourcePointer<Direct2DFactories> factories;
-
-        const auto dwFactory = factories->getDWriteFactory();
-
-        if (dwFactory == nullptr)
-            return {};
-
-        ComSmartPtr<IDWriteFontCollection> customFontCollection;
-
-        if (FAILED (dwFactory->CreateCustomFontCollection (factories->getCollectionLoader(),
-                                                           blob.getData(),
-                                                           (UINT32) blob.getSize(),
-                                                           customFontCollection.resetAndGetPointerAddress())))
-            return {};
-
-        if (customFontCollection == nullptr)
-            return {};
-
-        ComSmartPtr<IDWriteFontFamily> fontFamily;
-
-        if (FAILED (customFontCollection->GetFontFamily (0, fontFamily.resetAndGetPointerAddress())) || fontFamily == nullptr)
-            return {};
-
-        ComSmartPtr<IDWriteFont> dwFont;
-
-        if (FAILED (fontFamily->GetFont (0, dwFont.resetAndGetPointerAddress())) || dwFont == nullptr)
-            return {};
-
-        ComSmartPtr<IDWriteFontFace> dwFontFace;
-
-        if (FAILED (dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress())) || dwFontFace == nullptr)
-            return {};
-
-        const auto name = getLocalisedFamilyName (*fontFamily);
-        const auto style = getLocalisedStyle (*dwFont);
-
-        const HbFace hbFace { hb_directwrite_face_create (dwFontFace) };
-        HbFont font { hb_font_create (hbFace.get()) };
-        const auto metrics = getGdiMetrics (font.get()).value_or (getDwriteMetrics (dwFontFace));
-
-        return new WindowsDirectWriteTypeface (name,
-                                               style,
-                                               dwFont,
-                                               dwFontFace,
-                                               std::move (font),
-                                               metrics,
-                                               customFontCollection);
-    }
 
     static String getLocalisedFamilyName (IDWriteFont& font)
     {
