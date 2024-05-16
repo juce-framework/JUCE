@@ -486,10 +486,58 @@ public:
         jassert (! isClear);
     }
 
-    void setDataToReferToNoReallocation(Type* const* dataToReferTo,
-                                        int newNumChannels,
-                                        int newStartSample,
-                                        int newNumSamples) {
+    /**
+        Reserve a given number of channels to then use setDataToReferToNoAlloc as many times as needed with that
+        number of channels.
+
+        This sets the number of samples to 0.
+
+        @param newNumChannels Number of channels to reserve
+    */
+    void reserveChannels(int newNumChannels)
+    {
+        jassert(newNumChannels >= 0);
+
+        if (allocatedBytes != 0) {
+            allocatedBytes = 0;
+            allocatedData.free();
+        }
+
+        numChannels = newNumChannels;
+        size = 0;
+
+        if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
+        {
+            channels = static_cast<Type**> (preallocatedChannelSpace);
+        }
+        else
+        {
+            allocatedData.malloc (numChannels + 1, sizeof (Type*));
+            channels = unalignedPointerCast<Type**> (allocatedData.get());
+        }
+    }
+
+    /**
+         Set the data to refer to, with the guarantee that no allocation is performed if reserveChannels() is called
+         with the same number of channel beforehand (and no setSize or setDataToReferTo was called since then).
+
+         If this function is used improperly, it will fall back to a normal setDataToReferTo call.
+
+         @param dataToReferTo  a pre-allocated array containing pointers to the data
+                               for each channel that should be used by this buffer. The
+                               buffer will only refer to this memory, it won't try to delete
+                               it when the buffer is deleted or resized.
+         @param newNumChannels the number of channels to use - this must correspond to the
+                               number of elements in the array passed in
+         @param newStartSample the offset within the arrays at which the data begins
+         @param newNumSamples  the number of samples to use - this must correspond to the
+                               size of the arrays passed in
+     */
+    void setDataToReferToNoAlloc(Type* const* dataToReferTo,
+                                 int newNumChannels,
+                                 int newStartSample,
+                                 int newNumSamples)
+    {
         jassert (dataToReferTo != nullptr);
         jassert (newNumChannels == numChannels);
         jassert (newNumSamples >= 0);
@@ -509,25 +557,26 @@ public:
         size = newNumSamples;
     }
 
-    void reserveChannels(int newNumChannels) {
-        jassert(newNumChannels >= 0);
 
-        if (allocatedBytes != 0) {
-            allocatedBytes = 0;
-            allocatedData.free();
-        }
+    /**
+        Set the number of samples to use, without allocating memory.
 
-        numChannels = newNumChannels;
-        size = 0;
+        This function can only be used when the memory is managed externally (a setDataToReferTo variant was called,
+        or a constructor with dataToReferTo argument was used).
+        So this function should never be used in conjunction with setSize.
 
-        if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
-        {
-            channels = static_cast<Type**> (preallocatedChannelSpace);
-        }
-        else
-        {
-            allocatedData.malloc (numChannels + 1, sizeof (Type*));
-            channels = unalignedPointerCast<Type**> (allocatedData.get());
+        Make sure that the memory you provided for each channel is at least newNumSamples long.
+
+        @param newNumSamples the number of samples to use - this must correspond to the
+                             size of the arrays passed in
+    */
+    void setNumSamplesNoAlloc(int newNumSamples)
+    {
+        jassert (newNumSamples >= 0);
+        jassert (allocatedBytes == 0);
+
+        if (size != newNumSamples) {
+            size = newNumSamples;
         }
     }
 
