@@ -486,6 +486,51 @@ public:
         jassert (! isClear);
     }
 
+    void setDataToReferToNoReallocation(Type* const* dataToReferTo,
+                                        int newNumChannels,
+                                        int newStartSample,
+                                        int newNumSamples) {
+        jassert (dataToReferTo != nullptr);
+        jassert (newNumChannels == numChannels);
+        jassert (newNumSamples >= 0);
+
+        // Should never happen
+        if (newNumChannels != numChannels) {
+            // Fallback and allocate new memory
+            jassertfalse;
+            setDataToReferTo(dataToReferTo, newNumChannels, newStartSample, newNumSamples);
+        }
+
+        for (int i = 0; i < numChannels; ++i) {
+            jassert(dataToReferTo[i] != nullptr);
+            channels[i] = dataToReferTo[i] + newStartSample;
+        }
+
+        size = newNumSamples;
+    }
+
+    void reserveChannels(int newNumChannels) {
+        jassert(newNumChannels >= 0);
+
+        if (allocatedBytes != 0) {
+            allocatedBytes = 0;
+            allocatedData.free();
+        }
+
+        numChannels = newNumChannels;
+        size = 0;
+
+        if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
+        {
+            channels = static_cast<Type**> (preallocatedChannelSpace);
+        }
+        else
+        {
+            allocatedData.malloc (numChannels + 1, sizeof (Type*));
+            channels = unalignedPointerCast<Type**> (allocatedData.get());
+        }
+    }
+
     /** Makes this buffer point to a pre-allocated set of channel data arrays.
 
         There's also a constructor that lets you specify arrays like this, but this
