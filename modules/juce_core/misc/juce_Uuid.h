@@ -128,6 +128,9 @@ public:
     */
     const uint8* getRawData() const noexcept                { return uuid; }
 
+    /** Returns the size in bytes of the raw data making up this UUID. */
+    static constexpr size_t size() { return sizeInBytes; }
+
     /** Creates a UUID from a 16-byte array.
         @see getRawData
     */
@@ -136,10 +139,10 @@ public:
     /** Sets this UUID from 16-bytes of raw data. */
     Uuid& operator= (const uint8* rawData) noexcept;
 
-
 private:
     //==============================================================================
-    uint8 uuid[16];
+    static constexpr size_t sizeInBytes = 16;
+    uint8 uuid[sizeInBytes];
     String getHexRegion (int, int) const;
     int compare (Uuid) const noexcept;
 
