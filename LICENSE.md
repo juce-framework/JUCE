@@ -3,7 +3,7 @@
 The JUCE Framework is an open source framework licensed under a combination of
 open source and commercial licences.
 
-The JUCE Framwork modules are dual-licensed under the
+The JUCE Framework modules are dual-licensed under the
 [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html) and the commercial [JUCE
 licence](https://juce.com/legal/juce-8-licence/).
 
