@@ -141,6 +141,7 @@ private:
     class TimerThread;
     size_t positionInQueue = (size_t) -1;
     int timerPeriodMs = 0;
+    SharedResourcePointer<TimerThread> timerThread;
 
     Timer& operator= (const Timer&) = delete;
 };

@@ -35,20 +35,70 @@
 namespace juce
 {
 
+class ShutdownDetector : private DeletedAtShutdown
+{
+public:
+    ShutdownDetector() = default;
+
+    ~ShutdownDetector() override
+    {
+        getListeners().call (&Listener::applicationShuttingDown);
+    }
+
+    struct Listener
+    {
+        virtual ~Listener() = default;
+        virtual void applicationShuttingDown() = 0;
+    };
+
+    static void addListener (Listener* listenerToAdd)
+    {
+        // Only try to create an instance of the ShutdownDetector when a listener is added
+        [[maybe_unused]] auto* instance = getInstance();
+        getListeners().add (listenerToAdd);
+    }
+
+    static void removeListener (Listener* listenerToRemove)
+    {
+        getListeners().remove (listenerToRemove);
+    }
+
+private:
+    using ListenerListType = ListenerList<Listener, Array<Listener*, CriticalSection>>;
+
+    // By having a static ListenerList it can outlive the ShutdownDetector instance preventing
+    // issues for objects trying to remove themselves after the instance has been deleted
+    static ListenerListType& getListeners()
+    {
+        static ListenerListType listeners;
+        return listeners;
+    }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ShutdownDetector)
+    JUCE_DECLARE_NON_MOVEABLE (ShutdownDetector)
+    JUCE_DECLARE_SINGLETON (ShutdownDetector, false)
+};
+
+JUCE_IMPLEMENT_SINGLETON (ShutdownDetector)
+
 class Timer::TimerThread final : private Thread,
-                                 private DeletedAtShutdown
+                                 private ShutdownDetector::Listener
 {
 public:
     using LockType = CriticalSection;
 
-    JUCE_DECLARE_SINGLETON (TimerThread, true)
+    TimerThread()
+        : Thread ("JUCE Timer")
+    {
+        timers.reserve (32);
+        ShutdownDetector::addListener (this);
+    }
 
     ~TimerThread() override
     {
-        signalThreadShouldExit();
-        callbackArrived.signal();
+        stopThreadAsync();
+        ShutdownDetector::removeListener (this);
         stopThread (-1);
-        clearSingletonInstance();
     }
 
     void run() override
@@ -215,8 +265,8 @@ private:
 
         void messageCallback() override
         {
-            if (auto* instance = TimerThread::getInstanceWithoutCreating())
-                instance->callTimers();
+            if (auto instance = SharedResourcePointer<TimerThread>::getSharedObjectWithoutCreating())
+                (*instance)->callTimers();
         }
     };
 
@@ -285,12 +335,20 @@ private:
     }
 
     //==============================================================================
-    TimerThread()  : Thread ("JUCE Timer") { timers.reserve (32); }
+    void applicationShuttingDown() final
+    {
+        stopThreadAsync();
+    }
 
+    void stopThreadAsync()
+    {
+        signalThreadShouldExit();
+        callbackArrived.signal();
+    }
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimerThread)
 };
-
-JUCE_IMPLEMENT_SINGLETON (Timer::TimerThread)
 
 //==============================================================================
 Timer::Timer() noexcept {}
@@ -315,16 +373,13 @@ void Timer::startTimer (int interval) noexcept
     // running, then you're not going to get any timer callbacks!
     JUCE_ASSERT_MESSAGE_MANAGER_EXISTS
 
-    if (auto* instance = TimerThread::getInstance())
-    {
-        bool wasStopped = (timerPeriodMs == 0);
-        timerPeriodMs = jmax (1, interval);
+    bool wasStopped = (timerPeriodMs == 0);
+    timerPeriodMs = jmax (1, interval);
 
-        if (wasStopped)
-            instance->addTimer (this);
-        else
-            instance->resetTimerCounter (this);
-    }
+    if (wasStopped)
+        timerThread->addTimer (this);
+    else
+        timerThread->resetTimerCounter (this);
 }
 
 void Timer::startTimerHz (int timerFrequencyHz) noexcept
@@ -339,17 +394,15 @@ void Timer::stopTimer() noexcept
 {
     if (timerPeriodMs > 0)
     {
-        if (auto* instance = TimerThread::getInstanceWithoutCreating())
-            instance->removeTimer (this);
-
+        timerThread->removeTimer (this);
         timerPeriodMs = 0;
     }
 }
 
 void JUCE_CALLTYPE Timer::callPendingTimersSynchronously()
 {
-    if (auto* instance = TimerThread::getInstanceWithoutCreating())
-        instance->callTimersSynchronously();
+    if (auto instance = SharedResourcePointer<TimerThread>::getSharedObjectWithoutCreating())
+        (*instance)->callTimersSynchronously();
 }
 
 struct LambdaInvoker final : private Timer,
