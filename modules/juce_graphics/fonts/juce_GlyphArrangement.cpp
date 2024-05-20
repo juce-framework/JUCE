@@ -306,7 +306,7 @@ void GlyphArrangement::addFittedText (const Font& f,
     maximumLines = jmin (maximumLines, length);
 
     auto font = f;
-    float cumulativeLineLengths{};
+    auto cumulativeLineLengths = font.getHeight() * 1.4f;
 
     while (numLines < maximumLines)
     {
