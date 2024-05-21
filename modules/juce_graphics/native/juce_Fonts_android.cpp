@@ -633,9 +633,4 @@ void Typeface::scanFolderForFonts (const File&)
     jassertfalse; // not currently available
 }
 
-bool TextLayout::createNativeLayout (const AttributedString&)
-{
-    return false;
-}
-
 } // namespace juce

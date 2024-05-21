@@ -271,7 +271,6 @@ private:
     Justification justification;
 
     void createStandardLayout (const AttributedString&);
-    bool createNativeLayout (const AttributedString&);
 
     JUCE_LEAK_DETECTOR (TextLayout)
 };

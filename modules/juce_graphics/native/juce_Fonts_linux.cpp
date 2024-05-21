@@ -104,11 +104,6 @@ StringArray Font::findAllTypefaceStyles (const String& family)
     return FTTypefaceList::getInstance()->findAllTypefaceStyles (family);
 }
 
-bool TextLayout::createNativeLayout (const AttributedString&)
-{
-    return false;
-}
-
 //==============================================================================
 struct DefaultFontInfo
 {

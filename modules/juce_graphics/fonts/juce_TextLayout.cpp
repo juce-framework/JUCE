@@ -273,8 +273,7 @@ void TextLayout::createLayout (const AttributedString& text, float maxWidth, flo
     height = maxHeight;
     justification = text.getJustification();
 
-    if (! createNativeLayout (text))
-        createStandardLayout (text);
+    createStandardLayout (text);
 
     recalculateSize();
 }

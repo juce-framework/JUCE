@@ -855,11 +855,4 @@ void Typeface::scanFolderForFonts (const File&)
     // TODO(reuk)
 }
 
-//==============================================================================
-bool TextLayout::createNativeLayout ([[maybe_unused]] const AttributedString& text)
-{
-    // TODO(reuk) Currently unimplemented
-    return false;
-}
-
 } // namespace juce
