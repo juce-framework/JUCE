@@ -212,6 +212,29 @@ public:
             Colour backgroundColour;
         };
 
+        /** Options specific to the WkWebView backend used on Apple systems. These options will be
+            ignored on non-Apple platforms.
+        */
+        class AppleWkWebView
+        {
+        public:
+            /** Specifies whether the WebView is allowed to access siblings of files specified with
+                the file:// URL scheme.
+
+                Allowing this is a potential security vulnerability if you don't have full control
+                over the file that you are opening.
+            */
+            [[nodiscard]] AppleWkWebView withAllowAccessToEnclosingDirectory (bool x) const
+            {
+                return withMember (*this, &AppleWkWebView::allowAccessToEnclosingDirectory, x);
+            }
+
+            auto getAllowAccessToEnclosingDirectory() const { return allowAccessToEnclosingDirectory; }
+
+        private:
+            bool allowAccessToEnclosingDirectory = false;
+        };
+
         /** Specifies options that apply to the Windows implementation when the WebView2 feature is
             enabled.
 
@@ -220,6 +243,13 @@ public:
         [[nodiscard]] Options withWinWebView2Options (const WinWebView2& winWebView2Options) const
         {
             return withMember (*this, &Options::winWebView2, winWebView2Options);
+        }
+
+        /** Specifies options that influence the WebBrowserComponent's behaviour on Apple systems.
+        */
+        [[nodiscard]] Options withAppleWkWebViewOptions (const AppleWkWebView& appleWkWebViewOptions) const
+        {
+            return withMember (*this, &Options::appleWkWebView, appleWkWebViewOptions);
         }
 
         /** Enables native integration features for the code running inside the WebBrowserComponent.
@@ -342,6 +372,7 @@ public:
         auto        keepsPageLoadedWhenBrowserIsHidden() const noexcept  { return keepPageLoadedWhenBrowserIsHidden; }
         auto        getUserAgent() const                                 { return userAgent; }
         auto        getWinWebView2BackendOptions() const                 { return winWebView2; }
+        auto        getAppleWkWebViewOptions() const                     { return appleWkWebView; }
         auto        getNativeIntegrationsEnabled() const                 { return enableNativeIntegration; }
         const auto& getNativeFunctions() const                           { return nativeFunctions; }
         const auto& getEventListeners() const                            { return eventListeners; }
@@ -357,6 +388,7 @@ public:
         bool enableNativeIntegration = false;
         String userAgent;
         WinWebView2 winWebView2;
+        AppleWkWebView appleWkWebView;
         std::map<Identifier, NativeFunction> nativeFunctions;
         std::vector<std::pair<Identifier, NativeEventListener>> eventListeners;
         StringArray userScripts;

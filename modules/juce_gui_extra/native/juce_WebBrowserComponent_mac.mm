@@ -818,7 +818,9 @@ public:
           delegateConnector (implIn.owner,
                              [this] (const auto& m) { owner.handleNativeEvent (m); },
                              [this] (const auto& r) { return owner.handleResourceRequest (r); },
-                             browserOptions)
+                             browserOptions),
+          allowAccessToEnclosingDirectory (browserOptions.getAppleWkWebViewOptions()
+                                                         .getAllowAccessToEnclosingDirectory())
     {
         ObjCObjectHandle<WKWebViewConfiguration*> config { [WKWebViewConfiguration new] };
         id preferences = [config.get() preferences];
@@ -987,8 +989,23 @@ public:
         {
             auto file = URL (url).getLocalFile();
 
-            if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
-                [webView.get() loadFileURL: appendParametersToFileURL (url, nsUrl) allowingReadAccessToURL: nsUrl];
+            NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())];
+
+            auto* accessPath = [&]
+            {
+                if (! allowAccessToEnclosingDirectory)
+                    return nsUrl;
+
+                auto* parentUrl = [NSURL fileURLWithPath: juceStringToNS (file.getParentDirectory().getFullPathName())];
+
+                if (parentUrl == nullptr)
+                    return nsUrl;
+
+                return parentUrl;
+            }();
+
+            if (nsUrl != nullptr)
+                [webView.get() loadFileURL: appendParametersToFileURL (url, nsUrl) allowingReadAccessToURL: accessPath];
         }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
@@ -1061,6 +1078,7 @@ public:
 private:
     WebBrowserComponent::Impl& owner;
     DelegateConnector delegateConnector;
+    bool allowAccessToEnclosingDirectory = false;
     LastFocusChange lastFocusChange;
     ObjCObjectHandle<WKWebView*> webView;
     ObjCObjectHandle<id> webViewDelegate;
