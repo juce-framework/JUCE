@@ -387,15 +387,18 @@ private:
             const auto level = (uint16_t) embeddingLevel;
             const auto isEven = isOdd (level) == false;
 
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
-            switch (curr.getBidiType())
+            if (curr.getGeneralCategory() != GeneralCategory::pc)
             {
-                case BidiType::ltr: curr.bidiLevel = (isEven ? level     : level + 1); break;
-                case BidiType::rtl: curr.bidiLevel = (isEven ? level + 1 : level    ); break;
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
+                switch (curr.getBidiType())
+                {
+                    case BidiType::ltr: curr.bidiLevel = (isEven ? level     : level + 1); break;
+                    case BidiType::rtl: curr.bidiLevel = (isEven ? level + 1 : level    ); break;
 
-                default: break;
+                    default: break;
+                }
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             }
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
     }
 
