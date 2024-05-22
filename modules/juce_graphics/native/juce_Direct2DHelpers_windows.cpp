@@ -128,7 +128,8 @@ struct D2DHelpers
             {
                 case Path::Iterator::cubicTo:
                 {
-                    jassert (figureStarted);
+                    if (! figureStarted)
+                        break;
 
                     transform.transformPoint (it.x1, it.y1);
                     transform.transformPoint (it.x2, it.y2);
@@ -140,7 +141,8 @@ struct D2DHelpers
 
                 case Path::Iterator::lineTo:
                 {
-                    jassert (figureStarted);
+                    if (! figureStarted)
+                        break;
 
                     transform.transformPoint (it.x1, it.y1);
                     sink->AddLine ({ it.x1, it.y1 });
@@ -149,7 +151,8 @@ struct D2DHelpers
 
                 case Path::Iterator::quadraticTo:
                 {
-                    jassert (figureStarted);
+                    if (! figureStarted)
+                        break;
 
                     transform.transformPoint (it.x1, it.y1);
                     transform.transformPoint (it.x2, it.y2);
@@ -170,9 +173,7 @@ struct D2DHelpers
                 case Path::Iterator::startNewSubPath:
                 {
                     if (figureStarted)
-                    {
                         sink->EndFigure (D2D1_FIGURE_END_OPEN);
-                    }
 
                     transform.transformPoint (it.x1, it.y1);
                     sink->BeginFigure ({ it.x1, it.y1 }, figureMode);
