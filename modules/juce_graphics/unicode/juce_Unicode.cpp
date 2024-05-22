@@ -35,47 +35,153 @@
 namespace juce
 {
 
-Array<Unicode::Codepoint> Unicode::performAnalysis (const String& string)
+//==============================================================================
+/*
+    A collection of methods and types for breaking down text into a unicode representation.
+*/
+class Unicode
 {
-    if (string.isEmpty())
-        return {};
-
-    thread_local std::unordered_map<String, Array<Unicode::Codepoint>> cache;
-    auto& result = cache[string];
-
-    if (! result.isEmpty())
-        return result;
-
-    auto analysisBuffer = [&str = std::as_const (string)]
+    struct Key
     {
-        std::vector<UnicodeAnalysisPoint> points;
+        String text;
+        std::optional<TextDirection> directionOverride;
 
-        const auto data   = str.toUTF32();
-        const auto length = data.length();
+        auto tie() const { return std::tie (text, directionOverride); }
+        bool operator< (const Key& other) const { return tie() < other.tie(); }
+    };
 
-        points.reserve (length);
+public:
+    Unicode() = delete;
 
-        std::transform (data.getAddress(), data.getAddress() + length, std::back_inserter (points), [] (uint32_t cp)
+    //==============================================================================
+    /*  A unicode Codepoint, from this you can infer various Unicode properties such
+        as direction, logical string index and breaking type, etc.
+    */
+    struct Codepoint
+    {
+        uint32_t codepoint;
+
+        size_t logicalIndex;     // Index of the character in the source string
+        size_t visualIndex;
+
+        TextBreakType breaking;  // Breaking characteristics of this codepoint
+
+        TextDirection direction; // Direction of this codepoint
+
+        TextScript script;       // Script class for this codepoint
+    };
+
+    template <typename Value>
+    static auto prefix (Span<Value> v, size_t num)
+    {
+        return Span { v.data(), std::min (v.size(), num) };
+    }
+
+    template <typename Value>
+    static auto removePrefix (Span<Value> v, size_t num)
+    {
+        const auto increment = std::min (v.size(), num);
+        return Span { v.data() + increment, v.size() - increment };
+    }
+
+    //==============================================================================
+    /*  Performs unicode analysis on a piece of text and returns an array of Codepoints
+        in logical order.
+    */
+    static Array<Codepoint> performAnalysis (const String& string, std::optional<TextDirection> textDirection = {})
+    {
+        if (string.isEmpty())
+            return {};
+
+        thread_local LruCache<Key, Array<Unicode::Codepoint>> cache;
+
+        return cache.get ({ string, textDirection }, analysisCallback);
+    }
+
+    //==============================================================================
+    template <typename Traits>
+    struct Iterator
+    {
+        using ValueType = typename Traits::ValueType;
+
+        Iterator() = default;
+        explicit Iterator (Span<ValueType> s) : data (s) {}
+
+        std::optional<Span<ValueType>> next()
         {
-            UnicodeAnalysisPoint p;
+            if (data.empty())
+                return {};
 
-            p.character = cp;
-            p.data = getUnicodeDataForCodepoint (cp);
-            p.bidi.level = 0;
+            const auto breakpoint = std::find_if (data.begin(), data.end(), [&] (const auto& i)
+            {
+                return ! Traits::compare (i, data.front());
+            });
+            const auto lengthToBreak = (size_t) std::distance (data.begin(), breakpoint) + (Traits::includeBreakingIndex() ? 1 : 0);
+            const ScopeGuard scope { [&] { data = removePrefix (data, lengthToBreak); } };
+            return prefix (data, lengthToBreak);
+        }
 
-           //#define JUCE_TR9_UPPERCASE_IS_RTL
-           #if defined (JUCE_TR9_UPPERCASE_IS_RTL)
-            if (cp >= 65 && cp <= 90)
-                p.data.bidi = BidiType::al;
-           #undef JUCE_TR9_UPPERCASE_IS_RTL
-           #endif
+    private:
+        Span<ValueType> data;
+    };
 
-            return p;
-        });
+    struct BidiTraits
+    {
+        using ValueType = const Codepoint;
 
-        return points;
-    }();
+        static bool compare (const Codepoint& t1, const Codepoint& t2)
+        {
+            return t1.direction == t2.direction;
+        }
 
+        static bool includeBreakingIndex() { return false; }
+    };
+
+    using BidiRunIterator = Iterator<BidiTraits>;
+
+    struct LineTraits
+    {
+        using ValueType = const Codepoint;
+
+        static bool compare (const Codepoint& t1, const Codepoint&)
+        {
+            return t1.breaking != TextBreakType::hard;
+        }
+
+        static bool includeBreakingIndex() { return true; }
+    };
+
+    using LineBreakIterator = Iterator<LineTraits>;
+
+    struct WordTraits
+    {
+        using ValueType = const Codepoint;
+
+        static bool compare (const Codepoint& t1, const Codepoint&)
+        {
+            return t1.breaking != TextBreakType::soft;
+        }
+
+        static bool includeBreakingIndex() { return false; }
+    };
+
+    using WordBreakIterator = Iterator<WordTraits>;
+
+    struct ScriptTraits
+    {
+        using ValueType = const Codepoint;
+
+        static bool compare (const Codepoint& t1, const Codepoint& t2)
+        {
+            return t1.script == t2.script;
+        }
+
+        static bool includeBreakingIndex() { return false; }
+    };
+
+    using ScriptRunIterator = Iterator<ScriptTraits>;
+
+private:
     struct ParagraphIterator
     {
         explicit ParagraphIterator (Span<UnicodeAnalysisPoint> Span) : data (Span) {}
@@ -85,244 +191,131 @@ Array<Unicode::Codepoint> Unicode::performAnalysis (const String& string)
             const auto start = head;
             auto end = start;
 
-            if ((size_t) start < data.size())
+            if ((size_t) start >= data.size())
+                return std::nullopt;
+
+            while ((size_t) end < data.size())
             {
-                while ((size_t) end < data.size())
-                {
-                    if (data[(size_t) end].character == 0x2029)
-                        break;
+                constexpr auto paragraphSeparator = 0x2029;
 
-                    end++;
-                }
+                if (data[(size_t) end].character == paragraphSeparator)
+                    break;
 
-
-                head = end + 1;
-                return std::make_optional (Range<int> { start, end });
+                end++;
             }
 
-            return nullopt;
+            head = end + 1;
+            return std::make_optional (Range<int> { start, end });
         }
 
         Span<UnicodeAnalysisPoint> data;
         int head = 0;
     };
 
-    result.resize ((int) analysisBuffer.size());
-
-    for (size_t i = 0; i < analysisBuffer.size(); i++)
-        result.getReference ((int) i).codepoint = analysisBuffer[i].character;
-
-    tr24::analyseScripts (analysisBuffer, [&result] (int index, TextScript script)
+    static Array<Unicode::Codepoint> analysisCallback (const Key& key)
     {
-        result.getReference (index).script = script;
-    });
-
-    tr14::analyseLineBreaks (analysisBuffer, [&result] (int index, TextBreakType type)
-    {
-        result.getReference ((int) index).breaking = type;
-    });
-
-    ParagraphIterator iter { analysisBuffer };
-
-    while (auto range = iter.next())
-    {
-        const auto run  = Span { analysisBuffer.data() + (size_t) range->getStart(), (size_t) range->getLength() };
-        const auto bidi = tr9::analyseBidiRun (run);
-
-        for (size_t i = 0; i < (size_t) range->getLength(); i++)
+        auto analysisBuffer = [&key]
         {
-            auto& point = result.getReference ((int) i + range->getStart());
+            std::vector<UnicodeAnalysisPoint> points;
 
-            point.direction      = bidi.resolvedLevels[i] % 2 == 0 ? TextDirection::ltr : TextDirection::rtl;
-            point.logicalIndex   = (size_t) range->getStart() + i;
-            point.visualIndex    = (size_t) bidi.visualOrder[i];
-        }
-    }
+            const auto data   = key.text.toUTF32();
+            const auto length = data.length();
 
-    return result;
-}
+            points.reserve (length);
 
-// https://unicode-org.github.io/icu/userguide/transforms/bidi.html#logical-order-versus-visual-order
-Array<Unicode::Codepoint> Unicode::convertLogicalToVisual (Span<const Unicode::Codepoint> codepoints)
-{
-    Array<Unicode::Codepoint> visual;
+            std::transform (data.getAddress(), data.getAddress() + length, std::back_inserter (points), [] (uint32_t cp)
+            {
+                UnicodeAnalysisPoint p { cp, UnicodeDataTable::getDataForCodepoint (cp) };
 
-    visual.resize ((int) codepoints.size());
+                // Define this to enable TR9 debugging. All upper case
+                // characters will be interpreted as right-to-left.
+               #if defined (JUCE_TR9_UPPERCASE_IS_RTL)
+                if (65 <= cp && cp <= 90)
+                    p.data.bidi = BidiType::al;
+               #endif
 
-    for (const auto& codepoint : codepoints)
-        visual.set ((int) codepoint.visualIndex, codepoint);
+                return p;
+            });
 
-    return visual;
-}
-
-bool UnicodeFunctions::isRenderableCharacter (juce_wchar character)
-{
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
-    switch (getUnicodeDataForCodepoint ((uint32_t) character).bt)
-    {
-        case LineBreakType::cr:
-        case LineBreakType::lf:
-        case LineBreakType::bk:
-        case LineBreakType::nl:
-        case LineBreakType::sp:
-        case LineBreakType::zw:
-        case LineBreakType::zwj:
-        case LineBreakType::cm:
-        case LineBreakType::cb:
-            return false;
-
-        default: break;
-    }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    return true;
-}
-
-bool UnicodeFunctions::isBreakableWhitespace (juce_wchar character)
-{
-    switch (character)
-    {
-        case 0x0020: case 0x1680: case 0x180E: case 0x2000:
-        case 0x2001: case 0x2002: case 0x2003: case 0x2004:
-        case 0x2005: case 0x2006: case 0x2007: case 0x2008:
-        case 0x2009: case 0x200A: case 0x200B: case 0x202F:
-        case 0x205F: case 0x3000:
-            return true;
-
-        default: break;
-    }
-
-    return false;
-}
-
-bool UnicodeFunctions::isEmoji (juce_wchar character)
-{
-    return getEmojiType ((uint32_t) character) != EmojiType::no;
-}
-
-bool UnicodeFunctions::shouldVerticalGlyphRotate (juce_wchar character)
-{
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
-    switch (getUnicodeDataForCodepoint ((uint32_t) character).vertical)
-    {
-    case VerticalTransformType::R:
-    case VerticalTransformType::Tr:
-    case VerticalTransformType::Tu: return true;
-
-    default: break;
-    }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    return false;
-}
-
-//#define JUCE_UNICODE_UNIT_TESTS
-
-#if defined(JUCE_UNIT_TESTS) && defined(JUCE_UNICODE_UNIT_TESTS)
-struct LineBreakTests : UnitTest
-{
-    LineBreakTests() : UnitTest ("UnicodeLineBreakTests", UnitTestCategories::unicode)
-    {
-    }
-
-    void runTest()
-    {
-        static const auto data = []
-        {
-            using namespace generated;
-
-            MemoryInputStream mStream {tr14TestData, sizeof (tr14TestData), false};
-            GZIPDecompressorInputStream zStream {&mStream, false};
-
-            MemoryBlock data {tr14TestDataUncompressedSize, false};
-            zStream.read (data.getData(), data.getSize());
-
-            return std::move (data);
+            return points;
         }();
 
-        MemoryInputStream stream {data, false};
+        Array<Unicode::Codepoint> result;
+        result.resize ((int) analysisBuffer.size());
 
-        int testCounter = 0;
+        for (size_t i = 0; i < analysisBuffer.size(); i++)
+            result.getReference ((int) i).codepoint = analysisBuffer[i].character;
 
-        while (! stream.isExhausted())
+        TR24::analyseScripts (analysisBuffer, [&result] (int index, TextScript script)
         {
-            uint32_t input[256]{};
-            bool     output[256]{};
-
-            const auto inputStringLength = (size_t) stream.readShort();
-            jassert (inputStringLength < std::size (input));
-
-            for (size_t i = 0; i < inputStringLength; i++)
-                input[i] = (uint32_t) stream.readInt();
-
-            for (size_t i = 0; i < inputStringLength + 1; i++)
-                output[i] = (bool) stream.readBool();
-
-            beginTest ("Test " + String (++testCounter));
-            expect (runTest (Span<const uint32_t> { input,  inputStringLength },
-                             Span<const bool>     { output, inputStringLength + 1 }));
-        }
-    }
-
-    static bool runTest (Span<const uint32_t> input, Span<const bool> output)
-    {
-        UnicodeAnalysisPoint points[256]{};
-        bool                 result[256]{};
-
-        std::transform (input.begin(), input.end(), points, [] (uint32_t cp)
-        {
-            auto data = getUnicodePointForCodepoint (cp);
-            return UnicodeAnalysisPoint {cp, data};
+            result.getReference (index).script = script;
         });
 
-        const auto resultCount = tr14::analyseLineBreaks ({ points, input.size() }, [&result, output] (int index, TextBreakType type)
+        TR14::analyseLineBreaks (analysisBuffer, [&result] (int index, TextBreakType type)
         {
-            jassert (index <= output.size());
-            result[index] = type != TextBreakType::noBreak;
+            result.getReference (index).breaking = type;
         });
 
-        const auto s = std::equal (output.begin(), output.end(), std::begin (result)) &&
-                       resultCount == output.size();
+        ParagraphIterator iter { analysisBuffer };
 
-       #if JUCE_DEBUG
-        if (! s)
+        TR9::BidiOutput bidiOutput;
+
+        while (auto range = iter.next())
         {
-            String expected, actual;
+            const auto run  = Span { analysisBuffer.data() + (size_t) range->getStart(), (size_t) range->getLength() };
 
-            DBG ("Test Failed:");
+            TR9::analyseBidiRun (bidiOutput, run, key.directionOverride);
 
-            if (resultCount != output.size())
+            for (size_t i = 0; i < (size_t) range->getLength(); i++)
             {
-                DBG ("\tIncorrect output size. Expected " << output.size() << " got " << resultCount);
-                jassertfalse;
+                auto& point = result.getReference ((int) i + range->getStart());
+
+                point.direction      = bidiOutput.resolvedLevels[i] % 2 == 0 ? TextDirection::ltr : TextDirection::rtl;
+                point.logicalIndex   = (size_t) range->getStart() + i;
+                point.visualIndex    = (size_t) bidiOutput.visualOrder[i];
             }
-
-            for (size_t i = 0; i < output.size(); i++)
-            {
-                expected << (output[i] ? "True" : "False") << " ";
-                actual   << (result[i] ? "True" : "False") << " ";
-            }
-
-            String inputString;
-
-            for (auto value : input)
-                inputString << String::formatted ("%04X ", value);
-
-            DBG ("\tInput:    { " << inputString << "}");
-            DBG ("\tOutput:   { " << actual   << "}");
-            DBG ("\tExpected: { " << expected << "}");
-
-            DBG (tr14::debugString);
-            jassertfalse;
         }
-       #endif
 
-        return s;
+        return result;
     }
 };
 
-static LineBreakTests lineBreakTests;
+#if JUCE_UNIT_TESTS
+
+class NumericalVisualOrderTest : UnitTest
+{
+public:
+    NumericalVisualOrderTest() : UnitTest ("NumericalVisualOrderTest", UnitTestCategories::text)
+    {
+    }
+
+    void runTest() override
+    {
+        auto doTest = [this] (const String& text)
+        {
+            String visual;
+            String logical;
+
+            for (auto cp : Unicode::performAnalysis (text))
+            {
+                visual << text[(int) cp.visualIndex];
+                logical << text[(int) cp.logicalIndex];
+            }
+
+            beginTest (text);
+            expectEquals (visual, logical);
+        };
+
+        doTest ("12345");
+        doTest ("12345_00001");
+        doTest ("1_3(1)");
+        doTest ("-12323");
+    }
+};
+
+static NumericalVisualOrderTest visualOrderTest;
 
 #endif
 
-}
+
+} // namespace juce

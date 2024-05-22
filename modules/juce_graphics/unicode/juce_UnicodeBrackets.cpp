@@ -35,417 +35,108 @@
 namespace juce
 {
 
-enum class BracketType
+class Brackets
 {
-    none,
-    open,
-    close
-};
+public:
+    Brackets() = delete;
 
-static inline BracketType getBracketType (uint32_t cp)
-{
-   #define OPEN(code)  case code: return BracketType::open
-   #define CLOSE(code) case code: return BracketType::close
-
-    switch (cp)
+    enum class Kind
     {
-        OPEN(0x0028);
-        CLOSE(0x0029);
-        OPEN(0x005B);
-        CLOSE(0x005D);
-        OPEN(0x007B);
-        CLOSE(0x007D);
-        OPEN(0x0F3A);
-        CLOSE(0x0F3B);
-        OPEN(0x0F3C);
-        CLOSE(0x0F3D);
-        OPEN(0x169B);
-        CLOSE(0x169C);
-        OPEN(0x2045);
-        CLOSE(0x2046);
-        OPEN(0x207D);
-        CLOSE(0x207E);
-        OPEN(0x208D);
-        CLOSE(0x208E);
-        OPEN(0x2308);
-        CLOSE(0x2309);
-        OPEN(0x230A);
-        CLOSE(0x230B);
-        OPEN(0x2329);
-        CLOSE(0x232A);
-        OPEN(0x2768);
-        CLOSE(0x2769);
-        OPEN(0x276A);
-        CLOSE(0x276B);
-        OPEN(0x276C);
-        CLOSE(0x276D);
-        OPEN(0x276E);
-        CLOSE(0x276F);
-        OPEN(0x2770);
-        CLOSE(0x2771);
-        OPEN(0x2772);
-        CLOSE(0x2773);
-        OPEN(0x2774);
-        CLOSE(0x2775);
-        OPEN(0x27C5);
-        CLOSE(0x27C6);
-        OPEN(0x27E6);
-        CLOSE(0x27E7);
-        OPEN(0x27E8);
-        CLOSE(0x27E9);
-        OPEN(0x27EA);
-        CLOSE(0x27EB);
-        OPEN(0x27EC);
-        CLOSE(0x27ED);
-        OPEN(0x27EE);
-        CLOSE(0x27EF);
-        OPEN(0x2983);
-        CLOSE(0x2984);
-        OPEN(0x2985);
-        CLOSE(0x2986);
-        OPEN(0x2987);
-        CLOSE(0x2988);
-        OPEN(0x2989);
-        CLOSE(0x298A);
-        OPEN(0x298B);
-        CLOSE(0x298C);
-        OPEN(0x298D);
-        CLOSE(0x298E);
-        OPEN(0x298F);
-        CLOSE(0x2990);
-        OPEN(0x2991);
-        CLOSE(0x2992);
-        OPEN(0x2993);
-        CLOSE(0x2994);
-        OPEN(0x2995);
-        CLOSE(0x2996);
-        OPEN(0x2997);
-        CLOSE(0x2998);
-        OPEN(0x29D8);
-        CLOSE(0x29D9);
-        OPEN(0x29DA);
-        CLOSE(0x29DB);
-        OPEN(0x29FC);
-        CLOSE(0x29FD);
-        OPEN(0x2E22);
-        CLOSE(0x2E23);
-        OPEN(0x2E24);
-        CLOSE(0x2E25);
-        OPEN(0x2E26);
-        CLOSE(0x2E27);
-        OPEN(0x2E28);
-        CLOSE(0x2E29);
-        OPEN(0x2E55);
-        CLOSE(0x2E56);
-        OPEN(0x2E57);
-        CLOSE(0x2E58);
-        OPEN(0x2E59);
-        CLOSE(0x2E5A);
-        OPEN(0x2E5B);
-        CLOSE(0x2E5C);
-        OPEN(0x3008);
-        CLOSE(0x3009);
-        OPEN(0x300A);
-        CLOSE(0x300B);
-        OPEN(0x300C);
-        CLOSE(0x300D);
-        OPEN(0x300E);
-        CLOSE(0x300F);
-        OPEN(0x3010);
-        CLOSE(0x3011);
-        OPEN(0x3014);
-        CLOSE(0x3015);
-        OPEN(0x3016);
-        CLOSE(0x3017);
-        OPEN(0x3018);
-        CLOSE(0x3019);
-        OPEN(0x301A);
-        CLOSE(0x301B);
-        OPEN(0xFE59);
-        CLOSE(0xFE5A);
-        OPEN(0xFE5B);
-        CLOSE(0xFE5C);
-        OPEN(0xFE5D);
-        CLOSE(0xFE5E);
-        OPEN(0xFF08);
-        CLOSE(0xFF09);
-        OPEN(0xFF3B);
-        CLOSE(0xFF3D);
-        OPEN(0xFF5B);
-        CLOSE(0xFF5D);
-        OPEN(0xFF5F);
-        CLOSE(0xFF60);
-        OPEN(0xFF62);
-        CLOSE(0xFF63);
+        none,
+        open,
+        close
+    };
+
+    static Kind getKind (uint32_t cp)
+    {
+        for (const auto& pair : pairs)
+        {
+            if (cp == pair.first)
+                return Kind::open;
+
+            if (cp == pair.second)
+                return Kind::close;
+        }
+
+        return Kind::none;
     }
 
-   #undef OPEN
-   #undef CLOSE
+    static bool isMatchingPair (uint32_t b1, uint32_t b2)
+    {
+        return std::any_of (std::begin (pairs), std::end (pairs), [=] (const auto& pair)
+        {
+            return pair == std::pair { b1, b2 } || pair == std::pair { b2, b1 };
+        });
+    }
 
-    return BracketType::none;
-}
-
-static inline auto isMatchingBracketPair (uint32_t b1, uint32_t b2)
-{
-    // TODO: remove duplicates
-    if (b1 == 0x0028 && b2 == 0x0029) return true;
-    if (b1 == 0x0029 && b2 == 0x0028) return true;
-    if (b1 == 0x0029 && b2 == 0x0028) return true;
-    if (b1 == 0x0028 && b2 == 0x0029) return true;
-    if (b1 == 0x005B && b2 == 0x005D) return true;
-    if (b1 == 0x005D && b2 == 0x005B) return true;
-    if (b1 == 0x005D && b2 == 0x005B) return true;
-    if (b1 == 0x005B && b2 == 0x005D) return true;
-    if (b1 == 0x007B && b2 == 0x007D) return true;
-    if (b1 == 0x007D && b2 == 0x007B) return true;
-    if (b1 == 0x007D && b2 == 0x007B) return true;
-    if (b1 == 0x007B && b2 == 0x007D) return true;
-    if (b1 == 0x0F3A && b2 == 0x0F3B) return true;
-    if (b1 == 0x0F3B && b2 == 0x0F3A) return true;
-    if (b1 == 0x0F3B && b2 == 0x0F3A) return true;
-    if (b1 == 0x0F3A && b2 == 0x0F3B) return true;
-    if (b1 == 0x0F3C && b2 == 0x0F3D) return true;
-    if (b1 == 0x0F3D && b2 == 0x0F3C) return true;
-    if (b1 == 0x0F3D && b2 == 0x0F3C) return true;
-    if (b1 == 0x0F3C && b2 == 0x0F3D) return true;
-    if (b1 == 0x169B && b2 == 0x169C) return true;
-    if (b1 == 0x169C && b2 == 0x169B) return true;
-    if (b1 == 0x169C && b2 == 0x169B) return true;
-    if (b1 == 0x169B && b2 == 0x169C) return true;
-    if (b1 == 0x2045 && b2 == 0x2046) return true;
-    if (b1 == 0x2046 && b2 == 0x2045) return true;
-    if (b1 == 0x2046 && b2 == 0x2045) return true;
-    if (b1 == 0x2045 && b2 == 0x2046) return true;
-    if (b1 == 0x207D && b2 == 0x207E) return true;
-    if (b1 == 0x207E && b2 == 0x207D) return true;
-    if (b1 == 0x207E && b2 == 0x207D) return true;
-    if (b1 == 0x207D && b2 == 0x207E) return true;
-    if (b1 == 0x208D && b2 == 0x208E) return true;
-    if (b1 == 0x208E && b2 == 0x208D) return true;
-    if (b1 == 0x208E && b2 == 0x208D) return true;
-    if (b1 == 0x208D && b2 == 0x208E) return true;
-    if (b1 == 0x2308 && b2 == 0x2309) return true;
-    if (b1 == 0x2309 && b2 == 0x2308) return true;
-    if (b1 == 0x2309 && b2 == 0x2308) return true;
-    if (b1 == 0x2308 && b2 == 0x2309) return true;
-    if (b1 == 0x230A && b2 == 0x230B) return true;
-    if (b1 == 0x230B && b2 == 0x230A) return true;
-    if (b1 == 0x230B && b2 == 0x230A) return true;
-    if (b1 == 0x230A && b2 == 0x230B) return true;
-    if (b1 == 0x2329 && b2 == 0x232A) return true;
-    if (b1 == 0x232A && b2 == 0x2329) return true;
-    if (b1 == 0x232A && b2 == 0x2329) return true;
-    if (b1 == 0x2329 && b2 == 0x232A) return true;
-    if (b1 == 0x2768 && b2 == 0x2769) return true;
-    if (b1 == 0x2769 && b2 == 0x2768) return true;
-    if (b1 == 0x2769 && b2 == 0x2768) return true;
-    if (b1 == 0x2768 && b2 == 0x2769) return true;
-    if (b1 == 0x276A && b2 == 0x276B) return true;
-    if (b1 == 0x276B && b2 == 0x276A) return true;
-    if (b1 == 0x276B && b2 == 0x276A) return true;
-    if (b1 == 0x276A && b2 == 0x276B) return true;
-    if (b1 == 0x276C && b2 == 0x276D) return true;
-    if (b1 == 0x276D && b2 == 0x276C) return true;
-    if (b1 == 0x276D && b2 == 0x276C) return true;
-    if (b1 == 0x276C && b2 == 0x276D) return true;
-    if (b1 == 0x276E && b2 == 0x276F) return true;
-    if (b1 == 0x276F && b2 == 0x276E) return true;
-    if (b1 == 0x276F && b2 == 0x276E) return true;
-    if (b1 == 0x276E && b2 == 0x276F) return true;
-    if (b1 == 0x2770 && b2 == 0x2771) return true;
-    if (b1 == 0x2771 && b2 == 0x2770) return true;
-    if (b1 == 0x2771 && b2 == 0x2770) return true;
-    if (b1 == 0x2770 && b2 == 0x2771) return true;
-    if (b1 == 0x2772 && b2 == 0x2773) return true;
-    if (b1 == 0x2773 && b2 == 0x2772) return true;
-    if (b1 == 0x2773 && b2 == 0x2772) return true;
-    if (b1 == 0x2772 && b2 == 0x2773) return true;
-    if (b1 == 0x2774 && b2 == 0x2775) return true;
-    if (b1 == 0x2775 && b2 == 0x2774) return true;
-    if (b1 == 0x2775 && b2 == 0x2774) return true;
-    if (b1 == 0x2774 && b2 == 0x2775) return true;
-    if (b1 == 0x27C5 && b2 == 0x27C6) return true;
-    if (b1 == 0x27C6 && b2 == 0x27C5) return true;
-    if (b1 == 0x27C6 && b2 == 0x27C5) return true;
-    if (b1 == 0x27C5 && b2 == 0x27C6) return true;
-    if (b1 == 0x27E6 && b2 == 0x27E7) return true;
-    if (b1 == 0x27E7 && b2 == 0x27E6) return true;
-    if (b1 == 0x27E7 && b2 == 0x27E6) return true;
-    if (b1 == 0x27E6 && b2 == 0x27E7) return true;
-    if (b1 == 0x27E8 && b2 == 0x27E9) return true;
-    if (b1 == 0x27E9 && b2 == 0x27E8) return true;
-    if (b1 == 0x27E9 && b2 == 0x27E8) return true;
-    if (b1 == 0x27E8 && b2 == 0x27E9) return true;
-    if (b1 == 0x27EA && b2 == 0x27EB) return true;
-    if (b1 == 0x27EB && b2 == 0x27EA) return true;
-    if (b1 == 0x27EB && b2 == 0x27EA) return true;
-    if (b1 == 0x27EA && b2 == 0x27EB) return true;
-    if (b1 == 0x27EC && b2 == 0x27ED) return true;
-    if (b1 == 0x27ED && b2 == 0x27EC) return true;
-    if (b1 == 0x27ED && b2 == 0x27EC) return true;
-    if (b1 == 0x27EC && b2 == 0x27ED) return true;
-    if (b1 == 0x27EE && b2 == 0x27EF) return true;
-    if (b1 == 0x27EF && b2 == 0x27EE) return true;
-    if (b1 == 0x27EF && b2 == 0x27EE) return true;
-    if (b1 == 0x27EE && b2 == 0x27EF) return true;
-    if (b1 == 0x2983 && b2 == 0x2984) return true;
-    if (b1 == 0x2984 && b2 == 0x2983) return true;
-    if (b1 == 0x2984 && b2 == 0x2983) return true;
-    if (b1 == 0x2983 && b2 == 0x2984) return true;
-    if (b1 == 0x2985 && b2 == 0x2986) return true;
-    if (b1 == 0x2986 && b2 == 0x2985) return true;
-    if (b1 == 0x2986 && b2 == 0x2985) return true;
-    if (b1 == 0x2985 && b2 == 0x2986) return true;
-    if (b1 == 0x2987 && b2 == 0x2988) return true;
-    if (b1 == 0x2988 && b2 == 0x2987) return true;
-    if (b1 == 0x2988 && b2 == 0x2987) return true;
-    if (b1 == 0x2987 && b2 == 0x2988) return true;
-    if (b1 == 0x2989 && b2 == 0x298A) return true;
-    if (b1 == 0x298A && b2 == 0x2989) return true;
-    if (b1 == 0x298A && b2 == 0x2989) return true;
-    if (b1 == 0x2989 && b2 == 0x298A) return true;
-    if (b1 == 0x298B && b2 == 0x298C) return true;
-    if (b1 == 0x298C && b2 == 0x298B) return true;
-    if (b1 == 0x298C && b2 == 0x298B) return true;
-    if (b1 == 0x298B && b2 == 0x298C) return true;
-    if (b1 == 0x298D && b2 == 0x2990) return true;
-    if (b1 == 0x2990 && b2 == 0x298D) return true;
-    if (b1 == 0x298E && b2 == 0x298F) return true;
-    if (b1 == 0x298F && b2 == 0x298E) return true;
-    if (b1 == 0x298F && b2 == 0x298E) return true;
-    if (b1 == 0x298E && b2 == 0x298F) return true;
-    if (b1 == 0x2990 && b2 == 0x298D) return true;
-    if (b1 == 0x298D && b2 == 0x2990) return true;
-    if (b1 == 0x2991 && b2 == 0x2992) return true;
-    if (b1 == 0x2992 && b2 == 0x2991) return true;
-    if (b1 == 0x2992 && b2 == 0x2991) return true;
-    if (b1 == 0x2991 && b2 == 0x2992) return true;
-    if (b1 == 0x2993 && b2 == 0x2994) return true;
-    if (b1 == 0x2994 && b2 == 0x2993) return true;
-    if (b1 == 0x2994 && b2 == 0x2993) return true;
-    if (b1 == 0x2993 && b2 == 0x2994) return true;
-    if (b1 == 0x2995 && b2 == 0x2996) return true;
-    if (b1 == 0x2996 && b2 == 0x2995) return true;
-    if (b1 == 0x2996 && b2 == 0x2995) return true;
-    if (b1 == 0x2995 && b2 == 0x2996) return true;
-    if (b1 == 0x2997 && b2 == 0x2998) return true;
-    if (b1 == 0x2998 && b2 == 0x2997) return true;
-    if (b1 == 0x2998 && b2 == 0x2997) return true;
-    if (b1 == 0x2997 && b2 == 0x2998) return true;
-    if (b1 == 0x29D8 && b2 == 0x29D9) return true;
-    if (b1 == 0x29D9 && b2 == 0x29D8) return true;
-    if (b1 == 0x29D9 && b2 == 0x29D8) return true;
-    if (b1 == 0x29D8 && b2 == 0x29D9) return true;
-    if (b1 == 0x29DA && b2 == 0x29DB) return true;
-    if (b1 == 0x29DB && b2 == 0x29DA) return true;
-    if (b1 == 0x29DB && b2 == 0x29DA) return true;
-    if (b1 == 0x29DA && b2 == 0x29DB) return true;
-    if (b1 == 0x29FC && b2 == 0x29FD) return true;
-    if (b1 == 0x29FD && b2 == 0x29FC) return true;
-    if (b1 == 0x29FD && b2 == 0x29FC) return true;
-    if (b1 == 0x29FC && b2 == 0x29FD) return true;
-    if (b1 == 0x2E22 && b2 == 0x2E23) return true;
-    if (b1 == 0x2E23 && b2 == 0x2E22) return true;
-    if (b1 == 0x2E23 && b2 == 0x2E22) return true;
-    if (b1 == 0x2E22 && b2 == 0x2E23) return true;
-    if (b1 == 0x2E24 && b2 == 0x2E25) return true;
-    if (b1 == 0x2E25 && b2 == 0x2E24) return true;
-    if (b1 == 0x2E25 && b2 == 0x2E24) return true;
-    if (b1 == 0x2E24 && b2 == 0x2E25) return true;
-    if (b1 == 0x2E26 && b2 == 0x2E27) return true;
-    if (b1 == 0x2E27 && b2 == 0x2E26) return true;
-    if (b1 == 0x2E27 && b2 == 0x2E26) return true;
-    if (b1 == 0x2E26 && b2 == 0x2E27) return true;
-    if (b1 == 0x2E28 && b2 == 0x2E29) return true;
-    if (b1 == 0x2E29 && b2 == 0x2E28) return true;
-    if (b1 == 0x2E29 && b2 == 0x2E28) return true;
-    if (b1 == 0x2E28 && b2 == 0x2E29) return true;
-    if (b1 == 0x2E55 && b2 == 0x2E56) return true;
-    if (b1 == 0x2E56 && b2 == 0x2E55) return true;
-    if (b1 == 0x2E56 && b2 == 0x2E55) return true;
-    if (b1 == 0x2E55 && b2 == 0x2E56) return true;
-    if (b1 == 0x2E57 && b2 == 0x2E58) return true;
-    if (b1 == 0x2E58 && b2 == 0x2E57) return true;
-    if (b1 == 0x2E58 && b2 == 0x2E57) return true;
-    if (b1 == 0x2E57 && b2 == 0x2E58) return true;
-    if (b1 == 0x2E59 && b2 == 0x2E5A) return true;
-    if (b1 == 0x2E5A && b2 == 0x2E59) return true;
-    if (b1 == 0x2E5A && b2 == 0x2E59) return true;
-    if (b1 == 0x2E59 && b2 == 0x2E5A) return true;
-    if (b1 == 0x2E5B && b2 == 0x2E5C) return true;
-    if (b1 == 0x2E5C && b2 == 0x2E5B) return true;
-    if (b1 == 0x2E5C && b2 == 0x2E5B) return true;
-    if (b1 == 0x2E5B && b2 == 0x2E5C) return true;
-    if (b1 == 0x3008 && b2 == 0x3009) return true;
-    if (b1 == 0x3009 && b2 == 0x3008) return true;
-    if (b1 == 0x3009 && b2 == 0x3008) return true;
-    if (b1 == 0x3008 && b2 == 0x3009) return true;
-    if (b1 == 0x300A && b2 == 0x300B) return true;
-    if (b1 == 0x300B && b2 == 0x300A) return true;
-    if (b1 == 0x300B && b2 == 0x300A) return true;
-    if (b1 == 0x300A && b2 == 0x300B) return true;
-    if (b1 == 0x300C && b2 == 0x300D) return true;
-    if (b1 == 0x300D && b2 == 0x300C) return true;
-    if (b1 == 0x300D && b2 == 0x300C) return true;
-    if (b1 == 0x300C && b2 == 0x300D) return true;
-    if (b1 == 0x300E && b2 == 0x300F) return true;
-    if (b1 == 0x300F && b2 == 0x300E) return true;
-    if (b1 == 0x300F && b2 == 0x300E) return true;
-    if (b1 == 0x300E && b2 == 0x300F) return true;
-    if (b1 == 0x3010 && b2 == 0x3011) return true;
-    if (b1 == 0x3011 && b2 == 0x3010) return true;
-    if (b1 == 0x3011 && b2 == 0x3010) return true;
-    if (b1 == 0x3010 && b2 == 0x3011) return true;
-    if (b1 == 0x3014 && b2 == 0x3015) return true;
-    if (b1 == 0x3015 && b2 == 0x3014) return true;
-    if (b1 == 0x3015 && b2 == 0x3014) return true;
-    if (b1 == 0x3014 && b2 == 0x3015) return true;
-    if (b1 == 0x3016 && b2 == 0x3017) return true;
-    if (b1 == 0x3017 && b2 == 0x3016) return true;
-    if (b1 == 0x3017 && b2 == 0x3016) return true;
-    if (b1 == 0x3016 && b2 == 0x3017) return true;
-    if (b1 == 0x3018 && b2 == 0x3019) return true;
-    if (b1 == 0x3019 && b2 == 0x3018) return true;
-    if (b1 == 0x3019 && b2 == 0x3018) return true;
-    if (b1 == 0x3018 && b2 == 0x3019) return true;
-    if (b1 == 0x301A && b2 == 0x301B) return true;
-    if (b1 == 0x301B && b2 == 0x301A) return true;
-    if (b1 == 0x301B && b2 == 0x301A) return true;
-    if (b1 == 0x301A && b2 == 0x301B) return true;
-    if (b1 == 0xFE59 && b2 == 0xFE5A) return true;
-    if (b1 == 0xFE5A && b2 == 0xFE59) return true;
-    if (b1 == 0xFE5A && b2 == 0xFE59) return true;
-    if (b1 == 0xFE59 && b2 == 0xFE5A) return true;
-    if (b1 == 0xFE5B && b2 == 0xFE5C) return true;
-    if (b1 == 0xFE5C && b2 == 0xFE5B) return true;
-    if (b1 == 0xFE5C && b2 == 0xFE5B) return true;
-    if (b1 == 0xFE5B && b2 == 0xFE5C) return true;
-    if (b1 == 0xFE5D && b2 == 0xFE5E) return true;
-    if (b1 == 0xFE5E && b2 == 0xFE5D) return true;
-    if (b1 == 0xFE5E && b2 == 0xFE5D) return true;
-    if (b1 == 0xFE5D && b2 == 0xFE5E) return true;
-    if (b1 == 0xFF08 && b2 == 0xFF09) return true;
-    if (b1 == 0xFF09 && b2 == 0xFF08) return true;
-    if (b1 == 0xFF09 && b2 == 0xFF08) return true;
-    if (b1 == 0xFF08 && b2 == 0xFF09) return true;
-    if (b1 == 0xFF3B && b2 == 0xFF3D) return true;
-    if (b1 == 0xFF3D && b2 == 0xFF3B) return true;
-    if (b1 == 0xFF3D && b2 == 0xFF3B) return true;
-    if (b1 == 0xFF3B && b2 == 0xFF3D) return true;
-    if (b1 == 0xFF5B && b2 == 0xFF5D) return true;
-    if (b1 == 0xFF5D && b2 == 0xFF5B) return true;
-    if (b1 == 0xFF5D && b2 == 0xFF5B) return true;
-    if (b1 == 0xFF5B && b2 == 0xFF5D) return true;
-    if (b1 == 0xFF5F && b2 == 0xFF60) return true;
-    if (b1 == 0xFF60 && b2 == 0xFF5F) return true;
-    if (b1 == 0xFF60 && b2 == 0xFF5F) return true;
-    if (b1 == 0xFF5F && b2 == 0xFF60) return true;
-    if (b1 == 0xFF62 && b2 == 0xFF63) return true;
-    if (b1 == 0xFF63 && b2 == 0xFF62) return true;
-    if (b1 == 0xFF63 && b2 == 0xFF62) return true;
-    if (b1 == 0xFF62 && b2 == 0xFF63) return true;
-
-    return false;
-}
+private:
+    // https://www.unicode.org/Public/14.0.0/ucd/BidiBrackets.txt
+    static constexpr std::pair<uint32_t, uint32_t> pairs[] {
+        { 0x0028, 0x0029 },
+        { 0x005B, 0x005D },
+        { 0x007B, 0x007D },
+        { 0x0F3A, 0x0F3B },
+        { 0x0F3C, 0x0F3D },
+        { 0x169B, 0x169C },
+        { 0x2045, 0x2046 },
+        { 0x207D, 0x207E },
+        { 0x208D, 0x208E },
+        { 0x2308, 0x2309 },
+        { 0x230A, 0x230B },
+        { 0x2329, 0x232A },
+        { 0x2768, 0x2769 },
+        { 0x276A, 0x276B },
+        { 0x276C, 0x276D },
+        { 0x276E, 0x276F },
+        { 0x2770, 0x2771 },
+        { 0x2772, 0x2773 },
+        { 0x2774, 0x2775 },
+        { 0x27C5, 0x27C6 },
+        { 0x27E6, 0x27E7 },
+        { 0x27E8, 0x27E9 },
+        { 0x27EA, 0x27EB },
+        { 0x27EC, 0x27ED },
+        { 0x27EE, 0x27EF },
+        { 0x2983, 0x2984 },
+        { 0x2985, 0x2986 },
+        { 0x2987, 0x2988 },
+        { 0x2989, 0x298A },
+        { 0x298B, 0x298C },
+        { 0x298D, 0x298E },
+        { 0x298F, 0x2990 },
+        { 0x2991, 0x2992 },
+        { 0x2993, 0x2994 },
+        { 0x2995, 0x2996 },
+        { 0x2997, 0x2998 },
+        { 0x29D8, 0x29D9 },
+        { 0x29DA, 0x29DB },
+        { 0x29FC, 0x29FD },
+        { 0x2E22, 0x2E23 },
+        { 0x2E24, 0x2E25 },
+        { 0x2E26, 0x2E27 },
+        { 0x2E28, 0x2E29 },
+        { 0x2E55, 0x2E56 },
+        { 0x2E57, 0x2E58 },
+        { 0x2E59, 0x2E5A },
+        { 0x2E5B, 0x2E5C },
+        { 0x3008, 0x3009 },
+        { 0x300A, 0x300B },
+        { 0x300C, 0x300D },
+        { 0x300E, 0x300F },
+        { 0x3010, 0x3011 },
+        { 0x3014, 0x3015 },
+        { 0x3016, 0x3017 },
+        { 0x3018, 0x3019 },
+        { 0x301A, 0x301B },
+        { 0xFE59, 0xFE5A },
+        { 0xFE5B, 0xFE5C },
+        { 0xFE5D, 0xFE5E },
+        { 0xFF08, 0xFF09 },
+        { 0xFF3B, 0xFF3D },
+        { 0xFF5B, 0xFF5D },
+        { 0xFF5F, 0xFF60 },
+        { 0xFF62, 0xFF63 }
+    };
+};
 
 } // namespace juce

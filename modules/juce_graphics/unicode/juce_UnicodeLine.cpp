@@ -32,260 +32,242 @@
   ==============================================================================
 */
 
-namespace juce::tr14
+namespace juce
 {
 
-using EAWType    = EastAsianWidthType;
-using BreakClass = LineBreakType;
-
-// This compiles down to the same machine code as an array matrix and
-// gives us enum value compile time safety. This way we dont need to worry
-// about the enum being modified and the table being out of sync.
-template <size_t Size, typename ValueType, typename ResultType>
-struct LookUpTable
+class TR14
 {
-    inline constexpr void set (ValueType v1, ValueType v2, ResultType result)
-    {
-        cols[index (v1)][index (v2)] = result;
-    }
+public:
+    TR14() = delete;
 
-    inline constexpr ResultType get (ValueType v1, ValueType v2) const
+    template <typename Callback>
+    static size_t analyseLineBreaks (Span<const UnicodeAnalysisPoint> span, Callback&& callback)
     {
-        return cols[index (v1)][index (v2)];
+        uint32_t resultIndex     = 0;
+        uint32_t regionalCounter = 0;
+        std::optional<LineBreakType> lb9;
+        bool lb21a{};
+
+        const auto data = span.data();
+        const auto len  = span.size();
+
+        const auto emit = [&] (auto op) { callback ((int) resultIndex++, op); };
+
+        for (size_t i = 0; i < len;)
+        {
+            const auto isSOT = i == 0;
+            const auto isEOT = i == len - 1;
+
+            const auto resolved = resolve (data[i]);
+            const auto prev = isSOT ? resolveSOT (resolved)
+                                    : lb9.value_or (resolved);
+            const auto finalBreak = lb9.has_value() ? LineBreakType::al
+                                                    : LineBreakType::cm;
+            const auto next = isEOT ? finalBreak
+                                    : resolve (data[i + 1]);
+            lb9.reset();
+
+            // LB3
+            if (isEOT)
+            {
+                emit (TextBreakType::soft);
+                break;
+            }
+
+            //==============================================================================
+            // LB4-6
+            if (prev == LineBreakType::bk)
+            {
+                emit (TextBreakType::hard);
+                i++;
+                continue;
+            }
+
+            if (prev == LineBreakType::cr && next == LineBreakType::lf)
+            {
+                emit (TextBreakType::none);
+                i++;
+                continue;
+            }
+
+            if (contains ({ LineBreakType::cr, LineBreakType::lf, LineBreakType::nl }, prev))
+            {
+                emit (TextBreakType::hard);
+                i++;
+                continue;
+            }
+
+            if (contains ({ LineBreakType::cr, LineBreakType::lf, LineBreakType::nl, LineBreakType::bk }, next))
+            {
+                emit (TextBreakType::none);
+                i++;
+                continue;
+            }
+
+            //==============================================================================
+            // LB7
+            if (contains ({ LineBreakType::sp, LineBreakType::zw }, next))
+            {
+                emit (TextBreakType::none);
+                i++;
+                continue;
+            }
+
+            // LB8a
+            if (prev == LineBreakType::zwj)
+            {
+                emit (TextBreakType::none);
+                i++;
+                continue;
+            }
+
+            // LB13
+            if (contains ({ LineBreakType::cl, LineBreakType::cp, LineBreakType::ex, LineBreakType::is, LineBreakType::sy }, next))
+            {
+                emit (TextBreakType::none);
+                i++;
+                continue;
+            }
+
+            // lb21a
+            if (lb21a && contains ({ LineBreakType::hy, LineBreakType::ba }, prev))
+            {
+                emit (TextBreakType::none);
+                i++;
+                continue;
+            }
+
+            lb21a = prev == LineBreakType::hl;
+
+            // LB30a
+            if (prev == LineBreakType::ri)
+            {
+                regionalCounter++;
+
+                if (next == LineBreakType::ri && regionalCounter % 2 == 0)
+                {
+                    regionalCounter = 0;
+                    emit (TextBreakType::soft);
+                    i++;
+                    continue;
+                }
+            }
+            else
+            {
+                regionalCounter = 0;
+            }
+
+            const auto bt = BreakPairTable::getLineBreakOpportunity (prev, next);
+
+            switch (bt)
+            {
+                case BreakOpportunity::direct:
+                {
+                    emit (TextBreakType::soft);
+                    i++;
+                    continue;
+                }
+
+                case BreakOpportunity::prohibited:
+                {
+                    emit (TextBreakType::none);
+                    i++;
+                    continue;
+                }
+
+                case BreakOpportunity::indirect:
+                {
+                    emit (next == LineBreakType::sp || next == LineBreakType::cm ? TextBreakType::soft
+                                                                                 : TextBreakType::none);
+                    i++;
+                    continue;
+                }
+
+                case BreakOpportunity::combinedIndirect:
+                case BreakOpportunity::combinedProhibited:
+                {
+                    if (! contains ({ LineBreakType::bk, LineBreakType::cr,
+                                      LineBreakType::lf, LineBreakType::nl,
+                                      LineBreakType::sp, LineBreakType::zw }, prev))
+                    {
+                        lb9 = std::make_optional (prev);
+                    }
+
+                    while (i < len)
+                    {
+                        if (i == len - 1)
+                        {
+                            emit (TextBreakType::soft);
+                            i++;
+                            break;
+                        }
+
+                        emit (TextBreakType::none);
+
+                        if (! contains ({ LineBreakType::cm, LineBreakType::zwj }, resolve (data[i])))
+                            break;
+
+                        i++;
+                    }
+
+                    i++;
+                    continue;
+                }
+            }
+
+            i++;
+            continue;
+        }
+
+        return resultIndex;
     }
 
 private:
-    static inline constexpr size_t index (ValueType value)
+    static LineBreakType resolve (const UnicodeAnalysisPoint& point)
     {
-        return (size_t) value;
+        const auto bc = point.getBreakType();
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
+        switch (bc)
+        {
+            case LineBreakType::ai:
+            case LineBreakType::sg:
+            case LineBreakType::xx:
+                return LineBreakType::al;
+
+            case LineBreakType::cj:
+                return LineBreakType::ns;
+
+            case LineBreakType::sa:
+                return contains ({ GeneralCategory::mn, GeneralCategory::mc }, point.getGeneralCategory())
+                    ? LineBreakType::cm
+                    : LineBreakType::al;
+
+            default: break;
+        }
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return bc;
     }
 
-    ResultType cols[Size][Size];
+    static LineBreakType resolveSOT (LineBreakType bc)
+    {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
+        switch (bc)
+        {
+            case LineBreakType::lf:
+            case LineBreakType::nl:
+                return LineBreakType::bk;
+
+            case LineBreakType::sp:
+                return LineBreakType::wj;
+
+            default: break;
+        }
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return bc;
+    }
 };
-
-enum class BreakOppurtunity
-{
-    direct,
-    indirect,
-    prohibited,
-    combinedProhibited,
-    combinedIndirect
-};
-
-struct BreakAtom final : public UnicodeAnalysisPoint
-{
-    constexpr bool operator== (BreakClass type) const { return data.bt == type; }
-    constexpr bool operator== (EAWType type)    const { return data.asian == type; }
-
-    constexpr auto getBreakClass()              const { return data.bt; }
-    constexpr auto getEastAsianWidthType()      const { return data.asian; }
-};
-
-static_assert (sizeof (BreakAtom) == sizeof (UnicodeAnalysisPoint), "BreakAtom - UnicodeAnalysisPoint size mismatch");
-
-struct BreakPairTable final : LookUpTable<42, BreakClass, BreakOppurtunity>
-{
-    BreakPairTable()
-    {
-        #include "juce_LineBreakTable.inl"
-    }
-};
-
-static inline BreakClass resolve (BreakClass bc, [[maybe_unused]] bool mnMc = false)
-{
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
-    switch (bc)
-    {
-        case BreakClass::ai:
-        case BreakClass::sg:
-        case BreakClass::xx:
-            return BreakClass::al;
-
-        case BreakClass::sa:
-            return BreakClass::al;
-
-        case BreakClass::cj:
-            return BreakClass::ns;
-
-        default: break;
-    }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    return bc;
-}
-
-static inline BreakClass resolveSOT (BreakClass bc)
-{
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
-    switch (bc)
-    {
-        case BreakClass::lf:
-        case BreakClass::nl:
-            return BreakClass::bk;
-
-        case BreakClass::sp:
-            return BreakClass::wj;
-
-        default: break;
-    }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    return bc;
-}
-
-static const BreakPairTable pairTable;
-
-template <typename Callback>
-size_t analyseLineBreaks (Span<const UnicodeAnalysisPoint> span, Callback&& callback)
-{
-    uint32_t resultIndex     = 0;
-    uint32_t regionalCounter = 0;
-    std::optional<BreakClass> lb9;
-    bool lb21a{};
-
-    const auto data = (const BreakAtom*) span.data();
-    const auto len  = span.size();
-
-    const auto emit = [&] (auto op) { callback ((int) resultIndex++, op); };
-
-    #define step()   i++; continue
-
-    for (size_t i = 0; i < len;)
-    {
-        const auto isSOT = i == 0;
-        const auto isEOT = i == len - 1;
-
-        const auto prev = isSOT ? resolveSOT (resolve (data[i].getBreakClass()))
-                                : lb9.value_or (resolve (data[i].getBreakClass()));
-        const auto next = isEOT ? BreakClass::cm
-                                : resolve (data[i + 1].getBreakClass());
-
-        lb9.reset();
-
-        if (prev == BreakClass::cr && next == BreakClass::lf)
-        {
-            emit (TextBreakType::none);
-            step();
-        }
-
-        // LB4
-        if (any (prev, BreakClass::bk, BreakClass::lf, BreakClass::nl))
-        {
-            emit (TextBreakType::hard);
-            step();
-        }
-
-        // LB6
-        if (any (next, BreakClass::bk, BreakClass::lf, BreakClass::nl))
-        {
-            emit (TextBreakType::none);
-            step();
-        }
-
-        // LB7
-        if (any (next, BreakClass::sp, BreakClass::zw))
-        {
-            emit (TextBreakType::none);
-            step();
-        }
-
-        // LB13
-        if (any (next, BreakClass::cl, BreakClass::cp, BreakClass::ex, BreakClass::is, BreakClass::sy))
-        {
-            emit (TextBreakType::none);
-            step();
-        }
-
-        // lb21a
-        if (lb21a && any (prev, BreakClass::hy, BreakClass::ba))
-        {
-            emit (TextBreakType::none);
-            step();
-        }
-
-        lb21a = prev == BreakClass::hl;
-
-        // LB30a
-        if (prev == BreakClass::ri)
-        {
-            regionalCounter++;
-
-            if (next == BreakClass::ri && regionalCounter % 2 == 0)
-            {
-                regionalCounter = 0;
-                emit (TextBreakType::soft);
-                step();
-            }
-        }
-        else
-        {
-            regionalCounter = 0;
-        }
-
-        const auto bt = pairTable.get (prev, next);
-
-        switch (bt)
-        {
-            case BreakOppurtunity::direct:
-            {
-                emit (TextBreakType::soft);
-                step();
-            } break;
-
-            case BreakOppurtunity::prohibited:
-            {
-                emit (TextBreakType::none);
-                step();
-            } break;
-
-            case BreakOppurtunity::indirect:
-            {
-                while (i < len)
-                {
-                    emit (TextBreakType::none);
-
-                    if (resolve (data[i].getBreakClass()) != BreakClass::sp)
-                        break;
-
-                    i++;
-                }
-
-                step();
-            } break;
-
-            case BreakOppurtunity::combinedIndirect:
-            {
-                lb9 = std::make_optional (prev);
-
-                while (i < len)
-                {
-                    emit (TextBreakType::none);
-
-                    if (! any (resolve (data[i].getBreakClass()), BreakClass::cm, BreakClass::zwj))
-                        break;
-
-                    i++;
-                }
-
-                step();
-            } break;
-
-            case BreakOppurtunity::combinedProhibited:
-            {
-                emit (TextBreakType::none);
-                step();
-            } break;
-        }
-
-        step();
-    }
-
-    //emit (TextBreakType::soft);
-
-    #undef emit
-    #undef step
-
-    return resultIndex;
-}
 
 }

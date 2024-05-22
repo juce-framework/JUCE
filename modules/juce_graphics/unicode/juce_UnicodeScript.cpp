@@ -34,126 +34,202 @@
 
 namespace juce
 {
-
-inline TextScript mapTextScript (UnicodeTextScript type)
+// https://www.unicode.org/reports/tr31/#Table_Recommended_Scripts
+enum class TextScript
 {
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
+    // Recommend scripts
+    common,
+    arabic,
+    armenian,
+    bengali,
+    bopomofo,
+    cyrillic,
+    devanagari,
+    ethiopic,
+    georgian,
+    greek,
+    gujarati,
+    gurmukhi,
+    hangul,
+    han,
+    hebrew,
+    hiragana,
+    katakana,
+    kannada,
+    khmer,
+    lao,
+    latin,
+    malayalam,
+    myanmar,
+    oriya,
+    sinhala,
+    tamil,
+    telugu,
+    thaana,
+    thai,
+    tibetan,
 
-   #define CASE(in, out) case UnicodeTextScript::in: return TextScript::out
-    switch (type)
-    {
-        CASE (Common,       common);
-        CASE (Emoji,        emoji);
-        CASE (Arabic,       arabic);
-        CASE (Armenian,     armenian);
-        CASE (Bengali,      bengali);
-        CASE (Bopomofo,     bopomofo);
-        CASE (Cyrillic,     cyrillic);
-        CASE (Devanagari,   devanagari);
-        CASE (Ethiopic,     ethiopic);
-        CASE (Georgian,     georgian);
-        CASE (Greek,        greek);
-        CASE (Gujarati,     gujarati);
-        CASE (Gurmukhi,     gurmukhi);
-        CASE (Hangul,       hangul);
-        CASE (Han,          han);
-        CASE (Hebrew,       hebrew);
-        CASE (Hiragana,     hiragana);
-        CASE (Katakana,     katakana);
-        CASE (Kannada,      kannada);
-        CASE (Khmer,        khmer);
-        CASE (Lao,          lao);
-        CASE (Latin,        latin);
-        CASE (Malayalam,    malayalam);
-        CASE (Myanmar,      myanmar);
-        CASE (Oriya,        oriya);
-        CASE (Sinhala,      sinhala);
-        CASE (Tamil,        tamil);
-        CASE (Telugu,       telugu);
-        CASE (Thaana,       thaana);
-        CASE (Thai,         thai);
-        CASE (Tibetan,      tibetan);
+    // Limited use
+    adlam,
+    balinese,
+    bamum,
+    batak,
+    chakma,
+    canadianAboriginalSyllabics,
+    cham,
+    cherokee,
+    nyiakengPuachueHmong,
+    javanese,
+    kayahLi,
+    taiTham,
+    lepcha,
+    limbu,
+    lisu,
+    mandaic,
+    meeteiMayek,
+    newa,
+    nko,
+    olChiki,
+    osage,
+    miao,
+    hanifiRohingya,
+    saurashtra,
+    sundanese,
+    sylotiNagri,
+    syriac,
+    taiLe,
+    newTaiLue,
+    taiViet,
+    tifinagh,
+    vai,
+    wancho,
+    yi,
 
-        CASE (Adlam,        adlam);
-        CASE (Balinese,     balinese);
-        CASE (Bamum,        bamum);
-        CASE (Batak,        batak);
-        CASE (Chakma,       chakma);
-        CASE (Cham,         cham);
-        CASE (Cherokee,     cherokee);
-        CASE (Javanese,     javanese);
-        CASE (Kayah_Li,     kayahLi);
-        CASE (Tai_Tham,     taiTham);
-        CASE (Lepcha,       lepcha);
-        CASE (Limbu,        limbu);
-        CASE (Lisu,         lisu);
-        CASE (Mandaic,      mandaic);
-        CASE (Meetei_Mayek, meeteiMayek);
-        CASE (Newa,         newa);
-        CASE (Nko,          nko);
-        CASE (Ol_Chiki,     olChiki);
-        CASE (Osage,        osage);
-        CASE (Miao,         miao);
-        CASE (Saurashtra,   saurashtra);
-        CASE (Sundanese,    sundanese);
-        CASE (Syloti_Nagri, sylotiNagri);
-        CASE (Syriac,       syriac);
-        CASE (Tai_Le,       taiLe);
-        CASE (New_Tai_Lue,  newTaiLue);
-        CASE (Tai_Viet,     taiViet);
-        CASE (Tifinagh,     tifinagh);
-        CASE (Vai,          vai);
-        CASE (Wancho,       wancho);
-        CASE (Yi,           yi);
+    emoji,
 
-        CASE (Hanifi_Rohingya,        hanifiRohingya);
-        CASE (Nyiakeng_Puachue_Hmong, nyiakengPuachueHmong);
-        CASE (Canadian_Aboriginal,    canadianAboriginalSyllabics);
+    scriptCount
+};
 
-    default: break;
-    }
-   #undef CASE
-
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    return TextScript::common;
-}
-
-// TR24
 // https://www.unicode.org/reports/tr24/tr24-32.html
-namespace tr24
+class TR24
 {
+public:
+    TR24() = delete;
 
-template <typename Callback>
-void inline analyseScripts (const Span<UnicodeAnalysisPoint> points, Callback&& callback)
-{
-    bool once = false;
-    UnicodeTextScript previousBaseTextScript = UnicodeTextScript::Common;
-
-    for (size_t i = 0; i < points.size(); i++)
+    template <typename Callback>
+    static void analyseScripts (Span<const UnicodeAnalysisPoint> points, Callback&& callback)
     {
-        const auto& entry      = points[i].data;
-        auto script            = entry.script;
+        bool once = false;
+        auto previousBaseTextScript = UnicodeScriptType::common;
 
-        if (! std::exchange (once, true))
+        for (const auto [i, value] : enumerate (points))
         {
-            if (script == UnicodeTextScript::Inherited)
-                script = UnicodeTextScript::Common;
+            const auto& entry = value.data;
+            auto script       = entry.script;
 
+            if (! std::exchange (once, true))
+            {
+                if (script == UnicodeScriptType::inherited)
+                    script = UnicodeScriptType::common;
+
+                previousBaseTextScript = script;
+            }
+
+            if (script == UnicodeScriptType::common && entry.emoji == EmojiType::extended)
+                script = UnicodeScriptType::emoji;
+
+            if (script == UnicodeScriptType::common || script == UnicodeScriptType::inherited)
+                script = previousBaseTextScript;
+
+            callback ((int) i, mapTextScript (script));
             previousBaseTextScript = script;
         }
-
-        if (script == UnicodeTextScript::Common && entry.emoji == EmojiType::extended)
-            script = UnicodeTextScript::Emoji;
-
-        // Last part is a hack..
-        if (script == UnicodeTextScript::Common || script == UnicodeTextScript::Inherited)
-            script = previousBaseTextScript;
-
-        callback ((int) i, mapTextScript (script));
-        previousBaseTextScript = script;
     }
-}
-}
+
+private:
+    // The Unicode script spec lists a large number of scripts, some of which are recommended to be ignored.
+    // We map them to a script that we support here.
+    static TextScript mapTextScript (UnicodeScriptType type)
+    {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
+
+        switch (type)
+        {
+            case UnicodeScriptType::common:         return TextScript::common;
+            case UnicodeScriptType::emoji:          return TextScript::emoji;
+            case UnicodeScriptType::arabic:         return TextScript::arabic;
+            case UnicodeScriptType::armenian:       return TextScript::armenian;
+            case UnicodeScriptType::bengali:        return TextScript::bengali;
+            case UnicodeScriptType::bopomofo:       return TextScript::bopomofo;
+            case UnicodeScriptType::cyrillic:       return TextScript::cyrillic;
+            case UnicodeScriptType::devanagari:     return TextScript::devanagari;
+            case UnicodeScriptType::ethiopic:       return TextScript::ethiopic;
+            case UnicodeScriptType::georgian:       return TextScript::georgian;
+            case UnicodeScriptType::greek:          return TextScript::greek;
+            case UnicodeScriptType::gujarati:       return TextScript::gujarati;
+            case UnicodeScriptType::gurmukhi:       return TextScript::gurmukhi;
+            case UnicodeScriptType::hangul:         return TextScript::hangul;
+            case UnicodeScriptType::han:            return TextScript::han;
+            case UnicodeScriptType::hebrew:         return TextScript::hebrew;
+            case UnicodeScriptType::hiragana:       return TextScript::hiragana;
+            case UnicodeScriptType::katakana:       return TextScript::katakana;
+            case UnicodeScriptType::kannada:        return TextScript::kannada;
+            case UnicodeScriptType::khmer:          return TextScript::khmer;
+            case UnicodeScriptType::lao:            return TextScript::lao;
+            case UnicodeScriptType::latin:          return TextScript::latin;
+            case UnicodeScriptType::malayalam:      return TextScript::malayalam;
+            case UnicodeScriptType::myanmar:        return TextScript::myanmar;
+            case UnicodeScriptType::oriya:          return TextScript::oriya;
+            case UnicodeScriptType::sinhala:        return TextScript::sinhala;
+            case UnicodeScriptType::tamil:          return TextScript::tamil;
+            case UnicodeScriptType::telugu:         return TextScript::telugu;
+            case UnicodeScriptType::thaana:         return TextScript::thaana;
+            case UnicodeScriptType::thai:           return TextScript::thai;
+            case UnicodeScriptType::tibetan:        return TextScript::tibetan;
+
+            case UnicodeScriptType::adlam:          return TextScript::adlam;
+            case UnicodeScriptType::balinese:       return TextScript::balinese;
+            case UnicodeScriptType::bamum:          return TextScript::bamum;
+            case UnicodeScriptType::batak:          return TextScript::batak;
+            case UnicodeScriptType::chakma:         return TextScript::chakma;
+            case UnicodeScriptType::cham:           return TextScript::cham;
+            case UnicodeScriptType::cherokee:       return TextScript::cherokee;
+            case UnicodeScriptType::javanese:       return TextScript::javanese;
+            case UnicodeScriptType::kayah_li:       return TextScript::kayahLi;
+            case UnicodeScriptType::tai_tham:       return TextScript::taiTham;
+            case UnicodeScriptType::lepcha:         return TextScript::lepcha;
+            case UnicodeScriptType::limbu:          return TextScript::limbu;
+            case UnicodeScriptType::lisu:           return TextScript::lisu;
+            case UnicodeScriptType::mandaic:        return TextScript::mandaic;
+            case UnicodeScriptType::meetei_mayek:   return TextScript::meeteiMayek;
+            case UnicodeScriptType::newa:           return TextScript::newa;
+            case UnicodeScriptType::nko:            return TextScript::nko;
+            case UnicodeScriptType::ol_chiki:       return TextScript::olChiki;
+            case UnicodeScriptType::osage:          return TextScript::osage;
+            case UnicodeScriptType::miao:           return TextScript::miao;
+            case UnicodeScriptType::saurashtra:     return TextScript::saurashtra;
+            case UnicodeScriptType::sundanese:      return TextScript::sundanese;
+            case UnicodeScriptType::syloti_nagri:   return TextScript::sylotiNagri;
+            case UnicodeScriptType::syriac:         return TextScript::syriac;
+            case UnicodeScriptType::tai_le:         return TextScript::taiLe;
+            case UnicodeScriptType::new_tai_lue:    return TextScript::newTaiLue;
+            case UnicodeScriptType::tai_viet:       return TextScript::taiViet;
+            case UnicodeScriptType::tifinagh:       return TextScript::tifinagh;
+            case UnicodeScriptType::vai:            return TextScript::vai;
+            case UnicodeScriptType::wancho:         return TextScript::wancho;
+            case UnicodeScriptType::yi:             return TextScript::yi;
+
+            case UnicodeScriptType::hanifi_rohingya:        return TextScript::hanifiRohingya;
+            case UnicodeScriptType::nyiakeng_puachue_hmong: return TextScript::nyiakengPuachueHmong;
+            case UnicodeScriptType::canadian_aboriginal:    return TextScript::canadianAboriginalSyllabics;
+
+            default: break;
+        }
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return TextScript::common;
+    }
+};
 
 }

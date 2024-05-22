@@ -35,235 +35,70 @@
 namespace juce
 {
 
-// This only make sense with integral/enum types.
-// We use it for enums and std::pair<enum, enum>.
-template <typename T, typename... TT>
-static constexpr bool any (T b, TT... bs)
+template <typename T>
+static constexpr bool contains (std::initializer_list<T> span, const T& b)
 {
-    return ((b == bs) || ...);
+    for (const auto& i : span)
+        if (i == b)
+            return true;
+
+    return false;
 }
-
-// Order is important!!!!
-enum class LineBreakType : uint8_t
-{
-    al, bk,  cm, cr, gl, lf, nl, sp, wj,
-    zw, zwj, ai, b2, ba, bb, cb, cj, cl, cp,
-    eb, em,  ex, h2, h3, hl, hy, in, is, jl,
-    id, jt,  jv, ns, nu, op, po, pr, qu, ri,
-    sa, sg,  sy, xx, opw
-};
-
-// Order is important!!!!
-enum class EastAsianWidthType : uint8_t
-{
-    N,
-    narrow,
-    ambiguous,
-    full,
-    half,
-    wide
-};
-
-// Order is important!!!!
-enum class BidiType : uint8_t
-{
-    // Strong: Left to right
-    ltr,
-
-    // Strong: Right to left
-    rtl,
-
-    // Strong: Arabic Right to left
-    al,
-
-    // Weak: European number
-    en,
-
-    // Weak: Arabic umber
-    an,
-
-    // Weak: European number seperator
-    es,
-
-    // Weak: European number terminator
-    et,
-
-    // Weak: Common number seperator
-    cs,
-
-    // Weak: onspacing mark
-    nsm,
-
-    // Weak: Boundary
-    bn,
-
-    // eutral: Paragraph seperator
-    b,
-
-    // eutral: Segment seperator
-    s,
-
-    // eutral: Whitespace
-    ws,
-
-    // eutral: Other s
-    on,
-
-    // Explicit Formatting: LTR Embedding
-    lre,
-
-    // Explicit Formatting: LTR Override
-    lro,
-
-    // Explicit Formatting: RTL Embedding
-    rle,
-
-    // Explicit Formatting: RTL Overide
-    rlo,
-
-    // Explicit Formatting: Pop Directional Format
-    pdf,
-
-    // Explicit Formatting: LTR Isolate
-    lri,
-
-    // Explicit Formatting: RTL Isolate
-    rli,
-
-    // Explicit Formatting: First Strong Isolate
-    fsi,
-
-    // Explicit Formatting: Pop Directional Isolate
-    pdi,
-
-    none
-};
-
-
-enum class VerticalTransformType : uint8_t
-{
-    R, U, Tr, Tu
-};
-
-// https://www.unicode.org/reports/tr51/tr51-21.html
-enum class EmojiType : uint8_t
-{
-    yes,
-    presentation,
-    modifier,
-    modifierBase,
-    component,
-    extended,
-    no
-};
-
-// This is an internal type
-enum class UnicodeTextScript : uint8_t
-{
-    Common, Inherited, Han, Arabic, Hiragana, Adlam, Mende_Kikakui, Ethiopic, Wancho,
-    Toto, Nyiakeng_Puachue_Hmong, Glagolitic, Latin, SignWriting, Greek, Duployan,
-    Nushu, Katakana, Tangut, Khitan_Small_Script, Miao, Medefaidrin, Pahawh_Hmong,
-    Bassa_Vah, Tangsa, Mro, Bamum, Cypro_Minoan, Cuneiform, Tamil, Lisu, Makasar,
-    Gunjala_Gondi, Masaram_Gondi, Marchen, Bhaiksuki, Pau_Cin_Hau, Canadian_Aboriginal,
-    Soyombo, Zanabazar_Square, Nandinagari, Dives_Akuru, Warang_Citi, Dogra, Ahom,
-    Takri, Mongolian, Modi, Siddham, Tirhuta, Newa, Grantha, Khudawadi, Multani,
-    Khojki, Sinhala, Sharada, Mahajani, Chakma, Sora_Sompeng, Kaithi, Brahmi, Elymaic,
-    Chorasmian, Sogdian, Yezidi, Hanifi_Rohingya, Psalter_Pahlavi, Avestan, Manichaean,
-    Kharoshthi, Meroitic_Cursive, Lydian, Phoenician, Hatran, Nabataean, Palmyrene,
-    Imperial_Aramaic, Cypriot, Vithkuqi, Caucasian_Albanian, Elbasan, Osage,
-    Osmanya, Shavian, Deseret, Ugaritic, Gothic, Carian, Lycian, Hangul, Cyrillic,
-    Hebrew, Armenian, Meetei_Mayek, Cherokee, Tai_Viet, Myanmar, Cham, Javanese, Rejang,
-    Kayah_Li, Devanagari, Saurashtra, Phags_Pa, Syloti_Nagri, Vai, Yi, Bopomofo,
-    Tifinagh, Georgian, Coptic, Braille, Sundanese, Ol_Chiki, Lepcha, Batak, Balinese,
-    Tai_Tham, Buginese, Khmer, Limbu, Tai_Le, Tagbanwa, Buhid, Hanunoo, Tagalog, Runic,
-    Ogham, Tibetan, Lao, Thai, Malayalam, Kannada, Telugu, Oriya, Gujarati, Gurmukhi,
-    Bengali, Syriac, Mandaic, Samaritan, Nko, Thaana,
-
-    Linear_A,
-    Linear_B,
-
-    New_Tai_Lue,
-
-    Old_Hungarian,
-    Old_Turkic,
-    Old_Uyghur,
-    Old_Sogdian,
-    Old_South_Arabian,
-    Old_North_Arabian,
-    Old_Persian,
-    Old_Permic,
-    Old_Italic,
-
-    Inscriptional_Pahlavi,
-    Inscriptional_Parthian,
-
-    Anatolian_Hieroglyphs,
-    Egyptian_Hieroglyphs,
-    Meroitic_Hieroglyphs,
-
-    Emoji
-};
-
-enum class GraphemeBreakType : uint8_t
-{
-    other, cr, lf, control, extend, regionalIndicator, prepend, spacingMark,
-    l, v, t, lv, lvt, zwj
-};
-
-
-namespace generated
-{
-#include "juce_UnicodeData.cpp"
-#ifdef JUCE_UNIT_TESTS
- #include "juce_UnicodeTestData.cpp"
-#endif
-}
-
-using UnicodeData = generated::UnicodeEntry;
 
 struct UnicodeAnalysisPoint
 {
-    uint32_t    character;
-    UnicodeData data;
+    char32_t character = 0;
+    UnicodeEntry data{};
+    uint16_t bidiLevel = 0;
 
-    struct
+    UnicodeAnalysisPoint (char32_t characterIn, UnicodeEntry entry)
+        : character { characterIn },
+          data { std::move (entry) }
+    {}
+
+    LineBreakType getBreakType() const
     {
-        uint16_t level;
-    } bidi;
+        return data.bt;
+    }
+
+    GeneralCategory getGeneralCategory() const
+    {
+        return data.generalCategory;
+    }
+
+    BidiType getBidiType() const
+    {
+        return data.bidi;
+    }
+
+    void setBidiType (BidiType newType)
+    {
+        data.bidi = newType;
+    }
+
+    bool operator== (const BidiType& b) const
+    {
+        return getBidiType() == b;
+    }
 };
 
-static UnicodeData getUnicodeDataForCodepoint (uint32_t codepoint)
+//==============================================================================
+/*  Types of breaks between characters. */
+enum class TextBreakType
 {
-    static const Array<UnicodeData> data = []
-    {
-        using namespace generated;
+    none, // The sequence of characters should not be broken.
 
-        Array<UnicodeData> arr;
+    soft, // The sequence of characters can be broken, if required.
 
-        MemoryInputStream mStream {compressedUnicodeData, std::size (compressedUnicodeData), false};
-        GZIPDecompressorInputStream zStream {&mStream, false};
+    hard  // The sequence of characters must be broken here.
+};
 
-        // TODO: error checking
-        arr.resize (uncompressedUnicodeDataSize / sizeof (UnicodeData));
-        zStream.read (arr.getRawDataPointer(), uncompressedUnicodeDataSize);
-
-        return arr;
-    }();
-
-    return data[(int) codepoint];
-}
-
-// https://www.unicode.org/Public/UCD/latest/ucd/Jamo.txt
-static inline bool isJamoSymbol (uint32_t cp)
+/** Types of text direction. This may also be applied to characters. */
+enum class TextDirection
 {
-    return ((cp >= 0x1100 && cp <= 0x1112) ||
-            (cp >= 0x1161 && cp <= 0x1175) ||
-            (cp >= 0x11A8 && cp <= 0x11C2));
-}
+    ltr, // This text reads left to right.
 
-static inline EmojiType getEmojiType (uint32_t cp)
-{
-    return getUnicodeDataForCodepoint (cp).emoji;
-}
+    rtl  // This text reads right to left.
+};
 
 } // namespace juce
