@@ -36,18 +36,19 @@ Full licence terms:
 ## The JUCE Framework Dependencies
 
 The JUCE modules contain the following dependencies:
+- [AudioUnitSDK](modules/juce_audio_plugin_client/AU/AudioUnitSDK/) ([Apache 2.0](modules/juce_audio_plugin_client/AU/AudioUnitSDK/LICENSE.txt))
 - [Oboe](modules/juce_audio_devices/native/oboe/) ([Apache 2.0](modules/juce_audio_devices/native/oboe/LICENSE))
 - [FLAC](modules/juce_audio_formats/codecs/flac/) ([BSD](modules/juce_audio_formats/codecs/flac/Flac%20Licence.txt))
+- [GLEW](modules/juce_opengl/opengl/juce_gl.h) ([BSD](modules/juce_opengl/opengl/juce_gl.h)), including [Mesa](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h)) and [Khronos](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h))
 - [Ogg Vorbis](modules/juce_audio_formats/codecs/oggvorbis/) ([BSD](modules/juce_audio_formats/codecs/oggvorbis/Ogg%20Vorbis%20Licence.txt))
-- [AudioUnitSDK](modules/juce_audio_plugin_client/AU/AudioUnitSDK/) ([Apache 2.0](modules/juce_audio_plugin_client/AU/AudioUnitSDK/LICENSE.txt))
+- [jpeglib](modules/juce_graphics/image_formats/jpglib/) ([Independent JPEG Group License](modules/juce_graphics/image_formats/jpglib/README))
 - [LV2](modules/juce_audio_processors/format_types/LV2_SDK/) ([ISC](modules/juce_audio_processors/format_types/LV2_SDK/lv2/COPYING))
 - [pslextensions](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h) ([Public domain](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h))
-- [VST3](modules/juce_audio_processors/format_types/VST3_SDK/) ([Proprietary Steinberg VST3/GPLv3](modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt))
-- [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
+- [AAX](modules/juce_audio_plugin_client/AAX/SDK/) ([Proprietary Avid AAX License/GPLv3](modules/juce_audio_plugin_client/AAX/SDK/LICENSE.txt))
+- [VST3](modules/juce_audio_processors/format_types/VST3_SDK/) ([Proprietary Steinberg VST3 License/GPLv3](modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt))
 - [Box2D](modules/juce_box2d/box2d/) ([zlib](modules/juce_box2d/box2d/Box2D.h))
-- [jpeglib](modules/juce_graphics/image_formats/jpglib/) ([Independent JPEG Group License](modules/juce_graphics/image_formats/jpglib/README))
 - [pnglib](modules/juce_graphics/image_formats/pnglib/) ([zlib](modules/juce_graphics/image_formats/pnglib/LICENSE))
-- [GLEW](modules/juce_opengl/opengl/juce_gl.h) ([BSD](modules/juce_opengl/opengl/juce_gl.h)), including [Mesa](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h)) and [Khronos](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h))
+- [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
 
 The JUCE examples are licensed under the terms of the
 [ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
