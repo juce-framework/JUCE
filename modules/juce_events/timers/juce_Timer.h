@@ -144,6 +144,8 @@ private:
     SharedResourcePointer<TimerThread> timerThread;
 
     Timer& operator= (const Timer&) = delete;
+
+    JUCE_LEAK_DETECTOR (Timer)
 };
 
 } // namespace juce
