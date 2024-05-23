@@ -284,7 +284,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
         resizableBorder.reset();
     }
 
-    if (isUsingNativeTitleBar())
+    if (isOnDesktop())
         recreateDesktopWindow();
 
     childBoundsChanged (contentComponent);
