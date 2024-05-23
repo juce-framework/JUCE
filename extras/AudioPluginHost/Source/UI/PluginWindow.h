@@ -233,7 +233,7 @@ public:
     const AudioProcessorGraph::Node::Ptr node;
     const Type type;
 
-    BorderSize<int> getBorderThickness() override
+    BorderSize<int> getBorderThickness() const override
     {
        #if JUCE_IOS || JUCE_ANDROID
         const int border = 10;

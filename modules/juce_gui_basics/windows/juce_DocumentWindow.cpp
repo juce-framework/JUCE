@@ -247,12 +247,7 @@ void DocumentWindow::resized()
                             titleBarArea.getWidth(), menuBarHeight);
 }
 
-BorderSize<int> DocumentWindow::getBorderThickness()
-{
-    return ResizableWindow::getBorderThickness();
-}
-
-BorderSize<int> DocumentWindow::getContentComponentBorder()
+BorderSize<int> DocumentWindow::getContentComponentBorder() const
 {
     auto border = getBorderThickness();
 

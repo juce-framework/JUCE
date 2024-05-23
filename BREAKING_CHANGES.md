@@ -4,6 +4,27 @@
 
 ## Change
 
+The virtual functions ResizableWindow::getBorderThickness() and
+ResizableWindow::getContentComponentBorder() are now const.
+
+**Possible Issues**
+
+Classes overriding these functions will fail to compile.
+
+**Workaround**
+
+Add 'const' to overriding functions.
+
+**Rationale**
+
+Omitting 'const' from these functions implies that they may change the state of
+the ResizableWindow, which would be unexpected behaviour for getter functions.
+It also means that the functions cannot be called from const member functions,
+which limits their usefulness.
+
+
+## Change
+
 As part of the Unicode upgrades TextLayout codepaths have been unified across
 all platforms. As a consequence the behaviour of TextLayout on Apple platforms
 will now be different in two regards:

@@ -279,9 +279,7 @@ public:
     /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
-    BorderSize<int> getBorderThickness() override;
-    /** @internal */
-    BorderSize<int> getContentComponentBorder() override;
+    BorderSize<int> getContentComponentBorder() const override;
     /** @internal */
     void mouseDoubleClick (const MouseEvent&) override;
     /** @internal */
