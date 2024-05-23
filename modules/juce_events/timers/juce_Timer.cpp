@@ -31,6 +31,7 @@ public:
     ~ShutdownDetector() override
     {
         getListeners().call (&Listener::applicationShuttingDown);
+        clearSingletonInstance();
     }
 
     struct Listener
