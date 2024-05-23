@@ -8285,6 +8285,9 @@
     <None Include="..\..\..\..\modules\juce_core\javascript\choc\JUCE_CHANGES.txt">
       <Filter>JUCE Modules\juce_core\javascript\choc</Filter>
     </None>
+    <None Include="..\..\..\..\modules\juce_core\javascript\choc\LICENSE.md">
+      <Filter>JUCE Modules\juce_core\javascript\choc</Filter>
+    </None>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt">
       <Filter>JUCE Modules\juce_core\native\java</Filter>
     </None>
