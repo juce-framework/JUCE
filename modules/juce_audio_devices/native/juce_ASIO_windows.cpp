@@ -321,8 +321,8 @@ public:
         ::CoInitialize (nullptr);
 
         name = devName;
-        inBuffers.calloc (4);
-        outBuffers.calloc (4);
+        inBuffers.jcalloc (4);
+        outBuffers.jcalloc (4);
 
         jassert (currentASIODev[slotNumber] == nullptr);
         currentASIODev[slotNumber] = this;
@@ -443,8 +443,8 @@ public:
         if (asioObject->future (kAsioCanReportOverload, nullptr) != ASE_OK)
             xruns = -1;
 
-        inBuffers.calloc (totalNumInputChans + 8);
-        outBuffers.calloc (totalNumOutputChans + 8);
+        inBuffers.jcalloc (totalNumInputChans + 8);
+        outBuffers.jcalloc (totalNumOutputChans + 8);
 
         if (needToReset)
         {
@@ -486,7 +486,7 @@ public:
         if (err == ASE_OK)
         {
             buffersCreated = true;
-            ioBufferSpace.calloc (totalBuffers * currentBlockSizeSamples + 32);
+            ioBufferSpace.jcalloc (totalBuffers * currentBlockSizeSamples + 32);
 
             int n = 0;
             Array<int> types;
@@ -1211,11 +1211,11 @@ private:
                     JUCE_ASIO_LOG (String ((int) totalNumInputChans) + " in, " + String ((int) totalNumOutputChans) + " out");
 
                     const int chansToAllocate = totalNumInputChans + totalNumOutputChans + 4;
-                    bufferInfos.calloc (chansToAllocate);
-                    inBuffers.calloc (chansToAllocate);
-                    outBuffers.calloc (chansToAllocate);
-                    inputFormat.calloc (chansToAllocate);
-                    outputFormat.calloc (chansToAllocate);
+                    bufferInfos.jcalloc (chansToAllocate);
+                    inBuffers.jcalloc (chansToAllocate);
+                    outBuffers.jcalloc (chansToAllocate);
+                    inputFormat.jcalloc (chansToAllocate);
+                    outputFormat.jcalloc (chansToAllocate);
 
                     if ((err = refreshBufferSizes()) == 0)
                     {

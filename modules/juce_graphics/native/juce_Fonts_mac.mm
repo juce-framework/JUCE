@@ -90,7 +90,7 @@ namespace CoreTextTypeLayout
         {
             if (advances == nullptr)
             {
-                local.malloc (numGlyphs);
+                local.jmalloc (numGlyphs);
                 CTRunGetAdvances (run, CFRangeMake (0, 0), local);
                 advances = local;
             }
@@ -106,7 +106,7 @@ namespace CoreTextTypeLayout
         {
             if (glyphs == nullptr)
             {
-                local.malloc (numGlyphs);
+                local.jmalloc (numGlyphs);
                 CTRunGetGlyphs (run, CFRangeMake (0, 0), local);
                 glyphs = local;
             }
@@ -122,7 +122,7 @@ namespace CoreTextTypeLayout
         {
             if (points == nullptr)
             {
-                local.malloc (numGlyphs);
+                local.jmalloc (numGlyphs);
                 CTRunGetPositions (run, CFRangeMake (0, 0), local);
                 points = local;
             }

@@ -204,8 +204,8 @@ public:
                                                            JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
             }
 
-            inChans.calloc (totalNumberOfInputChannels + 2);
-            outChans.calloc (totalNumberOfOutputChannels + 2);
+            inChans.jcalloc (totalNumberOfInputChannels + 2);
+            outChans.jcalloc (totalNumberOfOutputChannels + 2);
         }
     }
 

@@ -450,8 +450,8 @@ public:
 
         if (bitsToShift > 0)
         {
-            temp.malloc (numChannels * (size_t) numSamples);
-            channels.calloc (numChannels + 1);
+            temp.jmalloc (numChannels * (size_t) numSamples);
+            channels.jcalloc (numChannels + 1);
 
             for (unsigned int i = 0; i < numChannels; ++i)
             {

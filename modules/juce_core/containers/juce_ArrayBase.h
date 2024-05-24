@@ -216,7 +216,7 @@ public:
             if (numElements > 0)
                 setAllocatedSizeInternal (numElements);
             else
-                elements.free();
+                elements.jfree();
         }
 
         numAllocated = numElements;
@@ -414,7 +414,7 @@ private:
     {
         if constexpr (isTriviallyCopyable)
         {
-            elements.realloc ((size_t) numElements);
+            elements.jrealloc ((size_t) numElements);
         }
         else
         {

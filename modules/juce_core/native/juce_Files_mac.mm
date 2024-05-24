@@ -226,7 +226,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
             {
                 unsigned int size = 8192;
                 HeapBlock<char> buffer;
-                buffer.calloc (size + 8);
+                buffer.jcalloc (size + 8);
 
                 _NSGetExecutablePath (buffer.get(), &size);
                 return File (String::fromUTF8 (buffer, (int) size));

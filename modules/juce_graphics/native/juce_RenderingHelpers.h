@@ -943,7 +943,7 @@ namespace EdgeTableFillers
               maxX (src.width  - 1),
               maxY (src.height - 1)
         {
-            scratchBuffer.malloc (scratchSize);
+            scratchBuffer.jmalloc (scratchSize);
         }
 
         forcedinline void setEdgeTableYPos (int newY) noexcept
@@ -973,7 +973,7 @@ namespace EdgeTableFillers
             if (width > (int) scratchSize)
             {
                 scratchSize = (size_t) width;
-                scratchBuffer.malloc (scratchSize);
+                scratchBuffer.jmalloc (scratchSize);
             }
 
             SrcPixelType* span = scratchBuffer;
@@ -1017,7 +1017,7 @@ namespace EdgeTableFillers
             if (width > (int) scratchSize)
             {
                 scratchSize = (size_t) width;
-                scratchBuffer.malloc (scratchSize);
+                scratchBuffer.jmalloc (scratchSize);
             }
 
             currentY = y;

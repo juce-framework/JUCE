@@ -250,7 +250,7 @@ public:
             auto len = (receivingLength ? sizeof (size_t) : bufferLength.len);
 
             if (! receivingLength)
-                buffer.realloc (len);
+                buffer.jrealloc (len);
 
             auto* dst = (receivingLength ? bufferLength.data : buffer.getData());
 

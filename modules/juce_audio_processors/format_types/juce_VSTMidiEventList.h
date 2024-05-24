@@ -160,9 +160,9 @@ public:
             const size_t size = 20 + (size_t) numEventsNeeded * sizeof (Vst2::VstEvent*);
 
             if (events == nullptr)
-                events.calloc (size, 1);
+                events.jcalloc (size, 1);
             else
-                events.realloc (size, 1);
+                events.jrealloc (size, 1);
 
             for (int i = numEventsAllocated; i < numEventsNeeded; ++i)
                 getEvent (i) = allocateVSTEvent();
@@ -178,7 +178,7 @@ public:
             for (int i = numEventsAllocated; --i >= 0;)
                 freeVSTEvent (getEvent (i));
 
-            events.free();
+            events.jfree();
             numEventsUsed = 0;
             numEventsAllocated = 0;
         }

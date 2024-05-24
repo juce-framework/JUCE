@@ -70,9 +70,9 @@ public:
         if (numAllocated != numElements)
         {
             if (numElements > 0)
-                elements.realloc ((size_t) numElements);
+                elements.jrealloc ((size_t) numElements);
             else
-                elements.free();
+                elements.jfree();
 
             numAllocated = numElements;
         }

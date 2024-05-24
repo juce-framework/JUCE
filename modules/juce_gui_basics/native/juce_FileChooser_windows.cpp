@@ -54,7 +54,7 @@ public:
         auto parentDirectory = startingFile.getParentDirectory();
 
         // Handle nonexistent root directories in the same way as existing ones
-        files.calloc (static_cast<size_t> (charsAvailableForResult) + 1);
+        files.jcalloc (static_cast<size_t> (charsAvailableForResult) + 1);
 
         if (startingFile.isDirectory() || startingFile.isRoot())
         {
@@ -587,7 +587,7 @@ private:
     void setupFilters()
     {
         const size_t filterSpaceNumChars = 2048;
-        filters.calloc (filterSpaceNumChars);
+        filters.jcalloc (filterSpaceNumChars);
 
         const size_t bytesWritten = filtersString.copyToUTF16 (filters.getData(), filterSpaceNumChars * sizeof (WCHAR));
         filtersString.copyToUTF16 (filters + (bytesWritten / sizeof (WCHAR)),

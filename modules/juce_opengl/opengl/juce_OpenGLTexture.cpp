@@ -106,7 +106,7 @@ struct Flipper
     static void flip (HeapBlock<PixelARGB>& dataCopy, const uint8* srcData, const int lineStride,
                       const int w, const int h)
     {
-        dataCopy.malloc (w * h);
+        dataCopy.jmalloc (w * h);
 
         for (int y = 0; y < h; ++y)
         {

@@ -80,7 +80,7 @@ String String::convertToPrecomposedUnicode() const
         const size_t bytesNeeded = CharPointer_UTF16::getBytesRequiredFor (getCharPointer());
 
         HeapBlock<char> tempOut;
-        tempOut.calloc (bytesNeeded + 4);
+        tempOut.jcalloc (bytesNeeded + 4);
 
         ByteCount bytesRead = 0;
         ByteCount outputBufferSize = 0;

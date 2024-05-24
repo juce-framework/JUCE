@@ -70,7 +70,7 @@ void Filter<SampleType>::reset (SampleType resetToValue)
 
     if (newOrder != order)
     {
-        memory.malloc (jmax (order, newOrder, static_cast<size_t> (3)) + 1);
+        memory.jmalloc (jmax (order, newOrder, static_cast<size_t> (3)) + 1);
         state = snapPointerToAlignment (memory.getData(), sizeof (SampleType));
         order = newOrder;
     }

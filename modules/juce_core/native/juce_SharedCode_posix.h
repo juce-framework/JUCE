@@ -125,7 +125,7 @@ File File::getCurrentWorkingDirectory()
 
     while (cwd == nullptr && errno == ERANGE)
     {
-        heapBuffer.malloc (bufferSize);
+        heapBuffer.jmalloc (bufferSize);
         cwd = getcwd (heapBuffer, bufferSize - 1);
         bufferSize += 1024;
     }
