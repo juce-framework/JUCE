@@ -876,8 +876,8 @@ public:
         Components with custom shapes will probably want to override it to perform
         some more complex hit-testing.
 
-        The default implementation of this method returns either true or false,
-        depending on the value that was set by calling setInterceptsMouseClicks() (true
+        The default implementation of this method returns either 'client' or 'none',
+        depending on the value that was set by calling setInterceptsMouseClicks() ('client'
         is the default return value).
 
         Note that the hit-test region is not related to the opacity with which
@@ -900,6 +900,33 @@ public:
         @see setInterceptsMouseClicks, contains
     */
     virtual bool hitTest (int x, int y);
+
+    /** Types of control that are commonly found in windows, especially title-bars. */
+    enum class WindowControlKind
+    {
+        client,             ///< Parts of the component that are not transparent and also don't have any of the following control functions
+        caption,            ///< The part of a title bar that may be dragged by the mouse to move the window
+        minimise,           ///< The minimise/iconify button
+        maximise,           ///< The maximise/zoom button
+        close,              ///< The button that dismisses the component
+        sizeTop,            ///< The area that may be dragged to move the top edge of the window
+        sizeLeft,           ///< The area that may be dragged to move the left edge of the window
+        sizeRight,          ///< The area that may be dragged to move the right edge of the window
+        sizeBottom,         ///< The area that may be dragged to move the bottom edge of the window
+        sizeTopLeft,        ///< The area that may be dragged to move the top-left corner of the window
+        sizeTopRight,       ///< The area that may be dragged to move the top-right corner of the window
+        sizeBottomLeft,     ///< The area that may be dragged to move the bottom-left corner of the window
+        sizeBottomRight,    ///< The area that may be dragged to move the bottom-right corner of the window
+    };
+
+    /** For components that are added to the desktop, this may be called to determine what kind of
+        control is at particular locations in the window. On Windows, this is used to provide
+        functionality like Aero Snap (snapping the window to half of the screen after dragging the
+        window's caption area to the edge of the screen), double-clicking a horizontal border to
+        stretch a window vertically, and the window tiling flyout that appears when hovering the
+        mouse over the maximise button.
+     */
+    virtual WindowControlKind findControlAtPoint (Point<float>) const { return WindowControlKind::client; }
 
     /** Changes the default return value for the hitTest() method.
 
