@@ -71,8 +71,10 @@ elseif(NOT WebView2_FIND_QUIETLY)
             "open a PowerShell and issue the following commands"
             "\n"
             "> Register-PackageSource -provider NuGet -name nugetRepository -location https://www.nuget.org/api/v2\n"
-            "> Install-Package NuGet.CommandLine -Scope CurrentUser\n"
-            "> Install-Package Microsoft.Web.WebView2 -Scope CurrentUser -RequiredVersion 1.0.1901.177\n")
+            "> Install-Package Microsoft.Web.WebView2 -Scope CurrentUser -RequiredVersion 1.0.1901.177 -Source nugetRepository\n"
+            "\n"
+            "Alternatively you can use the JUCE_WEBVIEW2_PACKAGE_LOCATION CMake variable to specify the directory "
+            "where this find script is looking for the *Microsoft.Web.WebView2* package directory.")
 endif()
 
 find_package_handle_standard_args(WebView2 DEFAULT_MSG WebView2_include_dir WebView2_library)

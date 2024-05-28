@@ -58,20 +58,12 @@ function(_juce_add_pips)
             list(APPEND CMAKE_MODULE_PATH "${JUCE_CMAKE_UTILS_DIR}")
         endif()
 
-        find_package(WebView2 QUIET)
+        find_package(WebView2)
 
         if(NOT WebView2_FOUND)
             list(REMOVE_ITEM headers "${CMAKE_CURRENT_SOURCE_DIR}/WebViewPluginDemo.h")
 
-            message(WARNING "The WebViewPluginDemo was not enabled because WebView2 wasn't found"
-                    " in the the local NuGet folder"
-                    "\n"
-                    "To install NuGet and the WebView2 package containing the statically linked library, "
-                    "open a PowerShell and issue the following commands"
-                    "\n"
-                    "> Register-PackageSource -provider NuGet -name nugetRepository -location https://www.nuget.org/api/v2\n"
-                    "> Install-Package NuGet.CommandLine -Scope CurrentUser\n"
-                    "> Install-Package Microsoft.Web.WebView2 -Scope CurrentUser -RequiredVersion 1.0.1901.177\n")
+            message(WARNING "The WebViewPluginDemo was not enabled because the WebView2 package wasn't found.")
         endif()
     endif()
 
