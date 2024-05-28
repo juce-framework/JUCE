@@ -79,7 +79,7 @@ int ResizableWindow::getDesktopWindowStyleFlags() const
 {
     int styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
 
-    if (isResizable() && (styleFlags & ComponentPeer::windowHasTitleBar) != 0)
+    if (isResizable())
         styleFlags |= ComponentPeer::windowIsResizable;
 
     return styleFlags;
