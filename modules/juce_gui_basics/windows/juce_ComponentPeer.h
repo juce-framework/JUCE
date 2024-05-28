@@ -74,7 +74,7 @@ public:
                                                                            close button on it. */
         windowHasDropShadow                             = (1 << 8),   /**< Indicates that the window should have a drop-shadow (this may
                                                                            not be possible on all platforms). */
-        windowRepaintedExplictly                        = (1 << 9),   /**< Not intended for public use - this tells a window not to
+        windowRepaintedExplicitly                       = (1 << 9),   /**< Not intended for public use - this tells a window not to
                                                                            do its own repainting, but only to repaint when the
                                                                            performAnyPendingRepaintsNow() method is called. */
         windowIgnoresKeyPresses                         = (1 << 10),  /**< Tells the window not to catch any keypresses. This can
