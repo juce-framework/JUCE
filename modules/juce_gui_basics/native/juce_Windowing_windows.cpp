@@ -1459,7 +1459,6 @@ struct RenderContext
     virtual void setResizing (bool) = 0;
     virtual void handleNcCalcSize (WPARAM wParam, LPARAM lParam) = 0;
     virtual void handleShowWindow() = 0;
-    virtual std::optional<LRESULT> getNcHitTestResult() = 0;
 
     /*  Gets a snapshot of whatever the render context is currently showing. */
     virtual Image createSnapshot() = 0;
@@ -1579,17 +1578,56 @@ public:
             handlePaintMessage();
     }
 
-    void updateBorderSize()
+    std::optional<BorderSize<int>> getCustomBorderSize() const
     {
-        WINDOWINFO info;
+        if (hasTitleBar() || (styleFlags & windowAppearsOnTaskbar) == 0)
+            return {};
+
+        ScopedThreadDPIAwarenessSetter setter { hwnd };
+        // Apply standard padding to the left, right, and bottom of the client area.
+        // The system will use this for the resizable border area.
+        // No padding at the top, though, because we want to paint our own title there.
+        const auto dpi = GetDpiForWindow (hwnd);
+        const auto frameX = GetSystemMetricsForDpi (SM_CXFRAME, dpi);
+        const auto frameY = GetSystemMetricsForDpi (SM_CYFRAME, dpi);
+        const auto padding = GetSystemMetricsForDpi (SM_CXPADDEDBORDER, dpi);
+
+        // On Windows 11, the non-client area drawing will obscure the top pixel of the client
+        // area. Adding a bit of extra padding ensures that the entirety of the client area remains
+        // visible.
+        // Unfortunately, earlier Windows versions seem to display the full title bar if the top
+        // padding is not zero, so we have to use a different padding value there.
+        const auto topPadding = SystemStats::getOperatingSystemType() == SystemStats::Windows11
+                              ? (int) dpi / USER_DEFAULT_SCREEN_DPI
+                              : 0;
+
+        return BorderSize<int> { isFullScreen() ? frameY + padding : topPadding,
+                                 frameX + padding,
+                                 frameY + padding,
+                                 frameX + padding };
+    }
+
+    BorderSize<int> findPhysicalBorderSize() const
+    {
+        if (const auto custom = getCustomBorderSize())
+            return *custom;
+
+        ScopedThreadDPIAwarenessSetter setter { hwnd };
+
+        WINDOWINFO info{};
         info.cbSize = sizeof (info);
 
-        if (GetWindowInfo (hwnd, &info))
-            windowBorder = BorderSize<int> (roundToInt ((info.rcClient.top    - info.rcWindow.top)    / scaleFactor),
-                                            roundToInt ((info.rcClient.left   - info.rcWindow.left)   / scaleFactor),
-                                            roundToInt ((info.rcWindow.bottom - info.rcClient.bottom) / scaleFactor),
-                                            roundToInt ((info.rcWindow.right  - info.rcClient.right)  / scaleFactor));
+        if (! GetWindowInfo (hwnd, &info))
+            return {};
 
+        return { roundToInt ((info.rcClient.top    - info.rcWindow.top)),
+                 roundToInt ((info.rcClient.left   - info.rcWindow.left)),
+                 roundToInt ((info.rcWindow.bottom - info.rcClient.bottom)),
+                 roundToInt ((info.rcWindow.right  - info.rcClient.right)) };
+    }
+
+    void updateBorderSize()
+    {
         if (renderContext != nullptr)
             renderContext->updateBorderSize();
     }
@@ -1607,7 +1645,20 @@ public:
 
         fullScreen = isNowFullScreen;
 
-        auto newBounds = windowBorder.addedTo (bounds);
+        const auto borderSize = findPhysicalBorderSize();
+        auto newBounds = borderSize.addedTo ([&]
+        {
+            ScopedThreadDPIAwarenessSetter setter { hwnd };
+
+            if (! isPerMonitorDPIAwareWindow (hwnd))
+                return bounds;
+
+            if (inDpiChange)
+                return convertLogicalScreenRectangleToPhysical (bounds, hwnd);
+
+            return convertLogicalScreenRectangleToPhysical (bounds, hwnd)
+                    .withPosition (Desktop::getInstance().getDisplays().logicalToPhysical (bounds.getTopLeft()));
+        }());
 
         if (isNotOpaque())
         {
@@ -1618,17 +1669,29 @@ public:
             }
         }
 
-        auto oldBounds = getBounds();
+        const auto oldBounds = [this]
+        {
+            ScopedThreadDPIAwarenessSetter setter { hwnd };
+            RECT result;
+            GetWindowRect (hwnd, &result);
+            return D2DUtilities::toRectangle (result);
+        }();
 
         const bool hasMoved = (oldBounds.getPosition() != bounds.getPosition());
         const bool hasResized = (oldBounds.getWidth() != bounds.getWidth()
                                   || oldBounds.getHeight() != bounds.getHeight());
 
-        DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER;
+        DWORD flags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED;
         if (! hasMoved)    flags |= SWP_NOMOVE;
         if (! hasResized)  flags |= SWP_NOSIZE;
 
-        setWindowPos (hwnd, newBounds, flags, ! inDpiChange);
+        SetWindowPos (hwnd,
+                      nullptr,
+                      newBounds.getX(),
+                      newBounds.getY(),
+                      newBounds.getWidth(),
+                      newBounds.getHeight(),
+                      flags);
 
         if (hasResized && isValidPeer (this))
         {
@@ -1639,28 +1702,20 @@ public:
 
     Rectangle<int> getBounds() const override
     {
-        auto bounds = [this]
-        {
-            if (parentToAddTo == nullptr)
-                return convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
+        if (parentToAddTo == nullptr)
+            return convertPhysicalScreenRectangleToLogical (findPhysicalBorderSize().subtractedFrom (D2DUtilities::toRectangle (getWindowScreenRect (hwnd))), hwnd);
 
-            auto localBounds = D2DUtilities::toRectangle (getWindowClientRect (hwnd));
+        auto localBounds = D2DUtilities::toRectangle (getWindowClientRect (hwnd));
 
-            if (isPerMonitorDPIAwareWindow (hwnd))
-                return (localBounds.toDouble() / getPlatformScaleFactor()).toNearestInt();
+        if (isPerMonitorDPIAwareWindow (hwnd))
+            return (localBounds.toDouble() / getPlatformScaleFactor()).toNearestInt();
 
-            return localBounds;
-        }();
-
-        return windowBorder.subtractedFrom (bounds);
+        return localBounds;
     }
 
     Point<int> getScreenPosition() const
     {
-        auto r = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
-
-        return { r.getX() + windowBorder.getLeft(),
-                 r.getY() + windowBorder.getTop() };
+        return convertPhysicalScreenRectangleToLogical (findPhysicalBorderSize().subtractedFrom (D2DUtilities::toRectangle (getWindowScreenRect (hwnd))), hwnd).getPosition();
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition().toFloat(); }
@@ -1730,18 +1785,14 @@ public:
             {
                 auto boundsCopy = lastNonFullscreenBounds;
 
-                if (hasTitleBar())
-                    ShowWindow (hwnd, SW_SHOWNORMAL);
+                ShowWindow (hwnd, SW_SHOWNORMAL);
 
                 if (! boundsCopy.isEmpty())
                     setBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, boundsCopy), false);
             }
             else
             {
-                if (hasTitleBar())
-                    ShowWindow (hwnd, SW_SHOWMAXIMIZED);
-                else
-                    SendMessageW (hwnd, WM_SETTINGCHANGE, 0, 0);
+                ShowWindow (hwnd, SW_SHOWMAXIMIZED);
             }
 
             if (deletionChecker != nullptr)
@@ -1757,9 +1808,6 @@ public:
 
     bool isFullScreen() const override
     {
-        if (! hasTitleBar())
-            return fullScreen;
-
         WINDOWPLACEMENT wp;
         wp.length = sizeof (wp);
         GetWindowPlacement (hwnd, &wp);
@@ -1782,12 +1830,12 @@ public:
 
     OptionalBorderSize getFrameSizeIfPresent() const override
     {
-        return ComponentPeer::OptionalBorderSize { windowBorder };
+        return ComponentPeer::OptionalBorderSize { getFrameSize() };
     }
 
     BorderSize<int> getFrameSize() const override
     {
-        return windowBorder;
+        return findPhysicalBorderSize().multipliedBy (1.0 / scaleFactor);
     }
 
     bool setAlwaysOnTop (bool alwaysOnTop) override
@@ -2233,7 +2281,6 @@ private:
     ULONGLONG lastMagnifySize = 0;
     bool fullScreen = false, isDragging = false, isMouseOver = false,
          hasCreatedCaret = false, constrainerIsResizing = false;
-    BorderSize<int> windowBorder;
     IconConverters::IconPtr currentWindowIcon;
     FileDropTarget* dropTarget = nullptr;
     UWPUIViewSettings uwpViewSettings;
@@ -2394,32 +2441,32 @@ private:
         {
             type |= WS_OVERLAPPED;
 
-            if ((styleFlags & windowHasCloseButton) != 0)
-            {
-                type |= WS_SYSMENU;
-            }
-            else
+            if ((styleFlags & windowHasCloseButton) == 0)
             {
                 // annoyingly, windows won't let you have a min/max button without a close button
                 jassert ((styleFlags & (windowHasMinimiseButton | windowHasMaximiseButton)) == 0);
             }
-
-            if ((styleFlags & windowIsResizable) != 0)
-                type |= WS_THICKFRAME;
         }
         else if (parentToAddTo != nullptr)
         {
             type |= WS_CHILD;
         }
-        else
-        {
-            type |= WS_POPUP | WS_SYSMENU;
-        }
 
-        if ((styleFlags & windowAppearsOnTaskbar) == 0)
-            exstyle |= WS_EX_TOOLWINDOW;
-        else
-            exstyle |= WS_EX_APPWINDOW;
+        if (parentToAddTo == nullptr)
+        {
+            if ((styleFlags & windowAppearsOnTaskbar) != 0)
+            {
+                exstyle |= WS_EX_APPWINDOW;
+            }
+            else
+            {
+                exstyle |= WS_EX_TOOLWINDOW;
+                type |= WS_POPUP; // Note that popup windows don't get rounded corners by default
+            }
+
+            if ((styleFlags & windowIsResizable) != 0)
+                type |= WS_THICKFRAME | WS_SYSMENU;
+        }
 
         // Don't set WS_EX_TRANSPARENT here; setting that flag hides OpenGL child windows
         // behind the Direct2D composition tree.
@@ -2430,6 +2477,14 @@ private:
         hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->getWindowClassName(),
                                L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
                                (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
+
+        if (! hasTitleBar() && parentToAddTo == nullptr)
+        {
+            // Disable rounded corners on Windows 11 for custom windows with no titlebar,
+            // because window borders look weird when they get rounded away.
+            const auto pref = DWMWCP_DONOTROUND;
+            DwmSetWindowAttribute (hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &pref, sizeof (pref));
+        }
 
        #if JUCE_DEBUG
         // The DPI-awareness context of this window and JUCE's hidden message window are different.
@@ -2545,8 +2600,10 @@ private:
 
     void updateShadower()
     {
-        if (! component.isCurrentlyModal() && (styleFlags & windowHasDropShadow) != 0
-            && ((! hasTitleBar()) || SystemStats::getOperatingSystemType() < SystemStats::WinVista))
+        if (! component.isCurrentlyModal()
+            && (styleFlags & windowHasDropShadow) != 0
+            && (styleFlags & windowIsTemporary) != 0
+            && (! hasTitleBar() || SystemStats::getOperatingSystemType() < SystemStats::WinVista))
         {
             shadower = component.getLookAndFeel().createDropShadowerForComponent (component);
 
@@ -2628,7 +2685,13 @@ private:
         return false;
     }
 
-    void doMouseMove (Point<float> position, bool isMouseDownEvent)
+    enum class WindowArea
+    {
+        nonclient,
+        client,
+    };
+
+    void doMouseMove (Point<float> position, bool isMouseDownEvent, WindowArea area)
     {
         ModifierKeys modsToSend (ModifierKeys::currentModifiers);
 
@@ -2662,7 +2725,8 @@ private:
             if (! TrackMouseEvent (&tme))
                 jassertfalse;
 
-            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
+            if (area == WindowArea::client)
+                Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
         }
         else if (! isDragging)
         {
@@ -2685,7 +2749,7 @@ private:
         }
     }
 
-    void doMouseDown (Point<float> position, const WPARAM wParam)
+    void doMouseDown (Point<float> position, const WPARAM wParam, WindowArea area)
     {
         // this will be handled by WM_TOUCH
         if (isTouchEvent() || areOtherTouchSourcesActive())
@@ -2694,7 +2758,7 @@ private:
         if (GetCapture() != hwnd)
             SetCapture (hwnd);
 
-        doMouseMove (position, true);
+        doMouseMove (position, true, area);
 
         if (isValidPeer (this))
         {
@@ -3247,32 +3311,51 @@ private:
     bool isConstrainedNativeWindow() const
     {
         return constrainer != nullptr
-                && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable)
+                && (styleFlags & windowIsResizable) != 0
                 && ! isKioskMode();
     }
 
     Rectangle<int> getCurrentScaledBounds() const
     {
-        return detail::ScalingHelpers::unscaledScreenPosToScaled (component, windowBorder.addedTo (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBounds())));
+        const auto windowBorder = findPhysicalBorderSize().multipliedBy (1.0 / scaleFactor);
+        const auto unscaled = windowBorder.addedTo (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBounds()));
+        return detail::ScalingHelpers::unscaledScreenPosToScaled (component, unscaled);
     }
 
     LRESULT handleSizeConstraining (RECT& r, const WPARAM wParam)
     {
         if (isConstrainedNativeWindow())
         {
-            const auto logicalBounds = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (r).toFloat(), hwnd);
-            auto pos = detail::ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds).toNearestInt();
+            const auto movingTop    = wParam == WMSZ_TOP    || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_TOPRIGHT;
+            const auto movingLeft   = wParam == WMSZ_LEFT   || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_BOTTOMLEFT;
+            const auto movingBottom = wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT;
+            const auto movingRight  = wParam == WMSZ_RIGHT  || wParam == WMSZ_TOPRIGHT   || wParam == WMSZ_BOTTOMRIGHT;
 
-            const auto original = getCurrentScaledBounds();
+            const auto snap = [&] (auto original, auto constrained)
+            {
+                const auto snappedX = movingLeft ? constrained.withRightX  (original.getRight())  : constrained.withX (original.getX());
+                const auto snappedY = movingTop  ? snappedX   .withBottomY (original.getBottom()) : snappedX   .withY (original.getY());
+                return snappedY;
+            };
 
-            constrainer->checkBounds (pos, original,
+            const auto physicalBounds = D2DUtilities::toRectangle (r);
+            const auto logicalBounds = convertPhysicalScreenRectangleToLogical (physicalBounds.toFloat(), hwnd);
+            const auto posFloat = detail::ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds);
+            auto pos = posFloat.toNearestInt();
+
+            constrainer->checkBounds (pos,
+                                      getCurrentScaledBounds(),
                                       Desktop::getInstance().getDisplays().getTotalBounds (true),
-                                      wParam == WMSZ_TOP    || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_TOPRIGHT,
-                                      wParam == WMSZ_LEFT   || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_BOTTOMLEFT,
-                                      wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
-                                      wParam == WMSZ_RIGHT  || wParam == WMSZ_TOPRIGHT   || wParam == WMSZ_BOTTOMRIGHT);
+                                      movingTop,
+                                      movingLeft,
+                                      movingBottom,
+                                      movingRight);
 
-            r = D2DUtilities::toRECT (convertLogicalScreenRectangleToPhysical (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()).toNearestInt(), hwnd));
+            const auto snappedLogicalPos = snap (posFloat, pos.toFloat());
+            const auto newPhysicalRect = convertLogicalScreenRectangleToPhysical (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, snappedLogicalPos).toNearestInt(), hwnd);
+            const auto snappedPhysicalPos = snap (physicalBounds, newPhysicalRect);
+
+            r = D2DUtilities::toRECT (snappedPhysicalPos);
         }
 
         updateBorderSize();
@@ -3457,29 +3540,29 @@ private:
 
     void handleLeftClickInNCArea (WPARAM wParam)
     {
-        if (! sendInputAttemptWhenModalMessage())
-        {
-            switch (wParam)
-            {
-            case HTBOTTOM:
-            case HTBOTTOMLEFT:
-            case HTBOTTOMRIGHT:
-            case HTGROWBOX:
-            case HTLEFT:
-            case HTRIGHT:
-            case HTTOP:
-            case HTTOPLEFT:
-            case HTTOPRIGHT:
-                if (isConstrainedNativeWindow())
-                {
-                    constrainerIsResizing = true;
-                    constrainer->resizeStart();
-                }
-                break;
+        if (sendInputAttemptWhenModalMessage())
+            return;
 
-            default:
-                break;
+        switch (wParam)
+        {
+        case HTBOTTOM:
+        case HTBOTTOMLEFT:
+        case HTBOTTOMRIGHT:
+        case HTGROWBOX:
+        case HTLEFT:
+        case HTRIGHT:
+        case HTTOP:
+        case HTTOPLEFT:
+        case HTTOPRIGHT:
+            if (isConstrainedNativeWindow())
+            {
+                constrainerIsResizing = true;
+                constrainer->resizeStart();
             }
+            return;
+
+        default:
+            break;
         }
     }
 
@@ -3557,6 +3640,12 @@ private:
         return { GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam) };
     }
 
+    Point<float> getLocalPointFromScreenLParam (LPARAM lParam)
+    {
+        const auto globalPos = D2DUtilities::toPoint (getPOINTFromLParam (lParam));
+        return globalToLocal (convertPhysicalScreenPointToLogical (globalPos, hwnd).toFloat());
+    }
+
     Point<float> getPointFromLocalLParam (LPARAM lParam) noexcept
     {
         auto p = D2DUtilities::toPoint (getPOINTFromLParam (lParam));
@@ -3566,8 +3655,9 @@ private:
             // LPARAM is relative to this window's top-left but may be on a different monitor so we need to calculate the
             // physical screen position and then convert this to local logical coordinates
             auto r = getWindowScreenRect (hwnd);
-            return globalToLocal (Desktop::getInstance().getDisplays().physicalToLogical (D2DUtilities::toPoint ({ r.left + p.x + roundToInt (windowBorder.getLeft() * scaleFactor),
-                                                                                                                   r.top  + p.y + roundToInt (windowBorder.getTop()  * scaleFactor) })).toFloat());
+            const auto windowBorder = findPhysicalBorderSize();
+            return globalToLocal (Desktop::getInstance().getDisplays().physicalToLogical (D2DUtilities::toPoint ({ r.left + p.x + windowBorder.getLeft(),
+                                                                                                                   r.top  + p.y + windowBorder.getTop() })).toFloat());
         }
 
         return p.toFloat();
@@ -3584,14 +3674,41 @@ private:
         {
             //==============================================================================
             case WM_NCHITTEST:
+            {
                 if ((styleFlags & windowIgnoresMouseClicks) != 0)
                     return HTTRANSPARENT;
 
-                if (renderContext != nullptr)
-                    if (auto result = renderContext->getNcHitTestResult())
-                        return *result;
+                if (! hasTitleBar() && parentToAddTo == nullptr)
+                {
+                    if ((styleFlags & windowIsResizable) != 0)
+                        if (const auto result = DefWindowProc (h, message, wParam, lParam); HTSIZEFIRST <= result && result <= HTSIZELAST)
+                            return result;
+
+                    const auto kind = component.findControlAtPoint (getLocalPointFromScreenLParam (lParam).toFloat());
+
+                    using Kind = Component::WindowControlKind;
+                    switch (kind)
+                    {
+                        case Kind::client:          return HTCLIENT;
+                        case Kind::caption:         return HTCAPTION;
+                        case Kind::minimise:        return HTMINBUTTON;
+                        case Kind::maximise:        return HTMAXBUTTON;
+                        case Kind::close:           return HTCLOSE;
+                        case Kind::sizeTop:         return HTTOP;
+                        case Kind::sizeLeft:        return HTLEFT;
+                        case Kind::sizeRight:       return HTRIGHT;
+                        case Kind::sizeBottom:      return HTBOTTOM;
+                        case Kind::sizeTopLeft:     return HTTOPLEFT;
+                        case Kind::sizeTopRight:    return HTTOPRIGHT;
+                        case Kind::sizeBottomLeft:  return HTBOTTOMLEFT;
+                        case Kind::sizeBottomRight: return HTBOTTOMRIGHT;
+                    }
+
+                    return HTNOWHERE;
+                }
 
                 break;
+            }
 
             //==============================================================================
             case WM_PAINT:
@@ -3599,12 +3716,11 @@ private:
                 return 0;
 
             case WM_NCPAINT:
-                handlePaintMessage(); // this must be done, even with native titlebars, or there are rendering artifacts.
-
-                if (hasTitleBar())
-                    break; // let the DefWindowProc handle drawing the frame.
-
-                return 0;
+                // this must be done, even with native titlebars, or there are rendering artifacts.
+                handlePaintMessage();
+                // Even if we're *not* using a native titlebar (i.e. extending into the nonclient area)
+                // the system needs to handle the NCPAINT to draw rounded corners and shadows.
+                break;
 
             case WM_ERASEBKGND:
                 if (hasTitleBar())
@@ -3613,10 +3729,27 @@ private:
                 return 1;
 
             case WM_NCCALCSIZE:
+            {
                 if (renderContext != nullptr)
                     renderContext->handleNcCalcSize (wParam, lParam);
 
-                break;
+                if (! wParam)
+                    break;
+
+                const auto custom = getCustomBorderSize();
+
+                if (! custom.has_value())
+                    break;
+
+                auto& rect = *reinterpret_cast<NCCALCSIZE_PARAMS *> (lParam)->rgrc;
+
+                rect.top += custom->getTop();
+                rect.bottom -= custom->getBottom();
+                rect.left += custom->getLeft();
+                rect.right -= custom->getRight();
+
+                return 0;
+            }
 
             //==============================================================================
             case WM_POINTERUPDATE:
@@ -3635,14 +3768,21 @@ private:
                 break;
 
             //==============================================================================
-            case WM_MOUSEMOVE:          doMouseMove (getPointFromLocalLParam (lParam), false); return 0;
+            case WM_NCMOUSEMOVE:
+            case WM_MOUSEMOVE:
+                doMouseMove (message == WM_MOUSEMOVE ? getPointFromLocalLParam (lParam) : getLocalPointFromScreenLParam (lParam),
+                             false,
+                             message == WM_MOUSEMOVE ? WindowArea::client : WindowArea::nonclient);
+                return 0;
 
             case WM_POINTERLEAVE:
             case WM_MOUSELEAVE:         doMouseExit(); return 0;
 
             case WM_LBUTTONDOWN:
             case WM_MBUTTONDOWN:
-            case WM_RBUTTONDOWN:        doMouseDown (getPointFromLocalLParam (lParam), wParam); return 0;
+            case WM_RBUTTONDOWN:
+                doMouseDown (getPointFromLocalLParam (lParam), wParam, WindowArea::client);
+                return 0;
 
             case WM_LBUTTONUP:
             case WM_MBUTTONUP:
@@ -3655,13 +3795,6 @@ private:
             case 0x020E: /* WM_MOUSEHWHEEL */  doMouseWheel (wParam, false); return 0;
 
             case WM_CAPTURECHANGED:     doCaptureChanged(); return 0;
-
-            case WM_NCPOINTERUPDATE:
-            case WM_NCMOUSEMOVE:
-                if (hasTitleBar())
-                    break;
-
-                return 0;
 
             case WM_TOUCH:
                 if (getTouchInputInfo != nullptr)
@@ -3867,12 +4000,8 @@ private:
                     if (sendInputAttemptWhenModalMessage())
                         return 0;
 
-                    if (hasTitleBar())
-                    {
-                        PostMessage (h, WM_CLOSE, 0, 0);
-                        return 0;
-                    }
-                    break;
+                    PostMessage (h, WM_CLOSE, 0, 0);
+                    return 0;
 
                 case SC_KEYMENU:
                    #if ! JUCE_WINDOWS_ALT_KEY_TRIGGERS_MENU
@@ -3887,27 +4016,24 @@ private:
 
                     // (NB mustn't call sendInputAttemptWhenModalMessage() here because of very obscure
                     // situations that can arise if a modal loop is started from an alt-key keypress).
-                    if (hasTitleBar() && h == GetCapture())
+                    if (h == GetCapture())
                         ReleaseCapture();
 
                     break;
 
                 case SC_MAXIMIZE:
-                    if (! sendInputAttemptWhenModalMessage())
-                        setFullScreen (true);
+                    if (sendInputAttemptWhenModalMessage())
+                        return 0;
 
+                    setFullScreen (true);
                     return 0;
 
                 case SC_MINIMIZE:
                     if (sendInputAttemptWhenModalMessage())
                         return 0;
 
-                    if (! hasTitleBar())
-                    {
-                        setMinimised (true);
-                        return 0;
-                    }
-                    break;
+                    setMinimised (true);
+                    return 0;
 
                 case SC_RESTORE:
                     if (sendInputAttemptWhenModalMessage())
@@ -3936,14 +4062,38 @@ private:
                 break;
 
             case WM_NCPOINTERDOWN:
+                handleLeftClickInNCArea (HIWORD (wParam));
+                break;
+
             case WM_NCLBUTTONDOWN:
                 handleLeftClickInNCArea (wParam);
+
+                if (wParam == HTCLOSE || wParam == HTMAXBUTTON || wParam == HTMINBUTTON)
+                    return 0;
+
+                break;
+
+            case WM_NCLBUTTONUP:
+                switch (wParam)
+                {
+                    case HTCLOSE:
+                        PostMessage (h, WM_CLOSE, 0, 0);
+                        return 0;
+
+                    case HTMAXBUTTON:
+                        setFullScreen (! isFullScreen());
+                        return 0;
+
+                    case HTMINBUTTON:
+                        setMinimised (true);
+                        return 0;
+                }
                 break;
 
             case WM_NCRBUTTONDOWN:
             case WM_NCMBUTTONDOWN:
                 sendInputAttemptWhenModalMessage();
-                break;
+                return 0;
 
             case WM_IME_SETCONTEXT:
                 imeHandler.handleSetContext (h, wParam == TRUE);
@@ -3979,7 +4129,7 @@ private:
                 break;
         }
 
-        return DefWindowProcW (h, message, wParam, lParam);
+        return DefWindowProc (h, message, wParam, lParam);
     }
 
     bool sendInputAttemptWhenModalMessage()
@@ -4459,14 +4609,6 @@ public:
 
     void onVBlank() override {}
 
-    std::optional<LRESULT> getNcHitTestResult() override
-    {
-        if (! peer.hasTitleBar())
-            return HTCLIENT;
-
-        return {};
-    }
-
     void setResizing (bool) override {}
     void handleNcCalcSize (WPARAM, LPARAM) override {}
     void handleShowWindow() override {}
@@ -4722,8 +4864,6 @@ public:
     {
         handleDirect2DPaint();
     }
-
-    std::optional<LRESULT> getNcHitTestResult() override { return {}; }
 
     void setResizing (bool x) override
     {
