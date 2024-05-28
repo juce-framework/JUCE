@@ -406,6 +406,11 @@ public:
         resizing = x;
     }
 
+    bool getResizing() const
+    {
+        return resizing;
+    }
+
     void setSize (Rectangle<int> size)
     {
         if (size == frameSize || size.isEmpty())
@@ -690,6 +695,11 @@ void Direct2DHwndContext::setWindowAlpha (float alpha)
 void Direct2DHwndContext::setResizing (bool x)
 {
     pimpl->setResizing (x);
+}
+
+bool Direct2DHwndContext::getResizing() const
+{
+    return pimpl->getResizing();
 }
 
 void Direct2DHwndContext::setSize (int width, int height)
