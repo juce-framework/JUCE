@@ -264,13 +264,68 @@ int DocumentWindow::getTitleBarHeight() const
     return isUsingNativeTitleBar() ? 0 : jmin (titleBarHeight, getHeight() - 4);
 }
 
-Rectangle<int> DocumentWindow::getTitleBarArea()
+Rectangle<int> DocumentWindow::getTitleBarArea() const
 {
     if (isKioskMode())
         return {};
 
     auto border = getBorderThickness();
     return { border.getLeft(), border.getTop(), getWidth() - border.getLeftAndRight(), getTitleBarHeight() };
+}
+
+auto DocumentWindow::findControlAtPoint (Point<float> pt) const -> WindowControlKind
+{
+    if (resizableBorder != nullptr)
+    {
+        using Zone = ResizableBorderComponent::Zone;
+        const auto zone = Zone::fromPositionOnBorder (getLocalBounds(),
+                                                      resizableBorder->getBorderThickness(),
+                                                      pt.roundToInt());
+
+        switch (zone.getZoneFlags())
+        {
+            case Zone::top: return WindowControlKind::sizeTop;
+            case Zone::left: return WindowControlKind::sizeLeft;
+            case Zone::right: return WindowControlKind::sizeRight;
+            case Zone::bottom: return WindowControlKind::sizeBottom;
+
+            case Zone::top | Zone::left: return WindowControlKind::sizeTopLeft;
+            case Zone::top | Zone::right: return WindowControlKind::sizeTopRight;
+            case Zone::bottom | Zone::left: return WindowControlKind::sizeBottomLeft;
+            case Zone::bottom | Zone::right: return WindowControlKind::sizeBottomRight;
+        }
+    }
+
+    const auto topArea = getTitleBarArea().withTop (0);
+
+    if (! topArea.toFloat().contains (pt))
+        return WindowControlKind::client;
+
+    for (const auto& [control, kind] : { std::tuple (getMinimiseButton(), WindowControlKind::minimise),
+                                         std::tuple (getMaximiseButton(), WindowControlKind::maximise),
+                                         std::tuple (getCloseButton(),    WindowControlKind::close) })
+    {
+        if (control != nullptr && control->contains (control->getLocalPoint (this, pt)))
+            return kind;
+    }
+
+    // Add a few pixels for the top resizer, because Windows 11 expects the top resizer to be inside
+    // the window, unlike the resizers on the bottom/left/right.
+    constexpr auto topResizerSize = 4;
+    const auto topResizerArea = getLocalBounds().withHeight (topResizerSize).toFloat();
+
+    if (topResizerArea.contains (pt))
+    {
+        if (pt.x <= topResizerArea.getX() + topResizerSize)
+            return WindowControlKind::sizeTopLeft;
+
+        if (topResizerArea.getRight() - topResizerSize <= pt.x)
+            return WindowControlKind::sizeTopRight;
+
+        return WindowControlKind::sizeTop;
+    }
+
+    return WindowControlKind::caption;
 }
 
 Button* DocumentWindow::getCloseButton()    const noexcept  { return titleBarButtons[2].get(); }

@@ -291,7 +291,9 @@ public:
     /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
-    Rectangle<int> getTitleBarArea();
+    Rectangle<int> getTitleBarArea() const;
+    /** @internal */
+    WindowControlKind findControlAtPoint (Point<float>) const override;
    #endif
 
 private:
