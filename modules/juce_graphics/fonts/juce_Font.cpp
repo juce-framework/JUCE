@@ -763,22 +763,22 @@ int Font::getStringWidth (const String& text) const
 
 float Font::getStringWidthFloat (const String& text) const
 {
-    const auto w = getTypefacePtr()->getStringWidth (font->getMetricsKind(), text, getHeight(), getHorizontalScale());
-    return w + (font->getHeight() * font->getHorizontalScale() * font->getKerning() * (float) text.length());
+    const auto w = getTypefacePtr()->getStringWidth (getMetricsKind(), text, getHeight(), getHorizontalScale());
+    return w + (getHeight() * getHorizontalScale() * getExtraKerningFactor() * (float) text.length());
 }
 
 void Font::getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) const
 {
-    getTypefacePtr()->getGlyphPositions (font->getMetricsKind(), text, glyphs, xOffsets, getHeight(), getHorizontalScale());
+    getTypefacePtr()->getGlyphPositions (getMetricsKind(), text, glyphs, xOffsets, getHeight(), getHorizontalScale());
 
     if (auto num = xOffsets.size())
     {
-        auto scale = font->getHeight() * font->getHorizontalScale();
+        auto scale = getHeight() * getHorizontalScale();
         auto* x = xOffsets.getRawDataPointer();
 
-        if (! approximatelyEqual (font->getKerning(), 0.0f))
+        if (! approximatelyEqual (getExtraKerningFactor(), 0.0f))
             for (int i = 0; i < num; ++i)
-                x[i] += ((float) i * font->getKerning() * scale);
+                x[i] += ((float) i * getExtraKerningFactor() * scale);
     }
 }
 
