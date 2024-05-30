@@ -214,7 +214,6 @@ HarfBuzz Typeface implementation. New support for automatic font fallback
 will be introduced in JUCE 8, and this will obviate much of the need for
 CustomTypeface.
 
->>>>>>> 94454123d6 (Typeface: Implement platform typefaces using Harfbuzz hb_font_t)
 
 ## Change
 
@@ -426,6 +425,48 @@ The new JUCE End User Licence Agreement is much easier to understand, and has a
 much more generous personal tier. The move from ISC to AGPLv3/JUCE simplifies
 the licensing situation and encourages the creation of more open source software
 without impacting personal use of the JUCE framework.
+
+
+# Version 7.0.12
+
+## Change
+
+The function AudioChannelSet::create9point0point4, along with variants for
+9.1.4, 9.0.6, and 9.1.6, used to correspond to VST3 layouts k90_4, k91_4,
+k90_6, and k91_6 respectively. These functions now correspond to k90_4_W,
+k91_4_W, k90_6_W, and k91_6_W respectively.
+
+**Possible Issues**
+
+VST3 plugins that used these AudioChannelSet layouts to specify initial bus
+layouts, or to validate layouts in isBusesLayoutSupported, will now behave
+differently.
+
+For example, if the host wants to check whether the k90_4 layout is supported,
+previously isBusesLayoutSupported() would have received the layout created by
+create9point0point4(), but will now receive the layout created by
+create9point0point4ITU().
+
+**Workaround**
+
+If you already have special-case handling for specific surround layouts,
+e.g. to enable or disable them in isBusesLayoutSupported(), you may need to
+add cases to handle the new AudioChannelSet::create*ITU() layout variants.
+
+**Rationale**
+
+Previously, the VST3 SDK only contained ITU higher-order surround layouts, but
+the higher-order layouts specified in JUCE used Atmos speaker positions rather
+than ITU speaker positions. This meant that JUCE had to remap speaker layouts
+between Atmos/ITU formats when communicating with VST3 plugins. This was
+confusing, as it required that the meaning of some channels was changed during
+the conversion.
+
+In newer versions of the VST3 SDK, new "wide" left and right speaker
+definitions are available, allowing both ITU and Atmos surround layouts to be
+represented. The change in JUCE surfaces this distinction to the user, allowing
+them to determine e.g. whether the host has requested an ITU or an Atmos
+layout, and to handle these cases separately if necessary.
 
 
 # Version 7.0.10

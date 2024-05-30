@@ -57,9 +57,9 @@ public:
             expect (map.getJuceChannelForVst3Channel (1) == 1); // R -> right
         }
 
-        beginTest ("ChannelMapping for a 9.1.6 bus remaps the channels appropriately");
+        beginTest ("ChannelMapping for a k91_6 bus remaps the channels appropriately");
         {
-            ChannelMapping map (AudioChannelSet::create9point1point6());
+            ChannelMapping map (AudioChannelSet::create9point1point6ITU());
             expect (map.size() == 16);
 
             // VST3 order is:
@@ -80,6 +80,64 @@ public:
             //      Tsl
             //      Tsr
             // JUCE order is:
+            //      left
+            //      right
+            //      centre
+            //      LFE
+            //      leftSurround
+            //      rightSurround
+            //      leftCentre
+            //      rightCentre
+            //      leftSurroundSide
+            //      rightSurroundSide
+            //      topFrontLeft
+            //      topRearRight
+            //      topRearLeft
+            //      topRearRight
+            //      topSideLeft
+            //      topSideRight
+
+            expect (map.getJuceChannelForVst3Channel (0)  == 0);  // L   -> left
+            expect (map.getJuceChannelForVst3Channel (1)  == 1);  // R   -> right
+            expect (map.getJuceChannelForVst3Channel (2)  == 2);  // C   -> centre
+            expect (map.getJuceChannelForVst3Channel (3)  == 3);  // Lfe -> LFE
+            expect (map.getJuceChannelForVst3Channel (4)  == 4);  // Ls  -> leftSurround
+            expect (map.getJuceChannelForVst3Channel (5)  == 5);  // Rs  -> rightSurround
+            expect (map.getJuceChannelForVst3Channel (6)  == 6);  // Lc  -> leftCentre
+            expect (map.getJuceChannelForVst3Channel (7)  == 7);  // Rc  -> rightCentre
+            expect (map.getJuceChannelForVst3Channel (8)  == 8);  // Sl  -> leftSurroundSide
+            expect (map.getJuceChannelForVst3Channel (9)  == 9);  // Sr  -> rightSurroundSide
+            expect (map.getJuceChannelForVst3Channel (10) == 10); // Tfl -> topFrontLeft
+            expect (map.getJuceChannelForVst3Channel (11) == 11); // Tfr -> topFrontRight
+            expect (map.getJuceChannelForVst3Channel (12) == 12); // Trl -> topRearLeft
+            expect (map.getJuceChannelForVst3Channel (13) == 13); // Trr -> topRearRight
+            expect (map.getJuceChannelForVst3Channel (14) == 14); // Tsl -> topSideLeft
+            expect (map.getJuceChannelForVst3Channel (15) == 15); // Tsr -> topSideRight
+        }
+
+        beginTest ("ChannelMapping for a k91_6_W bus remaps the channels appropriately");
+        {
+            ChannelMapping map (AudioChannelSet::create9point1point6());
+            expect (map.size() == 16);
+
+            // VST3 order is:
+            //      L
+            //      R
+            //      C
+            //      Lfe
+            //      Ls
+            //      Rs
+            //      Sl
+            //      Sr
+            //      Tfl
+            //      Tfr
+            //      Trl
+            //      Trr
+            //      Tsl
+            //      Tsr
+            //      Lw
+            //      Rw
+            // JUCE order is:
             //      Left
             //      Right
             //      Centre
@@ -97,22 +155,22 @@ public:
             //      Top Side Left
             //      Top Side Right
 
-            expect (map.getJuceChannelForVst3Channel (0)  == 12); // L   -> wideLeft
-            expect (map.getJuceChannelForVst3Channel (1)  == 13); // R   -> wideRight
+            expect (map.getJuceChannelForVst3Channel (0)  == 0);  // L   -> left
+            expect (map.getJuceChannelForVst3Channel (1)  == 1);  // R   -> right
             expect (map.getJuceChannelForVst3Channel (2)  == 2);  // C   -> centre
             expect (map.getJuceChannelForVst3Channel (3)  == 3);  // Lfe -> LFE
             expect (map.getJuceChannelForVst3Channel (4)  == 10); // Ls  -> leftSurroundRear
             expect (map.getJuceChannelForVst3Channel (5)  == 11); // Rs  -> rightSurroundRear
-            expect (map.getJuceChannelForVst3Channel (6)  == 0);  // Lc  -> left
-            expect (map.getJuceChannelForVst3Channel (7)  == 1);  // Rc  -> right
-            expect (map.getJuceChannelForVst3Channel (8)  == 4);  // Sl  -> leftSurroundSide
-            expect (map.getJuceChannelForVst3Channel (9)  == 5);  // Sl  -> leftSurroundSide
-            expect (map.getJuceChannelForVst3Channel (10) == 6);  // Tfl -> topFrontLeft
-            expect (map.getJuceChannelForVst3Channel (11) == 7);  // Tfr -> topFrontRight
-            expect (map.getJuceChannelForVst3Channel (12) == 8);  // Trl -> topRearLeft
-            expect (map.getJuceChannelForVst3Channel (13) == 9);  // Trr -> topRearRight
-            expect (map.getJuceChannelForVst3Channel (14) == 14); // Tsl -> topSideLeft
-            expect (map.getJuceChannelForVst3Channel (15) == 15); // Tsr -> topSideRight
+            expect (map.getJuceChannelForVst3Channel (6)  == 4);  // Sl  -> leftSurroundSide
+            expect (map.getJuceChannelForVst3Channel (7)  == 5);  // Sr  -> rightSurroundSide
+            expect (map.getJuceChannelForVst3Channel (8)  == 6);  // Tfl -> topFrontLeft
+            expect (map.getJuceChannelForVst3Channel (9)  == 7);  // Tfr -> topFrontRight
+            expect (map.getJuceChannelForVst3Channel (10) == 8);  // Trl -> topRearLeft
+            expect (map.getJuceChannelForVst3Channel (11) == 9);  // Trr -> topRearRight
+            expect (map.getJuceChannelForVst3Channel (12) == 14); // Tsl -> topSideLeft
+            expect (map.getJuceChannelForVst3Channel (13) == 15); // Tsr -> topSideRight
+            expect (map.getJuceChannelForVst3Channel (14) == 12); // Lw  -> wideLeft
+            expect (map.getJuceChannelForVst3Channel (15) == 13); // Lw  -> wideRight
         }
 
         const auto blockSize = 128;

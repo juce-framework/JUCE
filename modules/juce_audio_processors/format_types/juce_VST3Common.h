@@ -269,6 +269,8 @@ static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannel
         case AudioChannelSet::bottomRearLeft:    return Steinberg::Vst::kSpeakerBrl;
         case AudioChannelSet::bottomRearCentre:  return Steinberg::Vst::kSpeakerBrc;
         case AudioChannelSet::bottomRearRight:   return Steinberg::Vst::kSpeakerBrr;
+        case AudioChannelSet::wideLeft:          return Steinberg::Vst::kSpeakerLw;
+        case AudioChannelSet::wideRight:         return Steinberg::Vst::kSpeakerRw;
 
         case AudioChannelSet::discreteChannel0:  return Steinberg::Vst::kSpeakerM;
 
@@ -311,8 +313,6 @@ static std::optional<Steinberg::Vst::Speaker> getSpeakerType (const AudioChannel
         case AudioChannelSet::ambisonicACN61:
         case AudioChannelSet::ambisonicACN62:
         case AudioChannelSet::ambisonicACN63:
-        case AudioChannelSet::wideLeft:
-        case AudioChannelSet::wideRight:
         case AudioChannelSet::unknown:
             break;
     }
@@ -383,6 +383,8 @@ static std::optional<AudioChannelSet::ChannelType> getChannelType (Steinberg::Vs
         case Steinberg::Vst::kSpeakerBrl:   return AudioChannelSet::bottomRearLeft;
         case Steinberg::Vst::kSpeakerBrc:   return AudioChannelSet::bottomRearCentre;
         case Steinberg::Vst::kSpeakerBrr:   return AudioChannelSet::bottomRearRight;
+        case Steinberg::Vst::kSpeakerLw:    return AudioChannelSet::wideLeft;
+        case Steinberg::Vst::kSpeakerRw:    return AudioChannelSet::wideRight;
     }
 
     return {};
@@ -433,11 +435,15 @@ namespace detail
         { k71_6,                        { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
         { k70_6,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
 
-        // The VST3 layout uses 'left/right' and 'left-of-center/right-of-center', but the JUCE layout uses 'left/right' and 'wide-left/wide-right'.
-        { k91_4,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
-        { k90_4,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
-        { k91_6,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
-        { k90_6,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+        { k90_4_W,                      { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::wideLeft, X::wideRight } },
+        { k91_4_W,                      { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::wideLeft, X::wideRight } },
+        { k90_6_W,                      { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight, X::wideLeft, X::wideRight } },
+        { k91_6_W,                      { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight, X::wideLeft, X::wideRight } },
+
+        { k90_4,                        { X::left, X::right, X::centre,         X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k91_4,                        { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k90_6,                        { X::left, X::right, X::centre,         X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+        { k91_6,                        { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
     };
 
    #if JUCE_DEBUG
