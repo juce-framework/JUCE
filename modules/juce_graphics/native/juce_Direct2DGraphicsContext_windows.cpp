@@ -55,7 +55,7 @@ public:
     void push (ComSmartPtr<ID2D1DeviceContext1> context, const D2D1_LAYER_PARAMETERS& layerParameters)
     {
         // Clipping and transparency are all handled by pushing Direct2D
-        // layers.The SavedState creates an internal stack of Layer objects to
+        // layers. The SavedState creates an internal stack of Layer objects to
         // keep track of how many layers need to be popped. Pass nullptr for
         // the PushLayer layer parameter to allow Direct2D to manage the layers
         // (Windows 8 or later)
@@ -105,7 +105,7 @@ public:
 
             Sink sink;
             geometry->Simplify (D2D1_GEOMETRY_SIMPLIFICATION_OPTION_CUBICS_AND_LINES,
-                                D2D1::Matrix3x2F::Identity(),
+                                layerParameters.maskTransform,
                                 1.0f,
                                 &sink);
 
