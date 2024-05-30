@@ -275,12 +275,7 @@ public:
         jassert (getReferenceCount() == 1);
         typeface = newTypeface;
 
-        if (newTypeface != nullptr)
-        {
-            options = options.withTypeface (typeface)
-                             .withName (typeface->getName())
-                             .withStyle (typeface->getStyle());
-        }
+        options = options.withTypeface (typeface);
     }
 
     void setTypefaceName (String x)
@@ -477,8 +472,8 @@ void Font::setTypefaceName (const String& faceName)
         jassert (faceName.isNotEmpty());
 
         dupeInternalIfShared();
-        font->setTypefaceName (faceName);
         font->setTypeface (nullptr);
+        font->setTypefaceName (faceName);
     }
 }
 
@@ -487,8 +482,8 @@ void Font::setTypefaceStyle (const String& typefaceStyle)
     if (typefaceStyle != font->getTypefaceStyle())
     {
         dupeInternalIfShared();
-        font->setTypefaceStyle (typefaceStyle);
         font->setTypeface (nullptr);
+        font->setTypefaceStyle (typefaceStyle);
     }
 }
 
@@ -934,5 +929,105 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 
     return Native::getDefaultPlatformTypefaceForFont (font);
 }
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class FontTests : public UnitTest
+{
+public:
+    FontTests() : UnitTest ("Font", UnitTestCategories::graphics) {}
+
+    void runTest() override
+    {
+        const Span data { FontBinaryData::Karla_Regular_Typo_On_Offsets_Off };
+        const auto face = Typeface::createSystemTypefaceFor (data.data(), data.size());
+
+        beginTest ("Old constructor from Typeface");
+        {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+            Font f { face };
+            JUCE_END_IGNORE_WARNINGS_MSVC
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            expect (f.getTypefaceName() == face->getName());
+            expect (f.getTypefaceStyle() == face->getStyle());
+            expect (f.getTypefacePtr() == face);
+
+            f.setTypefaceStyle ("Italic");
+
+            expect (f.getTypefaceName() == face->getName());
+            expect (f.getTypefaceStyle() == "Italic");
+            expect (f.getTypefacePtr() != face);
+        }
+
+        beginTest ("FontOptions constructor from Typeface");
+        {
+            const FontOptions opt { face };
+            expect (opt.getName() == face->getName());
+            expect (opt.getStyle() == face->getStyle());
+            expect (opt.getTypeface() == face);
+
+            Font f { opt };
+
+            expect (f.getTypefaceName() == face->getName());
+            expect (f.getTypefaceStyle() == face->getStyle());
+            expect (f.getTypefacePtr() == face);
+
+            f.setTypefaceStyle ("Italic");
+
+            expect (f.getTypefaceName() == face->getName());
+            expect (f.getTypefaceStyle() == "Italic");
+            expect (f.getTypefacePtr() != face);
+        }
+
+        beginTest ("FontOptions constructor from Typeface with style and name set");
+        {
+            const auto opt = FontOptions { face }.withName ("placeholder").withStyle ("Italic");
+            expect (opt.getName() == face->getName());
+            expect (opt.getStyle() == face->getStyle());
+            expect (opt.getTypeface() == face);
+
+            Font f { opt };
+
+            expect (f.getTypefaceName() == face->getName());
+            expect (f.getTypefaceStyle() == face->getStyle());
+            expect (f.getTypefacePtr() == face);
+
+            f.setTypefaceStyle ("Italic");
+
+            expect (f.getTypefaceName() == face->getName());
+            expect (f.getTypefaceStyle() == "Italic");
+            expect (f.getTypefacePtr() != face);
+        }
+
+        auto a = FontOptions().withName ("placeholder").withStyle ("Italic");
+
+        beginTest ("Setting Typeface on FontOptions replaces previous name/style");
+        {
+            auto b = a.withTypeface (face);
+
+            expect (b.getName() == face->getName());
+            expect (b.getStyle() == face->getStyle());
+        }
+
+        beginTest ("Setting a name or style on a FontOptions holding a typeface has no effect");
+        {
+            auto b = a.withTypeface (face).withName ("name").withStyle ("style");
+            expect (b.getName() == face->getName());
+            expect (b.getStyle() == face->getStyle());
+
+            auto c = b.withTypeface (nullptr).withName ("name").withStyle ("style");
+            expect (c.getName() == "name");
+            expect (c.getStyle() == "style");
+        }
+    }
+};
+
+static FontTests fontTests;
+
+#endif
 
 } // namespace juce

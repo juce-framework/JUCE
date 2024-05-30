@@ -90,18 +90,44 @@ public:
         If the options include a non-null Typeface::Ptr, this will be ignored.
         Otherwise, a suitable typeface will be located based on the typeface name and style strings.
     */
-    [[nodiscard]] FontOptions withName            (String x)               const { return withMember (*this, &FontOptions::name, x); }
+    [[nodiscard]] FontOptions withName (String x) const
+    {
+        if (typeface == nullptr)
+            return withMember (*this, &FontOptions::name, x);
+
+        // This field will be ignored if the typeface pointer is non-null.
+        // If you want to set a custom name, first set the typeface pointer to null.
+        jassertfalse;
+        return *this;
+    }
 
     /** Returns a copy of these options with a new typeface style.
         If the options include a non-null Typeface::Ptr, this will be ignored.
         Otherwise, a suitable typeface will be located based on the typeface name and style strings.
     */
-    [[nodiscard]] FontOptions withStyle           (String x)               const { return withMember (*this, &FontOptions::style, x); }
+    [[nodiscard]] FontOptions withStyle (String x) const
+    {
+        if (typeface == nullptr)
+            return withMember (*this, &FontOptions::style, x);
+
+        // This field will be ignored if the typeface pointer is non-null.
+        // If you want to set a custom style, first set the typeface pointer to null.
+        jassertfalse;
+        return *this;
+    }
 
     /** Returns a copy of these options with a new typeface.
         If the typeface is non-null, it takes precedence over the name and style strings.
     */
-    [[nodiscard]] FontOptions withTypeface        (Typeface::Ptr x)        const { return withMember (*this, &FontOptions::typeface, x); }
+    [[nodiscard]] FontOptions withTypeface (Typeface::Ptr x) const
+    {
+        // If the typeface is non-null, then the name and style fields will be ignored.
+        jassert (x == nullptr || name.isEmpty());
+        jassert (x == nullptr || style.isEmpty());
+
+        auto result = (x != nullptr ? withName (x->getName()).withStyle (x->getStyle()) : *this);
+        return withMember (std::move (result), &FontOptions::typeface, x);
+    }
 
     /** Returns a copy of these options with a new set of preferred fallback family names. */
     [[nodiscard]] FontOptions withFallbacks       (std::vector<String> x)  const { return withMember (*this, &FontOptions::fallbacks, std::move (x)); }
