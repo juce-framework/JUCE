@@ -81,7 +81,7 @@ public:
             {
                 auto* v = listenersCopy.getUnchecked (i);
 
-                if (i == 0 || valueTreesWithListeners.contains (v))
+                if (i == 0 || valueTreesWithListeners[i] == v || valueTreesWithListeners.contains (v))
                     v->listeners.callExcluding (listenerToExclude, fn);
             }
         }
