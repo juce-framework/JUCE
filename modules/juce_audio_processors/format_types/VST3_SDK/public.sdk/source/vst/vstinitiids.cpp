@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -41,6 +41,7 @@
 #include "pluginterfaces/vst/ivstautomationstate.h"
 #include "pluginterfaces/vst/ivstchannelcontextinfo.h"
 #include "pluginterfaces/vst/ivstcontextmenu.h"
+#include "pluginterfaces/vst/ivstdataexchange.h"
 #include "pluginterfaces/vst/ivsteditcontroller.h"
 #include "pluginterfaces/vst/ivstevents.h"
 #include "pluginterfaces/vst/ivsthostapplication.h"
@@ -53,6 +54,7 @@
 #include "pluginterfaces/vst/ivstpluginterfacesupport.h"
 #include "pluginterfaces/vst/ivstplugview.h"
 #include "pluginterfaces/vst/ivstprefetchablesupport.h"
+#include "pluginterfaces/vst/ivstremapparamid.h"
 #include "pluginterfaces/vst/ivstrepresentation.h"
 #include "pluginterfaces/vst/ivsttestplugprovider.h"
 #include "pluginterfaces/vst/ivstunits.h"
@@ -138,8 +140,15 @@ DEF_CLASS_IID (Vst::IProcessContextRequirements)
 DEF_CLASS_IID (Vst::IProgress)
 DEF_CLASS_IID (Vst::ITestPlugProvider2)
 
-
 //----VST 3.7.5---------------------------------
 DEF_CLASS_IID (IPluginCompatibility)
+
+//----VST 3.7.9---------------------------------
+DEF_CLASS_IID (Vst::IComponentHandlerSystemTime)
+DEF_CLASS_IID (Vst::IDataExchangeHandler)
+DEF_CLASS_IID (Vst::IDataExchangeReceiver)
+
+//----VST 3.7.11---------------------------------
+DEF_CLASS_IID (Vst::IRemapParamID)
 
 } // Steinberg

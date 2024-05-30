@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -180,7 +180,12 @@ public:
 			{
 				std::string wd (workDir);
 				wd += "/";
-				return loadInternal (wd + path, errorDescription);
+				if (loadInternal (wd + path, errorDescription))
+				{
+					name = path;
+					return true;
+				}
+				return false;
 			}
 		}
 		return loadInternal (path, errorDescription);

@@ -322,7 +322,11 @@
 // Deprecation setting
 //-----------------------------------------------------------------------------
 #ifndef SMTG_DEPRECATED_ATTRIBUTE
+#if SMTG_CPP17
+#define SMTG_DEPRECATED_ATTRIBUTE(msg) [[deprecated(msg)]]
+#else
 #define SMTG_DEPRECATED_ATTRIBUTE(msg)
+#endif
 #endif
 
 #define SMTG_DEPRECATED_MSG(msg) SMTG_DEPRECATED_ATTRIBUTE(msg)

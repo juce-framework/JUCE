@@ -253,7 +253,11 @@ DECLARE_CLASS_IID (ITimerHandler, 0x10BDD94F, 0x41424774, 0x821FAD8F, 0xECA72CA9
 - [released: 3.6.8]
 
 On Linux the host has to provide this interface to the plug-in as there's no global event run loop
-defined as on other platforms.
+defined as on other platforms. 
+
+This can be done by IPlugFrame and the context which is passed to the plug-in as an argument 
+in the method IPlugFactory3::setHostContext. This way the plug-in can get a runloop even if 
+it does not have an editor.
 
 A plug-in can register an event handler for a file descriptor. The host has to call the event
 handler when the file descriptor is marked readable.

@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -2245,7 +2245,8 @@ bool String::toMultiByte (uint32 destCodePage)
 //-----------------------------------------------------------------------------
 void String::fromUTF8 (const char8* utf8String)
 {
-	resize (0, false);
+	if (buffer8 != utf8String)
+		resize (0, false);
 	_toWideString (utf8String, static_cast<int32> (strlen (utf8String)), kCP_Utf8);
 }
 
