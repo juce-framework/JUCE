@@ -401,7 +401,12 @@ protected:
 private:
     //==============================================================================
     Component::SafePointer<Component> contentComponent;
-    bool ownsContentComponent = false, resizeToFitContent = false, fullscreen = false, canDrag = true, dragStarted = false;
+    bool ownsContentComponent = false;
+    bool resizeToFitContent = false;
+    bool fullscreen = false;
+    bool canDrag = true;
+    bool dragStarted = false;
+    bool resizable = false;
     ComponentDragger dragger;
     Rectangle<int> lastNonFullScreenPos;
     ComponentBoundsConstrainer defaultConstrainer;

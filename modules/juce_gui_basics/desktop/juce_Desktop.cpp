@@ -374,4 +374,13 @@ bool Desktop::isHeadless() const noexcept
     return displays->displays.isEmpty();
 }
 
+bool Desktop::supportsBorderlessNonClientResize() const
+{
+   #if JUCE_WINDOWS || JUCE_MAC
+    return true;
+   #else
+    return false;
+   #endif
+}
+
 } // namespace juce
