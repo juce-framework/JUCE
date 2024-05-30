@@ -298,6 +298,26 @@ public:
     */
     static AudioChannelSet JUCE_CALLTYPE create9point1point6();
 
+    /** Creates a set for a 9.0.4 ITU surround setup:
+        left, right, centre, leftSurround, rightSurround, leftCentre, rightCentre, leftSurroundSide, rightSurroundSide, topFrontLeft, topFrontRight, topRearLeft, topRearRight
+    */
+    static AudioChannelSet JUCE_CALLTYPE create9point0point4ITU();
+
+    /** Creates a set for a 9.1.4 ITU surround setup.
+        left, right, centre, LFE, leftSurround, rightSurround, leftCentre, rightCentre, leftSurroundSide, rightSurroundSide, topFrontLeft, topFrontRight, topRearLeft, topRearRight
+    */
+    static AudioChannelSet JUCE_CALLTYPE create9point1point4ITU();
+
+    /** Creates a set for a 9.0.6 ITU surround setup.
+        left, right, centre, leftSurround, rightSurround, leftCentre, rightCentre, leftSurroundSide, rightSurroundSide, topFrontLeft, topRearRight, topFrontRight, topRearRight, topSideLeft, topSideRight
+    */
+    static AudioChannelSet JUCE_CALLTYPE create9point0point6ITU();
+
+    /** Creates a set for a 9.1.6 ITU surround setup.
+        left, right, centre, LFE, leftSurround, rightSurround, leftCentre, rightCentre, leftSurroundSide, rightSurroundSide, topFrontLeft, topRearRight, topFrontRight, topRearRight, topSideLeft, topSideRight
+    */
+    static AudioChannelSet JUCE_CALLTYPE create9point1point6ITU();
+
     //==============================================================================
     /** Creates a set for quadraphonic surround setup (left, right, leftSurround, rightSurround)
 
