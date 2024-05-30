@@ -102,6 +102,12 @@ public:
         return withMember (*this, &ShapedTextOptions::ellipsis, std::move (x));
     }
 
+    [[nodiscard]] ShapedTextOptions withReadingDirection (std::optional<TextDirection> x) const
+    {
+        return withMember (*this, &ShapedTextOptions::readingDir, x);
+    }
+
+    const auto& getReadingDirection() const             { return readingDir; }
     const auto& getJustification() const                { return justification; }
     const auto& getMaxWidth() const                     { return maxWidth; }
     const auto& getHeight() const                       { return height; }
@@ -116,6 +122,7 @@ public:
 
 private:
     Justification justification { Justification::topLeft };
+    std::optional<TextDirection> readingDir;
     std::optional<float> maxWidth;
     std::optional<float> height;
     std::vector<FontForRange> fontsForRange { { { 0, std::numeric_limits<int64>::max() },
@@ -930,7 +937,7 @@ void SimpleShapedText::shape (const String& data,
     std::vector<LineChunkInLogicalOrder> lineChunks;
     int64 numGlyphsInLine = 0;
 
-    const auto analysis = Unicode::performAnalysis (data);
+    const auto analysis = Unicode::performAnalysis (data, options.getReadingDirection());
 
     IntegralCanBreakBeforeIterator softBreakIterator { makeSpan (analysis) };
 

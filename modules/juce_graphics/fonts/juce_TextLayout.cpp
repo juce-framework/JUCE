@@ -390,6 +390,21 @@ static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const 
     return result;
 }
 
+static std::optional<TextDirection> getTextDirection (const AttributedString& text)
+{
+    using ReadingDirection = AttributedString::ReadingDirection;
+
+    const auto dir = text.getReadingDirection();
+
+    if (dir == ReadingDirection::leftToRight)
+        return TextDirection::ltr;
+
+    if (dir == ReadingDirection::rightToLeft)
+        return TextDirection::rtl;
+
+    return std::nullopt;
+}
+
 void TextLayout::createStandardLayout (const AttributedString& text)
 {
     detail::RangedValues<Font> fonts;
@@ -407,7 +422,8 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                                                .withMaxWidth (width)
                                                                .withLanguage (SystemStats::getUserLanguage())
                                                                .withTrailingWhitespacesShouldFit (false)
-                                                               .withJustification (justification) };
+                                                               .withJustification (justification)
+                                                               .withReadingDirection (getTextDirection (text)) };
 
     std::optional<int64> lastLineNumber;
     std::unique_ptr<Line> line;
