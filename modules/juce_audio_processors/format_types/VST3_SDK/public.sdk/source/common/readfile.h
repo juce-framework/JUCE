@@ -51,5 +51,4 @@ Returns entire file content at the given path
 std::string readFile (const std::string& path);
 
 //------------------------------------------------------------------------
-
 } // namespace Steinberg

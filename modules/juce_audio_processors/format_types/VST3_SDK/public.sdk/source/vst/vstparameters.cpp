@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -228,6 +228,8 @@ ParamValue RangeParameter::toNormalized (ParamValue plainValue) const
 {
 	if (info.stepCount > 1)
 		return ToNormalized <ParamValue>(plainValue - getMin (), info.stepCount);
+
+	SMTG_ASSERT (getMax () - getMin () != 0);
 	return (plainValue - getMin ()) / (getMax () - getMin ());
 }
 

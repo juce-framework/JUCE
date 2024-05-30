@@ -36,8 +36,13 @@
 //-----------------------------------------------------------------------------
 
 #include "readfile.h"
-#include "public.sdk/source/vst/utility/stringconvert.h"
+
 #include "pluginterfaces/base/fplatform.h"
+
+#if SMTG_OS_WINDOWS
+#include "public.sdk/source/vst/utility/stringconvert.h"
+#endif
+
 #include <fstream>
 #include <sstream>
 

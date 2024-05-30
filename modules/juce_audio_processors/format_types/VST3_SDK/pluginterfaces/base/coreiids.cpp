@@ -37,4 +37,4 @@ DEF_CLASS_IID (IBStream)
 DEF_CLASS_IID (ISizeableStream)
 
 //------------------------------------------------------------------------
-} // Steinberg
+} // namespace Steinberg

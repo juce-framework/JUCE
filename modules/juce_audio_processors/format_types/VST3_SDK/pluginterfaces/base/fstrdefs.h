@@ -246,7 +246,7 @@ inline SMTG_CONSTEXPR14 void str8ToStr16 (char16* dst, const char8* src, int32 n
 	int32 i = 0;
 	for (;;)
 	{
-		if (i == n)
+		if (i == (n - 1))
 		{
 			dst[i] = 0;
 			return;

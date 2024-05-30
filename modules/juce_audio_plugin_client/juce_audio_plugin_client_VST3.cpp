@@ -1748,6 +1748,8 @@ private:
            #endif
         }
 
+        ~JuceVST3Editor() override = default; // NOLINT
+
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
         {
             const auto result = testFor (*this, targetIID, UniqueBase<IPlugViewContentScaleSupport>{});
@@ -1758,7 +1760,9 @@ private:
             return Vst::EditorView::queryInterface (targetIID, obj);
         }
 
+        // NOLINTBEGIN
         REFCOUNT_METHODS (Vst::EditorView)
+        // NOLINTEND
 
         //==============================================================================
         tresult PLUGIN_API isPlatformTypeSupported (FIDString type) override

@@ -117,7 +117,7 @@ namespace Steinberg
 	typedef int32 UCoord;
 	static const UCoord kMaxCoord = ((UCoord)0x7FFFFFFF);
 	static const UCoord kMinCoord = ((UCoord)-0x7FFFFFFF);
-}	// namespace Steinberg
+} // namespace Steinberg
 
 
 //----------------------------------------------------------------------------
