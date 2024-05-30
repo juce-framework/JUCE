@@ -35,6 +35,9 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
+#include "pluginterfaces/base/iplugincompatibility.h"
+#include "public.sdk/source/common/memorystream.h"
+
 #include "public.sdk/source/common/readfile.h"
 #include "public.sdk/source/vst/hosting/module.h"
 #include "public.sdk/source/vst/moduleinfo/moduleinfocreator.h"
@@ -97,6 +100,35 @@ std::optional<ModuleInfo::CompatibilityList> openAndParseCompatJSON (const std::
 }
 
 //------------------------------------------------------------------------
+std::optional<ModuleInfo::CompatibilityList> loadCompatibilityFromModule (const VST3::Hosting::Module& module)
+{
+	const auto& factory = module.getFactory();
+	const auto& infos = factory.classInfos();
+
+	const auto iter = std::find_if (infos.begin(), infos.end(), [&] (const auto& info)
+	{
+		return info.category() == kPluginCompatibilityClass;
+	});
+
+	if (iter == infos.end())
+		return {};
+
+	const auto compatibility = factory.createInstance<Steinberg::IPluginCompatibility> (iter->ID());
+
+	if (compatibility == nullptr)
+		return {};
+
+	Steinberg::MemoryStream stream;
+
+	if (compatibility->getCompatibilityJSON (&stream) != kResultOk)
+		return {};
+
+	const std::string_view streamView (stream.getData(), stream.getSize());
+
+	return ModuleInfoLib::parseCompatibilityJson (streamView, nullptr);
+}
+
+//------------------------------------------------------------------------
 int createJSON (const std::optional<ModuleInfo::CompatibilityList>& compat,
                 const std::string& modulePath, const std::string& moduleVersion,
                 std::ostream& outStream)
@@ -111,6 +143,9 @@ int createJSON (const std::optional<ModuleInfo::CompatibilityList>& compat,
 	auto moduleInfo = ModuleInfoLib::createModuleInfo (*module, false);
 	if (compat)
 		moduleInfo.compatibility = *compat;
+	else if (auto loaded = loadCompatibilityFromModule (*module))
+		moduleInfo.compatibility = *loaded;
+
 	moduleInfo.version = moduleVersion;
 
 	std::stringstream output;
