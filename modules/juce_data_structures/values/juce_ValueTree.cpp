@@ -76,23 +76,21 @@ public:
     template <typename Function>
     void callListeners (ValueTree::Listener* listenerToExclude, Function fn) const
     {
-        auto numListeners = valueTreesWithListeners.size();
+        if (valueTreesWithListeners.size() == 0)
+            return;
 
-        if (numListeners == 1)
+        if (valueTreesWithListeners.size() == 1)
         {
             valueTreesWithListeners.getUnchecked (0)->listeners.callExcluding (listenerToExclude, fn);
+            return;
         }
-        else if (numListeners > 0)
+
+        const auto listenersCopy = valueTreesWithListeners;
+
+        for (auto [i, v] : enumerate (listenersCopy, int{}))
         {
-            auto listenersCopy = valueTreesWithListeners;
-
-            for (int i = 0; i < numListeners; ++i)
-            {
-                auto* v = listenersCopy.getUnchecked (i);
-
-                if (i == 0 || valueTreesWithListeners.contains (v))
-                    v->listeners.callExcluding (listenerToExclude, fn);
-            }
+            if (valueTreesWithListeners[i] == v || valueTreesWithListeners.contains (v))
+                v->listeners.callExcluding (listenerToExclude, fn);
         }
     }
 
