@@ -141,6 +141,7 @@ class SliderState {
       label: "",
       numSteps: 100,
       interval: 0,
+      parameterIndex: -1,
     };
     this.valueChangedEvent = new ListenerList();
     this.propertiesChangedEvent = new ListenerList();
@@ -252,6 +253,7 @@ class ToggleState {
     this.value = false;
     this.properties = {
       name: "",
+      parameterIndex: -1,
     };
     this.valueChangedEvent = new ListenerList();
     this.propertiesChangedEvent = new ListenerList();
@@ -326,6 +328,7 @@ class ComboBoxState {
     this.value = 0.0;
     this.properties = {
       name: "",
+      parameterIndex: -1,
       choices: [],
     };
     this.valueChangedEvent = new ListenerList();

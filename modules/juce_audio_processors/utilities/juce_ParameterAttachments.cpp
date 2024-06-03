@@ -304,6 +304,7 @@ void WebSliderParameterAttachment::sendInitialUpdate()
     object->setProperty ("label", parameter.getLabel());
     object->setProperty ("numSteps", parameter.getNumSteps());
     object->setProperty ("interval", range.interval);
+    object->setProperty ("parameterIndex", parameter.getParameterIndex());
     sliderState.emitEvent (object.get());
     attachment.sendInitialUpdate();
 }
@@ -347,6 +348,7 @@ void WebToggleButtonParameterAttachment::sendInitialUpdate()
     DynamicObject::Ptr object { new DynamicObject };
     object->setProperty (detail::WebSliderRelayEvents::Event::eventTypeKey, "propertiesChanged");
     object->setProperty ("name", parameter.getName (100));
+    object->setProperty ("parameterIndex", parameter.getParameterIndex());
     relay.emitEvent (object.get());
     attachment.sendInitialUpdate();
 }
@@ -395,6 +397,7 @@ void WebComboBoxParameterAttachment::sendInitialUpdate()
     DynamicObject::Ptr object { new DynamicObject };
     object->setProperty (detail::WebSliderRelayEvents::Event::eventTypeKey, "propertiesChanged");
     object->setProperty ("name", parameter.getName (100));
+    object->setProperty ("parameterIndex", parameter.getParameterIndex());
 
     if (auto* choiceParameter = dynamic_cast<AudioParameterChoice*> (&parameter))
         object->setProperty ("choices", choiceParameter->choices);
