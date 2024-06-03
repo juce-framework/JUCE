@@ -73,10 +73,7 @@ namespace juce
     guaranteed that no more listeners will be called.
 
     By default a ListenerList is not thread safe. If thread-safety is required,
-    you can provide a thread-safe Array type as the second type parameter e.g.
-    @code
-    using ThreadSafeList = ListenerList<MyListenerType, Array<MyListenerType*, CriticalSection>>;
-    @endcode
+    use the ThreadSafeListenerList type.
 
     When calling listeners the iteration can be escaped early by using a
     "BailOutChecker". A BailOutChecker is a type that has a public member function
@@ -87,8 +84,8 @@ namespace juce
 
     @tags{Core}
 */
-template <class ListenerClass,
-          class ArrayType = Array<ListenerClass*>>
+template <typename ListenerClass,
+          typename ArrayType = Array<ListenerClass*>>
 class ListenerList
 {
 public:
@@ -401,5 +398,14 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE (ListenerList)
 };
+
+//==============================================================================
+/**
+    A thread safe version of the ListenerList class.
+
+    @see ListenerList
+*/
+template <typename ListenerClass>
+using ThreadSafeListenerList = ListenerList<ListenerClass, Array<ListenerClass*, CriticalSection>>;
 
 } // namespace juce

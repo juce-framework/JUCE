@@ -65,7 +65,7 @@ public:
     }
 
 private:
-    using ListenerListType = ListenerList<Listener, Array<Listener*, CriticalSection>>;
+    using ListenerListType = ThreadSafeListenerList<Listener>;
 
     // By having a static ListenerList it can outlive the ShutdownDetector instance preventing
     // issues for objects trying to remove themselves after the instance has been deleted

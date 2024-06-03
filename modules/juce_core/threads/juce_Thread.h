@@ -602,7 +602,7 @@ private:
     uint32 affinityMask = 0;
     bool deleteOnThreadEnd = false;
     std::atomic<bool> shouldExit { false };
-    ListenerList<Listener, Array<Listener*, CriticalSection>> listeners;
+    ThreadSafeListenerList<Listener> listeners;
 
    #if JUCE_ANDROID || JUCE_LINUX || JUCE_BSD
     std::atomic<Priority> priority;

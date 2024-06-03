@@ -147,7 +147,7 @@ private:
     String jobName;
     ThreadPool* pool = nullptr;
     std::atomic<bool> shouldStop { false }, isActive { false }, shouldBeDeleted { false };
-    ListenerList<Thread::Listener, Array<Thread::Listener*, CriticalSection>> listeners;
+    ThreadSafeListenerList<Thread::Listener> listeners;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob)
 };
