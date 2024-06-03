@@ -99,9 +99,9 @@ DECLARE_JNI_CLASS (BillingFlowParamsBuilder, "com/android/billingclient/api/Bill
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-  METHOD (build,                       "build",                       "()Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams;") \
-  METHOD (setOldPurchaseToken,         "setOldPurchaseToken",         "(Ljava/lang/String;)Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder;") \
-  METHOD (setReplaceProrationMode,     "setReplaceProrationMode",     "(I)Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder;")
+  METHOD (build,                          "build",                          "()Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams;") \
+  METHOD (setOldPurchaseToken,            "setOldPurchaseToken",            "(Ljava/lang/String;)Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder;") \
+  METHOD (setSubscriptionReplacementMode, "setSubscriptionReplacementMode", "(I)Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder;")
 
 DECLARE_JNI_CLASS (BillingFlowParamsSubscriptionUpdateParamsBuilder, "com/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder")
 #undef JNI_CLASS_MEMBERS
@@ -856,9 +856,10 @@ private:
 
                         if (! creditForUnusedSubscription)
                         {
+                            constexpr auto WITHOUT_PRORATION = 3;
                             env->CallObjectMethod (subscriptionBuilder.get(),
-                                                   BillingFlowParamsSubscriptionUpdateParamsBuilder.setReplaceProrationMode,
-                                                   3 /*IMMEDIATE_WITHOUT_PRORATION*/);
+                                                   BillingFlowParamsSubscriptionUpdateParamsBuilder.setSubscriptionReplacementMode,
+                                                   WITHOUT_PRORATION);
                         }
 
                         const LocalRef<jobject> subscriptionParams { env->CallObjectMethod (subscriptionBuilder.get(),

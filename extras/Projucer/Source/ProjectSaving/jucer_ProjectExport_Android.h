@@ -926,7 +926,7 @@ private:
             mo << "        implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
         if (isInAppBillingEnabled())
-            mo << "        implementation 'com.android.billingclient:billing:5.0.0'" << newLine;
+            mo << "        implementation 'com.android.billingclient:billing:7.0.0'" << newLine;
 
         if (areRemoteNotificationsEnabled())
         {
