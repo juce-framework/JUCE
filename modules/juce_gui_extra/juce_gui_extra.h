@@ -158,3 +158,4 @@
 #include "misc/juce_AnimatedAppComponent.h"
 #include "detail/juce_WebControlRelayEvents.h"
 #include "misc/juce_WebControlRelays.h"
+#include "misc/juce_WebControlParameterIndexReceiver.h"
