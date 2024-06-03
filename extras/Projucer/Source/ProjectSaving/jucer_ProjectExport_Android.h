@@ -220,6 +220,7 @@ public:
         writeFile (targetFolder, "build.gradle",                             getProjectBuildGradleFileContent());
         writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent (modules));
         writeFile (targetFolder, "local.properties",                         getLocalPropertiesFileContent());
+        writeFile (targetFolder, "gradle.properties",                        getGradlePropertiesFileContent());
         writeFile (targetFolder, "gradle/wrapper/gradle-wrapper.properties", getGradleWrapperPropertiesFileContent());
 
         writeBinaryFile (targetFolder, "gradle/wrapper/LICENSE-for-gradlewrapper.txt", BinaryData::LICENSE,           BinaryData::LICENSESize);
@@ -1067,6 +1068,16 @@ private:
         props << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
         return replaceLineFeeds (props, getNewLineString());
+    }
+
+    String getGradlePropertiesFileContent() const
+    {
+        String result;
+
+        // Silences warning when Google Play Billing v7 is enabled
+        result << "android.useAndroidX=true" << newLine;
+
+        return replaceLineFeeds (result, getNewLineString());
     }
 
     String getGradleWrapperPropertiesFileContent() const
