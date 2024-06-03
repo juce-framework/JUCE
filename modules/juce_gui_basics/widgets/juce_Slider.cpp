@@ -225,7 +225,10 @@ public:
             // Need to do this comparison because the Value will use equalsWithSameType to compare
             // the new and old values, so will generate unwanted change events if the type changes.
             // Cast to double before comparing, to prevent comparing as another type (e.g. String).
-            if (! approximatelyEqual (static_cast<double> (currentValue.getValue()), newValue))
+            // We also want to avoid sending a notification if both new and old values are NaN.
+            const auto asDouble = static_cast<double> (currentValue.getValue());
+
+            if (! (approximatelyEqual (asDouble, newValue) || (std::isnan (asDouble) && std::isnan (newValue))))
                 currentValue = newValue;
 
             updateText();
