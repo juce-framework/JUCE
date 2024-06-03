@@ -202,7 +202,7 @@ struct WebViewKeyEquivalentResponder final : public ObjCClass<WebViewClass>
 {
     using Base = ObjCClass<WebViewClass>;
 
-    WebViewKeyEquivalentResponder()
+    explicit WebViewKeyEquivalentResponder (bool acceptsFirstMouse)
         : Base ("WebViewKeyEquivalentResponder_")
     {
         this->template addIvar<LastFocusChange*> (lastFocusChangeMemberName);
@@ -282,6 +282,9 @@ struct WebViewKeyEquivalentResponder final : public ObjCClass<WebViewClass>
 
                             return result;
                          });
+
+        if (acceptsFirstMouse)
+            this->addMethod (@selector (acceptsFirstMouse:), [] (id, SEL, NSEvent*) { return YES; });
 
         this->registerClass();
     }
@@ -680,7 +683,7 @@ class WebBrowserComponent::Impl::Platform::WebViewImpl  : public WebBrowserCompo
 public:
     WebViewImpl (WebBrowserComponent::Impl& implIn, const String& userAgent) : browser (implIn.owner)
     {
-        static WebViewKeyEquivalentResponder<WebView> webviewClass;
+        static WebViewKeyEquivalentResponder<WebView> webviewClass { false };
 
         webView.reset ([webviewClass.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                                           frameName: nsEmptyString()
@@ -863,7 +866,19 @@ public:
        #endif
 
        #if JUCE_MAC
-        static WebViewKeyEquivalentResponder<WKWebView> webviewClass;
+        auto& webviewClass = [&]() -> auto&
+        {
+            if (browserOptions.getAppleWkWebViewOptions().getAcceptsFirstMouse())
+            {
+                static WebViewKeyEquivalentResponder<WKWebView> juceWebviewClass { true };
+                return juceWebviewClass;
+            }
+            else
+            {
+                static WebViewKeyEquivalentResponder<WKWebView> juceWebviewClass { false };
+                return juceWebviewClass;
+            }
+        }();
 
         webView.reset ([webviewClass.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
                                                       configuration: config.get()]);

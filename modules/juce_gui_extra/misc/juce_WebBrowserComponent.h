@@ -229,10 +229,24 @@ public:
                 return withMember (*this, &AppleWkWebView::allowAccessToEnclosingDirectory, x);
             }
 
+            /** If this options is specified, the underlying WebView will return NO from its
+                acceptsFirstMouse method.
+
+                This disables the click-through behaviour, meaning that clicking a previously
+                unfocused application window only makes the window focused, but will not pass on the
+                click to whichever control inside the WebView is under the mouse.
+            */
+            [[nodiscard]] AppleWkWebView withDisabledAcceptsFirstMouse() const
+            {
+                return withMember (*this, &AppleWkWebView::acceptsFirstMouse, false);
+            }
+
             auto getAllowAccessToEnclosingDirectory() const { return allowAccessToEnclosingDirectory; }
+            auto getAcceptsFirstMouse() const { return acceptsFirstMouse; }
 
         private:
             bool allowAccessToEnclosingDirectory = false;
+            bool acceptsFirstMouse = true;
         };
 
         /** Specifies options that apply to the Windows implementation when the WebView2 feature is
