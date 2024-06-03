@@ -1040,7 +1040,7 @@ public:
    #endif
 
     //==============================================================================
-    tresult PLUGIN_API setComponentState (IBStream* stream) override
+    tresult PLUGIN_API setComponentState (IBStream*) override
     {
         // As an IEditController member, the host should only call this from the message thread.
         assertHostMessageThread();
@@ -1065,7 +1065,7 @@ public:
         if (auto* handler = getComponentHandler())
             handler->restartComponent (Vst::kParamValuesChanged);
 
-        return Vst::EditController::setComponentState (stream);
+        return kResultOk;
     }
 
     void setAudioProcessor (JuceAudioProcessor* audioProc)
