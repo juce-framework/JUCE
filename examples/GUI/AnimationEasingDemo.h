@@ -215,10 +215,10 @@ struct CubicBezier
     Point<float> cp2 {};
     Point<float> cp3 { 1.0f, 1.0f };
 
-    bool operator!= (const CubicBezier& other)
+    bool operator== (const CubicBezier& other)
     {
         const auto tie = [](const CubicBezier& x) { return std::tie (x.cp0, x.cp1, x.cp2, x.cp3); };
-        return tie (*this) != tie (other);
+        return tie (*this) == tie (other);
     }
 };
 
@@ -255,7 +255,7 @@ public:
 
     void setCubicBezierCurve (const CubicBezier& newBezierCurve)
     {
-        if (std::exchange (bezierCurve, newBezierCurve) != newBezierCurve)
+        if (std::exchange (bezierCurve, newBezierCurve) == newBezierCurve)
            return;
 
         updateText();
@@ -323,7 +323,7 @@ class CubicBezierGraphComponent final : public Component
 public:
     void setCubicBezierCurve (const CubicBezier& newBezierCurve)
     {
-        if (std::exchange (bezierCurve, newBezierCurve) != newBezierCurve)
+        if (std::exchange (bezierCurve, newBezierCurve) == newBezierCurve)
            return;
 
         NullCheckedInvocation::invoke (onValueChange);
