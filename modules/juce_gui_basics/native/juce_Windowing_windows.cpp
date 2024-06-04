@@ -2732,7 +2732,7 @@ private:
 
             TRACKMOUSEEVENT tme;
             tme.cbSize = sizeof (tme);
-            tme.dwFlags = TME_LEAVE;
+            tme.dwFlags = TME_LEAVE | (area == WindowArea::nonclient ? TME_NONCLIENT : 0);
             tme.hwndTrack = hwnd;
             tme.dwHoverTime = 0;
 
@@ -3792,7 +3792,10 @@ private:
                 return 0;
 
             case WM_POINTERLEAVE:
-            case WM_MOUSELEAVE:         doMouseExit(); return 0;
+            case WM_NCMOUSELEAVE:
+            case WM_MOUSELEAVE:
+                doMouseExit();
+                return 0;
 
             case WM_LBUTTONDOWN:
             case WM_MBUTTONDOWN:
@@ -3802,7 +3805,9 @@ private:
 
             case WM_LBUTTONUP:
             case WM_MBUTTONUP:
-            case WM_RBUTTONUP:          doMouseUp (getPointFromLocalLParam (lParam), wParam); return 0;
+            case WM_RBUTTONUP:
+                doMouseUp (getPointFromLocalLParam (lParam), wParam);
+                return 0;
 
             case WM_POINTERWHEEL:
             case 0x020A: /* WM_MOUSEWHEEL */   doMouseWheel (wParam, true);  return 0;
