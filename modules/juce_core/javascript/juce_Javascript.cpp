@@ -35,7 +35,8 @@
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-with-dtor",
                                      "-Wunused-but-set-variable",
                                      "-Wdeprecated",
-                                     "-Wunused-function")
+                                     "-Wunused-function",
+                                     "-Wpedantic")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011 6246 6255 6262 6297 6308 6323 6340 6385 6386 28182)
 #include <juce_core/javascript/choc/javascript/choc_javascript_QuickJS.h>
 #include <juce_core/javascript/choc/javascript/choc_javascript.h>
@@ -228,6 +229,10 @@ static qjs::JSValue juceToQuickJs (var variant, qjs::JSContext* ctx)
 }
 
 //==============================================================================
+// Any type that references the QuickJS types inside the anonymous namespace added by us requires
+// this with GCC. Suppressing this warning is fine, since these classes are only visible and used
+// in a single translation unit.
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsubobject-linkage")
 class detail::QuickJSWrapper
 {
 public:
@@ -268,6 +273,7 @@ private:
     choc::javascript::Context context = choc::javascript::createQuickJSContext();
     std::function<int()> interruptHandler;
 };
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 using SetterFn = qjs::JSValue (*) (qjs::JSContext* ctx,
                                    qjs::JSValueConst thisVal,
@@ -644,6 +650,7 @@ static uint32_t toUint32 (int64 value)
 }
 
 //==============================================================================
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wsubobject-linkage")
 struct JSFunctionArguments
 {
     explicit JSFunctionArguments (qjs::JSContext* contextIn) : context (contextIn)
@@ -822,6 +829,7 @@ private:
     const detail::QuickJSWrapper* engine = nullptr;
     ValuePtr valuePtr;
 };
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 JSObject::JSObject (const detail::QuickJSWrapper* engine)
     : impl (new Impl (engine))
