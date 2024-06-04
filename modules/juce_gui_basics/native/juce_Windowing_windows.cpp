@@ -2459,7 +2459,11 @@ private:
         {
             type |= WS_OVERLAPPED;
 
-            if ((styleFlags & windowHasCloseButton) == 0)
+            if ((styleFlags & windowHasCloseButton) != 0)
+            {
+                type |= WS_SYSMENU;
+            }
+            else
             {
                 // annoyingly, windows won't let you have a min/max button without a close button
                 jassert ((styleFlags & (windowHasMinimiseButton | windowHasMaximiseButton)) == 0);
