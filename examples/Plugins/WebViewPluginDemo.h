@@ -405,6 +405,11 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
+    int getControlParameterIndex (Component&) override
+    {
+        return controlParameterIndexReceiver.getControlParameterIndex();
+    }
+
     void timerCallback() override
     {
         static constexpr size_t numFramesBuffered = 5;
@@ -437,6 +442,8 @@ private:
     WebToggleButtonRelay muteToggleRelay      { webComponent, "muteToggle" };
     WebComboBoxRelay     filterTypeComboRelay { webComponent, "filterTypeCombo" };
 
+    WebControlParameterIndexReceiver controlParameterIndexReceiver;
+
     SinglePageBrowser webComponent { WebBrowserComponent::Options{}
                                          .withBackend (WebBrowserComponent::Options::Backend::webview2)
                                          .withWinWebView2Options (WebBrowserComponent::Options::WinWebView2{}
@@ -445,6 +452,7 @@ private:
                                          .withOptionsFrom (cutoffSliderRelay)
                                          .withOptionsFrom (muteToggleRelay)
                                          .withOptionsFrom (filterTypeComboRelay)
+                                         .withOptionsFrom (controlParameterIndexReceiver)
                                          .withNativeFunction ("sayHello", [](auto& var, auto complete)
                                                               {
                                                                   complete ("Hello " + var[0].toString());

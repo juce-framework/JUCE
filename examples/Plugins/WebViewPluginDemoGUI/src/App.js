@@ -50,6 +50,9 @@ import * as Juce from "juce-framework-frontend";
 
 import "./App.css";
 
+// Custom attributes in React must be in all lower case
+const controlParameterIndexAnnotation = "controlparameterindex";
+
 function JuceSlider({ identifier, title }) {
   JuceSlider.propTypes = {
     identifier: PropTypes.string,
@@ -94,7 +97,12 @@ function JuceSlider({ identifier, title }) {
   }
 
   return (
-    <Box>
+    <Box
+      {...{
+        [controlParameterIndexAnnotation]:
+          sliderState.properties.parameterIndex,
+      }}
+    >
       <Typography sx={{ mt: 1.5 }}>
         {properties.name}: {sliderState.getScaledValue()} {properties.label}
       </Typography>
@@ -146,7 +154,12 @@ function JuceCheckbox({ identifier }) {
   const cb = <Checkbox checked={value} onChange={handleChange} />;
 
   return (
-    <Box>
+    <Box
+      {...{
+        [controlParameterIndexAnnotation]:
+          checkboxState.properties.parameterIndex,
+      }}
+    >
       <FormGroup>
         <FormControlLabel control={cb} label={properties.name} />
       </FormGroup>
@@ -185,7 +198,12 @@ function JuceComboBox({ identifier }) {
   });
 
   return (
-    <Box>
+    <Box
+      {...{
+        [controlParameterIndexAnnotation]:
+          comboBoxState.properties.parameterIndex,
+      }}
+    >
       <FormControl fullWidth>
         <InputLabel id={identifier}>{properties.name}</InputLabel>
         <Select
@@ -360,6 +378,14 @@ function FreqBandInfo() {
 }
 
 function App() {
+  const controlParameterIndexUpdater = new Juce.ControlParameterIndexUpdater(
+    controlParameterIndexAnnotation
+  );
+
+  document.addEventListener("mousemove", (event) => {
+    controlParameterIndexUpdater.handleMouseMove(event);
+  });
+
   const [open, setOpen] = useState(false);
   const [snackbarMessage, setMessage] = useState("No message received yet");
 
