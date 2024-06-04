@@ -1480,19 +1480,7 @@ public:
           dontRepaint (nonRepainting),
           parentToAddTo (parent)
     {
-        getNativeRealtimeModifiers = []
-        {
-            HWNDComponentPeer::updateKeyModifiers();
-
-            int mouseMods = 0;
-            if (HWNDComponentPeer::isKeyDown (VK_LBUTTON))  mouseMods |= ModifierKeys::leftButtonModifier;
-            if (HWNDComponentPeer::isKeyDown (VK_RBUTTON))  mouseMods |= ModifierKeys::rightButtonModifier;
-            if (HWNDComponentPeer::isKeyDown (VK_MBUTTON))  mouseMods |= ModifierKeys::middleButtonModifier;
-
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
-
-            return ModifierKeys::currentModifiers;
-        };
+        getNativeRealtimeModifiers = getMouseModifiers;
 
         // CreateWindowEx needs to be called from the message thread
         callFunctionIfNotLocked (&createWindowCallback, this);
@@ -2724,11 +2712,7 @@ private:
                 NullCheckedInvocation::invoke (getNativeRealtimeModifiers);
 
             updateKeyModifiers();
-
-           #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-            if (modProvider != nullptr)
-                ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (modProvider->getWin32Modifiers());
-           #endif
+            updateModifiersFromModProvider();
 
             TRACKMOUSEEVENT tme;
             tme.cbSize = sizeof (tme);
@@ -2762,6 +2746,26 @@ private:
         }
     }
 
+    void updateModifiersFromModProvider() const
+    {
+       #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+        if (modProvider != nullptr)
+            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (modProvider->getWin32Modifiers());
+       #endif
+    }
+
+    void updateModifiersWithMouseWParam (const WPARAM wParam) const
+    {
+        updateModifiersFromWParam (wParam);
+        updateModifiersFromModProvider();
+    }
+
+    void releaseCaptureIfNecessary() const
+    {
+        if (! ModifierKeys::currentModifiers.isAnyMouseButtonDown() && hwnd == GetCapture())
+            ReleaseCapture();
+    }
+
     void doMouseDown (Point<float> position, const WPARAM wParam, WindowArea area)
     {
         // this will be handled by WM_TOUCH
@@ -2775,12 +2779,7 @@ private:
 
         if (isValidPeer (this))
         {
-            updateModifiersFromWParam (wParam);
-
-           #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-            if (modProvider != nullptr)
-                ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (modProvider->getWin32Modifiers());
-           #endif
+            updateModifiersWithMouseWParam (wParam);
 
             isDragging = true;
 
@@ -2794,19 +2793,13 @@ private:
         if (isTouchEvent() || areOtherTouchSourcesActive())
             return;
 
-        updateModifiersFromWParam (wParam);
+        updateModifiersWithMouseWParam (wParam);
 
-       #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
-        if (modProvider != nullptr)
-            ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (modProvider->getWin32Modifiers());
-       #endif
-
-        const bool wasDragging = isDragging;
-        isDragging = false;
+        const bool wasDragging = std::exchange (isDragging, false);
 
         // release the mouse capture if the user has released all buttons
-        if (adjustCapture && (wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
-            ReleaseCapture();
+        if (adjustCapture)
+            releaseCaptureIfNecessary();
 
         // NB: under some circumstances (e.g. double-clicking a native title bar), a mouse-up can
         // arrive without a mouse-down, so in that case we need to avoid sending a message.
@@ -3684,6 +3677,20 @@ private:
         return globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint (getPOINTFromLParam ((LPARAM) GetMessagePos())), hwnd).toFloat());
     }
 
+    static ModifierKeys getMouseModifiers()
+    {
+        HWNDComponentPeer::updateKeyModifiers();
+
+        int mouseMods = 0;
+        if (HWNDComponentPeer::isKeyDown (VK_LBUTTON))  mouseMods |= ModifierKeys::leftButtonModifier;
+        if (HWNDComponentPeer::isKeyDown (VK_RBUTTON))  mouseMods |= ModifierKeys::rightButtonModifier;
+        if (HWNDComponentPeer::isKeyDown (VK_MBUTTON))  mouseMods |= ModifierKeys::middleButtonModifier;
+
+        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+
+        return ModifierKeys::currentModifiers;
+    }
+
     LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
     {
         switch (message)
@@ -4089,12 +4096,35 @@ private:
                 break;
 
             case WM_NCLBUTTONDOWN:
+            {
                 handleLeftClickInNCArea (wParam);
 
+                // The default implementation in DefWindowProc for these functions has some
+                // unwanted behaviour. Specifically, it seems to draw some ugly grey buttons over
+                // our custom nonclient area, just for one frame.
+                // To avoid this, we handle the message ourselves. The actual handling happens
+                // in WM_NCLBUTTONUP.
                 if (wParam == HTCLOSE || wParam == HTMAXBUTTON || wParam == HTMINBUTTON)
                     return 0;
 
+                // When clicking and dragging on the caption area, a new modal loop is started
+                // inside DefWindowProc. This modal loop appears to consume some mouse events,
+                // without forwarding them back to our own window proc. In particular, we never
+                // get to see the WM_NCLBUTTONUP event with the HTCAPTION argument, or any other
+                // kind of mouse-up event to signal that the loop exited, so
+                // ModifierKeys::currentModifiers gets left in the wrong state. As a workaround, we
+                // manually update the modifier keys after DefWindowProc exits, and update the
+                // capture state if necessary.
+                if (wParam == HTCAPTION)
+                {
+                    const auto result = DefWindowProc (h, message, wParam, lParam);
+                    getMouseModifiers();
+                    releaseCaptureIfNecessary();
+                    return result;
+                }
+
                 break;
+            }
 
             case WM_NCLBUTTONUP:
                 switch (wParam)
