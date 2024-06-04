@@ -95,8 +95,6 @@ namespace CommandIDs
         zoomNormal              = 0x300073,
         spaceBarDrag            = 0x300074,
 
-        loginLogout             = 0x300090,
-
         showForum               = 0x300100,
         showAPIModules          = 0x300101,
         showAPIClasses          = 0x300102,

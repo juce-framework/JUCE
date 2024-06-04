@@ -38,7 +38,6 @@
 #include "StartPage/jucer_StartPageComponent.h"
 #include "../Utility/UI/jucer_JucerTreeViewBase.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
-#include "UserAccount/jucer_LoginFormComponent.h"
 #include "../Project/UI/jucer_ProjectContentComponent.h"
 
 //==============================================================================
@@ -78,11 +77,6 @@ public:
         g.drawImage (componentImage, getLocalBounds().toFloat());
     }
 
-    void inputAttemptWhenModal() override
-    {
-        mainWindow.hideLoginFormOverlay();
-    }
-
 private:
     void componentPeerChanged() override                {}
 
@@ -95,12 +89,6 @@ private:
     using ComponentMovementWatcher::componentMovedOrResized;
 
     void handleAsyncUpdate() override                   { resized(); }
-
-    void mouseUp (const MouseEvent& event) override
-    {
-        if (event.eventComponent == this)
-            mainWindow.hideLoginFormOverlay();
-    }
 
     void lookAndFeelChanged() override
     {
@@ -624,18 +612,6 @@ void MainWindow::showStartPage()
     getContentComponent()->grabKeyboardFocus();
 }
 
-void MainWindow::showLoginFormOverlay()
-{
-    blurOverlayComponent = std::make_unique<BlurOverlayWithComponent> (*this, std::make_unique<LoginFormComponent> (*this));
-    loginFormOpen = true;
-}
-
-void MainWindow::hideLoginFormOverlay()
-{
-    blurOverlayComponent.reset();
-    loginFormOpen = false;
-}
-
 //==============================================================================
 ApplicationCommandTarget* MainWindow::getNextCommandTarget()
 {
@@ -950,15 +926,6 @@ MainWindow* MainWindowList::getMainWindowForFile (const File& file)
             }
         }
     }
-
-    return nullptr;
-}
-
-MainWindow* MainWindowList::getMainWindowWithLoginFormOpen()
-{
-    for (auto* window : windows)
-        if (window->isShowingLoginForm())
-            return window;
 
     return nullptr;
 }

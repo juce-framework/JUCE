@@ -1912,10 +1912,6 @@
     <ClInclude Include="..\..\Source\Application\StartPage\jucer_NewProjectWizard.h"/>
     <ClInclude Include="..\..\Source\Application\StartPage\jucer_StartPageComponent.h"/>
     <ClInclude Include="..\..\Source\Application\StartPage\jucer_StartPageTreeHolder.h"/>
-    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseController.h"/>
-    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseQueryThread.h"/>
-    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseState.h"/>
-    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LoginFormComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_AboutWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_EditorColourSchemeWindowComponent.h"/>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_FloatingToolWindow.h"/>
@@ -2035,7 +2031,6 @@
     <ClInclude Include="..\..\Source\Project\UI\jucer_ModulesInformationComponent.h"/>
     <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.h"/>
     <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectMessagesComponent.h"/>
-    <ClInclude Include="..\..\Source\Project\UI\jucer_UserAvatarComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_Project.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Android.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CodeBlocks.h"/>
@@ -2884,7 +2879,6 @@
     <None Include="..\..\Source\BinaryData\Icons\export_linux.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_visualStudio.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_xcode.svg"/>
-    <None Include="..\..\Source\BinaryData\Icons\agplv3_logo.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\juce_icon.png"/>
     <None Include="..\..\Source\BinaryData\Icons\wizard_AnimatedApp.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\wizard_AudioApp.svg"/>

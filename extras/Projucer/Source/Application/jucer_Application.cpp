@@ -161,7 +161,6 @@ void ProjucerApplication::handleAsyncUpdate()
 
 void ProjucerApplication::doBasicApplicationSetup()
 {
-    licenseController = std::make_unique<LicenseController>();
     LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
     initCommandManager();
     icons = std::make_unique<Icons>();
@@ -373,8 +372,6 @@ PopupMenu ProjucerApplication::createFileMenu()
     menu.addSeparator();
     menu.addCommandItem (commandManager.get(), CommandIDs::openInIDE);
     menu.addCommandItem (commandManager.get(), CommandIDs::saveAndOpenInIDE);
-    menu.addSeparator();
-    menu.addCommandItem (commandManager.get(), CommandIDs::loginLogout);
 
    #if ! JUCE_MAC
     menu.addCommandItem (commandManager.get(), CommandIDs::showAboutWindow);
@@ -924,8 +921,7 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showForum,
                               CommandIDs::showAPIModules,
                               CommandIDs::showAPIClasses,
-                              CommandIDs::showTutorials,
-                              CommandIDs::loginLogout };
+                              CommandIDs::showTutorials };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -1031,19 +1027,6 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("JUCE Tutorials", "Shows the JUCE tutorials in a browser", CommandCategories::general, 0);
         break;
 
-    case CommandIDs::loginLogout:
-        {
-            auto licenseState = licenseController->getCurrentState();
-
-            if (licenseState.isAGPL())
-                result.setInfo ("Disable AGPLv3 mode", "Disables AGPLv3 mode", CommandCategories::general, 0);
-            else
-                result.setInfo (licenseState.isSignedIn() ? String ("Sign out ") + licenseState.username + "..." : String ("Sign in..."),
-                                "Sign out of your JUCE account",
-                                CommandCategories::general, 0);
-            break;
-        }
-
     default:
         JUCEApplication::getCommandInfo (commandID, result);
         break;
@@ -1074,7 +1057,6 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::showAPIModules:            launchModulesBrowser(); break;
         case CommandIDs::showAPIClasses:            launchClassesBrowser(); break;
         case CommandIDs::showTutorials:             launchTutorialsBrowser(); break;
-        case CommandIDs::loginLogout:               doLoginOrLogout(); break;
         default:                                    return JUCEApplication::perform (info);
     }
 
@@ -1305,26 +1287,6 @@ void ProjucerApplication::launchTutorialsBrowser()
 
     if (tutorialsLink.isWellFormed())
         tutorialsLink.launchInDefaultBrowser();
-}
-
-void ProjucerApplication::doLoginOrLogout()
-{
-    if (licenseController->getCurrentState().isSignedIn())
-    {
-        licenseController->resetState();
-    }
-    else
-    {
-        if (auto* window = mainWindowList.getMainWindowWithLoginFormOpen())
-        {
-            window->toFront (true);
-        }
-        else
-        {
-            mainWindowList.createWindowIfNoneAreOpen();
-            mainWindowList.getFrontmostWindow()->showLoginFormOverlay();
-        }
-    }
 }
 
 //==============================================================================

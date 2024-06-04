@@ -62,9 +62,6 @@ namespace BinaryData
     extern const char*   export_xcode_svg;
     const int            export_xcode_svgSize = 12295;
 
-    extern const char*   agplv3_logo_svg;
-    const int            agplv3_logo_svgSize = 26610;
-
     extern const char*   juce_icon_png;
     const int            juce_icon_pngSize = 105697;
 
@@ -222,7 +219,7 @@ namespace BinaryData
     const int            juce_SimpleBinaryBuilder_cppSize = 12997;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 71;
+    const int namedResourceListSize = 70;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

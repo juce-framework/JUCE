@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              version="8.0.0" bundleIdentifier="com.juce.theprojucer"
-              companyName="Raw Material Software Limited"
+              version="8.0.0" bundleIdentifier="com.juce.theprojucer" companyName="Raw Material Software Limited"
               companyCopyright="Raw Material Software Limited" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
@@ -116,16 +115,6 @@
         <FILE id="dsxevB" name="jucer_StartPageTreeHolder.h" compile="0" resource="0"
               file="Source/Application/StartPage/jucer_StartPageTreeHolder.h"/>
       </GROUP>
-      <GROUP id="{70333C48-4F84-A180-24E1-0EC9EF223F3B}" name="UserAccount">
-        <FILE id="Rw7w0l" name="jucer_LicenseController.h" compile="0" resource="0"
-              file="Source/Application/UserAccount/jucer_LicenseController.h"/>
-        <FILE id="rUtPud" name="jucer_LicenseQueryThread.h" compile="0" resource="0"
-              file="Source/Application/UserAccount/jucer_LicenseQueryThread.h"/>
-        <FILE id="Dwndl3" name="jucer_LicenseState.h" compile="0" resource="0"
-              file="Source/Application/UserAccount/jucer_LicenseState.h"/>
-        <FILE id="d5kWEN" name="jucer_LoginFormComponent.h" compile="0" resource="0"
-              file="Source/Application/UserAccount/jucer_LoginFormComponent.h"/>
-      </GROUP>
       <GROUP id="{2F08ABDF-C7BB-5F54-55F5-0C2E27983930}" name="Windows">
         <FILE id="w1XB4w" name="jucer_AboutWindowComponent.h" compile="0" resource="0"
               file="Source/Application/Windows/jucer_AboutWindowComponent.h"/>
@@ -204,7 +193,6 @@
               file="Source/BinaryData/Icons/export_visualStudio.svg"/>
         <FILE id="G0oYd6" name="export_xcode.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_xcode.svg"/>
-        <FILE id="CfDTJ0" name="agplv3_logo.svg" compile="0" resource="1" file="Source/BinaryData/Icons/agplv3_logo.svg"/>
         <FILE id="Zrx1Gl" name="juce_icon.png" compile="0" resource="1" file="Source/BinaryData/Icons/juce_icon.png"/>
         <FILE id="iPYmG9" name="wizard_AnimatedApp.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/wizard_AnimatedApp.svg"/>
@@ -550,8 +538,6 @@
               resource="0" file="Source/Project/UI/jucer_ProjectContentComponent.h"/>
         <FILE id="itkVli" name="jucer_ProjectMessagesComponent.h" compile="0"
               resource="0" file="Source/Project/UI/jucer_ProjectMessagesComponent.h"/>
-        <FILE id="UUlUDF" name="jucer_UserAvatarComponent.h" compile="0" resource="0"
-              file="Source/Project/UI/jucer_UserAvatarComponent.h"/>
       </GROUP>
       <FILE id="JT1rMJ" name="jucer_Project.cpp" compile="1" resource="0"
             file="Source/Project/jucer_Project.cpp"/>

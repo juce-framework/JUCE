@@ -122,9 +122,6 @@ Project::Project (const File& f)
 
     auto& app = ProjucerApplication::getApp();
 
-    if (! app.isRunningCommandLine)
-        app.getLicenseController().addListener (this);
-
     app.getJUCEPathModulesList().addListener (this);
     app.getUserPathsModulesList().addListener (this);
 
@@ -143,9 +140,6 @@ Project::~Project()
     auto& app = ProjucerApplication::getApp();
 
     app.openDocumentManager.closeAllDocumentsUsingProjectWithoutSaving (*this);
-
-    if (! app.isRunningCommandLine)
-        app.getLicenseController().removeListener (this);
 
     app.getJUCEPathModulesList().removeListener (this);
     app.getUserPathsModulesList().removeListener (this);
@@ -191,8 +185,6 @@ void Project::updateCompanyNameDependencies()
     pluginARAFactoryIDValue.setDefault  (getDefaultARAFactoryIDString());
     pluginARAArchiveIDValue.setDefault  (getDefaultARADocumentArchiveID());
     pluginManufacturerValue.setDefault  (getDefaultPluginManufacturerString());
-
-    updateLicenseWarning();
 }
 
 void Project::updateWebsiteDependencies()
@@ -705,8 +697,6 @@ Result Project::loadDocument (const File& file)
 
     setChangedFlag (false);
 
-    updateLicenseWarning();
-
     return Result::ok();
 }
 
@@ -812,19 +802,6 @@ bool Project::isSaveAndExportDisabled() const
 {
     return ! ProjucerApplication::getApp().isRunningCommandLine
            && isFileModificationCheckPending();
-}
-
-void Project::updateLicenseWarning()
-{
-    if (ProjucerApplication::getApp().isRunningCommandLine)
-        return;
-
-    auto currentLicenseState = ProjucerApplication::getApp().getLicenseController().getCurrentState();
-
-    if (currentLicenseState.isPersonalOrNone() || currentLicenseState.isOldLicense())
-        addProjectMessage (ProjectMessages::Ids::personalLicense, {});
-    else
-        removeProjectMessage (ProjectMessages::Ids::personalLicense);
 }
 
 void Project::updateJUCEPathWarning()
@@ -976,11 +953,6 @@ void Project::updateModuleNotFoundWarning (bool showWarning)
         addProjectMessage (ProjectMessages::Ids::moduleNotFound, {});
     else
         removeProjectMessage (ProjectMessages::Ids::moduleNotFound);
-}
-
-void Project::licenseStateChanged()
-{
-    updateLicenseWarning();
 }
 
 void Project::changeListenerCallback (ChangeBroadcaster*)

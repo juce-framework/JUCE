@@ -76,10 +76,6 @@ public:
 
     void showStartPage();
 
-    void showLoginFormOverlay();
-    void hideLoginFormOverlay();
-    bool isShowingLoginForm() const noexcept  { return loginFormOpen; }
-
     bool isInterestedInFileDrag (const StringArray& files) override;
     void filesDropped (const StringArray& filenames, int mouseX, int mouseY) override;
 
@@ -111,7 +107,6 @@ private:
     Value projectNameValue;
 
     std::unique_ptr<Component> blurOverlayComponent;
-    bool loginFormOpen = false;
 
     ScopedMessageBox messageBox;
 
@@ -138,7 +133,6 @@ public:
     MainWindow* getFrontmostWindow (bool createIfNotFound = true);
     MainWindow* getOrCreateEmptyWindow();
     MainWindow* getMainWindowForFile (const File&);
-    MainWindow* getMainWindowWithLoginFormOpen();
 
     Project* getFrontmostProject();
 

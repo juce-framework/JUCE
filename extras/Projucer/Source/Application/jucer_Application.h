@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include "UserAccount/jucer_LicenseController.h"
 #include "jucer_MainWindow.h"
 #include "../Project/Modules/jucer_Modules.h"
 #include "jucer_AutoUpdater.h"
@@ -86,8 +85,6 @@ public:
 
     AvailableModulesList& getJUCEPathModulesList()     { return jucePathModulesList; }
     AvailableModulesList& getUserPathsModulesList()    { return userPathsModulesList; }
-
-    LicenseController& getLicenseController()          { return *licenseController; }
 
     bool isAutomaticVersionCheckingEnabled() const;
     void setAutomaticVersionCheckingEnabled (bool shouldBeEnabled);
@@ -169,9 +166,6 @@ private:
     void launchClassesBrowser();
     void launchTutorialsBrowser();
 
-    void doLoginOrLogout();
-    void showLoginForm();
-
     void enableOrDisableGUIEditor();
 
     //==============================================================================
@@ -208,8 +202,6 @@ private:
    #endif
 
     //==============================================================================
-    std::unique_ptr<LicenseController> licenseController;
-
     std::unique_ptr<TooltipWindow> tooltipWindow;
     AvailableModulesList jucePathModulesList, userPathsModulesList;
 

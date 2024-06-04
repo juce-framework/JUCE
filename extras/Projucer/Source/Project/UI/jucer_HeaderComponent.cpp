@@ -54,9 +54,6 @@ HeaderComponent::HeaderComponent (ProjectContentComponent* pcc)
     juceIcon.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize), RectanglePlacement::centred);
     addAndMakeVisible (juceIcon);
 
-    addAndMakeVisible (userAvatar);
-    userAvatar.addChangeListener (this);
-
     projectNameLabel.setText ({}, dontSendNotification);
     addAndMakeVisible (projectNameLabel);
 
@@ -95,9 +92,6 @@ void HeaderComponent::resized()
         exporterBox.setBounds (exporterBounds.removeFromBottom (roundToInt ((float) exporterBounds.getHeight() / 1.8f)));
         configLabel.setBounds (exporterBounds);
     }
-
-    userAvatar.setBounds (bounds.removeFromRight (userAvatar.isDisplaingAGPLLogo() ? roundToInt ((float) bounds.getHeight() * 1.9f)
-                                                                                   : bounds.getHeight()).reduced (2));
 }
 
 void HeaderComponent::paint (Graphics& g)
@@ -205,13 +199,6 @@ void HeaderComponent::sidebarTabsWidthChanged (int newWidth)
 {
     tabsWidth = newWidth;
     resized();
-}
-
-//==============================================================================
-void HeaderComponent::changeListenerCallback (ChangeBroadcaster* source)
-{
-    if (source == &userAvatar)
-        resized();
 }
 
 void HeaderComponent::valueChanged (Value&)

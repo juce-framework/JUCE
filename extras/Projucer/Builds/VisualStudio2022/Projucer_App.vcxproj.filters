@@ -5,9 +5,6 @@
     <Filter Include="Projucer\Application\StartPage">
       <UniqueIdentifier>{1E1D2D75-0ADA-6E9E-105F-2F87632B55AF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\Application\UserAccount">
-      <UniqueIdentifier>{DA27985D-8427-CE70-CA06-EAF7009CCC60}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Projucer\Application\Windows">
       <UniqueIdentifier>{DC7E18A5-E854-3D99-627F-AAA88246B712}</UniqueIdentifier>
     </Filter>
@@ -2403,18 +2400,6 @@
     <ClInclude Include="..\..\Source\Application\StartPage\jucer_StartPageTreeHolder.h">
       <Filter>Projucer\Application\StartPage</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseController.h">
-      <Filter>Projucer\Application\UserAccount</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseQueryThread.h">
-      <Filter>Projucer\Application\UserAccount</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LicenseState.h">
-      <Filter>Projucer\Application\UserAccount</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Application\UserAccount\jucer_LoginFormComponent.h">
-      <Filter>Projucer\Application\UserAccount</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Application\Windows\jucer_AboutWindowComponent.h">
       <Filter>Projucer\Application\Windows</Filter>
     </ClInclude>
@@ -2770,9 +2755,6 @@
       <Filter>Projucer\Project\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectMessagesComponent.h">
-      <Filter>Projucer\Project\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\UI\jucer_UserAvatarComponent.h">
       <Filter>Projucer\Project\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_Project.h">
@@ -5313,9 +5295,6 @@
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_xcode.svg">
-      <Filter>Projucer\BinaryData\Icons</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\Icons\agplv3_logo.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\juce_icon.png">

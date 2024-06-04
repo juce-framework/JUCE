@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include "../Application/UserAccount/jucer_LicenseController.h"
 #include "Modules/jucer_AvailableModulesList.h"
 
 class ProjectExporter;
@@ -50,7 +49,6 @@ namespace ProjectMessages
 
         DECLARE_ID (projectMessages);
 
-        DECLARE_ID (personalLicense);
         DECLARE_ID (cppStandard);
         DECLARE_ID (moduleNotFound);
         DECLARE_ID (jucePath);
@@ -80,7 +78,7 @@ namespace ProjectMessages
         if (std::find (std::begin (warnings), std::end (warnings), message) != std::end (warnings))
             return Ids::warning;
 
-        static Identifier notifications[] = { Ids::personalLicense, Ids::newVersionAvailable };
+        static Identifier notifications[] = { Ids::newVersionAvailable };
 
         if (std::find (std::begin (notifications), std::end (notifications), message) != std::end (notifications))
             return Ids::notification;
@@ -101,7 +99,6 @@ namespace ProjectMessages
         if (message == Ids::pluginCodeInvalid)          return "Invalid Plugin Code";
         if (message == Ids::manufacturerCodeInvalid)    return "Invalid Manufacturer Code";
         if (message == Ids::deprecatedExporter)         return "Deprecated Exporter";
-        if (message == Ids::personalLicense)            return "Personal Licence";
 
         jassertfalse;
         return {};
@@ -119,7 +116,6 @@ namespace ProjectMessages
         if (message == Ids::pluginCodeInvalid)          return "The plugin code should be exactly four characters in length.";
         if (message == Ids::manufacturerCodeInvalid)    return "The manufacturer code should be exactly four characters in length.";
         if (message == Ids::deprecatedExporter)         return "The project includes a deprecated exporter.";
-        if (message == Ids::personalLicense)            return "You are using a Personal licence. Sign in to activate a commercial licence.";
 
         jassertfalse;
         return {};
@@ -191,7 +187,6 @@ enum class Async { no, yes };
 //==============================================================================
 class Project final : public FileBasedDocument,
                       private ValueTree::Listener,
-                      private LicenseController::LicenseStateListener,
                       private ChangeListener,
                       private AvailableModulesList::Listener,
                       private MessageBoxQueue::Listener
@@ -713,11 +708,9 @@ private:
     void updateOldModulePaths();
 
     //==============================================================================
-    void licenseStateChanged() override;
     void changeListenerCallback (ChangeBroadcaster*) override;
     void availableModulesChanged (AvailableModulesList*) override;
 
-    void updateLicenseWarning();
     void updateJUCEPathWarning();
 
     void updateModuleWarnings();

@@ -36,7 +36,6 @@
 
 #include "../../Application/jucer_Headers.h"
 #include "../../Utility/UI/jucer_IconButton.h"
-#include "jucer_UserAvatarComponent.h"
 
 class Project;
 class ProjectContentComponent;
@@ -45,7 +44,6 @@ class ProjectExporter;
 //==============================================================================
 class HeaderComponent final : public Component,
                               private ValueTree::Listener,
-                              private ChangeListener,
                               private Value::Listener,
                               private Timer
 {
@@ -67,7 +65,6 @@ public:
 
 private:
     //==============================================================================
-    void changeListenerCallback (ChangeBroadcaster* source) override;
     void valueChanged (Value&) override;
     void timerCallback() override;
 
@@ -101,7 +98,6 @@ private:
     Label configLabel  { "Config Label", "Selected exporter" }, projectNameLabel;
 
     ImageComponent juceIcon;
-    UserAvatarComponent userAvatar { true };
 
     IconButton projectSettingsButton { "Project Settings", getIcons().settings },
                saveAndOpenInIDEButton { "Save and Open in IDE", Image() };
