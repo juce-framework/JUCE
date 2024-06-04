@@ -2788,7 +2788,7 @@ private:
         }
     }
 
-    void doMouseUp (Point<float> position, const WPARAM wParam)
+    void doMouseUp (Point<float> position, const WPARAM wParam, bool adjustCapture = true)
     {
         // this will be handled by WM_TOUCH
         if (isTouchEvent() || areOtherTouchSourcesActive())
@@ -2805,7 +2805,7 @@ private:
         isDragging = false;
 
         // release the mouse capture if the user has released all buttons
-        if ((wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
+        if (adjustCapture && (wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
             ReleaseCapture();
 
         // NB: under some circumstances (e.g. double-clicking a native title bar), a mouse-up can
@@ -2828,7 +2828,7 @@ private:
             renderContext->setResizing (false);
 
         if (isDragging)
-            doMouseUp (getCurrentMousePos(), (WPARAM) 0);
+            doMouseUp (getCurrentMousePos(), (WPARAM) 0, false);
     }
 
     void doMouseExit()
@@ -3810,7 +3810,9 @@ private:
             case WM_POINTERHWHEEL:
             case 0x020E: /* WM_MOUSEHWHEEL */  doMouseWheel (wParam, false); return 0;
 
-            case WM_CAPTURECHANGED:     doCaptureChanged(); return 0;
+            case WM_CAPTURECHANGED:
+                doCaptureChanged();
+                return 0;
 
             case WM_TOUCH:
                 if (getTouchInputInfo != nullptr)
@@ -4097,11 +4099,13 @@ private:
                         return 0;
 
                     case HTMAXBUTTON:
-                        setFullScreen (! isFullScreen());
+                        if ((styleFlags & windowHasMaximiseButton) != 0 && ! sendInputAttemptWhenModalMessage())
+                            setFullScreen (! isFullScreen());
                         return 0;
 
                     case HTMINBUTTON:
-                        setMinimised (true);
+                        if ((styleFlags & windowHasMinimiseButton) != 0 && ! sendInputAttemptWhenModalMessage())
+                            setMinimised (true);
                         return 0;
                 }
                 break;
