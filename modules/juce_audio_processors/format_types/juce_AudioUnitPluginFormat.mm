@@ -349,19 +349,82 @@ namespace AudioUnitFormatHelpers
     };
   #endif
 
-    template <typename Value>
-    static Optional<Value> tryGetProperty (AudioUnit inUnit,
-                                           AudioUnitPropertyID inID,
-                                           AudioUnitScope inScope,
-                                           AudioUnitElement inElement)
+    template <typename PropertyType>
+    static std::optional<PropertyType> tryGetProperty (AudioUnit inUnit,
+                                                       AudioUnitPropertyID inID,
+                                                       AudioUnitScope inScope,
+                                                       AudioUnitElement inElement)
     {
-        Value data;
-        auto size = (UInt32) sizeof (Value);
+        PropertyType property{};
+        auto size = (UInt32) sizeof (property);
 
-        if (AudioUnitGetProperty (inUnit, inID, inScope, inElement, &data, &size) == noErr)
-            return data;
+        if (AudioUnitGetProperty (inUnit, inID, inScope, inElement, &property, &size) != noErr)
+            return {};
 
-        return {};
+        // This may lead to a memory corruption as the plugin has written more data than was provided!
+        jassert (size <= sizeof (PropertyType));
+
+        return property;
+    }
+
+    template <typename Type>
+    class PropertyData
+    {
+    public:
+        explicit PropertyData (MemoryBlock&& inData) : data (std::move (inData)) {}
+
+              Type& get()       { return *static_cast<      Type*> (data.getData()); }
+        const Type& get() const { return *static_cast<const Type*> (data.getData()); }
+        UInt32 size() const { return (UInt32) data.getSize(); }
+
+    private:
+        MemoryBlock data;
+    };
+
+    template <typename Type>
+    static std::optional<PropertyData<Type>> tryGetPropertyData (AudioUnit inUnit,
+                                                                 AudioUnitPropertyID inID,
+                                                                 AudioUnitScope inScope,
+                                                                 AudioUnitElement inElement)
+    {
+        UInt32 size{};
+
+        if (AudioUnitGetPropertyInfo (inUnit, inID, inScope, inElement, &size, nullptr) != noErr)
+            return {};
+
+        constexpr auto minimumSize = sizeof (Type);
+        size = jmax ((UInt32) minimumSize, size);
+
+        MemoryBlock data;
+        data.setSize (size, true);
+
+        if (AudioUnitGetProperty (inUnit, inID, inScope, inElement, data.getData(), &size) != noErr)
+            return {};
+
+        // This may lead to a memory corruption as the plugin has written more data than was provided!
+        jassert (size <= data.getSize());
+
+        return PropertyData<Type> { std::move (data) };
+    }
+
+    template <typename Type>
+    static bool trySetProperty (AudioUnit inUnit,
+                                AudioUnitPropertyID inID,
+                                AudioUnitScope inScope,
+                                AudioUnitElement inElement,
+                                const Type& newValue)
+    {
+        return AudioUnitSetProperty (inUnit, inID, inScope, inElement, &newValue, sizeof (Type));
+    }
+
+    template <typename Type>
+    static bool trySetProperty (AudioUnit inUnit,
+                                AudioUnitPropertyID inID,
+                                AudioUnitScope inScope,
+                                AudioUnitElement inElement,
+                                const PropertyData<Type>& newValue)
+    {
+        return AudioUnitSetProperty (inUnit, inID, inScope, inElement, newValue.get(), newValue.size());
     }
 
     static UInt32 getElementCount (AudioUnit comp, AudioUnitScope scope) noexcept
@@ -392,10 +455,10 @@ namespace AudioUnitFormatHelpers
             {
                 std::vector<size_t> busMap;
 
-                if (const auto layout = tryGetProperty<AudioChannelLayout> (comp, kAudioUnitProperty_AudioChannelLayout, scope, busIndex))
+                if (const auto layout = tryGetPropertyData<AudioChannelLayout> (comp, kAudioUnitProperty_AudioChannelLayout, scope, busIndex))
                 {
-                    const auto juceChannelOrder = CoreAudioLayouts::fromCoreAudio (*layout);
-                    const auto auChannelOrder   = CoreAudioLayouts::getCoreAudioLayoutChannels (*layout);
+                    const auto juceChannelOrder = CoreAudioLayouts::fromCoreAudio (layout->get());
+                    const auto auChannelOrder   = CoreAudioLayouts::getCoreAudioLayoutChannels (layout->get());
 
                     for (auto juceChannelIndex = 0; juceChannelIndex < juceChannelOrder.size(); ++juceChannelIndex)
                         busMap.push_back ((size_t) auChannelOrder.indexOf (juceChannelOrder.getTypeOfChannel (juceChannelIndex)));
@@ -1002,99 +1065,77 @@ public:
     {
         layoutHasChanged = false;
 
-        for (int dir = 0; dir < 2; ++dir)
+        for (const auto scope : { kAudioUnitScope_Input, kAudioUnitScope_Output })
         {
-            const bool isInput = (dir == 0);
-            const AudioUnitScope scope = isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output;
-            const int n = getBusCount (isInput);
+            const auto isInput = scope == kAudioUnitScope_Input;
+            const auto busCount = (UInt32) getBusCount (isInput);
 
-            if (getElementCount (scope) != n && isBusCountWritable (isInput))
+            if (AudioUnitFormatHelpers::getElementCount (audioUnit, scope) != busCount && isBusCountWritable (isInput))
             {
-                auto newCount = static_cast<UInt32> (n);
                 layoutHasChanged = true;
 
-                [[maybe_unused]] auto err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount));
-                jassert (err == noErr);
+                if (! AudioUnitFormatHelpers::trySetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, busCount))
+                    jassertfalse;
             }
 
-            for (int i = 0; i < n; ++i)
+            for (UInt32 busIndex = 0; busIndex < busCount; ++busIndex)
             {
-                Float64 sampleRate;
-                UInt32 sampleRateSize = sizeof (sampleRate);
+                const auto& set = layouts.getChannelSet (isInput, (int) busIndex);
+                const auto currentStream = AudioUnitFormatHelpers::tryGetProperty<AudioStreamBasicDescription> (audioUnit, kAudioUnitProperty_StreamFormat, scope, busIndex);
 
-                AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sampleRate, &sampleRateSize);
+                if (! currentStream.has_value())
+                    return false;
 
-                const AudioChannelSet& set = layouts.getChannelSet (isInput, i);
-                const int requestedNumChannels = set.size();
+                const auto actualNumChannels = static_cast<int> (currentStream->mChannelsPerFrame);
+                const auto requestedNumChannels = set.size();
 
+                if (actualNumChannels != requestedNumChannels)
                 {
-                    AudioStreamBasicDescription stream;
-                    UInt32 dataSize = sizeof (stream);
-                    auto err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (i), &stream, &dataSize);
+                    const auto sampleRate = AudioUnitFormatHelpers::tryGetProperty<Float64> (audioUnit, kAudioUnitProperty_SampleRate, scope, busIndex);
+                    jassert (sampleRate.has_value());
 
-                    if (err != noErr || dataSize < sizeof (stream))
+                    layoutHasChanged = true;
+                    AudioStreamBasicDescription newStream{};
+                    newStream.mSampleRate       = *sampleRate;
+                    newStream.mFormatID         = kAudioFormatLinearPCM;
+                    newStream.mFormatFlags      = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
+                    newStream.mFramesPerPacket  = 1;
+                    newStream.mBytesPerPacket   = 4;
+                    newStream.mBytesPerFrame    = 4;
+                    newStream.mBitsPerChannel   = 32;
+                    newStream.mChannelsPerFrame = static_cast<UInt32> (requestedNumChannels);
+
+                    if (AudioUnitFormatHelpers::trySetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, busIndex, newStream))
                         return false;
-
-                    const int actualNumChannels = static_cast<int> (stream.mChannelsPerFrame);
-
-                    if (actualNumChannels != requestedNumChannels)
-                    {
-                        layoutHasChanged = true;
-                        zerostruct (stream); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
-                        stream.mSampleRate       = sampleRate;
-                        stream.mFormatID         = kAudioFormatLinearPCM;
-                        stream.mFormatFlags      = (int) kAudioFormatFlagsNativeFloatPacked | (int) kAudioFormatFlagIsNonInterleaved | (int) kAudioFormatFlagsNativeEndian;
-                        stream.mFramesPerPacket  = 1;
-                        stream.mBytesPerPacket   = 4;
-                        stream.mBytesPerFrame    = 4;
-                        stream.mBitsPerChannel   = 32;
-                        stream.mChannelsPerFrame = static_cast<UInt32> (requestedNumChannels);
-
-                        err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (i), &stream, sizeof (stream));
-                        if (err != noErr) return false;
-                    }
                 }
 
-                if (! set.isDiscreteLayout())
+                if (isInitialized && ! set.isDiscreteLayout())
                 {
-                    const AudioChannelLayoutTag requestedTag = CoreAudioLayouts::toCoreAudio (set);
-
-                    AudioChannelLayout layout;
-                    const UInt32 minDataSize = sizeof (layout) - sizeof (AudioChannelDescription);
-                    UInt32 dataSize = minDataSize;
-
-                    AudioChannelLayoutTag actualTag = kAudioChannelLayoutTag_Unknown;
-                    auto err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope, static_cast<UInt32> (i), &layout, &dataSize);
-                    bool supportsLayouts = (err == noErr && dataSize >= minDataSize);
-
-                    if (supportsLayouts)
+                    if (const auto layout = AudioUnitFormatHelpers::tryGetPropertyData<AudioChannelLayout> (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope, busIndex))
                     {
-                        const UInt32 expectedSize =
-                            minDataSize + (sizeof (AudioChannelDescription) * layout.mNumberChannelDescriptions);
+                        // This is likely a fault with the plugin. Not enough data has been allocated
+                        // to support the AudioChannelLayout being described
+                        jassert (layout->get().mChannelLayoutTag != kAudioChannelLayoutTag_UseChannelDescriptions
+                                 || layout->size() >= offsetof (AudioChannelLayout, mChannelDescriptions) + layout->get().mNumberChannelDescriptions * sizeof (AudioChannelDescription));
 
-                        HeapBlock<AudioChannelLayout> layoutBuffer;
-                        layoutBuffer.malloc (1, expectedSize);
-                        dataSize = expectedSize;
-
-                        err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope,
-                                                    static_cast<UInt32> (i), layoutBuffer.get(), &dataSize);
-
-                        if (err != noErr || dataSize < expectedSize)
-                            return false;
-
-                        // try to convert the layout into a tag
-                        actualTag = CoreAudioLayouts::toCoreAudio (CoreAudioLayouts::fromCoreAudio (layout));
+                        const auto requestedTag = CoreAudioLayouts::toCoreAudio (set);
+                        const auto actualTag    = CoreAudioLayouts::toCoreAudio (CoreAudioLayouts::fromCoreAudio (layout->get()));
 
                         if (actualTag != requestedTag)
                         {
-                            zerostruct (layout);
-                            layout.mChannelLayoutTag = requestedTag;
+                            AudioChannelLayout newLayout{};
+                            newLayout.mChannelLayoutTag = requestedTag;
 
-                            err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope, static_cast<UInt32> (i), &layout, minDataSize);
+                            // We'll likely need to fill more data in the newLayout for these tags.
+                            // Please notify the JUCE team if you hit this assertion and provide clear
+                            // instructions regarding the plugin being loaded and any other relevant
+                            // details required to hit this assertion. Preferably if you can recreate
+                            // the assertion using the AudioPluginHost that would be extremely helpful.
 
-                            // only bail out if the plug-in claims to support layouts
-                            // See AudioUnit headers on kAudioUnitProperty_AudioChannelLayout
-                            if (err != noErr && supportsLayouts && isInitialized)
+                            jassert (requestedTag != kAudioChannelLayoutTag_UseChannelBitmap
+                                  && requestedTag != kAudioChannelLayoutTag_UseChannelDescriptions);
+
+                            if (AudioUnitFormatHelpers::trySetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope, busIndex, newLayout))
                                 return false;
                         }
                     }
@@ -2383,12 +2424,6 @@ private:
     }
 
     //==============================================================================
-    int getElementCount (AudioUnitScope scope) const noexcept
-    {
-        return static_cast<int> (AudioUnitFormatHelpers::getElementCount (audioUnit, scope));
-    }
-
-    //==============================================================================
     void getBusProperties (bool isInput, UInt32 busIdx, String& busName, AudioChannelSet& currentLayout) const
     {
         getBusProperties (audioUnit, isInput, busIdx, busName, currentLayout);
@@ -2407,13 +2442,8 @@ private:
                 if (busNameCF.object != nullptr)
                     busName = nsStringToJuce ((NSString*) busNameCF.object);
 
-            {
-                AudioChannelLayout auLayout;
-                propertySize = sizeof (auLayout);
-
-                if (AudioUnitGetProperty (comp, kAudioUnitProperty_AudioChannelLayout, scope, busIdx, &auLayout, &propertySize) == noErr)
-                    currentLayout = CoreAudioLayouts::fromCoreAudio (auLayout);
-            }
+            if (const auto auLayout = AudioUnitFormatHelpers::tryGetPropertyData<AudioChannelLayout> (comp, kAudioUnitProperty_AudioChannelLayout, scope, busIdx))
+                currentLayout = CoreAudioLayouts::fromCoreAudio (auLayout->get());
 
             if (currentLayout.isDisabled())
             {
@@ -2443,27 +2473,22 @@ private:
         {
             const bool isInput = (dir == 0);
             const AudioUnitScope scope = isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output;
-            auto n = getElementCount (scope);
+            const auto n = AudioUnitFormatHelpers::getElementCount (audioUnit, scope);
 
-            for (int busIdx = 0; busIdx < n; ++busIdx)
+            for (UInt32 busIdx = 0; busIdx < n; ++busIdx)
             {
                 Array<AudioChannelSet> supported;
                 AudioChannelSet currentLayout;
 
-                {
-                    AudioChannelLayout auLayout;
-                    UInt32 propertySize = sizeof (auLayout);
-
-                    if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope, static_cast<UInt32> (busIdx), &auLayout, &propertySize) == noErr)
-                        currentLayout = CoreAudioLayouts::fromCoreAudio (auLayout);
-                }
+                if (const auto auLayout = AudioUnitFormatHelpers::tryGetPropertyData<AudioChannelLayout> (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope, busIdx))
+                    currentLayout = CoreAudioLayouts::fromCoreAudio (auLayout->get());
 
                 if (currentLayout.isDisabled())
                 {
                     AudioStreamBasicDescription descr;
                     UInt32 propertySize = sizeof (descr);
 
-                    if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (busIdx), &descr, &propertySize) == noErr)
+                    if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, busIdx, &descr, &propertySize) == noErr)
                         currentLayout = AudioChannelSet::canonicalChannelSet (static_cast<int> (descr.mChannelsPerFrame));
                 }
 
@@ -2472,7 +2497,7 @@ private:
                     UInt32 propertySize = 0;
                     Boolean writable;
 
-                    if (AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_SupportedChannelLayoutTags, scope, static_cast<UInt32> (busIdx), &propertySize, &writable) == noErr
+                    if (AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_SupportedChannelLayoutTags, scope, busIdx, &propertySize, &writable) == noErr
                         && propertySize > 0)
                     {
                         const size_t numElements = propertySize / sizeof (AudioChannelLayoutTag);
