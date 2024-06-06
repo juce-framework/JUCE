@@ -43,6 +43,7 @@
 		89AD16514B1F4133FFEA1DF9 /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = 96D99A08027CA35D6A4E5CFD; };
 		8C0AEA08A71075A6C765AEC9 /* AVKit.framework */ = {isa = PBXBuildFile; fileRef = 3B99CF94C44E2EE04635A439; };
 		91CD2BCE4CA07E18229EB436 /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = 9672FCE6167ADB567A9EB2F8; };
+		98D376BD41E5359370AD42D9 /* include_juce_core_CompilationTime.cpp */ = {isa = PBXBuildFile; fileRef = 640B7C54D35F5DF408327886; };
 		9BEA1428416CE06BF72FBAB8 /* DiscRecording.framework */ = {isa = PBXBuildFile; fileRef = 3DC90DA86565B0356B6E5E0B; };
 		9EACEA6BE8D0ACC72C12C080 /* include_juce_audio_devices.mm */ = {isa = PBXBuildFile; fileRef = 03A63C3CA6F24977F19C316D; };
 		9F15FD7A7CE83CFD98F07D59 /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = 02A2ED58B066B4D119F67913; };
@@ -103,6 +104,7 @@
 		5CD17151385A69F1E07FE85B /* DSP */ /* DSP */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DSP; path = ../../../DSP; sourceTree = "<group>"; };
 		60F2869DC345EAF2314D6C09 /* juce_audio_devices */ /* juce_audio_devices */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_devices; path = ../../../../modules/juce_audio_devices; sourceTree = SOURCE_ROOT; };
 		61AE09C749B007B70A265D9B /* CoreMIDI.framework */ /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
+		640B7C54D35F5DF408327886 /* include_juce_core_CompilationTime.cpp */ /* include_juce_core_CompilationTime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_core_CompilationTime.cpp; path = ../../JuceLibraryCode/include_juce_core_CompilationTime.cpp; sourceTree = SOURCE_ROOT; };
 		651ECE3C7BA845DDCFEE48F3 /* juce_osc */ /* juce_osc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_osc; path = ../../../../modules/juce_osc; sourceTree = SOURCE_ROOT; };
 		6847A9B2C5E3C2ED56D8D4E7 /* juce_audio_basics */ /* juce_audio_basics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_basics; path = ../../../../modules/juce_audio_basics; sourceTree = SOURCE_ROOT; };
 		685A261BE78585293F3EAD36 /* Assets */ /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Assets; path = ../../../Assets; sourceTree = "<group>"; };
@@ -245,6 +247,7 @@
 				EDDA01B246C6128CAF7A2914,
 				4DF215D350FFE5E119CBA7E5,
 				3BC9753E0CD75A36DC742EE0,
+				640B7C54D35F5DF408327886,
 				6C5E26B4D28F8450435B8AE1,
 				F5F2EA2238973488632FC322,
 				C1E93FAF6C68A40A664422CD,
@@ -450,6 +453,7 @@
 				712D81867EC698463252FA79,
 				611298FAC1A543BDD10D4C41,
 				D183F8140174ACCDDCD230A2,
+				98D376BD41E5359370AD42D9,
 				FF87532E62753EDFA3D29CAD,
 				2F76CA28C8C0EFC7453D0EB8,
 				6B5560283DEEBD6DD2D6C984,

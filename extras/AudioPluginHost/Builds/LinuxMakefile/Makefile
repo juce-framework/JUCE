@@ -88,6 +88,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/include_juce_audio_processors_lv2_libs_12bdca08.o \
   $(JUCE_OBJDIR)/include_juce_audio_utils_9f9fb2d6.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
+  $(JUCE_OBJDIR)/include_juce_core_CompilationTime_9257742c.o \
   $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
   $(JUCE_OBJDIR)/include_juce_dsp_aeb2060f.o \
@@ -189,6 +190,11 @@ $(JUCE_OBJDIR)/include_juce_audio_utils_9f9fb2d6.o: ../../JuceLibraryCode/includ
 $(JUCE_OBJDIR)/include_juce_core_f26d17db.o: ../../JuceLibraryCode/include_juce_core.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling include_juce_core.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_core_CompilationTime_9257742c.o: ../../JuceLibraryCode/include_juce_core_CompilationTime.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_core_CompilationTime.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o: ../../JuceLibraryCode/include_juce_cryptography.cpp

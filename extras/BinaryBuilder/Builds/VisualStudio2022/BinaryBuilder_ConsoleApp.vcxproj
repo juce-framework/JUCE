@@ -496,9 +496,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\juce_core.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\juce_core_CompilationTime.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp">
       <AdditionalOptions> /bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_core_CompilationTime.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.h"/>

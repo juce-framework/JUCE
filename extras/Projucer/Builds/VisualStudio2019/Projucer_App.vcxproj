@@ -635,6 +635,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\juce_core.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\juce_core_CompilationTime.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_cryptography\encryption\juce_BlowFish.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1894,6 +1897,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp">
       <AdditionalOptions> /bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_core_CompilationTime.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_cryptography.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_events.cpp"/>

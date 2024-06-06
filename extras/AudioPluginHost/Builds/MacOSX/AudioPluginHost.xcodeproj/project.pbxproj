@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		025B22813EA4E34CE3630B9A /* IOConfigurationWindow.cpp */ = {isa = PBXBuildFile; fileRef = C37B2E77AAB6C9E13729BF99; };
 		075C54DDDBDEA5AAD2F60154 /* include_juce_graphics.mm */ = {isa = PBXBuildFile; fileRef = 82800DBA287EF4BAB13B42FB; };
+		08E08AEF1DFE00F06F5ED160 /* include_juce_core_CompilationTime.cpp */ = {isa = PBXBuildFile; fileRef = DB6C39B4C628E31A58A28675; };
 		09309BD494A05931864B6730 /* PluginGraph.cpp */ = {isa = PBXBuildFile; fileRef = 0B1CC8C80F6F99BDE7D6AEC9; };
 		0F20A4AE04736634F097F5A6 /* include_juce_audio_utils.mm */ = {isa = PBXBuildFile; fileRef = B285CAB91AE928C476CA4F9C; };
 		15CCE43D7DCFC649638919D4 /* include_juce_audio_basics.mm */ = {isa = PBXBuildFile; fileRef = 4C7D82F9274A4F9DBF11235C; };
@@ -124,6 +125,7 @@
 		CA726B9AA0EC87B58D005C8D /* ARAPlugin.h */ /* ARAPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ARAPlugin.h; path = ../../Source/Plugins/ARAPlugin.h; sourceTree = SOURCE_ROOT; };
 		D313CF37B25D7FD313C4F336 /* OpenGL.framework */ /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		D4EBC17BDB7F88CCBC76730B /* AudioToolbox.framework */ /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		DB6C39B4C628E31A58A28675 /* include_juce_core_CompilationTime.cpp */ /* include_juce_core_CompilationTime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_core_CompilationTime.cpp; path = ../../JuceLibraryCode/include_juce_core_CompilationTime.cpp; sourceTree = SOURCE_ROOT; };
 		E19F52E4D8928B850832C57F /* include_juce_graphics_Harfbuzz.cpp */ /* include_juce_graphics_Harfbuzz.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_graphics_Harfbuzz.cpp; path = ../../JuceLibraryCode/include_juce_graphics_Harfbuzz.cpp; sourceTree = SOURCE_ROOT; };
 		E68018DE199135B7F738FB17 /* CoreAudioKit.framework */ /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		F14CDB17EFE157DA3C3A5A91 /* IOConfigurationWindow.h */ /* IOConfigurationWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IOConfigurationWindow.h; path = ../../Source/Plugins/IOConfigurationWindow.h; sourceTree = SOURCE_ROOT; };
@@ -199,6 +201,7 @@
 				5183A94449F6317518C48B0C,
 				B285CAB91AE928C476CA4F9C,
 				683CEE986A2467C850FE99E6,
+				DB6C39B4C628E31A58A28675,
 				B8E24A5CEE6B7055537725CF,
 				5EF1D381F42AA8764597F189,
 				36689CA4EFC2AF183A0848AE,
@@ -427,6 +430,7 @@
 				60BBD03840ABDD719FED194F,
 				0F20A4AE04736634F097F5A6,
 				76A80851698FC773D2479B4E,
+				08E08AEF1DFE00F06F5ED160,
 				E4A926EF695823F0F13268FF,
 				A09E93F1B354E1FF8B3E9ABE,
 				A5F0B3B7175766C8AF1D6C3E,

@@ -124,6 +124,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
   $(JUCE_OBJDIR)/include_juce_build_tools_f5069398.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
+  $(JUCE_OBJDIR)/include_juce_core_CompilationTime_9257742c.o \
   $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
   $(JUCE_OBJDIR)/include_juce_events_fd7d695.o \
@@ -403,6 +404,11 @@ $(JUCE_OBJDIR)/include_juce_build_tools_f5069398.o: ../../JuceLibraryCode/includ
 $(JUCE_OBJDIR)/include_juce_core_f26d17db.o: ../../JuceLibraryCode/include_juce_core.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling include_juce_core.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_core_CompilationTime_9257742c.o: ../../JuceLibraryCode/include_juce_core_CompilationTime.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling include_juce_core_CompilationTime.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o: ../../JuceLibraryCode/include_juce_cryptography.cpp

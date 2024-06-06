@@ -13,6 +13,7 @@
 		09C4EDDF7F8B6E75EA3CE3A9 /* jucer_DocumentEditorComponent.cpp */ = {isa = PBXBuildFile; fileRef = BC3B310D42C489E8B8D93327; };
 		0A89E8E0E99C3B5B2B38F2E6 /* jucer_NewProjectWizard.cpp */ = {isa = PBXBuildFile; fileRef = C2835F16963B34839FC36220; };
 		0E783907C6214ADD59EC95DC /* jucer_Modules.cpp */ = {isa = PBXBuildFile; fileRef = F58B23995765C9FDBE28F871; };
+		10E26DA28CF28BBFDC64E796 /* include_juce_core_CompilationTime.cpp */ = {isa = PBXBuildFile; fileRef = 5F0374A45E6B5EC8E47D688F; };
 		11D42F7EC6E6539D79A7F4B1 /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = E5D6C36496F5BC84D7213BE8; };
 		13180B0F6CE42B355C90CF3C /* include_juce_graphics_Harfbuzz.cpp */ = {isa = PBXBuildFile; fileRef = 39F69DABE999E4B2CBC6041F; };
 		1321E6C1C6170B6C898AD09D /* Icon.icns */ = {isa = PBXBuildFile; fileRef = 951128CA33CCDEF570436B1C; };
@@ -186,6 +187,7 @@
 		5B3532C5F103DAC87B4A5675 /* wizard_GUI.svg */ /* wizard_GUI.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = wizard_GUI.svg; path = ../../Source/BinaryData/Icons/wizard_GUI.svg; sourceTree = SOURCE_ROOT; };
 		5BF0374EB908F0476BD8ED42 /* jucer_AudioComponentTemplate.h */ /* jucer_AudioComponentTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AudioComponentTemplate.h; path = ../../Source/BinaryData/Templates/jucer_AudioComponentTemplate.h; sourceTree = SOURCE_ROOT; };
 		5E4EB84A7983AB31366A3490 /* jucer_ModuleTreeItems.h */ /* jucer_ModuleTreeItems.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ModuleTreeItems.h; path = ../../Source/Project/UI/Sidebar/jucer_ModuleTreeItems.h; sourceTree = SOURCE_ROOT; };
+		5F0374A45E6B5EC8E47D688F /* include_juce_core_CompilationTime.cpp */ /* include_juce_core_CompilationTime.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_core_CompilationTime.cpp; path = ../../JuceLibraryCode/include_juce_core_CompilationTime.cpp; sourceTree = SOURCE_ROOT; };
 		5F6584B675E30761521A9F42 /* colourscheme_light.xml */ /* colourscheme_light.xml */ = {isa = PBXFileReference; lastKnownFileType = file.xml; name = colourscheme_light.xml; path = ../../Source/BinaryData/colourscheme_light.xml; sourceTree = SOURCE_ROOT; };
 		62922B3C0620368D1799A653 /* wizard_OpenGL.svg */ /* wizard_OpenGL.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = wizard_OpenGL.svg; path = ../../Source/BinaryData/Icons/wizard_OpenGL.svg; sourceTree = SOURCE_ROOT; };
 		630DC5EAA31D3EE60B2D989F /* jucer_GenericComponentHandler.h */ /* jucer_GenericComponentHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_GenericComponentHandler.h; path = ../../Source/ComponentEditor/Components/jucer_GenericComponentHandler.h; sourceTree = SOURCE_ROOT; };
@@ -524,6 +526,7 @@
 				4F687965FBE86EAFDB3ACFEC,
 				E2687B099347B364D1919A9B,
 				DB9C8E35DF815B803CB4A9CF,
+				5F0374A45E6B5EC8E47D688F,
 				D766BB9D8C32B5560F0493F3,
 				1DE5BBC777FB64798D823002,
 				5867DC4E39DF8539B54C0D59,
@@ -1069,6 +1072,7 @@
 				3C5267E06A897B0DC0F7EA50,
 				4C743A3DA8682EEE89BDBD28,
 				5DD883699B85E4C492CAD065,
+				10E26DA28CF28BBFDC64E796,
 				D5C9125F65493CA481F18E53,
 				02E8F35A8E0D4A0DF6F38D60,
 				234B6BA2952CBC7C61EF70EF,
