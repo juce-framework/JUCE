@@ -602,14 +602,18 @@ static int getMonthNumberForCompileDate (const String& m)
     return 0;
 }
 
+// Implemented in juce_core_CompilationTime.cpp
+extern const char* juce_compilationDate;
+extern const char* juce_compilationTime;
+
 Time Time::getCompilationDate()
 {
     StringArray dateTokens, timeTokens;
 
-    dateTokens.addTokens (__DATE__, true);
+    dateTokens.addTokens (juce_compilationDate, true);
     dateTokens.removeEmptyStrings (true);
 
-    timeTokens.addTokens (__TIME__, ":", StringRef());
+    timeTokens.addTokens (juce_compilationTime, ":", StringRef());
 
     return Time (dateTokens[2].getIntValue(),
                  getMonthNumberForCompileDate (dateTokens[0]),
