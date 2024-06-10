@@ -381,7 +381,8 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     // Adding the converted portion of the text with hb_buffer_add_utf32() or especially with
     // hb_buffer_add() gives us control over cluster numbers. hb_buffer_add_utf32() will increment
     // cluster numbers by unicode codepoints (as opposed to UTF8 bytes) starting from 0.
-    auto utf32Ptr = string.toUTF32() + (int) range.getStart();
+    auto utf32Span = Span { string.toUTF32().getAddress() + (size_t) range.getStart(),
+                            (size_t) range.getLength() };
 
     // TODO(ati) This should be configurable in case someone wants to implement a "display whitespace" functionality
     // We're using a word joiner (zero width non-breaking space) followed by a non-breaking space
@@ -391,11 +392,12 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
 
     const auto numLineEndsToReplace = [&]
     {
-        const auto chunkLength = (int) range.getLength();
+        constexpr auto lf = 0x0a;
+        constexpr auto cr = 0x0d;
 
-        if (chunkLength >= 1 && utf32Ptr[chunkLength - 1] == 0xa)
+        if (! utf32Span.empty() && (utf32Span.back() == lf || utf32Span.back() == cr))
         {
-            if (chunkLength >= 2 && utf32Ptr[chunkLength - 2] == 0xd)
+            if (utf32Span.size() >= 2 && utf32Span[utf32Span.size() - 2] == cr)
                 return 2;
 
             return 1;
@@ -405,7 +407,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     }();
 
     hb_buffer_add_utf32 (buffer.get(),
-                         (uint32_t*) utf32Ptr.getAddress(),
+                         (uint32_t*) utf32Span.data(),
                          (int) range.getLength() - numLineEndsToReplace,
                          (unsigned int) 0,
                          (int) range.getLength() - numLineEndsToReplace);
@@ -467,7 +469,8 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     });
 
     // It this is hit, the typeface can't display one or more characters.
-    // This normally shouldn't happen if font fallback is enabled.
+    // This normally shouldn't happen if font fallback is enabled, unless the String contains
+    // control characters that JUCE doesn't know how to handle appropriately.
     jassert (unknownGlyph == infos.end());
 
     [[maybe_unused]] const auto trackingAmount = (! HB_DIRECTION_IS_VERTICAL (direction) && ! trackingIsDefault)
