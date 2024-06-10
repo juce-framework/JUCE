@@ -288,7 +288,6 @@ SimpleShapedText::SimpleShapedText (const String* data,
     shape (string, options);
 }
 
-// TODO(ati) This can probably be removed. Or we can do shaping using raw UTF8 pointers.
 struct Utf8Lookup
 {
     Utf8Lookup (const String& s)
@@ -349,27 +348,8 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     hb_buffer_set_direction (buffer.get(),
                              direction == TextDirection::ltr ? HB_DIRECTION_LTR : HB_DIRECTION_RTL);
 
-    // TODO(ati) I lifted this from the Skia source comments. Unfortunately the bug tracker isn't
-    // externally available.
-    //
-    // Documentation for HB_BUFFER_FLAG_BOT/EOT at 763e5466c0a03a7c27020e1e2598e488612529a7.
-    // Currently BOT forces a dotted circle when first codepoint is a mark; EOT has no effect.
-    // Avoid adding dotted circle, re-evaluate if BOT/EOT change. See https://skbug.com/9618.
-    // hb_buffer_set_flags(buffer, HB_BUFFER_FLAG_BOT | HB_BUFFER_FLAG_EOT);
-    // const auto flags = HB_BUFFER_FLAG_DEFAULT
-    //                  | (byteRange.getStart() == 0                          ? HB_BUFFER_FLAG_BOT : 0)
-    //                  | (byteRange.getEnd()   == string.getNumBytesAsUTF8() ? HB_BUFFER_FLAG_EOT : 0);
-    //
-    // hb_buffer_set_flags (buffer.get(), (hb_buffer_flags_t) flags);
-
     Utf8Lookup utf8Lookup { string };
 
-    // TODO(ati) Test this first. I wonder if visual linebreaks are forced by the SKIA technique,
-    // where they add the buffer contents in three separate calls to hb_buffer_add* and add
-    // precontext, text-to-shape and postcontext.
-    //
-    // I am afraid they just assume that it is safe to break at run boundaries, which doesn't quite
-    // hit all our imagined use-cases.
     const auto preContextByteRange = utf8Lookup.getByteRange (Range<int64> { 0, range.getStart() });
 
     hb_buffer_add_utf8 (buffer.get(),
@@ -384,7 +364,6 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     auto utf32Span = Span { string.toUTF32().getAddress() + (size_t) range.getStart(),
                             (size_t) range.getLength() };
 
-    // TODO(ati) This should be configurable in case someone wants to implement a "display whitespace" functionality
     // We're using a word joiner (zero width non-breaking space) followed by a non-breaking space
     // for visual representation. This is so that it's not possible to break the glyph representing
     // the line breaking glyph on its own.
@@ -414,7 +393,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
 
     for (int i = 0; i < numLineEndsToReplace; ++i)
     {
-        // TODO(ati) The following gets cluster values right, but this does not follow clearly from harfbuzz documentation.
+        // The following gets cluster values right, but this does not follow clearly from harfbuzz documentation.
         // Add at least a regression test checking the correctness of cluster values.
         hb_buffer_add (buffer.get(),
                        static_cast<hb_codepoint_t> (*(crLf + (2 - numLineEndsToReplace) + i)),
@@ -530,7 +509,6 @@ private:
 template <typename T>
 static auto makeSubSpanLookup (Span<T> s) { return SubSpanLookup<T> { s }; }
 
-// TODO(ati) Fix Unicode::WordBreakIterator
 struct CanBreakBeforeIterator
 {
     explicit CanBreakBeforeIterator (Span<const Unicode::Codepoint> s)
@@ -616,7 +594,6 @@ private:
     CanBreakBeforeIterator it;
     Range<int64> restrictedTo { std::numeric_limits<int64>::min(),  std::numeric_limits<int64>::max() };
 
-    // TODO(ati) Move this out of here into append(). We want to signal that the entire range can be consumed without breaking.
     bool rangeEndReturned = false;
 };
 

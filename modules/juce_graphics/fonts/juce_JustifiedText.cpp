@@ -371,7 +371,6 @@ JustifiedText::JustifiedText (const SimpleShapedText& t, const ShapedTextOptions
         || effectiveLength <= *options.getMaxWidth() + maxWidthTolerance)
         return;
 
-    // TODO(ati) This should be (! isLtr) once we have a mechanism to determine the base writing direction
     const auto cutoffAtFront = lastLineAlignment.value.getX() < 0.0f - maxWidthTolerance;
 
     const auto getLastLineVisibleRange = [&] (float ellipsisLength)
