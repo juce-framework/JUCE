@@ -1565,31 +1565,10 @@ public:
 
     std::optional<BorderSize<int>> getCustomBorderSize() const
     {
-        if (hasTitleBar() || (styleFlags & windowAppearsOnTaskbar) == 0)
+        if (hasTitleBar() || (styleFlags & windowIsTemporary) != 0)
             return {};
 
-        ScopedThreadDPIAwarenessSetter setter { hwnd };
-        // Apply standard padding to the left, right, and bottom of the client area.
-        // The system will use this for the resizable border area.
-        // No padding at the top, though, because we want to paint our own title there.
-        const auto dpi = GetDpiForWindow (hwnd);
-        const auto frameX = GetSystemMetricsForDpi (SM_CXFRAME, dpi);
-        const auto frameY = GetSystemMetricsForDpi (SM_CYFRAME, dpi);
-        const auto padding = GetSystemMetricsForDpi (SM_CXPADDEDBORDER, dpi);
-
-        // On Windows 11, the non-client area drawing will obscure the top pixel of the client
-        // area. Adding a bit of extra padding ensures that the entirety of the client area remains
-        // visible.
-        // Unfortunately, earlier Windows versions seem to display the full title bar if the top
-        // padding is not zero, so we have to use a different padding value there.
-        const auto topPadding = SystemStats::getOperatingSystemType() == SystemStats::Windows11
-                              ? (int) dpi / USER_DEFAULT_SCREEN_DPI
-                              : 0;
-
-        return BorderSize<int> { isFullScreen() ? frameY + padding : topPadding,
-                                 frameX + padding,
-                                 frameY + padding,
-                                 frameX + padding };
+        return BorderSize<int> { 0, 0, 0, 0 };
     }
 
     BorderSize<int> findPhysicalBorderSize() const
@@ -1605,10 +1584,19 @@ public:
         if (! GetWindowInfo (hwnd, &info))
             return {};
 
-        return { roundToInt ((info.rcClient.top    - info.rcWindow.top)),
-                 roundToInt ((info.rcClient.left   - info.rcWindow.left)),
-                 roundToInt ((info.rcWindow.bottom - info.rcClient.bottom)),
-                 roundToInt ((info.rcWindow.right  - info.rcClient.right)) };
+        return { info.rcClient.top - info.rcWindow.top,
+                 info.rcClient.left - info.rcWindow.left,
+                 info.rcWindow.bottom - info.rcClient.bottom,
+                 info.rcWindow.right - info.rcClient.right };
+    }
+
+    BorderSize<float> getScaledBorderSize() const
+    {
+        const auto physical = findPhysicalBorderSize();
+        return { (float) physical.getTop()    / (float) scaleFactor,
+                 (float) physical.getLeft()   / (float) scaleFactor,
+                 (float) physical.getBottom() / (float) scaleFactor,
+                 (float) physical.getRight()  / (float) scaleFactor };
     }
 
     void updateBorderSize()
@@ -1695,7 +1683,22 @@ public:
     Rectangle<int> getBounds() const override
     {
         if (parentToAddTo == nullptr)
-            return convertPhysicalScreenRectangleToLogical (findPhysicalBorderSize().subtractedFrom (D2DUtilities::toRectangle (getWindowScreenRect (hwnd))), hwnd);
+        {
+            // Depending on the desktop scale factor, the physical size of the window may not map to
+            // an integral client-area size.
+            // In this case, we always round the width and height of the client area up to the next
+            // integer.
+            // This means that we may end up clipping off up to one logical pixel under the physical
+            // window border, but this is preferable to displaying an uninitialised/unpainted
+            // region of the client area.
+            const auto physicalBorder = findPhysicalBorderSize();
+
+            const auto physicalBounds = D2DUtilities::toRectangle (getWindowScreenRect (hwnd));
+            const auto physicalClient = physicalBorder.subtractedFrom (physicalBounds);
+            const auto logicalClient = convertPhysicalScreenRectangleToLogical (physicalClient.toFloat(), hwnd);
+            const auto snapped = logicalClient.withPosition (logicalClient.getPosition().roundToInt().toFloat()).getSmallestIntegerContainer();
+            return snapped;
+        }
 
         auto localBounds = D2DUtilities::toRectangle (getWindowClientRect (hwnd));
 
@@ -2443,53 +2446,50 @@ private:
         DWORD exstyle = 0;
         DWORD type = WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
-        if (hasTitleBar())
-        {
-            type |= WS_OVERLAPPED;
+        const auto titled = (styleFlags & windowHasTitleBar) != 0;
+        const auto hasClose = (styleFlags & windowHasCloseButton) != 0;
+        const auto hasMin = (styleFlags & windowHasMinimiseButton) != 0;
+        const auto hasMax = (styleFlags & windowHasMaximiseButton) != 0;
+        const auto appearsOnTaskbar = (styleFlags & windowAppearsOnTaskbar) != 0;
+        const auto resizable = (styleFlags & windowIsResizable) != 0;
+        const auto transparent = (styleFlags & windowIsSemiTransparent) != 0;
 
-            if ((styleFlags & windowHasCloseButton) != 0)
-            {
-                type |= WS_SYSMENU;
-            }
-            else
-            {
-                // annoyingly, windows won't let you have a min/max button without a close button
-                jassert ((styleFlags & (windowHasMinimiseButton | windowHasMaximiseButton)) == 0);
-            }
-        }
-        else if (parentToAddTo != nullptr)
+        if (parentToAddTo != nullptr)
         {
             type |= WS_CHILD;
         }
-
-        if (parentToAddTo == nullptr)
+        else
         {
-            if ((styleFlags & windowAppearsOnTaskbar) != 0)
-            {
-                exstyle |= WS_EX_APPWINDOW;
-            }
-            else
-            {
-                exstyle |= WS_EX_TOOLWINDOW;
-                type |= WS_POPUP; // Note that popup windows don't get rounded corners by default
-            }
-
-            if ((styleFlags & windowIsResizable) != 0)
-                type |= WS_THICKFRAME | WS_SYSMENU;
+            type |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
+            type |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
+            type |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION) : 0;
+            type |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION) : 0;
+            type |= resizable || windowUsesNativeShadow() ? WS_THICKFRAME : 0;
+            exstyle |= appearsOnTaskbar ? WS_EX_APPWINDOW : WS_EX_TOOLWINDOW;
         }
 
-        // Don't set WS_EX_TRANSPARENT here; setting that flag hides OpenGL child windows
-        // behind the Direct2D composition tree.
-        if ((styleFlags & windowHasMinimiseButton) != 0)    type |= WS_MINIMIZEBOX;
-        if ((styleFlags & windowHasMaximiseButton) != 0)    type |= WS_MAXIMIZEBOX;
-        if ((styleFlags & windowIsSemiTransparent) != 0)    exstyle |= WS_EX_LAYERED;
+        exstyle |= transparent ? WS_EX_LAYERED : 0;
 
         hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->getWindowClassName(),
                                L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
                                (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
 
-        if (! hasTitleBar() && parentToAddTo == nullptr)
+        if (! titled && windowUsesNativeShadow())
         {
+            // The choice of margins is very particular.
+            // - Using 0 for all values disables the system decoration (shadow etc.) completely.
+            // - Using -1 for all values breaks the software renderer, because the client content
+            //   gets blended with the system-drawn controls.
+            //   It looks OK most of the time with the D2D renderer, but can look very ugly during
+            //   resize because the native window controls still get drawn under the client area.
+            // - Using 1 for all values looks the way we want for both renderers, but seems to
+            //   prevent the Windows 11 maximize-button flyout from appearing (?).
+            // - Using 1 for left and right, and 0 for top and bottom shows the system shadow and
+            //   maximize-button flyout.
+            static constexpr MARGINS margins { 1, 1, 0, 0 };
+            ::DwmExtendFrameIntoClientArea (hwnd, &margins);
+            ::SetWindowPos (hwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
+
             // Disable rounded corners on Windows 11 for custom windows with no titlebar,
             // because window borders look weird when they get rounded away.
             const auto pref = DWMWCP_DONOTROUND;
@@ -2608,12 +2608,19 @@ private:
         return ! component.isOpaque();
     }
 
+    bool windowUsesNativeShadow() const
+    {
+        return hasTitleBar()
+            || (   (0 != (styleFlags & windowHasDropShadow))
+                && (0 == (styleFlags & windowIsSemiTransparent))
+                && (0 == (styleFlags & windowIsTemporary)));
+    }
+
     void updateShadower()
     {
         if (! component.isCurrentlyModal()
             && (styleFlags & windowHasDropShadow) != 0
-            && (styleFlags & windowIsTemporary) != 0
-            && ! hasTitleBar())
+            && ! windowUsesNativeShadow())
         {
             shadower = component.getLookAndFeel().createDropShadowerForComponent (component);
 
@@ -3340,31 +3347,13 @@ private:
             const auto movingBottom = wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT;
             const auto movingRight  = wParam == WMSZ_RIGHT  || wParam == WMSZ_TOPRIGHT   || wParam == WMSZ_BOTTOMRIGHT;
 
-            const auto snap = [&] (auto original, auto constrained)
-            {
-                const auto snappedX = movingLeft ? constrained.withRightX  (original.getRight())  : constrained.withX (original.getX());
-                const auto snappedY = movingTop  ? snappedX   .withBottomY (original.getBottom()) : snappedX   .withY (original.getY());
-                return snappedY;
-            };
-
-            const auto physicalBounds = D2DUtilities::toRectangle (r);
-            const auto logicalBounds = convertPhysicalScreenRectangleToLogical (physicalBounds.toFloat(), hwnd);
-            const auto posFloat = detail::ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds);
-            auto pos = posFloat.toNearestInt();
-
-            constrainer->checkBounds (pos,
-                                      getCurrentScaledBounds(),
-                                      Desktop::getInstance().getDisplays().getTotalBounds (true),
-                                      movingTop,
-                                      movingLeft,
-                                      movingBottom,
-                                      movingRight);
-
-            const auto snappedLogicalPos = snap (posFloat, pos.toFloat());
-            const auto newPhysicalRect = convertLogicalScreenRectangleToPhysical (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, snappedLogicalPos).toNearestInt(), hwnd);
-            const auto snappedPhysicalPos = snap (physicalBounds, newPhysicalRect);
-
-            r = D2DUtilities::toRECT (snappedPhysicalPos);
+            const auto requestedPhysicalBounds = D2DUtilities::toRectangle (r);
+            const auto modifiedPhysicalBounds = getConstrainedBounds (requestedPhysicalBounds,
+                                                                      movingTop,
+                                                                      movingLeft,
+                                                                      movingBottom,
+                                                                      movingRight);
+            r = D2DUtilities::toRECT (modifiedPhysicalBounds);
         }
 
         updateBorderSize();
@@ -3380,29 +3369,13 @@ private:
                  && (wp.x > -32000 && wp.y > -32000)
                  && ! Component::isMouseButtonDownAnywhere())
             {
-                const auto logicalBounds = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle ({ wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy }).toFloat(), hwnd);
-                auto pos = detail::ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds).toNearestInt();
+                const auto requestedPhysicalBounds = D2DUtilities::toRectangle ({ wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy });
+                const auto modifiedPhysicalBounds = getConstrainedBounds (requestedPhysicalBounds, false, false, false, false);
 
-                const auto original = getCurrentScaledBounds();
-
-                constrainer->checkBounds (pos, original,
-                                          Desktop::getInstance().getDisplays().getTotalBounds (true),
-                                          pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
-                                          pos.getX() != original.getX() && pos.getRight()  == original.getRight(),
-                                          pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
-                                          pos.getX() == original.getX() && pos.getRight()  != original.getRight());
-
-                auto physicalBounds = convertLogicalScreenRectangleToPhysical (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()), hwnd);
-
-                auto getNewPositionIfNotRoundingError = [] (int posIn, float newPos)
-                {
-                    return (std::abs ((float) posIn - newPos) >= 1.0f) ? roundToInt (newPos) : posIn;
-                };
-
-                wp.x  = getNewPositionIfNotRoundingError (wp.x,  physicalBounds.getX());
-                wp.y  = getNewPositionIfNotRoundingError (wp.y,  physicalBounds.getY());
-                wp.cx = getNewPositionIfNotRoundingError (wp.cx, physicalBounds.getWidth());
-                wp.cy = getNewPositionIfNotRoundingError (wp.cy, physicalBounds.getHeight());
+                wp.x  = modifiedPhysicalBounds.getX();
+                wp.y  = modifiedPhysicalBounds.getY();
+                wp.cx = modifiedPhysicalBounds.getWidth();
+                wp.cy = modifiedPhysicalBounds.getHeight();
             }
         }
 
@@ -3412,6 +3385,69 @@ private:
             component.setVisible (false);
 
         return 0;
+    }
+
+    Rectangle<int> getConstrainedBounds (Rectangle<int> proposed, bool top, bool left, bool bottom, bool right) const
+    {
+        const auto physicalBorder = findPhysicalBorderSize();
+        const auto logicalBorder = getFrameSize();
+
+        // The constrainer expects to operate in logical coordinate space.
+        // Additionally, the ComponentPeer can only report the current frame size as an integral
+        // number of logical pixels, but at fractional scale factors it may not be possible to
+        // express the logical frame size accurately as an integer.
+        // To work around this, we replace the physical borders with the currently-reported logical
+        // border size before invoking the constrainer.
+        // After the constrainer returns, we substitute in the other direction, replacing logical
+        // borders with physical.
+        const auto requestedPhysicalBounds = proposed;
+        const auto requestedPhysicalClient = physicalBorder.subtractedFrom (requestedPhysicalBounds);
+        const auto requestedLogicalClient = detail::ScalingHelpers::unscaledScreenPosToScaled (
+                component,
+                convertPhysicalScreenRectangleToLogical (requestedPhysicalClient, hwnd));
+        const auto requestedLogicalBounds = logicalBorder.addedTo (requestedLogicalClient);
+
+        const auto originalLogicalBounds = logicalBorder.addedTo (component.getBounds());
+
+        auto modifiedLogicalBounds = requestedLogicalBounds;
+
+        constrainer->checkBounds (modifiedLogicalBounds,
+                                  originalLogicalBounds,
+                                  Desktop::getInstance().getDisplays().getTotalBounds (true),
+                                  top,
+                                  left,
+                                  bottom,
+                                  right);
+
+        const auto modifiedLogicalClient = logicalBorder.subtractedFrom (modifiedLogicalBounds);
+        const auto modifiedPhysicalClient = convertLogicalScreenRectangleToPhysical (
+                detail::ScalingHelpers::scaledScreenPosToUnscaled (component, modifiedLogicalClient).toFloat(),
+                hwnd);
+
+        const auto closestIntegralSize = modifiedPhysicalClient
+                .withPosition (requestedPhysicalClient.getPosition().toFloat())
+                .getLargestIntegerWithin();
+
+        const auto withSnappedPosition = [&]
+        {
+            auto modified = closestIntegralSize;
+
+            if (left || right)
+            {
+                modified = left ? modified.withRightX (requestedPhysicalClient.getRight())
+                                : modified.withX (requestedPhysicalClient.getX());
+            }
+
+            if (top || bottom)
+            {
+                modified = top ? modified.withBottomY (requestedPhysicalClient.getBottom())
+                               : modified.withY (requestedPhysicalClient.getY());
+            }
+
+            return modified;
+        }();
+
+        return physicalBorder.addedTo (withSnappedPosition);
     }
 
     enum class ForceRefreshDispatcher
@@ -3701,18 +3737,18 @@ private:
                 if ((styleFlags & windowIgnoresMouseClicks) != 0)
                     return HTTRANSPARENT;
 
-                if (! hasTitleBar() && parentToAddTo == nullptr)
+                if (! hasTitleBar() && (styleFlags & windowIsTemporary) == 0 && parentToAddTo == nullptr)
                 {
                     if ((styleFlags & windowIsResizable) != 0)
                         if (const auto result = DefWindowProc (h, message, wParam, lParam); HTSIZEFIRST <= result && result <= HTSIZELAST)
                             return result;
 
-                    const auto kind = component.findControlAtPoint (getLocalPointFromScreenLParam (lParam).toFloat());
+                    const auto localPoint = getLocalPointFromScreenLParam (lParam).toFloat();
+                    const auto kind = component.findControlAtPoint (localPoint);
 
                     using Kind = Component::WindowControlKind;
                     switch (kind)
                     {
-                        case Kind::client:          return HTCLIENT;
                         case Kind::caption:         return HTCAPTION;
                         case Kind::minimise:        return HTMINBUTTON;
                         case Kind::maximise:        return HTMAXBUTTON;
@@ -3725,9 +3761,71 @@ private:
                         case Kind::sizeTopRight:    return HTTOPRIGHT;
                         case Kind::sizeBottomLeft:  return HTBOTTOMLEFT;
                         case Kind::sizeBottomRight: return HTBOTTOMRIGHT;
+
+                        case Kind::client:
+                            break;
                     }
 
-                    return HTNOWHERE;
+                    // For a bordered window, Windows would normally let you resize by hovering just
+                    // outside the client area (over the drop shadow).
+                    // When we disable the border by doing nothing in WM_NCCALCSIZE, the client
+                    // size will match the total window size.
+                    // It seems that, when there's no nonclient area, Windows won't send us
+                    // WM_NCHITTEST when hovering the window shadow.
+                    // We only start getting NCHITTEST messages once the cursor is inside the client
+                    // area.
+                    // The upshot of all this is that we need to emulate the resizable border
+                    // ourselves, but inside the window.
+                    // Other borderless apps (1Password, Spotify, VS Code) seem to do the same thing,
+                    // and if Microsoft's own VS Code doesn't have perfect mouse handling I don't
+                    // think we can be expected to either!
+
+                    if ((styleFlags & windowIsResizable) != 0)
+                    {
+                        const ScopedThreadDPIAwarenessSetter scope { hwnd };
+
+                        const auto cursor = getPOINTFromLParam (lParam);
+                        RECT client{};
+                        ::GetWindowRect (h, &client);
+
+                        const auto dpi = GetDpiForWindow (hwnd);
+                        const auto padding = GetSystemMetricsForDpi (SM_CXPADDEDBORDER, dpi);
+                        const auto borderX = GetSystemMetricsForDpi (SM_CXFRAME, dpi) + padding;
+                        const auto borderY = GetSystemMetricsForDpi (SM_CYFRAME, dpi) + padding;
+
+                        const auto left   = cursor.x < client.left + borderX;
+                        const auto right  = client.right - borderX < cursor.x;
+                        const auto top    = cursor.y < client.top + borderY;
+                        const auto bottom = client.bottom - borderY < cursor.y;
+
+                        enum Bits
+                        {
+                            bitL = 1 << 0,
+                            bitR = 1 << 1,
+                            bitT = 1 << 2,
+                            bitB = 1 << 3,
+                        };
+
+                        const auto positionMask = (left   ? bitL : 0)
+                                                | (right  ? bitR : 0)
+                                                | (top    ? bitT : 0)
+                                                | (bottom ? bitB : 0);
+
+                        switch (positionMask)
+                        {
+                            case bitL: return HTLEFT;
+                            case bitR: return HTRIGHT;
+                            case bitT: return HTTOP;
+                            case bitB: return HTBOTTOM;
+
+                            case bitT | bitL: return HTTOPLEFT;
+                            case bitT | bitR: return HTTOPRIGHT;
+                            case bitB | bitL: return HTBOTTOMLEFT;
+                            case bitB | bitR: return HTBOTTOMRIGHT;
+                        }
+                    }
+
+                    return HTCLIENT;
                 }
 
                 break;
@@ -3759,19 +3857,10 @@ private:
                 if (! wParam)
                     break;
 
-                const auto custom = getCustomBorderSize();
+                if (! hasTitleBar() && windowUsesNativeShadow())
+                    return 0;
 
-                if (! custom.has_value())
-                    break;
-
-                auto& rect = *reinterpret_cast<NCCALCSIZE_PARAMS *> (lParam)->rgrc;
-
-                rect.top += custom->getTop();
-                rect.bottom -= custom->getBottom();
-                rect.left += custom->getLeft();
-                rect.right -= custom->getRight();
-
-                return 0;
+                break;
             }
 
             //==============================================================================
@@ -3851,7 +3940,12 @@ private:
 
                 return handleSizeConstraining (*(RECT*) lParam, wParam);
 
-            case WM_WINDOWPOSCHANGING:       return handlePositionChanging (*(WINDOWPOS*) lParam);
+            case WM_MOVING:
+                return handleSizeConstraining (*(RECT*) lParam, 0);
+
+            case WM_WINDOWPOSCHANGING:
+                return handlePositionChanging (*(WINDOWPOS*) lParam);
+
             case 0x2e0: /* WM_DPICHANGED */  return handleDPIChanging ((int) HIWORD (wParam), *(RECT*) lParam);
 
             case WM_WINDOWPOSCHANGED:
