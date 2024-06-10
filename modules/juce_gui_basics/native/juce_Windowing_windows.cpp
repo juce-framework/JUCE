@@ -2491,11 +2491,6 @@ private:
             static constexpr MARGINS margins { 1, 1, 0, 0 };
             ::DwmExtendFrameIntoClientArea (hwnd, &margins);
             ::SetWindowPos (hwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER);
-
-            // Disable rounded corners on Windows 11 for custom windows with no titlebar,
-            // because window borders look weird when they get rounded away.
-            const auto pref = DWMWCP_DONOTROUND;
-            DwmSetWindowAttribute (hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &pref, sizeof (pref));
         }
 
        #if JUCE_DEBUG
