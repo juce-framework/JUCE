@@ -1291,21 +1291,16 @@ void Direct2DGraphicsContext::fillRectList (const RectangleList<float>& list)
 
 void Direct2DGraphicsContext::drawRect (const Rectangle<float>& r, float lineThickness)
 {
-    // ID2D1DeviceContext::DrawRectangle centers the stroke around the edges of the specified rectangle, but
-    // the software renderer contains the stroke within the rectangle
-    // To match the software renderer, reduce the rectangle by half the stroke width
-    if (r.getWidth() * 0.5f < lineThickness || r.getHeight() * 0.5f < lineThickness)
-        return;
-
     auto draw = [&] (Rectangle<float> rect, ComSmartPtr<ID2D1DeviceContext1> deviceContext, ComSmartPtr<ID2D1Brush> brush)
     {
+        // ID2D1DeviceContext::DrawRectangle centers the stroke around the edges of the specified rectangle, but
+        // the software renderer contains the stroke within the rectangle
+        // To match the software renderer, reduce the rectangle by half the stroke width
         if (brush != nullptr)
-            deviceContext->DrawRectangle (D2DUtilities::toRECT_F (rect), brush, lineThickness);
+            deviceContext->DrawRectangle (D2DUtilities::toRECT_F (rect.reduced (lineThickness * 0.5f)), brush, lineThickness);
     };
 
-    auto reducedR = r.reduced (lineThickness * 0.5f);
-
-    getPimpl()->paintPrimitive (reducedR, draw);
+    getPimpl()->paintPrimitive (r, draw);
 }
 
 void Direct2DGraphicsContext::fillPath (const Path& p, const AffineTransform& transform)
