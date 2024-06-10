@@ -88,7 +88,6 @@
  #include <sapi.h>
  #include <vfw.h>
  #include <windowsx.h>
- #include <dwmapi.h>
 
  #if JUCE_ETW_TRACELOGGING
   #include <TraceLoggingProvider.h>
@@ -117,7 +116,6 @@
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
   #pragma comment(lib, "comctl32.lib")
-  #pragma comment(lib, "dwmapi.lib")
 
   #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")

@@ -376,7 +376,7 @@ bool Desktop::isHeadless() const noexcept
 
 bool Desktop::supportsBorderlessNonClientResize() const
 {
-   #if JUCE_WINDOWS || JUCE_MAC
+   #if JUCE_MAC
     return true;
    #else
     return false;
