@@ -44,7 +44,14 @@ or
 - libxrender-dev (unless `JUCE_USE_XRENDER=0`)
 
 #### juce_gui_extra
-- libwebkit2gtk-4.0-dev (unless `JUCE_WEB_BROWSER=0`)
+- libwebkit2gtk-4.1-dev (unless `JUCE_WEB_BROWSER=0`)
+
+On older systems, where 4.1 is not available, you can also use
+
+- libwebkit2gtk-4.0-dev
+
+Compiled JUCE applications will dynamically load whichever library version is
+available during runtime.
 
 #### juce_opengl
 - libglu1-mesa-dev
@@ -58,5 +65,5 @@ The full command is as follows:
         libcurl4-openssl-dev  \
         libfreetype6-dev \
         libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \
-        libwebkit2gtk-4.0-dev \
+        libwebkit2gtk-4.1-dev \
         libglu1-mesa-dev mesa-common-dev

@@ -373,14 +373,37 @@ private:
                             makeSymbolBinding (juce_g_free, "g_free"));
     }
 
+    struct WebKitAndDependencyLibraryNames
+    {
+        const char* webkitLib;
+        const char* jsLib;
+        const char* soupLib;
+    };
+
+    bool openWebKitAndDependencyLibraries (const WebKitAndDependencyLibraryNames& names)
+    {
+        if (webkitLib.open (names.webkitLib) && jsLib.open (names.jsLib) && soupLib.open (names.soupLib))
+            return true;
+
+        for (auto* l : { &webkitLib, &jsLib, &soupLib })
+            l->close();
+
+        return false;
+    }
+
     //==============================================================================
+    DynamicLibrary webkitLib, jsLib, soupLib;
+
     DynamicLibrary gtkLib    { "libgtk-3.so" },
-                   webkitLib { "libwebkit2gtk-4.0.so" },
-                   jsLib     { "libjavascriptcoregtk-4.0.so" },
-                   soupLib   { "libsoup-2.4.so" },
                    glib      { "libglib-2.0.so" };
 
-    const bool webKitIsAvailable =    loadWebkitSymbols()
+    const bool webKitIsAvailable =    (   openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.1.so",
+                                                                              "libjavascriptcoregtk-4.1.so",
+                                                                              "libsoup-3.0.so" })
+                                       || openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.0.so",
+                                                                              "libjavascriptcoregtk-4.0.so",
+                                                                              "libsoup-2.4.so" }))
+                                   && loadWebkitSymbols()
                                    && loadGtkSymbols()
                                    && loadJsLibSymbols()
                                    && loadSoupLibSymbols()
