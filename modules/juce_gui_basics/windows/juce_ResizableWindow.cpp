@@ -326,13 +326,12 @@ void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer
     {
         constrainer = newConstrainer;
 
-        bool useBottomRightCornerResizer = resizableCorner != nullptr;
-        bool shouldBeResizable = useBottomRightCornerResizer || resizableBorder != nullptr;
+        const bool useBottomRightCornerResizer = resizableCorner != nullptr;
 
         resizableCorner.reset();
         resizableBorder.reset();
 
-        setResizable (shouldBeResizable, useBottomRightCornerResizer);
+        setResizable (isResizable(), useBottomRightCornerResizer);
         updatePeerConstrainer();
     }
 }
