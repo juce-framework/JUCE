@@ -1445,7 +1445,6 @@ struct RenderContext
     virtual const char* getName() const = 0;
 
     /*  The following functions will all be called by the peer to update the state of the renderer. */
-    virtual void updateBorderSize() = 0;
     virtual void setAlpha (float) = 0;
     virtual void handlePaintMessage() = 0;
     virtual void repaint (const Rectangle<int>& area) = 0;
@@ -1454,8 +1453,8 @@ struct RenderContext
     virtual void onVBlank() = 0;
     virtual void setResizing (bool) = 0;
     virtual bool getResizing() const = 0;
-    virtual void handleNcCalcSize (WPARAM wParam, LPARAM lParam) = 0;
     virtual void handleShowWindow() = 0;
+    virtual void setSize (int, int) = 0;
 
     /*  Gets a snapshot of whatever the render context is currently showing. */
     virtual Image createSnapshot() = 0;
@@ -1601,8 +1600,12 @@ public:
 
     void updateBorderSize()
     {
-        if (renderContext != nullptr)
-            renderContext->updateBorderSize();
+        if (renderContext == nullptr)
+            return;
+
+        RECT r;
+        GetClientRect (hwnd, &r);
+        renderContext->setSize (r.right - r.left, r.bottom - r.top);
     }
 
     void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen) override
@@ -1797,8 +1800,7 @@ public:
                 constrainer->resizeEnd();
         }
 
-        if (renderContext != nullptr)
-            renderContext->updateBorderSize();
+        updateBorderSize();
     }
 
     bool isFullScreen() const override
@@ -3356,7 +3358,8 @@ private:
             r = D2DUtilities::toRECT (modifiedPhysicalBounds);
         }
 
-        updateBorderSize();
+        if (renderContext != nullptr)
+            renderContext->setSize (r.right - r.left, r.bottom - r.top);
 
         return TRUE;
     }
@@ -3851,8 +3854,10 @@ private:
 
             case WM_NCCALCSIZE:
             {
+                auto* rect = (RECT*) lParam;
+
                 if (renderContext != nullptr)
-                    renderContext->handleNcCalcSize (wParam, lParam);
+                    renderContext->setSize (rect->right - rect->left, rect->bottom - rect->top);
 
                 if (! wParam)
                     break;
@@ -4659,8 +4664,6 @@ public:
 
     const char* getName() const override { return name; }
 
-    void updateBorderSize() override {}
-
     void setAlpha (float newAlpha) override
     {
         auto intAlpha = (uint8) jlimit (0, 255, (int) (newAlpha * 255.0f));
@@ -4756,11 +4759,11 @@ public:
         return createGDISnapshotOfNativeWindow (peer.getHWND());
     }
 
+    void setSize (int, int) override {}
     void onVBlank() override {}
 
     void setResizing (bool x) override { resizing = x; }
     bool getResizing() const override { return resizing; }
-    void handleNcCalcSize (WPARAM, LPARAM) override {}
     void handleShowWindow() override {}
 
 private:
@@ -4972,12 +4975,6 @@ public:
 
     const char* getName() const override { return name; }
 
-    void updateBorderSize() override
-    {
-        if (peer.getComponent().isVisible())
-            direct2DContext->updateSize();
-    }
-
     void setAlpha (float newAlpha) override
     {
         direct2DContext->setWindowAlpha (newAlpha);
@@ -5026,15 +5023,12 @@ public:
         return direct2DContext->getResizing();
     }
 
-    void handleNcCalcSize (WPARAM, LPARAM lParam) override
+    void setSize (int w, int h) override
     {
         JUCE_TRACE_LOG_D2D_RESIZE (WM_NCCALCSIZE);
 
-        if (! peer.getComponent().isVisible())
-            return;
-
-        auto* rect = (RECT*) lParam;
-        direct2DContext->setSize (rect->right - rect->left, rect->bottom - rect->top);
+        if (peer.getComponent().isVisible())
+            direct2DContext->setSize (w, h);
     }
 
     void handleShowWindow() override
