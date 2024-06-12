@@ -1843,7 +1843,8 @@ public:
             {
                 // there's some kind of component currently modal, but the host
                 // is trying to delete our plugin..
-                jassert (Component::getCurrentlyModalComponent() == nullptr);
+                jassert (ModalComponentManager::getInstanceWithoutCreating() == nullptr
+                         || Component::getCurrentlyModalComponent() == nullptr);
             }
         }
     };
