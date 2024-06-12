@@ -32,6 +32,10 @@
   ==============================================================================
 */
 
+/** A base class for building Options.
+
+    @tags{Core}
+*/
 template <typename OptionsType>
 class OptionsBuilder
 {

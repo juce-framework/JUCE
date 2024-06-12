@@ -36,7 +36,10 @@ namespace juce
 {
 
 //==============================================================================
-/** A selection of options available for customising a spring style easing function. */
+/** A selection of options available for customising a spring style easing function.
+
+    @tags{Animations}
+*/
 class SpringEasingOptions
 {
 public:

@@ -42,6 +42,8 @@ namespace juce
 
     @see Slider::addListener, Slider::removeListener, WebSliderRelay::addListener,
          WebSliderRelay::removeListener
+
+     @tags{GUI}
 */
 template <typename Emitter>
 class JUCE_API  SliderListener

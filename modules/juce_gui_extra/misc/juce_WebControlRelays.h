@@ -59,6 +59,8 @@ namespace juce
     @endcode
 
     @see WebSliderParameterAttachment
+
+    @tags{GUI}
 */
 class JUCE_API  WebSliderRelay : public OptionsBuilder<WebBrowserComponent::Options>
 {
@@ -129,6 +131,8 @@ private:
     @endcode
 
     @see WebToggleButtonParameterAttachment
+
+    @tags{GUI}
 */
 class JUCE_API  WebToggleButtonRelay  : public OptionsBuilder<WebBrowserComponent::Options>
 {
@@ -197,6 +201,8 @@ private:
     @endcode
 
     @see WebComboBoxParameterAttachment
+
+    @tags{GUI}
 */
 class JUCE_API  WebComboBoxRelay  : public OptionsBuilder<WebBrowserComponent::Options>
 {

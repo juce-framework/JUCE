@@ -46,6 +46,8 @@ namespace juce
     In your frontend code you can use the ControlParameterIndexUpdater class, that emits
     controlParameterIndexChanged events based on the mouse movement, and control parameter index
     annotations attached to DOM elements.
+
+    @tags{GUI}
 */
 class JUCE_API  WebControlParameterIndexReceiver : public OptionsBuilder<WebBrowserComponent::Options>
 {

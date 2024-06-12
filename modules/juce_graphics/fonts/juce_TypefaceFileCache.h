@@ -32,6 +32,8 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 
@@ -68,3 +70,5 @@ private:
 JUCE_IMPLEMENT_SINGLETON (TypefaceFileCache)
 
 } // namespace juce
+
+#endif

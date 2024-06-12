@@ -482,8 +482,10 @@ public:
     class EvaluationResult
     {
     public:
+        /** A simple error type class. */
         struct Error
         {
+            /** Error type. */
             enum class Type
             {
                 /** Error occurring for a reason unknown to us. */

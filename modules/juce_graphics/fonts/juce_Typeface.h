@@ -37,6 +37,8 @@ namespace juce
 
 /** A single path-based layer of a colour glyph. Contains the glyph shape and the colour in which
     the shape should be painted.
+
+    @tags{Graphics}
 */
 struct ColourLayer
 {
@@ -45,6 +47,8 @@ struct ColourLayer
 };
 
 /** A bitmap representing (part of) a glyph, most commonly used to represent colour emoji glyphs.
+
+    @tags{Graphics}
 */
 struct ImageLayer
 {
@@ -53,6 +57,8 @@ struct ImageLayer
 };
 
 /** A single layer that makes up part of a glyph image.
+
+    @tags{Graphics}
 */
 struct GlyphLayer
 {
@@ -85,6 +91,8 @@ enum class TypefaceMetricsKind
 };
 
 /** Font metrics using JUCE conventions.
+
+    @tags{Graphics}
 */
 struct TypefaceMetrics
 {
@@ -280,6 +288,7 @@ public:
         const auto isMonochrome   = typeface->getColourGlyphFormats() == 0;
         const auto isSvg          = (typeface->getColourGlyphFormats() & Typeface::colourGlyphFormatSvg) != 0;
         const auto isSimpleColour = (typeface->getColourGlyphFormats() & (Typeface::colourGlyphFormatBitmap | Typeface::colourGlyphFormatCOLRv0)) != 0;
+        @endcode
     */
     int getColourGlyphFormats() const;
 
