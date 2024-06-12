@@ -3,6 +3,14 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.0
+
+  - Added a new Direct2D renderer
+  - Added support for WebView based UIs
+  - Added consistent unicode support across platforms
+  - Added a new animation module
+  - Bundled the AAX SDK
+
 ## Version 7.0.12
 
   - Fixed an issue with timers in Pro Tools
