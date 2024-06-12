@@ -2702,13 +2702,46 @@ private:
         client,
     };
 
-    void doMouseMove (Point<float> position, bool isMouseDownEvent, WindowArea area)
+    std::optional<LRESULT> doMouseMove (LPARAM lParam, bool isMouseDownEvent, WindowArea area)
     {
+        auto point = getPOINTFromLParam (lParam);
+
+        if (area == WindowArea::client)
+            ClientToScreen (hwnd, &point);
+
+        const auto adjustedLParam = MAKELPARAM (point.x, point.y);
+
+        // Check if the mouse has moved since being pressed in the caption area.
+        // If it has, then we defer to DefWindowProc to handle the mouse movement.
+        // Allowing DefWindowProc to handle WM_NCLBUTTONDOWN directly will pause message
+        // processing (and therefore painting) when the mouse is clicked in the caption area,
+        // which is why we wait until the mouse is *moved* before asking the system to take over.
+        // Letting the system handle the move is important for things like Aero Snap to work.
+        if (captionMouseDown.has_value() && *captionMouseDown != adjustedLParam)
+        {
+            captionMouseDown.reset();
+
+            // When clicking and dragging on the caption area, a new modal loop is started
+            // inside DefWindowProc. This modal loop appears to consume some mouse events,
+            // without forwarding them back to our own window proc. In particular, we never
+            // get to see the WM_NCLBUTTONUP event with the HTCAPTION argument, or any other
+            // kind of mouse-up event to signal that the loop exited, so
+            // ModifierKeys::currentModifiers gets left in the wrong state. As a workaround, we
+            // manually update the modifier keys after DefWindowProc exits, and update the
+            // capture state if necessary.
+            const auto result = DefWindowProc (hwnd, WM_NCLBUTTONDOWN, HTCAPTION, adjustedLParam);
+            getMouseModifiers();
+            releaseCaptureIfNecessary();
+            return result;
+        }
+
+        const auto position = getLocalPointFromScreenLParam (adjustedLParam);
+
         ModifierKeys modsToSend (ModifierKeys::currentModifiers);
 
         // this will be handled by WM_TOUCH
         if (isTouchEvent() || areOtherTouchSourcesActive())
-            return;
+            return {};
 
         if (! isMouseOver)
         {
@@ -2738,7 +2771,7 @@ private:
         else if (! isDragging)
         {
             if (! contains (position.roundToInt(), false))
-                return;
+                return {};
         }
 
         static uint32 lastMouseTime = 0;
@@ -2753,6 +2786,8 @@ private:
             doMouseEvent (position, MouseInputSource::defaultPressure,
                           MouseInputSource::defaultOrientation, modsToSend);
         }
+
+        return {};
     }
 
     void updateModifiersFromModProvider() const
@@ -2775,7 +2810,7 @@ private:
             ReleaseCapture();
     }
 
-    void doMouseDown (Point<float> position, const WPARAM wParam, WindowArea area)
+    void doMouseDown (LPARAM lParam, const WPARAM wParam, WindowArea area)
     {
         // this will be handled by WM_TOUCH
         if (isTouchEvent() || areOtherTouchSourcesActive())
@@ -2784,7 +2819,7 @@ private:
         if (GetCapture() != hwnd)
             SetCapture (hwnd);
 
-        doMouseMove (position, true, area);
+        doMouseMove (lParam, true, area);
 
         if (isValidPeer (this))
         {
@@ -2792,6 +2827,8 @@ private:
 
             isDragging = true;
 
+            const auto position = area == WindowArea::client ? getPointFromLocalLParam (lParam)
+                                                             : getLocalPointFromScreenLParam (lParam);
             doMouseEvent (position, MouseInputSource::defaultPressure);
         }
     }
@@ -3730,6 +3767,34 @@ private:
         return ModifierKeys::currentModifiers;
     }
 
+    std::optional<LRESULT> onNcLButtonDown (WPARAM wParam, LPARAM lParam)
+    {
+        handleLeftClickInNCArea (wParam);
+
+        switch (wParam)
+        {
+            case HTCLOSE:
+            case HTMAXBUTTON:
+            case HTMINBUTTON:
+                // The default implementation in DefWindowProc for these functions has some
+                // unwanted behaviour. Specifically, it seems to draw some ugly grey buttons over
+                // our custom nonclient area, just for one frame.
+                // To avoid this, we handle the message ourselves. The actual handling happens
+                // in WM_NCLBUTTONUP.
+                return 0;
+
+            case HTCAPTION:
+                // The default click-in-caption handler appears to block the message loop until a
+                // mouse move is detected, which prevents the view from repainting. We want to keep
+                // painting, so log the click ourselves and only defer to DefWindowProc once the
+                // mouse moves with the button held.
+                captionMouseDown = lParam;
+                return 0;
+        }
+
+        return {};
+    }
+
     LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
     {
         switch (message)
@@ -3887,10 +3952,7 @@ private:
             //==============================================================================
             case WM_NCMOUSEMOVE:
             case WM_MOUSEMOVE:
-                doMouseMove (message == WM_MOUSEMOVE ? getPointFromLocalLParam (lParam) : getLocalPointFromScreenLParam (lParam),
-                             false,
-                             message == WM_MOUSEMOVE ? WindowArea::client : WindowArea::nonclient);
-                return 0;
+                return doMouseMove (lParam, false, message == WM_MOUSEMOVE ? WindowArea::client : WindowArea::nonclient).value_or (0);
 
             case WM_POINTERLEAVE:
             case WM_NCMOUSELEAVE:
@@ -3901,7 +3963,7 @@ private:
             case WM_LBUTTONDOWN:
             case WM_MBUTTONDOWN:
             case WM_RBUTTONDOWN:
-                doMouseDown (getPointFromLocalLParam (lParam), wParam, WindowArea::client);
+                doMouseDown (lParam, wParam, WindowArea::client);
                 return 0;
 
             case WM_LBUTTONUP:
@@ -4196,31 +4258,8 @@ private:
 
             case WM_NCLBUTTONDOWN:
             {
-                handleLeftClickInNCArea (wParam);
-
-                // The default implementation in DefWindowProc for these functions has some
-                // unwanted behaviour. Specifically, it seems to draw some ugly grey buttons over
-                // our custom nonclient area, just for one frame.
-                // To avoid this, we handle the message ourselves. The actual handling happens
-                // in WM_NCLBUTTONUP.
-                if (wParam == HTCLOSE || wParam == HTMAXBUTTON || wParam == HTMINBUTTON)
-                    return 0;
-
-                // When clicking and dragging on the caption area, a new modal loop is started
-                // inside DefWindowProc. This modal loop appears to consume some mouse events,
-                // without forwarding them back to our own window proc. In particular, we never
-                // get to see the WM_NCLBUTTONUP event with the HTCAPTION argument, or any other
-                // kind of mouse-up event to signal that the loop exited, so
-                // ModifierKeys::currentModifiers gets left in the wrong state. As a workaround, we
-                // manually update the modifier keys after DefWindowProc exits, and update the
-                // capture state if necessary.
-                if (wParam == HTCAPTION)
-                {
-                    const auto result = DefWindowProc (h, message, wParam, lParam);
-                    getMouseModifiers();
-                    releaseCaptureIfNecessary();
-                    return result;
-                }
+                if (auto result = onNcLButtonDown (wParam, lParam))
+                    return *result;
 
                 break;
             }
@@ -4616,6 +4655,7 @@ private:
     std::optional<TimedCallback> monitorUpdateTimer;
 
     std::unique_ptr<RenderContext> renderContext;
+    std::optional<LPARAM> captionMouseDown;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)
