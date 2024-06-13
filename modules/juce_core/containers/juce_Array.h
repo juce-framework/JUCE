@@ -72,7 +72,7 @@ private:
 public:
     //==============================================================================
     /** Creates an empty array. */
-    Array() = default;
+    Array() noexcept = default;
 
     /** Creates a copy of another array.
         @param other    the array to copy

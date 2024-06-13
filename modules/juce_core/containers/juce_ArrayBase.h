@@ -54,13 +54,16 @@ class ArrayBase  : public TypeOfCriticalSectionToUse
 private:
     using ParameterType = typename TypeHelpers::ParameterType<ElementType>::type;
 
+    static_assert (std::is_nothrow_constructible_v<TypeOfCriticalSectionToUse>,
+                   "The critical section type used must not throw during construction");
+
     template <class OtherElementType, class OtherCriticalSection>
     using AllowConversion = std::enable_if_t<! std::is_same_v<std::tuple<ElementType, TypeOfCriticalSectionToUse>,
                                                               std::tuple<OtherElementType, OtherCriticalSection>>>;
 
 public:
     //==============================================================================
-    ArrayBase() = default;
+    ArrayBase() noexcept = default;
 
     ~ArrayBase()
     {

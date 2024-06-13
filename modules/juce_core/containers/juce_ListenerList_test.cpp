@@ -384,11 +384,11 @@ public:
 
             struct TestCriticalSection
             {
-                TestCriticalSection()  { isAlive() = true; }
-                ~TestCriticalSection() { isAlive() = false; }
+                TestCriticalSection()  noexcept { isAlive() = true; }
+                ~TestCriticalSection() noexcept { isAlive() = false; }
 
                 static void enter() noexcept { numOutOfScopeCalls() += isAlive() ? 0 : 1; }
-                static void exit() noexcept  { numOutOfScopeCalls() += isAlive() ? 0 : 1; }
+                static void exit()  noexcept { numOutOfScopeCalls() += isAlive() ? 0 : 1; }
 
                 static bool tryEnter() noexcept
                 {
@@ -398,13 +398,13 @@ public:
 
                 using ScopedLockType = GenericScopedLock<TestCriticalSection>;
 
-                static bool& isAlive()
+                static bool& isAlive() noexcept
                 {
                     static bool inScope = false;
                     return inScope;
                 }
 
-                static int& numOutOfScopeCalls()
+                static int& numOutOfScopeCalls() noexcept
                 {
                     static int numOutOfScopeCalls = 0;
                     return numOutOfScopeCalls;
