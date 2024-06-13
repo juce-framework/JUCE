@@ -171,6 +171,8 @@ public:
         if (! initialised())
             return;
 
+        const ScopedLockType lock { listeners->getLock() };
+
         listeners->clear();
 
         for (auto* it : *iterators)
