@@ -275,6 +275,9 @@ public:
         jassert (getReferenceCount() == 1);
         typeface = newTypeface;
 
+        if (typeface != nullptr)
+            options = options.withTypeface (nullptr).withName ("").withStyle ("");
+
         options = options.withTypeface (typeface);
     }
 
