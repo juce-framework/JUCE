@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 def ndkVersionString = "26.2.11394342"
 
 android {
-    compileSdkVersion 34
+    compileSdk 34
     ndkVersion ndkVersionString
     namespace "com.juce.audioperformancetest"
     externalNativeBuild {
