@@ -77,12 +77,16 @@ public:
     static StringPool& getGlobalPool() noexcept;
 
     //==============================================================================
-    void ensureAdditionalStorageAllocated (int numStringsNeeded);
+    /**
+     * Add a set of sorted strings to the pool and return an array of Identifiers that can be used to access them.
+     * The input array must be sorted and contain no duplicates.
+     */
+    Array<Identifier> addSortedStrings (const Array<String>& stringsToAdd);
 
-    int getCapacity() const noexcept { return strings.size(); }
-
-    Array<Identifier> addSortedStrings(const Array<String>& stringsToAdd);
-
+#if MA_UNIT_TESTS
+    /** Returns the underlying array of strings. */
+    const Array<String>& getStrings() const noexcept { return strings; }
+#endif
 
 private:
 
@@ -100,7 +104,7 @@ private:
      * @param endIndex End index (exclusive) for the search
      * @return Pair of bool and int. The bool is true if the string is in the pool, false otherwise. The int is the index at which the string should be inserted or the index of the string in the pool.
      */
-    std::pair<bool, int> getIndex(const String& newString, int startIndex, int endIndex) const;
+    std::pair<bool, int> locateOrGetInsertIndex(const String& newString, int startIndex, int endIndex) const;
 
     JUCE_DECLARE_NON_COPYABLE (StringPool)
 };

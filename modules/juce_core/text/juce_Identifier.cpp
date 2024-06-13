@@ -63,6 +63,10 @@ Identifier::Identifier(const String& nm, bool alreadyInPool)
 
     jassertquiet(alreadyInPool);
 
+    // In case this constructor is used incorrectly
+    if (! alreadyInPool)
+        name = StringPool::getGlobalPool().getPooledString(nm);
+
     jassert(name.getCharPointer() == nm.getCharPointer());
 
     // Make sure the string is already in the pool

@@ -174,14 +174,11 @@ StringPool& StringPool::getGlobalPool() noexcept
     return pool;
 }
 
-void StringPool::ensureAdditionalStorageAllocated(int numStringsNeeded)
-{
-    const ScopedLock sl(lock);
-    strings.ensureStorageAllocated(strings.size() + numStringsNeeded);
-}
-
 Array<Identifier> StringPool::addSortedStrings(const Array<String>& stringsToAdd)
 {
+    // Assert that this is the global pool
+    jassert(this == &getGlobalPool());
+
     if (stringsToAdd.isEmpty()) {
         return {};
     }
@@ -195,10 +192,9 @@ Array<Identifier> StringPool::addSortedStrings(const Array<String>& stringsToAdd
                                [](const auto& a, const auto& b) { return compareStrings(a, b) == 0; })
             == stringsToAdd.end());
 
-    // Ensure the existing pool is sorted
-//    jassert(std::is_sorted(
-//        strings.begin(), strings.end(), [](const auto& a, const auto& b) { return compareStrings(a, b) < 0; }));
-
+    // Ensure the existing pool is sorted (very long check)
+    //    jassert(std::is_sorted(
+    //        strings.begin(), strings.end(), [](const auto& a, const auto& b) { return compareStrings(a, b) < 0; }));
 
     const ScopedLock sl(lock);
 
@@ -208,66 +204,66 @@ Array<Identifier> StringPool::addSortedStrings(const Array<String>& stringsToAdd
     int start = 0;
     const int end = stringsToAdd.size();
 
-
     while (start < end) {
         const auto& startString = stringsToAdd.getReference(start);
-        auto [found, insertion_index] = getIndex(startString, 0, strings.size());
+        auto [found, insertionIndex] = locateOrGetInsertIndex(startString, 0, strings.size());
 
         if (found) {
-            result.set(start, Identifier(strings.getReference(insertion_index), true));
+            result.set(start, Identifier(strings.getReference(insertionIndex), true));
             start++;
-//            pool_start_search_index = insertion_index;
             continue;
         }
 
-        //        // Determine the number of elements that can be inserted at insertion_index (using binary search)
-        //        auto rangeEnd =
-        //            std::upper_bound(strings.begin() + insertion_index + 1,
-        //                             strings.end(),
-        //                             insertion_index,
-        //                             [pool_end_search_index, this](const auto& expected_insertion_index, const auto& inString) {
-        //                                 auto [already_in, current_insertion_index] =
-        //                                     getIndex(inString, expected_insertion_index, pool_end_search_index);
-        //
-        //                                 return already_in ? true : current_insertion_index != expected_insertion_index;
-        //                             });
-        //                auto num_elems = (int)std::distance(strings.begin() + insertion_index, rangeEnd);
+        int numElems;
+        auto low = start + 1;
+        auto high = end;
 
-        int num_elems = 1;
-        // TODO: This is a linear search, but it should be possible to do a binary search here
-        while (num_elems < end - start) {
-            auto [new_found, new_insertion_index] =
-                getIndex(stringsToAdd.getReference(start + num_elems), insertion_index, strings.size());
+        auto [endFound, endInsertionIndex] = locateOrGetInsertIndex(stringsToAdd.getLast(), insertionIndex, strings.size());
 
-            if (new_found || new_insertion_index != insertion_index) {
-                break;
-            } else {
-                num_elems++;
+        // Check if all the remaining elements can be inserted at insertion_index
+        if (!endFound && endInsertionIndex == insertionIndex) {
+
+            numElems = end - start;
+
+        } else {
+            // Binary search to find the last element that can be inserted at insertion_index
+            while (low < high) {
+                auto mid = low + (high - low) / 2;
+                auto [newFound, newInsertionIndex] =
+                    locateOrGetInsertIndex(stringsToAdd.getReference(mid), insertionIndex, strings.size());
+
+                if (newFound || newInsertionIndex != insertionIndex) {
+                    high = mid;
+                } else {
+                    low = mid + 1;
+                }
             }
-        }
 
+            numElems = low - start;
+        }
 
         // Insert the elements
-        strings.insertArray(insertion_index, stringsToAdd.begin() + start, num_elems);
+        strings.insertArray(insertionIndex, stringsToAdd.begin() + start, numElems);
 
-        for (int i = 0; i < num_elems; i++) {
-            result.set(i + start, Identifier(strings.getReference(insertion_index + i), true));
+        for (int i = 0; i < numElems; i++) {
+            result.set(i + start, Identifier(strings.getReference(insertionIndex + i), true));
         }
 
-        start += num_elems;
+        start += numElems;
     }
 
-//    jassert(std::is_sorted(
-//        strings.begin(), strings.end(), [](const auto& a, const auto& b) { return compareStrings(a, b) < 0; }));
-//
-//    jassert(std::adjacent_find(
-//                strings.begin(), strings.end(), [](const auto& a, const auto& b) { return compareStrings(a, b) == 0; })
-//            == strings.end());
+    // Ensure the pool is still sorted and contains no duplicates (very long checks)
+    //    jassert(std::is_sorted(
+    //        strings.begin(), strings.end(), [](const auto& a, const auto& b) { return compareStrings(a, b) < 0; }));
+    //
+    //    jassert(std::adjacent_find(
+    //                strings.begin(), strings.end(), [](const auto& a, const auto& b) { return compareStrings(a, b) == 0; })
+    //            == strings.end());
 
     return result;
 }
 
-std::pair<bool, int> StringPool::getIndex(const String& newString, int startIndex, int endIndex) const
+std::pair<bool, int> StringPool::locateOrGetInsertIndex(const String& newString, int startIndex, int endIndex) const
 {
     int start = startIndex;
     int end = endIndex;
