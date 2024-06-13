@@ -1713,6 +1713,41 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
           previousTarget (createCopyIfNotNull (other.previousTarget.get()))
     {}
 
+    void drawImage (const Image& sourceImage, const AffineTransform& trans)
+    {
+        auto t = transform.getTransformWith (trans);
+        auto alpha = fillType.colour.getAlpha();
+
+        // If we're only translating, and if the target image can be drawn with a
+		// clip that can be reduced to a single rectangle, we can just add a single
+		// quad to the queue and dispatch a draw call.
+        if (isOnlyTranslationAllowingError (t, 0.002f))
+        {
+            auto targetRect = Rectangle<int>{
+                (int)t.getTranslationX(),
+                (int)t.getTranslationY(),
+                sourceImage.getWidth(),
+                sourceImage.getHeight(),
+            };
+			Rectangle<int> trimmedTargetRect;
+
+            if (clip->trimRectangularClip(targetRect, trimmedTargetRect))
+            {
+                state->shaderQuadQueue.flush();
+                state->setShaderForTiledImageFill (state->cachedImageList->getTextureFor (sourceImage), t, 0, nullptr, false);
+
+                state->shaderQuadQueue.add (trimmedTargetRect, PixelARGB ((uint8) alpha, (uint8) alpha, (uint8) alpha, (uint8) alpha));
+                state->shaderQuadQueue.flush();
+
+                state->currentShader.clearShader (state->shaderQuadQueue);
+
+                return;
+            }
+        }
+
+        BaseClass::drawImage(sourceImage, trans);
+    }
+
     SavedState* beginTransparencyLayer (float opacity)
     {
         auto* s = new SavedState (*this);

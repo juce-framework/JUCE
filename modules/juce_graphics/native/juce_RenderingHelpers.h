@@ -1553,6 +1553,12 @@ namespace ClipRegions
         virtual Ptr clipToImageAlpha (const Image&, const AffineTransform&, Graphics::ResamplingQuality) = 0;
         virtual void translate (Point<int> delta) = 0;
 
+        // Check whether the supplied rectangle can be drawn clipped inside a single
+		// rectangle.
+        // Pessimistic check; only used for optimization - returning false is always
+        // a correct choice, though it might lead to a slower path in the rasterizer.
+        virtual bool trimRectangularClip(Rectangle<int> requestedDrawRect, Rectangle<int>& trimmedDrawRect) const = 0;
+
         virtual bool clipRegionIntersects (Rectangle<int>) const = 0;
         virtual Rectangle<int> getClipBounds() const = 0;
 
@@ -1667,6 +1673,11 @@ namespace ClipRegions
         void translate (Point<int> delta) override
         {
             edgeTable.translate ((float) delta.x, delta.y);
+        }
+
+        bool trimRectangularClip(Rectangle<int>, Rectangle<int>&) const override
+        {
+            return false;
         }
 
         bool clipRegionIntersects (Rectangle<int> r) const override
@@ -1792,6 +1803,15 @@ namespace ClipRegions
         void translate (Point<int> delta) override                    { clip.offsetAll (delta); }
         bool clipRegionIntersects (Rectangle<int> r) const override   { return clip.intersects (r); }
         Rectangle<int> getClipBounds() const override                 { return clip.getBounds(); }
+
+        bool trimRectangularClip(Rectangle<int> requestedDrawRect, Rectangle<int>& trimmedDrawRect) const override
+        {
+			if (clip.getNumRectangles() != 1) return false;
+
+			Rectangle<int> rect = clip.getRectangle(0);
+			trimmedDrawRect = rect.getIntersection(requestedDrawRect);
+			return !trimmedDrawRect.isEmpty();
+        }
 
         void fillRectWithColour (SavedStateType& state, Rectangle<int> area, PixelARGB colour, bool replaceContents) const override
         {
