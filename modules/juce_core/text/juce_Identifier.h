@@ -68,6 +68,9 @@ public:
     /** Creates a copy of another identifier. */
     Identifier (Identifier&& other) noexcept;
 
+    /** Creates identifier from a string already in the pool. */
+    Identifier (const String& nm, bool alreadyInPool);
+
     /** Creates a copy of another identifier. */
     Identifier& operator= (Identifier&& other) noexcept;
 

@@ -49,6 +49,24 @@ Identifier::Identifier (const String& nm)
     jassert (nm.isNotEmpty());
 }
 
+Identifier::Identifier (const String& nm, bool alreadyInPool)
+: name (nm)
+{
+    // An Identifier cannot be created from an empty string!
+    jassert(nm.isNotEmpty());
+
+    jassertquiet(alreadyInPool);
+
+    // In case this constructor is used incorrectly
+    if (! alreadyInPool)
+        name = StringPool::getGlobalPool().getPooledString (nm);
+
+    jassert (name.getCharPointer() == nm.getCharPointer());
+
+    // Make sure the string is already in the pool
+    jassert (name.getCharPointer() == StringPool::getGlobalPool().getPooledString (name).getCharPointer());
+}
+
 Identifier::Identifier (const char* nm)
     : name (StringPool::getGlobalPool().getPooledString (nm))
 {
