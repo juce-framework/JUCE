@@ -104,7 +104,7 @@ private:
      * @param endIndex End index (exclusive) for the search
      * @return Pair of bool and int. The bool is true if the string is in the pool, false otherwise. The int is the index at which the string should be inserted or the index of the string in the pool.
      */
-    std::pair<bool, int> locateOrGetInsertIndex(const String& newString, int startIndex, int endIndex) const;
+    std::pair<bool, int> locateOrGetInsertIndex (const String& newString, int startIndex, int endIndex) const;
 
     JUCE_DECLARE_NON_COPYABLE (StringPool)
 };
