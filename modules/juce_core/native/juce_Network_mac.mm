@@ -119,34 +119,290 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments ([[maybe_unused]] const Str
 }
 
 //==============================================================================
-class URLConnectionState final
+struct SessionListener
+{
+    virtual ~SessionListener() = default;
+    virtual void didComplete (NSError*) = 0;
+    virtual void didReceiveResponse (NSURLResponse*, void (^) (NSURLSessionResponseDisposition)) = 0;
+    virtual void didReceiveData (NSData*) = 0;
+    virtual void didSendBodyData (int64_t) = 0;
+    virtual void willPerformHTTPRedirection (NSURLRequest*, void (^) (NSURLRequest *)) = 0;
+};
+
+class SharedSession
+{
+public:
+    SharedSession()
+    {
+        DelegateClass::setState (delegate.get(), this);
+    }
+
+    ~SharedSession()
+    {
+        std::unique_lock lock { mutex };
+        [session.get() finishTasksAndInvalidate];
+        condvar.wait (lock, [&] { return state == State::stopped; });
+    }
+
+    NSUniquePtr<NSURLSessionTask> addTask (NSURLRequest* request, SessionListener* listener)
+    {
+        std::unique_lock lock { mutex };
+
+        if (state != State::running)
+            return nullptr;
+
+        NSUniquePtr<NSURLSessionTask> task { [[session.get() dataTaskWithRequest: request] retain] };
+        listenerForTask[[task.get() taskIdentifier]] = listener;
+        return task;
+    }
+
+    void removeTask (NSURLSessionTask* task)
+    {
+        std::unique_lock lock { mutex };
+        condvar.wait (lock, [&] { return listenerForTask.find ([task taskIdentifier]) == listenerForTask.end(); });
+    }
+
+private:
+    void didBecomeInvalid ([[maybe_unused]] NSError* error)
+    {
+       #if JUCE_DEBUG
+        if (error != nullptr)
+            DBG (nsStringToJuce ([error description]));
+       #endif
+
+        const auto toNotify = [&]
+        {
+            const std::scoped_lock lock { mutex };
+            state = State::stopRequested;
+            // Take a copy of listenerForTask so that we don't need to hold the lock while
+            // iterating through the remaining listeners.
+            return listenerForTask;
+        }();
+
+        for (const auto& pair : toNotify)
+            pair.second->didComplete (error);
+
+        const std::scoped_lock lock { mutex };
+        listenerForTask.clear();
+        state = State::stopped;
+
+        // Important: we keep the lock held while calling condvar.notify_one().
+        // If we don't, then it's possible that when the destructor runs, it will wake
+        // before we notify the condvar on this thread, allowing the destructor to continue
+        // and destroying the condition variable. When didBecomeInvalid resumes, the condition
+        // variable will have been destroyed.
+        condvar.notify_one();
+    }
+
+    void didComplete (NSURLSessionTask* task, [[maybe_unused]] NSError* error)
+    {
+       #if JUCE_DEBUG
+        if (error != nullptr)
+            DBG (nsStringToJuce ([error description]));
+       #endif
+
+        auto* listener = getListener (task);
+
+        if (listener == nullptr)
+            return;
+
+        listener->didComplete (error);
+
+        {
+            const std::scoped_lock lock { mutex };
+            listenerForTask.erase ([task taskIdentifier]);
+        }
+
+        condvar.notify_one();
+    }
+
+    void didReceiveResponse (NSURLSessionTask* task,
+                             NSURLResponse* response,
+                             void (^completionHandler) (NSURLSessionResponseDisposition))
+    {
+        if (auto* listener = getListener (task))
+            listener->didReceiveResponse (response, completionHandler);
+    }
+
+    void didReceiveData (NSURLSessionTask* task, NSData* newData)
+    {
+        if (auto* listener = getListener (task))
+            listener->didReceiveData (newData);
+    }
+
+    void didSendBodyData (NSURLSessionTask* task, int64_t totalBytesWritten)
+    {
+        if (auto* listener = getListener (task))
+            listener->didSendBodyData (totalBytesWritten);
+    }
+
+    void willPerformHTTPRedirection (NSURLSessionTask* task,
+                                     NSURLRequest* urlRequest,
+                                     void (^completionHandler) (NSURLRequest *))
+    {
+        if (auto* listener = getListener (task))
+            listener->willPerformHTTPRedirection (urlRequest, completionHandler);
+    }
+
+    SessionListener* getListener (NSURLSessionTask* t)
+    {
+        const std::scoped_lock lock { mutex };
+        const auto iter = listenerForTask.find ([t taskIdentifier]);
+        return iter != listenerForTask.end() ? iter->second : nullptr;
+    }
+
+    struct DelegateClass final : public ObjCClass<NSObject<NSURLSessionTaskDelegate>>
+    {
+        DelegateClass()
+            : ObjCClass ("JUCE_URLDelegate_")
+        {
+            addIvar<SharedSession*> ("state");
+
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),
+                       [] (id self, SEL, NSURLSession*, NSError* error)
+                       {
+                           getState (self)->didBecomeInvalid (error);
+                       });
+
+            addMethod (@selector (URLSession:dataTask:didReceiveResponse:completionHandler:),
+                       [] (id self,
+                           SEL,
+                           NSURLSession*,
+                           NSURLSessionDataTask* task,
+                           NSURLResponse* response,
+                           void (^completionHandler) (NSURLSessionResponseDisposition))
+                       {
+                           getState (self)->didReceiveResponse (task, response, completionHandler);
+                       });
+
+            addMethod (@selector (URLSession:dataTask:didReceiveData:),
+                       [] (id self, SEL, NSURLSession*, NSURLSessionDataTask* task, NSData* newData)
+                       {
+                           getState (self)->didReceiveData (task, newData);
+                       });
+
+            addMethod (@selector (URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:),
+                       [] (id self,
+                           SEL,
+                           NSURLSession*,
+                           NSURLSessionTask* task,
+                           int64_t,
+                           int64_t totalBytesWritten,
+                           int64_t)
+                       {
+                           getState (self)->didSendBodyData (task, totalBytesWritten);
+                       });
+
+            addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
+                       [] (id self,
+                           SEL,
+                           NSURLSession*,
+                           NSURLSessionTask* task,
+                           NSHTTPURLResponse*,
+                           NSURLRequest* req,
+                           void (^completionHandler) (NSURLRequest *))
+                       {
+                           getState (self)->willPerformHTTPRedirection (task, req, completionHandler);
+                       });
+
+            addMethod (@selector (URLSession:task:didCompleteWithError:),
+                       [] (id self, SEL, NSURLConnection*, NSURLSessionTask* task, NSError* error)
+                       {
+                           getState (self)->didComplete (task, error);
+                       });
+
+            registerClass();
+        }
+
+        static void setState (NSObject* self, SharedSession* state)  { object_setInstanceVariable (self, "state", state); }
+        static SharedSession* getState (NSObject* self)              { return getIvar<SharedSession*> (self, "state"); }
+
+        static DelegateClass& get()
+        {
+            static DelegateClass cls;
+            return cls;
+        }
+    };
+
+    enum class State
+    {
+        running,
+        stopRequested,
+        stopped,
+    };
+
+    std::mutex mutex;
+    std::condition_variable condvar;
+
+    NSUniquePtr<NSObject<NSURLSessionTaskDelegate>> delegate { [DelegateClass::get().createInstance() init] };
+    NSUniquePtr<NSURLSession> session
+    {
+        [[NSURLSession sessionWithConfiguration: [NSURLSessionConfiguration defaultSessionConfiguration]
+                                       delegate: delegate.get()
+                                  delegateQueue: nil] retain]
+    };
+
+    std::map<NSUInteger, SessionListener*> listenerForTask;
+
+    State state = State::running;
+};
+
+class TaskToken
+{
+public:
+    TaskToken() = default;
+
+    explicit TaskToken (NSURLRequest* request, SessionListener* l)
+        : task ([&]
+                {
+                    SharedResourcePointer<SharedSession> session;
+                    return session->addTask (request, l);
+                }())
+    {
+        if (auto* t = task.get())
+            [t resume];
+    }
+
+    TaskToken (TaskToken&&) noexcept = default;
+    TaskToken& operator= (TaskToken&&) noexcept = default;
+
+    ~TaskToken()
+    {
+        SharedResourcePointer<SharedSession> session;
+
+        if (auto* toRemove = task.get())
+            session->removeTask (toRemove);
+    }
+
+    void cancel()
+    {
+        if (auto* toCancel = task.get())
+            [toCancel cancel];
+    }
+
+private:
+    NSUniquePtr<NSURLSessionTask> task;
+};
+
+//==============================================================================
+class URLConnectionState final : private SessionListener
 {
 public:
     URLConnectionState (NSUniquePtr<NSURLRequest> req, const int maxRedirects)
         : request (std::move (req)),
           numRedirects (maxRedirects)
     {
-        DelegateClass::setState (delegate.get(), this);
     }
 
-    ~URLConnectionState()
+    ~URLConnectionState() override
     {
         cancel();
-
-        std::unique_lock lock { mutex };
-        [session.get() finishTasksAndInvalidate];
-        condvar.wait (lock, [&] { return state == State::invalidated; });
     }
 
     void cancel()
     {
         const std::scoped_lock lock { mutex };
-
-        // When a task completes, URLSession:task:didCompleteWithError: will be called on the
-        // delegate, even if the task is cancelled.
-
-        if (auto* toCancel = task.get())
-            [toCancel cancel];
+        token.cancel();
     }
 
     int64 getContentLength() const noexcept
@@ -169,8 +425,10 @@ public:
 
     bool start (WebInputStream& inputStream, WebInputStream::Listener* listener)
     {
+        TaskToken newToken { request.get(), this };
+
         std::unique_lock lock { mutex };
-        [task.get() resume];
+        token = std::move (newToken);
 
         while (! condvar.wait_for (lock,
                                    std::chrono::milliseconds { 1 },
@@ -216,8 +474,17 @@ public:
     }
 
 private:
-    void didReceiveResponse (NSURLResponse* response,
-                             void (^completionHandler) (NSURLSessionResponseDisposition))
+    void didComplete (NSError*) override
+    {
+        {
+            const std::scoped_lock lock { mutex };
+            state = State::requestFinished;
+        }
+
+        condvar.notify_one();
+    }
+
+    void didReceiveResponse (NSURLResponse* response, void (^completionHandler) (NSURLSessionResponseDisposition)) override
     {
         {
             const std::scoped_lock lock { mutex };
@@ -239,39 +506,7 @@ private:
         completionHandler (NSURLSessionResponseAllow);
     }
 
-    void didComplete ([[maybe_unused]] NSError* error)
-    {
-        {
-            const std::scoped_lock lock { mutex };
-
-            if (state != State::invalidated)
-                state = State::requestFinished;
-        }
-
-        condvar.notify_one();
-
-       #if JUCE_DEBUG
-        if (error != nullptr)
-            DBG (nsStringToJuce ([error description]));
-       #endif
-    }
-
-    void didBecomeInvalid ([[maybe_unused]] NSError* error)
-    {
-        {
-            const std::scoped_lock lock { mutex };
-            state = State::invalidated;
-        }
-
-        condvar.notify_one();
-
-       #if JUCE_DEBUG
-        if (error != nullptr)
-            DBG (nsStringToJuce ([error description]));
-       #endif
-    }
-
-    void didReceiveData (NSData* newData)
+    void didReceiveData (NSData* newData) override
     {
         {
             const std::scoped_lock lock { mutex };
@@ -284,99 +519,24 @@ private:
         condvar.notify_one();
     }
 
-    void didSendBodyData (int64_t totalBytesWritten)
+    void didSendBodyData (int64_t totalBytesWritten) override
     {
         const std::scoped_lock lock { mutex };
         latestTotalBytes = totalBytesWritten;
     }
 
-    void willPerformHTTPRedirection (NSURLRequest* urlRequest, void (^completionHandler) (NSURLRequest *))
+    void willPerformHTTPRedirection (NSURLRequest* urlRequest, void (^completionHandler) (NSURLRequest *)) override
     {
         // No lock required here because numRedirects is only accessed from the session's work queue
         // after the task has started.
         completionHandler (--numRedirects >= 0 ? urlRequest : nil);
     }
 
-    //==============================================================================
-    struct DelegateClass final : public ObjCClass<NSObject<NSURLSessionTaskDelegate>>
-    {
-        DelegateClass()
-            : ObjCClass ("JUCE_URLDelegate_")
-        {
-            addIvar<URLConnectionState*> ("state");
-
-            addMethod (@selector (URLSession:dataTask:didReceiveResponse:completionHandler:),
-                       [] (id self,
-                           SEL,
-                           NSURLSession*,
-                           NSURLSessionDataTask*,
-                           NSURLResponse* response,
-                           void (^completionHandler) (NSURLSessionResponseDisposition))
-                       {
-                           getState (self)->didReceiveResponse (response, completionHandler);
-                       });
-
-            addMethod (@selector (URLSession:didBecomeInvalidWithError:),
-                       [] (id self, SEL, NSURLSession*, NSError* error)
-                       {
-                           getState (self)->didBecomeInvalid (error);
-                       });
-
-            addMethod (@selector (URLSession:dataTask:didReceiveData:),
-                       [] (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSData* newData)
-                       {
-                           getState (self)->didReceiveData (newData);
-                       });
-
-            addMethod (@selector (URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:),
-                       [] (id self,
-                           SEL,
-                           NSURLSession*,
-                           NSURLSessionTask*,
-                           int64_t,
-                           int64_t totalBytesWritten,
-                           int64_t)
-                       {
-                           getState (self)->didSendBodyData (totalBytesWritten);
-                       });
-
-            addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
-                       [] (id self,
-                           SEL,
-                           NSURLSession*,
-                           NSURLSessionTask*,
-                           NSHTTPURLResponse*,
-                           NSURLRequest* req,
-                           void (^completionHandler) (NSURLRequest *))
-                       {
-                           getState (self)->willPerformHTTPRedirection (req, completionHandler);
-                       });
-
-            addMethod (@selector (URLSession:task:didCompleteWithError:),
-                       [] (id self, SEL, NSURLConnection*, NSURLSessionTask*, NSError* error)
-                       {
-                           getState (self)->didComplete (error);
-                       });
-
-            registerClass();
-        }
-
-        static void setState (NSObject* self, URLConnectionState* state)  { object_setInstanceVariable (self, "state", state); }
-        static URLConnectionState* getState (NSObject* self)              { return getIvar<URLConnectionState*> (self, "state"); }
-    };
-
-    static DelegateClass& getDelegateClass()
-    {
-        static DelegateClass cls;
-        return cls;
-    }
-
     enum class State
     {
         beforeStart,
         started,
-        requestFinished,
-        invalidated,
+        requestFinished
     };
 
     mutable std::mutex mutex;
@@ -384,21 +544,16 @@ private:
 
     NSUniquePtr<NSDictionary> headers;
     NSUniquePtr<NSURLRequest> request;
-    NSUniquePtr<NSObject<NSURLSessionTaskDelegate>> delegate { [getDelegateClass().createInstance() init] };
     NSUniquePtr<NSMutableData> data { [[NSMutableData data] retain] };
-    NSUniquePtr<NSURLSession> session
-    {
-        [[NSURLSession sessionWithConfiguration: [NSURLSessionConfiguration defaultSessionConfiguration]
-                                       delegate: delegate.get()
-                                  delegateQueue: nil] retain]
-    };
-    NSUniquePtr<NSURLSessionTask> task { [[session.get() dataTaskWithRequest: request.get()] retain] };
 
     int64 latestTotalBytes = 0;
     int64 contentLength = -1;
     int statusCode = 0;
     int numRedirects = 0;
     State state = State::beforeStart;
+
+    SharedResourcePointer<SharedSession> session;
+    TaskToken token;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
