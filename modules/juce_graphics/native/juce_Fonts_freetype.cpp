@@ -125,7 +125,7 @@ struct FTFaceWrapper final : public ReferenceCountedObject
     MemoryBlock savedFaceData;
     FT_Face face = {};
 
-    JUCE_HEAVYWEIGHT_LEAK_DETECTOR(FTFaceWrapper)
+    JUCE_LEAK_DETECTOR (FTFaceWrapper)
 };
 
 //==============================================================================
