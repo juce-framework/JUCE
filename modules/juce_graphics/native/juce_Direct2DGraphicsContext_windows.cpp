@@ -347,32 +347,32 @@ public:
         Point<float> translation{};
         AffineTransform transform{};
 
-        if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
-        {
-            if (currentTransform.isOnlyTranslated)
-                translation = currentTransform.offset.toFloat();
-            else
-                transform = currentTransform.getTransform();
-        }
-
-        if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
-        {
-            if (fillType.transform.isOnlyTranslation())
-                translation += Point<float> (fillType.transform.getTranslationX(), fillType.transform.getTranslationY());
-            else
-                transform = transform.followedBy (fillType.transform);
-        }
-
-        if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
-        {
-            if (currentTransform.isOnlyTranslated)
-                translation -= currentTransform.offset.toFloat();
-            else
-                transform = transform.followedBy (currentTransform.getTransform().inverted());
-        }
-
         if (fillType.isGradient())
         {
+            if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
+            {
+                if (currentTransform.isOnlyTranslated)
+                    translation = currentTransform.offset.toFloat();
+                else
+                    transform = currentTransform.getTransform();
+            }
+
+            if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
+            {
+                if (fillType.transform.isOnlyTranslation())
+                    translation += Point (fillType.transform.getTranslationX(), fillType.transform.getTranslationY());
+                else
+                    transform = transform.followedBy (fillType.transform);
+            }
+
+            if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
+            {
+                if (currentTransform.isOnlyTranslated)
+                    translation -= currentTransform.offset.toFloat();
+                else
+                    transform = transform.followedBy (currentTransform.getTransform().inverted());
+            }
+
             const auto p1 = fillType.gradient->point1 + translation;
             const auto p2 = fillType.gradient->point2 + translation;
 
@@ -388,6 +388,17 @@ public:
                 linearGradient->SetStartPoint ({ p1.x, p1.y });
                 linearGradient->SetEndPoint ({ p2.x, p2.y });
             }
+        }
+        else if (fillType.isTiledImage())
+        {
+            if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
+                transform = currentTransform.getTransform();
+
+            if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
+                transform = transform.followedBy (fillType.transform);
+
+            if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
+                transform = transform.followedBy (currentTransform.getTransform().inverted());
         }
 
         currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));
