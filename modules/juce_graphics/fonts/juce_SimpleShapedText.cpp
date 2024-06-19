@@ -330,6 +330,49 @@ private:
     size_t beyondEnd{};
 };
 
+enum class ControlCharacter
+{
+    crFollowedByLf,
+    cr,
+    lf,
+    tab
+};
+
+static auto findControlCharacters (Span<juce_wchar> text)
+{
+    constexpr juce_wchar lf = 0x0a;
+    constexpr juce_wchar cr = 0x0d;
+    constexpr juce_wchar tab = 0x09;
+
+    std::map<size_t, ControlCharacter> result;
+
+    const auto iMax = text.size();
+
+    for (const auto [i, c] : enumerate (text, size_t{}))
+    {
+        if (c == lf)
+        {
+            result[i] = ControlCharacter::lf;
+            continue;
+        }
+
+        if (c == cr)
+        {
+            if (iMax - i > 1 && text[i + 1] == lf)
+                result[i] = ControlCharacter::crFollowedByLf;
+            else
+                result[i] = ControlCharacter::cr;
+
+            continue;
+        }
+
+        if (c == tab)
+            result[i] = ControlCharacter::tab;
+    }
+
+    return result;
+}
+
 /*  Returns glyphs in logical order as that favours wrapping. */
 static std::vector<ShapedGlyph> lowLevelShape (const String& string,
                                                Range<int64> range,
@@ -358,46 +401,32 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
                         0,
                         0);
 
-    // Adding the converted portion of the text with hb_buffer_add_utf32() or especially with
-    // hb_buffer_add() gives us control over cluster numbers. hb_buffer_add_utf32() will increment
-    // cluster numbers by unicode codepoints (as opposed to UTF8 bytes) starting from 0.
-    auto utf32Span = Span { string.toUTF32().getAddress() + (size_t) range.getStart(),
-                            (size_t) range.getLength() };
+    const Span utf32Span { string.toUTF32().getAddress() + (size_t) range.getStart(),
+                           (size_t) range.getLength() };
 
-    // We're using a word joiner (zero width non-breaking space) followed by a non-breaking space
-    // for visual representation. This is so that it's not possible to break the glyph representing
-    // the line breaking glyph on its own.
-    static constexpr uint32_t crLf[] = { 0x2060, 0x00A0 };
+    const auto controlChars = findControlCharacters (utf32Span);
+    auto nextControlChar = controlChars.begin();
 
-    const auto numLineEndsToReplace = [&]
+    for (const auto pair : enumerate (utf32Span, size_t{}))
     {
-        constexpr auto lf = 0x0a;
-        constexpr auto cr = 0x0d;
-
-        if (! utf32Span.empty() && (utf32Span.back() == lf || utf32Span.back() == cr))
+        const auto charToAdd = [&]
         {
-            if (utf32Span.size() >= 2 && utf32Span[utf32Span.size() - 2] == cr)
-                return 2;
+            if (nextControlChar == controlChars.end() || pair.index != nextControlChar->first)
+                return pair.value;
 
-            return 1;
-        }
+            constexpr juce_wchar wordJoiner       = 0x2060;
+            constexpr juce_wchar nonBreakingSpace = 0x00a0;
 
-        return 0;
-    }();
+            const auto replacement = nextControlChar->second == ControlCharacter::crFollowedByLf
+                                   ? wordJoiner
+                                   : nonBreakingSpace;
 
-    hb_buffer_add_utf32 (buffer.get(),
-                         (uint32_t*) utf32Span.data(),
-                         (int) range.getLength() - numLineEndsToReplace,
-                         (unsigned int) 0,
-                         (int) range.getLength() - numLineEndsToReplace);
+            ++nextControlChar;
 
-    for (int i = 0; i < numLineEndsToReplace; ++i)
-    {
-        // The following gets cluster values right, but this does not follow clearly from harfbuzz documentation.
-        // Add at least a regression test checking the correctness of cluster values.
-        hb_buffer_add (buffer.get(),
-                       static_cast<hb_codepoint_t> (*(crLf + (2 - numLineEndsToReplace) + i)),
-                       (unsigned int) ((int) range.getLength() - numLineEndsToReplace + i));
+            return replacement;
+        }();
+
+        hb_buffer_add (buffer.get(), static_cast<hb_codepoint_t> (charToAdd), (unsigned int) pair.index);
     }
 
     const auto postContextByteRange = utf8Lookup.getByteRange (Range<int64> { range.getEnd(), (int64) string.length() });

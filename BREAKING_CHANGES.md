@@ -1,5 +1,35 @@
 # JUCE breaking changes
 
+# develop
+
+## Change
+
+The tab width when rendering text with the GlyphArrangement and TextLayout
+classes now equals the width of a space. Previously it equaled the width of a
+tofu character used for missing glyphs.
+
+**Possible Issues**
+
+User interfaces using the GlyphArrangement and TextLayout classes directly to
+render text containing tabs will look differently. The TextEditor and
+CodeEditorComponent classes have special logic for replacing the tabs prior to
+rendering, and consequently, these are not affected.
+
+**Workaround**
+
+Replace the tab characters prior to rendering and substitute them with the
+required number of non-breaking spaces.
+
+**Rationale**
+
+Since the Unicode related revamping of JUCE's text rendering classes, tab
+characters would raise assertions and would be rendered with the tofu glyph.
+This change visually treats tab characters as non-breaking spaces. Since the
+JUCE 7 behaviour of using the tofu glyph's width was not a conscious decision,
+but rather a side effect of ignoring unresolved glyphs, using a default width
+of one space is more reasonable.
+
+
 # Version 8.0.0
 
 ## Change
