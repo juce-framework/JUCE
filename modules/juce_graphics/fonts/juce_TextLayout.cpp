@@ -456,13 +456,23 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                run->font = font;
                                run->colour = colour;
 
-                               for (decltype (glyphs.size()) i = 0, iMax = glyphs.size(); i < iMax; ++i)
+                               const auto beyondLastNonWhitespace = [&]
                                {
-                                   if (glyphs[i].whitespace)
-                                       continue;
+                                   auto i = glyphs.size();
 
+                                   for (auto it  = std::reverse_iterator { glyphs.end() },
+                                             end = std::reverse_iterator { glyphs.begin() };
+                                        it != end && it->whitespace;
+                                        ++it)
+                                   {
+                                       --i;
+                                   }
+
+                                   return i;
+                               }();
+
+                               for (size_t i = 0; i < beyondLastNonWhitespace; ++i)
                                    run->glyphs.add ({ (int) glyphs[i].glyphId, positions[i] - line->lineOrigin, glyphs[i].advance.x });
-                               }
 
                                line->runs.add (std::move (run));
                            },
