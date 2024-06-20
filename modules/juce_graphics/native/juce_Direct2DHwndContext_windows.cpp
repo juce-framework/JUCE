@@ -518,27 +518,28 @@ public:
 
     void clearWindowRedirectionBitmap()
     {
-        if (! opaque && swap.state == SwapChain::State::bufferAllocated)
-        {
-            deviceResources.deviceContext.createHwndRenderTarget (hwnd);
+        if (opaque || swap.state != SwapChain::State::bufferAllocated)
+            return;
 
-            // Clear the GDI redirection bitmap using a Direct2D 1.0 render target
-            auto& hwndRenderTarget = deviceResources.deviceContext.hwndRenderTarget;
+        deviceResources.deviceContext.createHwndRenderTarget (hwnd);
 
-            if (hwndRenderTarget)
-            {
-                const auto colorF = D2DUtilities::toCOLOR_F (getBackgroundTransparencyKeyColour());
+        // Clear the GDI redirection bitmap using a Direct2D 1.0 render target
+        const auto& hwndRenderTarget = deviceResources.deviceContext.hwndRenderTarget;
 
-                RECT clientRect;
-                GetClientRect (hwnd, &clientRect);
+        if (hwndRenderTarget == nullptr)
+            return;
 
-                D2D1_SIZE_U size { (uint32) (clientRect.right - clientRect.left), (uint32) (clientRect.bottom - clientRect.top) };
-                hwndRenderTarget->Resize (size);
-                hwndRenderTarget->BeginDraw();
-                hwndRenderTarget->Clear (colorF);
-                hwndRenderTarget->EndDraw();
-            }
-        }
+        const auto colorF = D2DUtilities::toCOLOR_F (getBackgroundTransparencyKeyColour());
+
+        RECT clientRect;
+        GetClientRect (hwnd, &clientRect);
+
+        const D2D1_SIZE_U size { (uint32) (clientRect.right  - clientRect.left),
+                                 (uint32) (clientRect.bottom - clientRect.top) };
+        hwndRenderTarget->Resize (size);
+        hwndRenderTarget->BeginDraw();
+        hwndRenderTarget->Clear (colorF);
+        hwndRenderTarget->EndDraw();
     }
 
     SavedState* startFrame (float dpiScale) override
