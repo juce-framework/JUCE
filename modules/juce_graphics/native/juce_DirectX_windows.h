@@ -241,7 +241,10 @@ private:
     }
 
     ComSmartPtr<ID2D1Factory2> d2dFactory;
-    ListenerList<DxgiAdapterListener> listeners;
+
+    // It's possible that we'll need to add/remove listeners from background threads, especially in
+    // the case that Images are created on a background thread.
+    ThreadSafeListenerList<DxgiAdapterListener> listeners;
     ComSmartPtr<IDXGIFactory2> factory = makeDxgiFactory();
     ReferenceCountedArray<DxgiAdapter> adapterArray;
 };
