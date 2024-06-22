@@ -42,8 +42,8 @@ OSCArgument::OSCArgument (double v)             : type (OSCTypes::double64),doub
 OSCArgument::OSCArgument (const String& s)      : type (OSCTypes::string),  stringValue (s) {}
 OSCArgument::OSCArgument (MemoryBlock b)        : type (OSCTypes::blob),    blob (std::move (b)) {}
 OSCArgument::OSCArgument (OSCColour c)          : type (OSCTypes::colour),  intValue ((int32) c.toInt32()) {}
-OSCArgument::OSCArgument(bool b)                : type (b ? OSCTypes::T : OSCTypes::F) {}
-OSCArgument::OSCArgument(OSCType t)             : type (t) {} //for nil and impulse
+OSCArgument::OSCArgument (bool b)               : type (b ? OSCTypes::T : OSCTypes::F) {}
+OSCArgument::OSCArgument (OSCType t)            : type (t) {} //for nil and impulse
 
 
 //==============================================================================

@@ -53,13 +53,13 @@ public:
     OSCArgument (int32 value);
 
     /** Constructs an OSCArgument with type int64 and a given value. */
-    OSCArgument(int64 value);
+    OSCArgument (int64 value);
 
     /** Constructs an OSCArgument with type float32 and a given value. */
     OSCArgument (float value);
 
     /** Constructs an OSCArgument with type double and a given value. */
-    OSCArgument(double value);
+    OSCArgument (double value);
 
     /** Constructs an OSCArgument with type string and a given value */
     OSCArgument (const String& value);
@@ -76,12 +76,12 @@ public:
     OSCArgument (OSCColour colour);
 
     /** Constructs an OSCArgument with type T or F depending on the given boolean value */
-    OSCArgument(bool value);
+    OSCArgument (bool value);
 
     /** Constructs an OSCArgument with the given OSC type tag.
 		This constructor is intended for creating OSCArgument objects with type nil or impulse.
 	*/
-    OSCArgument(OSCType type);
+    OSCArgument (OSCType type);
 
     /** Returns the type of the OSCArgument as an OSCType.
         OSCType is a char type, and its value will be the OSC type tag of the type.
@@ -98,7 +98,7 @@ public:
     bool isFloat32() const noexcept         { return type == OSCTypes::float32; }
 
     /** Returns whether the type of the OSCArgument is double. */
-    bool isDouble() const noexcept        { return type == OSCTypes::double64; }
+    bool isDouble() const noexcept          { return type == OSCTypes::double64; }
 
     /** Returns whether the type of the OSCArgument is string. */
     bool isString() const noexcept          { return type == OSCTypes::string; }
@@ -116,7 +116,7 @@ public:
     bool isImpulse() const noexcept         { return type == OSCTypes::impulse; }
 
     /** Returns whether the type of the OSCArgument is T or F. */
-    bool isBool() const noexcept { return type == OSCTypes::T || type == OSCTypes::F; }
+    bool isBool() const noexcept            { return type == OSCTypes::T || type == OSCTypes::F; }
 
     /** Returns the value of the OSCArgument as an int32.
         If the type of the OSCArgument is not int32, the behaviour is undefined.
