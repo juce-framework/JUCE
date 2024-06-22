@@ -158,7 +158,7 @@ public:
     /** Returns the value of the OSCArgument as a boolean.
 		If the type of the OSCArgument is not T or F, the behaviour is undefined.
 	*/
-    bool getBool() const noexcept { return type == OSCTypes::T; }
+    bool getBool() const noexcept;
 
 private:
     //==============================================================================
