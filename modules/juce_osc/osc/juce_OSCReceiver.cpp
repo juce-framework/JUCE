@@ -354,7 +354,16 @@ struct OSCReceiver::Pimpl   : private Thread,
         if (! disconnect())
             return false;
 
-        socket.setOwned (new DatagramSocket (false));
+#if JUCE_ENABLE_BROADCAST_BY_DEFAULT 
+        DatagramSocket* datagram = new DatagramSocket(true);
+#else 
+        DatagramSocket* datagram = new DatagramSocket(false);
+#endif 
+        socket.setOwned(datagram);
+
+#if JUCE_EXCLUSIVE_BINDING_BY_DEFAULT 
+        socket->setEnablePortReuse(false);
+#endif 
 
         if (! socket->bindToPort (portNumber))
             return false;
