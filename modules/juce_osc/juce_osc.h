@@ -60,6 +60,14 @@
 
 #pragma once
 #define JUCE_OSC_H_INCLUDED
+
+/** Config: JUCE_ALLOW_SPECIAL_CHARS_IN_ADDRESS
+	Enables the use of characters in adress that are not allowed by the OSC specifications (like spaces), but that are used
+	by some applications anyway (e.g. /my spaced/address)
+*/
+#ifndef JUCE_ALLOW_SPECIAL_CHARS_IN_ADDRESS 
+#define JUCE_ALLOW_SPECIAL_CHARS_IN_ADDRESS 0 
+#endif 
 /** Config: JUCE_IP_AND_PORT_DETECTION
 	If enabled, this will add remoteIP and remotePort variables to osc packets, corresponding to the sender's ip and port when receiving messages.
 */

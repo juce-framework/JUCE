@@ -285,7 +285,11 @@ namespace
 
         static bool isDisallowedChar (juce_wchar c) noexcept
         {
-            return CharPointer_ASCII (Traits::getDisallowedChars()).indexOf (c, false) >= 0;
+#if JUCE_ALLOW_SPECIAL_CHARS_IN_ADDRESS 
+            return false;
+#else 
+            return CharPointer_ASCII( Traits::getDisallowedChars()).indexOf (c, false) >= 0;
+#endif 
         }
 
         static bool containsOnlyAllowedPrintableASCIIChars (const String& string) noexcept
