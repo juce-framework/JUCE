@@ -56,9 +56,18 @@ namespace
             @param sourceData               the block of data to use as the stream's source
             @param sourceDataSize           the number of bytes in the source data block
         */
+
+#if JUCE_IP_AND_PORT_DETECTION 
+        OSCInputStream (const void* sourceData, size_t sourceDataSize, const String& senderIPAddress, const int& senderPortNumber) :
+            input(sourceData, sourceDataSize, false),
+            senderIPAddress(senderIPAddress),
+            senderPortNumber(senderPortNumber)
+        {}
+#else 
         OSCInputStream (const void* sourceData, size_t sourceDataSize)
             : input (sourceData, sourceDataSize, false)
         {}
+#endif
 
         //==============================================================================
         /** Returns a pointer to the source data block from which this stream is reading. */
@@ -273,6 +282,11 @@ namespace
     private:
         MemoryInputStream input;
 
+#if JUCE_IP_AND_PORT_DETECTION 
+        String senderIPAddress;
+        int senderPortNumber;
+#endif 
+
         //==============================================================================
         void readPaddingZeros (size_t bytesRead)
         {
@@ -427,10 +441,15 @@ struct OSCReceiver::Pimpl   : private Thread,
     };
 
     //==============================================================================
-    void handleBuffer (const char* data, size_t dataSize)
+#if JUCE_IP_AND_PORT_DETECTION 
+    void handleBuffer(const char* data, size_t dataSize, const String& senderIPAddress, const int& senderPortNumber)
     {
-        OSCInputStream inStream (data, dataSize);
-
+        OSCInputStream inStream(data, dataSize, senderIPAddress, senderPortNumber);
+#else 
+    void handleBuffer(const char* data, size_t dataSize)
+    {
+        OSCInputStream inStream(data, dataSize);
+#endif 
         try
         {
             auto content = inStream.readElementWithKnownSize (dataSize);
@@ -477,10 +496,19 @@ private:
             if (ready == 0)
                 continue;
 
+
+#if JUCE_IP_AND_PORT_DETECTION 
+            String senderIPAddress = "";
+            int senderPortNumber = 0;
+            auto bytesRead = (size_t) socket->read (oscBuffer.getData(), bufferSize, false, senderIPAddress, senderPortNumber);
+            if (bytesRead >= 4)
+                handleBuffer(oscBuffer.getData(), bytesRead, senderIPAddress, senderPortNumber);
+#else
             auto bytesRead = (size_t) socket->read (oscBuffer.getData(), bufferSize, false);
 
             if (bytesRead >= 4)
                 handleBuffer (oscBuffer.getData(), bytesRead);
+#endif
         }
     }
 

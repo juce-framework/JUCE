@@ -60,6 +60,12 @@
 
 #pragma once
 #define JUCE_OSC_H_INCLUDED
+/** Config: JUCE_IP_AND_PORT_DETECTION
+	If enabled, this will add remoteIP and remotePort variables to osc packets, corresponding to the sender's ip and port when receiving messages.
+*/
+#ifndef JUCE_IP_AND_PORT_DETECTION 
+#define JUCE_IP_AND_PORT_DETECTION 0 
+#endif 
 
 #include <juce_core/juce_core.h>
 #include <juce_events/juce_events.h>
