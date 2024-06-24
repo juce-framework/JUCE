@@ -93,9 +93,21 @@ define_property(TARGET PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD INHERITED
     FULL_DOCS "Whether or not plugins should be copied after building")
 set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
 
+function(_juce_available_pkgconfig_module_or_else out package alternative_package)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(package_to_be_found ${package} QUIET)
+
+    if(package_to_be_found_FOUND)
+        set(${out} ${package} PARENT_SCOPE)
+    else()
+        set(${out} ${alternative_package} PARENT_SCOPE)
+    endif()
+endfunction()
+
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
-    _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS webkit2gtk-4.0 gtk+-x11-3.0)
+    _juce_available_pkgconfig_module_or_else(webkit_package_name webkit2gtk-4.1 webkit2gtk-4.0)
+    _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS ${webkit_package_name} gtk+-x11-3.0)
 endif()
 
 # We set up default/fallback copy dirs here. If you need different copy dirs, use
