@@ -55,6 +55,17 @@ static auto createIcon (const void* iconData, size_t iconDataSize)
     return image;
 }
 
+std::vector<PackageDependency> makePackageDependencies (const StringArray& dependencies)
+{
+    std::vector<PackageDependency> result;
+    result.reserve ((size_t) dependencies.size());
+    std::transform (dependencies.begin(),
+                    dependencies.end(),
+                    std::back_inserter (result),
+                    [] (auto& d) { return PackageDependency { d }; });
+    return result;
+}
+
 template <typename Exporter>
 static ProjectExporter::ExporterTypeInfo createExporterTypeInfo (const void* iconData, size_t iconDataSize)
 {
@@ -587,9 +598,10 @@ static bool isLoadCurlSymbolsLazilyEnabled (Project& project)
             && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
 }
 
-StringArray ProjectExporter::getLinuxPackages (PackageDependencyType type) const
+std::vector<PackageDependency> ProjectExporter::getLinuxPackages (PackageDependencyType type) const
 {
     auto packages = linuxPackages;
+    std::vector<PackageDependency> dependencies;
 
     // don't add libcurl if curl symbols are loaded at runtime
     if (isCurlEnabled (project) && ! isLoadCurlSymbolsLazilyEnabled (project))
@@ -597,14 +609,17 @@ StringArray ProjectExporter::getLinuxPackages (PackageDependencyType type) const
 
     if (isWebBrowserComponentEnabled (project) && type == PackageDependencyType::compile)
     {
-        packages.add ("webkit2gtk-4.0");
         packages.add ("gtk+-x11-3.0");
+        dependencies.push_back (PackageDependency { "webkit2gtk-4.1", "webkit2gtk-4.0" });
     }
 
     packages.removeEmptyStrings();
     packages.removeDuplicates (false);
 
-    return packages;
+    const auto simpleDependencies = makePackageDependencies (packages);
+    dependencies.insert (dependencies.end(), simpleDependencies.begin(), simpleDependencies.end());
+
+    return dependencies;
 }
 
 void ProjectExporter::addProjectPathToBuildPathList (StringArray& pathList,

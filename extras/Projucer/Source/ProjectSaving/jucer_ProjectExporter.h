@@ -73,6 +73,26 @@ private:
 };
 
 //==============================================================================
+struct PackageDependency
+{
+    explicit PackageDependency (StringRef dependencyIn)
+        : dependency { dependencyIn }
+    {
+    }
+
+    PackageDependency (StringRef dependencyIn, StringRef fallbackIn)
+        : dependency { dependencyIn },
+          fallback { fallbackIn }
+    {
+    }
+
+    String dependency;
+    std::optional<String> fallback;
+};
+
+std::vector<PackageDependency> makePackageDependencies (const StringArray& dependencies);
+
+//==============================================================================
 class ProjectExporter : private Value::Listener
 {
 public:
@@ -262,7 +282,7 @@ public:
         link
     };
 
-    StringArray getLinuxPackages (PackageDependencyType type) const;
+    std::vector<PackageDependency> getLinuxPackages (PackageDependencyType type) const;
 
     //==============================================================================
     StringPairArray msvcExtraPreprocessorDefs;
