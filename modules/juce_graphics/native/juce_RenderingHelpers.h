@@ -2191,8 +2191,10 @@ public:
             }
             else if (! transform.isRotated)
             {
-                jassert (! replaceContents); // not implemented
-                fillTargetRect (transform.boundsAfterTransform (r.toFloat()));
+                if (replaceContents)
+                    fillTargetRect (transform.boundsAfterTransform (r.toFloat()).toNearestInt(), true);
+                else
+                    fillTargetRect (transform.boundsAfterTransform (r.toFloat()));
             }
             else
             {
