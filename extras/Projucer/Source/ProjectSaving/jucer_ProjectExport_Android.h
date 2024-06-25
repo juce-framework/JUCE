@@ -158,10 +158,10 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "8.2"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "8.6"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           gradleClangTidy                      (settings, Ids::gradleClangTidy,                      getUndoManager(), false),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.4.2"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "8.4.1"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
@@ -220,6 +220,7 @@ public:
         writeFile (targetFolder, "build.gradle",                             getProjectBuildGradleFileContent());
         writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent (modules));
         writeFile (targetFolder, "local.properties",                         getLocalPropertiesFileContent());
+        writeFile (targetFolder, "gradle.properties",                        getGradlePropertiesFileContent());
         writeFile (targetFolder, "gradle/wrapper/gradle-wrapper.properties", getGradleWrapperPropertiesFileContent());
 
         writeBinaryFile (targetFolder, "gradle/wrapper/LICENSE-for-gradlewrapper.txt", BinaryData::LICENSE,           BinaryData::LICENSESize);
@@ -700,7 +701,7 @@ private:
         mo << "def ndkVersionString = \"26.2.11394342\"" << newLine << newLine;
 
         mo << "android {"                                                                    << newLine;
-        mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
+        mo << "    compileSdk " << static_cast<int> (androidTargetSDK.get())                 << newLine;
         mo << "    ndkVersion ndkVersionString"                                              << newLine;
         mo << "    namespace " << project.getBundleIdentifierString().toLowerCase().quoted() << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
@@ -925,7 +926,7 @@ private:
             mo << "        implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
         if (isInAppBillingEnabled())
-            mo << "        implementation 'com.android.billingclient:billing:5.0.0'" << newLine;
+            mo << "        implementation 'com.android.billingclient:billing:7.0.0'" << newLine;
 
         if (areRemoteNotificationsEnabled())
         {
@@ -1067,6 +1068,16 @@ private:
         props << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
         return replaceLineFeeds (props, getNewLineString());
+    }
+
+    String getGradlePropertiesFileContent() const
+    {
+        String result;
+
+        // Silences warning when Google Play Billing v7 is enabled
+        result << "android.useAndroidX=true" << newLine;
+
+        return replaceLineFeeds (result, getNewLineString());
     }
 
     String getGradleWrapperPropertiesFileContent() const

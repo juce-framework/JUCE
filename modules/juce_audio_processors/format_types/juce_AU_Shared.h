@@ -366,20 +366,17 @@ struct AudioUnitHelpers
 
     static Array<AUChannelInfo> getAUChannelInfo (const AudioProcessor& processor)
     {
+       #if JucePlugin_IsMidiEffect
+        // A MIDI effect requires an output bus in order to determine the sample rate.
+        // No audio will be written to the output bus, so it can have any number of channels.
+        // No input bus is required.
+        return { AUChannelInfo { 0, -1 } };
+       #endif
+
         Array<AUChannelInfo> channelInfo;
 
         auto hasMainInputBus  = (AudioUnitHelpers::getBusCountForWrapper (processor, true)  > 0);
         auto hasMainOutputBus = (AudioUnitHelpers::getBusCountForWrapper (processor, false) > 0);
-
-        if ((! hasMainInputBus) && (! hasMainOutputBus))
-        {
-            // midi effect plug-in: no audio
-            AUChannelInfo info;
-            info.inChannels = 0;
-            info.outChannels = 0;
-
-            return { &info, 1 };
-        }
 
         auto layout = processor.getBusesLayout();
 

@@ -123,7 +123,7 @@ class AnimationSettingsComponent final : public Component
 public:
     explicit AnimationSettingsComponent (const AnimationSettings& settingsIn)
     {
-        playbackControls.button.onClick = [&]{ NullCheckedInvocation::invoke (onAnimate); };
+        playbackControls.button.onClick = [&] { NullCheckedInvocation::invoke (onAnimate); };
 
         durationControls.slider.getValueObject().referTo (settingsIn.durationMs);
         playbackControls.positionToggle.getToggleStateValue().referTo (settingsIn.shouldAnimatePosition);
@@ -514,7 +514,7 @@ protected:
     void setCustomSettingsPage (Component& settingsPage)
     {
         customSettingsPage = &settingsPage;
-        editViewButton.onClick = [&]{ toggleSettingsPage(); };
+        editViewButton.onClick = [&] { toggleSettingsPage(); };
         addChildComponent (settingsPageBackground);
         addChildComponent (customSettingsPage);
 
@@ -596,16 +596,16 @@ class StandardEasingAnimationView final : public AnimationView
 public:
     StandardEasingAnimationView (const AnimationSettings& settings,
                                  ValueAnimatorBuilder::EasingFn easingFunction)
-        : AnimationView (settings, [=]{ return easingFunction; })
+        : AnimationView (settings, [=] { return easingFunction; })
     {}
 };
 
 class CubicBezierEasingAnimationView final : public AnimationView
 {
 public:
-    CubicBezierEasingAnimationView (const AnimationSettings& animationSettings)
-        : AnimationView (animationSettings,
-                         [&]{ return Easings::createCubicBezier (bezierCurve.cp1, bezierCurve.cp2); })
+    CubicBezierEasingAnimationView (const AnimationSettings& settings)
+        : AnimationView (settings,
+                         [&] { return Easings::createCubicBezier (bezierCurve.cp1, bezierCurve.cp2); })
     {
         settingsPage.graph.onValueChange = [&] { setCubicBezierCurve (settingsPage.graph.getCubicBezierCurve()); };
         settingsPage.settings.onValueChange = [&] { setCubicBezierCurve (settingsPage.settings.getCubicBezierCurve()); };
@@ -669,11 +669,11 @@ struct SliderAndLabel final : public Component
 class SpringEasingAnimationView final : public AnimationView
 {
 public:
-    SpringEasingAnimationView (const AnimationSettings& animationSettings)
-        : AnimationView (animationSettings,
-                         [&]{ return Easings::createSpring (SpringEasingOptions{}.withFrequency (getFrequency())
-                                                                                 .withAttenuation (getAttenuation())
-                                                                                 .withExtraAttenuationRange (getExtraAttenuationRange())); })
+    SpringEasingAnimationView (const AnimationSettings& settings)
+        : AnimationView (settings,
+                         [&] { return Easings::createSpring (SpringEasingOptions{}.withFrequency (getFrequency())
+                                                                                  .withAttenuation (getAttenuation())
+                                                                                  .withExtraAttenuationRange (getExtraAttenuationRange())); })
     {
         setCustomSettingsPage (settingsPage);
     }
@@ -720,9 +720,9 @@ private:
 class BounceOutEasingAnimationView final : public AnimationView
 {
 public:
-    BounceOutEasingAnimationView (const AnimationSettings& animationSettings)
-        : AnimationView (animationSettings,
-                         [&]{ return Easings::createBounce (roundToInt (numberOfBounces.slider.getValue())); })
+    BounceOutEasingAnimationView (const AnimationSettings& settings)
+        : AnimationView (settings,
+                         [&] { return Easings::createBounce (roundToInt (numberOfBounces.slider.getValue())); })
     {
         numberOfBounces.label.setText ("Number of bounces", NotificationType::dontSendNotification);
         numberOfBounces.slider.setRange (1.0, 10.0, 1.0);

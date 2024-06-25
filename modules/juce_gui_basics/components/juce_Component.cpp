@@ -1443,12 +1443,18 @@ bool Component::isCurrentlyBlockedByAnotherModalComponent() const
 
 int JUCE_CALLTYPE Component::getNumCurrentlyModalComponents() noexcept
 {
-    return ModalComponentManager::getInstance()->getNumModalComponents();
+    if (auto* manager = ModalComponentManager::getInstanceWithoutCreating())
+        return manager->getNumModalComponents();
+
+    return {};
 }
 
 Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent (int index) noexcept
 {
-    return ModalComponentManager::getInstance()->getModalComponent (index);
+    if (auto* manager = ModalComponentManager::getInstanceWithoutCreating())
+        return manager->getModalComponent (index);
+
+    return {};
 }
 
 //==============================================================================

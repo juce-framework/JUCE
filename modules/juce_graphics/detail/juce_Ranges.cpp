@@ -195,9 +195,12 @@ public:
 
             auto ops = ranges.split (47);
 
-            expectEquals ((int64) ops.size(), (int64) 2, "");
-            expect (std::get_if<Ranges::Ops::Changed> (&ops[0]) != nullptr);
-            expect (std::get_if<Ranges::Ops::Inserted> (&ops[1]) != nullptr);
+            expectEquals ((int64) ops.size(), (int64) 1, "");
+            const auto op0 = std::get_if<Ranges::Ops::Split> (&ops[0]);
+            expect (op0 != nullptr);
+
+            if (op0 != nullptr)
+                expectEquals ((int) op0->index, 0, "The 0th element should be split");
 
             expectEquals ((int64) ranges.size(), (int64) 3, "");
             expectRange (ranges.get (0), { 0, 47 });
@@ -251,6 +254,157 @@ public:
             auto ops = ranges.insert ({ 0, 0 });
             expect (ranges.isEmpty());
             expect (ops.empty());
+        }
+
+        const auto getTestRanges = []
+        {
+            Ranges ranges;
+
+            ranges.set ({ 0, 48 });
+            ranges.set ({ 48, 49 });
+            ranges.set ({ 55, 94 });
+            ranges.set ({ 94, 127 });
+
+            return ranges;
+        };
+
+        beginTest ("Ranges::eraseFrom() - erasing beyond all ranges has no effect");
+        {
+            auto ranges = getTestRanges();
+            ranges.eraseFrom (ranges.get (ranges.size() - 1).getEnd() + 5);
+
+            expectEquals ((int64) ranges.size(), (int64) 4, "");
+            expectRange (ranges.get (0), { 0, 48 });
+            expectRange (ranges.get (1), { 48, 49 });
+            expectRange (ranges.get (2), { 55, 94 });
+            expectRange (ranges.get (3), { 94, 127 });
+        }
+
+        beginTest ("Ranges::eraseFrom() - erasing modifies the range that encloses the starting index");
+        {
+            auto ranges = getTestRanges();
+            ranges.eraseFrom (122);
+
+            expectEquals ((int64) ranges.size(), (int64) 4, "");
+            expectRange (ranges.get (0), { 0, 48 });
+            expectRange (ranges.get (1), { 48, 49 });
+            expectRange (ranges.get (2), { 55, 94 });
+            expectRange (ranges.get (3), { 94, 122 });
+        }
+
+        beginTest ("Ranges::eraseFrom() - ranges starting after the erased index are deleted entirely");
+        {
+            auto ranges = getTestRanges();
+            ranges.eraseFrom (60);
+
+            expectEquals ((int64) ranges.size(), (int64) 3, "");
+            expectRange (ranges.get (0), { 0, 48 });
+            expectRange (ranges.get (1), { 48, 49 });
+            expectRange (ranges.get (2), { 55, 60 });
+        }
+
+        beginTest ("Ranges::eraseFrom() - erasing from a location outside any ranges will still drop subsequent ranges");
+        {
+            auto ranges = getTestRanges();
+            ranges.eraseFrom (51);
+
+            expectEquals ((int64) ranges.size(), (int64) 2, "");
+            expectRange (ranges.get (0), { 0, 48 });
+            expectRange (ranges.get (1), { 48, 49 });
+        }
+
+        beginTest ("Ranges::erase() - erasing a zero length range has no effect");
+        {
+            auto ranges = getTestRanges();
+
+            ranges.erase ({ 30, 30 });
+
+            expectEquals ((int64) ranges.size(), (int64) 4, "");
+            expectRange (ranges.get (0), { 0, 48 });
+            expectRange (ranges.get (1), { 48, 49 });
+            expectRange (ranges.get (2), { 55, 94 });
+            expectRange (ranges.get (3), { 94, 127 });
+        }
+
+        beginTest ("Ranges::erase() - erasing inside a range splits that range");
+        {
+            auto ranges = getTestRanges();
+
+            ranges.erase ({ 30, 31 });
+
+            expectEquals ((int64) ranges.size(), (int64) 5, "");
+            expectRange (ranges.get (0), { 0, 30 });
+            expectRange (ranges.get (1), { 31, 48 });
+            expectRange (ranges.get (2), { 48, 49 });
+            expectRange (ranges.get (3), { 55, 94 });
+            expectRange (ranges.get (4), { 94, 127 });
+        }
+
+        beginTest ("Ranges::erase() - erasing a range that completely overlaps existing ranges erases those");
+        {
+            auto ranges = getTestRanges();
+
+            ranges.erase ({ 30, 70 });
+
+            expectEquals ((int64) ranges.size(), (int64) 3, "");
+            expectRange (ranges.get (0), { 0, 30 });
+            expectRange (ranges.get (1), { 70, 94 });
+            expectRange (ranges.get (2), { 94, 127 });
+        }
+
+        beginTest ("Ranges::erase() - erasing a range that no previous ranges covered has no effect");
+        {
+            auto ranges = getTestRanges();
+
+            ranges.erase ({ 51, 53 });
+
+            expectEquals ((int64) ranges.size(), (int64) 4, "");
+            expectRange (ranges.get (0), { 0, 48 });
+            expectRange (ranges.get (1), { 48, 49 });
+            expectRange (ranges.get (2), { 55, 94 });
+            expectRange (ranges.get (3), { 94, 127 });
+        }
+
+        beginTest ("Ranges::erase() - erasing over a range beyond all limits clears all ranges");
+        {
+            auto ranges = getTestRanges();
+
+            ranges.erase ({ -1000, 1000 });
+
+            expect (ranges.isEmpty());
+        }
+
+        beginTest ("Ranges::drop() - dropping a range shifts all following ranges downward");
+        {
+            auto ranges = getTestRanges();
+
+            ranges.drop ({ 48, 49 });
+
+            expectEquals ((int64) ranges.size(), (int64) 3, "");
+            expectRange (ranges.get (0), { 0, 48 });
+            expectRange (ranges.get (1), { 54, 93 });
+            expectRange (ranges.get (2), { 93, 126 });
+        }
+
+        beginTest ("Ranges::drop() - dropping a range shifts all following ranges downward even if no range covered the dropped range previously");
+        {
+            auto ranges = getTestRanges();
+
+            ranges.drop ({ 51, 53 });
+
+            expectEquals ((int64) ranges.size(), (int64) 4, "");
+            expectRange (ranges.get (0), { 0, 48 });
+            expectRange (ranges.get (1), { 48, 49 });
+            expectRange (ranges.get (2), { 53, 92 });
+            expectRange (ranges.get (3), { 92, 125 });
+        }
+
+        beginTest ("Ranges::drop() - dropping a range covering all other ranges empties the collection");
+        {
+            auto ranges = getTestRanges();
+
+            ranges.drop ({ -1000, 1000 });
+            expect (ranges.isEmpty());
         }
     }
 };
@@ -480,6 +634,79 @@ public:
                 expectEquals ((int64) rangedValues.size(), (int64) 1);
                 expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },   'a');
             }
+        }
+
+        const auto createRangedValuesObjectForErase = [&]
+        {
+            RangedValues<char> rangedValues;
+
+            rangedValues.set ({ 0, 10 }, 'a');
+            rangedValues.set ({ 11, 20 }, 'b');
+            rangedValues.set ({ 23, 30 }, 'c');
+            rangedValues.set ({ 35, 45 }, 'c');
+            rangedValues.set ({ 45, 60 }, 'd');
+
+            return rangedValues;
+        };
+
+        beginTest ("RangedValues::erase() - erase will not shift subsequent ranges downward");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+
+            rangedValues.erase ({ 15, 16 });
+
+            expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
+            expectRangedValuesItem (rangedValues.getItem (1), { 11, 15 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (2), { 16, 20 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (3), { 23, 30 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (4), { 35, 45 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (5), { 45, 60 }, 'd');
+        }
+
+        beginTest ("RangedValues::drop() - drop shifts ranges downward on the right side");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+
+            rangedValues.drop<MergeEqualItems::no> ({ 15, 16 });
+
+            expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
+            expectRangedValuesItem (rangedValues.getItem (1), { 11, 15 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (2), { 15, 19 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (3), { 22, 29 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (4), { 34, 44 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (5), { 44, 59 }, 'd');
+        }
+
+        beginTest ("RangedValues::drop() - drop can be used to merge equal values");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+
+            rangedValues.drop<MergeEqualItems::yes> ({ 15, 16 });
+
+            expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
+            expectRangedValuesItem (rangedValues.getItem (1), { 11, 19 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (2), { 22, 29 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (3), { 34, 44 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (4), { 44, 59 }, 'd');
+        }
+
+        beginTest ("RangedValues::drop() - the merge happens at the seam caused by the drop and does not extend beyond");
+        {
+            auto rangedValues = createRangedValuesObjectForErase();
+            rangedValues.set<MergeEqualItems::no> ({ 20, 30 }, 'b');
+
+            rangedValues.drop<MergeEqualItems::yes> ({ 15, 16 });
+
+            expectRangedValuesItem (rangedValues.getItem (0), { 0, 10 },  'a');
+
+            // These two items are not merged, even though they form a contiguous range, because
+            // they were disjoint before the drop and they don't touch each other at the drop
+            // seam of 15.
+            expectRangedValuesItem (rangedValues.getItem (1), { 11, 19 }, 'b');
+            expectRangedValuesItem (rangedValues.getItem (2), { 19, 29 }, 'b');
+
+            expectRangedValuesItem (rangedValues.getItem (3), { 34, 44 }, 'c');
+            expectRangedValuesItem (rangedValues.getItem (4), { 44, 59 }, 'd');
         }
     }
 };

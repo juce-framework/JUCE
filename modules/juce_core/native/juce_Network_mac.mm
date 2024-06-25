@@ -119,562 +119,441 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments ([[maybe_unused]] const Str
 }
 
 //==============================================================================
-class URLConnectionStateBase : public Thread
+struct SessionListener
 {
-public:
-    explicit URLConnectionStateBase (NSURLRequest* req, int maxRedirects)
-        : Thread ("http connection"),
-          request ([req retain]),
-          data ([[NSMutableData data] retain]),
-          numRedirectsToFollow (maxRedirects)
-    {
-    }
-
-    virtual ~URLConnectionStateBase() = default;
-
-    virtual void cancel() = 0;
-    virtual bool start (WebInputStream&, WebInputStream::Listener*) = 0;
-    virtual int read (char* dest, int numBytes) = 0;
-
-    int64 getContentLength() const noexcept    { return contentLength; }
-    NSDictionary* getHeaders() const noexcept  { return headers; }
-    int getStatusCode() const noexcept         { return statusCode; }
-    NSInteger getErrorCode() const noexcept    { return nsUrlErrorCode; }
-
-protected:
-    CriticalSection dataLock, createConnectionLock;
-    id delegate = nil;
-    NSDictionary* headers = nil;
-    NSURLRequest* request = nil;
-    NSMutableData* data = nil;
-    int64 contentLength = -1;
-    int statusCode = 0;
-    NSInteger nsUrlErrorCode = 0;
-
-    std::atomic<bool> initialised { false }, hasFailed { false }, hasFinished { false };
-    const int numRedirectsToFollow;
-    int numRedirects = 0;
-    int64 latestTotalBytes = 0;
-    bool hasBeenCancelled = false;
-
-private:
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionStateBase)
+    virtual ~SessionListener() = default;
+    virtual void didComplete (NSError*) = 0;
+    virtual void didReceiveResponse (NSURLResponse*, void (^) (NSURLSessionResponseDisposition)) = 0;
+    virtual void didReceiveData (NSData*) = 0;
+    virtual void didSendBodyData (int64_t) = 0;
+    virtual void willPerformHTTPRedirection (NSURLRequest*, void (^) (NSURLRequest *)) = 0;
 };
 
-#if JUCE_MAC
-// This version is only used for backwards-compatibility with older OSX targets,
-// so we'll turn off deprecation warnings. This code will be removed at some point
-// in the future.
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated")
-class URLConnectionStatePreYosemite final : public URLConnectionStateBase
+class SharedSession
 {
 public:
-    URLConnectionStatePreYosemite (NSURLRequest* req, const int maxRedirects)
-        : URLConnectionStateBase (req, maxRedirects)
+    SharedSession()
     {
-        static DelegateClass cls;
-        delegate = [cls.createInstance() init];
-        DelegateClass::setState (delegate, this);
+        DelegateClass::setState (delegate.get(), this);
     }
 
-    ~URLConnectionStatePreYosemite() override
+    ~SharedSession()
     {
-        stop();
-
-        [connection release];
-        [request release];
-        [headers release];
-        [delegate release];
-        [data release];
+        std::unique_lock lock { mutex };
+        [session.get() finishTasksAndInvalidate];
+        condvar.wait (lock, [&] { return state == State::stopped; });
     }
 
-    bool start (WebInputStream& inputStream, WebInputStream::Listener* listener) override
+    NSUniquePtr<NSURLSessionTask> addTask (NSURLRequest* request, SessionListener* listener)
     {
-        startThread();
+        std::unique_lock lock { mutex };
 
-        while (isThreadRunning() && ! initialised)
-        {
-            if (listener != nullptr)
-                if (! listener->postDataSendProgress (inputStream, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
-                    return false;
+        if (state != State::running)
+            return nullptr;
 
-            Thread::sleep (1);
-        }
-
-        return connection != nil && ! hasFailed;
+        NSUniquePtr<NSURLSessionTask> task { [[session.get() dataTaskWithRequest: request] retain] };
+        listenerForTask[[task.get() taskIdentifier]] = listener;
+        return task;
     }
 
-    void stop()
+    void removeTask (NSURLSessionTask* task)
     {
-        {
-            const ScopedLock dLock (dataLock);
-            const ScopedLock connectionLock (createConnectionLock);
-
-            hasBeenCancelled = true;
-
-            if (connection != nil)
-                [connection cancel];
-        }
-
-        stopThread (10000);
-    }
-
-    void cancel() override
-    {
-        hasFinished = hasFailed = true;
-        stop();
-    }
-
-    int read (char* dest, int numBytes) override
-    {
-        int numDone = 0;
-
-        while (numBytes > 0)
-        {
-            const ScopedLock sl (dataLock);
-            auto available = jmin (numBytes, (int) [data length]);
-
-            if (available > 0)
-            {
-                [data getBytes: dest length: (NSUInteger) available];
-                [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
-
-                numDone += available;
-                numBytes -= available;
-                dest += available;
-            }
-            else
-            {
-                if (hasFailed || hasFinished)
-                    break;
-
-                const ScopedUnlock sul (dataLock);
-                Thread::sleep (1);
-            }
-        }
-
-        return numDone;
-    }
-
-    void didReceiveResponse (NSURLResponse* response)
-    {
-        {
-            const ScopedLock sl (dataLock);
-            [data setLength: 0];
-        }
-
-        contentLength = [response expectedContentLength];
-
-        [headers release];
-        headers = nil;
-
-        if ([response isKindOfClass: [NSHTTPURLResponse class]])
-        {
-            NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*) response;
-            headers = [[httpResponse allHeaderFields] retain];
-            statusCode = (int) [httpResponse statusCode];
-        }
-
-        initialised = true;
-    }
-
-    NSURLRequest* willSendRequest (NSURLRequest* newRequest, NSURLResponse* redirectResponse)
-    {
-        if (redirectResponse != nullptr)
-        {
-            if (numRedirects >= numRedirectsToFollow)
-                return nil;  // Cancel redirect and allow connection to continue
-
-            ++numRedirects;
-        }
-
-        return newRequest;
-    }
-
-    void didFailWithError ([[maybe_unused]] NSError* error)
-    {
-        DBG (nsStringToJuce ([error description]));
-        nsUrlErrorCode = [error code];
-        hasFailed = true;
-        initialised = true;
-        signalThreadShouldExit();
-    }
-
-    void didReceiveData (NSData* newData)
-    {
-        const ScopedLock sl (dataLock);
-        [data appendData: newData];
-        initialised = true;
-    }
-
-    void didSendBodyData (NSInteger totalBytesWritten, NSInteger /*totalBytesExpected*/)
-    {
-        latestTotalBytes = static_cast<int> (totalBytesWritten);
-    }
-
-    void finishedLoading()
-    {
-        hasFinished = true;
-        initialised = true;
-        signalThreadShouldExit();
-    }
-
-    void run() override
-    {
-        {
-            const ScopedLock lock (createConnectionLock);
-
-            if (hasBeenCancelled)
-                return;
-
-            connection = [[NSURLConnection alloc] initWithRequest: request
-                                                         delegate: delegate];
-        }
-
-        while (! threadShouldExit())
-        {
-            JUCE_AUTORELEASEPOOL
-            {
-                [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
-            }
-        }
+        std::unique_lock lock { mutex };
+        condvar.wait (lock, [&] { return listenerForTask.find ([task taskIdentifier]) == listenerForTask.end(); });
     }
 
 private:
-    //==============================================================================
-    struct DelegateClass final : public ObjCClass<NSObject>
+    void didBecomeInvalid ([[maybe_unused]] NSError* error)
     {
-        DelegateClass()  : ObjCClass<NSObject> ("JUCENetworkDelegate_")
-        {
-            addIvar<URLConnectionStatePreYosemite*> ("state");
-
-            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse);
-            addMethod (@selector (connection:didFailWithError:),   didFailWithError);
-            addMethod (@selector (connection:didReceiveData:),     didReceiveData);
-            addMethod (@selector (connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:),
-                                                                   connectionDidSendBodyData);
-            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading);
-            addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest);
-
-            registerClass();
-        }
-
-        static void setState (id self, URLConnectionStatePreYosemite* state)  { object_setInstanceVariable (self, "state", state); }
-        static URLConnectionStatePreYosemite* getState (id self)              { return getIvar<URLConnectionStatePreYosemite*> (self, "state"); }
-
-    private:
-        static void didReceiveResponse (id self, SEL, NSURLConnection*, NSURLResponse* response)
-        {
-            getState (self)->didReceiveResponse (response);
-        }
-
-        static void didFailWithError (id self, SEL, NSURLConnection*, NSError* error)
-        {
-            getState (self)->didFailWithError (error);
-        }
-
-        static void didReceiveData (id self, SEL, NSURLConnection*, NSData* newData)
-        {
-            getState (self)->didReceiveData (newData);
-        }
-
-        static NSURLRequest* willSendRequest (id self, SEL, NSURLConnection*, NSURLRequest* request, NSURLResponse* response)
-        {
-            return getState (self)->willSendRequest (request, response);
-        }
-
-        static void connectionDidSendBodyData (id self, SEL, NSURLConnection*, NSInteger, NSInteger totalBytesWritten, NSInteger totalBytesExpected)
-        {
-            getState (self)->didSendBodyData (totalBytesWritten, totalBytesExpected);
-        }
-
-        static void connectionDidFinishLoading (id self, SEL, NSURLConnection*)
-        {
-            getState (self)->finishedLoading();
-        }
-    };
-
-    NSURLConnection* connection = nil;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionStatePreYosemite)
-};
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-#endif
-
-//==============================================================================
-class API_AVAILABLE (macos (10.9)) URLConnectionState final : public URLConnectionStateBase
-{
-public:
-    URLConnectionState (NSURLRequest* req, const int maxRedirects)
-        : URLConnectionStateBase (req, maxRedirects)
-    {
-        static DelegateClass cls;
-        delegate = [cls.createInstance() init];
-        DelegateClass::setState (delegate, this);
-    }
-
-    ~URLConnectionState() override
-    {
-        signalThreadShouldExit();
-
-        {
-            const ScopedLock sl (dataLock);
-            isBeingDeleted = true;
-            [task cancel];
-            DelegateClass::setState (delegate, nullptr);
-        }
-
-        stopThread (10000);
-        [task release];
-        [request release];
-        [headers release];
-
-        [session finishTasksAndInvalidate];
-        [session release];
-
-        const ScopedLock sl (dataLock);
-        [delegate release];
-        [data release];
-    }
-
-    void cancel() override
-    {
-        {
-            const ScopedLock lock (createConnectionLock);
-            hasBeenCancelled = true;
-        }
-
-        signalThreadShouldExit();
-        stopThread (10000);
-    }
-
-    bool start (WebInputStream& inputStream, WebInputStream::Listener* listener) override
-    {
-        {
-            const ScopedLock lock (createConnectionLock);
-
-            if (hasBeenCancelled)
-                return false;
-        }
-
-        startThread();
-
-        while (isThreadRunning() && ! initialised)
-        {
-            if (listener != nullptr)
-                if (! listener->postDataSendProgress (inputStream, (int) latestTotalBytes, (int) [[request HTTPBody] length]))
-                    return false;
-
-            Thread::sleep (1);
-        }
-
-        return true;
-    }
-
-    int read (char* dest, int numBytes) override
-    {
-        int numDone = 0;
-
-        while (numBytes > 0)
-        {
-            const ScopedLock sl (dataLock);
-            auto available = jmin (numBytes, (int) [data length]);
-
-            if (available > 0)
-            {
-                [data getBytes: dest length: (NSUInteger) available];
-                [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
-
-                numDone += available;
-                numBytes -= available;
-                dest += available;
-            }
-            else
-            {
-                if (hasFailed || hasFinished)
-                    break;
-
-                const ScopedUnlock ul (dataLock);
-                Thread::sleep (1);
-            }
-        }
-
-        return numDone;
-    }
-
-    void didReceiveResponse (NSURLResponse* response, id completionHandler)
-    {
-        {
-            const ScopedLock sl (dataLock);
-            if (isBeingDeleted)
-                return;
-
-            [data setLength: 0];
-        }
-
-        contentLength = [response expectedContentLength];
-
-        [headers release];
-        headers = nil;
-
-        if ([response isKindOfClass: [NSHTTPURLResponse class]])
-        {
-            auto httpResponse = (NSHTTPURLResponse*) response;
-            headers = [[httpResponse allHeaderFields] retain];
-            statusCode = (int) [httpResponse statusCode];
-        }
-
-        initialised = true;
-
-        if (completionHandler != nil)
-        {
-            // Need to wrangle this parameter back into an obj-C block,
-            // and call it to allow the transfer to continue..
-            void (^callbackBlock)(NSURLSessionResponseDisposition) = completionHandler;
-            callbackBlock (NSURLSessionResponseAllow);
-        }
-    }
-
-    void didComplete (NSError* error)
-    {
-        const ScopedLock sl (dataLock);
-
-        if (isBeingDeleted)
-            return;
-
        #if JUCE_DEBUG
         if (error != nullptr)
             DBG (nsStringToJuce ([error description]));
        #endif
 
-        hasFailed = (error != nullptr);
-        initialised = true;
-        signalThreadShouldExit();
+        const auto toNotify = [&]
+        {
+            const std::scoped_lock lock { mutex };
+            state = State::stopRequested;
+            // Take a copy of listenerForTask so that we don't need to hold the lock while
+            // iterating through the remaining listeners.
+            return listenerForTask;
+        }();
+
+        for (const auto& pair : toNotify)
+            pair.second->didComplete (error);
+
+        const std::scoped_lock lock { mutex };
+        listenerForTask.clear();
+        state = State::stopped;
+
+        // Important: we keep the lock held while calling condvar.notify_one().
+        // If we don't, then it's possible that when the destructor runs, it will wake
+        // before we notify the condvar on this thread, allowing the destructor to continue
+        // and destroying the condition variable. When didBecomeInvalid resumes, the condition
+        // variable will have been destroyed.
+        condvar.notify_one();
     }
 
-    void didReceiveData (NSData* newData)
+    void didComplete (NSURLSessionTask* task, [[maybe_unused]] NSError* error)
     {
-        const ScopedLock sl (dataLock);
+       #if JUCE_DEBUG
+        if (error != nullptr)
+            DBG (nsStringToJuce ([error description]));
+       #endif
 
-        if (isBeingDeleted)
+        auto* listener = getListener (task);
+
+        if (listener == nullptr)
             return;
 
-        [data appendData: newData];
-        initialised = true;
-    }
+        listener->didComplete (error);
 
-    void didSendBodyData (int64_t totalBytesWritten)
-    {
-        latestTotalBytes = static_cast<int> (totalBytesWritten);
-    }
-
-    void willPerformHTTPRedirection (NSURLRequest* urlRequest, void (^completionHandler)(NSURLRequest *))
-    {
         {
-            const ScopedLock sl (dataLock);
-
-            if (isBeingDeleted)
-                return;
+            const std::scoped_lock lock { mutex };
+            listenerForTask.erase ([task taskIdentifier]);
         }
 
-        completionHandler (numRedirects++ < numRedirectsToFollow ? urlRequest : nil);
+        condvar.notify_one();
     }
 
-    void run() override
+    void didReceiveResponse (NSURLSessionTask* task,
+                             NSURLResponse* response,
+                             void (^completionHandler) (NSURLSessionResponseDisposition))
     {
-        jassert (task == nil && session == nil);
-
-        session = [[NSURLSession sessionWithConfiguration: [NSURLSessionConfiguration defaultSessionConfiguration]
-                                                 delegate: delegate
-                                            delegateQueue: [NSOperationQueue currentQueue]] retain];
-
-        {
-            const ScopedLock lock (createConnectionLock);
-
-            if (! hasBeenCancelled)
-                task = [session dataTaskWithRequest: request];
-        }
-
-        if (task == nil)
-            return;
-
-        [task retain];
-        [task resume];
-
-        while (! threadShouldExit())
-            wait (5);
-
-        hasFinished = true;
-        initialised = true;
+        if (auto* listener = getListener (task))
+            listener->didReceiveResponse (response, completionHandler);
     }
 
-private:
-    //==============================================================================
-    struct DelegateClass final : public ObjCClass<NSObject>
+    void didReceiveData (NSURLSessionTask* task, NSData* newData)
     {
-        DelegateClass()  : ObjCClass<NSObject> ("JUCE_URLDelegate_")
+        if (auto* listener = getListener (task))
+            listener->didReceiveData (newData);
+    }
+
+    void didSendBodyData (NSURLSessionTask* task, int64_t totalBytesWritten)
+    {
+        if (auto* listener = getListener (task))
+            listener->didSendBodyData (totalBytesWritten);
+    }
+
+    void willPerformHTTPRedirection (NSURLSessionTask* task,
+                                     NSURLRequest* urlRequest,
+                                     void (^completionHandler) (NSURLRequest *))
+    {
+        if (auto* listener = getListener (task))
+            listener->willPerformHTTPRedirection (urlRequest, completionHandler);
+    }
+
+    SessionListener* getListener (NSURLSessionTask* t)
+    {
+        const std::scoped_lock lock { mutex };
+        const auto iter = listenerForTask.find ([t taskIdentifier]);
+        return iter != listenerForTask.end() ? iter->second : nullptr;
+    }
+
+    struct DelegateClass final : public ObjCClass<NSObject<NSURLSessionTaskDelegate>>
+    {
+        DelegateClass()
+            : ObjCClass ("JUCE_URLDelegate_")
         {
-            addIvar<URLConnectionState*> ("state");
+            addIvar<SharedSession*> ("state");
+
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),
+                       [] (id self, SEL, NSURLSession*, NSError* error)
+                       {
+                           getState (self)->didBecomeInvalid (error);
+                       });
 
             addMethod (@selector (URLSession:dataTask:didReceiveResponse:completionHandler:),
-                                                                            didReceiveResponse);
-            addMethod (@selector (URLSession:didBecomeInvalidWithError:),   didBecomeInvalidWithError);
-            addMethod (@selector (URLSession:dataTask:didReceiveData:),     didReceiveData);
+                       [] (id self,
+                           SEL,
+                           NSURLSession*,
+                           NSURLSessionDataTask* task,
+                           NSURLResponse* response,
+                           void (^completionHandler) (NSURLSessionResponseDisposition))
+                       {
+                           getState (self)->didReceiveResponse (task, response, completionHandler);
+                       });
+
+            addMethod (@selector (URLSession:dataTask:didReceiveData:),
+                       [] (id self, SEL, NSURLSession*, NSURLSessionDataTask* task, NSData* newData)
+                       {
+                           getState (self)->didReceiveData (task, newData);
+                       });
+
             addMethod (@selector (URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:),
-                                                                            didSendBodyData);
+                       [] (id self,
+                           SEL,
+                           NSURLSession*,
+                           NSURLSessionTask* task,
+                           int64_t,
+                           int64_t totalBytesWritten,
+                           int64_t)
+                       {
+                           getState (self)->didSendBodyData (task, totalBytesWritten);
+                       });
+
             addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
-                                                                            willPerformHTTPRedirection);
-            addMethod (@selector (URLSession:task:didCompleteWithError:),   didCompleteWithError);
+                       [] (id self,
+                           SEL,
+                           NSURLSession*,
+                           NSURLSessionTask* task,
+                           NSHTTPURLResponse*,
+                           NSURLRequest* req,
+                           void (^completionHandler) (NSURLRequest *))
+                       {
+                           getState (self)->willPerformHTTPRedirection (task, req, completionHandler);
+                       });
+
+            addMethod (@selector (URLSession:task:didCompleteWithError:),
+                       [] (id self, SEL, NSURLConnection*, NSURLSessionTask* task, NSError* error)
+                       {
+                           getState (self)->didComplete (task, error);
+                       });
 
             registerClass();
         }
 
-        static void setState (id self, URLConnectionState* state)  { object_setInstanceVariable (self, "state", state); }
-        static URLConnectionState* getState (id self)              { return getIvar<URLConnectionState*> (self, "state"); }
+        static void setState (NSObject* self, SharedSession* state)  { object_setInstanceVariable (self, "state", state); }
+        static SharedSession* getState (NSObject* self)              { return getIvar<SharedSession*> (self, "state"); }
 
-    private:
-        static void didReceiveResponse (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSURLResponse* response, id completionHandler)
+        static DelegateClass& get()
         {
-            if (auto state = getState (self))
-                state->didReceiveResponse (response, completionHandler);
-        }
-
-        static void didBecomeInvalidWithError (id self, SEL, NSURLSession*, NSError* error)
-        {
-            if (auto state = getState (self))
-                state->didComplete (error);
-        }
-
-        static void didReceiveData (id self, SEL, NSURLSession*, NSURLSessionDataTask*, NSData* newData)
-        {
-            if (auto state = getState (self))
-                state->didReceiveData (newData);
-        }
-
-        static void didSendBodyData (id self, SEL, NSURLSession*, NSURLSessionTask*, int64_t, int64_t totalBytesWritten, int64_t)
-        {
-            if (auto state = getState (self))
-                state->didSendBodyData (totalBytesWritten);
-        }
-
-        static void willPerformHTTPRedirection (id self, SEL, NSURLSession*, NSURLSessionTask*, NSHTTPURLResponse*,
-                                                NSURLRequest* request, void (^completionHandler)(NSURLRequest *))
-        {
-            if (auto state = getState (self))
-                state->willPerformHTTPRedirection (request, completionHandler);
-        }
-
-        static void didCompleteWithError (id self, SEL, NSURLConnection*, NSURLSessionTask*, NSError* error)
-        {
-            if (auto state = getState (self))
-                state->didComplete (error);
+            static DelegateClass cls;
+            return cls;
         }
     };
 
-    NSURLSession* session = nil;
-    NSURLSessionTask* task = nil;
-    bool isBeingDeleted = false;
+    enum class State
+    {
+        running,
+        stopRequested,
+        stopped,
+    };
+
+    std::mutex mutex;
+    std::condition_variable condvar;
+
+    NSUniquePtr<NSObject<NSURLSessionTaskDelegate>> delegate { [DelegateClass::get().createInstance() init] };
+    NSUniquePtr<NSURLSession> session
+    {
+        [[NSURLSession sessionWithConfiguration: [NSURLSessionConfiguration defaultSessionConfiguration]
+                                       delegate: delegate.get()
+                                  delegateQueue: nil] retain]
+    };
+
+    std::map<NSUInteger, SessionListener*> listenerForTask;
+
+    State state = State::running;
+};
+
+class TaskToken
+{
+public:
+    TaskToken() = default;
+
+    explicit TaskToken (NSURLRequest* request, SessionListener* l)
+        : task ([&]
+                {
+                    SharedResourcePointer<SharedSession> session;
+                    return session->addTask (request, l);
+                }())
+    {
+        if (auto* t = task.get())
+            [t resume];
+    }
+
+    TaskToken (TaskToken&&) noexcept = default;
+    TaskToken& operator= (TaskToken&&) noexcept = default;
+
+    ~TaskToken()
+    {
+        SharedResourcePointer<SharedSession> session;
+
+        if (auto* toRemove = task.get())
+            session->removeTask (toRemove);
+    }
+
+    void cancel()
+    {
+        if (auto* toCancel = task.get())
+            [toCancel cancel];
+    }
+
+private:
+    NSUniquePtr<NSURLSessionTask> task;
+};
+
+//==============================================================================
+class URLConnectionState final : private SessionListener
+{
+public:
+    URLConnectionState (NSUniquePtr<NSURLRequest> req, const int maxRedirects)
+        : request (std::move (req)),
+          numRedirects (maxRedirects)
+    {
+    }
+
+    ~URLConnectionState() override
+    {
+        cancel();
+    }
+
+    void cancel()
+    {
+        const std::scoped_lock lock { mutex };
+        token.cancel();
+    }
+
+    int64 getContentLength() const noexcept
+    {
+        const std::scoped_lock lock { mutex };
+        return contentLength;
+    }
+
+    NSUniquePtr<NSDictionary> getHeaders() const noexcept
+    {
+        const std::scoped_lock lock { mutex };
+        return NSUniquePtr<NSDictionary> { [headers.get() copy] };
+    }
+
+    int getStatusCode() const noexcept
+    {
+        const std::scoped_lock lock { mutex };
+        return statusCode;
+    }
+
+    bool start (WebInputStream& inputStream, WebInputStream::Listener* listener)
+    {
+        TaskToken newToken { request.get(), this };
+
+        std::unique_lock lock { mutex };
+        token = std::move (newToken);
+
+        while (! condvar.wait_for (lock,
+                                   std::chrono::milliseconds { 1 },
+                                   [&] { return state != State::beforeStart; }))
+        {
+            if (listener != nullptr
+                && ! listener->postDataSendProgress (inputStream,
+                                                     (int) latestTotalBytes,
+                                                     (int) [[request.get() HTTPBody] length]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    int read (char* dest, int numBytes)
+    {
+        int numDone = 0;
+
+        while (numBytes > 0)
+        {
+            std::unique_lock lock { mutex };
+
+            const auto getNumAvailable = [&] { return jmin (numBytes, (int) [data.get() length]); };
+            condvar.wait (lock, [&] { return getNumAvailable() > 0 || state == State::requestFinished; });
+
+            const auto available = getNumAvailable();
+
+            if (available <= 0)
+                break;
+
+            [data.get() getBytes: dest length: (NSUInteger) available];
+            [data.get() replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
+
+            numDone += available;
+            numBytes -= available;
+            dest += available;
+        }
+
+        return numDone;
+    }
+
+private:
+    void didComplete (NSError*) override
+    {
+        {
+            const std::scoped_lock lock { mutex };
+            state = State::requestFinished;
+        }
+
+        condvar.notify_one();
+    }
+
+    void didReceiveResponse (NSURLResponse* response, void (^completionHandler) (NSURLSessionResponseDisposition)) override
+    {
+        {
+            const std::scoped_lock lock { mutex };
+
+            contentLength = [response expectedContentLength];
+
+            if ([response isKindOfClass: [NSHTTPURLResponse class]])
+            {
+                auto httpResponse = (NSHTTPURLResponse*) response;
+                headers.reset ([[httpResponse allHeaderFields] retain]);
+                statusCode = (int) [httpResponse statusCode];
+            }
+
+            if (state == State::beforeStart)
+                state = State::started;
+        }
+
+        condvar.notify_one();
+        completionHandler (NSURLSessionResponseAllow);
+    }
+
+    void didReceiveData (NSData* newData) override
+    {
+        {
+            const std::scoped_lock lock { mutex };
+            [data.get() appendData: newData];
+
+            if (state == State::beforeStart)
+                state = State::started;
+        }
+
+        condvar.notify_one();
+    }
+
+    void didSendBodyData (int64_t totalBytesWritten) override
+    {
+        const std::scoped_lock lock { mutex };
+        latestTotalBytes = totalBytesWritten;
+    }
+
+    void willPerformHTTPRedirection (NSURLRequest* urlRequest, void (^completionHandler) (NSURLRequest *)) override
+    {
+        // No lock required here because numRedirects is only accessed from the session's work queue
+        // after the task has started.
+        completionHandler (--numRedirects >= 0 ? urlRequest : nil);
+    }
+
+    enum class State
+    {
+        beforeStart,
+        started,
+        requestFinished
+    };
+
+    mutable std::mutex mutex;
+    std::condition_variable condvar;
+
+    NSUniquePtr<NSDictionary> headers;
+    NSUniquePtr<NSURLRequest> request;
+    NSUniquePtr<NSMutableData> data { [[NSMutableData data] retain] };
+
+    int64 latestTotalBytes = 0;
+    int64 contentLength = -1;
+    int statusCode = 0;
+    int numRedirects = 0;
+    State state = State::beforeStart;
+
+    SharedResourcePointer<SharedSession> session;
+    TaskToken token;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
@@ -953,11 +832,11 @@ class WebInputStream::Pimpl
 {
 public:
     Pimpl (WebInputStream& pimplOwner, const URL& urlToUse, bool addParametersToBody)
-      : owner (pimplOwner),
-        url (urlToUse),
-        addParametersToRequestBody (addParametersToBody),
-        hasBodyDataToSend (addParametersToRequestBody || url.hasBodyDataToSend()),
-        httpRequestCmd (hasBodyDataToSend ? "POST" : "GET")
+        : owner (pimplOwner),
+          url (urlToUse),
+          addParametersToRequestBody (addParametersToBody),
+          hasBodyDataToSend (addParametersToRequestBody || url.hasBodyDataToSend()),
+          httpRequestCmd (hasBodyDataToSend ? "POST" : "GET")
     {
     }
 
@@ -977,51 +856,39 @@ public:
             createConnection();
         }
 
-        if (connection == nullptr)
+        if (! connection.has_value())
             return false;
 
         if (! connection->start (owner, webInputListener))
         {
-            const auto errorCode = connection->getErrorCode();
             connection.reset();
-
-            if (@available (macOS 10.10, *))
-                return false;
-
-            // Workaround for macOS versions below 10.10 where HTTPS POST requests with keep-alive
-            // fail with the NSURLErrorNetworkConnectionLost error code.
-            if (numRetries == 0 && errorCode == NSURLErrorNetworkConnectionLost)
-                return connect (webInputListener, ++numRetries);
-
             return false;
         }
 
-        if (auto* connectionHeaders = connection->getHeaders())
-        {
-            statusCode = connection->getStatusCode();
+        const auto connectionHeaders = connection->getHeaders();
 
-            NSEnumerator* enumerator = [connectionHeaders keyEnumerator];
+        if (connectionHeaders == nullptr)
+            return false;
 
-            while (NSString* key = [enumerator nextObject])
-                responseHeaders.set (nsStringToJuce (key),
-                                     nsStringToJuce ((NSString*) [connectionHeaders objectForKey: key]));
+        statusCode = connection->getStatusCode();
 
-            return true;
-        }
+        NSEnumerator* enumerator = [connectionHeaders.get() keyEnumerator];
 
-        return false;
+        while (NSString* key = [enumerator nextObject])
+            responseHeaders.set (nsStringToJuce (key),
+                                 nsStringToJuce ((NSString*) [connectionHeaders.get() objectForKey: key]));
+
+        return true;
     }
 
     void cancel()
     {
-        {
-            const ScopedLock lock (createConnectionLock);
+        const ScopedLock lock (createConnectionLock);
 
-            if (connection != nullptr)
-                connection->cancel();
+        if (connection.has_value())
+            connection->cancel();
 
-            hasBeenCancelled = true;
-        }
+        hasBeenCancelled = true;
     }
 
     //==============================================================================
@@ -1045,8 +912,8 @@ public:
     int getStatusCode() const                                             { return statusCode; }
 
     //==============================================================================
-    bool isError() const                { return (connection == nullptr || connection->getHeaders() == nullptr); }
-    int64 getTotalLength()              { return connection == nullptr ? -1 : connection->getContentLength(); }
+    bool isError() const                { return (! connection.has_value() || connection->getHeaders() == nullptr); }
+    int64 getTotalLength()              { return ! connection.has_value() ? -1 : connection->getContentLength(); }
     bool isExhausted()                  { return finished; }
     int64 getPosition()                 { return position; }
 
@@ -1094,7 +961,7 @@ public:
 private:
     WebInputStream& owner;
     URL url;
-    std::unique_ptr<URLConnectionStateBase> connection;
+    std::optional<URLConnectionState> connection;
     String headers;
     MemoryBlock postData;
     int64 position = 0;
@@ -1109,63 +976,64 @@ private:
 
     void createConnection()
     {
-        jassert (connection == nullptr);
+        jassert (! connection.has_value());
 
-        if (NSURL* nsURL = [NSURL URLWithString: juceStringToNS (url.toString (! addParametersToRequestBody))])
+        NSUniquePtr<NSURL> nsURL { [[NSURL URLWithString: juceStringToNS (url.toString (! addParametersToRequestBody))] retain] };
+
+        if (nsURL == nullptr)
+            return;
+
+        const auto timeOutSeconds = [this]
         {
-            const auto timeOutSeconds = [this]
-            {
-                if (timeOutMs > 0)
-                    return timeOutMs / 1000.0;
+            if (timeOutMs > 0)
+                return timeOutMs / 1000.0;
 
-                return timeOutMs < 0 ? std::numeric_limits<double>::infinity() : 60.0;
-            }();
+            return timeOutMs < 0 ? std::numeric_limits<double>::infinity() : 60.0;
+        }();
 
-            if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: nsURL
-                                                                   cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                                               timeoutInterval: timeOutSeconds])
-            {
-                if (NSString* httpMethod = [NSString stringWithUTF8String: httpRequestCmd.toRawUTF8()])
-                {
-                    [req setHTTPMethod: httpMethod];
+        NSUniquePtr<NSMutableURLRequest> req { [[NSMutableURLRequest requestWithURL: nsURL.get()
+                                                                        cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+                                                                    timeoutInterval: timeOutSeconds] retain] };
 
-                    if (hasBodyDataToSend)
-                    {
-                        WebInputStream::createHeadersAndPostData (url,
-                                                                  headers,
-                                                                  postData,
-                                                                  addParametersToRequestBody);
+        if (req == nullptr)
+            return;
 
-                        if (! postData.isEmpty())
-                            [req setHTTPBody: [NSData dataWithBytes: postData.getData()
-                                                             length: postData.getSize()]];
-                    }
+        NSUniquePtr<NSString> httpMethod { [[NSString stringWithUTF8String: httpRequestCmd.toRawUTF8()] retain] };
 
-                    StringArray headerLines;
-                    headerLines.addLines (headers);
-                    headerLines.removeEmptyStrings (true);
+        if (httpMethod == nullptr)
+            return;
 
-                    for (int i = 0; i < headerLines.size(); ++i)
-                    {
-                        auto key   = headerLines[i].upToFirstOccurrenceOf (":", false, false).trim();
-                        auto value = headerLines[i].fromFirstOccurrenceOf (":", false, false).trim();
+        [req.get() setHTTPMethod: httpMethod.get()];
 
-                        if (key.isNotEmpty() && value.isNotEmpty())
-                            [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
-                    }
+        if (hasBodyDataToSend)
+        {
+            WebInputStream::createHeadersAndPostData (url,
+                                                      headers,
+                                                      postData,
+                                                      addParametersToRequestBody);
 
-                    // Workaround for an Apple bug. See https://github.com/AFNetworking/AFNetworking/issues/2334
-                    [req HTTPBody];
-
-                    if (@available (macOS 10.10, *))
-                        connection = std::make_unique<URLConnectionState> (req, numRedirectsToFollow);
-                   #if JUCE_MAC
-                    else
-                        connection = std::make_unique<URLConnectionStatePreYosemite> (req, numRedirectsToFollow);
-                   #endif
-                }
-            }
+            if (! postData.isEmpty())
+                [req.get() setHTTPBody: [NSData dataWithBytes: postData.getData()
+                                                       length: postData.getSize()]];
         }
+
+        StringArray headerLines;
+        headerLines.addLines (headers);
+        headerLines.removeEmptyStrings (true);
+
+        for (int i = 0; i < headerLines.size(); ++i)
+        {
+            auto key   = headerLines[i].upToFirstOccurrenceOf (":", false, false).trim();
+            auto value = headerLines[i].fromFirstOccurrenceOf (":", false, false).trim();
+
+            if (key.isNotEmpty() && value.isNotEmpty())
+                [req.get() addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
+        }
+
+        // Workaround for an Apple bug. See https://github.com/AFNetworking/AFNetworking/issues/2334
+        [req.get() HTTPBody];
+
+        connection.emplace (std::move (req), numRedirectsToFollow);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)

@@ -1098,7 +1098,7 @@ public:
                     AudioStreamBasicDescription newStream{};
                     newStream.mSampleRate       = *sampleRate;
                     newStream.mFormatID         = kAudioFormatLinearPCM;
-                    newStream.mFormatFlags      = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
+                    newStream.mFormatFlags      = (int) kAudioFormatFlagsNativeFloatPacked | (int) kAudioFormatFlagIsNonInterleaved | (int) kAudioFormatFlagsNativeEndian;
                     newStream.mFramesPerPacket  = 1;
                     newStream.mBytesPerPacket   = 4;
                     newStream.mBytesPerFrame    = 4;

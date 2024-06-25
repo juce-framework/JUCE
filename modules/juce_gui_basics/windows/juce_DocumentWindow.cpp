@@ -325,6 +325,10 @@ auto DocumentWindow::findControlAtPoint (Point<float> pt) const -> WindowControl
         return WindowControlKind::sizeTop;
     }
 
+    for (const auto& c : getChildren())
+        if (c->contains (c->getLocalPoint (this, pt)))
+            return WindowControlKind::client;
+
     return WindowControlKind::caption;
 }
 

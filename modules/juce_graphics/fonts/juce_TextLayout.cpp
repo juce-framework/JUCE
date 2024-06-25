@@ -380,10 +380,10 @@ static MaxFontAscentAndDescent getMaxFontAscentAndDescentInEnclosingLine (const 
 
     MaxFontAscentAndDescent result;
 
-    for (const auto& [r, font] : fonts)
+    for (const auto& pair : fonts)
     {
-        result.ascent = std::max (result.ascent, font.getAscent());
-        result.descent = std::max (result.descent, font.getDescent());
+        result.ascent = std::max (result.ascent, pair.value.getAscent());
+        result.descent = std::max (result.descent, pair.value.getDescent());
     }
 
     return result;

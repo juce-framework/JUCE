@@ -2164,7 +2164,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
     }
 
     jassert (CharPointer_UTF8::isValidString (buffer, bufferSizeBytes));
-    return { CharPointer_UTF8 (buffer), (size_t) bufferSizeBytes };
+    return { CharPointer_UTF8 (buffer), CharPointer_UTF8 (buffer + bufferSizeBytes) };
 }
 
 #if __cpp_char8_t

@@ -114,8 +114,22 @@ class JuceAU final : public AudioProcessorHolder,
                      public AudioProcessorListener,
                      public AudioProcessorParameter::Listener
 {
+    auto& getSupportedBusLayouts (bool isInput, int bus) noexcept
+    {
+        auto& layout = isInput ? supportedInputLayouts : supportedOutputLayouts;
+        jassert (isPositiveAndBelow (bus, layout.size()));
+        return layout.getReference (bus);
+    }
+
+    auto& getCurrentLayout (bool isInput, int bus) noexcept
+    {
+        auto& layout = isInput ? currentInputLayout : currentOutputLayout;
+        jassert (isPositiveAndBelow (bus, layout.size()));
+        return layout.getReference (bus);
+    }
+
 public:
-    JuceAU (AudioUnit component)
+    explicit JuceAU (AudioUnit component)
         : MusicDeviceBase (component,
                            (UInt32) AudioUnitHelpers::getBusCountForWrapper (*juceFilter, true),
                            (UInt32) AudioUnitHelpers::getBusCountForWrapper (*juceFilter, false))
@@ -1829,7 +1843,8 @@ public:
             {
                 // there's some kind of component currently modal, but the host
                 // is trying to delete our plugin..
-                jassert (Component::getCurrentlyModalComponent() == nullptr);
+                jassert (ModalComponentManager::getInstanceWithoutCreating() == nullptr
+                         || Component::getCurrentlyModalComponent() == nullptr);
             }
         }
     };
@@ -2565,12 +2580,6 @@ private:
     }
 
     //==============================================================================
-    std::vector<AudioChannelLayoutTag>&       getSupportedBusLayouts (bool isInput, int bus) noexcept       { return (isInput ? supportedInputLayouts : supportedOutputLayouts).getReference (bus); }
-    const std::vector<AudioChannelLayoutTag>& getSupportedBusLayouts (bool isInput, int bus) const noexcept { return (isInput ? supportedInputLayouts : supportedOutputLayouts).getReference (bus); }
-    AudioChannelLayoutTag& getCurrentLayout (bool isInput, int bus) noexcept               { return (isInput ? currentInputLayout : currentOutputLayout).getReference (bus); }
-    AudioChannelLayoutTag  getCurrentLayout (bool isInput, int bus) const noexcept         { return (isInput ? currentInputLayout : currentOutputLayout)[bus]; }
-
-    //==============================================================================
     std::vector<AudioChannelLayoutTag> getSupportedLayoutTagsForBus (bool isInput, int busNum) const
     {
         std::set<AudioChannelLayoutTag> tags;
@@ -2616,13 +2625,13 @@ private:
 
     void addSupportedLayoutTags()
     {
-        currentInputLayout.clear(); currentOutputLayout.clear();
-
-        currentInputLayout. resize (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, true));
-        currentOutputLayout.resize (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, false));
-
-        addSupportedLayoutTagsForDirection (true);
-        addSupportedLayoutTagsForDirection (false);
+        for (auto& [layout, isInput] : { std::tuple (&currentInputLayout,  true),
+                                         std::tuple (&currentOutputLayout, false) })
+        {
+            layout->clear();
+            layout->resize (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, isInput));
+            addSupportedLayoutTagsForDirection (isInput);
+        }
     }
 
     static int maxChannelsToProbeFor()
