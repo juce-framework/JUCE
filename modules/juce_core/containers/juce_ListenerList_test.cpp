@@ -431,25 +431,59 @@ public:
             ListenerList<Listener> listeners;
             expect (listeners.size() == 0);
 
-            Listener listener;
-            listeners.add (&listener);
-            expect (listeners.size() == 1);
+            Listener listener1;
+            Listener listener2;
+            listeners.add (&listener1);
+            listeners.add (&listener2);
+            expect (listeners.size() == 2);
 
-            bool listenerCalled = false;
+            int numberOfCallbacks = 0;
 
             listeners.call ([&] (auto& l)
             {
                 listeners.remove (&l);
-                expect (listeners.size() == 0);
-
-                listeners.add (&l);
                 expect (listeners.size() == 1);
 
-                listenerCalled = true;
+                listeners.add (&l);
+                expect (listeners.size() == 2);
+
+                ++numberOfCallbacks;
             });
 
-            expect (listenerCalled);
-            expect (listeners.size() == 1);
+            expect (numberOfCallbacks == 2);
+            expect (listeners.size() == 2);
+        }
+
+        beginTest ("Add and remove a nested listener");
+        {
+            struct Listener{};
+
+            ListenerList<Listener> listeners;
+            expect (listeners.size() == 0);
+
+            Listener listener1;
+            Listener listener2;
+            listeners.add (&listener1);
+            listeners.add (&listener2);
+            expect (listeners.size() == 2);
+
+            int numberOfCallbacks = 0;
+
+            listeners.call ([&] (auto)
+            {
+                Listener nestedListener;
+
+                listeners.add (&nestedListener);
+                expect (listeners.size() == 3);
+
+                listeners.remove (&nestedListener);
+                expect (listeners.size() == 2);
+
+                ++numberOfCallbacks;
+            });
+
+            expect (numberOfCallbacks == 2);
+            expect (listeners.size() == 2);
         }
     }
 

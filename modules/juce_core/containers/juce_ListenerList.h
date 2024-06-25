@@ -135,7 +135,8 @@ public:
         {
             for (auto* it : *iterators)
             {
-                --it->end;
+                if (index < it->end)
+                    --it->end;
 
                 if (index <= it->index)
                     --it->index;
