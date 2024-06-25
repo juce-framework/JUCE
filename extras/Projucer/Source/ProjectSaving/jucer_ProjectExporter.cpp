@@ -611,7 +611,7 @@ StringArray ProjectExporter::getLinuxPackages (PackageDependencyType type) const
 
     if (isWebBrowserComponentEnabled (project) && type == PackageDependencyType::compile)
     {
-        packages.add ("webkit2gtk-4.0");
+        packages.add ("webkit2gtk-4.1");
         packages.add ("gtk+-x11-3.0");
     }
 
