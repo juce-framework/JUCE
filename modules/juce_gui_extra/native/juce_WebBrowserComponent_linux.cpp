@@ -400,7 +400,7 @@ private:
     const bool webKitIsAvailable =    (   openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.1.so",
                                                                               "libjavascriptcoregtk-4.1.so",
                                                                               "libsoup-3.0.so" })
-                                       || openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.0.so",
+                                       || openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.1.so",
                                                                               "libjavascriptcoregtk-4.0.so",
                                                                               "libsoup-2.4.so" }))
                                    && loadWebkitSymbols()

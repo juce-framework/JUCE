@@ -48,7 +48,7 @@ or
 
 On older systems, where 4.1 is not available, you can also use
 
-- libwebkit2gtk-4.0-dev
+- libwebkit2gtk-4.1-dev
 
 Compiled JUCE applications will dynamically load whichever library version is
 available during runtime.
