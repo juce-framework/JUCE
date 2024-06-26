@@ -81,7 +81,6 @@ std::vector<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypeI
 
         createExporterTypeInfo<MSVCProjectExporterVC2022> (export_visualStudio_svg, export_visualStudio_svgSize),
         createExporterTypeInfo<MSVCProjectExporterVC2019> (export_visualStudio_svg, export_visualStudio_svgSize),
-        createExporterTypeInfo<MSVCProjectExporterVC2017> (export_visualStudio_svg, export_visualStudio_svgSize),
 
         createExporterTypeInfo<MakefileProjectExporter> (export_linux_svg, export_linux_svgSize),
 
@@ -152,7 +151,6 @@ std::unique_ptr<ProjectExporter> ProjectExporter::createExporterFromSettings (Pr
                                 Tag<XcodeProjectExporter>{},
                                 Tag<MSVCProjectExporterVC2022>{},
                                 Tag<MSVCProjectExporterVC2019>{},
-                                Tag<MSVCProjectExporterVC2017>{},
                                 Tag<MakefileProjectExporter>{},
                                 Tag<AndroidProjectExporter>{});
 }
@@ -169,7 +167,6 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             #elif JUCE_WINDOWS
              MSVCProjectExporterVC2022::getValueTreeTypeName(),
              MSVCProjectExporterVC2019::getValueTreeTypeName(),
-             MSVCProjectExporterVC2017::getValueTreeTypeName(),
             #endif
              AndroidProjectExporter::getValueTreeTypeName()
         };

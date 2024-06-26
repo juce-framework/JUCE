@@ -4,6 +4,26 @@
 
 ## Change
 
+The Visual Studio 2017 exporter has been removed from the Projucer.
+
+**Possible Issues**
+
+It will no longer be possible to generate Visual Studio 2017 projects using the
+Projucer.
+
+**Workaround**
+
+Use a different exporter, such as the exporter for Visual Studio 2019 or 2022.
+
+**Rationale**
+
+Since JUCE 8, the minimum build requirement has been Visual Studio 2019. This
+minimum requirement allows JUCE to use modern C++ features, along with modern
+Windows platform features.
+
+
+## Change
+
 The Code::Blocks exporter has been removed from the Projucer.
 
 **Possible Issues**

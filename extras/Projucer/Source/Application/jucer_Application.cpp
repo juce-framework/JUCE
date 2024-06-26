@@ -687,7 +687,7 @@ static File getPlatformSpecificProjectFolder()
    #if JUCE_MAC
     return buildsFolder.getChildFile ("MacOSX");
    #elif JUCE_WINDOWS
-    return buildsFolder.getChildFile ("VisualStudio2017");
+    return buildsFolder.getChildFile ("VisualStudio2022");
    #elif JUCE_LINUX || JUCE_BSD
     return buildsFolder.getChildFile ("LinuxMakefile");
    #else
