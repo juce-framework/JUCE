@@ -42,14 +42,12 @@ class OpenDocumentManager
 public:
     //==============================================================================
     OpenDocumentManager();
-    ~OpenDocumentManager();
 
     //==============================================================================
     class Document
     {
     public:
-        Document() {}
-        virtual ~Document() {}
+        virtual ~Document() = default;
 
         virtual bool loadedOk() const = 0;
         virtual bool isForFile (const File& file) const = 0;

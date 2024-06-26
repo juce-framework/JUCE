@@ -4,6 +4,24 @@
 
 ## Change
 
+The GUI Editor has been removed from the Projucer.
+
+**Possible Issues**
+
+The Projucer can no longer be used to visually edit JUCE Components.
+
+**Workaround**
+
+There is no workaround.
+
+**Rationale**
+
+This feature has been deprecated, without receiving bugfixes or maintenance,
+for a long time.
+
+
+## Change
+
 The Visual Studio 2017 exporter has been removed from the Projucer.
 
 **Possible Issues**

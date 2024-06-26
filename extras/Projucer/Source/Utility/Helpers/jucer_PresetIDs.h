@@ -391,7 +391,6 @@ namespace Ids
     DECLARE_ID (dontAskAboutJUCEPath);
     DECLARE_ID (postExportShellCommandPosix);
     DECLARE_ID (postExportShellCommandWin);
-    DECLARE_ID (guiEditorEnabled);
     DECLARE_ID (jucerFormatVersion);
     DECLARE_ID (buildNumber);
     DECLARE_ID (lv2Uri);
