@@ -164,8 +164,6 @@ void sendAccessibilityPropertyChangedEvent (const AccessibilityHandler& handler,
 
 void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler, Event eventType)
 {
-    using namespace ComTypes::Constants;
-
     if (eventType == Event::elementCreated
         || eventType == Event::elementDestroyed)
     {
@@ -232,8 +230,6 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
     auto event = [eventType]() -> EVENTID
     {
-        using namespace ComTypes::Constants;
-
         switch (eventType)
         {
             case AccessibilityEvent::textSelectionChanged:  return UIA_Text_TextSelectionChangedEventId;
@@ -255,7 +251,7 @@ struct SpVoiceWrapper final : public DeletedAtShutdown
 {
     SpVoiceWrapper()
     {
-        [[maybe_unused]] auto hr = voice.CoCreateInstance (ComTypes::CLSID_SpVoice);
+        [[maybe_unused]] auto hr = voice.CoCreateInstance (CLSID_SpVoice);
 
         jassert (SUCCEEDED (hr));
     }

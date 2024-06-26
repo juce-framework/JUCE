@@ -267,7 +267,7 @@ public:
     //==============================================================================
     StringPairArray msvcExtraPreprocessorDefs;
     String msvcDelayLoadedDLLs;
-    StringArray mingwLibs, windowsLibs;
+    StringArray windowsLibs;
 
     //==============================================================================
     StringArray androidLibs;

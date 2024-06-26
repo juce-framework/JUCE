@@ -478,7 +478,7 @@ public:
     /** Parses this string as a 64-bit integer. */
     int64 getIntValue64() const noexcept
     {
-       #if JUCE_WINDOWS && ! JUCE_MINGW
+       #if JUCE_WINDOWS
         return _atoi64 (data);
        #else
         return atoll (data);

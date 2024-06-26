@@ -95,8 +95,7 @@ will be used and the cpp ignored. (And vice-versa for other platforms, of course
 Precompiled libraries can be included in a module by placing them in a libs/ subdirectory.
 The following directories are automatically added to the library search paths, and libraries
 placed in these directories can be linked with projects via the OSXLibs, iOSLibs,
-windowsLibs, linuxLibs and mingwLibs keywords in the module declaration (see the following
-section).
+windowsLibs, and linuxLibs keywords in the module declaration (see the following section).
 
 - OS X
   - libs/MacOSX - to support multiple architectures, you may place libraries built as universal
@@ -114,9 +113,6 @@ section).
 - Linux
   - libs/Linux/{arch}, where {arch} is the architecture you are targeting with the compiler. Some
     common examples of {arch} are "x86_64", "i386" and "armv6".
-
-- MinGW
-  - libs/MinGW/{arch}, where {arch} can take the same values as Linux.
 
 - iOS
   - libs/iOS - to support multiple architectures, you may place libraries built as universal
@@ -206,10 +202,6 @@ Possible values:
   - (Optional) A list (space or comma-separated) of static or dynamic libs that should be linked in a
     linux build (these are passed to the linker via the -l flag)
 
-- mingwLibs
-  - (Optional) A list (space or comma-separated) of static libs that should be linked in a
-    win32 mingw build (these are passed to the linker via the -l flag)
-
 - OSXLibs
   - (Optional) A list (space or comma-separated) of static or dynamic libs that should be linked in an
     OS X build (these are passed to the linker via the -l flag)
@@ -238,7 +230,6 @@ Here's an example block:
      OSXFrameworks:    CoreAudio CoreMIDI DiscRecording
      iOSFrameworks:    CoreAudio CoreMIDI AudioToolbox AVFoundation
      linuxLibs:        asound
-     mingwLibs:        winmm
 
     END_JUCE_MODULE_DECLARATION
 

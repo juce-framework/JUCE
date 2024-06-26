@@ -415,8 +415,6 @@ function(_juce_add_module_staticlib_paths module_target module_path)
             set(subfolder "$<IF:$<STREQUAL:${runtime_lib},MultiThreaded>,MT,${subfolder}>")
             target_link_directories(${module_target} INTERFACE
                 "${module_path}/libs/VisualStudio${CMAKE_MATCH_1}/${arch}/${subfolder}")
-        elseif(MSYS OR MINGW)
-            _juce_add_library_path(${module_target} "${module_path}/libs/MinGW/${JUCE_TARGET_ARCHITECTURE}")
         endif()
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
         _juce_add_library_path(${module_target} "${module_path}/libs/Android/${CMAKE_ANDROID_ARCH_ABI}")

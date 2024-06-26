@@ -43,10 +43,6 @@
 
 #include "juce_audio_basics.h"
 
-#if JUCE_MINGW && ! defined (alloca)
- #define alloca __builtin_alloca
-#endif
-
 #if JUCE_USE_SSE_INTRINSICS
  #include <emmintrin.h>
 #endif

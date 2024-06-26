@@ -37,7 +37,7 @@ namespace juce
 
 //==============================================================================
 class UIAToggleProvider  : public UIAProviderBase,
-                           public ComBaseClassHelper<ComTypes::IToggleProvider>
+                           public ComBaseClassHelper<IToggleProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;
@@ -64,7 +64,7 @@ public:
         return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
-    JUCE_COMRESULT get_ToggleState (ComTypes::ToggleState* pRetVal) override
+    JUCE_COMRESULT get_ToggleState (ToggleState* pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, [&]
         {
@@ -74,10 +74,10 @@ public:
     }
 
 private:
-    ComTypes::ToggleState getCurrentToggleState() const
+    ToggleState getCurrentToggleState() const
     {
-        return getHandler().getCurrentState().isChecked() ? ComTypes::ToggleState_On
-                                                          : ComTypes::ToggleState_Off;
+        return getHandler().getCurrentState().isChecked() ? ToggleState_On
+                                                          : ToggleState_Off;
     }
 
     //==============================================================================

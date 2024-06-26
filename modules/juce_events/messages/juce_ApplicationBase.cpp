@@ -294,7 +294,7 @@ bool JUCEApplicationBase::initialiseApp()
     }
    #endif
 
-   #if JUCE_WINDOWS && (! defined (_CONSOLE)) && (! JUCE_MINGW)
+   #if JUCE_WINDOWS && (! defined (_CONSOLE))
     if (isStandaloneApp() && AttachConsole (ATTACH_PARENT_PROCESS) != 0)
     {
         // if we've launched a GUI app from cmd.exe or PowerShell, we need this to enable printf etc.

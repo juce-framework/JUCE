@@ -54,10 +54,13 @@
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #include "wmsdkidl.h"
- #include "native/juce_ComTypes_windows.h"
+ #include "dshow.h"
+ #include "dshowasf.h"
+ #include "evr.h"
+ #include "strmif.h"
+ #include "wmsdk.h"
 
- #if ! JUCE_MINGW && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment (lib, "strmiids.lib")
 
   #if JUCE_USE_CAMERA

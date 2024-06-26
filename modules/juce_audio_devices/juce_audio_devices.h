@@ -55,7 +55,6 @@
   OSXFrameworks:      CoreAudio CoreMIDI AudioToolbox
   iOSFrameworks:      CoreAudio CoreMIDI AudioToolbox AVFoundation
   linuxPackages:      alsa
-  mingwLibs:          winmm
 
  END_JUCE_MODULE_DECLARATION
 

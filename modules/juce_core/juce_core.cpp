@@ -61,18 +61,12 @@
 #if JUCE_WINDOWS
  #include <ctime>
 
- #if JUCE_MINGW
-  #include <ws2spi.h>
-  #include <cstdio>
-  #include <locale.h>
- #else
-  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4091)
-  #include <Dbghelp.h>
-  JUCE_END_IGNORE_WARNINGS_MSVC
+ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4091)
+ #include <Dbghelp.h>
+ JUCE_END_IGNORE_WARNINGS_MSVC
 
-  #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-   #pragma comment (lib, "DbgHelp.lib")
-  #endif
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+  #pragma comment (lib, "DbgHelp.lib")
  #endif
 
 #else

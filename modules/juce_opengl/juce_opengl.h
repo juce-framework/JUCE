@@ -55,7 +55,6 @@
   OSXFrameworks:      OpenGL
   iOSFrameworks:      OpenGLES
   linuxPackages:      gl
-  mingwLibs:          opengl32
 
  END_JUCE_MODULE_DECLARATION
 

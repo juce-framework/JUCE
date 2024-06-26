@@ -447,8 +447,6 @@ public:
             CHARPTR_DOUBLE_PAIR_COMBOS (1.7976931348623157e+308),
             CHARPTR_DOUBLE_PAIR_COMBOS (2.2250738585072014e-308),
 
-            // Too many sig figs. The parsing routine on MinGW gets the last
-            // significant figure wrong.
             CHARPTR_DOUBLE_PAIR_COMBOS (17654321098765432.9),
             CHARPTR_DOUBLE_PAIR_COMBOS (183456789012345678.9),
             CHARPTR_DOUBLE_PAIR_COMBOS (1934567890123456789.9),

@@ -4,6 +4,29 @@
 
 ## Change
 
+Support for the MinGW toolchain has been removed.
+
+**Possible Issues**
+
+MinGW can no longer be used to build JUCE.
+
+**Workaround**
+
+On Windows, use an alternative compiler such as Clang or MSVC.
+
+Cross-compiling for Windows from Linux is not supported, and there is no
+workaround for this use case.
+
+**Rationale**
+
+The MinGW provides a poor user experience, with very long build times and
+missing features. The high maintenance cost, both in terms of developer time,
+and continuous integration bandwidth (both of which could provide more value
+elsewhere), means that continued support for MinGW is difficult to justify.
+
+
+## Change
+
 The GUI Editor has been removed from the Projucer.
 
 **Possible Issues**

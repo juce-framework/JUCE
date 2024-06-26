@@ -37,7 +37,7 @@ namespace juce
 
 //==============================================================================
 class UIATransformProvider  : public UIAProviderBase,
-                              public ComBaseClassHelper<ComTypes::ITransformProvider>
+                              public ComBaseClassHelper<ITransformProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;

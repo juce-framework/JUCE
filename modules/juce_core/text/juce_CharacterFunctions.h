@@ -161,12 +161,11 @@ public:
         constexpr auto inf = std::numeric_limits<double>::infinity();
 
         bool isNegative = false;
-       #if ! JUCE_MINGW
+
         constexpr const int maxSignificantDigits = 17 + 1; // An additional digit for rounding
         constexpr const int bufferSize = maxSignificantDigits + 7 + 1; // -.E-XXX and a trailing null-terminator
         char buffer[(size_t) bufferSize] = {};
         char* writePtr = &(buffer[0]);
-       #endif
 
         const auto endOfWhitspace = text.findEndOfWhitespace();
         text = endOfWhitspace;
@@ -177,9 +176,7 @@ public:
         {
             case '-':
                 isNegative = true;
-               #if ! JUCE_MINGW
                 *writePtr++ = '-';
-               #endif
                 JUCE_FALLTHROUGH
             case '+':
                 c = *++text;
@@ -219,113 +216,6 @@ public:
             default:
                 break;
         }
-
-       #if JUCE_MINGW
-        // MinGW does not have access to the locale functions required for strtold, so we parse the doubles
-        // ourselves. There are some edge cases where the least significant digit will be wrong!
-        double result[3] = { 0 }, accumulator[2] = { 0 };
-        int exponentAdjustment[2] = { 0 }, exponentAccumulator[2] = { -1, -1 };
-        int exponent = 0, decPointIndex = 0, digit = 0;
-        int lastDigit = 0, numSignificantDigits = 0;
-        bool digitsFound = false;
-        constexpr const int maxSignificantDigits = 17 + 1;
-
-        for (;;)
-        {
-            if (text.isDigit())
-            {
-                lastDigit = digit;
-                digit = (int) text.getAndAdvance() - '0';
-                digitsFound = true;
-
-                if (decPointIndex != 0)
-                    exponentAdjustment[1]++;
-
-                if (numSignificantDigits == 0 && digit == 0)
-                    continue;
-
-                if (++numSignificantDigits > maxSignificantDigits)
-                {
-                    if (digit > 5)
-                        ++accumulator [decPointIndex];
-                    else if (digit == 5 && (lastDigit & 1) != 0)
-                        ++accumulator [decPointIndex];
-
-                    if (decPointIndex > 0)
-                        exponentAdjustment[1]--;
-                    else
-                        exponentAdjustment[0]++;
-
-                    while (text.isDigit())
-                    {
-                        ++text;
-                        if (decPointIndex == 0)
-                            exponentAdjustment[0]++;
-                    }
-                }
-                else
-                {
-                    const auto maxAccumulatorValue = (double) ((std::numeric_limits<unsigned int>::max() - 9) / 10);
-                    if (accumulator [decPointIndex] > maxAccumulatorValue)
-                    {
-                        result [decPointIndex] = mulexp10 (result [decPointIndex], exponentAccumulator [decPointIndex])
-                                                 + accumulator [decPointIndex];
-                        accumulator [decPointIndex] = 0;
-                        exponentAccumulator [decPointIndex] = 0;
-                    }
-
-                    accumulator [decPointIndex] = accumulator[decPointIndex] * 10 + digit;
-                    exponentAccumulator [decPointIndex]++;
-                }
-            }
-            else if (decPointIndex == 0 && *text == '.')
-            {
-                ++text;
-                decPointIndex = 1;
-
-                if (numSignificantDigits > maxSignificantDigits)
-                {
-                    while (text.isDigit())
-                        ++text;
-                    break;
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        result[0] = mulexp10 (result[0], exponentAccumulator[0]) + accumulator[0];
-
-        if (decPointIndex != 0)
-            result[1] = mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
-
-        c = *text;
-        if ((c == 'e' || c == 'E') && digitsFound)
-        {
-            auto negativeExponent = false;
-
-            switch (*++text)
-            {
-                case '-':   negativeExponent = true; JUCE_FALLTHROUGH
-                case '+':   ++text;
-            }
-
-            while (text.isDigit())
-                exponent = (exponent * 10) + ((int) text.getAndAdvance() - '0');
-
-            if (negativeExponent)
-                exponent = -exponent;
-        }
-
-        auto r = mulexp10 (result[0], exponent + exponentAdjustment[0]);
-        if (decPointIndex != 0)
-            r += mulexp10 (result[1], exponent - exponentAdjustment[1]);
-
-        return isNegative ? -r : r;
-
-       #else   // ! JUCE_MINGW
 
         int numSigFigs = 0, extraExponent = 0;
         bool decimalPointFound = false, leadingZeros = false;
@@ -460,8 +350,6 @@ public:
         return strtod_l (&buffer[0], nullptr, locale);
         #endif
        #endif
-
-       #endif   // JUCE_MINGW
     }
 
     /** Parses a character string, to read a floating-point value. */

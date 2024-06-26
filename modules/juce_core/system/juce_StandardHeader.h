@@ -128,11 +128,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 
-#if JUCE_MINGW
- #include <cstring>
- #include <sys/types.h>
-#endif
-
 #if JUCE_ANDROID
  #include <cstring>
  #include <byteswap.h>

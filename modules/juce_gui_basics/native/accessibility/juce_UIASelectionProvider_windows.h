@@ -39,7 +39,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
 //==============================================================================
 class UIASelectionItemProvider  : public UIAProviderBase,
-                                  public ComBaseClassHelper<ComTypes::ISelectionItemProvider>
+                                  public ComBaseClassHelper<ISelectionItemProvider>
 {
 public:
     explicit UIASelectionItemProvider (AccessibilityNativeHandle* handle)
@@ -58,8 +58,6 @@ public:
 
         if (isRadioButton)
         {
-            using namespace ComTypes::Constants;
-
             handler.getActions().invoke (AccessibilityActionType::press);
             sendAccessibilityAutomationEvent (handler, UIA_SelectionItem_ElementSelectedEventId);
 
@@ -139,7 +137,7 @@ private:
 
 //==============================================================================
 class UIASelectionProvider  : public UIAProviderBase,
-                              public ComBaseClassHelper<ComTypes::ISelectionProvider2>
+                              public ComBaseClassHelper<ISelectionProvider2>
 {
 public:
     using UIAProviderBase::UIAProviderBase;
@@ -147,11 +145,11 @@ public:
     //==============================================================================
     JUCE_COMRESULT QueryInterface (REFIID iid, void** result) override
     {
-        if (iid == __uuidof (IUnknown) || iid == __uuidof (ComTypes::ISelectionProvider))
-            return castToType<ComTypes::ISelectionProvider> (result);
+        if (iid == __uuidof (IUnknown) || iid == __uuidof (ISelectionProvider))
+            return castToType<ISelectionProvider> (result);
 
-        if (iid == __uuidof (ComTypes::ISelectionProvider2))
-            return castToType<ComTypes::ISelectionProvider2> (result);
+        if (iid == __uuidof (ISelectionProvider2))
+            return castToType<ISelectionProvider2> (result);
 
         *result = nullptr;
         return E_NOINTERFACE;

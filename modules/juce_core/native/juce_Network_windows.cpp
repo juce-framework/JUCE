@@ -547,13 +547,8 @@ namespace MACAddressHelpers
 
     static void split (const sockaddr_in6* sa_in6, int off, uint8* split)
     {
-       #if JUCE_MINGW
-        split[0] = sa_in6->sin6_addr._S6_un._S6_u8[off + 1];
-        split[1] = sa_in6->sin6_addr._S6_un._S6_u8[off];
-       #else
         split[0] = sa_in6->sin6_addr.u.Byte[off + 1];
         split[1] = sa_in6->sin6_addr.u.Byte[off];
-       #endif
     }
 
     static IPAddress createAddress (const sockaddr_in6* sa_in6)

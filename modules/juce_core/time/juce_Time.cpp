@@ -39,11 +39,7 @@ namespace TimeHelpers
 {
     static std::tm millisToLocal (int64 millis) noexcept
     {
-       #if JUCE_WINDOWS && JUCE_MINGW
-        auto now = (time_t) (millis / 1000);
-        return *localtime (&now);
-
-       #elif JUCE_WINDOWS
+       #if JUCE_WINDOWS
         std::tm result;
         millis /= 1000;
 
@@ -65,11 +61,7 @@ namespace TimeHelpers
 
     static std::tm millisToUTC (int64 millis) noexcept
     {
-       #if JUCE_WINDOWS && JUCE_MINGW
-        auto now = (time_t) (millis / 1000);
-        return *gmtime (&now);
-
-       #elif JUCE_WINDOWS
+       #if JUCE_WINDOWS
         std::tm result;
         millis /= 1000;
 
@@ -231,7 +223,7 @@ Time::Time (int year, int month, int day,
 //==============================================================================
 int64 Time::currentTimeMillis() noexcept
 {
-   #if JUCE_WINDOWS && ! JUCE_MINGW
+   #if JUCE_WINDOWS
     struct _timeb t;
     _ftime_s (&t);
     return ((int64) t.time) * 1000 + t.millitm;

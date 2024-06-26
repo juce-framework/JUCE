@@ -766,9 +766,7 @@ static void setWindowZOrder (HWND hwnd, HWND insertAfter)
 }
 
 //==============================================================================
-#if ! JUCE_MINGW
-extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
-#endif
+RTL_OSVERSIONINFOW getWindowsVersionInfo();
 
 double Desktop::getDefaultMasterScale()
 {
@@ -788,7 +786,6 @@ class Desktop::NativeDarkModeChangeDetectorImpl
 public:
     NativeDarkModeChangeDetectorImpl()
     {
-       #if ! JUCE_MINGW
         const auto winVer = getWindowsVersionInfo();
 
         if (winVer.dwMajorVersion >= 10 && winVer.dwBuildNumber >= 17763)
@@ -805,7 +802,6 @@ public:
                     darkModeEnabled = shouldAppsUseDarkMode() && ! isHighContrast();
             }
         }
-       #endif
     }
 
     ~NativeDarkModeChangeDetectorImpl()

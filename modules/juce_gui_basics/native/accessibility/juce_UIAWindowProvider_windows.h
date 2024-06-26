@@ -37,13 +37,13 @@ namespace juce
 
 //==============================================================================
 class UIAWindowProvider : public UIAProviderBase,
-                          public ComBaseClassHelper<ComTypes::IWindowProvider>
+                          public ComBaseClassHelper<IWindowProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
-    JUCE_COMRESULT SetVisualState (ComTypes::WindowVisualState state) override
+    JUCE_COMRESULT SetVisualState (WindowVisualState state) override
     {
         if (! isElementValid())
             return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
@@ -52,15 +52,15 @@ public:
         {
             switch (state)
             {
-                case ComTypes::WindowVisualState_Maximized:
+                case WindowVisualState_Maximized:
                     peer->setFullScreen (true);
                     break;
 
-                case ComTypes::WindowVisualState_Minimized:
+                case WindowVisualState_Minimized:
                     peer->setMinimised (true);
                     break;
 
-                case ComTypes::WindowVisualState_Normal:
+                case WindowVisualState_Normal:
                     peer->setFullScreen (false);
                     peer->setMinimised (false);
                     break;
@@ -139,18 +139,18 @@ public:
         });
     }
 
-    JUCE_COMRESULT get_WindowVisualState (ComTypes::WindowVisualState* pRetVal) override
+    JUCE_COMRESULT get_WindowVisualState (WindowVisualState* pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, [&]() -> HRESULT
         {
             if (auto* peer = getPeer())
             {
                 if (peer->isFullScreen())
-                    *pRetVal = ComTypes::WindowVisualState_Maximized;
+                    *pRetVal = WindowVisualState_Maximized;
                 else if (peer->isMinimised())
-                    *pRetVal = ComTypes::WindowVisualState_Minimized;
+                    *pRetVal = WindowVisualState_Minimized;
                 else
-                    *pRetVal = ComTypes::WindowVisualState_Normal;
+                    *pRetVal = WindowVisualState_Normal;
 
                 return S_OK;
             }
@@ -159,15 +159,15 @@ public:
         });
     }
 
-    JUCE_COMRESULT get_WindowInteractionState (ComTypes::WindowInteractionState* pRetVal) override
+    JUCE_COMRESULT get_WindowInteractionState (WindowInteractionState* pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, [&]() -> HRESULT
         {
             if (auto* peer = getPeer())
             {
                 *pRetVal = peer->getComponent().isCurrentlyBlockedByAnotherModalComponent()
-                    ? ComTypes::WindowInteractionState::WindowInteractionState_BlockedByModalWindow
-                    : ComTypes::WindowInteractionState::WindowInteractionState_Running;
+                    ? WindowInteractionState::WindowInteractionState_BlockedByModalWindow
+                    : WindowInteractionState::WindowInteractionState_Running;
 
                 return S_OK;
             }

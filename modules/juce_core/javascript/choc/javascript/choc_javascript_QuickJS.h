@@ -47,10 +47,6 @@
 #include <stdarg.h>
 
 #include <inttypes.h>
-#if JUCE_MINGW
- #undef PRId64
- #define PRId64 "lld"
-#endif
 
 #include <string.h>
 #include <assert.h>

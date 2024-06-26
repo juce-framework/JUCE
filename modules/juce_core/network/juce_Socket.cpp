@@ -338,7 +338,7 @@ namespace SocketHelpers
 
         auto h = handle.load();
 
-       #if JUCE_WINDOWS || JUCE_MINGW
+       #if JUCE_WINDOWS
         struct timeval timeout;
         struct timeval* timeoutp;
 

@@ -111,6 +111,7 @@
 
   #ifdef __MINGW32__
     #define JUCE_MINGW 1
+    #warning Support for MinGW has been removed. Please use an alternative compiler.
     #ifdef __MINGW64__
       #define JUCE_64BIT 1
     #else

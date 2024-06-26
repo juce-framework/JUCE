@@ -7257,9 +7257,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_AccessibilityTextHelpers.h">
       <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_ComInterfaces_windows.h">
-      <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_UIAExpandCollapseProvider_windows.h">
       <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
     </ClInclude>
