@@ -151,7 +151,6 @@
 		3F9D4C7F6E5779D4E4AE655D /* jucer_ComponentLayout.h */ /* jucer_ComponentLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentLayout.h; path = ../../Source/ComponentEditor/jucer_ComponentLayout.h; sourceTree = SOURCE_ROOT; };
 		409C636B96A9AC1D732B96F8 /* jucer_ComboBoxHandler.h */ /* jucer_ComboBoxHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComboBoxHandler.h; path = ../../Source/ComponentEditor/Components/jucer_ComboBoxHandler.h; sourceTree = SOURCE_ROOT; };
 		41105E536155E394E54BDD35 /* colourscheme_dark.xml */ /* colourscheme_dark.xml */ = {isa = PBXFileReference; lastKnownFileType = file.xml; name = colourscheme_dark.xml; path = ../../Source/BinaryData/colourscheme_dark.xml; sourceTree = SOURCE_ROOT; };
-		42F4AA3EF0883D506987CA99 /* export_codeBlocks.svg */ /* export_codeBlocks.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = export_codeBlocks.svg; path = ../../Source/BinaryData/Icons/export_codeBlocks.svg; sourceTree = SOURCE_ROOT; };
 		463C8CF42FAA00014198B71B /* PIPComponent.cpp.in */ /* PIPComponent.cpp.in */ = {isa = PBXFileReference; lastKnownFileType = file.in; name = PIPComponent.cpp.in; path = ../../../Build/CMake/PIPComponent.cpp.in; sourceTree = SOURCE_ROOT; };
 		472F9A90F685220D730EBF6C /* BinaryData.cpp */ /* BinaryData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = SOURCE_ROOT; };
 		486E8D02DAD2A0BF54A901C0 /* jucer_MiscUtilities.cpp */ /* jucer_MiscUtilities.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MiscUtilities.cpp; path = ../../Source/Utility/Helpers/jucer_MiscUtilities.cpp; sourceTree = SOURCE_ROOT; };
@@ -359,7 +358,6 @@
 		F8A38C0C7C45F2DB6A5FB812 /* wizard_Highlight.svg */ /* wizard_Highlight.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = wizard_Highlight.svg; path = ../../Source/BinaryData/Icons/wizard_Highlight.svg; sourceTree = SOURCE_ROOT; };
 		F9111E150CFF155329D44853 /* jucer_OpenDocumentManager.cpp */ /* jucer_OpenDocumentManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_OpenDocumentManager.cpp; path = ../../Source/CodeEditor/jucer_OpenDocumentManager.cpp; sourceTree = SOURCE_ROOT; };
 		F9A363BFBB6B1143C2E967C3 /* jucer_ModuleDescription.h */ /* jucer_ModuleDescription.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ModuleDescription.h; path = ../../Source/Project/Modules/jucer_ModuleDescription.h; sourceTree = SOURCE_ROOT; };
-		FA790C59A304579F660F112F /* jucer_ProjectExport_CodeBlocks.h */ /* jucer_ProjectExport_CodeBlocks.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExport_CodeBlocks.h; path = ../../Source/ProjectSaving/jucer_ProjectExport_CodeBlocks.h; sourceTree = SOURCE_ROOT; };
 		FB80347407261BF6CCEFDE91 /* jucer_ComponentTemplate.cpp */ /* jucer_ComponentTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ComponentTemplate.cpp; path = ../../Source/BinaryData/Templates/jucer_ComponentTemplate.cpp; sourceTree = SOURCE_ROOT; };
 		FCEBE24EA79A13713D7CBF26 /* jucer_ComponentColourProperty.h */ /* jucer_ComponentColourProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentColourProperty.h; path = ../../Source/ComponentEditor/Properties/jucer_ComponentColourProperty.h; sourceTree = SOURCE_ROOT; };
 		FD6A6FA8BDBDDD441BCD33F9 /* juce_SimpleBinaryBuilder.cpp */ /* juce_SimpleBinaryBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_SimpleBinaryBuilder.cpp; path = ../../Source/BinaryData/juce_SimpleBinaryBuilder.cpp; sourceTree = SOURCE_ROOT; };
@@ -584,7 +582,6 @@
 			isa = PBXGroup;
 			children = (
 				CCD62DB0A19A985A4B9D7F32,
-				FA790C59A304579F660F112F,
 				59520B8137E6A2E483074399,
 				FF68231DE2B395461009116C,
 				20075A86A4D0E8A5B973D9DB,
@@ -778,7 +775,6 @@
 			children = (
 				514F2FAFDBF535AC03FA2E6C,
 				807049CA2D5B6DE18EA078F2,
-				42F4AA3EF0883D506987CA99,
 				69B478C992FA0B8C885946A6,
 				EAC1731150A7F79D59BAA0B6,
 				8F4D281E98808204E2846A7D,

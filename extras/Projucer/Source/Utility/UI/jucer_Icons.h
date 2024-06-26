@@ -85,8 +85,7 @@ public:
     Icons();
 
     Path imageDoc, config, graph, info, warning, user, closedFolder, exporter, fileExplorer, file,
-         modules, openFolder, settings, singleModule, plus, android, codeBlocks,
-         linux, xcode, visualStudio;
+         modules, openFolder, settings, singleModule, plus, android, linux, xcode, visualStudio;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons)

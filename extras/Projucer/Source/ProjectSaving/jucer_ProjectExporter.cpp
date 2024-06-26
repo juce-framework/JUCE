@@ -40,7 +40,6 @@
 #include "jucer_ProjectExport_MSVC.h"
 #include "jucer_ProjectExport_Xcode.h"
 #include "jucer_ProjectExport_Android.h"
-#include "jucer_ProjectExport_CodeBlocks.h"
 
 #include "../Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"
 
@@ -87,15 +86,6 @@ std::vector<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypeI
         createExporterTypeInfo<MakefileProjectExporter> (export_linux_svg, export_linux_svgSize),
 
         createExporterTypeInfo<AndroidProjectExporter> (export_android_svg, export_android_svgSize),
-
-        { CodeBlocksProjectExporter::getValueTreeTypeNameWindows(),
-          CodeBlocksProjectExporter::getDisplayNameWindows(),
-          CodeBlocksProjectExporter::getTargetFolderNameWindows(),
-          createIcon (export_codeBlocks_svg, export_codeBlocks_svgSize) },
-        { CodeBlocksProjectExporter::getValueTreeTypeNameLinux(),
-          CodeBlocksProjectExporter::getDisplayNameLinux(),
-          CodeBlocksProjectExporter::getTargetFolderNameLinux(),
-          createIcon (export_codeBlocks_svg, export_codeBlocks_svgSize) }
     };
 
     return infos;
@@ -164,8 +154,7 @@ std::unique_ptr<ProjectExporter> ProjectExporter::createExporterFromSettings (Pr
                                 Tag<MSVCProjectExporterVC2019>{},
                                 Tag<MSVCProjectExporterVC2017>{},
                                 Tag<MakefileProjectExporter>{},
-                                Tag<AndroidProjectExporter>{},
-                                Tag<CodeBlocksProjectExporter>{});
+                                Tag<AndroidProjectExporter>{});
 }
 
 bool ProjectExporter::canProjectBeLaunched (Project* project)
@@ -762,8 +751,7 @@ static bool areCompatibleExporters (const ProjectExporter& p1, const ProjectExpo
     return (p1.isVisualStudio() && p2.isVisualStudio())
         || (p1.isXcode() && p2.isXcode())
         || (p1.isMakefile() && p2.isMakefile())
-        || (p1.isAndroidStudio() && p2.isAndroidStudio())
-        || (p1.isCodeBlocks() && p2.isCodeBlocks() && p1.isWindows() != p2.isLinux());
+        || (p1.isAndroidStudio() && p2.isAndroidStudio());
 }
 
 void ProjectExporter::createDefaultModulePaths()

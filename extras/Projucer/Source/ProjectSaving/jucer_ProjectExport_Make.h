@@ -491,7 +491,6 @@ public:
 
     bool isXcode() const override                           { return false; }
     bool isVisualStudio() const override                    { return false; }
-    bool isCodeBlocks() const override                      { return false; }
     bool isMakefile() const override                        { return true; }
     bool isAndroidStudio() const override                   { return false; }
 

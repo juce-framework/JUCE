@@ -115,7 +115,6 @@ public:
     // IDE targeted by exporter
     virtual bool isXcode() const         = 0;
     virtual bool isVisualStudio() const  = 0;
-    virtual bool isCodeBlocks() const    = 0;
     virtual bool isMakefile() const      = 0;
     virtual bool isAndroidStudio() const = 0;
 

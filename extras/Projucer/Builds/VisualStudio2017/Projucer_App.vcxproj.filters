@@ -5294,9 +5294,6 @@
     <None Include="..\..\Source\BinaryData\Icons\export_android.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\Icons\export_codeBlocks.svg">
-      <Filter>Projucer\BinaryData\Icons</Filter>
-    </None>
     <None Include="..\..\Source\BinaryData\Icons\export_linux.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>

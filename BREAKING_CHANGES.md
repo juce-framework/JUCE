@@ -4,6 +4,31 @@
 
 ## Change
 
+The Code::Blocks exporter has been removed from the Projucer.
+
+**Possible Issues**
+
+It will no longer be possible to generate Code::Blocks projects using the
+Projucer.
+
+**Workaround**
+
+Use a different exporter, such as the Makefile exporter on Linux, or one of the
+Visual Studio exporters on Windows.
+
+**Rationale**
+
+The Code::Blocks IDE does not seem to be actively maintained. Other projects
+are dropping support, with the Code::Blocks generator deprecated in CMake 3.27.
+Additionally, the Code::Blocks exporter did not provide a good user experience,
+especially for new users on Windows, as it defaulted to using the MinGW
+toolchain. This toolchain tends to be slow to build and link, and is not fully
+supported by JUCE, missing support for some audio and video backends, and
+plugin formats.
+
+
+## Change
+
 The tab width when rendering text with the GlyphArrangement and TextLayout
 classes now equals the width of a space. Previously it equaled the width of a
 tofu character used for missing glyphs.
@@ -615,7 +640,6 @@ fixed white colour was inappropriate for most user interfaces.
 
 ## Change
 
->>>>>>> c74b2b1058 (CIDevice: Improve robustness of subscription API)
 ProfileHost::enableProfile and ProfileHost::disableProfile have been combined
 into a single function, ProfileHost::setProfileEnablement.
 
