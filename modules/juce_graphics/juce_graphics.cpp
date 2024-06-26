@@ -166,7 +166,6 @@
 #include "geometry/juce_PathStrokeType.cpp"
 #include "placement/juce_RectanglePlacement.cpp"
 #include "contexts/juce_GraphicsContext.cpp"
-#include "contexts/juce_LowLevelGraphicsPostScriptRenderer.cpp"
 #include "contexts/juce_LowLevelGraphicsSoftwareRenderer.cpp"
 #include "images/juce_Image.cpp"
 #include "images/juce_ImageCache.cpp"

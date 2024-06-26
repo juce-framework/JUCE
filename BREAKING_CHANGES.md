@@ -4,6 +4,27 @@
 
 ## Change
 
+The LowLevelGraphicsPostscriptRenderer has been removed.
+
+**Possible Issues**
+
+Code that uses this class will no longer compile.
+
+**Workaround**
+
+There is no workaround. If you need this functionality, please let us know
+about your use case. In the meantime, you may be able to copy the old classes
+into your own project/module and use them that way.
+
+**Rationale**
+
+We are not aware of any projects using this functionality. This renderer was
+not as fully-featured as any of the other renders, so it's likely that users
+would have filed issue reports if they were using this feature.
+
+
+## Change
+
 Support for the MinGW toolchain has been removed.
 
 **Possible Issues**

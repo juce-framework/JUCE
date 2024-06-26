@@ -2218,9 +2218,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_GraphicsContext.cpp">
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.cpp">
-      <Filter>JUCE Modules\juce_graphics\contexts</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.cpp">
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
     </ClCompile>
@@ -5608,9 +5605,6 @@
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsContext.h">
-      <Filter>JUCE Modules\juce_graphics\contexts</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.h">
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.h">
