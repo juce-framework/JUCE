@@ -35,8 +35,6 @@
 namespace juce
 {
 
-#if JUCE_UNIT_TESTS
-
 class ListenerListTests final : public UnitTest
 {
 public:
@@ -468,7 +466,5 @@ private:
 };
 
 static ListenerListTests listenerListTests;
-
-#endif
 
 } // namespace juce

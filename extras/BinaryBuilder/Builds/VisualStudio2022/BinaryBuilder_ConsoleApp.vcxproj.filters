@@ -121,7 +121,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">

@@ -1117,7 +1117,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">
