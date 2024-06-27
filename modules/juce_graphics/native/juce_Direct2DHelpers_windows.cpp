@@ -122,8 +122,6 @@ struct D2DHelpers
         class ScopedFigure
         {
         public:
-            ScopedFigure() = default;
-
             ScopedFigure (ID2D1GeometrySink* s, D2D1_POINT_2F pt, D2D1_FIGURE_BEGIN mode)
                 : sink (s)
             {
@@ -133,38 +131,26 @@ struct D2DHelpers
             ~ScopedFigure()
             {
                 if (sink != nullptr)
-                    sink->EndFigure (D2D1_FIGURE_END_OPEN);
+                    sink->EndFigure (end);
             }
 
-            ScopedFigure (ScopedFigure&& other) noexcept
-                : sink (std::exchange (other.sink, {}))
+            void setClosed()
             {
-            }
-
-            ScopedFigure& operator= (ScopedFigure&& other) noexcept
-            {
-                swap (other);
-                return *this;
-            }
-
-            bool isValid() const
-            {
-                return sink != nullptr;
+                end = D2D1_FIGURE_END_CLOSED;
             }
 
         private:
-            void swap (ScopedFigure& other) noexcept
-            {
-                std::swap (other.sink, sink);
-            }
-
             ID2D1GeometrySink* sink = nullptr;
+            D2D1_FIGURE_END end = D2D1_FIGURE_END_OPEN;
+
+            JUCE_DECLARE_NON_COPYABLE (ScopedFigure)
+            JUCE_DECLARE_NON_MOVEABLE (ScopedFigure)
         };
 
         // Every call to BeginFigure must have a matching call to EndFigure. But - the Path does not necessarily
         // have matching startNewSubPath and closePath markers.
         D2D1_POINT_2F lastLocation{};
-        ScopedFigure figure;
+        std::optional<ScopedFigure> figure;
         Path::Iterator it (path);
 
         const auto doTransform = [&transform] (float x, float y)
@@ -175,8 +161,8 @@ struct D2DHelpers
 
         const auto updateFigure = [&] (float x, float y)
         {
-            if (! figure.isValid())
-                figure = { sink, lastLocation, figureMode };
+            if (! figure.has_value())
+                figure.emplace (sink, lastLocation, figureMode);
 
             lastLocation = doTransform (x, y);
         };
@@ -201,13 +187,16 @@ struct D2DHelpers
                     break;
 
                 case Path::Iterator::closePath:
-                    figure = {};
+                    if (figure.has_value())
+                        figure->setClosed();
+
+                    figure.reset();
                     break;
 
                 case Path::Iterator::startNewSubPath:
-                    figure = {};
+                    figure.reset();
                     lastLocation = doTransform (it.x1, it.y1);
-                    figure = { sink, lastLocation, figureMode };
+                    figure.emplace (sink, lastLocation, figureMode);
                     break;
             }
         }
