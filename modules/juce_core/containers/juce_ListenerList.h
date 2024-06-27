@@ -37,50 +37,32 @@ namespace juce
 
 //==============================================================================
 /**
-    Holds a set of objects and can invoke a member function callback on each
-    object in the set with a single call.
+    Holds a set of objects and can invoke a member function callback on each object in the set with
+    a single call.
 
-    Use a ListenerList to manage a set of objects which need a callback, and you
-    can invoke a member function by simply calling call(), callChecked(), or
-    callExcluding().
+    It is safe to add listeners, remove listeners, clear the listeners, and even delete the
+    ListenerList itself during any listener callback. If you don't need these extra guarantees
+    consider using a LightweightListenerList instead.
 
-    E.g.
-    @code
-    class MyListenerType
-    {
-    public:
-        void myCallbackMethod (int foo, bool bar);
-    };
+    If a Listener is added during a callback, it is guaranteed not to be called in the same
+    iteration.
 
-    ListenerList<MyListenerType> listeners;
-    listeners.add (someCallbackObjects...);
+    If a Listener is removed during a callback, it is guaranteed not to be called if it hasn't
+    already been called.
 
-    // This will invoke myCallbackMethod (1234, true) on each of the objects
-    // in the list...
-    listeners.call ([] (MyListenerType& l) { l.myCallbackMethod (1234, true); });
-    @endcode
+    If the ListenerList is cleared or deleted during a callback, it is guaranteed that no more
+    listeners will be called.
 
-    It is safe to add listeners, remove listeners, clear the listeners, and
-    delete the ListenerList itself during any listener callback.
+    It is NOT safe to make concurrent calls to the listeners without a mutex. If you need this
+    functionality, either use a LightweightListenerList or a ThreadSafeListenerList.
 
-    If a Listener is added during a callback, it is guaranteed not to be called
-    in the same iteration.
-
-    If a Listener is removed during a callback, it is guaranteed not to be
-    called if it hasn't already been called.
-
-    If the ListenerList is cleared or deleted during a callback, it is
-    guaranteed that no more listeners will be called.
-
-    By default a ListenerList is not thread safe. If thread-safety is required,
-    use the ThreadSafeListenerList type.
-
-    When calling listeners the iteration can be escaped early by using a
-    "BailOutChecker". A BailOutChecker is a type that has a public member function
-    with the following signature:
+    When calling listeners the iteration can be escaped early by using a "BailOutChecker".
+    A BailOutChecker is a type that has a public member function with the following signature:
     @code bool shouldBailOut() const @endcode
     This function will be called before making a call to each listener.
     For an example see the DummyBailOutChecker.
+
+    @see LightweightListenerList, ThreadSafeListenerList
 
     @tags{Core}
 */
@@ -98,11 +80,11 @@ public:
 
     //==============================================================================
     /** Adds a listener to the list.
-        A listener can only be added once, so if the listener is already in the list,
-        this method has no effect.
+        A listener can only be added once, so if the listener is already in the list, this method
+        has no effect.
 
-        If a Listener is added during a callback, it is guaranteed not to be called
-        in the same iteration.
+        If a Listener is added during a callback, it is guaranteed not to be called in the same
+        iteration.
 
         @see remove
     */
@@ -119,8 +101,8 @@ public:
     /** Removes a listener from the list.
         If the listener wasn't in the list, this has no effect.
 
-        If a Listener is removed during a callback, it is guaranteed not to be
-        called if it hasn't already been called.
+        If a Listener is removed during a callback, it is guaranteed not to be called if it hasn't
+        already been called.
     */
     void remove (ListenerClass* listenerToRemove)
     {
@@ -150,22 +132,22 @@ public:
         ListenerList is destroyed, otherwise the ErasedScopeGuard may attempt to dereference a
         dangling pointer when it is destroyed, which will result in a crash.
     */
-    ErasedScopeGuard addScoped (ListenerClass& listenerToAdd)
+    [[nodiscard]] ErasedScopeGuard addScoped (ListenerClass& listenerToAdd)
     {
         add (&listenerToAdd);
         return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
     }
 
     /** Returns the number of registered listeners. */
-    int size() const noexcept                                { return ! initialised() ? 0 : listeners->size(); }
+    [[nodiscard]] int size() const noexcept                                { return ! initialised() ? 0 : listeners->size(); }
 
     /** Returns true if no listeners are registered, false otherwise. */
-    bool isEmpty() const noexcept                            { return ! initialised() || listeners->isEmpty(); }
+    [[nodiscard]] bool isEmpty() const noexcept                            { return ! initialised() || listeners->isEmpty(); }
 
     /** Clears the list.
 
-        If the ListenerList is cleared during a callback, it is guaranteed that
-        no more listeners will be called.
+        If the ListenerList is cleared during a callback, it is guaranteed that no more
+        listeners will be called.
     */
     void clear()
     {
@@ -181,7 +163,7 @@ public:
     }
 
     /** Returns true if the specified listener has been added to the list. */
-    bool contains (ListenerClass* listener) const noexcept
+    [[nodiscard]] bool contains (ListenerClass* listener) const noexcept
     {
         return initialised()
             && listeners->contains (listener);
@@ -191,12 +173,12 @@ public:
 
         Any attempt to mutate the array may result in undefined behaviour.
 
-        If the array uses a mutex/CriticalSection, reading from the array without first
-        obtaining the lock may potentially result in undefined behaviour.
+        If the array uses a mutex/CriticalSection, reading from the array without first obtaining
+        the lock may potentially result in undefined behaviour.
 
         @see add, remove, clear, contains
     */
-    const ArrayType& getListeners() const noexcept
+    [[nodiscard]] const ArrayType& getListeners() const noexcept
     {
         const_cast<ListenerList*> (this)->initialiseIfNeeded();
         return *listeners;
@@ -212,8 +194,8 @@ public:
                               std::forward<Callback> (callback));
     }
 
-    /** Calls an invokable object for each listener in the list, except for the
-        listener specified by listenerToExclude.
+    /** Calls an invokable object for each listener in the list, except for the listener specified
+        by listenerToExclude.
     */
     template <typename Callback>
     void callExcluding (ListenerClass* listenerToExclude, Callback&& callback)
@@ -224,8 +206,8 @@ public:
 
     }
 
-    /** Calls an invokable object for each listener in the list, additionally
-        checking the bail-out checker before each call.
+    /** Calls an invokable object for each listener in the list, additionally checking the bail-out
+        checker before each call.
 
         See the class description for info about writing a bail-out checker.
     */
@@ -237,9 +219,8 @@ public:
                               std::forward<Callback> (callback));
     }
 
-    /** Calls an invokable object for each listener in the list, except for the
-        listener specified by listenerToExclude, additionally checking the
-        bail-out checker before each call.
+    /** Calls an invokable object for each listener in the list, except for the listener specified
+        by listenerToExclude, additionally checking the bail-out checker before each call.
 
         See the class description for info about writing a bail-out checker.
     */
@@ -248,6 +229,16 @@ public:
                                const BailOutCheckerType& bailOutChecker,
                                Callback&& callback)
     {
+       #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+        const ScopedTryLock callCheckedExcludingLock (*callCheckedExcludingMutex);
+
+        // If you hit this assertion it means you're trying to call the listeners from multiple
+        // threads concurrently. If you need to do this either use a LightweightListenerList, for a
+        // lock free option, or a ThreadSafeListenerList if you also need the extra guarantees
+        // provided by ListenerList. See the class descriptions for more details.
+        jassert (callCheckedExcludingLock.isLocked());
+       #endif
+
         if (! initialised())
             return;
 
@@ -289,8 +280,8 @@ public:
                               std::forward<Args> (args)...);
     }
 
-    /** Calls a specific listener method for each listener in the list, except
-        for the listener specified by listenerToExclude.
+    /** Calls a specific listener method for each listener in the list, except for the listener
+        specified by listenerToExclude.
     */
     template <typename... MethodArgs, typename... Args>
     void callExcluding (ListenerClass* listenerToExclude,
@@ -404,6 +395,12 @@ private:
             std::this_thread::yield();
     }
 
+   #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+    // using a unique_ptr helps keep the size of this class down to prevent excessive stack sizes
+    // due to objects that contain a ListenerList being created on the stack
+    std::unique_ptr<CriticalSection> callCheckedExcludingMutex = std::make_unique<CriticalSection>();
+   #endif
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE (ListenerList)
 };
@@ -412,9 +409,255 @@ private:
 /**
     A thread safe version of the ListenerList class.
 
-    @see ListenerList
+    @see ListenerList, LightweightListenerList
+
+    @tags{Core}
 */
 template <typename ListenerClass>
 using ThreadSafeListenerList = ListenerList<ListenerClass, Array<ListenerClass*, CriticalSection>>;
+
+//==============================================================================
+/**
+    A lightweight version of the ListenerList that doesn't provide any guarantees when mutating the
+    list from a callback, but allows callbacks to be triggered concurrently without a mutex.
+
+    @see ListenerList, ThreadSafeListenerList
+
+    @tags{Core}
+*/
+template <typename ListenerClass>
+class LightweightListenerList
+{
+public:
+    //==============================================================================
+    /** Creates an empty list. */
+    LightweightListenerList() = default;
+
+    /** Destructor. */
+    ~LightweightListenerList()
+    {
+        // If you hit this jassert it means you're trying to delete the list while iterating through
+        // the listeners! If you need to handle this situation gracefully use a ListenerList or
+        // ThreadSafeListenerList.
+        jassert (numCallsInProgress == 0);
+    }
+
+    //==============================================================================
+    /** Adds a listener to the list.
+        A listener can only be added once, so if the listener is already in the list, this method
+        has no effect.
+
+        If you need to add a Listener during a callback, use the ListenerList type.
+
+        @see remove
+    */
+    void add (ListenerClass* listenerToAdd)
+    {
+        // If you hit this jassert it means you're trying to add a listener while iterating through
+        // the listeners! If you need to handle this situation gracefully use a ListenerList or
+        // ThreadSafeListenerList.
+        jassert (numCallsInProgress == 0);
+
+        if (listenerToAdd != nullptr)
+            listeners.addIfNotAlreadyThere (listenerToAdd);
+        else
+            jassertfalse; // Listeners can't be null pointers!
+    }
+
+    /** Removes a listener from the list.
+        If the listener wasn't in the list, this has no effect.
+
+        If you need to remove a Listener during a callback, use the ListenerList type.
+    */
+    void remove (ListenerClass* listenerToRemove)
+    {
+        // If you hit this jassert it means you're trying to remove a listener while iterating
+        // through the listeners! If you need to handle this situation gracefully use a ListenerList
+        // or ThreadSafeListenerList.
+        jassert (numCallsInProgress == 0);
+
+        jassert (listenerToRemove != nullptr); // Listeners can't be null pointers!
+
+        listeners.removeFirstMatchingValue (listenerToRemove);
+    }
+
+    /** Adds a listener that will be automatically removed when the Guard is destroyed.
+
+        Be very careful to ensure that the ErasedScopeGuard is destroyed or released before the
+        ListenerList is destroyed, otherwise the ErasedScopeGuard may attempt to dereference a
+        dangling pointer when it is destroyed, which will result in a crash.
+    */
+    [[nodiscard]] ErasedScopeGuard addScoped (ListenerClass& listenerToAdd)
+    {
+        add (&listenerToAdd);
+        return ErasedScopeGuard { [this, &listenerToAdd] { remove (&listenerToAdd); } };
+    }
+
+    /** Returns the number of registered listeners. */
+    [[nodiscard]] int size() const noexcept { return listeners.size(); }
+
+    /** Returns true if no listeners are registered, false otherwise. */
+    [[nodiscard]] bool isEmpty() const noexcept { return listeners.isEmpty(); }
+
+    /** Clears the list.
+
+        If you need to clear the list during a callback, use the ListenerList type.
+    */
+    void clear()
+    {
+        // If you hit this jassert it means you're trying to clear the listener list while iterating
+        // through the listeners! If you need to handle this situation gracefully use a ListenerList
+        // or ThreadSafeListenerList.
+        jassert (numCallsInProgress == 0);
+
+        listeners.clear();
+    }
+
+    /** Returns true if the specified listener has been added to the list. */
+    [[nodiscard]] bool contains (ListenerClass* listener) const noexcept
+    {
+        return listeners.contains (listener);
+    }
+
+    //==============================================================================
+    /** Calls an invokable object for each listener in the list. */
+    template <typename Callback>
+    void call (Callback&& callback) const
+    {
+        callCheckedExcluding (nullptr,
+                              DummyBailOutChecker{},
+                              std::forward<Callback> (callback));
+    }
+
+    /** Calls an invokable object for each listener in the list, except for the listener specified
+        by listenerToExclude.
+    */
+    template <typename Callback>
+    void callExcluding (ListenerClass* listenerToExclude, Callback&& callback) const
+    {
+        callCheckedExcluding (listenerToExclude,
+                              DummyBailOutChecker{},
+                              std::forward<Callback> (callback));
+
+    }
+
+    /** Calls an invokable object for each listener in the list, additionally checking the bail-out
+        checker before each call.
+
+        See the class description for info about writing a bail-out checker.
+    */
+    template <typename Callback, typename BailOutCheckerType>
+    void callChecked (const BailOutCheckerType& bailOutChecker, Callback&& callback) const
+    {
+        callCheckedExcluding (nullptr,
+                              bailOutChecker,
+                              std::forward<Callback> (callback));
+    }
+
+    /** Calls an invokable object for each listener in the list, except for the listener specified
+        by listenerToExclude, additionally checking the bail-out checker before each call.
+
+        See the class description for info about writing a bail-out checker.
+    */
+    template <typename Callback, typename BailOutCheckerType>
+    void callCheckedExcluding (ListenerClass* listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               Callback&& callback) const
+    {
+       #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+        ++numCallsInProgress;
+        const ScopeGuard decrementPerformingCallbackCount { [&] { --numCallsInProgress; }};
+       #endif
+
+        for (auto* listener : listeners)
+        {
+            if (bailOutChecker.shouldBailOut())
+                return;
+
+            if (listener == listenerToExclude)
+                continue;
+
+            callback (*listener);
+        }
+    }
+
+    //==============================================================================
+    /** Calls a specific listener method for each listener in the list. */
+    template <typename... MethodArgs, typename... Args>
+    void call (void (ListenerClass::*callbackFunction) (MethodArgs...), Args&&... args) const
+    {
+        callCheckedExcluding (nullptr,
+                              DummyBailOutChecker{},
+                              callbackFunction,
+                              std::forward<Args> (args)...);
+    }
+
+    /** Calls a specific listener method for each listener in the list, except for the listener
+        specified by listenerToExclude.
+    */
+    template <typename... MethodArgs, typename... Args>
+    void callExcluding (ListenerClass* listenerToExclude,
+                        void (ListenerClass::*callbackFunction) (MethodArgs...),
+                        Args&&... args) const
+    {
+        callCheckedExcluding (listenerToExclude,
+                              DummyBailOutChecker{},
+                              callbackFunction,
+                              std::forward<Args> (args)...);
+    }
+
+    /** Calls a specific listener method for each listener in the list, additionally checking the
+        bail-out checker before each call.
+
+        See the class description for info about writing a bail-out checker.
+    */
+    template <typename BailOutCheckerType, typename... MethodArgs, typename... Args>
+    void callChecked (const BailOutCheckerType& bailOutChecker,
+                      void (ListenerClass::*callbackFunction) (MethodArgs...),
+                      Args&&... args) const
+    {
+        callCheckedExcluding (nullptr,
+                              bailOutChecker,
+                              callbackFunction,
+                              std::forward<Args> (args)...);
+    }
+
+    /** Calls a specific listener method for each listener in the list, except for the listener
+        specified by listenerToExclude, additionally checking the bail-out checker before each call.
+
+        See the class description for info about writing a bail-out checker.
+    */
+    template <typename BailOutCheckerType, typename... MethodArgs, typename... Args>
+    void callCheckedExcluding (ListenerClass* listenerToExclude,
+                               const BailOutCheckerType& bailOutChecker,
+                               void (ListenerClass::*callbackFunction) (MethodArgs...),
+                               Args&&... args) const
+    {
+        callCheckedExcluding (listenerToExclude, bailOutChecker, [&] (ListenerClass& l)
+        {
+            (l.*callbackFunction) (args...);
+        });
+    }
+
+    //==============================================================================
+    /** A dummy bail-out checker that always returns false.
+        See the class description for info about writing a bail-out checker.
+    */
+    using DummyBailOutChecker = typename ListenerList<ListenerClass>::DummyBailOutChecker;
+
+    //==============================================================================
+    using ThisType      = LightweightListenerList<ListenerClass>;
+    using ListenerType  = ListenerClass;
+
+private:
+   #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
+    mutable std::atomic<int> numCallsInProgress { 0 };
+   #endif
+
+    Array<ListenerClass*> listeners;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE (LightweightListenerList)
+};
 
 } // namespace juce

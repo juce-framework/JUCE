@@ -1235,7 +1235,7 @@ private:
         //==============================================================================
         struct Listener
         {
-            virtual ~Listener() {};
+            virtual ~Listener() = default;
             virtual void bleDeviceAdded (const String& containerID) = 0;
             virtual void bleDeviceDisconnected (const String& containerID) = 0;
         };
