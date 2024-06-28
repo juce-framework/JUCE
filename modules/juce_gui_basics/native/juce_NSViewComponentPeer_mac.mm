@@ -185,6 +185,8 @@ public:
           isSharedWindow (viewToAttachTo != nil),
           lastRepaintTime (Time::getMillisecondCounter())
     {
+        UPDDManager::getInstance()->ensureConnected();
+        
         appFocusChangeCallback = appFocusChanged;
         isEventBlockedByModalComps = checkEventBlockedByModalComps;
 
@@ -2954,9 +2956,16 @@ bool KeyPress::isKeyCurrentlyDown (int keyCode)
 //==============================================================================
 bool detail::MouseInputSourceList::addSource()
 {
-    if (sources.size() == 0)
+    auto numSources = sources.size();
+
+    if (numSources == 0)
     {
         addSource (0, MouseInputSource::InputSourceType::mouse);
+        
+        if (UPDDManager::getInstance()->isUPDDAvailable()) {
+            addSource (1, MouseInputSource::InputSourceType::touch);
+        }
+        
         return true;
     }
 
@@ -2965,7 +2974,7 @@ bool detail::MouseInputSourceList::addSource()
 
 bool detail::MouseInputSourceList::canUseTouch() const
 {
-    return false;
+    return UPDDManager::getInstance()->isUPDDAvailable();
 }
 
 //==============================================================================
