@@ -210,22 +210,22 @@ String SystemStats::getComputerName()
 
 String SystemStats::getUserLanguage()
 {
-   #if JUCE_BSD
+   #if JUCE_GLIBC
+    return getLocaleValue (_NL_ADDRESS_LANG_AB);
+   #else
     if (auto langEnv = getenv ("LANG"))
         return String::fromUTF8 (langEnv).upToLastOccurrenceOf (".UTF-8", false, true);
 
     return {};
-   #else
-    return getLocaleValue (_NL_ADDRESS_LANG_AB);
    #endif
 }
 
 String SystemStats::getUserRegion()
 {
-   #if JUCE_BSD
-    return {};
-   #else
+   #if JUCE_GLIBC
     return getLocaleValue (_NL_ADDRESS_COUNTRY_AB2);
+   #else
+    return {};
    #endif
 }
 
