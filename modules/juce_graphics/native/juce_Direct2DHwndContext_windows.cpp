@@ -59,7 +59,6 @@ public:
             presentationBitmap = Direct2DBitmap::createBitmap (context,
                                                                Image::ARGB,
                                                                { (uint32) swapSize.getWidth(), (uint32) swapSize.getHeight() },
-                                                               swapSize.getWidth() * 4,
                                                                D2D1_BITMAP_OPTIONS_TARGET);
         }
 
