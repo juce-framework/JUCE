@@ -69,12 +69,6 @@ void AudioIODeviceType::callDeviceChangeListeners()
 #if JUCE_WINDOWS && JUCE_WASAPI
  AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI (WASAPIDeviceMode deviceMode)
  {
-     auto windowsVersion = SystemStats::getOperatingSystemType();
-
-     if (windowsVersion < SystemStats::WinVista
-         || (WasapiClasses::isLowLatencyMode (deviceMode) && windowsVersion < SystemStats::Windows10))
-         return nullptr;
-
      return new WasapiClasses::WASAPIAudioIODeviceType (deviceMode);
  }
 

@@ -342,7 +342,7 @@ private:
     }
 
     //==============================================================================
-    Array<URL> openDialogVistaAndUp()
+    Array<URL> openDialogWithoutPreview()
     {
         const auto getUrl = [] (IShellItem& item)
         {
@@ -431,7 +431,7 @@ private:
         return result;
     }
 
-    Array<URL> openDialogPreVista (bool async)
+    Array<URL> openDialogWithPreview (bool async)
     {
         Array<URL> selections;
 
@@ -546,13 +546,10 @@ private:
 
         const Remover remover (*this);
 
-        if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista
-            && customComponent == nullptr)
-        {
-            return openDialogVistaAndUp();
-        }
+        if (customComponent == nullptr)
+            return openDialogWithoutPreview();
 
-        return openDialogPreVista (async);
+        return openDialogWithPreview (async);
     }
 
     void run() override

@@ -187,8 +187,7 @@ public:
 
             /** Sets the background colour that WebView2 renders underneath all web content.
 
-                This colour must either be fully opaque or transparent. On Windows 7 this
-                colour must be opaque.
+                This colour must either be fully opaque or fully transparent.
             */
             [[nodiscard]] WinWebView2 withBackgroundColour (const Colour& colour) const
             {
