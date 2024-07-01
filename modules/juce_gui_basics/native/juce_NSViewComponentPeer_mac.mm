@@ -398,13 +398,8 @@ public:
         }
         else
         {
-            // Repaint behaviour of setFrame seemed to change in 10.11, and the drawing became synchronous,
-            // causing performance issues. But sending an async update causes flickering in older versions,
-            // hence this version check to use the old behaviour on pre 10.11 machines
-            static bool isPre10_11 = SystemStats::getOperatingSystemType() <= SystemStats::MacOSX_10_10;
-
             [window setFrame: [window frameRectForContentRect: flippedScreenRect (r)]
-                     display: isPre10_11];
+                     display: false];
         }
 
         if (! CGSizeEqualToSize (oldViewSize, r.size))
@@ -1962,13 +1957,9 @@ private:
 
     void setFullScreenSizeConstraints (const ComponentBoundsConstrainer& c)
     {
-        if (@available (macOS 10.11, *))
-        {
-            const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
-                                             0.0f);
-            [window setMinFullScreenContentSize: minSize];
-            [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
-        }
+        const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()), 0.0f);
+        [window setMinFullScreenContentSize: minSize];
+        [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
     }
 
     void displayLayer ([[maybe_unused]] CALayer* layer) override

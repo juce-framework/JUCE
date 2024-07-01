@@ -129,13 +129,10 @@ public:
             preview->addToDesktop (0, (void*) nsViewPreview);
             preview->setVisible (true);
 
-            if (@available (macOS 10.11, *))
+            if (! isSave)
             {
-                if (! isSave)
-                {
-                    auto* openPanel = static_cast<NSOpenPanel*> (panel);
-                    [openPanel setAccessoryViewDisclosed: YES];
-                }
+                auto* openPanel = static_cast<NSOpenPanel*> (panel);
+                [openPanel setAccessoryViewDisclosed: YES];
             }
         }
 

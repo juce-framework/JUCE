@@ -499,10 +499,7 @@ namespace AudioUnitFormatHelpers
 
     static bool isPluginAUv3 (const AudioComponentDescription& desc)
     {
-        if (@available (macOS 10.11, *))
-            return (desc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0;
-
-        return false;
+        return (desc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0;
     }
 }
 
@@ -580,17 +577,14 @@ static void createAudioUnit (VersionedAudioComponent versionedComponent, AudioUn
 {
     if (versionedComponent.isAUv3)
     {
-        if (@available (macOS 10.11, *))
-        {
-            AudioComponentInstantiate (versionedComponent.audioComponent,
-                                       kAudioComponentInstantiation_LoadOutOfProcess,
-                                       ^(AudioComponentInstance audioUnit, OSStatus err)
-                                       {
-                                           callback (audioUnit, err);
-                                       });
+        AudioComponentInstantiate (versionedComponent.audioComponent,
+                                   kAudioComponentInstantiation_LoadOutOfProcess,
+                                   ^(AudioComponentInstance audioUnit, OSStatus err)
+                                   {
+                                       callback (audioUnit, err);
+                                   });
 
-            return;
-        }
+        return;
     }
 
     AudioComponentInstance audioUnit;
@@ -2771,8 +2765,7 @@ private:
         {
             auto size = CGSizeZero;
 
-            if (@available (macOS 10.11, *))
-                size = [controller preferredContentSize];
+            size = [controller preferredContentSize];
 
             if (approximatelyEqual (size.width, 0.0) || approximatelyEqual (size.height, 0.0))
                 size = controller.view.frame.size;

@@ -786,12 +786,12 @@ private:
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
-class API_AVAILABLE (macos (10.11)) WebBrowserComponent::Impl::Platform::WKWebViewImpl : public WebBrowserComponent::Impl::PlatformInterface,
-                                                                                        #if JUCE_MAC
-                                                                                         public NSViewComponent
-                                                                                        #else
-                                                                                         public UIViewComponent
-                                                                                        #endif
+class WebBrowserComponent::Impl::Platform::WKWebViewImpl : public WebBrowserComponent::Impl::PlatformInterface,
+                                                          #if JUCE_MAC
+                                                           public NSViewComponent
+                                                          #else
+                                                           public UIViewComponent
+                                                          #endif
 {
 public:
     WKWebViewImpl (WebBrowserComponent::Impl& implIn,
@@ -1085,14 +1085,7 @@ auto WebBrowserComponent::Impl::createAndInitPlatformDependentPart (WebBrowserCo
                                                                     const StringArray& userScripts)
     -> std::unique_ptr<PlatformInterface>
 {
-    if (@available (macOS 10.11, *))
-        return std::make_unique<Platform::WKWebViewImpl> (impl, options, userScripts);
-
-  #if JUCE_MAC
-    return std::make_unique<Platform::WebViewImpl> (impl, options.getUserAgent());
-  #endif
-
-    return {};
+    return std::make_unique<Platform::WKWebViewImpl> (impl, options, userScripts);
 }
 
 //==============================================================================
