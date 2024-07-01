@@ -1113,21 +1113,20 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
     // The D2D bitmap brush will extend past the boundaries of sourceImage, so clip
     // to the sourceImage bounds
     auto brushTransform = currentState->currentTransform.getTransformWith (transform);
-    {
-        if (D2DHelpers::isTransformAxisAligned (brushTransform))
-        {
-            currentState->pushAliasedAxisAlignedClipLayer (sourceImage.getBounds().toFloat().transformedBy (brushTransform));
-        }
-        else
-        {
-            const auto sourceImageRectF = D2DUtilities::toRECT_F (sourceImage.getBounds());
-            ComSmartPtr<ID2D1RectangleGeometry> geometry;
 
-            if (const auto hr = getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (sourceImageRectF, geometry.resetAndGetPointerAddress());
-                SUCCEEDED (hr) && geometry != nullptr)
-            {
-                currentState->pushTransformedRectangleGeometryClipLayer (geometry, brushTransform);
-            }
+    if (D2DHelpers::isTransformAxisAligned (brushTransform))
+    {
+        currentState->pushAliasedAxisAlignedClipLayer (sourceImage.getBounds().toFloat().transformedBy (brushTransform));
+    }
+    else
+    {
+        const auto sourceImageRectF = D2DUtilities::toRECT_F (sourceImage.getBounds());
+        ComSmartPtr<ID2D1RectangleGeometry> geometry;
+
+        if (const auto hr = getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (sourceImageRectF, geometry.resetAndGetPointerAddress());
+            SUCCEEDED (hr) && geometry != nullptr)
+        {
+            currentState->pushTransformedRectangleGeometryClipLayer (geometry, brushTransform);
         }
     }
 
