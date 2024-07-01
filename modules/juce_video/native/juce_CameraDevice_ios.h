@@ -498,11 +498,48 @@ private:
             SessionDelegateClass()  : ObjCClass<NSObject> ("SessionDelegateClass_")
             {
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-                addMethod (@selector (sessionDidStartRunning:),   started);
-                addMethod (@selector (sessionDidStopRunning:),    stopped);
-                addMethod (@selector (runtimeError:),             runtimeError);
-                addMethod (@selector (sessionWasInterrupted:),    interrupted);
-                addMethod (@selector (sessionInterruptionEnded:), interruptionEnded);
+                addMethod (@selector (sessionDidStartRunning:),
+                           [] (id self, SEL, [[maybe_unused]] NSNotification* notification)
+                           {
+                               JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
+
+                               dispatch_async (dispatch_get_main_queue(),
+                                               ^{
+                                                   getOwner (self).cameraSessionStarted();
+                                               });
+                           });
+
+                addMethod (@selector (sessionDidStopRunning:),
+                           [] (id, SEL, [[maybe_unused]] NSNotification* notification)
+                           {
+                               JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
+                           });
+
+                addMethod (@selector (runtimeError:),
+                           [] (id self, SEL, NSNotification* notification)
+                           {
+                               JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
+
+                               dispatch_async (dispatch_get_main_queue(),
+                                               ^{
+                                                   NSError* error = notification.userInfo[AVCaptureSessionErrorKey];
+                                                   auto errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
+                                                   getOwner (self).cameraSessionRuntimeError (errorString);
+                                               });
+                           });
+
+                addMethod (@selector (sessionWasInterrupted:),
+                           [] (id, SEL, [[maybe_unused]] NSNotification* notification)
+                           {
+                               JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
+                           });
+
+                addMethod (@selector (sessionInterruptionEnded:),
+                           [] (id, SEL, [[maybe_unused]] NSNotification* notification)
+                           {
+                               JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
+                           });
+
                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<CaptureSession*> ("owner");
@@ -513,45 +550,6 @@ private:
             //==============================================================================
             static CaptureSession& getOwner (id self)         { return *getIvar<CaptureSession*> (self, "owner"); }
             static void setOwner (id self, CaptureSession* s) { object_setInstanceVariable (self, "owner", s); }
-
-        private:
-            //==============================================================================
-            static void started (id self, SEL, [[maybe_unused]] NSNotification* notification)
-            {
-                JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-
-                dispatch_async (dispatch_get_main_queue(),
-                                ^{
-                                    getOwner (self).cameraSessionStarted();
-                                });
-            }
-
-            static void stopped (id, SEL, [[maybe_unused]] NSNotification* notification)
-            {
-                JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-            }
-
-            static void runtimeError (id self, SEL, NSNotification* notification)
-            {
-                JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-
-                dispatch_async (dispatch_get_main_queue(),
-                                ^{
-                                    NSError* error = notification.userInfo[AVCaptureSessionErrorKey];
-                                    auto errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-                                    getOwner (self).cameraSessionRuntimeError (errorString);
-                                });
-            }
-
-            static void interrupted (id, SEL, [[maybe_unused]] NSNotification* notification)
-            {
-                JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-            }
-
-            static void interruptionEnded (id, SEL, [[maybe_unused]] NSNotification* notification)
-            {
-                JUCE_CAMERA_LOG (nsStringToJuce ([notification description]));
-            }
         };
 
         //==============================================================================
@@ -715,12 +713,61 @@ private:
             public:
                 PhotoOutputDelegateClass() : ObjCClass<NSObject> ("PhotoOutputDelegateClass_")
                 {
-                    addMethod (@selector (captureOutput:willBeginCaptureForResolvedSettings:),       willBeginCaptureForSettings);
-                    addMethod (@selector (captureOutput:willCapturePhotoForResolvedSettings:),       willCaptureForSettings);
-                    addMethod (@selector (captureOutput:didCapturePhotoForResolvedSettings:),        didCaptureForSettings);
-                    addMethod (@selector (captureOutput:didFinishCaptureForResolvedSettings:error:), didFinishCaptureForSettings);
+                    addMethod (@selector (captureOutput:willBeginCaptureForResolvedSettings:),
+                               [] (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*)
+                               {
+                                   JUCE_CAMERA_LOG ("willBeginCaptureForSettings()");
+                               });
 
-                    addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:), didFinishProcessingPhoto);
+                    addMethod (@selector (captureOutput:willCapturePhotoForResolvedSettings:),
+                               [] (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*)
+                               {
+                                   JUCE_CAMERA_LOG ("willCaptureForSettings()");
+                               });
+
+                    addMethod (@selector (captureOutput:didCapturePhotoForResolvedSettings:),
+                               [] (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*)
+                               {
+                                   JUCE_CAMERA_LOG ("didCaptureForSettings()");
+                               });
+
+                    addMethod (@selector (captureOutput:didFinishCaptureForResolvedSettings:error:),
+                               [] (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*, NSError* error)
+                               {
+                                   [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
+
+                                   JUCE_CAMERA_LOG ("didFinishCaptureForSettings(), error = " + errorString);
+                               });
+
+                    addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:),
+                               [] (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* capturePhoto, NSError* error)
+                               {
+                                   getOwner (self).takingPicture = false;
+
+                                   [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
+
+                                   JUCE_CAMERA_LOG ("didFinishProcessingPhoto(), error = " + errorString);
+
+                                   if (error != nil)
+                                   {
+                                       JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
+                                       jassertfalse;
+                                       return;
+                                   }
+
+                                   auto* imageOrientation = (NSNumber *) capturePhoto.metadata[(NSString*) kCGImagePropertyOrientation];
+
+                                   auto* uiImage = getImageWithCorrectOrientation ((CGImagePropertyOrientation) imageOrientation.unsignedIntValue,
+                                   [capturePhoto CGImageRepresentation]);
+
+                                   auto* imageData = UIImageJPEGRepresentation (uiImage, 0.f);
+
+                                   auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
+
+                                   getOwner (self).callListeners (image);
+
+                                   MessageManager::callAsync ([self, image]() { getOwner (self).notifyPictureTaken (image); });
+                               });
 
                     addIvar<StillPictureTaker*> ("owner");
 
@@ -732,57 +779,6 @@ private:
                 static void setOwner (id self, StillPictureTaker* t) { object_setInstanceVariable (self, "owner", t); }
 
             private:
-                static void willBeginCaptureForSettings (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*)
-                {
-                    JUCE_CAMERA_LOG ("willBeginCaptureForSettings()");
-                }
-
-                static void willCaptureForSettings (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*)
-                {
-                    JUCE_CAMERA_LOG ("willCaptureForSettings()");
-                }
-
-                static void didCaptureForSettings (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*)
-                {
-                    JUCE_CAMERA_LOG ("didCaptureForSettings()");
-                }
-
-                static void didFinishCaptureForSettings (id, SEL, AVCapturePhotoOutput*, AVCaptureResolvedPhotoSettings*, NSError* error)
-                {
-                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-
-                    JUCE_CAMERA_LOG ("didFinishCaptureForSettings(), error = " + errorString);
-                }
-
-                static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* capturePhoto, NSError* error)
-                {
-                    getOwner (self).takingPicture = false;
-
-                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-
-                    JUCE_CAMERA_LOG ("didFinishProcessingPhoto(), error = " + errorString);
-
-                    if (error != nil)
-                    {
-                        JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
-                        jassertfalse;
-                        return;
-                    }
-
-                    auto* imageOrientation = (NSNumber *) capturePhoto.metadata[(NSString*) kCGImagePropertyOrientation];
-
-                    auto* uiImage = getImageWithCorrectOrientation ((CGImagePropertyOrientation) imageOrientation.unsignedIntValue,
-                                                                    [capturePhoto CGImageRepresentation]);
-
-                    auto* imageData = UIImageJPEGRepresentation (uiImage, 0.f);
-
-                    auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
-
-                    getOwner (self).callListeners (image);
-
-                    MessageManager::callAsync ([self, image]() { getOwner (self).notifyPictureTaken (image); });
-                }
-
                 static UIImage* getImageWithCorrectOrientation (CGImagePropertyOrientation imageOrientation,
                                                                 CGImageRef imageData)
                 {
@@ -997,8 +993,36 @@ private:
             {
                 FileOutputRecordingDelegateClass()  : ObjCClass<NSObject<AVCaptureFileOutputRecordingDelegate>> ("FileOutputRecordingDelegateClass_")
                 {
-                    addMethod (@selector (captureOutput:didStartRecordingToOutputFileAtURL:fromConnections:),        started);
-                    addMethod (@selector (captureOutput:didFinishRecordingToOutputFileAtURL:fromConnections:error:), stopped);
+                    addMethod (@selector (captureOutput:didStartRecordingToOutputFileAtURL:fromConnections:),
+                               [] (id self, SEL, AVCaptureFileOutput*, NSURL*, NSArray<AVCaptureConnection*>*)
+                               {
+                                   JUCE_CAMERA_LOG ("Started recording");
+
+                                   getOwner (self).firstRecordedFrameTimeMs.set (Time::getCurrentTime().toMilliseconds());
+                                   getOwner (self).recordingInProgress = true;
+                               });
+
+                    addMethod (@selector (captureOutput:didFinishRecordingToOutputFileAtURL:fromConnections:error:),
+                               [] (id self, SEL, AVCaptureFileOutput*, NSURL*, NSArray<AVCaptureConnection*>*, NSError* error)
+                               {
+                                   String errorString;
+                                   bool recordingPlayable = true;
+
+                                   // There might have been an error in the recording, yet there may be a playable file...
+                                   if ([error code] != noErr)
+                                   {
+                                       id value = [[error userInfo] objectForKey: AVErrorRecordingSuccessfullyFinishedKey];
+
+                                       if (value != nil && ! [value boolValue])
+                                       recordingPlayable = false;
+
+                                       errorString = nsStringToJuce (error.localizedDescription) + ", playable: " + String ((int) recordingPlayable);
+                                   }
+
+                                   JUCE_CAMERA_LOG ("Stopped recording, error = " + errorString);
+
+                                   getOwner (self).recordingInProgress = false;
+                               });
 
                     addIvar<VideoRecorder*> ("owner");
 
@@ -1008,36 +1032,6 @@ private:
                 //==============================================================================
                 static VideoRecorder& getOwner (id self)         { return *getIvar<VideoRecorder*> (self, "owner"); }
                 static void setOwner (id self, VideoRecorder* r) { object_setInstanceVariable (self, "owner", r); }
-
-            private:
-                static void started (id self, SEL, AVCaptureFileOutput*, NSURL*, NSArray<AVCaptureConnection*>*)
-                {
-                    JUCE_CAMERA_LOG ("Started recording");
-
-                    getOwner (self).firstRecordedFrameTimeMs.set (Time::getCurrentTime().toMilliseconds());
-                    getOwner (self).recordingInProgress = true;
-                }
-
-                static void stopped (id self, SEL, AVCaptureFileOutput*, NSURL*, NSArray<AVCaptureConnection*>*, NSError* error)
-                {
-                    String errorString;
-                    bool recordingPlayable = true;
-
-                    // There might have been an error in the recording, yet there may be a playable file...
-                    if ([error code] != noErr)
-                    {
-                        id value = [[error userInfo] objectForKey: AVErrorRecordingSuccessfullyFinishedKey];
-
-                        if (value != nil && ! [value boolValue])
-                            recordingPlayable = false;
-
-                        errorString = nsStringToJuce (error.localizedDescription) + ", playable: " + String ((int) recordingPlayable);
-                    }
-
-                    JUCE_CAMERA_LOG ("Stopped recording, error = " + errorString);
-
-                    getOwner (self).recordingInProgress = false;
-                }
             };
 
             AVCaptureMovieFileOutput* movieFileOutput;
@@ -1177,24 +1171,23 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
     {
         JuceCameraDeviceViewerClass()  : ObjCClass<UIView> ("JuceCameraDeviceViewerClass_")
         {
-            addMethod (@selector (layoutSubviews), layoutSubviews);
+            addMethod (@selector (layoutSubviews),
+                       [] (id self, SEL)
+                       {
+                           sendSuperclassMessage<void> (self, @selector (layoutSubviews));
+
+                           UIView* asUIView = (UIView*) self;
+
+                           updateOrientation (self);
+
+                           if (auto* previewLayer = getPreviewLayer (self))
+                               previewLayer.frame = asUIView.bounds;
+                       });
 
             registerClass();
         }
 
     private:
-        static void layoutSubviews (id self, SEL)
-        {
-            sendSuperclassMessage<void> (self, @selector (layoutSubviews));
-
-            UIView* asUIView = (UIView*) self;
-
-            updateOrientation (self);
-
-            if (auto* previewLayer = getPreviewLayer (self))
-                previewLayer.frame = asUIView.bounds;
-        }
-
         static AVCaptureVideoPreviewLayer* getPreviewLayer (id self)
         {
             UIView* asUIView = (UIView*) self;
