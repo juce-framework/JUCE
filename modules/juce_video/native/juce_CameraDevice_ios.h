@@ -154,8 +154,7 @@ private:
 
         [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInDualCamera];
 
-        if (@available (iOS 11.1, *))
-            [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInTrueDepthCamera];
+        [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInTrueDepthCamera];
 
         auto discoverySession = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes: deviceTypes.get()
                                                                                        mediaType: AVMediaTypeVideo
@@ -208,12 +207,9 @@ private:
         JUCE_CAMERA_LOG ("Device type: " + nsStringToJuce (device.deviceType));
         JUCE_CAMERA_LOG ("Locking focus with custom lens position supported: " + String ((int)device.lockingFocusWithCustomLensPositionSupported));
 
-        if (@available (iOS 11.0, *))
-        {
-            JUCE_CAMERA_LOG ("Min available video zoom factor: " + String (device.minAvailableVideoZoomFactor));
-            JUCE_CAMERA_LOG ("Max available video zoom factor: " + String (device.maxAvailableVideoZoomFactor));
-            JUCE_CAMERA_LOG ("Dual camera switch over video zoom factor: " + String (device.dualCameraSwitchOverVideoZoomFactor));
-        }
+        JUCE_CAMERA_LOG ("Min available video zoom factor: " + String (device.minAvailableVideoZoomFactor));
+        JUCE_CAMERA_LOG ("Max available video zoom factor: " + String (device.maxAvailableVideoZoomFactor));
+        JUCE_CAMERA_LOG ("Dual camera switch over video zoom factor: " + String (device.dualCameraSwitchOverVideoZoomFactor));
 
         JUCE_CAMERA_LOG ("Capture formats start-------------------");
         for (AVCaptureDeviceFormat* format in device.formats)
@@ -275,11 +271,8 @@ private:
         JUCE_CAMERA_LOG ("Cinematic video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeCinematic]));
         JUCE_CAMERA_LOG ("Auto video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeAuto]));
 
-        if (@available (iOS 11.0, *))
-        {
-            JUCE_CAMERA_LOG ("Min zoom factor for depth data delivery: " + String (format.videoMinZoomFactorForDepthDataDelivery));
-            JUCE_CAMERA_LOG ("Max zoom factor for depth data delivery: " + String (format.videoMaxZoomFactorForDepthDataDelivery));
-        }
+        JUCE_CAMERA_LOG ("Min zoom factor for depth data delivery: " + String (format.videoMinZoomFactorForDepthDataDelivery));
+        JUCE_CAMERA_LOG ("Max zoom factor for depth data delivery: " + String (format.videoMaxZoomFactorForDepthDataDelivery));
     }
 
     static String getHighResStillImgDimensionsString (CMVideoDimensions d)
@@ -663,34 +656,30 @@ private:
                     JUCE_CAMERA_LOG ("Lens stabilization during bracketed capture supported: " + String ((int) photoOutput.lensStabilizationDuringBracketedCaptureSupported));
                     JUCE_CAMERA_LOG ("Live photo capture supported: " + String ((int) photoOutput.livePhotoCaptureSupported));
 
+                    typesString.clear();
 
-                    if (@available (iOS 11.0, *))
-                    {
-                        typesString.clear();
+                    for (AVFileType type in photoOutput.availablePhotoFileTypes)
+                        typesString << nsStringToJuce (type) << " ";
 
-                        for (AVFileType type in photoOutput.availablePhotoFileTypes)
-                            typesString << nsStringToJuce (type) << " ";
+                    JUCE_CAMERA_LOG ("Available photo file types: " + typesString);
 
-                        JUCE_CAMERA_LOG ("Available photo file types: " + typesString);
+                    typesString.clear();
 
-                        typesString.clear();
+                    for (AVFileType type in photoOutput.availableRawPhotoFileTypes)
+                        typesString << nsStringToJuce (type) << " ";
 
-                        for (AVFileType type in photoOutput.availableRawPhotoFileTypes)
-                            typesString << nsStringToJuce (type) << " ";
+                    JUCE_CAMERA_LOG ("Available RAW photo file types: " + typesString);
 
-                        JUCE_CAMERA_LOG ("Available RAW photo file types: " + typesString);
+                    typesString.clear();
 
-                        typesString.clear();
+                    for (AVFileType type in photoOutput.availableLivePhotoVideoCodecTypes)
+                        typesString << nsStringToJuce (type) << " ";
 
-                        for (AVFileType type in photoOutput.availableLivePhotoVideoCodecTypes)
-                            typesString << nsStringToJuce (type) << " ";
+                    JUCE_CAMERA_LOG ("Available live photo video codec types: " + typesString);
 
-                        JUCE_CAMERA_LOG ("Available live photo video codec types: " + typesString);
-
-                        JUCE_CAMERA_LOG ("Dual camera dual photo delivery supported: " + String ((int) photoOutput.dualCameraDualPhotoDeliverySupported));
-                        JUCE_CAMERA_LOG ("Camera calibration data delivery supported: " + String ((int) photoOutput.cameraCalibrationDataDeliverySupported));
-                        JUCE_CAMERA_LOG ("Depth data delivery supported: " + String ((int) photoOutput.depthDataDeliverySupported));
-                    }
+                    JUCE_CAMERA_LOG ("Dual camera dual photo delivery supported: " + String ((int) photoOutput.dualCameraDualPhotoDeliverySupported));
+                    JUCE_CAMERA_LOG ("Camera calibration data delivery supported: " + String ((int) photoOutput.cameraCalibrationDataDeliverySupported));
+                    JUCE_CAMERA_LOG ("Depth data delivery supported: " + String ((int) photoOutput.depthDataDeliverySupported));
 
                     return;
                 }
@@ -731,14 +720,7 @@ private:
                     addMethod (@selector (captureOutput:didCapturePhotoForResolvedSettings:),        didCaptureForSettings);
                     addMethod (@selector (captureOutput:didFinishCaptureForResolvedSettings:error:), didFinishCaptureForSettings);
 
-                    if (@available (iOS 11.0, *))
-                    {
-                        addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:), didFinishProcessingPhoto);
-                    }
-                    else
-                    {
-                        addMethod (@selector (captureOutput:didFinishProcessingPhotoSampleBuffer:previewPhotoSampleBuffer:resolvedSettings:bracketSettings:error:), didFinishProcessingPhotoSampleBuffer);
-                    }
+                    addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:), didFinishProcessingPhoto);
 
                     addIvar<StillPictureTaker*> ("owner");
 
@@ -772,7 +754,6 @@ private:
                     JUCE_CAMERA_LOG ("didFinishCaptureForSettings(), error = " + errorString);
                 }
 
-                API_AVAILABLE (ios (11.0))
                 static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* capturePhoto, NSError* error)
                 {
                     getOwner (self).takingPicture = false;

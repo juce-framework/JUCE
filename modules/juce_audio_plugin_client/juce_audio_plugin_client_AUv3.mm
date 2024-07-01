@@ -547,7 +547,7 @@ public:
         hostMusicalContextCallback = [au musicalContextBlock];
         hostTransportStateCallback = [au transportStateBlock];
 
-        if (@available (macOS 10.13, iOS 11.0, *))
+        if (@available (macOS 10.13, *))
             midiOutputEventBlock = [au MIDIOutputEventBlock];
 
         reset();
@@ -853,7 +853,7 @@ private:
             addMethod (@selector (supportsMPE),                             [] (id self, SEL)                                                   { return _this (self)->getSupportsMPE() ? YES : NO; });
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-            if (@available (macOS 10.13, iOS 11.0, *))
+            if (@available (macOS 10.13, *))
                 addMethod (@selector (MIDIOutputNames),                     [] (id self, SEL)                                                   { return _this (self)->getMIDIOutputNames(); });
 
             //==============================================================================
@@ -875,7 +875,7 @@ private:
            #endif
 
             //==============================================================================
-            if (@available (macOS 10.13, iOS 11.0, *))
+            if (@available (macOS 10.13, *))
             {
                 addMethod (@selector (supportedViewConfigurations:), [] (id self, SEL, NSArray<AUAudioUnitViewConfiguration*>* configs)
                 {
@@ -1585,7 +1585,7 @@ private:
 
             // send MIDI
            #if JucePlugin_ProducesMidiOutput
-            if (@available (macOS 10.13, iOS 11.0, *))
+            if (@available (macOS 10.13, *))
             {
                 if (auto midiOut = midiOutputEventBlock)
                     for (const auto metadata : midiMessages)

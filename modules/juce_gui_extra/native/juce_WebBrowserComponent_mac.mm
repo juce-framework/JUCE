@@ -835,7 +835,7 @@ public:
 
         [[config.get() userContentController] addUserScript:script.get()];
 
-        if (@available (macOS 10.13, iOS 11.0, *))
+        if (@available (macOS 10.13, *))
         {
             if (browserOptions.getResourceProvider() != nullptr)
                 [config.get() setURLSchemeHandler:webViewDelegate.get() forURLScheme:@"juce"];

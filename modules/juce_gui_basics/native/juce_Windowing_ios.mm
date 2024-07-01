@@ -625,22 +625,11 @@ static Rectangle<int> getRecommendedWindowBounds()
 
 static BorderSize<int> getSafeAreaInsets (float masterScale)
 {
-    if (@available (iOS 11.0, *))
-    {
-        UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
-        return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
-                                                                          safeInsets.left,
-                                                                          safeInsets.bottom,
-                                                                          safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
-    }
-
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-    auto statusBarSize = [UIApplication sharedApplication].statusBarFrame.size;
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    auto statusBarHeight = jmin (statusBarSize.width, statusBarSize.height);
-
-    return { roundToInt (statusBarHeight / masterScale), 0, 0, 0 };
+    UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
+    return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
+                                                                      safeInsets.left,
+                                                                      safeInsets.bottom,
+                                                                      safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
 }
 
 //==============================================================================
