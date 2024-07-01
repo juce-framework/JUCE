@@ -367,41 +367,30 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
     void requestPermissionsWithSettings (const PushNotifications::Settings& settingsToUse)
     {
-        if (@available (macOS 10.7, *))
+        settings = settingsToUse;
+
+        NSRemoteNotificationType types = NSUInteger ((bool) settings.allowBadge);
+
+        if (@available (macOS 10.8, *))
         {
-            settings = settingsToUse;
-
-            NSRemoteNotificationType types = NSUInteger ((bool) settings.allowBadge);
-
-            if (@available (macOS 10.8, *))
-            {
-                types |= (NSUInteger) ((settings.allowSound ? NSRemoteNotificationTypeSound : 0)
-                                     | (settings.allowAlert ? NSRemoteNotificationTypeAlert : 0));
-            }
-
-            [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
+            types |= (NSUInteger) ((settings.allowSound ? NSRemoteNotificationTypeSound : 0)
+                                 | (settings.allowAlert ? NSRemoteNotificationTypeAlert : 0));
         }
+
+        [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
     }
 
     void requestSettingsUsed()
     {
-        if (@available (macOS 10.7, *))
-        {
-            settings.allowBadge = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeBadge;
+        settings.allowBadge = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeBadge;
 
-            if (@available (macOS 10.8, *))
-            {
-                settings.allowSound = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeSound;
-                settings.allowAlert = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeAlert;
-            }
-
-            owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
-        }
-        else
+        if (@available (macOS 10.8, *))
         {
-            // no settings available
-            owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
+            settings.allowSound = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeSound;
+            settings.allowAlert = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeAlert;
         }
+
+        owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
     }
 
     bool areNotificationsEnabled() const { return true; }
