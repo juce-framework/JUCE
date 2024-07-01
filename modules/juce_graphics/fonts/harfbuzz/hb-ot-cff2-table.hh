@@ -40,8 +40,6 @@ namespace CFF {
  */
 #define HB_OT_TAG_CFF2 HB_TAG('C','F','F','2')
 
-typedef CFFIndex<HBUINT32>  CFF2Index;
-
 typedef CFF2Index         CFF2CharStrings;
 typedef Subrs<HBUINT32>   CFF2Subrs;
 
@@ -111,7 +109,7 @@ struct CFF2FDSelect
   DEFINE_SIZE_MIN (2);
 };
 
-struct CFF2VariationStore
+struct CFF2ItemVariationStore
 {
   bool sanitize (hb_sanitize_context_t *c) const
   {
@@ -122,11 +120,11 @@ struct CFF2VariationStore
 		  varStore.sanitize (c));
   }
 
-  bool serialize (hb_serialize_context_t *c, const CFF2VariationStore *varStore)
+  bool serialize (hb_serialize_context_t *c, const CFF2ItemVariationStore *varStore)
   {
     TRACE_SERIALIZE (this);
     unsigned int size_ = varStore->get_size ();
-    CFF2VariationStore *dest = c->allocate_size<CFF2VariationStore> (size_);
+    CFF2ItemVariationStore *dest = c->allocate_size<CFF2ItemVariationStore> (size_);
     if (unlikely (!dest)) return_trace (false);
     hb_memcpy (dest, varStore, size_);
     return_trace (true);
@@ -135,9 +133,9 @@ struct CFF2VariationStore
   unsigned int get_size () const { return HBUINT16::static_size + size; }
 
   HBUINT16	size;
-  VariationStore  varStore;
+  ItemVariationStore  varStore;
 
-  DEFINE_SIZE_MIN (2 + VariationStore::min_size);
+  DEFINE_SIZE_MIN (2 + ItemVariationStore::min_size);
 };
 
 struct cff2_top_dict_values_t : top_dict_values_t<>
@@ -150,8 +148,8 @@ struct cff2_top_dict_values_t : top_dict_values_t<>
   }
   void fini () { top_dict_values_t<>::fini (); }
 
-  unsigned int  vstoreOffset;
-  unsigned int  FDSelectOffset;
+  int  vstoreOffset;
+  int  FDSelectOffset;
 };
 
 struct cff2_top_dict_opset_t : top_dict_opset_t<>
@@ -169,11 +167,11 @@ struct cff2_top_dict_opset_t : top_dict_opset_t<>
 	break;
 
       case OpCode_vstore:
-	dictval.vstoreOffset = env.argStack.pop_uint ();
+	dictval.vstoreOffset = env.argStack.pop_int ();
 	env.clear_args ();
 	break;
       case OpCode_FDSelect:
-	dictval.FDSelectOffset = env.argStack.pop_uint ();
+	dictval.FDSelectOffset = env.argStack.pop_int ();
 	env.clear_args ();
 	break;
 
@@ -241,7 +239,7 @@ struct cff2_private_dict_values_base_t : dict_values_t<VAL>
   }
   void fini () { dict_values_t<VAL>::fini (); }
 
-  unsigned int      subrsOffset;
+  int                subrsOffset;
   const CFF2Subrs   *localSubrs;
   unsigned int      ivs;
 };
@@ -295,7 +293,7 @@ struct cff2_private_dict_opset_t : dict_opset_t
 	env.clear_args ();
 	break;
       case OpCode_Subrs:
-	dictval.subrsOffset = env.argStack.pop_uint ();
+	dictval.subrsOffset = env.argStack.pop_int ();
 	env.clear_args ();
 	break;
       case OpCode_vsindexdict:
@@ -344,7 +342,7 @@ struct cff2_private_dict_opset_subset_t : dict_opset_t
 	return;
 
       case OpCode_Subrs:
-	dictval.subrsOffset = env.argStack.pop_uint ();
+	dictval.subrsOffset = env.argStack.pop_int ();
 	env.clear_args ();
 	break;
 
@@ -426,18 +424,15 @@ struct cff2
 	if (unlikely (!top_interp.interpret (topDict))) goto fail;
       }
 
-      globalSubrs = &StructAtOffset<CFF2Subrs> (cff2, cff2->topDict + cff2->topDictSize);
-      varStore = &StructAtOffsetOrNull<CFF2VariationStore> (cff2, topDict.vstoreOffset);
-      charStrings = &StructAtOffsetOrNull<CFF2CharStrings> (cff2, topDict.charStringsOffset);
-      fdArray = &StructAtOffsetOrNull<CFF2FDArray> (cff2, topDict.FDArrayOffset);
-      fdSelect = &StructAtOffsetOrNull<CFF2FDSelect> (cff2, topDict.FDSelectOffset);
+      globalSubrs = &StructAtOffsetOrNull<CFF2Subrs> (cff2, cff2->topDict + cff2->topDictSize, sc);
+      varStore = &StructAtOffsetOrNull<CFF2ItemVariationStore> (cff2, topDict.vstoreOffset, sc);
+      charStrings = &StructAtOffsetOrNull<CFF2CharStrings> (cff2, topDict.charStringsOffset, sc);
+      fdArray = &StructAtOffsetOrNull<CFF2FDArray> (cff2, topDict.FDArrayOffset, sc);
+      fdSelect = &StructAtOffsetOrNull<CFF2FDSelect> (cff2, topDict.FDSelectOffset, sc, fdArray->count);
 
-      if (((varStore != &Null (CFF2VariationStore)) && unlikely (!varStore->sanitize (&sc))) ||
-	  (charStrings == &Null (CFF2CharStrings)) || unlikely (!charStrings->sanitize (&sc)) ||
-	  (globalSubrs == &Null (CFF2Subrs)) || unlikely (!globalSubrs->sanitize (&sc)) ||
-	  (fdArray == &Null (CFF2FDArray)) || unlikely (!fdArray->sanitize (&sc)) ||
-	  !hb_barrier () ||
-	  (((fdSelect != &Null (CFF2FDSelect)) && unlikely (!fdSelect->sanitize (&sc, fdArray->count)))))
+      if (charStrings == &Null (CFF2CharStrings) ||
+	  globalSubrs == &Null (CFF2Subrs) ||
+	  fdArray == &Null (CFF2FDArray))
         goto fail;
 
       num_glyphs = charStrings->count;
@@ -462,19 +457,14 @@ struct cff2
 	font->init ();
 	if (unlikely (!font_interp.interpret (*font))) goto fail;
 
-	const hb_ubytes_t privDictStr = StructAtOffsetOrNull<UnsizedByteStr> (cff2, font->privateDictInfo.offset).as_ubytes (font->privateDictInfo.size);
-	if (unlikely (!privDictStr.sanitize (&sc))) goto fail;
-	hb_barrier ();
+	const hb_ubytes_t privDictStr = StructAtOffsetOrNull<UnsizedByteStr> (cff2, font->privateDictInfo.offset, sc, font->privateDictInfo.size).as_ubytes (font->privateDictInfo.size);
+	if (unlikely (privDictStr == (const unsigned char *) &Null (UnsizedByteStr))) goto fail;
 	cff2_priv_dict_interp_env_t env2 (privDictStr);
 	dict_interpreter_t<PRIVOPSET, PRIVDICTVAL, cff2_priv_dict_interp_env_t> priv_interp (env2);
 	privateDicts[i].init ();
 	if (unlikely (!priv_interp.interpret (privateDicts[i]))) goto fail;
 
-	privateDicts[i].localSubrs = &StructAtOffsetOrNull<CFF2Subrs> (&privDictStr[0], privateDicts[i].subrsOffset);
-	if (privateDicts[i].localSubrs != &Null (CFF2Subrs) &&
-	  unlikely (!privateDicts[i].localSubrs->sanitize (&sc)))
-	  goto fail;
-	hb_barrier ();
+	privateDicts[i].localSubrs = &StructAtOffsetOrNull<CFF2Subrs> (&privDictStr[0], privateDicts[i].subrsOffset, sc);
       }
 
       return;
@@ -509,7 +499,7 @@ struct cff2
     hb_blob_t			*blob = nullptr;
     cff2_top_dict_values_t	topDict;
     const CFF2Subrs		*globalSubrs = nullptr;
-    const CFF2VariationStore	*varStore = nullptr;
+    const CFF2ItemVariationStore	*varStore = nullptr;
     const CFF2CharStrings	*charStrings = nullptr;
     const CFF2FDArray		*fdArray = nullptr;
     const CFF2FDSelect		*fdSelect = nullptr;
@@ -530,6 +520,7 @@ struct cff2
 				  hb_glyph_extents_t *extents) const;
     HB_INTERNAL bool paint_glyph (hb_font_t *font, hb_codepoint_t glyph, hb_paint_funcs_t *funcs, void *data, hb_color_t foreground) const;
     HB_INTERNAL bool get_path (hb_font_t *font, hb_codepoint_t glyph, hb_draw_session_t &draw_session) const;
+    HB_INTERNAL bool get_path_at (hb_font_t *font, hb_codepoint_t glyph, hb_draw_session_t &draw_session, hb_array_t<const int> coords) const;
   };
 
   struct accelerator_subset_t : accelerator_templ_t<cff2_private_dict_opset_subset_t, cff2_private_dict_values_subset_t>
