@@ -418,7 +418,6 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, [[maybe_unused
             for (int i = 0; i < params.size(); ++i)
                 [paramArray addObject: juceStringToNS (params[i])];
 
-           #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_15
             if (@available (macOS 10.15, *))
             {
                 auto config = [NSWorkspaceOpenConfiguration configuration];
@@ -431,7 +430,6 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, [[maybe_unused
 
                 return true;
             }
-           #endif
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 

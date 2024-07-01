@@ -90,16 +90,12 @@ struct CoreAudioLayouts
                              List { kAudioChannelLayoutTag_Hexagonal, { left, right, leftSurroundRear, rightSurroundRear, centre, centreSurround } },
                              List { kAudioChannelLayoutTag_Octagonal, { left, right, leftSurround, rightSurround, centre, centreSurround, wideLeft, wideRight } },
 
-                            #if defined (MAC_OS_VERSION_11_0)
                              List { kAudioChannelLayoutTag_Atmos_5_1_4, { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, topRearLeft, topRearRight } },
                              List { kAudioChannelLayoutTag_Atmos_7_1_2, { left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topSideLeft, topSideRight } },
-                            #endif
 
-                            #if defined (MAC_OS_X_VERSION_10_15)
                              List { kAudioChannelLayoutTag_Atmos_5_1_2, { left, right, centre, LFE, leftSurround, rightSurround, topSideLeft, topSideRight } },
                              List { kAudioChannelLayoutTag_Atmos_7_1_4, { left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topFrontLeft, topFrontRight, topRearLeft, topRearRight } },
                              List { kAudioChannelLayoutTag_Atmos_9_1_6, { left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topSideLeft, topSideRight, topRearLeft, topRearRight } },
-                            #endif
 
                              // More uncommon layouts...
                              List { kAudioChannelLayoutTag_StereoHeadphones, { left, right } },

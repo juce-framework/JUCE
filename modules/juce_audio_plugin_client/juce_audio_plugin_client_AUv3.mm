@@ -37,10 +37,6 @@
 
 #if JucePlugin_Build_AUv3
 
-#if JUCE_MAC && ! (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11)
- #error AUv3 needs Deployment Target OS X 10.11 or higher to compile
-#endif
-
 #ifndef __OBJC2__
  #error AUv3 needs Objective-C 2 support (compile with 64-bit)
 #endif
