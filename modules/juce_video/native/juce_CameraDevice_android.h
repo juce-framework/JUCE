@@ -549,21 +549,14 @@ struct CameraDevice::Pimpl
 
     void continueOpenRequest (bool granted)
     {
-        if (getAndroidSDKVersion() >= 21)
+        if (granted)
         {
-            if (granted)
-            {
-                getEnv()->CallVoidMethod (getAppContext().get(), AndroidApplication.registerActivityLifecycleCallbacks, activityLifeListener.get());
-                scopedCameraDevice.reset (new ScopedCameraDevice (*this, cameraId, cameraManager, handler, getAutoFocusModeToUse()));
-            }
-            else
-            {
-                invokeCameraOpenCallback ("Camera permission not granted");
-            }
+            getEnv()->CallVoidMethod (getAppContext().get(), AndroidApplication.registerActivityLifecycleCallbacks, activityLifeListener.get());
+            scopedCameraDevice.reset (new ScopedCameraDevice (*this, cameraId, cameraManager, handler, getAutoFocusModeToUse()));
         }
         else
         {
-            invokeCameraOpenCallback ("Camera requires android sdk version 21 or greater");
+            invokeCameraOpenCallback ("Camera permission not granted");
         }
     }
 
@@ -636,9 +629,6 @@ struct CameraDevice::Pimpl
 
     static StringArray getAvailableDevices()
     {
-        if (getAndroidSDKVersion() < 21)
-            return StringArray(); // Camera requires SDK version 21 or later
-
         StringArray results;
 
         auto* env = getEnv();

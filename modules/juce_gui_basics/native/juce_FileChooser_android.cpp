@@ -59,7 +59,6 @@ public:
             currentFileChooser = this;
             auto* env = getEnv();
 
-            auto sdkVersion         = getAndroidSDKVersion();
             auto saveMode           = ((flags & FileBrowserComponent::saveMode) != 0);
             auto selectsDirectories = ((flags & FileBrowserComponent::canSelectDirectories) != 0);
             auto canSelectMultiple  = ((flags & FileBrowserComponent::canSelectMultipleItems) != 0);
@@ -67,24 +66,9 @@ public:
             // You cannot save a directory
             jassert (! (saveMode && selectsDirectories));
 
-            if (sdkVersion < 19)
-            {
-                // native save dialogs are only supported in Android versions >= 19
-                jassert (! saveMode);
-                saveMode = false;
-            }
-
-            if (sdkVersion < 21)
-            {
-                // native directory chooser dialogs are only supported in Android versions >= 21
-                jassert (! selectsDirectories);
-                selectsDirectories = false;
-            }
-
             const char* action = (selectsDirectories ? "android.intent.action.OPEN_DOCUMENT_TREE"
                                                      : (saveMode ? "android.intent.action.CREATE_DOCUMENT"
-                                                     : (sdkVersion >= 19 ? "android.intent.action.OPEN_DOCUMENT"
-                                                     : "android.intent.action.GET_CONTENT")));
+                                                                 : "android.intent.action.OPEN_DOCUMENT"));
 
 
             intent = GlobalRef (LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructWithString,
@@ -108,13 +92,10 @@ public:
                                            uri.get());
             }
 
-            if (canSelectMultiple && sdkVersion >= 18)
-            {
-                env->CallObjectMethod (intent.get(),
-                                       AndroidIntent.putExtraBool,
-                                       javaString ("android.intent.extra.ALLOW_MULTIPLE").get(),
-                                       true);
-            }
+            env->CallObjectMethod (intent.get(),
+                                   AndroidIntent.putExtraBool,
+                                   javaString ("android.intent.extra.ALLOW_MULTIPLE").get(),
+                                   canSelectMultiple);
 
             if (! selectsDirectories)
             {

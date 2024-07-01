@@ -84,10 +84,8 @@ namespace juce::AndroidHighPerformanceAudioHelpers
         if (canUseHighPerformanceAudioPath (nativeBufferSize, nativeBufferSize, (int) requestedSampleRate))
         {
             // see https://developer.android.com/ndk/guides/audio/opensl/opensl-prog-notes.html#sandp
-            // "For Android 4.2 (API level 17) and earlier, a buffer count of two or more is required
-            //  for lower latency. Beginning with Android 4.3 (API level 18), a buffer count of one
-            //  is sufficient for lower latency."
-            return (getAndroidSDKVersion() >= 18 ? 1 : 2);
+            // > Beginning with Android 4.3 (API level 18), a buffer count of one is sufficient for lower latency.
+            return 1;
         }
 
         // not using low-latency path so we can use the absolute minimum number of buffers to queue
