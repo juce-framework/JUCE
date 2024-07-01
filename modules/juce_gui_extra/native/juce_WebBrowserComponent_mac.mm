@@ -72,16 +72,7 @@ static NSMutableURLRequest* getRequestForURL (const String& url, const StringArr
 {
     NSString* urlString = juceStringToNS (url);
 
-     if (@available (macOS 10.9, *))
-     {
-         urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
-     }
-     else
-     {
-         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-         urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-     }
+     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
 
      if (NSURL* nsURL = [NSURL URLWithString: urlString])
      {

@@ -872,25 +872,13 @@ static void sendHandlerNotification (const AccessibilityHandler& handler,
     if (! areAnyAccessibilityClientsActive() || notification == NSAccessibilityNotificationName{})
         return;
 
-    if (@available (macOS 10.9, *))
+    if (id accessibilityElement = static_cast<id> (handler.getNativeImplementation()))
     {
-        if (id accessibilityElement = static_cast<id> (handler.getNativeImplementation()))
-        {
-            sendAccessibilityEvent (accessibilityElement, notification,
-                                    (notification == NSAccessibilityLayoutChangedNotification
-                                         ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
-                                         : nil));
-        }
+        sendAccessibilityEvent (accessibilityElement, notification,
+                                (notification == NSAccessibilityLayoutChangedNotification
+                                     ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
+                                     : nil));
     }
-}
-
-static NSAccessibilityNotificationName layoutChangedNotification()
-{
-    if (@available (macOS 10.9, *))
-        return NSAccessibilityLayoutChangedNotification;
-
-    static NSString* layoutChangedString = @"AXLayoutChanged";
-    return layoutChangedString;
 }
 
 void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler, Event eventType)
@@ -901,7 +889,7 @@ void detail::AccessibilityHelpers::notifyAccessibilityEvent (const Accessibility
         {
             case Event::elementCreated:         return NSAccessibilityCreatedNotification;
             case Event::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
-            case Event::elementMovedOrResized:  return layoutChangedNotification();
+            case Event::elementMovedOrResized:  return NSAccessibilityLayoutChangedNotification;
             case Event::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
             case Event::windowOpened:           return NSAccessibilityWindowCreatedNotification;
             case Event::windowClosed:           break;
@@ -925,7 +913,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
             case AccessibilityEvent::textChanged:
             case AccessibilityEvent::valueChanged:          return NSAccessibilityValueChangedNotification;
             case AccessibilityEvent::titleChanged:          return NSAccessibilityTitleChangedNotification;
-            case AccessibilityEvent::structureChanged:      return layoutChangedNotification();
+            case AccessibilityEvent::structureChanged:      return NSAccessibilityLayoutChangedNotification;
         }
 
         return NSAccessibilityNotificationName{};
@@ -939,31 +927,28 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
     if (! areAnyAccessibilityClientsActive())
         return;
 
-    if (@available (macOS 10.9, *))
+    auto nsPriority = [priority]
     {
-        auto nsPriority = [priority]
+        // The below doesn't get noticed by the @available check above
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability")
+
+        switch (priority)
         {
-            // The below doesn't get noticed by the @available check above
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability")
+            case AnnouncementPriority::low:    return NSAccessibilityPriorityLow;
+            case AnnouncementPriority::medium: return NSAccessibilityPriorityMedium;
+            case AnnouncementPriority::high:   return NSAccessibilityPriorityHigh;
+        }
 
-            switch (priority)
-            {
-                case AnnouncementPriority::low:    return NSAccessibilityPriorityLow;
-                case AnnouncementPriority::medium: return NSAccessibilityPriorityMedium;
-                case AnnouncementPriority::high:   return NSAccessibilityPriorityHigh;
-            }
+        jassertfalse;
+        return NSAccessibilityPriorityLow;
 
-            jassertfalse;
-            return NSAccessibilityPriorityLow;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }();
 
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }();
-
-        sendAccessibilityEvent (static_cast<id> ([NSApp mainWindow]),
-                                NSAccessibilityAnnouncementRequestedNotification,
-                                @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
-                                   NSAccessibilityPriorityKey:     @(nsPriority) });
-     }
+    sendAccessibilityEvent (static_cast<id> ([NSApp mainWindow]),
+                            NSAccessibilityAnnouncementRequestedNotification,
+                            @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
+                               NSAccessibilityPriorityKey:     @(nsPriority) });
 }
 
 } // namespace juce

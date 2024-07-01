@@ -60,15 +60,12 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                     {
                         if (auto* window = [view window])
                         {
-                            if (@available (macOS 10.9, *))
+                            [alertWindow.get() beginSheetModalForWindow: window completionHandler: ^(NSModalResponse result)
                             {
-                                [alertWindow.get() beginSheetModalForWindow: window completionHandler: ^(NSModalResponse result)
-                                {
-                                    onDone (result);
-                                }];
+                                onDone (result);
+                            }];
 
-                                return;
-                            }
+                            return;
                         }
                     }
                 }

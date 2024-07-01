@@ -261,8 +261,7 @@ public:
             if (! [window isOpaque])
                 [window setBackgroundColor: [NSColor clearColor]];
 
-           if (@available (macOS 10.9, *))
-                [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
+            [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
 
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 
@@ -2783,9 +2782,6 @@ struct JuceNSWindowClass final : public NSViewComponentPeerWrapper<ObjCClass<NSW
 
         addMethod (@selector (windowWillEnterFullScreen:), [] (id self, SEL, NSNotification*)
         {
-            if (SystemStats::getOperatingSystemType() <= SystemStats::MacOSX_10_9)
-                return;
-
             if (auto* owner = getOwner (self))
                 if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
                     [owner->window setStyleMask: NSWindowStyleMaskBorderless];

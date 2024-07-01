@@ -85,52 +85,49 @@ namespace PushNotificationsDelegateDetailsOsx
         if (n.actions.size() > 0)
             notification.actionButtonTitle = juceStringToNS (n.actions.getReference (0).title);
 
-        if (@available (macOS 10.9, *))
+        notification.identifier = juceStringToNS (n.identifier);
+
+        if (n.actions.size() > 0)
         {
-            notification.identifier = juceStringToNS (n.identifier);
+            notification.hasReplyButton = n.actions.getReference (0).style == Action::text;
+            notification.responsePlaceholder = juceStringToNS (n.actions.getReference (0).textInputPlaceholder);
+        }
 
-            if (n.actions.size() > 0)
+        auto* imageDirectory = n.icon.contains ("/")
+                             ? juceStringToNS (n.icon.upToLastOccurrenceOf ("/", false, true))
+                             : [NSString string];
+
+        auto* imageName      = juceStringToNS (n.icon.fromLastOccurrenceOf ("/", false, false)
+                                                     .upToLastOccurrenceOf (".", false, false));
+        auto* imageExtension = juceStringToNS (n.icon.fromLastOccurrenceOf (".", false, false));
+
+        NSString* imagePath = nil;
+
+        if ([imageDirectory length] == NSUInteger (0))
+        {
+            imagePath = [[NSBundle mainBundle] pathForResource: imageName
+                                                        ofType: imageExtension];
+        }
+        else
+        {
+            imagePath = [[NSBundle mainBundle] pathForResource: imageName
+                                                        ofType: imageExtension
+                                                   inDirectory: imageDirectory];
+        }
+
+        notification.contentImage = [[NSImage alloc] initWithContentsOfFile: imagePath];
+
+        if (@available (macOS 10.10, *))
+        {
+            if (n.actions.size() > 1)
             {
-                notification.hasReplyButton = n.actions.getReference (0).style == Action::text;
-                notification.responsePlaceholder = juceStringToNS (n.actions.getReference (0).textInputPlaceholder);
-            }
+                auto additionalActions = [NSMutableArray arrayWithCapacity: (NSUInteger) n.actions.size() - 1];
 
-            auto* imageDirectory = n.icon.contains ("/")
-                                 ? juceStringToNS (n.icon.upToLastOccurrenceOf ("/", false, true))
-                                 : [NSString string];
+                for (int a = 1; a < n.actions.size(); ++a)
+                    [additionalActions addObject: [NSUserNotificationAction actionWithIdentifier: juceStringToNS (n.actions[a].identifier)
+                                                                                           title: juceStringToNS (n.actions[a].title)]];
 
-            auto* imageName      = juceStringToNS (n.icon.fromLastOccurrenceOf ("/", false, false)
-                                                         .upToLastOccurrenceOf (".", false, false));
-            auto* imageExtension = juceStringToNS (n.icon.fromLastOccurrenceOf (".", false, false));
-
-            NSString* imagePath = nil;
-
-            if ([imageDirectory length] == NSUInteger (0))
-            {
-                imagePath = [[NSBundle mainBundle] pathForResource: imageName
-                                                            ofType: imageExtension];
-            }
-            else
-            {
-                imagePath = [[NSBundle mainBundle] pathForResource: imageName
-                                                            ofType: imageExtension
-                                                       inDirectory: imageDirectory];
-            }
-
-            notification.contentImage = [[NSImage alloc] initWithContentsOfFile: imagePath];
-
-            if (@available (macOS 10.10, *))
-            {
-                if (n.actions.size() > 1)
-                {
-                    auto additionalActions = [NSMutableArray arrayWithCapacity: (NSUInteger) n.actions.size() - 1];
-
-                    for (int a = 1; a < n.actions.size(); ++a)
-                        [additionalActions addObject: [NSUserNotificationAction actionWithIdentifier: juceStringToNS (n.actions[a].identifier)
-                                                                                               title: juceStringToNS (n.actions[a].title)]];
-
-                    notification.additionalActions = additionalActions;
-                }
+                notification.additionalActions = additionalActions;
             }
         }
 
@@ -165,13 +162,10 @@ namespace PushNotificationsDelegateDetailsOsx
         notif.soundToPlay = URL (nsStringToJuce (n.soundName));
         notif.properties  = nsDictionaryToVar (n.userInfo);
 
-        if (@available (macOS 10.9, *))
-        {
-            notif.identifier = nsStringToJuce (n.identifier);
+        notif.identifier = nsStringToJuce (n.identifier);
 
-            if (n.contentImage != nil)
-                notif.icon = nsStringToJuce ([n.contentImage name]);
-        }
+        if (n.contentImage != nil)
+            notif.icon = nsStringToJuce ([n.contentImage name]);
 
         Array<Action> actions;
 
@@ -180,14 +174,11 @@ namespace PushNotificationsDelegateDetailsOsx
             Action action;
             action.title = nsStringToJuce (n.actionButtonTitle);
 
-            if (@available (macOS 10.9, *))
-            {
-                if (n.hasReplyButton)
-                    action.style = Action::text;
+            if (n.hasReplyButton)
+                action.style = Action::text;
 
-                if (n.responsePlaceholder != nil)
-                    action.textInputPlaceholder = nsStringToJuce (n.responsePlaceholder);
-            }
+            if (n.responsePlaceholder != nil)
+                action.textInputPlaceholder = nsStringToJuce (n.responsePlaceholder);
 
             actions.add (action);
         }
