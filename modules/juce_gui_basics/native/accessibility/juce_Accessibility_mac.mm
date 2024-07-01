@@ -32,7 +32,6 @@
   ==============================================================================
 */
 
-API_AVAILABLE (macos (10.10))
 static void juceFreeAccessibilityPlatformSpecificData (NSAccessibilityElement<NSAccessibility>*)  {}
 
 namespace juce
@@ -45,12 +44,10 @@ class AccessibilityHandler::AccessibilityNativeImpl
 {
 public:
     explicit AccessibilityNativeImpl (AccessibilityHandler& handler)
+        : accessibilityElement (AccessibilityElement::create (handler))
     {
-        if (@available (macOS 10.10, *))
-            accessibilityElement = AccessibilityElement::create (handler);
     }
 
-    API_AVAILABLE (macos (10.10))
     NSAccessibilityElement<NSAccessibility>* getAccessibilityElement() const noexcept
     {
         return accessibilityElement.get();
@@ -58,20 +55,15 @@ public:
 
 private:
     //==============================================================================
-    class API_AVAILABLE (macos (10.10)) AccessibilityElement final : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
+    class AccessibilityElement final : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
     {
     public:
         static Holder create (AccessibilityHandler& handler)
         {
-            if (@available (macOS 10.10, *))
-            {
-                static AccessibilityElement cls;
-                Holder element ([cls.createInstance() init]);
-                object_setInstanceVariable (element.get(), "handler", &handler);
-                return element;
-            }
-
-            return {};
+            static AccessibilityElement cls;
+            Holder element ([cls.createInstance() init]);
+            object_setInstanceVariable (element.get(), "handler", &handler);
+            return element;
         }
 
     private:
@@ -825,7 +817,6 @@ private:
     };
 
     //==============================================================================
-    API_AVAILABLE (macos (10.10))
     AccessibilityElement::Holder accessibilityElement;
 
     //==============================================================================
@@ -835,10 +826,7 @@ private:
 //==============================================================================
 AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
 {
-    if (@available (macOS 10.10, *))
-        return (AccessibilityNativeHandle*) nativeImpl->getAccessibilityElement();
-
-    return nullptr;
+    return (AccessibilityNativeHandle*) nativeImpl->getAccessibilityElement();
 }
 
 static bool areAnyAccessibilityClientsActive()

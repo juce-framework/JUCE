@@ -250,8 +250,7 @@ public:
             [window setColorSpace: [NSColorSpace sRGBColorSpace]];
             setOwner (window, this);
 
-            if (@available (macOS 10.10, *))
-                [window setAccessibilityElement: YES];
+            [window setAccessibilityElement: YES];
 
             [window orderOut: nil];
             [window setDelegate: (id<NSWindowDelegate>) window];
@@ -954,16 +953,7 @@ public:
         if (r.size.width < 1.0f || r.size.height < 1.0f)
             return;
 
-        auto cg = []
-        {
-            if (@available (macOS 10.10, *))
-                return (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
-
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-            return (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }();
-
+        auto* cg = (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
         drawRectWithContext (cg, r);
     }
 
@@ -2863,10 +2853,7 @@ struct JuceNSWindowClass final : public NSViewComponentPeerWrapper<ObjCClass<NSW
 
         addMethod (@selector (accessibilitySubrole), [] (id self, SEL) -> NSAccessibilitySubrole
         {
-            if (@available (macOS 10.10, *))
-                return [getAccessibleChild (self) accessibilitySubrole];
-
-            return nil;
+            return [getAccessibleChild (self) accessibilitySubrole];
         });
 
         addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:), [] (id self, SEL, id /*window*/, NSEvent*, NSPoint, NSPasteboard*)

@@ -117,18 +117,15 @@ namespace PushNotificationsDelegateDetailsOsx
 
         notification.contentImage = [[NSImage alloc] initWithContentsOfFile: imagePath];
 
-        if (@available (macOS 10.10, *))
+        if (n.actions.size() > 1)
         {
-            if (n.actions.size() > 1)
-            {
-                auto additionalActions = [NSMutableArray arrayWithCapacity: (NSUInteger) n.actions.size() - 1];
+            auto additionalActions = [NSMutableArray arrayWithCapacity: (NSUInteger) n.actions.size() - 1];
 
-                for (int a = 1; a < n.actions.size(); ++a)
-                    [additionalActions addObject: [NSUserNotificationAction actionWithIdentifier: juceStringToNS (n.actions[a].identifier)
-                                                                                           title: juceStringToNS (n.actions[a].title)]];
+            for (int a = 1; a < n.actions.size(); ++a)
+                [additionalActions addObject: [NSUserNotificationAction actionWithIdentifier: juceStringToNS (n.actions[a].identifier)
+                                                                                       title: juceStringToNS (n.actions[a].title)]];
 
-                notification.additionalActions = additionalActions;
-            }
+            notification.additionalActions = additionalActions;
         }
 
         [notification autorelease];
@@ -183,18 +180,15 @@ namespace PushNotificationsDelegateDetailsOsx
             actions.add (action);
         }
 
-        if (@available (macOS 10.10, *))
+        if (n.additionalActions != nil)
         {
-            if (n.additionalActions != nil)
+            for (NSUserNotificationAction* a in n.additionalActions)
             {
-                for (NSUserNotificationAction* a in n.additionalActions)
-                {
-                    Action action;
-                    action.identifier = nsStringToJuce (a.identifier);
-                    action.title      = nsStringToJuce (a.title);
+                Action action;
+                action.identifier = nsStringToJuce (a.identifier);
+                action.title      = nsStringToJuce (a.title);
 
-                    actions.add (action);
-                }
+                actions.add (action);
             }
         }
 
@@ -503,9 +497,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         {
             const auto actionIdentifier = nsStringToJuce ([&]
             {
-                if (@available (macOS 10.10, *))
-                    if (notification.additionalActivationAction != nil)
-                        return notification.additionalActivationAction.identifier;
+                if (notification.additionalActivationAction != nil)
+                    return notification.additionalActivationAction.identifier;
 
                 return notification.actionButtonTitle;
             }());

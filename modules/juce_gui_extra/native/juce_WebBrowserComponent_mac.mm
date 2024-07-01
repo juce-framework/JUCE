@@ -37,35 +37,24 @@ namespace juce
 
 static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
 {
-    if (@available (macOS 10.10, *))
-    {
-        const auto parameterNames = url.getParameterNames();
-        const auto parameterValues = url.getParameterValues();
+    const auto parameterNames = url.getParameterNames();
+    const auto parameterValues = url.getParameterValues();
 
-        jassert (parameterNames.size() == parameterValues.size());
+    jassert (parameterNames.size() == parameterValues.size());
 
-        if (parameterNames.isEmpty())
-            return fileUrl;
+    if (parameterNames.isEmpty())
+        return fileUrl;
 
-        NSUniquePtr<NSURLComponents> components ([[NSURLComponents alloc] initWithURL: fileUrl resolvingAgainstBaseURL: NO]);
-        NSUniquePtr<NSMutableArray> queryItems ([[NSMutableArray alloc] init]);
+    NSUniquePtr<NSURLComponents> components ([[NSURLComponents alloc] initWithURL: fileUrl resolvingAgainstBaseURL: NO]);
+    NSUniquePtr<NSMutableArray> queryItems ([[NSMutableArray alloc] init]);
 
-        for (int i = 0; i < parameterNames.size(); ++i)
-            [queryItems.get() addObject: [NSURLQueryItem queryItemWithName: juceStringToNS (parameterNames[i])
-                                                                     value: juceStringToNS (parameterValues[i])]];
+    for (int i = 0; i < parameterNames.size(); ++i)
+        [queryItems.get() addObject: [NSURLQueryItem queryItemWithName: juceStringToNS (parameterNames[i])
+                                                                 value: juceStringToNS (parameterValues[i])]];
 
-        [components.get() setQueryItems: queryItems.get()];
+    [components.get() setQueryItems: queryItems.get()];
 
-        return [components.get() URL];
-    }
-
-    const auto queryString = url.getQueryString();
-
-    if (queryString.isNotEmpty())
-        if (NSString* fileUrlString = [fileUrl absoluteString])
-            return [NSURL URLWithString: [fileUrlString stringByAppendingString: juceStringToNS (queryString)]];
-
-    return fileUrl;
+    return [components.get() URL];
 }
 
 static NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
@@ -426,7 +415,7 @@ private:
     WebBrowserComponent::Options options;
 };
 
-struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass final : public ObjCClass<NSObject>
+struct WebViewDelegateClass final : public ObjCClass<NSObject>
 {
     WebViewDelegateClass()  : ObjCClass ("JUCEWebViewDelegate_")
     {

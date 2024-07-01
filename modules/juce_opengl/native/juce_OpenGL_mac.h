@@ -95,8 +95,7 @@ public:
                     return NSOpenGLProfileVersion3_2Core;
 
                 if (version != defaultGLVersion)
-                    if (@available (macOS 10.10, *))
-                        return NSOpenGLProfileVersion4_1Core;
+                    return NSOpenGLProfileVersion4_1Core;
 
                 return NSOpenGLProfileVersionLegacy;
             }(),

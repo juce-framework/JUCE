@@ -488,17 +488,8 @@ static void selectImageForDrawing (const Image& image)
 {
     [NSGraphicsContext saveGraphicsState];
 
-    if (@available (macOS 10.10, *))
-    {
-        [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithCGContext: juce_getImageContext (image)
-                                                                                      flipped: false]];
-        return;
-    }
-
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-    [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithGraphicsPort: juce_getImageContext (image)
-                                                                                     flipped: false]];
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    [NSGraphicsContext setCurrentContext: [NSGraphicsContext graphicsContextWithCGContext: juce_getImageContext (image)
+                                                                                  flipped: false]];
 }
 
 static void releaseImageAfterDrawing()

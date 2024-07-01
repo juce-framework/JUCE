@@ -44,7 +44,6 @@ namespace juce
  bool isIOSAppActive = true;
 #endif
 
-API_AVAILABLE (macos (10.10))
 static auto getNativeQOS (Thread::Priority priority)
 {
     switch (priority)
@@ -59,7 +58,6 @@ static auto getNativeQOS (Thread::Priority priority)
     return QOS_CLASS_DEFAULT;
 }
 
-API_AVAILABLE (macos (10.10))
 static auto getJucePriority (qos_class_t qos)
 {
     switch (qos)
@@ -132,10 +130,7 @@ bool Thread::createNativeThread (Priority priority)
 {
     PosixThreadAttribute attribute { threadStackSize };
 
-    if (@available (macos 10.10, *))
-        pthread_attr_set_qos_class_np (attribute.get(), getNativeQOS (priority), 0);
-    else
-        PosixSchedulerPriority::getNativeSchedulerAndPriority (realtimeOptions, priority).apply (attribute);
+    pthread_attr_set_qos_class_np (attribute.get(), getNativeQOS (priority), 0);
 
     struct ThreadData
     {
@@ -182,21 +177,7 @@ Thread::Priority Thread::getPriority() const
     jassert (Thread::getCurrentThreadId() == getThreadId());
 
     if (! isRealtime())
-    {
-        if (@available (macOS 10.10, *))
-            return getJucePriority (qos_class_self());
-
-        // fallback for older versions of macOS
-        const auto min = jmax (0, sched_get_priority_min (SCHED_OTHER));
-        const auto max = jmax (0, sched_get_priority_max (SCHED_OTHER));
-
-        if (min != 0 && max != 0)
-        {
-            const auto native = PosixSchedulerPriority::findCurrentSchedulerAndPriority().getPriority();
-            const auto mapped = jmap (native, min, max, 0, 4);
-            return ThreadPriorities::getJucePriority (mapped);
-        }
-    }
+        return getJucePriority (qos_class_self());
 
     return {};
 }
@@ -205,20 +186,7 @@ bool Thread::setPriority (Priority priority)
 {
     jassert (Thread::getCurrentThreadId() == getThreadId());
 
-    if (@available (macOS 10.10, *))
-        return pthread_set_qos_class_self_np (getNativeQOS (priority), 0) == 0;
-
-   #if JUCE_ARM
-    // M1 platforms should never reach this code!!!!!!
-    jassertfalse;
-   #endif
-
-    // Just in case older versions of macOS support SCHED_OTHER priorities.
-    const auto psp = PosixSchedulerPriority::getNativeSchedulerAndPriority ({}, priority);
-
-    struct sched_param param;
-    param.sched_priority = psp.getPriority();
-    return pthread_setschedparam (pthread_self(), psp.getScheduler(), &param) == 0;
+    return pthread_set_qos_class_self_np (getNativeQOS (priority), 0) == 0;
 }
 
 //==============================================================================
