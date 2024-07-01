@@ -1159,12 +1159,7 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
     if (auto* target = [self getTextInputTarget])
     {
         if (action == @selector (paste:))
-        {
-            if (@available (iOS 10, *))
-                return [[UIPasteboard generalPasteboard] hasStrings];
-
-            return [[UIPasteboard generalPasteboard] string] != nil;
-        }
+            return [[UIPasteboard generalPasteboard] hasStrings];
     }
 
     return [super canPerformAction: action withSender: sender];

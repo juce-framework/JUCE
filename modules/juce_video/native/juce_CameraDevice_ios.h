@@ -147,27 +147,21 @@ struct CameraDevice::Pimpl
 private:
     static NSArray<AVCaptureDevice*>* getDevices()
     {
-        if (@available (iOS 10.0, *))
-        {
-            std::unique_ptr<NSMutableArray<AVCaptureDeviceType>, NSObjectDeleter> deviceTypes ([[NSMutableArray alloc] initWithCapacity: 2]);
+        std::unique_ptr<NSMutableArray<AVCaptureDeviceType>, NSObjectDeleter> deviceTypes ([[NSMutableArray alloc] initWithCapacity: 2]);
 
-            [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInWideAngleCamera];
-            [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInTelephotoCamera];
+        [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInWideAngleCamera];
+        [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInTelephotoCamera];
 
-            if (@available (iOS 10.2, *))
-                [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInDualCamera];
+        [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInDualCamera];
 
-            if (@available (iOS 11.1, *))
-                [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInTrueDepthCamera];
+        if (@available (iOS 11.1, *))
+            [deviceTypes.get() addObject: AVCaptureDeviceTypeBuiltInTrueDepthCamera];
 
-            auto discoverySession = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes: deviceTypes.get()
-                                                                                           mediaType: AVMediaTypeVideo
-                                                                                            position: AVCaptureDevicePositionUnspecified];
+        auto discoverySession = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes: deviceTypes.get()
+                                                                                       mediaType: AVMediaTypeVideo
+                                                                                        position: AVCaptureDevicePositionUnspecified];
 
-            return [discoverySession devices];
-        }
-
-        return [AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo];
+        return [discoverySession devices];
     }
 
     //==============================================================================
@@ -211,11 +205,8 @@ private:
         JUCE_CAMERA_LOG ("Supports custom exposure: " + String ((int)[device isExposureModeSupported: AVCaptureExposureModeCustom]));
         JUCE_CAMERA_LOG ("Supports point of interest exposure: " + String ((int)device.exposurePointOfInterestSupported));
 
-        if (@available (iOS 10.0, *))
-        {
-            JUCE_CAMERA_LOG ("Device type: " + nsStringToJuce (device.deviceType));
-            JUCE_CAMERA_LOG ("Locking focus with custom lens position supported: " + String ((int)device.lockingFocusWithCustomLensPositionSupported));
-        }
+        JUCE_CAMERA_LOG ("Device type: " + nsStringToJuce (device.deviceType));
+        JUCE_CAMERA_LOG ("Locking focus with custom lens position supported: " + String ((int)device.lockingFocusWithCustomLensPositionSupported));
 
         if (@available (iOS 11.0, *))
         {
@@ -238,22 +229,19 @@ private:
     {
         JUCE_CAMERA_LOG ("Media type: " + nsStringToJuce (format.mediaType));
 
-        if (@available (iOS 10.0, *))
+        String colourSpaces;
+
+        for (NSNumber* number in format.supportedColorSpaces)
         {
-            String colourSpaces;
-
-            for (NSNumber* number in format.supportedColorSpaces)
+            switch ([number intValue])
             {
-                switch ([number intValue])
-                {
-                    case AVCaptureColorSpace_sRGB:   colourSpaces << "sRGB ";  break;
-                    case AVCaptureColorSpace_P3_D65: colourSpaces << "P3_D65 "; break;
-                    default: break;
-                }
+                case AVCaptureColorSpace_sRGB:   colourSpaces << "sRGB ";  break;
+                case AVCaptureColorSpace_P3_D65: colourSpaces << "P3_D65 "; break;
+                default: break;
             }
-
-            JUCE_CAMERA_LOG ("Supported colour spaces: " + colourSpaces);
         }
+
+        JUCE_CAMERA_LOG ("Supported colour spaces: " + colourSpaces);
 
         JUCE_CAMERA_LOG ("Video field of view: " + String (format.videoFieldOfView));
         JUCE_CAMERA_LOG ("Video max zoom factor: " + String (format.videoMaxZoomFactor));
@@ -582,12 +570,9 @@ private:
                   captureOutput (createCaptureOutput()),
                   photoOutputDelegate (nullptr)
             {
-                if (@available (iOS 10.0, *))
-                {
-                    static PhotoOutputDelegateClass cls;
-                    photoOutputDelegate.reset ([cls.createInstance() init]);
-                    PhotoOutputDelegateClass::setOwner (photoOutputDelegate.get(), this);
-                }
+                static PhotoOutputDelegateClass cls;
+                photoOutputDelegate.reset ([cls.createInstance() init]);
+                PhotoOutputDelegateClass::setOwner (photoOutputDelegate.get(), this);
 
                 captureSession.addOutputIfPossible (captureOutput);
             }
@@ -607,19 +592,16 @@ private:
 
                 if (auto* connection = findVideoConnection (captureOutput))
                 {
-                    if (@available (iOS 10.0, *))
+                    if ([captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
                     {
-                        if ([captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
-                        {
-                            auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
-                            auto outputConnection = [photoOutput connectionWithMediaType: AVMediaTypeVideo];
-                            outputConnection.videoOrientation = orientationToUse;
+                        auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
+                        auto outputConnection = [photoOutput connectionWithMediaType: AVMediaTypeVideo];
+                        outputConnection.videoOrientation = orientationToUse;
 
-                            [photoOutput capturePhotoWithSettings: [AVCapturePhotoSettings photoSettings]
-                                                         delegate: id<AVCapturePhotoCaptureDelegate> (photoOutputDelegate.get())];
+                        [photoOutput capturePhotoWithSettings: [AVCapturePhotoSettings photoSettings]
+                                                     delegate: id<AVCapturePhotoCaptureDelegate> (photoOutputDelegate.get())];
 
-                            return;
-                        }
+                        return;
                     }
 
                     auto* stillImageOutput = (AVCaptureStillImageOutput*) captureOutput;
@@ -657,66 +639,60 @@ private:
         private:
             static AVCaptureOutput* createCaptureOutput()
             {
-                if (@available (iOS 10.0, *))
-                    return [AVCapturePhotoOutput new];
-
-                return [AVCaptureStillImageOutput new];
+                return [AVCapturePhotoOutput new];
             }
 
             static void printImageOutputDebugInfo (AVCaptureOutput* captureOutput)
             {
-                if (@available (iOS 10.0, *))
+                if ([captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
                 {
-                    if ([captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
+                    auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
+
+                    String typesString;
+
+                    for (id type in photoOutput.availablePhotoCodecTypes)
+                        typesString << nsStringToJuce (type) << " ";
+
+                    JUCE_CAMERA_LOG ("Available image codec types: " + typesString);
+
+                    JUCE_CAMERA_LOG ("Still image stabilization supported: " + String ((int) photoOutput.stillImageStabilizationSupported));
+                    JUCE_CAMERA_LOG ("Dual camera fusion supported: " + String ((int) photoOutput.dualCameraFusionSupported));
+                    JUCE_CAMERA_LOG ("Supports flash: "      + String ((int) [photoOutput.supportedFlashModes containsObject: @(AVCaptureFlashModeOn)]));
+                    JUCE_CAMERA_LOG ("Supports auto flash: " + String ((int) [photoOutput.supportedFlashModes containsObject: @(AVCaptureFlashModeAuto)]));
+                    JUCE_CAMERA_LOG ("Max bracketed photo count: " + String (photoOutput.maxBracketedCapturePhotoCount));
+                    JUCE_CAMERA_LOG ("Lens stabilization during bracketed capture supported: " + String ((int) photoOutput.lensStabilizationDuringBracketedCaptureSupported));
+                    JUCE_CAMERA_LOG ("Live photo capture supported: " + String ((int) photoOutput.livePhotoCaptureSupported));
+
+
+                    if (@available (iOS 11.0, *))
                     {
-                        auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
+                        typesString.clear();
 
-                        String typesString;
-
-                        for (id type in photoOutput.availablePhotoCodecTypes)
+                        for (AVFileType type in photoOutput.availablePhotoFileTypes)
                             typesString << nsStringToJuce (type) << " ";
 
-                        JUCE_CAMERA_LOG ("Available image codec types: " + typesString);
+                        JUCE_CAMERA_LOG ("Available photo file types: " + typesString);
 
-                        JUCE_CAMERA_LOG ("Still image stabilization supported: " + String ((int) photoOutput.stillImageStabilizationSupported));
-                        JUCE_CAMERA_LOG ("Dual camera fusion supported: " + String ((int) photoOutput.dualCameraFusionSupported));
-                        JUCE_CAMERA_LOG ("Supports flash: "      + String ((int) [photoOutput.supportedFlashModes containsObject: @(AVCaptureFlashModeOn)]));
-                        JUCE_CAMERA_LOG ("Supports auto flash: " + String ((int) [photoOutput.supportedFlashModes containsObject: @(AVCaptureFlashModeAuto)]));
-                        JUCE_CAMERA_LOG ("Max bracketed photo count: " + String (photoOutput.maxBracketedCapturePhotoCount));
-                        JUCE_CAMERA_LOG ("Lens stabilization during bracketed capture supported: " + String ((int) photoOutput.lensStabilizationDuringBracketedCaptureSupported));
-                        JUCE_CAMERA_LOG ("Live photo capture supported: " + String ((int) photoOutput.livePhotoCaptureSupported));
+                        typesString.clear();
 
+                        for (AVFileType type in photoOutput.availableRawPhotoFileTypes)
+                            typesString << nsStringToJuce (type) << " ";
 
-                        if (@available (iOS 11.0, *))
-                        {
-                            typesString.clear();
+                        JUCE_CAMERA_LOG ("Available RAW photo file types: " + typesString);
 
-                            for (AVFileType type in photoOutput.availablePhotoFileTypes)
-                                typesString << nsStringToJuce (type) << " ";
+                        typesString.clear();
 
-                            JUCE_CAMERA_LOG ("Available photo file types: " + typesString);
+                        for (AVFileType type in photoOutput.availableLivePhotoVideoCodecTypes)
+                            typesString << nsStringToJuce (type) << " ";
 
-                            typesString.clear();
+                        JUCE_CAMERA_LOG ("Available live photo video codec types: " + typesString);
 
-                            for (AVFileType type in photoOutput.availableRawPhotoFileTypes)
-                                typesString << nsStringToJuce (type) << " ";
-
-                            JUCE_CAMERA_LOG ("Available RAW photo file types: " + typesString);
-
-                            typesString.clear();
-
-                            for (AVFileType type in photoOutput.availableLivePhotoVideoCodecTypes)
-                                typesString << nsStringToJuce (type) << " ";
-
-                            JUCE_CAMERA_LOG ("Available live photo video codec types: " + typesString);
-
-                            JUCE_CAMERA_LOG ("Dual camera dual photo delivery supported: " + String ((int) photoOutput.dualCameraDualPhotoDeliverySupported));
-                            JUCE_CAMERA_LOG ("Camera calibration data delivery supported: " + String ((int) photoOutput.cameraCalibrationDataDeliverySupported));
-                            JUCE_CAMERA_LOG ("Depth data delivery supported: " + String ((int) photoOutput.depthDataDeliverySupported));
-                        }
-
-                        return;
+                        JUCE_CAMERA_LOG ("Dual camera dual photo delivery supported: " + String ((int) photoOutput.dualCameraDualPhotoDeliverySupported));
+                        JUCE_CAMERA_LOG ("Camera calibration data delivery supported: " + String ((int) photoOutput.cameraCalibrationDataDeliverySupported));
+                        JUCE_CAMERA_LOG ("Depth data delivery supported: " + String ((int) photoOutput.depthDataDeliverySupported));
                     }
+
+                    return;
                 }
 
                 auto* stillImageOutput = (AVCaptureStillImageOutput*) captureOutput;
@@ -745,7 +721,7 @@ private:
             }
 
             //==============================================================================
-            class API_AVAILABLE (ios (10.0)) PhotoOutputDelegateClass : public ObjCClass<NSObject>
+            class PhotoOutputDelegateClass : public ObjCClass<NSObject>
             {
             public:
                 PhotoOutputDelegateClass() : ObjCClass<NSObject> ("PhotoOutputDelegateClass_")
@@ -996,8 +972,7 @@ private:
 
             void startRecording (const File& file, AVCaptureVideoOrientation orientationToUse)
             {
-                if (@available (iOS 10.0, *))
-                    printVideoOutputDebugInfo (movieFileOutput);
+                printVideoOutputDebugInfo (movieFileOutput);
 
                 auto url = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())
                                       isDirectory: NO];
