@@ -297,33 +297,10 @@ bool File::moveToTrash() const
 
     JUCE_AUTORELEASEPOOL
     {
-        if (@available (macOS 10.8, iOS 11.0, *))
-        {
-            NSError* error = nil;
-            return [[NSFileManager defaultManager] trashItemAtURL: createNSURLFromFile (*this)
-                                                 resultingItemURL: nil
-                                                            error: &error];
-        }
-
-       #if JUCE_IOS
-        return deleteFile();
-       #else
-        [[NSWorkspace sharedWorkspace] recycleURLs: [NSArray arrayWithObject: createNSURLFromFile (*this)]
-                                 completionHandler: nil];
-
-        // recycleURLs is async, so we need to block until it has finished. We can't use a
-        // run-loop here because it'd dispatch unexpected messages, so have to do this very
-        // nasty bodge. But this is only needed for support of pre-10.8 versions.
-        for (int retries = 100; --retries >= 0;)
-        {
-            if (! exists())
-                return true;
-
-            Thread::sleep (5);
-        }
-
-        return false;
-       #endif
+        NSError* error = nil;
+        return [[NSFileManager defaultManager] trashItemAtURL: createNSURLFromFile (*this)
+                                             resultingItemURL: nil
+                                                        error: &error];
     }
 }
 
@@ -534,9 +511,8 @@ void File::addToDock() const
 
 File File::getContainerForSecurityApplicationGroupIdentifier (const String& appGroup)
 {
-    if (@available (macOS 10.8, *))
-        if (auto* url = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: juceStringToNS (appGroup)])
-            return File (nsStringToJuce ([url path]));
+    if (auto* url = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: juceStringToNS (appGroup)])
+        return File (nsStringToJuce ([url path]));
 
     return File();
 }

@@ -220,12 +220,9 @@ public:
 
         if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         {
-            if (@available (macOS 10.8, *))
-            {
-                [view setWantsLayer: YES];
-                [view setLayerContentsRedrawPolicy: NSViewLayerContentsRedrawDuringViewResize];
-                [view layer].drawsAsynchronously = YES;
-            }
+            [view setWantsLayer: YES];
+            [view setLayerContentsRedrawPolicy: NSViewLayerContentsRedrawDuringViewResize];
+            [view layer].drawsAsynchronously = YES;
         }
 
        #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS

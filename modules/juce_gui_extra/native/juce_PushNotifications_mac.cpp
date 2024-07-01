@@ -371,11 +371,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
         NSRemoteNotificationType types = NSUInteger ((bool) settings.allowBadge);
 
-        if (@available (macOS 10.8, *))
-        {
-            types |= (NSUInteger) ((settings.allowSound ? NSRemoteNotificationTypeSound : 0)
-                                 | (settings.allowAlert ? NSRemoteNotificationTypeAlert : 0));
-        }
+        types |= (NSUInteger) ((settings.allowSound ? NSRemoteNotificationTypeSound : 0)
+                             | (settings.allowAlert ? NSRemoteNotificationTypeAlert : 0));
 
         [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
     }
@@ -384,11 +381,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     {
         settings.allowBadge = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeBadge;
 
-        if (@available (macOS 10.8, *))
-        {
-            settings.allowSound = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeSound;
-            settings.allowAlert = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeAlert;
-        }
+        settings.allowSound = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeSound;
+        settings.allowAlert = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeAlert;
 
         owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
     }
