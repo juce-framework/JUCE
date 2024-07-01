@@ -39,6 +39,23 @@ namespace juce
 JUCE_IMPLEMENT_SINGLETON (Direct2DMetricsHub)
 #endif
 
+struct ScopedBlendCopy
+{
+    explicit ScopedBlendCopy (ComSmartPtr<ID2D1DeviceContext1> c)
+        : ctx (c)
+    {
+        ctx->SetPrimitiveBlend (D2D1_PRIMITIVE_BLEND_COPY);
+    }
+
+    ~ScopedBlendCopy()
+    {
+        ctx->SetPrimitiveBlend (blend);
+    }
+
+    ComSmartPtr<ID2D1DeviceContext1> ctx;
+    D2D1_PRIMITIVE_BLEND blend = ctx->GetPrimitiveBlend();
+};
+
 class PushedLayers
 {
 public:
@@ -142,10 +159,100 @@ public:
         return pushedLayers.empty();
     }
 
+    void fillGeometryWithNoLayersActive (ComSmartPtr<ID2D1DeviceContext1> ctx,
+                                         ComSmartPtr<ID2D1Geometry> geo,
+                                         ComSmartPtr<ID2D1Brush> brush)
+    {
+        ComSmartPtr<ID2D1Factory> factory;
+        ctx->GetFactory (factory.resetAndGetPointerAddress());
+
+        const auto hasGeoLayer = std::any_of (pushedLayers.begin(),
+                                              pushedLayers.end(),
+                                              [] (const auto& x) { return std::holds_alternative<OwningLayer> (x.var); });
+
+        const auto intersection = [&]() -> ComSmartPtr<ID2D1Geometry>
+        {
+            if (! hasGeoLayer)
+                return {};
+
+            const auto contextSize = ctx->GetPixelSize();
+
+            ComSmartPtr<ID2D1RectangleGeometry> rect;
+            factory->CreateRectangleGeometry (D2D1::RectF (0.0f,
+                                                           0.0f,
+                                                           (float) contextSize.width,
+                                                           (float) contextSize.height),
+                                              rect.resetAndGetPointerAddress());
+
+            ComSmartPtr<ID2D1Geometry> clip = rect;
+
+            for (const auto& layer : pushedLayers)
+            {
+                ScopedGeometryWithSink scope { factory, D2D1_FILL_MODE_WINDING };
+
+                if (auto* l = std::get_if<OwningLayer> (&layer.var))
+                {
+                    clip->CombineWithGeometry (l->geometry,
+                                               D2D1_COMBINE_MODE_INTERSECT,
+                                               l->params.maskTransform,
+                                               scope.sink);
+                }
+                else if (auto* r = std::get_if<Rectangle<float>> (&layer.var))
+                {
+                    ComSmartPtr<ID2D1RectangleGeometry> temporaryRect;
+                    factory->CreateRectangleGeometry (D2DUtilities::toRECT_F (*r),
+                                                      temporaryRect.resetAndGetPointerAddress());
+                    clip->CombineWithGeometry (temporaryRect,
+                                               D2D1_COMBINE_MODE_INTERSECT,
+                                               D2D1::Matrix3x2F::Identity(),
+                                               scope.sink);
+                }
+
+                clip = scope.geometry;
+            }
+
+            return clip;
+        }();
+
+        const auto clipWithGeo = [&]() -> ComSmartPtr<ID2D1Geometry>
+        {
+            if (intersection == nullptr)
+                return geo;
+
+            ScopedGeometryWithSink scope { factory, D2D1_FILL_MODE_WINDING };
+            intersection->CombineWithGeometry (geo,
+                                               D2D1_COMBINE_MODE_INTERSECT,
+                                               D2D1::Matrix3x2F::Identity(),
+                                               scope.sink);
+            return scope.geometry;
+        }();
+
+        if (intersection != nullptr)
+        {
+            std::for_each (pushedLayers.rbegin(),
+                           pushedLayers.rend(),
+                           [&] (const auto& layer) { layer.pop (ctx); });
+        }
+
+        {
+            const ScopedBlendCopy scope { ctx };
+            ctx->FillGeometry (clipWithGeo, brush);
+        }
+
+        if (intersection != nullptr)
+        {
+            pushedLayers.clear();
+
+            auto newLayer = D2D1::LayerParameters1();
+            newLayer.geometricMask = intersection;
+            push (ctx, newLayer);
+        }
+    }
+
 private:
     struct OwningLayer
     {
-        explicit OwningLayer (D2D1_LAYER_PARAMETERS1 p) : params (p) {}
+        explicit OwningLayer (const D2D1_LAYER_PARAMETERS1& p) : params (p) {}
 
         D2D1_LAYER_PARAMETERS1 params;
         ComSmartPtr<ID2D1Geometry> geometry = params.geometricMask != nullptr ? addComSmartPtrOwner (params.geometricMask) : nullptr;
@@ -1276,17 +1383,30 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExi
         return;
 
     if (replaceExistingContents)
-        clipToRectangle (r);
-
-    const auto clearColour = currentState->fillType.colour;
-
-    auto fill = [replaceExistingContents, clearColour] (Rectangle<float> rect,
-                                                        ComSmartPtr<ID2D1DeviceContext1> deviceContext,
-                                                        ComSmartPtr<ID2D1Brush> brush)
     {
-        if (replaceExistingContents)
-            deviceContext->Clear (D2DUtilities::toCOLOR_F (clearColour));
-        else if (brush != nullptr)
+        applyPendingClipList();
+
+        const auto asRectF = D2DUtilities::toRECT_F (getPimpl()->getFrameSize().toFloat());
+        ComSmartPtr<ID2D1RectangleGeometry> rectGeometry;
+        getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (asRectF,
+                                                                   rectGeometry.resetAndGetPointerAddress());
+
+        const auto matrix = D2DUtilities::transformToMatrix (currentState->currentTransform.getTransform());
+        ComSmartPtr<ID2D1TransformedGeometry> geo;
+        getPimpl()->getDirect2DFactory()->CreateTransformedGeometry (rectGeometry,
+                                                                     matrix,
+                                                                     geo.resetAndGetPointerAddress());
+
+        const auto brush = currentState->fillType.isInvisible() ? currentState->currentBrush : currentState->getBrush();
+        currentState->layers.fillGeometryWithNoLayersActive (getPimpl()->getDeviceContext(), geo, brush);
+        return;
+    }
+
+    const auto fill = [] (Rectangle<float> rect,
+                          ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+                          ComSmartPtr<ID2D1Brush> brush)
+    {
+        if (brush != nullptr)
             deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
     };
 
