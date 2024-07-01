@@ -1000,8 +1000,6 @@ void Direct2DGraphicsContext::excludeClipRectangle (const Rectangle<int>& userSp
 {
     JUCE_SCOPED_TRACE_EVENT_FRAME_RECT_I32 (etw::excludeClipRectangle, etw::direct2dKeyword, getFrameId(), userSpaceExcludedRectangle)
 
-    applyPendingClipList();
-
     auto& transform = currentState->currentTransform;
     auto& deviceSpaceClipList = currentState->deviceSpaceClipList;
     const auto frameSize = getPimpl()->getFrameSize().toFloat();
@@ -1030,6 +1028,8 @@ void Direct2DGraphicsContext::excludeClipRectangle (const Rectangle<int>& userSp
     }
     else
     {
+        applyPendingClipList();
+
         deviceSpaceClipList = frameSize;
         pendingClipList.subtract (userSpaceExcludedRectangle.toFloat());
     }
