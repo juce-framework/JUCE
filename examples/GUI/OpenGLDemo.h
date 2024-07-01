@@ -1120,7 +1120,8 @@ private:
 
         void selectPreset (int preset)
         {
-            const auto& p = OpenGLUtils::getPresets()[preset];
+            const auto presets = OpenGLUtils::getPresets();
+            const auto& p = presets[preset];
 
             vertexDocument  .replaceAllContent (p.vertexShader);
             fragmentDocument.replaceAllContent (p.fragmentShader);
