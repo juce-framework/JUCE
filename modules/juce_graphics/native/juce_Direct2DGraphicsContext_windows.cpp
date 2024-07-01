@@ -52,7 +52,7 @@ public:
     }
    #endif
 
-    void push (ComSmartPtr<ID2D1DeviceContext1> context, const D2D1_LAYER_PARAMETERS& layerParameters)
+    void push (ComSmartPtr<ID2D1DeviceContext1> context, const D2D1_LAYER_PARAMETERS1& layerParameters)
     {
         // Clipping and transparency are all handled by pushing Direct2D
         // layers. The SavedState creates an internal stack of Layer objects to
@@ -118,14 +118,14 @@ public:
                  || ! isGeometryAxisAlignedRectangle);
        #endif
 
-        context->PushLayer (layerParameters, nullptr);
-        pushedLayers.emplace_back (popLayerFlag);
+        pushedLayers.emplace_back (OwningLayer { layerParameters });
+        pushedLayers.back().push (context);
     }
 
     void push (ComSmartPtr<ID2D1DeviceContext1> context, const Rectangle<float>& r)
     {
-        context->PushAxisAlignedClip (D2DUtilities::toRECT_F (r), D2D1_ANTIALIAS_MODE_ALIASED);
-        pushedLayers.emplace_back (popAxisAlignedLayerFlag);
+        pushedLayers.emplace_back (r);
+        pushedLayers.back().push (context);
     }
 
     void popOne (ComSmartPtr<ID2D1DeviceContext1> context)
@@ -133,11 +133,7 @@ public:
         if (pushedLayers.empty())
             return;
 
-        if (pushedLayers.back() == popLayerFlag)
-            context->PopLayer();
-        else
-            context->PopAxisAlignedClip();
-
+        pushedLayers.back().pop (context);
         pushedLayers.pop_back();
     }
 
@@ -147,6 +143,40 @@ public:
     }
 
 private:
+    struct OwningLayer
+    {
+        explicit OwningLayer (D2D1_LAYER_PARAMETERS1 p) : params (p) {}
+
+        D2D1_LAYER_PARAMETERS1 params;
+        ComSmartPtr<ID2D1Geometry> geometry = params.geometricMask != nullptr ? addComSmartPtrOwner (params.geometricMask) : nullptr;
+        ComSmartPtr<ID2D1Brush> brush = params.opacityBrush != nullptr ? addComSmartPtrOwner (params.opacityBrush) : nullptr;
+    };
+
+    struct Layer
+    {
+        explicit Layer (std::variant<OwningLayer, Rectangle<float>> v) : var (std::move (v)) {}
+
+        void push (ComSmartPtr<ID2D1DeviceContext1> context) const
+        {
+            if (auto* layer = std::get_if<OwningLayer> (&var))
+                context->PushLayer (layer->params, nullptr);
+            else if (auto* rect = std::get_if<Rectangle<float>> (&var))
+                context->PushAxisAlignedClip (D2DUtilities::toRECT_F (*rect), D2D1_ANTIALIAS_MODE_ALIASED);
+        }
+
+        void pop (ComSmartPtr<ID2D1DeviceContext1> context) const
+        {
+            if (std::holds_alternative<OwningLayer> (var))
+                context->PopLayer();
+            else if (std::holds_alternative<Rectangle<float>> (var))
+                context->PopAxisAlignedClip();
+        }
+
+        std::variant<OwningLayer, Rectangle<float>> var;
+    };
+
+    std::vector<Layer> pushedLayers;
+
     //==============================================================================
     // PushedLayer represents a Direct2D clipping or transparency layer
     //
@@ -174,13 +204,6 @@ private:
     //
     // PushedLayer, PushedAxisAlignedClipLayer, and LayerPopper all exist just to unwind the
     // layer stack accordingly.
-    enum
-    {
-        popLayerFlag,
-        popAxisAlignedLayerFlag
-    };
-
-    std::vector<int> pushedLayers;
 };
 
 struct Direct2DGraphicsContext::SavedState
@@ -201,7 +224,7 @@ public:
     {
     }
 
-    void pushLayer (const D2D1_LAYER_PARAMETERS& layerParameters)
+    void pushLayer (const D2D1_LAYER_PARAMETERS1& layerParameters)
     {
         layers.push (deviceResources.deviceContext.context, layerParameters);
     }
@@ -209,7 +232,7 @@ public:
     void pushGeometryClipLayer (ComSmartPtr<ID2D1Geometry> geometry)
     {
         if (geometry != nullptr)
-            pushLayer (D2D1::LayerParameters (D2D1::InfiniteRect(), geometry));
+            pushLayer (D2D1::LayerParameters1 (D2D1::InfiniteRect(), geometry));
     }
 
     void pushTransformedRectangleGeometryClipLayer (ComSmartPtr<ID2D1RectangleGeometry> geometry, const AffineTransform& transform)
@@ -217,7 +240,7 @@ public:
         JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.metrics, pushGeometryLayerTime)
 
         jassert (geometry != nullptr);
-        auto layerParameters = D2D1::LayerParameters (D2D1::InfiniteRect(), geometry);
+        auto layerParameters = D2D1::LayerParameters1 (D2D1::InfiniteRect(), geometry);
         layerParameters.maskTransform = D2DUtilities::transformToMatrix (transform);
         pushLayer (layerParameters);
     }
@@ -1142,7 +1165,7 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
                 // Push the clipping layer onto the layer stack
                 // Don't set maskTransform in the LayerParameters struct; that only applies to geometry clipping
                 // Do set the contentBounds member, transformed appropriately
-                auto layerParams = D2D1::LayerParameters();
+                auto layerParams = D2D1::LayerParameters1();
                 auto transformedBounds = sourceImage.getBounds().toFloat().transformedBy (brushTransform);
                 layerParams.contentBounds = D2DUtilities::toRECT_F (transformedBounds);
                 layerParams.opacityBrush = brush;
