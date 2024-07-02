@@ -43,7 +43,7 @@ namespace KeyboardFocusTraverserHelpers
         return comp->getWantsKeyboardFocus() && container->isParentOf (comp);
     }
 
-    static Component* traverse (Component* current, Component* container,
+    static Component* traverse (const Component* current, const Component* container,
                                 detail::FocusHelpers::NavigationDirection direction)
     {
         if (auto* comp = detail::FocusHelpers::navigateFocus (current, container, direction,

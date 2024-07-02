@@ -46,7 +46,7 @@ struct FocusHelpers
     }
 
     template <typename FocusContainerFn>
-    static void findAllComponents (Component* parent,
+    static void findAllComponents (const Component* parent,
                                    std::vector<Component*>& components,
                                    FocusContainerFn isFocusContainer)
     {
@@ -88,8 +88,8 @@ struct FocusHelpers
     enum class NavigationDirection { forwards, backwards };
 
     template <typename FocusContainerFn>
-    static Component* navigateFocus (Component* current,
-                                     Component* focusContainer,
+    static Component* navigateFocus (const Component* current,
+                                     const Component* focusContainer,
                                      NavigationDirection direction,
                                      FocusContainerFn isFocusContainer)
     {
