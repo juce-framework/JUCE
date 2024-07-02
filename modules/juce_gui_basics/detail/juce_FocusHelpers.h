@@ -93,30 +93,30 @@ struct FocusHelpers
                                      NavigationDirection direction,
                                      FocusContainerFn isFocusContainer)
     {
-        if (focusContainer != nullptr)
+        if (focusContainer == nullptr)
+            return nullptr;
+
+        std::vector<Component*> components;
+        findAllComponents (focusContainer, components, isFocusContainer);
+
+        const auto iter = std::find (components.cbegin(), components.cend(), current);
+
+        if (iter == components.cend())
+            return nullptr;
+
+        switch (direction)
         {
-            std::vector<Component*> components;
-            findAllComponents (focusContainer, components, isFocusContainer);
+            case NavigationDirection::forwards:
+                if (iter != std::prev (components.cend()))
+                    return *std::next (iter);
 
-            const auto iter = std::find (components.cbegin(), components.cend(), current);
+                break;
 
-            if (iter == components.cend())
-                return nullptr;
+            case NavigationDirection::backwards:
+                if (iter != components.cbegin())
+                    return *std::prev (iter);
 
-            switch (direction)
-            {
-                case NavigationDirection::forwards:
-                    if (iter != std::prev (components.cend()))
-                        return *std::next (iter);
-
-                    break;
-
-                case NavigationDirection::backwards:
-                    if (iter != components.cbegin())
-                        return *std::prev (iter);
-
-                    break;
-            }
+                break;
         }
 
         return nullptr;
