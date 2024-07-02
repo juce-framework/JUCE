@@ -582,7 +582,7 @@ private:
 
     //==============================================================================
     ListenerList<OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>> listeners;
-    ListenerList<OSCReceiver::Listener<OSCReceiver::RealtimeCallback>>    realtimeListeners;
+    LightweightListenerList<OSCReceiver::Listener<OSCReceiver::RealtimeCallback>> realtimeListeners;
 
     Array<std::pair<OSCAddress, OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>*>> listenersWithAddress;
     Array<std::pair<OSCAddress, OSCReceiver::ListenerWithOSCAddress<OSCReceiver::RealtimeCallback>*>>    realtimeListenersWithAddress;

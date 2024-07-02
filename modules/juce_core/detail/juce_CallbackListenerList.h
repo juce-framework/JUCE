@@ -72,7 +72,7 @@ public:
 
 private:
     std::list<Callback> callbacks;
-    ListenerList<Callback> listeners;
+    LightweightListenerList<Callback> listeners;
 };
 
 } // namespace juce::detail

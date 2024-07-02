@@ -51,7 +51,7 @@ public:
 
 private:
     friend void notifyAllocationHooksForThread();
-    ListenerList<Listener> listenerList;
+    LightweightListenerList<Listener> listenerList;
 };
 
 //==============================================================================
