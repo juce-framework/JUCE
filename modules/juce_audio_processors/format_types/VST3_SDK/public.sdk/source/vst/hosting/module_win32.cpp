@@ -167,8 +167,25 @@ public:
 		}
 	}
 
+	static void getLastError(const std::string& inPath, std::string& errorDescription) {
+		auto lastError = GetLastError ();
+		LPVOID lpMessageBuffer {nullptr};
+		if (FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+							nullptr, lastError, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+							(LPSTR)&lpMessageBuffer, 0, nullptr) > 0)
+		{
+			errorDescription = "LoadLibray failed for path " + inPath + ". " + std::string ((char*)lpMessageBuffer);
+			LocalFree (lpMessageBuffer);
+		}
+		else
+		{
+			errorDescription =
+				"LoadLibrary failed with error number " + std::to_string (lastError) + " for path " + inPath;
+		}
+	}
+
 	//--- -----------------------------------------------------------------------
-	HINSTANCE loadAsPackage (const std::string& inPath, const char* archString = architectureString)
+	HINSTANCE loadAsPackage (const std::string& inPath, std::string& errorDescription, const char* archString = architectureString)
 	{
 		filesystem::path p (inPath);
 		auto filename = p.filename ();
@@ -179,10 +196,18 @@ public:
 		HINSTANCE instance = LoadLibraryW (reinterpret_cast<LPCWSTR> (wideStr.data ()));
 #if SMTG_CPU_ARM_64EC
 		if (instance == nullptr)
-			instance = loadAsPackage (inPath, architectureArm64XString);
+			instance = loadAsPackage (inPath, errorDescription, architectureArm64XString);
 		if (instance == nullptr)
-			instance = loadAsPackage (inPath, architectureX64String);
+			instance = loadAsPackage (inPath, errorDescription, architectureX64String);
+		if (instance == nullptr) {
+			Win32Module::getLastError(inPath, errorDescription);
+		}
+#else
+		if (instance == nullptr) {
+			Win32Module::getLastError(p.string(), errorDescription);
+		}
 #endif
+
 		return instance;
 	}
 
@@ -193,20 +218,7 @@ public:
 		HINSTANCE instance = LoadLibraryW (reinterpret_cast<LPCWSTR> (wideStr.data ()));
 		if (instance == nullptr)
 		{
-			auto lastError = GetLastError ();
-			LPVOID lpMessageBuffer {nullptr};
-			if (FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-			                    nullptr, lastError, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
-			                    (LPSTR)&lpMessageBuffer, 0, nullptr) > 0)
-			{
-				errorDescription = "LoadLibray failed: " + std::string ((char*)lpMessageBuffer);
-				LocalFree (lpMessageBuffer);
-			}
-			else
-			{
-				errorDescription =
-				    "LoadLibrary failed with error number : " + std::to_string (lastError);
-			}
+			Win32Module::getLastError(inPath, errorDescription);
 		}
 		else
 		{
@@ -227,7 +239,7 @@ public:
 		if (filesystem::is_directory (tmp))
 		{
 			// try as package (bundle)
-			mModule = loadAsPackage (inPath);
+			mModule = loadAsPackage (inPath, errorDescription);
 		}
 		else
 		{
@@ -546,7 +558,7 @@ Module::PathList Module::getModulePaths ()
 #endif
 		findModules (path, list);
 	}
-	
+
 	// find plug-ins located in VST3 (application folder)
 	WCHAR modulePath[kIPPathNameMax];
 	GetModuleFileNameW (nullptr, modulePath, kIPPathNameMax);
