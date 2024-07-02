@@ -571,8 +571,6 @@ namespace CoreMidiHelpers
     {
         static const auto globalMidiClient = [&]
         {
-            // Since OSX 10.6, the MIDIClientCreate function will only work
-            // correctly when called from the message thread!
             JUCE_ASSERT_MESSAGE_THREAD
 
             enableSimulatorMidiSession();

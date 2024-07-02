@@ -82,7 +82,7 @@ public:
 
     using OpenCameraResultCallback = std::function<void (CameraDevice*, const String& /*error*/)>;
 
-    /** Asynchronously opens a camera device on iOS (iOS 7+) or Android (API 21+).
+    /** Asynchronously opens a camera device on iOS or Android.
         On other platforms, the function will simply call openDevice(). Upon completion,
         resultCallback will be invoked with valid CameraDevice* and an empty error
         String on success, or nullptr CameraDevice and a non-empty error String on failure.

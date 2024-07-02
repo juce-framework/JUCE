@@ -132,7 +132,7 @@ struct PushNotificationsDelegateDetails
         }
 
         // request
-        // each notification on iOS 10 needs to have an identifier, otherwise it will not show up
+        // each notification needs to have an identifier, otherwise it will not show up
         jassert (n.identifier.isNotEmpty());
         UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier: juceStringToNS (n.identifier)
                                                                               content: content
