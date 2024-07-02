@@ -112,7 +112,7 @@ struct SIMDRegister
     /** The number of elements that this vector can hold. */
     static constexpr size_t SIMDNumElements = SIMDRegisterSize / sizeof (ElementType);
 
-    vSIMDType value;
+    vSIMDType value{};
 
     /** Default constructor. */
     inline SIMDRegister() noexcept = default;
