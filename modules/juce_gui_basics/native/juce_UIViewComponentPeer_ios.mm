@@ -1079,14 +1079,11 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
 {
     [super traitCollectionDidChange: previousTraitCollection];
 
-    if (@available (iOS 12.0, *))
-    {
-        const auto wasDarkModeActive = ([previousTraitCollection userInterfaceStyle] == UIUserInterfaceStyleDark);
+    const auto wasDarkModeActive = ([previousTraitCollection userInterfaceStyle] == UIUserInterfaceStyleDark);
 
-        if (wasDarkModeActive != Desktop::getInstance().isDarkModeActive())
-            [[NSNotificationCenter defaultCenter] postNotificationName: UIViewComponentPeer::getDarkModeNotificationName()
-                                                                object: nil];
-    }
+    if (wasDarkModeActive != Desktop::getInstance().isDarkModeActive())
+        [[NSNotificationCenter defaultCenter] postNotificationName: UIViewComponentPeer::getDarkModeNotificationName()
+                                                            object: nil];
 }
 
 - (BOOL) isAccessibilityElement

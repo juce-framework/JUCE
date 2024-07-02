@@ -545,10 +545,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 
 bool Desktop::isDarkModeActive() const
 {
-    if (@available (iOS 12.0, *))
-        return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
-
-    return false;
+    return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
 }
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
