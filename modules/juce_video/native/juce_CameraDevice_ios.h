@@ -32,8 +32,6 @@
   ==============================================================================
 */
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
 struct CameraDevice::Pimpl
 {
     using InternalOpenCameraResultCallback = std::function<void (const String& /*cameraId*/, const String& /*error*/)>;
@@ -583,42 +581,12 @@ private:
 
                 if (auto* connection = findVideoConnection (captureOutput))
                 {
-                    if ([captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
-                    {
-                        auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
-                        auto outputConnection = [photoOutput connectionWithMediaType: AVMediaTypeVideo];
-                        outputConnection.videoOrientation = orientationToUse;
-
-                        [photoOutput capturePhotoWithSettings: [AVCapturePhotoSettings photoSettings]
-                                                     delegate: id<AVCapturePhotoCaptureDelegate> (photoOutputDelegate.get())];
-
-                        return;
-                    }
-
-                    auto* stillImageOutput = (AVCaptureStillImageOutput*) captureOutput;
-                    auto outputConnection = [stillImageOutput connectionWithMediaType: AVMediaTypeVideo];
+                    auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
+                    auto outputConnection = [photoOutput connectionWithMediaType: AVMediaTypeVideo];
                     outputConnection.videoOrientation = orientationToUse;
 
-                    [stillImageOutput captureStillImageAsynchronouslyFromConnection: connection completionHandler:
-                         ^(CMSampleBufferRef imageSampleBuffer, NSError* error)
-                         {
-                             takingPicture = false;
-
-                             if (error != nil)
-                             {
-                                 JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
-                                 jassertfalse;
-                                 return;
-                             }
-
-                             NSData* imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation: imageSampleBuffer];
-
-                             auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
-
-                             callListeners (image);
-
-                             MessageManager::callAsync ([this, image] { notifyPictureTaken (image); });
-                         }];
+                    [photoOutput capturePhotoWithSettings: [AVCapturePhotoSettings photoSettings]
+                                                 delegate: id<AVCapturePhotoCaptureDelegate> (photoOutputDelegate.get())];
                 }
                 else
                 {
@@ -635,65 +603,47 @@ private:
 
             static void printImageOutputDebugInfo (AVCaptureOutput* captureOutput)
             {
-                if ([captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
-                {
-                    auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
-
-                    String typesString;
-
-                    for (id type in photoOutput.availablePhotoCodecTypes)
-                        typesString << nsStringToJuce (type) << " ";
-
-                    JUCE_CAMERA_LOG ("Available image codec types: " + typesString);
-
-                    JUCE_CAMERA_LOG ("Still image stabilization supported: " + String ((int) photoOutput.stillImageStabilizationSupported));
-                    JUCE_CAMERA_LOG ("Dual camera fusion supported: " + String ((int) photoOutput.dualCameraFusionSupported));
-                    JUCE_CAMERA_LOG ("Supports flash: "      + String ((int) [photoOutput.supportedFlashModes containsObject: @(AVCaptureFlashModeOn)]));
-                    JUCE_CAMERA_LOG ("Supports auto flash: " + String ((int) [photoOutput.supportedFlashModes containsObject: @(AVCaptureFlashModeAuto)]));
-                    JUCE_CAMERA_LOG ("Max bracketed photo count: " + String (photoOutput.maxBracketedCapturePhotoCount));
-                    JUCE_CAMERA_LOG ("Lens stabilization during bracketed capture supported: " + String ((int) photoOutput.lensStabilizationDuringBracketedCaptureSupported));
-                    JUCE_CAMERA_LOG ("Live photo capture supported: " + String ((int) photoOutput.livePhotoCaptureSupported));
-
-                    typesString.clear();
-
-                    for (AVFileType type in photoOutput.availablePhotoFileTypes)
-                        typesString << nsStringToJuce (type) << " ";
-
-                    JUCE_CAMERA_LOG ("Available photo file types: " + typesString);
-
-                    typesString.clear();
-
-                    for (AVFileType type in photoOutput.availableRawPhotoFileTypes)
-                        typesString << nsStringToJuce (type) << " ";
-
-                    JUCE_CAMERA_LOG ("Available RAW photo file types: " + typesString);
-
-                    typesString.clear();
-
-                    for (AVFileType type in photoOutput.availableLivePhotoVideoCodecTypes)
-                        typesString << nsStringToJuce (type) << " ";
-
-                    JUCE_CAMERA_LOG ("Available live photo video codec types: " + typesString);
-
-                    JUCE_CAMERA_LOG ("Dual camera dual photo delivery supported: " + String ((int) photoOutput.dualCameraDualPhotoDeliverySupported));
-                    JUCE_CAMERA_LOG ("Camera calibration data delivery supported: " + String ((int) photoOutput.cameraCalibrationDataDeliverySupported));
-                    JUCE_CAMERA_LOG ("Depth data delivery supported: " + String ((int) photoOutput.depthDataDeliverySupported));
-
-                    return;
-                }
-
-                auto* stillImageOutput = (AVCaptureStillImageOutput*) captureOutput;
+                auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
 
                 String typesString;
 
-                for (id type in stillImageOutput.availableImageDataCodecTypes)
+                for (id type in photoOutput.availablePhotoCodecTypes)
                     typesString << nsStringToJuce (type) << " ";
 
                 JUCE_CAMERA_LOG ("Available image codec types: " + typesString);
-                JUCE_CAMERA_LOG ("Still image stabilization supported: " + String ((int) stillImageOutput.stillImageStabilizationSupported));
-                JUCE_CAMERA_LOG ("Automatically enables still image stabilization when available: " + String ((int) stillImageOutput.automaticallyEnablesStillImageStabilizationWhenAvailable));
 
-                JUCE_CAMERA_LOG ("Output settings for image output: " + nsStringToJuce ([stillImageOutput.outputSettings description]));
+                JUCE_CAMERA_LOG ("Still image stabilization supported: " + String ((int) photoOutput.stillImageStabilizationSupported));
+                JUCE_CAMERA_LOG ("Dual camera fusion supported: " + String ((int) photoOutput.dualCameraFusionSupported));
+                JUCE_CAMERA_LOG ("Supports flash: "      + String ((int) [photoOutput.supportedFlashModes containsObject: @(AVCaptureFlashModeOn)]));
+                JUCE_CAMERA_LOG ("Supports auto flash: " + String ((int) [photoOutput.supportedFlashModes containsObject: @(AVCaptureFlashModeAuto)]));
+                JUCE_CAMERA_LOG ("Max bracketed photo count: " + String (photoOutput.maxBracketedCapturePhotoCount));
+                JUCE_CAMERA_LOG ("Lens stabilization during bracketed capture supported: " + String ((int) photoOutput.lensStabilizationDuringBracketedCaptureSupported));
+                JUCE_CAMERA_LOG ("Live photo capture supported: " + String ((int) photoOutput.livePhotoCaptureSupported));
+
+                typesString.clear();
+
+                for (AVFileType type in photoOutput.availablePhotoFileTypes)
+                    typesString << nsStringToJuce (type) << " ";
+
+                JUCE_CAMERA_LOG ("Available photo file types: " + typesString);
+
+                typesString.clear();
+
+                for (AVFileType type in photoOutput.availableRawPhotoFileTypes)
+                    typesString << nsStringToJuce (type) << " ";
+
+                JUCE_CAMERA_LOG ("Available RAW photo file types: " + typesString);
+
+                typesString.clear();
+
+                for (AVFileType type in photoOutput.availableLivePhotoVideoCodecTypes)
+                    typesString << nsStringToJuce (type) << " ";
+
+                JUCE_CAMERA_LOG ("Available live photo video codec types: " + typesString);
+
+                JUCE_CAMERA_LOG ("Dual camera dual photo delivery supported: " + String ((int) photoOutput.dualCameraDualPhotoDeliverySupported));
+                JUCE_CAMERA_LOG ("Camera calibration data delivery supported: " + String ((int) photoOutput.cameraCalibrationDataDeliverySupported));
+                JUCE_CAMERA_LOG ("Depth data delivery supported: " + String ((int) photoOutput.depthDataDeliverySupported));
             }
 
             //==============================================================================
@@ -849,39 +799,6 @@ private:
 
                     jassertfalse;
                     return CGSizeMake ((CGFloat) width, (CGFloat) height);
-                }
-
-                static void didFinishProcessingPhotoSampleBuffer (id self, SEL, AVCapturePhotoOutput*,
-                                                                  CMSampleBufferRef imageBuffer, CMSampleBufferRef imagePreviewBuffer,
-                                                                  AVCaptureResolvedPhotoSettings*, AVCaptureBracketedStillImageSettings*,
-                                                                  NSError* error)
-                {
-                    getOwner (self).takingPicture = false;
-
-                    [[maybe_unused]] String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-
-                    JUCE_CAMERA_LOG ("didFinishProcessingPhotoSampleBuffer(), error = " + errorString);
-
-                    if (error != nil)
-                    {
-                        JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
-                        jassertfalse;
-                        return;
-                    }
-
-                    NSData* origImageData = [AVCapturePhotoOutput JPEGPhotoDataRepresentationForJPEGSampleBuffer: imageBuffer previewPhotoSampleBuffer: imagePreviewBuffer];
-                    auto origImage = [UIImage imageWithData: origImageData];
-                    auto imageOrientation = uiImageOrientationToCGImageOrientation (origImage.imageOrientation);
-
-                    auto* uiImage = getImageWithCorrectOrientation (imageOrientation, origImage.CGImage);
-
-                    auto* imageData = UIImageJPEGRepresentation (uiImage, 0.f);
-
-                    auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
-
-                    getOwner (self).callListeners (image);
-
-                    MessageManager::callAsync ([self, image]() { getOwner (self).notifyPictureTaken (image); });
                 }
 
                 static CGImagePropertyOrientation uiImageOrientationToCGImageOrientation (UIImageOrientation orientation)
@@ -1243,5 +1160,3 @@ String CameraDevice::getFileExtension()
 {
     return ".mov";
 }
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE

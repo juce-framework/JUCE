@@ -32,8 +32,6 @@
   ==============================================================================
 */
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
 namespace juce
 {
 
@@ -535,5 +533,3 @@ private:
 };
 
 } // namespace juce
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE

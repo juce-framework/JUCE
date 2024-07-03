@@ -43,11 +43,6 @@
 namespace juce
 {
 
-#if ! (defined (__IPHONE_16_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_0)
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
- #define JUCE_DEPRECATION_IGNORED 1
-#endif
-
 //==============================================================================
 class FileChooser::Native final : public FileChooser::Pimpl,
                                   public detail::NativeModalWrapperComponent,
@@ -335,10 +330,6 @@ std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser
     return Native::make (owner, flags);
 }
 
-#if JUCE_DEPRECATION_IGNORED
- JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-#endif
-
 } // namespace juce
 
 @implementation FileChooserControllerClass
@@ -366,14 +357,6 @@ std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser
     owner = o;
     return self;
 }
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-implementations")
-- (void) documentPicker: (UIDocumentPickerViewController*) controller didPickDocumentAtURL: (NSURL*) url
-{
-    if (owner != nullptr)
-        owner->didPickDocumentAtURL (url);
-}
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 - (void) documentPicker: (UIDocumentPickerViewController*) controller didPickDocumentsAtURLs: (NSArray<NSURL*>*) urls
 {
