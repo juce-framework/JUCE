@@ -50,10 +50,12 @@ namespace juce
     The browser itself will be platform-dependent. On Mac and iOS it will be
     WebKit, on Android it will be Chrome, and on Linux it will be WebKit.
 
-    On Windows it will be IE, but if JUCE_USE_WIN_WEBVIEW2 is enabled then using
-    the WindowsWebView2WebBrowserComponent wrapper instead of this class directly
-    will attempt to use the Microsoft Edge (Chromium) WebView2. See the documentation
-    of that class for more information about its requirements.
+    The default engine on Windows will be IE, but if JUCE_USE_WIN_WEBVIEW2=1 or
+    JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1 is defined, then passing the
+    WebBrowserComponent::Options::Backend::webview2 value to the constructor will
+    attempt to use the Chrome based Edge WebView, and fall back to IE in case of
+    failure. CMake builds also need to specify the NEEDS_WEBVIEW2 option when
+    creating a JUCE based target.
 
     @tags{GUI}
 */
@@ -282,6 +284,8 @@ public:
 
             To call this function from the frontend, you can import the JUCE frontend helper module
             or issue a call to the low-level frontend API.
+
+            The callback is always called on the message thread.
 
             @code
             import { getNativeFunction } from "./juce";
