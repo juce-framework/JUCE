@@ -120,6 +120,8 @@ class ListenerList {
 
 const BasicControl_valueChangedEventId = "valueChanged";
 const BasicControl_propertiesChangedId = "propertiesChanged";
+const SliderControl_sliderDragStartedEventId = "sliderDragStarted";
+const SliderControl_sliderDragEndedEventId = "sliderDragEnded";
 
 /**
  * SliderState encapsulates data and callbacks that are synchronised with a WebSliderRelay object
@@ -187,12 +189,20 @@ class SliderState {
   /**
    * This function should be called first thing when the user starts interacting with the slider.
    */
-  sliderDragStarted() {}
+  sliderDragStarted() {
+    window.__JUCE__.backend.emitEvent(this.identifier, {
+      eventType: SliderControl_sliderDragStartedEventId,
+    });
+  }
 
   /**
    * This function should be called when the user finished the interaction with the slider.
    */
-  sliderDragEnded() {}
+  sliderDragEnded() {
+    window.__JUCE__.backend.emitEvent(this.identifier, {
+      eventType: SliderControl_sliderDragEndedEventId,
+    });
+  }
 
   /** Internal. */
   handleEvent(event) {
