@@ -302,7 +302,13 @@ void WebSliderParameterAttachment::sendInitialUpdate()
     object->setProperty ("skew", range.skew);
     object->setProperty ("name", parameter.getName (100));
     object->setProperty ("label", parameter.getLabel());
-    object->setProperty ("numSteps", parameter.getNumSteps());
+
+    // We use the NormalisableRange defined num steps even for an AudioParameterFloat.
+    const auto numSteps = range.interval > 0
+                        ? static_cast<int> ((range.end - range.start) / range.interval) + 1
+                        : AudioProcessor::getDefaultNumParameterSteps();
+
+    object->setProperty ("numSteps", numSteps);
     object->setProperty ("interval", range.interval);
     object->setProperty ("parameterIndex", parameter.getParameterIndex());
     sliderState.emitEvent (object.get());
