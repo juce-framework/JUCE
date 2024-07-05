@@ -60,9 +60,6 @@ struct VariantConverter<choc::value::Value>
 {
     static choc::value::Value fromVar (const var& variant)
     {
-        if (variant.isVoid())
-            return {};
-
         if (variant.isInt())
             return choc::value::Value { (int) variant };
 
