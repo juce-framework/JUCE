@@ -42,7 +42,6 @@ public:
     //==============================================================================
     bool isXcode() const override                { return false; }
     bool isVisualStudio() const override         { return false; }
-    bool isCodeBlocks() const override           { return false; }
     bool isMakefile() const override             { return false; }
     bool isAndroidStudio() const override        { return true;  }
 

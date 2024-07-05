@@ -120,7 +120,18 @@ class ListenerList {
 
 const BasicControl_valueChangedEventId = "valueChanged";
 const BasicControl_propertiesChangedId = "propertiesChanged";
+const SliderControl_sliderDragStartedEventId = "sliderDragStarted";
+const SliderControl_sliderDragEndedEventId = "sliderDragEnded";
 
+/**
+ * SliderState encapsulates data and callbacks that are synchronised with a WebSliderRelay object
+ * on the backend.
+ *
+ * Use getSliderState() to create a SliderState object. This object will be synchronised with the
+ * WebSliderRelay backend object that was created using the same unique name.
+ *
+ * @param {String} name
+ */
 class SliderState {
   constructor(name) {
     if (!window.__JUCE__.initialisationData.__juce__sliders.includes(name))
@@ -155,6 +166,15 @@ class SliderState {
     });
   }
 
+  /**
+   * Sets the normalised value of the corresponding backend parameter. This value is always in the
+   * [0, 1] range (inclusive).
+   *
+   * The meaning of this range is the same as in the case of
+   * AudioProcessorParameter::getValue() (C++).
+   *
+   * @param {String} name
+   */
   setNormalisedValue(newValue) {
     this.scaledValue = this.snapToLegalValue(
       this.normalisedToScaledValue(newValue)
@@ -166,10 +186,25 @@ class SliderState {
     });
   }
 
-  sliderDragStarted() {}
+  /**
+   * This function should be called first thing when the user starts interacting with the slider.
+   */
+  sliderDragStarted() {
+    window.__JUCE__.backend.emitEvent(this.identifier, {
+      eventType: SliderControl_sliderDragStartedEventId,
+    });
+  }
 
-  sliderDragEnded() {}
+  /**
+   * This function should be called when the user finished the interaction with the slider.
+   */
+  sliderDragEnded() {
+    window.__JUCE__.backend.emitEvent(this.identifier, {
+      eventType: SliderControl_sliderDragEndedEventId,
+    });
+  }
 
+  /** Internal. */
   handleEvent(event) {
     if (event.eventType == BasicControl_valueChangedEventId) {
       this.scaledValue = event.value;
@@ -183,10 +218,24 @@ class SliderState {
     }
   }
 
+  /**
+   * Returns the scaled value of the parameter. This corresponds to the return value of
+   * NormalisableRange::convertFrom0to1() (C++). This value will differ from a linear
+   * [0, 1] range if a non-default NormalisableRange was set for the parameter.
+   */
   getScaledValue() {
     return this.scaledValue;
   }
 
+  /**
+   * Returns the normalised value of the corresponding backend parameter. This value is always in the
+   * [0, 1] range (inclusive).
+   *
+   * The meaning of this range is the same as in the case of
+   * AudioProcessorParameter::getValue() (C++).
+   *
+   * @param {String} name
+   */
   getNormalisedValue() {
     return Math.pow(
       (this.scaledValue - this.properties.start) /
@@ -195,6 +244,7 @@ class SliderState {
     );
   }
 
+  /** Internal. */
   normalisedToScaledValue(normalisedValue) {
     return (
       Math.pow(normalisedValue, 1 / this.properties.skew) *
@@ -203,6 +253,7 @@ class SliderState {
     );
   }
 
+  /** Internal. */
   snapToLegalValue(value) {
     const interval = this.properties.interval;
 
@@ -239,6 +290,15 @@ function getSliderState(name) {
   return sliderStates.get(name);
 }
 
+/**
+ * ToggleState encapsulates data and callbacks that are synchronised with a WebToggleRelay object
+ * on the backend.
+ *
+ * Use getToggleState() to create a ToggleState object. This object will be synchronised with the
+ * WebToggleRelay backend object that was created using the same unique name.
+ *
+ * @param {String} name
+ */
 class ToggleState {
   constructor(name) {
     if (!window.__JUCE__.initialisationData.__juce__toggles.includes(name))
@@ -267,10 +327,12 @@ class ToggleState {
     });
   }
 
+  /** Returns the value corresponding to the associated WebToggleRelay's (C++) state. */
   getValue() {
     return this.value;
   }
 
+  /** Informs the backend to change the associated WebToggleRelay's (C++) state. */
   setValue(newValue) {
     this.value = newValue;
 
@@ -280,6 +342,7 @@ class ToggleState {
     });
   }
 
+  /** Internal. */
   handleEvent(event) {
     if (event.eventType == BasicControl_valueChangedEventId) {
       this.value = event.value;
@@ -314,6 +377,15 @@ function getToggleState(name) {
   return toggleStates.get(name);
 }
 
+/**
+ * ComboBoxState encapsulates data and callbacks that are synchronised with a WebComboBoxRelay object
+ * on the backend.
+ *
+ * Use getComboBoxState() to create a ComboBoxState object. This object will be synchronised with the
+ * WebComboBoxRelay backend object that was created using the same unique name.
+ *
+ * @param {String} name
+ */
 class ComboBoxState {
   constructor(name) {
     if (!window.__JUCE__.initialisationData.__juce__comboBoxes.includes(name))
@@ -343,10 +415,22 @@ class ComboBoxState {
     });
   }
 
+  /**
+   * Returns the value corresponding to the associated WebComboBoxRelay's (C++) state.
+   *
+   * This is an index identifying which element of the properties.choices array is currently
+   * selected.
+   */
   getChoiceIndex() {
     return Math.round(this.value * (this.properties.choices.length - 1));
   }
 
+  /**
+   * Informs the backend to change the associated WebComboBoxRelay's (C++) state.
+   *
+   * This should be called with the index identifying the selected element from the
+   * properties.choices array.
+   */
   setChoiceIndex(index) {
     const numItems = this.properties.choices.length;
     this.value = numItems > 1 ? index / (numItems - 1) : 0.0;
@@ -357,6 +441,7 @@ class ComboBoxState {
     });
   }
 
+  /** Internal. */
   handleEvent(event) {
     if (event.eventType == BasicControl_valueChangedEventId) {
       this.value = event.value;

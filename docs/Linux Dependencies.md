@@ -32,7 +32,11 @@ or
 - libcurl4-openssl-dev (unless `JUCE_USE_CURL=0`)
 
 #### juce_graphics
-- libfreetype6-dev (unless `JUCE_USE_FREETYPE=0`)
+- libfontconfig1-dev (unless `JUCE_USE_FONTCONFIG=0`)
+- libfreetype-dev (unless `JUCE_USE_FREETYPE=0`)
+
+These packages are available on Ubuntu 22 and 24. If libfreetype-dev is not
+available you could try installing the libfreetype6-dev package.
 
 #### juce_gui_basics
 - libx11-dev
@@ -63,7 +67,7 @@ The full command is as follows:
     sudo apt install libasound2-dev libjack-jackd2-dev \
         ladspa-sdk \
         libcurl4-openssl-dev  \
-        libfreetype6-dev \
+        libfreetype-dev libfontconfig1-dev \
         libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \
         libwebkit2gtk-4.1-dev \
         libglu1-mesa-dev mesa-common-dev

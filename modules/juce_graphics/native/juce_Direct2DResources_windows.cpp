@@ -150,7 +150,6 @@ public:
     static ComSmartPtr<ID2D1Bitmap1> createBitmap (ComSmartPtr<ID2D1DeviceContext1> deviceContext,
                                                    Image::PixelFormat format,
                                                    D2D_SIZE_U size,
-                                                   int lineStride,
                                                    D2D1_BITMAP_OPTIONS options)
     {
         JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::createDirect2DBitmap, etw::graphicsKeyword);
@@ -166,20 +165,18 @@ public:
         jassert (size.width <= maxBitmapSize && size.height <= maxBitmapSize);
        #endif
 
-        D2D1_BITMAP_PROPERTIES1 bitmapProperties{};
-        bitmapProperties.dpiX = bitmapProperties.dpiY = USER_DEFAULT_SCREEN_DPI;
-        bitmapProperties.pixelFormat.format = format == Image::SingleChannel
-                                            ? DXGI_FORMAT_A8_UNORM
-                                            : DXGI_FORMAT_B8G8R8A8_UNORM;
-        bitmapProperties.pixelFormat.alphaMode = format == Image::RGB
-                                               ? D2D1_ALPHA_MODE_IGNORE
-                                               : D2D1_ALPHA_MODE_PREMULTIPLIED;
-        bitmapProperties.bitmapOptions = options;
+        const auto pixelFormat = D2D1::PixelFormat (format == Image::SingleChannel
+                                                        ? DXGI_FORMAT_A8_UNORM
+                                                        : DXGI_FORMAT_B8G8R8A8_UNORM,
+                                                    format == Image::RGB
+                                                        ? D2D1_ALPHA_MODE_IGNORE
+                                                        : D2D1_ALPHA_MODE_PREMULTIPLIED);
+        const auto bitmapProperties = D2D1::BitmapProperties1 (options, pixelFormat);
 
         ComSmartPtr<ID2D1Bitmap1> bitmap;
         deviceContext->CreateBitmap (size,
-                                     nullptr,
-                                     (UINT32) lineStride,
+                                     {},
+                                     {},
                                      bitmapProperties,
                                      bitmap.resetAndGetPointerAddress());
         return bitmap;

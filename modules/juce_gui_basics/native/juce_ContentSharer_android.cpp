@@ -288,9 +288,6 @@ public:
             constexpr int grantReadUriPermission   = 1;
             constexpr int grantPrefixUriPermission = 128;
 
-            if (getAndroidSDKVersion() < 21)
-                return grantReadUriPermission;
-
             return grantReadUriPermission | grantPrefixUriPermission;
         };
 

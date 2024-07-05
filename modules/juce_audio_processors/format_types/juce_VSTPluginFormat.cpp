@@ -38,7 +38,7 @@
 #undef PRAGMA_ALIGN_SUPPORTED
 
 
-#if ! JUCE_MINGW && ! JUCE_MSVC
+#if ! JUCE_MSVC
  #define __cdecl
 #endif
 
@@ -71,11 +71,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 
 #include "juce_VSTMidiEventList.h"
 
-#if JUCE_MINGW
- #ifndef WM_APPCOMMAND
-  #define WM_APPCOMMAND 0x0319
- #endif
-#elif ! JUCE_WINDOWS
+#if ! JUCE_WINDOWS
  static void _fpreset() {}
  static void _clearfp() {}
 #endif

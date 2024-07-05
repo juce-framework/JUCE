@@ -298,10 +298,8 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         {
             options |= AVAudioSessionCategoryOptionDefaultToSpeaker
                      | AVAudioSessionCategoryOptionAllowBluetooth
-                     | AVAudioSessionCategoryOptionAllowAirPlay;
-
-            if (@available (iOS 10.0, *))
-                options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+                     | AVAudioSessionCategoryOptionAllowAirPlay
+                     | AVAudioSessionCategoryOptionAllowBluetoothA2DP;
         }
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
@@ -739,18 +737,9 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
                                              &dataSize);
         if (err == noErr)
         {
-            if (@available (iOS 10.0, *))
-            {
-                [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl
-                                                   options: @{}
-                                         completionHandler: nil];
-
-                return;
-            }
-
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-            [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl];
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl
+                                               options: @{}
+                                     completionHandler: nil];
         }
     }
 

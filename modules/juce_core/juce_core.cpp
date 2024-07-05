@@ -61,18 +61,12 @@
 #if JUCE_WINDOWS
  #include <ctime>
 
- #if JUCE_MINGW
-  #include <ws2spi.h>
-  #include <cstdio>
-  #include <locale.h>
- #else
-  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4091)
-  #include <Dbghelp.h>
-  JUCE_END_IGNORE_WARNINGS_MSVC
+ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4091)
+ #include <Dbghelp.h>
+ JUCE_END_IGNORE_WARNINGS_MSVC
 
-  #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-   #pragma comment (lib, "DbgHelp.lib")
-  #endif
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+  #pragma comment (lib, "DbgHelp.lib")
  #endif
 
 #else
@@ -134,7 +128,6 @@
 //==============================================================================
 #include "containers/juce_AbstractFifo.cpp"
 #include "containers/juce_ArrayBase.cpp"
-#include "containers/juce_ListenerList.cpp"
 #include "containers/juce_NamedValueSet.cpp"
 #include "containers/juce_OwnedArray.cpp"
 #include "containers/juce_PropertySet.cpp"
@@ -293,6 +286,7 @@
  #include "containers/juce_HashMap_test.cpp"
  #include "containers/juce_Optional_test.cpp"
  #include "containers/juce_Enumerate_test.cpp"
+ #include "containers/juce_ListenerList_test.cpp"
  #include "maths/juce_MathsFunctions_test.cpp"
  #include "misc/juce_EnumHelpers_test.cpp"
  #include "containers/juce_FixedSizeFunction_test.cpp"

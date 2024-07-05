@@ -37,51 +37,31 @@ namespace juce
 
 static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
 {
-    if (@available (macOS 10.10, *))
-    {
-        const auto parameterNames = url.getParameterNames();
-        const auto parameterValues = url.getParameterValues();
+    const auto parameterNames = url.getParameterNames();
+    const auto parameterValues = url.getParameterValues();
 
-        jassert (parameterNames.size() == parameterValues.size());
+    jassert (parameterNames.size() == parameterValues.size());
 
-        if (parameterNames.isEmpty())
-            return fileUrl;
+    if (parameterNames.isEmpty())
+        return fileUrl;
 
-        NSUniquePtr<NSURLComponents> components ([[NSURLComponents alloc] initWithURL: fileUrl resolvingAgainstBaseURL: NO]);
-        NSUniquePtr<NSMutableArray> queryItems ([[NSMutableArray alloc] init]);
+    NSUniquePtr<NSURLComponents> components ([[NSURLComponents alloc] initWithURL: fileUrl resolvingAgainstBaseURL: NO]);
+    NSUniquePtr<NSMutableArray> queryItems ([[NSMutableArray alloc] init]);
 
-        for (int i = 0; i < parameterNames.size(); ++i)
-            [queryItems.get() addObject: [NSURLQueryItem queryItemWithName: juceStringToNS (parameterNames[i])
-                                                                     value: juceStringToNS (parameterValues[i])]];
+    for (int i = 0; i < parameterNames.size(); ++i)
+        [queryItems.get() addObject: [NSURLQueryItem queryItemWithName: juceStringToNS (parameterNames[i])
+                                                                 value: juceStringToNS (parameterValues[i])]];
 
-        [components.get() setQueryItems: queryItems.get()];
+    [components.get() setQueryItems: queryItems.get()];
 
-        return [components.get() URL];
-    }
-
-    const auto queryString = url.getQueryString();
-
-    if (queryString.isNotEmpty())
-        if (NSString* fileUrlString = [fileUrl absoluteString])
-            return [NSURL URLWithString: [fileUrlString stringByAppendingString: juceStringToNS (queryString)]];
-
-    return fileUrl;
+    return [components.get() URL];
 }
 
 static NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
 {
     NSString* urlString = juceStringToNS (url);
 
-     if (@available (macOS 10.9, *))
-     {
-         urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
-     }
-     else
-     {
-         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-         urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-     }
+     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
 
      if (NSURL* nsURL = [NSURL URLWithString: urlString])
      {
@@ -435,7 +415,7 @@ private:
     WebBrowserComponent::Options options;
 };
 
-struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass final : public ObjCClass<NSObject>
+struct WebViewDelegateClass final : public ObjCClass<NSObject>
 {
     WebViewDelegateClass()  : ObjCClass ("JUCEWebViewDelegate_")
     {
@@ -806,12 +786,12 @@ private:
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
-class API_AVAILABLE (macos (10.11)) WebBrowserComponent::Impl::Platform::WKWebViewImpl : public WebBrowserComponent::Impl::PlatformInterface,
-                                                                                        #if JUCE_MAC
-                                                                                         public NSViewComponent
-                                                                                        #else
-                                                                                         public UIViewComponent
-                                                                                        #endif
+class WebBrowserComponent::Impl::Platform::WKWebViewImpl : public WebBrowserComponent::Impl::PlatformInterface,
+                                                          #if JUCE_MAC
+                                                           public NSViewComponent
+                                                          #else
+                                                           public UIViewComponent
+                                                          #endif
 {
 public:
     WKWebViewImpl (WebBrowserComponent::Impl& implIn,
@@ -855,7 +835,7 @@ public:
 
         [[config.get() userContentController] addUserScript:script.get()];
 
-        if (@available (macOS 10.13, iOS 11.0, *))
+        if (@available (macOS 10.13, *))
         {
             if (browserOptions.getResourceProvider() != nullptr)
                 [config.get() setURLSchemeHandler:webViewDelegate.get() forURLScheme:@"juce"];
@@ -1105,14 +1085,7 @@ auto WebBrowserComponent::Impl::createAndInitPlatformDependentPart (WebBrowserCo
                                                                     const StringArray& userScripts)
     -> std::unique_ptr<PlatformInterface>
 {
-    if (@available (macOS 10.11, *))
-        return std::make_unique<Platform::WKWebViewImpl> (impl, options, userScripts);
-
-  #if JUCE_MAC
-    return std::make_unique<Platform::WebViewImpl> (impl, options.getUserAgent());
-  #endif
-
-    return {};
+    return std::make_unique<Platform::WKWebViewImpl> (impl, options, userScripts);
 }
 
 //==============================================================================

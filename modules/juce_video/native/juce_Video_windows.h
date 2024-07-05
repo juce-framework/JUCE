@@ -39,7 +39,7 @@ namespace VideoRenderers
     {
         virtual ~Base() = default;
 
-        virtual HRESULT create (ComSmartPtr<ComTypes::IGraphBuilder>&, ComSmartPtr<ComTypes::IBaseFilter>&, HWND) = 0;
+        virtual HRESULT create (ComSmartPtr<IGraphBuilder>&, ComSmartPtr<IBaseFilter>&, HWND) = 0;
         virtual void setVideoWindow (HWND) = 0;
         virtual void setVideoPosition (HWND) = 0;
         virtual void repaintVideo (HWND, HDC) = 0;
@@ -52,19 +52,19 @@ namespace VideoRenderers
     {
         VMR7() {}
 
-        HRESULT create (ComSmartPtr<ComTypes::IGraphBuilder>& graphBuilder,
-                        ComSmartPtr<ComTypes::IBaseFilter>& baseFilter, HWND hwnd) override
+        HRESULT create (ComSmartPtr<IGraphBuilder>& graphBuilder,
+                        ComSmartPtr<IBaseFilter>& baseFilter, HWND hwnd) override
         {
-            ComSmartPtr<ComTypes::IVMRFilterConfig> filterConfig;
+            ComSmartPtr<IVMRFilterConfig> filterConfig;
 
-            HRESULT hr = baseFilter.CoCreateInstance (ComTypes::CLSID_VideoMixingRenderer);
+            HRESULT hr = baseFilter.CoCreateInstance (CLSID_VideoMixingRenderer);
 
             if (SUCCEEDED (hr))   hr = graphBuilder->AddFilter (baseFilter, L"VMR-7");
             if (SUCCEEDED (hr))   hr = baseFilter.QueryInterface (filterConfig);
-            if (SUCCEEDED (hr))   hr = filterConfig->SetRenderingMode (ComTypes::VMRMode_Windowless);
+            if (SUCCEEDED (hr))   hr = filterConfig->SetRenderingMode (VMRMode_Windowless);
             if (SUCCEEDED (hr))   hr = baseFilter.QueryInterface (windowlessControl);
             if (SUCCEEDED (hr))   hr = windowlessControl->SetVideoClippingWindow (hwnd);
-            if (SUCCEEDED (hr))   hr = windowlessControl->SetAspectRatioMode (ComTypes::VMR_ARMODE_LETTER_BOX);
+            if (SUCCEEDED (hr))   hr = windowlessControl->SetAspectRatioMode (VMR_ARMODE_LETTER_BOX);
 
             return hr;
         }
@@ -101,7 +101,7 @@ namespace VideoRenderers
             return windowlessControl->GetNativeVideoSize (&videoWidth, &videoHeight, nullptr, nullptr);
         }
 
-        ComSmartPtr<ComTypes::IVMRWindowlessControl> windowlessControl;
+        ComSmartPtr<IVMRWindowlessControl> windowlessControl;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VMR7)
     };
@@ -112,21 +112,21 @@ namespace VideoRenderers
     {
         EVR() = default;
 
-        HRESULT create (ComSmartPtr<ComTypes::IGraphBuilder>& graphBuilder,
-                        ComSmartPtr<ComTypes::IBaseFilter>& baseFilter, HWND hwnd) override
+        HRESULT create (ComSmartPtr<IGraphBuilder>& graphBuilder,
+                        ComSmartPtr<IBaseFilter>& baseFilter, HWND hwnd) override
         {
-            ComSmartPtr<ComTypes::IMFGetService> getService;
+            ComSmartPtr<IMFGetService> getService;
 
-            HRESULT hr = baseFilter.CoCreateInstance (ComTypes::CLSID_EnhancedVideoRenderer);
+            HRESULT hr = baseFilter.CoCreateInstance (CLSID_EnhancedVideoRenderer);
 
             if (SUCCEEDED (hr))   hr = graphBuilder->AddFilter (baseFilter, L"EVR");
             if (SUCCEEDED (hr))   hr = baseFilter.QueryInterface (getService);
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-            if (SUCCEEDED (hr))   hr = getService->GetService (ComTypes::MR_VIDEO_RENDER_SERVICE, __uuidof (ComTypes::IMFVideoDisplayControl),
+            if (SUCCEEDED (hr))   hr = getService->GetService (MR_VIDEO_RENDER_SERVICE, __uuidof (IMFVideoDisplayControl),
                                                                (void**) videoDisplayControl.resetAndGetPointerAddress());
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             if (SUCCEEDED (hr))   hr = videoDisplayControl->SetVideoWindow (hwnd);
-            if (SUCCEEDED (hr))   hr = videoDisplayControl->SetAspectRatioMode (ComTypes::MFVideoARMode_PreservePicture);
+            if (SUCCEEDED (hr))   hr = videoDisplayControl->SetAspectRatioMode (MFVideoARMode_PreservePicture);
 
             return hr;
         }
@@ -138,7 +138,7 @@ namespace VideoRenderers
 
         void setVideoPosition (HWND hwnd) override
         {
-            const ComTypes::MFVideoNormalizedRect src { 0.0f, 0.0f, 1.0f, 1.0f };
+            const MFVideoNormalizedRect src { 0.0f, 0.0f, 1.0f, 1.0f };
 
             RECT dest;
             GetClientRect (hwnd, &dest);
@@ -162,7 +162,7 @@ namespace VideoRenderers
             return hr;
         }
 
-        ComSmartPtr<ComTypes::IMFVideoDisplayControl> videoDisplayControl;
+        ComSmartPtr<IMFVideoDisplayControl> videoDisplayControl;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EVR)
     };
@@ -452,8 +452,8 @@ private:
 
             createNativeWindow();
 
-            mediaEvent->CancelDefaultHandling (ComTypes::EC_STATE_CHANGE);
-            mediaEvent->SetNotifyWindow ((ComTypes::OAHWND) hwnd, graphEventID, 0);
+            mediaEvent->CancelDefaultHandling (EC_STATE_CHANGE);
+            mediaEvent->SetNotifyWindow ((OAHWND) hwnd, graphEventID, 0);
 
             if (videoRenderer != nullptr)
                 videoRenderer->setVideoWindow (hwnd);
@@ -503,7 +503,7 @@ private:
             if (! createNativeWindow())
                 return Result::fail ("Can't create window");
 
-            HRESULT hr = graphBuilder.CoCreateInstance (ComTypes::CLSID_FilterGraph);
+            HRESULT hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph);
 
             // basic playback interfaces
             if (SUCCEEDED (hr))   hr = graphBuilder.QueryInterface (mediaControl);
@@ -565,8 +565,8 @@ private:
             // set window to receive events
             if (SUCCEEDED (hr))
             {
-                mediaEvent->CancelDefaultHandling (ComTypes::EC_STATE_CHANGE);
-                hr = mediaEvent->SetNotifyWindow ((ComTypes::OAHWND) hwnd, graphEventID, 0);
+                mediaEvent->CancelDefaultHandling (EC_STATE_CHANGE);
+                hr = mediaEvent->SetNotifyWindow ((OAHWND) hwnd, graphEventID, 0);
             }
 
             if (SUCCEEDED (hr))
@@ -587,12 +587,12 @@ private:
         {
             switch (hr)
             {
-                case ComTypes::VFW_E_INVALID_FILE_FORMAT:         return Result::fail ("Invalid file format");
-                case ComTypes::VFW_E_NOT_FOUND:                   return Result::fail ("File not found");
-                case ComTypes::VFW_E_UNKNOWN_FILE_TYPE:           return Result::fail ("Unknown file type");
-                case ComTypes::VFW_E_UNSUPPORTED_STREAM:          return Result::fail ("Unsupported stream");
-                case ComTypes::VFW_E_CANNOT_CONNECT:              return Result::fail ("Cannot connect");
-                case ComTypes::VFW_E_CANNOT_LOAD_SOURCE_FILTER:   return Result::fail ("Cannot load source filter");
+                case VFW_E_INVALID_FILE_FORMAT:         return Result::fail ("Invalid file format");
+                case VFW_E_NOT_FOUND:                   return Result::fail ("File not found");
+                case VFW_E_UNKNOWN_FILE_TYPE:           return Result::fail ("Unknown file type");
+                case VFW_E_UNSUPPORTED_STREAM:          return Result::fail ("Unsupported stream");
+                case VFW_E_CANNOT_CONNECT:              return Result::fail ("Cannot connect");
+                case VFW_E_CANNOT_LOAD_SOURCE_FILTER:   return Result::fail ("Cannot load source filter");
             }
 
             TCHAR messageBuffer[512] = { 0 };
@@ -643,28 +643,28 @@ private:
 
                 switch (ec)
                 {
-                    case ComTypes::EC_REPAINT:
+                    case EC_REPAINT:
                         component.repaint();
                         break;
 
-                    case ComTypes::EC_COMPLETE:
+                    case EC_COMPLETE:
                         component.stop();
                         component.setPosition (0.0);
                         break;
 
-                    case ComTypes::EC_ERRORABORT:
-                    case ComTypes::EC_ERRORABORTEX:
+                    case EC_ERRORABORT:
+                    case EC_ERRORABORTEX:
                         component.errorOccurred (getErrorMessageFromResult ((HRESULT) p1).getErrorMessage());
                         // intentional fallthrough
-                    case ComTypes::EC_USERABORT:
+                    case EC_USERABORT:
                         component.close();
                         break;
 
-                    case ComTypes::EC_STATE_CHANGE:
+                    case EC_STATE_CHANGE:
                         switch (p1)
                         {
-                            case ComTypes::State_Paused:  component.playbackStopped(); break;
-                            case ComTypes::State_Running: component.playbackStarted(); break;
+                            case State_Paused:  component.playbackStopped(); break;
+                            case State_Running: component.playbackStarted(); break;
                             default: break;
                         }
 
@@ -707,7 +707,7 @@ private:
         //==============================================================================
         double getDuration() const
         {
-            ComTypes::REFTIME duration;
+            REFTIME duration;
             mediaPosition->get_Duration (&duration);
             return duration;
         }
@@ -721,7 +721,7 @@ private:
 
         double getPosition() const
         {
-            ComTypes::REFTIME seconds;
+            REFTIME seconds;
             mediaPosition->get_CurrentPosition (&seconds);
             return seconds;
         }
@@ -757,12 +757,12 @@ private:
         HWND hwnd = {};
         HDC hdc = {};
 
-        ComSmartPtr<ComTypes::IGraphBuilder> graphBuilder;
-        ComSmartPtr<ComTypes::IMediaControl> mediaControl;
-        ComSmartPtr<ComTypes::IMediaPosition> mediaPosition;
-        ComSmartPtr<ComTypes::IMediaEventEx> mediaEvent;
-        ComSmartPtr<ComTypes::IBasicAudio> basicAudio;
-        ComSmartPtr<ComTypes::IBaseFilter> baseFilter;
+        ComSmartPtr<IGraphBuilder> graphBuilder;
+        ComSmartPtr<IMediaControl> mediaControl;
+        ComSmartPtr<IMediaPosition> mediaPosition;
+        ComSmartPtr<IMediaEventEx> mediaEvent;
+        ComSmartPtr<IBasicAudio> basicAudio;
+        ComSmartPtr<IBaseFilter> baseFilter;
 
         std::unique_ptr<VideoRenderers::Base> videoRenderer;
 
@@ -810,31 +810,31 @@ private:
 
         bool isRendererConnected()
         {
-            ComSmartPtr<ComTypes::IEnumPins> enumPins;
+            ComSmartPtr<IEnumPins> enumPins;
 
             HRESULT hr = baseFilter->EnumPins (enumPins.resetAndGetPointerAddress());
 
             if (SUCCEEDED (hr))
                 hr = enumPins->Reset();
 
-            ComSmartPtr<ComTypes::IPin> pin;
+            ComSmartPtr<IPin> pin;
 
             while (SUCCEEDED (hr)
                     && enumPins->Next (1, pin.resetAndGetPointerAddress(), nullptr) == S_OK)
             {
-                ComSmartPtr<ComTypes::IPin> otherPin;
+                ComSmartPtr<IPin> otherPin;
 
                 hr = pin->ConnectedTo (otherPin.resetAndGetPointerAddress());
 
                 if (SUCCEEDED (hr))
                 {
-                    ComTypes::PIN_DIRECTION direction;
+                    PIN_DIRECTION direction;
                     hr = pin->QueryDirection (&direction);
 
-                    if (SUCCEEDED (hr) && direction == ComTypes::PINDIR_INPUT)
+                    if (SUCCEEDED (hr) && direction == PINDIR_INPUT)
                         return true;
                 }
-                else if (hr == ComTypes::VFW_E_NOT_CONNECTED)
+                else if (hr == VFW_E_NOT_CONNECTED)
                 {
                     hr = S_OK;
                 }

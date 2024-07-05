@@ -96,7 +96,7 @@ struct StatusItemContainer : public Timer
 };
 
 //==============================================================================
-struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem  final : public StatusItemContainer
+struct ButtonBasedStatusItem  final : public StatusItemContainer
 {
     //==============================================================================
     ButtonBasedStatusItem (SystemTrayIconComponent& iconComp, const Image& im)
@@ -388,11 +388,8 @@ class SystemTrayIconComponent::Pimpl
 public:
     //==============================================================================
     Pimpl (SystemTrayIconComponent& iconComp, const Image& im)
+        : statusItemHolder (std::make_unique<ButtonBasedStatusItem> (iconComp, im))
     {
-        if (@available (macOS 10.10, *))
-            statusItemHolder = std::make_unique<ButtonBasedStatusItem> (iconComp, im);
-        else
-            statusItemHolder = std::make_unique<ViewBasedStatusItem> (iconComp, im);
     }
 
     //==============================================================================

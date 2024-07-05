@@ -359,45 +359,18 @@ private:
 
     static Array<File> getSecondaryStorageDirectories()
     {
+        auto* env = getEnv();
+        static jmethodID m = (env->GetMethodID (AndroidContext, "getExternalFilesDirs",
+                                                "(Ljava/lang/String;)[Ljava/io/File;"));
+        if (m == nullptr)
+            return {};
+
+        auto paths = convertFileArray (LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(), m, nullptr)));
+
         Array<File> results;
 
-        if (getAndroidSDKVersion() >= 19)
-        {
-            auto* env = getEnv();
-            static jmethodID m = (env->GetMethodID (AndroidContext, "getExternalFilesDirs",
-                                                    "(Ljava/lang/String;)[Ljava/io/File;"));
-            if (m == nullptr)
-                return {};
-
-            auto paths = convertFileArray (LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(), m, nullptr)));
-
-            for (auto path : paths)
-                results.add (getMountPointForFile (path));
-        }
-        else
-        {
-            // on older SDKs other external storages are located "next" to the primary
-            // storage mount point
-            auto mountFolder = getMountPointForFile (getPrimaryStorageDirectory())
-                                    .getParentDirectory();
-
-            // don't include every folder. Only folders which are actually mountpoints
-            juce_statStruct info;
-            if (! juce_stat (mountFolder.getFullPathName(), info))
-                return {};
-
-            auto rootFsDevice = info.st_dev;
-
-            for (const auto& iter : RangedDirectoryIterator (mountFolder, false, "*", File::findDirectories))
-            {
-                auto candidate = iter.getFile();
-
-                if (juce_stat (candidate.getFullPathName(), info)
-                      && info.st_dev != rootFsDevice)
-                    results.add (candidate);
-            }
-
-        }
+        for (auto path : paths)
+            results.add (getMountPointForFile (path));
 
         return results;
     }
@@ -827,12 +800,7 @@ String File::getVersion() const
 
 static File getDocumentsDirectory()
 {
-    auto* env = getEnv();
-
-    if (getAndroidSDKVersion() >= 19)
-        return getWellKnownFolder ("DIRECTORY_DOCUMENTS");
-
-    return juceFile (LocalRef<jobject> (env->CallStaticObjectMethod (AndroidEnvironment, AndroidEnvironment.getDataDirectory)));
+    return getWellKnownFolder ("DIRECTORY_DOCUMENTS");
 }
 
 static File getAppDataDir (bool dataDir)

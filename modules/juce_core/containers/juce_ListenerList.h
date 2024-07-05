@@ -135,7 +135,8 @@ public:
         {
             for (auto* it : *iterators)
             {
-                --it->end;
+                if (index < it->end)
+                    --it->end;
 
                 if (index <= it->index)
                     --it->index;
@@ -387,6 +388,12 @@ private:
 
         if (state.compare_exchange_strong (expected, State::initialising))
         {
+            static_assert (std::is_nothrow_constructible_v<ArrayType>,
+                           "Any ListenerList ArrayType must have a noexcept default constructor");
+
+            static_assert (std::is_nothrow_constructible_v<SafeIterators>,
+                           "Please notify the JUCE team if you encounter this assertion");
+
             listeners = std::make_shared<ArrayType>();
             iterators = std::make_shared<SafeIterators>();
             state = State::initialised;

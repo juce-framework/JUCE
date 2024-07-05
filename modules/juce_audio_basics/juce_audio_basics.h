@@ -70,10 +70,6 @@
 #undef Factor
 
 //==============================================================================
-#if JUCE_MINGW && ! defined (__SSE2__)
- #define JUCE_USE_SSE_INTRINSICS 0
-#endif
-
 #ifndef JUCE_USE_SSE_INTRINSICS
  #define JUCE_USE_SSE_INTRINSICS 1
 #endif

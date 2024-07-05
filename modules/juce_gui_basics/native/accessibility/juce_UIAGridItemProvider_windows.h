@@ -37,7 +37,7 @@ namespace juce
 
 //==============================================================================
 class UIAGridItemProvider  : public UIAProviderBase,
-                             public ComBaseClassHelper<ComTypes::IGridItemProvider, ComTypes::ITableItemProvider>
+                             public ComBaseClassHelper<IGridItemProvider, ITableItemProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;

@@ -39,6 +39,23 @@ namespace juce
 JUCE_IMPLEMENT_SINGLETON (Direct2DMetricsHub)
 #endif
 
+struct ScopedBlendCopy
+{
+    explicit ScopedBlendCopy (ComSmartPtr<ID2D1DeviceContext1> c)
+        : ctx (c)
+    {
+        ctx->SetPrimitiveBlend (D2D1_PRIMITIVE_BLEND_COPY);
+    }
+
+    ~ScopedBlendCopy()
+    {
+        ctx->SetPrimitiveBlend (blend);
+    }
+
+    ComSmartPtr<ID2D1DeviceContext1> ctx;
+    D2D1_PRIMITIVE_BLEND blend = ctx->GetPrimitiveBlend();
+};
+
 class PushedLayers
 {
 public:
@@ -52,7 +69,7 @@ public:
     }
    #endif
 
-    void push (ComSmartPtr<ID2D1DeviceContext1> context, const D2D1_LAYER_PARAMETERS& layerParameters)
+    void push (ComSmartPtr<ID2D1DeviceContext1> context, const D2D1_LAYER_PARAMETERS1& layerParameters)
     {
         // Clipping and transparency are all handled by pushing Direct2D
         // layers. The SavedState creates an internal stack of Layer objects to
@@ -118,14 +135,14 @@ public:
                  || ! isGeometryAxisAlignedRectangle);
        #endif
 
-        context->PushLayer (layerParameters, nullptr);
-        pushedLayers.emplace_back (popLayerFlag);
+        pushedLayers.emplace_back (OwningLayer { layerParameters });
+        pushedLayers.back().push (context);
     }
 
     void push (ComSmartPtr<ID2D1DeviceContext1> context, const Rectangle<float>& r)
     {
-        context->PushAxisAlignedClip (D2DUtilities::toRECT_F (r), D2D1_ANTIALIAS_MODE_ALIASED);
-        pushedLayers.emplace_back (popAxisAlignedLayerFlag);
+        pushedLayers.emplace_back (r);
+        pushedLayers.back().push (context);
     }
 
     void popOne (ComSmartPtr<ID2D1DeviceContext1> context)
@@ -133,11 +150,7 @@ public:
         if (pushedLayers.empty())
             return;
 
-        if (pushedLayers.back() == popLayerFlag)
-            context->PopLayer();
-        else
-            context->PopAxisAlignedClip();
-
+        pushedLayers.back().pop (context);
         pushedLayers.pop_back();
     }
 
@@ -146,7 +159,131 @@ public:
         return pushedLayers.empty();
     }
 
+    void fillGeometryWithNoLayersActive (ComSmartPtr<ID2D1DeviceContext1> ctx,
+                                         ComSmartPtr<ID2D1Geometry> geo,
+                                         ComSmartPtr<ID2D1Brush> brush)
+    {
+        ComSmartPtr<ID2D1Factory> factory;
+        ctx->GetFactory (factory.resetAndGetPointerAddress());
+
+        const auto hasGeoLayer = std::any_of (pushedLayers.begin(),
+                                              pushedLayers.end(),
+                                              [] (const auto& x) { return std::holds_alternative<OwningLayer> (x.var); });
+
+        const auto intersection = [&]() -> ComSmartPtr<ID2D1Geometry>
+        {
+            if (! hasGeoLayer)
+                return {};
+
+            const auto contextSize = ctx->GetPixelSize();
+
+            ComSmartPtr<ID2D1RectangleGeometry> rect;
+            factory->CreateRectangleGeometry (D2D1::RectF (0.0f,
+                                                           0.0f,
+                                                           (float) contextSize.width,
+                                                           (float) contextSize.height),
+                                              rect.resetAndGetPointerAddress());
+
+            ComSmartPtr<ID2D1Geometry> clip = rect;
+
+            for (const auto& layer : pushedLayers)
+            {
+                ScopedGeometryWithSink scope { factory, D2D1_FILL_MODE_WINDING };
+
+                if (auto* l = std::get_if<OwningLayer> (&layer.var))
+                {
+                    clip->CombineWithGeometry (l->geometry,
+                                               D2D1_COMBINE_MODE_INTERSECT,
+                                               l->params.maskTransform,
+                                               scope.sink);
+                }
+                else if (auto* r = std::get_if<Rectangle<float>> (&layer.var))
+                {
+                    ComSmartPtr<ID2D1RectangleGeometry> temporaryRect;
+                    factory->CreateRectangleGeometry (D2DUtilities::toRECT_F (*r),
+                                                      temporaryRect.resetAndGetPointerAddress());
+                    clip->CombineWithGeometry (temporaryRect,
+                                               D2D1_COMBINE_MODE_INTERSECT,
+                                               D2D1::Matrix3x2F::Identity(),
+                                               scope.sink);
+                }
+
+                clip = scope.geometry;
+            }
+
+            return clip;
+        }();
+
+        const auto clipWithGeo = [&]() -> ComSmartPtr<ID2D1Geometry>
+        {
+            if (intersection == nullptr)
+                return geo;
+
+            ScopedGeometryWithSink scope { factory, D2D1_FILL_MODE_WINDING };
+            intersection->CombineWithGeometry (geo,
+                                               D2D1_COMBINE_MODE_INTERSECT,
+                                               D2D1::Matrix3x2F::Identity(),
+                                               scope.sink);
+            return scope.geometry;
+        }();
+
+        if (intersection != nullptr)
+        {
+            std::for_each (pushedLayers.rbegin(),
+                           pushedLayers.rend(),
+                           [&] (const auto& layer) { layer.pop (ctx); });
+        }
+
+        {
+            const ScopedBlendCopy scope { ctx };
+            ctx->FillGeometry (clipWithGeo, brush);
+        }
+
+        if (intersection != nullptr)
+        {
+            pushedLayers.clear();
+
+            auto newLayer = D2D1::LayerParameters1();
+            newLayer.geometricMask = intersection;
+            push (ctx, newLayer);
+        }
+    }
+
 private:
+    struct OwningLayer
+    {
+        explicit OwningLayer (const D2D1_LAYER_PARAMETERS1& p) : params (p) {}
+
+        D2D1_LAYER_PARAMETERS1 params;
+        ComSmartPtr<ID2D1Geometry> geometry = params.geometricMask != nullptr ? addComSmartPtrOwner (params.geometricMask) : nullptr;
+        ComSmartPtr<ID2D1Brush> brush = params.opacityBrush != nullptr ? addComSmartPtrOwner (params.opacityBrush) : nullptr;
+    };
+
+    struct Layer
+    {
+        explicit Layer (std::variant<OwningLayer, Rectangle<float>> v) : var (std::move (v)) {}
+
+        void push (ComSmartPtr<ID2D1DeviceContext1> context) const
+        {
+            if (auto* layer = std::get_if<OwningLayer> (&var))
+                context->PushLayer (layer->params, nullptr);
+            else if (auto* rect = std::get_if<Rectangle<float>> (&var))
+                context->PushAxisAlignedClip (D2DUtilities::toRECT_F (*rect), D2D1_ANTIALIAS_MODE_ALIASED);
+        }
+
+        void pop (ComSmartPtr<ID2D1DeviceContext1> context) const
+        {
+            if (std::holds_alternative<OwningLayer> (var))
+                context->PopLayer();
+            else if (std::holds_alternative<Rectangle<float>> (var))
+                context->PopAxisAlignedClip();
+        }
+
+        std::variant<OwningLayer, Rectangle<float>> var;
+    };
+
+    std::vector<Layer> pushedLayers;
+
     //==============================================================================
     // PushedLayer represents a Direct2D clipping or transparency layer
     //
@@ -174,13 +311,6 @@ private:
     //
     // PushedLayer, PushedAxisAlignedClipLayer, and LayerPopper all exist just to unwind the
     // layer stack accordingly.
-    enum
-    {
-        popLayerFlag,
-        popAxisAlignedLayerFlag
-    };
-
-    std::vector<int> pushedLayers;
 };
 
 struct Direct2DGraphicsContext::SavedState
@@ -201,7 +331,7 @@ public:
     {
     }
 
-    void pushLayer (const D2D1_LAYER_PARAMETERS& layerParameters)
+    void pushLayer (const D2D1_LAYER_PARAMETERS1& layerParameters)
     {
         layers.push (deviceResources.deviceContext.context, layerParameters);
     }
@@ -209,7 +339,7 @@ public:
     void pushGeometryClipLayer (ComSmartPtr<ID2D1Geometry> geometry)
     {
         if (geometry != nullptr)
-            pushLayer (D2D1::LayerParameters (D2D1::InfiniteRect(), geometry));
+            pushLayer (D2D1::LayerParameters1 (D2D1::InfiniteRect(), geometry));
     }
 
     void pushTransformedRectangleGeometryClipLayer (ComSmartPtr<ID2D1RectangleGeometry> geometry, const AffineTransform& transform)
@@ -217,7 +347,7 @@ public:
         JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.metrics, pushGeometryLayerTime)
 
         jassert (geometry != nullptr);
-        auto layerParameters = D2D1::LayerParameters (D2D1::InfiniteRect(), geometry);
+        auto layerParameters = D2D1::LayerParameters1 (D2D1::InfiniteRect(), geometry);
         layerParameters.maskTransform = D2DUtilities::transformToMatrix (transform);
         pushLayer (layerParameters);
     }
@@ -347,32 +477,32 @@ public:
         Point<float> translation{};
         AffineTransform transform{};
 
-        if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
-        {
-            if (currentTransform.isOnlyTranslated)
-                translation = currentTransform.offset.toFloat();
-            else
-                transform = currentTransform.getTransform();
-        }
-
-        if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
-        {
-            if (fillType.transform.isOnlyTranslation())
-                translation += Point<float> (fillType.transform.getTranslationX(), fillType.transform.getTranslationY());
-            else
-                transform = transform.followedBy (fillType.transform);
-        }
-
-        if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
-        {
-            if (currentTransform.isOnlyTranslated)
-                translation -= currentTransform.offset.toFloat();
-            else
-                transform = transform.followedBy (currentTransform.getTransform().inverted());
-        }
-
         if (fillType.isGradient())
         {
+            if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
+            {
+                if (currentTransform.isOnlyTranslated)
+                    translation = currentTransform.offset.toFloat();
+                else
+                    transform = currentTransform.getTransform();
+            }
+
+            if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
+            {
+                if (fillType.transform.isOnlyTranslation())
+                    translation += Point (fillType.transform.getTranslationX(), fillType.transform.getTranslationY());
+                else
+                    transform = transform.followedBy (fillType.transform);
+            }
+
+            if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
+            {
+                if (currentTransform.isOnlyTranslated)
+                    translation -= currentTransform.offset.toFloat();
+                else
+                    transform = transform.followedBy (currentTransform.getTransform().inverted());
+            }
+
             const auto p1 = fillType.gradient->point1 + translation;
             const auto p2 = fillType.gradient->point2 + translation;
 
@@ -388,6 +518,17 @@ public:
                 linearGradient->SetStartPoint ({ p1.x, p1.y });
                 linearGradient->SetEndPoint ({ p2.x, p2.y });
             }
+        }
+        else if (fillType.isTiledImage())
+        {
+            if ((flags & BrushTransformFlags::applyWorldTransform) != 0)
+                transform = currentTransform.getTransform();
+
+            if ((flags & BrushTransformFlags::applyFillTypeTransform) != 0)
+                transform = transform.followedBy (fillType.transform);
+
+            if ((flags & BrushTransformFlags::applyInverseWorldTransform) != 0)
+                transform = transform.followedBy (currentTransform.getTransform().inverted());
         }
 
         currentBrush->SetTransform (D2DUtilities::transformToMatrix (transform));
@@ -966,8 +1107,6 @@ void Direct2DGraphicsContext::excludeClipRectangle (const Rectangle<int>& userSp
 {
     JUCE_SCOPED_TRACE_EVENT_FRAME_RECT_I32 (etw::excludeClipRectangle, etw::direct2dKeyword, getFrameId(), userSpaceExcludedRectangle)
 
-    applyPendingClipList();
-
     auto& transform = currentState->currentTransform;
     auto& deviceSpaceClipList = currentState->deviceSpaceClipList;
     const auto frameSize = getPimpl()->getFrameSize().toFloat();
@@ -996,6 +1135,8 @@ void Direct2DGraphicsContext::excludeClipRectangle (const Rectangle<int>& userSp
     }
     else
     {
+        applyPendingClipList();
+
         deviceSpaceClipList = frameSize;
         pendingClipList.subtract (userSpaceExcludedRectangle.toFloat());
     }
@@ -1079,21 +1220,20 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
     // The D2D bitmap brush will extend past the boundaries of sourceImage, so clip
     // to the sourceImage bounds
     auto brushTransform = currentState->currentTransform.getTransformWith (transform);
-    {
-        if (D2DHelpers::isTransformAxisAligned (brushTransform))
-        {
-            currentState->pushAliasedAxisAlignedClipLayer (sourceImage.getBounds().toFloat().transformedBy (brushTransform));
-        }
-        else
-        {
-            const auto sourceImageRectF = D2DUtilities::toRECT_F (sourceImage.getBounds());
-            ComSmartPtr<ID2D1RectangleGeometry> geometry;
 
-            if (const auto hr = getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (sourceImageRectF, geometry.resetAndGetPointerAddress());
-                SUCCEEDED (hr) && geometry != nullptr)
-            {
-                currentState->pushTransformedRectangleGeometryClipLayer (geometry, brushTransform);
-            }
+    if (D2DHelpers::isTransformAxisAligned (brushTransform))
+    {
+        currentState->pushAliasedAxisAlignedClipLayer (sourceImage.getBounds().toFloat().transformedBy (brushTransform));
+    }
+    else
+    {
+        const auto sourceImageRectF = D2DUtilities::toRECT_F (sourceImage.getBounds());
+        ComSmartPtr<ID2D1RectangleGeometry> geometry;
+
+        if (const auto hr = getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (sourceImageRectF, geometry.resetAndGetPointerAddress());
+            SUCCEEDED (hr) && geometry != nullptr)
+        {
+            currentState->pushTransformedRectangleGeometryClipLayer (geometry, brushTransform);
         }
     }
 
@@ -1131,7 +1271,7 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
                 // Push the clipping layer onto the layer stack
                 // Don't set maskTransform in the LayerParameters struct; that only applies to geometry clipping
                 // Do set the contentBounds member, transformed appropriately
-                auto layerParams = D2D1::LayerParameters();
+                auto layerParams = D2D1::LayerParameters1();
                 auto transformedBounds = sourceImage.getBounds().toFloat().transformedBy (brushTransform);
                 layerParams.contentBounds = D2DUtilities::toRECT_F (transformedBounds);
                 layerParams.opacityBrush = brush;
@@ -1243,17 +1383,30 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExi
         return;
 
     if (replaceExistingContents)
-        clipToRectangle (r);
-
-    const auto clearColour = currentState->fillType.colour;
-
-    auto fill = [replaceExistingContents, clearColour] (Rectangle<float> rect,
-                                                        ComSmartPtr<ID2D1DeviceContext1> deviceContext,
-                                                        ComSmartPtr<ID2D1Brush> brush)
     {
-        if (replaceExistingContents)
-            deviceContext->Clear (D2DUtilities::toCOLOR_F (clearColour));
-        else if (brush != nullptr)
+        applyPendingClipList();
+
+        const auto asRectF = D2DUtilities::toRECT_F (getPimpl()->getFrameSize().toFloat());
+        ComSmartPtr<ID2D1RectangleGeometry> rectGeometry;
+        getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (asRectF,
+                                                                   rectGeometry.resetAndGetPointerAddress());
+
+        const auto matrix = D2DUtilities::transformToMatrix (currentState->currentTransform.getTransform());
+        ComSmartPtr<ID2D1TransformedGeometry> geo;
+        getPimpl()->getDirect2DFactory()->CreateTransformedGeometry (rectGeometry,
+                                                                     matrix,
+                                                                     geo.resetAndGetPointerAddress());
+
+        const auto brush = currentState->fillType.isInvisible() ? currentState->currentBrush : currentState->getBrush();
+        currentState->layers.fillGeometryWithNoLayersActive (getPimpl()->getDeviceContext(), geo, brush);
+        return;
+    }
+
+    const auto fill = [] (Rectangle<float> rect,
+                          ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+                          ComSmartPtr<ID2D1Brush> brush)
+    {
+        if (brush != nullptr)
             deviceContext->FillRectangle (D2DUtilities::toRECT_F (rect), brush);
     };
 

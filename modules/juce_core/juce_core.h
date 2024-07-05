@@ -55,7 +55,6 @@
   OSXFrameworks:      Cocoa Foundation IOKit Security
   iOSFrameworks:      Foundation
   linuxLibs:          rt dl pthread
-  mingwLibs:          uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
 
  END_JUCE_MODULE_DECLARATION
 

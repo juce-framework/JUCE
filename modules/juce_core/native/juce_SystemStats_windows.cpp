@@ -48,13 +48,6 @@ void Logger::outputDebugString (const String& text)
 
 static int findNumberOfPhysicalCores() noexcept
 {
-   #if JUCE_MINGW
-    // Not implemented in MinGW
-    jassertfalse;
-
-    return 1;
-   #else
-
     DWORD bufferSize = 0;
     GetLogicalProcessorInformation (nullptr, &bufferSize);
 
@@ -78,8 +71,6 @@ static int findNumberOfPhysicalCores() noexcept
     {
         return info.Relationship == RelationProcessorCore;
     });
-
-   #endif // JUCE_MINGW
 }
 
 //==============================================================================
@@ -89,7 +80,7 @@ static int findNumberOfPhysicalCores() noexcept
   #pragma intrinsic (__rdtsc)
  #endif
 
- #if JUCE_MINGW || JUCE_CLANG
+ #if JUCE_CLANG
 static void callCPUID (int result[4], uint32 type)
 {
   uint32 la = (uint32) result[0], lb = (uint32) result[1],
@@ -253,66 +244,34 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 #endif
 
 //==============================================================================
-#if JUCE_MINGW
- static uint64 getWindowsVersion()
- {
-     auto filename = _T ("kernel32.dll");
-     DWORD handle = 0;
+RTL_OSVERSIONINFOW getWindowsVersionInfo();
+RTL_OSVERSIONINFOW getWindowsVersionInfo()
+{
+    RTL_OSVERSIONINFOW versionInfo = {};
 
-     if (auto size = GetFileVersionInfoSize (filename, &handle))
-     {
-         HeapBlock<char> data (size);
+    if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
+    {
+        using RtlGetVersion = LONG (WINAPI*) (PRTL_OSVERSIONINFOW);
 
-         if (GetFileVersionInfo (filename, handle, size, data))
-         {
-             VS_FIXEDFILEINFO* info = nullptr;
-             UINT verSize = 0;
+        if (auto* rtlGetVersion = (RtlGetVersion) ::GetProcAddress (moduleHandle, "RtlGetVersion"))
+        {
+            versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
+            LONG STATUS_SUCCESS = 0;
 
-             if (VerQueryValue (data, (LPCTSTR) _T ("\\"), (void**) &info, &verSize))
-                 if (size > 0 && info != nullptr && info->dwSignature == 0xfeef04bd)
-                     return ((uint64) info->dwFileVersionMS << 32) | (uint64) info->dwFileVersionLS;
-         }
-     }
+            if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
+                versionInfo = {};
+        }
+    }
 
-     return 0;
- }
-#else
- RTL_OSVERSIONINFOW getWindowsVersionInfo();
- RTL_OSVERSIONINFOW getWindowsVersionInfo()
- {
-     RTL_OSVERSIONINFOW versionInfo = {};
-
-     if (auto* moduleHandle = ::GetModuleHandleW (L"ntdll.dll"))
-     {
-         using RtlGetVersion = LONG (WINAPI*) (PRTL_OSVERSIONINFOW);
-
-         if (auto* rtlGetVersion = (RtlGetVersion) ::GetProcAddress (moduleHandle, "RtlGetVersion"))
-         {
-             versionInfo.dwOSVersionInfoSize = sizeof (versionInfo);
-             LONG STATUS_SUCCESS = 0;
-
-             if (rtlGetVersion (&versionInfo) != STATUS_SUCCESS)
-                 versionInfo = {};
-         }
-     }
-
-     return versionInfo;
- }
-#endif
+    return versionInfo;
+}
 
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
-   #if JUCE_MINGW
-    const auto v = getWindowsVersion();
-    const auto major = (v >> 48) & 0xffff;
-    const auto minor = (v >> 32) & 0xffff;
-    const auto build = (v >> 16) & 0xffff;
-   #else
     const auto versionInfo = getWindowsVersionInfo();
     const auto major = versionInfo.dwMajorVersion;
     const auto minor = versionInfo.dwMinorVersion;
     const auto build = versionInfo.dwBuildNumber;
-   #endif
 
     jassert (major <= 10); // need to add support for new version!
 

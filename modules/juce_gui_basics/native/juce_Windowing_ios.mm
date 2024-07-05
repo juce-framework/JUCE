@@ -85,24 +85,6 @@ namespace juce
                                     withResponseInfo: (NSDictionary*) responseInfo
                                    completionHandler: (void(^)()) completionHandler;
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-- (void)                    application: (UIApplication*) application
-    didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
-- (void)                    application: (UIApplication*) application
-            didReceiveLocalNotification: (UILocalNotification*) notification;
-- (void)                    application: (UIApplication*) application
-             handleActionWithIdentifier: (NSString*) identifier
-                   forLocalNotification: (UILocalNotification*) notification
-                      completionHandler: (void(^)()) completionHandler;
-- (void)                    application: (UIApplication*) application
-             handleActionWithIdentifier: (NSString*) identifier
-                   forLocalNotification: (UILocalNotification*) notification
-                       withResponseInfo: (NSDictionary*) responseInfo
-                      completionHandler: (void(^)()) completionHandler;
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center
         willPresentNotification: (UNNotification*) notification
           withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler;
@@ -328,96 +310,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 }
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-- (void)                    application: (UIApplication*) application
-    didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
-{
-    ignoreUnused (application);
-
-    SEL selector = @selector (application:didRegisterUserNotificationSettings:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector:selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application atIndex: 2];
-        [invocation setArgument: &notificationSettings atIndex: 3];
-
-        [invocation invoke];
-    }
-}
-
-- (void)            application: (UIApplication*) application
-    didReceiveLocalNotification: (UILocalNotification*) notification
-{
-    ignoreUnused (application);
-
-    SEL selector = @selector (application:didReceiveLocalNotification:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application  atIndex: 2];
-        [invocation setArgument: &notification atIndex: 3];
-
-        [invocation invoke];
-    }
-}
-
-- (void)           application: (UIApplication*) application
-    handleActionWithIdentifier: (NSString*) identifier
-          forLocalNotification: (UILocalNotification*) notification
-             completionHandler: (void(^)()) completionHandler
-{
-    ignoreUnused (application);
-
-    SEL selector = @selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application       atIndex:2];
-        [invocation setArgument: &identifier        atIndex:3];
-        [invocation setArgument: &notification      atIndex:4];
-        [invocation setArgument: &completionHandler atIndex:5];
-
-        [invocation invoke];
-    }
-}
-
-- (void)           application: (UIApplication*) application
-    handleActionWithIdentifier: (NSString*) identifier
-          forLocalNotification: (UILocalNotification*) notification
-              withResponseInfo: (NSDictionary*) responseInfo
-             completionHandler: (void(^)()) completionHandler
-{
-    ignoreUnused (application);
-
-    SEL selector = @selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application       atIndex:2];
-        [invocation setArgument: &identifier        atIndex:3];
-        [invocation setArgument: &notification      atIndex:4];
-        [invocation setArgument: &responseInfo      atIndex:5];
-        [invocation setArgument: &completionHandler atIndex:6];
-
-        [invocation invoke];
-    }
-}
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center
         willPresentNotification: (UNNotification*) notification
           withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
@@ -545,10 +437,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 
 bool Desktop::isDarkModeActive() const
 {
-    if (@available (iOS 12.0, *))
-        return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
-
-    return false;
+    return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
 }
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
@@ -625,22 +514,11 @@ static Rectangle<int> getRecommendedWindowBounds()
 
 static BorderSize<int> getSafeAreaInsets (float masterScale)
 {
-    if (@available (iOS 11.0, *))
-    {
-        UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
-        return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
-                                                                          safeInsets.left,
-                                                                          safeInsets.bottom,
-                                                                          safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
-    }
-
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-    auto statusBarSize = [UIApplication sharedApplication].statusBarFrame.size;
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    auto statusBarHeight = jmin (statusBarSize.width, statusBarSize.height);
-
-    return { roundToInt (statusBarHeight / masterScale), 0, 0, 0 };
+    UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
+    return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
+                                                                      safeInsets.left,
+                                                                      safeInsets.bottom,
+                                                                      safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
 }
 
 //==============================================================================

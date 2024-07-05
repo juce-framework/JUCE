@@ -40,10 +40,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4365 6240 6326 6386 6385 28182 28183 6387 6011 
 namespace jpeglibNamespace
 {
 #if JUCE_INCLUDE_JPEGLIB_CODE || ! defined (JUCE_INCLUDE_JPEGLIB_CODE)
-    #if JUCE_MINGW
-     typedef unsigned char boolean;
-    #endif
-
      JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                           "-Wdeprecated-register",
                                           "-Wdeprecated-declarations",

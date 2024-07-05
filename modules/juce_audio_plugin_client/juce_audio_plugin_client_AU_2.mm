@@ -72,30 +72,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wambiguous-reversed-operator",
  #define verify_noerr(errorCode)  __Verify_noErr(errorCode)
 #endif
 
-#if ! defined (MAC_OS_VERSION_11_0) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_11_0
-// These constants are only defined in the macOS 11+ SDKs
-
-enum MIDICVStatus : unsigned int
-{
-    kMIDICVStatusNoteOff                = 0x8,
-    kMIDICVStatusNoteOn                 = 0x9,
-    kMIDICVStatusPolyPressure           = 0xA,
-    kMIDICVStatusControlChange          = 0xB,
-    kMIDICVStatusProgramChange          = 0xC,
-    kMIDICVStatusChannelPressure        = 0xD,
-    kMIDICVStatusPitchBend              = 0xE,
-    kMIDICVStatusRegisteredPNC          = 0x0,
-    kMIDICVStatusAssignablePNC          = 0x1,
-    kMIDICVStatusRegisteredControl      = 0x2,
-    kMIDICVStatusAssignableControl      = 0x3,
-    kMIDICVStatusRelRegisteredControl   = 0x4,
-    kMIDICVStatusRelAssignableControl   = 0x5,
-    kMIDICVStatusPerNotePitchBend       = 0x6,
-    kMIDICVStatusPerNoteMgmt            = 0xF
-};
-
-#endif
-
 #include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBase.cpp>
 #include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBuffer.cpp>
 #include <juce_audio_plugin_client/AU/AudioUnitSDK/AUBufferAllocator.cpp>

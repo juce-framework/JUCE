@@ -73,6 +73,26 @@ private:
 };
 
 //==============================================================================
+struct PackageDependency
+{
+    explicit PackageDependency (StringRef dependencyIn)
+        : dependency { dependencyIn }
+    {
+    }
+
+    PackageDependency (StringRef dependencyIn, StringRef fallbackIn)
+        : dependency { dependencyIn },
+          fallback { fallbackIn }
+    {
+    }
+
+    String dependency;
+    std::optional<String> fallback;
+};
+
+std::vector<PackageDependency> makePackageDependencies (const StringArray& dependencies);
+
+//==============================================================================
 class ProjectExporter : private Value::Listener
 {
 public:
@@ -115,7 +135,6 @@ public:
     // IDE targeted by exporter
     virtual bool isXcode() const         = 0;
     virtual bool isVisualStudio() const  = 0;
-    virtual bool isCodeBlocks() const    = 0;
     virtual bool isMakefile() const      = 0;
     virtual bool isAndroidStudio() const = 0;
 
@@ -263,12 +282,12 @@ public:
         link
     };
 
-    StringArray getLinuxPackages (PackageDependencyType type) const;
+    std::vector<PackageDependency> getLinuxPackages (PackageDependencyType type) const;
 
     //==============================================================================
     StringPairArray msvcExtraPreprocessorDefs;
     String msvcDelayLoadedDLLs;
-    StringArray mingwLibs, windowsLibs;
+    StringArray windowsLibs;
 
     //==============================================================================
     StringArray androidLibs;

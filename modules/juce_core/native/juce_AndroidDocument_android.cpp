@@ -218,9 +218,6 @@ struct AndroidDocumentDetail
 
     static void setPermissions (const URL& url, jmethodID func)
     {
-        if (getAndroidSDKVersion() < 19)
-            return;
-
         const auto javaUri = urlToUri (url);
 
         if (const auto resolver = AndroidContentUriResolver::getContentResolver())
@@ -402,18 +399,17 @@ struct AndroidDocument::Utils
                                                                               AndroidMimeTypeMap.getSingleton) } };
     };
 
-    class AndroidDocumentPimplApi19 : public Pimpl
+    //==============================================================================
+    class AndroidDocumentPimplApi21 : public Pimpl
     {
     public:
-        AndroidDocumentPimplApi19() = default;
+        AndroidDocumentPimplApi21() = default;
 
-        explicit AndroidDocumentPimplApi19 (const URL& uriIn)
-            : AndroidDocumentPimplApi19 (urlToUri (uriIn)) {}
+        explicit AndroidDocumentPimplApi21 (const URL& uriIn)
+            : AndroidDocumentPimplApi21 (urlToUri (uriIn)) {}
 
-        explicit AndroidDocumentPimplApi19 (const LocalRef<jobject>& uriIn)
+        explicit AndroidDocumentPimplApi21 (const LocalRef<jobject>& uriIn)
             : uri (uriIn) {}
-
-        std::unique_ptr<Pimpl> clone() const override { return std::make_unique<AndroidDocumentPimplApi19> (*this); }
 
         bool deleteDocument() const override
         {
@@ -523,16 +519,6 @@ struct AndroidDocument::Utils
 
         NativeInfo getNativeInfo() const override { return { uri }; }
 
-    private:
-        GlobalRef uri;
-    };
-
-    //==============================================================================
-    class AndroidDocumentPimplApi21 : public AndroidDocumentPimplApi19
-    {
-    public:
-        using AndroidDocumentPimplApi19::AndroidDocumentPimplApi19;
-
         std::unique_ptr<Pimpl> clone() const override { return std::make_unique<AndroidDocumentPimplApi21> (*this); }
 
         std::unique_ptr<Pimpl> createChildDocumentWithTypeAndName (const String& type, const String& name) const override
@@ -558,6 +544,9 @@ struct AndroidDocument::Utils
 
             return nullptr;
         }
+
+    private:
+        GlobalRef uri;
     };
 
     //==============================================================================
@@ -607,8 +596,7 @@ struct AndroidDocument::Utils
 
         return createPimplForSdkImpl (uri,
                                       VersionTag<AndroidDocumentPimplApi24> { 24 },
-                                      VersionTag<AndroidDocumentPimplApi21> { 21 },
-                                      VersionTag<AndroidDocumentPimplApi19> { 19 });
+                                      VersionTag<AndroidDocumentPimplApi21> { 21 });
     }
 
     static std::unique_ptr<Pimpl> createPimplForSdkImpl (const LocalRef<jobject>&)
@@ -777,9 +765,6 @@ std::vector<AndroidDocumentPermission> AndroidDocumentPermission::getPersistedPe
    #if ! JUCE_ANDROID
     return {};
    #else
-    if (getAndroidSDKVersion() < 19)
-        return {};
-
     auto* env = getEnv();
     const LocalRef<jobject> permissions { env->CallObjectMethod (AndroidContentUriResolver::getContentResolver().get(),
                                                                  ContentResolver19.getPersistedUriPermissions) };
@@ -829,13 +814,6 @@ AndroidDocument AndroidDocument::fromFile (const File& filePath)
 AndroidDocument AndroidDocument::fromDocument ([[maybe_unused]] const URL& documentUrl)
 {
    #if JUCE_ANDROID
-    if (getAndroidSDKVersion() < 19)
-    {
-        // This function is unsupported on this platform.
-        jassertfalse;
-        return AndroidDocument{};
-    }
-
     const auto javaUri = urlToUri (documentUrl);
 
     if (! getEnv()->CallStaticBooleanMethod (DocumentsContract19,
@@ -855,13 +833,6 @@ AndroidDocument AndroidDocument::fromDocument ([[maybe_unused]] const URL& docum
 AndroidDocument AndroidDocument::fromTree ([[maybe_unused]] const URL& treeUrl)
 {
    #if JUCE_ANDROID
-    if (getAndroidSDKVersion() < 21)
-    {
-        // This function is unsupported on this platform.
-        jassertfalse;
-        return AndroidDocument{};
-    }
-
     const auto javaUri = urlToUri (treeUrl);
     LocalRef<jobject> treeDocumentId { getEnv()->CallStaticObjectMethod (DocumentsContract21,
                                                                          DocumentsContract21.getTreeDocumentId,
@@ -1042,7 +1013,7 @@ AndroidDocumentIterator AndroidDocumentIterator::makeNonRecursive (const Android
     using Detail = AndroidDocumentDetail;
 
    #if JUCE_ANDROID
-    if (21 <= getAndroidSDKVersion())
+    if (getAndroidSDKVersion() == 21)
     {
         if (auto uri = dir.getNativeInfo().uri)
             return Utils::makeWithEngine (Detail::makeDocumentsContractIteratorEngine (uri));
@@ -1060,7 +1031,7 @@ AndroidDocumentIterator AndroidDocumentIterator::makeRecursive (const AndroidDoc
     using Detail = AndroidDocumentDetail;
 
    #if JUCE_ANDROID
-    if (21 <= getAndroidSDKVersion())
+    if (getAndroidSDKVersion() == 21)
     {
         if (auto uri = dir.getNativeInfo().uri)
             return Utils::makeWithEngine (Detail::RecursiveEngine { uri });

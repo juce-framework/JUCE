@@ -1543,7 +1543,6 @@ public:
 
     bool isXcode() const override                            { return false; }
     bool isVisualStudio() const override                     { return true; }
-    bool isCodeBlocks() const override                       { return false; }
     bool isMakefile() const override                         { return false; }
     bool isAndroidStudio() const override                    { return false; }
 
@@ -1949,51 +1948,6 @@ protected:
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterBase)
-};
-
-//==============================================================================
-class MSVCProjectExporterVC2017 final : public MSVCProjectExporterBase
-{
-public:
-    MSVCProjectExporterVC2017 (Project& p, const ValueTree& t)
-        : MSVCProjectExporterBase (p, t, getTargetFolderName())
-    {
-        name = getDisplayName();
-
-        targetPlatformVersion.setDefault (defaultTargetPlatform);
-        platformToolsetValue.setDefault (defaultToolset);
-    }
-
-    static String getDisplayName()        { return "Visual Studio 2017"; }
-    static String getValueTreeTypeName()  { return "VS2017"; }
-    static String getTargetFolderName()   { return "VisualStudio2017"; }
-
-    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
-
-    int getVisualStudioVersion() const override                      { return 15; }
-    String getSolutionComment() const override                       { return "# Visual Studio 15"; }
-    String getToolsVersion() const override                          { return "15.0"; }
-    String getDefaultToolset() const override                        { return defaultToolset; }
-    String getDefaultWindowsTargetPlatformVersion() const override   { return defaultTargetPlatform; }
-
-    static MSVCProjectExporterVC2017* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
-    {
-        if (settingsToUse.hasType (getValueTreeTypeName()))
-            return new MSVCProjectExporterVC2017 (projectToUse, settingsToUse);
-
-        return nullptr;
-    }
-
-    void createExporterProperties (PropertyListBuilder& props) override
-    {
-        addToolsetProperty (props, { "v140", "v140_xp", "v141", "v141_xp" });
-        MSVCProjectExporterBase::createExporterProperties (props);
-    }
-
-private:
-    const String defaultToolset { "v141" }, defaultTargetPlatform { "Latest" };
-
-    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
 };
 
 //==============================================================================

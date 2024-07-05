@@ -491,7 +491,6 @@ public:
 
     bool isXcode() const override                           { return false; }
     bool isVisualStudio() const override                    { return false; }
-    bool isCodeBlocks() const override                      { return false; }
     bool isMakefile() const override                        { return true; }
     bool isAndroidStudio() const override                   { return false; }
 
@@ -625,33 +624,56 @@ private:
         return result;
     }
 
-    StringArray getExtraPkgConfigPackages() const
+    std::vector<PackageDependency> getExtraPkgConfigPackages() const
     {
         auto packages = StringArray::fromTokens (extraPkgConfigValue.get().toString(), " ", "\"'");
         packages.removeEmptyStrings();
 
-        return packages;
+        return makePackageDependencies (packages);
     }
 
-    StringArray getCompilePackages() const
+    std::vector<PackageDependency> getCompilePackages() const
     {
         auto packages = getLinuxPackages (PackageDependencyType::compile);
-        packages.addArray (getExtraPkgConfigPackages());
+        const auto extra = getExtraPkgConfigPackages();
+        packages.insert (packages.end(), extra.begin(), extra.end());
 
         return packages;
     }
 
-    StringArray getLinkPackages() const
+    std::vector<PackageDependency> getLinkPackages() const
     {
         auto packages = getLinuxPackages (PackageDependencyType::link);
-        packages.addArray (getExtraPkgConfigPackages());
+        const auto extra = getExtraPkgConfigPackages();
+        packages.insert (packages.end(), extra.begin(), extra.end());
+
+        return packages;
+    }
+
+    static StringArray getPackagesCommand (const std::vector<PackageDependency>& dependencies)
+    {
+        StringArray packages;
+
+        for (const auto& d : dependencies)
+        {
+            if (d.fallback.has_value())
+            {
+                packages.add (String { "$(shell ($(PKG_CONFIG) --exists %VALUE% && echo %VALUE%) || echo %OR_ELSE%)" }
+                                  .replace ("%VALUE%", d.dependency)
+                                  .replace ("%OR_ELSE%", *d.fallback));
+            }
+            else
+            {
+                packages.add (d.dependency);
+            }
+        }
 
         return packages;
     }
 
     String getPreprocessorPkgConfigFlags() const
     {
-        auto compilePackages = getCompilePackages();
+        auto compilePackages = getPackagesCommand (getCompilePackages());
 
         if (compilePackages.size() > 0)
             return "$(shell $(PKG_CONFIG) --cflags " + compilePackages.joinIntoString (" ") + ")";
@@ -661,7 +683,7 @@ private:
 
     String getLinkerPkgConfigFlags() const
     {
-        auto linkPackages = getLinkPackages();
+        auto linkPackages = getPackagesCommand (getLinkPackages());
 
         if (linkPackages.size() > 0)
             return "$(shell $(PKG_CONFIG) --libs " + linkPackages.joinIntoString (" ") + ")";
@@ -1241,7 +1263,7 @@ private:
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        writeTargetLines (out, getLinkPackages());
+        writeTargetLines (out, getPackagesCommand (getLinkPackages()));
 
         for (auto target : targets)
             target->addFiles (out, getFilesForTarget (filesToCompile, target, project));

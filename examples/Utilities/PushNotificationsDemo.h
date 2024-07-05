@@ -314,9 +314,9 @@ private:
         if (! n.isValid())
         {
           #if JUCE_IOS
-            String requiredFields = "identifier (from iOS 10), title, body and category";
+            String requiredFields = "identifier, title, body and category";
           #elif JUCE_ANDROID
-            String requiredFields = "channel ID (from Android O), title, body and icon";
+            String requiredFields = "channel ID, title, body and icon";
           #else
             String requiredFields = "all required fields";
           #endif

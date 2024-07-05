@@ -354,9 +354,6 @@ struct VideoComponent::Pimpl
         , systemVolumeListener (*this)
        #endif
     {
-        // Video requires SDK version 21 or higher
-        jassert (getAndroidSDKVersion() >= 21);
-
         setVisible (true);
 
         auto* env = getEnv();
@@ -1617,9 +1614,6 @@ private:
         //==============================================================================
         static LocalRef<jobject> getAudioAttributes()
         {
-            // Video requires SDK version 21 or higher
-            jassert (getAndroidSDKVersion() >= 21);
-
             auto* env = getEnv();
 
             auto audioAttribsBuilder = LocalRef<jobject> (env->NewObject (AndroidAudioAttributesBuilder,

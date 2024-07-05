@@ -111,6 +111,7 @@
 
   #ifdef __MINGW32__
     #define JUCE_MINGW 1
+    #warning Support for MinGW has been removed. Please use an alternative compiler.
     #ifdef __MINGW64__
       #define JUCE_64BIT 1
     #else
@@ -160,10 +161,10 @@
   #endif
 
   #if JUCE_MAC
-    #if ! defined (MAC_OS_X_VERSION_10_14)
-      #error "The 10.14 SDK (Xcode 10.1+) is required to build JUCE apps. You can create apps that run on macOS 10.9+ by changing the deployment target."
-    #elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
-      #error "Building for OSX 10.8 and earlier is no longer supported!"
+    #if ! defined (MAC_OS_VERSION_11_1)
+      #error "The macOS 11.1 SDK (Xcode 12.4+) is required to build JUCE apps. You can create apps that run on macOS 10.11+ by changing the deployment target."
+    #elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11
+      #error "Building for OSX 10.10 and earlier is no longer supported!"
     #endif
   #endif
 #endif

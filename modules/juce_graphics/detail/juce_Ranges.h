@@ -63,28 +63,28 @@ struct Ranges final
 
         struct New
         {
-            New() = delete;
+            explicit New (size_t x) : index { x } {}
 
             size_t index;
         };
 
         struct Split
         {
-            Split() = delete;
+            explicit Split (size_t x) : index { x } {}
 
             size_t index;
         };
 
         struct Erase
         {
-            Erase() = delete;
+            explicit Erase (Range<size_t> x) : range { x } {}
 
             Range<size_t> range;
         };
 
         struct Change
         {
-            Change() = delete;
+            explicit Change (size_t x) : index { x } {}
 
             size_t index;
         };

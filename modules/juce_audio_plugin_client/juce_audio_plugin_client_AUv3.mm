@@ -37,10 +37,6 @@
 
 #if JucePlugin_Build_AUv3
 
-#if JUCE_MAC && ! (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11)
- #error AUv3 needs Deployment Target OS X 10.11 or higher to compile
-#endif
-
 #ifndef __OBJC2__
  #error AUv3 needs Objective-C 2 support (compile with 64-bit)
 #endif
@@ -547,7 +543,7 @@ public:
         hostMusicalContextCallback = [au musicalContextBlock];
         hostTransportStateCallback = [au transportStateBlock];
 
-        if (@available (macOS 10.13, iOS 11.0, *))
+        if (@available (macOS 10.13, *))
             midiOutputEventBlock = [au MIDIOutputEventBlock];
 
         reset();
@@ -633,7 +629,7 @@ public:
             {
                 const auto value = (newValue != nullptr ? *newValue : juceParam->getValue()) * getMaximumParameterValue (*juceParam);
 
-                if (@available (macOS 10.12, iOS 10.0, *))
+                if (@available (macOS 10.12, *))
                 {
                     [param setValue: value
                          originator: editorObserverToken.get()
@@ -853,7 +849,7 @@ private:
             addMethod (@selector (supportsMPE),                             [] (id self, SEL)                                                   { return _this (self)->getSupportsMPE() ? YES : NO; });
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-            if (@available (macOS 10.13, iOS 11.0, *))
+            if (@available (macOS 10.13, *))
                 addMethod (@selector (MIDIOutputNames),                     [] (id self, SEL)                                                   { return _this (self)->getMIDIOutputNames(); });
 
             //==============================================================================
@@ -875,7 +871,7 @@ private:
            #endif
 
             //==============================================================================
-            if (@available (macOS 10.13, iOS 11.0, *))
+            if (@available (macOS 10.13, *))
             {
                 addMethod (@selector (supportedViewConfigurations:), [] (id self, SEL, NSArray<AUAudioUnitViewConfiguration*>* configs)
                 {
@@ -1585,7 +1581,7 @@ private:
 
             // send MIDI
            #if JucePlugin_ProducesMidiOutput
-            if (@available (macOS 10.13, iOS 11.0, *))
+            if (@available (macOS 10.13, *))
             {
                 if (auto midiOut = midiOutputEventBlock)
                     for (const auto metadata : midiMessages)

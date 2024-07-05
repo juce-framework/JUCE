@@ -73,7 +73,7 @@ struct PluginUtilities
     // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.
     static void getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
     {
-        #if JUCE_WINDOWS && ! JUCE_MINGW
+        #if JUCE_WINDOWS
          const auto juce_sprintf = [] (auto&& head, auto&&... tail) { sprintf_s (head, (size_t) numElementsInArray (head), tail...); };
          const auto juce_strcpy  = [] (auto&& head, auto&&... tail) { strcpy_s  (head, (size_t) numElementsInArray (head), tail...); };
          const auto juce_strcat  = [] (auto&& head, auto&&... tail) { strcat_s  (head, (size_t) numElementsInArray (head), tail...); };

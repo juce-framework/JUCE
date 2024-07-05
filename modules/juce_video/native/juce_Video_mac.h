@@ -597,9 +597,8 @@ private:
         {
             wrappedPlayer = [&]() -> std::unique_ptr<WrappedPlayer>
             {
-                if (@available (macOS 10.9, *))
-                    if (useNativeControls)
-                        return std::make_unique<WrappedPlayerView>();
+                if (useNativeControls)
+                    return std::make_unique<WrappedPlayerView>();
 
                 return std::make_unique<WrappedPlayerLayer>();
             }();
@@ -669,7 +668,7 @@ private:
             NSUniquePtr<AVPlayerLayer> playerLayer      { [[AVPlayerLayer alloc] init] };
         };
 
-        class API_AVAILABLE (macos (10.9)) WrappedPlayerView : public WrappedPlayer
+        class WrappedPlayerView : public WrappedPlayer
         {
         public:
             WrappedPlayerView() = default;

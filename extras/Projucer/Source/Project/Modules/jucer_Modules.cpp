@@ -75,9 +75,6 @@ void LibraryModule::addSearchPathsToExporter (ProjectExporter& exporter) const
         if (exporter.isLinux())
             return "Linux";
 
-        if (exporter.isCodeBlocks() && exporter.isWindows())
-            return "MinGW";
-
         return exporter.getTypeInfoForExporter (exporter.getExporterIdentifier()).targetFolder;
     }();
 
@@ -163,10 +160,7 @@ void LibraryModule::addLibsToExporter (ProjectExporter& exporter) const
     }
     else if (exporter.isWindows())
     {
-        if (exporter.isCodeBlocks())
-            parseAndAddLibsToList (exporter.mingwLibs, moduleInfo["mingwLibs"].toString());
-        else
-            parseAndAddLibsToList (exporter.windowsLibs, moduleInfo["windowsLibs"].toString());
+        parseAndAddLibsToList (exporter.windowsLibs, moduleInfo["windowsLibs"].toString());
     }
     else if (exporter.isAndroid())
     {

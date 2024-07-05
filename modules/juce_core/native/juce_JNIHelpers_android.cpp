@@ -680,23 +680,20 @@ bool androidHasSystemFeature (const String& property)
 
 String audioManagerGetProperty (const String& property)
 {
-    if (getAndroidSDKVersion() >= 17)
+    auto* env = getEnv();
+    LocalRef<jobject> audioManager (env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService,
+                                                           javaString ("audio").get()));
+
+    if (audioManager != nullptr)
     {
-        auto* env = getEnv();
-        LocalRef<jobject> audioManager (env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService,
-                                                               javaString ("audio").get()));
+        LocalRef<jstring> jProperty (javaString (property));
 
-        if (audioManager != nullptr)
-        {
-            LocalRef<jstring> jProperty (javaString (property));
+        auto methodID = env->GetMethodID (AndroidAudioManager, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;");
 
-            auto methodID = env->GetMethodID (AndroidAudioManager, "getProperty", "(Ljava/lang/String;)Ljava/lang/String;");
-
-            if (methodID != nullptr)
-                return juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (audioManager.get(),
-                                                                                       methodID,
-                                                                                       javaString (property).get())));
-        }
+        if (methodID != nullptr)
+            return juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (audioManager.get(),
+                                                                                   methodID,
+                                                                                   javaString (property).get())));
     }
 
     return {};

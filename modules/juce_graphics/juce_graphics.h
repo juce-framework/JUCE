@@ -146,7 +146,6 @@ namespace juce
 #include "fonts/juce_LruCache.h"
 #include "native/juce_RenderingHelpers.h"
 #include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
-#include "contexts/juce_LowLevelGraphicsPostScriptRenderer.h"
 #include "effects/juce_ImageEffectFilter.h"
 #include "effects/juce_DropShadowEffect.h"
 #include "effects/juce_GlowEffect.h"

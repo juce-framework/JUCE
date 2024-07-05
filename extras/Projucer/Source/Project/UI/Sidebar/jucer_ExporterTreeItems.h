@@ -67,7 +67,6 @@ public:
             if         (e->isXcode())        return Icon (getIcons().xcode,        Colours::transparentBlack);
             else if    (e->isVisualStudio()) return Icon (getIcons().visualStudio, Colours::transparentBlack);
             else if    (e->isAndroid())      return Icon (getIcons().android,      Colours::transparentBlack);
-            else if    (e->isCodeBlocks())   return Icon (getIcons().codeBlocks,   Colours::transparentBlack);
             else if    (e->isMakefile())     return Icon (getIcons().linux,        Colours::transparentBlack);
         }
 

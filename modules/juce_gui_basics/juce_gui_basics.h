@@ -56,7 +56,6 @@
   WeakOSXFrameworks:  Metal MetalKit
   iOSFrameworks:      CoreServices UIKit
   WeakiOSFrameworks:  Metal MetalKit
-  mingwLibs:          dxgi
 
  END_JUCE_MODULE_DECLARATION
 

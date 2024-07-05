@@ -216,9 +216,6 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
             static const auto result = [&]() -> TaskDialogIndirectFunc
             {
-                if (SystemStats::getOperatingSystemType() < SystemStats::WinVista)
-                    return nullptr;
-
                 const auto comctl = "Comctl32.dll";
                 LoadLibraryA (comctl);
                 const auto comctlModule = GetModuleHandleA (comctl);

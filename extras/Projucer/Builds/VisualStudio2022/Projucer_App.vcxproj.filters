@@ -26,24 +26,6 @@
     <Filter Include="Projucer\CodeEditor">
       <UniqueIdentifier>{DE3E40F0-B495-2AC0-52AF-AA073FFE8E4C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\ComponentEditor\Components">
-      <UniqueIdentifier>{A61A4546-CC78-CCFD-CC99-D5CD03650B08}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\ComponentEditor\Documents">
-      <UniqueIdentifier>{485EE240-BE7D-E5FD-07C2-760B7401D5F3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\ComponentEditor\PaintElements">
-      <UniqueIdentifier>{35957741-E3A5-47F8-86DC-FDE691866C74}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\ComponentEditor\Properties">
-      <UniqueIdentifier>{16DF510D-120E-D924-C478-E1E82643ED83}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\ComponentEditor\UI">
-      <UniqueIdentifier>{3207865A-047C-278E-870A-BC204B74ECB3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\ComponentEditor">
-      <UniqueIdentifier>{5F21E507-E5E8-0A74-F1AE-874BB67C26CC}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Projucer\Project\Modules">
       <UniqueIdentifier>{F5C79836-30DE-9DC7-9392-DAAB3F04C18E}</UniqueIdentifier>
     </Filter>
@@ -259,6 +241,12 @@
     </Filter>
     <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\name">
       <UniqueIdentifier>{1CD94C81-9754-F2A6-0E6F-53AD2CA6F254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC">
+      <UniqueIdentifier>{7B438AED-DDA8-FF31-67D3-4ABDF0BF11E4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Var">
+      <UniqueIdentifier>{C3F2648D-B6F9-6827-36EB-520E888C02D5}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\juce_graphics\fonts\harfbuzz\OT">
       <UniqueIdentifier>{E0C58D4E-D619-E6F8-E0E6-524676456033}</UniqueIdentifier>
@@ -481,72 +469,6 @@
     <ClCompile Include="..\..\Source\CodeEditor\jucer_SourceCodeEditor.cpp">
       <Filter>Projucer\CodeEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\Components\jucer_ComponentTypeHandler.cpp">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\Documents\jucer_ButtonDocument.cpp">
-      <Filter>Projucer\ComponentEditor\Documents</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\Documents\jucer_ComponentDocument.cpp">
-      <Filter>Projucer\ComponentEditor\Documents</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColouredElement.cpp">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElement.cpp">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementGroup.cpp">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementImage.cpp">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementPath.cpp">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutEditor.cpp">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ComponentOverlayComponent.cpp">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_EditingPanelBase.cpp">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_JucerDocumentEditor.cpp">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutineEditor.cpp">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutinePanel.cpp">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ResourceEditorPanel.cpp">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_TestComponent.cpp">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_BinaryResources.cpp">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_ComponentLayout.cpp">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_GeneratedCode.cpp">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_JucerDocument.cpp">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_ObjectTypes.cpp">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Project\Modules\jucer_Modules.cpp">
       <Filter>Projucer\Project\Modules</Filter>
     </ClCompile>
@@ -652,7 +574,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">
@@ -1159,9 +1081,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_GraphicsContext.cpp">
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.cpp">
-      <Filter>JUCE Modules\juce_graphics\contexts</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.cpp">
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
     </ClCompile>
@@ -1173,6 +1092,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\effects\juce_GlowEffect.cpp">
       <Filter>JUCE Modules\juce_graphics\effects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC\VARC.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\failing-alloc.c">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\harfbuzz-subset.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\harfbuzz.cc">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
@@ -1228,7 +1156,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-glib.cc">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gobject-structs.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-graphite2.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-icu.cc">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-map.cc">
@@ -1358,6 +1292,9 @@
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-input.cc">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-iup.cc">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-solver.cc">
@@ -2526,198 +2463,6 @@
     <ClInclude Include="..\..\Source\CodeEditor\jucer_SourceCodeEditor.h">
       <Filter>Projucer\CodeEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComboBoxHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentNameProperty.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentTypeHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentUndoableAction.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_GenericComponentHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_GroupComponentHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_HyperlinkButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ImageButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_JucerComponentHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_LabelHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_SliderHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TabbedComponentHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TextButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TextEditorHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ToggleButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TreeViewHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ViewportHandler.h">
-      <Filter>Projucer\ComponentEditor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Documents\jucer_ButtonDocument.h">
-      <Filter>Projucer\ComponentEditor\Documents</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Documents\jucer_ComponentDocument.h">
-      <Filter>Projucer\ComponentEditor\Documents</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColouredElement.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ElementSiblingComponent.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_FillType.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_GradientPointComponent.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ImageResourceProperty.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElement.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementEllipse.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementGroup.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementImage.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementPath.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementRectangle.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementRoundedRectangle.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementText.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementUndoableAction.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PointComponent.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_StrokeType.h">
-      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ColourPropertyComponent.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentBooleanProperty.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentChoiceProperty.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentColourProperty.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentTextProperty.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_FilePropertyComponent.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_FontPropertyComponent.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_JustificationProperty.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_PositionPropertyBase.h">
-      <Filter>Projucer\ComponentEditor\Properties</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutEditor.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutPanel.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentOverlayComponent.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_EditingPanelBase.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_JucerCommandIDs.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_JucerDocumentEditor.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutineEditor.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutinePanel.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_RelativePositionedRectangle.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ResourceEditorPanel.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_SnapGridPainter.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_TestComponent.h">
-      <Filter>Projucer\ComponentEditor\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_BinaryResources.h">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_ComponentLayout.h">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_GeneratedCode.h">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_JucerDocument.h">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_ObjectTypes.h">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.h">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h">
-      <Filter>Projucer\ComponentEditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Project\Modules\jucer_AvailableModulesList.h">
       <Filter>Projucer\Project\Modules</Filter>
     </ClInclude>
@@ -2767,9 +2512,6 @@
       <Filter>Projucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Android.h">
-      <Filter>Projucer\ProjectSaving</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CodeBlocks.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Make.h">
@@ -3564,9 +3306,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsContext.h">
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.h">
-      <Filter>JUCE Modules\juce_graphics\contexts</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.h">
       <Filter>JUCE Modules\juce_graphics\contexts</Filter>
     </ClInclude>
@@ -3606,9 +3345,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\CompositeGlyph.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\coord-setter.hh">
-      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\glyf-helpers.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
     </ClInclude>
@@ -3631,9 +3367,6 @@
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\SubsetGlyph.hh">
-      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\VarCompositeGlyph.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\glyf</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common\Coverage.hh">
@@ -3819,6 +3552,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\name\name.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\name</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC\coord-setter.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC\VARC.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-ankr-table.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
@@ -3972,10 +3711,22 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gdi.h">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-geometry.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-glib.h">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gobject-structs.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gobject.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-graphite2.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-icu.h">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-iter.hh">
@@ -4239,6 +3990,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-mvar-table.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-varc-table.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var.h">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
@@ -4264,6 +4018,9 @@
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-priority-queue.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-repacker.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-sanitize.hh">
@@ -4314,6 +4071,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-input.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-iup.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-solver.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
@@ -4354,6 +4114,27 @@
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-version.h">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-blob.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-buffer.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-common.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-face.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-font.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-list.hh">
+      <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-shape.hh">
       <Filter>JUCE Modules\juce_graphics\fonts\harfbuzz</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api.h">
@@ -4938,9 +4719,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_AccessibilityTextHelpers.h">
       <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_ComInterfaces_windows.h">
-      <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_UIAExpandCollapseProvider_windows.h">
       <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
     </ClInclude>
@@ -5292,9 +5070,6 @@
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_android.svg">
-      <Filter>Projucer\BinaryData\Icons</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\Icons\export_codeBlocks.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_linux.svg">

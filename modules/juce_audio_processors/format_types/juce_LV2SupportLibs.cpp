@@ -71,19 +71,6 @@ extern "C"
 #include "serd/src/n3.c"
 #undef TRY
 
-// node.c will replace isnan and isinf with _isnan and _finite if the former symbols are undefined.
-// MinGW declares these as normal functions rather than as preprocessor definitions, causing the build to fail.
-#if defined (_WIN32) && defined (__GNUC__)
-
-namespace Utils
-{
-    inline int _isnan  (double x) noexcept { return isnan (x); }
-    inline int _finite (double x) noexcept { return ! isinf (x); }
-} // namespace Utils
-
-using namespace Utils;
-#endif
-
 #include "serd/src/node.c"
 #include "serd/src/reader.c"
 #include "serd/src/string.c"

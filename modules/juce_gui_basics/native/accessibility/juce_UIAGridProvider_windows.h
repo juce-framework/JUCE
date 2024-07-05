@@ -37,7 +37,7 @@ namespace juce
 
 //==============================================================================
 class UIAGridProvider  : public UIAProviderBase,
-                         public ComBaseClassHelper<ComTypes::IGridProvider, ComTypes::ITableProvider>
+                         public ComBaseClassHelper<IGridProvider, ITableProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;
@@ -133,9 +133,9 @@ public:
         });
     }
 
-    JUCE_COMRESULT get_RowOrColumnMajor (ComTypes::RowOrColumnMajor* pRetVal) override
+    JUCE_COMRESULT get_RowOrColumnMajor (RowOrColumnMajor* pRetVal) override
     {
-        *pRetVal = ComTypes::RowOrColumnMajor_RowMajor;
+        *pRetVal = RowOrColumnMajor_RowMajor;
         return S_OK;
     }
 

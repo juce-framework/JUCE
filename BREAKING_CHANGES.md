@@ -1,5 +1,142 @@
 # JUCE breaking changes
 
+# develop
+
+## Change
+
+The LowLevelGraphicsPostscriptRenderer has been removed.
+
+**Possible Issues**
+
+Code that uses this class will no longer compile.
+
+**Workaround**
+
+There is no workaround. If you need this functionality, please let us know
+about your use case. In the meantime, you may be able to copy the old classes
+into your own project/module and use them that way.
+
+**Rationale**
+
+We are not aware of any projects using this functionality. This renderer was
+not as fully-featured as any of the other renders, so it's likely that users
+would have filed issue reports if they were using this feature.
+
+
+## Change
+
+Support for the MinGW toolchain has been removed.
+
+**Possible Issues**
+
+MinGW can no longer be used to build JUCE.
+
+**Workaround**
+
+On Windows, use an alternative compiler such as Clang or MSVC.
+
+Cross-compiling for Windows from Linux is not supported, and there is no
+workaround for this use case.
+
+**Rationale**
+
+The MinGW provides a poor user experience, with very long build times and
+missing features. The high maintenance cost, both in terms of developer time,
+and continuous integration bandwidth (both of which could provide more value
+elsewhere), means that continued support for MinGW is difficult to justify.
+
+
+## Change
+
+The GUI Editor has been removed from the Projucer.
+
+**Possible Issues**
+
+The Projucer can no longer be used to visually edit JUCE Components.
+
+**Workaround**
+
+There is no workaround.
+
+**Rationale**
+
+This feature has been deprecated, without receiving bugfixes or maintenance,
+for a long time.
+
+
+## Change
+
+The Visual Studio 2017 exporter has been removed from the Projucer.
+
+**Possible Issues**
+
+It will no longer be possible to generate Visual Studio 2017 projects using the
+Projucer.
+
+**Workaround**
+
+Use a different exporter, such as the exporter for Visual Studio 2019 or 2022.
+
+**Rationale**
+
+Since JUCE 8, the minimum build requirement has been Visual Studio 2019. This
+minimum requirement allows JUCE to use modern C++ features, along with modern
+Windows platform features.
+
+
+## Change
+
+The Code::Blocks exporter has been removed from the Projucer.
+
+**Possible Issues**
+
+It will no longer be possible to generate Code::Blocks projects using the
+Projucer.
+
+**Workaround**
+
+Use a different exporter, such as the Makefile exporter on Linux, or one of the
+Visual Studio exporters on Windows.
+
+**Rationale**
+
+The Code::Blocks IDE does not seem to be actively maintained. Other projects
+are dropping support, with the Code::Blocks generator deprecated in CMake 3.27.
+Additionally, the Code::Blocks exporter did not provide a good user experience,
+especially for new users on Windows, as it defaulted to using the MinGW
+toolchain. This toolchain tends to be slow to build and link, and is not fully
+supported by JUCE, missing support for some audio and video backends, and
+plugin formats.
+
+
+## Change
+
+The tab width when rendering text with the GlyphArrangement and TextLayout
+classes now equals the width of a space. Previously it equaled the width of a
+tofu character used for missing glyphs.
+
+**Possible Issues**
+
+User interfaces using the GlyphArrangement and TextLayout classes directly to
+render text containing tabs will look differently. The TextEditor and
+CodeEditorComponent classes have special logic for replacing the tabs prior to
+rendering, and consequently, these are not affected.
+
+**Workaround**
+
+Replace the tab characters prior to rendering and substitute them with the
+required number of non-breaking spaces.
+
+**Rationale**
+
+Since the Unicode related revamping of JUCE's text rendering classes, tab
+characters would raise assertions and would be rendered with the tofu glyph.
+This change visually treats tab characters as non-breaking spaces. Since the
+JUCE 7 behaviour of using the tofu glyph's width was not a conscious decision,
+but rather a side effect of ignoring unresolved glyphs, using a default width
+of one space is more reasonable.
+
+
 # Version 8.0.0
 
 ## Change
@@ -585,7 +722,6 @@ fixed white colour was inappropriate for most user interfaces.
 
 ## Change
 
->>>>>>> c74b2b1058 (CIDevice: Improve robustness of subscription API)
 ProfileHost::enableProfile and ProfileHost::disableProfile have been combined
 into a single function, ProfileHost::setProfileEnablement.
 

@@ -128,76 +128,62 @@ private:
                 return nil;
             });
 
-            if (@available (iOS 11.0, *))
+            addMethod (@selector (accessibilityDataTableCellElementForRow:column:), [] (id self, SEL, NSUInteger row, NSUInteger column) -> id
             {
-                addMethod (@selector (accessibilityDataTableCellElementForRow:column:), [] (id self, SEL, NSUInteger row, NSUInteger column) -> id
+                if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+                    if (auto* tableInterface = tableHandler->getTableInterface())
+                        if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
+                            if (auto* parent = getAccessibleParent (cellHandler))
+                                return static_cast<id> (parent->getNativeImplementation());
+
+                return nil;
+            });
+
+            addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
+            addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
+
+            addMethod (@selector (accessibilityHeaderElementsForColumn:), [] (id self, SEL, NSUInteger column) -> NSArray*
+            {
+                if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
                 {
-                    if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
-                        if (auto* tableInterface = tableHandler->getTableInterface())
-                            if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
-                                if (auto* parent = getAccessibleParent (cellHandler))
-                                    return static_cast<id> (parent->getNativeImplementation());
-
-                    return nil;
-                });
-
-                addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
-                addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
-
-                addMethod (@selector (accessibilityHeaderElementsForColumn:), [] (id self, SEL, NSUInteger column) -> NSArray*
-                {
-                    if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+                    if (auto* tableInterface = tableHandler->getTableInterface())
                     {
-                        if (auto* tableInterface = tableHandler->getTableInterface())
+                        if (auto* header = tableInterface->getHeaderHandler())
                         {
-                            if (auto* header = tableInterface->getHeaderHandler())
+                            if (isPositiveAndBelow (column, header->getChildren().size()))
                             {
-                                if (isPositiveAndBelow (column, header->getChildren().size()))
-                                {
-                                    auto* result = [NSMutableArray new];
-                                    [result addObject: static_cast<id> (header->getChildren()[(size_t) column]->getNativeImplementation())];
-                                    return result;
-                                }
+                                auto* result = [NSMutableArray new];
+                                [result addObject: static_cast<id> (header->getChildren()[(size_t) column]->getNativeImplementation())];
+                                return result;
                             }
                         }
                     }
+                }
 
-                    return nullptr;
-                });
+                return nullptr;
+            });
 
-                addProtocol (@protocol (UIAccessibilityContainerDataTable));
+            addProtocol (@protocol (UIAccessibilityContainerDataTable));
 
-                addMethod (@selector (accessibilityContainerType), [] (id self, SEL) -> NSInteger
+            addMethod (@selector (accessibilityContainerType), [] (id self, SEL) -> NSInteger
+            {
+                if (auto* handler = getHandler (self))
                 {
-                    if (auto* handler = getHandler (self))
+                    if (handler->getTableInterface() != nullptr)
+                        return UIAccessibilityContainerTypeDataTable;
+
+                    const auto handlerRole = handler->getRole();
+
+                    if (handlerRole == AccessibilityRole::popupMenu
+                        || handlerRole == AccessibilityRole::list
+                        || handlerRole == AccessibilityRole::tree)
                     {
-                        if (handler->getTableInterface() != nullptr)
-                        {
-                            if (@available (iOS 11.0, *))
-                                return UIAccessibilityContainerTypeDataTable;
-
-                            return 1; // UIAccessibilityContainerTypeDataTable
-                        }
-
-                        const auto handlerRole = handler->getRole();
-
-                        if (handlerRole == AccessibilityRole::popupMenu
-                            || handlerRole == AccessibilityRole::list
-                            || handlerRole == AccessibilityRole::tree)
-                        {
-                            if (@available (iOS 11.0, *))
-                                return UIAccessibilityContainerTypeList;
-
-                            return 2; // UIAccessibilityContainerTypeList
-                        }
+                        return UIAccessibilityContainerTypeList;
                     }
+                }
 
-                    if (@available (iOS 11.0, *))
-                        return UIAccessibilityContainerTypeNone;
-
-                    return 0; // UIAccessibilityContainerTypeNone
-                });
-            }
+                return UIAccessibilityContainerTypeNone;
+            });
 
             registerClass();
         }
@@ -511,12 +497,9 @@ private:
                 addProtocol (@protocol (UITextInput));
             }
 
-            if (@available (iOS 11.0, *))
-            {
-                addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
-                addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
-                addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
-            }
+            addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
+            addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
+            addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
 
             addIvar<UIAccessibilityElement*> ("container");
 

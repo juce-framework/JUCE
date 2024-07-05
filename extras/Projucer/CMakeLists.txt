@@ -49,28 +49,6 @@ target_sources(Projucer PRIVATE
     Source/CodeEditor/jucer_DocumentEditorComponent.cpp
     Source/CodeEditor/jucer_OpenDocumentManager.cpp
     Source/CodeEditor/jucer_SourceCodeEditor.cpp
-    Source/ComponentEditor/Components/jucer_ComponentTypeHandler.cpp
-    Source/ComponentEditor/Documents/jucer_ButtonDocument.cpp
-    Source/ComponentEditor/Documents/jucer_ComponentDocument.cpp
-    Source/ComponentEditor/PaintElements/jucer_ColouredElement.cpp
-    Source/ComponentEditor/PaintElements/jucer_PaintElement.cpp
-    Source/ComponentEditor/PaintElements/jucer_PaintElementGroup.cpp
-    Source/ComponentEditor/PaintElements/jucer_PaintElementImage.cpp
-    Source/ComponentEditor/PaintElements/jucer_PaintElementPath.cpp
-    Source/ComponentEditor/UI/jucer_ComponentLayoutEditor.cpp
-    Source/ComponentEditor/UI/jucer_ComponentOverlayComponent.cpp
-    Source/ComponentEditor/UI/jucer_EditingPanelBase.cpp
-    Source/ComponentEditor/UI/jucer_JucerDocumentEditor.cpp
-    Source/ComponentEditor/UI/jucer_PaintRoutineEditor.cpp
-    Source/ComponentEditor/UI/jucer_PaintRoutinePanel.cpp
-    Source/ComponentEditor/UI/jucer_ResourceEditorPanel.cpp
-    Source/ComponentEditor/UI/jucer_TestComponent.cpp
-    Source/ComponentEditor/jucer_BinaryResources.cpp
-    Source/ComponentEditor/jucer_ComponentLayout.cpp
-    Source/ComponentEditor/jucer_GeneratedCode.cpp
-    Source/ComponentEditor/jucer_JucerDocument.cpp
-    Source/ComponentEditor/jucer_ObjectTypes.cpp
-    Source/ComponentEditor/jucer_PaintRoutine.cpp
     Source/Project/Modules/jucer_Modules.cpp
     Source/Project/UI/jucer_HeaderComponent.cpp
     Source/Project/jucer_Project.cpp
@@ -105,7 +83,6 @@ target_compile_definitions(Projucer PRIVATE
 juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Icons/background_logo.svg
     Source/BinaryData/Icons/export_android.svg
-    Source/BinaryData/Icons/export_codeBlocks.svg
     Source/BinaryData/Icons/export_linux.svg
     Source/BinaryData/Icons/export_visualStudio.svg
     Source/BinaryData/Icons/export_xcode.svg

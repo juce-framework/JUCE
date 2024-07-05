@@ -208,28 +208,6 @@
     <ClCompile Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.cpp"/>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_OpenDocumentManager.cpp"/>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_SourceCodeEditor.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\Components\jucer_ComponentTypeHandler.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\Documents\jucer_ButtonDocument.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\Documents\jucer_ComponentDocument.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColouredElement.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElement.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementGroup.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementImage.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementPath.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutEditor.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ComponentOverlayComponent.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_EditingPanelBase.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_JucerDocumentEditor.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutineEditor.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutinePanel.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ResourceEditorPanel.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_TestComponent.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_BinaryResources.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_ComponentLayout.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_GeneratedCode.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_JucerDocument.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_ObjectTypes.cpp"/>
-    <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp"/>
     <ClCompile Include="..\..\Source\Project\Modules\jucer_Modules.cpp"/>
     <ClCompile Include="..\..\Source\Project\UI\jucer_HeaderComponent.cpp"/>
     <ClCompile Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.cpp">
@@ -299,7 +277,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">
@@ -767,9 +745,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_GraphicsContext.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -780,6 +755,15 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\effects\juce_GlowEffect.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC\VARC.cc">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\failing-alloc.c">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\harfbuzz-subset.cc">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\harfbuzz.cc">
@@ -836,7 +820,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-glib.cc">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gobject-structs.cc">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-graphite2.cc">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-icu.cc">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-map.cc">
@@ -966,6 +956,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-input.cc">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-iup.cc">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-solver.cc">
@@ -1956,70 +1949,6 @@
     <ClInclude Include="..\..\Source\CodeEditor\jucer_ItemPreviewComponent.h"/>
     <ClInclude Include="..\..\Source\CodeEditor\jucer_OpenDocumentManager.h"/>
     <ClInclude Include="..\..\Source\CodeEditor\jucer_SourceCodeEditor.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ButtonHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComboBoxHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentNameProperty.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentTypeHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentUndoableAction.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_GenericComponentHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_GroupComponentHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_HyperlinkButtonHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ImageButtonHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_JucerComponentHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_LabelHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_SliderHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TabbedComponentHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TextButtonHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TextEditorHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ToggleButtonHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TreeViewHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ViewportHandler.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Documents\jucer_ButtonDocument.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Documents\jucer_ComponentDocument.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColouredElement.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ElementSiblingComponent.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_FillType.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_GradientPointComponent.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ImageResourceProperty.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElement.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementEllipse.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementGroup.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementImage.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementPath.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementRectangle.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementRoundedRectangle.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementText.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementUndoableAction.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PointComponent.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_StrokeType.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ColourPropertyComponent.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentBooleanProperty.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentChoiceProperty.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentColourProperty.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentTextProperty.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_FilePropertyComponent.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_FontPropertyComponent.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_JustificationProperty.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_PositionPropertyBase.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutEditor.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutPanel.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentOverlayComponent.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_EditingPanelBase.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_JucerCommandIDs.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_JucerDocumentEditor.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutineEditor.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutinePanel.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_RelativePositionedRectangle.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ResourceEditorPanel.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_SnapGridPainter.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_TestComponent.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_BinaryResources.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_ComponentLayout.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_GeneratedCode.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_JucerDocument.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_ObjectTypes.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.h"/>
-    <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h"/>
     <ClInclude Include="..\..\Source\Project\Modules\jucer_AvailableModulesList.h"/>
     <ClInclude Include="..\..\Source\Project\Modules\jucer_ModuleDescription.h"/>
     <ClInclude Include="..\..\Source\Project\Modules\jucer_Modules.h"/>
@@ -2037,7 +1966,6 @@
     <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectMessagesComponent.h"/>
     <ClInclude Include="..\..\Source\Project\jucer_Project.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Android.h"/>
-    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CodeBlocks.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Make.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_MSVC.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Xcode.h"/>
@@ -2302,7 +2230,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\colour\juce_PixelFormats.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_GraphicsContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsContext.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsPostScriptRenderer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\contexts\juce_LowLevelGraphicsSoftwareRenderer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\detail\juce_Ranges.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\effects\juce_DropShadowEffect.h"/>
@@ -2316,7 +2243,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Color\svg\svg.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\composite-iter.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\CompositeGlyph.hh"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\coord-setter.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\glyf-helpers.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\glyf.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\Glyph.hh"/>
@@ -2325,7 +2251,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\path-builder.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\SimpleGlyph.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\SubsetGlyph.hh"/>
-    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\glyf\VarCompositeGlyph.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common\Coverage.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common\CoverageFormat1.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\Common\CoverageFormat2.hh"/>
@@ -2387,6 +2312,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\GSUB\SubstLookupSubTable.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Layout\types.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\name\name.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC\coord-setter.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\OT\Var\VARC\VARC.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-ankr-table.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-bsln-table.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-aat-layout-common.hh"/>
@@ -2438,8 +2365,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ft-colr.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ft.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gdi.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-geometry.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-glib.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gobject-structs.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-gobject.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-graphite2.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-icu.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-iter.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-kern.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-limits.hh"/>
@@ -2527,6 +2458,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-gvar-table.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-hvar-table.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-mvar-table.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var-varc-table.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-var.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot-vorg-table.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-ot.h"/>
@@ -2536,6 +2468,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-paint.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-pool.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-priority-queue.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-repacker.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-sanitize.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-serialize.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-set-digest.hh"/>
@@ -2552,6 +2485,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-accelerator.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-cff-common.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-input.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-iup.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-instancer-solver.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-plan-member-list.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-subset-plan.hh"/>
@@ -2566,6 +2500,13 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-utf.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-vector.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-version.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-blob.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-buffer.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-common.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-face.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-font.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-list.hh"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api-shape.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb-wasm-api.hh"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\harfbuzz\hb.h"/>
@@ -2760,7 +2701,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_AccessibilityElement_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_AccessibilityTextHelpers.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_ComInterfaces_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_UIAExpandCollapseProvider_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_UIAGridItemProvider_windows.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_UIAGridProvider_windows.h"/>
@@ -2880,7 +2820,6 @@
     <None Include="..\..\Source\BinaryData\gradle\LICENSE"/>
     <None Include="..\..\Source\BinaryData\Icons\background_logo.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_android.svg"/>
-    <None Include="..\..\Source\BinaryData\Icons\export_codeBlocks.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_linux.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_visualStudio.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_xcode.svg"/>

@@ -149,9 +149,6 @@ namespace Ids
     DECLARE_ID (msvcManifestFile);
     DECLARE_ID (warningsAreErrors);
     DECLARE_ID (linuxArchitecture);
-    DECLARE_ID (linuxCodeBlocksArchitecture);
-    DECLARE_ID (windowsCodeBlocksArchitecture);
-    DECLARE_ID (codeBlocksWindowsTarget);
     DECLARE_ID (toolset);
     DECLARE_ID (windowsTargetPlatformVersion);
     DECLARE_ID (debugInformationFormat);
@@ -394,7 +391,6 @@ namespace Ids
     DECLARE_ID (dontAskAboutJUCEPath);
     DECLARE_ID (postExportShellCommandPosix);
     DECLARE_ID (postExportShellCommandWin);
-    DECLARE_ID (guiEditorEnabled);
     DECLARE_ID (jucerFormatVersion);
     DECLARE_ID (buildNumber);
     DECLARE_ID (lv2Uri);

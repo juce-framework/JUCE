@@ -37,7 +37,7 @@ namespace juce
 
 //==============================================================================
 class UIAValueProvider  : public UIAProviderBase,
-                          public ComBaseClassHelper<ComTypes::IValueProvider>
+                          public ComBaseClassHelper<IValueProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;

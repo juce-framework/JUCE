@@ -94,7 +94,7 @@ using uint32    = unsigned int;
   using pointer_sized_uint = unsigned int;
 #endif
 
-#if JUCE_WINDOWS && ! JUCE_MINGW
+#if JUCE_WINDOWS
   using ssize_t = pointer_sized_int;
 #endif
 

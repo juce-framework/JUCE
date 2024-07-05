@@ -123,7 +123,7 @@
 #elif (JUCE_LINUX || JUCE_BSD) && JUCE_WEB_BROWSER
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant", "-Wparentheses", "-Wdeprecated-declarations")
 
- // If you're missing this header, you need to install the webkit2gtk-4.0 package
+ // If you're missing this header, you need to install the webkit2gtk-4.1 or webkit2gtk-4.0 package
  #include <gtk/gtk.h>
  #include <gtk/gtkx.h>
  #include <glib-unix.h>

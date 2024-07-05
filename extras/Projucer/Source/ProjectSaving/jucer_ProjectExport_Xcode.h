@@ -404,7 +404,6 @@ public:
 
     bool isXcode() const override                           { return true; }
     bool isVisualStudio() const override                    { return false; }
-    bool isCodeBlocks() const override                      { return false; }
     bool isMakefile() const override                        { return false; }
     bool isAndroidStudio() const override                   { return false; }
 
@@ -1005,18 +1004,18 @@ protected:
             if (iOS)
             {
                 props.add (new TextPropertyComponent (iosBaseSDK, "iOS Base SDK", 8, false),
-                           "The version of the iOS SDK to link against." + sdkInfoString + "9.3.");
+                           "The version of the iOS SDK to link against." + sdkInfoString + "14.4.");
 
                 props.add (new TextPropertyComponent (iosDeploymentTarget, "iOS Deployment Target", 8, false),
-                           "The minimum version of iOS to target." + sdkInfoString + "9.0.");
+                           "The minimum version of iOS to target." + sdkInfoString + "12.0.");
             }
             else
             {
                 props.add (new TextPropertyComponent (macOSBaseSDK, "macOS Base SDK", 8, false),
-                           "The version of the macOS SDK to link against." + sdkInfoString + "10.11.");
+                           "The version of the macOS SDK to link against." + sdkInfoString + "11.1.");
 
                 props.add (new TextPropertyComponent (macOSDeploymentTarget, "macOS Deployment Target", 8, false),
-                           "The minimum version of macOS to target." + sdkInfoString + "10.9.");
+                           "The minimum version of macOS to target." + sdkInfoString + "10.11.");
 
                 props.add (new ChoicePropertyComponent (macOSArchitecture, "macOS Architecture",
                                                         { "Native architecture of build machine", "Standard 32-bit",        "Standard 32/64-bit",     "Standard 64-bit" },

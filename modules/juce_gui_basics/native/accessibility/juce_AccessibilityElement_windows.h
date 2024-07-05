@@ -36,9 +36,9 @@ namespace juce
 {
 
 class AccessibilityNativeHandle  : public ComBaseClassHelper<IRawElementProviderSimple,
-                                                             ComTypes::IRawElementProviderFragment,
-                                                             ComTypes::IRawElementProviderFragmentRoot,
-                                                             ComTypes::IRawElementProviderHwndOverride>
+                                                             IRawElementProviderFragment,
+                                                             IRawElementProviderFragmentRoot,
+                                                             IRawElementProviderHwndOverride>
 {
 public:
     explicit AccessibilityNativeHandle (AccessibilityHandler& handler);
@@ -58,15 +58,15 @@ public:
     JUCE_COMRESULT GetPatternProvider (PATTERNID pId, IUnknown** provider) override;
     JUCE_COMRESULT GetPropertyValue (PROPERTYID propertyId, VARIANT* pRetVal) override;
 
-    JUCE_COMRESULT Navigate (ComTypes::NavigateDirection direction, ComTypes::IRawElementProviderFragment** pRetVal) override;
+    JUCE_COMRESULT Navigate (NavigateDirection direction, IRawElementProviderFragment** pRetVal) override;
     JUCE_COMRESULT GetRuntimeId (SAFEARRAY** pRetVal) override;
-    JUCE_COMRESULT get_BoundingRectangle (ComTypes::UiaRect* pRetVal) override;
+    JUCE_COMRESULT get_BoundingRectangle (UiaRect* pRetVal) override;
     JUCE_COMRESULT GetEmbeddedFragmentRoots (SAFEARRAY** pRetVal) override;
     JUCE_COMRESULT SetFocus() override;
-    JUCE_COMRESULT get_FragmentRoot (ComTypes::IRawElementProviderFragmentRoot** pRetVal) override;
+    JUCE_COMRESULT get_FragmentRoot (IRawElementProviderFragmentRoot** pRetVal) override;
 
-    JUCE_COMRESULT ElementProviderFromPoint (double x, double y, ComTypes::IRawElementProviderFragment** pRetVal) override;
-    JUCE_COMRESULT GetFocus (ComTypes::IRawElementProviderFragment** pRetVal) override;
+    JUCE_COMRESULT ElementProviderFromPoint (double x, double y, IRawElementProviderFragment** pRetVal) override;
+    JUCE_COMRESULT GetFocus (IRawElementProviderFragment** pRetVal) override;
 
     JUCE_COMRESULT GetOverrideProviderForHwnd (HWND hwnd, IRawElementProviderSimple** pRetVal) override;
 

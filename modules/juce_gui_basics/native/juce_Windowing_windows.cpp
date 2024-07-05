@@ -766,9 +766,7 @@ static void setWindowZOrder (HWND hwnd, HWND insertAfter)
 }
 
 //==============================================================================
-#if ! JUCE_MINGW
-extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
-#endif
+RTL_OSVERSIONINFOW getWindowsVersionInfo();
 
 double Desktop::getDefaultMasterScale()
 {
@@ -788,7 +786,6 @@ class Desktop::NativeDarkModeChangeDetectorImpl
 public:
     NativeDarkModeChangeDetectorImpl()
     {
-       #if ! JUCE_MINGW
         const auto winVer = getWindowsVersionInfo();
 
         if (winVer.dwMajorVersion >= 10 && winVer.dwBuildNumber >= 17763)
@@ -805,7 +802,6 @@ public:
                     darkModeEnabled = shouldAppsUseDarkMode() && ! isHighContrast();
             }
         }
-       #endif
     }
 
     ~NativeDarkModeChangeDetectorImpl()
@@ -1782,8 +1778,22 @@ public:
         if (! r.withZeroOrigin().contains (localPos))
             return false;
 
-        auto w = WindowFromPoint (D2DUtilities::toPOINT (convertLogicalScreenPointToPhysical (localPos + getScreenPosition(),
-                                                                                              hwnd)));
+        const auto screenPos = convertLogicalScreenPointToPhysical (localPos + getScreenPosition(), hwnd);
+
+        if (trueIfInAChildWindow)
+        {
+            // Quick check to see whether the point is inside the client bounds
+            RECT rect;
+            GetClientRect (hwnd, &rect);
+            POINT points[2];
+            memcpy (points, &rect, sizeof (points));
+            MapWindowPoints (hwnd, nullptr, points, (UINT) std::size (points));
+            memcpy (&rect, points, sizeof (points));
+
+            return PtInRect (&rect, D2DUtilities::toPOINT (screenPos));
+        }
+
+        auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
 
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
@@ -2553,8 +2563,7 @@ private:
 
     void updateShadower()
     {
-        if (! component.isCurrentlyModal() && (styleFlags & windowHasDropShadow) != 0
-            && ((! hasTitleBar()) || SystemStats::getOperatingSystemType() < SystemStats::WinVista))
+        if (! component.isCurrentlyModal() && (styleFlags & windowHasDropShadow) != 0 && ! hasTitleBar())
         {
             shadower = component.getLookAndFeel().createDropShadowerForComponent (component);
 
@@ -2605,14 +2614,6 @@ private:
     StringArray getAvailableRenderingEngines() override;
     int getCurrentRenderingEngine() const override;
     void setCurrentRenderingEngine (int e) override;
-
-    static uint32 getMinTimeBetweenMouseMoves()
-    {
-        if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
-            return 0;
-
-        return 1000 / 60;  // Throttling the incoming mouse-events seems to still be needed in XP..
-    }
 
     bool isTouchEvent() noexcept
     {
@@ -2679,13 +2680,12 @@ private:
         }
 
         static uint32 lastMouseTime = 0;
-        static auto minTimeBetweenMouses = getMinTimeBetweenMouseMoves();
         auto now = Time::getMillisecondCounter();
 
         if (! Desktop::getInstance().getMainMouseSource().isDragging())
             modsToSend = modsToSend.withoutMouseButtons();
 
-        if (now >= lastMouseTime + minTimeBetweenMouses)
+        if (now >= lastMouseTime)
         {
             lastMouseTime = now;
             doMouseEvent (position, MouseInputSource::defaultPressure,

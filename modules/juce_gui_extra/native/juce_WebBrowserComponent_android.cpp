@@ -941,18 +941,8 @@ void WebBrowserComponent::clearCookies()
     auto cookieManager = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidCookieManager,
                                                                          AndroidCookieManager.getInstance));
 
-    jmethodID clearCookiesMethod = nullptr;
-
-    if (getAndroidSDKVersion() >= 21)
-    {
-        clearCookiesMethod = env->GetMethodID (AndroidCookieManager, "removeAllCookies", "(Landroid/webkit/ValueCallback;)V");
-        env->CallVoidMethod (cookieManager, clearCookiesMethod, 0);
-    }
-    else
-    {
-        clearCookiesMethod = env->GetMethodID (AndroidCookieManager, "removeAllCookie", "()V");
-        env->CallVoidMethod (cookieManager, clearCookiesMethod);
-    }
+    jmethodID clearCookiesMethod = env->GetMethodID (AndroidCookieManager, "removeAllCookies", "(Landroid/webkit/ValueCallback;)V");
+    env->CallVoidMethod (cookieManager, clearCookiesMethod, 0);
 }
 
 bool WebBrowserComponent::areOptionsSupported (const Options& options)

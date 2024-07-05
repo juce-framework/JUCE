@@ -109,7 +109,7 @@ public:
         After creation, you can resize the array using the malloc(), calloc(),
         or realloc() methods.
     */
-    HeapBlock() = default;
+    HeapBlock() noexcept = default;
 
     /** Creates a HeapBlock containing a number of elements.
 

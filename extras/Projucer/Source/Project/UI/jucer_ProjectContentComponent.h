@@ -95,13 +95,11 @@ public:
     void showCurrentExporterSettings();
     void showExporterSettings (const String& exporterName);
     void showModule (const String& moduleID);
-    void showUserSettings();
 
     void deleteSelectedTreeItems();
 
     void refreshProjectTreeFileStatuses();
     void updateMissingFileStatuses();
-    void addNewGUIFile();
 
     void showBubbleMessage (Rectangle<int>, const String&);
 

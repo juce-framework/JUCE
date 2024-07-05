@@ -37,11 +37,7 @@ namespace juce
 
 #if JUCE_WEB_BROWSER || DOXYGEN
 
-#if    (JUCE_MAC && (defined (MAC_OS_X_VERSION_10_13) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_13))) \
-    || (JUCE_IOS && (defined (__IPHONE_11_0) && (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)))                \
-    || (JUCE_WINDOWS && JUCE_USE_WIN_WEBVIEW2)                                                                       \
-    || JUCE_ANDROID                                                                                                  \
-    || JUCE_LINUX
+#if JUCE_MAC || JUCE_IOS || (JUCE_WINDOWS && JUCE_USE_WIN_WEBVIEW2) || JUCE_ANDROID || JUCE_LINUX
  #define JUCE_WEB_BROWSER_RESOURCE_PROVIDER_AVAILABLE 1
 #else
  #define JUCE_WEB_BROWSER_RESOURCE_PROVIDER_AVAILABLE 0
@@ -54,10 +50,12 @@ namespace juce
     The browser itself will be platform-dependent. On Mac and iOS it will be
     WebKit, on Android it will be Chrome, and on Linux it will be WebKit.
 
-    On Windows it will be IE, but if JUCE_USE_WIN_WEBVIEW2 is enabled then using
-    the WindowsWebView2WebBrowserComponent wrapper instead of this class directly
-    will attempt to use the Microsoft Edge (Chromium) WebView2. See the documentation
-    of that class for more information about its requirements.
+    The default engine on Windows will be IE, but if JUCE_USE_WIN_WEBVIEW2=1 or
+    JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1 is defined, then passing the
+    WebBrowserComponent::Options::Backend::webview2 value to the constructor will
+    attempt to use the Chrome based Edge WebView, and fall back to IE in case of
+    failure. CMake builds also need to specify the NEEDS_WEBVIEW2 option when
+    creating a JUCE based target.
 
     @tags{GUI}
 */
@@ -187,8 +185,7 @@ public:
 
             /** Sets the background colour that WebView2 renders underneath all web content.
 
-                This colour must either be fully opaque or transparent. On Windows 7 this
-                colour must be opaque.
+                This colour must either be fully opaque or fully transparent.
             */
             [[nodiscard]] WinWebView2 withBackgroundColour (const Colour& colour) const
             {
@@ -287,6 +284,8 @@ public:
 
             To call this function from the frontend, you can import the JUCE frontend helper module
             or issue a call to the low-level frontend API.
+
+            The callback is always called on the message thread.
 
             @code
             import { getNativeFunction } from "./juce";

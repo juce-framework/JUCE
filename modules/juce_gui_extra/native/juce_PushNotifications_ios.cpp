@@ -43,105 +43,37 @@ struct PushNotificationsDelegateDetails
 
     static void* actionToNSAction (const Action& a)
     {
-        if (@available (iOS 10, *))
+        if (a.style == Action::text)
         {
-            if (a.style == Action::text)
-            {
-                return [UNTextInputNotificationAction actionWithIdentifier: juceStringToNS (a.identifier)
-                                                                     title: juceStringToNS (a.title)
-                                                                   options: NSUInteger (a.destructive << 1 | (! a.triggerInBackground) << 2)
-                                                      textInputButtonTitle: juceStringToNS (a.textInputButtonText)
-                                                      textInputPlaceholder: juceStringToNS (a.textInputPlaceholder)];
-            }
-
-            return [UNNotificationAction actionWithIdentifier: juceStringToNS (a.identifier)
-                                                        title: juceStringToNS (a.title)
-                                                      options: NSUInteger (a.destructive << 1 | (! a.triggerInBackground) << 2)];
+            return [UNTextInputNotificationAction actionWithIdentifier: juceStringToNS (a.identifier)
+                                                                 title: juceStringToNS (a.title)
+                                                               options: NSUInteger (a.destructive << 1 | (! a.triggerInBackground) << 2)
+                                                  textInputButtonTitle: juceStringToNS (a.textInputButtonText)
+                                                  textInputPlaceholder: juceStringToNS (a.textInputPlaceholder)];
         }
 
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-        auto action = [[UIMutableUserNotificationAction alloc] init];
-
-        action.identifier     = juceStringToNS (a.identifier);
-        action.title          = juceStringToNS (a.title);
-        action.behavior       = a.style == Action::text ? UIUserNotificationActionBehaviorTextInput
-                                                        : UIUserNotificationActionBehaviorDefault;
-        action.parameters     = varToNSDictionary (a.parameters);
-        action.activationMode = a.triggerInBackground ? UIUserNotificationActivationModeBackground
-                                                      : UIUserNotificationActivationModeForeground;
-        action.destructive    = (bool) a.destructive;
-
-        [action autorelease];
-
-        return action;
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        return [UNNotificationAction actionWithIdentifier: juceStringToNS (a.identifier)
+                                                    title: juceStringToNS (a.title)
+                                                  options: NSUInteger (a.destructive << 1 | (! a.triggerInBackground) << 2)];
     }
 
     static void* categoryToNSCategory (const Category& c)
     {
-        if (@available (iOS 10, *))
-        {
-            auto actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
-
-            for (const auto& a : c.actions)
-            {
-                auto* action = (UNNotificationAction*) actionToNSAction (a);
-                [actions addObject: action];
-            }
-
-            return [UNNotificationCategory categoryWithIdentifier: juceStringToNS (c.identifier)
-                                                          actions: actions
-                                                intentIdentifiers: @[]
-                                                          options: c.sendDismissAction ? UNNotificationCategoryOptionCustomDismissAction : 0];
-        }
-
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-        auto category = [[UIMutableUserNotificationCategory alloc] init];
-        category.identifier = juceStringToNS (c.identifier);
-
         auto actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
 
         for (const auto& a : c.actions)
         {
-            auto* action = (UIUserNotificationAction*) actionToNSAction (a);
+            auto* action = (UNNotificationAction*) actionToNSAction (a);
             [actions addObject: action];
         }
 
-        [category setActions: actions forContext: UIUserNotificationActionContextDefault];
-        [category setActions: actions forContext: UIUserNotificationActionContextMinimal];
-
-        [category autorelease];
-
-        return category;
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        return [UNNotificationCategory categoryWithIdentifier: juceStringToNS (c.identifier)
+                                                      actions: actions
+                                            intentIdentifiers: @[]
+                                                      options: c.sendDismissAction ? UNNotificationCategoryOptionCustomDismissAction : 0];
     }
 
     //==============================================================================
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-    static UILocalNotification* juceNotificationToUILocalNotification (const PushNotifications::Notification& n)
-    {
-        auto notification = [[UILocalNotification alloc] init];
-
-        notification.alertTitle = juceStringToNS (n.title);
-        notification.alertBody  = juceStringToNS (n.body);
-        notification.category   = juceStringToNS (n.category);
-        notification.applicationIconBadgeNumber = n.badgeNumber;
-
-        auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
-        notification.fireDate   = [NSDate dateWithTimeIntervalSince1970: (double) triggerTime.toMilliseconds() / 1000.0];
-        notification.userInfo   = varToNSDictionary (n.properties);
-
-        auto soundToPlayString = n.soundToPlay.toString (true);
-
-        if (soundToPlayString == "default_os_sound")
-            notification.soundName = UILocalNotificationDefaultSoundName;
-        else if (soundToPlayString.isNotEmpty())
-            notification.soundName = juceStringToNS (soundToPlayString);
-
-        return notification;
-    }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
     static UNNotificationRequest* juceNotificationToUNNotificationRequest (const PushNotifications::Notification& n)
     {
         // content
@@ -161,8 +93,8 @@ struct PushNotificationsDelegateDetails
         else if (soundToPlayString.isNotEmpty())
             content.sound = [UNNotificationSound soundNamed: juceStringToNS (soundToPlayString)];
 
-        auto* propsDict = (NSMutableDictionary*) varToNSDictionary (n.properties);
-        [propsDict setObject: juceStringToNS (soundToPlayString) forKey: nsStringLiteral ("com.juce.soundName")];
+        auto* propsDict = (NSMutableDictionary*) [varToNSDictionary (n.properties) mutableCopy];
+        [propsDict setObject: juceStringToNS (soundToPlayString) forKey: @"com.juce.soundName"];
         content.userInfo = propsDict;
 
         // trigger
@@ -175,7 +107,7 @@ struct PushNotificationsDelegateDetails
         }
 
         // request
-        // each notification on iOS 10 needs to have an identifier, otherwise it will not show up
+        // each notification needs to have an identifier, otherwise it will not show up
         jassert (n.identifier.isNotEmpty());
         UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier: juceStringToNS (n.identifier)
                                                                               content: content
@@ -288,59 +220,6 @@ struct PushNotificationsDelegateDetails
         return unNotificationRequestToJuceNotification (n.request);
     }
 
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-    static PushNotifications::Notification uiLocalNotificationToJuceNotification (UILocalNotification* n)
-    {
-        PushNotifications::Notification notif;
-
-        notif.title       = nsStringToJuce (n.alertTitle);
-        notif.body        = nsStringToJuce (n.alertBody);
-
-        if (n.fireDate != nil)
-        {
-            NSDate* dateNow = [NSDate date];
-            NSDate* fireDate = n.fireDate;
-
-            notif.triggerIntervalSec = [dateNow timeIntervalSinceDate: fireDate];
-        }
-
-        notif.soundToPlay = URL (nsStringToJuce (n.soundName));
-        notif.badgeNumber = (int) n.applicationIconBadgeNumber;
-        notif.category    = nsStringToJuce (n.category);
-        notif.properties  = nsDictionaryToVar (n.userInfo);
-
-        return notif;
-    }
-
-    static Action uiUserNotificationActionToAction (UIUserNotificationAction* a)
-    {
-        Action action;
-
-        action.identifier = nsStringToJuce (a.identifier);
-        action.title = nsStringToJuce (a.title);
-        action.style = a.behavior == UIUserNotificationActionBehaviorTextInput
-                     ? Action::text
-                     : Action::button;
-
-        action.triggerInBackground = a.activationMode == UIUserNotificationActivationModeBackground;
-        action.destructive = a.destructive;
-        action.parameters = nsDictionaryToVar (a.parameters);
-
-        return action;
-    }
-
-    static Category uiUserNotificationCategoryToCategory (UIUserNotificationCategory* c)
-    {
-        Category category;
-        category.identifier = nsStringToJuce (c.identifier);
-
-        for (UIUserNotificationAction* a in [c actionsForContext: UIUserNotificationActionContextDefault])
-            category.actions.add (uiUserNotificationActionToAction (a));
-
-        return category;
-    }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
     static Action unNotificationActionToAction (UNNotificationAction* a)
     {
         Action action;
@@ -418,10 +297,7 @@ private:
 //==============================================================================
 bool PushNotifications::Notification::isValid() const noexcept
 {
-    if (@available (iOS 10, *))
-        return title.isNotEmpty() && body.isNotEmpty() && identifier.isNotEmpty() && category.isNotEmpty();
-
-    return title.isNotEmpty() && body.isNotEmpty() && category.isNotEmpty();
+    return title.isNotEmpty() && body.isNotEmpty() && identifier.isNotEmpty() && category.isNotEmpty();
 }
 
 //==============================================================================
@@ -446,170 +322,87 @@ struct PushNotifications::Pimpl
 
         auto categories = [NSMutableSet setWithCapacity: (NSUInteger) settings.categories.size()];
 
-        if (@available (iOS 10, *))
+        for (const auto& c : settings.categories)
         {
-            for (const auto& c : settings.categories)
-            {
-                auto* category = (UNNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c);
-                [categories addObject: category];
-            }
-
-            UNAuthorizationOptions authOptions = NSUInteger ((bool)settings.allowBadge << 0
-                                                           | (bool)settings.allowSound << 1
-                                                           | (bool)settings.allowAlert << 2);
-
-            [[UNUserNotificationCenter currentNotificationCenter] setNotificationCategories: categories];
-            [[UNUserNotificationCenter currentNotificationCenter] requestAuthorizationWithOptions: authOptions
-                                                                                completionHandler: ^(BOOL /*granted*/, NSError* /*error*/)
-                                                                                                   {
-                                                                                                       requestSettingsUsed();
-                                                                                                   }];
+            auto* category = (UNNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c);
+            [categories addObject: category];
         }
-        else
-        {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
-            for (const auto& c : settings.categories)
-            {
-                auto* category = (UIUserNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c);
-                [categories addObject: category];
-            }
+        UNAuthorizationOptions authOptions = NSUInteger ((bool)settings.allowBadge << 0
+                                                       | (bool)settings.allowSound << 1
+                                                       | (bool)settings.allowAlert << 2);
 
-            UIUserNotificationType type = NSUInteger ((bool)settings.allowBadge << 0
-                                                    | (bool)settings.allowSound << 1
-                                                    | (bool)settings.allowAlert << 2);
-
-            UIUserNotificationSettings* s = [UIUserNotificationSettings settingsForTypes: type categories: categories];
-            [[UIApplication sharedApplication] registerUserNotificationSettings: s];
-
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }
+        [[UNUserNotificationCenter currentNotificationCenter] setNotificationCategories: categories];
+        [[UNUserNotificationCenter currentNotificationCenter] requestAuthorizationWithOptions: authOptions
+                                                                            completionHandler: ^(BOOL /*granted*/, NSError* /*error*/)
+                                                                                               {
+                                                                                                   requestSettingsUsed();
+                                                                                               }];
 
         [[UIApplication sharedApplication] registerForRemoteNotifications];
     }
 
     void requestSettingsUsed()
     {
-        if (@available (iOS 10, *))
-        {
-            [[UNUserNotificationCenter currentNotificationCenter] getNotificationSettingsWithCompletionHandler:
-             ^(UNNotificationSettings* s)
-             {
-                 [[UNUserNotificationCenter currentNotificationCenter] getNotificationCategoriesWithCompletionHandler:
-                  ^(NSSet<UNNotificationCategory*>* categories)
-                  {
-                      settings.allowBadge = s.badgeSetting == UNNotificationSettingEnabled;
-                      settings.allowSound = s.soundSetting == UNNotificationSettingEnabled;
-                      settings.allowAlert = s.alertSetting == UNNotificationSettingEnabled;
+        [[UNUserNotificationCenter currentNotificationCenter] getNotificationSettingsWithCompletionHandler:
+         ^(UNNotificationSettings* s)
+         {
+             [[UNUserNotificationCenter currentNotificationCenter] getNotificationCategoriesWithCompletionHandler:
+              ^(NSSet<UNNotificationCategory*>* categories)
+              {
+                  settings.allowBadge = s.badgeSetting == UNNotificationSettingEnabled;
+                  settings.allowSound = s.soundSetting == UNNotificationSettingEnabled;
+                  settings.allowAlert = s.alertSetting == UNNotificationSettingEnabled;
 
-                      for (UNNotificationCategory* c in categories)
-                          settings.categories.add (PushNotificationsDelegateDetails::unNotificationCategoryToCategory (c));
+                  for (UNNotificationCategory* c in categories)
+                      settings.categories.add (PushNotificationsDelegateDetails::unNotificationCategoryToCategory (c));
 
-                      owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
-                  }
-                 ];
-
-             }];
-        }
-        else
-        {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-            UIUserNotificationSettings* s = [UIApplication sharedApplication].currentUserNotificationSettings;
-
-            settings.allowBadge = s.types & UIUserNotificationTypeBadge;
-            settings.allowSound = s.types & UIUserNotificationTypeSound;
-            settings.allowAlert = s.types & UIUserNotificationTypeAlert;
-
-            for (UIUserNotificationCategory *c in s.categories)
-                settings.categories.add (PushNotificationsDelegateDetails::uiUserNotificationCategoryToCategory (c));
-
-            owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
-
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }
+                  owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
+              }
+             ];
+         }];
     }
 
     bool areNotificationsEnabled() const { return true; }
 
     void sendLocalNotification (const Notification& n)
     {
-        if (@available (iOS 10, *))
-        {
-            UNNotificationRequest* request = PushNotificationsDelegateDetails::juceNotificationToUNNotificationRequest (n);
+        UNNotificationRequest* request = PushNotificationsDelegateDetails::juceNotificationToUNNotificationRequest (n);
 
-            [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest: request
-                                                                   withCompletionHandler: ^(NSError* error)
-                                                                                          {
-                                                                                              jassert (error == nil);
+        [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest: request
+                                                               withCompletionHandler: ^(NSError* error)
+                                                                                      {
+                                                                                          jassert (error == nil);
 
-                                                                                              if (error != nil)
-                                                                                                  NSLog (nsStringLiteral ("addNotificationRequest error: %@"), error);
-                                                                                          }];
-        }
-        else
-        {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-            auto* notification = PushNotificationsDelegateDetails::juceNotificationToUILocalNotification (n);
-
-            [[UIApplication sharedApplication] scheduleLocalNotification: notification];
-            [notification release];
-
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }
+                                                                                          if (error != nil)
+                                                                                              NSLog (nsStringLiteral ("addNotificationRequest error: %@"), error);
+                                                                                      }];
     }
 
     void getDeliveredNotifications() const
     {
-        if (@available (iOS 10, *))
-        {
-            [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:
-             ^(NSArray<UNNotification*>* notifications)
-             {
-                Array<PushNotifications::Notification> notifs;
+        [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:
+         ^(NSArray<UNNotification*>* notifications)
+         {
+            Array<PushNotifications::Notification> notifs;
 
-                for (UNNotification* n in notifications)
-                    notifs.add (PushNotificationsDelegateDetails::unNotificationToJuceNotification (n));
+            for (UNNotification* n in notifications)
+                notifs.add (PushNotificationsDelegateDetails::unNotificationToJuceNotification (n));
 
-                owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifs); });
-             }];
-        }
-        else
-        {
-            // Not supported on this platform
-            jassertfalse;
-            owner.listeners.call ([] (Listener& l) { l.deliveredNotificationsListReceived ({}); });
-        }
+            owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifs); });
+         }];
     }
 
     void removeAllDeliveredNotifications()
     {
-        if (@available (iOS 10, *))
-        {
-            [[UNUserNotificationCenter currentNotificationCenter] removeAllDeliveredNotifications];
-        }
-        else
-        {
-            // Not supported on this platform
-            jassertfalse;
-        }
+        [[UNUserNotificationCenter currentNotificationCenter] removeAllDeliveredNotifications];
     }
 
     void removeDeliveredNotification ([[maybe_unused]] const String& identifier)
     {
-        if (@available (iOS 10, *))
-        {
+        NSArray<NSString*>* identifiers = [NSArray arrayWithObject: juceStringToNS (identifier)];
 
-            NSArray<NSString*>* identifiers = [NSArray arrayWithObject: juceStringToNS (identifier)];
-
-            [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers: identifiers];
-        }
-        else
-        {
-            // Not supported on this platform
-            jassertfalse;
-        }
+        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers: identifiers];
     }
 
     void setupChannels ([[maybe_unused]] const Array<ChannelGroup>& groups, [[maybe_unused]] const Array<Channel>& channels)
@@ -618,64 +411,27 @@ struct PushNotifications::Pimpl
 
     void getPendingLocalNotifications() const
     {
-        if (@available (iOS 10, *))
-        {
-            [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:
-             ^(NSArray<UNNotificationRequest*>* requests)
-             {
-                 Array<PushNotifications::Notification> notifs;
+        [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:
+         ^(NSArray<UNNotificationRequest*>* requests)
+         {
+             Array<PushNotifications::Notification> notifs;
 
-                 for (UNNotificationRequest* r : requests)
-                     notifs.add (PushNotificationsDelegateDetails::unNotificationRequestToJuceNotification (r));
+             for (UNNotificationRequest* r : requests)
+                 notifs.add (PushNotificationsDelegateDetails::unNotificationRequestToJuceNotification (r));
 
-                 owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
-             }
-            ];
-        }
-        else
-        {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-            Array<PushNotifications::Notification> notifs;
-
-            for (UILocalNotification* n in [UIApplication sharedApplication].scheduledLocalNotifications)
-                notifs.add (PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (n));
-
-            owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
-
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }
+             owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
+         }];
     }
 
     void removePendingLocalNotification (const String& identifier)
     {
-        if (@available (iOS 10, *))
-        {
-            NSArray<NSString*>* identifiers = [NSArray arrayWithObject: juceStringToNS (identifier)];
-
-            [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers: identifiers];
-        }
-        else
-        {
-            // Not supported on this platform
-            jassertfalse;
-        }
+        NSArray<NSString*>* identifiers = [NSArray arrayWithObject: juceStringToNS (identifier)];
+        [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers: identifiers];
     }
 
     void removeAllPendingLocalNotifications()
     {
-        if (@available (iOS 10, *))
-        {
-            [[UNUserNotificationCenter currentNotificationCenter] removeAllPendingNotificationRequests];
-        }
-        else
-        {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-            [[UIApplication sharedApplication] cancelAllLocalNotifications];
-
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }
+        [[UNUserNotificationCenter currentNotificationCenter] removeAllPendingNotificationRequests];
     }
 
     String getDeviceToken()
@@ -757,46 +513,6 @@ private:
         completionHandler();
     }
 
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-    void didRegisterUserNotificationSettings (UIUserNotificationSettings*)
-    {
-        requestSettingsUsed();
-    }
-
-    void didReceiveLocalNotification (UILocalNotification* notification)
-    {
-        auto n = PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (notification);
-
-        owner.listeners.call ([&] (Listener& l) { l.handleNotification (true, n); });
-    }
-
-    void handleActionForLocalNotificationCompletionHandler (NSString* actionIdentifier,
-                                                            UILocalNotification* notification,
-                                                            void (^completionHandler)())
-    {
-        handleActionForLocalNotificationWithResponseCompletionHandler (actionIdentifier,
-                                                                       notification,
-                                                                       nil,
-                                                                       completionHandler);
-    }
-
-    void handleActionForLocalNotificationWithResponseCompletionHandler (NSString* actionIdentifier,
-                                                                        UILocalNotification* notification,
-                                                                        NSDictionary* responseInfo,
-                                                                        void (^completionHandler)())
-    {
-        auto n = PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (notification);
-        auto actionString = nsStringToJuce (actionIdentifier);
-        auto response = PushNotificationsDelegateDetails::getUserResponseFromNSDictionary (responseInfo);
-
-        owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (true, n, actionString, response); });
-
-        completionHandler();
-    }
-
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
     void willPresentNotificationWithCompletionHandler ([[maybe_unused]] UNNotification* notification,
                                                        void (^completionHandler)(UNNotificationPresentationOptions options))
     {
@@ -865,30 +581,6 @@ private:
             {
                 getThis (self).handleActionForRemoteNotificationCompletionHandler (actionIdentifier, userInfo, responseInfo, completionHandler);
             });
-
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-            addMethod (@selector (application:didRegisterUserNotificationSettings:), [] (id self, SEL, UIApplication*, UIUserNotificationSettings* settingsToUse)
-            {
-                getThis (self).didRegisterUserNotificationSettings (settingsToUse);
-            });
-
-            addMethod (@selector (application:didReceiveLocalNotification:), [] (id self, SEL, UIApplication*, UILocalNotification* notification)
-            {
-                getThis (self).didReceiveLocalNotification (notification);
-            });
-
-            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, UILocalNotification* notification, void (^completionHandler)())
-            {
-                getThis (self).handleActionForLocalNotificationCompletionHandler (actionIdentifier, notification, completionHandler);
-            });
-
-            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, UILocalNotification* notification, NSDictionary* responseInfo, void (^completionHandler)())
-            {
-                getThis (self). handleActionForLocalNotificationWithResponseCompletionHandler (actionIdentifier, notification, responseInfo, completionHandler);
-            });
-
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             addMethod (@selector (userNotificationCenter:willPresentNotification:withCompletionHandler:), [] (id self, SEL, UNUserNotificationCenter*, UNNotification* notification, void (^completionHandler)(UNNotificationPresentationOptions options))
             {

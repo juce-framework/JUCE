@@ -2707,7 +2707,7 @@ AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
-#if _MSC_VER || JUCE_MINGW
+#if _MSC_VER
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
 extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID) { if (reason == DLL_PROCESS_ATTACH) Process::setCurrentModuleInstanceHandle (instance); return true; }
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE

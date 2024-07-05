@@ -114,79 +114,91 @@ struct D2DHelpers
         return transform.mat01 == 0.0f && transform.mat10 == 0.0f;
     }
 
-    static void pathToGeometrySink (const Path& path, ID2D1GeometrySink* sink, const AffineTransform& transform, D2D1_FIGURE_BEGIN figureMode)
+    static void pathToGeometrySink (const Path& path,
+                                    ID2D1GeometrySink* sink,
+                                    const AffineTransform& transform,
+                                    D2D1_FIGURE_BEGIN figureMode)
     {
+        class ScopedFigure
+        {
+        public:
+            ScopedFigure (ID2D1GeometrySink* s, D2D1_POINT_2F pt, D2D1_FIGURE_BEGIN mode)
+                : sink (s)
+            {
+                sink->BeginFigure (pt, mode);
+            }
+
+            ~ScopedFigure()
+            {
+                if (sink != nullptr)
+                    sink->EndFigure (end);
+            }
+
+            void setClosed()
+            {
+                end = D2D1_FIGURE_END_CLOSED;
+            }
+
+        private:
+            ID2D1GeometrySink* sink = nullptr;
+            D2D1_FIGURE_END end = D2D1_FIGURE_END_OPEN;
+
+            JUCE_DECLARE_NON_COPYABLE (ScopedFigure)
+            JUCE_DECLARE_NON_MOVEABLE (ScopedFigure)
+        };
+
         // Every call to BeginFigure must have a matching call to EndFigure. But - the Path does not necessarily
-        // have matching startNewSubPath and closePath markers. The figureStarted flag indicates if an extra call
-        // to BeginFigure or EndFigure is needed during the iteration loop or when exiting this function.
+        // have matching startNewSubPath and closePath markers.
+        D2D1_POINT_2F lastLocation{};
+        std::optional<ScopedFigure> figure;
         Path::Iterator it (path);
-        bool figureStarted = false;
+
+        const auto doTransform = [&transform] (float x, float y)
+        {
+            transform.transformPoint (x, y);
+            return D2D1_POINT_2F { x, y };
+        };
+
+        const auto updateFigure = [&] (float x, float y)
+        {
+            if (! figure.has_value())
+                figure.emplace (sink, lastLocation, figureMode);
+
+            lastLocation = doTransform (x, y);
+        };
 
         while (it.next())
         {
             switch (it.elementType)
             {
-                case Path::Iterator::cubicTo:
-                {
-                    if (! figureStarted)
-                        break;
-
-                    transform.transformPoint (it.x1, it.y1);
-                    transform.transformPoint (it.x2, it.y2);
-                    transform.transformPoint (it.x3, it.y3);
-
-                    sink->AddBezier ({ { it.x1, it.y1 }, { it.x2, it.y2 }, { it.x3, it.y3 } });
-                    break;
-                }
-
                 case Path::Iterator::lineTo:
-                {
-                    if (! figureStarted)
-                        break;
-
-                    transform.transformPoint (it.x1, it.y1);
-                    sink->AddLine ({ it.x1, it.y1 });
+                    updateFigure (it.x1, it.y1);
+                    sink->AddLine (lastLocation);
                     break;
-                }
 
                 case Path::Iterator::quadraticTo:
-                {
-                    if (! figureStarted)
-                        break;
-
-                    transform.transformPoint (it.x1, it.y1);
-                    transform.transformPoint (it.x2, it.y2);
-                    sink->AddQuadraticBezier ({ { it.x1, it.y1 }, { it.x2, it.y2 } });
+                    updateFigure (it.x2, it.y2);
+                    sink->AddQuadraticBezier ({ doTransform (it.x1, it.y1), lastLocation });
                     break;
-                }
+
+                case Path::Iterator::cubicTo:
+                    updateFigure (it.x3, it.y3);
+                    sink->AddBezier ({ doTransform (it.x1, it.y1), doTransform (it.x2, it.y2), lastLocation });
+                    break;
 
                 case Path::Iterator::closePath:
-                {
-                    if (figureStarted)
-                    {
-                        sink->EndFigure (D2D1_FIGURE_END_CLOSED);
-                        figureStarted = false;
-                    }
+                    if (figure.has_value())
+                        figure->setClosed();
+
+                    figure.reset();
                     break;
-                }
 
                 case Path::Iterator::startNewSubPath:
-                {
-                    if (figureStarted)
-                        sink->EndFigure (D2D1_FIGURE_END_OPEN);
-
-                    transform.transformPoint (it.x1, it.y1);
-                    sink->BeginFigure ({ it.x1, it.y1 }, figureMode);
-
-                    figureStarted = true;
+                    figure.reset();
+                    lastLocation = doTransform (it.x1, it.y1);
+                    figure.emplace (sink, lastLocation, figureMode);
                     break;
-                }
             }
-        }
-
-        if (figureStarted)
-        {
-            sink->EndFigure (D2D1_FIGURE_END_OPEN);
         }
     }
 

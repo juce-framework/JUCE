@@ -35,7 +35,7 @@
 namespace juce
 {
 
-#if (JUCE_MINGW && JUCE_32BIT) || (! defined (_MSC_VER) && ! defined (__uuidof))
+#if ! defined (_MSC_VER) && ! defined (__uuidof)
  #ifdef __uuidof
   #undef __uuidof
  #endif
