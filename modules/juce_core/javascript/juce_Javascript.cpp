@@ -933,7 +933,7 @@ public:
                          ctx };
 
 
-        if (const auto* propertyNames = discardError (quickJSToJuce (names)).getArray())
+        if (auto v = discardError (quickJSToJuce (names)); const auto* propertyNames = v.getArray())
         {
             for (const auto& name : *propertyNames)
             {
