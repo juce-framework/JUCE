@@ -214,7 +214,15 @@ public:
     void unregisterHandlerForFrame (IPlugFrame* plugFrame)
     {
         if (auto* runLoop = getRunLoopFromFrame (plugFrame))
-            refreshAttachedEventLoop ([this, runLoop] { hostRunLoops.erase (runLoop); });
+        {
+            refreshAttachedEventLoop ([this, runLoop]
+            {
+                const auto it = hostRunLoops.find (runLoop);
+
+                if (it != hostRunLoops.end())
+                    hostRunLoops.erase (it);
+            });
+        }
     }
 
     /* Asserts if it can be established that the calling thread is different from the host's message
