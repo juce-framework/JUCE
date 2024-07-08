@@ -1422,8 +1422,8 @@ private:
         return hostName.contains ("Blue Cat's VST3 Host");
     }
 
-    friend class JuceVST3Component;
-    friend struct Param;
+    friend JuceVST3Component;
+    friend Param;
 
     //==============================================================================
     VSTComSmartPtr<JuceAudioProcessor> audioProcessor;
@@ -2367,7 +2367,7 @@ private:
         std::unique_ptr<ContentWrapperComponent> component;
        #endif
 
-        friend struct ContentWrapperComponent;
+        friend ContentWrapperComponent;
 
        #if JUCE_MAC
         void* macHostWindow = nullptr;
