@@ -202,27 +202,27 @@ public:
     }
 
     //==============================================================================
-    void registerHandlerForFrame (IPlugFrame* plugFrame)
+    void registerHandlerForRunLoop (Linux::IRunLoop* l)
     {
-        if (auto* runLoop = getRunLoopFromFrame (plugFrame))
-        {
-            refreshAttachedEventLoop ([this, runLoop] { hostRunLoops.insert (runLoop); });
-            updateCurrentMessageThread();
-        }
+        if (l == nullptr)
+            return;
+
+        refreshAttachedEventLoop ([this, l] { hostRunLoops.insert (l); });
+        updateCurrentMessageThread();
     }
 
-    void unregisterHandlerForFrame (IPlugFrame* plugFrame)
+    void unregisterHandlerForRunLoop (Linux::IRunLoop* l)
     {
-        if (auto* runLoop = getRunLoopFromFrame (plugFrame))
-        {
-            refreshAttachedEventLoop ([this, runLoop]
-            {
-                const auto it = hostRunLoops.find (runLoop);
+        if (l == nullptr)
+            return;
 
-                if (it != hostRunLoops.end())
-                    hostRunLoops.erase (it);
-            });
-        }
+        refreshAttachedEventLoop ([this, l]
+        {
+            const auto it = hostRunLoops.find (l);
+
+            if (it != hostRunLoops.end())
+                hostRunLoops.erase (it);
+        });
     }
 
     /* Asserts if it can be established that the calling thread is different from the host's message
@@ -285,17 +285,6 @@ private:
     };
 
     //==============================================================================
-    static Linux::IRunLoop* getRunLoopFromFrame (IPlugFrame* plugFrame)
-    {
-        Linux::IRunLoop* runLoop = nullptr;
-
-        if (plugFrame != nullptr)
-            plugFrame->queryInterface (Linux::IRunLoop::iid, (void**) &runLoop);
-
-        jassert (runLoop != nullptr);
-        return runLoop;
-    }
-
     void updateCurrentMessageThread()
     {
         if (! MessageManager::getInstance()->isThisTheMessageThread())
@@ -723,6 +712,59 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
 };
 
+#if JUCE_LINUX || JUCE_BSD
+using RunLoop = VSTComSmartPtr<Linux::IRunLoop>;
+
+class ScopedRunLoop
+{
+public:
+    explicit ScopedRunLoop (const RunLoop& l)
+        : runLoop (l)
+    {
+        eventHandler->registerHandlerForRunLoop (runLoop.get());
+    }
+
+    ~ScopedRunLoop()
+    {
+        eventHandler->unregisterHandlerForRunLoop (runLoop.get());
+    }
+
+    RunLoop get() const { return runLoop; }
+
+    JUCE_DECLARE_NON_COPYABLE (ScopedRunLoop)
+    JUCE_DECLARE_NON_MOVEABLE (ScopedRunLoop)
+
+    static RunLoop getRunLoopFromFrame (IPlugFrame* plugFrame)
+    {
+        VSTComSmartPtr<Linux::IRunLoop> result;
+        result.loadFrom (plugFrame);
+        return result;
+    }
+
+private:
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+    SharedResourcePointer<detail::MessageThread> messageThread;
+    SharedResourcePointer<EventHandler> eventHandler;
+    RunLoop runLoop;
+};
+#else
+struct RunLoop
+{
+    void loadFrom (FUnknown*) {}
+};
+
+class ScopedRunLoop
+{
+public:
+    explicit ScopedRunLoop (const RunLoop&) {}
+    RunLoop get() const { return {}; }
+    static RunLoop getRunLoopFromFrame (IPlugFrame*) { return {}; }
+
+private:
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+};
+#endif
+
 class JuceVST3Component;
 
 static thread_local bool inParameterChangedCallback = false;
@@ -748,12 +790,14 @@ class JuceVST3EditController final : public Vst::EditController,
                                      private ComponentRestarter::Listener
 {
 public:
-    explicit JuceVST3EditController (Vst::IHostApplication* host)
+    JuceVST3EditController (const VSTComSmartPtr<Vst::IHostApplication>& host,
+                            const RunLoop& l)
+        : scopedRunLoop (l)
     {
         if (host != nullptr)
             host->queryInterface (FUnknown::iid, (void**) &hostContext);
 
-        blueCatPatchwork |= isBlueCatHost (host);
+        blueCatPatchwork |= isBlueCatHost (host.get());
     }
 
     //==============================================================================
@@ -1434,6 +1478,7 @@ private:
     friend Param;
 
     //==============================================================================
+    ScopedRunLoop scopedRunLoop;
     VSTComSmartPtr<JuceAudioProcessor> audioProcessor;
 
     struct MidiController
@@ -1813,9 +1858,7 @@ private:
             if (parent == nullptr || isPlatformTypeSupported (type) == kResultFalse)
                 return kResultFalse;
 
-           #if JUCE_LINUX || JUCE_BSD
-            eventHandler->registerHandlerForFrame (plugFrame);
-           #endif
+            viewRunLoop.emplace (ScopedRunLoop::getRunLoopFromFrame (plugFrame));
 
             systemWindow = parent;
 
@@ -1877,9 +1920,7 @@ private:
                 lastReportedSize.reset();
             }
 
-           #if JUCE_LINUX || JUCE_BSD
-            eventHandler->unregisterHandlerForFrame (plugFrame);
-           #endif
+            viewRunLoop.reset();
 
             return CPluginView::removed();
         }
@@ -2348,13 +2389,8 @@ private:
         }
 
         //==============================================================================
-        ScopedJuceInitialiser_GUI libraryInitialiser;
+        std::optional<ScopedRunLoop> viewRunLoop;
         std::optional<ViewRect> lastReportedSize;
-
-       #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<detail::MessageThread> messageThread;
-        SharedResourcePointer<EventHandler> eventHandler;
-       #endif
 
         VSTComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;
@@ -2503,9 +2539,11 @@ class JuceVST3Component final : public Vst::IComponent,
                                 public AudioPlayHead
 {
 public:
-    JuceVST3Component (Vst::IHostApplication* h)
-        : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3).release()),
-          host (addVSTComSmartPtrOwner (h))
+    JuceVST3Component (const VSTComSmartPtr<Vst::IHostApplication>& h,
+                       const RunLoop& l)
+        : scopedRunLoop (l),
+          pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3).release()),
+          host (h)
     {
         inParameterChangedCallback = false;
 
@@ -3849,12 +3887,7 @@ private:
    #endif
 
     //==============================================================================
-    ScopedJuceInitialiser_GUI libraryInitialiser;
-
-   #if JUCE_LINUX || JUCE_BSD
-    SharedResourcePointer<detail::MessageThread> messageThread;
-   #endif
-
+    ScopedRunLoop scopedRunLoop;
     std::atomic<int> refCount { 1 };
     AudioProcessor* pluginInstance = nullptr;
 
@@ -4097,7 +4130,8 @@ private:
 };
 
 //==============================================================================
-using CreateFunction = FUnknown* (*) (Vst::IHostApplication*);
+using CreateFunction = FUnknown* (*) (const VSTComSmartPtr<Vst::IHostApplication>&,
+                                      const RunLoop&);
 
 //==============================================================================
 struct JucePluginFactory final : public IPluginFactory3
@@ -4166,11 +4200,7 @@ struct JucePluginFactory final : public IPluginFactory3
 
     tresult PLUGIN_API createInstance (FIDString cid, FIDString sourceIid, void** obj) override
     {
-        ScopedJuceInitialiser_GUI libraryInitialiser;
-
-       #if JUCE_LINUX || JUCE_BSD
-        SharedResourcePointer<detail::MessageThread> messageThread;
-       #endif
+        const ScopedRunLoop scope { runLoop };
 
         *obj = nullptr;
 
@@ -4197,7 +4227,7 @@ struct JucePluginFactory final : public IPluginFactory3
         {
             if (doUIDsMatch (entry.infoW.cid, cid))
             {
-                if (auto instance = becomeVSTComSmartPtrOwner (entry.createFunction (host.get())))
+                if (auto instance = becomeVSTComSmartPtrOwner (entry.createFunction (host, runLoop)))
                 {
                     if (instance->queryInterface (iidToQuery, obj) == kResultOk)
                         return kResultOk;
@@ -4212,6 +4242,7 @@ struct JucePluginFactory final : public IPluginFactory3
 
     tresult PLUGIN_API setHostContext (FUnknown* context) override
     {
+        runLoop.loadFrom (context);
         host.loadFrom (context);
 
         if (host != nullptr)
@@ -4230,6 +4261,7 @@ private:
     std::atomic<int> refCount { 1 };
     const PFactoryInfo factoryInfo;
     VSTComSmartPtr<Vst::IHostApplication> host;
+    RunLoop runLoop;
 
     //==============================================================================
     struct ClassEntry
@@ -4309,20 +4341,24 @@ private:
 
         static const ClassEntry classEntries[]
         {
-            ClassEntry { componentClass, [] (Vst::IHostApplication* h) -> FUnknown*
+            ClassEntry { componentClass, [] (const VSTComSmartPtr<Vst::IHostApplication>& h,
+                                             const RunLoop& l) -> FUnknown*
             {
-                return static_cast<Vst::IAudioProcessor*> (new JuceVST3Component (h));
+                return static_cast<Vst::IAudioProcessor*> (new JuceVST3Component (h, l));
             } },
-            ClassEntry { controllerClass, [] (Vst::IHostApplication* h) -> FUnknown*
+            ClassEntry { controllerClass, [] (const VSTComSmartPtr<Vst::IHostApplication>& h,
+                                              const RunLoop& l) -> FUnknown*
             {
-                return static_cast<Vst::IEditController*> (new JuceVST3EditController (h));
+                return static_cast<Vst::IEditController*> (new JuceVST3EditController (h, l));
             } },
-            ClassEntry { compatibilityClass, [] (Vst::IHostApplication*) -> FUnknown*
+            ClassEntry { compatibilityClass, [] (const VSTComSmartPtr<Vst::IHostApplication>&,
+                                                 const RunLoop&) -> FUnknown*
             {
                 return new JucePluginCompatibility;
             } },
            #if JucePlugin_Enable_ARA
-            ClassEntry { araFactoryClass, [] (Vst::IHostApplication*) -> FUnknown*
+            ClassEntry { araFactoryClass, [] (const VSTComSmartPtr<Vst::IHostApplication>&,
+                                              const RunLoop&) -> FUnknown*
             {
                 return static_cast<ARA::IMainFactory*> (new JuceARAFactory);
             } },
