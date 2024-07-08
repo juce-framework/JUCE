@@ -485,7 +485,7 @@ public:
     ~FreeTypeTypeface() override
     {
         if (doCache == DoCache::yes)
-            if (auto* list = FTTypefaceList::getInstance())
+            if (auto* list = FTTypefaceList::getInstanceWithoutCreating())
                 list->removeMemoryFace (ftFace);
     }
 
