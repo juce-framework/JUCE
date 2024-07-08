@@ -168,7 +168,7 @@ private:
     std::mutex m;
 };
 
-class EventHandler final  : public Steinberg::Linux::IEventHandler,
+class EventHandler final  : public Linux::IEventHandler,
                             private LinuxEventLoopInternal::Listener
 {
 public:
@@ -192,10 +192,10 @@ public:
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        return testFor (*this, targetIID, UniqueBase<Steinberg::Linux::IEventHandler>{}).extract (obj);
+        return testFor (*this, targetIID, UniqueBase<Linux::IEventHandler>{}).extract (obj);
     }
 
-    void PLUGIN_API onFDIsSet (Steinberg::Linux::FileDescriptor fd) override
+    void PLUGIN_API onFDIsSet (Linux::FileDescriptor fd) override
     {
         updateCurrentMessageThread();
         LinuxEventLoopInternal::invokeEventLoopCallbackForFd (fd);
@@ -236,7 +236,7 @@ private:
     public:
         AttachedEventLoop() = default;
 
-        AttachedEventLoop (Steinberg::Linux::IRunLoop* loopIn, Steinberg::Linux::IEventHandler* handlerIn)
+        AttachedEventLoop (Linux::IRunLoop* loopIn, Linux::IEventHandler* handlerIn)
             : loop (loopIn), handler (handlerIn)
         {
             for (auto& fd : LinuxEventLoopInternal::getRegisteredFds())
@@ -272,17 +272,17 @@ private:
             std::swap (other.handler, handler);
         }
 
-        Steinberg::Linux::IRunLoop* loop = nullptr;
-        Steinberg::Linux::IEventHandler* handler = nullptr;
+        Linux::IRunLoop* loop = nullptr;
+        Linux::IEventHandler* handler = nullptr;
     };
 
     //==============================================================================
-    static Steinberg::Linux::IRunLoop* getRunLoopFromFrame (IPlugFrame* plugFrame)
+    static Linux::IRunLoop* getRunLoopFromFrame (IPlugFrame* plugFrame)
     {
-        Steinberg::Linux::IRunLoop* runLoop = nullptr;
+        Linux::IRunLoop* runLoop = nullptr;
 
         if (plugFrame != nullptr)
-            plugFrame->queryInterface (Steinberg::Linux::IRunLoop::iid, (void**) &runLoop);
+            plugFrame->queryInterface (Linux::IRunLoop::iid, (void**) &runLoop);
 
         jassert (runLoop != nullptr);
         return runLoop;
@@ -336,17 +336,15 @@ private:
 
     std::atomic<int> refCount { 1 };
 
-    std::multiset<Steinberg::Linux::IRunLoop*> hostRunLoops;
+    std::multiset<Linux::IRunLoop*> hostRunLoops;
     AttachedEventLoop attachedEventLoop;
 
-    static HostMessageThreadState hostMessageThreadState;
+    static inline HostMessageThreadState hostMessageThreadState;
 
     //==============================================================================
     JUCE_DECLARE_NON_MOVEABLE (EventHandler)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler)
 };
-
-HostMessageThreadState EventHandler::hostMessageThreadState;
 
 #endif
 
@@ -1239,7 +1237,7 @@ public:
     }
 
     tresult PLUGIN_API setUnitProgramData (Steinberg::int32 listOrUnitId, Steinberg::int32 programIndex,
-                                           Steinberg::IBStream* data) override
+                                           IBStream* data) override
     {
         if (audioProcessor != nullptr)
             return audioProcessor->setUnitProgramData (listOrUnitId, programIndex, data);
@@ -1635,13 +1633,13 @@ private:
     {
     public:
         EditorContextMenu (AudioProcessorEditor& editorIn,
-                           VSTComSmartPtr<Steinberg::Vst::IContextMenu> contextMenuIn)
+                           VSTComSmartPtr<Vst::IContextMenu> contextMenuIn)
             : editor (editorIn), contextMenu (contextMenuIn) {}
 
         PopupMenu getEquivalentPopupMenu() const override
         {
-            using MenuItem   = Steinberg::Vst::IContextMenuItem;
-            using MenuTarget = Steinberg::Vst::IContextMenuTarget;
+            using MenuItem   = Vst::IContextMenuItem;
+            using MenuTarget = Vst::IContextMenuTarget;
 
             struct Submenu
             {
@@ -1711,7 +1709,7 @@ private:
 
     private:
         AudioProcessorEditor& editor;
-        VSTComSmartPtr<Steinberg::Vst::IContextMenu> contextMenu;
+        VSTComSmartPtr<Vst::IContextMenu> contextMenu;
     };
 
     class EditorHostContext final : public AudioProcessorEditorHostContext
@@ -1719,8 +1717,8 @@ private:
     public:
         EditorHostContext (JuceAudioProcessor& processorIn,
                            AudioProcessorEditor& editorIn,
-                           Steinberg::Vst::IComponentHandler* handler,
-                           Steinberg::IPlugView* viewIn)
+                           Vst::IComponentHandler* handler,
+                           IPlugView* viewIn)
             : processor (processorIn), editor (editorIn), componentHandler (handler), view (viewIn) {}
 
         std::unique_ptr<HostProvidedContextMenu> getContextMenuForParameter (const AudioProcessorParameter* parameter) const override
@@ -1728,7 +1726,7 @@ private:
             if (componentHandler == nullptr || view == nullptr)
                 return {};
 
-            Steinberg::FUnknownPtr<Steinberg::Vst::IComponentHandler3> handler (componentHandler);
+            FUnknownPtr<Vst::IComponentHandler3> handler (componentHandler);
 
             if (handler == nullptr)
                 return {};
@@ -1741,8 +1739,8 @@ private:
     private:
         JuceAudioProcessor& processor;
         AudioProcessorEditor& editor;
-        Steinberg::Vst::IComponentHandler* componentHandler = nullptr;
-        Steinberg::IPlugView* view = nullptr;
+        Vst::IComponentHandler* componentHandler = nullptr;
+        IPlugView* view = nullptr;
     };
 
     //==============================================================================
@@ -2028,7 +2026,7 @@ private:
             return kResultFalse;
         }
 
-        tresult PLUGIN_API setContentScaleFactor ([[maybe_unused]] const Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
+        tresult PLUGIN_API setContentScaleFactor ([[maybe_unused]] const IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
            #if ! JUCE_MAC
             const auto scaleToApply = [&]
@@ -2038,7 +2036,7 @@ private:
                 if (detail::PluginUtilities::getHostType().type != PluginHostType::SteinbergCubase10)
                     return factor;
 
-                const auto hostWindowScale = (Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getScaleFactorForWindow (static_cast<HWND> (systemWindow));
+                const auto hostWindowScale = (IPlugViewContentScaleSupport::ScaleFactor) getScaleFactorForWindow (static_cast<HWND> (systemWindow));
 
                 if (hostWindowScale <= 0.0 || approximatelyEqual (factor, hostWindowScale))
                     return factor;
@@ -3027,7 +3025,7 @@ public:
                                             Steinberg::int16 midiPitch, Vst::String128 name) override                           { return comPluginInstance->getProgramPitchName (listId, programIndex, midiPitch, name); }
     tresult PLUGIN_API selectUnit (Vst::UnitID unitId) override                                                                 { return comPluginInstance->selectUnit (unitId); }
     tresult PLUGIN_API setUnitProgramData (Steinberg::int32 listOrUnitId, Steinberg::int32 programIndex,
-                                           Steinberg::IBStream* data) override                                                  { return comPluginInstance->setUnitProgramData (listOrUnitId, programIndex, data); }
+                                           IBStream* data) override                                                             { return comPluginInstance->setUnitProgramData (listOrUnitId, programIndex, data); }
     Vst::UnitID PLUGIN_API getSelectedUnit() override                                                                           { return comPluginInstance->getSelectedUnit(); }
     tresult PLUGIN_API getUnitByBus (Vst::MediaType type, Vst::BusDirection dir, Steinberg::int32 busIndex,
                                      Steinberg::int32 channel, Vst::UnitID& unitId) override                                    { return comPluginInstance->getUnitByBus (type, dir, busIndex, channel, unitId); }
@@ -3137,7 +3135,7 @@ public:
                 info.channelCount = bus->getLastEnabledLayout().size();
 
                 [[maybe_unused]] const auto lastEnabledVst3Layout = getVst3SpeakerArrangement (bus->getLastEnabledLayout());
-                jassert (lastEnabledVst3Layout.has_value() && info.channelCount == Steinberg::Vst::SpeakerArr::getChannelCount (*lastEnabledVst3Layout));
+                jassert (lastEnabledVst3Layout.has_value() && info.channelCount == Vst::SpeakerArr::getChannelCount (*lastEnabledVst3Layout));
                 toString128 (info.name, bus->getName());
 
                 info.busType = [&]
@@ -3539,7 +3537,7 @@ public:
             double value = 0.0;
         };
 
-        const auto getPointFromQueue = [] (Steinberg::Vst::IParamValueQueue* queue, Steinberg::int32 index)
+        const auto getPointFromQueue = [] (Vst::IParamValueQueue* queue, Steinberg::int32 index)
         {
             ParamChangeInfo result;
             return queue->getPoint (index, result.offsetSamples, result.value) == kResultTrue
@@ -4091,8 +4089,7 @@ private:
 };
 
 //==============================================================================
-/** This typedef represents VST3's createInstance() function signature */
-using CreateFunction = FUnknown* (*)(Vst::IHostApplication*);
+using CreateFunction = FUnknown* (*) (Vst::IHostApplication*);
 
 //==============================================================================
 struct JucePluginFactory final : public IPluginFactory3
@@ -4304,20 +4301,20 @@ private:
 
         static const ClassEntry classEntries[]
         {
-            ClassEntry { componentClass, [] (Vst::IHostApplication* h) -> Steinberg::FUnknown*
+            ClassEntry { componentClass, [] (Vst::IHostApplication* h) -> FUnknown*
             {
                 return static_cast<Vst::IAudioProcessor*> (new JuceVST3Component (h));
             } },
-            ClassEntry { controllerClass, [] (Vst::IHostApplication* h) -> Steinberg::FUnknown*
+            ClassEntry { controllerClass, [] (Vst::IHostApplication* h) -> FUnknown*
             {
                 return static_cast<Vst::IEditController*> (new JuceVST3EditController (h));
             } },
-            ClassEntry { compatibilityClass, [] (Vst::IHostApplication*) -> Steinberg::FUnknown*
+            ClassEntry { compatibilityClass, [] (Vst::IHostApplication*) -> FUnknown*
             {
                 return new JucePluginCompatibility;
             } },
            #if JucePlugin_Enable_ARA
-            ClassEntry { araFactoryClass, [] (Vst::IHostApplication*) -> Steinberg::FUnknown*
+            ClassEntry { araFactoryClass, [] (Vst::IHostApplication*) -> FUnknown*
             {
                 return static_cast<ARA::IMainFactory*> (new JuceARAFactory);
             } },
