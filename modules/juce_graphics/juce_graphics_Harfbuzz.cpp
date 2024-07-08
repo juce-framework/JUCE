@@ -58,8 +58,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
 
 #define HAVE_ATEXIT 1
 
-#define HAVE_ATEXIT 1
-
 #if JUCE_LINUX || JUCE_BSD
  #ifndef JUCE_USE_FREETYPE
   #define JUCE_USE_FREETYPE 1
