@@ -17,12 +17,12 @@
 #ifndef _SB_INTERNAL_LINE_H
 #define _SB_INTERNAL_LINE_H
 
-#include <SBBase.h>
-#include <SBCodepointSequence.h>
-#include <SBConfig.h>
-#include <SBLine.h>
-#include <SBParagraph.h>
-#include <SBRun.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBLine.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBParagraph.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBRun.h>
 
 typedef struct _SBLine {
     SBCodepointSequence codepointSequence;

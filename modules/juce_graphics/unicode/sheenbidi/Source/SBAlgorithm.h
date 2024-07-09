@@ -17,11 +17,11 @@
 #ifndef _SB_INTERNAL_ALGORITHM_H
 #define _SB_INTERNAL_ALGORITHM_H
 
-#include <SBAlgorithm.h>
-#include <SBBase.h>
-#include <SBBidiType.h>
-#include <SBCodepointSequence.h>
-#include <SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBAlgorithm.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBBidiType.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
 
 typedef struct _SBAlgorithm {
     SBCodepointSequence codepointSequence;

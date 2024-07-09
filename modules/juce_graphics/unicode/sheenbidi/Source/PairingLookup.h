@@ -6,7 +6,7 @@
 #ifndef _SB_INTERNAL_PAIRING_LOOKUP_H
 #define _SB_INTERNAL_PAIRING_LOOKUP_H
 
-#include <SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
 
 #include "BracketType.h"
 #include "SBBase.h"

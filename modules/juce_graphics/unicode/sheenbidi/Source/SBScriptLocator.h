@@ -17,9 +17,9 @@
 #ifndef _SB_INTERNAL_SCRIPT_LOCATOR_H
 #define _SB_INTERNAL_SCRIPT_LOCATOR_H
 
-#include <SBBase.h>
-#include <SBCodepointSequence.h>
-#include <SBScriptLocator.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBCodepointSequence.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBScriptLocator.h>
 
 #include "ScriptStack.h"
 

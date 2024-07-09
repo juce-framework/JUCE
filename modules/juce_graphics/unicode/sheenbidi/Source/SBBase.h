@@ -17,12 +17,12 @@
 #ifndef _SB_INTERNAL_BASE_H
 #define _SB_INTERNAL_BASE_H
 
-#include <SBBase.h>
-#include <SBBidiType.h>
-#include <SBCodepoint.h>
-#include <SBConfig.h>
-#include <SBGeneralCategory.h>
-#include <SBScript.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBBidiType.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBCodepoint.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBGeneralCategory.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBScript.h>
 
 /**
  * A value that indicates an invalid unsigned index.

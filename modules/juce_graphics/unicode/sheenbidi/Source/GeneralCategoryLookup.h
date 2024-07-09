@@ -6,8 +6,8 @@
 #ifndef _SB_INTERNAL_GENERAL_CATEGORY_LOOKUP_H
 #define _SB_INTERNAL_GENERAL_CATEGORY_LOOKUP_H
 
-#include <SBConfig.h>
-#include <SBGeneralCategory.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBGeneralCategory.h>
 
 #include "SBBase.h"
 

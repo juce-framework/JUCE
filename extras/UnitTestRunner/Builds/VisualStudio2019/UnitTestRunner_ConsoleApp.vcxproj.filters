@@ -3067,6 +3067,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_Harfbuzz.cpp">
       <Filter>JUCE Modules\juce_graphics</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics_Sheenbidi.c">
+      <Filter>JUCE Modules\juce_graphics</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityHandler.cpp">
       <Filter>JUCE Modules\juce_gui_basics\accessibility</Filter>
     </ClCompile>
@@ -3869,6 +3872,9 @@
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_Harfbuzz.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics_Sheenbidi.c">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp">
@@ -8233,6 +8239,9 @@
     </None>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt">
       <Filter>JUCE Modules\juce_graphics\image_formats\pnglib</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_graphics\unicode\sheenbidi\JUCE_CHANGES.txt">
+      <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

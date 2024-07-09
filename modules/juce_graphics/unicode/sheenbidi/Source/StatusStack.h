@@ -17,7 +17,7 @@
 #ifndef _SB_INTERNAL_STATUS_STACK_H
 #define _SB_INTERNAL_STATUS_STACK_H
 
-#include <SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
 #include "SBBase.h"
 
 #define _StatusStackList_Length         16

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <SBConfig.h>
-#include <SheenBidi.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SheenBidi.h>
 
 #ifdef SB_CONFIG_UNITY
 

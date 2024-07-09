@@ -17,10 +17,10 @@
 #ifndef _SB_INTERNAL_PARAGRAPH_H
 #define _SB_INTERNAL_PARAGRAPH_H
 
-#include <SBAlgorithm.h>
-#include <SBBase.h>
-#include <SBConfig.h>
-#include <SBParagraph.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBAlgorithm.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBParagraph.h>
 
 typedef struct _SBParagraph {
     SBAlgorithmRef algorithm;

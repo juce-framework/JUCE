@@ -17,9 +17,9 @@
 #ifndef _SB_INTERNAL_MIRROR_LOCATOR_H
 #define _SB_INTERNAL_MIRROR_LOCATOR_H
 
-#include <SBBase.h>
-#include <SBMirrorLocator.h>
-#include <SBLine.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBBase.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBMirrorLocator.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBLine.h>
 
 typedef struct _SBMirrorLocator {
     SBLineRef _line;

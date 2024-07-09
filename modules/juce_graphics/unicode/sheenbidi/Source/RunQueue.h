@@ -17,7 +17,7 @@
 #ifndef _SB_INTERNAL_RUN_QUEUE_H
 #define _SB_INTERNAL_RUN_QUEUE_H
 
-#include <SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
 
 #include "LevelRun.h"
 #include "SBBase.h"

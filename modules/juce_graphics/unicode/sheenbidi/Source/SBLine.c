@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-#include <SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBRun.h>
+
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -24,7 +26,6 @@
 #include "SBBase.h"
 #include "SBCodepointSequence.h"
 #include "SBParagraph.h"
-#include "SBRun.h"
 #include "SBLine.h"
 
 typedef struct _LineContext {

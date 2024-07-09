@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
 
 #include "BidiChain.h"
 #include "BracketQueue.h"

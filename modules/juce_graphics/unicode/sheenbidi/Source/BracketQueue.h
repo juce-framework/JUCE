@@ -17,7 +17,7 @@
 #ifndef _SB_INTERNAL_BRACKET_QUEUE_H
 #define _SB_INTERNAL_BRACKET_QUEUE_H
 
-#include <SBConfig.h>
+#include <juce_graphics/unicode/sheenbidi/Headers/SBConfig.h>
 
 #include "BidiChain.h"
 #include "SBBase.h"
