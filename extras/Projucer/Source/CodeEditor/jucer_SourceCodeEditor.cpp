@@ -275,6 +275,89 @@ void SourceCodeEditor::valueTreeRedirected (ValueTree&)                         
 void SourceCodeEditor::codeDocumentTextInserted (const String&, int)              { checkSaveState(); }
 void SourceCodeEditor::codeDocumentTextDeleted (int, int)                         { checkSaveState(); }
 
+class GenericCodeEditorComponent::FindPanel final : public Component
+{
+public:
+    FindPanel()
+    {
+        editor.setColour (CaretComponent::caretColourId, Colours::black);
+
+        addAndMakeVisible (editor);
+        label.setColour (Label::textColourId, Colours::white);
+        label.attachToComponent (&editor, false);
+
+        addAndMakeVisible (caseButton);
+        caseButton.setColour (ToggleButton::textColourId, Colours::white);
+        caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
+        caseButton.onClick = [this] { setCaseSensitiveSearch (caseButton.getToggleState()); };
+
+        findPrev.setConnectedEdges (Button::ConnectedOnRight);
+        findNext.setConnectedEdges (Button::ConnectedOnLeft);
+        addAndMakeVisible (findPrev);
+        addAndMakeVisible (findNext);
+
+        setWantsKeyboardFocus (false);
+        setFocusContainerType (FocusContainerType::keyboardFocusContainer);
+        findPrev.setWantsKeyboardFocus (false);
+        findNext.setWantsKeyboardFocus (false);
+
+        editor.setText (getSearchString());
+        editor.onTextChange = [this] { changeSearchString(); };
+        editor.onReturnKey  = [] { ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::findNext, true); };
+        editor.onEscapeKey  = [this]
+        {
+            if (auto* ed = getOwner())
+                ed->hideFindPanel();
+        };
+    }
+
+    void setCommandManager (ApplicationCommandManager* cm)
+    {
+        findPrev.setCommandToTrigger (cm, CommandIDs::findPrevious, true);
+        findNext.setCommandToTrigger (cm, CommandIDs::findNext, true);
+    }
+
+    void paint (Graphics& g) override
+    {
+        Path outline;
+        outline.addRoundedRectangle (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 8.0f);
+
+        g.setColour (Colours::black.withAlpha (0.6f));
+        g.fillPath (outline);
+        g.setColour (Colours::white.withAlpha (0.8f));
+        g.strokePath (outline, PathStrokeType (1.0f));
+    }
+
+    void resized() override
+    {
+        int y = 30;
+        editor.setBounds (10, y, getWidth() - 20, 24);
+        y += 30;
+        caseButton.setBounds (10, y, getWidth() / 2 - 10, 22);
+        findNext.setBounds (getWidth() - 40, y, 30, 22);
+        findPrev.setBounds (getWidth() - 70, y, 30, 22);
+    }
+
+    void changeSearchString()
+    {
+        setSearchString (editor.getText());
+
+        if (auto* ed = getOwner())
+            ed->findNext (true, false);
+    }
+
+    GenericCodeEditorComponent* getOwner() const
+    {
+        return findParentComponentOfClass <GenericCodeEditorComponent>();
+    }
+
+    TextEditor editor;
+    Label label  { {}, "Find:" };
+    ToggleButton caseButton  { "Case-sensitive" };
+    TextButton findPrev  { "<" },
+               findNext  { ">" };
+};
+
 //==============================================================================
 GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocument& codeDocument,
                                                         CodeTokeniser* tokeniser)
@@ -384,89 +467,6 @@ void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Lis
 }
 
 //==============================================================================
-class GenericCodeEditorComponent::FindPanel final : public Component
-{
-public:
-    FindPanel()
-    {
-        editor.setColour (CaretComponent::caretColourId, Colours::black);
-
-        addAndMakeVisible (editor);
-        label.setColour (Label::textColourId, Colours::white);
-        label.attachToComponent (&editor, false);
-
-        addAndMakeVisible (caseButton);
-        caseButton.setColour (ToggleButton::textColourId, Colours::white);
-        caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
-        caseButton.onClick = [this] { setCaseSensitiveSearch (caseButton.getToggleState()); };
-
-        findPrev.setConnectedEdges (Button::ConnectedOnRight);
-        findNext.setConnectedEdges (Button::ConnectedOnLeft);
-        addAndMakeVisible (findPrev);
-        addAndMakeVisible (findNext);
-
-        setWantsKeyboardFocus (false);
-        setFocusContainerType (FocusContainerType::keyboardFocusContainer);
-        findPrev.setWantsKeyboardFocus (false);
-        findNext.setWantsKeyboardFocus (false);
-
-        editor.setText (getSearchString());
-        editor.onTextChange = [this] { changeSearchString(); };
-        editor.onReturnKey  = [] { ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::findNext, true); };
-        editor.onEscapeKey  = [this]
-        {
-            if (auto* ed = getOwner())
-                ed->hideFindPanel();
-        };
-    }
-
-    void setCommandManager (ApplicationCommandManager* cm)
-    {
-        findPrev.setCommandToTrigger (cm, CommandIDs::findPrevious, true);
-        findNext.setCommandToTrigger (cm, CommandIDs::findNext, true);
-    }
-
-    void paint (Graphics& g) override
-    {
-        Path outline;
-        outline.addRoundedRectangle (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 8.0f);
-
-        g.setColour (Colours::black.withAlpha (0.6f));
-        g.fillPath (outline);
-        g.setColour (Colours::white.withAlpha (0.8f));
-        g.strokePath (outline, PathStrokeType (1.0f));
-    }
-
-    void resized() override
-    {
-        int y = 30;
-        editor.setBounds (10, y, getWidth() - 20, 24);
-        y += 30;
-        caseButton.setBounds (10, y, getWidth() / 2 - 10, 22);
-        findNext.setBounds (getWidth() - 40, y, 30, 22);
-        findPrev.setBounds (getWidth() - 70, y, 30, 22);
-    }
-
-    void changeSearchString()
-    {
-        setSearchString (editor.getText());
-
-        if (auto* ed = getOwner())
-            ed->findNext (true, false);
-    }
-
-    GenericCodeEditorComponent* getOwner() const
-    {
-        return findParentComponentOfClass <GenericCodeEditorComponent>();
-    }
-
-    TextEditor editor;
-    Label label  { {}, "Find:" };
-    ToggleButton caseButton  { "Case-sensitive" };
-    TextButton findPrev  { "<" },
-               findNext  { ">" };
-};
-
 void GenericCodeEditorComponent::resized()
 {
     CodeEditorComponent::resized();

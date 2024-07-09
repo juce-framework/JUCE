@@ -244,6 +244,7 @@
 #endif
 
 //==============================================================================
+#include "native/accessibility/juce_Accessibility.cpp"
 #include "accessibility/juce_AccessibilityHandler.cpp"
 #include "application/juce_Application.cpp"
 #include "buttons/juce_ArrowButton.cpp"
@@ -330,7 +331,6 @@
 #include "mouse/juce_MouseInactivityDetector.cpp"
 #include "mouse/juce_MouseInputSource.cpp"
 #include "mouse/juce_MouseListener.cpp"
-#include "native/accessibility/juce_Accessibility.cpp"
 #include "native/juce_ScopedDPIAwarenessDisabler.cpp"
 #include "positioning/juce_MarkerList.cpp"
 #include "positioning/juce_RelativeCoordinate.cpp"

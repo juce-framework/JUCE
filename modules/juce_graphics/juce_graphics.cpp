@@ -52,6 +52,7 @@
 //==============================================================================
 #if JUCE_MAC
  #import <QuartzCore/QuartzCore.h>
+ #include <CoreImage/CIRenderDestination.h>
  #include <CoreText/CTFont.h>
 
 #elif JUCE_WINDOWS

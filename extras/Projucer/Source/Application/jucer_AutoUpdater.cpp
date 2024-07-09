@@ -36,6 +36,158 @@
 #include "jucer_Application.h"
 #include "jucer_AutoUpdater.h"
 
+class DownloadAndInstallThread final : private ThreadWithProgressWindow
+{
+public:
+    DownloadAndInstallThread  (const VersionInfo::Asset& a, const File& t, std::function<void (Result)>&& cb)
+        : ThreadWithProgressWindow ("Downloading New Version", true, true),
+          asset (a), targetFolder (t), completionCallback (std::move (cb))
+    {
+        launchThread (Priority::low);
+    }
+
+private:
+    void run() override
+    {
+        setProgress (-1.0);
+
+        MemoryBlock zipData;
+        auto result = download (zipData);
+
+        if (result.wasOk() && ! threadShouldExit())
+            result = install (zipData);
+
+        MessageManager::callAsync ([result, callback = completionCallback]
+        {
+            callback (result);
+        });
+    }
+
+    Result download (MemoryBlock& dest)
+    {
+        setStatusMessage ("Downloading...");
+
+        int statusCode = 0;
+        auto inStream = VersionInfo::createInputStreamForAsset (asset, statusCode);
+
+        if (inStream != nullptr && statusCode == 200)
+        {
+            int64 total = 0;
+            MemoryOutputStream mo (dest, true);
+
+            for (;;)
+            {
+                if (threadShouldExit())
+                    return Result::fail ("Cancelled");
+
+                auto written = mo.writeFromInputStream (*inStream, 8192);
+
+                if (written == 0)
+                    break;
+
+                total += written;
+
+                setStatusMessage ("Downloading... " + File::descriptionOfSizeInBytes (total));
+            }
+
+            return Result::ok();
+        }
+
+        return Result::fail ("Failed to download from: " + asset.url);
+    }
+
+    Result install (const MemoryBlock& data)
+    {
+        setStatusMessage ("Installing...");
+
+        MemoryInputStream input (data, false);
+        ZipFile zip (input);
+
+        if (zip.getNumEntries() == 0)
+            return Result::fail ("The downloaded file was not a valid JUCE file!");
+
+        struct ScopedDownloadFolder
+        {
+            explicit ScopedDownloadFolder (const File& installTargetFolder)
+            {
+                folder = installTargetFolder.getSiblingFile (installTargetFolder.getFileNameWithoutExtension() + "_download").getNonexistentSibling();
+                jassert (folder.createDirectory());
+            }
+
+            ~ScopedDownloadFolder()   { folder.deleteRecursively(); }
+
+            File folder;
+        };
+
+        ScopedDownloadFolder unzipTarget (targetFolder);
+
+        if (! unzipTarget.folder.isDirectory())
+            return Result::fail ("Couldn't create a temporary folder to unzip the new version!");
+
+        auto r = zip.uncompressTo (unzipTarget.folder);
+
+        if (r.failed())
+            return r;
+
+        if (threadShouldExit())
+            return Result::fail ("Cancelled");
+
+       #if JUCE_LINUX || JUCE_BSD || JUCE_MAC
+        r = setFilePermissions (unzipTarget.folder, zip);
+
+        if (r.failed())
+            return r;
+
+        if (threadShouldExit())
+            return Result::fail ("Cancelled");
+       #endif
+
+        if (targetFolder.exists())
+        {
+            auto oldFolder = targetFolder.getSiblingFile (targetFolder.getFileNameWithoutExtension() + "_old").getNonexistentSibling();
+
+            if (! targetFolder.moveFileTo (oldFolder))
+                return Result::fail ("Could not remove the existing folder!\n\n"
+                                     "This may happen if you are trying to download into a directory that requires administrator privileges to modify.\n"
+                                     "Please select a folder that is writable by the current user.");
+        }
+
+        if (! unzipTarget.folder.getChildFile ("JUCE").moveFileTo (targetFolder))
+            return Result::fail ("Could not overwrite the existing folder!\n\n"
+                                 "This may happen if you are trying to download into a directory that requires administrator privileges to modify.\n"
+                                 "Please select a folder that is writable by the current user.");
+
+        return Result::ok();
+    }
+
+    Result setFilePermissions (const File& root, const ZipFile& zip)
+    {
+        constexpr uint32 executableFlag = (1 << 22);
+
+        for (int i = 0; i < zip.getNumEntries(); ++i)
+        {
+            auto* entry = zip.getEntry (i);
+
+            if ((entry->externalFileAttributes & executableFlag) != 0 && entry->filename.getLastCharacter() != '/')
+            {
+                auto exeFile = root.getChildFile (entry->filename);
+
+                if (! exeFile.exists())
+                    return Result::fail ("Failed to find executable file when setting permissions " + exeFile.getFileName());
+
+                if (! exeFile.setExecutePermission (true))
+                    return Result::fail ("Failed to set executable file permission for " + exeFile.getFileName());
+            }
+        }
+
+        return Result::ok();
+    }
+
+    VersionInfo::Asset asset;
+    File targetFolder;
+    std::function<void (Result)> completionCallback;
+};
+
 //==============================================================================
 LatestVersionCheckerAndUpdater::LatestVersionCheckerAndUpdater()
     : Thread ("VersionChecker")
@@ -394,158 +546,6 @@ void LatestVersionCheckerAndUpdater::addNotificationToOpenProjects (const Versio
 }
 
 //==============================================================================
-class DownloadAndInstallThread final : private ThreadWithProgressWindow
-{
-public:
-    DownloadAndInstallThread  (const VersionInfo::Asset& a, const File& t, std::function<void (Result)>&& cb)
-        : ThreadWithProgressWindow ("Downloading New Version", true, true),
-          asset (a), targetFolder (t), completionCallback (std::move (cb))
-    {
-        launchThread (Priority::low);
-    }
-
-private:
-    void run() override
-    {
-        setProgress (-1.0);
-
-        MemoryBlock zipData;
-        auto result = download (zipData);
-
-        if (result.wasOk() && ! threadShouldExit())
-            result = install (zipData);
-
-        MessageManager::callAsync ([result, callback = completionCallback]
-        {
-            callback (result);
-        });
-    }
-
-    Result download (MemoryBlock& dest)
-    {
-        setStatusMessage ("Downloading...");
-
-        int statusCode = 0;
-        auto inStream = VersionInfo::createInputStreamForAsset (asset, statusCode);
-
-        if (inStream != nullptr && statusCode == 200)
-        {
-            int64 total = 0;
-            MemoryOutputStream mo (dest, true);
-
-            for (;;)
-            {
-                if (threadShouldExit())
-                    return Result::fail ("Cancelled");
-
-                auto written = mo.writeFromInputStream (*inStream, 8192);
-
-                if (written == 0)
-                    break;
-
-                total += written;
-
-                setStatusMessage ("Downloading... " + File::descriptionOfSizeInBytes (total));
-            }
-
-            return Result::ok();
-        }
-
-        return Result::fail ("Failed to download from: " + asset.url);
-    }
-
-    Result install (const MemoryBlock& data)
-    {
-        setStatusMessage ("Installing...");
-
-        MemoryInputStream input (data, false);
-        ZipFile zip (input);
-
-        if (zip.getNumEntries() == 0)
-            return Result::fail ("The downloaded file was not a valid JUCE file!");
-
-        struct ScopedDownloadFolder
-        {
-            explicit ScopedDownloadFolder (const File& installTargetFolder)
-            {
-                folder = installTargetFolder.getSiblingFile (installTargetFolder.getFileNameWithoutExtension() + "_download").getNonexistentSibling();
-                jassert (folder.createDirectory());
-            }
-
-            ~ScopedDownloadFolder()   { folder.deleteRecursively(); }
-
-            File folder;
-        };
-
-        ScopedDownloadFolder unzipTarget (targetFolder);
-
-        if (! unzipTarget.folder.isDirectory())
-            return Result::fail ("Couldn't create a temporary folder to unzip the new version!");
-
-        auto r = zip.uncompressTo (unzipTarget.folder);
-
-        if (r.failed())
-            return r;
-
-        if (threadShouldExit())
-            return Result::fail ("Cancelled");
-
-       #if JUCE_LINUX || JUCE_BSD || JUCE_MAC
-        r = setFilePermissions (unzipTarget.folder, zip);
-
-        if (r.failed())
-            return r;
-
-        if (threadShouldExit())
-            return Result::fail ("Cancelled");
-       #endif
-
-        if (targetFolder.exists())
-        {
-            auto oldFolder = targetFolder.getSiblingFile (targetFolder.getFileNameWithoutExtension() + "_old").getNonexistentSibling();
-
-            if (! targetFolder.moveFileTo (oldFolder))
-                return Result::fail ("Could not remove the existing folder!\n\n"
-                                     "This may happen if you are trying to download into a directory that requires administrator privileges to modify.\n"
-                                     "Please select a folder that is writable by the current user.");
-        }
-
-        if (! unzipTarget.folder.getChildFile ("JUCE").moveFileTo (targetFolder))
-            return Result::fail ("Could not overwrite the existing folder!\n\n"
-                                 "This may happen if you are trying to download into a directory that requires administrator privileges to modify.\n"
-                                 "Please select a folder that is writable by the current user.");
-
-        return Result::ok();
-    }
-
-    Result setFilePermissions (const File& root, const ZipFile& zip)
-    {
-        constexpr uint32 executableFlag = (1 << 22);
-
-        for (int i = 0; i < zip.getNumEntries(); ++i)
-        {
-            auto* entry = zip.getEntry (i);
-
-            if ((entry->externalFileAttributes & executableFlag) != 0 && entry->filename.getLastCharacter() != '/')
-            {
-                auto exeFile = root.getChildFile (entry->filename);
-
-                if (! exeFile.exists())
-                    return Result::fail ("Failed to find executable file when setting permissions " + exeFile.getFileName());
-
-                if (! exeFile.setExecutePermission (true))
-                    return Result::fail ("Failed to set executable file permission for " + exeFile.getFileName());
-            }
-        }
-
-        return Result::ok();
-    }
-
-    VersionInfo::Asset asset;
-    File targetFolder;
-    std::function<void (Result)> completionCallback;
-};
-
 static void restartProcess (const File& targetFolder)
 {
    #if JUCE_MAC || JUCE_LINUX || JUCE_BSD
