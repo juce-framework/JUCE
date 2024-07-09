@@ -4,6 +4,40 @@
 
 ## Change
 
+All member functions of DynamicObject other than clone() and writeAsJSON() have
+been made non-virtual.
+
+**Possible Issues**
+
+Classes that override these functions will fail to compile.
+
+**Workaround**
+
+Instead of overriding hasMethod() and invokeMethod(), call setMethod() to
+add new member functions.
+
+Instead of overriding getProperty() to return a custom property, add that
+property using setProperty().
+
+**Rationale**
+
+Allowing the implementations of these functions to be changed may cause derived
+types to accidentally break the invariants of the DynamicObject type.
+Specifically, the results of hasMethod() and hasProperty() must be consistent
+with the result of getProperties(). Additiionally, calling getProperty() should
+return the same var as fetching the property through getProperties(), and
+calling invokeMethod() should behave the same way as retrieving and invoking a
+NativeFunction via getProperties().
+
+More concretely, the new QuickJS-based Javascript engine requires that all
+methods/properties are declared explicitly, which cannot be mapped to the more
+open-ended invokeMethod() API taking an arbitrary method name. Making
+invokeMethod() non-virtual forces users to add methods with setMethod() instead
+of overriding invokeMethod(), which is more compatible with QuickJS.
+
+
+## Change
+
 The LowLevelGraphicsPostscriptRenderer has been removed.
 
 **Possible Issues**
