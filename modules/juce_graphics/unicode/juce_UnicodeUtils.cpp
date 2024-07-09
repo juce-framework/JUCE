@@ -49,7 +49,6 @@ struct UnicodeAnalysisPoint
 {
     char32_t character = 0;
     UnicodeEntry data{};
-    uint16_t embeddingLevel = 0;
 
     UnicodeAnalysisPoint (char32_t characterIn, UnicodeEntry entry)
         : character { characterIn },
@@ -66,24 +65,9 @@ struct UnicodeAnalysisPoint
         return SBCodepointGetGeneralCategory (character);
     }
 
-    BidiType getBidiType() const
-    {
-        return data.bidi;
-    }
-
-    void setBidiType (BidiType newType)
-    {
-        data.bidi = newType;
-    }
-
     auto getScriptType() const
     {
         return SBCodepointGetScript (character);
-    }
-
-    bool operator== (const BidiType& b) const
-    {
-        return getBidiType() == b;
     }
 };
 
