@@ -918,7 +918,11 @@ bool XmlElement::isTextElement() const noexcept
     return tagName.isEmpty();
 }
 
-static const String juce_xmltextContentAttributeName ("text");
+static const String& getJuceXmlTextContentAttributeName()
+{
+    static String result { "text" };
+    return result;
+}
 
 const String& XmlElement::getText() const noexcept
 {
@@ -926,13 +930,13 @@ const String& XmlElement::getText() const noexcept
                                 // isn't actually a text element.. If this contains text sub-nodes, you
                                 // probably want to use getAllSubText instead.
 
-    return getStringAttribute (juce_xmltextContentAttributeName);
+    return getStringAttribute (getJuceXmlTextContentAttributeName());
 }
 
 void XmlElement::setText (const String& newText)
 {
     if (isTextElement())
-        setAttribute (juce_xmltextContentAttributeName, newText);
+        setAttribute (getJuceXmlTextContentAttributeName(), newText);
     else
         jassertfalse; // you can only change the text in a text element, not a normal one.
 }
@@ -964,7 +968,7 @@ String XmlElement::getChildElementAllSubText (StringRef childTagName, const Stri
 XmlElement* XmlElement::createTextElement (const String& text)
 {
     auto e = new XmlElement ((int) 0);
-    e->setAttribute (juce_xmltextContentAttributeName, text);
+    e->setAttribute (getJuceXmlTextContentAttributeName(), text);
     return e;
 }
 

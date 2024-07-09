@@ -83,6 +83,12 @@ static qjs::JSValue juceToQuickJs (const var& v, qjs::JSContext* ctx)
 {
     using namespace qjs;
 
+    if (v.isVoid())
+        return JS_NULL;
+
+    if (v.isUndefined())
+        return JS_UNDEFINED;
+
     if (v.isInt())
         return JS_NewInt32   (ctx, static_cast<int> (v));
 
@@ -180,7 +186,7 @@ static qjs::JSValue juceToQuickJs (const var& v, qjs::JSContext* ctx)
         return result;
     }
 
-    jassert (v.isVoid());
+    jassertfalse;
     return JS_UNDEFINED;
 }
 
@@ -933,7 +939,7 @@ public:
                          ctx };
 
 
-        if (const auto* propertyNames = discardError (quickJSToJuce (names)).getArray())
+        if (auto v = discardError (quickJSToJuce (names)); const auto* propertyNames = v.getArray())
         {
             for (const auto& name : *propertyNames)
             {
