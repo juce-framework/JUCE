@@ -338,6 +338,9 @@ public:
 
     bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* auBus)
     {
+        if (allocated)
+            return false;
+
         const auto isInput = ([auBus busType] == AUAudioUnitBusTypeInput);
         const auto busIdx = static_cast<int> ([auBus index]);
         const auto newNumChannels = static_cast<int> ([format channelCount]);
@@ -453,6 +456,7 @@ public:
     //==============================================================================
     bool allocateRenderResourcesAndReturnError (NSError **outError)
     {
+        allocated = false;
         AudioProcessor& processor = getAudioProcessor();
         const AUAudioFrameCount maxFrames = [au maximumFramesToRender];
 
@@ -547,12 +551,14 @@ public:
             midiOutputEventBlock = [au MIDIOutputEventBlock];
 
         reset();
+        allocated = true;
 
         return true;
     }
 
     void deallocateRenderResources()
     {
+        allocated = false;
         midiOutputEventBlock = nullptr;
 
         hostMusicalContextCallback = nullptr;
@@ -862,6 +868,7 @@ private:
             addMethod (@selector (setShouldBypassEffect:),                  [] (id self, SEL, BOOL shouldBypass)                                { return _this (self)->setShouldBypassEffect (shouldBypass); });
             addMethod (@selector (allocateRenderResourcesAndReturnError:),  [] (id self, SEL, NSError** error)                                  { return _this (self)->allocateRenderResourcesAndReturnError (error) ? YES : NO; });
             addMethod (@selector (deallocateRenderResources),               [] (id self, SEL)                                                   { return _this (self)->deallocateRenderResources(); });
+            addMethod (@selector (renderResourcesAllocated),                [] (id self, SEL)                                                   { return _this (self)->allocated; });
 
             //==============================================================================
             addMethod (@selector (contextName),                             [] (id self, SEL)                                                   { return _this (self)->getContextName(); });
@@ -1797,6 +1804,7 @@ private:
     static constexpr bool forceLegacyParamIDs = false;
    #endif
     AudioProcessorParameter* bypassParam = nullptr;
+    bool allocated = false;
 };
 
 #if JUCE_IOS
