@@ -338,9 +338,9 @@ public:
 
     bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* auBus)
     {
-        const bool isInput = ([auBus busType] == AUAudioUnitBusTypeInput);
-        const int busIdx = static_cast<int> ([auBus index]);
-        const int newNumChannels = static_cast<int> ([format channelCount]);
+        const auto isInput = ([auBus busType] == AUAudioUnitBusTypeInput);
+        const auto busIdx = static_cast<int> ([auBus index]);
+        const auto newNumChannels = static_cast<int> ([format channelCount]);
 
         AudioProcessor& processor = getAudioProcessor();
 
@@ -748,7 +748,8 @@ public:
 private:
     struct Class final : public ObjCClass<AUAudioUnit>
     {
-        Class() : ObjCClass<AUAudioUnit> ("AUAudioUnit_")
+        Class()
+            : ObjCClass ("AUAudioUnit_")
         {
             addIvar<JuceAudioUnitv3*> ("cppObject");
 
@@ -1023,7 +1024,7 @@ private:
     class FactoryPresets
     {
     public:
-        using Presets = std::unique_ptr<NSMutableArray<AUAudioUnitPreset*>, NSObjectDeleter>;
+        using Presets = NSUniquePtr<NSMutableArray<AUAudioUnitPreset*>>;
 
         void set (Presets newPresets)
         {
@@ -1055,38 +1056,38 @@ private:
     //==============================================================================
     void addAudioUnitBusses (bool isInput)
     {
-        std::unique_ptr<NSMutableArray<AUAudioUnitBus*>, NSObjectDeleter> array ([[NSMutableArray<AUAudioUnitBus*> alloc] init]);
+        NSUniquePtr<NSMutableArray<AUAudioUnitBus*>> array ([[NSMutableArray<AUAudioUnitBus*> alloc] init]);
         AudioProcessor& processor = getAudioProcessor();
         const auto numWrapperBuses = AudioUnitHelpers::getBusCountForWrapper (processor, isInput);
         const auto numProcessorBuses = AudioUnitHelpers::getBusCount (processor, isInput);
 
         for (int i = 0; i < numWrapperBuses; ++i)
         {
-            using AVAudioFormatPtr = std::unique_ptr<AVAudioFormat, NSObjectDeleter>;
+            using AVAudioFormatPtr = NSUniquePtr<AVAudioFormat>;
 
             const auto audioFormat = [&]() -> AVAudioFormatPtr
             {
                 const auto tag = i < numProcessorBuses ? CoreAudioLayouts::toCoreAudio (processor.getChannelLayoutOfBus (isInput, i))
                                                        : kAudioChannelLayoutTag_Stereo;
-                const std::unique_ptr<AVAudioChannelLayout, NSObjectDeleter> layout { [[AVAudioChannelLayout alloc] initWithLayoutTag: tag] };
+                const NSUniquePtr<AVAudioChannelLayout> layout { [[AVAudioChannelLayout alloc] initWithLayoutTag: tag] };
 
-                if (auto format = AVAudioFormatPtr { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
-                                                                                               channelLayout: layout.get()] })
+                if (AVAudioFormatPtr format  { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
+                                                                                         channelLayout: layout.get()] })
                     return format;
 
                 const auto channels = i < numProcessorBuses ? processor.getChannelCountOfBus (isInput, i)
                                                             : 2;
 
                 // According to the docs, this will fail if the number of channels is greater than 2.
-                if (auto format = AVAudioFormatPtr { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
-                                                                                                    channels: static_cast<AVAudioChannelCount> (channels)] })
+                if (AVAudioFormatPtr format { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
+                                                                                             channels: static_cast<AVAudioChannelCount> (channels)] })
                     return format;
 
                 jassertfalse;
                 return nullptr;
             }();
 
-            using AUAudioUnitBusPtr = std::unique_ptr<AUAudioUnitBus, NSObjectDeleter>;
+            using AUAudioUnitBusPtr = NSUniquePtr<AUAudioUnitBus>;
 
             const auto audioUnitBus = [&]() -> AUAudioUnitBusPtr
             {
@@ -1142,7 +1143,7 @@ private:
         if (parameter.isMetaParameter())
             flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
-        std::unique_ptr<NSMutableArray, NSObjectDeleter> valueStrings;
+        NSUniquePtr<NSMutableArray> valueStrings;
 
         // Is this a meter?
         if (((parameter.getCategory() & 0xffff0000) >> 16) == 2)
@@ -1183,7 +1184,7 @@ private:
             return String (parameter.getParameterIndex());
         };
 
-        std::unique_ptr<AUParameter, NSObjectDeleter> param;
+        NSUniquePtr<AUParameter> param;
 
         @try
         {
@@ -1214,9 +1215,9 @@ private:
 
     struct NodeArrayResult
     {
-        std::unique_ptr<NSMutableArray<AUParameterNode*>, NSObjectDeleter> nodeArray { [NSMutableArray<AUParameterNode*> new] };
+        NSUniquePtr<NSMutableArray<AUParameterNode*>> nodeArray { [NSMutableArray<AUParameterNode*> new] };
 
-        void addParameter (const AudioProcessorParameter&, std::unique_ptr<AUParameter, NSObjectDeleter> auParam)
+        void addParameter (const AudioProcessorParameter&, NSUniquePtr<AUParameter> auParam)
         {
             [nodeArray.get() addObject: [auParam.get() retain]];
         }
@@ -1244,7 +1245,7 @@ private:
         NodeArrayResult nodeArray;
         std::map<int, AUParameterAddress> addressForIndex;
 
-        void addParameter (const AudioProcessorParameter& juceParam, std::unique_ptr<AUParameter, NSObjectDeleter> auParam)
+        void addParameter (const AudioProcessorParameter& juceParam, NSUniquePtr<AUParameter> auParam)
         {
             const auto index = juceParam.getParameterIndex();
             const auto address = [auParam.get() address];
@@ -1343,7 +1344,7 @@ private:
        #endif
     }
 
-    void installNewParameterTree (std::unique_ptr<NSMutableArray<AUParameterNode*>, NSObjectDeleter> topLevelNodes)
+    void installNewParameterTree (NSUniquePtr<NSMutableArray<AUParameterNode*>> topLevelNodes)
     {
         editorObserverToken.reset();
 
@@ -1395,7 +1396,7 @@ private:
         {
             String name = getAudioProcessor().getProgramName (idx);
 
-            std::unique_ptr<AUAudioUnitPreset, NSObjectDeleter> preset ([[AUAudioUnitPreset alloc] init]);
+            NSUniquePtr<AUAudioUnitPreset> preset ([[AUAudioUnitPreset alloc] init]);
             [preset.get() setName: juceStringToNS (name)];
             [preset.get() setNumber: static_cast<NSInteger> (idx)];
 
@@ -1739,7 +1740,7 @@ private:
     int totalInChannels, totalOutChannels;
 
     CoreAudioTimeConversions timeConversions;
-    std::unique_ptr<AUAudioUnitBusArray, NSObjectDeleter> inputBusses, outputBusses;
+    NSUniquePtr<AUAudioUnitBusArray> inputBusses, outputBusses;
 
    #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
     std::map<AUParameterAddress, int> indexForAddress;
@@ -1749,10 +1750,10 @@ private:
 
     // to avoid recursion on parameter changes, we need to add an
     // editor observer to do the parameter changes
-    std::unique_ptr<AUParameterTree, NSObjectDeleter> paramTree;
+    NSUniquePtr<AUParameterTree> paramTree;
     ObserverPtr editorObserverToken;
 
-    std::unique_ptr<NSMutableArray<NSNumber*>, NSObjectDeleter> channelCapabilities;
+    NSUniquePtr<NSMutableArray<NSNumber*>> channelCapabilities;
 
     FactoryPresets factoryPresets;
 
@@ -1801,7 +1802,7 @@ struct UIViewPeerControllerReceiver
 class JuceAUViewController
 {
 public:
-    JuceAUViewController (AUViewController<AUAudioUnitFactory>* p)
+    explicit JuceAUViewController (AUViewController<AUAudioUnitFactory>* p)
         : myself (p)
     {
         initialiseJuce_GUI();
