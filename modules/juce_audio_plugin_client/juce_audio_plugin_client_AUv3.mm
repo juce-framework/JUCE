@@ -1065,41 +1065,53 @@ private:
         {
             using AVAudioFormatPtr = NSUniquePtr<AVAudioFormat>;
 
-            const auto audioFormat = [&]() -> AVAudioFormatPtr
+            const auto audioFormat = [&]
             {
-                const auto tag = i < numProcessorBuses ? CoreAudioLayouts::toCoreAudio (processor.getChannelLayoutOfBus (isInput, i))
-                                                       : kAudioChannelLayoutTag_Stereo;
-                const NSUniquePtr<AVAudioChannelLayout> layout { [[AVAudioChannelLayout alloc] initWithLayoutTag: tag] };
+                const auto defaultLayout = i < numProcessorBuses ? processor.getBus (isInput, i)->getLastEnabledLayout()
+                                                                 : AudioChannelSet::stereo();
+                NSUniquePtr<AVAudioChannelLayout> layout { [[AVAudioChannelLayout alloc] initWithLayoutTag: CoreAudioLayouts::toCoreAudio (defaultLayout)] };
 
-                if (AVAudioFormatPtr format  { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
-                                                                                         channelLayout: layout.get()] })
+                if (AVAudioFormatPtr format { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
+                                                                                        channelLayout: layout.get()] })
                     return format;
-
-                const auto channels = i < numProcessorBuses ? processor.getChannelCountOfBus (isInput, i)
-                                                            : 2;
 
                 // According to the docs, this will fail if the number of channels is greater than 2.
                 if (AVAudioFormatPtr format { [[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
-                                                                                             channels: static_cast<AVAudioChannelCount> (channels)] })
+                                                                                             channels: static_cast<AVAudioChannelCount> (defaultLayout.size())] })
                     return format;
 
                 jassertfalse;
-                return nullptr;
+                return AVAudioFormatPtr{};
             }();
 
             using AUAudioUnitBusPtr = NSUniquePtr<AUAudioUnitBus>;
 
-            const auto audioUnitBus = [&]() -> AUAudioUnitBusPtr
+            const auto audioUnitBus = [&]
             {
-                if (audioFormat != nullptr)
-                    return AUAudioUnitBusPtr { [[AUAudioUnitBus alloc] initWithFormat: audioFormat.get() error: nullptr] };
+                if (audioFormat == nullptr)
+                {
+                    jassertfalse;
+                    return AUAudioUnitBusPtr{};
+                }
 
-                jassertfalse;
-                return nullptr;
+                NSError* error = nullptr;
+                AUAudioUnitBusPtr result { [[AUAudioUnitBus alloc] initWithFormat: audioFormat.get() error: &error] };
+
+                if (error != nullptr)
+                {
+                    jassertfalse;
+                    return AUAudioUnitBusPtr{};
+                }
+
+                return result;
             }();
 
-            if (audioUnitBus != nullptr)
-                [array.get() addObject: audioUnitBus.get()];
+            if (audioUnitBus == nullptr)
+                continue;
+
+            const auto enabled = numProcessorBuses <= i || processor.getBus (isInput, i)->isEnabled();
+            [audioUnitBus.get() setEnabled: enabled];
+            [array.get() addObject: audioUnitBus.get()];
         }
 
         (isInput ? inputBusses : outputBusses).reset ([[AUAudioUnitBusArray alloc] initWithAudioUnit: au
