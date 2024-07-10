@@ -79,6 +79,7 @@
  #endif
 
  #if JUCE_WASM
+  #include <emscripten.h>
   #include <stdio.h>
   #include <sys/types.h>
   #include <sys/socket.h>

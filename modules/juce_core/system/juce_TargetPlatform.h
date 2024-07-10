@@ -76,6 +76,8 @@
   #define       JUCE_ANDROID 1
 #elif defined (__FreeBSD__) || defined (__OpenBSD__)
   #define       JUCE_BSD 1
+#elif defined (__wasm__)
+  #define       JUCE_WASM 1
 #elif defined (LINUX) || defined (__linux__)
   #define       JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined (__APPLE_CC__)
@@ -89,8 +91,6 @@
   #else
     #define     JUCE_MAC 1
   #endif
-#elif defined (__wasm__)
-  #define       JUCE_WASM 1
 #else
   #error "Unknown platform!"
 #endif
