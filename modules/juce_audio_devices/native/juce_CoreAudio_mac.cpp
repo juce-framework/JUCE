@@ -118,7 +118,7 @@ struct IgnoreUnused
 template <typename T>
 static auto getDataPtrAndSize (T& t)
 {
-    static_assert (std::is_pod_v<T>);
+    static_assert (std::is_standard_layout_v<T>);
     return std::make_tuple (&t, (UInt32) sizeof (T));
 }
 
