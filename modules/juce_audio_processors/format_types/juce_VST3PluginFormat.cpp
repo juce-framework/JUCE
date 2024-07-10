@@ -197,7 +197,7 @@ static void fillDescriptionWith (PluginDescription& description, ObjectType& obj
         description.manufacturerName = toString (object.vendor).trim();
 }
 
-static std::vector<PluginDescription> createPluginDescriptions (const File& pluginFile, const Steinberg::ModuleInfo& info)
+static std::vector<PluginDescription> createPluginDescriptions (const File& pluginFile, const ModuleInfo& info)
 {
     std::vector<PluginDescription> result;
 
@@ -525,7 +525,7 @@ struct VST3HostContext final : public Vst::IComponentHandler,  // From VST V3.0.
             return kResultFalse;
         }
 
-        tresult PLUGIN_API popup (Steinberg::UCoord x, Steinberg::UCoord y) override;
+        tresult PLUGIN_API popup (UCoord x, UCoord y) override;
 
        #if ! JUCE_MODAL_LOOPS_PERMITTED
         static void menuFinished (int modalResult, VSTComSmartPtr<ContextMenu> menu)  { menu->handleResult (modalResult); }
@@ -898,7 +898,7 @@ struct DescriptionLister
             return {};
 
         const std::string_view blockAsStringView (static_cast<const char*> (mb.getData()), mb.getSize());
-        const auto parsed = Steinberg::ModuleInfoLib::parseJson (blockAsStringView, nullptr);
+        const auto parsed = ModuleInfoLib::parseJson (blockAsStringView, nullptr);
 
         if (! parsed)
             return {};
@@ -929,7 +929,7 @@ struct DescriptionLister
 
         auto numClasses = factory.countClasses();
 
-        // Every ARA::IMainFactory must have a matching Steinberg::IComponent.
+        // Every ARA::IMainFactory must have a matching IComponent.
         // The match is determined by the two classes having the same name.
         std::unordered_set<String> araMainFactoryClassNames;
 
@@ -1471,7 +1471,7 @@ static void forEachARAFactory ([[maybe_unused]] IPluginFactory* pluginFactory, [
    #endif
 }
 
-static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] Steinberg::IPluginFactory* pluginFactory,
+static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] IPluginFactory* pluginFactory,
                                                              [[maybe_unused]] const String& pluginName)
 {
     std::shared_ptr<const ARA::ARAFactory> factory;
@@ -1484,7 +1484,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] St
                            {
                                ARA::IMainFactory* source;
                                if (pluginFactory->createInstance (pcClassInfo.cid, ARA::IMainFactory::iid, (void**) &source)
-                                   == Steinberg::kResultOk)
+                                   == kResultOk)
                                {
                                    factory = getOrCreateARAFactory (source->getFactory(),
                                                                     [source]() { source->release(); });
@@ -1526,7 +1526,7 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
         setConstrainer (this);
 
         warnOnFailure (view->setFrame (this));
-        view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
+        view->queryInterface (IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
 
         setContentScaleFactor();
         resizeToFit();
@@ -1787,7 +1787,7 @@ private:
     {
         if (scaleInterface != nullptr)
         {
-            [[maybe_unused]] const auto result = scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getEffectiveScale());
+            [[maybe_unused]] const auto result = scaleInterface->setContentScaleFactor ((IPlugViewContentScaleSupport::ScaleFactor) getEffectiveScale());
 
            #if ! JUCE_MAC
             [[maybe_unused]] const auto warning = warnOnFailure (result);
@@ -1853,7 +1853,7 @@ private:
     HandleFormat pluginHandle = {};
     bool recursiveResize = false, isInOnSize = false, attachedCalled = false;
 
-    Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
+    IPlugViewContentScaleSupport* scaleInterface = nullptr;
     float nativeScaleFactor = 1.0f;
     float userScaleFactor = 1.0f;
 
@@ -2391,7 +2391,7 @@ public:
             return String (cachedInfo.id);
         }
 
-        Steinberg::Vst::ParamID getParamID() const noexcept { return cachedInfo.id; }
+        Vst::ParamID getParamID() const noexcept { return cachedInfo.id; }
 
         void updateCachedInfo()
         {
@@ -2514,7 +2514,7 @@ public:
         {
             explicit Extensions (const VST3PluginInstance* instanceIn) : instance (instanceIn) {}
 
-            Steinberg::Vst::IComponent* getIComponentPtr() const noexcept override   { return instance->holder->component.get(); }
+            Vst::IComponent* getIComponentPtr() const noexcept override   { return instance->holder->component.get(); }
 
             MemoryBlock getPreset() const override             { return instance->getStateForPresetFile(); }
 
@@ -3137,7 +3137,7 @@ public:
         }
     }
 
-    void setComponentStateAndResetParameters (Steinberg::MemoryStream& stream)
+    void setComponentStateAndResetParameters (MemoryStream& stream)
     {
         jassert (editController != nullptr);
 
@@ -3157,15 +3157,15 @@ public:
 
     MemoryBlock getStateForPresetFile() const
     {
-        auto memoryStream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream());
+        auto memoryStream = becomeVSTComSmartPtrOwner (new MemoryStream());
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return {};
 
-        const auto saved = Steinberg::Vst::PresetFile::savePreset (memoryStream.get(),
-                                                                   holder->cidOfComponent,
-                                                                   holder->component.get(),
-                                                                   editController.get());
+        const auto saved = Vst::PresetFile::savePreset (memoryStream.get(),
+                                                        holder->cidOfComponent,
+                                                        holder->component.get(),
+                                                        editController.get());
 
         if (saved)
             return { memoryStream->getData(), static_cast<size_t> (memoryStream->getSize()) };
@@ -3176,13 +3176,13 @@ public:
     bool setStateFromPresetFile (const MemoryBlock& rawData) const
     {
         auto rawDataCopy = rawData;
-        auto memoryStream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()));
+        auto memoryStream = becomeVSTComSmartPtrOwner (new MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()));
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return false;
 
-        return Steinberg::Vst::PresetFile::loadPreset (memoryStream.get(), holder->cidOfComponent,
-                                                       holder->component.get(), editController.get(), nullptr);
+        return Vst::PresetFile::loadPreset (memoryStream.get(), holder->cidOfComponent,
+                                            holder->component.get(), editController.get(), nullptr);
     }
 
     //==============================================================================
@@ -3282,7 +3282,7 @@ private:
     {
         if (object != nullptr)
         {
-            Steinberg::MemoryStream stream;
+            MemoryStream stream;
 
             const auto result = object->getState (&stream);
 
@@ -3294,7 +3294,7 @@ private:
         }
     }
 
-    static VSTComSmartPtr<Steinberg::MemoryStream> createMemoryStreamForState (XmlElement& head, StringRef identifier)
+    static VSTComSmartPtr<MemoryStream> createMemoryStreamForState (XmlElement& head, StringRef identifier)
     {
         if (auto* state = head.getChildByName (identifier))
         {
@@ -3302,7 +3302,7 @@ private:
 
             if (mem.fromBase64Encoding (state->getAllSubText()))
             {
-                auto stream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream());
+                auto stream = becomeVSTComSmartPtrOwner (new MemoryStream());
                 stream->setSize ((TSize) mem.getSize());
                 mem.copyTo (stream->getData(), 0, mem.getSize());
                 return stream;
@@ -3420,10 +3420,10 @@ private:
 
     void synchroniseStates()
     {
-        Steinberg::MemoryStream stream;
+        MemoryStream stream;
 
         if (holder->component->getState (&stream) == kResultTrue)
-            if (stream.seek (0, Steinberg::IBStream::kIBSeekSet, nullptr) == kResultTrue)
+            if (stream.seek (0, IBStream::kIBSeekSet, nullptr) == kResultTrue)
                 setComponentStateAndResetParameters (stream);
     }
 
@@ -3637,7 +3637,7 @@ private:
 
             for (idx = 0; idx < num; ++idx)
                 if (editController->getParameterInfo (idx, paramInfo) == kResultOk
-                     && (paramInfo.flags & Steinberg::Vst::ParameterInfo::kIsProgramChange) != 0)
+                     && (paramInfo.flags & Vst::ParameterInfo::kIsProgramChange) != 0)
                     break;
 
             if (idx >= num)
@@ -3808,7 +3808,7 @@ void VST3HostContext::restartComponentOnMessageThread (int32 flags)
 }
 
 //==============================================================================
-tresult VST3HostContext::ContextMenu::popup (Steinberg::UCoord x, Steinberg::UCoord y)
+tresult VST3HostContext::ContextMenu::popup (UCoord x, UCoord y)
 {
     Array<const Item*> subItemStack;
     OwnedArray<PopupMenu> menuStack;
