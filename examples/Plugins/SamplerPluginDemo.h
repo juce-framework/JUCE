@@ -571,14 +571,14 @@ public:
 class MemoryAudioFormatReaderFactory final : public AudioFormatReaderFactory
 {
 public:
-    MemoryAudioFormatReaderFactory (const void* sampleDataIn, size_t dataSizeIn)
-        : sampleData (sampleDataIn),
-          dataSize (dataSizeIn)
-    {}
+    explicit MemoryAudioFormatReaderFactory (MemoryBlock mb)
+        : memoryBlock (std::make_shared<MemoryBlock> (std::move (mb)))
+    {
+    }
 
     std::unique_ptr<AudioFormatReader> make (AudioFormatManager& manager) const override
     {
-        return makeAudioFormatReader (manager, sampleData, dataSize);
+        return makeAudioFormatReader (manager, memoryBlock->getData(), memoryBlock->getSize());
     }
 
     std::unique_ptr<AudioFormatReaderFactory> clone() const override
@@ -587,8 +587,7 @@ public:
     }
 
 private:
-    const void* sampleData;
-    size_t dataSize;
+    std::shared_ptr<MemoryBlock> memoryBlock;
 };
 
 //==============================================================================
@@ -2115,25 +2114,28 @@ public:
     {
         if (auto inputStream = createAssetInputStream ("cello.wav"))
         {
+            MemoryBlock mb;
             inputStream->readIntoMemoryBlock (mb);
-            readerFactory.reset (new MemoryAudioFormatReaderFactory (mb.getData(), mb.getSize()));
+            readerFactory = std::make_unique<MemoryAudioFormatReaderFactory> (std::move (mb));
         }
 
-        // Set up initial sample, which we load from a binary resource
-        AudioFormatManager manager;
-        manager.registerBasicFormats();
-        auto reader = readerFactory->make (manager);
-        jassert (reader != nullptr); // Failed to load resource!
+        if (readerFactory != nullptr)
+        {
+            AudioFormatManager manager;
+            manager.registerBasicFormats();
 
-        auto sound = samplerSound;
-        auto sample = std::unique_ptr<Sample> (new Sample (*reader, 10.0));
-        auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
-        sound->setLoopPointsInSeconds ({lengthInSeconds * 0.1, lengthInSeconds * 0.9 });
-        sound->setSample (std::move (sample));
+            if (auto reader = readerFactory->make (manager))
+            {
+                auto sample = std::make_unique<Sample> (*reader, 10.0);
+                auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
+                samplerSound->setLoopPointsInSeconds ({ lengthInSeconds * 0.1, lengthInSeconds * 0.9 });
+                samplerSound->setSample (std::move (sample));
+            }
+        }
 
         // Start with the max number of voices
         for (auto i = 0; i != maxVoices; ++i)
-            synthesiser.addVoice (new MPESamplerVoice (sound));
+            synthesiser.addVoice (new MPESamplerVoice (samplerSound));
     }
 
     void prepareToPlay (double sampleRate, int) override
@@ -2590,7 +2592,6 @@ private:
 
     CommandFifo<SamplerAudioProcessor> commands;
 
-    MemoryBlock mb;
     std::unique_ptr<AudioFormatReaderFactory> readerFactory;
     std::shared_ptr<MPESamplerSound> samplerSound = std::make_shared<MPESamplerSound>();
     MPESynthesiser synthesiser;
