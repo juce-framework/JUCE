@@ -491,11 +491,10 @@ public:
 
     void fallbackPaint (Graphics& webBrowserComponentContext) override
     {
+        webBrowserComponentContext.fillAll (Colours::white);
+
         if (! hasBrowserBeenCreated())
-        {
-            webBrowserComponentContext.fillAll (Colours::white);
             checkWindowAssociation();
-        }
     }
 
     void focusGainedWithDirection (FocusChangeType, FocusChangeDirection direction) override
