@@ -417,12 +417,16 @@ void TextLayout::createStandardLayout (const AttributedString& text)
         colours.set (range, attribute.colour);
     }
 
-    ShapedText shapedText { text.getText(), ShapedTextOptions{}.withFontsForRange (getFontsForRange (fonts))
-                                                               .withMaxWidth (width)
-                                                               .withLanguage (SystemStats::getUserLanguage())
-                                                               .withTrailingWhitespacesShouldFit (false)
-                                                               .withJustification (justification)
-                                                               .withReadingDirection (getTextDirection (text)) };
+    auto shapedTextOptions = ShapedTextOptions{}.withFontsForRange (getFontsForRange (fonts))
+                                                .withLanguage (SystemStats::getUserLanguage())
+                                                .withTrailingWhitespacesShouldFit (false)
+                                                .withJustification (justification)
+                                                .withReadingDirection (getTextDirection (text));
+
+    if (text.getWordWrap() != AttributedString::none)
+        shapedTextOptions = shapedTextOptions.withMaxWidth (width);
+
+    ShapedText shapedText { text.getText(), shapedTextOptions };
 
     std::optional<int64> lastLineNumber;
     std::unique_ptr<Line> line;

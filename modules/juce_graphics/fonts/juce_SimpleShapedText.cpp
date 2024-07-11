@@ -1032,6 +1032,8 @@ void SimpleShapedText::shape (const String& data,
 
             std::optional<BestMatch> bestMatch;
 
+            static constexpr auto floatMax = std::numeric_limits<float>::max();
+
             for (auto breakBefore = softBreakIterator.next();
                  breakBefore.has_value() && (lineNumbers.size() == 0
                                              || (int64) lineNumbers.size() < options.getMaxNumLines() - 1);
@@ -1040,8 +1042,8 @@ void SimpleShapedText::shape (const String& data,
                 if (auto safeAdvance = glyphsToConsume.getAdvanceXUpToBreakPointIfSafe (*breakBefore,
                                                                                         options.getTrailingWhitespacesShouldFit()))
                 {
-                    if (safeAdvance->maybeIgnoringWhitespace < remainingWidth || ! bestMatch.has_value())
-                        bestMatch = BestMatch { *breakBefore, *safeAdvance, false, std::vector<ShapedGlyph> {} };
+                    if (safeAdvance->maybeIgnoringWhitespace < remainingWidth.value_or (floatMax) || ! bestMatch.has_value())
+                        bestMatch = BestMatch { *breakBefore, *safeAdvance, false, std::vector<ShapedGlyph>{} };
                     else
                         break;  // We found a safe break that is too large to fit. Anything beyond
                                 // this point would be too large to fit.
@@ -1076,7 +1078,7 @@ void SimpleShapedText::shape (const String& data,
                                                           float {},
                                                           [] (auto acc, const auto& elem) { return acc + elem.advance.getX(); });
 
-                    if (advance < remainingWidth || ! bestMatch.has_value())
+                    if (advance < remainingWidth.value_or (floatMax) || ! bestMatch.has_value())
                         bestMatch = BestMatch { *breakBefore, { advance, advance }, true, std::move (glyphs) };
                 }
             }
@@ -1120,7 +1122,7 @@ void SimpleShapedText::shape (const String& data,
                 glyphsToConsume.breakBeforeAndConsume (bestMatch->breakBefore);
             };
 
-            if (bestMatch->advance.maybeIgnoringWhitespace >= remainingWidth)
+            if (bestMatch->advance.maybeIgnoringWhitespace >= remainingWidth.value_or (floatMax))
             {
                 // Even an empty line is too short to fit any of the text
                 if (numGlyphsInLine == 0 && exactlyEqual (remainingWidth, options.getMaxWidth()))
