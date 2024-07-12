@@ -49,7 +49,7 @@ struct UnicodeAnalysisPoint
 {
     char32_t character = 0;
     UnicodeEntry data{};
-    uint16_t bidiLevel = 0;
+    uint16_t embeddingLevel = 0;
 
     UnicodeAnalysisPoint (char32_t characterIn, UnicodeEntry entry)
         : character { characterIn },
