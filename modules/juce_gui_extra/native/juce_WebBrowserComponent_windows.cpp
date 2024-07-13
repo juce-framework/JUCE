@@ -519,6 +519,12 @@ public:
 
     ~WebView2() override
     {
+        if (webView2ConstructionHelper.webView2BeingCreated == this)
+            webView2ConstructionHelper.webView2BeingCreated = nullptr;
+
+        webView2ConstructionHelper.viewsWaitingForCreation.erase (this);
+
+        cancelPendingUpdate();
         removeEventHandlers();
         closeWebView();
     }
@@ -1021,8 +1027,6 @@ private:
 
             webView2ConstructionHelper.viewsWaitingForCreation.erase (this);
             webView2ConstructionHelper.webView2BeingCreated = this;
-
-            WeakReference<WebView2> weakThis (this);
 
             webViewHandle.environment->CreateCoreWebView2Controller ((HWND) peer->getNativeHandle(),
                 Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler> (
