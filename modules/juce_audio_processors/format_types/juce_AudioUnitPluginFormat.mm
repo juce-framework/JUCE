@@ -1354,6 +1354,10 @@ public:
         if (auSupportsBypass)
         {
             updateBypass (processBlockBypassedCalled);
+            if (processBlockBypassedCalled)
+            {
+                return;
+            }
         }
         else if (processBlockBypassedCalled)
         {
