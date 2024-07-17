@@ -120,7 +120,7 @@ void DynamicObject::writeAsJSON (OutputStream& out, const JSON::FormatOptions& f
             JSONFormatter::writeSpaces (out, format.getIndentLevel() + JSONFormatter::indentSize);
 
         out << '"';
-        JSONFormatter::writeString (out, properties.getName (i));
+        JSONFormatter::writeString (out, properties.getName (i), format.getEncoding());
         out << "\":";
 
         if (format.getSpacing() != JSON::Spacing::none)
