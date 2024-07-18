@@ -311,6 +311,7 @@ void WebSliderParameterAttachment::sendInitialUpdate()
     object->setProperty ("numSteps", numSteps);
     object->setProperty ("interval", range.interval);
     object->setProperty ("parameterIndex", parameter.getParameterIndex());
+    object->setProperty ("defaultValue", parameter.getDefaultValue());
     sliderState.emitEvent (object.get());
     attachment.sendInitialUpdate();
 }
