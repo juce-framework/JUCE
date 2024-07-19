@@ -295,6 +295,9 @@
  #include "containers/juce_FixedSizeFunction_test.cpp"
  #include "javascript/juce_JSONSerialisation_test.cpp"
  #include "memory/juce_SharedResourcePointer_test.cpp"
+ #include "text/juce_CharPointer_UTF8_test.cpp"
+ #include "text/juce_CharPointer_UTF16_test.cpp"
+ #include "text/juce_CharPointer_UTF32_test.cpp"
  #if JUCE_MAC || JUCE_IOS
   #include "native/juce_ObjCHelpers_mac_test.mm"
  #endif

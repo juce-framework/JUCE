@@ -357,17 +357,24 @@ public:
     /** Returns true if the given unicode character can be represented in this encoding. */
     static bool canRepresent (juce_wchar character) noexcept
     {
-        return ((uint32) character) < (uint32) 0x10ffff;
+        return CharacterFunctions::isNonSurrogateCodePoint (character);
     }
 
     /** Returns true if this data contains a valid string in this encoding. */
-    static bool isValidString (const CharType* dataToTest, int maxBytesToRead)
+    static bool isValidString (const CharType* codeUnits, int maxBytesToRead)
     {
-        maxBytesToRead /= (int) sizeof (CharType);
+        const auto maxCodeUnitsToRead = (size_t) maxBytesToRead / sizeof (CharType);
 
-        while (--maxBytesToRead >= 0 && *dataToTest != 0)
-            if (! canRepresent (*dataToTest++))
+        for (size_t codeUnitIndex = 0; codeUnitIndex < maxCodeUnitsToRead; ++codeUnitIndex)
+        {
+            const auto c = codeUnits[codeUnitIndex];
+
+            if (c == 0)
+                return true;
+
+            if (! canRepresent (c))
                 return false;
+        }
 
         return true;
     }

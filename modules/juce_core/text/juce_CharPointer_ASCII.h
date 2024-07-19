@@ -366,7 +366,7 @@ public:
     /** Returns true if the given unicode character can be represented in this encoding. */
     static bool canRepresent (juce_wchar character) noexcept
     {
-        return ((unsigned int) character) < (unsigned int) 128;
+        return CharacterFunctions::isAscii (character);
     }
 
     /** Returns true if this data contains a valid string in this encoding. */

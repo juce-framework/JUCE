@@ -497,45 +497,80 @@ public:
     /** Returns true if the given unicode character can be represented in this encoding. */
     static bool canRepresent (juce_wchar character) noexcept
     {
-        return ((uint32) character) < (uint32) 0x10ffff;
+        return CharacterFunctions::isNonSurrogateCodePoint (character);
     }
 
     /** Returns true if this data contains a valid string in this encoding. */
-    static bool isValidString (const CharType* dataToTest, int maxBytesToRead)
+    static bool isValidString (const CharType* codeUnits, int maxBytesToRead)
     {
-        while (--maxBytesToRead >= 0 && *dataToTest != 0)
+        const auto maxCodeUnitsToRead = (size_t) maxBytesToRead / sizeof (CharType);
+
+        for (size_t codeUnitIndex = 0; codeUnitIndex < maxCodeUnitsToRead; ++codeUnitIndex)
         {
-            auto byte = (signed char) *dataToTest++;
+            const auto firstByte = (uint8_t) codeUnits[codeUnitIndex];
 
-            if (byte < 0)
+            if (firstByte == 0)
+                return true;
+
+            if (CharacterFunctions::isAscii ((juce_wchar) firstByte))
+                continue;
+
+            auto numExtraBytes = [&]
             {
-                int bit = 0x40;
-                int numExtraValues = 0;
+                if (firstByte < 0xc0)
+                    return 0;
 
-                while ((byte & bit) != 0)
-                {
-                    if (bit < 8)
-                        return false;
+                if (firstByte < 0xe0)
+                    return 1;
 
-                    ++numExtraValues;
-                    bit >>= 1;
+                if (firstByte <  0xf0)
+                    return 2;
 
-                    if (bit == 8 && (numExtraValues > maxBytesToRead
-                                       || *CharPointer_UTF8 (dataToTest - 1) > 0x10ffff))
-                        return false;
-                }
+                if (firstByte <= 0xf4)
+                    return 3;
 
-                if (numExtraValues == 0)
+                return 0;
+            }();
+
+            if (numExtraBytes == 0)
+                return false;
+
+            auto bytes = (uint32_t) firstByte;
+
+            while (numExtraBytes--)
+            {
+                if (++codeUnitIndex >= maxCodeUnitsToRead)
                     return false;
 
-                maxBytesToRead -= numExtraValues;
-                if (maxBytesToRead < 0)
-                    return false;
-
-                while (--numExtraValues >= 0)
-                    if ((*dataToTest++ & 0xc0) != 0x80)
-                        return false;
+                bytes <<= 8;
+                bytes |= (uint32_t) (uint8_t) codeUnits[codeUnitIndex];
             }
+
+            if (constexpr uint32_t firstTwoByteCodePoint = 0xc280; bytes < firstTwoByteCodePoint)
+                return false;
+
+            if (constexpr uint32_t lastTwoByteCodePoint = 0xdfbf; bytes <= lastTwoByteCodePoint)
+                continue;
+
+            if (constexpr uint32_t firstThreeByteCodePoint = 0xe0a080; bytes < firstThreeByteCodePoint)
+                return false;
+
+            if (constexpr uint32_t firstSurrogateCodePoint = 0xeda080; bytes < firstSurrogateCodePoint)
+                continue;
+
+            if (constexpr uint32_t lastSurrogateCodePoint = 0xedbfbf; bytes <= lastSurrogateCodePoint)
+                return false;
+
+            if (constexpr uint32_t lastThreeByteCodePoint = 0xefbfbf; bytes <= lastThreeByteCodePoint)
+                continue;
+
+            if (constexpr uint32_t firstFourByteCodePoint = 0xf0908080; bytes < firstFourByteCodePoint)
+                return false;
+
+            if (constexpr uint32_t lastFourByteCodePoint = 0xf48fbfbf; bytes <= lastFourByteCodePoint)
+                continue;
+
+            return false;
         }
 
         return true;
