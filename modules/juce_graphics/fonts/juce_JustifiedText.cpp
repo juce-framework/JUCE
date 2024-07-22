@@ -327,7 +327,7 @@ JustifiedText::JustifiedText (const SimpleShapedText& t, const ShapedTextOptions
                                         : getCrossAxisStartingAnchor (options.getJustification(),
                                                                       lineInfos,
                                                                       options.getHeight(),
-                                                                      options.getLeading() - 1.0f);
+                                                                      leading);
 
     for (const auto [lineIndex, lineInfo] : enumerate (lineInfos))
     {
@@ -345,7 +345,7 @@ JustifiedText::JustifiedText (const SimpleShapedText& t, const ShapedTextOptions
         const auto maxDescent = lineInfo.lineHeight - lineInfo.maxAscent;
         const auto nextLineMaxAscent = lineIndex < (int) lineInfos.size() - 1 ? lineInfos[(size_t) lineIndex + 1].maxAscent : 0.0f;
 
-        y += (1.0f + leading) * (maxDescent + nextLineMaxAscent);
+        y += (1.0f + leading) * (maxDescent + nextLineMaxAscent) + options.getAdditiveLineSpacing();
     }
 
     rangesToDraw.set ({ 0, (int64) shapedText.getGlyphs().size() }, DrawType::normal);

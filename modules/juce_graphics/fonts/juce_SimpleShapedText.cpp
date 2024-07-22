@@ -77,9 +77,21 @@ public:
         return withMember (*this, &ShapedTextOptions::firstLineIndent, x);
     }
 
+    /*  This controls the space between lines using a proportional value, with a default of 1.0,
+        meaning single line spacing i.e. the descender of the current line + ascender of the next
+        line. This value is multiplied by the leading provided here.
+    */
     [[nodiscard]] ShapedTextOptions withLeading (float x) const
     {
         return withMember (*this, &ShapedTextOptions::leading, x);
+    }
+
+    /*  This controls the space between lines using an additive absolute value, with a default of 0.0.
+        This value is added to the spacing between each two lines.
+    */
+    [[nodiscard]] ShapedTextOptions withAdditiveLineSpacing (float x) const
+    {
+        return withMember (*this, &ShapedTextOptions::additiveLineSpacing, x);
     }
 
     [[nodiscard]] ShapedTextOptions withBaselineAtZero (bool x = true) const
@@ -115,6 +127,7 @@ public:
     const auto& getLanguage() const                     { return language; }
     const auto& getFirstLineIndent() const              { return firstLineIndent; }
     const auto& getLeading() const                      { return leading; }
+    const auto& getAdditiveLineSpacing() const          { return additiveLineSpacing; }
     const auto& isBaselineAtZero() const                { return baselineAtZero; }
     const auto& getTrailingWhitespacesShouldFit() const { return trailingWhitespacesShouldFit; }
     const auto& getMaxNumLines() const                  { return maxNumLines; }
@@ -130,6 +143,7 @@ private:
     String language = SystemStats::getDisplayLanguage();
     float firstLineIndent = 0.0f;
     float leading = 1.0f;
+    float additiveLineSpacing = 0.0f;
     bool baselineAtZero = false;
     bool trailingWhitespacesShouldFit;
     int64 maxNumLines = std::numeric_limits<int64>::max();

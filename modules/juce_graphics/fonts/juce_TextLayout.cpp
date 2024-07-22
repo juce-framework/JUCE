@@ -421,7 +421,8 @@ void TextLayout::createStandardLayout (const AttributedString& text)
                                                 .withLanguage (SystemStats::getUserLanguage())
                                                 .withTrailingWhitespacesShouldFit (false)
                                                 .withJustification (justification)
-                                                .withReadingDirection (getTextDirection (text));
+                                                .withReadingDirection (getTextDirection (text))
+                                                .withAdditiveLineSpacing (text.getLineSpacing());
 
     if (text.getWordWrap() != AttributedString::none)
         shapedTextOptions = shapedTextOptions.withMaxWidth (width);
