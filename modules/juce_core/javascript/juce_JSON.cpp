@@ -333,14 +333,13 @@ struct JSONFormatter
             {
                 case 0:  return;
 
-                case '\"':  out << "\\\""; break;
-                case '\\':  out << "\\\\"; break;
-                case '\a':  out << "\\a";  break;
-                case '\b':  out << "\\b";  break;
-                case '\f':  out << "\\f";  break;
-                case '\t':  out << "\\t";  break;
-                case '\r':  out << "\\r";  break;
-                case '\n':  out << "\\n";  break;
+                case '\"': out << "\\\""; break;
+                case '\\': out << "\\\\"; break;
+                case '\b': out << "\\b";  break;
+                case '\f': out << "\\f";  break;
+                case '\t': out << "\\t";  break;
+                case '\r': out << "\\r";  break;
+                case '\n': out << "\\n";  break;
 
                 default:
                     if (c >= 32 && c < 127)
