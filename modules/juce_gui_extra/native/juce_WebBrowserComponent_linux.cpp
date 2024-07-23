@@ -63,6 +63,9 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_load_uri, juce_webkit_web_view_load_uri,
                                          (WebKitWebView*, const gchar*), void)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_load_request, juce_webkit_web_view_load_request,
+                                         (WebKitWebView*, WebKitURIRequest*), void)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_policy_decision_use, juce_webkit_policy_decision_use,
                                          (WebKitPolicyDecision*), void)
 
@@ -334,7 +337,8 @@ private:
                             makeSymbolBinding (juce_webkit_uri_scheme_response_new,                              "webkit_uri_scheme_response_new"),
                             makeSymbolBinding (juce_webkit_uri_scheme_response_set_http_headers,                 "webkit_uri_scheme_response_set_http_headers"),
                             makeSymbolBinding (juce_webkit_uri_scheme_response_set_status,                       "webkit_uri_scheme_response_set_status"),
-                            makeSymbolBinding (juce_webkit_uri_scheme_request_finish_with_response,              "webkit_uri_scheme_request_finish_with_response"));
+                            makeSymbolBinding (juce_webkit_uri_scheme_request_finish_with_response,              "webkit_uri_scheme_request_finish_with_response"),
+                            makeSymbolBinding (juce_webkit_web_view_load_request,                                "webkit_web_view_load_request"));
     }
 
     bool loadGtkSymbols()
@@ -804,8 +808,19 @@ public:
     {
         static Identifier urlIdentifier ("url");
         auto url = params.getProperty (urlIdentifier, var()).toString();
+        static Identifier headersIdentifier ("headers");
+        auto headers = params.getProperty (headersIdentifier, var(StringArray {}));
 
-        WebKitSymbols::getInstance()->juce_webkit_web_view_load_uri (webview, url.toRawUTF8());
+        auto request = webkit_uri_request_new(url.toRawUTF8());
+        auto http_headers = webkit_uri_request_get_http_headers(request);
+
+        for (int i = 0; i < headers.size(); i++) {
+            const String header = headers[i].toString();
+            auto name = header.upToFirstOccurrenceOf (":", false, false).trim();
+            auto value = header.fromFirstOccurrenceOf (":", false, false).trim();
+            soup_message_headers_append(http_headers, name.toRawUTF8(), value.toRawUTF8());
+        }
+        WebKitSymbols::getInstance()->juce_webkit_web_view_load_request (webview, request);
     }
 
     void handleDecisionResponse (const var& params)
