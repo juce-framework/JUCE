@@ -1,0 +1,122 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix time: <http://lv2plug.in/ns/ext/time#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/time>
+	a owl:Ontology ;
+	rdfs:label "LV2 Time" ;
+	rdfs:comment "A vocabulary for describing musical time." ;
+	rdfs:seeAlso <time.h> ,
+		<time.meta.ttl> .
+
+time:Time
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf time:Position ;
+	rdfs:label "Time" ;
+	rdfs:comment "A point in time in some unit/dimension." .
+
+time:Position
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:label "Position" ;
+	rdfs:comment "A point in time and/or the speed at which time is passing." .
+
+time:Rate
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf time:Position ;
+	rdfs:label "Rate" ;
+	rdfs:comment "The rate of passage of time." .
+
+time:position
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:range time:Position ;
+	rdfs:label "position" ;
+	rdfs:comment "A musical position." .
+
+time:barBeat
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Time ;
+	rdfs:range xsd:float ;
+	rdfs:label "beat within bar" ;
+	rdfs:comment "The beat number within the bar, from 0 to time:beatsPerBar." .
+
+time:bar
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Time ;
+	rdfs:range xsd:long ;
+	rdfs:label "bar" ;
+	rdfs:comment "A musical bar or measure." .
+
+time:beat
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Time ;
+	rdfs:range xsd:double ;
+	rdfs:label "beat" ;
+	rdfs:comment "The global running beat number." .
+
+time:beatUnit
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Rate ;
+	rdfs:range xsd:nonNegativeInteger ;
+	rdfs:label "beat unit" ;
+	rdfs:comment "The note value that counts as one beat." .
+
+time:beatsPerBar
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Rate ;
+	rdfs:range xsd:float ;
+	rdfs:label "beats per bar" ;
+	rdfs:comment "The number of beats in one bar." .
+
+time:beatsPerMinute
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Rate ;
+	rdfs:range xsd:float ;
+	rdfs:label "beats per minute" ;
+	rdfs:comment "Tempo in beats per minute." .
+
+time:frame
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Time ;
+	rdfs:range xsd:long ;
+	rdfs:label "frame" ;
+	rdfs:comment "A time stamp in audio frames." .
+
+time:framesPerSecond
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Rate ;
+	rdfs:range xsd:float ;
+	rdfs:label "frames per second" ;
+	rdfs:comment "Frame rate in frames per second." .
+
+time:speed
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain time:Rate ;
+	rdfs:range xsd:float ;
+	rdfs:label "speed" ;
+	rdfs:comment "The rate of the progress of time as a fraction of normal speed." .
+

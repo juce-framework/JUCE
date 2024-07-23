@@ -1,0 +1,202 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix param: <http://lv2plug.in/ns/ext/parameters#> .
+@prefix pg: <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+
+<http://lv2plug.in/ns/ext/parameters>
+	a owl:Ontology ;
+	rdfs:label "LV2 Parameters" ;
+	rdfs:comment "Common parameters for audio processing." ;
+	rdfs:seeAlso <parameters.meta.ttl> .
+
+param:ControlGroup
+	a rdfs:Class ;
+	rdfs:subClassOf pg:Group ;
+	rdfs:label "Control Group" ;
+	rdfs:comment "A group representing a set of associated controls." .
+
+param:amplitude
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "amplitude" ;
+	rdfs:comment "An amplitude as a factor, where 0 is silent and 1 is unity." .
+
+param:attack
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "attack" ;
+	rdfs:comment "The duration of an envelope attack stage." .
+
+param:cutoffFrequency
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "cutoff frequency" ;
+	rdfs:comment "The cutoff frequency, typically in Hz, for a filter." .
+
+param:decay
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "decay" ;
+	rdfs:comment "The duration of an envelope decay stage." .
+
+param:delay
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "delay" ;
+	rdfs:comment "The duration of an envelope delay stage." .
+
+param:frequency
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "frequency" ;
+	rdfs:comment "A frequency, typically in Hz." .
+
+param:hold
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "hold" ;
+	rdfs:comment "The duration of an envelope hold stage." .
+
+param:pulseWidth
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "pulse width" ;
+	rdfs:comment "The width of a pulse of a rectangular waveform." .
+
+param:ratio
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "ratio" ;
+	rdfs:comment "Compression ratio." .
+
+param:release
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "release" ;
+	rdfs:comment "The duration of an envelope release stage." .
+
+param:resonance
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "resonance" ;
+	rdfs:comment "The resonance of a filter." .
+
+param:sustain
+	a lv2:Parameter ;
+	rdfs:label "sustain" ;
+	rdfs:range atom:Float ;
+	rdfs:comment "The level of an envelope sustain stage as a factor." .
+
+param:threshold
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "threshold" ;
+	rdfs:comment "Compression threshold." .
+
+param:waveform
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	rdfs:label "waveform" ;
+	rdfs:comment """The waveform "fader" for oscillators or modulators that have several.""" .
+
+param:gain
+	a lv2:Parameter ;
+	rdfs:range atom:Float ;
+	lv2:default 0.0 ;
+	lv2:minimum -20.0 ;
+	lv2:maximum 20.0 ;
+	units:unit units:db ;
+	rdfs:label "gain" ;
+	rdfs:comment "Gain in decibels." .
+
+param:wetDryRatio
+	a lv2:Parameter ;
+	rdfs:label "wet/dry ratio" ;
+	rdfs:comment "The ratio between processed and bypassed levels in the output." .
+
+param:wetLevel
+	a lv2:Parameter ;
+	rdfs:label "wet level" ;
+	rdfs:comment "The level of the processed component of a signal." .
+
+param:dryLevel
+	a lv2:Parameter ;
+	rdfs:label "dry level" ;
+	rdfs:comment "The level of the unprocessed component of a signal." .
+
+param:bypass
+	a lv2:Parameter ;
+	rdfs:label "bypass" ;
+	rdfs:comment "A boolean parameter that disables processing if true." .
+
+param:sampleRate
+	a lv2:Parameter ;
+	rdfs:label "sample rate" ;
+	rdfs:comment "A sample rate in Hz." .
+
+param:EnvelopeControls
+	a rdfs:Class ;
+	rdfs:subClassOf param:ControlGroup ;
+	rdfs:label "Envelope Controls" ;
+	rdfs:comment "Typical controls for a DAHDSR envelope." ;
+	pg:element [
+		lv2:index 0 ;
+		lv2:designation param:delay
+	] , [
+		lv2:index 1 ;
+		lv2:designation param:attack
+	] , [
+		lv2:index 2 ;
+		lv2:designation param:hold
+	] , [
+		lv2:index 3 ;
+		lv2:designation param:decay
+	] , [
+		lv2:index 4 ;
+		lv2:designation param:sustain
+	] , [
+		lv2:index 5 ;
+		lv2:designation param:release
+	] .
+
+param:OscillatorControls
+	a rdfs:Class ;
+	rdfs:subClassOf param:ControlGroup ;
+	rdfs:label "Oscillator Controls" ;
+	rdfs:comment "Typical controls for an oscillator." ;
+	pg:element [
+		lv2:designation param:frequency
+	] , [
+		lv2:designation param:amplitude
+	] , [
+		lv2:designation param:waveform
+	] , [
+		lv2:designation param:pulseWidth
+	] .
+
+param:FilterControls
+	a rdfs:Class ;
+	rdfs:subClassOf param:ControlGroup ;
+	rdfs:label "Filter Controls" ;
+	rdfs:comment "Typical controls for a filter." ;
+	pg:element [
+		lv2:designation param:cutoffFrequency
+	] , [
+		lv2:designation param:resonance
+	] .
+
+param:CompressorControls
+	a rdfs:Class ;
+	rdfs:subClassOf param:ControlGroup ;
+	rdfs:label "Compressor Controls" ;
+	rdfs:comment "Typical controls for a compressor." ;
+	pg:element [
+		lv2:designation param:threshold
+	] , [
+		lv2:designation param:ratio
+	] .
+

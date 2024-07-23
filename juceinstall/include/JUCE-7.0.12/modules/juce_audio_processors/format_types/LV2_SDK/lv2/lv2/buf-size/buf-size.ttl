@@ -1,0 +1,67 @@
+@prefix bufsz: <http://lv2plug.in/ns/ext/buf-size#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix opts: <http://lv2plug.in/ns/ext/options#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/buf-size>
+	a owl:Ontology ;
+	rdfs:label "LV2 Buf Size" ;
+	rdfs:comment "Access to, and restrictions on, buffer sizes." ;
+	rdfs:seeAlso <buf-size.h> ,
+		<buf-size.meta.ttl> .
+
+bufsz:boundedBlockLength
+	a lv2:Feature ;
+	rdfs:label "bounded block length" ;
+	rdfs:comment "Block length has lower and upper bounds." .
+
+bufsz:fixedBlockLength
+	a lv2:Feature ;
+	rdfs:label "fixed block length" ;
+	rdfs:comment "Block length never changes." .
+
+bufsz:powerOf2BlockLength
+	a lv2:Feature ;
+	rdfs:label "power of 2 block length" ;
+	rdfs:comment "Block length is a power of 2." .
+
+bufsz:coarseBlockLength
+	a lv2:Feature ;
+	rdfs:label "coarse block length" ;
+	rdfs:comment "Plugin prefers coarse block length without buffer splitting." .
+
+bufsz:maxBlockLength
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		opts:Option ;
+	rdfs:label "maximum block length" ;
+	rdfs:comment "Block length has an upper bound." ;
+	rdfs:range xsd:nonNegativeInteger .
+
+bufsz:minBlockLength
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		opts:Option ;
+	rdfs:label "minimum block length" ;
+	rdfs:comment "Block length has a lower bound." ;
+	rdfs:range xsd:nonNegativeInteger .
+
+bufsz:nominalBlockLength
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		opts:Option ;
+	rdfs:label "nominal block length" ;
+	rdfs:comment "Typical block length that will most often be processed." ;
+	rdfs:range xsd:nonNegativeInteger .
+
+bufsz:sequenceSize
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		opts:Option ;
+	rdfs:label "sequence size" ;
+	rdfs:comment "The maximum size of a sequence, in bytes." ;
+	rdfs:range xsd:nonNegativeInteger .
+

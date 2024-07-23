@@ -1,0 +1,246 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix ev: <http://lv2plug.in/ns/ext/event#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/event>
+	a doap:Project ;
+	doap:license <http://opensource.org/licenses/isc> ;
+	doap:name "LV2 Event" ;
+	doap:shortdesc "A port-based real-time generic event interface." ;
+	doap:created "2008-00-00" ;
+	doap:developer <http://drobilla.net/drobilla#me> ,
+		<http://lv2plug.in/ns/meta#larsl> ;
+	doap:release [
+		doap:revision "1.12" ;
+		doap:created "2014-08-08" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.10.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Minor documentation improvements."
+			]
+		]
+	] , [
+		doap:revision "1.10" ;
+		doap:created "2013-01-13" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.4.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Fix incorrect return type in lv2_event_get()."
+			]
+		]
+	] , [
+		doap:revision "1.8" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Make event iterator gracefully handle optional ports."
+			] , [
+				rdfs:label "Remove asserts from event-helper.h."
+			] , [
+				rdfs:label "Use more precise domain and range for EventPort properties."
+			] , [
+				rdfs:label "Use consistent label style."
+			]
+		]
+	] , [
+		doap:revision "1.6" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Fix bug in lv2_event_reserve()."
+			] , [
+				rdfs:label "Fix incorrect ranges of some properties."
+			] , [
+				rdfs:label "Merge with unified LV2 package."
+			]
+		]
+	] , [
+		doap:revision "1.4" ;
+		doap:created "2011-11-21" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-event-1.4.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Update packaging."
+			]
+		]
+	] , [
+		doap:revision "1.2" ;
+		doap:created "2011-05-26" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-event-1.2.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add build system (for installation)."
+			] , [
+				rdfs:label "Convert documentation to HTML and use lv2:documentation."
+			] , [
+				rdfs:label "Use lv2:Specification to be discovered as an extension."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2010-11-24" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-event-1.0.tar.gz> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+<span class="warning">This extension is deprecated.</span> New implementations
+should use <a href="atom.html">LV2 Atom</a> instead.
+
+This extension defines a generic time-stamped event port type, which can be
+used to create plugins that read and write real-time events, such as MIDI,
+OSC, or any other type of event payload.  The type(s) of event supported by
+a port is defined in the data file for a plugin, for example:
+
+    :::turtle
+    <http://example.org/some-plugin>
+        lv2:port [
+            a ev:EventPort, lv2:InputPort ;
+            lv2:index 0 ;
+            ev:supportsEvent <http://lv2plug.in/ns/ext/midi#MidiEvent> ;
+            lv2:symbol "midi_input" ;
+            lv2:name "MIDI input" ;
+        ] .
+
+"""^^lv2:Markdown .
+
+ev:EventPort
+	lv2:documentation """
+
+Ports of this type will be connected to a struct of type LV2_Event_Buffer,
+defined in event.h.  These ports contain a sequence of generic events (possibly
+several types mixed in a single stream), the specific types of which are
+defined by some URI in another LV2 extension.
+
+"""^^lv2:Markdown .
+
+ev:Event
+	a rdfs:Class ;
+	rdfs:label "Event" ;
+	lv2:documentation """
+
+An ev:EventPort contains an LV2_Event_Buffer which contains a sequence of these
+events.  The binary format of LV2 events is defined by the LV2_Event struct in
+event.h.
+
+Specific event types (such as MIDI or OSC) are defined by extensions, and
+should be rdfs:subClassOf this class.
+
+"""^^lv2:Markdown .
+
+ev:TimeStamp
+	lv2:documentation """
+
+This defines the meaning of the 'frames' and 'subframes' fields of an LV2_Event
+(both unsigned 32-bit integers).
+
+"""^^lv2:Markdown .
+
+ev:FrameStamp
+	lv2:documentation """
+
+The default time stamp unit for an LV2 event: the frames field represents audio
+frames (in the sample rate passed to intantiate), and the subframes field is
+1/UINT32_MAX of a frame.
+
+"""^^lv2:Markdown .
+
+ev:generic
+	lv2:documentation """
+
+Indicates that this port does something meaningful for any event type.  This is
+useful for things like event mixers, delays, serialisers, and so on.
+
+If this property is set, hosts should consider the port suitable for any type
+of event.  Otherwise, hosts should consider the port 'appropriate' only for the
+specific event types listed with :supportsEvent.  Note that plugins must
+gracefully handle unknown event types whether or not this property is present.
+
+"""^^lv2:Markdown .
+
+ev:supportsEvent
+	lv2:documentation """
+
+Indicates that this port supports or "understands" a certain event type.
+
+For input ports, this means the plugin understands and does something useful
+with events of this type.  For output ports, this means the plugin may generate
+events of this type.  If the plugin never actually generates events of this
+type, but might pass them through from an input, this property should not be
+set (use ev:inheritsEvent for that).
+
+Plugins with event input ports must always gracefully handle any type of event,
+even if it does not 'support' it.  This property should always be set for event
+types the plugin understands/generates so hosts can discover plugins
+appropriate for a given scenario (for example, plugins with a MIDI input).
+Hosts are not expected to consider event ports suitable for some type of event
+if the relevant :supportsEvent property is not set, unless the ev:generic
+property for that port is also set.
+
+
+"""^^lv2:Markdown .
+
+ev:inheritsEvent
+	lv2:documentation """
+
+Indicates that this output port might pass through events that arrived at some
+other input port (or generate an event of the same type as events arriving at
+that input).  The host must always check the stamp type of all outputs when
+connecting an input, but this property should be set whenever it applies.
+
+
+"""^^lv2:Markdown .
+
+ev:supportsTimeStamp
+	lv2:documentation """
+
+Indicates that this port supports or "understands" a certain time stamp type.
+Meaningful only for input ports, the host must never connect a port to an event
+buffer with a time stamp type that isn't supported by the port.
+
+"""^^lv2:Markdown .
+
+ev:generatesTimeStamp
+	lv2:documentation """
+
+Indicates that this port may output a certain time stamp type, regardless of
+the time stamp type of any input ports.
+
+If the port outputs stamps based on what type inputs are connected to, this
+property should not be set (use the ev:inheritsTimeStamp property for that).
+Hosts MUST check the time_stamp value of any output port buffers after a call
+to connect_port on ANY event input port on the plugin.
+
+If the plugin changes the stamp_type field of an output event buffer during a
+call to run(), the plugin must call the stamp_type_changed function provided by
+the host in the LV2_Event_Feature struct, if it is non-NULL.
+
+"""^^lv2:Markdown .
+
+ev:inheritsTimeStamp
+	lv2:documentation """
+
+Indicates that this port follows the time stamp type of an input port.
+
+This property is not necessary, but it should be set for outputs that base
+their output type on an input port so the host can make more sense of the
+plugin and provide a more sensible interface.
+
+"""^^lv2:Markdown .
+

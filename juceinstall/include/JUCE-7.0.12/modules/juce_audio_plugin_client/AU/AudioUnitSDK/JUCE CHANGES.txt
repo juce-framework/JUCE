@@ -1,0 +1,7 @@
+AUScopeElement.cpp - The method AUScope::RestoreElementNames was changed to only call AUElement::SetName if the name actually changed (instead of always). This is a workaround for a Ableton Live 11 bug which crashes on duplicating AUs with more than 16 output busses.
+
+AUBase.h - The line that reads
+    CFStringGetCString(inName, std::data(ioInfo.name), std::size(ioInfo.name), ...
+previously read
+    CFStringGetCString(inName, &ioInfo.name[0], offsetof(AudioUnitParameterInfo, clumpID), ...
+This change is necessary because AudioUnitParameterInfo includes another data member between the `name` and `clumpID` members.

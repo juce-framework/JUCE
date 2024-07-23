@@ -1,0 +1,264 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2022 - Raw Material Software Limited
+
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
+
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
+
+   End User License Agreement: www.juce.com/juce-7-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
+
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
+
+  ==============================================================================
+*/
+
+namespace juce
+{
+
+//==============================================================================
+/**
+    Manages a list of undo/redo commands.
+
+    An UndoManager object keeps a list of past actions and can use these actions
+    to move backwards and forwards through an undo history.
+
+    To use it, create subclasses of UndoableAction which perform all the
+    actions you need, then when you need to actually perform an action, create one
+    and pass it to the UndoManager's perform() method.
+
+    The manager also uses the concept of 'transactions' to group the actions
+    together - all actions performed between calls to beginNewTransaction() are
+    grouped together and are all undone/redone as a group.
+
+    The UndoManager is a ChangeBroadcaster, so listeners can register to be told
+    when actions are performed or undone.
+
+    @see UndoableAction
+
+    @tags{DataStructures}
+*/
+class JUCE_API  UndoManager  : public ChangeBroadcaster
+{
+public:
+    //==============================================================================
+    /** Creates an UndoManager.
+
+        @param maxNumberOfUnitsToKeep       each UndoableAction object returns a value
+                                            to indicate how much storage it takes up
+                                            (UndoableAction::getSizeInUnits()), so this
+                                            lets you specify the maximum total number of
+                                            units that the undomanager is allowed to
+                                            keep in memory before letting the older actions
+                                            drop off the end of the list.
+        @param minimumTransactionsToKeep    this specifies the minimum number of transactions
+                                            that will be kept, even if this involves exceeding
+                                            the amount of space specified in maxNumberOfUnitsToKeep
+    */
+    UndoManager (int maxNumberOfUnitsToKeep = 30000,
+                 int minimumTransactionsToKeep = 30);
+
+    /** Destructor. */
+    ~UndoManager() override;
+
+    //==============================================================================
+    /** Deletes all stored actions in the list. */
+    void clearUndoHistory();
+
+    /** Returns the current amount of space to use for storing UndoableAction objects.
+        @see setMaxNumberOfStoredUnits
+    */
+    int getNumberOfUnitsTakenUpByStoredCommands() const;
+
+    /** Sets the amount of space that can be used for storing UndoableAction objects.
+
+        @param maxNumberOfUnitsToKeep       each UndoableAction object returns a value
+                                            to indicate how much storage it takes up
+                                            (UndoableAction::getSizeInUnits()), so this
+                                            lets you specify the maximum total number of
+                                            units that the undomanager is allowed to
+                                            keep in memory before letting the older actions
+                                            drop off the end of the list.
+        @param minimumTransactionsToKeep    this specifies the minimum number of transactions
+                                            that will be kept, even if this involves exceeding
+                                            the amount of space specified in maxNumberOfUnitsToKeep
+        @see getNumberOfUnitsTakenUpByStoredCommands
+    */
+    void setMaxNumberOfStoredUnits (int maxNumberOfUnitsToKeep,
+                                    int minimumTransactionsToKeep);
+
+    //==============================================================================
+    /** Performs an action and adds it to the undo history list.
+
+        @param action   the action to perform - this object will be deleted by
+                        the UndoManager when no longer needed
+        @returns true if the command succeeds - see UndoableAction::perform
+        @see beginNewTransaction
+    */
+    bool perform (UndoableAction* action);
+
+    /** Performs an action and also gives it a name.
+
+        @param action       the action to perform - this object will be deleted by
+                            the UndoManager when no longer needed
+        @param actionName   if this string is non-empty, the current transaction will be
+                            given this name; if it's empty, the current transaction name will
+                            be left unchanged. See setCurrentTransactionName()
+        @returns true if the command succeeds - see UndoableAction::perform
+        @see beginNewTransaction
+    */
+    bool perform (UndoableAction* action, const String& actionName);
+
+    /** Starts a new group of actions that together will be treated as a single transaction.
+
+        All actions that are passed to the perform() method between calls to this
+        method are grouped together and undone/redone together by a single call to
+        undo() or redo().
+    */
+    void beginNewTransaction();
+
+    /** Starts a new group of actions that together will be treated as a single transaction.
+
+        All actions that are passed to the perform() method between calls to this
+        method are grouped together and undone/redone together by a single call to
+        undo() or redo().
+
+        @param actionName   a description of the transaction that is about to be
+                            performed
+    */
+    void beginNewTransaction (const String& actionName);
+
+    /** Changes the name stored for the current transaction.
+
+        Each transaction is given a name when the beginNewTransaction() method is
+        called, but this can be used to change that name without starting a new
+        transaction.
+    */
+    void setCurrentTransactionName (const String& newName);
+
+    /** Returns the name of the current transaction.
+        @see setCurrentTransactionName
+    */
+    String getCurrentTransactionName() const;
+
+    //==============================================================================
+    /** Returns true if there's at least one action in the list to undo.
+        @see getUndoDescription, undo, canRedo
+    */
+    bool canUndo() const;
+
+    /** Tries to roll-back the last transaction.
+        @returns    true if the transaction can be undone, and false if it fails, or
+                    if there aren't any transactions to undo
+        @see undoCurrentTransactionOnly
+    */
+    bool undo();
+
+    /** Tries to roll-back any actions that were added to the current transaction.
+
+        This will perform an undo() only if there are some actions in the undo list
+        that were added after the last call to beginNewTransaction().
+
+        This is useful because it lets you call beginNewTransaction(), then
+        perform an operation which may or may not actually perform some actions, and
+        then call this method to get rid of any actions that might have been done
+        without it rolling back the previous transaction if nothing was actually
+        done.
+
+        @returns true if any actions were undone.
+    */
+    bool undoCurrentTransactionOnly();
+
+    /** Returns the name of the transaction that will be rolled-back when undo() is called.
+        @see undo, canUndo, getUndoDescriptions
+    */
+    String getUndoDescription() const;
+
+    /** Returns the names of the sequence of transactions that will be performed if undo()
+        is repeatedly called. Note that for transactions where no name was provided, the
+        corresponding string will be empty.
+        @see undo, canUndo, getUndoDescription
+    */
+    StringArray getUndoDescriptions() const;
+
+    /** Returns the time to which the state would be restored if undo() was to be called.
+        If an undo isn't currently possible, it'll return Time().
+    */
+    Time getTimeOfUndoTransaction() const;
+
+    /** Returns a list of the UndoableAction objects that have been performed during the
+        transaction that is currently open.
+
+        Effectively, this is the list of actions that would be undone if undoCurrentTransactionOnly()
+        were to be called now.
+
+        The first item in the list is the earliest action performed.
+    */
+    void getActionsInCurrentTransaction (Array<const UndoableAction*>& actionsFound) const;
+
+    /** Returns the number of UndoableAction objects that have been performed during the
+        transaction that is currently open.
+        @see getActionsInCurrentTransaction
+    */
+    int getNumActionsInCurrentTransaction() const;
+
+    //==============================================================================
+    /** Returns true if there's at least one action in the list to redo.
+        @see getRedoDescription, redo, canUndo
+    */
+    bool canRedo() const;
+
+    /** Tries to redo the last transaction that was undone.
+        @returns   true if the transaction can be redone, and false if it fails, or
+                   if there aren't any transactions to redo
+    */
+    bool redo();
+
+    /** Returns the name of the transaction that will be redone when redo() is called.
+        @see redo, canRedo, getRedoDescriptions
+    */
+    String getRedoDescription() const;
+
+    /** Returns the names of the sequence of transactions that will be performed if redo()
+        is repeatedly called. Note that for transactions where no name was provided, the
+        corresponding string will be empty.
+        @see redo, canRedo, getRedoDescription
+    */
+    StringArray getRedoDescriptions() const;
+
+    /** Returns the time to which the state would be restored if redo() was to be called.
+        If a redo isn't currently possible, it'll return Time::getCurrentTime().
+        @see redo, canRedo
+    */
+    Time getTimeOfRedoTransaction() const;
+
+    /** Returns true if the caller code is in the middle of an undo or redo action. */
+    bool isPerformingUndoRedo() const;
+
+private:
+    //==============================================================================
+    struct ActionSet;
+    OwnedArray<ActionSet> transactions, stashedFutureTransactions;
+    String newTransactionName;
+    int totalUnitsStored = 0, maxNumUnitsToKeep = 0, minimumTransactionsToKeep = 0, nextIndex = 0;
+    bool newTransaction = true, isInsideUndoRedoCall = false;
+    ActionSet* getCurrentSet() const;
+    ActionSet* getNextSet() const;
+    void moveFutureTransactionsToStash();
+    void restoreStashedFutureTransactions();
+    void dropOldTransactionsIfTooLarge();
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UndoManager)
+};
+
+} // namespace juce

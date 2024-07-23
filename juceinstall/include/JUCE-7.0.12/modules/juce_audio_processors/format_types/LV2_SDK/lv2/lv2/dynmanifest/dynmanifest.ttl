@@ -1,0 +1,25 @@
+@prefix dman: <http://lv2plug.in/ns/ext/dynmanifest#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/dynmanifest>
+	a owl:Ontology ;
+	rdfs:label "LV2 Dyn Manifest" ;
+	rdfs:comment "Support for dynamic manifest data generation." ;
+	rdfs:seeAlso <dynmanifest.h> ,
+		<dynmanifest.meta.ttl> .
+
+dman:DynManifest
+	a rdfs:Class ;
+	rdfs:label "Dynamic Manifest" ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty lv2:binary ;
+		owl:minCardinality 1 ;
+		rdfs:comment "A DynManifest MUST have at least one lv2:binary."
+	] ;
+	rdfs:comment "Dynamic manifest for an LV2 binary." .
+

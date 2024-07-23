@@ -1,0 +1,44 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix opts: <http://lv2plug.in/ns/ext/options#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/options>
+	a owl:Ontology ;
+	rdfs:label "LV2 Options" ;
+	rdfs:comment "Runtime options for LV2 plugins and UIs." ;
+	rdfs:seeAlso <options.h> ,
+		<options.meta.ttl> .
+
+opts:Option
+	a rdfs:Class ;
+	rdfs:label "Option" ;
+	rdfs:subClassOf rdf:Property ;
+	rdfs:comment "A value for a static option passed to an instance." .
+
+opts:interface
+	a lv2:ExtensionData ;
+	rdfs:label "interface" ;
+	rdfs:comment "An interface for dynamically setting and getting options." .
+
+opts:options
+	a lv2:Feature ;
+	rdfs:label "options" ;
+	rdfs:comment "The feature used to provide options to an instance." .
+
+opts:requiredOption
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:range rdf:Property ;
+	rdfs:label "required option" ;
+	rdfs:comment "An option required by the instance to function at all." .
+
+opts:supportedOption
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:range rdf:Property ;
+	rdfs:label "supported option" ;
+	rdfs:comment "An option supported or by the instance." .
+

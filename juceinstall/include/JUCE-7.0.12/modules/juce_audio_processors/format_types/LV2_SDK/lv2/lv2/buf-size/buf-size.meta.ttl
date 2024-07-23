@@ -1,0 +1,157 @@
+@prefix bufsz: <http://lv2plug.in/ns/ext/buf-size#> .
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/buf-size>
+	a doap:Project ;
+	doap:name "LV2 Buf Size" ;
+	doap:shortdesc "Access to, and restrictions on, buffer sizes." ;
+	doap:created "2012-08-07" ;
+	doap:developer <http://drobilla.net/drobilla#me> ;
+	doap:release [
+		doap:revision "1.4" ;
+		doap:created "2015-09-18" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.14.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add bufsz:nominalBlockLength option."
+			] , [
+				rdfs:label "Add bufsz:coarseBlockLength feature."
+			]
+		]
+	] , [
+		doap:revision "1.2" ;
+		doap:created "2012-12-21" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.4.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Fix typo in bufsz:sequenceSize label."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This extension defines a facility for plugins to get information about the
+block length (the sample_count parameter of LV2_Descriptor::run) and port
+buffer sizes, as well as several features which can be used to restrict the
+block length.
+
+This extension defines features and properties but has no special purpose
+API of its own.  The host provides all the relevant information to the plugin
+as [options](options.html).
+
+To require restrictions on the block length, plugins can require additional
+features: bufsz:boundedBlockLength, bufsz:powerOf2BlockLength, and
+bufsz:fixedBlockLength.  These features are data-only, that is they merely
+indicate a restriction and do not carry any data or API.
+
+"""^^lv2:Markdown .
+
+bufsz:boundedBlockLength
+	lv2:documentation """
+
+A feature that indicates the host will provide both the bufsz:minBlockLength
+and bufsz:maxBlockLength options to the plugin.  Plugins that copy data from
+audio inputs can require this feature to ensure they know how much space is
+required for auxiliary buffers.  Note the minimum may be zero, this feature is
+mainly useful to ensure a maximum is available.
+
+All hosts SHOULD support this feature, since it is simple to support and
+necessary for any plugins that may need to copy the input.
+
+"""^^lv2:Markdown .
+
+bufsz:fixedBlockLength
+	lv2:documentation """
+
+A feature that indicates the host will always call LV2_Descriptor::run() with
+the same value for sample_count.  This length MUST be provided as the value of
+both the bufsz:minBlockLength and bufsz:maxBlockLength options.
+
+Note that requiring this feature may severely limit the number of hosts capable
+of running the plugin.
+
+"""^^lv2:Markdown .
+
+bufsz:powerOf2BlockLength
+	lv2:documentation """
+
+A feature that indicates the host will always call LV2_Descriptor::run() with a
+power of two sample_count.  Note that this feature does not guarantee the value
+is the same each call, to guarantee a fixed power of two block length plugins
+must require both this feature and bufsz:fixedBlockLength.
+
+Note that requiring this feature may severely limit the number of hosts capable
+of running the plugin.
+
+"""^^lv2:Markdown .
+
+bufsz:coarseBlockLength
+	lv2:documentation """
+
+A feature that indicates the plugin prefers coarse, regular block lengths.  For
+example, plugins that do not implement sample-accurate control use this feature
+to indicate that the host should not split the run cycle because controls have
+changed.
+
+Note that this feature is merely a hint, and does not guarantee a fixed block
+length.  The run cycle may be split for other reasons, and the blocksize itself
+may change anytime.
+
+"""^^lv2:Markdown .
+
+bufsz:maxBlockLength
+	lv2:documentation """
+
+The maximum block length the host will ever request the plugin to process at
+once, that is, the maximum `sample_count` parameter that will ever be passed to
+LV2_Descriptor::run().
+
+"""^^lv2:Markdown .
+
+bufsz:minBlockLength
+	lv2:documentation """
+
+The minimum block length the host will ever request the plugin to process at
+once, that is, the minimum `sample_count` parameter that will ever be passed to
+LV2_Descriptor::run().
+
+"""^^lv2:Markdown .
+
+bufsz:nominalBlockLength
+	lv2:documentation """
+
+The typical block length the host will request the plugin to process at once,
+that is, the typical `sample_count` parameter that will be passed to
+LV2_Descriptor::run().  This will usually be equivalent, or close to, the
+maximum block length, but there are no strong guarantees about this value
+whatsoever.  Plugins may use this length for optimization purposes, but MUST
+NOT assume the host will always process blocks of this length.  In particular,
+the host MAY process longer blocks.
+
+"""^^lv2:Markdown .
+
+bufsz:sequenceSize
+	lv2:documentation """
+
+This should be provided as an option by hosts that support event ports
+(including but not limited to MIDI), so plugins have the ability to allocate
+auxiliary buffers large enough to copy the input.
+
+"""^^lv2:Markdown .
+

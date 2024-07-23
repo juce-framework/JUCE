@@ -1,0 +1,75 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix param: <http://lv2plug.in/ns/ext/parameters#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/parameters>
+	a doap:Project ;
+	doap:name "LV2 Parameters" ;
+	doap:release [
+		doap:revision "1.4" ;
+		doap:created "2015-04-07" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.12.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add range to parameters so hosts know how to control them."
+			]
+		]
+	] , [
+		doap:revision "1.2" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Use consistent label style."
+			] , [
+				rdfs:label "Add param:sampleRate."
+			] , [
+				rdfs:label "Add parameters.h of URI defines for convenience."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	doap:created "2009-00-00" ;
+	doap:shortdesc "Common parameters for audio processing." ;
+	doap:maintainer <http://drobilla.net/drobilla#me> ;
+	doap:developer <http://lv2plug.in/ns/meta#larsl> ;
+	lv2:documentation """
+
+This is a vocabulary for parameters that are common in audio processing
+software.  A <q>parameter</q> is purely a metadata concept, unrelated to any
+particular code mechanism.  Parameters are used to assign meaning to controls
+(for example, using lv2:designation for ports) so they can be used more
+intelligently or presented to the user more efficiently.
+
+"""^^lv2:Markdown .
+
+param:wetDryRatio
+	a lv2:Parameter ;
+	rdfs:label "wet/dry ratio" ;
+	lv2:documentation """
+
+The ratio between processed and bypass components in output signal.  The dry
+and wet percentages can be calculated from the following equations:
+
+    :::c
+    dry = (wetDryRatio.maximum - wetDryRatio.value) / wetDryRatio.maximum
+    wet = wetDryRatio.value / wetDryRatio.maximum
+
+Typically, maximum value of 1 or 100 and minimum value of 0 should be used.
+
+"""^^lv2:Markdown .
+

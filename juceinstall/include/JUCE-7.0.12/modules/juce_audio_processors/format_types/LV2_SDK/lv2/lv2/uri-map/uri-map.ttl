@@ -1,0 +1,14 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix umap: <http://lv2plug.in/ns/ext/uri-map#> .
+
+<http://lv2plug.in/ns/ext/uri-map>
+	a lv2:Feature ;
+	owl:deprecated true ;
+	rdfs:label "LV2 URI Map" ;
+	rdfs:comment "A feature for mapping URIs to integers." ;
+	rdfs:seeAlso <uri-map.h> ,
+		<uri-map.meta.ttl> .
+
