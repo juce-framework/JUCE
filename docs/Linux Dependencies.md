@@ -64,10 +64,19 @@ available during runtime.
 The full command is as follows:
 
     sudo apt update
-    sudo apt install libasound2-dev libjack-jackd2-dev \
-        ladspa-sdk \
+    sudo apt install ladspa-sdk \
+        libasound2-dev \
         libcurl4-openssl-dev  \
-        libfreetype-dev libfontconfig1-dev \
-        libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \
+        libfontconfig1-dev \
+        libfreetype-dev \
+        libglu1-mesa-dev \
+        libjack-jackd2-dev \
         libwebkit2gtk-4.1-dev \
-        libglu1-mesa-dev mesa-common-dev
+        libx11-dev \
+        libxcomposite-dev \
+        libxcursor-dev \
+        libxext-dev \
+        libxinerama-dev \
+        libxrandr-dev \
+        libxrender-dev \
+        mesa-common-dev
