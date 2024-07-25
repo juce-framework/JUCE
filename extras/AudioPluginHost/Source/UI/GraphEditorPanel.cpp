@@ -277,6 +277,7 @@ struct GraphEditorPanel::PluginComponent final : public Component,
 
     void paint (Graphics& g) override
     {
+        g.fillAll (juce::Colours::black);
         auto boxArea = getLocalBounds().reduced (4, pinSize);
         bool isBypassed = false;
 
@@ -357,7 +358,7 @@ struct GraphEditorPanel::PluginComponent final : public Component,
         if (textWidth > 300)
             h = 100;
 
-        setSize (w, h);
+        setSize (w, h); //Changed from w, h
         setName (processor.getName() + formatSuffix);
 
         {
