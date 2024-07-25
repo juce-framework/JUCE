@@ -115,6 +115,7 @@ public:
     void fillRect (const Rectangle<float>&) override;
     void fillRectList (const RectangleList<float>&) override;
     void fillPath (const Path&, const AffineTransform&) override;
+    void strokePath (const Path& path, const PathStrokeType& strokeType, const AffineTransform& transform) override;
     void drawImage (const Image& sourceImage, const AffineTransform&) override;
 
     //==============================================================================
@@ -138,7 +139,8 @@ private:
     std::unique_ptr<SavedState> state;
     OwnedArray<SavedState> stateStack;
 
-    void setContextClipToPath (const Path&, const AffineTransform&);
+    void setContextClipToCurrentPath (bool useNonZeroWinding);
+    void drawCurrentPath (CGPathDrawingMode mode);
     void drawGradient();
     void createPath (const Path&, const AffineTransform&) const;
     void flip() const;

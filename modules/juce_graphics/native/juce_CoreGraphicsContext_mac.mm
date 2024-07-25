@@ -352,11 +352,9 @@ void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
     clipToRectangleListWithoutTest (remaining);
 }
 
-void CoreGraphicsContext::setContextClipToPath (const Path& path, const AffineTransform& transform)
+void CoreGraphicsContext::setContextClipToCurrentPath (bool useNonZeroWinding)
 {
-    createPath (path, transform);
-
-    if (path.isUsingNonZeroWinding())
+    if (useNonZeroWinding)
         CGContextClip (context.get());
     else
         CGContextEOClip (context.get());
@@ -364,7 +362,8 @@ void CoreGraphicsContext::setContextClipToPath (const Path& path, const AffineTr
 
 void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& transform)
 {
-    setContextClipToPath (path, transform);
+    createPath (path, transform);
+    setContextClipToCurrentPath (path.isUsingNonZeroWinding());
     lastClipRect.reset();
 }
 
@@ -470,6 +469,7 @@ void CoreGraphicsContext::setFill (const FillType& fillType)
 
         const detail::ColorPtr color { CGColorCreate (rgbColourSpace.get(), components) };
         CGContextSetFillColorWithColor (context.get(), color.get());
+        CGContextSetStrokeColorWithColor (context.get(), color.get());
         CGContextSetAlpha (context.get(), 1.0f);
     }
 }
@@ -550,27 +550,64 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExisting
         drawImage (state->fillType.image, state->fillType.transform, true);
 }
 
-void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& transform)
+void CoreGraphicsContext::drawCurrentPath (CGPathDrawingMode mode)
 {
     if (state->fillType.isColour())
     {
-        createPath (path, transform);
-
-        if (path.isUsingNonZeroWinding())
-            CGContextFillPath (context.get());
-        else
-            CGContextEOFillPath (context.get());
-
+        CGContextDrawPath (context.get(), mode);
         return;
     }
 
+    if (mode == kCGPathStroke)
+        CGContextReplacePathWithStrokedPath (context.get());
+
     ScopedCGContextState scopedState (context.get());
-    setContextClipToPath (path, transform);
+    setContextClipToCurrentPath (  mode == kCGPathFill
+                                 || mode == kCGPathStroke
+                                 || mode == kCGPathFillStroke);
 
     if (state->fillType.isGradient())
         drawGradient();
     else
         drawImage (state->fillType.image, state->fillType.transform, true);
+}
+
+void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& transform)
+{
+    createPath (path, transform);
+    drawCurrentPath (path.isUsingNonZeroWinding() ? kCGPathFill : kCGPathEOFill);
+}
+
+void CoreGraphicsContext::strokePath (const Path& path, const PathStrokeType& strokeType, const AffineTransform& transform)
+{
+    const auto lineCap = [&]
+    {
+        switch (strokeType.getEndStyle())
+        {
+            case PathStrokeType::EndCapStyle::butt:    return kCGLineCapButt;
+            case PathStrokeType::EndCapStyle::square:  return kCGLineCapSquare;
+            case PathStrokeType::EndCapStyle::rounded: return kCGLineCapRound;
+            default: jassertfalse;                     return kCGLineCapButt;
+        }
+    }();
+
+    const auto lineJoin = [&]
+    {
+        switch (strokeType.getJointStyle())
+        {
+            case PathStrokeType::JointStyle::mitered: return kCGLineJoinMiter;
+            case PathStrokeType::JointStyle::curved:  return kCGLineJoinRound;
+            case PathStrokeType::JointStyle::beveled: return kCGLineJoinBevel;
+            default: jassertfalse;                    return kCGLineJoinMiter;
+        }
+    }();
+
+    CGContextSetLineWidth (context.get(), strokeType.getStrokeThickness());
+    CGContextSetLineCap (context.get(), lineCap);
+    CGContextSetLineJoin (context.get(), lineJoin);
+
+    createPath (path, transform);
+    drawCurrentPath (kCGPathStroke);
 }
 
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform)
