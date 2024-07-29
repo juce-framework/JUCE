@@ -46,12 +46,11 @@ public:
         virtual void newOrDeleteCalled() noexcept = 0;
     };
 
-    void addListener    (Listener* l)          { listenerList.add (l); }
-    void removeListener (Listener* l) noexcept { listenerList.remove (l); }
+    void setListener (Listener* l) { listener = l; }
 
 private:
     friend void notifyAllocationHooksForThread();
-    ListenerList<Listener> listenerList;
+    Listener* listener = nullptr;
 };
 
 //==============================================================================
