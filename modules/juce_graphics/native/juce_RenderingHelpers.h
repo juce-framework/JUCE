@@ -137,7 +137,8 @@ public:
         return r.transformedBy (complexTransform);
     }
 
-    auto transformed (Point<float> r) const noexcept
+    template <typename RectangleOrPoint>
+    auto transformed (RectangleOrPoint r) const noexcept
     {
         jassert (! isOnlyTranslated);
         return r.transformedBy (complexTransform);
@@ -2021,6 +2022,11 @@ public:
             {
                 cloneClipIfMultiplyReferenced();
                 clip = clip->clipToRectangle (transform.translated (r));
+            }
+            else if (! transform.isRotated)
+            {
+                cloneClipIfMultiplyReferenced();
+                clip = clip->clipToRectangle (transform.transformed (r));
             }
             else
             {
