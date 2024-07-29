@@ -719,23 +719,6 @@ JUCE_API double getScaleFactorForWindow (HWND h)
         return (double) localGetDPIForWindow (h) / USER_DEFAULT_SCREEN_DPI;
 
     return 1.0;
- }
-
-//==============================================================================
-static void setWindowPos (HWND hwnd, Rectangle<int> bounds, UINT flags, bool adjustTopLeft = false)
-{
-    ScopedThreadDPIAwarenessSetter setter { hwnd };
-
-    if (isPerMonitorDPIAwareWindow (hwnd))
-    {
-        if (adjustTopLeft)
-            bounds = convertLogicalScreenRectangleToPhysical (bounds, hwnd)
-                      .withPosition (Desktop::getInstance().getDisplays().logicalToPhysical (bounds.getTopLeft()));
-        else
-            bounds = convertLogicalScreenRectangleToPhysical (bounds, hwnd);
-    }
-
-    SetWindowPos (hwnd, nullptr, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), flags);
 }
 
 static RECT getWindowScreenRect (HWND hwnd)
@@ -1617,6 +1600,9 @@ public:
         if (inHandlePositionChanged)
             return;
 
+        if (isNowFullScreen != isFullScreen())
+            setFullScreen (isNowFullScreen);
+
         // This is more of a guess than a certainty, but if we've captured the mouse and we're also
         // updating the bounds, there's a good chance we're in a client-initiated resize.
         // The resizing flag will be unset by WM_CAPTURECHANGED.
@@ -1625,8 +1611,6 @@ public:
                 renderContext->setResizing (true);
 
         const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
-
-        fullScreen = isNowFullScreen;
 
         const auto borderSize = findPhysicalBorderSize();
         auto newBounds = borderSize.addedTo ([&]
@@ -1776,10 +1760,13 @@ public:
             if (constrainer != nullptr)
                 constrainer->resizeStart();
 
-            fullScreen = shouldBeFullScreen;
             const WeakReference<Component> deletionChecker (&component);
 
-            if (! fullScreen)
+            if (shouldBeFullScreen)
+            {
+                ShowWindow (hwnd, SW_SHOWMAXIMIZED);
+            }
+            else
             {
                 auto boundsCopy = lastNonFullscreenBounds;
 
@@ -1787,10 +1774,6 @@ public:
 
                 if (! boundsCopy.isEmpty())
                     setBounds (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, boundsCopy), false);
-            }
-            else
-            {
-                ShowWindow (hwnd, SW_SHOWMAXIMIZED);
             }
 
             if (deletionChecker != nullptr)
@@ -2290,7 +2273,7 @@ private:
     std::unique_ptr<DropShadower> shadower;
     uint32 lastPaintTime = 0;
     ULONGLONG lastMagnifySize = 0;
-    bool fullScreen = false, isDragging = false, isMouseOver = false,
+    bool isDragging = false, isMouseOver = false,
          hasCreatedCaret = false, constrainerIsResizing = false;
     IconConverters::IconPtr currentWindowIcon;
     FileDropTarget* dropTarget = nullptr;
@@ -3665,11 +3648,6 @@ private:
     void doSettingChange()
     {
         forceDisplayUpdate();
-
-        if (fullScreen && ! isMinimised())
-            setWindowPos (hwnd, detail::ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays()
-                                                                                              .getDisplayForRect (component.getScreenBounds())->userArea),
-                          SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
 
         auto* dispatcher = VBlankDispatcher::getInstance();
         dispatcher->reconfigureDisplays();
