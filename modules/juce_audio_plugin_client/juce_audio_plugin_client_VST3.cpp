@@ -1735,12 +1735,19 @@ private:
                 }
                 else
                 {
-                    const auto ownedTarget = addVSTComSmartPtrOwner (target);
-                    const auto tag = item.tag;
+                    const auto callback = [menu = contextMenu, i]
+                    {
+                        MenuItem localItem{};
+                        MenuTarget* localTarget = nullptr;
+
+                        if (menu->getItem (i, localItem, &localTarget) == kResultOk && localTarget != nullptr)
+                            localTarget->executeMenuItem (localItem.tag);
+                    };
+
                     menuStack.back().menu.addItem (toString (item.name),
                                                    (item.flags & MenuItem::kIsDisabled) == 0,
                                                    (item.flags & MenuItem::kIsChecked) != 0,
-                                                   [ownedTarget, tag] { ownedTarget->executeMenuItem (tag); });
+                                                   callback);
                 }
             }
 
