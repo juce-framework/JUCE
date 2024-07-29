@@ -414,23 +414,55 @@ bool MidiFile::readFrom (InputStream& sourceStream,
     return successful;
 }
 
+template <typename It>
+static void reorderNoteOnsAfterNoteOffs (const It begin, const It end)
+{
+    for (auto it = begin; it != end;)
+    {
+        const auto firstNoteOn = std::find_if (it, end, [] (const auto& x)
+        {
+            return x->message.isNoteOn();
+        });
+
+        if (firstNoteOn == end)
+            return;
+
+        const auto channel = (*firstNoteOn)->message.getChannel();
+        const auto noteNumber = (*firstNoteOn)->message.getNoteNumber();
+        const auto rEnd = std::make_reverse_iterator (firstNoteOn);
+        const auto lastNoteOff = std::find_if (std::make_reverse_iterator (end), rEnd, [&] (const auto& x)
+        {
+            return x->message.getChannel() == channel
+                   && x->message.getNoteNumber() == noteNumber
+                   && x->message.isNoteOff();
+        });
+
+        if (lastNoteOff == rEnd)
+            return;
+
+        std::iter_swap (firstNoteOn, std::prev (lastNoteOff.base()));
+
+        it = std::next (firstNoteOn);
+    }
+}
+
 void MidiFile::readNextTrack (const uint8* data, int size, bool createMatchingNoteOffs)
 {
     auto sequence = MidiFileHelpers::readTrack (data, size);
+    sequence.sort();
 
-    // sort so that we put all the note-offs before note-ons that have the same time
-    std::stable_sort (sequence.list.begin(), sequence.list.end(),
-                      [] (const MidiMessageSequence::MidiEventHolder* a,
-                          const MidiMessageSequence::MidiEventHolder* b)
+    for (auto it = sequence.begin(); it != sequence.end();)
     {
-        auto t1 = a->message.getTimeStamp();
-        auto t2 = b->message.getTimeStamp();
+        const auto stamp = (*it)->message.getTimeStamp();
+        const auto nextTime = std::find_if (it, sequence.end(), [stamp] (const auto& x)
+        {
+            return ! exactlyEqual (x->message.getTimeStamp(), stamp);
+        });
 
-        if (t1 < t2)  return true;
-        if (t2 < t1)  return false;
+        reorderNoteOnsAfterNoteOffs (it, nextTime);
 
-        return a->message.isNoteOff() && b->message.isNoteOn();
-    });
+        it = nextTime;
+    }
 
     if (createMatchingNoteOffs)
         sequence.updateMatchedPairs();
@@ -751,6 +783,86 @@ struct MidiFileTest final : public UnitTest
                 expectEquals (track.getNumEvents(), 1);
                 expect (track.getEventPointer (0)->message.isNoteOff());
                 expectEquals (track.getEventPointer (0)->message.getTimeStamp(), (double) 0x0f);
+            }
+        }
+
+        beginTest ("Reorder note on/off");
+        {
+            // Note off before note on does not get reordered
+            {
+                const auto channel = 1;
+                const auto noteNumber = 64;
+                MidiMessageSequence sequence;
+                sequence.addEvent (MidiMessage::noteOff (channel, noteNumber).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOn (channel, noteNumber, 0.5f).withTimeStamp (0));
+
+                reorderNoteOnsAfterNoteOffs (sequence.begin(), sequence.end());
+
+                expect (sequence.getEventPointer (0)->message.isNoteOff());
+                expect (sequence.getEventPointer (1)->message.isNoteOn());
+            }
+
+            // Note on before note off gets swapped
+            {
+                const auto channel = 1;
+                const auto noteNumber = 64;
+                MidiMessageSequence sequence;
+                sequence.addEvent (MidiMessage::noteOn (channel, noteNumber, 0.5f).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOff (channel, noteNumber).withTimeStamp (0));
+
+                reorderNoteOnsAfterNoteOffs (sequence.begin(), sequence.end());
+
+                expect (sequence.getEventPointer (0)->message.isNoteOff());
+                expect (sequence.getEventPointer (1)->message.isNoteOn());
+            }
+
+            // Note on before note off is not swapped if note numbers differ
+            {
+                const auto channel = 1;
+                MidiMessageSequence sequence;
+                sequence.addEvent (MidiMessage::noteOn (channel, 64, 0.5f).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOff (channel, 65).withTimeStamp (0));
+
+                reorderNoteOnsAfterNoteOffs (sequence.begin(), sequence.end());
+
+                expect (sequence.getEventPointer (0)->message.isNoteOn());
+                expect (sequence.getEventPointer (1)->message.isNoteOff());
+            }
+
+            // Note on before note off is not swapped if channel numbers differ
+            {
+                const auto noteNumber = 64;
+                MidiMessageSequence sequence;
+                sequence.addEvent (MidiMessage::noteOn (1, noteNumber, 0.5f).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOff (2, noteNumber).withTimeStamp (0));
+
+                reorderNoteOnsAfterNoteOffs (sequence.begin(), sequence.end());
+
+                expect (sequence.getEventPointer (0)->message.isNoteOn());
+                expect (sequence.getEventPointer (1)->message.isNoteOff());
+            }
+
+            // If there are several note ons/offs, all offs come before all ons
+            {
+                const auto channel = 1;
+                const auto noteNumber = 64;
+                MidiMessageSequence sequence;
+                sequence.addEvent (MidiMessage::noteOn (channel, noteNumber, 0.5f).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOff (channel, noteNumber).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOn (channel, noteNumber, 0.5f).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOff (channel, noteNumber).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOn (channel, noteNumber, 0.5f).withTimeStamp (0));
+                sequence.addEvent (MidiMessage::noteOff (channel, noteNumber).withTimeStamp (0));
+
+                reorderNoteOnsAfterNoteOffs (sequence.begin(), sequence.end());
+
+                expect (sequence.getEventPointer (0)->message.isNoteOff());
+                expect (sequence.getEventPointer (1)->message.isNoteOff());
+                expect (sequence.getEventPointer (2)->message.isNoteOff());
+
+                expect (sequence.getEventPointer (3)->message.isNoteOn());
+                expect (sequence.getEventPointer (4)->message.isNoteOn());
+                expect (sequence.getEventPointer (5)->message.isNoteOn());
             }
         }
     }
