@@ -3346,9 +3346,7 @@ private:
 
     bool isConstrainedNativeWindow() const
     {
-        return constrainer != nullptr
-                && (styleFlags & windowIsResizable) != 0
-                && ! isKioskMode();
+        return constrainer != nullptr && ! isKioskMode();
     }
 
     LRESULT handleSizeConstraining (RECT& r, const WPARAM wParam)
