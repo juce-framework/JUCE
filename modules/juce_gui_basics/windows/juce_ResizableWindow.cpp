@@ -79,7 +79,7 @@ int ResizableWindow::getDesktopWindowStyleFlags() const
 {
     int styleFlags = TopLevelWindow::getDesktopWindowStyleFlags();
 
-    if (isResizable())
+    if (isResizable() && Desktop::getInstance().supportsBorderlessNonClientResize())
         styleFlags |= ComponentPeer::windowIsResizable;
 
     return styleFlags;
