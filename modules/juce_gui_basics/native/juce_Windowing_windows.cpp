@@ -1572,15 +1572,6 @@ public:
                  info.rcWindow.right - info.rcClient.right };
     }
 
-    BorderSize<float> getScaledBorderSize() const
-    {
-        const auto physical = findPhysicalBorderSize();
-        return { (float) physical.getTop()    / (float) scaleFactor,
-                 (float) physical.getLeft()   / (float) scaleFactor,
-                 (float) physical.getBottom() / (float) scaleFactor,
-                 (float) physical.getRight()  / (float) scaleFactor };
-    }
-
     void updateBorderSize()
     {
         if (renderContext == nullptr)
@@ -3346,13 +3337,6 @@ private:
         return constrainer != nullptr
                 && (styleFlags & windowIsResizable) != 0
                 && ! isKioskMode();
-    }
-
-    Rectangle<int> getCurrentScaledBounds() const
-    {
-        const auto windowBorder = findPhysicalBorderSize().multipliedBy (1.0 / scaleFactor);
-        const auto unscaled = windowBorder.addedTo (detail::ScalingHelpers::scaledScreenPosToUnscaled (component, component.getBounds()));
-        return detail::ScalingHelpers::unscaledScreenPosToScaled (component, unscaled);
     }
 
     LRESULT handleSizeConstraining (RECT& r, const WPARAM wParam)
