@@ -71,7 +71,7 @@ private:
 template <typename Ptr>
 auto createCheckedReference (Ptr* ptrIn)
 {
-    return std::make_shared<CheckedReference<Ptr>> (ptrIn);
+    return std::shared_ptr<CheckedReference<Ptr>> { new CheckedReference<Ptr> (ptrIn) };
 }
 
 class MidiInput::Pimpl
