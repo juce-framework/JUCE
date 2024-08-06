@@ -514,12 +514,12 @@ void CoreGraphicsContext::fillAll()
 
 void CoreGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExistingContents)
 {
-    fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), replaceExistingContents);
+    fillCGRect (convertToCGRectFlipped (r), replaceExistingContents);
 }
 
 void CoreGraphicsContext::fillRect (const Rectangle<float>& r)
 {
-    fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), false);
+    fillCGRect (convertToCGRectFlipped (r), false);
 }
 
 void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExistingContents)
@@ -608,6 +608,91 @@ void CoreGraphicsContext::strokePath (const Path& path, const PathStrokeType& st
 
     createPath (path, transform);
     drawCurrentPath (kCGPathStroke);
+}
+
+void CoreGraphicsContext::drawEllipse (const Rectangle<float>& area, float lineThickness)
+{
+    CGContextBeginPath (context.get());
+    CGContextSetLineWidth (context.get(), lineThickness);
+    CGContextSetLineCap (context.get(), kCGLineCapButt);
+    CGContextSetLineJoin (context.get(), kCGLineJoinMiter);
+    CGContextAddEllipseInRect (context.get(), convertToCGRectFlipped (area));
+    drawCurrentPath (kCGPathStroke);
+}
+
+void CoreGraphicsContext::fillEllipse (const Rectangle<float>& area)
+{
+    CGContextBeginPath (context.get());
+    CGContextAddEllipseInRect (context.get(), convertToCGRectFlipped (area));
+    drawCurrentPath (kCGPathFill);
+}
+
+void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float cornerSize, float lineThickness)
+{
+    CGContextBeginPath (context.get());
+
+    if (state->fillType.isColour())
+    {
+        CGContextSetLineWidth (context.get(), lineThickness);
+        CGContextSetLineCap (context.get(), kCGLineCapButt);
+        CGContextSetLineJoin (context.get(), kCGLineJoinMiter);
+
+        CGPathRef path = CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr);
+        CGContextAddPath (context.get(), path);
+        drawCurrentPath (kCGPathStroke);
+        CGPathRelease (path);
+    }
+    else
+    {
+        lineThickness *= 0.5f;
+
+        const auto outsideRect = r.expanded (lineThickness);
+        const auto outsideCornerSize = cornerSize + lineThickness;
+
+        const auto insideRect = r.reduced (lineThickness);
+        const auto insideCornerSize = cornerSize - lineThickness;
+
+        CGMutablePathRef path = CGPathCreateMutable();
+        CGPathAddRoundedRect (path, nullptr, convertToCGRectFlipped (outsideRect),
+                              jmin (outsideCornerSize, outsideRect.getWidth() / 2.0f),
+                              jmin (outsideCornerSize, outsideRect.getHeight() / 2.0f));
+
+        CGPathAddRoundedRect (path, nullptr, convertToCGRectFlipped (insideRect),
+                              jmin (insideCornerSize, insideRect.getWidth() / 2.0f),
+                              jmin (insideCornerSize, insideRect.getHeight() / 2.0f));
+
+        CGContextAddPath (context.get(), path);
+        drawCurrentPath (kCGPathEOFill);
+        CGPathRelease (path);
+    }
+}
+
+void CoreGraphicsContext::fillRoundedRectangle (const Rectangle<float>& r, float cornerSize)
+{
+    CGContextBeginPath (context.get());
+    CGPathRef path = CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr);
+    CGContextAddPath (context.get(), path);
+    drawCurrentPath (kCGPathFill);
+    CGPathRelease (path);
+}
+
+void CoreGraphicsContext::drawLineWithThickness (const Line<float>& line, float lineThickness)
+{
+    const auto reversed = line.reversed();
+    lineThickness *= 0.5f;
+    const auto p1 = line.getPointAlongLine (0, lineThickness);
+    const auto p2 = line.getPointAlongLine (0, -lineThickness);
+    const auto p3 = reversed.getPointAlongLine (0, lineThickness);
+    const auto p4 = reversed.getPointAlongLine (0, -lineThickness);
+
+    CGContextBeginPath      (context.get());
+    CGContextMoveToPoint    (context.get(), (CGFloat) p1.getX(), flipHeight - (CGFloat) p1.getY());
+    CGContextAddLineToPoint (context.get(), (CGFloat) p2.getX(), flipHeight - (CGFloat) p2.getY());
+    CGContextAddLineToPoint (context.get(), (CGFloat) p3.getX(), flipHeight - (CGFloat) p3.getY());
+    CGContextAddLineToPoint (context.get(), (CGFloat) p4.getX(), flipHeight - (CGFloat) p4.getY());
+    CGContextClosePath      (context.get());
+
+    drawCurrentPath (kCGPathFill);
 }
 
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform)
@@ -868,6 +953,15 @@ void CoreGraphicsContext::applyTransform (const AffineTransform& transform) cons
     t.tx = transform.mat02;
     t.ty = transform.mat12;
     CGContextConcatCTM (context.get(), t);
+}
+
+template <class RectType>
+CGRect CoreGraphicsContext::convertToCGRectFlipped (RectType r) const noexcept
+{
+    return CGRectMake ((CGFloat) r.getX(),
+                       flipHeight - (CGFloat) r.getBottom(),
+                       (CGFloat) r.getWidth(),
+                       (CGFloat) r.getHeight());
 }
 
 //==============================================================================

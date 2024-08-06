@@ -128,6 +128,14 @@ public:
 
     uint64_t getFrameId() const override { return 0; }
 
+    void drawEllipse (const Rectangle<float>& area, float lineThickness) override;
+    void fillEllipse (const Rectangle<float>& area) override;
+
+    void drawRoundedRectangle (const Rectangle<float>& r, float cornerSize, float lineThickness) override;
+    void fillRoundedRectangle (const Rectangle<float>& r, float cornerSize) override;
+
+    void drawLineWithThickness (const Line<float>& line, float lineThickness) override;
+
 private:
     //==============================================================================
     detail::ContextPtr context;
@@ -139,6 +147,8 @@ private:
     std::unique_ptr<SavedState> state;
     OwnedArray<SavedState> stateStack;
 
+    template <class RectType>
+    CGRect convertToCGRectFlipped (RectType r) const noexcept;
     void setContextClipToCurrentPath (bool useNonZeroWinding);
     void drawCurrentPath (CGPathDrawingMode mode);
     void drawGradient();
