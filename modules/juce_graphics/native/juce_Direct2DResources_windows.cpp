@@ -608,51 +608,40 @@ public:
 class CompositionTree
 {
 public:
-    HRESULT create (IDXGIDevice* const dxgiDevice, HWND hwnd, IDXGISwapChain1* const swapChain)
+    static std::optional<CompositionTree> create (IDXGIDevice* dxgiDevice, HWND hwnd, IDXGISwapChain1* swapChain)
     {
-        if (compositionDevice != nullptr)
-            return S_OK;
-
         if (dxgiDevice == nullptr)
-            return E_FAIL;
+            return {};
+
+        CompositionTree result;
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
         if (const auto hr = DCompositionCreateDevice (dxgiDevice,
                                                       __uuidof (IDCompositionDevice),
-                                                      reinterpret_cast<void**> (compositionDevice.resetAndGetPointerAddress()));
-            FAILED (hr))
+                                                      reinterpret_cast<void**> (result.compositionDevice.resetAndGetPointerAddress()));
+                FAILED (hr))
         {
-            return hr;
+            return {};
         }
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        if (const auto hr = compositionDevice->CreateTargetForHwnd (hwnd, FALSE, compositionTarget.resetAndGetPointerAddress()); FAILED (hr))
-            return hr;
-        if (const auto hr = compositionDevice->CreateVisual (compositionVisual.resetAndGetPointerAddress()); FAILED (hr))
-            return hr;
-        if (const auto hr = compositionTarget->SetRoot (compositionVisual); FAILED (hr))
-            return hr;
-        if (const auto hr = compositionVisual->SetContent (swapChain); FAILED (hr))
-            return hr;
-        if (const auto hr = compositionDevice->Commit(); FAILED (hr))
-            return hr;
+        if (const auto hr = result.compositionDevice->CreateTargetForHwnd (hwnd, FALSE, result.compositionTarget.resetAndGetPointerAddress()); FAILED (hr))
+            return {};
+        if (const auto hr = result.compositionDevice->CreateVisual (result.compositionVisual.resetAndGetPointerAddress()); FAILED (hr))
+            return {};
+        if (const auto hr = result.compositionTarget->SetRoot (result.compositionVisual); FAILED (hr))
+            return {};
+        if (const auto hr = result.compositionVisual->SetContent (swapChain); FAILED (hr))
+            return {};
+        if (const auto hr = result.compositionDevice->Commit(); FAILED (hr))
+            return {};
 
-        return S_OK;
-    }
-
-    void release()
-    {
-        compositionVisual = nullptr;
-        compositionTarget = nullptr;
-        compositionDevice = nullptr;
-    }
-
-    bool canPaint() const
-    {
-        return compositionVisual != nullptr;
+        return result;
     }
 
 private:
+    CompositionTree() = default;
+
     ComSmartPtr<IDCompositionDevice> compositionDevice;
     ComSmartPtr<IDCompositionTarget> compositionTarget;
     ComSmartPtr<IDCompositionVisual> compositionVisual;

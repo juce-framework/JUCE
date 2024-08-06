@@ -312,7 +312,7 @@ private:
     SwapChain swap;
     std::unique_ptr<SwapChainThread> swapChainThread;
     BackBufferLock presentation;
-    CompositionTree compositionTree;
+    std::optional<CompositionTree> compositionTree;
     UpdateRegion updateRegion;
     RectangleList<int> deferredRepaints;
     Rectangle<int> frameSize;
@@ -356,18 +356,18 @@ private:
                 swapChainThread = std::make_unique<SwapChainThread> (*this, directX->getD2DMultithread());
         }
 
-        if (! compositionTree.canPaint())
-        {
-            if (auto hr = compositionTree.create (adapter->dxgiDevice, hwnd, swap.chain); FAILED (hr))
-                return hr;
-        }
+        if (! compositionTree.has_value())
+            compositionTree = CompositionTree::create (adapter->dxgiDevice, hwnd, swap.chain);
+
+        if (! compositionTree.has_value())
+            return E_FAIL;
 
         return S_OK;
     }
 
     void teardown() override
     {
-        compositionTree.release();
+        compositionTree.reset();
         swapChainThread = nullptr;
         swap.release();
 
@@ -403,7 +403,7 @@ private:
         //      the swap chain thread is ready
         bool ready = Pimpl::checkPaintReady();
         ready &= swap.canPaint();
-        ready &= compositionTree.canPaint();
+        ready &= compositionTree.has_value();
         ready &= deferredRepaints.getNumRectangles() > 0 || resizing;
         ready &= presentation.getPresentation() != nullptr;
         return ready;
