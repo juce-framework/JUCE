@@ -65,6 +65,7 @@
 #include <cmath>
 #include <condition_variable>
 #include <cstddef>
+#include <cstring>
 #include <functional>
 #include <future>
 #include <iomanip>
@@ -97,7 +98,7 @@
 // Now we'll include some common OS headers..
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
 
-#if JUCE_MSVC
+#if JUCE_WINDOWS
  #include <intrin.h>
 #endif
 
@@ -110,7 +111,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
 #endif
 
 #if JUCE_LINUX || JUCE_BSD
- #include <cstring>
  #include <signal.h>
 
  #if __INTEL_COMPILER
