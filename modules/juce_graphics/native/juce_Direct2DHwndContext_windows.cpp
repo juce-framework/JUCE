@@ -490,8 +490,6 @@ public:
             if (swapChainThread)
                 swapChainThread->notify();
         }
-
-        clearWindowRedirectionBitmap();
     }
 
     void addDeferredRepaint (Rectangle<int> deferredRepaint)
@@ -513,32 +511,6 @@ public:
             addDeferredRepaint (D2DUtilities::toRectangle (rectArray[i]));
 
         updateRegion.clear();
-    }
-
-    void clearWindowRedirectionBitmap()
-    {
-        if (opaque || swap.state != SwapChain::State::bufferAllocated)
-            return;
-
-        deviceResources.deviceContext.createHwndRenderTarget (hwnd);
-
-        // Clear the GDI redirection bitmap using a Direct2D 1.0 render target
-        const auto& hwndRenderTarget = deviceResources.deviceContext.hwndRenderTarget;
-
-        if (hwndRenderTarget == nullptr)
-            return;
-
-        const auto colorF = D2DUtilities::toCOLOR_F (getBackgroundTransparencyKeyColour());
-
-        RECT clientRect;
-        GetClientRect (hwnd, &clientRect);
-
-        const D2D1_SIZE_U size { (uint32) (clientRect.right  - clientRect.left),
-                                 (uint32) (clientRect.bottom - clientRect.top) };
-        hwndRenderTarget->Resize (size);
-        hwndRenderTarget->BeginDraw();
-        hwndRenderTarget->Clear (colorF);
-        hwndRenderTarget->EndDraw();
     }
 
     SavedState* startFrame (float dpiScale) override

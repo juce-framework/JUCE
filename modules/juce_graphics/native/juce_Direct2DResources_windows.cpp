@@ -37,28 +37,6 @@ namespace juce
 
 struct Direct2DDeviceContext
 {
-    HRESULT createHwndRenderTarget (HWND hwnd)
-    {
-        if (hwndRenderTarget != nullptr)
-            return S_OK;
-
-        SharedResourcePointer<DirectX> directX;
-
-        D2D1_SIZE_U size { 1, 1 };
-
-        D2D1_RENDER_TARGET_PROPERTIES renderTargetProps{};
-        renderTargetProps.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
-        renderTargetProps.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
-
-        D2D1_HWND_RENDER_TARGET_PROPERTIES hwndRenderTargetProps{};
-        hwndRenderTargetProps.hwnd = hwnd;
-        hwndRenderTargetProps.pixelSize = size;
-        hwndRenderTargetProps.presentOptions = D2D1_PRESENT_OPTIONS_IMMEDIATELY | D2D1_PRESENT_OPTIONS_RETAIN_CONTENTS;
-        return directX->getD2DFactory()->CreateHwndRenderTarget (&renderTargetProps,
-                                                                 &hwndRenderTargetProps,
-                                                                 hwndRenderTarget.resetAndGetPointerAddress());
-    }
-
     void resetTransform()
     {
         context->SetTransform (D2D1::IdentityMatrix());
@@ -71,7 +49,6 @@ struct Direct2DDeviceContext
 
     void release()
     {
-        hwndRenderTarget = nullptr;
         context = nullptr;
     }
 
@@ -95,7 +72,6 @@ struct Direct2DDeviceContext
     }
 
     ComSmartPtr<ID2D1DeviceContext1> context;
-    ComSmartPtr<ID2D1HwndRenderTarget> hwndRenderTarget;
 };
 
 class Direct2DBitmap final
