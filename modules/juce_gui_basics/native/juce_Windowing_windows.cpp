@@ -2447,8 +2447,8 @@ private:
         {
             type |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
             type |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
-            type |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION) : 0;
-            type |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION) : 0;
+            type |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
+            type |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
             type |= resizable || windowUsesNativeShadow() ? WS_THICKFRAME : 0;
             exstyle |= appearsOnTaskbar ? WS_EX_APPWINDOW : WS_EX_TOOLWINDOW;
         }
