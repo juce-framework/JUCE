@@ -38,10 +38,9 @@
 namespace juce
 {
 
-template <typename CFType>
 struct CFObjectDeleter
 {
-    void operator() (CFType object) const noexcept
+    void operator() (CFTypeRef object) const noexcept
     {
         if (object != nullptr)
             CFRelease (object);
@@ -49,7 +48,17 @@ struct CFObjectDeleter
 };
 
 template <typename CFType>
-using CFUniquePtr = std::unique_ptr<std::remove_pointer_t<CFType>, CFObjectDeleter<CFType>>;
+struct CFRefRemover
+{
+    static_assert (std::is_pointer_v<CFType>, "CFType must be a Ref type");
+    using Type = std::remove_pointer_t<CFType>;
+};
+
+template <typename CFType>
+using CFRemoveRef = typename CFRefRemover<CFType>::Type;
+
+template <typename CFType>
+using CFUniquePtr = std::unique_ptr<CFRemoveRef<CFType>, CFObjectDeleter>;
 
 template <typename CFType>
 struct CFObjectHolder

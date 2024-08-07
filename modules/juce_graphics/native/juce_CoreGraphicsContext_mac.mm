@@ -637,10 +637,9 @@ void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float
         CGContextSetLineCap (context.get(), kCGLineCapButt);
         CGContextSetLineJoin (context.get(), kCGLineJoinMiter);
 
-        CGPathRef path = CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr);
-        CGContextAddPath (context.get(), path);
+        detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr) };
+        CGContextAddPath (context.get(), path.get());
         drawCurrentPath (kCGPathStroke);
-        CGPathRelease (path);
     }
     else
     {
@@ -652,28 +651,26 @@ void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float
         const auto insideRect = r.reduced (lineThickness);
         const auto insideCornerSize = cornerSize - lineThickness;
 
-        CGMutablePathRef path = CGPathCreateMutable();
-        CGPathAddRoundedRect (path, nullptr, convertToCGRectFlipped (outsideRect),
+        detail::MutablePathPtr path { CGPathCreateMutable() };
+        CGPathAddRoundedRect (path.get(), nullptr, convertToCGRectFlipped (outsideRect),
                               jmin (outsideCornerSize, outsideRect.getWidth() / 2.0f),
                               jmin (outsideCornerSize, outsideRect.getHeight() / 2.0f));
 
-        CGPathAddRoundedRect (path, nullptr, convertToCGRectFlipped (insideRect),
+        CGPathAddRoundedRect (path.get(), nullptr, convertToCGRectFlipped (insideRect),
                               jmin (insideCornerSize, insideRect.getWidth() / 2.0f),
                               jmin (insideCornerSize, insideRect.getHeight() / 2.0f));
 
-        CGContextAddPath (context.get(), path);
+        CGContextAddPath (context.get(), path.get());
         drawCurrentPath (kCGPathEOFill);
-        CGPathRelease (path);
     }
 }
 
 void CoreGraphicsContext::fillRoundedRectangle (const Rectangle<float>& r, float cornerSize)
 {
     CGContextBeginPath (context.get());
-    CGPathRef path = CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr);
-    CGContextAddPath (context.get(), path);
+    detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr) };
+    CGContextAddPath (context.get(), path.get());
     drawCurrentPath (kCGPathFill);
-    CGPathRelease (path);
 }
 
 void CoreGraphicsContext::drawLineWithThickness (const Line<float>& line, float lineThickness)

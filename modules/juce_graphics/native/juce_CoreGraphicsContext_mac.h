@@ -37,43 +37,14 @@ namespace juce
 
 namespace detail
 {
-    struct ColorSpaceDelete
-    {
-        void operator() (CGColorSpaceRef ptr) const noexcept { CGColorSpaceRelease (ptr); }
-    };
-
-    struct ContextDelete
-    {
-        void operator() (CGContextRef ptr) const noexcept { CGContextRelease (ptr); }
-    };
-
-    struct DataProviderDelete
-    {
-        void operator() (CGDataProviderRef ptr) const noexcept { CGDataProviderRelease (ptr); }
-    };
-
-    struct ImageDelete
-    {
-        void operator() (CGImageRef ptr) const noexcept { CGImageRelease (ptr); }
-    };
-
-    struct GradientDelete
-    {
-        void operator() (CGGradientRef ptr) const noexcept { CGGradientRelease (ptr); }
-    };
-
-    struct ColorDelete
-    {
-        void operator() (CGColorRef ptr) const noexcept { CGColorRelease (ptr); }
-    };
-
-    //==============================================================================
-    using ColorSpacePtr = std::unique_ptr<CGColorSpace, ColorSpaceDelete>;
-    using ContextPtr = std::unique_ptr<CGContext, ContextDelete>;
-    using DataProviderPtr = std::unique_ptr<CGDataProvider, DataProviderDelete>;
-    using ImagePtr = std::unique_ptr<CGImage, ImageDelete>;
-    using GradientPtr = std::unique_ptr<CGGradient, GradientDelete>;
-    using ColorPtr = std::unique_ptr<CGColor, ColorDelete>;
+    using ColorSpacePtr     = CFUniquePtr<CGColorSpaceRef>;
+    using ContextPtr        = CFUniquePtr<CGContextRef>;
+    using DataProviderPtr   = CFUniquePtr<CGDataProviderRef>;
+    using ImagePtr          = CFUniquePtr<CGImageRef>;
+    using GradientPtr       = CFUniquePtr<CGGradientRef>;
+    using ColorPtr          = CFUniquePtr<CGColorRef>;
+    using PathPtr           = CFUniquePtr<CGPathRef>;
+    using MutablePathPtr    = CFUniquePtr<CGMutablePathRef>;
 }
 
 //==============================================================================
