@@ -573,10 +573,54 @@ public:
         g.drawLine (positions[4].getValue() * w,
                     positions[5].getValue() * h,
                     positions[6].getValue() * w,
-                    positions[7].getValue() * h);
+                    positions[7].getValue() * h,
+                    10.0f * thickness.getValue());
     }
 
-    SlowerBouncingNumber offset, positions[8];
+    SlowerBouncingNumber offset, positions[8], thickness;
+};
+
+//==============================================================================
+class ShapesDemo final : public GraphicsDemoBase
+{
+public:
+    explicit ShapesDemo (ControllersComponent& cc)
+        : GraphicsDemoBase (cc, "Shapes")
+    {}
+
+    void drawDemo (Graphics& g) override
+    {
+        auto bounds = getLocalBounds().toFloat();
+        const auto rowHeight = bounds.getHeight() / 2.0f;
+        const auto spacing = 5.0f;
+
+        const auto drawShapes = [&] (auto area)
+        {
+            const auto lineThickness = thickness.getValue() * 25.0f;
+            const auto cornerSize = 15.0f;
+            const auto shapeWidth = area.getWidth() / 4.0f;
+
+            g.drawEllipse (area.removeFromLeft (shapeWidth).reduced (spacing), lineThickness);
+            g.fillEllipse (area.removeFromLeft (shapeWidth).reduced (spacing));
+
+            g.drawRoundedRectangle (area.removeFromLeft (shapeWidth).reduced (spacing), cornerSize, lineThickness);
+            g.fillRoundedRectangle (area.removeFromLeft (shapeWidth).reduced (spacing), cornerSize);
+        };
+
+        g.addTransform (AffineTransform::translation (-(bounds.getWidth() / 2.0f), -(bounds.getHeight() / 2.0f)).followedBy (getTransform()));
+
+        g.setColour (juce::Colours::red.withAlpha (getAlpha()));
+        drawShapes (bounds.removeFromTop (rowHeight).reduced (spacing));
+
+        const auto r = bounds.removeFromTop (rowHeight).reduced (spacing);
+        g.setGradientFill (juce::ColourGradient (juce::Colours::green, r.getTopLeft(),
+                                                 juce::Colours::blue, r.getBottomRight(),
+                                                 false));
+        g.setOpacity (getAlpha());
+        drawShapes (r);
+    }
+
+    SlowerBouncingNumber thickness;
 };
 
 //==============================================================================
@@ -646,6 +690,7 @@ public:
         demos.add (new GlyphsDemo (controls));
         demos.add (new SVGDemo    (controls));
         demos.add (new LinesDemo  (controls));
+        demos.add (new ShapesDemo (controls));
 
         addAndMakeVisible (listBox);
         listBox.setTitle ("Test List");
