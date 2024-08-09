@@ -162,6 +162,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
 #pragma push_macro ("False")
 #undef False
 
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmultichar", "-Wfour-char-constants")
+
  #include <base/source/updatehandler.cpp>
  #include <pluginterfaces/base/conststringtable.cpp>
  #include <pluginterfaces/base/funknown.cpp>
@@ -176,6 +178,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
  #include <public.sdk/source/vst/moduleinfo/moduleinfoparser.cpp>
  #include <public.sdk/source/vst/utility/stringconvert.cpp>
+ #include <public.sdk/source/vst/utility/vst2persistence.cpp>
  #include <public.sdk/source/vst/utility/uid.h>
  #include <public.sdk/source/vst/vstbus.cpp>
  #include <public.sdk/source/vst/vstcomponent.cpp>
@@ -184,6 +187,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <public.sdk/source/vst/vstinitiids.cpp>
  #include <public.sdk/source/vst/vstparameters.cpp>
  #include <public.sdk/source/vst/vstpresetfile.cpp>
+
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #pragma pop_macro ("True")
 #pragma pop_macro ("False")

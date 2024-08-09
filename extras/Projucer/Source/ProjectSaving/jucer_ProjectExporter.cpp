@@ -954,6 +954,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
                                 "-Wno-maybe-uninitialized",
                                 "-Wredundant-decls",
                                 "-Wno-strict-overflow",
+                                "-Wno-multichar",
                                 "-Wshadow" });
 }
 

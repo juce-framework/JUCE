@@ -66,10 +66,6 @@ struct PluginUtilities
         return hostType;
     }
 
-   #ifndef JUCE_VST3_CAN_REPLACE_VST2
-    #define JUCE_VST3_CAN_REPLACE_VST2 1
-   #endif
-
     // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.
     static void getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
     {

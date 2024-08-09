@@ -64,24 +64,6 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #include <juce_audio_processors/utilities/juce_FlagCache.h>
 #include <juce_audio_processors/format_types/juce_VST3Common.h>
 
-#ifndef JUCE_VST3_CAN_REPLACE_VST2
- #define JUCE_VST3_CAN_REPLACE_VST2 1
-#endif
-
-#if JUCE_VST3_CAN_REPLACE_VST2
-
- #if ! JUCE_MSVC && ! defined (__cdecl)
-  #define __cdecl
- #endif
-
- namespace Vst2
- {
- struct AEffect;
- #include "pluginterfaces/vst2.x/vstfxstore.h"
- }
-
-#endif
-
 #ifndef JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
  #if JucePlugin_WantsMidiInput
   #define JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS 1
@@ -2824,102 +2806,22 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_VST3_CAN_REPLACE_VST2
-    bool loadVST2VstWBlock (const char* data, int size)
-    {
-        jassert (ByteOrder::bigEndianInt ("VstW") == htonl ((uint32) readUnaligned<int32> (data)));
-        jassert (1 == htonl ((uint32) readUnaligned<int32> (data + 8))); // version should be 1 according to Steinberg's docs
-
-        auto headerLen = (int) htonl ((uint32) readUnaligned<int32> (data + 4)) + 8;
-        return loadVST2CcnKBlock (data + headerLen, size - headerLen);
-    }
-
-    bool loadVST2CcnKBlock (const char* data, int size)
-    {
-        auto* bank = reinterpret_cast<const Vst2::fxBank*> (data);
-
-        jassert (ByteOrder::bigEndianInt ("CcnK") == htonl ((uint32) bank->chunkMagic));
-        jassert (ByteOrder::bigEndianInt ("FBCh") == htonl ((uint32) bank->fxMagic));
-        jassert (htonl ((uint32) bank->version) == 1 || htonl ((uint32) bank->version) == 2);
-        jassert (JucePlugin_VSTUniqueID == htonl ((uint32) bank->fxID));
-
-        setStateInformation (bank->content.data.chunk,
-                             jmin ((int) (size - (bank->content.data.chunk - data)),
-                                   (int) htonl ((uint32) bank->content.data.size)));
-        return true;
-    }
-
-    bool loadVST3PresetFile (const char* data, int size)
-    {
-        if (size < 48)
-            return false;
-
-        // At offset 4 there's a little-endian version number which seems to typically be 1
-        // At offset 8 there's 32 bytes the SDK calls "ASCII-encoded class id"
-        auto chunkListOffset = (int) ByteOrder::littleEndianInt (data + 40);
-        jassert (memcmp (data + chunkListOffset, "List", 4) == 0);
-        auto entryCount = (int) ByteOrder::littleEndianInt (data + chunkListOffset + 4);
-        jassert (entryCount > 0);
-
-        for (int i = 0; i < entryCount; ++i)
-        {
-            auto entryOffset = chunkListOffset + 8 + 20 * i;
-
-            if (entryOffset + 20 > size)
-                return false;
-
-            if (memcmp (data + entryOffset, "Comp", 4) == 0)
-            {
-                // "Comp" entries seem to contain the data.
-                auto chunkOffset = ByteOrder::littleEndianInt64 (data + entryOffset + 4);
-                auto chunkSize   = ByteOrder::littleEndianInt64 (data + entryOffset + 12);
-
-                if (static_cast<uint64> (chunkOffset + chunkSize) > static_cast<uint64> (size))
-                {
-                    jassertfalse;
-                    return false;
-                }
-
-                loadVST2VstWBlock (data + chunkOffset, (int) chunkSize);
-            }
-        }
-
-        return true;
-    }
-
-    bool loadVST2CompatibleState (const char* data, int size)
-    {
-        if (size < 4)
-            return false;
-
-        auto header = htonl ((uint32) readUnaligned<int32> (data));
-
-        if (header == ByteOrder::bigEndianInt ("VstW"))
-            return loadVST2VstWBlock (data, size);
-
-        if (header == ByteOrder::bigEndianInt ("CcnK"))
-            return loadVST2CcnKBlock (data, size);
-
-        if (memcmp (data, "VST3", 4) == 0)
-        {
-            // In Cubase 5, when loading VST3 .vstpreset files,
-            // we get the whole content of the files to load.
-            // In Cubase 7 we get just the contents within and
-            // we go directly to the loadVST2VstW codepath instead.
-            return loadVST3PresetFile (data, size);
-        }
-
-        return false;
-    }
-   #endif
-
-    void loadStateData (const void* data, int size)
+    bool shouldTryToLoadVst2State()
     {
        #if JUCE_VST3_CAN_REPLACE_VST2
-        if (loadVST2CompatibleState ((const char*) data, size))
-            return;
+        return true;
+       #else
+        return false;
        #endif
-        setStateInformation (data, size);
+    }
+
+    bool shouldWriteStateWithVst2Compatibility()
+    {
+       #if JUCE_VST3_CAN_REPLACE_VST2
+        return true;
+       #else
+        return false;
+       #endif
     }
 
     bool readFromMemoryStream (IBStream* state)
@@ -2952,7 +2854,7 @@ public:
                 if (block.getSize() >= 5 && memcmp (block.getData(), "VC2!E", 5) == 0)
                     return false;
 
-            loadStateData (block.getData(), (int) block.getSize());
+            setStateInformation (block.getData(), (int) block.getSize());
             return true;
         }
 
@@ -2984,8 +2886,19 @@ public:
         if (dataSize <= 0 || dataSize >= 0x7fffffff)
             return false;
 
-        loadStateData (allData.getData(), (int) dataSize);
+        setStateInformation (allData.getData(), (int) dataSize);
         return true;
+    }
+
+    bool readVst2State (IBStream* state)
+    {
+        if (auto vst2State = VST3::tryVst2StateLoad (*state))
+        {
+            setStateInformation (vst2State->chunk.data(), (int) vst2State->chunk.size());
+            return true;
+        }
+
+        return false;
     }
 
     tresult PLUGIN_API setState (IBStream* state) override
@@ -2999,36 +2912,41 @@ public:
 
         FUnknownPtr<IBStream> stateRefHolder (state); // just in case the caller hasn't properly ref-counted the stream object
 
-        if (state->seek (0, IBStream::kIBSeekSet, nullptr) == kResultTrue)
+        const auto seekToBeginningOfStream = [&]
         {
-            if (! detail::PluginUtilities::getHostType().isFruityLoops() && readFromMemoryStream (state))
-                return kResultTrue;
+            return state->seek (0, IBStream::kIBSeekSet, nullptr) == kResultTrue;
+        };
 
-            if (readFromUnknownStream (state))
-                return kResultTrue;
-        }
+        if (seekToBeginningOfStream() && shouldTryToLoadVst2State() && readVst2State (state))
+            return kResultTrue;
+
+        if (seekToBeginningOfStream() && ! detail::PluginUtilities::getHostType().isFruityLoops() && readFromMemoryStream (state))
+            return kResultTrue;
+
+        if (seekToBeginningOfStream() && readFromUnknownStream (state))
+            return kResultTrue;
 
         return kResultFalse;
     }
 
-   #if JUCE_VST3_CAN_REPLACE_VST2
-    static tresult writeVST2Header (IBStream* state, bool bypassed)
+    tresult getStateWithVst2Compatibility (const MemoryBlock& dataChunk, IBStream& outState)
     {
-        auto writeVST2IntToState = [state] (uint32 n)
-        {
-            auto t = (int32) htonl (n);
-            return state->write (&t, 4);
-        };
+        VST3::Vst2xState vst2State;
 
-        auto status = writeVST2IntToState (ByteOrder::bigEndianInt ("VstW"));
+        vst2State.chunk.resize (dataChunk.getSize());
+        std::copy (dataChunk.begin(), dataChunk.end(), vst2State.chunk.begin());
 
-        if (status == kResultOk) status = writeVST2IntToState (8); // header size
-        if (status == kResultOk) status = writeVST2IntToState (1); // version
-        if (status == kResultOk) status = writeVST2IntToState (bypassed ? 1 : 0); // bypass
+        vst2State.fxUniqueID = JucePlugin_VSTUniqueID;
+        vst2State.fxVersion = JucePlugin_VersionCode;
+        vst2State.isBypassed = isBypassed();
 
-        return status;
+        if (VST3::writeVst2State (vst2State, outState))
+            return kResultTrue;
+
+        // Please inform the JUCE team if you hit this assertion
+        jassertfalse;
+        return kResultFalse;
     }
-   #endif
 
     tresult PLUGIN_API getState (IBStream* state) override
     {
@@ -3038,29 +2956,11 @@ public:
         MemoryBlock mem;
         getStateInformation (mem);
 
-      #if JUCE_VST3_CAN_REPLACE_VST2
-        tresult status = writeVST2Header (state, isBypassed());
+        if (mem.isEmpty())
+            return kResultFalse;
 
-        if (status != kResultOk)
-            return status;
-
-        const int bankBlockSize = 160;
-        Vst2::fxBank bank;
-
-        zerostruct (bank);
-        bank.chunkMagic         = (int32) htonl (ByteOrder::bigEndianInt ("CcnK"));
-        bank.byteSize           = (int32) htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
-        bank.fxMagic            = (int32) htonl (ByteOrder::bigEndianInt ("FBCh"));
-        bank.version            = (int32) htonl (2);
-        bank.fxID               = (int32) htonl (JucePlugin_VSTUniqueID);
-        bank.fxVersion          = (int32) htonl (JucePlugin_VersionCode);
-        bank.content.data.size  = (int32) htonl ((unsigned int) mem.getSize());
-
-        status = state->write (&bank, bankBlockSize);
-
-        if (status != kResultOk)
-            return status;
-       #endif
+        if (shouldWriteStateWithVst2Compatibility())
+            return getStateWithVst2Compatibility (mem, *state);
 
         return state->write (mem.getData(), (Steinberg::int32) mem.getSize());
     }

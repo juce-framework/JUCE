@@ -99,6 +99,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wno-implicit-fallthrough
         -Wno-maybe-uninitialized
         -Wno-ignored-qualifiers
+        -Wno-multichar
         -Wswitch-enum
         -Wredundant-decls
         -Wno-strict-overflow
