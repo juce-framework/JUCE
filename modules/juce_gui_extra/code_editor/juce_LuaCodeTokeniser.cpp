@@ -190,6 +190,10 @@ struct LuaTokeniserFunctions
 
         case '?':
         case '~':
+        // SURGE ADDITION
+        case '#':
+        case '/':
+        // END SURGE ADDITION
             source.skip();
             return LuaTokeniser::tokenType_operator;
 
