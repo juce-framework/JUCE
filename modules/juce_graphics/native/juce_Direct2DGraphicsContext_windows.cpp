@@ -547,7 +547,6 @@ protected:
     Direct2DGraphicsContext& owner;
     SharedResourcePointer<DirectX> directX;
     SharedResourcePointer<Direct2DFactories> directWrite;
-    RectangleList<int> paintAreas;
 
     std::optional<Direct2DDeviceResources> deviceResources;
 
@@ -567,8 +566,6 @@ protected:
     }
 
     virtual ComSmartPtr<ID2D1Image> getDeviceContextTarget() const = 0;
-
-    virtual void updatePaintAreas() = 0;
 
     virtual bool checkPaintReady()
     {
@@ -602,8 +599,8 @@ public:
         prepare();
 
         // Anything to paint?
-        updatePaintAreas();
-        auto paintBounds = paintAreas.getBounds();
+        const auto paintAreas = getPaintAreas();
+        const auto paintBounds = paintAreas.getBounds();
 
         if (! getFrameSize().intersects (paintBounds) || paintBounds.isEmpty())
             return nullptr;
@@ -705,12 +702,8 @@ public:
         return deviceResources->deviceContext;
     }
 
-    const auto& getPaintAreas() const noexcept
-    {
-        return paintAreas;
-    }
-
-    virtual Rectangle<int> getFrameSize() = 0;
+    virtual RectangleList<int> getPaintAreas() const = 0;
+    virtual Rectangle<int> getFrameSize() const = 0;
 
     void setDeviceContextTransform (AffineTransform transform)
     {
@@ -893,7 +886,8 @@ Direct2DGraphicsContext::~Direct2DGraphicsContext() = default;
 
 bool Direct2DGraphicsContext::startFrame (float dpiScale)
 {
-    auto pimpl = getPimpl();
+    const auto pimpl = getPimpl();
+    const auto paintAreas = pimpl->getPaintAreas();
     currentState = pimpl->startFrame (dpiScale);
 
     if (currentState == nullptr)
@@ -903,7 +897,7 @@ bool Direct2DGraphicsContext::startFrame (float dpiScale)
     {
         resetPendingClipList();
 
-        clipToRectangleList (pimpl->getPaintAreas());
+        clipToRectangleList (paintAreas);
 
         // Clear the buffer *after* setting the clip region
         clearTargetBuffer();

@@ -371,18 +371,18 @@ private:
         Pimpl::teardown();
     }
 
-    void updatePaintAreas() override
+    RectangleList<int> getPaintAreas() const override
     {
         // Does the entire buffer need to be filled?
         if (swap.state == SwapChain::State::bufferAllocated || resizing)
-            deferredRepaints = swap.getSize();
+            return swap.getSize();
 
         // If the window alpha is less than 1.0, clip to the union of the
         // deferred repaints so the device context Clear() works correctly
         if (targetAlpha < 1.0f || ! opaque)
-            paintAreas = deferredRepaints.getBounds();
-        else
-            paintAreas = deferredRepaints;
+            return deferredRepaints.getBounds();
+
+        return deferredRepaints;
     }
 
     bool checkPaintReady() override
@@ -436,7 +436,7 @@ public:
         return Rectangle<int>::leftTopRightBottom (clientRect.left, clientRect.top, clientRect.right, clientRect.bottom);
     }
 
-    Rectangle<int> getFrameSize() override
+    Rectangle<int> getFrameSize() const override
     {
         return getClientRect();
     }
@@ -523,7 +523,7 @@ public:
         // next frame
         JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::direct2dHwndPaintStart, owner.getFrameId());
 
-        presentation.getPresentation()->setPaintAreas (paintAreas);
+        presentation.getPresentation()->setPaintAreas (getPaintAreas());
 
         deferredRepaints.clear();
 

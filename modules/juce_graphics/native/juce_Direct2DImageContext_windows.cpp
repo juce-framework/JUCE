@@ -46,15 +46,15 @@ public:
     {
     }
 
-    Rectangle<int> getFrameSize() override
+    Rectangle<int> getFrameSize() const override
     {
         const auto targetBitmap = getBitmap();
 
         if (targetBitmap == nullptr)
             return {};
 
-        auto size = targetBitmap->GetSize();
-        return Rectangle<float> { size.width, size.height }.getSmallestIntegerContainer();
+        const auto size = targetBitmap->GetSize();
+        return { (int) size.width, (int) size.height };
     }
 
     ComSmartPtr<ID2D1Image> getDeviceContextTarget() const override
@@ -81,9 +81,9 @@ private:
         return target->getAdapterD2D1Bitmap();
     }
 
-    void updatePaintAreas() override
+    RectangleList<int> getPaintAreas() const override
     {
-        paintAreas = getFrameSize();
+        return getFrameSize();
     }
 
     Direct2DPixelData::Ptr target;
