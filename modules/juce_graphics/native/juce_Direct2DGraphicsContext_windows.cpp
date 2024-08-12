@@ -553,24 +553,21 @@ protected:
     RectangleList<int> paintAreas;
 
     DxgiAdapter::Ptr adapter;
-    Direct2DDeviceResources deviceResources;
+    std::optional<Direct2DDeviceResources> deviceResources;
 
     std::vector<std::unique_ptr<Direct2DGraphicsContext::SavedState>> savedClientStates;
 
     virtual HRESULT prepare()
     {
-        if (! deviceResources.canPaint (adapter))
-        {
-            if (auto hr = deviceResources.create (adapter); FAILED (hr))
-                return hr;
-        }
+        if (! deviceResources.has_value())
+            deviceResources = Direct2DDeviceResources::create (adapter);
 
-        return S_OK;
+        return deviceResources.has_value() ? S_OK : E_FAIL;
     }
 
     virtual void teardown()
     {
-        deviceResources.release();
+        deviceResources.reset();
     }
 
     virtual ComSmartPtr<ID2D1Image> getDeviceContextTarget() const = 0;
@@ -579,7 +576,7 @@ protected:
 
     virtual bool checkPaintReady()
     {
-        return deviceResources.canPaint (adapter);
+        return deviceResources.has_value();
     }
 
 public:
@@ -626,14 +623,14 @@ public:
         JUCE_TRACE_EVENT_INT_RECT_LIST (etw::startD2DFrame, etw::direct2dKeyword, owner.getFrameId(), paintAreas);
 
         // Init device context transform
-        resetTransform (deviceResources.deviceContext);
+        resetTransform (deviceResources->deviceContext);
 
         const auto effectiveDpi = USER_DEFAULT_SCREEN_DPI * dpiScale;
-        deviceResources.deviceContext->SetDpi (effectiveDpi, effectiveDpi);
+        deviceResources->deviceContext->SetDpi (effectiveDpi, effectiveDpi);
 
         // Start drawing
-        deviceResources.deviceContext->SetTarget (getDeviceContextTarget());
-        deviceResources.deviceContext->BeginDraw();
+        deviceResources->deviceContext->SetTarget (getDeviceContextTarget());
+        deviceResources->deviceContext->BeginDraw();
 
         // Init the save state stack and return the first saved state
         return pushFirstSavedState (paintBounds);
@@ -651,8 +648,8 @@ public:
             JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.metrics, endDrawDuration)
             JUCE_SCOPED_TRACE_EVENT_FRAME (etw::endDraw, etw::direct2dKeyword, owner.getFrameId());
 
-            hr = deviceResources.deviceContext->EndDraw();
-            deviceResources.deviceContext->SetTarget (nullptr);
+            hr = deviceResources->deviceContext->EndDraw();
+            deviceResources->deviceContext->SetTarget (nullptr);
         }
 
         jassert (SUCCEEDED (hr));
@@ -678,9 +675,9 @@ public:
 
         savedClientStates.push_back (std::make_unique<SavedState> (owner,
                                                                    initialClipRegion,
-                                                                   deviceResources.colourBrush,
+                                                                   deviceResources->colourBrush,
                                                                    adapter,
-                                                                   deviceResources));
+                                                                   *deviceResources));
 
         return getCurrentSavedState();
     }
@@ -715,7 +712,7 @@ public:
 
     ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const noexcept
     {
-        return deviceResources.deviceContext;
+        return deviceResources->deviceContext;
     }
 
     const auto& getPaintAreas() const noexcept
@@ -727,12 +724,12 @@ public:
 
     void setDeviceContextTransform (AffineTransform transform)
     {
-        setTransform (deviceResources.deviceContext, transform);
+        setTransform (deviceResources->deviceContext, transform);
     }
 
     void resetDeviceContextTransform()
     {
-        resetTransform (deviceResources.deviceContext);
+        resetTransform (deviceResources->deviceContext);
     }
 
     auto getDirect2DFactory()
@@ -760,7 +757,7 @@ public:
         if (! owner.currentState->fillType.isColour())
             return false;
 
-        auto* rectangleListSpriteBatch = deviceResources.rectangleListSpriteBatch.get();
+        auto* rectangleListSpriteBatch = deviceResources->rectangleListSpriteBatch.get();
 
         if (rectangleListSpriteBatch == nullptr)
             return false;
@@ -826,7 +823,7 @@ public:
 
         owner.applyPendingClipList();
 
-        auto deviceContext = deviceResources.deviceContext;
+        auto deviceContext = deviceResources->deviceContext;
 
         if (deviceContext == nullptr)
             return;

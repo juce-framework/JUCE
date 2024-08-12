@@ -332,11 +332,11 @@ private:
                 return E_FAIL;
         }
 
-        if (! deviceResources.canPaint (adapter))
-        {
-            if (auto hr = deviceResources.create (adapter); FAILED (hr))
-                return hr;
-        }
+        if (! deviceResources.has_value())
+            deviceResources = Direct2DDeviceResources::create (adapter);
+
+        if (! deviceResources.has_value())
+            return E_FAIL;
 
         if (! hwnd || frameSize.isEmpty())
             return E_FAIL;
@@ -346,7 +346,7 @@ private:
             if (auto hr = swap.create (hwnd, frameSize, adapter); FAILED (hr))
                 return hr;
 
-            if (auto hr = swap.createBuffer (deviceResources.deviceContext); FAILED (hr))
+            if (auto hr = swap.createBuffer (deviceResources->deviceContext); FAILED (hr))
                 return hr;
         }
 
@@ -450,7 +450,7 @@ public:
     ComSmartPtr<ID2D1Image> getDeviceContextTarget() const override
     {
         if (auto* p = presentation.getPresentation())
-            return p->getPresentationBitmap (swap.getSize(), deviceResources.deviceContext);
+            return p->getPresentationBitmap (swap.getSize(), deviceResources->deviceContext);
 
         return {};
     }
@@ -478,7 +478,7 @@ public:
         // Resize/scale the swap chain
         prepare();
 
-        if (auto deviceContext = deviceResources.deviceContext)
+        if (auto deviceContext = deviceResources->deviceContext)
         {
             ScopedMultithread scopedMultithread { directX->getD2DMultithread() };
 
@@ -630,7 +630,7 @@ public:
 
     Image createSnapshot() const
     {
-        if (frameSize.isEmpty() || deviceResources.deviceContext == nullptr || swap.buffer == nullptr)
+        if (frameSize.isEmpty() || deviceResources->deviceContext == nullptr || swap.buffer == nullptr)
             return {};
 
         // Create the bitmap to receive the snapshot
@@ -643,7 +643,7 @@ public:
 
         ComSmartPtr<ID2D1Bitmap1> snapshot;
 
-        if (const auto hr = deviceResources.deviceContext->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
+        if (const auto hr = deviceResources->deviceContext->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
             return {};
 
         const ScopedMultithread scope { directX->getD2DMultithread() };

@@ -254,45 +254,113 @@ private:
 class Direct2DDeviceResources
 {
 public:
-    Direct2DDeviceResources() = default;
-
-    // Create a Direct2D device context for a DXGI adapter
-    HRESULT create (DxgiAdapter::Ptr adapter)
+    static DxgiAdapter::Ptr findAdapter (const DxgiAdapters& adapters, ID2D1Bitmap1* bitmap)
     {
-        jassert (adapter);
+        if (bitmap == nullptr)
+            return {};
 
-        if (deviceContext == nullptr)
-            deviceContext = Direct2DDeviceContext::create (adapter);
+        ComSmartPtr<IDXGISurface> surface;
+        bitmap->GetSurface (surface.resetAndGetPointerAddress());
 
-        if (colourBrush == nullptr)
+        if (surface == nullptr)
+            return {};
+
+        ComSmartPtr<IDXGIDevice> device;
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        surface->GetDevice (__uuidof (device), (void**) device.resetAndGetPointerAddress());
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return findAdapter (adapters, device);
+    }
+
+    static DxgiAdapter::Ptr findAdapter (const DxgiAdapters& dxgiAdapters, IDXGIDevice* dxgiDevice)
+    {
+        if (dxgiDevice == nullptr)
+            return {};
+
+        ComSmartPtr<IDXGIAdapter> adapter;
+        dxgiDevice->GetAdapter (adapter.resetAndGetPointerAddress());
+
+        if (adapter == nullptr)
+            return {};
+
+        ComSmartPtr<IDXGIAdapter1> adapter1;
+        adapter.QueryInterface (adapter1);
+
+        if (adapter1 == nullptr)
+            return {};
+
+        const auto adapterLuid = getLUID (adapter1);
+
+        const auto& adapters = dxgiAdapters.getAdapterArray();
+
+        const auto it = std::find_if (adapters.begin(), adapters.end(), [&] (DxgiAdapter::Ptr ptr)
         {
-            if (const auto hr = deviceContext->CreateSolidColorBrush (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f),
-                                                                      colourBrush.resetAndGetPointerAddress());
+            const auto tie = [] (const LUID& x) { return std::tie (x.LowPart, x.HighPart); };
+
+            const auto thisLuid = getLUID (ptr->dxgiAdapter);
+            return tie (thisLuid) == tie (adapterLuid);
+        });
+
+        if (it == adapters.end())
+            return {};
+
+        return *it;
+    }
+
+    static DxgiAdapter::Ptr findAdapter (const DxgiAdapters& dxgiAdapters, ID2D1DeviceContext1* context)
+    {
+        if (context == nullptr)
+            return {};
+
+        ComSmartPtr<ID2D1Device> device;
+        context->GetDevice (device.resetAndGetPointerAddress());
+
+        if (device == nullptr)
+            return {};
+
+        ComSmartPtr<IDXGIDevice> dxgiDevice;
+        device.QueryInterface (dxgiDevice);
+
+        return findAdapter (dxgiAdapters, dxgiDevice);
+    }
+
+    static LUID getLUID (ComSmartPtr<IDXGIAdapter1> adapter)
+    {
+        DXGI_ADAPTER_DESC1 desc{};
+        adapter->GetDesc1 (&desc);
+        return desc.AdapterLuid;
+    }
+
+    static std::optional<Direct2DDeviceResources> create (DxgiAdapter::Ptr adapter)
+    {
+        return create (Direct2DDeviceContext::create (adapter));
+    }
+
+    static std::optional<Direct2DDeviceResources> create (ComSmartPtr<ID2D1DeviceContext1> context)
+    {
+        if (context == nullptr)
+            return {};
+
+        Direct2DDeviceResources result;
+        result.deviceContext = context;
+
+        if (const auto hr = result.deviceContext->CreateSolidColorBrush (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f),
+                                                                         result.colourBrush.resetAndGetPointerAddress());
                 FAILED (hr))
-            {
-                jassertfalse;
-                return hr;
-            }
+        {
+            jassertfalse;
+            return {};
         }
 
-        if (rectangleListSpriteBatch == nullptr)
-            rectangleListSpriteBatch = std::make_unique<RectangleListSpriteBatch>();
+        result.rectangleListSpriteBatch = std::make_unique<RectangleListSpriteBatch>();
 
-        return S_OK;
+        return result;
     }
 
-    void release()
+    DxgiAdapter::Ptr findAdapter (const DxgiAdapters& adapters) const
     {
-        rectangleListSpriteBatch = nullptr;
-        linearGradientCache = {};
-        radialGradientCache = {};
-        colourBrush = nullptr;
-        deviceContext = nullptr;
-    }
-
-    bool canPaint (DxgiAdapter::Ptr adapter) const
-    {
-        return adapter->direct2DDevice != nullptr && deviceContext != nullptr && colourBrush != nullptr;
+        return findAdapter (adapters, deviceContext);
     }
 
     ComSmartPtr<ID2D1DeviceContext1> deviceContext;
@@ -300,6 +368,9 @@ public:
     LinearGradientCache linearGradientCache;
     RadialGradientCache radialGradientCache;
     std::unique_ptr<RectangleListSpriteBatch> rectangleListSpriteBatch;
+
+private:
+    Direct2DDeviceResources() = default;
 };
 
 class SwapChain
