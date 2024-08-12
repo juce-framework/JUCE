@@ -154,9 +154,3 @@ namespace juce
  #include "native/juce_CoreGraphicsHelpers_mac.h"
  #include "native/juce_CoreGraphicsContext_mac.h"
 #endif
-
-#if JUCE_WINDOWS
- #include "native/juce_Direct2DMetrics_windows.h"
- #include "native/juce_Direct2DGraphicsContext_windows.h"
- #include "native/juce_Direct2DHwndContext_windows.h"
-#endif
