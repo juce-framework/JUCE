@@ -256,12 +256,10 @@ public:
     SavedState (Direct2DGraphicsContext& ownerIn,
                 Rectangle<int> frameSizeIn,
                 ComSmartPtr<ID2D1SolidColorBrush>& colourBrushIn,
-                DxgiAdapter::Ptr& adapterIn,
                 Direct2DDeviceResources& deviceResourcesIn)
         : owner (ownerIn),
           currentBrush (colourBrushIn),
           colourBrush (colourBrushIn),
-          adapter (adapterIn),
           deviceResources (deviceResourcesIn),
           deviceSpaceClipList (frameSizeIn.toFloat())
     {
@@ -519,7 +517,6 @@ public:
 
     RenderingHelpers::TranslationOrTransform currentTransform;
 
-    DxgiAdapter::Ptr& adapter;
     Direct2DDeviceResources& deviceResources;
     RectangleList<float> deviceSpaceClipList;
 
@@ -676,7 +673,6 @@ public:
         savedClientStates.push_back (std::make_unique<SavedState> (owner,
                                                                    initialClipRegion,
                                                                    deviceResources->colourBrush,
-                                                                   adapter,
                                                                    *deviceResources));
 
         return getCurrentSavedState();
