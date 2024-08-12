@@ -38,11 +38,10 @@ namespace juce
 class Direct2DHwndContext : public Direct2DGraphicsContext
 {
 public:
-    Direct2DHwndContext (void* windowHandle, bool opaque);
+    explicit Direct2DHwndContext (HWND windowHandle);
     ~Direct2DHwndContext() override;
 
     void handleShowWindow();
-    void setWindowAlpha (float alpha);
 
     void setResizing (bool);
     bool getResizing() const;
@@ -52,11 +51,6 @@ public:
     void addDeferredRepaint (Rectangle<int> deferredRepaint);
 
     Image createSnapshot() const override;
-
-    static Colour getBackgroundTransparencyKeyColour() noexcept
-    {
-        return Colour { 0xff000001 };
-    }
 
 private:
     struct HwndPimpl;

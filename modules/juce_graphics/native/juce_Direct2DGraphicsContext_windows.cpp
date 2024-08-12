@@ -573,11 +573,9 @@ protected:
     }
 
 public:
-    Pimpl (Direct2DGraphicsContext& ownerIn, bool opaqueIn)
-        : owner (ownerIn), opaque (opaqueIn)
+    explicit Pimpl (Direct2DGraphicsContext& ownerIn)
+        : owner (ownerIn)
     {
-        setTargetAlpha (1.0f);
-
         directX->adapters.addListener (*this);
     }
 
@@ -586,12 +584,6 @@ public:
         directX->adapters.removeListener (*this);
 
         popAllSavedStates();
-    }
-
-    void setTargetAlpha (float alpha)
-    {
-        backgroundColor = D2DUtilities::toCOLOR_F (Colours::black.withAlpha (opaque ? targetAlpha : 0.0f));
-        targetAlpha = alpha;
     }
 
     virtual SavedState* startFrame (float dpiScale)
@@ -832,9 +824,6 @@ public:
     }
 
     DirectWriteGlyphRun glyphRun;
-    bool opaque = true;
-    float targetAlpha = 1.0f;
-    D2D1_COLOR_F backgroundColor{};
 
 private:
     static void resetTransform (ID2D1DeviceContext1* context)

@@ -38,13 +38,11 @@ namespace juce
 struct Direct2DImageContext::ImagePimpl : public Direct2DGraphicsContext::Pimpl
 {
 public:
-    static constexpr auto opaque = false;
-
     ImagePimpl (Direct2DImageContext& ownerIn,
                 ComSmartPtr<ID2D1DeviceContext1> contextIn,
                 ComSmartPtr<ID2D1Bitmap1> bitmapIn,
                 const RectangleList<int>& paintAreasIn)
-        : Pimpl (ownerIn, opaque),
+        : Pimpl (ownerIn),
           context (std::move (contextIn)),
           bitmap (std::move (bitmapIn)),
           paintAreas (paintAreasIn)

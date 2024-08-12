@@ -373,11 +373,6 @@ private:
         if (swap.state == SwapChain::State::bufferAllocated || resizing)
             return swap.getSize();
 
-        // If the window alpha is less than 1.0, clip to the union of the
-        // deferred repaints so the device context Clear() works correctly
-        if (targetAlpha < 1.0f || ! opaque)
-            return deferredRepaints.getBounds();
-
         return deferredRepaints;
     }
 
@@ -405,8 +400,8 @@ private:
     JUCE_DECLARE_WEAK_REFERENCEABLE (HwndPimpl)
 
 public:
-    HwndPimpl (Direct2DHwndContext& ownerIn, HWND hwndIn, bool opaqueIn)
-        : Pimpl (ownerIn, opaqueIn),
+    HwndPimpl (Direct2DHwndContext& ownerIn, HWND hwndIn)
+        : Pimpl (ownerIn),
           hwnd (hwndIn)
     {
     }
@@ -645,7 +640,7 @@ public:
 };
 
 //==============================================================================
-Direct2DHwndContext::Direct2DHwndContext (void* windowHandle, bool opaque)
+Direct2DHwndContext::Direct2DHwndContext (HWND windowHandle)
 {
    #if JUCE_DIRECT2D_METRICS
     metrics = new Direct2DMetrics { Direct2DMetricsHub::getInstance()->lock,
@@ -654,7 +649,7 @@ Direct2DHwndContext::Direct2DHwndContext (void* windowHandle, bool opaque)
     Direct2DMetricsHub::getInstance()->add (metrics);
    #endif
 
-    pimpl = std::make_unique<HwndPimpl> (*this, reinterpret_cast<HWND> (windowHandle), opaque);
+    pimpl = std::make_unique<HwndPimpl> (*this, windowHandle);
     updateSize();
 }
 
@@ -673,11 +668,6 @@ Direct2DGraphicsContext::Pimpl* Direct2DHwndContext::getPimpl() const noexcept
 void Direct2DHwndContext::handleShowWindow()
 {
     pimpl->handleShowWindow();
-}
-
-void Direct2DHwndContext::setWindowAlpha (float alpha)
-{
-    pimpl->setTargetAlpha (alpha);
 }
 
 void Direct2DHwndContext::setResizing (bool x)
@@ -712,13 +702,7 @@ Image Direct2DHwndContext::createSnapshot() const
 
 void Direct2DHwndContext::clearTargetBuffer()
 {
-    // For opaque windows, clear the background to black with the window alpha
-    // For non-opaque windows, clear the background to transparent black
-    // In either case, add a transparency layer if the window alpha is less than 1.0
-    pimpl->getDeviceContext()->Clear (pimpl->backgroundColor);
-
-    if (pimpl->targetAlpha < 1.0f)
-        beginTransparencyLayer (pimpl->targetAlpha);
+    pimpl->getDeviceContext()->Clear();
 }
 
 } // namespace juce

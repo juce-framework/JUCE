@@ -4996,42 +4996,15 @@ public:
 
     explicit D2DRenderContext (HWNDComponentPeer& peerIn)
         : peer (peerIn),
-          direct2DContext (std::make_unique<Direct2DHwndContext> (peer.getHWND(), peer.getComponent().isOpaque()))
+          direct2DContext (std::make_unique<Direct2DHwndContext> (peer.getHWND()))
     {
-        // Layered windows use the contents of the window back buffer to automatically determine mouse hit testing
-        // But - Direct2D doesn't fill the window back buffer so the hit tests pass through for transparent windows
-        //
-        // Layered windows can use a single RGB colour as a transparency key (like a green screen). So - choose an
-        // RGB color as the key and call SetLayeredWindowAttributes with LWA_COLORKEY and the key colour.
-        //
-        // Then, use an ID2D1HwndRenderTarget when resizing the window to flush the redirection bitmap to that same
-        // RGB color.
-        //
-        // Setting the window class background brush and handling WM_ERASEBKGND didn't work; Windows keeps filling
-        // the redirection bitmap in with solid black when the window resizes.
-        //
-        // Also - only certain colour values seem to work for the transparency key; RGB(0, 0, 1) seems OK
-        if (peer.getComponent().isOpaque())
-            return;
-
-        peer.setLayeredWindowStyle (true);
-
-        auto backgroundKeyColour = Direct2DHwndContext::getBackgroundTransparencyKeyColour();
-        [[maybe_unused]] auto ok = SetLayeredWindowAttributes (peer.getHWND(),
-                                                               RGB (backgroundKeyColour.getRed(),
-                                                                    backgroundKeyColour.getGreen(),
-                                                                    backgroundKeyColour.getBlue()),
-                                                               255,
-                                                               LWA_COLORKEY);
-        jassert (ok);
     }
 
     const char* getName() const override { return name; }
 
-    void setAlpha (float newAlpha) override
+    void setAlpha (float) override
     {
-        direct2DContext->setWindowAlpha (newAlpha);
-        peer.getComponent().repaint();
+        // setAlpha is not supported for swapchain-backed D2D rendering
     }
 
     void handlePaintMessage() override
