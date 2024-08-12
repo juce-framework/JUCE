@@ -3477,6 +3477,19 @@ private:
         yes
     };
 
+    static void updateVBlankDispatcherForAllPeers (ForceRefreshDispatcher force = ForceRefreshDispatcher::no)
+    {
+        // There's an edge case where only top-level windows seem to get WM_SETTINGCHANGE
+        // messages, which means that if we have a plugin that opens its own top-level/desktop
+        // window, then the extra window might get a SETTINGCHANGE but the plugin window may not.
+        // If we only update the vblank dispatcher for windows that get a SETTINGCHANGE, we might
+        // miss child windows, and those windows won't be able to repaint.
+
+        for (auto i = getNumPeers(); --i >= 0;)
+            if (auto* peer = static_cast<HWNDComponentPeer*> (getPeer (i)))
+                peer->updateCurrentMonitorAndRefreshVBlankDispatcher (force);
+    }
+
     void updateCurrentMonitorAndRefreshVBlankDispatcher (ForceRefreshDispatcher force = ForceRefreshDispatcher::no)
     {
         auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL);
@@ -3655,7 +3668,7 @@ private:
 
         auto* dispatcher = VBlankDispatcher::getInstance();
         dispatcher->reconfigureDisplays();
-        updateCurrentMonitorAndRefreshVBlankDispatcher (ForceRefreshDispatcher::yes);
+        updateVBlankDispatcherForAllPeers (ForceRefreshDispatcher::yes);
     }
 
     //==============================================================================
