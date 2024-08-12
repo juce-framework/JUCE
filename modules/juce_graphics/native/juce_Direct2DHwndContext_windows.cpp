@@ -505,10 +505,8 @@ public:
 
         // Call addDeferredRepaint for each RECT in the update region to make
         // sure they are snapped properly for DPI scaling
-        auto rectArray = updateRegion.getRECTArray();
-
-        for (uint32 i = 0; i < updateRegion.getNumRECT(); ++i)
-            addDeferredRepaint (D2DUtilities::toRectangle (rectArray[i]));
+        for (const auto& rect : updateRegion.getRects())
+            addDeferredRepaint (D2DUtilities::toRectangle (rect));
 
         updateRegion.clear();
     }

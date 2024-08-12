@@ -444,4 +444,72 @@ struct Direct2DBitmap
     }
 };
 
+//==============================================================================
+/*  UpdateRegion extracts the invalid region for a window
+    UpdateRegion is used to service WM_PAINT to add the invalid region of a window to
+    deferredRepaints. UpdateRegion marks the region as valid, and the region should be painted on the
+    next vblank.
+    This is similar to the invalid region update in HWNDComponentPeer::handlePaintMessage()
+*/
+class UpdateRegion
+{
+public:
+    void findRECTAndValidate (HWND windowHandle)
+    {
+        numRect = 0;
+
+        auto regionHandle = CreateRectRgn (0, 0, 0, 0);
+
+        if (regionHandle == nullptr)
+        {
+            ValidateRect (windowHandle, nullptr);
+            return;
+        }
+
+        auto regionType = GetUpdateRgn (windowHandle, regionHandle, false);
+
+        if (regionType == SIMPLEREGION || regionType == COMPLEXREGION)
+        {
+            auto regionDataBytes = GetRegionData (regionHandle, (DWORD) block.getSize(), (RGNDATA*) block.getData());
+
+            if (regionDataBytes > block.getSize())
+            {
+                block.ensureSize (regionDataBytes);
+                regionDataBytes = GetRegionData (regionHandle, (DWORD) block.getSize(), (RGNDATA*) block.getData());
+            }
+
+            if (regionDataBytes > 0)
+            {
+                auto header = (RGNDATAHEADER const* const) block.getData();
+
+                if (header->iType == RDH_RECTANGLES)
+                    numRect = header->nCount;
+            }
+        }
+
+        if (numRect > 0)
+            ValidateRgn (windowHandle, regionHandle);
+        else
+            ValidateRect (windowHandle, nullptr);
+
+        DeleteObject (regionHandle);
+    }
+
+    void clear()
+    {
+        numRect = 0;
+    }
+
+    Span<const RECT> getRects() const
+    {
+        auto header = (RGNDATAHEADER const* const) block.getData();
+        auto* data = (RECT*) (header + 1);
+        return { data, numRect };
+    }
+
+private:
+    MemoryBlock block { 1024 };
+    uint32 numRect = 0;
+};
+
 } // namespace juce
