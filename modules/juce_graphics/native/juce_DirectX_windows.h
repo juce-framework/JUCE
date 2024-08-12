@@ -327,4 +327,93 @@ struct D2DUtilities
     }
 };
 
+//==============================================================================
+struct Direct2DBitmap
+{
+    Direct2DBitmap() = delete;
+
+    static ComSmartPtr<ID2D1Bitmap1> toBitmap (const Image& image,
+                                               ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+                                               Image::PixelFormat outputFormat)
+    {
+        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
+
+        jassert (outputFormat == Image::ARGB || outputFormat == Image::SingleChannel);
+
+        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::createDirect2DBitmapFromImage, etw::graphicsKeyword);
+
+        // Calling Image::convertedToFormat could cause unchecked recursion since convertedToFormat
+        // calls Graphics::drawImageAt which calls Direct2DGraphicsContext::drawImage which calls this function...
+        //
+        // Use a software image for the conversion instead so the Graphics::drawImageAt call doesn't go
+        // through the Direct2D renderer
+        //
+        // Be sure to explicitly set the DPI to 96.0 for the image; otherwise it will default to the screen DPI
+        // and may be scaled incorrectly
+        const auto convertedImage = SoftwareImageType{}.convert (image).convertedToFormat (outputFormat);
+
+        if (! convertedImage.isValid())
+            return {};
+
+        Image::BitmapData bitmapData { convertedImage, Image::BitmapData::readWrite };
+
+        D2D1_BITMAP_PROPERTIES1 bitmapProperties{};
+        bitmapProperties.pixelFormat.format = outputFormat == Image::SingleChannel
+                                              ? DXGI_FORMAT_A8_UNORM
+                                              : DXGI_FORMAT_B8G8R8A8_UNORM;
+        bitmapProperties.pixelFormat.alphaMode = outputFormat == Image::RGB
+                                                 ? D2D1_ALPHA_MODE_IGNORE
+                                                 : D2D1_ALPHA_MODE_PREMULTIPLIED;
+        bitmapProperties.dpiX = USER_DEFAULT_SCREEN_DPI;
+        bitmapProperties.dpiY = USER_DEFAULT_SCREEN_DPI;
+
+        const D2D1_SIZE_U size { (UINT32) image.getWidth(), (UINT32) image.getHeight() };
+
+        ComSmartPtr<ID2D1Bitmap1> bitmap;
+        deviceContext->CreateBitmap (size,
+                                     bitmapData.data,
+                                     (UINT32) bitmapData.lineStride,
+                                     bitmapProperties,
+                                     bitmap.resetAndGetPointerAddress());
+        return bitmap;
+    }
+
+    static ComSmartPtr<ID2D1Bitmap1> createBitmap (ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+                                                   Image::PixelFormat format,
+                                                   D2D_SIZE_U size,
+                                                   D2D1_BITMAP_OPTIONS options)
+    {
+        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::createDirect2DBitmap, etw::graphicsKeyword);
+
+        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
+
+       #if JUCE_DEBUG
+        // Verify that the GPU can handle a bitmap of this size
+        //
+        // If you need a bitmap larger than this, you'll need to either split it up into multiple bitmaps
+        // or use a software image (see SoftwareImageType).
+        auto maxBitmapSize = deviceContext->GetMaximumBitmapSize();
+        jassert (size.width <= maxBitmapSize && size.height <= maxBitmapSize);
+       #endif
+
+        const auto pixelFormat = D2D1::PixelFormat (format == Image::SingleChannel
+                                                        ? DXGI_FORMAT_A8_UNORM
+                                                        : DXGI_FORMAT_B8G8R8A8_UNORM,
+                                                    format == Image::RGB
+                                                        ? D2D1_ALPHA_MODE_IGNORE
+                                                        : D2D1_ALPHA_MODE_PREMULTIPLIED);
+        const auto bitmapProperties = D2D1::BitmapProperties1 (options, pixelFormat);
+
+        ComSmartPtr<ID2D1Bitmap1> bitmap;
+        const auto hr = deviceContext->CreateBitmap (size,
+                                                     {},
+                                                     {},
+                                                     bitmapProperties,
+                                                     bitmap.resetAndGetPointerAddress());
+
+        jassertquiet (SUCCEEDED (hr) && bitmap != nullptr);
+        return bitmap;
+    }
+};
+
 } // namespace juce

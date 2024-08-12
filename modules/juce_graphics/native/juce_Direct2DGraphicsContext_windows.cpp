@@ -351,7 +351,7 @@ public:
 
                 JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
 
-                return Direct2DBitmap::fromImage (fillType.image, deviceResources.deviceContext.context, Image::ARGB);
+                return Direct2DBitmap::toBitmap (fillType.image, deviceResources.deviceContext.context, Image::ARGB);
             }();
 
             if (d2d1Bitmap != nullptr)
@@ -1188,7 +1188,7 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
         if (! d2d1Bitmap)
         {
             // Convert sourceImage to single-channel alpha-only maskImage
-            d2d1Bitmap = Direct2DBitmap::fromImage (sourceImage, deviceContext, Image::SingleChannel);
+            d2d1Bitmap = Direct2DBitmap::toBitmap (sourceImage, deviceContext, Image::SingleChannel);
         }
 
         if (d2d1Bitmap)
@@ -1474,7 +1474,7 @@ void Direct2DGraphicsContext::drawImage (const Image& image, const AffineTransfo
         {
             JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
 
-            d2d1Bitmap = Direct2DBitmap::fromImage (image, deviceContext, Image::ARGB);
+            d2d1Bitmap = Direct2DBitmap::toBitmap (image, deviceContext, Image::ARGB);
             imageClipArea = image.getBounds();
         }
 
