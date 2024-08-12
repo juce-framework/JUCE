@@ -35,45 +35,6 @@
 namespace juce
 {
 
-struct Direct2DDeviceContext
-{
-    void resetTransform()
-    {
-        context->SetTransform (D2D1::IdentityMatrix());
-    }
-
-    void setTransform (AffineTransform newTransform)
-    {
-        context->SetTransform (D2DUtilities::transformToMatrix (newTransform));
-    }
-
-    void release()
-    {
-        context = nullptr;
-    }
-
-    static ComSmartPtr<ID2D1DeviceContext1> createContext (DxgiAdapter::Ptr adapter)
-    {
-        ComSmartPtr<ID2D1DeviceContext1> result;
-
-        if (const auto hr = adapter->direct2DDevice->CreateDeviceContext (D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
-                                                                          result.resetAndGetPointerAddress());
-            FAILED (hr))
-        {
-            jassertfalse;
-            return {};
-        }
-
-        result->SetTextAntialiasMode (D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
-        result->SetAntialiasMode (D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
-        result->SetUnitMode (D2D1_UNIT_MODE_PIXELS);
-
-        return result;
-    }
-
-    ComSmartPtr<ID2D1DeviceContext1> context;
-};
-
 static ComSmartPtr<ID2D1GradientStopCollection> makeGradientStopCollection (const ColourGradient& gradient,
                                                                             ComSmartPtr<ID2D1DeviceContext1> deviceContext,
                                                                             [[maybe_unused]] Direct2DMetrics* metrics) noexcept
@@ -300,13 +261,13 @@ public:
     {
         jassert (adapter);
 
-        if (deviceContext.context == nullptr)
-            deviceContext.context = Direct2DDeviceContext::createContext (adapter);
+        if (deviceContext == nullptr)
+            deviceContext = Direct2DDeviceContext::create (adapter);
 
         if (colourBrush == nullptr)
         {
-            if (const auto hr = deviceContext.context->CreateSolidColorBrush (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f),
-                                                                              colourBrush.resetAndGetPointerAddress());
+            if (const auto hr = deviceContext->CreateSolidColorBrush (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f),
+                                                                      colourBrush.resetAndGetPointerAddress());
                 FAILED (hr))
             {
                 jassertfalse;
@@ -326,15 +287,15 @@ public:
         linearGradientCache = {};
         radialGradientCache = {};
         colourBrush = nullptr;
-        deviceContext.release();
+        deviceContext = nullptr;
     }
 
     bool canPaint (DxgiAdapter::Ptr adapter) const
     {
-        return adapter->direct2DDevice != nullptr && deviceContext.context != nullptr && colourBrush != nullptr;
+        return adapter->direct2DDevice != nullptr && deviceContext != nullptr && colourBrush != nullptr;
     }
 
-    Direct2DDeviceContext deviceContext;
+    ComSmartPtr<ID2D1DeviceContext1> deviceContext;
     ComSmartPtr<ID2D1SolidColorBrush> colourBrush;
     LinearGradientCache linearGradientCache;
     RadialGradientCache radialGradientCache;

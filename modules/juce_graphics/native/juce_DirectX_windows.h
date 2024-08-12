@@ -328,6 +328,34 @@ struct D2DUtilities
 };
 
 //==============================================================================
+struct Direct2DDeviceContext
+{
+    static ComSmartPtr<ID2D1DeviceContext1> create (DxgiAdapter::Ptr adapter)
+    {
+        if (adapter == nullptr)
+            return {};
+
+        ComSmartPtr<ID2D1DeviceContext1> result;
+
+        if (const auto hr = adapter->direct2DDevice->CreateDeviceContext (D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
+                                                                          result.resetAndGetPointerAddress());
+                FAILED (hr))
+        {
+            jassertfalse;
+            return {};
+        }
+
+        result->SetTextAntialiasMode (D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+        result->SetAntialiasMode (D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+        result->SetUnitMode (D2D1_UNIT_MODE_PIXELS);
+
+        return result;
+    }
+
+    Direct2DDeviceContext() = delete;
+};
+
+//==============================================================================
 struct Direct2DBitmap
 {
     Direct2DBitmap() = delete;

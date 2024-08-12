@@ -158,7 +158,7 @@ void Direct2DPixelData::createDeviceResources()
         adapter = directX->adapters.getDefaultAdapter();
 
     if (context == nullptr)
-        context = Direct2DDeviceContext::createContext (adapter);
+        context = Direct2DDeviceContext::create (adapter);
 
     if (nativeBitmap == nullptr)
     {
