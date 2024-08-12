@@ -324,13 +324,10 @@ private:
 
     HRESULT prepare() override
     {
-        if (! adapter || ! adapter->direct2DDevice)
-        {
-            adapter = directX->adapters.getAdapterForHwnd (hwnd);
+        const auto adapter = directX->adapters.getAdapterForHwnd (hwnd);
 
-            if (! adapter)
-                return E_FAIL;
-        }
+        if (adapter == nullptr)
+            return E_FAIL;
 
         if (! deviceResources.has_value())
             deviceResources = Direct2DDeviceResources::create (adapter);
@@ -416,12 +413,9 @@ public:
         : Pimpl (ownerIn, opaqueIn),
           hwnd (hwndIn)
     {
-        adapter = directX->adapters.getAdapterForHwnd (hwndIn);
     }
 
     ~HwndPimpl() override = default;
-
-    HWND getHwnd() const { return hwnd; }
 
     void handleShowWindow()
     {
@@ -685,11 +679,6 @@ Direct2DHwndContext::~Direct2DHwndContext()
    #if JUCE_DIRECT2D_METRICS
     Direct2DMetricsHub::getInstance()->remove (metrics);
    #endif
-}
-
-void* Direct2DHwndContext::getHwnd() const noexcept
-{
-    return pimpl->getHwnd();
 }
 
 Direct2DGraphicsContext::Pimpl* Direct2DHwndContext::getPimpl() const noexcept

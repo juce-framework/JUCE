@@ -549,7 +549,6 @@ protected:
     SharedResourcePointer<Direct2DFactories> directWrite;
     RectangleList<int> paintAreas;
 
-    DxgiAdapter::Ptr adapter;
     std::optional<Direct2DDeviceResources> deviceResources;
 
     std::vector<std::unique_ptr<Direct2DGraphicsContext::SavedState>> savedClientStates;
@@ -557,7 +556,7 @@ protected:
     virtual HRESULT prepare()
     {
         if (! deviceResources.has_value())
-            deviceResources = Direct2DDeviceResources::create (adapter);
+            deviceResources = Direct2DDeviceResources::create (directX->adapters.getDefaultAdapter());
 
         return deviceResources.has_value() ? S_OK : E_FAIL;
     }
@@ -699,11 +698,6 @@ public:
     {
         while (! savedClientStates.empty())
             popSavedState();
-    }
-
-    DxgiAdapter& getAdapter() const noexcept
-    {
-        return *adapter;
     }
 
     ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const noexcept
@@ -860,24 +854,28 @@ private:
         context->SetTransform (D2DUtilities::transformToMatrix (newTransform));
     }
 
+    DxgiAdapter::Ptr findAdapter() const
+    {
+        if (! deviceResources.has_value())
+            return {};
+
+        return deviceResources->findAdapter (directX->adapters);
+    }
+
     void adapterCreated (DxgiAdapter::Ptr newAdapter) override
     {
-        if (! adapter || adapter->uniqueIDMatches (newAdapter))
-        {
-            teardown();
+        const auto adapter = findAdapter();
 
-            adapter = newAdapter;
-        }
+        if (adapter == nullptr || ! adapter->uniqueIDMatches (newAdapter))
+            teardown();
     }
 
     void adapterRemoved (DxgiAdapter::Ptr expiringAdapter) override
     {
-        if (adapter && adapter->uniqueIDMatches (expiringAdapter))
-        {
-            teardown();
+        const auto adapter = findAdapter();
 
-            adapter = nullptr;
-        }
+        if (adapter != nullptr && adapter->uniqueIDMatches (expiringAdapter))
+            teardown();
     }
 
     HWND hwnd = nullptr;

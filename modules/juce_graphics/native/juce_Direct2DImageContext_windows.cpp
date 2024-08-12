@@ -44,10 +44,6 @@ public:
         : Pimpl (ownerIn, opaque),
           target (targetIn)
     {
-        if (target != nullptr)
-            adapter = target->getAdapter();
-        else
-            jassertfalse;
     }
 
     Rectangle<int> getFrameSize() override

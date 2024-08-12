@@ -41,7 +41,6 @@ public:
     Direct2DHwndContext (void* windowHandle, bool opaque);
     ~Direct2DHwndContext() override;
 
-    void* getHwnd() const noexcept;
     void handleShowWindow();
     void setWindowAlpha (float alpha);
 

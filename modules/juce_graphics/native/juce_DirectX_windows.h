@@ -90,6 +90,9 @@ struct DxgiAdapter : public ReferenceCountedObject
 
     bool uniqueIDMatches (ReferenceCountedObjectPtr<DxgiAdapter> other) const
     {
+        if (other == nullptr)
+            return false;
+
         auto luid = getAdapterUniqueID();
         auto otherLuid = other->getAdapterUniqueID();
         return (luid.HighPart == otherLuid.HighPart) && (luid.LowPart == otherLuid.LowPart);
