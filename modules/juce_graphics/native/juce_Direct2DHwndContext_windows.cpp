@@ -615,7 +615,9 @@ public:
         if (presentParameters.DirtyRectsCount == 0)
         {
             D2D1_POINT_2U destPoint { 0, 0 };
-            swap.buffer->CopyFromBitmap (&destPoint, paintedPresentation->getPresentationBitmap(), nullptr);
+
+            if (auto bitmap = paintedPresentation->getPresentationBitmap())
+                swap.buffer->CopyFromBitmap (&destPoint, bitmap, nullptr);
         }
 
         // Present the freshly painted buffer
