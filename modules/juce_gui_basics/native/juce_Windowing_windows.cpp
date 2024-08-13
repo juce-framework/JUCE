@@ -1694,7 +1694,7 @@ public:
 
     Point<int> getScreenPosition() const
     {
-        return convertPhysicalScreenRectangleToLogical (findPhysicalBorderSize().subtractedFrom (D2DUtilities::toRectangle (getWindowScreenRect (hwnd))), hwnd).getPosition();
+        return convertPhysicalScreenPointToLogical (getClientRectInScreen().getPosition(), hwnd);
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override  { return relativePosition + getScreenPosition().toFloat(); }
