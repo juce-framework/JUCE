@@ -1105,40 +1105,6 @@ private:
 };
 
 //==============================================================================
-static Image createGDISnapshotOfNativeWindow (void* nativeWindowHandle)
-{
-    auto hwnd = (HWND) nativeWindowHandle;
-
-    auto r = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
-    const auto w = r.getWidth();
-    const auto h = r.getHeight();
-
-    WindowsBitmapImage::Ptr nativeBitmap = new WindowsBitmapImage (Image::RGB, w, h, true);
-    Image bitmap (nativeBitmap);
-
-    ScopedDeviceContext deviceContext { hwnd };
-
-    if (isPerMonitorDPIAwareProcess())
-    {
-        auto scale = getScaleFactorForWindow (hwnd);
-        auto prevStretchMode = SetStretchBltMode (nativeBitmap->hdc, HALFTONE);
-        SetBrushOrgEx (nativeBitmap->hdc, 0, 0, nullptr);
-
-        StretchBlt (nativeBitmap->hdc, 0, 0, w, h,
-                    deviceContext.dc, 0, 0, roundToInt (w * scale), roundToInt (h * scale),
-                    SRCCOPY);
-
-        SetStretchBltMode (nativeBitmap->hdc, prevStretchMode);
-    }
-    else
-    {
-        BitBlt (nativeBitmap->hdc, 0, 0, w, h, deviceContext.dc, 0, 0, SRCCOPY);
-    }
-
-    return SoftwareImageType().convert (bitmap);
-}
-
-//==============================================================================
 namespace IconConverters
 {
     struct IconDestructor
@@ -4807,7 +4773,35 @@ public:
 
     Image createSnapshot() override
     {
-        return createGDISnapshotOfNativeWindow (peer.getHWND());
+        auto hwnd = peer.getHWND();
+
+        auto r = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
+        const auto w = r.getWidth();
+        const auto h = r.getHeight();
+
+        WindowsBitmapImage::Ptr nativeBitmap = new WindowsBitmapImage (Image::RGB, w, h, true);
+        Image bitmap (nativeBitmap);
+
+        ScopedDeviceContext deviceContext { hwnd };
+
+        if (isPerMonitorDPIAwareProcess())
+        {
+            auto scale = getScaleFactorForWindow (hwnd);
+            auto prevStretchMode = SetStretchBltMode (nativeBitmap->hdc, HALFTONE);
+            SetBrushOrgEx (nativeBitmap->hdc, 0, 0, nullptr);
+
+            StretchBlt (nativeBitmap->hdc, 0, 0, w, h,
+                        deviceContext.dc, 0, 0, roundToInt (w * scale), roundToInt (h * scale),
+                        SRCCOPY);
+
+            SetStretchBltMode (nativeBitmap->hdc, prevStretchMode);
+        }
+        else
+        {
+            BitBlt (nativeBitmap->hdc, 0, 0, w, h, deviceContext.dc, 0, 0, SRCCOPY);
+        }
+
+        return SoftwareImageType().convert (bitmap);
     }
 
     void setSize (int, int) override {}
