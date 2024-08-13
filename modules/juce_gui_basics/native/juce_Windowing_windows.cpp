@@ -1680,13 +1680,7 @@ public:
                 return snapped;
             }
 
-            RECT rect{};
-            GetClientRect (hwnd, &rect);
-            auto points = readUnaligned<std::array<POINT, 2>> (&rect);
-            MapWindowPoints (hwnd, nullptr, points.data(), (UINT) points.size());
-
-            const auto mappedRect = readUnaligned<RECT> (points.data());
-            const auto logicalClient = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (mappedRect), hwnd);
+            const auto logicalClient = convertPhysicalScreenRectangleToLogical (getClientRectInScreen(), hwnd);
             return logicalClient;
         }
 
@@ -1798,6 +1792,19 @@ public:
         return wp.showCmd == SW_SHOWMAXIMIZED;
     }
 
+    Rectangle<int> getClientRectInScreen() const
+    {
+        ScopedThreadDPIAwarenessSetter setter { hwnd };
+
+        RECT rect{};
+        GetClientRect (hwnd, &rect);
+        auto points = readUnaligned<std::array<POINT, 2>> (&rect);
+        MapWindowPoints (hwnd, nullptr, points.data(), (UINT) points.size());
+        const auto result = readUnaligned<RECT> (&points);
+
+        return D2DUtilities::toRectangle (result);
+    }
+
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
         auto r = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
@@ -1808,17 +1815,7 @@ public:
         const auto screenPos = convertLogicalScreenPointToPhysical (localPos + getScreenPosition(), hwnd);
 
         if (trueIfInAChildWindow)
-        {
-            // Quick check to see whether the point is inside the client bounds
-            RECT rect;
-            GetClientRect (hwnd, &rect);
-            POINT points[2];
-            memcpy (points, &rect, sizeof (points));
-            MapWindowPoints (hwnd, nullptr, points, (UINT) std::size (points));
-            memcpy (&rect, points, sizeof (points));
-
-            return PtInRect (&rect, D2DUtilities::toPOINT (screenPos));
-        }
+            return getClientRectInScreen().contains (screenPos);
 
         auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
 
