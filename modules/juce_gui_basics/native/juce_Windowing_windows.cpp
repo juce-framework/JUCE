@@ -2437,7 +2437,6 @@ private:
         const auto hasMax = (styleFlags & windowHasMaximiseButton) != 0;
         const auto appearsOnTaskbar = (styleFlags & windowAppearsOnTaskbar) != 0;
         const auto resizable = (styleFlags & windowIsResizable) != 0;
-        const auto transparent = (styleFlags & windowIsSemiTransparent) != 0;
 
         if (parentToAddTo != nullptr)
         {
@@ -2445,15 +2444,24 @@ private:
         }
         else
         {
-            type |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
-            type |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
-            type |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
-            type |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
-            type |= resizable || windowUsesNativeShadow() ? WS_THICKFRAME : 0;
+            if (titled || windowUsesNativeShadow())
+            {
+                type |= titled ? (WS_OVERLAPPED | WS_CAPTION) : WS_POPUP;
+                type |= hasClose ? (WS_SYSMENU | WS_CAPTION) : 0;
+                type |= hasMin ? (WS_MINIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
+                type |= hasMax ? (WS_MAXIMIZEBOX | WS_CAPTION | WS_SYSMENU) : 0;
+                type |= resizable || windowUsesNativeShadow() ? WS_THICKFRAME : 0;
+            }
+            else
+            {
+                // Transparent windows need WS_POPUP and not WS_OVERLAPPED | WS_CAPTION, otherwise
+                // the top corners of the window will get rounded unconditionally.
+                // Unfortunately, this disables nice mouse handling for the caption area.
+                type |= WS_POPUP;
+            }
+
             exstyle |= appearsOnTaskbar ? WS_EX_APPWINDOW : WS_EX_TOOLWINDOW;
         }
-
-        exstyle |= transparent ? WS_EX_LAYERED : 0;
 
         hwnd = CreateWindowEx (exstyle, WindowClassHolder::getInstance()->getWindowClassName(),
                                L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
