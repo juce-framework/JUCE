@@ -4663,12 +4663,12 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
     return {};
 }
 
-class GDIContext : public RenderContext
+class GDIRenderContext : public RenderContext
 {
 public:
     static constexpr auto name = "Software Renderer";
 
-    explicit GDIContext (HWNDComponentPeer& peerIn)
+    explicit GDIRenderContext (HWNDComponentPeer& peerIn)
         : peer (peerIn)
     {
         peer.setLayeredWindowStyle (false);
@@ -4989,12 +4989,12 @@ private:
     bool resizing = false;
 };
 
-class D2DContext : public RenderContext
+class D2DRenderContext : public RenderContext
 {
 public:
     static constexpr auto name = "Direct2D";
 
-    explicit D2DContext (HWNDComponentPeer& peerIn)
+    explicit D2DRenderContext (HWNDComponentPeer& peerIn)
         : peer (peerIn),
           direct2DContext (std::make_unique<Direct2DHwndContext> (peer.getHWND(), peer.getComponent().isOpaque()))
     {
@@ -5174,7 +5174,7 @@ inline constexpr ContextDescriptor contextDescriptorList[]
 };
 
 // To add a new rendering backend, implement RenderContext for that backend, and then append the backend to this typelist
-inline constexpr auto& contextDescriptors = contextDescriptorList<GDIContext, D2DContext>;
+inline constexpr auto& contextDescriptors = contextDescriptorList<GDIRenderContext, D2DRenderContext>;
 
 void HWNDComponentPeer::setCurrentRenderingEngine (int e)
 {
