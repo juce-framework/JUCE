@@ -101,6 +101,9 @@ public:
 
     static void flushImage (Image softwareImage, ComSmartPtr<ID2D1Bitmap1> native, D2D1_RECT_U target)
     {
+        if (native == nullptr)
+            return;
+
         if (softwareImage.getFormat() == Image::PixelFormat::RGB)
             softwareImage = softwareImage.convertedToFormat (Image::PixelFormat::ARGB);
 
@@ -225,7 +228,27 @@ std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContex
 {
     sendDataChangeMessage();
 
-    return std::make_unique<Direct2DImageContext> (this);
+    struct FlushingContext : public Direct2DImageContext
+    {
+        explicit FlushingContext (Direct2DPixelData::Ptr p)
+            : Direct2DImageContext (p->context, p->getAdapterD2D1Bitmap(), Rectangle { p->width, p->height }),
+              ptr (startFrame (1.0f) ? p : nullptr)
+        {
+        }
+
+        ~FlushingContext() override
+        {
+            if (ptr == nullptr)
+                return;
+
+            endFrame();
+            ptr->flushToSoftwareBackup();
+        }
+
+        Direct2DPixelData::Ptr ptr;
+    };
+
+    return std::make_unique<FlushingContext> (this);
 }
 
 void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode)

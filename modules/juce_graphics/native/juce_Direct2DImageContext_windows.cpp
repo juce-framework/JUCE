@@ -40,72 +40,56 @@ struct Direct2DImageContext::ImagePimpl : public Direct2DGraphicsContext::Pimpl
 public:
     static constexpr auto opaque = false;
 
-    ImagePimpl (Direct2DImageContext& ownerIn, Direct2DPixelData::Ptr targetIn)
+    ImagePimpl (Direct2DImageContext& ownerIn,
+                ComSmartPtr<ID2D1DeviceContext1> contextIn,
+                ComSmartPtr<ID2D1Bitmap1> bitmapIn,
+                const RectangleList<int>& paintAreasIn)
         : Pimpl (ownerIn, opaque),
-          target (targetIn)
+          context (std::move (contextIn)),
+          bitmap (std::move (bitmapIn)),
+          paintAreas (paintAreasIn)
     {
     }
 
     Rectangle<int> getFrameSize() const override
     {
-        const auto targetBitmap = getBitmap();
-
-        if (targetBitmap == nullptr)
+        if (bitmap == nullptr)
             return {};
 
-        const auto size = targetBitmap->GetSize();
+        const auto size = bitmap->GetSize();
         return { (int) size.width, (int) size.height };
     }
 
     ComSmartPtr<ID2D1Image> getDeviceContextTarget() const override
     {
-        return getBitmap();
-    }
-
-    HRESULT finishFrame() override
-    {
-        const auto result = Pimpl::finishFrame();
-
-        if (target != nullptr)
-            target->flushToSoftwareBackup();
-
-        return result;
-    }
-
-private:
-    ComSmartPtr<ID2D1Bitmap1> getBitmap() const
-    {
-        if (target == nullptr)
-            return {};
-
-        return target->getAdapterD2D1Bitmap();
+        return bitmap;
     }
 
     RectangleList<int> getPaintAreas() const override
     {
-        return getFrameSize();
+        return paintAreas;
     }
 
-    Direct2DPixelData::Ptr target;
+private:
+    ComSmartPtr<ID2D1DeviceContext1> context;
+    ComSmartPtr<ID2D1Bitmap1> bitmap;
+    RectangleList<int> paintAreas;
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (ImagePimpl)
 };
 
 //==============================================================================
-Direct2DImageContext::Direct2DImageContext (Direct2DPixelData::Ptr targetIn)
-    : pimpl (new ImagePimpl { *this, targetIn })
+Direct2DImageContext::Direct2DImageContext (ComSmartPtr<ID2D1DeviceContext1> context,
+                                            ComSmartPtr<ID2D1Bitmap1> bitmap,
+                                            const RectangleList<int>& paintAreas)
+    : pimpl (new ImagePimpl { *this, context, bitmap, paintAreas })
 {
    #if JUCE_DIRECT2D_METRICS
     metrics = Direct2DMetricsHub::getInstance()->imageContextMetrics;
    #endif
-
-    startFrame (1.0f);
 }
 
-Direct2DImageContext::~Direct2DImageContext()
-{
-    endFrame();
-}
+Direct2DImageContext::~Direct2DImageContext() = default;
 
 Direct2DGraphicsContext::Pimpl* Direct2DImageContext::getPimpl() const noexcept
 {
