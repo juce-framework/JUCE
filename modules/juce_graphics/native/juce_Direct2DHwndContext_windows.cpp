@@ -70,7 +70,7 @@ public:
         paintAreas = std::move (areas);
     }
 
-    auto getPaintAreas() const
+    const RectangleList<int>& getPaintAreas() const
     {
         return paintAreas;
     }
@@ -346,11 +346,8 @@ private:
                 return hr;
         }
 
-        if (! swapChainThread)
-        {
-            if (swap.swapChainEvent.has_value())
-                swapChainThread = std::make_unique<SwapChainThread> (*this, directX->getD2DMultithread());
-        }
+        if (! swapChainThread && swap.swapChainEvent.has_value())
+            swapChainThread = std::make_unique<SwapChainThread> (*this, directX->getD2DMultithread());
 
         if (! compositionTree.has_value())
             compositionTree = CompositionTree::create (adapter->dxgiDevice, hwnd, swap.chain);
