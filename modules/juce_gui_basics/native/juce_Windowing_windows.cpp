@@ -1054,38 +1054,40 @@ public:
         return newImage.getPixelData();
     }
 
-    void blitToWindow (HWND hwnd, HDC dc, bool transparent, int x, int y, uint8 layeredWindowAlpha) noexcept
+    static void updateLayeredWindow (HDC sourceHdc, HWND hwnd, Point<int> pt, float constantAlpha)
+    {
+        const auto windowBounds = getWindowScreenRect (hwnd);
+
+        auto p = D2DUtilities::toPOINT (pt);
+        POINT pos = { windowBounds.left, windowBounds.top };
+        SIZE size = { windowBounds.right - windowBounds.left,
+                      windowBounds.bottom - windowBounds.top };
+
+        BLENDFUNCTION bf { AC_SRC_OVER, 0, (BYTE) (255.0f * constantAlpha), AC_SRC_ALPHA };
+
+        UpdateLayeredWindow (hwnd, nullptr, &pos, &size, sourceHdc, &p, 0, &bf, ULW_ALPHA);
+    }
+
+    void updateLayeredWindow (HWND hwnd, Point<int> pt, float constantAlpha) const noexcept
+    {
+        updateLayeredWindow (hdc, hwnd, pt, constantAlpha);
+    }
+
+    void blitToDC (HDC dc, int x, int y) const noexcept
     {
         SetMapMode (dc, MM_TEXT);
 
-        if (transparent)
-        {
-            auto windowBounds = getWindowScreenRect (hwnd);
-
-            POINT p = { -x, -y };
-            POINT pos = { windowBounds.left, windowBounds.top };
-            SIZE size = { windowBounds.right - windowBounds.left,
-                          windowBounds.bottom - windowBounds.top };
-
-            BLENDFUNCTION bf;
-            bf.AlphaFormat = 1 /*AC_SRC_ALPHA*/;
-            bf.BlendFlags = 0;
-            bf.BlendOp = AC_SRC_OVER;
-            bf.SourceConstantAlpha = layeredWindowAlpha;
-
-            [[maybe_unused]] auto ok = UpdateLayeredWindow (hwnd, nullptr, &pos, &size, hdc, &p, 0, &bf, 2 /*ULW_ALPHA*/);
-            jassert (ok);
-        }
-        else
-        {
-            StretchDIBits (dc,
-                           x, y, width, height,
-                           0, 0, width, height,
-                           bitmapData, (const BITMAPINFO*) &bitmapInfo,
-                           DIB_RGB_COLORS, SRCCOPY);
-        }
+        StretchDIBits (dc,
+                       x, y, width, height,
+                       0, 0, width, height,
+                       bitmapData, (const BITMAPINFO*) &bitmapInfo,
+                       DIB_RGB_COLORS, SRCCOPY);
     }
 
+    HBITMAP getHBITMAP() const { return hBitmap; }
+    HDC getHDC() const { return hdc; }
+
+private:
     HBITMAP hBitmap;
     HGDIOBJ previousBitmap;
     BITMAPV4HEADER bitmapInfo;
@@ -1094,7 +1096,6 @@ public:
     int pixelStride, lineStride;
     uint8* imageData;
 
-private:
     static bool isGraphicsCard32Bit()
     {
         ScopedDeviceContext deviceContext { nullptr };
@@ -1240,7 +1241,7 @@ namespace IconConverters
         info.xHotspot = (DWORD) hotspotX;
         info.yHotspot = (DWORD) hotspotY;
         info.hbmMask = mask;
-        info.hbmColor = nativeBitmap->hBitmap;
+        info.hbmColor = nativeBitmap->getHBITMAP();
 
         auto hi = CreateIconIndirect (&info);
         DeleteObject (mask);
@@ -4784,21 +4785,23 @@ public:
 
         ScopedDeviceContext deviceContext { hwnd };
 
+        const auto hdc = nativeBitmap->getHDC();
+
         if (isPerMonitorDPIAwareProcess())
         {
             auto scale = getScaleFactorForWindow (hwnd);
-            auto prevStretchMode = SetStretchBltMode (nativeBitmap->hdc, HALFTONE);
-            SetBrushOrgEx (nativeBitmap->hdc, 0, 0, nullptr);
+            auto prevStretchMode = SetStretchBltMode (hdc, HALFTONE);
+            SetBrushOrgEx (hdc, 0, 0, nullptr);
 
-            StretchBlt (nativeBitmap->hdc, 0, 0, w, h,
+            StretchBlt (hdc, 0, 0, w, h,
                         deviceContext.dc, 0, 0, roundToInt (w * scale), roundToInt (h * scale),
                         SRCCOPY);
 
-            SetStretchBltMode (nativeBitmap->hdc, prevStretchMode);
+            SetStretchBltMode (hdc, prevStretchMode);
         }
         else
         {
-            BitBlt (nativeBitmap->hdc, 0, 0, w, h, deviceContext.dc, 0, 0, SRCCOPY);
+            BitBlt (hdc, 0, 0, w, h, deviceContext.dc, 0, 0, SRCCOPY);
         }
 
         return SoftwareImageType().convert (bitmap);
@@ -4907,7 +4910,12 @@ private:
                     peer.handlePaint (*context);
                 }
 
-                static_cast<WindowsBitmapImage*> (offscreenImage.getPixelData())->blitToWindow (peer.getHWND(), dc, transparent, x, y, layeredWindowAlpha);
+                auto* image = static_cast<WindowsBitmapImage*> (offscreenImage.getPixelData());
+
+                if (! peer.getComponent().isOpaque() || peer.getComponent().getAlpha() < 1.0f)
+                    image->updateLayeredWindow (peer.getHWND(), { x, y }, peer.getComponent().getAlpha());
+                else
+                    image->blitToDC (dc, x, y);
             }
 
             if (childClipInfo.savedDC != 0)
