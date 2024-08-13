@@ -50,7 +50,6 @@ public:
     void updateSize();
 
     void addDeferredRepaint (Rectangle<int> deferredRepaint);
-    void addInvalidWindowRegionToDeferredRepaints();
 
     Image createSnapshot() const override;
 

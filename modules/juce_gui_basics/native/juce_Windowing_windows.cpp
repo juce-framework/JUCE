@@ -5033,7 +5033,10 @@ public:
         auto paintStartTicks = Time::getHighResolutionTicks();
        #endif
 
-        direct2DContext->addInvalidWindowRegionToDeferredRepaints();
+        updateRegion.findRECTAndValidate (peer.getHWND());
+
+        for (const auto& rect : updateRegion.getRects())
+            repaint (D2DUtilities::toRectangle (rect));
 
        #if JUCE_DIRECT2D_METRICS
         lastPaintStartTicks = paintStartTicks;
@@ -5122,6 +5125,7 @@ private:
     HWNDComponentPeer& peer;
 
     std::unique_ptr<Direct2DHwndContext> direct2DContext;
+    UpdateRegion updateRegion;
 
    #if JUCE_ETW_TRACELOGGING
     struct ETWEventProvider

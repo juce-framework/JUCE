@@ -313,7 +313,6 @@ private:
     std::unique_ptr<SwapChainThread> swapChainThread;
     BackBufferLock presentation;
     std::optional<CompositionTree> compositionTree;
-    UpdateRegion updateRegion;
     RectangleList<int> deferredRepaints;
     Rectangle<int> frameSize;
     std::vector<RECT> dirtyRectangles;
@@ -491,18 +490,6 @@ public:
         deferredRepaints.add (deferredRepaint);
 
         JUCE_TRACE_EVENT_INT_RECT (etw::repaint, etw::paintKeyword, snappedRectangle);
-    }
-
-    void addInvalidWindowRegionToDeferredRepaints()
-    {
-        updateRegion.findRECTAndValidate (hwnd);
-
-        // Call addDeferredRepaint for each RECT in the update region to make
-        // sure they are snapped properly for DPI scaling
-        for (const auto& rect : updateRegion.getRects())
-            addDeferredRepaint (D2DUtilities::toRectangle (rect));
-
-        updateRegion.clear();
     }
 
     SavedState* startFrame (float dpiScale) override
@@ -719,11 +706,6 @@ void Direct2DHwndContext::updateSize()
 void Direct2DHwndContext::addDeferredRepaint (Rectangle<int> deferredRepaint)
 {
     pimpl->addDeferredRepaint (deferredRepaint);
-}
-
-void Direct2DHwndContext::addInvalidWindowRegionToDeferredRepaints()
-{
-    pimpl->addInvalidWindowRegionToDeferredRepaints();
 }
 
 Image Direct2DHwndContext::createSnapshot() const
