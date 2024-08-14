@@ -47,7 +47,9 @@ public:
                      bool clearImageIn,
                      DxgiAdapter::Ptr adapterIn);
 
-    static Ptr fromDirect2DBitmap (ComSmartPtr<ID2D1Bitmap1> bitmap);
+    static Ptr fromDirect2DBitmap (DxgiAdapter::Ptr,
+                                   ComSmartPtr<ID2D1DeviceContext1>,
+                                   ComSmartPtr<ID2D1Bitmap1>);
 
     ~Direct2DPixelData() override;
 

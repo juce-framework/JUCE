@@ -205,10 +205,16 @@ auto Direct2DPixelData::make (Image::PixelFormat formatToUse,
     return new Direct2DPixelData (formatToUse, widthIn, heightIn, clearImageIn, adapterIn);
 }
 
-auto Direct2DPixelData::fromDirect2DBitmap (ComSmartPtr<ID2D1Bitmap1> bitmap) -> Ptr
+auto Direct2DPixelData::fromDirect2DBitmap (DxgiAdapter::Ptr adapterIn,
+                                            ComSmartPtr<ID2D1DeviceContext1> contextIn,
+                                            ComSmartPtr<ID2D1Bitmap1> bitmapIn) -> Ptr
 {
-    const auto size = bitmap->GetPixelSize();
-    return new Direct2DPixelData { Image::ARGB, (int) size.width, (int) size.height, false, nullptr };
+    const auto size = bitmapIn->GetPixelSize();
+    Ptr result = new Direct2DPixelData { Image::ARGB, (int) size.width, (int) size.height, false, nullptr };
+    result->adapter = adapterIn;
+    result->context = contextIn;
+    result->nativeBitmap = bitmapIn;
+    return result;
 }
 
 Direct2DPixelData::Direct2DPixelData (Image::PixelFormat f, int widthIn, int heightIn, bool clear, DxgiAdapter::Ptr adapterIn)

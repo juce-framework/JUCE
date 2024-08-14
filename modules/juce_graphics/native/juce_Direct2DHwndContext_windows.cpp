@@ -603,13 +603,15 @@ public:
 
     Image createSnapshot() const
     {
+        // This won't capture child windows. Perhaps a better approach would be to use
+        // IGraphicsCaptureItemInterop, although this is only supported on Windows 10 v1903+
+
         if (frameSize.isEmpty() || deviceResources->deviceContext == nullptr || swap.buffer == nullptr)
             return {};
 
         // Create the bitmap to receive the snapshot
         D2D1_BITMAP_PROPERTIES1 bitmapProperties{};
         bitmapProperties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET;
-        bitmapProperties.dpiX = bitmapProperties.dpiY = USER_DEFAULT_SCREEN_DPI * owner.getPhysicalPixelScaleFactor();
         bitmapProperties.pixelFormat = swap.buffer->GetPixelFormat();
 
         const D2D_SIZE_U size { (UINT32) frameSize.getWidth(), (UINT32) frameSize.getHeight() };
@@ -630,8 +632,9 @@ public:
         if (const auto hr = snapshot->CopyFromBitmap (&p, swap.buffer, &sourceRect); FAILED (hr))
             return {};
 
-        auto pixelData = Direct2DPixelData::fromDirect2DBitmap (snapshot);
-        Image result { pixelData };
+        const Image result { Direct2DPixelData::fromDirect2DBitmap (directX->adapters.getAdapterForHwnd (hwnd),
+                                                                    deviceResources->deviceContext,
+                                                                    snapshot) };
 
         swap.chain->Present (0, DXGI_PRESENT_DO_NOT_WAIT);
 
