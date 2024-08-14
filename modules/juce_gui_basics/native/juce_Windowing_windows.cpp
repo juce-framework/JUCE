@@ -1019,8 +1019,18 @@ public:
 
     std::unique_ptr<ImageType> createType() const override
     {
-        // WindowsBitmapImage needs to be a software bitmap, not a D2D bitmap
-        return std::make_unique<SoftwareImageType>();
+        // This type only exists to return a type ID that's different to the SoftwareImageType's ID,
+        // so that `SoftwareImageType{}.convert (windowsBitmapImage)` works.
+        // If we return SoftwareImageType here, then SoftwareImageType{}.convert() will compare the
+        // type IDs and assume the source image is already of the correct type.
+        struct Type : public ImageType
+        {
+            int getTypeID() const override { return ByteOrder::makeInt ('w', 'b', 'i', 't'); }
+            ImagePixelData::Ptr create (Image::PixelFormat, int, int, bool) const override { return {}; }
+            Image convert (const Image&) const override { return {}; }
+        };
+
+        return std::make_unique<Type>();
     }
 
     std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
