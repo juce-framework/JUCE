@@ -47,6 +47,9 @@ namespace juce::detail
      )
 #endif
 
+template <int... ids>
+constexpr int intArray[] { ids... };
+
 std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (const MessageBoxOptions& options)
 {
     class WindowsMessageBoxBase : public ScopedMessageBoxInterface
@@ -173,10 +176,23 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
                 const auto result = MessageBox (parent, message.toWideCharPointer(), title.toWideCharPointer(), flags);
 
-                if (result == IDYES || result == IDOK)     return 0;
-                if (result == IDNO && ((flags & 1) != 0))  return 1;
+                const auto buttons = [&]() -> Span<const int>
+                {
+                    switch (flags & 0xf)
+                    {
+                        case MB_OK:                 return intArray<IDOK>;
+                        case MB_OKCANCEL:           return intArray<IDOK, IDCANCEL>;
+                        case MB_ABORTRETRYIGNORE:   return intArray<IDABORT, IDRETRY, IDIGNORE>;
+                        case MB_YESNOCANCEL:        return intArray<IDYES, IDNO, IDCANCEL>;
+                        case MB_YESNO:              return intArray<IDYES, IDNO>;
+                        case MB_RETRYCANCEL:        return intArray<IDRETRY, IDCANCEL>;
+                        case MB_CANCELTRYCONTINUE:  return intArray<IDCANCEL, IDTRYAGAIN, IDCONTINUE>;
+                    }
 
-                return 2;
+                    return {};
+                }();
+
+                return (int) std::distance (buttons.begin(), std::find (buttons.begin(), buttons.end(), result));
             };
         }
 
