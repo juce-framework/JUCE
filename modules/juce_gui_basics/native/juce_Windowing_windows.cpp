@@ -4774,6 +4774,44 @@ public:
 
     Image createSnapshot() override
     {
+        return peer.isLayeredWindowStyle()
+             ? createSnapshotOfLayeredWindow()
+             : createSnapshotOfNormalWindow();
+    }
+
+    void setSize (int, int) override {}
+    void onVBlank() override {}
+
+    void setResizing (bool x) override { resizing = x; }
+    bool getResizing() const override { return resizing; }
+    void handleShowWindow() override {}
+
+private:
+    // If we've called UpdateLayeredWindow to display the window contents, retrieving the
+    // contents of the window DC will fail.
+    // Instead, we produce a fresh render of the window into a temporary image.
+    // Child windows will not be included.
+    Image createSnapshotOfLayeredWindow() const
+    {
+        const auto rect = peer.getClientRectInScreen();
+        Image result { Image::ARGB, rect.getWidth(), rect.getHeight(), true, SoftwareImageType{} };
+
+        {
+            auto context = peer.getComponent()
+                               .getLookAndFeel()
+                               .createGraphicsContext (result, {}, rect.withZeroOrigin());
+
+            context->addTransform (AffineTransform::scale ((float) peer.getPlatformScaleFactor()));
+            peer.handlePaint (*context);
+        }
+
+        return result;
+    }
+
+    // If UpdateLayeredWindow hasn't been called, then we can blit the window contents directly
+    // from the window's DC.
+    Image createSnapshotOfNormalWindow() const
+    {
         auto hwnd = peer.getHWND();
 
         auto r = convertPhysicalScreenRectangleToLogical (D2DUtilities::toRectangle (getWindowScreenRect (hwnd)), hwnd);
@@ -4807,14 +4845,6 @@ public:
         return SoftwareImageType().convert (bitmap);
     }
 
-    void setSize (int, int) override {}
-    void onVBlank() override {}
-
-    void setResizing (bool x) override { resizing = x; }
-    bool getResizing() const override { return resizing; }
-    void handleShowWindow() override {}
-
-private:
     void performPaint (HDC dc, HRGN rgn, int regionType, PAINTSTRUCT& paintStruct)
     {
         int x = paintStruct.rcPaint.left;
