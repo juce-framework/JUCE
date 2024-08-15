@@ -644,9 +644,9 @@ void WebBrowserComponent::goToURL (const String& url,
     else
         lastPostData.reset();
 
-    blankPageShown = false;
-
     impl->goToURL (url, headers, postData);
+
+    blankPageShown = false;
 }
 
 void WebBrowserComponent::stop()

@@ -474,7 +474,7 @@ public:
         }
         else
         {
-            if (owner.unloadPageWhenHidden && ! owner.blankPageShown)
+            if (webView != nullptr && owner.unloadPageWhenHidden && ! owner.blankPageShown)
             {
                 // when the component becomes invisible, some stuff like flash
                 // carries on playing audio, so we need to force it onto a blank
