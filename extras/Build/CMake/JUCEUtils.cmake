@@ -316,7 +316,14 @@ endfunction()
 function(_juce_append_record output key)
     string(ASCII 30 RS)
     string(ASCII 31 US)
-    set(${output} "${${output}}${key}${US}${ARGN}${RS}" PARENT_SCOPE)
+
+    set(prev)
+
+    if(DEFINED "${output}")
+        set(prev "${${output}}")
+    endif()
+
+    set(${output} "${prev}${key}${US}${ARGN}${RS}" PARENT_SCOPE)
 endfunction()
 
 function(_juce_append_target_property output key target property)

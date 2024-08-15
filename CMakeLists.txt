@@ -135,8 +135,7 @@ option(JUCE_WEBVIEW2_PACKAGE_LOCATION ${webview2_option_message} "")
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
     VERSION ${JUCE_VERSION}
-    COMPATIBILITY ExactVersion
-    ${extra_version_arg})
+    COMPATIBILITY ExactVersion)
 
 set(JUCE_INSTALL_DESTINATION "lib/cmake/JUCE-${JUCE_VERSION}" CACHE STRING
     "The location, relative to the install prefix, where the JUCE config file will be installed")

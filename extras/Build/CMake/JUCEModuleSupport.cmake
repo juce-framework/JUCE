@@ -159,7 +159,9 @@ endfunction()
 function(_juce_get_metadata target key out_var)
     get_target_property(content "${target}" "INTERFACE_JUCE_${key}")
 
-    if(NOT "${content}" STREQUAL "content-NOTFOUND")
+    if("${content}" STREQUAL "content-NOTFOUND")
+        set(${out_var} PARENT_SCOPE)
+    else()
         set(${out_var} "${content}" PARENT_SCOPE)
     endif()
 endfunction()
@@ -449,6 +451,8 @@ function(juce_add_module module_path)
     set(base_path "${module_parent_path}")
 
     _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
+
+    set(all_module_sources)
 
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         list(REMOVE_ITEM headers
