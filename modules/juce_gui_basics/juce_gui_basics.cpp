@@ -114,6 +114,16 @@
   #pragma comment(lib, "comctl32.lib")
   #pragma comment(lib, "dwmapi.lib")
 
+  // Link a newer version of the side-by-side comctl32 dll.
+  // Required to enable the newer native message box and visual styles on vista and above.
+  #pragma comment(linker,                             \
+          "\"/MANIFESTDEPENDENCY:type='Win32' "       \
+          "name='Microsoft.Windows.Common-Controls' " \
+          "version='6.0.0.0' "                        \
+          "processorArchitecture='*' "                \
+          "publicKeyToken='6595b64144ccf1df' "        \
+          "language='*'\""                            \
+      )
   #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")
    #pragma comment(lib, "GlU32.Lib")
