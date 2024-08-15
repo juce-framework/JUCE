@@ -2863,8 +2863,6 @@ private:
     {
         auto currentMousePos = getPOINTFromLParam ((LPARAM) GetMessagePos());
 
-        // Because Windows stupidly sends all wheel events to the window with the keyboard
-        // focus, we have to redirect them here according to the mouse pos..
         auto* peer = getOwnerOfWindow (WindowFromPoint (currentMousePos));
 
         if (peer == nullptr)
@@ -2892,7 +2890,7 @@ private:
         return MouseInputSource::InputSourceType::mouse;
     }
 
-    void doMouseWheel (const WPARAM wParam, const bool isVertical)
+    bool doMouseWheel (const WPARAM wParam, const bool isVertical)
     {
         updateKeyModifiers();
         const float amount = jlimit (-1000.0f, 1000.0f, 0.5f * (short) HIWORD (wParam));
@@ -2904,8 +2902,19 @@ private:
         wheel.isSmooth = false;
         wheel.isInertial = false;
 
-        if (const auto [peer, localPos] = findPeerUnderMouse(); peer != nullptr)
-            peer->handleMouseWheel (getPointerType (wParam), localPos, getMouseEventTime(), wheel);
+        // From Windows 10 onwards, mouse events are sent first to the window under the mouse, not
+        // the window with focus, despite what the MSDN docs might say.
+        // This is the behaviour we want; if we're receiving a scroll event, we can assume it
+        // should be processed by the current peer.
+        const auto currentMousePos = getPOINTFromLParam ((LPARAM) GetMessagePos());
+        auto* peer = getOwnerOfWindow (WindowFromPoint (currentMousePos));
+
+        if (peer == nullptr)
+            return false;
+
+        const auto localPos = peer->globalToLocal (convertPhysicalScreenPointToLogical (D2DUtilities::toPoint (currentMousePos), hwnd).toFloat());
+        peer->handleMouseWheel (getPointerType (wParam), localPos, getMouseEventTime(), wheel);
+        return true;
     }
 
     bool doGestureEvent (LPARAM lParam)
@@ -3952,10 +3961,16 @@ private:
                 return 0;
 
             case WM_POINTERWHEEL:
-            case 0x020A: /* WM_MOUSEWHEEL */   doMouseWheel (wParam, true);  return 0;
+            case WM_MOUSEWHEEL:
+                if (doMouseWheel (wParam, true))
+                    return 0;
+                break;
 
             case WM_POINTERHWHEEL:
-            case 0x020E: /* WM_MOUSEHWHEEL */  doMouseWheel (wParam, false); return 0;
+            case WM_MOUSEHWHEEL:
+                if (doMouseWheel (wParam, false))
+                    return 0;
+                break;
 
             case WM_CAPTURECHANGED:
                 doCaptureChanged();
