@@ -154,7 +154,7 @@
 #elif JUCE_WINDOWS
  #include "native/juce_ActiveXComponent_windows.cpp"
  #include "native/juce_SystemTrayIcon_windows.cpp"
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #include "native/juce_SystemTrayIcon_linux.cpp"
 #endif
 
