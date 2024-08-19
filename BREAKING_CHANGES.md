@@ -1,5 +1,30 @@
 # JUCE breaking changes
 
+# develop
+
+## Change
+
+The coefficients of LadderFilter::Mode::BPF12 have been changed, causing a
+slight change in the filter's transfer function.
+
+**Possible Issues**
+
+Code that uses the LadderFilter in BPF12 mode may produce different output
+samples.
+
+**Workaround**
+
+There is no workaround. If you need this functionality, please let us know
+about your use case. In the meantime, you may be able to copy the old class
+into your own project/module and use it that way.
+
+**Rationale**
+
+The LadderFilter implementation follows the paper Valimaki (2006): Oscillator
+and Filter Algorithms for Virtual Analog Synthesis. The BPF12 mode coefficients
+however contained a typo compared to the paper, making the BPF12 mode incorrect.
+
+
 # Version 8.0.1
 
 ## Change
