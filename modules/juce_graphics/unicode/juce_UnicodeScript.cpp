@@ -104,10 +104,6 @@ enum class TextScript
     vai,
     wancho,
     yi,
-
-    emoji,
-
-    scriptCount
 };
 
 // https://www.unicode.org/reports/tr24/tr24-32.html
@@ -135,9 +131,6 @@ public:
                 previousBaseTextScript = script;
             }
 
-            if (script == UnicodeScriptType::common && entry.emoji == EmojiType::extended)
-                script = UnicodeScriptType::emoji;
-
             if (script == UnicodeScriptType::common || script == UnicodeScriptType::inherited)
                 script = previousBaseTextScript;
 
@@ -156,7 +149,6 @@ private:
         switch (type)
         {
             case UnicodeScriptType::common:         return TextScript::common;
-            case UnicodeScriptType::emoji:          return TextScript::emoji;
             case UnicodeScriptType::arabic:         return TextScript::arabic;
             case UnicodeScriptType::armenian:       return TextScript::armenian;
             case UnicodeScriptType::bengali:        return TextScript::bengali;

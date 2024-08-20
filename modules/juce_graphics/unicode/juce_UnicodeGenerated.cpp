@@ -302,8 +302,7 @@ enum class UnicodeScriptType : uint8_t
     inscriptional_parthian,
     anatolian_hieroglyphs,
     egyptian_hieroglyphs,
-    meroitic_hieroglyphs,
-    emoji
+    meroitic_hieroglyphs
 };
 
 enum class BreakOpportunity : uint8_t
