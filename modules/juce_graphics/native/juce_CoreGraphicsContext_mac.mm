@@ -384,6 +384,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
 
         auto r = convertToCGRect (sourceImage.getBounds());
         CGContextClipToMask (context.get(), r, image.get());
+        CGContextClipToRect (context.get(), r);
 
         applyTransform (t.inverted());
         flip();
