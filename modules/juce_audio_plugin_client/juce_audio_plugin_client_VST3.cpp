@@ -2811,6 +2811,9 @@ public:
        #if JUCE_VST3_CAN_REPLACE_VST2
         return true;
        #else
+        if (auto extensions = pluginInstance->getVST3ClientExtensions())
+            return ! extensions->getCompatibleClasses().empty();
+
         return false;
        #endif
     }
