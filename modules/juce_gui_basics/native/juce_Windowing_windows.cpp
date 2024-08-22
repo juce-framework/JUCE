@@ -4650,7 +4650,12 @@ private:
 
                 constexpr auto maskToCheck = SWP_NOMOVE | SWP_NOSIZE;
 
-                if ((windowPosFlags & maskToCheck) == maskToCheck)
+                // This undocumented bit seems to get set when minimising/maximising windows with Win+D.
+                // If we attempt to dismiss modals while this bit is set, we might end up bringing
+                // modals to the front, which in turn may attempt to un-minimise them.
+                constexpr auto SWP_STATECHANGED = 0x8000;
+
+                if ((windowPosFlags & maskToCheck) == maskToCheck || (windowPosFlags & SWP_STATECHANGED) != 0)
                     return;
             }
 
