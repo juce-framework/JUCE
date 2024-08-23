@@ -695,7 +695,10 @@ public:
                                                      &propertySize);
 
                     if (! err && stringValue.outString != nullptr)
+                    {
+                        const CFUniquePtr<CFStringRef> ownedString { stringValue.outString };
                         return String::fromCFString (stringValue.outString).substring (0, maximumLength);
+                    }
                 }
             }
 
@@ -1542,13 +1545,13 @@ public:
 
     int getCurrentProgram() override
     {
-        AUPreset current;
-        current.presetNumber = 0;
+        AUPreset current{};
         UInt32 sz = sizeof (AUPreset);
 
         AudioUnitGetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
                               kAudioUnitScope_Global, 0, &current, &sz);
 
+        const CFUniquePtr<CFStringRef> ownedString { current.presetName };
         return current.presetNumber;
     }
 
@@ -1559,7 +1562,7 @@ public:
         if (factoryPresets.get() != nullptr
             && newIndex < (int) CFArrayGetCount (factoryPresets.get()))
         {
-            AUPreset current;
+            AUPreset current{};
             current.presetNumber = newIndex;
 
             if (auto* p = static_cast<const AUPreset*> (CFArrayGetValueAtIndex (factoryPresets.get(), newIndex)))
@@ -1576,16 +1579,16 @@ public:
     {
         if (index == -1)
         {
-            AUPreset current;
+            AUPreset current{};
             current.presetNumber = -1;
-            current.presetName = CFSTR ("");
 
             UInt32 prstsz = sizeof (AUPreset);
 
             AudioUnitGetProperty (audioUnit, kAudioUnitProperty_PresentPreset,
                                   kAudioUnitScope_Global, 0, &current, &prstsz);
 
-            return String::fromCFString (current.presetName);
+            const CFUniquePtr<CFStringRef> ownedString { current.presetName };
+            return current.presetName != nullptr ? String::fromCFString (current.presetName) : String{};
         }
 
         ScopedFactoryPresets factoryPresets { audioUnit };
@@ -1749,7 +1752,10 @@ public:
                                                           0,
                                                           &clumpNameInfo,
                                                           &clumpSz) == noErr)
+                                {
+                                    const CFUniquePtr<CFStringRef> ownedString { clumpNameInfo.outName };
                                     return String::fromCFString (clumpNameInfo.outName);
+                                }
 
                                 return String (info.get().clumpID);
                             }();
