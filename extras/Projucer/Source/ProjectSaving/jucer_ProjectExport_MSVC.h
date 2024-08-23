@@ -755,16 +755,6 @@ public:
                                                                           getOwner().getTargetFolder(),
                                                                           build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
                     }
-
-                    if (type == VST3Helper)
-                    {
-                        const auto manifest = getOwner().getModuleFolderRelativeToProject ("juce_audio_processors").getChildFile ("format_types")
-                                                                                                                   .getChildFile ("VST3_SDK")
-                                                                                                                   .getChildFile ("helper.manifest");
-                        additional->addTextElement (manifest.rebased (getOwner().getProject().getFile().getParentDirectory(),
-                                                                      getOwner().getTargetFolder(),
-                                                                      build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
-                    }
                 }
 
                 if (getTargetFileType() == staticLibrary && config.getArchitectureString() == "Win32")
