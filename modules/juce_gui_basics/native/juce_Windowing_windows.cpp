@@ -1693,16 +1693,6 @@ public:
 
     TransparencyKind getTransparencyKind() const
     {
-        if (hasTitleBar())
-        {
-            // If you hit this assertion, you're trying to create a window with a native titlebar
-            // and per-pixel transparency. If you want a semi-transparent window, then remove the
-            // native title bar. Otherwise, ensure that the window's component is opaque.
-            jassert (transparencyKind != TransparencyKind::perPixel);
-            return transparencyKind == TransparencyKind::perPixel ? TransparencyKind::opaque
-                                                                  : TransparencyKind::constant;
-        }
-
         return transparencyKind;
     }
 
@@ -2622,12 +2612,17 @@ private:
         }
     }
 
-    static TransparencyKind computeTransparencyKind (const Component& comp)
+    TransparencyKind computeTransparencyKind() const
     {
-        if (! comp.isOpaque())
+        if (! hasTitleBar() && ! component.isOpaque())
             return TransparencyKind::perPixel;
 
-        if (comp.getAlpha() < 1.0f)
+        // If you hit this assertion, you're trying to create a window with a native titlebar
+        // and per-pixel transparency. If you want a semi-transparent window, then remove the
+        // native title bar. Otherwise, ensure that the window's component is opaque.
+        jassert (! hasTitleBar() || component.isOpaque());
+
+        if (component.getAlpha() < 1.0f)
             return TransparencyKind::constant;
 
         return TransparencyKind::opaque;
@@ -2635,7 +2630,7 @@ private:
 
     void setLayeredWindow()
     {
-        const auto old = std::exchange (transparencyKind, computeTransparencyKind (component));
+        const auto old = std::exchange (transparencyKind, computeTransparencyKind());
 
         if (old == getTransparencyKind())
             return;
