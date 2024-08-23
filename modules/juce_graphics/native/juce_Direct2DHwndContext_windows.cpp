@@ -117,6 +117,9 @@ public:
         {
             const std::scoped_lock lock { mutex };
 
+            if (preparing == nullptr)
+                return;
+
             if (readyToDisplay != nullptr)
             {
                 // Copy the dirty regions from the newest presentation over the top of the 'ready'
