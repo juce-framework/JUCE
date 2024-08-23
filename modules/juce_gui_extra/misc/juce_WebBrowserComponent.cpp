@@ -593,9 +593,17 @@ WebBrowserComponent::WebBrowserComponent (const Options& options)
     ignoreUnused (blankPageShown);
     ignoreUnused (unloadPageWhenHidden);
    #endif
+
+    for (const auto& l : options.getLifetimeListeners())
+        lifetimeListeners.add (l);
+
+    lifetimeListeners.call (&WebViewLifetimeListener::webViewConstructed, this);
 }
 
-WebBrowserComponent::~WebBrowserComponent() = default;
+WebBrowserComponent::~WebBrowserComponent()
+{
+    lifetimeListeners.call (&WebViewLifetimeListener::webViewDestructed, this);
+}
 
 void WebBrowserComponent::emitEventIfBrowserIsVisible (const Identifier& eventId, const var& object)
 {
