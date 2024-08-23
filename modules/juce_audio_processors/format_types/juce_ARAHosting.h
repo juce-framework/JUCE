@@ -1,4 +1,4 @@
-/*
+﻿/*
   ==============================================================================
 
    This file is part of the JUCE library.
@@ -717,7 +717,7 @@ private:
 
     @tags{ARA}
 */
-class ARAHostDocumentController final
+class JUCE_API ARAHostDocumentController final
 {
 public:
     /** Factory function.
