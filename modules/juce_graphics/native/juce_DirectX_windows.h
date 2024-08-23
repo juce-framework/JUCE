@@ -39,53 +39,50 @@ struct DxgiAdapter : public ReferenceCountedObject
 {
     using Ptr = ReferenceCountedObjectPtr<DxgiAdapter>;
 
-    DxgiAdapter (ComSmartPtr<ID2D1Factory2> d2dFactory, ComSmartPtr<IDXGIAdapter1> dxgiAdapterIn)
-        : dxgiAdapter (dxgiAdapterIn)
+    static Ptr create (ComSmartPtr<ID2D1Factory2> d2dFactory, ComSmartPtr<IDXGIAdapter1> dxgiAdapterIn)
     {
+        if (dxgiAdapterIn == nullptr || d2dFactory == nullptr)
+            return {};
+
+        Ptr result = new DxgiAdapter;
+        result->dxgiAdapter = dxgiAdapterIn;
+
         for (UINT i = 0;; ++i)
         {
             ComSmartPtr<IDXGIOutput> output;
-            const auto hr = dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress());
+            const auto hr = result->dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress());
 
             if (hr == DXGI_ERROR_NOT_FOUND || hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE)
                 break;
 
-            dxgiOutputs.push_back (output);
+            result->dxgiOutputs.push_back (output);
         }
 
         // This flag adds support for surfaces with a different color channel ordering
         // than the API default. It is required for compatibility with Direct2D.
         const auto creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-        jassert (dxgiAdapter);
 
-        if (const auto hr = D3D11CreateDevice (dxgiAdapter,
+        if (const auto hr = D3D11CreateDevice (result->dxgiAdapter,
                                                D3D_DRIVER_TYPE_UNKNOWN,
                                                nullptr,
                                                creationFlags,
                                                nullptr,
                                                0,
                                                D3D11_SDK_VERSION,
-                                               direct3DDevice.resetAndGetPointerAddress(),
+                                               result->direct3DDevice.resetAndGetPointerAddress(),
                                                nullptr,
                                                nullptr); FAILED (hr))
         {
-            return;
+            return {};
         }
 
-        if (const auto hr = direct3DDevice->QueryInterface (dxgiDevice.resetAndGetPointerAddress()); FAILED (hr))
-            return;
+        if (const auto hr = result->direct3DDevice->QueryInterface (result->dxgiDevice.resetAndGetPointerAddress()); FAILED (hr))
+            return {};
 
-        if (const auto hr = d2dFactory->CreateDevice (dxgiDevice, direct2DDevice.resetAndGetPointerAddress()); FAILED (hr))
-            return;
-    }
+        if (const auto hr = d2dFactory->CreateDevice (result->dxgiDevice, result->direct2DDevice.resetAndGetPointerAddress()); FAILED (hr))
+            return {};
 
-    void release()
-    {
-        direct2DDevice = nullptr;
-        dxgiDevice = nullptr;
-        dxgiOutputs.clear();
-        dxgiAdapter = nullptr;
-        direct3DDevice = nullptr; // release the Direct3D device after the adapter to avoid an exception with AMD
+        return result;
     }
 
     bool uniqueIDMatches (ReferenceCountedObjectPtr<DxgiAdapter> other) const
@@ -113,6 +110,9 @@ struct DxgiAdapter : public ReferenceCountedObject
     ComSmartPtr<ID2D1Device1> direct2DDevice;
     ComSmartPtr<IDXGIAdapter1> dxgiAdapter;
     std::vector<ComSmartPtr<IDXGIOutput>> dxgiOutputs;
+
+private:
+    DxgiAdapter() = default;
 };
 
 struct DxgiAdapterListener
@@ -162,8 +162,11 @@ public:
             if (factory->EnumAdapters1 (i, dxgiAdapter.resetAndGetPointerAddress()) == DXGI_ERROR_NOT_FOUND)
                 break;
 
-            const auto adapter = adapterArray.add (new DxgiAdapter { d2dFactory, dxgiAdapter });
-            listeners.call ([adapter] (DxgiAdapterListener& l) { l.adapterCreated (adapter); });
+            if (const auto adapter = DxgiAdapter::create (d2dFactory, dxgiAdapter))
+            {
+                adapterArray.add (adapter);
+                listeners.call ([adapter] (DxgiAdapterListener& l) { l.adapterCreated (adapter); });
+            }
         }
     }
 
