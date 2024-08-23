@@ -552,7 +552,7 @@ public:
 
         compareFunctions[{ Image::ARGB, Image::SingleChannel }] = [] (uint8* argb, uint8* singleChannel)
         {
-            return argb[3] = *singleChannel;
+            return argb[3] == *singleChannel;
         };
 
         compareFunctions[{ Image::SingleChannel, Image::RGB }] = [] (uint8* singleChannel, uint8* rgb)
@@ -563,7 +563,7 @@ public:
 
         compareFunctions[{ Image::SingleChannel, Image::ARGB }] = [] (uint8* singleChannel, uint8* argb)
         {
-            return *singleChannel = argb[3];
+            return *singleChannel == argb[3];
         };
 
         compareFunctions[{ Image::SingleChannel, Image::SingleChannel }] = [] (uint8* singleChannel1, uint8* singleChannel2)
