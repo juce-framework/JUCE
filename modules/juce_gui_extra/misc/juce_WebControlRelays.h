@@ -62,14 +62,15 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API  WebSliderRelay : public OptionsBuilder<WebBrowserComponent::Options>
+class JUCE_API  WebSliderRelay : public OptionsBuilder<WebBrowserComponent::Options>,
+                                 private WebViewLifetimeListener
 {
 public:
     /** Creating a relay will ensure that a Javascript object under the provided name will be
         available in the specified WebBrowserComponent's context. Use the frontend framework's
         getSliderState function with the same name to get a hold of this object.
     */
-    WebSliderRelay (WebBrowserComponent& browserIn, StringRef nameIn);
+    WebSliderRelay (StringRef nameIn);
 
     //==============================================================================
     /** @internal */
@@ -98,8 +99,10 @@ public:
 
 private:
     void handleEvent (const var& event);
+    void webViewConstructed (WebBrowserComponent*) override;
+    void webViewDestructed (WebBrowserComponent*) override;
 
-    WebBrowserComponent& browser;
+    WebBrowserComponent* browser = nullptr;
     String name;
     float value{};
     Identifier eventId { "__juce__slider" + name };
@@ -134,14 +137,15 @@ private:
 
     @tags{GUI}
 */
-class JUCE_API  WebToggleButtonRelay  : public OptionsBuilder<WebBrowserComponent::Options>
+class JUCE_API  WebToggleButtonRelay  : public OptionsBuilder<WebBrowserComponent::Options>,
+                                        private WebViewLifetimeListener
 {
 public:
     /** Creating a relay will ensure that a Javascript object under the provided name will be
         available in the specified WebBrowserComponent's context. Use the frontend framework's
         getToggleState function with the same name to get a hold of this object.
     */
-    WebToggleButtonRelay (WebBrowserComponent& browserIn, StringRef nameIn);
+    WebToggleButtonRelay (StringRef nameIn);
 
     //==============================================================================
     /** @internal */
@@ -169,8 +173,10 @@ public:
 
 private:
     void handleEvent (const var& event);
+    void webViewConstructed (WebBrowserComponent*) override;
+    void webViewDestructed (WebBrowserComponent*) override;
 
-    WebBrowserComponent& browser;
+    WebBrowserComponent* browser = nullptr;
     String name;
     Identifier eventId { "__juce__toggle" + name };
     ListenerList<Listener> listeners;
@@ -204,14 +210,15 @@ private:
 
     @tags{GUI}
 */
-class JUCE_API  WebComboBoxRelay  : public OptionsBuilder<WebBrowserComponent::Options>
+class JUCE_API  WebComboBoxRelay  : public OptionsBuilder<WebBrowserComponent::Options>,
+                                    private WebViewLifetimeListener
 {
 public:
     /** Creating a relay will ensure that a Javascript object under the provided name will be
         available in the specified WebBrowserComponent's context. Use the frontend framework's
         getComboBoxState function with the same name to get a hold of this object.
     */
-    WebComboBoxRelay (WebBrowserComponent& browserIn, StringRef nameIn);
+    WebComboBoxRelay (StringRef nameIn);
 
     //==============================================================================
     /** @internal */
@@ -239,8 +246,10 @@ public:
 
 private:
     void handleEvent (const var& event);
+    void webViewConstructed (WebBrowserComponent*) override;
+    void webViewDestructed (WebBrowserComponent*) override;
 
-    WebBrowserComponent& browser;
+    WebBrowserComponent* browser = nullptr;
     String name;
     Identifier eventId { "__juce__comboBox" + name };
     ListenerList<Listener> listeners;

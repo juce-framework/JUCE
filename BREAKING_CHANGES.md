@@ -4,6 +4,32 @@
 
 ## Change
 
+The constructors of the WebSliderRelay, WebToggleButtonRelay and 
+WebComboBoxRelay classes were changed and they no longer accept a reference
+parameter to a WebBrowserComponent object.
+
+**Possible Issues**
+
+Code that uses these classes will fail to compile.
+
+**Workaround**
+
+Omit the WebBrowserComponent parameter when constructing the relay objects.
+
+**Rationale**
+
+The relay classes use a new underlying mechanism to obtain a pointer to the
+WebBrowserComponent object. When calling the
+WebBrowserComponent::Options::withOptionsFrom() function with the relay as a
+parameter, the corresponding WebBrowserComponent object will notify the relay
+about its creation and destruction.
+
+This avoids the anti-pattern where the relay class required a reference to a
+yet uninitialised WebBrowserComponent object.
+
+
+## Change
+
 The coefficients of LadderFilter::Mode::BPF12 have been changed, causing a
 slight change in the filter's transfer function.
 
