@@ -654,12 +654,12 @@ void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float
 
         detail::MutablePathPtr path { CGPathCreateMutable() };
         CGPathAddRoundedRect (path.get(), nullptr, convertToCGRectFlipped (outsideRect),
-                              jmin (outsideCornerSize, outsideRect.getWidth() / 2.0f),
-                              jmin (outsideCornerSize, outsideRect.getHeight() / 2.0f));
+                              std::clamp (outsideCornerSize, 0.0f, outsideRect.getWidth() / 2.0f),
+                              std::clamp (outsideCornerSize, 0.0f, outsideRect.getHeight() / 2.0f));
 
         CGPathAddRoundedRect (path.get(), nullptr, convertToCGRectFlipped (insideRect),
-                              jmin (insideCornerSize, insideRect.getWidth() / 2.0f),
-                              jmin (insideCornerSize, insideRect.getHeight() / 2.0f));
+                              std::clamp (insideCornerSize, 0.0f, insideRect.getWidth() / 2.0f),
+                              std::clamp (insideCornerSize, 0.0f, insideRect.getHeight() / 2.0f));
 
         CGContextAddPath (context.get(), path.get());
         drawCurrentPath (kCGPathEOFill);
