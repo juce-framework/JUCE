@@ -974,6 +974,8 @@ private:
 
     void setWebViewPreferences()
     {
+        setControlVisible (owner.isShowing());
+
         ComSmartPtr<ICoreWebView2Controller2> controller2;
         webViewController->QueryInterface (controller2.resetAndGetPointerAddress());
 
