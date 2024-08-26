@@ -660,7 +660,7 @@ using EditorRendererInterface   = PlaybackRegionRegistry<ARA::ARAEditorRendererR
 
     @tags{ARA}
 */
-class PlugInExtensionInstance final
+class JUCE_API PlugInExtensionInstance final
 {
 public:
     /** Creates an empty PlugInExtensionInstance object.
