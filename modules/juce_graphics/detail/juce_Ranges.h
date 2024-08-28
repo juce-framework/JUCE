@@ -985,7 +985,7 @@ public:
 
     auto begin() const
     {
-        auto wrappers = std::apply ([](auto&&... args)
+        auto wrappers = std::apply ([] (auto&&... args)
                                     { return createIteratorWrappers (std::forward<decltype (args)> (args)...); },
                                     items);
 

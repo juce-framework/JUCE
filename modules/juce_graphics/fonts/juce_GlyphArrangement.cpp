@@ -204,7 +204,7 @@ void GlyphArrangement::addJustifiedText (const Font& font, const String& text,
                                                .withJustification (horizontalLayout)
                                                .withFont (font)
                                                .withLeading (1.0f + leading / font.getHeight())
-                                               .withBaselineAtZero ()
+                                               .withBaselineAtZero()
                                                .withTrailingWhitespacesShouldFit (false) };
 
     addGlyphsFromShapedText (*this, st, x, y);
