@@ -347,7 +347,7 @@ public:
 
         if (const auto hr = result.deviceContext->CreateSolidColorBrush (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f),
                                                                          result.colourBrush.resetAndGetPointerAddress());
-                FAILED (hr))
+            FAILED (hr))
         {
             jassertfalse;
             return {};

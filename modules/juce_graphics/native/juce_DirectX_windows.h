@@ -348,21 +348,7 @@ struct Direct2DDeviceContext
             return {};
         }
 
-        const auto textAntialiasing = [&]
-        {
-            BOOL smoothingEnabled{};
-            SystemParametersInfo (SPI_GETFONTSMOOTHING, 0, &smoothingEnabled, 0);
-
-            if (! smoothingEnabled)
-                return D2D1_TEXT_ANTIALIAS_MODE_ALIASED;
-
-            UINT smoothingKind{};
-            SystemParametersInfo (SPI_GETFONTSMOOTHINGTYPE, 0, &smoothingKind, 0);
-            return smoothingKind == FE_FONTSMOOTHINGCLEARTYPE ? D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE
-                                                              : D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE;
-        }();
-
-        result->SetTextAntialiasMode (textAntialiasing);
+        result->SetTextAntialiasMode (D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
         result->SetAntialiasMode (D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
         result->SetUnitMode (D2D1_UNIT_MODE_PIXELS);
 
