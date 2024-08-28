@@ -278,12 +278,12 @@ private:
     {
         if (auto wmHeaderInfo = wmSyncReader.getInterface<IWMHeaderInfo>())
         {
-            QWORD lengthInNanoseconds = 0;
-            WORD lengthOfLength = sizeof (lengthInNanoseconds);
+            QWORD lengthInHundredNanoseconds = 0;
+            WORD lengthOfLength = sizeof (lengthInHundredNanoseconds);
             WORD streamNum = 0;
             WMT_ATTR_DATATYPE wmAttrDataType;
             wmHeaderInfo->GetAttributeByName (&streamNum, L"Duration", &wmAttrDataType,
-                                              (BYTE*) &lengthInNanoseconds, &lengthOfLength);
+                                              (BYTE*) &lengthInHundredNanoseconds, &lengthOfLength);
 
             if (auto wmProfile = wmSyncReader.getInterface<IWMProfile>())
             {
@@ -308,7 +308,7 @@ private:
                             sampleRate = inputFormat->nSamplesPerSec;
                             numChannels = inputFormat->nChannels;
                             bitsPerSample = inputFormat->wBitsPerSample != 0 ? inputFormat->wBitsPerSample : 16;
-                            lengthInSamples = (lengthInNanoseconds * (QWORD) sampleRate) / 10000000;
+                            lengthInSamples = (lengthInHundredNanoseconds * (QWORD) sampleRate) / 10000000;
                         }
                     }
                 }
