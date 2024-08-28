@@ -766,7 +766,7 @@ private:
     The object passed to the callback must be checked even if the plugin instance reports having
     ARA extensions.
 */
-void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (ARAFactoryWrapper)> cb);
+void JUCE_API createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (ARAFactoryWrapper)> cb);
 
 } // namespace juce
 
