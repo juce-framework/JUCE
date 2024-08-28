@@ -43,6 +43,25 @@ namespace juce
  #define JUCE_WEB_BROWSER_RESOURCE_PROVIDER_AVAILABLE 0
 #endif
 
+class WebBrowserComponent;
+
+/** Type for a listener registered with
+    WebBrowserComponent::Options::withWebViewLifetimeListener. This can be useful for
+    types using the WebBrowserComponent::Options::withOptionsFrom function as they have to be
+    constructed before the WebBrowserComponent.
+*/
+class WebViewLifetimeListener
+{
+public:
+    virtual ~WebViewLifetimeListener() = default;
+
+    /** Called from the WebBrowserComponent constructor. */
+    virtual void webViewConstructed (WebBrowserComponent*) = 0;
+
+    /** Called from the WebBrowserComponent destructor. */
+    virtual void webViewDestructed (WebBrowserComponent*) = 0;
+};
+
 //==============================================================================
 /**
     A component that displays an embedded web browser.
@@ -372,6 +391,16 @@ public:
         }
 #endif
 
+        /** Adds an object that will be notified when the WebBrowserComponent is constructed and
+            destructed.
+        */
+        [[nodiscard]] Options withWebViewLifetimeListener (WebViewLifetimeListener* listener)
+        {
+            auto copy = *this;
+            copy.lifetimeListeners.push_back (listener);
+            return copy;
+        }
+
         /** Adds all options provided by the builder to the returned Options object.
         */
         template <typename OptionsType>
@@ -393,6 +422,7 @@ public:
         const auto& getInitialisationData() const                        { return initialisationData; }
         auto        getResourceProvider() const                          { return resourceProvider; }
         const auto& getAllowedOrigin() const                             { return allowedOrigin; }
+        const auto& getLifetimeListeners() const                         { return lifetimeListeners; }
 
     private:
         //==============================================================================
@@ -408,6 +438,7 @@ public:
         std::vector<std::pair<String, var>> initialisationData;
         ResourceProvider resourceProvider;
         std::optional<String> allowedOrigin;
+        std::vector<WebViewLifetimeListener*> lifetimeListeners;
     };
 
     //==============================================================================
@@ -615,6 +646,7 @@ private:
     String lastURL;
     StringArray lastHeaders;
     MemoryBlock lastPostData;
+    ListenerList<WebViewLifetimeListener> lifetimeListeners;
 
     void reloadLastURL();
 

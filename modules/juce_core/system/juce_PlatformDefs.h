@@ -179,12 +179,15 @@ namespace juce
   */
   #define jassertquiet(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
 
+  #define JUCE_ASSERTIONS_ENABLED       1
+
 #else
   //==============================================================================
   // If debugging is disabled, these dummy debug and assertion macros are used..
 
   #define DBG(textToWrite)
   #define jassertfalse                  JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION;)
+  #define JUCE_ASSERTIONS_ENABLED       0
 
   #if JUCE_LOG_ASSERTIONS
    #define jassert(expression)          JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
@@ -195,6 +198,8 @@ namespace juce
   #endif
 
 #endif
+
+#define JUCE_ASSERTIONS_ENABLED_OR_LOGGED   JUCE_ASSERTIONS_ENABLED || JUCE_LOG_ASSERTIONS
 
 //==============================================================================
 #ifndef DOXYGEN

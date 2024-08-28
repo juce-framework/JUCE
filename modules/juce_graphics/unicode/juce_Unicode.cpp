@@ -311,6 +311,15 @@ public:
         doTest ("1_3(1)");
         doTest ("-12323");
         doTest ("8784-43_-33");
+        doTest ("[v = get()](vector<int1> _arr) -> v2 { return _arr[5]; };");
+        doTest (R"([(lambda x: (x, len(x), x.upper(), x[::-1]))(word) for word in "JUCE is great".split()])");
+        doTest (R"(table.concat({table.unpack({string.reverse(string.gsub("JUCE is great", "%a", string.upper))})}, " "))");
+        doTest (R"(result = sum([(mod(i, 2) * i**2, i = 1, 100)], mask = [(mod(i, 2) == 0, i = 1, 100)]))");
+        doTest ("100     +100");
+        doTest ("100+     100");
+        doTest ("100   -  +100");
+        doTest ("abs=     +100");
+        doTest ("1.19.0 [1]");
     }
 };
 

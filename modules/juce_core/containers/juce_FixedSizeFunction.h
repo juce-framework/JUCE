@@ -108,14 +108,12 @@ template <size_t len, typename Ret, typename... Args>
 class FixedSizeFunction<len, Ret (Args...)>
 {
 private:
-    using Storage = std::aligned_storage_t<len>;
-
     template <typename Item>
     using Decay = std::decay_t<Item>;
 
     template <typename Item, typename Fn = Decay<Item>>
     using IntIfValidConversion = std::enable_if_t<sizeof (Fn) <= len
-                                                      && alignof (Fn) <= alignof (Storage)
+                                                      && alignof (Fn) <= alignof (std::max_align_t)
                                                       && ! std::is_same_v<FixedSizeFunction, Fn>,
                                                   int>;
 
@@ -137,7 +135,7 @@ public:
     {
         static_assert (sizeof (Fn) <= len,
                        "The requested function cannot fit in this FixedSizeFunction");
-        static_assert (alignof (Fn) <= alignof (Storage),
+        static_assert (alignof (Fn) <= alignof (std::max_align_t),
                        "FixedSizeFunction cannot accommodate the requested alignment requirements");
 
         static constexpr auto vtableForCallable = detail::makeVtable<Fn, Ret, Args...>();
@@ -228,7 +226,10 @@ private:
     }
 
     const detail::Vtable<Ret, Args...>* vtable = nullptr;
-    mutable Storage storage;
+
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4324)
+    alignas (std::max_align_t) mutable std::byte storage[len];
+    JUCE_END_IGNORE_WARNINGS_MSVC
 };
 
 template <size_t len, typename T>

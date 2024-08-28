@@ -44,7 +44,7 @@
 
   ID:                     juce_gui_extra
   vendor:                 juce
-  version:                8.0.0
+  version:                8.0.1
   name:                   JUCE extended GUI classes
   description:            Miscellaneous GUI classes for specialised tasks.
   website:                http://www.juce.com/juce

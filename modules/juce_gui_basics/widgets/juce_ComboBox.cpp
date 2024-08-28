@@ -678,7 +678,7 @@ public:
         return comboBox.isPopupActive() ? state.withExpanded() : state.withCollapsed();
     }
 
-    String getTitle() const override  { return comboBox.getText(); }
+    String getTitle() const override  { return comboBox.getTitle(); }
     String getHelp() const override   { return comboBox.getTooltip(); }
 
 private:

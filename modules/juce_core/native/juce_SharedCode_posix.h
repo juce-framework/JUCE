@@ -152,7 +152,7 @@ bool File::setAsCurrentWorkingDirectory() const
 
 //==============================================================================
 // The unix siginterrupt function is deprecated - this does the same job.
-int juce_siginterrupt ([[maybe_unused]] int sig, [[maybe_unused]] int flag)
+inline int juce_siginterrupt ([[maybe_unused]] int sig, [[maybe_unused]] int flag)
 {
    #if JUCE_WASM
     return 0;

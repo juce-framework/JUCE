@@ -261,7 +261,7 @@ public:
         and Thread::run() will not be called. An exception to this is the Android platform,
         which always starts a thread and attempts to upgrade the thread after creation.
 
-        @returns    true if the thread started successfully. false if it was unsuccesful.
+        @returns    true if the thread started successfully. false if it was unsuccessful.
 
         @see stopThread
     */

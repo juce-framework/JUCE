@@ -255,8 +255,6 @@ static void handleCrash (int signum)
     globalCrashHandler ((void*) (pointer_sized_int) signum);
     ::kill (getpid(), SIGKILL);
 }
-
-int juce_siginterrupt (int sig, int flag);
 #endif
 
 void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)

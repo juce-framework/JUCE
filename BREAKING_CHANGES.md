@@ -4,6 +4,91 @@
 
 ## Change
 
+The constructors of the WebSliderRelay, WebToggleButtonRelay and 
+WebComboBoxRelay classes were changed and they no longer accept a reference
+parameter to a WebBrowserComponent object.
+
+**Possible Issues**
+
+Code that uses these classes will fail to compile.
+
+**Workaround**
+
+Omit the WebBrowserComponent parameter when constructing the relay objects.
+
+**Rationale**
+
+The relay classes use a new underlying mechanism to obtain a pointer to the
+WebBrowserComponent object. When calling the
+WebBrowserComponent::Options::withOptionsFrom() function with the relay as a
+parameter, the corresponding WebBrowserComponent object will notify the relay
+about its creation and destruction.
+
+This avoids the anti-pattern where the relay class required a reference to a
+yet uninitialised WebBrowserComponent object.
+
+
+## Change
+
+The coefficients of LadderFilter::Mode::BPF12 have been changed, causing a
+slight change in the filter's transfer function.
+
+**Possible Issues**
+
+Code that uses the LadderFilter in BPF12 mode may produce different output
+samples.
+
+**Workaround**
+
+There is no workaround. If you need this functionality, please let us know
+about your use case. In the meantime, you may be able to copy the old class
+into your own project/module and use it that way.
+
+**Rationale**
+
+The LadderFilter implementation follows the paper Valimaki (2006): Oscillator
+and Filter Algorithms for Virtual Analog Synthesis. The BPF12 mode coefficients
+however contained a typo compared to the paper, making the BPF12 mode incorrect.
+
+
+# Version 8.0.1
+
+## Change
+
+All member functions of DynamicObject other than clone() and writeAsJSON() have
+been made non-virtual.
+
+**Possible Issues**
+
+Classes that override these functions will fail to compile.
+
+**Workaround**
+
+Instead of overriding hasMethod() and invokeMethod(), call setMethod() to
+add new member functions.
+
+Instead of overriding getProperty() to return a custom property, add that
+property using setProperty().
+
+**Rationale**
+
+Allowing the implementations of these functions to be changed may cause derived
+types to accidentally break the invariants of the DynamicObject type.
+Specifically, the results of hasMethod() and hasProperty() must be consistent
+with the result of getProperties(). Additiionally, calling getProperty() should
+return the same var as fetching the property through getProperties(), and
+calling invokeMethod() should behave the same way as retrieving and invoking a
+NativeFunction via getProperties().
+
+More concretely, the new QuickJS-based Javascript engine requires that all
+methods/properties are declared explicitly, which cannot be mapped to the more
+open-ended invokeMethod() API taking an arbitrary method name. Making
+invokeMethod() non-virtual forces users to add methods with setMethod() instead
+of overriding invokeMethod(), which is more compatible with QuickJS.
+
+
+## Change
+
 The LowLevelGraphicsPostscriptRenderer has been removed.
 
 **Possible Issues**

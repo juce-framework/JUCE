@@ -43,7 +43,7 @@ namespace KeyboardFocusTraverserHelpers
         return comp->getWantsKeyboardFocus() && container->isParentOf (comp);
     }
 
-    static Component* traverse (Component* current, Component* container,
+    static Component* traverse (const Component* current, const Component* container,
                                 detail::FocusHelpers::NavigationDirection direction)
     {
         if (auto* comp = detail::FocusHelpers::navigateFocus (current, container, direction,
@@ -112,55 +112,55 @@ struct KeyboardFocusTraverserTests final : public UnitTest
     void runTest() override
     {
         ScopedJuceInitialiser_GUI libraryInitialiser;
-        const MessageManagerLock mml;
+        const auto mml = std::make_unique<MessageManagerLock>();
 
         beginTest ("No child wants keyboard focus");
         {
-            TestComponent parent;
+            const auto parent = std::make_unique<TestComponent>();
 
-            expect (traverser.getDefaultComponent (&parent) == nullptr);
-            expect (traverser.getAllComponents (&parent).empty());
+            expect (traverser.getDefaultComponent (parent.get()) == nullptr);
+            expect (traverser.getAllComponents (parent.get()).empty());
         }
 
         beginTest ("Single child wants keyboard focus");
         {
-            TestComponent parent;
+            const auto parent = std::make_unique<TestComponent>();
 
-            parent.children[5].setWantsKeyboardFocus (true);
+            parent->children[5].setWantsKeyboardFocus (true);
 
-            auto* defaultComponent = traverser.getDefaultComponent (&parent);
+            auto* defaultComponent = traverser.getDefaultComponent (parent.get());
 
-            expect (defaultComponent == &parent.children[5]);
+            expect (defaultComponent == &parent->children[5]);
             expect (defaultComponent->getWantsKeyboardFocus());
 
             expect (traverser.getNextComponent (defaultComponent) == nullptr);
             expect (traverser.getPreviousComponent (defaultComponent) == nullptr);
-            expect (traverser.getAllComponents (&parent).size() == 1);
+            expect (traverser.getAllComponents (parent.get()).size() == 1);
         }
 
         beginTest ("Multiple children want keyboard focus");
         {
-            TestComponent parent;
+            const auto parent = std::make_unique<TestComponent>();
 
             Component* focusChildren[]
             {
-                &parent.children[1],
-                &parent.children[9],
-                &parent.children[3],
-                &parent.children[5],
-                &parent.children[8],
-                &parent.children[0]
+                &parent->children[1],
+                &parent->children[9],
+                &parent->children[3],
+                &parent->children[5],
+                &parent->children[8],
+                &parent->children[0]
             };
 
             for (auto* focusChild : focusChildren)
                 focusChild->setWantsKeyboardFocus (true);
 
-            auto allComponents = traverser.getAllComponents (&parent);
+            auto allComponents = traverser.getAllComponents (parent.get());
 
             for (auto* focusChild : focusChildren)
                 expect (std::find (allComponents.cbegin(), allComponents.cend(), focusChild) != allComponents.cend());
 
-            auto* componentToTest = traverser.getDefaultComponent (&parent);
+            auto* componentToTest = traverser.getDefaultComponent (parent.get());
 
             for (;;)
             {
@@ -177,7 +177,7 @@ struct KeyboardFocusTraverserTests final : public UnitTest
             for (auto* focusChild : focusChildren)
                 focusChild->setExplicitFocusOrder (focusOrder++);
 
-            componentToTest = traverser.getDefaultComponent (&parent);
+            componentToTest = traverser.getDefaultComponent (parent.get());
 
             for (auto* focusChild : focusChildren)
             {
@@ -190,40 +190,40 @@ struct KeyboardFocusTraverserTests final : public UnitTest
 
         beginTest ("Single nested child wants keyboard focus");
         {
-            TestComponent parent;
-            Component grandparent;
+            const auto parent = std::make_unique<TestComponent>();
+            const auto grandparent = std::make_unique<Component>();
 
-            grandparent.addAndMakeVisible (parent);
+            grandparent->addAndMakeVisible (parent.get());
 
-            auto& focusChild = parent.children[5];
+            auto& focusChild = parent->children[5];
 
             focusChild.setWantsKeyboardFocus (true);
 
-            expect (traverser.getDefaultComponent (&grandparent) == &focusChild);
-            expect (traverser.getDefaultComponent (&parent) == &focusChild);
+            expect (traverser.getDefaultComponent (grandparent.get()) == &focusChild);
+            expect (traverser.getDefaultComponent (parent.get()) == &focusChild);
             expect (traverser.getNextComponent (&focusChild) == nullptr);
             expect (traverser.getPreviousComponent (&focusChild) == nullptr);
-            expect (traverser.getAllComponents (&parent).size() == 1);
+            expect (traverser.getAllComponents (parent.get()).size() == 1);
         }
 
         beginTest ("Multiple nested children want keyboard focus");
         {
-            TestComponent parent;
-            Component grandparent;
+            const auto parent = std::make_unique<TestComponent>();
+            const auto grandparent = std::make_unique<Component>();
 
-            grandparent.addAndMakeVisible (parent);
+            grandparent->addAndMakeVisible (parent.get());
 
             Component* focusChildren[]
             {
-                &parent.children[1],
-                &parent.children[4],
-                &parent.children[5]
+                &parent->children[1],
+                &parent->children[4],
+                &parent->children[5]
             };
 
             for (auto* focusChild : focusChildren)
                 focusChild->setWantsKeyboardFocus (true);
 
-            auto allComponents = traverser.getAllComponents (&parent);
+            auto allComponents = traverser.getAllComponents (parent.get());
 
             expect (std::equal (allComponents.cbegin(), allComponents.cend(), focusChildren,
                                 [] (const Component* c1, const Component* c2) { return c1 == c2; }));
@@ -231,33 +231,34 @@ struct KeyboardFocusTraverserTests final : public UnitTest
             const auto front = *focusChildren;
             const auto back  = *std::prev (std::end (focusChildren));
 
-            expect (traverser.getDefaultComponent (&grandparent) == front);
-            expect (traverser.getDefaultComponent (&parent) == front);
+            expect (traverser.getDefaultComponent (grandparent.get()) == front);
+            expect (traverser.getDefaultComponent (parent.get()) == front);
             expect (traverser.getNextComponent (front) == *std::next (std::begin (focusChildren)));
             expect (traverser.getPreviousComponent (back) == *std::prev (std::end (focusChildren), 2));
 
-            std::array<Component, 3> otherParents;
+            std::array<std::unique_ptr<Component>, 3> otherParents;
 
             for (auto& p : otherParents)
             {
-                grandparent.addAndMakeVisible (p);
-                p.setWantsKeyboardFocus (true);
+                p = std::make_unique<Component>();
+                grandparent->addAndMakeVisible (p.get());
+                p->setWantsKeyboardFocus (true);
             }
 
-            expect (traverser.getDefaultComponent (&grandparent) == front);
-            expect (traverser.getDefaultComponent (&parent) == front);
-            expect (traverser.getNextComponent (back) == &otherParents.front());
-            expect (traverser.getNextComponent (&otherParents.back()) == nullptr);
-            expect (traverser.getAllComponents (&grandparent).size() == numElementsInArray (focusChildren) + otherParents.size());
-            expect (traverser.getAllComponents (&parent).size() == (size_t) numElementsInArray (focusChildren));
+            expect (traverser.getDefaultComponent (grandparent.get()) == front);
+            expect (traverser.getDefaultComponent (parent.get()) == front);
+            expect (traverser.getNextComponent (back) == otherParents.front().get());
+            expect (traverser.getNextComponent (otherParents.back().get()) == nullptr);
+            expect (traverser.getAllComponents (grandparent.get()).size() == numElementsInArray (focusChildren) + otherParents.size());
+            expect (traverser.getAllComponents (parent.get()).size() == (size_t) numElementsInArray (focusChildren));
 
             for (auto* focusChild : focusChildren)
                 focusChild->setWantsKeyboardFocus (false);
 
-            expect (traverser.getDefaultComponent (&grandparent) == &otherParents.front());
-            expect (traverser.getDefaultComponent (&parent) == nullptr);
-            expect (traverser.getAllComponents (&grandparent).size() == otherParents.size());
-            expect (traverser.getAllComponents (&parent).empty());
+            expect (traverser.getDefaultComponent (grandparent.get()) == otherParents.front().get());
+            expect (traverser.getDefaultComponent (parent.get()) == nullptr);
+            expect (traverser.getAllComponents (grandparent.get()).size() == otherParents.size());
+            expect (traverser.getAllComponents (parent.get()).empty());
         }
     }
 

@@ -153,6 +153,14 @@
 #include "misc/juce_ConsoleApplication.cpp"
 #include "misc/juce_ScopeGuard.cpp"
 #include "network/juce_MACAddress.cpp"
+
+#if ! JUCE_WINDOWS
+ #include "native/juce_SharedCode_posix.h"
+ #include "native/juce_NamedPipe_posix.cpp"
+#else
+ #include "native/juce_Files_windows.cpp"
+#endif
+
 #include "network/juce_NamedPipe.cpp"
 #include "network/juce_Socket.cpp"
 #include "network/juce_IPAddress.cpp"
@@ -197,12 +205,8 @@
 #include "native/juce_PlatformTimerListener.h"
 
 //==============================================================================
-#if ! JUCE_WINDOWS
- #include "native/juce_SharedCode_posix.h"
- #include "native/juce_NamedPipe_posix.cpp"
- #if ! JUCE_ANDROID || __ANDROID_API__ >= 24
-  #include "native/juce_IPAddress_posix.h"
- #endif
+#if ! JUCE_WINDOWS && (! JUCE_ANDROID || __ANDROID_API__ >= 24)
+ #include "native/juce_IPAddress_posix.h"
 #endif
 
 //==============================================================================
@@ -218,7 +222,6 @@
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #include "native/juce_Files_windows.cpp"
  #include "native/juce_Network_windows.cpp"
  #include "native/juce_Registry_windows.cpp"
  #include "native/juce_SystemStats_windows.cpp"

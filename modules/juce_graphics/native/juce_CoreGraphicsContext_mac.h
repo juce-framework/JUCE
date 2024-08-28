@@ -37,43 +37,14 @@ namespace juce
 
 namespace detail
 {
-    struct ColorSpaceDelete
-    {
-        void operator() (CGColorSpaceRef ptr) const noexcept { CGColorSpaceRelease (ptr); }
-    };
-
-    struct ContextDelete
-    {
-        void operator() (CGContextRef ptr) const noexcept { CGContextRelease (ptr); }
-    };
-
-    struct DataProviderDelete
-    {
-        void operator() (CGDataProviderRef ptr) const noexcept { CGDataProviderRelease (ptr); }
-    };
-
-    struct ImageDelete
-    {
-        void operator() (CGImageRef ptr) const noexcept { CGImageRelease (ptr); }
-    };
-
-    struct GradientDelete
-    {
-        void operator() (CGGradientRef ptr) const noexcept { CGGradientRelease (ptr); }
-    };
-
-    struct ColorDelete
-    {
-        void operator() (CGColorRef ptr) const noexcept { CGColorRelease (ptr); }
-    };
-
-    //==============================================================================
-    using ColorSpacePtr = std::unique_ptr<CGColorSpace, ColorSpaceDelete>;
-    using ContextPtr = std::unique_ptr<CGContext, ContextDelete>;
-    using DataProviderPtr = std::unique_ptr<CGDataProvider, DataProviderDelete>;
-    using ImagePtr = std::unique_ptr<CGImage, ImageDelete>;
-    using GradientPtr = std::unique_ptr<CGGradient, GradientDelete>;
-    using ColorPtr = std::unique_ptr<CGColor, ColorDelete>;
+    using ColorSpacePtr     = CFUniquePtr<CGColorSpaceRef>;
+    using ContextPtr        = CFUniquePtr<CGContextRef>;
+    using DataProviderPtr   = CFUniquePtr<CGDataProviderRef>;
+    using ImagePtr          = CFUniquePtr<CGImageRef>;
+    using GradientPtr       = CFUniquePtr<CGGradientRef>;
+    using ColorPtr          = CFUniquePtr<CGColorRef>;
+    using PathPtr           = CFUniquePtr<CGPathRef>;
+    using MutablePathPtr    = CFUniquePtr<CGMutablePathRef>;
 }
 
 //==============================================================================
@@ -115,6 +86,7 @@ public:
     void fillRect (const Rectangle<float>&) override;
     void fillRectList (const RectangleList<float>&) override;
     void fillPath (const Path&, const AffineTransform&) override;
+    void strokePath (const Path& path, const PathStrokeType& strokeType, const AffineTransform& transform) override;
     void drawImage (const Image& sourceImage, const AffineTransform&) override;
 
     //==============================================================================
@@ -127,6 +99,14 @@ public:
 
     uint64_t getFrameId() const override { return 0; }
 
+    void drawEllipse (const Rectangle<float>& area, float lineThickness) override;
+    void fillEllipse (const Rectangle<float>& area) override;
+
+    void drawRoundedRectangle (const Rectangle<float>& r, float cornerSize, float lineThickness) override;
+    void fillRoundedRectangle (const Rectangle<float>& r, float cornerSize) override;
+
+    void drawLineWithThickness (const Line<float>& line, float lineThickness) override;
+
 private:
     //==============================================================================
     detail::ContextPtr context;
@@ -138,7 +118,10 @@ private:
     std::unique_ptr<SavedState> state;
     OwnedArray<SavedState> stateStack;
 
-    void setContextClipToPath (const Path&, const AffineTransform&);
+    template <class RectType>
+    CGRect convertToCGRectFlipped (RectType r) const noexcept;
+    void setContextClipToCurrentPath (bool useNonZeroWinding);
+    void drawCurrentPath (CGPathDrawingMode mode);
     void drawGradient();
     void createPath (const Path&, const AffineTransform&) const;
     void flip() const;

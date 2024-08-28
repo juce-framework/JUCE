@@ -438,9 +438,9 @@ public:
 private:
     WebViewPluginAudioProcessor& processorRef;
 
-    WebSliderRelay       cutoffSliderRelay    { webComponent, "cutoffSlider" };
-    WebToggleButtonRelay muteToggleRelay      { webComponent, "muteToggle" };
-    WebComboBoxRelay     filterTypeComboRelay { webComponent, "filterTypeCombo" };
+    WebSliderRelay       cutoffSliderRelay    { "cutoffSlider" };
+    WebToggleButtonRelay muteToggleRelay      { "muteToggle" };
+    WebComboBoxRelay     filterTypeComboRelay { "filterTypeCombo" };
 
     WebControlParameterIndexReceiver controlParameterIndexReceiver;
 

@@ -59,7 +59,7 @@ void LadderFilter<SampleType>::setMode (Mode newMode) noexcept
     {
         case Mode::LPF12:   A = {{ SampleType (0), SampleType (0),  SampleType (1), SampleType (0),  SampleType (0) }}; comp = SampleType (0.5);  break;
         case Mode::HPF12:   A = {{ SampleType (1), SampleType (-2), SampleType (1), SampleType (0),  SampleType (0) }}; comp = SampleType (0);    break;
-        case Mode::BPF12:   A = {{ SampleType (0), SampleType (0), SampleType (-1), SampleType (1),  SampleType (0) }}; comp = SampleType (0.5);  break;
+        case Mode::BPF12:   A = {{ SampleType (0), SampleType (1), SampleType (-1), SampleType (0),  SampleType (0) }}; comp = SampleType (0.5);  break;
         case Mode::LPF24:   A = {{ SampleType (0), SampleType (0),  SampleType (0), SampleType (0),  SampleType (1) }}; comp = SampleType (0.5);  break;
         case Mode::HPF24:   A = {{ SampleType (1), SampleType (-4), SampleType (6), SampleType (-4), SampleType (1) }}; comp = SampleType (0);    break;
         case Mode::BPF24:   A = {{ SampleType (0), SampleType (0),  SampleType (1), SampleType (-2), SampleType (1) }}; comp = SampleType (0.5);  break;

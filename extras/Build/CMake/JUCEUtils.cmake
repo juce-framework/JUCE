@@ -316,7 +316,14 @@ endfunction()
 function(_juce_append_record output key)
     string(ASCII 30 RS)
     string(ASCII 31 US)
-    set(${output} "${${output}}${key}${US}${ARGN}${RS}" PARENT_SCOPE)
+
+    set(prev)
+
+    if(DEFINED "${output}")
+        set(prev "${${output}}")
+    endif()
+
+    set(${output} "${prev}${key}${US}${ARGN}${RS}" PARENT_SCOPE)
 endfunction()
 
 function(_juce_append_target_property output key target property)
@@ -2080,6 +2087,21 @@ function(juce_add_console_app target)
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         target_compile_definitions(${target} PRIVATE _CONSOLE=1)
     endif()
+
+    # When building for iOS, these properties will be read in order to populate
+    # a plist for the app. We probably don't care whether these values are sane;
+    # if we wanted to run on iOS, we'd use juce_gui_app instead.
+    # We clear these explicitly to avoid warnings when configuring with
+    # --warn-uninitialized
+    set_target_properties(${target} PROPERTIES
+        MACOSX_BUNDLE_BUNDLE_NAME           ""
+        MACOSX_BUNDLE_BUNDLE_VERSION        ""
+        MACOSX_BUNDLE_COPYRIGHT             ""
+        MACOSX_BUNDLE_GUI_IDENTIFIER        ""
+        MACOSX_BUNDLE_ICON_FILE             ""
+        MACOSX_BUNDLE_INFO_STRING           ""
+        MACOSX_BUNDLE_LONG_VERSION_STRING   ""
+        MACOSX_BUNDLE_SHORT_VERSION_STRING  "")
 
     _juce_initialise_target(${target} ${ARGN})
 

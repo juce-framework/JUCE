@@ -62,18 +62,18 @@ public:
     /** Returns true if the object has a property with this name.
         Note that if the property is actually a method, this will return false.
     */
-    virtual bool hasProperty (const Identifier& propertyName) const;
+    bool hasProperty (const Identifier& propertyName) const;
 
     /** Returns a named property.
         This returns var() if no such property exists.
     */
-    virtual const var& getProperty (const Identifier& propertyName) const;
+    const var& getProperty (const Identifier& propertyName) const;
 
     /** Sets a named property. */
-    virtual void setProperty (const Identifier& propertyName, const var& newValue);
+    void setProperty (const Identifier& propertyName, const var& newValue);
 
     /** Removes a named property. */
-    virtual void removeProperty (const Identifier& propertyName);
+    void removeProperty (const Identifier& propertyName);
 
     //==============================================================================
     /** Checks whether this object has the specified method.
@@ -82,7 +82,7 @@ public:
         with this name that's actually a method, but this can be overridden for
         building objects with dynamic invocation.
     */
-    virtual bool hasMethod (const Identifier& methodName) const;
+    bool hasMethod (const Identifier& methodName) const;
 
     /** Invokes a named method on this object.
 
@@ -92,8 +92,8 @@ public:
         This method is virtual to allow more dynamic invocation to used for objects
         where the methods may not already be set as properties.
     */
-    virtual var invokeMethod (Identifier methodName,
-                              const var::NativeFunctionArgs& args);
+    var invokeMethod (Identifier methodName,
+                      const var::NativeFunctionArgs& args);
 
     /** Adds a method to the class.
 

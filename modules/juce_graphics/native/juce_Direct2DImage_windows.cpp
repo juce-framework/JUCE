@@ -101,6 +101,9 @@ public:
 
     static void flushImage (Image softwareImage, ComSmartPtr<ID2D1Bitmap1> native, D2D1_RECT_U target)
     {
+        if (native == nullptr)
+            return;
+
         if (softwareImage.getFormat() == Image::PixelFormat::RGB)
             softwareImage = softwareImage.convertedToFormat (Image::PixelFormat::ARGB);
 
@@ -158,7 +161,7 @@ void Direct2DPixelData::createDeviceResources()
         adapter = directX->adapters.getDefaultAdapter();
 
     if (context == nullptr)
-        context = Direct2DDeviceContext::createContext (adapter);
+        context = Direct2DDeviceContext::create (adapter);
 
     if (nativeBitmap == nullptr)
     {
@@ -202,10 +205,16 @@ auto Direct2DPixelData::make (Image::PixelFormat formatToUse,
     return new Direct2DPixelData (formatToUse, widthIn, heightIn, clearImageIn, adapterIn);
 }
 
-auto Direct2DPixelData::fromDirect2DBitmap (ComSmartPtr<ID2D1Bitmap1> bitmap) -> Ptr
+auto Direct2DPixelData::fromDirect2DBitmap (DxgiAdapter::Ptr adapterIn,
+                                            ComSmartPtr<ID2D1DeviceContext1> contextIn,
+                                            ComSmartPtr<ID2D1Bitmap1> bitmapIn) -> Ptr
 {
-    const auto size = bitmap->GetPixelSize();
-    return new Direct2DPixelData { Image::ARGB, (int) size.width, (int) size.height, false, nullptr };
+    const auto size = bitmapIn->GetPixelSize();
+    Ptr result = new Direct2DPixelData { Image::ARGB, (int) size.width, (int) size.height, false, nullptr };
+    result->adapter = adapterIn;
+    result->context = contextIn;
+    result->nativeBitmap = bitmapIn;
+    return result;
 }
 
 Direct2DPixelData::Direct2DPixelData (Image::PixelFormat f, int widthIn, int heightIn, bool clear, DxgiAdapter::Ptr adapterIn)
@@ -225,7 +234,27 @@ std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContex
 {
     sendDataChangeMessage();
 
-    return std::make_unique<Direct2DImageContext> (this);
+    struct FlushingContext : public Direct2DImageContext
+    {
+        explicit FlushingContext (Direct2DPixelData::Ptr p)
+            : Direct2DImageContext (p->context, p->getAdapterD2D1Bitmap(), Rectangle { p->width, p->height }),
+              ptr (startFrame (1.0f) ? p : nullptr)
+        {
+        }
+
+        ~FlushingContext() override
+        {
+            if (ptr == nullptr)
+                return;
+
+            endFrame();
+            ptr->flushToSoftwareBackup();
+        }
+
+        Direct2DPixelData::Ptr ptr;
+    };
+
+    return std::make_unique<FlushingContext> (this);
 }
 
 void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode)

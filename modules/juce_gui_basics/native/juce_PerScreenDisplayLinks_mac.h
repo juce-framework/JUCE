@@ -103,6 +103,14 @@ private:
     Manages the lifetime of a CVDisplayLinkRef for a single display, and automatically starts and
     stops it.
 */
+
+// From macOS 15+, warnings suggest the CVDisplayLink functions can be replaced with
+// NSView.displayLink(target:selector:), NSWindow.displayLink(target:selector:), or
+// NSScreen.displayLink(target:selector:) all of which were only introduced in macOS 14+ however,
+// it's not clear how these methods can be used to replace all use cases
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
 class ScopedDisplayLink
 {
 public:
@@ -178,6 +186,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE (ScopedDisplayLink)
     JUCE_DECLARE_NON_MOVEABLE (ScopedDisplayLink)
 };
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 /*

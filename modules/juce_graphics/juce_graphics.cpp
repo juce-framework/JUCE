@@ -52,6 +52,7 @@
 //==============================================================================
 #if JUCE_MAC
  #import <QuartzCore/QuartzCore.h>
+ #include <CoreImage/CIRenderDestination.h>
  #include <CoreText/CTFont.h>
 
 #elif JUCE_WINDOWS
@@ -204,15 +205,19 @@
  #include "native/juce_IconHelpers_mac.cpp"
 
 #elif JUCE_WINDOWS
+ #include "native/juce_Direct2DMetrics_windows.h"
+ #include "native/juce_Direct2DGraphicsContext_windows.h"
+ #include "native/juce_Direct2DHwndContext_windows.h"
  #include "native/juce_DirectX_windows.h"
+ #include "native/juce_Direct2DImage_windows.h"
+ #include "native/juce_Direct2DImageContext_windows.h"
+
  #include "native/juce_DirectWriteTypeface_windows.cpp"
  #include "native/juce_IconHelpers_windows.cpp"
  #include "native/juce_Direct2DHelpers_windows.cpp"
  #include "native/juce_Direct2DResources_windows.cpp"
- #include "native/juce_Direct2DImage_windows.h"
  #include "native/juce_Direct2DGraphicsContext_windows.cpp"
  #include "native/juce_Direct2DHwndContext_windows.cpp"
- #include "native/juce_Direct2DImageContext_windows.h"
  #include "native/juce_Direct2DImageContext_windows.cpp"
  #include "native/juce_Direct2DImage_windows.cpp"
  #include "native/juce_Direct2DMetrics_windows.cpp"

@@ -256,12 +256,10 @@ public:
     SavedState (Direct2DGraphicsContext& ownerIn,
                 Rectangle<int> frameSizeIn,
                 ComSmartPtr<ID2D1SolidColorBrush>& colourBrushIn,
-                DxgiAdapter::Ptr& adapterIn,
                 Direct2DDeviceResources& deviceResourcesIn)
         : owner (ownerIn),
           currentBrush (colourBrushIn),
           colourBrush (colourBrushIn),
-          adapter (adapterIn),
           deviceResources (deviceResourcesIn),
           deviceSpaceClipList (frameSizeIn.toFloat())
     {
@@ -269,7 +267,7 @@ public:
 
     void pushLayer (const D2D1_LAYER_PARAMETERS1& layerParameters)
     {
-        layers.push (deviceResources.deviceContext.context, layerParameters);
+        layers.push (deviceResources.deviceContext, layerParameters);
     }
 
     void pushGeometryClipLayer (ComSmartPtr<ID2D1Geometry> geometry)
@@ -292,7 +290,7 @@ public:
     {
         JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.metrics, pushAliasedAxisAlignedLayerTime)
 
-        layers.push (deviceResources.deviceContext.context, r);
+        layers.push (deviceResources.deviceContext, r);
     }
 
     void pushTransparencyLayer (float opacity)
@@ -303,12 +301,12 @@ public:
     void popLayers()
     {
         while (! layers.isEmpty())
-            layers.popOne (deviceResources.deviceContext.context);
+            layers.popOne (deviceResources.deviceContext);
     }
 
     void popTopLayer()
     {
-        layers.popOne (deviceResources.deviceContext.context);
+        layers.popOne (deviceResources.deviceContext);
     }
 
     void setFont (const Font& newFont)
@@ -351,17 +349,17 @@ public:
 
                 JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
 
-                return Direct2DBitmap::fromImage (fillType.image, deviceResources.deviceContext.context, Image::ARGB);
+                return Direct2DBitmap::toBitmap (fillType.image, deviceResources.deviceContext, Image::ARGB);
             }();
 
             if (d2d1Bitmap != nullptr)
             {
                 D2D1_BRUSH_PROPERTIES brushProps { fillType.getOpacity(), D2DUtilities::transformToMatrix (fillType.transform) };
                 auto bmProps = D2D1::BitmapBrushProperties (D2D1_EXTEND_MODE_WRAP, D2D1_EXTEND_MODE_WRAP);
-                if (const auto hr = deviceResources.deviceContext.context->CreateBitmapBrush (d2d1Bitmap,
-                                                                                              bmProps,
-                                                                                              brushProps,
-                                                                                              bitmapBrush.resetAndGetPointerAddress()); SUCCEEDED (hr))
+                if (const auto hr = deviceResources.deviceContext->CreateBitmapBrush (d2d1Bitmap,
+                                                                                      bmProps,
+                                                                                      brushProps,
+                                                                                      bitmapBrush.resetAndGetPointerAddress()); SUCCEEDED (hr))
                 {
                     currentBrush = bitmapBrush;
                 }
@@ -371,12 +369,12 @@ public:
         {
             if (fillType.gradient->isRadial)
             {
-                radialGradient = deviceResources.radialGradientCache.get (*fillType.gradient, deviceResources.deviceContext.context, owner.metrics.get());
+                radialGradient = deviceResources.radialGradientCache.get (*fillType.gradient, deviceResources.deviceContext, owner.metrics.get());
                 currentBrush = radialGradient;
             }
             else
             {
-                linearGradient = deviceResources.linearGradientCache.get (*fillType.gradient, deviceResources.deviceContext.context, owner.metrics.get());
+                linearGradient = deviceResources.linearGradientCache.get (*fillType.gradient, deviceResources.deviceContext, owner.metrics.get());
                 currentBrush = linearGradient;
             }
         }
@@ -519,7 +517,6 @@ public:
 
     RenderingHelpers::TranslationOrTransform currentTransform;
 
-    DxgiAdapter::Ptr& adapter;
     Direct2DDeviceResources& deviceResources;
     RectangleList<float> deviceSpaceClipList;
 
@@ -550,44 +547,35 @@ protected:
     Direct2DGraphicsContext& owner;
     SharedResourcePointer<DirectX> directX;
     SharedResourcePointer<Direct2DFactories> directWrite;
-    RectangleList<int> paintAreas;
 
-    DxgiAdapter::Ptr adapter;
-    Direct2DDeviceResources deviceResources;
+    std::optional<Direct2DDeviceResources> deviceResources;
 
     std::vector<std::unique_ptr<Direct2DGraphicsContext::SavedState>> savedClientStates;
 
     virtual HRESULT prepare()
     {
-        if (! deviceResources.canPaint (adapter))
-        {
-            if (auto hr = deviceResources.create (adapter); FAILED (hr))
-                return hr;
-        }
+        if (! deviceResources.has_value())
+            deviceResources = Direct2DDeviceResources::create (directX->adapters.getDefaultAdapter());
 
-        return S_OK;
+        return deviceResources.has_value() ? S_OK : E_FAIL;
     }
 
     virtual void teardown()
     {
-        deviceResources.release();
+        deviceResources.reset();
     }
 
     virtual ComSmartPtr<ID2D1Image> getDeviceContextTarget() const = 0;
 
-    virtual void updatePaintAreas() = 0;
-
     virtual bool checkPaintReady()
     {
-        return deviceResources.canPaint (adapter);
+        return deviceResources.has_value();
     }
 
 public:
-    Pimpl (Direct2DGraphicsContext& ownerIn, bool opaqueIn)
-        : owner (ownerIn), opaque (opaqueIn)
+    explicit Pimpl (Direct2DGraphicsContext& ownerIn)
+        : owner (ownerIn)
     {
-        setTargetAlpha (1.0f);
-
         directX->adapters.addListener (*this);
     }
 
@@ -598,19 +586,13 @@ public:
         popAllSavedStates();
     }
 
-    void setTargetAlpha (float alpha)
-    {
-        backgroundColor = D2DUtilities::toCOLOR_F (Colours::black.withAlpha (opaque ? targetAlpha : 0.0f));
-        targetAlpha = alpha;
-    }
-
     virtual SavedState* startFrame (float dpiScale)
     {
         prepare();
 
         // Anything to paint?
-        updatePaintAreas();
-        auto paintBounds = paintAreas.getBounds();
+        const auto paintAreas = getPaintAreas();
+        const auto paintBounds = paintAreas.getBounds();
 
         if (! getFrameSize().intersects (paintBounds) || paintBounds.isEmpty())
             return nullptr;
@@ -626,14 +608,14 @@ public:
         JUCE_TRACE_EVENT_INT_RECT_LIST (etw::startD2DFrame, etw::direct2dKeyword, owner.getFrameId(), paintAreas);
 
         // Init device context transform
-        deviceResources.deviceContext.resetTransform();
+        resetTransform (deviceResources->deviceContext);
 
         const auto effectiveDpi = USER_DEFAULT_SCREEN_DPI * dpiScale;
-        deviceResources.deviceContext.context->SetDpi (effectiveDpi, effectiveDpi);
+        deviceResources->deviceContext->SetDpi (effectiveDpi, effectiveDpi);
 
         // Start drawing
-        deviceResources.deviceContext.context->SetTarget (getDeviceContextTarget());
-        deviceResources.deviceContext.context->BeginDraw();
+        deviceResources->deviceContext->SetTarget (getDeviceContextTarget());
+        deviceResources->deviceContext->BeginDraw();
 
         // Init the save state stack and return the first saved state
         return pushFirstSavedState (paintBounds);
@@ -651,8 +633,8 @@ public:
             JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (owner.metrics, endDrawDuration)
             JUCE_SCOPED_TRACE_EVENT_FRAME (etw::endDraw, etw::direct2dKeyword, owner.getFrameId());
 
-            hr = deviceResources.deviceContext.context->EndDraw();
-            deviceResources.deviceContext.context->SetTarget (nullptr);
+            hr = deviceResources->deviceContext->EndDraw();
+            deviceResources->deviceContext->SetTarget (nullptr);
         }
 
         jassert (SUCCEEDED (hr));
@@ -678,9 +660,8 @@ public:
 
         savedClientStates.push_back (std::make_unique<SavedState> (owner,
                                                                    initialClipRegion,
-                                                                   deviceResources.colourBrush,
-                                                                   adapter,
-                                                                   deviceResources));
+                                                                   deviceResources->colourBrush,
+                                                                   *deviceResources));
 
         return getCurrentSavedState();
     }
@@ -708,31 +689,22 @@ public:
             popSavedState();
     }
 
-    DxgiAdapter& getAdapter() const noexcept
-    {
-        return *adapter;
-    }
-
     ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const noexcept
     {
-        return deviceResources.deviceContext.context;
+        return deviceResources->deviceContext;
     }
 
-    const auto& getPaintAreas() const noexcept
-    {
-        return paintAreas;
-    }
-
-    virtual Rectangle<int> getFrameSize() = 0;
+    virtual RectangleList<int> getPaintAreas() const = 0;
+    virtual Rectangle<int> getFrameSize() const = 0;
 
     void setDeviceContextTransform (AffineTransform transform)
     {
-        deviceResources.deviceContext.setTransform (transform);
+        setTransform (deviceResources->deviceContext, transform);
     }
 
     void resetDeviceContextTransform()
     {
-        deviceResources.deviceContext.setTransform ({});
+        resetTransform (deviceResources->deviceContext);
     }
 
     auto getDirect2DFactory()
@@ -760,7 +732,7 @@ public:
         if (! owner.currentState->fillType.isColour())
             return false;
 
-        auto* rectangleListSpriteBatch = deviceResources.rectangleListSpriteBatch.get();
+        auto* rectangleListSpriteBatch = deviceResources->rectangleListSpriteBatch.get();
 
         if (rectangleListSpriteBatch == nullptr)
             return false;
@@ -826,7 +798,7 @@ public:
 
         owner.applyPendingClipList();
 
-        auto deviceContext = deviceResources.deviceContext.context;
+        auto deviceContext = deviceResources->deviceContext;
 
         if (deviceContext == nullptr)
             return;
@@ -852,29 +824,40 @@ public:
     }
 
     DirectWriteGlyphRun glyphRun;
-    bool opaque = true;
-    float targetAlpha = 1.0f;
-    D2D1_COLOR_F backgroundColor{};
 
 private:
+    static void resetTransform (ID2D1DeviceContext1* context)
+    {
+        context->SetTransform (D2D1::IdentityMatrix());
+    }
+
+    static void setTransform (ID2D1DeviceContext1* context, AffineTransform newTransform)
+    {
+        context->SetTransform (D2DUtilities::transformToMatrix (newTransform));
+    }
+
+    DxgiAdapter::Ptr findAdapter() const
+    {
+        if (! deviceResources.has_value())
+            return {};
+
+        return deviceResources->findAdapter (directX->adapters);
+    }
+
     void adapterCreated (DxgiAdapter::Ptr newAdapter) override
     {
-        if (! adapter || adapter->uniqueIDMatches (newAdapter))
-        {
-            teardown();
+        const auto adapter = findAdapter();
 
-            adapter = newAdapter;
-        }
+        if (adapter == nullptr || ! adapter->uniqueIDMatches (newAdapter))
+            teardown();
     }
 
     void adapterRemoved (DxgiAdapter::Ptr expiringAdapter) override
     {
-        if (adapter && adapter->uniqueIDMatches (expiringAdapter))
-        {
-            teardown();
+        const auto adapter = findAdapter();
 
-            adapter = nullptr;
-        }
+        if (adapter != nullptr && adapter->uniqueIDMatches (expiringAdapter))
+            teardown();
     }
 
     HWND hwnd = nullptr;
@@ -892,7 +875,8 @@ Direct2DGraphicsContext::~Direct2DGraphicsContext() = default;
 
 bool Direct2DGraphicsContext::startFrame (float dpiScale)
 {
-    auto pimpl = getPimpl();
+    const auto pimpl = getPimpl();
+    const auto paintAreas = pimpl->getPaintAreas();
     currentState = pimpl->startFrame (dpiScale);
 
     if (currentState == nullptr)
@@ -902,7 +886,7 @@ bool Direct2DGraphicsContext::startFrame (float dpiScale)
     {
         resetPendingClipList();
 
-        clipToRectangleList (pimpl->getPaintAreas());
+        clipToRectangleList (paintAreas);
 
         // Clear the buffer *after* setting the clip region
         clearTargetBuffer();
@@ -1188,7 +1172,7 @@ void Direct2DGraphicsContext::clipToImageAlpha (const Image& sourceImage, const 
         if (! d2d1Bitmap)
         {
             // Convert sourceImage to single-channel alpha-only maskImage
-            d2d1Bitmap = Direct2DBitmap::fromImage (sourceImage, deviceContext, Image::SingleChannel);
+            d2d1Bitmap = Direct2DBitmap::toBitmap (sourceImage, deviceContext, Image::SingleChannel);
         }
 
         if (d2d1Bitmap)
@@ -1474,7 +1458,7 @@ void Direct2DGraphicsContext::drawImage (const Image& image, const AffineTransfo
         {
             JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
 
-            d2d1Bitmap = Direct2DBitmap::fromImage (image, deviceContext, Image::ARGB);
+            d2d1Bitmap = Direct2DBitmap::toBitmap (image, deviceContext, Image::ARGB);
             imageClipArea = image.getBounds();
         }
 

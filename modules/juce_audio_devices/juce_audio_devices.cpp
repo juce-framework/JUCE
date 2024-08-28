@@ -58,7 +58,7 @@
 #include "juce_audio_devices.h"
 
 #include "audio_io/juce_SampleRateHelpers.cpp"
-#include "midi_io/juce_MidiDevices.cpp"
+#include "midi_io/juce_MidiDeviceListConnectionBroadcaster.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -257,6 +257,8 @@ namespace juce
  #endif
 
 #endif
+
+#include "midi_io/juce_MidiDevices.cpp"
 
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED
 namespace juce

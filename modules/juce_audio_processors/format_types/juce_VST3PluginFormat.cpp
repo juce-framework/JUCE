@@ -197,7 +197,7 @@ static void fillDescriptionWith (PluginDescription& description, ObjectType& obj
         description.manufacturerName = toString (object.vendor).trim();
 }
 
-static std::vector<PluginDescription> createPluginDescriptions (const File& pluginFile, const Steinberg::ModuleInfo& info)
+static std::vector<PluginDescription> createPluginDescriptions (const File& pluginFile, const ModuleInfo& info)
 {
     std::vector<PluginDescription> result;
 
@@ -409,6 +409,152 @@ static void toProcessContext (Vst::ProcessContext& context,
 }
 
 //==============================================================================
+#if JUCE_LINUX || JUCE_BSD
+
+class RunLoop  : public Linux::IRunLoop
+{
+public:
+    RunLoop() = default;
+
+    //==============================================================================
+    tresult PLUGIN_API registerEventHandler (Linux::IEventHandler* handler,
+                                             Linux::FileDescriptor fd) override
+    {
+        return impl->registerEventHandler (handler, fd);
+    }
+
+    tresult PLUGIN_API unregisterEventHandler (Linux::IEventHandler* handler) override
+    {
+        return impl->unregisterEventHandler (handler);
+    }
+
+    //==============================================================================
+    tresult PLUGIN_API registerTimer (Linux::ITimerHandler* handler, Linux::TimerInterval milliseconds) override
+    {
+        return impl->registerTimer (handler, milliseconds);
+    }
+
+    tresult PLUGIN_API unregisterTimer (Linux::ITimerHandler* handler) override
+    {
+        return impl->unregisterTimer (handler);
+    }
+
+private:
+    //==============================================================================
+    struct TimerCaller final : private Timer
+    {
+        TimerCaller (Linux::ITimerHandler* h, int interval)  : handler (h)  { startTimer (interval); }
+        ~TimerCaller() override { stopTimer(); }
+
+        void timerCallback() override  { handler->onTimer(); }
+
+        bool operator== (Linux::ITimerHandler* other) const noexcept { return handler == other; }
+
+        Linux::ITimerHandler* handler = nullptr;
+    };
+
+    class Impl
+    {
+    public:
+        ~Impl()
+        {
+            for (const auto& h : eventHandlerMap)
+                LinuxEventLoop::unregisterFdCallback (h.first);
+        }
+
+        //==============================================================================
+        tresult registerEventHandler (Linux::IEventHandler* handler, Linux::FileDescriptor fd)
+        {
+            if (handler == nullptr)
+                return kInvalidArgument;
+
+            auto& handlers = eventHandlerMap[fd];
+
+            if (handlers.empty())
+            {
+                LinuxEventLoop::registerFdCallback (fd, [this] (int descriptor)
+                {
+                    for (auto* h : eventHandlerMap[descriptor])
+                        h->onFDIsSet (descriptor);
+
+                    return true;
+                });
+            }
+
+            handlers.push_back (handler);
+
+            return kResultTrue;
+        }
+
+        tresult unregisterEventHandler (Linux::IEventHandler* handler)
+        {
+            if (handler == nullptr)
+                return kInvalidArgument;
+
+            for (auto iter = eventHandlerMap.begin(), end = eventHandlerMap.end(); iter != end;)
+            {
+                auto& handlers = iter->second;
+
+                auto handlersIter = std::find (std::begin (handlers), std::end (handlers), handler);
+
+                if (handlersIter != std::end (handlers))
+                {
+                    handlers.erase (handlersIter);
+
+                    if (handlers.empty())
+                    {
+                        LinuxEventLoop::unregisterFdCallback (iter->first);
+                        iter = eventHandlerMap.erase (iter);
+                        continue;
+                    }
+                }
+
+                ++iter;
+            }
+
+            return kResultTrue;
+        }
+
+        //==============================================================================
+        tresult registerTimer (Linux::ITimerHandler* handler, Linux::TimerInterval milliseconds)
+        {
+            if (handler == nullptr || milliseconds <= 0)
+                return kInvalidArgument;
+
+            timerCallers.emplace_back (handler, (int) milliseconds);
+            return kResultTrue;
+        }
+
+        tresult unregisterTimer (Linux::ITimerHandler* handler)
+        {
+            auto iter = std::find (timerCallers.begin(), timerCallers.end(), handler);
+
+            if (iter == timerCallers.end())
+                return kInvalidArgument;
+
+            timerCallers.erase (iter);
+            return kResultTrue;
+        }
+
+    private:
+        std::unordered_map<Linux::FileDescriptor, std::vector<Linux::IEventHandler*>> eventHandlerMap;
+        std::list<TimerCaller> timerCallers;
+    };
+
+    SharedResourcePointer<Impl> impl;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_MOVEABLE (RunLoop)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RunLoop)
+};
+
+#else
+
+class RunLoop {};
+
+#endif
+
+//==============================================================================
 class VST3PluginInstance;
 
 struct VST3HostContext final : public Vst::IComponentHandler,  // From VST V3.0.0
@@ -417,6 +563,7 @@ struct VST3HostContext final : public Vst::IComponentHandler,  // From VST V3.0.
                                public Vst::IContextMenuTarget,
                                public Vst::IHostApplication,
                                public Vst::IUnitHandler,
+                               public RunLoop,
                                private ComponentRestarter::Listener
 {
     VST3HostContext()
@@ -525,7 +672,7 @@ struct VST3HostContext final : public Vst::IComponentHandler,  // From VST V3.0.
             return kResultFalse;
         }
 
-        tresult PLUGIN_API popup (Steinberg::UCoord x, Steinberg::UCoord y) override;
+        tresult PLUGIN_API popup (UCoord x, UCoord y) override;
 
        #if ! JUCE_MODAL_LOOPS_PERMITTED
         static void menuFinished (int modalResult, VSTComSmartPtr<ContextMenu> menu)  { menu->handleResult (modalResult); }
@@ -640,6 +787,9 @@ struct VST3HostContext final : public Vst::IComponentHandler,  // From VST V3.0.
                                 UniqueBase<Vst::IContextMenuTarget>{},
                                 UniqueBase<Vst::IHostApplication>{},
                                 UniqueBase<Vst::IUnitHandler>{},
+                               #if JUCE_LINUX || JUCE_BSD
+                                UniqueBase<Linux::IRunLoop>{},
+                               #endif
                                 SharedBase<FUnknown, Vst::IComponentHandler>{}).extract (obj);
     }
 
@@ -898,7 +1048,7 @@ struct DescriptionLister
             return {};
 
         const std::string_view blockAsStringView (static_cast<const char*> (mb.getData()), mb.getSize());
-        const auto parsed = Steinberg::ModuleInfoLib::parseJson (blockAsStringView, nullptr);
+        const auto parsed = ModuleInfoLib::parseJson (blockAsStringView, nullptr);
 
         if (! parsed)
             return {};
@@ -929,7 +1079,7 @@ struct DescriptionLister
 
         auto numClasses = factory.countClasses();
 
-        // Every ARA::IMainFactory must have a matching Steinberg::IComponent.
+        // Every ARA::IMainFactory must have a matching IComponent.
         // The match is determined by the two classes having the same name.
         std::unordered_set<String> araMainFactoryClassNames;
 
@@ -1229,123 +1379,6 @@ private:
 JUCE_IMPLEMENT_SINGLETON (DLLHandleCache)
 
 //==============================================================================
-#if JUCE_LINUX || JUCE_BSD
-
-class RunLoop  final  : public Steinberg::Linux::IRunLoop
-{
-public:
-    RunLoop() = default;
-
-    ~RunLoop()
-    {
-        for (const auto& h : eventHandlerMap)
-            LinuxEventLoop::unregisterFdCallback (h.first);
-    }
-
-    //==============================================================================
-    tresult PLUGIN_API registerEventHandler (Linux::IEventHandler* handler,
-                                             Linux::FileDescriptor fd) override
-    {
-        if (handler == nullptr)
-            return kInvalidArgument;
-
-        auto& handlers = eventHandlerMap[fd];
-
-        if (handlers.empty())
-        {
-            LinuxEventLoop::registerFdCallback (fd, [this] (int descriptor)
-            {
-                for (auto* h : eventHandlerMap[descriptor])
-                    h->onFDIsSet (descriptor);
-
-                return true;
-            });
-        }
-
-        handlers.push_back (handler);
-
-        return kResultTrue;
-    }
-
-    tresult PLUGIN_API unregisterEventHandler (Linux::IEventHandler* handler) override
-    {
-        if (handler == nullptr)
-            return kInvalidArgument;
-
-        for (auto iter = eventHandlerMap.begin(), end = eventHandlerMap.end(); iter != end;)
-        {
-            auto& handlers = iter->second;
-
-            auto handlersIter = std::find (std::begin (handlers), std::end (handlers), handler);
-
-            if (handlersIter != std::end (handlers))
-            {
-                handlers.erase (handlersIter);
-
-                if (handlers.empty())
-                {
-                    LinuxEventLoop::unregisterFdCallback (iter->first);
-                    iter = eventHandlerMap.erase (iter);
-                    continue;
-                }
-            }
-
-            ++iter;
-        }
-
-        return kResultTrue;
-    }
-
-    //==============================================================================
-    tresult PLUGIN_API registerTimer (Linux::ITimerHandler* handler, Linux::TimerInterval milliseconds) override
-    {
-        if (handler == nullptr || milliseconds <= 0)
-            return kInvalidArgument;
-
-        timerCallers.emplace_back (handler, (int) milliseconds);
-        return kResultTrue;
-    }
-
-    tresult PLUGIN_API unregisterTimer (Linux::ITimerHandler* handler) override
-    {
-        auto iter = std::find (timerCallers.begin(), timerCallers.end(), handler);
-
-        if (iter == timerCallers.end())
-            return kInvalidArgument;
-
-        timerCallers.erase (iter);
-        return kResultTrue;
-    }
-
-    //==============================================================================
-    uint32 PLUGIN_API addRef() override                                { return 1000; }
-    uint32 PLUGIN_API release() override                               { return 1000; }
-    tresult PLUGIN_API queryInterface (const TUID, void**) override    { return kNoInterface; }
-
-private:
-    //==============================================================================
-    struct TimerCaller final : private Timer
-    {
-        TimerCaller (Linux::ITimerHandler* h, int interval)  : handler (h)  { startTimer (interval); }
-        ~TimerCaller() override { stopTimer(); }
-
-        void timerCallback() override  { handler->onTimer(); }
-
-        bool operator== (Linux::ITimerHandler* other) const noexcept { return handler == other; }
-
-        Linux::ITimerHandler* handler = nullptr;
-    };
-
-    std::unordered_map<Linux::FileDescriptor, std::vector<Linux::IEventHandler*>> eventHandlerMap;
-    std::list<TimerCaller> timerCallers;
-
-    //==============================================================================
-    JUCE_DECLARE_NON_MOVEABLE (RunLoop)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RunLoop)
-};
-
-#endif
-
 //==============================================================================
 struct VST3ModuleHandle final : public ReferenceCountedObject
 {
@@ -1471,7 +1504,7 @@ static void forEachARAFactory ([[maybe_unused]] IPluginFactory* pluginFactory, [
    #endif
 }
 
-static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] Steinberg::IPluginFactory* pluginFactory,
+static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] IPluginFactory* pluginFactory,
                                                              [[maybe_unused]] const String& pluginName)
 {
     std::shared_ptr<const ARA::ARAFactory> factory;
@@ -1484,7 +1517,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] St
                            {
                                ARA::IMainFactory* source;
                                if (pluginFactory->createInstance (pcClassInfo.cid, ARA::IMainFactory::iid, (void**) &source)
-                                   == Steinberg::kResultOk)
+                                   == kResultOk)
                                {
                                    factory = getOrCreateARAFactory (source->getFactory(),
                                                                     [source]() { source->release(); });
@@ -1508,9 +1541,10 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory (VST3ModuleHandle& m
 
 //==============================================================================
 struct VST3PluginWindow final : public AudioProcessorEditor,
+                                public RunLoop,
+                                public IPlugFrame,
                                 private ComponentMovementWatcher,
-                                private ComponentBoundsConstrainer,
-                                private IPlugFrame
+                                private ComponentBoundsConstrainer
 {
     VST3PluginWindow (AudioPluginInstance* owner, VSTComSmartPtr<IPlugView> pluginView)
         : AudioProcessorEditor (owner),
@@ -1526,7 +1560,7 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
         setConstrainer (this);
 
         warnOnFailure (view->setFrame (this));
-        view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
+        view->queryInterface (IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
 
         setContentScaleFactor();
         resizeToFit();
@@ -1557,23 +1591,15 @@ struct VST3PluginWindow final : public AudioProcessorEditor,
         view = nullptr;
     }
 
-   #if JUCE_LINUX || JUCE_BSD
-    Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID queryIid, void** obj) override
+    tresult PLUGIN_API queryInterface (const TUID queryIid, void** obj) override
     {
-        if (doUIDsMatch (queryIid, Steinberg::Linux::IRunLoop::iid))
-        {
-            *obj = &runLoop.get();
-            return kResultTrue;
-        }
-
-        jassertfalse;
-        *obj = nullptr;
-
-        return Steinberg::kNotImplemented;
+        return testForMultiple (*this,
+                                queryIid,
+                               #if JUCE_LINUX || JUCE_BSD
+                                UniqueBase<Linux::IRunLoop>{},
+                               #endif
+                                UniqueBase<IPlugFrame>{}).extract (obj);
     }
-   #else
-    JUCE_DECLARE_VST3_COM_QUERY_METHODS
-   #endif
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
@@ -1787,7 +1813,7 @@ private:
     {
         if (scaleInterface != nullptr)
         {
-            [[maybe_unused]] const auto result = scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) getEffectiveScale());
+            [[maybe_unused]] const auto result = scaleInterface->setContentScaleFactor ((IPlugViewContentScaleSupport::ScaleFactor) getEffectiveScale());
 
            #if ! JUCE_MAC
             [[maybe_unused]] const auto warning = warnOnFailure (result);
@@ -1842,7 +1868,6 @@ private:
     NSViewComponentWithParent embeddedComponent;
     using HandleFormat = NSView*;
    #elif JUCE_LINUX || JUCE_BSD
-    SharedResourcePointer<RunLoop> runLoop;
     XEmbedComponent embeddedComponent { true, false };
     using HandleFormat = Window;
    #else
@@ -1853,7 +1878,7 @@ private:
     HandleFormat pluginHandle = {};
     bool recursiveResize = false, isInOnSize = false, attachedCalled = false;
 
-    Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
+    IPlugViewContentScaleSupport* scaleInterface = nullptr;
     float nativeScaleFactor = 1.0f;
     float userScaleFactor = 1.0f;
 
@@ -2051,6 +2076,12 @@ struct VST3ComponentHolder
         JUCE_ASSERT_MESSAGE_THREAD
 
         factory = addVSTComSmartPtrOwner (module->getPluginFactory());
+
+        VSTComSmartPtr<IPluginFactory3> pf3;
+        pf3.loadFrom (factory.get());
+
+        if (pf3 != nullptr)
+            pf3->setHostContext (host->getFUnknown());
 
         int classIdx;
         if ((classIdx = getClassIndex (module->getName())) < 0)
@@ -2391,7 +2422,7 @@ public:
             return String (cachedInfo.id);
         }
 
-        Steinberg::Vst::ParamID getParamID() const noexcept { return cachedInfo.id; }
+        Vst::ParamID getParamID() const noexcept { return cachedInfo.id; }
 
         void updateCachedInfo()
         {
@@ -2514,7 +2545,7 @@ public:
         {
             explicit Extensions (const VST3PluginInstance* instanceIn) : instance (instanceIn) {}
 
-            Steinberg::Vst::IComponent* getIComponentPtr() const noexcept override   { return instance->holder->component.get(); }
+            Vst::IComponent* getIComponentPtr() const noexcept override   { return instance->holder->component.get(); }
 
             MemoryBlock getPreset() const override             { return instance->getStateForPresetFile(); }
 
@@ -3137,7 +3168,7 @@ public:
         }
     }
 
-    void setComponentStateAndResetParameters (Steinberg::MemoryStream& stream)
+    void setComponentStateAndResetParameters (MemoryStream& stream)
     {
         jassert (editController != nullptr);
 
@@ -3157,15 +3188,15 @@ public:
 
     MemoryBlock getStateForPresetFile() const
     {
-        auto memoryStream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream());
+        auto memoryStream = becomeVSTComSmartPtrOwner (new MemoryStream());
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return {};
 
-        const auto saved = Steinberg::Vst::PresetFile::savePreset (memoryStream.get(),
-                                                                   holder->cidOfComponent,
-                                                                   holder->component.get(),
-                                                                   editController.get());
+        const auto saved = Vst::PresetFile::savePreset (memoryStream.get(),
+                                                        holder->cidOfComponent,
+                                                        holder->component.get(),
+                                                        editController.get());
 
         if (saved)
             return { memoryStream->getData(), static_cast<size_t> (memoryStream->getSize()) };
@@ -3176,13 +3207,13 @@ public:
     bool setStateFromPresetFile (const MemoryBlock& rawData) const
     {
         auto rawDataCopy = rawData;
-        auto memoryStream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()));
+        auto memoryStream = becomeVSTComSmartPtrOwner (new MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()));
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return false;
 
-        return Steinberg::Vst::PresetFile::loadPreset (memoryStream.get(), holder->cidOfComponent,
-                                                       holder->component.get(), editController.get(), nullptr);
+        return Vst::PresetFile::loadPreset (memoryStream.get(), holder->cidOfComponent,
+                                            holder->component.get(), editController.get(), nullptr);
     }
 
     //==============================================================================
@@ -3228,10 +3259,6 @@ private:
     }
 
     //==============================================================================
-   #if JUCE_LINUX || JUCE_BSD
-    SharedResourcePointer<RunLoop> runLoop;
-   #endif
-
     std::unique_ptr<VST3ComponentHolder> holder;
 
     friend VST3HostContext;
@@ -3282,7 +3309,7 @@ private:
     {
         if (object != nullptr)
         {
-            Steinberg::MemoryStream stream;
+            MemoryStream stream;
 
             const auto result = object->getState (&stream);
 
@@ -3294,7 +3321,7 @@ private:
         }
     }
 
-    static VSTComSmartPtr<Steinberg::MemoryStream> createMemoryStreamForState (XmlElement& head, StringRef identifier)
+    static VSTComSmartPtr<MemoryStream> createMemoryStreamForState (XmlElement& head, StringRef identifier)
     {
         if (auto* state = head.getChildByName (identifier))
         {
@@ -3302,7 +3329,7 @@ private:
 
             if (mem.fromBase64Encoding (state->getAllSubText()))
             {
-                auto stream = becomeVSTComSmartPtrOwner (new Steinberg::MemoryStream());
+                auto stream = becomeVSTComSmartPtrOwner (new MemoryStream());
                 stream->setSize ((TSize) mem.getSize());
                 mem.copyTo (stream->getData(), 0, mem.getSize());
                 return stream;
@@ -3420,10 +3447,10 @@ private:
 
     void synchroniseStates()
     {
-        Steinberg::MemoryStream stream;
+        MemoryStream stream;
 
         if (holder->component->getState (&stream) == kResultTrue)
-            if (stream.seek (0, Steinberg::IBStream::kIBSeekSet, nullptr) == kResultTrue)
+            if (stream.seek (0, IBStream::kIBSeekSet, nullptr) == kResultTrue)
                 setComponentStateAndResetParameters (stream);
     }
 
@@ -3637,7 +3664,7 @@ private:
 
             for (idx = 0; idx < num; ++idx)
                 if (editController->getParameterInfo (idx, paramInfo) == kResultOk
-                     && (paramInfo.flags & Steinberg::Vst::ParameterInfo::kIsProgramChange) != 0)
+                     && (paramInfo.flags & Vst::ParameterInfo::kIsProgramChange) != 0)
                     break;
 
             if (idx >= num)
@@ -3808,7 +3835,7 @@ void VST3HostContext::restartComponentOnMessageThread (int32 flags)
 }
 
 //==============================================================================
-tresult VST3HostContext::ContextMenu::popup (Steinberg::UCoord x, Steinberg::UCoord y)
+tresult VST3HostContext::ContextMenu::popup (UCoord x, UCoord y)
 {
     Array<const Item*> subItemStack;
     OwnedArray<PopupMenu> menuStack;

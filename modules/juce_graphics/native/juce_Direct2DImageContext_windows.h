@@ -38,7 +38,9 @@ namespace juce
 class Direct2DImageContext : public Direct2DGraphicsContext
 {
 public:
-    explicit Direct2DImageContext (Direct2DPixelData::Ptr);
+    Direct2DImageContext (ComSmartPtr<ID2D1DeviceContext1>,
+                          ComSmartPtr<ID2D1Bitmap1>,
+                          const RectangleList<int>&);
 
     ~Direct2DImageContext() override;
 

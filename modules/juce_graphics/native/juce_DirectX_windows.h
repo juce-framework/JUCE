@@ -90,6 +90,9 @@ struct DxgiAdapter : public ReferenceCountedObject
 
     bool uniqueIDMatches (ReferenceCountedObjectPtr<DxgiAdapter> other) const
     {
+        if (other == nullptr)
+            return false;
+
         auto luid = getAdapterUniqueID();
         auto otherLuid = other->getAdapterUniqueID();
         return (luid.HighPart == otherLuid.HighPart) && (luid.LowPart == otherLuid.LowPart);
@@ -325,6 +328,205 @@ struct D2DUtilities
     {
         return { transform.mat00, transform.mat10, transform.mat01, transform.mat11, transform.mat02, transform.mat12 };
     }
+};
+
+//==============================================================================
+struct Direct2DDeviceContext
+{
+    static ComSmartPtr<ID2D1DeviceContext1> create (DxgiAdapter::Ptr adapter)
+    {
+        if (adapter == nullptr)
+            return {};
+
+        ComSmartPtr<ID2D1DeviceContext1> result;
+
+        if (const auto hr = adapter->direct2DDevice->CreateDeviceContext (D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
+                                                                          result.resetAndGetPointerAddress());
+                FAILED (hr))
+        {
+            jassertfalse;
+            return {};
+        }
+
+        const auto textAntialiasing = [&]
+        {
+            BOOL smoothingEnabled{};
+            SystemParametersInfo (SPI_GETFONTSMOOTHING, 0, &smoothingEnabled, 0);
+
+            if (! smoothingEnabled)
+                return D2D1_TEXT_ANTIALIAS_MODE_ALIASED;
+
+            UINT smoothingKind{};
+            SystemParametersInfo (SPI_GETFONTSMOOTHINGTYPE, 0, &smoothingKind, 0);
+            return smoothingKind == FE_FONTSMOOTHINGCLEARTYPE ? D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE
+                                                              : D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE;
+        }();
+
+        result->SetTextAntialiasMode (textAntialiasing);
+        result->SetAntialiasMode (D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+        result->SetUnitMode (D2D1_UNIT_MODE_PIXELS);
+
+        return result;
+    }
+
+    Direct2DDeviceContext() = delete;
+};
+
+//==============================================================================
+struct Direct2DBitmap
+{
+    Direct2DBitmap() = delete;
+
+    static ComSmartPtr<ID2D1Bitmap1> toBitmap (const Image& image,
+                                               ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+                                               Image::PixelFormat outputFormat)
+    {
+        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
+
+        jassert (outputFormat == Image::ARGB || outputFormat == Image::SingleChannel);
+
+        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::createDirect2DBitmapFromImage, etw::graphicsKeyword);
+
+        // Calling Image::convertedToFormat could cause unchecked recursion since convertedToFormat
+        // calls Graphics::drawImageAt which calls Direct2DGraphicsContext::drawImage which calls this function...
+        //
+        // Use a software image for the conversion instead so the Graphics::drawImageAt call doesn't go
+        // through the Direct2D renderer
+        //
+        // Be sure to explicitly set the DPI to 96.0 for the image; otherwise it will default to the screen DPI
+        // and may be scaled incorrectly
+        const auto convertedImage = SoftwareImageType{}.convert (image).convertedToFormat (outputFormat);
+
+        if (! convertedImage.isValid())
+            return {};
+
+        Image::BitmapData bitmapData { convertedImage, Image::BitmapData::readWrite };
+
+        D2D1_BITMAP_PROPERTIES1 bitmapProperties{};
+        bitmapProperties.pixelFormat.format = outputFormat == Image::SingleChannel
+                                              ? DXGI_FORMAT_A8_UNORM
+                                              : DXGI_FORMAT_B8G8R8A8_UNORM;
+        bitmapProperties.pixelFormat.alphaMode = outputFormat == Image::RGB
+                                                 ? D2D1_ALPHA_MODE_IGNORE
+                                                 : D2D1_ALPHA_MODE_PREMULTIPLIED;
+        bitmapProperties.dpiX = USER_DEFAULT_SCREEN_DPI;
+        bitmapProperties.dpiY = USER_DEFAULT_SCREEN_DPI;
+
+        const D2D1_SIZE_U size { (UINT32) image.getWidth(), (UINT32) image.getHeight() };
+
+        ComSmartPtr<ID2D1Bitmap1> bitmap;
+        deviceContext->CreateBitmap (size,
+                                     bitmapData.data,
+                                     (UINT32) bitmapData.lineStride,
+                                     bitmapProperties,
+                                     bitmap.resetAndGetPointerAddress());
+        return bitmap;
+    }
+
+    static ComSmartPtr<ID2D1Bitmap1> createBitmap (ComSmartPtr<ID2D1DeviceContext1> deviceContext,
+                                                   Image::PixelFormat format,
+                                                   D2D_SIZE_U size,
+                                                   D2D1_BITMAP_OPTIONS options)
+    {
+        JUCE_TRACE_LOG_D2D_PAINT_CALL (etw::createDirect2DBitmap, etw::graphicsKeyword);
+
+        JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
+
+       #if JUCE_DEBUG
+        // Verify that the GPU can handle a bitmap of this size
+        //
+        // If you need a bitmap larger than this, you'll need to either split it up into multiple bitmaps
+        // or use a software image (see SoftwareImageType).
+        auto maxBitmapSize = deviceContext->GetMaximumBitmapSize();
+        jassert (size.width <= maxBitmapSize && size.height <= maxBitmapSize);
+       #endif
+
+        const auto pixelFormat = D2D1::PixelFormat (format == Image::SingleChannel
+                                                        ? DXGI_FORMAT_A8_UNORM
+                                                        : DXGI_FORMAT_B8G8R8A8_UNORM,
+                                                    format == Image::RGB
+                                                        ? D2D1_ALPHA_MODE_IGNORE
+                                                        : D2D1_ALPHA_MODE_PREMULTIPLIED);
+        const auto bitmapProperties = D2D1::BitmapProperties1 (options, pixelFormat);
+
+        ComSmartPtr<ID2D1Bitmap1> bitmap;
+        const auto hr = deviceContext->CreateBitmap (size,
+                                                     {},
+                                                     {},
+                                                     bitmapProperties,
+                                                     bitmap.resetAndGetPointerAddress());
+
+        jassertquiet (SUCCEEDED (hr) && bitmap != nullptr);
+        return bitmap;
+    }
+};
+
+//==============================================================================
+/*  UpdateRegion extracts the invalid region for a window
+    UpdateRegion is used to service WM_PAINT to add the invalid region of a window to
+    deferredRepaints. UpdateRegion marks the region as valid, and the region should be painted on the
+    next vblank.
+    This is similar to the invalid region update in HWNDComponentPeer::handlePaintMessage()
+*/
+class UpdateRegion
+{
+public:
+    void findRECTAndValidate (HWND windowHandle)
+    {
+        numRect = 0;
+
+        auto regionHandle = CreateRectRgn (0, 0, 0, 0);
+
+        if (regionHandle == nullptr)
+        {
+            ValidateRect (windowHandle, nullptr);
+            return;
+        }
+
+        auto regionType = GetUpdateRgn (windowHandle, regionHandle, false);
+
+        if (regionType == SIMPLEREGION || regionType == COMPLEXREGION)
+        {
+            auto regionDataBytes = GetRegionData (regionHandle, (DWORD) block.getSize(), (RGNDATA*) block.getData());
+
+            if (regionDataBytes > block.getSize())
+            {
+                block.ensureSize (regionDataBytes);
+                regionDataBytes = GetRegionData (regionHandle, (DWORD) block.getSize(), (RGNDATA*) block.getData());
+            }
+
+            if (regionDataBytes > 0)
+            {
+                auto header = (RGNDATAHEADER const* const) block.getData();
+
+                if (header->iType == RDH_RECTANGLES)
+                    numRect = header->nCount;
+            }
+        }
+
+        if (numRect > 0)
+            ValidateRgn (windowHandle, regionHandle);
+        else
+            ValidateRect (windowHandle, nullptr);
+
+        DeleteObject (regionHandle);
+    }
+
+    void clear()
+    {
+        numRect = 0;
+    }
+
+    Span<const RECT> getRects() const
+    {
+        auto header = (RGNDATAHEADER const* const) block.getData();
+        auto* data = (RECT*) (header + 1);
+        return { data, numRect };
+    }
+
+private:
+    MemoryBlock block { 1024 };
+    uint32 numRect = 0;
 };
 
 } // namespace juce

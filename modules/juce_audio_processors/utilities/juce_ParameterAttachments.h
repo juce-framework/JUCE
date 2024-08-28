@@ -275,7 +275,7 @@ class WebSliderParameterAttachment   : private WebSliderRelay::Listener
 public:
     /** Creates a connection between a plug-in parameter and a WebSliderRelay.
 
-        @param parameter     The parameter to use
+        @param parameterIn   The parameter to use
         @param sliderStateIn The WebSliderRelay to use
         @param undoManager   An optional UndoManager
     */
@@ -323,7 +323,7 @@ class WebToggleButtonParameterAttachment  : private WebToggleButtonRelay::Listen
 public:
     /** Creates a connection between a plug-in parameter and a WebToggleButtonRelay.
 
-        @param parameter     The parameter to use
+        @param parameterIn   The parameter to use
         @param button        The WebToggleButtonRelay to use
         @param undoManager   An optional UndoManager
     */
@@ -368,7 +368,7 @@ class WebComboBoxParameterAttachment   : private WebComboBoxRelay::Listener
 public:
     /** Creates a connection between a plug-in parameter and a WebComboBoxRelay.
 
-        @param parameter     The parameter to use
+        @param parameterIn   The parameter to use
         @param combo         The WebComboBoxRelay to use
         @param undoManager   An optional UndoManager
     */

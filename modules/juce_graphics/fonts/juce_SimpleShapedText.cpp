@@ -77,9 +77,21 @@ public:
         return withMember (*this, &ShapedTextOptions::firstLineIndent, x);
     }
 
+    /*  This controls the space between lines using a proportional value, with a default of 1.0,
+        meaning single line spacing i.e. the descender of the current line + ascender of the next
+        line. This value is multiplied by the leading provided here.
+    */
     [[nodiscard]] ShapedTextOptions withLeading (float x) const
     {
         return withMember (*this, &ShapedTextOptions::leading, x);
+    }
+
+    /*  This controls the space between lines using an additive absolute value, with a default of 0.0.
+        This value is added to the spacing between each two lines.
+    */
+    [[nodiscard]] ShapedTextOptions withAdditiveLineSpacing (float x) const
+    {
+        return withMember (*this, &ShapedTextOptions::additiveLineSpacing, x);
     }
 
     [[nodiscard]] ShapedTextOptions withBaselineAtZero (bool x = true) const
@@ -115,6 +127,7 @@ public:
     const auto& getLanguage() const                     { return language; }
     const auto& getFirstLineIndent() const              { return firstLineIndent; }
     const auto& getLeading() const                      { return leading; }
+    const auto& getAdditiveLineSpacing() const          { return additiveLineSpacing; }
     const auto& isBaselineAtZero() const                { return baselineAtZero; }
     const auto& getTrailingWhitespacesShouldFit() const { return trailingWhitespacesShouldFit; }
     const auto& getMaxNumLines() const                  { return maxNumLines; }
@@ -130,6 +143,7 @@ private:
     String language = SystemStats::getDisplayLanguage();
     float firstLineIndent = 0.0f;
     float leading = 1.0f;
+    float additiveLineSpacing = 0.0f;
     bool baselineAtZero = false;
     bool trailingWhitespacesShouldFit;
     int64 maxNumLines = std::numeric_limits<int64>::max();
@@ -1032,6 +1046,8 @@ void SimpleShapedText::shape (const String& data,
 
             std::optional<BestMatch> bestMatch;
 
+            static constexpr auto floatMax = std::numeric_limits<float>::max();
+
             for (auto breakBefore = softBreakIterator.next();
                  breakBefore.has_value() && (lineNumbers.size() == 0
                                              || (int64) lineNumbers.size() < options.getMaxNumLines() - 1);
@@ -1040,8 +1056,8 @@ void SimpleShapedText::shape (const String& data,
                 if (auto safeAdvance = glyphsToConsume.getAdvanceXUpToBreakPointIfSafe (*breakBefore,
                                                                                         options.getTrailingWhitespacesShouldFit()))
                 {
-                    if (safeAdvance->maybeIgnoringWhitespace < remainingWidth || ! bestMatch.has_value())
-                        bestMatch = BestMatch { *breakBefore, *safeAdvance, false, std::vector<ShapedGlyph> {} };
+                    if (safeAdvance->maybeIgnoringWhitespace < remainingWidth.value_or (floatMax) || ! bestMatch.has_value())
+                        bestMatch = BestMatch { *breakBefore, *safeAdvance, false, std::vector<ShapedGlyph>{} };
                     else
                         break;  // We found a safe break that is too large to fit. Anything beyond
                                 // this point would be too large to fit.
@@ -1076,7 +1092,7 @@ void SimpleShapedText::shape (const String& data,
                                                           float {},
                                                           [] (auto acc, const auto& elem) { return acc + elem.advance.getX(); });
 
-                    if (advance < remainingWidth || ! bestMatch.has_value())
+                    if (advance < remainingWidth.value_or (floatMax) || ! bestMatch.has_value())
                         bestMatch = BestMatch { *breakBefore, { advance, advance }, true, std::move (glyphs) };
                 }
             }
@@ -1120,7 +1136,7 @@ void SimpleShapedText::shape (const String& data,
                 glyphsToConsume.breakBeforeAndConsume (bestMatch->breakBefore);
             };
 
-            if (bestMatch->advance.maybeIgnoringWhitespace >= remainingWidth)
+            if (bestMatch->advance.maybeIgnoringWhitespace >= remainingWidth.value_or (floatMax))
             {
                 // Even an empty line is too short to fit any of the text
                 if (numGlyphsInLine == 0 && exactlyEqual (remainingWidth, options.getMaxWidth()))

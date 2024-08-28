@@ -474,7 +474,7 @@ public:
         }
         else
         {
-            if (owner.unloadPageWhenHidden && ! owner.blankPageShown)
+            if (webView != nullptr && owner.unloadPageWhenHidden && ! owner.blankPageShown)
             {
                 // when the component becomes invisible, some stuff like flash
                 // carries on playing audio, so we need to force it onto a blank
@@ -491,11 +491,10 @@ public:
 
     void fallbackPaint (Graphics& webBrowserComponentContext) override
     {
+        webBrowserComponentContext.fillAll (Colours::white);
+
         if (! hasBrowserBeenCreated())
-        {
-            webBrowserComponentContext.fillAll (Colours::white);
             checkWindowAssociation();
-        }
     }
 
     void focusGainedWithDirection (FocusChangeType, FocusChangeDirection direction) override
@@ -520,6 +519,12 @@ public:
 
     ~WebView2() override
     {
+        if (webView2ConstructionHelper.webView2BeingCreated == this)
+            webView2ConstructionHelper.webView2BeingCreated = nullptr;
+
+        webView2ConstructionHelper.viewsWaitingForCreation.erase (this);
+
+        cancelPendingUpdate();
         removeEventHandlers();
         closeWebView();
     }
@@ -1022,8 +1027,6 @@ private:
 
             webView2ConstructionHelper.viewsWaitingForCreation.erase (this);
             webView2ConstructionHelper.webView2BeingCreated = this;
-
-            WeakReference<WebView2> weakThis (this);
 
             webViewHandle.environment->CreateCoreWebView2Controller ((HWND) peer->getNativeHandle(),
                 Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler> (
