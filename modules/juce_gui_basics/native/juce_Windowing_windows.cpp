@@ -3938,8 +3938,17 @@ private:
                 // so that the client area exactly fills the available space.
                 if (isFullScreen())
                 {
-                    const auto padX = -param->left;
-                    const auto padY = -param->top;
+                    const auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL);
+
+                    if (monitor == nullptr)
+                        return 0;
+
+                    MONITORINFOEX info{};
+                    info.cbSize = sizeof (info);
+                    GetMonitorInfo (monitor, &info);
+
+                    const auto padX = info.rcMonitor.left - param->left;
+                    const auto padY = info.rcMonitor.top - param->top;
 
                     param->left  += padX;
                     param->right -= padX;
@@ -5242,7 +5251,7 @@ private:
     public:
         LowLevelGraphicsContext* startFrame (HWND hwnd, float scale, const RectangleList<int>& dirty)
         {
-            RECT r;
+            RECT r{};
             GetClientRect (hwnd, &r);
 
             const auto w = r.right - r.left;
