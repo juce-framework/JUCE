@@ -549,7 +549,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
 
     int destIndex = 0, destTotal = 0;
     int level1 = 0, level2 = 0;
-    int lastX = std::numeric_limits<int>::min(), lastLevel = 0;
+    int lastLevel = 0;
 
     while (! srcLine1.empty() && ! srcLine2.empty())
     {
@@ -579,7 +579,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
 
         const auto nextLevel = (level1 * (level2 + 1)) / scale;
 
-        if (std::exchange (lastX, nextX) < nextX || std::exchange (lastLevel, nextLevel) != nextLevel)
+        if (std::exchange (lastLevel, nextLevel) != nextLevel)
         {
             jassert (isPositiveAndBelow (nextLevel, 256));
 
@@ -606,7 +606,6 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
             }
 
             ++destTotal;
-            lastLevel = nextLevel;
 
             if (! isUsingTempSpace)
             {
