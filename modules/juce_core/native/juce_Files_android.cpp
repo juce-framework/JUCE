@@ -560,8 +560,8 @@ struct AndroidStreamHelpers
 class AndroidInputStreamWrapper final : public InputStream
 {
 public:
-    explicit AndroidInputStreamWrapper (jobject streamIn)
-        : stream (LocalRef<jobject> { streamIn })
+    explicit AndroidInputStreamWrapper (LocalRef<jobject> streamIn)
+        : stream (std::move (streamIn))
     {
     }
 
@@ -577,7 +577,7 @@ public:
 
     AndroidInputStreamWrapper& operator= (AndroidInputStreamWrapper&& other) noexcept
     {
-        std::swap (*this, other);
+        AndroidInputStreamWrapper { std::move (other) }.swap (*this);
         return *this;
     }
 
@@ -585,6 +585,9 @@ public:
 
     ~AndroidInputStreamWrapper() override
     {
+        if (stream == nullptr)
+            return;
+
         getEnv()->CallVoidMethod (stream.get(), AndroidInputStream.close);
         jniCheckHasExceptionOccurredAndClear();
     }
@@ -647,14 +650,22 @@ private:
         return skipped == num;
     }
 
+    void swap (AndroidInputStreamWrapper& other) noexcept
+    {
+        std::swap (other.byteArray, byteArray);
+        std::swap (other.stream, stream);
+        std::swap (other.pos, pos);
+        std::swap (other.exhausted, exhausted);
+    }
+
     CachedByteArray byteArray;
     GlobalRef stream;
     int64 pos = 0;
     bool exhausted = false;
 };
 
-std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (jobject stream);
-std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (jobject stream)
+std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (LocalRef<jobject> stream);
+std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (LocalRef<jobject> stream)
 {
     return std::make_unique<AndroidInputStreamWrapper> (stream);
 }
@@ -672,7 +683,7 @@ struct AndroidContentUriInputStream final : public InputStream
 
     AndroidContentUriInputStream& operator= (AndroidContentUriInputStream&& other) noexcept
     {
-        std::swap (*this, other);
+        AndroidContentUriInputStream { std::move (other) }.swap (*this);
         return *this;
     }
 
@@ -742,6 +753,12 @@ private:
         const auto oldPosition = getPosition();
         skipNextBytes (num);
         return getPosition() == oldPosition + num;
+    }
+
+    void swap (AndroidContentUriInputStream& other) noexcept
+    {
+        std::swap (other.stream, stream);
+        std::swap (other.uri, uri);
     }
 
     AndroidInputStreamWrapper stream;
