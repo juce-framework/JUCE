@@ -313,6 +313,7 @@ private:
     };
 
     SwapChain swap;
+    ComSmartPtr<ID2D1DeviceContext1> deviceContext;
     std::unique_ptr<SwapChainThread> swapChainThread;
     BackBufferLock presentation;
     std::optional<CompositionTree> compositionTree;
@@ -324,29 +325,35 @@ private:
 
     HWND hwnd = nullptr;
 
-    HRESULT prepare() override
+    bool prepare() override
     {
         const auto adapter = directX->adapters.getAdapterForHwnd (hwnd);
 
         if (adapter == nullptr)
-            return E_FAIL;
+            return false;
+
+        if (deviceContext == nullptr)
+            deviceContext = Direct2DDeviceContext::create (adapter);
+
+        if (deviceContext == nullptr)
+            return false;
 
         if (! deviceResources.has_value())
-            deviceResources = Direct2DDeviceResources::create (adapter);
+            deviceResources = Direct2DDeviceResources::create (deviceContext);
 
         if (! deviceResources.has_value())
-            return E_FAIL;
+            return false;
 
         if (! hwnd || frameSize.isEmpty())
-            return E_FAIL;
+            return false;
 
         if (! swap.canPaint())
         {
             if (auto hr = swap.create (hwnd, frameSize, adapter); FAILED (hr))
-                return hr;
+                return false;
 
-            if (auto hr = swap.createBuffer (deviceResources->deviceContext); FAILED (hr))
-                return hr;
+            if (auto hr = swap.createBuffer (getDeviceContext()); FAILED (hr))
+                return false;
         }
 
         if (! swapChainThread && swap.swapChainEvent.has_value())
@@ -356,9 +363,9 @@ private:
             compositionTree = CompositionTree::create (adapter->dxgiDevice, hwnd, swap.chain);
 
         if (! compositionTree.has_value())
-            return E_FAIL;
+            return false;
 
-        return S_OK;
+        return true;
     }
 
     void teardown() override
@@ -435,10 +442,15 @@ public:
         return getClientRect();
     }
 
+    ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const override
+    {
+        return deviceContext;
+    }
+
     ComSmartPtr<ID2D1Image> getDeviceContextTarget() const override
     {
         if (auto* p = presentation.getPresentation())
-            return p->getPresentationBitmap (swap.getSize(), deviceResources->deviceContext);
+            return p->getPresentationBitmap (swap.getSize(), getDeviceContext());
 
         return {};
     }
@@ -466,11 +478,11 @@ public:
         // Resize/scale the swap chain
         prepare();
 
-        if (auto deviceContext = deviceResources->deviceContext)
+        if (auto dc = getDeviceContext())
         {
             ScopedMultithread scopedMultithread { directX->getD2DMultithread() };
 
-            auto hr = swap.resize (size, deviceContext);
+            auto hr = swap.resize (size, dc);
             jassert (SUCCEEDED (hr));
             if (FAILED (hr))
                 teardown();
@@ -609,7 +621,9 @@ public:
         // This won't capture child windows. Perhaps a better approach would be to use
         // IGraphicsCaptureItemInterop, although this is only supported on Windows 10 v1903+
 
-        if (frameSize.isEmpty() || deviceResources->deviceContext == nullptr || swap.buffer == nullptr)
+        const auto context = getDeviceContext();
+
+        if (frameSize.isEmpty() || context == nullptr || swap.buffer == nullptr)
             return {};
 
         // Create the bitmap to receive the snapshot
@@ -621,7 +635,7 @@ public:
 
         ComSmartPtr<ID2D1Bitmap1> snapshot;
 
-        if (const auto hr = deviceResources->deviceContext->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
+        if (const auto hr = context->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
             return {};
 
         const ScopedMultithread scope { directX->getD2DMultithread() };
@@ -636,7 +650,7 @@ public:
             return {};
 
         const Image result { Direct2DPixelData::fromDirect2DBitmap (directX->adapters.getAdapterForHwnd (hwnd),
-                                                                    deviceResources->deviceContext,
+                                                                    context,
                                                                     snapshot) };
 
         swap.chain->Present (0, DXGI_PRESENT_DO_NOT_WAIT);

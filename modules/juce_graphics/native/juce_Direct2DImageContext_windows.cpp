@@ -58,6 +58,11 @@ public:
         return { (int) size.width, (int) size.height };
     }
 
+    ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const override
+    {
+        return context;
+    }
+
     ComSmartPtr<ID2D1Image> getDeviceContextTarget() const override
     {
         return bitmap;
