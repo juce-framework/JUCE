@@ -22,7 +22,7 @@
 - AAX, AUv3 and AU Wrappers
 - VST 3 plug-ins Examples
 
-The full VST 3 SDK is available [here!](https://www.steinberg.net/en/company/developers.html). It contains:
+The full **VST 3 SDK** is available [here!](https://www.steinberg.net/en/company/developers.html). It contains:
 
 - VST 3 plug-in Test Host Application/Validator,
 - the **Steinberg VST 3 Plug-In SDK Licensing Agreement** that you have to sign if you want to develop or host **VST 3** plug-ins.
@@ -33,15 +33,15 @@ The full VST 3 SDK is available [here!](https://www.steinberg.net/en/company/dev
 
 Supported Platforms:
 
-| Operating System                      |Architecture               |Compiler                           | Notes|
-| :------------------------------------ | :-----------------------: | :-------------------------------: | :-----------: |
-|Windows 10/11                          |x86, x86_64, arm64         |MSVC 2022, MSVC 2019               | |
-|Windows 8.1                            |x86, x86_64                |MSVC 2019, MSVC 2017               | |
-|macOS 10.13, 10.14, 10.15, 11, 12, 13  |x86, x86_64, Apple Silicon |Xcode 10 - 14                      | |
-|iOS 13 - iOS 16                        |arm64                      |Xcode 11 - 14                      | |
-|Linux - Raspberry Pi OS (Buster)       |arm32                      |GCC 8.3 and higher                 |Visual Studio Code|
-|Linux - Ubuntu 18.04 LTS               |x86, x86_64                |GCC 8.3 and higher                 |Visual Studio Code, Qt Creator|
-|Linux - Ubuntu 20.04 LTS               |x86, x86_64                |GCC 8.3 and higher                 |Visual Studio Code, Qt Creator|
+| Operating System                |Architecture               |Compiler                 | Notes|
+| :------------------------------ | :-----------------------: | :---------------------: | :--------------------------: |
+|Windows 10/11                    |x86, x86_64, arm64         |MSVC 2022, MSVC 2019     |                              |
+|Windows 8.1                      |x86, x86_64                |MSVC 2019, MSVC 2017     |                              |
+|macOS 10.13 - 14                 |x86, x86_64, Apple Silicon |Xcode 10 - 15            |                              |
+|iOS 13 - iOS 17                  |arm64                      |Xcode 11 - 15            |                              |
+|Linux - Raspberry Pi OS (Buster) |arm32                      |GCC 8.3 and higher       |Visual Studio Code            |
+|Linux - Ubuntu 18.04 LTS         |x86, x86_64                |GCC 8.3 and higher       |Visual Studio Code, Qt Creator|
+|Linux - Ubuntu 20.04 LTS         |x86, x86_64                |GCC 8.3 and higher       |Visual Studio Code, Qt Creator|
 
 ---
 <div id='300'/>

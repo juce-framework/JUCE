@@ -54,8 +54,10 @@ public:
 	 * @param[in] pluginToReplaceUID - TUID of plug-in (processor) that will be replaced
 	 * @param[in] oldParamID - paramID (or index for VST 2 plug-ins) to be replaced
 	 * @param[out] newParamID - contains the associated paramID to be used
-	 * Return kResultTrue means that a compatible parameter is available
-	 * Return kResultFalse means that NO compatible parameter is available
+	 *
+	 * @return kResultTrue if a compatible parameter is available (newParamID has the appropriate
+	 * value, it could be the same than oldParamID), or kResultFalse if no compatible parameter is
+	 * available (newParamID is undefined)
 	 */
 	virtual tresult PLUGIN_API getCompatibleParamID (const TUID pluginToReplaceUID /*in*/,
 	                                                 ParamID oldParamID /*in*/,
@@ -65,6 +67,7 @@ public:
 };
 
 DECLARE_CLASS_IID (IRemapParamID, 0x2B88021E, 0x6286B646, 0xB49DF76A, 0x5663061C)
+
 
 //------------------------------------------------------------------------
 } // namespace Vst

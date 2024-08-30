@@ -36,6 +36,7 @@
 
 #include "vstcomponentbase.h"
 #include "base/source/fstring.h"
+#include "pluginterfaces/base/funknownimpl.h"
 
 namespace Steinberg {
 namespace Vst {
@@ -129,8 +130,7 @@ tresult PLUGIN_API ComponentBase::notify (IMessage* message)
 //------------------------------------------------------------------------
 IMessage* ComponentBase::allocateMessage () const
 {
-	FUnknownPtr<IHostApplication> hostApp (hostContext);
-	if (hostApp)
+	if (auto hostApp = U::cast<IHostApplication> (hostContext))
 		return Vst::allocateMessage (hostApp);
 	return nullptr;
 }

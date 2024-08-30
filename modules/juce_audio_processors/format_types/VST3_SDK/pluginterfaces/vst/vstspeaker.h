@@ -271,16 +271,20 @@ const SpeakerArrangement k70_2			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeake
 const SpeakerArrangement k71_2			 = k70_2 | kSpeakerLfe;
 const SpeakerArrangement k91Atmos		 = k71_2;		// 9.1 Dolby Atmos (3D)
 
+/** L R C Ls Rs Sl Sr Tfl Tfr */						// 7.0.2 (~ITU 2+7+0.0)
+const SpeakerArrangement k70_2_TF		 = k70Music | kSpeakerTfl | kSpeakerTfr;
+
+/** L R C Lfe Ls Rs Sl Sr Tfl Tfr */					// 7.1.2 (~ITU 2+7+0.1)
+const SpeakerArrangement k71_2_TF		 = k70_2_TF | kSpeakerLfe;
+
 /** L R C Ls Rs Sl Sr Tfl Tfr Trc */					// 7.0.3 (ITU 3+7+0.0 Sound System F)
-const SpeakerArrangement k70_3			 = kSpeakerL  | kSpeakerR | kSpeakerC | kSpeakerLs | kSpeakerRs | 
-                                           kSpeakerSl | kSpeakerSr | kSpeakerTfl | kSpeakerTfr | kSpeakerTrc;
+const SpeakerArrangement k70_3			 = k70_2_TF | kSpeakerTrc;
 
 /** L R C Lfe Ls Rs Sl Sr Tfl Tfr Trc Lfe2 */			// 7.2.3 (ITU 3+7+0.2 Sound System F)
 const SpeakerArrangement k72_3			 = k70_3 | kSpeakerLfe | kSpeakerLfe2;
 
 /** L R C Ls Rs Sl Sr Tfl Tfr Trl Trr */				// 7.0.4 (ITU 4+7+0.0 Sound System J)
-const SpeakerArrangement k70_4			 = kSpeakerL | kSpeakerR | kSpeakerC | kSpeakerLs | kSpeakerRs | kSpeakerSl | kSpeakerSr |
-                                           kSpeakerTfl | kSpeakerTfr | kSpeakerTrl | kSpeakerTrr;
+const SpeakerArrangement k70_4			 = k70_2_TF | kSpeakerTrl | kSpeakerTrr;
 
 /** L R C Lfe Ls Rs Sl Sr Tfl Tfr Trl Trr */			// 7.1.4 (ITU 4+7+0.1 Sound System J)
 const SpeakerArrangement k71_4			 = k70_4 | kSpeakerLfe;
@@ -502,6 +506,8 @@ const CString kString50_4_1		= "5.0.4.1";
 const CString kString51_4_1		= "5.1.4.1";
 const CString kString70_2		= "7.0.2";
 const CString kString71_2		= "7.1.2";
+const CString kString70_2_TF	= "7.0.2 Top Front";
+const CString kString71_2_TF	= "7.1.2 Top Front";
 const CString kString70_3		= "7.0.3";
 const CString kString72_3		= "7.2.3";
 const CString kString70_4		= "7.0.4";
@@ -605,6 +611,8 @@ const CString kString50_4_1S	= "L R C Ls Rs Tfl Tfr Trl Trr Bfc";
 const CString kString51_4_1S	= "L R C LFE Ls Rs Tfl Tfr Trl Trr Bfc";
 const CString kString70_2S		= "L R C Ls Rs Sl Sr Tsl Tsr"; 
 const CString kString71_2S		= "L R C LFE Ls Rs Sl Sr Tsl Tsr";
+const CString kString70_2_TFS	= "L R C Ls Rs Sl Sr Tfl Tfr";
+const CString kString71_2_TFS	= "L R C LFE Ls Rs Sl Sr Tfl Tfr";
 const CString kString70_3S		= "L R C Ls Rs Sl Sr Tfl Tfr Trc"; 
 const CString kString72_3S		= "L R C LFE Ls Rs Sl Sr Tfl Tfr Trc LFE2";
 const CString kString70_4S		= "L R C Ls Rs Sl Sr Tfl Tfr Trl Trr";
@@ -939,6 +947,10 @@ inline SpeakerArrangement getSpeakerArrangementFromString (CString arrStr)
 		return k70_2; 
 	if (!strcmp8 (arrStr, kString71_2))
 		return k71_2;
+	if (!strcmp8 (arrStr, kString70_2_TF))
+		return k70_2_TF;
+	if (!strcmp8 (arrStr, kString71_2_TF))
+		return k71_2_TF;
 	if (!strcmp8 (arrStr, kString70_3))
 		return k70_3;
 	if (!strcmp8 (arrStr, kString72_3))
@@ -1097,6 +1109,8 @@ inline CString getSpeakerArrangementString (SpeakerArrangement arr, bool withSpe
 		case k51_6:				return withSpeakersName ? kString51_6S		: kString51_6;
 		case k70_2:				return withSpeakersName ? kString70_2S		: kString70_2;
 		case k71_2:				return withSpeakersName ? kString71_2S		: kString71_2;
+		case k70_2_TF:			return withSpeakersName ? kString70_2_TFS	: kString70_2_TF;
+		case k71_2_TF:			return withSpeakersName ? kString71_2_TFS	: kString71_2_TF;
 		case k70_3:				return withSpeakersName ? kString70_3S		: kString70_3;
 		case k72_3:				return withSpeakersName ? kString72_3S		: kString72_3;
 		case k70_4:				return withSpeakersName ? kString70_4S		: kString70_4;

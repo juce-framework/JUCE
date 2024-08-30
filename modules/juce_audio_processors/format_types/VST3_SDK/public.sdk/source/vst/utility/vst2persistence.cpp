@@ -520,7 +520,7 @@ Optional<Vst2xState> tryVst2StateLoad (Steinberg::IBStream& stream,
 	int32_t numPrograms;
 	if (!(state >> numPrograms))
 		return {};
-	if (numPrograms < 1)
+	if (numPrograms < 1 && fxMagic == bankMagic)
 		return {};
 
 	int32_t currentProgram = 0;

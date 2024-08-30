@@ -51,7 +51,6 @@ CPluginView::CPluginView (const ViewRect* _rect)
 //------------------------------------------------------------------------
 CPluginView::~CPluginView ()
 {
-    setFrame (nullptr);
 }
 
 //------------------------------------------------------------------------
@@ -97,4 +96,5 @@ tresult PLUGIN_API CPluginView::getSize (ViewRect* size)
 	return kInvalidArgument;
 }
 
-} // end of namespace
+//------------------------------------------------------------------------
+} // namespace Steinberg

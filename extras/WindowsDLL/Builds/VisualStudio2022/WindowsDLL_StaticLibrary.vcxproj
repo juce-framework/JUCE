@@ -873,6 +873,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\samples\vst-utilities\moduleinfotool\source\main.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\commonstringconvert.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\memorystream.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -3137,6 +3140,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\fstrdefs.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\ftypes.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\funknown.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\funknownimpl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\futils.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\fvariant.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\ibstream.h"/>
@@ -3180,6 +3184,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\vstpshpack4.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\vstspeaker.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\vsttypes.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\commonstringconvert.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\memorystream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\pluginview.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\readfile.h"/>

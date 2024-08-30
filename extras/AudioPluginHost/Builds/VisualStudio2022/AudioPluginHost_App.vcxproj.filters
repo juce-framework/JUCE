@@ -1495,6 +1495,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\samples\vst-utilities\moduleinfotool\source\main.cpp">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\samples\vst-utilities\moduleinfotool\source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\commonstringconvert.cpp">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\memorystream.cpp">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClCompile>
@@ -4716,6 +4719,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\funknown.h">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\funknownimpl.h">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base\futils.h">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\base</Filter>
     </ClInclude>
@@ -4844,6 +4850,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst\vsttypes.h">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\pluginterfaces\vst</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\commonstringconvert.h">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common\memorystream.h">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\source\common</Filter>

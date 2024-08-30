@@ -37,6 +37,7 @@
 #include "module.h"
 #include "public.sdk/source/vst/utility/stringconvert.h"
 #include "public.sdk/source/vst/utility/optional.h"
+#include "pluginterfaces/base/funknownimpl.h"
 #include <sstream>
 #include <utility>
 
@@ -69,18 +70,21 @@ FactoryInfo& FactoryInfo::operator= (PFactoryInfo&& other) noexcept
 //------------------------------------------------------------------------
 std::string FactoryInfo::vendor () const noexcept
 {
+	namespace StringConvert = Steinberg::Vst::StringConvert;
 	return StringConvert::convert (info.vendor, PFactoryInfo::kNameSize);
 }
 
 //------------------------------------------------------------------------
 std::string FactoryInfo::url () const noexcept
 {
+	namespace StringConvert = Steinberg::Vst::StringConvert;
 	return StringConvert::convert (info.url, PFactoryInfo::kURLSize);
 }
 
 //------------------------------------------------------------------------
 std::string FactoryInfo::email () const noexcept
 {
+	namespace StringConvert = Steinberg::Vst::StringConvert;
 	return StringConvert::convert (info.email, PFactoryInfo::kEmailSize);
 }
 
@@ -145,8 +149,8 @@ PluginFactory::ClassInfos PluginFactory::classInfos () const noexcept
 	Optional<FactoryInfo> factoryInfo;
 	ClassInfos classes;
 	classes.reserve (count);
-	auto f3 = Steinberg::FUnknownPtr<Steinberg::IPluginFactory3> (factory);
-	auto f2 = Steinberg::FUnknownPtr<Steinberg::IPluginFactory2> (factory);
+	auto f3 = Steinberg::U::cast<Steinberg::IPluginFactory3> (factory);
+	auto f2 = Steinberg::U::cast<Steinberg::IPluginFactory2> (factory);
 	Steinberg::PClassInfo ci;
 	Steinberg::PClassInfo2 ci2;
 	Steinberg::PClassInfoW ci3;
@@ -228,6 +232,7 @@ Steinberg::uint32 ClassInfo::classFlags () const noexcept
 //------------------------------------------------------------------------
 ClassInfo::ClassInfo (const PClassInfo& info) noexcept
 {
+	namespace StringConvert = Steinberg::Vst::StringConvert;
 	data.classID = info.cid;
 	data.cardinality = info.cardinality;
 	data.category = StringConvert::convert (info.category, PClassInfo::kCategorySize);
@@ -237,6 +242,7 @@ ClassInfo::ClassInfo (const PClassInfo& info) noexcept
 //------------------------------------------------------------------------
 ClassInfo::ClassInfo (const PClassInfo2& info) noexcept
 {
+	namespace StringConvert = Steinberg::Vst::StringConvert;
 	data.classID = info.cid;
 	data.cardinality = info.cardinality;
 	data.category = StringConvert::convert (info.category, PClassInfo::kCategorySize);
@@ -252,6 +258,7 @@ ClassInfo::ClassInfo (const PClassInfo2& info) noexcept
 //------------------------------------------------------------------------
 ClassInfo::ClassInfo (const PClassInfoW& info) noexcept
 {
+	namespace StringConvert = Steinberg::Vst::StringConvert;
 	data.classID = info.cid;
 	data.cardinality = info.cardinality;
 	data.category = StringConvert::convert (info.category, PClassInfo::kCategorySize);

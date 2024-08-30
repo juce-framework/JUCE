@@ -1,9 +1,10 @@
 //-----------------------------------------------------------------------------
+// Flags       : clang-format SMTGSequencer
 // Project     : VST SDK
 //
 // Category    : Helpers
-// Filename    : public.sdk/source/vst/utility/stringconvert.cpp
-// Created by  : Steinberg, 11/2014
+// Filename    : public.sdk/source/common/commonstringconvert.cpp
+// Created by  : Steinberg, 07/2024
 // Description : c++11 unicode string convert functions
 //
 //-----------------------------------------------------------------------------
@@ -34,23 +35,22 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include "pluginterfaces/base/fplatform.h"
-
-#if SMTG_OS_WINDOWS
-#ifndef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#endif
-#endif // SMTG_OS_WINDOWS
-
-#include "public.sdk/source/vst/utility/stringconvert.h"
-#include "public.sdk/source/common/commonstringconvert.h"
+#include "commonstringconvert.h"
 
 #include <codecvt>
 #include <istream>
 #include <locale>
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
+
+//------------------------------------------------------------------------
 namespace Steinberg {
-namespace Vst {
 namespace StringConvert {
 
 //------------------------------------------------------------------------
@@ -63,14 +63,6 @@ using UTF16Type = wchar_t;
 using UTF16Type = char16_t;
 #endif
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4996)
-#endif
-
 using Converter = std::wstring_convert<std::codecvt_utf8_utf16<UTF16Type>, UTF16Type>;
 
 //------------------------------------------------------------------------
@@ -80,77 +72,50 @@ Converter& converter ()
 	return conv;
 }
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
 //------------------------------------------------------------------------
 } // anonymous
 
 //------------------------------------------------------------------------
 std::u16string convert (const std::string& utf8Str)
 {
-	return Steinberg::StringConvert::convert (utf8Str);
+#if defined(USE_WCHAR_AS_UTF16TYPE)
+	auto wstr = converter ().from_bytes (utf8Str);
+	return {wstr.data (), wstr.data () + wstr.size ()};
+#else
+	return converter ().from_bytes (utf8Str);
+#endif
 }
 
 //------------------------------------------------------------------------
-bool convert (const std::string& utf8Str, Steinberg::Vst::String128 str)
+std::string convert (const std::u16string& str)
 {
-	return convert (utf8Str, str, 128);
+	return converter ().to_bytes (reinterpret_cast<const UTF16Type*> (str.data ()),
+	                              reinterpret_cast<const UTF16Type*> (str.data () + str.size ()));
 }
 
 //------------------------------------------------------------------------
-bool convert (const std::string& utf8Str, Steinberg::Vst::TChar* str, uint32_t maxCharacters)
-{
-	auto ucs2 = convert (utf8Str);
-	if (ucs2.length () < maxCharacters)
-	{
-		ucs2.copy (reinterpret_cast<char16_t*> (str), ucs2.length ());
-		str[ucs2.length ()] = 0;
-		return true;
-	}
-	return false;
-}
-
-//------------------------------------------------------------------------
-std::string convert (const Steinberg::Vst::TChar* str)
-{
-	return converter ().to_bytes (reinterpret_cast<const UTF16Type*> (str));
-}
-
-//------------------------------------------------------------------------
-std::string convert (const Steinberg::Vst::TChar* str, uint32_t max)
+std::string convert (const char* str, uint32_t max)
 {
 	std::string result;
 	if (str)
 	{
-		Steinberg::Vst::TChar tmp[2] {};
+		result.reserve (max);
 		for (uint32_t i = 0; i < max; ++i, ++str)
 		{
-			tmp[0] = *str;
-			if (tmp[0] == 0)
+			if (*str == 0)
 				break;
-			result += convert (tmp);
+			result += *str;
 		}
 	}
 	return result;
 }
 
 //------------------------------------------------------------------------
-std::string convert (const std::u16string& str)
-{
-	return Steinberg::StringConvert::convert (str);
-}
-
-//------------------------------------------------------------------------
-std::string convert (const char* str, uint32_t max)
-{
-	return Steinberg::StringConvert::convert (str, max);
-}
-
-//------------------------------------------------------------------------
 } // StringConvert
-} // Vst
 } // Steinberg
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif

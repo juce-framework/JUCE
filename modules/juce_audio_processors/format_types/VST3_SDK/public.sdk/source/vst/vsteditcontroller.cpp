@@ -36,6 +36,7 @@
 
 #include "public.sdk/source/vst/vsteditcontroller.h"
 #include "base/source/updatehandler.h"
+#include "pluginterfaces/base/funknownimpl.h"
 #include "pluginterfaces/base/ustring.h"
 
 #include <cstdio>
@@ -363,8 +364,7 @@ tresult PLUGIN_API EditControllerEx1::getUnitInfo (int32 unitIndex, UnitInfo& in
 tresult EditControllerEx1::notifyUnitSelection ()
 {
 	tresult result = kResultFalse;
-	FUnknownPtr<IUnitHandler> unitHandler (componentHandler);
-	if (unitHandler)
+	if (auto unitHandler = U::cast<IUnitHandler> (componentHandler))
 		result = unitHandler->notifyUnitSelection (selectedUnit);
 	return result;
 }
@@ -389,8 +389,7 @@ ProgramList* EditControllerEx1::getProgramList (ProgramListID listId) const
 tresult EditControllerEx1::notifyProgramListChange (ProgramListID listId, int32 programIndex)
 {
 	tresult result = kResultFalse;
-	FUnknownPtr<IUnitHandler> unitHandler (componentHandler);
-	if (unitHandler)
+	if (auto unitHandler = U::cast<IUnitHandler> (componentHandler))
 		result = unitHandler->notifyProgramListChange (listId, programIndex);
 	return result;
 }
@@ -478,8 +477,7 @@ void PLUGIN_API EditControllerEx1::update (FUnknown* changedUnknown, int32 /*mes
 	auto* programList = FCast<ProgramList> (changedUnknown);
 	if (programList)
 	{
-		FUnknownPtr<IUnitHandler> unitHandler (componentHandler);
-		if (unitHandler)
+		if (auto unitHandler = U::cast<IUnitHandler> (componentHandler))
 			unitHandler->notifyProgramListChange (programList->getID (), kAllProgramInvalid);
 	}
 }

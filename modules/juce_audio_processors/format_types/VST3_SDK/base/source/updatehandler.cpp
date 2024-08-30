@@ -72,7 +72,10 @@ inline IPtr<FUnknown> getUnknownBase (FUnknown* unknown)
 {
 	FUnknown* result = nullptr;
 	if (unknown)
-		unknown->queryInterface (FUnknown::iid, (void**)&result);
+	{
+		if (unknown->queryInterface (FObject::iid, (void**)&result) != kResultTrue)
+			unknown->queryInterface (FUnknown::iid, (void**)&result);
+	}
 
 	return owned (result);
 }

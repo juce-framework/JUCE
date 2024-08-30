@@ -55,6 +55,10 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc++98-compat-extra-semi",
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387 6031)
 
+#ifndef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+ #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#endif
+
 #ifndef NOMINMAX
  #define NOMINMAX 1
 #endif
@@ -70,6 +74,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387 6031)
 #include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/coreiids.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/funknown.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/public.sdk/samples/vst-utilities/moduleinfotool/source/main.cpp>
+#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/commonstringconvert.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/memorystream.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/readfile.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/hosting/module.cpp>

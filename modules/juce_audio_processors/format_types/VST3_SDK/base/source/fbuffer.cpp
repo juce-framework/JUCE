@@ -304,7 +304,7 @@ bool Buffer::makeHexString (String& result)
 	if (data == nullptr || bytes == 0)
 		return false;
 
-	char8* stringBuffer = (char8*)malloc ((bytes * 2) + 1);
+	char8* stringBuffer = NEWSTR8 ((bytes * 2) + 1);
 	if (!stringBuffer)
 		return false;
 

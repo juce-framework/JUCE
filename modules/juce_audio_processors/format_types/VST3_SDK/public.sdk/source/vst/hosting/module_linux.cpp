@@ -35,8 +35,11 @@
 //-----------------------------------------------------------------------------
 
 #include "module.h"
-#include "../utility/optional.h"
-#include "../utility/stringconvert.h"
+#include "public.sdk/source/vst/utility/optional.h"
+#include "public.sdk/source/vst/utility/stringconvert.h"
+
+#include "pluginterfaces/base/funknownimpl.h"
+
 #include <algorithm>
 #include <dlfcn.h>
 #include <sys/types.h>
@@ -62,12 +65,12 @@
 #include <experimental/filesystem>
 namespace filesystem = std::experimental::filesystem;
 
-#else // USE_FILESYSTEM == 0
+#else // USE_EXPERIMENTAL_FS == 0
 
 #include <filesystem>
 namespace filesystem = std::filesystem;
 
-#endif // USE_FILESYSTEM
+#endif // USE_EXPERIMENTAL_FS
 
 //------------------------------------------------------------------------
 extern "C" {
@@ -215,7 +218,7 @@ public:
 			errorDescription = "Calling 'ModuleEntry' failed";
 			return false;
 		}
-		auto f = Steinberg::FUnknownPtr<Steinberg::IPluginFactory> (owned (factoryProc ()));
+		auto f = Steinberg::U::cast<Steinberg::IPluginFactory> (owned (factoryProc ()));
 		if (!f)
 		{
 			errorDescription = "Calling 'GetPluginFactory' returned nullptr";
