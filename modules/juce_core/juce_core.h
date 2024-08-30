@@ -258,6 +258,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_ContainerDeletePolicy.h"
 #include "memory/juce_HeapBlock.h"
 #include "memory/juce_MemoryBlock.h"
+#include "memory/juce_CopyableHeapBlock.h"
 #include "memory/juce_ReferenceCountedObject.h"
 #include "memory/juce_ScopedPointer.h"
 #include "memory/juce_OptionalScopedPointer.h"
