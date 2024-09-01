@@ -2104,6 +2104,7 @@ function(juce_add_console_app target)
         MACOSX_BUNDLE_SHORT_VERSION_STRING  "")
 
     _juce_initialise_target(${target} ${ARGN})
+    _juce_set_output_name(${target} $<TARGET_PROPERTY:${target},JUCE_PRODUCT_NAME>)
 
     if(NOT JUCE_ARG__NO_RESOURCERC)
         _juce_write_configure_time_info(${target})
