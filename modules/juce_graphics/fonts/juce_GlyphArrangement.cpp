@@ -246,6 +246,8 @@ void GlyphArrangement::addFittedText (const Font& f,
 
     const auto trimmed = text.trim();
 
+    constexpr auto widthFittingTolerance = 0.01f;
+
     // First attempt: try to squash the entire text on a single line
     {
         ShapedText st { trimmed, ShapedText::Options{}.withFont (f)
@@ -268,7 +270,7 @@ void GlyphArrangement::addFittedText (const Font& f,
         {
             ShapedText squashed { trimmed,
                                   ShapedText::Options{}
-                                      .withFont (f.withHorizontalScale (width / (requiredWidths.front() + 0.01f)))
+                                      .withFont (f.withHorizontalScale (width / (requiredWidths.front() + widthFittingTolerance)))
                                       .withMaxWidth (width)
                                       .withHeight (height)
                                       .withJustification (layout)
@@ -308,6 +310,12 @@ void GlyphArrangement::addFittedText (const Font& f,
     auto font = f;
     auto cumulativeLineLengths = font.getHeight() * 1.4f;
 
+    const auto isFittingAllText = [width] (auto& shapedText)
+    {
+        const auto lineWidths = shapedText.getMinimumRequiredWidthForLines();
+        return std::all_of (lineWidths.begin(), lineWidths.end(), [width] (auto& w) { return w <= width; });
+    };
+
     while (numLines < maximumLines)
     {
         ++numLines;
@@ -325,13 +333,13 @@ void GlyphArrangement::addFittedText (const Font& f,
                                   .withJustification (layout)
                                   .withTrailingWhitespacesShouldFit (false) };
 
-        const auto lineWidths = squashed.getMinimumRequiredWidthForLines();
-
-        if (lineWidths.empty() || lineWidths.back() <= width)
+        if (isFittingAllText (squashed))
         {
             addGlyphsFromShapedText (*this, squashed, x, y);
             return;
         }
+
+        const auto lineWidths = squashed.getMinimumRequiredWidthForLines();
 
         // We're trying to guess how much horizontal space the text would need to fit, and we
         // need to have an allowance for line end whitespaces which take up additional room
@@ -365,14 +373,9 @@ void GlyphArrangement::addFittedText (const Font& f,
     };
 
     auto lowerScaleBound = minimumHorizontalScale;
-    auto upperScaleBound = std::max (minimumHorizontalScale, ((float) numLines * width) / cumulativeLineLengths);
-
-    const auto isFittingAllText = [width] (auto& shapedText)
-    {
-        // ShapedText guarantees that all lines maybe except the last - when there is a maximum line
-        // limit - will fit the requested width
-        return shapedText.getMinimumRequiredWidthForLines().back() <= width;
-    };
+    auto upperScaleBound = jlimit (minimumHorizontalScale,
+                                   1.0f,
+                                   (float) numLines * width / cumulativeLineLengths);
 
     if (auto st = makeShapedText (upperScaleBound);
         isFittingAllText (st)
@@ -392,7 +395,7 @@ void GlyphArrangement::addFittedText (const Font& f,
 
     for (int i = 0, numApproximatingIterations = 3; i < numApproximatingIterations; ++i)
     {
-        auto scale = (upperScaleBound - lowerScaleBound) / 2.0f;
+        auto scale = jmap (0.5f, lowerScaleBound, upperScaleBound);
 
         if (auto st = makeShapedText (scale);
             isFittingAllText (st))
