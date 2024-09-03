@@ -119,6 +119,11 @@ public:
         return withMember (*this, &ShapedTextOptions::readingDir, x);
     }
 
+    [[nodiscard]] ShapedTextOptions withAllowBreakingInsideWord (bool x = true) const
+    {
+        return withMember (*this, &ShapedTextOptions::allowBreakingInsideWord, x);
+    }
+
     const auto& getReadingDirection() const             { return readingDir; }
     const auto& getJustification() const                { return justification; }
     const auto& getMaxWidth() const                     { return maxWidth; }
@@ -132,6 +137,7 @@ public:
     const auto& getTrailingWhitespacesShouldFit() const { return trailingWhitespacesShouldFit; }
     const auto& getMaxNumLines() const                  { return maxNumLines; }
     const auto& getEllipsis() const                     { return ellipsis; }
+    const auto& getAllowBreakingInsideWord() const      { return allowBreakingInsideWord; }
 
 private:
     Justification justification { Justification::topLeft };
@@ -145,6 +151,7 @@ private:
     float leading = 1.0f;
     float additiveLineSpacing = 0.0f;
     bool baselineAtZero = false;
+    bool allowBreakingInsideWord = false;
     bool trailingWhitespacesShouldFit;
     int64 maxNumLines = std::numeric_limits<int64>::max();
     String ellipsis;
@@ -392,7 +399,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     HbBuffer buffer { hb_buffer_create() };
     hb_buffer_clear_contents (buffer.get());
 
-    hb_buffer_set_cluster_level (buffer.get(), HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS);
+    hb_buffer_set_cluster_level (buffer.get(), HB_BUFFER_CLUSTER_LEVEL_MONOTONE_GRAPHEMES);
     hb_buffer_set_script (buffer.get(), getScriptTag (script));
     hb_buffer_set_language (buffer.get(), hb_language_from_string (language.toRawUTF8(), -1));
 
@@ -1009,11 +1016,20 @@ void SimpleShapedText::shape (const String& data,
         remainingWidth = options.getMaxWidth();
     };
 
+    enum class CanAddGlyphsBeyondLineLimits
+    {
+        no,
+        yes
+    };
+
     const auto append = [&] (const BidiParagraph& bidiParagraph, Range<int64> range, const ShapingParams& shapingParams)
     {
         jassert (! range.isEmpty());
 
         ConsumableGlyphs glyphsToConsume { data, range, shapingParams };
+
+        const auto appendingToFirstLine = [&] { return lineNumbers.isEmpty(); };
+        const auto appendingToLastLine  = [&] { return (int64) lineNumbers.size() == options.getMaxNumLines() - 1; };
 
         while (! glyphsToConsume.isEmpty())
         {
@@ -1038,8 +1054,7 @@ void SimpleShapedText::shape (const String& data,
             static constexpr auto floatMax = std::numeric_limits<float>::max();
 
             for (auto breakBefore = softBreakIterator.next();
-                 breakBefore.has_value() && (lineNumbers.isEmpty()
-                                             || (int64) lineNumbers.size() < options.getMaxNumLines() - 1);
+                 breakBefore.has_value() && (appendingToFirstLine() || ! appendingToLastLine());
                  breakBefore = softBreakIterator.next())
             {
                 if (auto safeAdvance = glyphsToConsume.getAdvanceXUpToBreakPointIfSafe (*breakBefore,
@@ -1098,7 +1113,13 @@ void SimpleShapedText::shape (const String& data,
 
             jassert (bestMatch.has_value());
 
-            const auto consumeBestMatch = [&]
+            struct ConsumedGlyphs
+            {
+                std::vector<ShapedGlyph> glyphs;
+                Range<int64> textRange;
+            };
+
+            const auto consumeGlyphs = [&]() -> ConsumedGlyphs
             {
                 auto glyphs = [&]
                 {
@@ -1110,30 +1131,111 @@ void SimpleShapedText::shape (const String& data,
 
                 const auto textRange = glyphsToConsume.getCodepointRange().withEnd (bestMatch->breakBefore);
 
+                std::vector<ShapedGlyph> copiedGlyphs { glyphs.begin(), glyphs.end() };
+
+                glyphsToConsume.breakBeforeAndConsume (bestMatch->breakBefore);
+
+                return { copiedGlyphs, textRange };
+            };
+
+            const auto addGlyphsToLine = [&] (const ConsumedGlyphs& toAdd,
+                                              CanAddGlyphsBeyondLineLimits evenIfFull) -> ConsumedGlyphs
+            {
+                const auto glyphsEnd = [&]
+                {
+                    if (evenIfFull == CanAddGlyphsBeyondLineLimits::yes || ! remainingWidth.has_value())
+                        return toAdd.glyphs.end();
+
+                    auto it = toAdd.glyphs.begin();
+
+                    for (float advance = 0.0f; it != toAdd.glyphs.end();)
+                    {
+                        const auto clusterEnd = std::find_if (it,
+                                                              toAdd.glyphs.end(),
+                                                              [cluster = it->cluster] (const auto& g)
+                                                              {
+                                                                  return g.cluster != cluster;
+                                                              });
+
+                        advance = std::accumulate (it,
+                                                   clusterEnd,
+                                                   advance,
+                                                   [] (auto acc, const auto& g)
+                                                   {
+                                                       return acc + g.advance.getX();
+                                                   });
+
+                        // Consume at least one glyph in each line, even if the line is too short.
+                        if (advance > *remainingWidth
+                            && (numGlyphsInLine == 0 && it != toAdd.glyphs.begin()))
+                        {
+                            break;
+                        }
+
+                        it = clusterEnd;
+                    }
+
+                    if (options.getTrailingWhitespacesShouldFit() || (numGlyphsInLine == 0 && it == toAdd.glyphs.begin()))
+                        return it;
+
+                    return std::find_if (it, toAdd.glyphs.end(), [] (const auto& x) { return ! x.whitespace; });
+                }();
+
+                const auto numGlyphsAdded = (int64) std::distance (toAdd.glyphs.begin(), glyphsEnd);
+
+                const auto textRange = [&]() -> Range<int64>
+                {
+                    if (glyphsEnd == toAdd.glyphs.end())
+                        return toAdd.textRange;
+
+                    return { toAdd.textRange.getStart(), glyphsEnd->cluster };
+                }();
+
                 lineChunks.push_back ({ textRange,
-                                        { glyphs.begin(), glyphs.end() },
+                                        { toAdd.glyphs.begin(), glyphsEnd },
                                         shapingParams.resolvedFont,
                                         shapingParams.embeddingLevel });
 
-                numGlyphsInLine += (int64) glyphs.size();
+                numGlyphsInLine += numGlyphsAdded;
 
                 if (remainingWidth.has_value())
-                    remainingWidth = *remainingWidth - bestMatch->advance.includingTrailingWhitespace;
+                {
+                    *remainingWidth -= std::accumulate (toAdd.glyphs.begin(),
+                                                        glyphsEnd,
+                                                        0.0f,
+                                                        [] (auto acc, auto& g) { return acc + g.advance.getX(); });
+                }
 
-                glyphsToConsume.breakBeforeAndConsume (bestMatch->breakBefore);
+                return { { glyphsEnd, toAdd.glyphs.end() }, toAdd.textRange.withStart (textRange.getEnd()) };
             };
 
             if (bestMatch->advance.maybeIgnoringWhitespace >= remainingWidth.value_or (floatMax))
             {
                 // Even an empty line is too short to fit any of the text
                 if (numGlyphsInLine == 0 && exactlyEqual (remainingWidth, options.getMaxWidth()))
-                    consumeBestMatch();
+                {
+                    auto glyphsToAdd = consumeGlyphs();
 
-                commitLine (bidiParagraph);
+                    while (! glyphsToAdd.glyphs.empty())
+                    {
+                        glyphsToAdd = addGlyphsToLine (glyphsToAdd,
+                                                       (appendingToLastLine() || ! options.getAllowBreakingInsideWord()) ? CanAddGlyphsBeyondLineLimits::yes
+                                                                                                                         : CanAddGlyphsBeyondLineLimits::no);
+
+                        if (! glyphsToAdd.glyphs.empty())
+                            commitLine (bidiParagraph);
+                    }
+                }
+                else
+                {
+                    commitLine (bidiParagraph);
+                }
             }
             else
             {
-                consumeBestMatch();
+                [[maybe_unused]] const auto remainder = addGlyphsToLine (consumeGlyphs(),
+                                                                         CanAddGlyphsBeyondLineLimits::yes);
+                jassert (remainder.glyphs.empty());
 
                 if (! glyphsToConsume.isEmpty())
                     commitLine (bidiParagraph);
