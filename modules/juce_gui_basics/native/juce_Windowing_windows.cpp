@@ -5313,7 +5313,7 @@ private:
 
         Image getImage() const
         {
-            return Image { Direct2DPixelData::fromDirect2DBitmap (adapter, deviceContext, bitmap) };
+            return Image { new Direct2DPixelData { deviceContext, bitmap } };
         }
 
         ComSmartPtr<ID2D1Bitmap1> getBitmap() const

@@ -649,9 +649,7 @@ public:
         if (const auto hr = snapshot->CopyFromBitmap (&p, swap.buffer, &sourceRect); FAILED (hr))
             return {};
 
-        const Image result { Direct2DPixelData::fromDirect2DBitmap (directX->adapters.getAdapterForHwnd (hwnd),
-                                                                    context,
-                                                                    snapshot) };
+        const Image result { new Direct2DPixelData { context, snapshot } };
 
         swap.chain->Present (0, DXGI_PRESENT_DO_NOT_WAIT);
 

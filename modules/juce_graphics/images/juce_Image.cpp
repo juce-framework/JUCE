@@ -80,6 +80,9 @@ public:
     {
     }
 
+    Rectangle<int>      getSubsection()      const { return area; }
+    ImagePixelData::Ptr getSourcePixelData() const { return sourceImage; }
+
     std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
     {
         auto g = sourceImage->createLowLevelContext();

@@ -322,6 +322,8 @@ struct D2DUtilities
     static Point<int> toPoint (POINT p) noexcept          { return { p.x, p.y }; }
     static POINT toPOINT (Point<int> p) noexcept          { return { p.x, p.y }; }
 
+    static D2D1_POINT_2U toPOINT_2U (Point<int> p)        { return D2D1::Point2U ((UINT32) p.x, (UINT32) p.y); }
+
     static D2D1_COLOR_F toCOLOR_F (Colour c)
     {
         return { c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha() };
@@ -331,21 +333,23 @@ struct D2DUtilities
     {
         return { transform.mat00, transform.mat10, transform.mat01, transform.mat11, transform.mat02, transform.mat12 };
     }
+
+    static Rectangle<int> rectFromSize (D2D1_SIZE_U s)
+    {
+        return { (int) s.width, (int) s.height };
+    }
 };
 
 //==============================================================================
 struct Direct2DDeviceContext
 {
-    static ComSmartPtr<ID2D1DeviceContext1> create (DxgiAdapter::Ptr adapter)
+    static ComSmartPtr<ID2D1DeviceContext1> create (ComSmartPtr<ID2D1Device1> device)
     {
-        if (adapter == nullptr)
-            return {};
-
         ComSmartPtr<ID2D1DeviceContext1> result;
 
-        if (const auto hr = adapter->direct2DDevice->CreateDeviceContext (D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
-                                                                          result.resetAndGetPointerAddress());
-                FAILED (hr))
+        if (const auto hr = device->CreateDeviceContext (D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
+                                                         result.resetAndGetPointerAddress());
+            FAILED (hr))
         {
             jassertfalse;
             return {};
@@ -356,6 +360,11 @@ struct Direct2DDeviceContext
         result->SetUnitMode (D2D1_UNIT_MODE_PIXELS);
 
         return result;
+    }
+
+    static ComSmartPtr<ID2D1DeviceContext1> create (DxgiAdapter::Ptr adapter)
+    {
+        return adapter != nullptr ? create (adapter->direct2DDevice) : nullptr;
     }
 
     Direct2DDeviceContext() = delete;

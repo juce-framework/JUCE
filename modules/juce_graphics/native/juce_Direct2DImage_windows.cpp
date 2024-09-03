@@ -35,194 +35,267 @@
 namespace juce
 {
 
-class NativeReadOnlyDataReleaser : public Image::BitmapData::BitmapDataReleaser
+Rectangle<int> Direct2DPixelDataPage::getBounds() const
 {
-public:
-    NativeReadOnlyDataReleaser (Image::PixelFormat pixelFormat,
-                                int w,
-                                int h,
-                                ComSmartPtr<ID2D1DeviceContext1> deviceContextIn,
-                                ComSmartPtr<ID2D1Bitmap1> sourceBitmap,
-                                Point<int> offset)
-        : bitmap (Direct2DBitmap::createBitmap (deviceContextIn,
-                                                pixelFormat,
-                                                { (UINT32) w, (UINT32) h },
-                                                D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW))
-    {
-        const D2D1_POINT_2U destPoint { 0, 0 };
-        const Rectangle fullRect { w, h };
-        const auto sourceRect = D2DUtilities::toRECT_U (fullRect.getIntersection (fullRect.withPosition (offset)));
-
-        if (auto hr = bitmap->CopyFromBitmap (&destPoint, sourceBitmap, &sourceRect); FAILED (hr))
-            return;
-
-        D2D1_MAPPED_RECT mappedRect{};
-        bitmap->Map (D2D1_MAP_OPTIONS_READ, &mappedRect);
-        data = mappedRect.bits;
-        pitch = mappedRect.pitch;
-    }
-
-    ~NativeReadOnlyDataReleaser() override
-    {
-        bitmap->Unmap();
-    }
-
-    auto getData() const
-    {
-        return data;
-    }
-
-    auto getPitch() const
-    {
-        return pitch;
-    }
-
-private:
-    ComSmartPtr<ID2D1Bitmap1> bitmap;
-    BYTE* data = nullptr;
-    UINT32 pitch = 0;
-};
-
-class SoftwareDataReleaser : public Image::BitmapData::BitmapDataReleaser
-{
-public:
-    SoftwareDataReleaser (std::unique_ptr<Image::BitmapData::BitmapDataReleaser> r,
-                          Image backupIn,
-                          ComSmartPtr<ID2D1Bitmap1> nativeBitmapIn,
-                          Image::BitmapData::ReadWriteMode modeIn,
-                          D2D1_RECT_U targetRectIn)
-        : oldReleaser (std::move (r)),
-          backup (std::move (backupIn)),
-          nativeBitmap (nativeBitmapIn),
-          targetRect (targetRectIn),
-          mode (modeIn)
-    {
-    }
-
-    static void flushImage (Image softwareImage, ComSmartPtr<ID2D1Bitmap1> native, D2D1_RECT_U target)
-    {
-        if (native == nullptr)
-            return;
-
-        if (softwareImage.getFormat() == Image::PixelFormat::RGB)
-            softwareImage = softwareImage.convertedToFormat (Image::PixelFormat::ARGB);
-
-        const Image::BitmapData bitmapData { softwareImage,
-                                             (int) target.left,
-                                             (int) target.top,
-                                             (int) (target.right - target.left),
-                                             (int) (target.bottom - target.top),
-                                             Image::BitmapData::readOnly };
-        const auto hr = native->CopyFromMemory (&target, bitmapData.data, (UINT32) bitmapData.lineStride);
-        jassertquiet (SUCCEEDED (hr));
-    }
-
-    ~SoftwareDataReleaser() override
-    {
-        // Ensure that writes to the backup bitmap have been flushed before reading from it
-        oldReleaser = nullptr;
-
-        if (mode != Image::BitmapData::ReadWriteMode::readOnly)
-            flushImage (backup, nativeBitmap, targetRect);
-    }
-
-private:
-    std::unique_ptr<Image::BitmapData::BitmapDataReleaser> oldReleaser;
-    Image backup;
-    ComSmartPtr<ID2D1Bitmap1> nativeBitmap;
-    D2D1_RECT_U targetRect{};
-    Image::BitmapData::ReadWriteMode mode{};
-};
-
-ComSmartPtr<ID2D1Bitmap1> Direct2DPixelData::createAdapterBitmap() const
-{
-    auto bitmap = Direct2DBitmap::createBitmap (context,
-                                                pixelFormat,
-                                                { (UINT32) width, (UINT32) height },
-                                                D2D1_BITMAP_OPTIONS_TARGET);
-
-    // The bitmap may be slightly too large due
-    // to DPI scaling, so fill it with transparent black
-    if (bitmap == nullptr || ! clearImage)
-        return bitmap;
-
-    context->SetTarget (bitmap);
-    context->BeginDraw();
-    context->Clear();
-    context->EndDraw();
-    context->SetTarget (nullptr);
-
-    return bitmap;
+    return bitmap != nullptr ? D2DUtilities::rectFromSize (bitmap->GetPixelSize()).withPosition (topLeft)
+                             : Rectangle<int>{};
 }
 
-void Direct2DPixelData::createDeviceResources()
+//==============================================================================
+static ComSmartPtr<ID2D1Device1> getDeviceForContext (ComSmartPtr<ID2D1DeviceContext1> context)
 {
-    if (adapter == nullptr)
-        adapter = directX->adapters.getDefaultAdapter();
+    if (context == nullptr)
+        return {};
+
+    ComSmartPtr<ID2D1Device> device;
+    context->GetDevice (device.resetAndGetPointerAddress());
+    return device.getInterface<ID2D1Device1>();
+}
+
+static std::vector<Direct2DPixelDataPage> makePages (ComSmartPtr<ID2D1Device1> device,
+                                                     ImagePixelData::Ptr backingData,
+                                                     bool needsClear)
+{
+    if (device == nullptr || backingData == nullptr)
+    {
+        jassertfalse;
+        return {};
+    }
+
+    // We create a new context rather than reusing an existing one, because we'll run into problems
+    // if we call BeginDraw/EndDraw on a context that's already doing its own drawing
+    const auto context = Direct2DDeviceContext::create (device);
 
     if (context == nullptr)
-        context = Direct2DDeviceContext::create (adapter);
-
-    if (nativeBitmap == nullptr)
     {
-        nativeBitmap = createAdapterBitmap();
-
-        if (backup.isValid())
-            SoftwareDataReleaser::flushImage (backup, nativeBitmap, { 0, 0, (UINT32) width, (UINT32) height });
+        jassertfalse;
+        return {};
     }
-}
 
-void Direct2DPixelData::initBitmapDataReadOnly (Image::BitmapData& bitmap, int x, int y)
-{
-    const auto pixelStride = getPixelStride();
-    const auto lineStride = getLineStride();
+    const auto maxDim = (size_t) context->GetMaximumBitmapSize();
+    std::vector<Direct2DPixelDataPage> result;
 
-    const auto offset = (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
-    bitmap.pixelFormat = pixelFormat;
-    bitmap.pixelStride = pixelStride;
-    bitmap.lineStride = lineStride;
-    bitmap.size = (size_t) (height * lineStride) - offset;
+    const auto width = (size_t) backingData->width;
+    const auto height = (size_t) backingData->height;
+    const auto pixelFormat = backingData->pixelFormat;
 
-    JUCE_TRACE_LOG_D2D_IMAGE_MAP_DATA;
+    for (size_t h = 0; h < height; h += maxDim)
+    {
+        const auto tileHeight = (UINT32) jmin (maxDim, height - h);
 
-    auto releaser = std::make_unique<NativeReadOnlyDataReleaser> (pixelFormat,
-                                                                  width,
-                                                                  height,
-                                                                  context,
-                                                                  getAdapterD2D1Bitmap(),
-                                                                  Point { x, y });
-    bitmap.data = releaser->getData();
-    bitmap.lineStride = (int) releaser->getPitch();
-    bitmap.dataReleaser = std::move (releaser);
-}
+        for (size_t w = 0; w < width; w += maxDim)
+        {
+            const auto tileWidth = (UINT32) jmin (maxDim, width - w);
 
-auto Direct2DPixelData::make (Image::PixelFormat formatToUse,
-                              int widthIn,
-                              int heightIn,
-                              bool clearImageIn,
-                              DxgiAdapter::Ptr adapterIn) -> Ptr
-{
-    return new Direct2DPixelData (formatToUse, widthIn, heightIn, clearImageIn, adapterIn);
-}
+            const auto bitmap = Direct2DBitmap::createBitmap (context,
+                                                              pixelFormat,
+                                                              D2D1::SizeU (tileWidth, tileHeight),
+                                                              D2D1_BITMAP_OPTIONS_TARGET);
 
-auto Direct2DPixelData::fromDirect2DBitmap (DxgiAdapter::Ptr adapterIn,
-                                            ComSmartPtr<ID2D1DeviceContext1> contextIn,
-                                            ComSmartPtr<ID2D1Bitmap1> bitmapIn) -> Ptr
-{
-    const auto size = bitmapIn->GetPixelSize();
-    Ptr result = new Direct2DPixelData { Image::ARGB, (int) size.width, (int) size.height, false, nullptr };
-    result->adapter = adapterIn;
-    result->context = contextIn;
-    result->nativeBitmap = bitmapIn;
+            jassert (bitmap != nullptr);
+
+            if (needsClear)
+            {
+                context->SetTarget (bitmap);
+                context->BeginDraw();
+                context->Clear();
+                context->EndDraw();
+            }
+
+            result.push_back (Direct2DPixelDataPage { bitmap, { (int) w, (int) h } });
+        }
+    }
+
     return result;
 }
 
-Direct2DPixelData::Direct2DPixelData (Image::PixelFormat f, int widthIn, int heightIn, bool clear, DxgiAdapter::Ptr adapterIn)
-    : ImagePixelData (f, widthIn, heightIn),
-      clearImage (clear),
-      adapter (adapterIn != nullptr ? adapterIn : directX->adapters.getDefaultAdapter())
+/*  Maps the content of the provided bitmap and copies it into target, which should be a software
+    bitmap.
+*/
+static bool readFromDirect2DBitmap (ComSmartPtr<ID2D1DeviceContext1> context,
+                                    ComSmartPtr<ID2D1Bitmap1> bitmap,
+                                    ImagePixelData::Ptr target)
 {
+    if (bitmap == nullptr || context == nullptr || target == nullptr)
+        return false;
+
+    const auto size = bitmap->GetPixelSize();
+
+    if (std::tuple (target->width, target->height) != std::tuple ((int) size.width, (int) size.height))
+    {
+        // Mismatched sizes, unable to read D2D image back into software image!
+        jassertfalse;
+        return false;
+    }
+
+    const auto readableBitmap = Direct2DBitmap::createBitmap (context,
+                                                              target->pixelFormat,
+                                                              size,
+                                                              D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW);
+
+    const auto dstPoint = D2D1::Point2U();
+    const auto srcRect = D2DUtilities::toRECT_U (D2DUtilities::rectFromSize (size));
+    readableBitmap->CopyFromBitmap (&dstPoint, bitmap, &srcRect);
+
+    // This is only used to construct a read-only BitmapData backed by a texture for conversion to a
+    // software image
+    struct TexturePixelData : public ImagePixelData
+    {
+        TexturePixelData (ComSmartPtr<ID2D1Bitmap1> bitmapIn, Image::PixelFormat format, int w, int h)
+            : ImagePixelData (format, w, h),
+              bitmap (bitmapIn)
+        {
+        }
+
+        std::unique_ptr<LowLevelGraphicsContext> createLowLevelContext() override
+        {
+            jassertfalse; // This should never be called
+            return {};
+        }
+
+        Ptr clone() override
+        {
+            jassertfalse; // This should never be called
+            return {};
+        }
+
+        std::unique_ptr<ImageType> createType() const override
+        {
+            jassertfalse; // This should never be called
+            return {};
+        }
+
+        void initialiseBitmapData (Image::BitmapData& bd, int x, int y, Image::BitmapData::ReadWriteMode mode) override
+        {
+            if (mode != Image::BitmapData::readOnly)
+            {
+                // This type only supports read-only access
+                jassertfalse;
+                return;
+            }
+
+            struct Releaser : public Image::BitmapData::BitmapDataReleaser
+            {
+                explicit Releaser (ComSmartPtr<ID2D1Bitmap1> toUnmapIn) : toUnmap (toUnmapIn) {}
+                ~Releaser() override { toUnmap->Unmap(); }
+                ComSmartPtr<ID2D1Bitmap1> toUnmap;
+            };
+
+            D2D1_MAPPED_RECT mapped{};
+            bitmap->Map (D2D1_MAP_OPTIONS_READ, &mapped);
+            const auto dataEnd = mapped.bits + bitmap->GetPixelSize().height * mapped.pitch;
+
+            bd.pixelFormat = pixelFormat;
+            bd.pixelStride = pixelFormat == Image::SingleChannel ? 1 : 4;
+            bd.lineStride = (int) mapped.pitch;
+            bd.data = mapped.bits + x * bd.pixelStride + y * (int) mapped.pitch;
+            bd.size = (size_t) (dataEnd - bd.data);
+            bd.dataReleaser = std::make_unique<Releaser> (bitmap);
+        }
+
+        ComSmartPtr<ID2D1Bitmap1> bitmap;
+    };
+
+    Image srcImage { new TexturePixelData { readableBitmap,
+                                            target->pixelFormat,
+                                            (int) size.width,
+                                            (int) size.height } };
+    Image::BitmapData srcBitmap { srcImage, Image::BitmapData::readOnly };
+    Image::BitmapData dstBitmap { Image { target }, Image::BitmapData::writeOnly };
+    BitmapDataDetail::convert (srcBitmap, dstBitmap);
+
+    return true;
+}
+
+/*  Returns new software bitmap storage with content matching the provided hardware bitmap. */
+static ImagePixelData::Ptr readFromDirect2DBitmap (ComSmartPtr<ID2D1DeviceContext1> context,
+                                                   ComSmartPtr<ID2D1Bitmap1> bitmap)
+{
+    if (bitmap == nullptr)
+        return {};
+
+    const auto size = bitmap->GetPixelSize();
+    const auto result = SoftwareImageType{}.create (Image::ARGB,
+                                                    (int) size.width,
+                                                    (int) size.height,
+                                                    false);
+
+    if (result == nullptr || ! readFromDirect2DBitmap (context, bitmap, result))
+        return {};
+
+    return result;
+}
+
+Direct2DPixelDataPages::Direct2DPixelDataPages (ComSmartPtr<ID2D1Bitmap1> bitmap,
+                                                ImagePixelData::Ptr image)
+    : backingData (image),
+      pages { Page { bitmap, {} } },
+      upToDate (true)
+{
+    // The backup image must be a software image
+    jassert (image->createType()->getTypeID() == SoftwareImageType{}.getTypeID());
+}
+
+Direct2DPixelDataPages::Direct2DPixelDataPages (ComSmartPtr<ID2D1DeviceContext1> context,
+                                                ImagePixelData::Ptr image,
+                                                State initialState)
+    : backingData (image),
+      pages (makePages (getDeviceForContext (context), backingData, initialState == State::cleared)),
+      upToDate (initialState != State::unsuitableToRead)
+{
+    // The backup image must be a software image
+    jassert (image->createType()->getTypeID() == SoftwareImageType{}.getTypeID());
+}
+
+auto Direct2DPixelDataPages::getPages() -> Span<const Page>
+{
+    if (std::exchange (upToDate, true))
+        return pages;
+
+    auto sourceToUse = backingData->pixelFormat == Image::RGB
+                     ? Image { backingData }.convertedToFormat (Image::ARGB)
+                     : Image { backingData };
+
+    for (const auto& page : pages)
+    {
+        const auto pageBounds = page.getBounds();
+        const Image::BitmapData bitmapData { sourceToUse,
+                                             pageBounds.getX(),
+                                             pageBounds.getY(),
+                                             pageBounds.getWidth(),
+                                             pageBounds.getHeight(),
+                                             Image::BitmapData::readOnly };
+
+        const auto target = D2DUtilities::toRECT_U (pageBounds.withZeroOrigin());
+        const auto hr = page.bitmap->CopyFromMemory (&target, bitmapData.data, (UINT32) bitmapData.lineStride);
+        jassertquiet (SUCCEEDED (hr));
+    }
+
+    return pages;
+}
+
+//==============================================================================
+Direct2DPixelData::Direct2DPixelData (ImagePixelData::Ptr ptr, State initialState)
+    : ImagePixelData { ptr->pixelFormat, ptr->width, ptr->height },
+      backingData (ptr),
+      state (initialState)
+{
+    jassert (backingData->createType()->getTypeID() == SoftwareImageType{}.getTypeID());
     directX->adapters.addListener (*this);
+}
+
+Direct2DPixelData::Direct2DPixelData (ComSmartPtr<ID2D1DeviceContext1> context,
+                                      ComSmartPtr<ID2D1Bitmap1> page)
+    : Direct2DPixelData (readFromDirect2DBitmap (context, page), State::suitableToRead)
+{
+    if (const auto device1 = getDeviceForContext (context))
+        pagesForDevice.emplace (device1, Direct2DPixelDataPages { page, backingData });
+}
+
+Direct2DPixelData::Direct2DPixelData (Image::PixelFormat formatToUse, int w, int h, bool clearIn)
+    : Direct2DPixelData { SoftwareImageType{}.create (formatToUse, w, h, clearIn),
+                          clearIn ? State::cleared : State::unsuitableToRead }
+{
 }
 
 Direct2DPixelData::~Direct2DPixelData()
@@ -230,110 +303,142 @@ Direct2DPixelData::~Direct2DPixelData()
     directX->adapters.removeListener (*this);
 }
 
+auto Direct2DPixelData::getIteratorForContext (ComSmartPtr<ID2D1DeviceContext1> context)
+{
+    const auto device1 = getDeviceForContext (context);
+
+    if (device1 == nullptr)
+        return pagesForDevice.end();
+
+    const auto iter = pagesForDevice.find (device1);
+
+    if (iter != pagesForDevice.end())
+        return iter;
+
+    const auto initialState = [&]
+    {
+        switch (state)
+        {
+            // If our image is currently cleared, then the initial state of the page should also
+            // be cleared.
+            case State::cleared:
+                return State::cleared;
+
+            // If our image holds junk, then it must be written before first read, which means
+            // that the cached pages must also be written before first read. Don't mark the new
+            // pages as needing a sync yet - there's a chance that we'll render directly into
+            // the new pages, in which case copying the initial state from the software image
+            // would be unnecessary and wasteful.
+            case State::unsuitableToRead:
+                return State::suitableToRead;
+
+            // If the software image has been written with valid data, then we need to preserve
+            // this data when reading or writing (e.g. to a subsection, or with transparency)
+            // to the new pages, so mark the new pages as needing a sync before first access.
+            case State::suitableToRead:
+                return State::unsuitableToRead;
+        }
+
+        return State::unsuitableToRead;
+    }();
+
+    const auto pair = pagesForDevice.emplace (device1, Pages { context, backingData, initialState });
+    return pair.first;
+}
+
 std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContext()
 {
     sendDataChangeMessage();
 
-    struct FlushingContext : public Direct2DImageContext
-    {
-        explicit FlushingContext (Direct2DPixelData::Ptr p)
-            : Direct2DImageContext (p->context, p->getAdapterD2D1Bitmap(), Rectangle { p->width, p->height }),
-              ptr (startFrame (1.0f) ? p : nullptr)
-        {
-        }
+    const auto adapter = directX->adapters.getDefaultAdapter();
 
-        ~FlushingContext() override
-        {
-            if (ptr == nullptr)
-                return;
-
-            endFrame();
-            ptr->flushToSoftwareBackup();
-        }
-
-        Direct2DPixelData::Ptr ptr;
-    };
-
-    return std::make_unique<FlushingContext> (this);
-}
-
-void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode)
-{
-    JUCE_TRACE_LOG_D2D_IMAGE_MAP_DATA;
-
-    // The native format matches the JUCE format, and there's no need to write from CPU->GPU, so
-    // map the GPU memory as read-only and return that.
-    if (mode == Image::BitmapData::ReadWriteMode::readOnly && pixelFormat != Image::PixelFormat::RGB)
-    {
-        initBitmapDataReadOnly (bitmap, x, y);
-        return;
-    }
-
-    // The native format does not match the JUCE format, or the user wants to read the current state of the image.
-    // If the user wants to read the image, then we'll need to copy it to CPU memory.
-    if (mode != Image::BitmapData::ReadWriteMode::writeOnly)
-    {
-        // Store the previous width and height, and set up the BitmapData to cover the entire image area
-        const auto oldW = std::exchange (bitmap.width, width);
-        const auto oldH = std::exchange (bitmap.height, height);
-
-        // Map the image as read-only.
-        initBitmapDataReadOnly (bitmap, 0, 0);
-        // Copy the mapped image to CPU memory in the correct format.
-        backup = BitmapDataDetail::convert (bitmap, SoftwareImageType{});
-        // Unmap the image (important, the BitmapData is reused later on).
-        bitmap.dataReleaser = {};
-
-        // Reset the initial width and height
-        bitmap.width  = oldW;
-        bitmap.height = oldH;
-    }
-
-    // If the user doesn't want to read from the image, then we may need to create a blank image that they can write to.
-    if (! backup.isValid())
-        backup = Image { SoftwareImageType{}.create (pixelFormat, width, height, clearImage) };
-
-    // Redirect the BitmapData to our backup software image.
-    backup.getPixelData()->initialiseBitmapData (bitmap, x, y, mode);
-
-    // When this dataReleaser is destroyed, then if the mode is not read-only, image data will be copied
-    // from the software image to GPU memory.
-    bitmap.dataReleaser = std::make_unique<SoftwareDataReleaser> (std::move (bitmap.dataReleaser),
-                                                                  backup,
-                                                                  getAdapterD2D1Bitmap(),
-                                                                  mode,
-                                                                  D2D1_RECT_U { (UINT32) x, (UINT32) y, (UINT32) width, (UINT32) height });
-}
-
-void Direct2DPixelData::flushToSoftwareBackup()
-{
-    backup = SoftwareImageType{}.convert (Image { this });
-}
-
-ImagePixelData::Ptr Direct2DPixelData::clone()
-{
-    auto cloned = make (pixelFormat, width, height, false, nullptr);
-
-    if (cloned == nullptr)
+    if (adapter == nullptr)
         return {};
 
-    cloned->backup = backup.createCopy();
+    const auto context = Direct2DDeviceContext::create (adapter);
 
-    const D2D1_POINT_2U destinationPoint { 0, 0 };
-    const auto sourceRectU = D2DUtilities::toRECT_U (Rectangle { width, height });
-    const auto sourceD2D1Bitmap = getAdapterD2D1Bitmap();
-    const auto destinationD2D1Bitmap = cloned->getAdapterD2D1Bitmap();
-
-    if (sourceD2D1Bitmap == nullptr || destinationD2D1Bitmap == nullptr)
+    if (context == nullptr)
         return {};
 
-    if (const auto hr = destinationD2D1Bitmap->CopyFromBitmap (&destinationPoint, sourceD2D1Bitmap, &sourceRectU); FAILED (hr))
+    const auto maxSize = (int) context->GetMaximumBitmapSize();
+
+    if (maxSize < width || maxSize < height)
+    {
+        for (auto& pair : pagesForDevice)
+            pair.second.markOutdated();
+
+        return backingData->createLowLevelContext();
+    }
+
+    const auto iter = getIteratorForContext (context);
+    jassert (iter != pagesForDevice.end());
+
+    const auto pages = iter->second.getPages();
+
+    if (pages.empty() || pages.front().bitmap == nullptr)
     {
         jassertfalse;
         return {};
     }
 
-    return cloned;
+    // Every page *other than the page we're about to render onto* will need to be updated from the
+    // software image before it is next read.
+    for (auto i = pagesForDevice.begin(); i != pagesForDevice.end(); ++i)
+        if (i != iter)
+            i->second.markOutdated();
+
+    // The low level context will eventually write valid image data to this image.
+    state = State::suitableToRead;
+
+    struct FlushingContext : public Direct2DImageContext
+    {
+        FlushingContext (SoftwarePixelData::Ptr backupIn,
+                         ComSmartPtr<ID2D1DeviceContext1> context,
+                         ComSmartPtr<ID2D1Bitmap1> target)
+            : Direct2DImageContext (context, target, D2DUtilities::rectFromSize (target->GetPixelSize())),
+              storedContext (context),
+              storedTarget (target),
+              backup (startFrame (1.0f) ? backupIn : nullptr)
+        {
+        }
+
+        ~FlushingContext() override
+        {
+            if (backup == nullptr)
+                return;
+
+            endFrame();
+            readFromDirect2DBitmap (storedContext, storedTarget, backup);
+        }
+
+        ComSmartPtr<ID2D1DeviceContext1> storedContext;
+        ComSmartPtr<ID2D1Bitmap1> storedTarget;
+        SoftwarePixelData::Ptr backup;
+    };
+
+    return std::make_unique<FlushingContext> (backingData, context, pages.front().bitmap);
+}
+
+void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
+                                              int x,
+                                              int y,
+                                              Image::BitmapData::ReadWriteMode mode)
+{
+    backingData->initialiseBitmapData (bitmap, x, y, mode);
+
+    // If we're only reading, then we can assume that the bitmap data was flushed to the software
+    // image directly after it was last modified by d2d, so we can just use the BitmapData
+    // initialised by the backing data.
+    // If we're writing, then we'll need to update our textures next time we try to use them, so
+    // mark them as outdated.
+    if (mode == Image::BitmapData::readOnly)
+        return;
+
+    // We're writing to the image data, so mark this image as having valid image data.
+    state = State::suitableToRead;
+
+    for (auto& pair : pagesForDevice)
+        pair.second.markOutdated();
 }
 
 void Direct2DPixelData::applyGaussianBlurEffect (float radius, Image& result)
@@ -341,7 +446,18 @@ void Direct2DPixelData::applyGaussianBlurEffect (float radius, Image& result)
     // The result must be a separate image!
     jassert (result.getPixelData() != this);
 
-    if (context == nullptr)
+    const auto adapter = directX->adapters.getDefaultAdapter();
+
+    if (adapter == nullptr)
+    {
+        result = {};
+        return;
+    }
+
+    const auto context = Direct2DDeviceContext::create (adapter);
+    const auto maxSize = (int) context->GetMaximumBitmapSize();
+
+    if (context == nullptr || maxSize < width || maxSize < height)
     {
         result = {};
         return;
@@ -355,38 +471,21 @@ void Direct2DPixelData::applyGaussianBlurEffect (float radius, Image& result)
         return;
     }
 
-    effect->SetInput (0, getAdapterD2D1Bitmap());
+    effect->SetInput (0, getFirstPageForContext (context));
     effect->SetValue (D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, radius / 3.0f);
 
-    const auto tie = [] (const auto& x) { return std::tuple (x.pixelFormat, x.width, x.height); };
-    const auto originalPixelData = dynamic_cast<Direct2DPixelData*> (result.getPixelData());
+    const auto outputPixelData = Direct2DBitmap::createBitmap (context,
+                                                               Image::ARGB,
+                                                               D2D1::SizeU ((UINT32) width, (UINT32) height),
+                                                               D2D1_BITMAP_OPTIONS_TARGET);
 
-    if (originalPixelData == nullptr || tie (*this) != tie (*originalPixelData))
-        result = Image { make (pixelFormat, width, height, false, adapter) };
+    context->SetTarget (outputPixelData);
+    context->BeginDraw();
+    context->Clear();
+    context->DrawImage (effect);
+    context->EndDraw();
 
-    const auto outputPixelData = dynamic_cast<Direct2DPixelData*> (result.getPixelData());
-
-    if (outputPixelData == nullptr)
-    {
-        result = {};
-        return;
-    }
-
-    outputPixelData->createDeviceResources();
-    auto outputDataContext = outputPixelData->context;
-
-    if (outputDataContext == nullptr)
-    {
-        result = {};
-        return;
-    }
-
-    outputDataContext->SetTarget (outputPixelData->getAdapterD2D1Bitmap());
-    outputDataContext->BeginDraw();
-    outputDataContext->Clear();
-    outputDataContext->DrawImage (effect);
-    outputDataContext->EndDraw();
-    outputDataContext->SetTarget (nullptr);
+    result = Image { new Direct2DPixelData { context, outputPixelData } };
 }
 
 void Direct2DPixelData::applySingleChannelBoxBlurEffect (int radius, Image& result)
@@ -394,7 +493,18 @@ void Direct2DPixelData::applySingleChannelBoxBlurEffect (int radius, Image& resu
     // The result must be a separate image!
     jassert (result.getPixelData() != this);
 
-    if (context == nullptr)
+    const auto adapter = directX->adapters.getDefaultAdapter();
+
+    if (adapter == nullptr)
+    {
+        result = {};
+        return;
+    }
+
+    const auto context = Direct2DDeviceContext::create (adapter);
+    const auto maxSize = (int) context->GetMaximumBitmapSize();
+
+    if (context == nullptr || maxSize < width || maxSize < height)
     {
         result = {};
         return;
@@ -410,7 +520,7 @@ void Direct2DPixelData::applySingleChannelBoxBlurEffect (int radius, Image& resu
         {
             ComSmartPtr<ID2D1Effect> effect;
             if (const auto hr = context->CreateEffect (CLSID_D2D1ConvolveMatrix, effect.resetAndGetPointerAddress());
-                    FAILED (hr) || effect == nullptr)
+                FAILED (hr) || effect == nullptr)
             {
                 result = {};
                 return;
@@ -439,58 +549,25 @@ void Direct2DPixelData::applySingleChannelBoxBlurEffect (int radius, Image& resu
         return;
     }
 
-    begin->SetInput (0, getAdapterD2D1Bitmap());
+    begin->SetInput (0, getFirstPageForContext (context));
 
-    const auto originalPixelData = dynamic_cast<Direct2DPixelData*> (result.getPixelData());
+    const auto outputPixelData = Direct2DBitmap::createBitmap (context,
+                                                               Image::ARGB,
+                                                               D2D1::SizeU ((UINT32) width, (UINT32) height),
+                                                               D2D1_BITMAP_OPTIONS_TARGET);
 
-    if (originalPixelData == nullptr || std::tuple (Image::SingleChannel, width, height) != std::tuple (originalPixelData->pixelFormat, originalPixelData->width, originalPixelData->height))
-        result = Image { make (Image::SingleChannel, width, height, false, adapter) };
+    context->SetTarget (outputPixelData);
+    context->BeginDraw();
+    context->Clear();
+    context->DrawImage (end);
+    context->EndDraw();
 
-    const auto outputPixelData = dynamic_cast<Direct2DPixelData*> (result.getPixelData());
-
-    if (outputPixelData == nullptr)
-    {
-        result = {};
-        return;
-    }
-
-    outputPixelData->createDeviceResources();
-    auto outputDataContext = outputPixelData->context;
-
-    if (outputDataContext == nullptr)
-    {
-        result = {};
-        return;
-    }
-
-    outputDataContext->SetTarget (outputPixelData->getAdapterD2D1Bitmap());
-    outputDataContext->BeginDraw();
-    outputDataContext->Clear();
-    outputDataContext->DrawImage (end);
-    outputDataContext->EndDraw();
-    outputDataContext->SetTarget (nullptr);
+    result = Image { new Direct2DPixelData { context, outputPixelData } };
 }
 
-std::unique_ptr<ImageType> Direct2DPixelData::createType() const
+auto Direct2DPixelData::getPagesForContext (ComSmartPtr<ID2D1DeviceContext1> context) -> Span<const Page>
 {
-    return std::make_unique<NativeImageType>();
-}
-
-void Direct2DPixelData::adapterCreated (DxgiAdapter::Ptr)
-{
-}
-
-void Direct2DPixelData::adapterRemoved (DxgiAdapter::Ptr)
-{
-    adapter = nullptr;
-    context = nullptr;
-    nativeBitmap = nullptr;
-}
-
-ComSmartPtr<ID2D1Bitmap1> Direct2DPixelData::getAdapterD2D1Bitmap()
-{
-    createDeviceResources();
-    return nativeBitmap;
+    return getIteratorForContext (context)->second.getPages();
 }
 
 //==============================================================================
@@ -508,7 +585,7 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
         return new SoftwarePixelData { format, width, height, clearImage };
     }
 
-    return Direct2DPixelData::make (format, width, height, clearImage, nullptr);
+    return new Direct2DPixelData (format, width, height, clearImage);
 }
 
 //==============================================================================
@@ -574,30 +651,109 @@ public:
 
     void runTest() override
     {
-        beginTest ("Direct2DImageUnitTest");
-
         random = getRandom();
 
-        for (auto format : formats)
-            compareSameFormat (format);
+        constexpr auto multiPageSize = (1 << 14) + 512 + 3;
 
-        testFormatConversion();
+        beginTest ("Direct2DImageUnitTest");
+        {
+            for (const auto size : { 100, multiPageSize })
+            {
+                for (auto format : formats)
+                {
+                    compareSameFormat (format, size, 32);
+                    compareSameFormat (format, 32, size);
+                }
+
+                testFormatConversion (size, 32);
+                testFormatConversion (32, size);
+            }
+        }
+
+        beginTest ("Ensure data parity across mapped page boundaries");
+        {
+            const auto adapterToUse = directX->adapters.getDefaultAdapter();
+            const auto contextToUse = Direct2DDeviceContext::create (adapterToUse);
+
+            for (auto sourceFormat : formats)
+            {
+                Image softwareImage { SoftwareImageType{}.create (sourceFormat, multiPageSize, 32, true) };
+
+                {
+                    const Image::BitmapData bitmap { softwareImage, Image::BitmapData::writeOnly };
+
+                    for (int y = 0; y < bitmap.height; y++)
+                    {
+                        auto line = bitmap.getLinePointer (y);
+
+                        for (int x = 0; x < bitmap.lineStride; x++)
+                            line[x] = (uint8_t) jmap (x, 0, bitmap.lineStride, 0, 256);
+                    }
+                }
+
+                for (auto destFormat : formats)
+                {
+                    auto d2dImage = NativeImageType{}.convert (softwareImage)
+                                                     .convertedToFormat (destFormat);
+
+                    const auto maxPageBounds = [&]
+                    {
+                        if (auto* data = dynamic_cast<Direct2DPixelData*> (d2dImage.getPixelData()))
+                            if (auto pages = data->getPagesForContext (contextToUse); ! pages.empty())
+                                return pages.front().getBounds();
+
+                        return Rectangle<int>{};
+                    }();
+
+                    const auto boundarySize = softwareImage.getHeight();
+                    const auto pageBoundary = softwareImage.getBounds().getIntersection ({ maxPageBounds.getWidth() - boundarySize / 2,
+                                                                                           0,
+                                                                                           boundarySize,
+                                                                                           boundarySize });
+
+                    const Image::BitmapData data1 { softwareImage,
+                                                    pageBoundary.getX(),
+                                                    pageBoundary.getY(),
+                                                    pageBoundary.getWidth(),
+                                                    pageBoundary.getHeight(),
+                                                    Image::BitmapData::ReadWriteMode::readOnly };
+                    const Image::BitmapData data2 { d2dImage,
+                                                    pageBoundary.getX(),
+                                                    pageBoundary.getY(),
+                                                    pageBoundary.getWidth(),
+                                                    pageBoundary.getHeight(),
+                                                    Image::BitmapData::ReadWriteMode::readOnly };
+
+                    auto f = compareFunctions.at ({ data1.pixelFormat, data2.pixelFormat });
+
+                    for (int y = 0; y < data1.height; y++)
+                    {
+                        for (int x = 0; x < data1.width; x++)
+                        {
+                            auto p1 = data1.getPixelPointer (x, y);
+                            auto p2 = data2.getPixelPointer (x, y);
+
+                            expect (f (p1, p2));
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Rectangle<int> randomRectangleWithin (Rectangle<int> container) noexcept
     {
-        auto x = random.nextInt (container.getWidth() - 2);
-        auto y = random.nextInt (container.getHeight() - 2);
-        auto w = random.nextInt (container.getHeight() - x);
-        auto h = random.nextInt (container.getWidth() - y);
-        h = jmax (h, 1);
-        w = jmax (w, 1);
-        return Rectangle<int> { x, y, w, h };
+        const auto w = random.nextInt ({ 1, container.getWidth() });
+        const auto h = random.nextInt ({ 1, container.getHeight() });
+        const auto x = random.nextInt ({ container.getX(), container.getRight() - w });
+        const auto y = random.nextInt ({ container.getY(), container.getBottom() - h });
+
+        return { x, y, w, h };
     }
 
-    void compareSameFormat (Image::PixelFormat format)
+    void compareSameFormat (Image::PixelFormat format, int width, int height)
     {
-        auto softwareImage = Image { SoftwareImageType{}.create (format, 100, 100, true) };
+        auto softwareImage = Image { SoftwareImageType{}.create (format, width, height, true) };
         {
             Graphics g { softwareImage };
             g.fillCheckerBoard (softwareImage.getBounds().toFloat(), 21.0f, 21.0f, makeRandomColor(), makeRandomColor());
@@ -713,27 +869,25 @@ public:
         }
     }
 
-    void testFormatConversion()
+    void testFormatConversion (int width, int height)
     {
         for (auto sourceFormat : formats)
         {
             for (auto destFormat : formats)
             {
-                auto softwareStartImage = Image { SoftwareImageType {}.create (sourceFormat, 100, 100, true) };
+                Image softwareStartImage { SoftwareImageType {}.create (sourceFormat, width, height, true) };
                 {
                     Graphics g { softwareStartImage };
                     g.fillCheckerBoard (softwareStartImage.getBounds().toFloat(), 21.0f, 21.0f, makeRandomColor(), makeRandomColor());
                 }
-                auto convertedSoftwareImage = softwareStartImage.convertedToFormat (destFormat);
 
+                auto convertedSoftwareImage = softwareStartImage.convertedToFormat (destFormat);
                 compareImages (softwareStartImage, convertedSoftwareImage, compareFunctions[{ sourceFormat, destFormat }]);
 
-                auto direct2DImage = NativeImageType {}.convert (softwareStartImage);
-
+                auto direct2DImage = NativeImageType{}.convert (softwareStartImage);
                 compareImages (softwareStartImage, direct2DImage, compareFunctions[{ sourceFormat, sourceFormat }]);
 
                 auto convertedDirect2DImage = direct2DImage.convertedToFormat (destFormat);
-
                 compareImages (softwareStartImage, convertedDirect2DImage, compareFunctions[{ sourceFormat, destFormat }]);
             }
         }
@@ -741,14 +895,14 @@ public:
 
     Colour makeRandomColor()
     {
-        uint8 red = (uint8) random.nextInt (255);
+        uint8 red   = (uint8) random.nextInt (255);
         uint8 green = (uint8) random.nextInt (255);
-        uint8 blue = (uint8) random.nextInt (255);
+        uint8 blue  = (uint8) random.nextInt (255);
         uint8 alpha = (uint8) random.nextInt (255);
         return Colour { red, green, blue, alpha };
     }
 
-
+    SharedResourcePointer<DirectX> directX;
     Random random;
     std::array<Image::PixelFormat, 3> const formats { Image::RGB, Image::ARGB, Image::SingleChannel };
     std::map<std::pair<Image::PixelFormat, Image::PixelFormat>, std::function<bool (uint8*, uint8*)>> compareFunctions;
