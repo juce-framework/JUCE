@@ -364,6 +364,16 @@ struct UnicodeEntry
 
 class UnicodeDataTable
 {
+    static auto computeHash()
+    {
+        uint32_t v = 5381;
+
+        for (auto c : compressedData)
+            v = ((v << 5) + v) + (uint32_t) c;
+
+        return v;
+    }
+
 public:
     UnicodeDataTable() = delete;
 
@@ -371,17 +381,7 @@ public:
     {
         static const auto data = []
         {
-            [[maybe_unused]] constexpr auto hash = []
-            {
-                uint32_t v = 5381;
-
-                for (auto c : compressedData)
-                    v = ((v << 5) + v) + (uint32_t) c;
-
-                return v;
-            }();
-
-            jassert (hash == 0x7f9e2da);
+            jassert (computeHash() == 0x7f9e2da);
 
             MemoryInputStream           mStream { compressedData, std::size (compressedData), false };
             GZIPDecompressorInputStream zStream { &mStream, false };
