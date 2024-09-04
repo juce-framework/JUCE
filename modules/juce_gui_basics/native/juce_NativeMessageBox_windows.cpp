@@ -100,12 +100,15 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
 
             return [this, parent]
             {
+                const auto title = options.getTitle();
+                const auto message = options.getMessage();
+
                 TASKDIALOGCONFIG config{};
 
                 config.cbSize         = sizeof (config);
                 config.hwndParent     = parent;
-                config.pszWindowTitle = options.getTitle().toWideCharPointer();
-                config.pszContent     = options.getMessage().toWideCharPointer();
+                config.pszWindowTitle = title.toWideCharPointer();
+                config.pszContent     = message.toWideCharPointer();
                 config.hInstance      = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
                 config.lpCallbackData = reinterpret_cast<LONG_PTR> (this);
                 config.pfCallback     = [] (HWND hwnd, UINT msg, WPARAM, LPARAM, LONG_PTR lpRefData)
@@ -154,11 +157,12 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
                     }();
                 }
 
+                std::vector<String> buttonStrings;
                 std::vector<TASKDIALOG_BUTTON> buttonLabels;
 
                 for (auto i = 0; i < options.getNumButtons(); ++i)
                     if (const auto buttonText = options.getButtonText (i); buttonText.isNotEmpty())
-                        buttonLabels.push_back ({ (int) buttonLabels.size(), buttonText.toWideCharPointer() });
+                        buttonLabels.push_back ({ (int) buttonLabels.size(), buttonStrings.emplace_back (buttonText).toWideCharPointer() });
 
                 config.pButtons = buttonLabels.data();
                 config.cButtons = (UINT) buttonLabels.size();
