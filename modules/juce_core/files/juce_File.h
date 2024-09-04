@@ -874,15 +874,29 @@ public:
 
     //==============================================================================
     /** A set of types of location that can be passed to the getSpecialLocation() method.
+
+        - On Windows, these map to "Constant Special Item ID List" or CSIDL values. These
+        values changed from XP to Windows Vista and are now consistent for all versions of
+        Windows since Vista (including versions 7, 8, 10, and 11). Note: CSIDL was deprecated
+        with Vista and now map to KNOWNFOLDERID values.
+
+        - On MacOS, the paths are manually specified and consistent across versions. User folders
+        are all in their expected locations under the user home directory (such as ~/Music).
+
+        - On Linux, xdg-user-dirs is queried, otherwise defaults are used, such as ~/Music.
     */
     enum SpecialLocationType
     {
         /** The user's home folder. This is the same as using File ("~"). */
         userHomeDirectory,
 
-        /** The user's default documents folder. On Windows, this might be the user's
-            "My Documents" folder. On the Mac it'll be their "Documents" folder. Linux
-            doesn't tend to have one of these, so it might just return their home folder.
+        /** The user's default documents folder.
+            On Windows, this is CSIDL_PERSONAL which maps to
+            %USERPROFILE%\Documents, for example "C:\Users\username\Documents".
+
+            On the Mac it is the "~/Documents" folder.
+
+            Linux returns XDG_DOCUMENTS_DIR if present, else the home folder.
         */
         userDocumentsDirectory,
 
@@ -899,18 +913,26 @@ public:
         userPicturesDirectory,
 
         /** The folder in which applications store their persistent user-specific settings.
-            On Windows, this might be "\Documents and Settings\username\Application Data".
-            On the Mac, it might be "~/Library". If you're going to store your settings in here,
-            always create your own sub-folder to put them in, to avoid making a mess.
+            This is a good place to store user presets and settings.
+
+            On Windows, this maps to CSIDL_APPDATA (which maps to FOLDERID_RoamingAppData)
+            which on Vista and later maps to "\Users\username\AppData\Roaming".
+
+            On the Mac, this is "~/Library" (note: you might want "~/Library/Audio/Presets").
+
             On GNU/Linux it is "~/.config".
+
+            Always create your own sub-folder in these folders to avoid making a mess.
         */
         userApplicationDataDirectory,
 
         /** An equivalent of the userApplicationDataDirectory folder that is shared by all users
             of the computer, rather than just the current user.
 
-            On the Mac it'll be "/Library", on Windows, it could be something like
-            "\Documents and Settings\All Users\Application Data".
+            On the Mac it'll be "/Library".
+
+            On Windows it maps to CSIDL_COMMON_APPDATA which on Vista and later will be
+            "C:\ProgramData".
 
             On GNU/Linux it is "/opt".
 
@@ -919,8 +941,8 @@ public:
         commonApplicationDataDirectory,
 
         /** A place to put documents which are shared by all users of the machine.
-            On Windows this may be somewhere like "C:\Users\Public\Documents", on OSX it
-            will be something like "/Users/Shared". Other OSes may have no such concept
+            On Windows this is CSIDL_COMMON_DOCUMENTS, for example "C:\Users\Public\Documents".
+            On MacOS, it is "/Users/Shared". Other OSes may have no such concept
             though, so be careful.
         */
         commonDocumentsDirectory,
@@ -931,7 +953,6 @@ public:
         tempDirectory,
 
         /** Returns this application's executable file.
-
             If running as a plug-in or DLL, this will (where possible) be the DLL rather than the
             host app.
 
@@ -944,7 +965,6 @@ public:
         currentExecutableFile,
 
         /** Returns this application's location.
-
             If running as a plug-in or DLL, this will (where possible) be the DLL rather than the
             host app.
 
@@ -969,8 +989,8 @@ public:
        #endif
 
         /** The directory in which applications normally get installed.
-            So on windows, this would be something like "C:\Program Files", on the
-            Mac "/Applications", or "/usr" on linux.
+            On Windows, CSIDL_PROGRAM_FILES results in "C:\Program Files".
+            On MacOS "/Applications". "/usr" on linux.
         */
         globalApplicationsDirectory,
 
@@ -1105,15 +1125,15 @@ public:
 
     //==============================================================================
    #if JUCE_MAC || JUCE_IOS || DOXYGEN
-    /** OSX ONLY - Finds the OSType of a file from the its resources. */
+    /** MacOS ONLY - Finds the OSType of a file from the its resources. */
     OSType getMacOSType() const;
 
-    /** OSX ONLY - Returns true if this file is actually a bundle. */
+    /** MacOS ONLY - Returns true if this file is actually a bundle. */
     bool isBundle() const;
    #endif
 
    #if JUCE_MAC || DOXYGEN
-    /** OSX ONLY - Adds this file to the OSX dock */
+    /** MacOS ONLY - Adds this file to the MacOS dock */
     void addToDock() const;
    #endif
 
