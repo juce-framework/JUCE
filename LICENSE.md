@@ -50,6 +50,7 @@ The JUCE modules contain the following dependencies:
 - [Box2D](modules/juce_box2d/box2d/) ([zlib](modules/juce_box2d/box2d/Box2D.h))
 - [pnglib](modules/juce_graphics/image_formats/pnglib/) ([zlib](modules/juce_graphics/image_formats/pnglib/LICENSE))
 - [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
+- [HarfBuzz](modules/juce_graphics/fonts/harfbuzz/) ([Old MIT](modules/juce_graphics/fonts/harfbuzz/COPYING))
 
 The JUCE examples are licensed under the terms of the
 [ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
