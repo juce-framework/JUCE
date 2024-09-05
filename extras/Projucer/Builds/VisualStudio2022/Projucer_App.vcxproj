@@ -2068,6 +2068,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Atomic.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ByteOrder.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_CopyableHeapBlock.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeavyweightLeakedObjectDetector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_LeakedObjectDetector.h"/>

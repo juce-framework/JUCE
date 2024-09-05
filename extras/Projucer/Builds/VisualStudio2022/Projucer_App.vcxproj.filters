@@ -2820,6 +2820,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_CopyableHeapBlock.h">
+      <Filter>JUCE Modules\juce_core\memory</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
