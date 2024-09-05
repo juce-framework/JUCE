@@ -52,8 +52,8 @@
   #endif
  #endif
 
- #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
+ #define JUCE_CXX20_IS_AVAILABLE (__cplusplus >= 202002L)
 
 #endif
 
@@ -84,8 +84,8 @@
   #error Please upgrade to Xcode 15.1 or higher
  #endif
 
- #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
+ #define JUCE_CXX20_IS_AVAILABLE (__cplusplus >= 202002L)
 
 #endif
 
@@ -103,8 +103,8 @@
   #endif
  #endif
 
-  #define JUCE_CXX14_IS_AVAILABLE (_MSVC_LANG >= 201402L)
   #define JUCE_CXX17_IS_AVAILABLE (_MSVC_LANG >= 201703L)
+  #define JUCE_CXX20_IS_AVAILABLE (_MSVC_LANG >= 202002L)
 #endif
 
 //==============================================================================
@@ -115,6 +115,7 @@
 //==============================================================================
 #ifndef DOXYGEN
  // These are old flags that are now supported on all compatible build targets
+ #define JUCE_CXX14_IS_AVAILABLE 1
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
  #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
