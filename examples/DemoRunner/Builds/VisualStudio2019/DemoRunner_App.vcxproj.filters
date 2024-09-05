@@ -3205,9 +3205,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeBidi.cpp">
       <Filter>JUCE Modules\juce_graphics\unicode</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeBrackets.cpp">
-      <Filter>JUCE Modules\juce_graphics\unicode</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeGenerated.cpp">
       <Filter>JUCE Modules\juce_graphics\unicode</Filter>
     </ClCompile>

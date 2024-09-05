@@ -2444,9 +2444,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeBidi.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeBrackets.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\unicode\juce_UnicodeGenerated.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
