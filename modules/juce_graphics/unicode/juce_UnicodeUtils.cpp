@@ -76,6 +76,11 @@ struct UnicodeAnalysisPoint
         data.bidi = newType;
     }
 
+    auto getScriptType() const
+    {
+        return SBCodepointGetScript (character);
+    }
+
     bool operator== (const BidiType& b) const
     {
         return getBidiType() == b;
