@@ -421,14 +421,12 @@ struct Direct2DBitmap
 
         JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
 
-       #if JUCE_DEBUG
         // Verify that the GPU can handle a bitmap of this size
         //
         // If you need a bitmap larger than this, you'll need to either split it up into multiple bitmaps
         // or use a software image (see SoftwareImageType).
-        auto maxBitmapSize = deviceContext->GetMaximumBitmapSize();
-        jassert (size.width <= maxBitmapSize && size.height <= maxBitmapSize);
-       #endif
+        const auto maxBitmapSize = deviceContext->GetMaximumBitmapSize();
+        jassertquiet (size.width <= maxBitmapSize && size.height <= maxBitmapSize);
 
         const auto pixelFormat = D2D1::PixelFormat (format == Image::SingleChannel
                                                         ? DXGI_FORMAT_A8_UNORM

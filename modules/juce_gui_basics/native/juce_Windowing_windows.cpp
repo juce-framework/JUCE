@@ -69,7 +69,6 @@ void* getUser32Function (const char*);
 
 #if JUCE_DEBUG
  int numActiveScopedDpiAwarenessDisablers = 0;
- static bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
  extern HWND juce_messageWindowHandle;
 #endif
 
@@ -2465,7 +2464,7 @@ private:
         // You normally want these to match otherwise timer events and async messages will happen
         // in a different context to normal HWND messages which can cause issues with UI scaling.
         jassert (isPerMonitorDPIAwareWindow (hwnd) == isPerMonitorDPIAwareWindow (juce_messageWindowHandle)
-                   || isInScopedDPIAwarenessDisabler());
+                   || numActiveScopedDpiAwarenessDisablers > 0);
        #endif
 
         if (hwnd != nullptr)
