@@ -370,7 +370,7 @@ public:
             const auto level  = point.embeddingLevel;
             const auto isEven = ! isOdd (level);
 
-            if (point.getGeneralCategory() != GeneralCategory::pc)
+            if (point.getGeneralCategory() != SBGeneralCategoryPC)
             {
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
                 switch (point.getBidiType())

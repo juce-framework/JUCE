@@ -239,7 +239,9 @@ private:
                 return LineBreakType::ns;
 
             case LineBreakType::sa:
-                return contains ({ GeneralCategory::mn, GeneralCategory::mc }, point.getGeneralCategory())
+                return contains ({ (SBGeneralCategory) SBGeneralCategoryMN,
+                                   (SBGeneralCategory) SBGeneralCategoryMC },
+                                 point.getGeneralCategory())
                     ? LineBreakType::cm
                     : LineBreakType::al;
 

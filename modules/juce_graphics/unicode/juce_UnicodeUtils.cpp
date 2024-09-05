@@ -61,9 +61,9 @@ struct UnicodeAnalysisPoint
         return data.bt;
     }
 
-    GeneralCategory getGeneralCategory() const
+    auto getGeneralCategory() const
     {
-        return data.generalCategory;
+        return SBCodepointGetGeneralCategory (character);
     }
 
     BidiType getBidiType() const
