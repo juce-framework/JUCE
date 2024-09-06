@@ -206,7 +206,7 @@ public:
         {
             info = infoToDisplay;
 
-            auto stringWidth = roundToInt (Font (FontOptions (14.0f)).getStringWidthFloat (info));
+            auto stringWidth = roundToInt (GlyphArrangement::getStringWidth (FontOptions (14.0f), info));
             width = jmin (300, stringWidth);
 
             numLines += static_cast<int> (stringWidth / width);
@@ -433,7 +433,7 @@ private:
             return 0;
 
         const auto font = ProjucerLookAndFeel::getPropertyComponentFont();
-        const auto labelWidth = font.getStringWidthFloat (pp.getName());
+        const auto labelWidth = GlyphArrangement::getStringWidth (font, pp.getName());
         const auto numLines = (int) (labelWidth / (float) availableTextWidth) + 1;
         return (int) std::round ((float) numLines * font.getHeight() * 1.1f);
     }

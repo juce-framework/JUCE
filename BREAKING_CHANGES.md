@@ -4,6 +4,36 @@
 
 ## Change
 
+Font::getStringWidth and Font::getStringWidthFloat have been deprecated.
+Font::getGlyphPositions has been removed.
+
+**Possible Issues**
+
+Code that uses these functions will raise warnings at compile time, or fail
+to build.
+
+**Workaround**
+
+Use GlyphArrangement::getStringWidth or TextLayout::getStringWidth to find the
+width of a string taking font-fallback and shaping into account.
+
+To find individual glyph positions, lay out the string using GlyphArrangement
+or TextLayout, then use the positions provided by
+GlyphArrangement::PositionedGlyph and/or TextLayout::Glyph.
+
+**Rationale**
+
+The results of the old Font member functions computed their results assuming
+that ligatures and other font features would not be used when rendering the
+string. The functions would also substitute missing characters with the Font's
+notdef/tofu glyph instead of using a fallback font.
+
+Using GlyphArrangement or TextLayout will use a sophisticated text shaping
+algorithm to lay out the string, with support for font fallback.
+
+
+## Change
+
 The constructors of the WebSliderRelay, WebToggleButtonRelay and 
 WebComboBoxRelay classes were changed and they no longer accept a reference
 parameter to a WebBrowserComponent object.

@@ -174,7 +174,7 @@ void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bo
 
     if (leftOfOwnerComp)
     {
-        auto width = jmin (roundToInt (f.getStringWidthFloat (textValue.toString()) + 0.5f)
+        auto width = jmin (roundToInt (GlyphArrangement::getStringWidth (f, textValue.toString()) + 0.5f)
                              + borderSize.getLeftAndRight(),
                            component.getX());
 

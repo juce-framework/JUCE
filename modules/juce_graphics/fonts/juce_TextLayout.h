@@ -265,6 +265,48 @@ public:
     */
     void recalculateSize();
 
+    /** This convenience function adds an AttributedString to a TextLayout
+        and returns the bounding box of the text after shaping.
+
+        The returned bounding box is positioned with its origin at the left end of the text's
+        baseline.
+    */
+    static Rectangle<float> getStringBounds (const AttributedString& string)
+    {
+        TextLayout layout;
+        layout.createLayout (string, std::numeric_limits<float>::max());
+        return layout.getLine (0).getLineBounds();
+    }
+
+    /** This convenience function adds text to a TextLayout using the specified font
+        and returns the bounding box of the text after shaping.
+
+        The returned bounding box is positioned with its origin at the left end of the text's
+        baseline.
+    */
+    static Rectangle<float> getStringBounds (const Font& font, StringRef text)
+    {
+        AttributedString string;
+        string.append (text, font);
+        return getStringBounds (string);
+    }
+
+    /** This convenience function adds an AttributedString to a TextLayout
+        and returns the bounding box of the text after shaping.
+    */
+    static float getStringWidth (const AttributedString& string)
+    {
+        return getStringBounds (string).getWidth();
+    }
+
+    /** This convenience function adds text to a TextLayout using the specified font
+        and returns the width of the bounding box of the text after shaping.
+    */
+    static float getStringWidth (const Font& font, StringRef text)
+    {
+        return getStringBounds (font, text).getWidth();
+    }
+
 private:
     OwnedArray<Line> lines;
     float width, height;

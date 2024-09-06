@@ -361,7 +361,7 @@ struct GraphEditorPanel::PluginComponent final : public Component,
 
         w = jmax (w, (jmax (numIns, numOuts) + 1) * 20);
 
-        const int textWidth = font.getStringWidth (processor.getName());
+        const auto textWidth = GlyphArrangement::getStringWidthInt (font, processor.getName());
         w = jmax (w, 16 + jmin (textWidth, 300));
         if (textWidth > 300)
             h = 100;

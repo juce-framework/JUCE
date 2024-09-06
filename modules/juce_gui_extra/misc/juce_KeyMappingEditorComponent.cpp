@@ -95,9 +95,14 @@ public:
     void fitToContent (const int h) noexcept
     {
         if (keyNum < 0)
+        {
             setSize (h, h);
+        }
         else
-            setSize (jlimit (h * 4, h * 8, 6 + Font (withDefaultMetrics (FontOptions { (float) h * 0.6f })).getStringWidth (getName())), h);
+        {
+            const auto idealWidth = GlyphArrangement::getStringWidthInt (withDefaultMetrics (FontOptions { (float) h * 0.6f }), getName());
+            setSize (jlimit (h * 4, h * 8, 6 + idealWidth), h);
+        }
     }
 
     //==============================================================================

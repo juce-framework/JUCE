@@ -118,12 +118,12 @@ private:
             {
                 const Font font = FontOptions (name, 20.0f, Font::plain);
 
-                const auto width = font.getStringWidth ("....");
+                const auto width = GlyphArrangement::getStringWidthInt (font, "....");
 
-                return width == font.getStringWidth ("WWWW")
-                    && width == font.getStringWidth ("0000")
-                    && width == font.getStringWidth ("1111")
-                    && width == font.getStringWidth ("iiii");
+                return width == GlyphArrangement::getStringWidthInt (font, "WWWW")
+                    && width == GlyphArrangement::getStringWidthInt (font, "0000")
+                    && width == GlyphArrangement::getStringWidthInt (font, "1111")
+                    && width == GlyphArrangement::getStringWidthInt (font, "iiii");
             }
 
             StringArray fontsToScan, fontsFound;

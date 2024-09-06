@@ -87,7 +87,7 @@ Font HyperlinkButton::getFontToUse() const
 
 void HyperlinkButton::changeWidthToFitText()
 {
-    setSize (getFontToUse().getStringWidth (getButtonText()) + 6, getHeight());
+    setSize (GlyphArrangement::getStringWidthInt (getFontToUse(), getButtonText()) + 6, getHeight());
 }
 
 void HyperlinkButton::setJustificationType (Justification newJustification)

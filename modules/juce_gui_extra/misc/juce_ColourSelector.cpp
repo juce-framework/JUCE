@@ -352,7 +352,7 @@ public:
             colourLabel.setColour (Label::textWhenEditingColourId, textColour);
             colourLabel.setText (currentColour.toDisplayString ((owner.flags & showAlphaChannel) != 0), dontSendNotification);
 
-            labelWidth = labelFont.getStringWidth (colourLabel.getText());
+            labelWidth = GlyphArrangement::getStringWidthInt (labelFont, colourLabel.getText());
 
             repaint();
         }

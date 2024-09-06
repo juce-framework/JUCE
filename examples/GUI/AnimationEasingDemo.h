@@ -157,7 +157,8 @@ private:
         void resized() final
         {
             auto bounds = getLocalBounds();
-            const auto labelWidth = label.getFont().getStringWidth (label.getText()) + AnimationEasingDemoConstants::largeGapSize;
+            const auto labelWidth = GlyphArrangement::getStringWidthInt (label.getFont(), label.getText())
+                                  + AnimationEasingDemoConstants::largeGapSize;
             label.setBounds (bounds.removeFromLeft (labelWidth));
             slider.setBounds (bounds);
         }
