@@ -1314,7 +1314,7 @@ void Direct2DGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExi
     {
         applyPendingClipList();
 
-        const auto asRectF = D2DUtilities::toRECT_F (getPimpl()->getFrameSize().toFloat());
+        const auto asRectF = D2DUtilities::toRECT_F (r.toFloat());
         ComSmartPtr<ID2D1RectangleGeometry> rectGeometry;
         getPimpl()->getDirect2DFactory()->CreateRectangleGeometry (asRectF,
                                                                    rectGeometry.resetAndGetPointerAddress());
