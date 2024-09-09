@@ -127,7 +127,6 @@ public:
     using Ptr = ReferenceCountedObjectPtr<Direct2DPixelData>;
     using Page = Direct2DPixelDataPage;
     using Pages = Direct2DPixelDataPages;
-    using State = Pages::State;
 
     /*  Creates image storage, taking ownership of the provided bitmap.
         This will immediately copy the content of the image to the software backup, so that the
@@ -145,7 +144,7 @@ public:
     */
     ImagePixelData::Ptr clone() override
     {
-        return new Direct2DPixelData (backingData->clone(), State::suitableToRead);
+        return new Direct2DPixelData (backingData->clone(), State::drawn);
     }
 
     std::unique_ptr<ImageType> createType() const override
@@ -191,6 +190,14 @@ public:
     }
 
 private:
+    enum class State
+    {
+        initiallyUndefined,
+        initiallyCleared,
+        drawing,
+        drawn,
+    };
+
     Direct2DPixelData (ImagePixelData::Ptr, State);
     auto getIteratorForContext (ComSmartPtr<ID2D1DeviceContext1>);
 

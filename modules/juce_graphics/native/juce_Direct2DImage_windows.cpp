@@ -286,7 +286,7 @@ Direct2DPixelData::Direct2DPixelData (ImagePixelData::Ptr ptr, State initialStat
 
 Direct2DPixelData::Direct2DPixelData (ComSmartPtr<ID2D1DeviceContext1> context,
                                       ComSmartPtr<ID2D1Bitmap1> page)
-    : Direct2DPixelData (readFromDirect2DBitmap (context, page), State::suitableToRead)
+    : Direct2DPixelData (readFromDirect2DBitmap (context, page), State::drawn)
 {
     if (const auto device1 = getDeviceForContext (context))
         pagesForDevice.emplace (device1, Direct2DPixelDataPages { page, backingData });
@@ -294,7 +294,7 @@ Direct2DPixelData::Direct2DPixelData (ComSmartPtr<ID2D1DeviceContext1> context,
 
 Direct2DPixelData::Direct2DPixelData (Image::PixelFormat formatToUse, int w, int h, bool clearIn)
     : Direct2DPixelData { SoftwareImageType{}.create (formatToUse, w, h, clearIn),
-                          clearIn ? State::cleared : State::unsuitableToRead }
+                          clearIn ? State::initiallyCleared : State::initiallyUndefined }
 {
 }
 
@@ -321,25 +321,33 @@ auto Direct2DPixelData::getIteratorForContext (ComSmartPtr<ID2D1DeviceContext1> 
         {
             // If our image is currently cleared, then the initial state of the page should also
             // be cleared.
-            case State::cleared:
-                return State::cleared;
+            case State::initiallyCleared:
+                return Pages::State::cleared;
 
             // If our image holds junk, then it must be written before first read, which means
             // that the cached pages must also be written before first read. Don't mark the new
             // pages as needing a sync yet - there's a chance that we'll render directly into
             // the new pages, in which case copying the initial state from the software image
             // would be unnecessary and wasteful.
-            case State::unsuitableToRead:
-                return State::suitableToRead;
+            case State::initiallyUndefined:
+                return Pages::State::suitableToRead;
 
             // If the software image has been written with valid data, then we need to preserve
             // this data when reading or writing (e.g. to a subsection, or with transparency)
             // to the new pages, so mark the new pages as needing a sync before first access.
-            case State::suitableToRead:
-                return State::unsuitableToRead;
+            case State::drawn:
+                return Pages::State::unsuitableToRead;
+
+            // If this is hit, there's already another BitmapData or Graphics context active on this
+            // image. Only one BitmapData or Graphics context may be active on an Image at a time.
+            case State::drawing:
+                jassertfalse;
+                return Pages::State::unsuitableToRead;
         }
 
-        return State::unsuitableToRead;
+        // Unhandled switch case?
+        jassertfalse;
+        return Pages::State::unsuitableToRead;
     }();
 
     const auto pair = pagesForDevice.emplace (device1, Pages { context, backingData, initialState });
@@ -348,27 +356,81 @@ auto Direct2DPixelData::getIteratorForContext (ComSmartPtr<ID2D1DeviceContext1> 
 
 std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContext()
 {
+    if (state == State::drawing)
+    {
+        // If this is hit, there's already a BitmapData or Graphics context active, drawing to this
+        // image. Perhaps you have two Graphics instances drawing into the image, or maybe you
+        // called Image::clear while also having a Graphics instance in scope that is targeting this
+        // image. A Direct2D Image can only have a single Graphics object active at a time.
+        // To fix this issue, check the call stack to see where this assertion is being hit, then
+        // modify the program to ensure no other BitmapData or Graphics context is active at this point.
+        jassertfalse;
+
+        struct InertContext : public LowLevelGraphicsContext
+        {
+            bool isVectorDevice() const override { return false; }
+            void setOrigin (Point<int>) override {}
+            void addTransform (const AffineTransform&) override {}
+            float getPhysicalPixelScaleFactor() const override { return 1.0f; }
+            bool clipToRectangle (const Rectangle<int>&) override { return false; }
+            bool clipToRectangleList (const RectangleList<int>&) override { return false; }
+            void excludeClipRectangle (const Rectangle<int>&) override {}
+            void clipToPath (const Path&, const AffineTransform&) override {}
+            void clipToImageAlpha (const Image&, const AffineTransform&) override {}
+            bool clipRegionIntersects (const Rectangle<int>&) override { return false; }
+            Rectangle<int> getClipBounds() const override { return {}; }
+            bool isClipEmpty() const override { return true; }
+            void saveState() override {}
+            void restoreState() override {}
+            void beginTransparencyLayer (float) override {}
+            void endTransparencyLayer() override {}
+            void setFill (const FillType&) override {}
+            void setOpacity (float) override {}
+            void setInterpolationQuality (Graphics::ResamplingQuality) override {}
+            void fillRect (const Rectangle<int>&, bool) override {}
+            void fillRect (const Rectangle<float>&) override {}
+            void fillRectList (const RectangleList<float>&) override {}
+            void fillPath (const Path&, const AffineTransform&) override {}
+            void drawImage (const Image&, const AffineTransform&) override {}
+            void drawLine (const Line<float>&) override {}
+            void setFont (const Font& f) override { font = f; }
+            const Font& getFont() override { return font; }
+            void drawGlyphs (Span<const uint16_t>, Span<const Point<float>>, const AffineTransform&) override {}
+            uint64_t getFrameId() const override { return 0; }
+            Font font { FontOptions{} };
+        };
+
+        return std::make_unique<InertContext>();
+    }
+
     sendDataChangeMessage();
 
-    const auto adapter = directX->adapters.getDefaultAdapter();
-
-    if (adapter == nullptr)
-        return {};
-
-    const auto context = Direct2DDeviceContext::create (adapter);
-
-    if (context == nullptr)
-        return {};
-
-    const auto maxSize = (int) context->GetMaximumBitmapSize();
-
-    if (maxSize < width || maxSize < height)
+    const auto invalidateAllAndReturnSoftwareContext = [this]
     {
+        // If this is hit, something has gone wrong when trying to create a Direct2D renderer,
+        // and we're about to fall back to a software renderer instead.
+        jassertfalse;
+
         for (auto& pair : pagesForDevice)
             pair.second.markOutdated();
 
         return backingData->createLowLevelContext();
-    }
+    };
+
+    const auto adapter = directX->adapters.getDefaultAdapter();
+
+    if (adapter == nullptr)
+        return invalidateAllAndReturnSoftwareContext();
+
+    const auto context = Direct2DDeviceContext::create (adapter);
+
+    if (context == nullptr)
+        return invalidateAllAndReturnSoftwareContext();
+
+    const auto maxSize = (int) context->GetMaximumBitmapSize();
+
+    if (maxSize < width || maxSize < height)
+        return invalidateAllAndReturnSoftwareContext();
 
     const auto iter = getIteratorForContext (context);
     jassert (iter != pagesForDevice.end());
@@ -376,10 +438,7 @@ std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContex
     const auto pages = iter->second.getPages();
 
     if (pages.empty() || pages.front().bitmap == nullptr)
-    {
-        jassertfalse;
-        return {};
-    }
+        return invalidateAllAndReturnSoftwareContext();
 
     // Every page *other than the page we're about to render onto* will need to be updated from the
     // software image before it is next read.
@@ -387,19 +446,19 @@ std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContex
         if (i != iter)
             i->second.markOutdated();
 
-    // The low level context will eventually write valid image data to this image.
-    state = State::suitableToRead;
-
     struct FlushingContext : public Direct2DImageContext
     {
-        FlushingContext (SoftwarePixelData::Ptr backupIn,
+        FlushingContext (Direct2DPixelData::Ptr selfIn,
                          ComSmartPtr<ID2D1DeviceContext1> context,
                          ComSmartPtr<ID2D1Bitmap1> target)
             : Direct2DImageContext (context, target, D2DUtilities::rectFromSize (target->GetPixelSize())),
               storedContext (context),
               storedTarget (target),
-              backup (startFrame (1.0f) ? backupIn : nullptr)
+              self (selfIn),
+              backup (startFrame (1.0f) ? selfIn->backingData : nullptr)
         {
+            if (backup != nullptr)
+                self->state = State::drawing;
         }
 
         ~FlushingContext() override
@@ -409,14 +468,16 @@ std::unique_ptr<LowLevelGraphicsContext> Direct2DPixelData::createLowLevelContex
 
             endFrame();
             readFromDirect2DBitmap (storedContext, storedTarget, backup);
+            self->state = State::drawn;
         }
 
         ComSmartPtr<ID2D1DeviceContext1> storedContext;
         ComSmartPtr<ID2D1Bitmap1> storedTarget;
-        SoftwarePixelData::Ptr backup;
+        Direct2DPixelData::Ptr self;
+        ImagePixelData::Ptr backup;
     };
 
-    return std::make_unique<FlushingContext> (backingData, context, pages.front().bitmap);
+    return std::make_unique<FlushingContext> (this, context, pages.front().bitmap);
 }
 
 void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
@@ -434,11 +495,30 @@ void Direct2DPixelData::initialiseBitmapData (Image::BitmapData& bitmap,
     if (mode == Image::BitmapData::readOnly)
         return;
 
-    // We're writing to the image data, so mark this image as having valid image data.
-    state = State::suitableToRead;
+    struct Releaser : public Image::BitmapData::BitmapDataReleaser
+    {
+        Releaser (std::unique_ptr<BitmapDataReleaser> wrappedIn, Direct2DPixelData::Ptr selfIn)
+            : wrapped (std::move (wrappedIn)), self (std::move (selfIn))
+        {
+            // If this is hit, there's already another BitmapData or Graphics context active on this
+            // image. Only one BitmapData or Graphics context may be active on an Image at a time.
+            jassert (self->state != State::drawing);
+            self->state = State::drawing;
+        }
 
-    for (auto& pair : pagesForDevice)
-        pair.second.markOutdated();
+        ~Releaser() override
+        {
+            self->state = State::drawn;
+
+            for (auto& pair : self->pagesForDevice)
+                pair.second.markOutdated();
+        }
+
+        std::unique_ptr<BitmapDataReleaser> wrapped;
+        Direct2DPixelData::Ptr self;
+    };
+
+    bitmap.dataReleaser = std::make_unique<Releaser> (std::move (bitmap.dataReleaser), this);
 }
 
 void Direct2DPixelData::applyGaussianBlurEffect (float radius, Image& result)
