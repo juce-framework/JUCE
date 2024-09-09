@@ -1170,8 +1170,8 @@ struct DescriptionLister
 //==============================================================================
 struct DLLHandle
 {
-    DLLHandle (const File& fileToOpen)
-       : dllFile (fileToOpen)
+    explicit DLLHandle (const File& fileToOpen)
+        : dllFile (fileToOpen)
     {
         open();
     }
@@ -1182,8 +1182,7 @@ struct DLLHandle
         if (bundleRef != nullptr)
        #endif
         {
-            if (factory != nullptr)
-                factory->release();
+            factory = nullptr;
 
             using ExitModuleFn = bool (PLUGIN_API*)();
 
@@ -1197,14 +1196,11 @@ struct DLLHandle
     }
 
     //==============================================================================
-    /** The factory should begin with a refCount of 1, so don't increment the reference count
-        (ie: don't use a VSTComSmartPtr in here)! Its lifetime will be handled by this DLLHandle.
-    */
-    IPluginFactory* JUCE_CALLTYPE getPluginFactory()
+    VSTComSmartPtr<IPluginFactory> getPluginFactory()
     {
         if (factory == nullptr)
             if (auto* proc = (GetFactoryProc) getFunction (factoryFnName))
-                factory = proc();
+                factory = becomeVSTComSmartPtrOwner (proc());
 
         // The plugin NEEDS to provide a factory to be able to be called a VST3!
         // Most likely you are trying to load a 32-bit VST3 from a 64-bit host
@@ -1230,7 +1226,7 @@ struct DLLHandle
 
 private:
     File dllFile;
-    IPluginFactory* factory = nullptr;
+    VSTComSmartPtr<IPluginFactory> factory;
 
     static constexpr const char* factoryFnName = "GetPluginFactory";
 
@@ -1420,7 +1416,7 @@ struct VST3ModuleHandle final : public ReferenceCountedObject
     }
 
     //==============================================================================
-    IPluginFactory* getPluginFactory()
+    VSTComSmartPtr<IPluginFactory> getPluginFactory()
     {
         return DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory();
     }
@@ -1439,7 +1435,7 @@ private:
     //==============================================================================
     bool open (const PluginDescription& description)
     {
-        auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory());
+        auto pluginFactory = getPluginFactory();
 
         if (pluginFactory != nullptr)
         {
@@ -1535,8 +1531,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] IP
 
 static std::shared_ptr<const ARA::ARAFactory> getARAFactory (VST3ModuleHandle& module)
 {
-    auto* pluginFactory = module.getPluginFactory();
-    return getARAFactory (pluginFactory, module.getName());
+    return getARAFactory (module.getPluginFactory().get(), module.getName());
 }
 
 //==============================================================================
@@ -2075,7 +2070,7 @@ struct VST3ComponentHolder
         // initialisation are only called from the message thread.
         JUCE_ASSERT_MESSAGE_THREAD
 
-        factory = addVSTComSmartPtrOwner (module->getPluginFactory());
+        factory = module->getPluginFactory();
 
         VSTComSmartPtr<IPluginFactory3> pf3;
         pf3.loadFrom (factory.get());
@@ -3948,7 +3943,7 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
             for every housed plugin.
         */
 
-        auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file).getPluginFactory());
+        auto pluginFactory = DLLHandleCache::getInstance()->findOrCreateHandle (file).getPluginFactory();
 
         if (pluginFactory == nullptr)
             continue;
@@ -3969,7 +3964,7 @@ void VST3PluginFormat::createARAFactoryAsync (const PluginDescription& descripti
     }
 
     File file (description.fileOrIdentifier);
-    auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory());
+    auto pluginFactory = DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory();
     const auto* pluginName = description.name.toRawUTF8();
 
     callback ({ ARAFactoryWrapper { ::juce::getARAFactory (pluginFactory.get(), pluginName) }, {} });
