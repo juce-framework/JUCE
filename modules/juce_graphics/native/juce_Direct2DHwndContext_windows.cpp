@@ -393,7 +393,8 @@ private:
             return false;
 
         if (presentation.getPresentation() == nullptr)
-            presentation = swapChainThread->getFreshPresentation();
+            if (swapChainThread != nullptr)
+                presentation = swapChainThread->getFreshPresentation();
 
         // Paint if:
         //      resources are allocated
