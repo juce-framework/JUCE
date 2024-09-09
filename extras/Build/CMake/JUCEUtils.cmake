@@ -207,9 +207,9 @@ function(_juce_create_embedded_linux_subprocess_target output_target_name target
     get_target_property(generated_sources_directory ${target} JUCE_GENERATED_SOURCES_DIRECTORY)
 
     if(generated_sources_directory)
-        set(juce_linux_subprocess_helper_binary_dir "${generated_sources_directory}")
+        set(juce_linux_subprocess_helper_binary_dir "${generated_sources_directory}/$<CONFIG>/")
     else()
-        set(juce_linux_subprocess_helper_binary_dir "${CMAKE_CURRENT_BINARY_DIR}/juce_LinuxSubprocessHelper")
+        set(juce_linux_subprocess_helper_binary_dir "${CMAKE_CURRENT_BINARY_DIR}/juce_LinuxSubprocessHelper/$<CONFIG>/")
     endif()
 
     set(binary_header_file  "${juce_linux_subprocess_helper_binary_dir}/juce_LinuxSubprocessHelperBinaryData.h")
