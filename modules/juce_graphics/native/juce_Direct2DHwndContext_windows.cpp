@@ -372,6 +372,7 @@ private:
     {
         compositionTree.reset();
         swapChainThread = nullptr;
+        deviceContext = nullptr;
         swap.release();
 
         Pimpl::teardown();
