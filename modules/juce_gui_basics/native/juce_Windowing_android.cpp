@@ -1462,6 +1462,11 @@ public:
         return false;
     }
 
+    bool isShowing() const override
+    {
+        return true;
+    }
+
     void setFullScreen (bool shouldBeFullScreen) override
     {
         if (shouldNavBarsBeHidden (shouldBeFullScreen))

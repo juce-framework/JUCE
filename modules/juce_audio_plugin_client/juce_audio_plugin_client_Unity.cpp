@@ -273,6 +273,7 @@ private:
     //==============================================================================
     void setMinimised (bool) override                                 {}
     bool isMinimised() const override                                 { return false; }
+    bool isShowing() const override                                   { return true; }
     void setFullScreen (bool) override                                {}
     bool isFullScreen() const override                                { return false; }
     bool setAlwaysOnTop (bool) override                               { return false; }

@@ -408,6 +408,7 @@ public:
     void setAlpha (float newAlpha) override;
     void setMinimised (bool) override                         {}
     bool isMinimised() const override                         { return false; }
+    bool isShowing() const override                           { return true; }
     void setFullScreen (bool shouldBeFullScreen) override;
     bool isFullScreen() const override                        { return fullScreen; }
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override;

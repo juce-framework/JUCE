@@ -244,6 +244,9 @@ public:
     /** True if the window is currently minimised. */
     virtual bool isMinimised() const = 0;
 
+    /** True if the window is being displayed on-screen. */
+    virtual bool isShowing() const = 0;
+
     /** Enable/disable fullscreen mode for the window. */
     virtual void setFullScreen (bool shouldBeFullScreen) = 0;
 
