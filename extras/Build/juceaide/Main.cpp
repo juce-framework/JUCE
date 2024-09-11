@@ -331,9 +331,6 @@ int writePlist (juce::ArgumentList&& args)
 juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File& file,
                                                                 juce::build_tools::ProjectType::Target::Type type)
 {
-    if (type == juce::build_tools::ProjectType::Target::ConsoleApp)
-        juce::ConsoleApplication::fail ("Deduced project type does not require entitlements", 1);
-
     const auto dict = parseProjectData (file);
 
     UpdateField updateField { dict };
