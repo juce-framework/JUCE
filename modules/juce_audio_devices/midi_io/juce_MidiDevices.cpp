@@ -49,7 +49,7 @@ void MidiInputCallback::handlePartialSysexMessage ([[maybe_unused]] MidiInput* s
 
 //==============================================================================
 MidiOutput::MidiOutput (const String& deviceName, const String& deviceIdentifier)
-    : Thread ("midi out"), deviceInfo (deviceName, deviceIdentifier)
+    : Thread (SystemStats::getJUCEVersion() + ": midi out"), deviceInfo (deviceName, deviceIdentifier)
 {
 }
 

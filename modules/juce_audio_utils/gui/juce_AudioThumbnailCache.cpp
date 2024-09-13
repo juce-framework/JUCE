@@ -69,7 +69,7 @@ private:
 
 //==============================================================================
 AudioThumbnailCache::AudioThumbnailCache (const int maxNumThumbs)
-    : thread ("thumb cache"),
+    : thread (SystemStats::getJUCEVersion() + ": thumb cache"),
       maxNumThumbsToStore (maxNumThumbs)
 {
     jassert (maxNumThumbsToStore > 0);

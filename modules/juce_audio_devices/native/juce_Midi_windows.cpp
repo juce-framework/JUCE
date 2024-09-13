@@ -1029,7 +1029,7 @@ private:
                                      EventRegistrationToken& added,
                                      EventRegistrationToken& removed,
                                      EventRegistrationToken& updated)
-                    : Thread ("WinRT Device Enumeration Thread"), handler (h), watcher (w),
+                    : Thread (SystemStats::getJUCEVersion() + ": WinRT Device Enumeration Thread"), handler (h), watcher (w),
                       deviceAddedToken (added), deviceRemovedToken (removed), deviceUpdatedToken (updated)
             {}
 

@@ -58,7 +58,7 @@ static String getCommandLinePrefix (const String& commandLineUniqueID)
 struct ChildProcessPingThread : public Thread,
                                 private AsyncUpdater
 {
-    ChildProcessPingThread (int timeout)  : Thread ("IPC ping"), timeoutMs (timeout)
+    ChildProcessPingThread (int timeout)  : Thread (SystemStats::getJUCEVersion() + ": IPC ping"), timeoutMs (timeout)
     {
         pingReceived();
     }

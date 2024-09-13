@@ -89,7 +89,7 @@ public:
     using LockType = CriticalSection;
 
     TimerThread()
-        : Thread ("JUCE Timer")
+        : Thread (SystemStats::getJUCEVersion() + ": Timer")
     {
         timers.reserve (32);
         ShutdownDetector::addListener (this);

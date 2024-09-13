@@ -310,7 +310,7 @@ void Thread::notify() const
 //==============================================================================
 struct LambdaThread final : public Thread
 {
-    LambdaThread (std::function<void()>&& f) : Thread ("anonymous"), fn (std::move (f)) {}
+    LambdaThread (std::function<void()>&& f) : Thread (SystemStats::getJUCEVersion() + ": anonymous"), fn (std::move (f)) {}
 
     void run() override
     {
@@ -496,7 +496,7 @@ class ThreadLocalValueUnitTest final : public UnitTest,
 public:
     ThreadLocalValueUnitTest()
         : UnitTest ("ThreadLocalValue", UnitTestCategories::threads),
-          Thread ("ThreadLocalValue Thread")
+          Thread (SystemStats::getJUCEVersion() + ": ThreadLocalValue Thread")
     {}
 
     void runTest() override

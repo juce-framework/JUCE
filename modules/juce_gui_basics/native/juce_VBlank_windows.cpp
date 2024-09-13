@@ -44,7 +44,7 @@ public:
     VBlankThread (ComSmartPtr<IDXGIOutput> out,
                   HMONITOR mon,
                   VBlankListener& listener)
-        : Thread ("VBlankThread"),
+        : Thread (SystemStats::getJUCEVersion() + ": VBlankThread"),
           output (out),
           monitor (mon)
     {

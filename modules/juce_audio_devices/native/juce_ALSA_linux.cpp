@@ -497,7 +497,7 @@ class ALSAThread final : public Thread
 {
 public:
     ALSAThread (const String& inputDeviceID, const String& outputDeviceID)
-        : Thread ("JUCE ALSA"),
+        : Thread (SystemStats::getJUCEVersion() + ": ALSA"),
           inputId (inputDeviceID),
           outputId (outputDeviceID)
     {

@@ -259,7 +259,7 @@ private:
     {
         ReceiverThread (const String& pName, bool shouldCreatePipe,
                         WaitableEvent& completed)
-            : NamedPipeThread ("NamePipeSender", pName, shouldCreatePipe, completed)
+            : NamedPipeThread ("NamePipeReceiver", pName, shouldCreatePipe, completed)
         {}
 
         ~ReceiverThread() override

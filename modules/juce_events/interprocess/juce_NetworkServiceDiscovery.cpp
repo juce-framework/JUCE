@@ -44,7 +44,7 @@ NetworkServiceDiscovery::Advertiser::Advertiser (const String& serviceTypeUID,
                                                  const String& serviceDescription,
                                                  int broadcastPortToUse, int connectionPort,
                                                  RelativeTime minTimeBetweenBroadcasts)
-    : Thread ("Discovery_broadcast"),
+    : Thread (SystemStats::getJUCEVersion() + ": Discovery_broadcast"),
       message (serviceTypeUID), broadcastPort (broadcastPortToUse),
       minInterval (minTimeBetweenBroadcasts)
 {
@@ -97,7 +97,7 @@ void NetworkServiceDiscovery::Advertiser::sendBroadcast()
 
 //==============================================================================
 NetworkServiceDiscovery::AvailableServiceList::AvailableServiceList (const String& serviceType, int broadcastPort)
-    : Thread ("Discovery_listen"), serviceTypeUID (serviceType)
+    : Thread (SystemStats::getJUCEVersion() + ": Discovery_listen"), serviceTypeUID (serviceType)
 {
    #if JUCE_ANDROID
     acquireMulticastLock();

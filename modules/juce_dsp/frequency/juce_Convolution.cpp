@@ -83,7 +83,7 @@ class BackgroundMessageQueue : private Thread
 {
 public:
     explicit BackgroundMessageQueue (int entries)
-        : Thread ("Convolution background loader"), queue (entries)
+        : Thread (SystemStats::getJUCEVersion() + ": Convolution background loader"), queue (entries)
     {}
 
     using IncomingCommand = FixedSizeFunction<400, void()>;
