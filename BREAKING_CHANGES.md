@@ -39,6 +39,27 @@ by only a select number of projects.
 
 ## Change
 
+The return type for VST3ClientExtensions::getCompatibleClasses() has changed
+from a String to an array of 16 bytes.
+
+**Possible Issues**
+
+Any inherited classes overriding this method might fail to compile.
+
+**Workaround**
+
+Either explicitly switch to creating a 16-byte std::array or use
+VST3ClientExtensions::toInterfaceId() to convert a string to a 16-byte array.
+
+**Rationale**
+
+As part of adding functionality to support migrating parameter IDs from
+compatible plugins it was useful to switch to a safer type for representing
+VST3 interface IDs that closer matches the VST3 SDK types.
+
+
+## Change
+
 The VBlankAttachment class' inheritance from the ComponentPeer::VBlankListener
 and ComponentListener classes has been made private.
 
