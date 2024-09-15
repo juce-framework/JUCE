@@ -301,7 +301,7 @@ struct JSONParser
             auto c = readChar();
 
             if (c == '}')
-                break;
+                throwError ("Unexpected trailing comma", errorLocation);
 
             if (c == 0)
                 throwError ("Unexpected EOF in object declaration", startOfObjectDecl);
@@ -342,9 +342,10 @@ struct JSONParser
         for (;;)
         {
             skipWhitespace();
-
+            auto errorLocation = currentLocation;
+          
             if (matchIf (']'))
-                break;
+                throwError ("Unexpected trailing comma", errorLocation);
 
             if (isEOF())
                 throwError ("Unexpected EOF in array declaration", startOfArrayDecl);
