@@ -445,7 +445,7 @@ static int64 juce_getClockCycleCounter() noexcept
   #elif JUCE_ARM
    #if defined (_M_ARM)
     return __rdpmccntr64();
-   #elif defined (_M_ARM64)
+   #elif defined (_M_ARM64) || defined (_M_ARM64EC)
     return _ReadStatusReg (ARM64_PMCCNTR_EL0);
    #else
     #error Unknown arm architecture
