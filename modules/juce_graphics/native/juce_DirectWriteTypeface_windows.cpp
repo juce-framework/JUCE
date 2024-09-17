@@ -153,6 +153,8 @@ public:
 
     ComSmartPtr<IDWriteFontFamily> getFamilyByName (const wchar_t* name)
     {
+        const std::scoped_lock lock { mutex };
+
         for (const auto& collection : collections)
         {
             const auto fontIndex = [&]
