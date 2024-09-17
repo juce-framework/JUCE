@@ -115,6 +115,12 @@
  #include <ft2build.h>
  #include FT_FREETYPE_H
  #include FT_ADVANCES_H
+ #include FT_TRUETYPE_TABLES_H
+ #include FT_GLYPH_H
+
+ #ifdef FT_COLOR_H
+  #include FT_COLOR_H
+ #endif
 #endif
 
 #if JUCE_USE_FONTCONFIG

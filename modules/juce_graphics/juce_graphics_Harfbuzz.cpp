@@ -87,6 +87,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations",
  #define __has_builtin(x) 1
 #endif
 
+#include <utility>
 #include <juce_graphics/fonts/harfbuzz/hb.hh>
 #include <juce_graphics/fonts/harfbuzz/harfbuzz.cc>
 
