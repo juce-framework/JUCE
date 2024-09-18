@@ -320,7 +320,18 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
     int tryBufferSize (const double currentSampleRate, const int newBufferSize)
     {
-        NSTimeInterval bufferDuration = currentSampleRate > 0 ? (NSTimeInterval) ((newBufferSize + 1) / currentSampleRate) : 0.0;
+        const auto extraOffset = std::invoke ([&]
+        {
+            // Older iOS versions (iOS 12) seem to require that the requested buffer size is a bit
+            // larger than the desired buffer size.
+            // This breaks on iOS 18, which needs the buffer duration to be as precise as possible.
+            if (@available (ios 18, *))
+                return 0;
+
+            return 1;
+        });
+
+        NSTimeInterval bufferDuration = currentSampleRate > 0 ? (NSTimeInterval) (newBufferSize + extraOffset) / currentSampleRate : 0.0;
 
         auto session = [AVAudioSession sharedInstance];
         JUCE_NSERROR_CHECK ([session setPreferredIOBufferDuration: bufferDuration
