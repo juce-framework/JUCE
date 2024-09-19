@@ -606,6 +606,9 @@ public:
 
         The errorInfo contains some platform dependent string describing the
         error.
+
+        Calling goToURL() inside this callback can encounter further network
+        errors, potentially causing an infinite loop.
     */
     virtual bool pageLoadHadNetworkError (const String& errorInfo);
 
