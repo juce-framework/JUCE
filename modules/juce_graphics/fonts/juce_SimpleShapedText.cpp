@@ -1022,6 +1022,12 @@ void SimpleShapedText::shape (const String& data,
         yes
     };
 
+    struct ConsumedGlyphs
+    {
+        std::vector<ShapedGlyph> glyphs;
+        Range<int64> textRange;
+    };
+
     const auto append = [&] (const BidiParagraph& bidiParagraph, Range<int64> range, const ShapingParams& shapingParams)
     {
         jassert (! range.isEmpty());
@@ -1112,12 +1118,6 @@ void SimpleShapedText::shape (const String& data,
             }
 
             jassert (bestMatch.has_value());
-
-            struct ConsumedGlyphs
-            {
-                std::vector<ShapedGlyph> glyphs;
-                Range<int64> textRange;
-            };
 
             const auto consumeGlyphs = [&]() -> ConsumedGlyphs
             {
