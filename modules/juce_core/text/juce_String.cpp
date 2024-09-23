@@ -2371,7 +2371,8 @@ public:
     {
         static void test (UnitTest& test, Random& r)
         {
-            String s (createRandomWideCharString (r));
+            constexpr auto stringLength = 50;
+            const String s (createRandomWideCharString (r, stringLength));
 
             using CharType = typename CharPointerType::CharType;
             CharType buffer[300];
@@ -2395,25 +2396,29 @@ public:
         }
     };
 
-    static String createRandomWideCharString (Random& r)
+    static String createRandomWideCharString (Random& r, size_t length)
     {
-        juce_wchar buffer[50] = { 0 };
+        std::vector<juce_wchar> characters (length, 0);
 
-        for (int i = 0; i < numElementsInArray (buffer) - 1; ++i)
+        for (auto& character : characters)
         {
             if (r.nextBool())
             {
                 do
                 {
-                    buffer[i] = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
+                    character = (juce_wchar) (1 + r.nextInt (0x10ffff - 1));
                 }
-                while (! CharPointer_UTF16::canRepresent (buffer[i]));
+                while (! CharPointer_UTF16::canRepresent (character));
             }
             else
-                buffer[i] = (juce_wchar) (1 + r.nextInt (0xff));
+            {
+                character = (juce_wchar) (1 + r.nextInt (0xff));
+            }
         }
 
-        return CharPointer_UTF32 (buffer);
+        characters.push_back (0);
+
+        return CharPointer_UTF32 (characters.data());
     }
 
     void runTest() override
