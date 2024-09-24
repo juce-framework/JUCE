@@ -1637,14 +1637,17 @@ private:
     /*  Convert from the component's coordinate system to the hosted VST3's coordinate system. */
     ViewRect componentToVST3Rect (Rectangle<int> r) const
     {
-        const auto physical = localAreaToGlobal (r) * nativeScaleFactor * getDesktopScaleFactor();
+        const auto combinedScale = nativeScaleFactor * getDesktopScaleFactor();
+        const auto physical = (localAreaToGlobal (r.toFloat()) * combinedScale).toNearestInt();
         return { 0, 0, physical.getWidth(), physical.getHeight() };
     }
 
     /*  Convert from the hosted VST3's coordinate system to the component's coordinate system. */
     Rectangle<int> vst3ToComponentRect (const ViewRect& vr) const
     {
-        return getLocalArea (nullptr, Rectangle<int> { vr.right, vr.bottom } / (nativeScaleFactor * getDesktopScaleFactor()));
+        const auto combinedScale = nativeScaleFactor * getDesktopScaleFactor();
+        const auto floatRect = Rectangle { (float) vr.right, (float) vr.bottom } / combinedScale;
+        return getLocalArea (nullptr, floatRect).toNearestInt();
     }
 
     void componentMovedOrResized (bool, bool wasResized) override
