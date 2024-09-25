@@ -67,7 +67,7 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_formats/juce_audio_formats.h>
 
-#if defined (_M_X64) || defined (__amd64__) || defined (__SSE2__) || (defined (_M_IX86_FP) && _M_IX86_FP == 2)
+#if JUCE_INTEL
 
  #if defined (_M_X64) || defined (__amd64__)
   #ifndef __SSE2__
@@ -83,15 +83,17 @@
   #include <immintrin.h>
  #endif
 
-// it's ok to check for _M_ARM below as this is only defined on Windows for Arm 32-bit
-// which has a minimum requirement of armv7, which supports neon.
-#elif defined (__ARM_NEON__) || defined (__ARM_NEON) || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM) || defined (_M_ARM64)
+#elif JUCE_ARM
 
  #ifndef JUCE_USE_SIMD
   #define JUCE_USE_SIMD 1
  #endif
 
- #include <arm_neon.h>
+ #if JUCE_64BIT && JUCE_WINDOWS
+  #include <arm64_neon.h>
+ #else
+  #include <arm_neon.h>
+ #endif
 
 #else
 
@@ -234,7 +236,7 @@ namespace util
  #include "native/juce_SIMDNativeOps_fallback.h"
 
  // include the correct native file for this build target CPU
- #if defined (__i386__) || defined (__amd64__) || defined (_M_X64) || defined (_X86_) || defined (_M_IX86)
+ #if JUCE_INTEL
   #ifdef __AVX2__
    #include "native/juce_SIMDNativeOps_avx.h"
   #else
