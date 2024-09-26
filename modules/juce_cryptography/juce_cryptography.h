@@ -44,7 +44,7 @@
 
   ID:                 juce_cryptography
   vendor:             juce
-  version:            8.0.1
+  version:            8.0.2
   name:               JUCE cryptography classes
   description:        Classes for various basic cryptography functions, including RSA, Blowfish, MD5, SHA, etc.
   website:            http://www.juce.com/juce

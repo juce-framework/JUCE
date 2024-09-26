@@ -43,7 +43,7 @@
 
   ID:                 juce_build_tools
   vendor:             juce
-  version:            8.0.1
+  version:            8.0.2
   name:               JUCE Build Tools
   description:        Classes for generating intermediate files for JUCE projects.
   website:            http://www.juce.com/juce
