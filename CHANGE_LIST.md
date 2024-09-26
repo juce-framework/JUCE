@@ -3,6 +3,16 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.2
+
+  - Fixed some issues handling large images in Direct2D
+  - Enabled rounded window corners in Windows 11
+  - Fixed some compiler warnings in Xcode 16
+  - Improved macOS and Android GU rendering performance
+  - Added support for C++20 and C++23
+  - Fixed a Windows mouse response issue
+  - Updated the VST3 SDK to 3.7.12
+
 ## Version 8.0.1
 
   - Fixed some issues with text layout
