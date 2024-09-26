@@ -545,9 +545,10 @@ public:
         }
     }
 
-    void setTextBoxIsEditable (bool shouldBeEditable)
+    void setTextBoxIsEditable (bool shouldBeEditable, bool editOnDoubleClick)
     {
         editableText = shouldBeEditable;
+        doubleClickToEditText = editOnDoubleClick;
         updateTextBoxEnablement();
     }
 
@@ -586,7 +587,8 @@ public:
             bool shouldBeEditable = editableText && owner.isEnabled();
 
             if (valueBox->isEditable() != shouldBeEditable) // (to avoid changing the single/double click flags unless we need to)
-                valueBox->setEditable (shouldBeEditable);
+                valueBox->setEditable (shouldBeEditable && !doubleClickToEditText,
+                                       shouldBeEditable && doubleClickToEditText);
         }
     }
 
@@ -1337,6 +1339,7 @@ public:
     ModifierKeys::Flags modifierToSwapModes = ModifierKeys::ctrlAltCommandModifiers;
 
     bool editableText = true;
+    bool doubleClickToEditText = false;
     bool doubleClickToValue = false;
     bool isVelocityBased = false;
     bool userKeyOverridesVelocity = true;
@@ -1553,7 +1556,10 @@ void Slider::setTextBoxStyle (TextEntryBoxPosition newPosition, bool isReadOnly,
 }
 
 bool Slider::isTextBoxEditable() const noexcept                     { return pimpl->editableText; }
-void Slider::setTextBoxIsEditable (const bool shouldBeEditable)     { pimpl->setTextBoxIsEditable (shouldBeEditable); }
+void Slider::setTextBoxIsEditable (const bool shouldBeEditable, bool editOnDoubleClick)
+{
+    pimpl->setTextBoxIsEditable (shouldBeEditable, editOnDoubleClick);
+}
 void Slider::showTextBox()                                          { pimpl->showTextBox(); }
 void Slider::hideTextBox (bool discardCurrentEditorContents)        { pimpl->hideTextBox (discardCurrentEditorContents); }
 
