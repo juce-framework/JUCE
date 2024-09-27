@@ -142,11 +142,11 @@ struct AppDelegateClass final : public ObjCClass<NSObject>
         {
             if (notification.userInfo != nil)
             {
-                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+                JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
                 // NSUserNotification is deprecated from macOS 11, but there doesn't seem to be a
                 // replacement for NSApplicationLaunchUserNotificationKey returning a non-deprecated type
                 NSUserNotification* userNotification = notification.userInfo[NSApplicationLaunchUserNotificationKey];
-                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+                JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullable-to-nonnull-conversion")
                 if (userNotification != nil && userNotification.userInfo != nil)

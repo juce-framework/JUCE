@@ -1932,7 +1932,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginWindow)
 };
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996) // warning about overriding deprecated methods
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 //==============================================================================
 static bool hasARAExtension (IPluginFactory* pluginFactory, const String& pluginClassName)
@@ -3891,7 +3891,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginInstance)
 };
 
-JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
 //==============================================================================
 tresult VST3HostContext::beginEdit (Vst::ParamID paramID)

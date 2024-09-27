@@ -63,11 +63,11 @@ struct AEffect;
 
 #include "juce_VSTCommon.h"
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
+JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
 
 #include "juce_VSTMidiEventList.h"
 
@@ -827,8 +827,6 @@ private:
 
 static const int defaultVSTSampleRateValue = 44100;
 static const int defaultVSTBlockSizeValue = 512;
-
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 class TempChannelPointers
 {
@@ -3446,8 +3444,6 @@ private:
 };
 #endif
 
-JUCE_END_IGNORE_WARNINGS_MSVC
-
 //==============================================================================
 AudioProcessorEditor* VSTPluginInstance::createEditor()
 {
@@ -3762,7 +3758,7 @@ void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
 
 } // namespace juce
 
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_DEPRECATION_WARNINGS
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

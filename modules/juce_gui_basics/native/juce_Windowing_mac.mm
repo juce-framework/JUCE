@@ -603,12 +603,12 @@ static Image createNSWindowSnapshot (NSWindow* nsWindow)
 
        #else
 
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
         return createImageFromCGImage ((CGImageRef) CFAutorelease (CGWindowListCreateImage (CGRectNull,
                                                                                             kCGWindowListOptionIncludingWindow,
                                                                                             (CGWindowID) [nsWindow windowNumber],
                                                                                             kCGWindowImageBoundsIgnoreFraming)));
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        JUCE_END_IGNORE_DEPRECATION_WARNINGS
 
        #endif
     }

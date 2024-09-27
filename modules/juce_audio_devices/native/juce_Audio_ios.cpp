@@ -818,7 +818,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
     //==============================================================================
    #if JUCE_MODULE_AVAILABLE_juce_graphics
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+    JUCE_BEGIN_IGNORE_DEPRECATION_WARNINGS
     Image getIcon (int size)
     {
        #if TARGET_OS_MACCATALYST
@@ -834,7 +834,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         return {};
     }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    JUCE_END_IGNORE_DEPRECATION_WARNINGS
    #endif
 
     void switchApplication()
