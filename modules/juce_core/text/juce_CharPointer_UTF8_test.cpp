@@ -44,31 +44,33 @@ public:
     {
         beginTest ("String validation - empty string / null-terminator");
         {
-            const std::vector<CharPointer_UTF8::CharType> string { 0x0 };
+            const std::vector<CharPointer_UTF8::CharType> string { '\0' };
             expect (CharPointer_UTF8::isValidString (string.data(), (int) string.size()));
         }
 
         beginTest ("String validation - ascii");
         {
-            const std::vector<CharPointer_UTF8::CharType> string { 0x54, 0x65, 0x73, 0x74, 0x21, 0x0 }; // Test!
+            const std::vector<CharPointer_UTF8::CharType> string { 'T', 'e', 's', 'T', '!', '\0' }; // Test!
             expect (CharPointer_UTF8::isValidString (string.data(), (int) string.size()));
         }
 
+        constexpr auto continuationCharacter = static_cast<char> (0x80);
+
         beginTest ("String validation - continuation characters are invalid when not proceeded by the correct bytes");
         {
-            const std::vector<CharPointer_UTF8::CharType> string { -1 };
+            const std::vector<CharPointer_UTF8::CharType> string { continuationCharacter };
             expect (! CharPointer_UTF8::isValidString (string.data(), (int) string.size()));
         }
 
         beginTest ("String validation - characters after a null terminator are ignored");
         {
-            const std::vector<CharPointer_UTF8::CharType> string { 0x54, 0x65, 0x73, 0x74, 0x0, -1 };
+            const std::vector<CharPointer_UTF8::CharType> string { 'T', 'e', 's', 'T', '\0', continuationCharacter };
             expect (CharPointer_UTF8::isValidString (string.data(), (int) string.size()));
         }
 
         beginTest ("String validation - characters exceeding max bytes are ignored");
         {
-            const std::vector<CharPointer_UTF8::CharType> string { 0x54, 0x65, 0x73, 0x74, -1 };
+            const std::vector<CharPointer_UTF8::CharType> string { 'T', 'e', 's', 'T', continuationCharacter };
             expect (CharPointer_UTF8::isValidString (string.data(), 4));
         }
 
