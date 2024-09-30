@@ -192,6 +192,21 @@ void DocumentWindow::maximiseButtonPressed()
     setFullScreen (! isFullScreen());
 }
 
+void DocumentWindow::windowControlClickedClose()
+{
+    closeButtonPressed();
+}
+
+void DocumentWindow::windowControlClickedMinimise()
+{
+    minimiseButtonPressed();
+}
+
+void DocumentWindow::windowControlClickedMaximise()
+{
+    maximiseButtonPressed();
+}
+
 //==============================================================================
 void DocumentWindow::paint (Graphics& g)
 {

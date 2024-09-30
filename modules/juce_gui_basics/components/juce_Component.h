@@ -925,8 +925,31 @@ public:
         window's caption area to the edge of the screen), double-clicking a horizontal border to
         stretch a window vertically, and the window tiling flyout that appears when hovering the
         mouse over the maximise button.
+
+        This is called by the peer. Component subclasses may override this but should not call it directly.
      */
     virtual WindowControlKind findControlAtPoint (Point<float>) const { return WindowControlKind::client; }
+
+    /** For components that are added to the desktop, this may be called to indicate that the mouse
+        was clicked inside the area of the "close" control. This is currently only called on Windows.
+
+        This is called by the peer. Component subclasses may override this but should not call it directly.
+    */
+    virtual void windowControlClickedClose() {}
+
+    /** For components that are added to the desktop, this may be called to indicate that the mouse
+        was clicked inside the area of the "minimise" control. This is currently only called on Windows.
+
+        This is called by the peer. Component subclasses may override this but should not call it directly.
+    */
+    virtual void windowControlClickedMinimise() {}
+
+    /** For components that are added to the desktop, this may be called to indicate that the mouse
+        was clicked inside the area of the "maximise" control. This is currently only called on Windows.
+
+        This is called by the peer. Component subclasses may override this but should not call it directly.
+    */
+    virtual void windowControlClickedMaximise() {}
 
     /** Changes the default return value for the hitTest() method.
 

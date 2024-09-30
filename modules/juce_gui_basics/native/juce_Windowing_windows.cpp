@@ -4304,17 +4304,33 @@ private:
                 switch (wParam)
                 {
                     case HTCLOSE:
-                        PostMessage (h, WM_CLOSE, 0, 0);
+                        if ((styleFlags & windowHasCloseButton) != 0 && ! sendInputAttemptWhenModalMessage())
+                        {
+                            if (hasTitleBar())
+                                PostMessage (h, WM_CLOSE, 0, 0);
+                            else
+                                component.windowControlClickedClose();
+                        }
                         return 0;
 
                     case HTMAXBUTTON:
                         if ((styleFlags & windowHasMaximiseButton) != 0 && ! sendInputAttemptWhenModalMessage())
-                            setFullScreen (! isFullScreen());
+                        {
+                            if (hasTitleBar())
+                                setFullScreen (! isFullScreen());
+                            else
+                                component.windowControlClickedMaximise();
+                        }
                         return 0;
 
                     case HTMINBUTTON:
                         if ((styleFlags & windowHasMinimiseButton) != 0 && ! sendInputAttemptWhenModalMessage())
-                            setMinimised (true);
+                        {
+                            if (hasTitleBar())
+                                setMinimised (true);
+                            else
+                                component.windowControlClickedMinimise();
+                        }
                         return 0;
                 }
                 break;
