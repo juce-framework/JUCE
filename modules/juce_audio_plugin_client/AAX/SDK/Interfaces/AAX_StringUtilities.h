@@ -65,6 +65,7 @@ namespace AAX
 	inline std::string	AsStringStemFormat(AAX_EStemFormat inStemFormat, bool inAbbreviate = false);
 	inline std::string	AsStringStemChannel(AAX_EStemFormat inStemFormat, uint32_t inChannelIndex, bool inAbbreviate);
 	inline std::string	AsStringResult(AAX_Result inResult);
+	inline std::string	AsStringSupportLevel(AAX_ESupportLevel inSupportLevel);
 } // namespace AAX
 
 

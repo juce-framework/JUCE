@@ -651,10 +651,8 @@ enum AAX_EProperty : int32_t
      *
      *  \li Apply this property at the \ref AAX_IEffectDescriptor level
      *  \li This property is only applicable to offline processing
-	 *
-	 *  \compatibility AAX_eProperty_DisableAudiosuiteReverse is not currently implemented
      */
-    AAX_eProperty_DisableAudiosuiteReverse = 118,
+    AAX_eProperty_DisableAudioSuiteReverse = 118,
 
 	AAX_eProperty_MaxASProp, // Intentionally given no explicit value
 	//@}end Offline (AudioSuite) properties
