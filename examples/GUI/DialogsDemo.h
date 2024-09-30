@@ -515,11 +515,14 @@ private:
             auto myImage = getImageFromAssets ("juce_icon.png");
 
             Image myImage2 (Image::RGB, 500, 500, true);
-            Graphics g (myImage2);
-            g.setColour (Colours::green);
-            ColourGradient gradient (Colours::yellow, 170, 170, Colours::cyan, 170, 20, true);
-            g.setGradientFill (gradient);
-            g.fillEllipse (20, 20, 300, 300);
+
+            {
+                Graphics g (myImage2);
+                g.setColour (Colours::green);
+                ColourGradient gradient (Colours::yellow, 170, 170, Colours::cyan, 170, 20, true);
+                g.setGradientFill (gradient);
+                g.fillEllipse (20, 20, 300, 300);
+            }
 
             Array<Image> images { myImage, myImage2 };
 
