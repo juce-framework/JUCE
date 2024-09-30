@@ -930,9 +930,14 @@ BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
 
 void BigInteger::exponentModulo (const BigInteger& exponent, const BigInteger& modulus)
 {
+    if (exponent.isZero())
+    {
+        *this = 1;
+        return;
+    }
+    
     *this %= modulus;
     auto exp = exponent;
-    exp %= modulus;
 
     if (modulus.getHighestBit() <= 32 || modulus % 2 == 0)
     {
