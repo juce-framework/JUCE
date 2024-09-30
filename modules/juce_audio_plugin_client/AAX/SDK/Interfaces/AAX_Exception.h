@@ -109,6 +109,15 @@ namespace AAX
 			, mWhat(AAX::Exception::Any::CreateWhat(mDesc, mFunction, mLine))
 			{
 			}
+
+			// copy constructor
+			Any(const Any& inOther)
+			: mDesc(inOther.mDesc)
+			, mFunction(inOther.mFunction)
+			, mLine(inOther.mLine)
+			, mWhat(inOther.mWhat)
+			{
+			}
 			
 			// assignment operator
 			Any& operator=(const Any& inOther)
@@ -173,6 +182,13 @@ namespace AAX
 			explicit ResultError(AAX_Result inWhatResult, const C1& inFunction, const C2& inLine)
 			: Any(ResultError::FormatResult(inWhatResult), inFunction, inLine)
 			, mResult(inWhatResult)
+			{
+			}
+
+			// copy constructor
+			ResultError(const ResultError& inOther)
+			: Any(inOther)
+			, mResult(inOther.mResult)
 			{
 			}
 			
