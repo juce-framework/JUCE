@@ -206,7 +206,7 @@ public:
 
     bool isShowing() const override
     {
-        return XWindowSystem::getInstance()->isMinimised (windowH);
+        return ! XWindowSystem::getInstance()->isMinimised (windowH);
     }
 
     void setFullScreen (bool shouldBeFullScreen) override
