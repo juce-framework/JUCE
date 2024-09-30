@@ -465,11 +465,6 @@ public:
         return [window isMiniaturized];
     }
 
-    bool isShowing() const override
-    {
-        return [window isVisible] && ! isMinimised();
-    }
-
     NSWindowCollectionBehavior getCollectionBehavior (bool forceFullScreen) const
     {
         if (forceFullScreen)

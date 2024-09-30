@@ -1720,11 +1720,6 @@ public:
         return wp.showCmd == SW_SHOWMINIMIZED;
     }
 
-    bool isShowing() const override
-    {
-        return IsWindowVisible (hwnd) && ! isMinimised();
-    }
-
     void setFullScreen (bool shouldBeFullScreen) override
     {
         const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);

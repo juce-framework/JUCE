@@ -204,11 +204,6 @@ public:
         return XWindowSystem::getInstance()->isMinimised (windowH);
     }
 
-    bool isShowing() const override
-    {
-        return XWindowSystem::getInstance()->isMinimised (windowH);
-    }
-
     void setFullScreen (bool shouldBeFullScreen) override
     {
         auto r = lastNonFullscreenBounds; // (get a copy of this before de-minimising)
