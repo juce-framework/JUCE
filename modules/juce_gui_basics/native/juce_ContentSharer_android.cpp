@@ -263,40 +263,45 @@ public:
 
         fileForUri.insert (fileForUriIn.begin(), fileForUriIn.end());
 
-        LocalRef<jobject> fileUris (env->NewObject (JavaArrayList, JavaArrayList.constructor, fileForUriIn.size()));
-
-        for (const auto& pair : fileForUriIn)
-        {
-            env->CallBooleanMethod (fileUris,
-                                    JavaArrayList.add,
-                                    env->CallStaticObjectMethod (AndroidUri,
-                                                                 AndroidUri.parse,
-                                                                 javaString (pair.first).get()));
-        }
+        const auto* action = fileForUriIn.size() == 1 ? "android.intent.action.SEND"
+                                                      : "android.intent.action.SEND_MULTIPLE";
 
         LocalRef<jobject> intent (env->NewObject (AndroidIntent, AndroidIntent.constructor));
-        env->CallObjectMethod (intent,
-                               AndroidIntent.setAction,
-                               javaString ("android.intent.action.SEND_MULTIPLE").get());
+        env->CallObjectMethod (intent, AndroidIntent.setAction, javaString (action).get());
 
         env->CallObjectMethod (intent,
                                AndroidIntent.setType,
                                javaString (getCommonMimeType (mimeTypes)).get());
 
-        const auto permissions = [&]
+        constexpr jint grantReadUriPermission   = 1;
+        constexpr jint grantPrefixUriPermission = 128;
+
+        env->CallObjectMethod (intent, AndroidIntent.setFlags, grantReadUriPermission | grantPrefixUriPermission);
+
+        if (fileForUriIn.size() == 1)
         {
-            constexpr int grantReadUriPermission   = 1;
-            constexpr int grantPrefixUriPermission = 128;
+            const auto uri = fileForUriIn.begin()->first;
+            LocalRef<jobject> androidUri { env->CallStaticObjectMethod (AndroidUri, AndroidUri.parse, javaString (uri).get()) };
+            env->CallObjectMethod (intent, AndroidIntent.putExtraParcelable, javaString ("android.intent.extra.STREAM").get(), androidUri.get());
+        }
+        else
+        {
+            LocalRef<jobject> fileUris (env->NewObject (JavaArrayList, JavaArrayList.constructor, fileForUriIn.size()));
 
-            return grantReadUriPermission | grantPrefixUriPermission;
-        };
+            for (const auto& pair : fileForUriIn)
+            {
+                env->CallBooleanMethod (fileUris,
+                                        JavaArrayList.add,
+                                        env->CallStaticObjectMethod (AndroidUri,
+                                                                     AndroidUri.parse,
+                                                                     javaString (pair.first).get()));
+            }
 
-        env->CallObjectMethod (intent, AndroidIntent.setFlags, permissions);
-
-        env->CallObjectMethod (intent,
-                               AndroidIntent.putParcelableArrayListExtra,
-                               javaString ("android.intent.extra.STREAM").get(),
-                               fileUris.get());
+            env->CallObjectMethod (intent,
+                                   AndroidIntent.putParcelableArrayListExtra,
+                                   javaString ("android.intent.extra.STREAM").get(),
+                                   fileUris.get());
+        }
 
         return doIntent (intent, callback);
     }
