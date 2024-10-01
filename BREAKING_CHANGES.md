@@ -4,6 +4,23 @@
 
 ## Change
 
+Support for Arm32 in Projucer has been removed for Windows targets.
+
+**Possible Issues**
+
+Projucer projects targeting Arm32 on Windows will no longer be able to select that option.
+
+**Workaround**
+
+Select Arm64 or Arm64EC instead of Arm32, and port any 32-bit specific code to 64-bit.
+
+**Rationale**
+
+32-bit Arm support has been deprecated in current versions of Windows 11.
+
+
+## Change
+
 The Javascript implementation has been moved into a independent juce module.
 
 **Possible Issues**

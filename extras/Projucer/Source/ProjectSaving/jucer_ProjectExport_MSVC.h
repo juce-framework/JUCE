@@ -148,6 +148,24 @@ public:
                         config->getValue (Ids::targetName) = oldStyleLibName;
         }
 
+        {
+            std::vector<ValueTree> toErase;
+
+            for (const auto& config : getConfigurations())
+            {
+                if (config.getProperty (Ids::winArchitecture) == "ARM")
+                    toErase.push_back (config);
+            }
+
+            if (! toErase.empty())
+            {
+                for (const auto& e : toErase)
+                    e.getParent().removeChild (e, nullptr);
+
+                getProject().addProjectMessage (ProjectMessages::Ids::unsupportedArm32Config, {});
+            }
+        }
+
         for (ConfigIterator i (*this); i.next();)
             dynamic_cast<MSVCBuildConfiguration&> (*i).updateOldLTOSetting();
     }
@@ -214,7 +232,6 @@ public:
         String getIntel64BitArchName() const              { return "x64"; }
         String getIntel32BitArchName() const              { return "Win32"; }
         String getArm64BitArchName() const                { return "ARM64"; }
-        String getArm32BitArchName() const                { return "ARM"; }
         String getArchitectureString() const              { return architectureTypeValue.get(); }
         String getDebugInformationFormatString() const    { return debugInformationFormatValue.get(); }
 
@@ -258,8 +275,8 @@ public:
                 addVisualStudioPluginInstallPathProperties (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
-                                                    { getIntel32BitArchName(), getIntel64BitArchName(), getArm32BitArchName(), getArm64BitArchName() },
-                                                    { getIntel32BitArchName(), getIntel64BitArchName(), getArm32BitArchName(), getArm64BitArchName() }),
+                                                    { getIntel32BitArchName(), getIntel64BitArchName(), getArm64BitArchName() },
+                                                    { getIntel32BitArchName(), getIntel64BitArchName(), getArm64BitArchName() }),
                        "Which Windows architecture to use.");
 
             props.add (new ChoicePropertyComponentWithEnablement (debugInformationFormatValue,
@@ -399,7 +416,6 @@ public:
                 {
                     { "Win32", { "%programfiles(x86)%", "%CommonProgramFiles(x86)%" } },
                     { "x64",   { "%ProgramW6432%",      "%CommonProgramW6432%"      } },
-                    { "ARM",   { "%programfiles(arm)%", "%CommonProgramFiles(arm)%" } },
                     { "ARM64", { "%ProgramW6432%",      "%CommonProgramW6432%"      } }
                 };
 
