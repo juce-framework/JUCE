@@ -129,11 +129,8 @@ public:
 
                 for (const auto& area : preparing->getPaintAreas())
                 {
-                    D2D1_POINT_2U destPoint { (uint32) area.getX(), (uint32) area.getY() };
-                    D2D1_RECT_U sourceRect { (uint32) area.getX(),
-                                             (uint32) area.getY(),
-                                             (uint32) area.getRight(),
-                                             (uint32) area.getBottom() };
+                    const auto destPoint = D2DUtilities::toPOINT_2U (area.getPosition());
+                    const auto sourceRect = D2DUtilities::toRECT_U (area);
                     readyToDisplay->getPresentationBitmap()->CopyFromBitmap (&destPoint, preparing->getPresentationBitmap(), &sourceRect);
                 }
 
