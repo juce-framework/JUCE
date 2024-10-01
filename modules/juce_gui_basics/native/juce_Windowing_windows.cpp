@@ -1788,8 +1788,9 @@ public:
 
         const auto screenPos = convertLogicalScreenPointToPhysical (localPos + getScreenPosition(), hwnd);
 
-        if (trueIfInAChildWindow)
-            return getClientRectInScreen().contains (screenPos);
+        // Surge diff while waiting for 803 revert
+        // if (trueIfInAChildWindow)
+        //    return getClientRectInScreen().contains (screenPos);
 
         auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
 
