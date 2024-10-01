@@ -3397,8 +3397,7 @@ private:
             r = D2DUtilities::toRECT (modifiedPhysicalBounds);
         }
 
-        if (renderContext != nullptr)
-            renderContext->setSize (r.right - r.left, r.bottom - r.top);
+        updateBorderSize();
 
         return TRUE;
     }
