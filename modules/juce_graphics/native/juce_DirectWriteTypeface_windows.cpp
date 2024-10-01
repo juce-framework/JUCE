@@ -114,6 +114,28 @@ public:
         return stringArrayFromRange (strings);
     }
 
+    static std::vector<ComSmartPtr<IDWriteFont>> getAllFontsInFamily (IDWriteFontFamily* fontFamily)
+    {
+        const auto fontFacesCount = fontFamily->GetFontCount();
+        std::vector<ComSmartPtr<IDWriteFont>> result;
+        result.reserve (fontFacesCount);
+
+        for (UINT32 i = 0; i < fontFacesCount; ++i)
+        {
+            ComSmartPtr<IDWriteFont> dwFont;
+
+            if (FAILED (fontFamily->GetFont (i, dwFont.resetAndGetPointerAddress())))
+                continue;
+
+            if (dwFont->GetSimulations() != DWRITE_FONT_SIMULATIONS_NONE)
+                continue;
+
+            result.push_back (dwFont);
+        }
+
+        return result;
+    }
+
     StringArray findAllTypefaceStyles (const String& family)
     {
         const std::scoped_lock lock { mutex };
@@ -131,19 +153,10 @@ public:
             if (FAILED (collection->GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress())) || fontFamily == nullptr)
                 continue;
 
-            // Get the font faces
-            const auto fontFacesCount = fontFamily->GetFontCount();
             std::set<String> results;
 
-            for (uint32 i = 0; i < fontFacesCount; ++i)
-            {
-                ComSmartPtr<IDWriteFont> dwFont;
-
-                if (FAILED (fontFamily->GetFont (i, dwFont.resetAndGetPointerAddress())) || dwFont->GetSimulations() != DWRITE_FONT_SIMULATIONS_NONE)
-                    continue;
-
-                results.insert (getFontFaceName (dwFont));
-            }
+            for (const auto& font : getAllFontsInFamily (fontFamily))
+                results.insert (getFontFaceName (font));
 
             return stringArrayFromRange (results);
         }
@@ -567,6 +580,17 @@ public:
         if (family == nullptr)
             return getLastResortTypeface (f);
 
+        // Try matching the typeface style first
+        const auto fonts = AggregateFontCollection::getAllFontsInFamily (family);
+        const auto matchingStyle = std::find_if (fonts.begin(), fonts.end(), [&] (const auto& ptr)
+        {
+            return style.compareIgnoreCase (getFontFaceName (ptr)) == 0;
+        });
+
+        if (matchingStyle != fonts.end())
+            return fromFont (*matchingStyle, nullptr, &f, MetricsMechanism::dwriteOnly);
+
+        // No matching typeface style, so let dwrite try to find a reasonable substitute
         const auto weight = f.isBold() ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL;
         const auto italic = f.isItalic() ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
 
