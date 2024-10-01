@@ -153,12 +153,18 @@ public:
             if (FAILED (collection->GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress())) || fontFamily == nullptr)
                 continue;
 
-            std::set<String> results;
+            std::set<String> uniqueResults;
+            StringArray orderedResults;
 
             for (const auto& font : getAllFontsInFamily (fontFamily))
-                results.insert (getFontFaceName (font));
+            {
+                const auto name = getFontFaceName (font);
 
-            return stringArrayFromRange (results);
+                if (uniqueResults.insert (name).second)
+                    orderedResults.add (name);
+            }
+
+            return orderedResults;
         }
 
         return {};
