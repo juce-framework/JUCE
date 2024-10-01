@@ -401,7 +401,7 @@ private:
         bool ready = Pimpl::checkPaintReady();
         ready &= swap.canPaint();
         ready &= compositionTree.has_value();
-        ready &= deferredRepaints.getNumRectangles() > 0 || resizing;
+        ready &= ! getPaintAreas().isEmpty();
         ready &= presentation.getPresentation() != nullptr;
         return ready;
     }
