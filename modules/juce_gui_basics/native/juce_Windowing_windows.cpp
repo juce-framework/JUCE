@@ -1793,11 +1793,7 @@ public:
 
         const auto screenPos = convertLogicalScreenPointToPhysical (localPos + getScreenPosition(), hwnd);
 
-        if (trueIfInAChildWindow)
-            return getClientRectInScreen().contains (screenPos);
-
         auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
-
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 

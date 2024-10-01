@@ -926,6 +926,11 @@ public:
         stretch a window vertically, and the window tiling flyout that appears when hovering the
         mouse over the maximise button.
 
+        It's dangerous to call Component::contains from an overriding function, because this might
+        call into the peer to do system hit-testing - but the system hit-test could in turn call
+        findControlAtPoint, leading to infinite recursion. It's better to use functions like
+        Rectangle::contains or Path::contains to test for the window control areas.
+
         This is called by the peer. Component subclasses may override this but should not call it directly.
      */
     virtual WindowControlKind findControlAtPoint (Point<float>) const { return WindowControlKind::client; }
