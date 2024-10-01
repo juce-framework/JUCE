@@ -315,7 +315,6 @@ private:
     BackBufferLock presentation;
     std::optional<CompositionTree> compositionTree;
     RectangleList<int> deferredRepaints;
-    Rectangle<int> frameSize;
     std::vector<RECT> dirtyRectangles;
     bool resizing = false;
     int64 lastFinishFrameTicks = 0;
@@ -341,12 +340,12 @@ private:
         if (! deviceResources.has_value())
             return false;
 
-        if (! hwnd || frameSize.isEmpty())
+        if (! hwnd || getClientRect().isEmpty())
             return false;
 
         if (! swap.canPaint())
         {
-            if (auto hr = swap.create (hwnd, frameSize, adapter); FAILED (hr))
+            if (auto hr = swap.create (hwnd, getClientRect(), adapter); FAILED (hr))
                 return false;
 
             if (auto hr = swap.createBuffer (getDeviceContext()); FAILED (hr))
@@ -423,9 +422,7 @@ public:
         // that's not really spelled out in the documentation.
         // This method is called when the component peer receives WM_SHOWWINDOW
         prepare();
-
-        frameSize = getClientRect();
-        deferredRepaints = frameSize;
+        deferredRepaints = getClientRect();
     }
 
     Rectangle<int> getClientRect() const
@@ -466,11 +463,10 @@ public:
 
     void setSize (Rectangle<int> size)
     {
-        if (size == frameSize || size.isEmpty())
+        if (size == swap.getSize() || size.isEmpty())
             return;
 
         // Require the entire window to be repainted
-        frameSize = size;
         deferredRepaints = size;
         InvalidateRect (hwnd, nullptr, TRUE);
 
@@ -502,8 +498,9 @@ public:
     {
         if (resizing)
         {
-            deferredRepaints = frameSize;
-            setSize (getClientRect());
+            const auto size = getClientRect();
+            setSize (size);
+            deferredRepaints = size;
         }
 
         auto* savedState = Pimpl::startFrame (dpiScale);
@@ -622,7 +619,7 @@ public:
 
         const auto context = getDeviceContext();
 
-        if (frameSize.isEmpty() || context == nullptr || swap.buffer == nullptr)
+        if (context == nullptr || swap.buffer == nullptr)
             return {};
 
         // Create the bitmap to receive the snapshot
@@ -630,7 +627,8 @@ public:
         bitmapProperties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET;
         bitmapProperties.pixelFormat = swap.buffer->GetPixelFormat();
 
-        const D2D_SIZE_U size { (UINT32) frameSize.getWidth(), (UINT32) frameSize.getHeight() };
+        const auto swapRect = swap.getSize();
+        const auto size = D2D1::SizeU ((UINT32) swapRect.getWidth(), (UINT32) swapRect.getHeight());
 
         ComSmartPtr<ID2D1Bitmap1> snapshot;
 
@@ -643,7 +641,7 @@ public:
 
         // Copy the swap chain buffer to the bitmap snapshot
         D2D_POINT_2U p { 0, 0 };
-        const auto sourceRect = D2DUtilities::toRECT_U (frameSize);
+        const auto sourceRect = D2DUtilities::toRECT_U (swapRect);
 
         if (const auto hr = snapshot->CopyFromBitmap (&p, swap.buffer, &sourceRect); FAILED (hr))
             return {};
