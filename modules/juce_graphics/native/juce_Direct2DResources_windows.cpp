@@ -501,7 +501,6 @@ public:
         idle,
         chainAllocated,
         bufferAllocated,
-        bufferFilled
     };
     State state = State::idle;
 };

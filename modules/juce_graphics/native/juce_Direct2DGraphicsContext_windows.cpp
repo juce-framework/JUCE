@@ -595,7 +595,7 @@ public:
         const auto paintAreas = getPaintAreas();
         const auto paintBounds = paintAreas.getBounds();
 
-        if (! getFrameSize().intersects (paintBounds) || paintBounds.isEmpty())
+        if (! getFrameSize().intersects (paintBounds) || paintBounds.isEmpty() || paintAreas.isEmpty())
             return nullptr;
 
         // Is Direct2D ready to paint?
