@@ -316,7 +316,6 @@ private:
     std::optional<CompositionTree> compositionTree;
     RectangleList<int> deferredRepaints;
     std::vector<RECT> dirtyRectangles;
-    bool resizing = false;
     int64 lastFinishFrameTicks = 0;
 
     HWND hwnd = nullptr;
@@ -377,7 +376,7 @@ private:
     RectangleList<int> getPaintAreas() const override
     {
         // Does the entire buffer need to be filled?
-        if (swap.state == SwapChain::State::bufferAllocated || resizing)
+        if (swap.state == SwapChain::State::bufferAllocated)
             return swap.getSize();
 
         return deferredRepaints;
@@ -451,20 +450,10 @@ public:
         return {};
     }
 
-    void setResizing (bool x)
-    {
-        resizing = x;
-    }
-
-    bool getResizing() const
-    {
-        return resizing;
-    }
-
-    void setSize (Rectangle<int> size)
+    bool setSize (Rectangle<int> size)
     {
         if (size == swap.getSize() || size.isEmpty())
-            return;
+            return false;
 
         // Require the entire window to be repainted
         deferredRepaints = size;
@@ -485,6 +474,8 @@ public:
             if (swapChainThread)
                 swapChainThread->notify();
         }
+
+        return true;
     }
 
     void addDeferredRepaint (Rectangle<int> deferredRepaint)
@@ -496,12 +487,7 @@ public:
 
     SavedState* startFrame (float dpiScale) override
     {
-        if (resizing)
-        {
-            const auto size = getClientRect();
-            setSize (size);
-            deferredRepaints = size;
-        }
+        setSize (getClientRect());
 
         auto* savedState = Pimpl::startFrame (dpiScale);
 
@@ -665,7 +651,6 @@ Direct2DHwndContext::Direct2DHwndContext (HWND windowHandle)
    #endif
 
     pimpl = std::make_unique<HwndPimpl> (*this, windowHandle);
-    updateSize();
 }
 
 Direct2DHwndContext::~Direct2DHwndContext()
@@ -683,26 +668,6 @@ Direct2DGraphicsContext::Pimpl* Direct2DHwndContext::getPimpl() const noexcept
 void Direct2DHwndContext::handleShowWindow()
 {
     pimpl->handleShowWindow();
-}
-
-void Direct2DHwndContext::setResizing (bool x)
-{
-    pimpl->setResizing (x);
-}
-
-bool Direct2DHwndContext::getResizing() const
-{
-    return pimpl->getResizing();
-}
-
-void Direct2DHwndContext::setSize (int width, int height)
-{
-    pimpl->setSize ({ width, height });
-}
-
-void Direct2DHwndContext::updateSize()
-{
-    pimpl->setSize (pimpl->getClientRect());
 }
 
 void Direct2DHwndContext::addDeferredRepaint (Rectangle<int> deferredRepaint)
