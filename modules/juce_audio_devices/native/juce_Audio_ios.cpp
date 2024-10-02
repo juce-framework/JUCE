@@ -441,21 +441,29 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     {
         availableBufferSizes.clear();
 
-        auto newBufferSize = tryBufferSize (sampleRate, 64);
-        jassert (newBufferSize > 0);
-
-        const auto longestBufferSize = tryBufferSize (sampleRate, 4096);
-
-        while (newBufferSize <= longestBufferSize)
+        const auto [minBufSize, maxBufSize] = std::invoke ([this]
         {
-            availableBufferSizes.add (newBufferSize);
-            newBufferSize *= 2;
-        }
+            constexpr auto suggestedMin = 64;
+            constexpr auto suggestedMax = 4096;
+
+            if (@available (ios 18, *))
+                return std::tuple (suggestedMin, suggestedMax);
+
+            const auto min = tryBufferSize (sampleRate, suggestedMin);
+            const auto max = tryBufferSize (sampleRate, suggestedMax);
+
+            bufferSize = tryBufferSize (sampleRate, bufferSize);
+
+            return std::tuple (min, max);
+        });
+
+        jassert (minBufSize > 0);
+
+        for (auto i = minBufSize; i <= maxBufSize; i *= 2)
+            availableBufferSizes.add (i);
 
         // Sometimes the largest supported buffer size is not a power of 2
-        availableBufferSizes.addIfNotAlreadyThere (longestBufferSize);
-
-        bufferSize = tryBufferSize (sampleRate, bufferSize);
+        availableBufferSizes.addIfNotAlreadyThere (maxBufSize);
 
        #if JUCE_IOS_AUDIO_LOGGING
         {
@@ -511,10 +519,6 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         }
 
         availableSampleRates.addIfNotAlreadyThere (highestRate);
-
-        // Restore the original values.
-        sampleRate = trySampleRate (sampleRate);
-        bufferSize = tryBufferSize (sampleRate, bufferSize);
 
         AudioUnitAddPropertyListener (audioUnit,
                                       kAudioUnitProperty_StreamFormat,
@@ -1227,9 +1231,6 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     {
         const ScopedLock sl (callbackLock);
 
-        updateHardwareInfo();
-        setTargetSampleRateAndBufferSize();
-
         if (isRunning)
         {
             if (audioUnit != nullptr)
@@ -1241,6 +1242,13 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
                     callback->audioDeviceStopped();
             }
 
+        }
+
+        updateHardwareInfo();
+        setTargetSampleRateAndBufferSize();
+
+        if (isRunning)
+        {
             channelData.reconfigure (requestedInputChannels, requestedOutputChannels);
 
             createAudioUnit();
