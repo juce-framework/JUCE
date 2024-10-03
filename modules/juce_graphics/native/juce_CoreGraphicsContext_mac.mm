@@ -638,7 +638,10 @@ void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float
         CGContextSetLineCap (context.get(), kCGLineCapButt);
         CGContextSetLineJoin (context.get(), kCGLineJoinMiter);
 
-        detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr) };
+        detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r),
+                                                            std::clamp (cornerSize, 0.0f, r.getWidth() / 2.0f),
+                                                            std::clamp (cornerSize, 0.0f, r.getHeight() / 2.0f),
+                                                            nullptr) };
         CGContextAddPath (context.get(), path.get());
         drawCurrentPath (kCGPathStroke);
     }
@@ -669,7 +672,10 @@ void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float
 void CoreGraphicsContext::fillRoundedRectangle (const Rectangle<float>& r, float cornerSize)
 {
     CGContextBeginPath (context.get());
-    detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr) };
+    detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r),
+                                                        std::clamp (cornerSize, 0.0f, r.getWidth() / 2.0f),
+                                                        std::clamp (cornerSize, 0.0f, r.getHeight() / 2.0f),
+                                                        nullptr) };
     CGContextAddPath (context.get(), path.get());
     drawCurrentPath (kCGPathFill);
 }
