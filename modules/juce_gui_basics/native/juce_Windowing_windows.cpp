@@ -1920,9 +1920,9 @@ public:
     }
 
     //==============================================================================
-    void onVBlank() override
+    void onVBlank (double timestampSec) override
     {
-        vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
+        callVBlankListeners (timestampSec);
         dispatchDeferredRepaints();
 
         if (renderContext != nullptr)

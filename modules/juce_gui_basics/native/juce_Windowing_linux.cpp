@@ -573,7 +573,8 @@ private:
 
     void onVBlank()
     {
-        vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
+        const auto timestampSec = Time::getMillisecondCounterHiRes() / 1000.0;
+        callVBlankListeners (timestampSec);
 
         if (repainter != nullptr)
             repainter->dispatchDeferredRepaints();

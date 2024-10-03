@@ -1075,9 +1075,9 @@ public:
         return areAnyWindowsInLiveResize();
     }
 
-    void onVBlank()
+    void onVBlank (double timestampSec)
     {
-        vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
+        callVBlankListeners (timestampSec);
         setNeedsDisplayRectangles();
     }
 
@@ -1758,13 +1758,18 @@ private:
         explicit AsyncRepainter (NSViewComponentPeer& o) : owner (o) {}
         ~AsyncRepainter() override { cancelPendingUpdate(); }
 
-        void markUpdated (const CGDirectDisplayID x)
+        void markUpdated (const CGDirectDisplayID x, double timestampSec)
         {
             {
                 const std::scoped_lock lock { mutex };
 
-                if (std::find (backgroundDisplays.cbegin(), backgroundDisplays.cend(), x) == backgroundDisplays.cend())
-                    backgroundDisplays.push_back (x);
+                if (const auto it = std::find_if (backgroundVBlankEvents.cbegin(),
+                                                  backgroundVBlankEvents.cend(),
+                                                  [&x] (const auto& event) { return event.display == x; });
+                    it == backgroundVBlankEvents.cend())
+                {
+                    backgroundVBlankEvents.push_back ({ x, timestampSec });
+                }
             }
 
             triggerAsyncUpdate();
@@ -1775,20 +1780,28 @@ private:
         {
             {
                 const std::scoped_lock lock { mutex };
-                mainThreadDisplays = backgroundDisplays;
-                backgroundDisplays.clear();
+                mainThreadVBlankEvents = backgroundVBlankEvents;
+                backgroundVBlankEvents.clear();
             }
 
-            for (const auto& display : mainThreadDisplays)
+            for (const auto& event : mainThreadVBlankEvents)
+            {
                 if (auto* peerView = owner.view)
                     if (auto* peerWindow = [peerView window])
-                        if (display == ScopedDisplayLink::getDisplayIdForScreen ([peerWindow screen]))
-                            owner.onVBlank();
+                        if (event.display == ScopedDisplayLink::getDisplayIdForScreen ([peerWindow screen]))
+                            owner.onVBlank (event.timeSec);
+            }
         }
+
+        struct VBlankEvent
+        {
+            CGDirectDisplayID display{};
+            double timeSec{};
+        };
 
         NSViewComponentPeer& owner;
         std::mutex mutex;
-        std::vector<CGDirectDisplayID> backgroundDisplays, mainThreadDisplays;
+        std::vector<VBlankEvent> backgroundVBlankEvents, mainThreadVBlankEvents;
     };
 
     AsyncRepainter asyncRepainter { *this };
@@ -1801,7 +1814,10 @@ private:
     {
         sharedDisplayLinks->registerFactory ([this] (CGDirectDisplayID display)
         {
-            return [this, display] { asyncRepainter.markUpdated (display); };
+            return [this, display] (double timestampSec)
+                   {
+                       asyncRepainter.markUpdated (display, timestampSec);
+                   };
         })
     };
 

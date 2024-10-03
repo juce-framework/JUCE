@@ -899,7 +899,7 @@ public:
         {
             connection.emplace (sharedDisplayLinks->registerFactory ([this] (CGDirectDisplayID display)
             {
-                return [this, display]
+                return [this, display] (double)
                 {
                     if (display == lastDisplay)
                         triggerRepaint();

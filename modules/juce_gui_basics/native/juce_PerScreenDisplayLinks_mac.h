@@ -119,7 +119,7 @@ public:
         return (CGDirectDisplayID) [[screen.deviceDescription objectForKey: @"NSScreenNumber"] unsignedIntegerValue];
     }
 
-    ScopedDisplayLink (NSScreen* screenIn, std::function<void()> onCallbackIn)
+    ScopedDisplayLink (NSScreen* screenIn, std::function<void (double)> onCallbackIn)
         : displayId (getDisplayIdForScreen (screenIn)),
           link ([display = displayId]
           {
@@ -133,12 +133,13 @@ public:
     {
         const auto callback = [] (CVDisplayLinkRef,
                                   const CVTimeStamp*,
-                                  const CVTimeStamp*,
+                                  const CVTimeStamp* outputTime,
                                   CVOptionFlags,
                                   CVOptionFlags*,
                                   void* context) -> int
         {
-            static_cast<const ScopedDisplayLink*> (context)->onCallback();
+            const auto outputTimeSec = (double) outputTime->videoTime / (double) outputTime->videoTimeScale;
+            static_cast<const ScopedDisplayLink*> (context)->onCallback (outputTimeSec);
             return kCVReturnSuccess;
         };
 
@@ -179,7 +180,7 @@ private:
 
     CGDirectDisplayID displayId;
     std::unique_ptr<std::remove_pointer_t<CVDisplayLinkRef>, DisplayLinkDestructor> link;
-    std::function<void()> onCallback;
+    std::function<void (double)> onCallback;
 
     // Instances can't be copied or moved, because 'this' is passed as context to
     // CVDisplayLinkSetOutputCallback
@@ -202,7 +203,7 @@ public:
         refreshScreens();
     }
 
-    using RefreshCallback = std::function<void()>;
+    using RefreshCallback = std::function<void (double)>;
     using Factory = std::function<RefreshCallback (CGDirectDisplayID)>;
 
     /*
@@ -293,10 +294,10 @@ private:
 
                 // This is the callback that will actually fire in response to this screen's display
                 // link callback.
-                result.emplace_back (screen, [cbs = std::move (callbacks)]
+                result.emplace_back (screen, [cbs = std::move (callbacks)] (double timestampSec)
                 {
                     for (const auto& callback : cbs)
-                        callback();
+                        callback (timestampSec);
                 });
             }
 

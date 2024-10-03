@@ -122,7 +122,7 @@ private:
             if (output->WaitForVBlank() == S_OK)
             {
                 if (const auto now = Time::getMillisecondCounterHiRes();
-                    now - std::exchange (lastVBlankEvent, now) < 1.0)
+                    now - lastVBlankEvent.exchange (now) < 1.0)
                 {
                     Thread::sleep (1);
                 }
@@ -145,8 +145,10 @@ private:
 
     void handleAsyncUpdate() override
     {
+        const auto timestampSec = lastVBlankEvent / 1000.0;
+
         for (auto& listener : listeners)
-            listener.get().onVBlank();
+            listener.get().onVBlank (timestampSec);
 
         {
             const std::scoped_lock lock { mutex };
@@ -170,7 +172,7 @@ private:
         exit,
     };
 
-    double lastVBlankEvent = 0.0;
+    std::atomic<double> lastVBlankEvent{};
     ThreadState threadState = ThreadState::paint;
     std::condition_variable condvar;
     std::mutex mutex;

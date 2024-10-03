@@ -420,7 +420,7 @@ public:
     void setIcon (const Image& newIcon) override;
     StringArray getAvailableRenderingEngines() override       { return StringArray ("CoreGraphics Renderer"); }
 
-    void displayLinkCallback();
+    void displayLinkCallback (double timestampSec);
 
     void drawRect (CGRect);
     void drawRectWithContext (CGContextRef, CGRect);
@@ -768,7 +768,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 - (void) displayLinkCallback: (CADisplayLink*) dl
 {
     if (owner != nullptr)
-        owner->displayLinkCallback();
+        owner->displayLinkCallback (dl.targetTimestamp);
 }
 
 #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
@@ -2160,9 +2160,9 @@ void UIViewComponentPeer::dismissPendingTextInput()
 }
 
 //==============================================================================
-void UIViewComponentPeer::displayLinkCallback()
+void UIViewComponentPeer::displayLinkCallback (double timestampSec)
 {
-    vBlankListeners.call ([] (auto& l) { l.onVBlank(); });
+    callVBlankListeners (timestampSec);
 
     if (deferredRepaints.isEmpty())
         return;
