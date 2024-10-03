@@ -37,6 +37,16 @@ namespace juce
 
 VBlankAttachment::VBlankAttachment (Component* c, std::function<void()> callbackIn)
     : owner (c),
+      callback ([cb = std::move (callbackIn)] (auto) { cb(); })
+{
+    jassert (owner != nullptr && callback);
+
+    updateOwner();
+    updatePeer();
+}
+
+VBlankAttachment::VBlankAttachment (Component* c, std::function<void (double)> callbackIn)
+    : owner (c),
       callback (std::move (callbackIn))
 {
     jassert (owner != nullptr && callback);
@@ -70,9 +80,9 @@ VBlankAttachment::~VBlankAttachment()
     cleanup();
 }
 
-void VBlankAttachment::onVBlank()
+void VBlankAttachment::onVBlank (double timestampMs)
 {
-    callback();
+    NullCheckedInvocation::invoke (callback, timestampMs);
 }
 
 void VBlankAttachment::componentParentHierarchyChanged (Component&)

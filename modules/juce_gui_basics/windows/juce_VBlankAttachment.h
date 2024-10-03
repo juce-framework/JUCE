@@ -41,8 +41,8 @@ namespace juce
 
     @tags{Animations}
 */
-class JUCE_API  VBlankAttachment final  : public ComponentPeer::VBlankListener,
-                                          public ComponentListener
+class JUCE_API  VBlankAttachment final  : private ComponentPeer::VBlankListener,
+                                          private ComponentListener
 {
 public:
     /** Default constructor for creating an empty object. */
@@ -52,8 +52,23 @@ public:
         blank event of the display that the passed in Component is currently visible on.
 
         The Component must be valid for the entire lifetime of the VBlankAttachment.
+
+        You should prefer the other constructor, where the callback also receives a timestamp
+        parameter. This constructor is only provided for compatibility with the earlier JUCE
+        implementation.
     */
     VBlankAttachment (Component* c, std::function<void()> callbackIn);
+
+    /** Constructor. Creates an attachment that will call the passed in function at every vertical
+        blank event of the display that the passed in Component is currently visible on.
+
+        The Component must be valid for the entire lifetime of the VBlankAttachment.
+
+        The provided callback is called with a monotonically increasing value expressed in seconds
+        that corresponds to the time of the next frame to be presented. Use this value to
+        synchronise drawing across all classes using a VBlankAttachment.
+    */
+    VBlankAttachment (Component* c, std::function<void (double)> callbackIn);
     VBlankAttachment (VBlankAttachment&& other);
     VBlankAttachment& operator= (VBlankAttachment&& other);
 
@@ -63,20 +78,20 @@ public:
     /** Returns true for a default constructed object. */
     bool isEmpty() const { return owner == nullptr; }
 
+private:
     //==============================================================================
-    void onVBlank() override;
+    void onVBlank (double timestampMs) override;
 
     //==============================================================================
     void componentParentHierarchyChanged (Component&) override;
 
-private:
     void updateOwner();
     void updatePeer();
     void cleanup();
 
     Component* owner = nullptr;
     Component* lastOwner = nullptr;
-    std::function<void()> callback;
+    std::function<void (double)> callback;
     ComponentPeer* lastPeer = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE (VBlankAttachment)
