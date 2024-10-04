@@ -1,33 +1,38 @@
 ![alt text](https://assets.juce.com/juce/JUCE_banner_github.png "JUCE")
 
-JUCE is an open-source cross-platform C++ application framework for creating high quality
-desktop and mobile applications, including VST, VST3, AU, AUv3, AAX and LV2 audio plug-ins
-and plug-in hosts. JUCE can be easily integrated with existing projects via CMake, or can
-be used as a project generation tool via the [Projucer](https://juce.com/discover/projucer),
-which supports exporting projects for Xcode (macOS and iOS), Visual Studio, Android Studio,
-Code::Blocks and Linux Makefiles as well as containing a source code editor.
+JUCE is an open-source cross-platform C++ application framework for creating
+desktop and mobile applications, including VST, VST3, AU, AUv3, AAX and LV2
+audio plug-ins and plug-in hosts. JUCE can be easily integrated with existing
+projects via CMake, or can be used as a project generation tool via the
+[Projucer](#the-projucer), which supports exporting projects for Xcode (macOS
+and iOS), Visual Studio, Android Studio, and Linux Makefiles as well as
+containing a source code editor.
 
 ## Getting Started
 
-The JUCE repository contains a [master](https://github.com/juce-framework/JUCE/tree/master)
-and [develop](https://github.com/juce-framework/JUCE/tree/develop) branch. The develop branch
-contains the latest bugfixes and features and is periodically merged into the master
-branch in stable [tagged releases](https://github.com/juce-framework/JUCE/releases)
-(the latest release containing pre-built binaries can be also downloaded from the
-[JUCE website](https://juce.com/get-juce)).
+The JUCE repository contains a
+[master](https://github.com/juce-framework/JUCE/tree/master) and
+[develop](https://github.com/juce-framework/JUCE/tree/develop) branch. The
+develop branch contains the latest bug fixes and features and is periodically
+merged into the master branch in stable [tagged
+releases](https://github.com/juce-framework/JUCE/releases) (the latest release
+containing pre-built binaries can be also downloaded from the [JUCE
+website](https://juce.com/get-juce)).
 
-JUCE projects can be managed with either the Projucer (JUCE's own project-configuration
-tool) or with CMake.
+JUCE projects can be managed with either the Projucer (JUCE's own
+project-configuration tool) or with CMake.
 
 ### The Projucer
 
 The repository doesn't contain a pre-built Projucer so you will need to build it
-for your platform - Xcode, Visual Studio and Linux Makefile projects are located in
-[extras/Projucer/Builds](/extras/Projucer/Builds)
-(the minimum system requirements are listed in the __System Requirements__ section below).
-The Projucer can then be used to create new JUCE projects, view tutorials and run examples.
-It is also possible to include the JUCE modules source code in an existing project directly,
-or build them into a static or dynamic library which can be linked into a project.
+for your platform - Xcode, Visual Studio and Linux Makefile projects are located
+in [extras/Projucer/Builds](/extras/Projucer/Builds) (the minimum system
+requirements are listed in the [minimum system
+requirements](#minimum-system-requirements) section below). The Projucer can
+then be used to create new JUCE projects, view tutorials and run examples. It is
+also possible to include the JUCE modules source code in an existing project
+directly, or build them into a static or dynamic library which can be linked
+into a project.
 
 For further help getting started, please refer to the JUCE
 [documentation](https://juce.com/learn/documentation) and
@@ -35,7 +40,7 @@ For further help getting started, please refer to the JUCE
 
 ### CMake
 
-Version 3.15 or higher is required. To use CMake, you will need to install it,
+Version 3.22 or higher is required. To use CMake, you will need to install it,
 either from your system package manager or from the [official download
 page](https://cmake.org/download/). For comprehensive documentation on JUCE's
 CMake API, see the [JUCE CMake documentation](/docs/CMake%20API.md). For
@@ -56,19 +61,20 @@ of the target you wish to build.
 
 #### Building JUCE Projects
 
-- __macOS/iOS__: Xcode 10.1 (macOS 10.13.6)
-- __Windows__: Windows 8.1 and Visual Studio 2017
+- __C++ Standard__: 17
+- __macOS/iOS__: Xcode 12.4 (Intel macOS 10.15.4, Apple Silicon macOS 11.0)
+- __Windows__: Visual Studio 2019 (Windows 10)
 - __Linux__: g++ 7.0 or Clang 6.0 (for a full list of dependencies, see
 [here](/docs/Linux%20Dependencies.md)).
-- __Android__: Android Studio on Windows, macOS or Linux
+- __Android__: Android Studio (NDK 26) on Windows, macOS or Linux
 
 #### Deployment Targets
 
-- __macOS__: macOS 10.9
-- __Windows__: Windows Vista
+- __macOS__: macOS 10.11
+- __Windows__: Windows 10
 - __Linux__: Mainstream Linux distributions
-- __iOS__: iOS 9.0
-- __Android__: Jelly Bean (API 16)
+- __iOS__: iOS 12
+- __Android__: Android 5 - Lollipop (API Level 21)
 
 ## Contributing
 
@@ -76,43 +82,37 @@ Please see our [contribution guidelines](.github/contributing.md).
 
 ## Licensing
 
-The core JUCE modules (juce_audio_basics, juce_audio_devices, juce_core and juce_events)
-are permissively licensed under the terms of the
-[ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
-Other modules are covered by a
-[GPL](https://www.gnu.org/licenses/gpl-3.0.en.html)/Commercial license.
+See [LICENSE.md](LICENSE.md) for licensing and dependency information.
 
-There are multiple commercial licensing tiers for JUCE, with different terms for each:
-- JUCE Personal (developers or startup businesses with revenue under 50K USD) - free
-- JUCE Indie (small businesses with revenue under 500K USD) - $40/month or $800 perpetual
-- JUCE Pro (no revenue limit) - $130/month or $2600 perpetual
-- JUCE Educational (no revenue limit) - free for bona fide educational institutes
+## AAX Plug-Ins
 
-For full terms see [LICENSE.md](LICENSE.md).
+AAX plug-ins need to be digitally signed using PACE Anti-Piracy's signing tools
+before they will run in commercially available versions of Pro Tools. These
+tools are provided free of charge by Avid. Before obtaining the signing tools,
+you will need to use a special build of Pro Tools, called Pro Tools Developer,
+to test your unsigned plug-ins. The steps to obtain Pro Tools Developer are:
 
-The JUCE framework contains the following dependencies:
-- [Oboe](modules/juce_audio_devices/native/oboe/) ([Apache 2.0](modules/juce_audio_devices/native/oboe/LICENSE))
-- [FLAC](modules/juce_audio_formats/codecs/flac/) ([BSD](modules/juce_audio_formats/codecs/flac/Flac%20Licence.txt))
-- [Ogg Vorbis](modules/juce_audio_formats/codecs/oggvorbis/) ([BSD](modules/juce_audio_formats/codecs/oggvorbis/Ogg%20Vorbis%20Licence.txt))
-- [AudioUnitSDK](modules/juce_audio_plugin_client/AU/AudioUnitSDK/) ([Apache 2.0](modules/juce_audio_plugin_client/AU/AudioUnitSDK/LICENSE.txt))
-- [AUResources.r](modules/juce_audio_plugin_client/AUResources.r) ([Apple](modules/juce_audio_plugin_client/AUResources.r))
-- [LV2](modules/juce_audio_processors/format_types/LV2_SDK/) ([ISC](modules/juce_audio_processors/format_types/LV2_SDK/lv2/COPYING))
-- [pslextensions](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h) ([Public domain](modules/juce_audio_processors/format_types/pslextensions/ipslcontextinfo.h))
-- [VST3](modules/juce_audio_processors/format_types/VST3_SDK/) ([Proprietary Steinberg VST3/GPLv3](modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt))
-- [zlib](modules/juce_core/zip/zlib/) ([zlib](modules/juce_core/zip/zlib/README))
-- [Box2D](modules/juce_box2d/box2d/) ([zlib](modules/juce_box2d/box2d/Box2D.h))
-- [jpeglib](modules/juce_graphics/image_formats/jpglib/) ([Independent JPEG Group License](modules/juce_graphics/image_formats/jpglib/README))
-- [pnglib](modules/juce_graphics/image_formats/pnglib/) ([zlib](modules/juce_graphics/image_formats/pnglib/LICENSE))
-- [GLEW](modules/juce_opengl/opengl/juce_gl.h) ([BSD](modules/juce_opengl/opengl/juce_gl.h)), including [Mesa](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h)) and [Khronos](modules/juce_opengl/opengl/juce_gl.h) ([MIT](modules/juce_opengl/opengl/juce_gl.h))
+1. Sign up as an AAX Developer [here](https://developer.avid.com/aax/).
+2. Request a Pro Tools Developer Bundle activation code by sending an email to
+   [devauth@avid.com](mailto:devauth@avid.com).
+3. Download the latest Pro Tools Developer build from your Avid Developer
+   account.
 
-The JUCE examples are licensed under the terms of the
-[ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
+When your plug-ins have been tested and debugged in Pro Tools Developer, and you
+are ready to digitally sign them, please send an email to
+[audiosdk@avid.com](mailto:audiosdk@avid.com) with the subject "PACE Eden
+Signing Tools Request". You need to include an overview of each plug-in along
+with a screen recording showing the plug-in running in Pro Tools Developer, with
+audio if possible.
 
-Dependencies in the examples:
-- [reaper-sdk](examples/Plugins/extern/) ([zlib](examples/Plugins/extern/LICENSE.md))
+Please also include the following information:
 
-Dependencies in the bundled applications:
-- [Projucer icons](extras/Projucer/Source/Utility/UI/jucer_Icons.cpp) ([MIT](extras/Projucer/Source/Utility/UI/jucer_Icons.cpp))
+- Company name
+- Admin full name
+- Telephone number
 
-Dependencies in the build system:
-- [Android Gradle](examples/DemoRunner/Builds/Android/gradle/wrapper/LICENSE-for-gradlewrapper.txt) ([Apache 2.0](examples/DemoRunner/Builds/Android/gradle/wrapper/LICENSE-for-gradlewrapper.txt))
+Once the request is submitted, PACE Anti-Piracy will contact you directly with
+information about signing your plug-ins. When the plug-ins have been signed, you
+are free to sell and distribute them. If you are interested in selling your
+plug-ins on the Avid Marketplace, please send an email to
+[audiosdk@avid.com](mailto:audiosdk@avid.com).

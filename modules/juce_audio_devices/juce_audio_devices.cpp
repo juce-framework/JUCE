@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -46,9 +58,13 @@
 #include "juce_audio_devices.h"
 
 #include "audio_io/juce_SampleRateHelpers.cpp"
+#include "midi_io/juce_MidiDeviceListConnectionBroadcaster.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
+ #include <juce_audio_basics/native/juce_CoreAudioTimeConversions_mac.h>
+ #include <juce_audio_basics/native/juce_AudioWorkgroup_mac.h>
+ #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
  #include <juce_audio_basics/midi/ump/juce_UMP.h>
  #include "midi_io/ump/juce_UMPBytestreamInputHandler.h"
  #include "midi_io/ump/juce_UMPU32InputHandler.h"
@@ -63,8 +79,8 @@
  #undef Point
  #undef Component
 
- #include "native/juce_mac_CoreAudio.cpp"
- #include "native/juce_mac_CoreMidi.mm"
+ #include "native/juce_CoreAudio_mac.cpp"
+ #include "native/juce_CoreMidi_mac.mm"
 
 #elif JUCE_IOS
  #import <AudioToolbox/AudioToolbox.h>
@@ -75,18 +91,22 @@
   #import <CoreMIDI/MIDINetworkSession.h>
  #endif
 
- #include "native/juce_ios_Audio.cpp"
- #include "native/juce_mac_CoreMidi.mm"
+ #if JUCE_MODULE_AVAILABLE_juce_graphics
+  #include <juce_graphics/native/juce_CoreGraphicsHelpers_mac.h>
+ #endif
+
+ #include "native/juce_Audio_ios.cpp"
+ #include "native/juce_CoreMidi_mac.mm"
 
 //==============================================================================
 #elif JUCE_WINDOWS
  #if JUCE_WASAPI
   #include <mmreg.h>
-  #include "native/juce_win32_WASAPI.cpp"
+  #include "native/juce_WASAPI_windows.cpp"
  #endif
 
  #if JUCE_DIRECTSOUND
-  #include "native/juce_win32_DirectSound.cpp"
+  #include "native/juce_DirectSound_windows.cpp"
  #endif
 
  #if JUCE_USE_WINRT_MIDI && (JUCE_MSVC || JUCE_CLANG)
@@ -113,7 +133,7 @@
  #endif
 
  #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
- #include "native/juce_win32_Midi.cpp"
+ #include "native/juce_Midi_windows.cpp"
 
  #if JUCE_ASIO
   /* This is very frustrating - we only need to use a handful of definitions from
@@ -136,7 +156,7 @@
         needed - so to simplify things, you could just copy these into your JUCE directory).
   */
   #include <iasiodrv.h>
-  #include "native/juce_win32_ASIO.cpp"
+  #include "native/juce_ASIO_windows.cpp"
  #endif
 
 //==============================================================================
@@ -150,8 +170,10 @@
      If you don't have the ALSA library and don't want to build JUCE with audio support,
      just set the JUCE_ALSA flag to 0.
   */
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-length-array")
   #include <alsa/asoundlib.h>
-  #include "native/juce_linux_ALSA.cpp"
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+  #include "native/juce_ALSA_linux.cpp"
  #endif
 
  #if JUCE_JACK
@@ -164,7 +186,7 @@
      JUCE with low latency audio support, just set the JUCE_JACK flag to 0.
   */
   #include <jack/jack.h>
-  #include "native/juce_linux_JackAudio.cpp"
+  #include "native/juce_JackAudio_linux.cpp"
  #endif
 
  #if (JUCE_LINUX && JUCE_BELA)
@@ -175,14 +197,14 @@
   #include <Bela.h>
   #include <Midi.h>
   #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
-  #include "native/juce_linux_Bela.cpp"
+  #include "native/juce_Bela_linux.cpp"
  #endif
 
  #undef SIZEOF
 
  #if ! JUCE_BELA
   #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
-  #include "native/juce_linux_Midi.cpp"
+  #include "native/juce_Midi_linux.cpp"
  #endif
 
 //==============================================================================
@@ -194,19 +216,19 @@ namespace juce
     RealtimeThreadFactory getAndroidRealtimeThreadFactory();
 } // namespace juce
 
-#include "native/juce_android_Audio.cpp"
+#include "native/juce_Audio_android.cpp"
 
  #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
- #include "native/juce_android_Midi.cpp"
+ #include "native/juce_Midi_android.cpp"
 
  #if JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE
-  #include "native/juce_android_HighPerformanceAudioHelpers.h"
+  #include "native/juce_HighPerformanceAudioHelpers_android.h"
 
   #if JUCE_USE_ANDROID_OPENSLES
    #include <SLES/OpenSLES.h>
    #include <SLES/OpenSLES_Android.h>
    #include <SLES/OpenSLES_AndroidConfiguration.h>
-   #include "native/juce_android_OpenSL.cpp"
+   #include "native/juce_OpenSL_android.cpp"
   #endif
 
   #if JUCE_USE_ANDROID_OBOE
@@ -218,11 +240,13 @@ namespace juce
                                         "-Wzero-as-null-pointer-constant",
                                         "-Winconsistent-missing-destructor-override",
                                         "-Wshadow-field-in-constructor",
-                                        "-Wshadow-field")
+                                        "-Wshadow-field",
+                                        "-Wsign-conversion",
+                                        "-Wswitch-enum")
    #include <oboe/Oboe.h>
    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-   #include "native/juce_android_Oboe.cpp"
+   #include "native/juce_Oboe_android.cpp"
   #endif
  #else
 // No audio library, so no way to create realtime threads.
@@ -233,6 +257,8 @@ namespace juce
  #endif
 
 #endif
+
+#include "midi_io/juce_MidiDevices.cpp"
 
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED
 namespace juce
@@ -249,6 +275,5 @@ namespace juce
 #include "audio_io/juce_AudioIODevice.cpp"
 #include "audio_io/juce_AudioIODeviceType.cpp"
 #include "midi_io/juce_MidiMessageCollector.cpp"
-#include "midi_io/juce_MidiDevices.cpp"
 #include "sources/juce_AudioSourcePlayer.cpp"
 #include "sources/juce_AudioTransportSource.cpp"

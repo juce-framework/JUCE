@@ -139,7 +139,7 @@ static void FLAC__MD5Transform(FLAC__uint32 buf[4], FLAC__uint32 const in[16])
 //@@@@@@ OPT: use bswap/intrinsics
 static void byteSwap(FLAC__uint32 *buf, uint32_t words)
 {
-	FLAC__uint32 x;
+	register FLAC__uint32 x;
 	do {
 		x = *buf;
 		x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0x00ff00ff);
@@ -148,7 +148,7 @@ static void byteSwap(FLAC__uint32 *buf, uint32_t words)
 }
 static void byteSwapX16(FLAC__uint32 *buf)
 {
-	FLAC__uint32 x;
+	register FLAC__uint32 x;
 
 	x = *buf; x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0x00ff00ff); *buf++ = (x >> 16) | (x << 16);
 	x = *buf; x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0x00ff00ff); *buf++ = (x >> 16) | (x << 16);

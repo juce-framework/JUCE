@@ -106,6 +106,9 @@ public:
             return true;
         }
 
+        // On some devices, Float does not work so it should be converted to I16.
+        static bool shouldConvertFloatToI16ForOutputStreams();
+
         static constexpr int32_t kDefaultBottomMarginInBursts = 0;
         static constexpr int32_t kDefaultTopMarginInBursts = 0;
 

@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -23,42 +35,46 @@
 namespace juce
 {
 
-MidiRPNDetector::MidiRPNDetector() noexcept
-{
-}
-
-MidiRPNDetector::~MidiRPNDetector() noexcept
-{
-}
-
 bool MidiRPNDetector::parseControllerMessage (int midiChannel,
                                               int controllerNumber,
                                               int controllerValue,
                                               MidiRPNMessage& result) noexcept
 {
+    auto parsed = tryParse (midiChannel, controllerNumber, controllerValue);
+
+    if (! parsed.has_value())
+        return false;
+
+    result = *parsed;
+    return true;
+}
+
+std::optional<MidiRPNMessage> MidiRPNDetector::tryParse (int midiChannel,
+                                                         int controllerNumber,
+                                                         int controllerValue)
+{
     jassert (midiChannel > 0 && midiChannel <= 16);
     jassert (controllerNumber >= 0 && controllerNumber < 128);
     jassert (controllerValue >= 0 && controllerValue < 128);
 
-    return states[midiChannel - 1].handleController (midiChannel, controllerNumber, controllerValue, result);
+    return states[midiChannel - 1].handleController (midiChannel, controllerNumber, controllerValue);
 }
 
 void MidiRPNDetector::reset() noexcept
 {
-    for (int i = 0; i < 16; ++i)
+    for (auto& state : states)
     {
-        states[i].parameterMSB = 0xff;
-        states[i].parameterLSB = 0xff;
-        states[i].resetValue();
-        states[i].isNRPN = false;
+        state.parameterMSB = 0xff;
+        state.parameterLSB = 0xff;
+        state.resetValue();
+        state.isNRPN = false;
     }
 }
 
 //==============================================================================
-bool MidiRPNDetector::ChannelState::handleController (int channel,
-                                                      int controllerNumber,
-                                                      int value,
-                                                      MidiRPNMessage& result) noexcept
+std::optional<MidiRPNMessage> MidiRPNDetector::ChannelState::handleController (int channel,
+                                                                               int controllerNumber,
+                                                                               int value) noexcept
 {
     switch (controllerNumber)
     {
@@ -68,13 +84,11 @@ bool MidiRPNDetector::ChannelState::handleController (int channel,
         case 0x64:  parameterLSB = uint8 (value); resetValue(); isNRPN = false; break;
         case 0x65:  parameterMSB = uint8 (value); resetValue(); isNRPN = false; break;
 
-        case 0x06:  valueMSB = uint8 (value); return sendIfReady (channel, result);
-        case 0x26:  valueLSB = uint8 (value); break;
-
-        default:  break;
+        case 0x06:  valueMSB = uint8 (value); valueLSB = 0xff; return sendIfReady (channel);
+        case 0x26:  valueLSB = uint8 (value);                  return sendIfReady (channel);
     }
 
-    return false;
+    return {};
 }
 
 void MidiRPNDetector::ChannelState::resetValue() noexcept
@@ -84,32 +98,28 @@ void MidiRPNDetector::ChannelState::resetValue() noexcept
 }
 
 //==============================================================================
-bool MidiRPNDetector::ChannelState::sendIfReady (int channel, MidiRPNMessage& result) noexcept
+std::optional<MidiRPNMessage> MidiRPNDetector::ChannelState::sendIfReady (int channel) noexcept
 {
-    if (parameterMSB < 0x80 && parameterLSB < 0x80)
+    if (parameterMSB >= 0x80 || parameterLSB >= 0x80 || valueMSB >= 0x80)
+        return {};
+
+    MidiRPNMessage result{};
+    result.channel = channel;
+    result.parameterNumber = (parameterMSB << 7) + parameterLSB;
+    result.isNRPN = isNRPN;
+
+    if (valueLSB < 0x80)
     {
-        if (valueMSB < 0x80)
-        {
-            result.channel = channel;
-            result.parameterNumber = (parameterMSB << 7) + parameterLSB;
-            result.isNRPN = isNRPN;
-
-            if (valueLSB < 0x80)
-            {
-                result.value = (valueMSB << 7) + valueLSB;
-                result.is14BitValue = true;
-            }
-            else
-            {
-                result.value = valueMSB;
-                result.is14BitValue = false;
-            }
-
-            return true;
-        }
+        result.value = (valueMSB << 7) + valueLSB;
+        result.is14BitValue = true;
+    }
+    else
+    {
+        result.value = valueMSB;
+        result.is14BitValue = false;
     }
 
-    return false;
+    return result;
 }
 
 //==============================================================================
@@ -132,24 +142,25 @@ MidiBuffer MidiRPNGenerator::generate (int midiChannel,
     jassert (parameterNumber >= 0 && parameterNumber < 16384);
     jassert (value >= 0 && value < (use14BitValue ? 16384 : 128));
 
-    uint8 parameterLSB = uint8 (parameterNumber & 0x0000007f);
-    uint8 parameterMSB = uint8 (parameterNumber >> 7);
+    auto parameterLSB = uint8 (parameterNumber & 0x0000007f);
+    auto parameterMSB = uint8 (parameterNumber >> 7);
 
     uint8 valueLSB = use14BitValue ? uint8 (value & 0x0000007f) : 0x00;
     uint8 valueMSB = use14BitValue ? uint8 (value >> 7) : uint8 (value);
 
-    uint8 channelByte = uint8 (0xb0 + midiChannel - 1);
+    auto channelByte = uint8 (0xb0 + midiChannel - 1);
 
     MidiBuffer buffer;
 
     buffer.addEvent (MidiMessage (channelByte, isNRPN ? 0x62 : 0x64, parameterLSB),  0);
     buffer.addEvent (MidiMessage (channelByte, isNRPN ? 0x63 : 0x65, parameterMSB),  0);
 
-    // sending the value LSB is optional, but must come before sending the value MSB:
+    buffer.addEvent (MidiMessage (channelByte, 0x06, valueMSB), 0);
+
+    // According to the MIDI spec, whenever a MSB is received, the corresponding LSB will
+    // be reset. Therefore, the LSB should be sent after the MSB.
     if (use14BitValue)
         buffer.addEvent (MidiMessage (channelByte, 0x26, valueLSB), 0);
-
-    buffer.addEvent (MidiMessage (channelByte, 0x06, valueMSB), 0);
 
     return buffer;
 }
@@ -159,7 +170,7 @@ MidiBuffer MidiRPNGenerator::generate (int midiChannel,
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class MidiRPNDetectorTests   : public UnitTest
+class MidiRPNDetectorTests final : public UnitTest
 {
 public:
     MidiRPNDetectorTests()
@@ -168,134 +179,196 @@ public:
 
     void runTest() override
     {
-        beginTest ("7-bit RPN");
+        // From the MIDI 1.0 spec:
+        // If 128 steps of resolution is sufficient the second byte (LSB) of the data value can be
+        // omitted. If both the MSB and LSB are sent initially, a subsequent fine adjustment only
+        // requires the sending of the LSB. The MSB does not have to be retransmitted. If a
+        // subsequent major adjustment is necessary the MSB must be transmitted again. When an MSB
+        // is received, the receiver should set its concept of the LSB to zero.
+
+        beginTest ("Individual MSB is parsed as 7-bit");
         {
             MidiRPNDetector detector;
-            MidiRPNMessage rpn;
-            expect (! detector.parseControllerMessage (2, 101, 0,  rpn));
-            expect (! detector.parseControllerMessage (2, 100, 7,  rpn));
-            expect (detector.parseControllerMessage   (2, 6,   42, rpn));
+            expect (! detector.tryParse (2, 101, 0));
+            expect (! detector.tryParse (2, 100, 7));
 
-            expectEquals (rpn.channel, 2);
-            expectEquals (rpn.parameterNumber, 7);
-            expectEquals (rpn.value, 42);
-            expect (! rpn.isNRPN);
-            expect (! rpn.is14BitValue);
+            auto parsed = detector.tryParse (2, 6, 42);
+            expect (parsed.has_value());
+
+            expectEquals (parsed->channel, 2);
+            expectEquals (parsed->parameterNumber, 7);
+            expectEquals (parsed->value, 42);
+            expect (! parsed->isNRPN);
+            expect (! parsed->is14BitValue);
         }
 
-        beginTest ("14-bit RPN");
+        beginTest ("LSB without preceding MSB is ignored");
         {
             MidiRPNDetector detector;
-            MidiRPNMessage rpn;
-            expect (! detector.parseControllerMessage (1, 100, 44, rpn));
-            expect (! detector.parseControllerMessage (1, 101, 2,  rpn));
-            expect (! detector.parseControllerMessage (1, 38,  94, rpn));
-            expect (detector.parseControllerMessage   (1, 6,   1,  rpn));
+            expect (! detector.tryParse (2, 101, 0));
+            expect (! detector.tryParse (2, 100, 7));
+            expect (! detector.tryParse (2, 38, 42));
+        }
 
-            expectEquals (rpn.channel, 1);
-            expectEquals (rpn.parameterNumber, 300);
-            expectEquals (rpn.value, 222);
-            expect (! rpn.isNRPN);
-            expect (rpn.is14BitValue);
+        beginTest ("LSB following MSB is parsed as 14-bit");
+        {
+            MidiRPNDetector detector;
+            expect (! detector.tryParse (1, 101, 2));
+            expect (! detector.tryParse (1, 100, 44));
+
+            expect (detector.tryParse (1, 6, 1).has_value());
+
+            auto lsbParsed = detector.tryParse (1, 38, 94);
+            expect (lsbParsed.has_value());
+
+            expectEquals (lsbParsed->channel, 1);
+            expectEquals (lsbParsed->parameterNumber, 300);
+            expectEquals (lsbParsed->value, 222);
+            expect (! lsbParsed->isNRPN);
+            expect (lsbParsed->is14BitValue);
+        }
+
+        beginTest ("Multiple LSB following MSB re-use the MSB");
+        {
+            MidiRPNDetector detector;
+            expect (! detector.tryParse (1, 101, 2));
+            expect (! detector.tryParse (1, 100, 43));
+
+            expect (detector.tryParse (1, 6, 1).has_value());
+
+            expect (detector.tryParse (1, 38, 94).has_value());
+            expect (detector.tryParse (1, 38, 95).has_value());
+            expect (detector.tryParse (1, 38, 96).has_value());
+
+            auto lsbParsed = detector.tryParse (1, 38, 97);
+            expect (lsbParsed.has_value());
+
+            expectEquals (lsbParsed->channel, 1);
+            expectEquals (lsbParsed->parameterNumber, 299);
+            expectEquals (lsbParsed->value, 225);
+            expect (! lsbParsed->isNRPN);
+            expect (lsbParsed->is14BitValue);
+        }
+
+        beginTest ("Sending a new MSB resets the LSB");
+        {
+            MidiRPNDetector detector;
+            expect (! detector.tryParse (1, 101, 3));
+            expect (! detector.tryParse (1, 100, 43));
+
+            expect (detector.tryParse (1, 6, 1).has_value());
+            expect (detector.tryParse (1, 38, 94).has_value());
+
+            auto newMsb = detector.tryParse (1, 6, 2);
+            expect (newMsb.has_value());
+
+            expectEquals (newMsb->channel, 1);
+            expectEquals (newMsb->parameterNumber, 427);
+            expectEquals (newMsb->value, 2);
+            expect (! newMsb->isNRPN);
+            expect (! newMsb->is14BitValue);
         }
 
         beginTest ("RPNs on multiple channels simultaneously");
         {
             MidiRPNDetector detector;
-            MidiRPNMessage rpn;
-            expect (! detector.parseControllerMessage (1, 100, 44, rpn));
-            expect (! detector.parseControllerMessage (2, 101, 0,  rpn));
-            expect (! detector.parseControllerMessage (1, 101, 2,  rpn));
-            expect (! detector.parseControllerMessage (2, 100, 7,  rpn));
-            expect (! detector.parseControllerMessage (1, 38,  94, rpn));
-            expect (detector.parseControllerMessage   (2, 6,   42, rpn));
+            expect (! detector.tryParse (1, 100, 44));
+            expect (! detector.tryParse (2, 101, 0));
+            expect (! detector.tryParse (1, 101, 2));
+            expect (! detector.tryParse (2, 100, 7));
+            expect (detector.tryParse   (1, 6,   1).has_value());
 
-            expectEquals (rpn.channel, 2);
-            expectEquals (rpn.parameterNumber, 7);
-            expectEquals (rpn.value, 42);
-            expect (! rpn.isNRPN);
-            expect (! rpn.is14BitValue);
+            auto channelTwo = detector.tryParse (2, 6, 42);
+            expect (channelTwo.has_value());
 
-            expect (detector.parseControllerMessage   (1, 6,   1,  rpn));
+            expectEquals (channelTwo->channel, 2);
+            expectEquals (channelTwo->parameterNumber, 7);
+            expectEquals (channelTwo->value, 42);
+            expect (! channelTwo->isNRPN);
+            expect (! channelTwo->is14BitValue);
 
-            expectEquals (rpn.channel, 1);
-            expectEquals (rpn.parameterNumber, 300);
-            expectEquals (rpn.value, 222);
-            expect (! rpn.isNRPN);
-            expect (rpn.is14BitValue);
+            auto channelOne = detector.tryParse (1, 38,  94);
+            expect (channelOne.has_value());
+
+            expectEquals (channelOne->channel, 1);
+            expectEquals (channelOne->parameterNumber, 300);
+            expectEquals (channelOne->value, 222);
+            expect (! channelOne->isNRPN);
+            expect (channelOne->is14BitValue);
         }
 
         beginTest ("14-bit RPN with value within 7-bit range");
         {
             MidiRPNDetector detector;
-            MidiRPNMessage rpn;
-            expect (! detector.parseControllerMessage (16, 100, 0 , rpn));
-            expect (! detector.parseControllerMessage (16, 101, 0,  rpn));
-            expect (! detector.parseControllerMessage (16, 38,  3,  rpn));
-            expect (detector.parseControllerMessage   (16, 6,   0,  rpn));
+            expect (! detector.tryParse (16, 100, 0));
+            expect (! detector.tryParse (16, 101, 0));
+            expect (detector.tryParse   (16, 6,   0).has_value());
 
-            expectEquals (rpn.channel, 16);
-            expectEquals (rpn.parameterNumber, 0);
-            expectEquals (rpn.value, 3);
-            expect (! rpn.isNRPN);
-            expect (rpn.is14BitValue);
+            auto parsed = detector.tryParse (16, 38,  3);
+            expect (parsed.has_value());
+
+            expectEquals (parsed->channel, 16);
+            expectEquals (parsed->parameterNumber, 0);
+            expectEquals (parsed->value, 3);
+            expect (! parsed->isNRPN);
+            expect (parsed->is14BitValue);
         }
 
         beginTest ("invalid RPN (wrong order)");
         {
             MidiRPNDetector detector;
-            MidiRPNMessage rpn;
-            expect (! detector.parseControllerMessage (2, 6,   42, rpn));
-            expect (! detector.parseControllerMessage (2, 101, 0,  rpn));
-            expect (! detector.parseControllerMessage (2, 100, 7,  rpn));
+            expect (! detector.tryParse (2, 6,   42));
+            expect (! detector.tryParse (2, 101, 0));
+            expect (! detector.tryParse (2, 100, 7));
         }
 
         beginTest ("14-bit RPN interspersed with unrelated CC messages");
         {
             MidiRPNDetector detector;
-            MidiRPNMessage rpn;
-            expect (! detector.parseControllerMessage (16, 3,   80, rpn));
-            expect (! detector.parseControllerMessage (16, 100, 0 , rpn));
-            expect (! detector.parseControllerMessage (16, 4,   81, rpn));
-            expect (! detector.parseControllerMessage (16, 101, 0,  rpn));
-            expect (! detector.parseControllerMessage (16, 5,   82, rpn));
-            expect (! detector.parseControllerMessage (16, 5,   83, rpn));
-            expect (! detector.parseControllerMessage (16, 38,  3,  rpn));
-            expect (! detector.parseControllerMessage (16, 4,   84, rpn));
-            expect (! detector.parseControllerMessage (16, 3,   85, rpn));
-            expect (detector.parseControllerMessage   (16, 6,   0,  rpn));
+            expect (! detector.tryParse (16, 3,   80));
+            expect (! detector.tryParse (16, 100, 0));
+            expect (! detector.tryParse (16, 4,   81));
+            expect (! detector.tryParse (16, 101, 0));
+            expect (! detector.tryParse (16, 5,   82));
+            expect (! detector.tryParse (16, 5,   83));
+            expect (detector.tryParse   (16, 6,   0).has_value());
+            expect (! detector.tryParse (16, 4,   84).has_value());
+            expect (! detector.tryParse (16, 3,   85).has_value());
 
-            expectEquals (rpn.channel, 16);
-            expectEquals (rpn.parameterNumber, 0);
-            expectEquals (rpn.value, 3);
-            expect (! rpn.isNRPN);
-            expect (rpn.is14BitValue);
+            auto parsed = detector.tryParse (16, 38,  3);
+            expect (parsed.has_value());
+
+            expectEquals (parsed->channel, 16);
+            expectEquals (parsed->parameterNumber, 0);
+            expectEquals (parsed->value, 3);
+            expect (! parsed->isNRPN);
+            expect (parsed->is14BitValue);
         }
 
         beginTest ("14-bit NRPN");
         {
             MidiRPNDetector detector;
-            MidiRPNMessage rpn;
-            expect (! detector.parseControllerMessage (1, 98,  44, rpn));
-            expect (! detector.parseControllerMessage (1, 99 , 2,  rpn));
-            expect (! detector.parseControllerMessage (1, 38,  94, rpn));
-            expect (detector.parseControllerMessage   (1, 6,   1,  rpn));
+            expect (! detector.tryParse (1, 98,  44));
+            expect (! detector.tryParse (1, 99 , 2));
+            expect (detector.tryParse   (1, 6,   1).has_value());
 
-            expectEquals (rpn.channel, 1);
-            expectEquals (rpn.parameterNumber, 300);
-            expectEquals (rpn.value, 222);
-            expect (rpn.isNRPN);
-            expect (rpn.is14BitValue);
+            auto parsed = detector.tryParse (1, 38,  94);
+            expect (parsed.has_value());
+
+            expectEquals (parsed->channel, 1);
+            expectEquals (parsed->parameterNumber, 300);
+            expectEquals (parsed->value, 222);
+            expect (parsed->isNRPN);
+            expect (parsed->is14BitValue);
         }
 
         beginTest ("reset");
         {
             MidiRPNDetector detector;
-            MidiRPNMessage rpn;
-            expect (! detector.parseControllerMessage (2, 101, 0,  rpn));
+            expect (! detector.tryParse (2, 101, 0));
             detector.reset();
-            expect (! detector.parseControllerMessage (2, 100, 7,  rpn));
-            expect (! detector.parseControllerMessage (2, 6,   42, rpn));
+            expect (! detector.tryParse (2, 100, 7));
+            expect (! detector.tryParse (2, 6,   42));
         }
     }
 };
@@ -303,7 +376,7 @@ public:
 static MidiRPNDetectorTests MidiRPNDetectorUnitTests;
 
 //==============================================================================
-class MidiRPNGeneratorTests   : public UnitTest
+class MidiRPNGeneratorTests final : public UnitTest
 {
 public:
     MidiRPNGeneratorTests()
@@ -346,25 +419,24 @@ private:
     //==============================================================================
     void expectContainsRPN (const MidiBuffer& midiBuffer, MidiRPNMessage expected)
     {
-        MidiRPNMessage result = MidiRPNMessage();
+        std::optional<MidiRPNMessage> result;
         MidiRPNDetector detector;
 
         for (const auto metadata : midiBuffer)
         {
             const auto midiMessage = metadata.getMessage();
 
-            if (detector.parseControllerMessage (midiMessage.getChannel(),
-                                                 midiMessage.getControllerNumber(),
-                                                 midiMessage.getControllerValue(),
-                                                 result))
-                break;
+            result = detector.tryParse (midiMessage.getChannel(),
+                                        midiMessage.getControllerNumber(),
+                                        midiMessage.getControllerValue());
         }
 
-        expectEquals (result.channel, expected.channel);
-        expectEquals (result.parameterNumber, expected.parameterNumber);
-        expectEquals (result.value, expected.value);
-        expect (result.isNRPN == expected.isNRPN);
-        expect (result.is14BitValue == expected.is14BitValue);
+        expect (result.has_value());
+        expectEquals (result->channel, expected.channel);
+        expectEquals (result->parameterNumber, expected.parameterNumber);
+        expectEquals (result->value, expected.value);
+        expect (result->isNRPN == expected.isNRPN);
+        expect (result->is14BitValue == expected.is14BitValue);
     }
 };
 

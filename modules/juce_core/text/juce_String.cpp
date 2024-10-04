@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -349,6 +361,24 @@ String::String (CharPointer_UTF16 t, size_t maxChars)   : text (StringHolderUtil
 String::String (CharPointer_UTF32 t, size_t maxChars)   : text (StringHolderUtils::createFromCharPointer (t, maxChars)) {}
 String::String (const wchar_t* t, size_t maxChars)      : text (StringHolderUtils::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
 
+#if __cpp_char8_t
+String::String (const char8_t* const t) : String (CharPointer_UTF8 (reinterpret_cast<const char*> (t)))
+{
+    /*  If you get an assertion here, then you're trying to create a string using the standard C++
+        type for UTF-8 character representation, but the data consists of invalid UTF-8 characters!
+    */
+    jassert (t == nullptr || CharPointer_UTF8::isValidString (reinterpret_cast<const char*> (t), std::numeric_limits<int>::max()));
+}
+
+String::String (const char8_t* t, size_t maxChars) : String (CharPointer_UTF8 (reinterpret_cast<const char*> (t)), maxChars)
+{
+    /*  If you get an assertion here, then you're trying to create a string using the standard C++
+        type for UTF-8 character representation, but the data consists of invalid UTF-8 characters!
+    */
+    jassert (t == nullptr || CharPointer_UTF8::isValidString (reinterpret_cast<const char*> (t), (int) maxChars));
+}
+#endif
+
 String::String (CharPointer_UTF8  start, CharPointer_UTF8  end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
 String::String (CharPointer_UTF16 start, CharPointer_UTF16 end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
 String::String (CharPointer_UTF32 start, CharPointer_UTF32 end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
@@ -439,7 +469,7 @@ namespace NumberToStringConverters
         return printDigits (t, v);
     }
 
-    struct StackArrayStream  : public std::basic_streambuf<char, std::char_traits<char>>
+    struct StackArrayStream final : public std::basic_streambuf<char, std::char_traits<char>>
     {
         explicit StackArrayStream (char* d)
         {
@@ -789,7 +819,7 @@ namespace StringHelpers
     template <typename T>
     inline String& operationAddAssign (String& str, const T number)
     {
-        char buffer [(sizeof(T) * 8) / 2];
+        char buffer [(sizeof (T) * 8) / 2];
         auto* end = buffer + numElementsInArray (buffer);
         auto* start = NumberToStringConverters::numberToString (end, number);
 
@@ -2124,20 +2154,25 @@ size_t String::getNumBytesAsUTF8() const noexcept
 
 String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 {
-    if (buffer != nullptr)
-    {
-        if (bufferSizeBytes < 0)
-            return String (CharPointer_UTF8 (buffer));
+    if (buffer == nullptr || bufferSizeBytes == 0)
+        return {};
 
-        if (bufferSizeBytes > 0)
-        {
-            jassert (CharPointer_UTF8::isValidString (buffer, bufferSizeBytes));
-            return String (CharPointer_UTF8 (buffer), CharPointer_UTF8 (buffer + bufferSizeBytes));
-        }
+    if (bufferSizeBytes < 0)
+    {
+        jassert (CharPointer_UTF8::isValidString (buffer, std::numeric_limits<int>::max()));
+        return { CharPointer_UTF8 (buffer) };
     }
 
-    return {};
+    jassert (CharPointer_UTF8::isValidString (buffer, bufferSizeBytes));
+    return { CharPointer_UTF8 (buffer), CharPointer_UTF8 (buffer + bufferSizeBytes) };
 }
+
+#if __cpp_char8_t
+String String::fromUTF8 (const char8_t* const buffer, int bufferSizeBytes)
+{
+    return { buffer, (size_t) bufferSizeBytes };
+}
+#endif
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 
@@ -2257,20 +2292,25 @@ static String reduceLengthOfFloatString (const String& input)
     return input;
 }
 
-static String serialiseDouble (double input)
+/*  maxDecimalPlaces <= 0 means "use as many decimal places as necessary"
+*/
+static String serialiseDouble (double input, int maxDecimalPlaces = 0)
 {
     auto absInput = std::abs (input);
 
     if (absInput >= 1.0e6 || absInput <= 1.0e-5)
-        return reduceLengthOfFloatString ({ input, 15, true });
+        return reduceLengthOfFloatString ({ input, maxDecimalPlaces > 0 ? maxDecimalPlaces : 15, true });
 
     int intInput = (int) input;
 
-    if ((double) intInput == input)
+    if (exactlyEqual ((double) intInput, input))
         return { input, 1 };
 
-    auto numberOfDecimalPlaces = [absInput]
+    auto numberOfDecimalPlaces = [absInput, maxDecimalPlaces]
     {
+        if (maxDecimalPlaces > 0)
+            return maxDecimalPlaces;
+
         if (absInput < 1.0)
         {
             if (absInput >= 1.0e-3)
@@ -2319,7 +2359,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)
 
-class StringTests  : public UnitTest
+class StringTests final : public UnitTest
 {
 public:
     StringTests()
@@ -2376,9 +2416,8 @@ public:
     {
         Random r = getRandom();
 
+        beginTest ("Basics");
         {
-            beginTest ("Basics");
-
             expect (String().length() == 0);
             expect (String() == String());
             String s1, s2 ("abcd");
@@ -2409,9 +2448,8 @@ public:
             expect (String ("abc foo bar").containsWholeWord ("abc") && String ("abc foo bar").containsWholeWord ("abc"));
         }
 
+        beginTest ("Operations");
         {
-            beginTest ("Operations");
-
             String s ("012345678");
             expect (s.hashCode() != 0);
             expect (s.hashCode64() != 0);
@@ -2420,12 +2458,12 @@ public:
             expect (s.compare (String ("012345678")) == 0);
             expect (s.compare (String ("012345679")) < 0);
             expect (s.compare (String ("012345676")) > 0);
-            expect (String("a").compareNatural ("A") == 0);
-            expect (String("A").compareNatural ("B") < 0);
-            expect (String("a").compareNatural ("B") < 0);
-            expect (String("10").compareNatural ("2") > 0);
-            expect (String("Abc 10").compareNatural ("aBC 2") > 0);
-            expect (String("Abc 1").compareNatural ("aBC 2") < 0);
+            expect (String ("a").compareNatural ("A") == 0);
+            expect (String ("A").compareNatural ("B") < 0);
+            expect (String ("a").compareNatural ("B") < 0);
+            expect (String ("10").compareNatural ("2") > 0);
+            expect (String ("Abc 10").compareNatural ("aBC 2") > 0);
+            expect (String ("Abc 1").compareNatural ("aBC 2") < 0);
             expect (s.substring (2, 3) == String::charToString (s[2]));
             expect (s.substring (0, 1) == String::charToString (s[0]));
             expect (s.getLastCharacter() == s [s.length() - 1]);
@@ -2567,16 +2605,16 @@ public:
 
             beginTest ("Numeric conversions");
             expect (String().getIntValue() == 0);
-            expect (String().getDoubleValue() == 0.0);
-            expect (String().getFloatValue() == 0.0f);
+            expectEquals (String().getDoubleValue(), 0.0);
+            expectEquals (String().getFloatValue(), 0.0f);
             expect (s.getIntValue() == 12345678);
             expect (s.getLargeIntValue() == (int64) 12345678);
-            expect (s.getDoubleValue() == 12345678.0);
-            expect (s.getFloatValue() == 12345678.0f);
+            expectEquals (s.getDoubleValue(), 12345678.0);
+            expectEquals (s.getFloatValue(), 12345678.0f);
             expect (String (-1234).getIntValue() == -1234);
             expect (String ((int64) -1234).getLargeIntValue() == -1234);
-            expect (String (-1234.56).getDoubleValue() == -1234.56);
-            expect (String (-1234.56f).getFloatValue() == -1234.56f);
+            expectEquals (String (-1234.56).getDoubleValue(), -1234.56);
+            expectEquals (String (-1234.56f).getFloatValue(), -1234.56f);
             expect (String (std::numeric_limits<int>::max()).getIntValue() == std::numeric_limits<int>::max());
             expect (String (std::numeric_limits<int>::min()).getIntValue() == std::numeric_limits<int>::min());
             expect (String (std::numeric_limits<int64>::max()).getLargeIntValue() == std::numeric_limits<int64>::max());
@@ -2707,7 +2745,7 @@ public:
             expectEquals (s5.upToLastOccurrenceOf (String(), true, false), s5);
             expectEquals (s5.upToLastOccurrenceOf ("zword", true, false), s5);
             expectEquals (s5.upToLastOccurrenceOf ("word", true, false), s5.dropLastCharacters (1));
-            expectEquals (s5.dropLastCharacters(1).upToLastOccurrenceOf ("word", true, false), s5.dropLastCharacters (1));
+            expectEquals (s5.dropLastCharacters (1).upToLastOccurrenceOf ("word", true, false), s5.dropLastCharacters (1));
             expectEquals (s5.upToLastOccurrenceOf ("Word", true, true), s5.dropLastCharacters (1));
             expectEquals (s5.upToLastOccurrenceOf ("word", false, false), s5.dropLastCharacters (5));
             expectEquals (s5.upToLastOccurrenceOf ("Word", false, true), s5.dropLastCharacters (5));
@@ -2747,17 +2785,15 @@ public:
             expect (String::repeatedString ("xyz", 3) == L"xyzxyzxyz");
         }
 
+        beginTest ("UTF conversions");
         {
-            beginTest ("UTF conversions");
-
             TestUTFConversion <CharPointer_UTF32>::test (*this, r);
             TestUTFConversion <CharPointer_UTF8>::test (*this, r);
             TestUTFConversion <CharPointer_UTF16>::test (*this, r);
         }
 
+        beginTest ("StringArray");
         {
-            beginTest ("StringArray");
-
             StringArray s;
             s.addTokens ("4,3,2,1,0", ";,", "x");
             expectEquals (s.size(), 5);
@@ -2785,9 +2821,8 @@ public:
             expectEquals (toks.joinIntoString ("-"), String ("x-'y,z'-"));
         }
 
+        beginTest ("var");
         {
-            beginTest ("var");
-
             var v1 = 0;
             var v2 = 0.16;
             var v3 = "0.16";
@@ -2806,9 +2841,8 @@ public:
             expect (! v4.equals (v2));
         }
 
+        beginTest ("Significant figures");
         {
-            beginTest ("Significant figures");
-
             // Integers
 
             expectEquals (String::toDecimalStringWithSignificantFigures (13, 1), String ("10"));
@@ -2849,9 +2883,8 @@ public:
             expectEquals (String::toDecimalStringWithSignificantFigures (-0.0000000000019, 1), String ("-0.000000000002"));
         }
 
+        beginTest ("Float trimming");
         {
-            beginTest ("Float trimming");
-
             {
                 StringPairArray tests;
                 tests.set ("1", "1");
@@ -2914,10 +2947,9 @@ public:
             }
         }
 
+        beginTest ("Serialisation");
         {
-            beginTest ("Serialisation");
-
-            std::map <double, String> tests;
+            std::map<double, String> tests;
 
             tests[364] = "364.0";
             tests[1e7] = "1.0e7";
@@ -2945,11 +2977,22 @@ public:
                 expectEquals (serialiseDouble (test.first), test.second);
                 expectEquals (serialiseDouble (-test.first), "-" + test.second);
             }
+
+            expectEquals (serialiseDouble (1.0, 0), String ("1.0"));
+            expectEquals (serialiseDouble (1.0, 1), String ("1.0"));
+            expectEquals (serialiseDouble (1.0, 2), String ("1.0"));
+            expectEquals (serialiseDouble (1.0, 3), String ("1.0"));
+            expectEquals (serialiseDouble (1.0, 10), String ("1.0"));
+
+            expectEquals (serialiseDouble (4.567, 0), String ("4.567"));
+            expectEquals (serialiseDouble (4.567, 1), String ("4.6"));
+            expectEquals (serialiseDouble (4.567, 2), String ("4.57"));
+            expectEquals (serialiseDouble (4.567, 3), String ("4.567"));
+            expectEquals (serialiseDouble (4.567, 10), String ("4.567"));
         }
 
+        beginTest ("Loops");
         {
-            beginTest ("Loops");
-
             String str (CharPointer_UTF8 ("\xc2\xaf\\_(\xe3\x83\x84)_/\xc2\xaf"));
             std::vector<juce_wchar> parts { 175, 92, 95, 40, 12484, 41, 95, 47, 175 };
             size_t index = 0;

@@ -8,7 +8,7 @@ namespace ausdk {
 
 BufferAllocator& BufferAllocator::instance()
 {
-	__attribute__((no_destroy)) static BufferAllocator global;
+	__attribute__ ((no_destroy)) static BufferAllocator global;
 	return global;
 }
 

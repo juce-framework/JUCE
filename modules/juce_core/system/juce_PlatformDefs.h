@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -87,7 +99,7 @@ namespace juce
 
 #if JUCE_CLANG && defined (__has_feature) && ! defined (JUCE_ANALYZER_NORETURN)
  #if __has_feature (attribute_analyzer_noreturn)
-  inline void __attribute__((analyzer_noreturn)) juce_assert_noreturn() {}
+  inline void __attribute__ ((analyzer_noreturn)) juce_assert_noreturn() {}
   #define JUCE_ANALYZER_NORETURN juce::juce_assert_noreturn();
  #endif
 #endif
@@ -163,18 +175,19 @@ namespace juce
 
   /** Platform-independent assertion macro which suppresses ignored-variable
       warnings in all build modes. You should probably use a plain jassert()
-      by default, and only replace it with jassertquiet() once you've
-      convinced yourself that any unused-variable warnings emitted by the
-      compiler are harmless.
+      and [[maybe_unused]] by default.
   */
   #define jassertquiet(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
+
+  #define JUCE_ASSERTIONS_ENABLED       1
 
 #else
   //==============================================================================
   // If debugging is disabled, these dummy debug and assertion macros are used..
 
   #define DBG(textToWrite)
-  #define jassertfalse                  JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION)
+  #define jassertfalse                  JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION;)
+  #define JUCE_ASSERTIONS_ENABLED       0
 
   #if JUCE_LOG_ASSERTIONS
    #define jassert(expression)          JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
@@ -185,6 +198,8 @@ namespace juce
   #endif
 
 #endif
+
+#define JUCE_ASSERTIONS_ENABLED_OR_LOGGED   JUCE_ASSERTIONS_ENABLED || JUCE_LOG_ASSERTIONS
 
 //==============================================================================
 #ifndef DOXYGEN
@@ -255,21 +270,20 @@ namespace juce
 
 //==============================================================================
 #if JUCE_MSVC && ! defined (DOXYGEN)
- #define JUCE_WARNING_HELPER(file, line, mess) message(file "(" JUCE_STRINGIFY (line) ") : Warning: " #mess)
- #define JUCE_COMPILER_WARNING(message)  __pragma(JUCE_WARNING_HELPER (__FILE__, __LINE__, message))
+ #define JUCE_COMPILER_WARNING(msg) __pragma (message (__FILE__ "(" JUCE_STRINGIFY (__LINE__) ") : Warning: " msg))
 #else
- #ifndef DOXYGEN
-  #define JUCE_WARNING_HELPER(mess) message(#mess)
- #endif
 
  /** This macro allows you to emit a custom compiler warning message.
      Very handy for marking bits of code as "to-do" items, or for shaming
      code written by your co-workers in a way that's hard to ignore.
 
-     GCC and Clang provide the \#warning directive, but MSVC doesn't, so this macro
-     is a cross-compiler way to get the same functionality as \#warning.
+     GCC and Clang provide the \#warning directive, but MSVC doesn't, so this
+     macro is a cross-compiler way to get the same functionality as \#warning.
+
+     Unlike the \#warning directive in GCC and Clang this macro requires the
+     argument to passed as a quoted string.
  */
- #define JUCE_COMPILER_WARNING(message)  _Pragma(JUCE_STRINGIFY (JUCE_WARNING_HELPER (message)))
+ #define JUCE_COMPILER_WARNING(msg)  _Pragma (JUCE_STRINGIFY (message (msg)))
 #endif
 
 
@@ -285,7 +299,7 @@ namespace juce
   #if JUCE_MSVC
    #define forcedinline       __forceinline
   #else
-   #define forcedinline       inline __attribute__((always_inline))
+   #define forcedinline       inline __attribute__ ((always_inline))
   #endif
 #endif
 
@@ -308,7 +322,7 @@ namespace juce
 
 //==============================================================================
 #if JUCE_GCC || JUCE_CLANG
- #define JUCE_PACKED __attribute__((packed))
+ #define JUCE_PACKED __attribute__ ((packed))
 #elif ! defined (DOXYGEN)
  #define JUCE_PACKED
 #endif
@@ -317,7 +331,7 @@ namespace juce
 #if JUCE_GCC || DOXYGEN
  /** This can be appended to a function declaration to tell gcc to disable associative
      math optimisations which break some floating point algorithms. */
- #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS   __attribute__((__optimize__("no-associative-math")))
+ #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS   __attribute__ ((__optimize__ ("no-associative-math")))
 #else
  #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS
 #endif

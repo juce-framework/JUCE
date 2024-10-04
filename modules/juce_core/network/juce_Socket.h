@@ -1,27 +1,83 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
 namespace juce
 {
+
+/**
+    Options used for the configuration of the underlying system socket in the
+    StreamingSocket and DatagramSocket classes.
+
+    @see StreamingSocket, DatagramSocket
+
+    @tags{Core}
+*/
+class JUCE_API  SocketOptions
+{
+public:
+    /** The provided size will be used to configure the socket's SO_RCVBUF property. Increasing the
+        buffer size can reduce the number of lost packets with the DatagramSocket class, if the
+        socket is to receive packets in large bursts.
+
+        If this property is not specified, the system default value will be used, but a minimum of
+        65536 will be ensured.
+    */
+    [[nodiscard]] SocketOptions withReceiveBufferSize (int size) const
+    {
+        return withMember (*this, &SocketOptions::receiveBufferSize, size);
+    }
+
+    /** The provided size will be used to configure the socket's SO_SNDBUF property.
+
+        If this property is not specified, the system default value will be used, but a minimum of
+        65536 will be ensured.
+    */
+    [[nodiscard]] SocketOptions withSendBufferSize (int size) const
+    {
+        return withMember (*this, &SocketOptions::sendBufferSize, size);
+    }
+
+    /** @see withReceiveBufferSize() */
+    [[nodiscard]] auto getReceiveBufferSize() const { return receiveBufferSize; }
+
+    /** @see withSendBufferSize() */
+    [[nodiscard]] auto getSendBufferSize() const    { return sendBufferSize; }
+
+private:
+    std::optional<int> receiveBufferSize;
+    std::optional<int> sendBufferSize;
+};
 
 //==============================================================================
 /**
@@ -37,6 +93,8 @@ namespace juce
 class JUCE_API  StreamingSocket  final
 {
 public:
+    using Options = SocketOptions;
+
     //==============================================================================
     /** Creates an uninitialised socket.
 
@@ -48,6 +106,20 @@ public:
         that comes along.
     */
     StreamingSocket();
+
+    /** Creates an uninitialised socket and allows specifying options related to the
+        configuration of the underlying socket.
+
+        To connect it, use the connect() method, after which you can read() or write()
+        to it.
+
+        To wait for other sockets to connect to this one, the createListener() method
+        enters "listener" mode, and can be used to spawn new sockets for each connection
+        that comes along.
+    */
+    explicit StreamingSocket (const SocketOptions& optionsIn)
+        : options { optionsIn }
+    {}
 
     /** Destructor. */
     ~StreamingSocket();
@@ -69,7 +141,7 @@ public:
 
         @returns  true on success; false may indicate that another socket is already bound
                   on the same port
-        @see bindToPort(int localPortNumber), IPAddress::getAllAddresses
+        @see bindToPort (int localPortNumber), IPAddress::getAllAddresses
     */
     bool bindToPort (int localPortNumber, const String& localAddress);
 
@@ -178,12 +250,13 @@ public:
 
 private:
     //==============================================================================
+    SocketOptions options;
     String hostName;
     std::atomic<int> portNumber { 0 }, handle { -1 };
     std::atomic<bool> connected { false }, isListener { false };
     mutable CriticalSection readLock;
 
-    StreamingSocket (const String& hostname, int portNumber, int handle);
+    StreamingSocket (const String& hostname, int portNumber, int handle, const SocketOptions& options);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StreamingSocket)
 };
@@ -203,7 +276,20 @@ private:
 class JUCE_API  DatagramSocket  final
 {
 public:
+    using Options = SocketOptions;
+
     //==============================================================================
+    /** Creates a datagram socket and allows specifying options related to the
+        configuration of the underlying socket.
+
+        You first need to bind this socket to a port with bindToPort if you intend to read
+        from this socket.
+
+        If enableBroadcasting is true, the socket will be allowed to send broadcast messages
+        (may require extra privileges on linux)
+    */
+    DatagramSocket (bool enableBroadcasting, const SocketOptions& optionsIn);
+
     /** Creates a datagram socket.
 
         You first need to bind this socket to a port with bindToPort if you intend to read
@@ -212,8 +298,19 @@ public:
         If enableBroadcasting is true, the socket will be allowed to send broadcast messages
         (may require extra privileges on linux)
     */
-    DatagramSocket (bool enableBroadcasting = false);
+    explicit DatagramSocket (bool enableBroadcasting)
+        : DatagramSocket (enableBroadcasting, SocketOptions{})
+    {}
 
+    /** Creates a datagram socket.
+
+        You first need to bind this socket to a port with bindToPort if you intend to read
+        from this socket.
+
+        This constructor creates a socket that does not allow sending broadcast messages.
+    */
+    DatagramSocket() : DatagramSocket (false)
+    {}
 
     /** Destructor. */
     ~DatagramSocket();
@@ -238,7 +335,7 @@ public:
 
         @returns  true on success; false may indicate that another socket is already bound
                   on the same port
-        @see bindToPort(int localPortNumber), IPAddress::getAllAddresses
+        @see bindToPort (int localPortNumber), IPAddress::getAllAddresses
     */
     bool bindToPort (int localPortNumber, const String& localAddress);
 
@@ -354,6 +451,7 @@ public:
 
 private:
     //==============================================================================
+    SocketOptions options;
     std::atomic<int> handle { -1 };
     bool isBound = false;
     String lastBindAddress, lastServerHost;

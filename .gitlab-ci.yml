@@ -1,4 +1,9 @@
-include:
-  - project: 'juce-repos/JUCE-utils'
-    file: '/CI/gitlab-ci.yml'
+variables:
+  REF: &REF master
 
+include:
+  - project: juce-repos/JUCE-utils
+    file: /CI/gitlab-ci.yml
+    ref: *REF
+    inputs:
+      ref: *REF

@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -42,13 +54,16 @@ class ArrayBase  : public TypeOfCriticalSectionToUse
 private:
     using ParameterType = typename TypeHelpers::ParameterType<ElementType>::type;
 
+    static_assert (std::is_nothrow_constructible_v<TypeOfCriticalSectionToUse>,
+                   "The critical section type used must not throw during construction");
+
     template <class OtherElementType, class OtherCriticalSection>
     using AllowConversion = std::enable_if_t<! std::is_same_v<std::tuple<ElementType, TypeOfCriticalSectionToUse>,
                                                               std::tuple<OtherElementType, OtherCriticalSection>>>;
 
 public:
     //==============================================================================
-    ArrayBase() = default;
+    ArrayBase() noexcept = default;
 
     ~ArrayBase()
     {
@@ -123,7 +138,7 @@ public:
         auto* e = begin();
 
         for (auto& o : other)
-            if (! (*e++ == o))
+            if (! exactlyEqual (*e++, o))
                 return false;
 
         return true;
@@ -385,7 +400,7 @@ public:
 
 private:
     //==============================================================================
-   #if defined(__GNUC__) && __GNUC__ < 5 && ! defined(__clang__)
+   #if defined (__GNUC__) && __GNUC__ < 5 && ! defined (__clang__)
     static constexpr auto isTriviallyCopyable = std::is_scalar_v<ElementType>;
    #else
     static constexpr auto isTriviallyCopyable = std::is_trivially_copyable_v<ElementType>;
@@ -567,14 +582,14 @@ private:
         }
     }
 
-    void checkSourceIsNotAMember (const ElementType& element)
+    void checkSourceIsNotAMember ([[maybe_unused]] const ElementType& element)
     {
         // when you pass a reference to an existing element into a method like add() which
         // may need to reallocate the array to make more space, the incoming reference may
         // be deleted indirectly during the reallocation operation! To work around this,
         // make a local copy of the item you're trying to add (and maybe use std::move to
         // move it into the add() method to avoid any extra overhead)
-        jassertquiet (std::addressof (element) < begin() || end() <= std::addressof (element));
+        jassert (std::addressof (element) < begin() || end() <= std::addressof (element));
     }
 
     //==============================================================================

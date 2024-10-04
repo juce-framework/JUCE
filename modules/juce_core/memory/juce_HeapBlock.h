@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -97,7 +109,7 @@ public:
         After creation, you can resize the array using the malloc(), calloc(),
         or realloc() methods.
     */
-    HeapBlock() = default;
+    HeapBlock() noexcept = default;
 
     /** Creates a HeapBlock containing a number of elements.
 
@@ -109,9 +121,8 @@ public:
     */
     template <typename SizeType, std::enable_if_t<std::is_convertible_v<SizeType, int>, int> = 0>
     explicit HeapBlock (SizeType numElements)
-        : data (static_cast<ElementType*> (std::malloc (static_cast<size_t> (numElements) * sizeof (ElementType))))
+        : data (mallocWrapper (static_cast<size_t> (numElements) * sizeof (ElementType)))
     {
-        throwOnAllocationFailure();
     }
 
     /** Creates a HeapBlock containing a number of elements.
@@ -121,11 +132,9 @@ public:
     */
     template <typename SizeType, std::enable_if_t<std::is_convertible_v<SizeType, int>, int> = 0>
     HeapBlock (SizeType numElements, bool initialiseToZero)
-        : data (static_cast<ElementType*> (initialiseToZero
-                                               ? std::calloc (static_cast<size_t> (numElements), sizeof (ElementType))
-                                               : std::malloc (static_cast<size_t> (numElements) * sizeof (ElementType))))
+        : data (initialiseToZero ? callocWrapper (static_cast<size_t> (numElements), sizeof (ElementType))
+                                 : mallocWrapper (static_cast<size_t> (numElements) * sizeof (ElementType)))
     {
-        throwOnAllocationFailure();
     }
 
     /** Destructor.
@@ -252,8 +261,7 @@ public:
     void malloc (SizeType newNumElements, size_t elementSize = sizeof (ElementType))
     {
         std::free (data);
-        data = static_cast<ElementType*> (std::malloc (static_cast<size_t> (newNumElements) * elementSize));
-        throwOnAllocationFailure();
+        data = mallocWrapper (static_cast<size_t> (newNumElements) * elementSize);
     }
 
     /** Allocates a specified amount of memory and clears it.
@@ -263,8 +271,7 @@ public:
     void calloc (SizeType newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         std::free (data);
-        data = static_cast<ElementType*> (std::calloc (static_cast<size_t> (newNumElements), elementSize));
-        throwOnAllocationFailure();
+        data = callocWrapper (static_cast<size_t> (newNumElements), elementSize);
     }
 
     /** Allocates a specified amount of memory and optionally clears it.
@@ -275,10 +282,8 @@ public:
     void allocate (SizeType newNumElements, bool initialiseToZero)
     {
         std::free (data);
-        data = static_cast<ElementType*> (initialiseToZero
-                                             ? std::calloc (static_cast<size_t> (newNumElements), sizeof (ElementType))
-                                             : std::malloc (static_cast<size_t> (newNumElements) * sizeof (ElementType)));
-        throwOnAllocationFailure();
+        data = initialiseToZero ? callocWrapper (static_cast<size_t> (newNumElements), sizeof (ElementType))
+                                : mallocWrapper (static_cast<size_t> (newNumElements) * sizeof (ElementType));
     }
 
     /** Re-allocates a specified amount of memory.
@@ -289,9 +294,7 @@ public:
     template <typename SizeType>
     void realloc (SizeType newNumElements, size_t elementSize = sizeof (ElementType))
     {
-        data = static_cast<ElementType*> (data == nullptr ? std::malloc (static_cast<size_t> (newNumElements) * elementSize)
-                                                          : std::realloc (data, static_cast<size_t> (newNumElements) * elementSize));
-        throwOnAllocationFailure();
+        data = reallocWrapper (data, static_cast<size_t> (newNumElements) * elementSize);
     }
 
     /** Frees any currently-allocated data.
@@ -327,19 +330,45 @@ public:
 
 private:
     //==============================================================================
-    ElementType* data = nullptr;
-
-    void throwOnAllocationFailure() const
+    // Calls to malloc, calloc and realloc with zero size have implementation-defined
+    // behaviour where either nullptr or a non-null pointer is returned.
+    template <typename Functor>
+    static ElementType* wrapper (size_t size, Functor&& f)
     {
+        if (size == 0)
+            return nullptr;
+
+        auto* memory = static_cast<ElementType*> (f());
+
        #if JUCE_EXCEPTIONS_DISABLED
-        jassert (data != nullptr); // without exceptions, you'll need to find a better way to handle this failure case.
+        jassert (memory != nullptr); // without exceptions, you'll need to find a better way to handle this failure case.
        #else
-        HeapBlockHelper::ThrowOnFail<throwOnFailure>::checkPointer (data);
+        HeapBlockHelper::ThrowOnFail<throwOnFailure>::checkPointer (memory);
        #endif
+
+        return memory;
+    }
+
+    static ElementType* mallocWrapper (size_t size)
+    {
+        return wrapper (size, [size] { return std::malloc (size); });
+    }
+
+    static ElementType* callocWrapper (size_t num, size_t size)
+    {
+        return wrapper (num * size, [num, size] { return std::calloc (num, size); });
+    }
+
+    static ElementType* reallocWrapper (void* ptr, size_t newSize)
+    {
+        return wrapper (newSize, [ptr, newSize] { return std::realloc (ptr, newSize); });
     }
 
     template <class OtherElementType, bool otherThrowOnFailure>
     friend class HeapBlock;
+
+    //==============================================================================
+    ElementType* data = nullptr;
 
    #if ! (defined (JUCE_DLL) || defined (JUCE_DLL_BUILD))
     JUCE_DECLARE_NON_COPYABLE (HeapBlock)

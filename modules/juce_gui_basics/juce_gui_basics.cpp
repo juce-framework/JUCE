@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -48,10 +57,22 @@
 #include <cctype>
 
 //==============================================================================
+#ifdef JUCE_DISPLAY_SPLASH_SCREEN
+ JUCE_COMPILER_WARNING ("This version of JUCE does not use the splash screen, the flag JUCE_DISPLAY_SPLASH_SCREEN is ignored")
+#endif
+
+#ifdef JUCE_USE_DARK_SPLASH_SCREEN
+ JUCE_COMPILER_WARNING ("This version of JUCE does not use the splash screen, the flag JUCE_USE_DARK_SPLASH_SCREEN is ignored")
+#endif
+
+//==============================================================================
 #if JUCE_MAC
- #import <WebKit/WebKit.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
  #import <MetalKit/MetalKit.h>
+
+ #if defined (MAC_OS_VERSION_14_4) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_14_4
+  #import <ScreenCaptureKit/ScreenCaptureKit.h>
+ #endif
 
 #elif JUCE_IOS
  #if JUCE_PUSH_NOTIFICATIONS
@@ -63,18 +84,19 @@
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #include <windowsx.h>
- #include <vfw.h>
- #include <commdlg.h>
  #include <commctrl.h>
+ #include <commdlg.h>
+ #include <d2d1_3.h>
+ #include <d3d11_2.h>
+ #include <dxgi1_3.h>
  #include <sapi.h>
- #include <dxgi.h>
+ #include <vfw.h>
+ #include <windowsx.h>
+ #include <dwmapi.h>
 
- #if JUCE_MINGW
-  // Some MinGW headers use 'new' as a parameter name
-  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wkeyword-macro")
-  #define new new_
-  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+ #if JUCE_ETW_TRACELOGGING
+  #include <TraceLoggingProvider.h>
+  #include <evntrace.h>
  #endif
 
  #include <uiautomation.h>
@@ -86,91 +108,160 @@
   #include <exdispid.h>
  #endif
 
- #if JUCE_MINGW
-  #include <imm.h>
- #elif ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
   #pragma comment(lib, "comctl32.lib")
-  #pragma comment(lib, "dxgi.lib")
+  #pragma comment(lib, "dwmapi.lib")
 
+  // Link a newer version of the side-by-side comctl32 dll.
+  // Required to enable the newer native message box and visual styles on vista and above.
+  #pragma comment(linker,                             \
+          "\"/MANIFESTDEPENDENCY:type='Win32' "       \
+          "name='Microsoft.Windows.Common-Controls' " \
+          "version='6.0.0.0' "                        \
+          "processorArchitecture='*' "                \
+          "publicKeyToken='6595b64144ccf1df' "        \
+          "language='*'\""                            \
+      )
   #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")
    #pragma comment(lib, "GlU32.Lib")
   #endif
 
-  #if JUCE_DIRECT2D
-   #pragma comment (lib, "Dwrite.lib")
-   #pragma comment (lib, "D2d1.lib")
-  #endif
  #endif
 #endif
 
 //==============================================================================
-#define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
-    jassert ((MessageManager::getInstanceWithoutCreating() != nullptr \
-               && MessageManager::getInstanceWithoutCreating()->currentThreadHasLockedMessageManager()) \
-              || getPeer() == nullptr);
+#include <juce_graphics/native/juce_EventTracing.h>
 
-namespace juce
-{
-    bool juce_areThereAnyAlwaysOnTopWindows();
+#include "detail/juce_AccessibilityHelpers.h"
+#include "detail/juce_ButtonAccessibilityHandler.h"
+#include "detail/juce_ScalingHelpers.h"
+#include "detail/juce_ComponentHelpers.h"
+#include "detail/juce_FocusHelpers.h"
+#include "detail/juce_FocusRestorer.h"
+#include "detail/juce_ViewportHelpers.h"
+#include "detail/juce_LookAndFeelHelpers.h"
+#include "detail/juce_PointerState.h"
+#include "detail/juce_CustomMouseCursorInfo.h"
+#include "detail/juce_MouseInputSourceImpl.h"
+#include "detail/juce_MouseInputSourceList.h"
+#include "detail/juce_ToolbarItemDragAndDropOverlayComponent.h"
+#include "detail/juce_ScopedMessageBoxInterface.h"
+#include "detail/juce_ScopedMessageBoxImpl.h"
+#include "detail/juce_ScopedContentSharerInterface.h"
+#include "detail/juce_ScopedContentSharerImpl.h"
+#include "detail/juce_WindowingHelpers.h"
+#include "detail/juce_AlertWindowHelpers.h"
+#include "detail/juce_TopLevelWindowManager.h"
+#include "detail/juce_StandardCachedComponentImage.h"
 
-    bool isEmbeddedInForegroundProcess (Component* c);
+//==============================================================================
+#if JUCE_IOS || JUCE_WINDOWS
+ #include "native/juce_MultiTouchMapper.h"
+#endif
 
-   #if ! JUCE_WINDOWS
-    bool isEmbeddedInForegroundProcess (Component*) { return false; }
-   #endif
+#if JUCE_ANDROID || JUCE_WINDOWS || JUCE_IOS || JUCE_UNIT_TESTS
+ #include "native/accessibility/juce_AccessibilityTextHelpers.h"
+#endif
 
-    /*  Returns true if this process is in the foreground, or if the viewComponent
-        is embedded into a window owned by the foreground process.
-    */
-    static bool isForegroundOrEmbeddedProcess (Component* viewComponent)
-    {
-        return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
-    }
+#if JUCE_MAC || JUCE_IOS
+ #include "native/accessibility/juce_AccessibilitySharedCode_mac.mm"
+ #include "native/juce_CGMetalLayerRenderer_mac.h"
 
-    bool isWindowOnCurrentVirtualDesktop (void*);
+ #if JUCE_IOS
+  #include "native/juce_UIViewComponentPeer_ios.mm"
+  #include "native/accessibility/juce_Accessibility_ios.mm"
+  #include "native/juce_WindowUtils_ios.mm"
+  #include "native/juce_Windowing_ios.mm"
+  #include "native/juce_NativeMessageBox_ios.mm"
+  #include "native/juce_NativeModalWrapperComponent_ios.h"
+  #include "native/juce_FileChooser_ios.mm"
 
-    struct CustomMouseCursorInfo
-    {
-        ScaledImage image;
-        Point<int> hotspot;
-    };
+  #if JUCE_CONTENT_SHARING
+   #include "native/juce_ContentSharer_ios.cpp"
+  #endif
 
-    template <typename MemberFn>
-    static const AccessibilityHandler* getEnclosingHandlerWithInterface (const AccessibilityHandler* handler, MemberFn fn)
-    {
-        if (handler == nullptr)
-            return nullptr;
+ #else
+  #include "native/accessibility/juce_Accessibility_mac.mm"
+  #include "native/juce_PerScreenDisplayLinks_mac.h"
+  #include "native/juce_NSViewComponentPeer_mac.mm"
+  #include "native/juce_WindowUtils_mac.mm"
+  #include "native/juce_Windowing_mac.mm"
+  #include "native/juce_NativeMessageBox_mac.mm"
+  #include "native/juce_MainMenu_mac.mm"
+  #include "native/juce_FileChooser_mac.mm"
+ #endif
 
-        if ((handler->*fn)() != nullptr)
-            return handler;
+ #include "native/juce_MouseCursor_mac.mm"
 
-        return getEnclosingHandlerWithInterface (handler->getParent(), fn);
-    }
-} // namespace juce
+#elif JUCE_WINDOWS
+ #include <juce_graphics/native/juce_Direct2DMetrics_windows.h>
+ #include <juce_graphics/native/juce_Direct2DGraphicsContext_windows.h>
+ #include <juce_graphics/native/juce_Direct2DHwndContext_windows.h>
+ #include <juce_graphics/native/juce_DirectX_windows.h>
+ #include <juce_graphics/native/juce_Direct2DImage_windows.h>
+ #include <juce_graphics/native/juce_Direct2DImageContext_windows.h>
 
-#include "mouse/juce_PointerState.h"
+ #include "native/accessibility/juce_WindowsUIAWrapper_windows.h"
+ #include "native/accessibility/juce_AccessibilityElement_windows.h"
+ #include "native/accessibility/juce_UIAHelpers_windows.h"
+ #include "native/accessibility/juce_UIAProviders_windows.h"
+ #include "native/accessibility/juce_AccessibilityElement_windows.cpp"
+ #include "native/accessibility/juce_Accessibility_windows.cpp"
+ #include "native/juce_WindowsHooks_windows.h"
+ #include "native/juce_WindowUtils_windows.cpp"
+ #include "native/juce_VBlank_windows.cpp"
+ #include "native/juce_Windowing_windows.cpp"
+ #include "native/juce_WindowsHooks_windows.cpp"
+ #include "native/juce_NativeMessageBox_windows.cpp"
+ #include "native/juce_DragAndDrop_windows.cpp"
+ #include "native/juce_FileChooser_windows.cpp"
 
+#elif JUCE_LINUX || JUCE_BSD
+ #include "native/juce_XSymbols_linux.cpp"
+ #include "native/juce_DragAndDrop_linux.cpp"
+
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
+
+ #include "native/juce_ScopedWindowAssociation_linux.h"
+ #include "native/juce_WindowUtils_linux.cpp"
+ #include "native/juce_Windowing_linux.cpp"
+ #include "native/juce_NativeMessageBox_linux.cpp"
+ #include "native/juce_XWindowSystem_linux.cpp"
+
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+ #include "native/juce_FileChooser_linux.cpp"
+
+#elif JUCE_ANDROID
+
+ #include "juce_core/files/juce_common_MimeTypes.h"
+ #include "native/accessibility/juce_Accessibility_android.cpp"
+ #include "native/juce_WindowUtils_android.cpp"
+ #include "native/juce_Windowing_android.cpp"
+ #include "native/juce_NativeMessageBox_android.cpp"
+ #include "native/juce_FileChooser_android.cpp"
+
+ #if JUCE_CONTENT_SHARING
+  #include "native/juce_ContentSharer_android.cpp"
+ #endif
+
+#endif
+
+//==============================================================================
+// Depends on types defined in platform-specific windowing files
+#include "mouse/juce_MouseCursor.cpp"
+
+#if JUCE_UNIT_TESTS
+ #include "native/accessibility/juce_AccessibilityTextHelpers_test.cpp"
+#endif
+
+//==============================================================================
+#include "native/accessibility/juce_Accessibility.cpp"
 #include "accessibility/juce_AccessibilityHandler.cpp"
-#include "components/juce_Component.cpp"
-#include "components/juce_ComponentListener.cpp"
-#include "components/juce_FocusTraverser.cpp"
-#include "mouse/juce_MouseInputSource.cpp"
-#include "desktop/juce_Displays.cpp"
-#include "desktop/juce_Desktop.cpp"
-#include "components/juce_ModalComponentManager.cpp"
-#include "mouse/juce_ComponentDragger.cpp"
-#include "mouse/juce_DragAndDropContainer.cpp"
-#include "mouse/juce_MouseEvent.cpp"
-#include "mouse/juce_MouseInactivityDetector.cpp"
-#include "mouse/juce_MouseListener.cpp"
-#include "keyboard/juce_CaretComponent.cpp"
-#include "keyboard/juce_KeyboardFocusTraverser.cpp"
-#include "keyboard/juce_KeyListener.cpp"
-#include "keyboard/juce_KeyPress.cpp"
-#include "keyboard/juce_ModifierKeys.cpp"
+#include "application/juce_Application.cpp"
 #include "buttons/juce_ArrowButton.cpp"
 #include "buttons/juce_Button.cpp"
 #include "buttons/juce_DrawableButton.cpp"
@@ -180,6 +271,17 @@ namespace juce
 #include "buttons/juce_TextButton.cpp"
 #include "buttons/juce_ToggleButton.cpp"
 #include "buttons/juce_ToolbarButton.cpp"
+#include "commands/juce_ApplicationCommandInfo.cpp"
+#include "commands/juce_ApplicationCommandManager.cpp"
+#include "commands/juce_ApplicationCommandTarget.cpp"
+#include "commands/juce_KeyPressMappingSet.cpp"
+#include "components/juce_Component.cpp"
+#include "components/juce_ComponentListener.cpp"
+#include "components/juce_FocusTraverser.cpp"
+#include "components/juce_ModalComponentManager.cpp"
+#include "desktop/juce_Desktop.cpp"
+#include "desktop/juce_Displays.cpp"
+#include "detail/juce_AccessibilityHelpers.cpp"
 #include "drawables/juce_Drawable.cpp"
 #include "drawables/juce_DrawableComposite.cpp"
 #include "drawables/juce_DrawableImage.cpp"
@@ -188,22 +290,31 @@ namespace juce
 #include "drawables/juce_DrawableShape.cpp"
 #include "drawables/juce_DrawableText.cpp"
 #include "drawables/juce_SVGParser.cpp"
+#include "filebrowser/juce_ContentSharer.cpp"
 #include "filebrowser/juce_DirectoryContentsDisplayComponent.cpp"
 #include "filebrowser/juce_DirectoryContentsList.cpp"
 #include "filebrowser/juce_FileBrowserComponent.cpp"
 #include "filebrowser/juce_FileChooser.cpp"
 #include "filebrowser/juce_FileChooserDialogBox.cpp"
 #include "filebrowser/juce_FileListComponent.cpp"
-#include "filebrowser/juce_FilenameComponent.cpp"
 #include "filebrowser/juce_FileSearchPathListComponent.cpp"
 #include "filebrowser/juce_FileTreeComponent.cpp"
+#include "filebrowser/juce_FilenameComponent.cpp"
 #include "filebrowser/juce_ImagePreviewComponent.cpp"
-#include "filebrowser/juce_ContentSharer.cpp"
+#include "keyboard/juce_CaretComponent.cpp"
+#include "keyboard/juce_KeyListener.cpp"
+#include "keyboard/juce_KeyPress.cpp"
+#include "keyboard/juce_KeyboardFocusTraverser.cpp"
+#include "keyboard/juce_ModifierKeys.cpp"
 #include "layout/juce_ComponentAnimator.cpp"
 #include "layout/juce_ComponentBoundsConstrainer.cpp"
+#include "layout/juce_BorderedComponentBoundsConstrainer.cpp"
 #include "layout/juce_ComponentBuilder.cpp"
 #include "layout/juce_ComponentMovementWatcher.cpp"
 #include "layout/juce_ConcertinaPanel.cpp"
+#include "layout/juce_FlexBox.cpp"
+#include "layout/juce_Grid.cpp"
+#include "layout/juce_GridItem.cpp"
 #include "layout/juce_GroupComponent.cpp"
 #include "layout/juce_MultiDocumentPanel.cpp"
 #include "layout/juce_ResizableBorderComponent.cpp"
@@ -218,14 +329,24 @@ namespace juce
 #include "layout/juce_TabbedComponent.cpp"
 #include "layout/juce_Viewport.cpp"
 #include "lookandfeel/juce_LookAndFeel.cpp"
-#include "lookandfeel/juce_LookAndFeel_V2.cpp"
 #include "lookandfeel/juce_LookAndFeel_V1.cpp"
+#include "lookandfeel/juce_LookAndFeel_V2.cpp"
 #include "lookandfeel/juce_LookAndFeel_V3.cpp"
 #include "lookandfeel/juce_LookAndFeel_V4.cpp"
-#include "menus/juce_MenuBarComponent.cpp"
 #include "menus/juce_BurgerMenuComponent.cpp"
+#include "menus/juce_MenuBarComponent.cpp"
 #include "menus/juce_MenuBarModel.cpp"
 #include "menus/juce_PopupMenu.cpp"
+#include "misc/juce_BubbleComponent.cpp"
+#include "misc/juce_DropShadower.cpp"
+#include "misc/juce_FocusOutline.cpp"
+#include "mouse/juce_ComponentDragger.cpp"
+#include "mouse/juce_DragAndDropContainer.cpp"
+#include "mouse/juce_MouseEvent.cpp"
+#include "mouse/juce_MouseInactivityDetector.cpp"
+#include "mouse/juce_MouseInputSource.cpp"
+#include "mouse/juce_MouseListener.cpp"
+#include "native/juce_ScopedDPIAwarenessDisabler.cpp"
 #include "positioning/juce_MarkerList.cpp"
 #include "positioning/juce_RelativeCoordinate.cpp"
 #include "positioning/juce_RelativeCoordinatePositioner.cpp"
@@ -236,11 +357,11 @@ namespace juce
 #include "properties/juce_BooleanPropertyComponent.cpp"
 #include "properties/juce_ButtonPropertyComponent.cpp"
 #include "properties/juce_ChoicePropertyComponent.cpp"
+#include "properties/juce_MultiChoicePropertyComponent.cpp"
 #include "properties/juce_PropertyComponent.cpp"
 #include "properties/juce_PropertyPanel.cpp"
 #include "properties/juce_SliderPropertyComponent.cpp"
 #include "properties/juce_TextPropertyComponent.cpp"
-#include "properties/juce_MultiChoicePropertyComponent.cpp"
 #include "widgets/juce_ComboBox.cpp"
 #include "widgets/juce_ImageComponent.cpp"
 #include "widgets/juce_Label.cpp"
@@ -250,213 +371,21 @@ namespace juce
 #include "widgets/juce_TableHeaderComponent.cpp"
 #include "widgets/juce_TableListBox.cpp"
 #include "widgets/juce_TextEditor.cpp"
-#include "widgets/juce_ToolbarItemComponent.cpp"
 #include "widgets/juce_Toolbar.cpp"
+#include "widgets/juce_ToolbarItemComponent.cpp"
 #include "widgets/juce_ToolbarItemPalette.cpp"
 #include "widgets/juce_TreeView.cpp"
+#include "windows/juce_NativeMessageBox.cpp"
 #include "windows/juce_AlertWindow.cpp"
 #include "windows/juce_CallOutBox.cpp"
 #include "windows/juce_ComponentPeer.cpp"
 #include "windows/juce_DialogWindow.cpp"
 #include "windows/juce_DocumentWindow.cpp"
+#include "windows/juce_MessageBoxOptions.cpp"
 #include "windows/juce_ResizableWindow.cpp"
+#include "windows/juce_ScopedMessageBox.cpp"
 #include "windows/juce_ThreadWithProgressWindow.cpp"
 #include "windows/juce_TooltipWindow.cpp"
 #include "windows/juce_TopLevelWindow.cpp"
-#include "windows/juce_VBlankAttachement.cpp"
-#include "commands/juce_ApplicationCommandInfo.cpp"
-#include "commands/juce_ApplicationCommandManager.cpp"
-#include "commands/juce_ApplicationCommandTarget.cpp"
-#include "commands/juce_KeyPressMappingSet.cpp"
-#include "application/juce_Application.cpp"
-#include "misc/juce_BubbleComponent.cpp"
-#include "misc/juce_DropShadower.cpp"
-#include "misc/juce_FocusOutline.cpp"
-#include "misc/juce_JUCESplashScreen.cpp"
-
-#include "layout/juce_FlexBox.cpp"
-#include "layout/juce_GridItem.cpp"
-#include "layout/juce_Grid.cpp"
-
-#if JUCE_IOS || JUCE_WINDOWS
- #include "native/juce_MultiTouchMapper.h"
-#endif
-
-#if JUCE_ANDROID || JUCE_WINDOWS || JUCE_IOS || JUCE_UNIT_TESTS
- #include "native/accessibility/juce_AccessibilityTextHelpers.h"
-#endif
-
-#if JUCE_MAC || JUCE_IOS
- #include "native/accessibility/juce_mac_AccessibilitySharedCode.mm"
-
- #if JUCE_IOS
-  #include "native/juce_ios_UIViewComponentPeer.mm"
-  #include "native/accessibility/juce_ios_Accessibility.mm"
-  #include "native/juce_ios_Windowing.mm"
-  #include "native/juce_ios_FileChooser.mm"
-
-  #if JUCE_CONTENT_SHARING
-   #include "native/juce_ios_ContentSharer.cpp"
-  #endif
-
- #else
-  #include "native/accessibility/juce_mac_Accessibility.mm"
-  #include "native/juce_mac_PerScreenDisplayLinks.h"
-  #include "native/juce_mac_NSViewComponentPeer.mm"
-  #include "native/juce_mac_Windowing.mm"
-  #include "native/juce_mac_MainMenu.mm"
-  #include "native/juce_mac_FileChooser.mm"
- #endif
-
- #include "native/juce_mac_MouseCursor.mm"
-
-#elif JUCE_WINDOWS
- #include "native/accessibility/juce_win32_ComInterfaces.h"
- #include "native/accessibility/juce_win32_WindowsUIAWrapper.h"
- #include "native/accessibility/juce_win32_AccessibilityElement.h"
- #include "native/accessibility/juce_win32_UIAHelpers.h"
- #include "native/accessibility/juce_win32_UIAProviders.h"
- #include "native/accessibility/juce_win32_AccessibilityElement.cpp"
- #include "native/accessibility/juce_win32_Accessibility.cpp"
- #include "native/juce_win32_Windowing.cpp"
- #include "native/juce_win32_DragAndDrop.cpp"
- #include "native/juce_win32_FileChooser.cpp"
-
-#elif JUCE_LINUX || JUCE_BSD
- #include "native/x11/juce_linux_X11_Symbols.cpp"
- #include "native/x11/juce_linux_X11_DragAndDrop.cpp"
-
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant")
-
- #include "native/x11/juce_linux_ScopedWindowAssociation.h"
- #include "native/juce_linux_Windowing.cpp"
- #include "native/x11/juce_linux_XWindowSystem.cpp"
-
- JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
- #include "native/juce_linux_FileChooser.cpp"
-
-#elif JUCE_ANDROID
-
-namespace juce
-{
-static jobject makeAndroidRect (Rectangle<int> r)
-{
-    return getEnv()->NewObject (AndroidRect,
-                                AndroidRect.constructor,
-                                r.getX(),
-                                r.getY(),
-                                r.getRight(),
-                                r.getBottom());
-}
-
-static jobject makeAndroidPoint (Point<int> p)
-{
-    return getEnv()->NewObject (AndroidPoint,
-                                AndroidPoint.create,
-                                p.getX(),
-                                p.getY());
-}
-} // namespace juce
-
- #include "juce_core/files/juce_common_MimeTypes.h"
- #include "native/accessibility/juce_android_Accessibility.cpp"
- #include "native/juce_android_Windowing.cpp"
- #include "native/juce_android_FileChooser.cpp"
-
- #if JUCE_CONTENT_SHARING
-  #include "native/juce_android_ContentSharer.cpp"
- #endif
-
-#endif
-
-namespace juce
-{
-   #if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED
-    class AccessibilityHandler::AccessibilityNativeImpl { public: AccessibilityNativeImpl (AccessibilityHandler&) {} };
-    void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
-    void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}
-    AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const { return nullptr; }
-    void notifyAccessibilityEventInternal (const AccessibilityHandler&, InternalAccessibilityEvent) {}
-    std::unique_ptr<AccessibilityHandler::AccessibilityNativeImpl> AccessibilityHandler::createNativeImpl (AccessibilityHandler&)
-    {
-        return nullptr;
-    }
-   #else
-    std::unique_ptr<AccessibilityHandler::AccessibilityNativeImpl> AccessibilityHandler::createNativeImpl (AccessibilityHandler& handler)
-    {
-        return std::make_unique<AccessibilityNativeImpl> (handler);
-    }
-   #endif
-}
-
-//==============================================================================
-#if JUCE_WINDOWS
-namespace juce
-{
-
-JUCE_COMCLASS (JuceIVirtualDesktopManager, "a5cd92ff-29be-454c-8d04-d82879fb3f1b") : public IUnknown
-{
-public:
-    virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(
-         __RPC__in HWND topLevelWindow,
-         __RPC__out BOOL * onCurrentDesktop) = 0;
-
-    virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(
-         __RPC__in HWND topLevelWindow,
-         __RPC__out GUID * desktopId) = 0;
-
-    virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(
-         __RPC__in HWND topLevelWindow,
-         __RPC__in REFGUID desktopId) = 0;
-};
-
-JUCE_COMCLASS (JuceVirtualDesktopManager, "aa509086-5ca9-4c25-8f95-589d3c07b48a");
-
-} // namespace juce
-
-#ifdef __CRT_UUID_DECL
-__CRT_UUID_DECL (juce::JuceIVirtualDesktopManager, 0xa5cd92ff, 0x29be, 0x454c, 0x8d, 0x04, 0xd8, 0x28, 0x79, 0xfb, 0x3f, 0x1b)
-__CRT_UUID_DECL (juce::JuceVirtualDesktopManager,  0xaa509086, 0x5ca9, 0x4c25, 0x8f, 0x95, 0x58, 0x9d, 0x3c, 0x07, 0xb4, 0x8a)
-#endif
-
-bool juce::isWindowOnCurrentVirtualDesktop (void* x)
-{
-    if (x == nullptr)
-        return false;
-
-    static auto* desktopManager = []
-    {
-        JuceIVirtualDesktopManager* result = nullptr;
-
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-
-        if (SUCCEEDED (CoCreateInstance (__uuidof (JuceVirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
-            return result;
-
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-        return static_cast<JuceIVirtualDesktopManager*> (nullptr);
-    }();
-
-    BOOL current = false;
-
-    if (auto* dm = desktopManager)
-        if (SUCCEEDED (dm->IsWindowOnCurrentVirtualDesktop (static_cast<HWND> (x), &current)))
-            return current != false;
-
-    return true;
-}
-
-#else
- bool juce::isWindowOnCurrentVirtualDesktop (void*) { return true; }
- juce::ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()  { ignoreUnused (previousContext); }
- juce::ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler() {}
-#endif
-
-// Depends on types defined in platform-specific windowing files
-#include "mouse/juce_MouseCursor.cpp"
-
-#if JUCE_UNIT_TESTS
-#include "native/accessibility/juce_AccessibilityTextHelpers_test.cpp"
-#endif
+#include "windows/juce_VBlankAttachment.cpp"
+#include "windows/juce_NativeScaleFactorNotifier.cpp"

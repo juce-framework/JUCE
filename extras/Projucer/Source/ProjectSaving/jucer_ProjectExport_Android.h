@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -27,13 +36,12 @@
 
 
 //==============================================================================
-class AndroidProjectExporter  : public ProjectExporter
+class AndroidProjectExporter final : public ProjectExporter
 {
 public:
     //==============================================================================
     bool isXcode() const override                { return false; }
     bool isVisualStudio() const override         { return false; }
-    bool isCodeBlocks() const override           { return false; }
     bool isMakefile() const override             { return false; }
     bool isAndroidStudio() const override        { return true;  }
 
@@ -105,7 +113,7 @@ public:
                                  androidReadMediaVideoPermission, androidExternalWritePermission,
                                  androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
                                  androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, gradleClangTidy, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -123,8 +131,8 @@ public:
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
-          androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
-          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "33"),
+          androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "21"),
+          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "34"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
           androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
@@ -149,9 +157,10 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.5.1"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "8.6"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.3.0"),
+          gradleClangTidy                      (settings, Ids::gradleClangTidy,                      getUndoManager(), false),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "8.4.1"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
@@ -171,6 +180,9 @@ public:
                                                 { "clang", "gcc" },
                                                 { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
+
+        props.add (new ChoicePropertyComponent (gradleClangTidy, "Use Clang-Tidy"),
+                   "If enabled and the toolchain is clang this will run clang-tidy when compiling.");
     }
 
     //==============================================================================
@@ -207,6 +219,7 @@ public:
         writeFile (targetFolder, "build.gradle",                             getProjectBuildGradleFileContent());
         writeFile (appFolder,    "build.gradle",                             getAppBuildGradleFileContent (modules));
         writeFile (targetFolder, "local.properties",                         getLocalPropertiesFileContent());
+        writeFile (targetFolder, "gradle.properties",                        getGradlePropertiesFileContent());
         writeFile (targetFolder, "gradle/wrapper/gradle-wrapper.properties", getGradleWrapperPropertiesFileContent());
 
         writeBinaryFile (targetFolder, "gradle/wrapper/LICENSE-for-gradlewrapper.txt", BinaryData::LICENSE,           BinaryData::LICENSESize);
@@ -272,7 +285,7 @@ public:
 
 protected:
     //==============================================================================
-    class AndroidBuildConfiguration  : public BuildConfiguration
+    class AndroidBuildConfiguration final : public BuildConfiguration
     {
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -389,10 +402,13 @@ private:
             mo << "# Automatically generated CMakeLists, created by the Projucer" << newLine
                << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
                << newLine
-               << "cmake_minimum_required(VERSION 3.4.1)" << newLine
+               << "cmake_minimum_required(VERSION 3.22)" << newLine
                << newLine
                << "project(juce_jni_project)" << newLine
                << newLine;
+
+            if (gradleClangTidy.get())
+                mo << "set(CMAKE_CXX_CLANG_TIDY \"${ANDROID_TOOLCHAIN_ROOT}/bin/clang-tidy\")" << newLine << newLine;
 
             if (! isLibrary())
                 mo << "set(BINARY_NAME \"juce_jni\")" << newLine << newLine;
@@ -533,7 +549,7 @@ private:
 
                 if (! first)
                 {
-                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration(0));
+                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration (0));
 
                     if (config)
                     {
@@ -608,7 +624,6 @@ private:
                 mo << newLine;
             }
 
-            libraries.addArray (userLibraries);
             mo << "target_link_libraries( ${BINARY_NAME}";
             if (libraries.size() > 0)
             {
@@ -622,6 +637,9 @@ private:
 
             if (useOboe)
                 mo << "    \"oboe\"" << newLine;
+
+            for (auto& lib : userLibraries)
+                mo << "    [[" << lib << "]]" << newLine;
 
             mo << ")" << newLine;
         });
@@ -678,12 +696,17 @@ private:
 
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
+        // NDK 26 is required for ANDROID_WEAK_API_DEFS, which is in turn required for weak-linking AFontMatcher
+        mo << "def ndkVersionString = \"26.2.11394342\"" << newLine << newLine;
+
         mo << "android {"                                                                    << newLine;
-        mo << "    compileSdkVersion " << static_cast<int> (androidTargetSDK.get())          << newLine;
+        mo << "    compileSdk " << static_cast<int> (androidTargetSDK.get())                 << newLine;
+        mo << "    ndkVersion ndkVersionString"                                              << newLine;
         mo << "    namespace " << project.getBundleIdentifierString().toLowerCase().quoted() << newLine;
         mo << "    externalNativeBuild {"                                                    << newLine;
         mo << "        cmake {"                                                              << newLine;
         mo << "            path \"CMakeLists.txt\""                                          << newLine;
+        mo << "            version \"3.22.1\""                                               << newLine;
         mo << "        }"                                                                    << newLine;
         mo << "    }"                                                                        << newLine;
 
@@ -808,7 +831,7 @@ private:
         auto numConfigs = getNumConfigurations();
         for (int i = 0; i < numConfigs; ++i)
         {
-            auto config = getConfiguration(i);
+            auto config = getConfiguration (i);
 
             if (config->isDebug()) numDebugConfigs++;
 
@@ -902,7 +925,7 @@ private:
             mo << "        implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
         if (isInAppBillingEnabled())
-            mo << "        implementation 'com.android.billingclient:billing:5.0.0'" << newLine;
+            mo << "        implementation 'com.android.billingclient:billing:7.0.0'" << newLine;
 
         if (areRemoteNotificationsEnabled())
         {
@@ -926,7 +949,7 @@ private:
         return mo.toString();
     }
 
-    void addModuleJavaFolderToSourceSet(StringArray& javaSourceSets, const File& source) const
+    void addModuleJavaFolderToSourceSet (StringArray& javaSourceSets, const File& source) const
     {
         if (source.isDirectory())
         {
@@ -1046,6 +1069,16 @@ private:
         return replaceLineFeeds (props, getNewLineString());
     }
 
+    String getGradlePropertiesFileContent() const
+    {
+        String result;
+
+        // Silences warning when Google Play Billing v7 is enabled
+        result << "android.useAndroidX=true" << newLine;
+
+        return replaceLineFeeds (result, getNewLineString());
+    }
+
     String getGradleWrapperPropertiesFileContent() const
     {
         String props;
@@ -1112,7 +1145,7 @@ private:
                    "An integer value that represents the version of the application code, relative to other versions.");
 
         props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK Version", 32, false),
-                   "The number of the minimum version of the Android SDK that the app requires (must be 16 or higher).");
+                   "The number of the minimum version of the Android SDK that the app requires (must be 21 or higher).");
 
         props.add (new TextPropertyComponent (androidTargetSDK, "Target SDK Version", 32, false),
                    "The number of the version of the Android SDK that the app is targeting.");
@@ -1465,7 +1498,7 @@ private:
                           Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
-            addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild, extraCompilerFlags);
+            addCompileUnits (getAllGroups().getReference (i), mo, excludeFromBuild, extraCompilerFlags);
     }
 
     //==============================================================================
@@ -1482,6 +1515,9 @@ private:
         cmakeArgs.add ("\"-DANDROID_CPP_FEATURES=exceptions rtti\"");
         cmakeArgs.add ("\"-DANDROID_ARM_MODE=arm\"");
         cmakeArgs.add ("\"-DANDROID_ARM_NEON=TRUE\"");
+
+        // This enables macOS/iOS-style weak-linking for symbols in the NDK, but is only available in NDK 26+
+        cmakeArgs.add ("\"-DANDROID_WEAK_API_DEFS=ON\"");
 
         auto cppStandard = [this]
         {
@@ -1672,6 +1708,10 @@ private:
         {
             auto* app = createApplicationElement (*manifest);
 
+            auto* receiver = getOrCreateChildWithName (*app, "receiver");
+            setAttributeIfNotPresent (*receiver, "android:name", "com.rmsl.juce.Receiver");
+            setAttributeIfNotPresent (*receiver, "android:exported", "false");
+
             auto* act = createActivityElement (*app);
             createIntentElement (*act);
 
@@ -1740,9 +1780,14 @@ private:
             if (permission == "android.permission.READ_EXTERNAL_STORAGE")
                 usesPermission->setAttribute ("android:maxSdkVersion", "32");
 
+            if (permission == "android.permission.BLUETOOTH_SCAN")
+                usesPermission->setAttribute ("android:usesPermissionFlags", "neverForLocation");
+
             // These permissions are obsoleted by new more fine-grained permissions in API level 31
             if (permission == "android.permission.BLUETOOTH"
-                || permission == "android.permission.BLUETOOTH_ADMIN")
+                || permission == "android.permission.BLUETOOTH_ADMIN"
+                || permission == "android.permission.ACCESS_FINE_LOCATION"
+                || permission == "android.permission.ACCESS_COARSE_LOCATION")
             {
                 usesPermission->setAttribute ("android:maxSdkVersion", "30");
             }

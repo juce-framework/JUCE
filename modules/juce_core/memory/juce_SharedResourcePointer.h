@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -87,74 +99,94 @@ public:
         using. Otherwise, if this is the first SharedResourcePointer to be created,
         then a shared object will be created automatically.
     */
-    SharedResourcePointer()
-    {
-        initialise();
-    }
+    SharedResourcePointer() = default;
 
-    SharedResourcePointer (const SharedResourcePointer&)
-    {
-        initialise();
-    }
+    /** Copy constructor. */
+    SharedResourcePointer (const SharedResourcePointer&) = default;
+
+    /** Move constructor. */
+    SharedResourcePointer (SharedResourcePointer&&) noexcept = default;
 
     /** Destructor.
         If no other SharedResourcePointer objects exist, this will also delete
         the shared object to which it refers.
     */
-    ~SharedResourcePointer()
-    {
-        auto& holder = getSharedObjectHolder();
-        const SpinLock::ScopedLockType sl (holder.lock);
+    ~SharedResourcePointer() = default;
 
-        if (--(holder.refCount) == 0)
-            holder.sharedInstance = nullptr;
-    }
+    /** Returns a pointer to the shared object. */
+    operator SharedObjectType*() const noexcept         { return sharedObject.get(); }
 
-    /** Returns the shared object. */
-    operator SharedObjectType*() const noexcept         { return sharedObject; }
-
-    /** Returns the shared object. */
+    /** Returns a reference to the shared object. */
     SharedObjectType& get() const noexcept              { return *sharedObject; }
 
-    /** Returns the object that this pointer references. */
+    /** Returns a reference to the shared object. */
     SharedObjectType& getObject() const noexcept        { return *sharedObject; }
 
-    /** Returns the shared object pointer. */
-    SharedObjectType* operator->() const noexcept       { return sharedObject; }
+    /** Returns a pointer to the shared object. */
+    SharedObjectType* operator->() const noexcept       { return sharedObject.get(); }
 
-    /** Returns the number of SharedResourcePointers that are currently holding the shared object. */
-    int getReferenceCount() const noexcept              { return getSharedObjectHolder().refCount; }
+    /** Returns a reference to the shared object. */
+    SharedObjectType& operator*() const noexcept        { return *sharedObject; }
+
+   #ifndef DOXYGEN
+    [[deprecated ("If you are relying on this function please inform the JUCE team as we are planing on removing this in a subsequent release")]]
+    int getReferenceCount() const noexcept              { return (int) sharedObject.use_count(); }
+   #endif
+
+    /** Returns the SharedResourcePointer if one already exists, or a null optional otherwise. */
+    static std::optional<SharedResourcePointer> getSharedObjectWithoutCreating()
+    {
+        if (auto sharedPtr = weak().lock())
+            return SharedResourcePointer { std::move (sharedPtr) };
+
+        return {};
+    }
 
 private:
-    struct SharedObjectHolder
+    explicit SharedResourcePointer (std::shared_ptr<SharedObjectType>&& other) noexcept
+        : sharedObject (std::move (other))
     {
-        SpinLock lock;
-        std::unique_ptr<SharedObjectType> sharedInstance;
-        int refCount;
+        jassert (sharedObject != nullptr);
+    }
+
+    class Weak
+    {
+    public:
+        std::shared_ptr<SharedObjectType> lock()
+        {
+            const SpinLock::ScopedLockType lock { mutex };
+            return ptr.lock();
+        }
+
+        std::shared_ptr<SharedObjectType> lockOrCreate()
+        {
+            const SpinLock::ScopedLockType lock { mutex };
+
+            if (auto locked = ptr.lock())
+                return locked;
+
+            const std::shared_ptr<SharedObjectType> shared (new SharedObjectType());
+            ptr = shared;
+            return shared;
+        }
+
+    private:
+        SpinLock mutex;
+        std::weak_ptr<SharedObjectType> ptr;
     };
 
-    static SharedObjectHolder& getSharedObjectHolder() noexcept
+    static inline Weak& weak()
     {
-        static void* holder [(sizeof (SharedObjectHolder) + sizeof(void*) - 1) / sizeof(void*)] = { nullptr };
-        return *reinterpret_cast<SharedObjectHolder*> (holder);
+        static Weak weak;
+        return weak;
     }
 
-    SharedObjectType* sharedObject;
-
-    void initialise()
-    {
-        auto& holder = getSharedObjectHolder();
-        const SpinLock::ScopedLockType sl (holder.lock);
-
-        if (++(holder.refCount) == 1)
-            holder.sharedInstance.reset (new SharedObjectType());
-
-        sharedObject = holder.sharedInstance.get();
-    }
+    std::shared_ptr<SharedObjectType> sharedObject = weak().lockOrCreate();
 
     // There's no need to assign to a SharedResourcePointer because every
     // instance of the class is exactly the same!
     SharedResourcePointer& operator= (const SharedResourcePointer&) = delete;
+    SharedResourcePointer& operator= (SharedResourcePointer&&) noexcept = delete;
 
     JUCE_LEAK_DETECTOR (SharedResourcePointer)
 };

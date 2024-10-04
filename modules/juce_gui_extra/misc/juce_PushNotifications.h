@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -88,7 +97,7 @@ public:
             bool    triggerInBackground = false;   /**< Whether the app can process the action in background. */
             bool    destructive = false;           /**< Whether to display the action as destructive. */
             String  textInputButtonText;           /**< Optional: Text displayed on text input notification
-                                                        button (from iOS 10 only).
+                                                        button.
                                                         Note that it will be ignored if style is set to Style::button. */
             /**@}*/
 
@@ -121,8 +130,7 @@ public:
                                   judiciously. On iOS available from version 10. On Android available from API 16. */
 
         String groupId;      /**< Optional: allows the OS to visually group, collapse, and expand a set of notifications,
-                                  note that OS may automatically group notifications if no groupId is specified.
-                                  Available on Android API 20 or above and iOS 10 or above. */
+                                  note that OS may automatically group notifications if no groupId is specified. */
 
         int badgeNumber = 0; /**< Optional: on platforms that support it, can set a number this notification represents. */
         URL soundToPlay;     /**< Optional: empty when the notification should be silent. When the name is set to
@@ -156,7 +164,7 @@ public:
                                              in requestPermissionsWithSettings()). */
         double triggerIntervalSec = 0.; /**< Optional: specifies number of seconds before the notification should trigger. */
         bool   repeat = false;          /**< Optional: allows the notification to continuously retrigger after
-                                             triggerIntervalSec seconds. Available from iOS 10. */
+                                             triggerIntervalSec seconds. */
 
         /**@}*/
 
@@ -397,7 +405,7 @@ public:
         {
             juce::String identifier;         /**< unique identifier */
             juce::Array<Action> actions;     /**< optional list of actions within this category */
-            bool sendDismissAction = false;  /**< whether dismiss action will be sent to the app (from iOS 10 only) */
+            bool sendDismissAction = false;  /**< whether dismiss action will be sent to the app */
         };
 
         bool allowSound = false;      /**< whether the app should play a sound upon notification */
@@ -498,7 +506,7 @@ public:
     */
     void getPendingLocalNotifications() const;
 
-    /** Unschedules a pending local notification with a given identifier. Available from iOS 10. */
+    /** Unschedules a pending local notification with a given identifier. */
     void removePendingLocalNotification (const String& identifier);
 
     /** Unschedules all pending local notifications. iOS only. */
@@ -511,9 +519,8 @@ public:
     bool areNotificationsEnabled() const;
 
     /** On iOS as well as on Android, sends a local notification.
-        On Android and iOS 10 or above, this will refresh an existing notification
-        if the same identifier is used as in a notification that was already sent
-        and not yet responded by a user.
+        This will refresh an existing notification if the same identifier is used as in
+        a notification that was already sent and not yet responded by a user.
     */
     void sendLocalNotification (const Notification& notification);
 
@@ -604,15 +611,13 @@ public:
         virtual void notificationSettingsReceived (const Settings& settings);
 
         /** Called when the list of pending notifications, requested by calling
-            getPendingLocalNotifications() is returned. iOS 10 or above only.
+            getPendingLocalNotifications() is returned.
         */
         virtual void pendingLocalNotificationsListReceived (const Array<Notification>& notifications);
 
         /** This can be called in multiple different situations, depending on the OS and the situation.
 
-            On pre iOS 10 device it will be called when a user presses on a notification or when a
-            notification was received when the app was in the foreground already. On iOS 10 it will be
-            called when a user presses on a notification
+            This will be called when a user presses on a notification
 
             Note: On Android, if remote notification was received while the app was in the background and
             then user pressed on it, the notification object received in this callback will contain only

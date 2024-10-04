@@ -19,7 +19,9 @@
 
 #include <math.h>
 
-namespace resampler {
+#include "ResamplerDefinitions.h"
+
+namespace RESAMPLER_OUTER_NAMESPACE::resampler {
 
 /**
  * Calculate a Kaiser window centered at 0.
@@ -83,5 +85,6 @@ private:
     double mInverseBesselBeta = 1.0;
 };
 
-} // namespace resampler
+} /* namespace RESAMPLER_OUTER_NAMESPACE::resampler */
+
 #endif //RESAMPLER_KAISER_WINDOW_H

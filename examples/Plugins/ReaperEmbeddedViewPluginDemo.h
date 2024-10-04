@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -47,7 +51,7 @@
 
 *******************************************************************************/
 
-/*  This demo shows how to use the VSTCallbackHandler and VST3ClientExtensions
+/*  This demo shows how to use the VST2ClientExtensions and VST3ClientExtensions
     classes to provide extended functionality in compatible VST/VST3 hosts.
 
     If this project is built as a VST or VST3 plugin and loaded in REAPER
@@ -104,12 +108,14 @@ struct EmbeddedViewListener
     virtual Steinberg::TPtrInt handledEmbeddedUIMessage (int msg,
                                                          Steinberg::TPtrInt parm2,
                                                          Steinberg::TPtrInt parm3) = 0;
+
+    virtual void setGlobalBypassFunction (void (*) (int)) = 0;
 };
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor")
 
 //==============================================================================
-class EmbeddedUI : public reaper::IReaperUIEmbedInterface
+class EmbeddedUI final : public reaper::IReaperUIEmbedInterface
 {
 public:
     explicit EmbeddedUI (EmbeddedViewListener& demo) : listener (demo) {}
@@ -144,8 +150,83 @@ private:
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
+class VST2Extensions final : public VST2ClientExtensions
+{
+public:
+    explicit VST2Extensions (EmbeddedViewListener& l)
+        : listener (l) {}
+
+    pointer_sized_int handleVstPluginCanDo (int32, pointer_sized_int, void* ptr, float) override
+    {
+        if (auto* str = static_cast<const char*> (ptr))
+            for (auto* key : { "hasCockosEmbeddedUI", "hasCockosExtensions" })
+                if (strcmp (str, key) == 0)
+                    return (pointer_sized_int) 0xbeef0000;
+
+        return 0;
+    }
+
+    pointer_sized_int handleVstManufacturerSpecific (int32 index,
+                                                     pointer_sized_int value,
+                                                     void* ptr,
+                                                     float opt) override
+    {
+        // The docstring at the top of reaper_plugin_fx_embed.h specifies
+        // that the index will always be effEditDraw, which is now deprecated.
+        if (index != __effEditDrawDeprecated)
+            return 0;
+
+        return (pointer_sized_int) listener.handledEmbeddedUIMessage ((int) opt,
+                                                                      (Steinberg::TPtrInt) value,
+                                                                      (Steinberg::TPtrInt) ptr);
+    }
+
+    void handleVstHostCallbackAvailable (std::function<VstHostCallbackType>&& hostcb) override
+    {
+        char functionName[] = "BypassFxAllTracks";
+        listener.setGlobalBypassFunction (reinterpret_cast<void (*) (int)> (hostcb ((int32_t) 0xdeadbeef, (int32_t) 0xdeadf00d, 0, functionName, 0.0)));
+    }
+
+private:
+    EmbeddedViewListener& listener;
+};
+
+class VST3Extensions final : public VST3ClientExtensions
+{
+public:
+    explicit VST3Extensions (EmbeddedViewListener& l)
+        : listener (l) {}
+
+    int32_t queryIEditController (const Steinberg::TUID tuid, void** obj) override
+    {
+        if (embeddedUi.queryInterface (tuid, obj) == Steinberg::kResultOk)
+            return Steinberg::kResultOk;
+
+        *obj = nullptr;
+        return Steinberg::kNoInterface;
+    }
+
+    void setIHostApplication (Steinberg::FUnknown* ptr) override
+    {
+        if (ptr == nullptr)
+            return;
+
+        void* objPtr = nullptr;
+
+        if (ptr->queryInterface (reaper::IReaperHostApplication::iid, &objPtr) == Steinberg::kResultOk)
+        {
+            if (void* fnPtr = static_cast<reaper::IReaperHostApplication*> (objPtr)->getReaperApi ("BypassFxAllTracks"))
+                listener.setGlobalBypassFunction (reinterpret_cast<void (*) (int)> (fnPtr));
+        }
+    }
+
+private:
+    EmbeddedViewListener& listener;
+    EmbeddedUI embeddedUi { listener };
+};
+
 //==============================================================================
-class Editor : public AudioProcessorEditor
+class Editor final : public AudioProcessorEditor
 {
 public:
     explicit Editor (AudioProcessor& proc,
@@ -157,7 +238,7 @@ public:
         addAndMakeVisible (bypassButton);
 
         // Clicking will bypass *everything*
-        bypassButton.onClick = [globalBypass] { if (globalBypass != nullptr) globalBypass (-1); };
+        bypassButton.onClick = [globalBypass] { NullCheckedInvocation::invoke (globalBypass, -1); };
 
         setSize (300, 80);
     }
@@ -181,11 +262,9 @@ private:
 };
 
 //==============================================================================
-class ReaperEmbeddedViewDemo  : public AudioProcessor,
-                                public VSTCallbackHandler,
-                                public VST3ClientExtensions,
-                                private EmbeddedViewListener,
-                                private Timer
+class ReaperEmbeddedViewDemo final : public AudioProcessor,
+                                     private EmbeddedViewListener,
+                                     private Timer
 {
 public:
     ReaperEmbeddedViewDemo()
@@ -236,63 +315,8 @@ public:
                                                         false).readFloat());
     }
 
-    int32_t queryIEditController (const Steinberg::TUID tuid, void** obj) override
-    {
-        if (embeddedUi.queryInterface (tuid, obj) == Steinberg::kResultOk)
-            return Steinberg::kResultOk;
-
-        *obj = nullptr;
-        return Steinberg::kNoInterface;
-    }
-
-    void setIHostApplication (Steinberg::FUnknown* ptr) override
-    {
-        if (ptr == nullptr)
-            return;
-
-        void* objPtr = nullptr;
-
-        if (ptr->queryInterface (reaper::IReaperHostApplication::iid, &objPtr) == Steinberg::kResultOk)
-        {
-            if (void* fnPtr = static_cast<reaper::IReaperHostApplication*> (objPtr)->getReaperApi ("BypassFxAllTracks"))
-                globalBypassFn = reinterpret_cast<void (*) (int)> (fnPtr);
-        }
-    }
-
-    pointer_sized_int handleVstPluginCanDo (int32, pointer_sized_int, void* ptr, float) override
-    {
-        if (auto* str = static_cast<const char*> (ptr))
-        {
-            if (strcmp (str, "hasCockosEmbeddedUI") == 0)
-                return 0xbeef0000;
-
-            if (strcmp (str, "hasCockosExtensions") == 0)
-                return 0xbeef0000;
-        }
-
-        return 0;
-    }
-
-    pointer_sized_int handleVstManufacturerSpecific (int32 index,
-                                                     pointer_sized_int value,
-                                                     void* ptr,
-                                                     float opt) override
-    {
-        // The docstring at the top of reaper_plugin_fx_embed.h specifies
-        // that the index will always be effEditDraw, which is now deprecated.
-        if (index != __effEditDrawDeprecated)
-            return 0;
-
-        return (pointer_sized_int) handledEmbeddedUIMessage ((int) opt,
-                                                             (Steinberg::TPtrInt) value,
-                                                             (Steinberg::TPtrInt) ptr);
-    }
-
-    void handleVstHostCallbackAvailable (std::function<VstHostCallbackType>&& hostcb) override
-    {
-        char functionName[] = "BypassFxAllTracks";
-        globalBypassFn = reinterpret_cast<void (*) (int)> (hostcb ((int32_t) 0xdeadbeef, (int32_t) 0xdeadf00d, 0, functionName, 0.0));
-    }
+    VST2ClientExtensions* getVST2ClientExtensions() override { return &vst2Extensions; }
+    VST3ClientExtensions* getVST3ClientExtensions() override { return &vst3Extensions; }
 
 private:
     template <typename Float>
@@ -414,10 +438,14 @@ private:
         return 0;
     }
 
+    void setGlobalBypassFunction (void (*fn) (int)) override { globalBypassFn = fn; }
+
     AudioParameterFloat* gain = nullptr;
     void (*globalBypassFn) (int) = nullptr;
-    EmbeddedUI embeddedUi { *this };
 
     std::atomic<float> storedLevel { 0.0f };
     float levelToDraw = 0.0f;
+
+    VST2Extensions vst2Extensions { *this };
+    VST3Extensions vst3Extensions { *this };
 };

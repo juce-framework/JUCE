@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -37,9 +49,9 @@ String SystemStats::getJUCEVersion()
     static_assert (sizeof (int64) == 8,                          "Basic sanity test failed: please report!");
     static_assert (sizeof (uint64) == 8,                         "Basic sanity test failed: please report!");
 
-    return "JUCE v" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
-                "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
-                "." JUCE_STRINGIFY(JUCE_BUILDNUMBER);
+    return "JUCE v" JUCE_STRINGIFY (JUCE_MAJOR_VERSION)
+                "." JUCE_STRINGIFY (JUCE_MINOR_VERSION)
+                "." JUCE_STRINGIFY (JUCE_BUILDNUMBER);
 }
 
 #if JUCE_ANDROID && ! defined (JUCE_DISABLE_JUCE_VERSION_PRINTING)
@@ -60,24 +72,64 @@ String SystemStats::getJUCEVersion()
 
 StringArray SystemStats::getDeviceIdentifiers()
 {
+    for (const auto flag : { MachineIdFlags::fileSystemId, MachineIdFlags::macAddresses  })
+        if (auto ids = getMachineIdentifiers (flag); ! ids.isEmpty())
+            return ids;
+
+    jassertfalse; // Failed to create any IDs!
+    return {};
+}
+
+String getLegacyUniqueDeviceID();
+
+StringArray SystemStats::getMachineIdentifiers (MachineIdFlags flags)
+{
+    auto macAddressProvider = [] (StringArray& arr)
+    {
+        for (const auto& mac : MACAddress::getAllAddresses())
+            arr.add (mac.toString());
+    };
+
+    auto fileSystemProvider = [] (StringArray& arr)
+    {
+       #if JUCE_WINDOWS
+        File f (File::getSpecialLocation (File::windowsSystemDirectory));
+       #else
+        File f ("~");
+       #endif
+        if (auto num = f.getFileIdentifier())
+            arr.add (String::toHexString ((int64) num));
+    };
+
+    auto legacyIdProvider = [] ([[maybe_unused]] StringArray& arr)
+    {
+       #if JUCE_WINDOWS
+        arr.add (getLegacyUniqueDeviceID());
+       #endif
+    };
+
+    auto uniqueIdProvider = [] (StringArray& arr)
+    {
+        arr.add (getUniqueDeviceID());
+    };
+
+    struct Provider { MachineIdFlags flag; void (*func) (StringArray&); };
+    static const Provider providers[] =
+    {
+        { MachineIdFlags::macAddresses,   macAddressProvider },
+        { MachineIdFlags::fileSystemId,   fileSystemProvider },
+        { MachineIdFlags::legacyUniqueId, legacyIdProvider },
+        { MachineIdFlags::uniqueId,       uniqueIdProvider }
+    };
+
     StringArray ids;
 
-   #if JUCE_WINDOWS
-    File f (File::getSpecialLocation (File::windowsSystemDirectory));
-   #else
-    File f ("~");
-   #endif
-    if (auto num = f.getFileIdentifier())
+    for (const auto& provider : providers)
     {
-        ids.add (String::toHexString ((int64) num));
-    }
-    else
-    {
-        for (auto& address : MACAddress::getAllAddresses())
-            ids.add (address.toString());
+        if (hasBitValueSet (flags, provider.flag))
+            provider.func (ids);
     }
 
-    jassert (! ids.isEmpty()); // Failed to create any IDs!
     return ids;
 }
 
@@ -138,7 +190,7 @@ String SystemStats::getStackBacktrace()
 {
     String result;
 
-   #if JUCE_ANDROID || JUCE_MINGW || JUCE_WASM
+   #if JUCE_ANDROID || JUCE_WASM
     jassertfalse; // sorry, not implemented yet!
 
    #elif JUCE_WINDOWS
@@ -177,7 +229,7 @@ String SystemStats::getStackBacktrace()
     auto frames = backtrace (stack, numElementsInArray (stack));
     char** frameStrings = backtrace_symbols (stack, frames);
 
-    for (int i = 0; i < frames; ++i)
+    for (auto i = (decltype (frames)) 0; i < frames; ++i)
         result << frameStrings[i] << newLine;
 
     ::free (frameStrings);
@@ -203,8 +255,6 @@ static void handleCrash (int signum)
     globalCrashHandler ((void*) (pointer_sized_int) signum);
     ::kill (getpid(), SIGKILL);
 }
-
-int juce_siginterrupt (int sig, int flag);
 #endif
 
 void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)
@@ -230,13 +280,8 @@ void SystemStats::setApplicationCrashHandler (CrashHandlerFunction handler)
 bool SystemStats::isRunningInAppExtensionSandbox() noexcept
 {
    #if JUCE_MAC || JUCE_IOS
-    static bool firstQuery = true;
-    static bool isRunningInAppSandbox = false;
-
-    if (firstQuery)
+    static bool isRunningInAppSandbox = [&]
     {
-        firstQuery = false;
-
         File bundle = File::getSpecialLocation (File::invokedExecutableFile).getParentDirectory();
 
        #if JUCE_MAC
@@ -244,8 +289,10 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
        #endif
 
         if (bundle.isDirectory())
-            isRunningInAppSandbox = (bundle.getFileExtension() == ".appex");
-    }
+            return bundle.getFileExtension() == ".appex";
+
+        return false;
+    }();
 
     return isRunningInAppSandbox;
    #else
@@ -255,7 +302,7 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
 
 #if JUCE_UNIT_TESTS
 
-class UniqueHardwareIDTest  : public UnitTest
+class UniqueHardwareIDTest final : public UnitTest
 {
 public:
     //==============================================================================

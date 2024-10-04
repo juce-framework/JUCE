@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,9 +35,9 @@
 namespace juce
 {
 
-class ParameterListener   : private AudioProcessorParameter::Listener,
-                            private AudioProcessorListener,
-                            private Timer
+class ParameterListener : private AudioProcessorParameter::Listener,
+                          private AudioProcessorListener,
+                          private Timer
 {
 public:
     ParameterListener (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -107,7 +116,7 @@ public:
 };
 
 //==============================================================================
-class BooleanParameterComponent : public ParameterComponent
+class BooleanParameterComponent final : public ParameterComponent
 {
 public:
     BooleanParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -154,7 +163,7 @@ private:
 };
 
 //==============================================================================
-class SwitchParameterComponent : public ParameterComponent
+class SwitchParameterComponent final : public ParameterComponent
 {
 public:
     SwitchParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -256,7 +265,7 @@ private:
 };
 
 //==============================================================================
-class ChoiceParameterComponent : public ParameterComponent
+class ChoiceParameterComponent final : public ParameterComponent
 {
 public:
     ChoiceParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -293,7 +302,7 @@ private:
             index = roundToInt (getParameter().getValue() * (float) (parameterValues.size() - 1));
         }
 
-        box.setSelectedItemIndex (index);
+        box.setSelectedItemIndex (index, dontSendNotification);
     }
 
     void boxChanged()
@@ -318,7 +327,7 @@ private:
 };
 
 //==============================================================================
-class SliderParameterComponent : public ParameterComponent
+class SliderParameterComponent final : public ParameterComponent
 {
 public:
     SliderParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
@@ -378,7 +387,7 @@ private:
     {
         auto newVal = (float) slider.getValue();
 
-        if (getParameter().getValue() != newVal)
+        if (! approximatelyEqual (getParameter().getValue(), newVal))
         {
             if (! isDragging)
                 getParameter().beginChangeGesture();
@@ -411,9 +420,9 @@ private:
 };
 
 //==============================================================================
-class ParameterDisplayComponent   : public Component,
-                                    private AudioProcessorListener,
-                                    private AsyncUpdater
+class ParameterDisplayComponent final : public Component,
+                                        private AudioProcessorListener,
+                                        private AsyncUpdater
 {
 public:
     ParameterDisplayComponent (AudioProcessorEditor& editorIn, AudioProcessorParameter& param)
@@ -515,7 +524,7 @@ private:
 };
 
 //==============================================================================
-struct ParamControlItem : public TreeViewItem
+struct ParamControlItem final : public TreeViewItem
 {
     ParamControlItem (AudioProcessorEditor& editorIn, AudioProcessorParameter& paramIn)
         : editor (editorIn), param (paramIn) {}
@@ -533,7 +542,7 @@ struct ParamControlItem : public TreeViewItem
     AudioProcessorParameter& param;
 };
 
-struct ParameterGroupItem : public TreeViewItem
+struct ParameterGroupItem final : public TreeViewItem
 {
     ParameterGroupItem (AudioProcessorEditor& editor, const AudioProcessorParameterGroup& group)
         : name (group.getName())

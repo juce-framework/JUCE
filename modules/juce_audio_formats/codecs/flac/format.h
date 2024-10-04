@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2016  Xiph.Org Foundation
+ * Copyright (C) 2011-2023  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,7 +60,7 @@ extern "C" {
  *  structures used by the rest of the interfaces.
  *
  *  First, you should be familiar with the
- *  <A HREF="../format.html">FLAC format</A>.  Many of the values here
+ *  <A HREF="https://xiph.org/flac/format.html">FLAC format</A>.  Many of the values here
  *  follow directly from the specification.  As a user of libFLAC, the
  *  interesting parts really are the structures that describe the frame
  *  header and metadata blocks.
@@ -113,19 +113,16 @@ extern "C" {
 
 /** The maximum sample resolution permitted by libFLAC.
  *
- * \warning
  * FLAC__MAX_BITS_PER_SAMPLE is the limit of the FLAC format.  However,
- * the reference encoder/decoder is currently limited to 24 bits because
- * of prevalent 32-bit math, so make sure and use this value when
- * appropriate.
+ * the reference encoder/decoder used to be limited to 24 bits. This
+ * value was used to signal that limit.
  */
-#define FLAC__REFERENCE_CODEC_MAX_BITS_PER_SAMPLE (24u)
+#define FLAC__REFERENCE_CODEC_MAX_BITS_PER_SAMPLE (32u)
 
 /** The maximum sample rate permitted by the format.  The value is
- *  ((2 ^ 16) - 1) * 10; see <A HREF="../format.html">FLAC format</A>
- *  as to why.
+ *  ((2 ^ 20) - 1)
  */
-#define FLAC__MAX_SAMPLE_RATE (655350u)
+#define FLAC__MAX_SAMPLE_RATE (1048575u)
 
 /** The maximum LPC order permitted by the format. */
 #define FLAC__MAX_LPC_ORDER (32u)
@@ -228,7 +225,7 @@ typedef struct {
 	 */
 } FLAC__EntropyCodingMethod_PartitionedRiceContents;
 
-/** Header for a Rice partitioned residual.  (c.f. <A HREF="../format.html#partitioned_rice">format specification</A>)
+/** Header for a Rice partitioned residual.  (c.f. <A HREF="https://xiph.org/flac/format.html#partitioned_rice">format specification</A>)
  */
 typedef struct {
 
@@ -250,7 +247,7 @@ extern FLAC_API const uint32_t FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE_ESCA
 extern FLAC_API const uint32_t FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_ESCAPE_PARAMETER;
 /**< == (1<<FLAC__ENTROPY_CODING_METHOD_PARTITIONED_RICE2_PARAMETER_LEN)-1 */
 
-/** Header for the entropy coding method.  (c.f. <A HREF="../format.html#residual">format specification</A>)
+/** Header for the entropy coding method.  (c.f. <A HREF="https://xiph.org/flac/format.html#residual">format specification</A>)
  */
 typedef struct {
 	FLAC__EntropyCodingMethodType type;
@@ -279,21 +276,31 @@ typedef enum {
 extern FLAC_API const char * const FLAC__SubframeTypeString[];
 
 
-/** CONSTANT subframe.  (c.f. <A HREF="../format.html#subframe_constant">format specification</A>)
+/** CONSTANT subframe.  (c.f. <A HREF="https://xiph.org/flac/format.html#subframe_constant">format specification</A>)
  */
 typedef struct {
-	FLAC__int32 value; /**< The constant signal value. */
+	FLAC__int64 value; /**< The constant signal value. */
 } FLAC__Subframe_Constant;
 
+/** An enumeration of the possible verbatim subframe data types. */
+typedef enum {
+	FLAC__VERBATIM_SUBFRAME_DATA_TYPE_INT32, /**< verbatim subframe has 32-bit int */
+	FLAC__VERBATIM_SUBFRAME_DATA_TYPE_INT64 /**< verbatim subframe has 64-bit int */
+} FLAC__VerbatimSubframeDataType;
 
-/** VERBATIM subframe.  (c.f. <A HREF="../format.html#subframe_verbatim">format specification</A>)
+
+/** VERBATIM subframe.  (c.f. <A HREF="https://xiph.org/flac/format.html#subframe_verbatim">format specification</A>)
  */
 typedef struct {
-	const FLAC__int32 *data; /**< A pointer to verbatim signal. */
+	union {
+		const FLAC__int32 *int32; /**< A FLAC__int32 pointer to verbatim signal. */
+		const FLAC__int64 *int64; /**< A FLAC__int64 pointer to verbatim signal. */
+	} data;
+	FLAC__VerbatimSubframeDataType data_type;
 } FLAC__Subframe_Verbatim;
 
 
-/** FIXED subframe.  (c.f. <A HREF="../format.html#subframe_fixed">format specification</A>)
+/** FIXED subframe.  (c.f. <A HREF="https://xiph.org/flac/format.html#subframe_fixed">format specification</A>)
  */
 typedef struct {
 	FLAC__EntropyCodingMethod entropy_coding_method;
@@ -302,7 +309,7 @@ typedef struct {
 	uint32_t order;
 	/**< The polynomial order. */
 
-	FLAC__int32 warmup[FLAC__MAX_FIXED_ORDER];
+	FLAC__int64 warmup[FLAC__MAX_FIXED_ORDER];
 	/**< Warmup samples to prime the predictor, length == order. */
 
 	const FLAC__int32 *residual;
@@ -310,7 +317,7 @@ typedef struct {
 } FLAC__Subframe_Fixed;
 
 
-/** LPC subframe.  (c.f. <A HREF="../format.html#subframe_lpc">format specification</A>)
+/** LPC subframe.  (c.f. <A HREF="https://xiph.org/flac/format.html#subframe_lpc">format specification</A>)
  */
 typedef struct {
 	FLAC__EntropyCodingMethod entropy_coding_method;
@@ -328,7 +335,7 @@ typedef struct {
 	FLAC__int32 qlp_coeff[FLAC__MAX_LPC_ORDER];
 	/**< FIR filter coefficients. */
 
-	FLAC__int32 warmup[FLAC__MAX_LPC_ORDER];
+	FLAC__int64 warmup[FLAC__MAX_LPC_ORDER];
 	/**< Warmup samples to prime the predictor, length == order. */
 
 	const FLAC__int32 *residual;
@@ -339,7 +346,7 @@ extern FLAC_API const uint32_t FLAC__SUBFRAME_LPC_QLP_COEFF_PRECISION_LEN; /**< 
 extern FLAC_API const uint32_t FLAC__SUBFRAME_LPC_QLP_SHIFT_LEN; /**< == 5 (bits) */
 
 
-/** FLAC subframe structure.  (c.f. <A HREF="../format.html#subframe">format specification</A>)
+/** FLAC subframe structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#subframe">format specification</A>)
  */
 typedef struct {
 	FLAC__SubframeType type;
@@ -406,7 +413,7 @@ typedef enum {
 extern FLAC_API const char * const FLAC__FrameNumberTypeString[];
 
 
-/** FLAC frame header structure.  (c.f. <A HREF="../format.html#frame_header">format specification</A>)
+/** FLAC frame header structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#frame_header">format specification</A>)
  */
 typedef struct {
 	uint32_t blocksize;
@@ -455,7 +462,7 @@ extern FLAC_API const uint32_t FLAC__FRAME_HEADER_ZERO_PAD_LEN; /**< == 1 (bit) 
 extern FLAC_API const uint32_t FLAC__FRAME_HEADER_CRC_LEN; /**< == 8 (bits) */
 
 
-/** FLAC frame footer structure.  (c.f. <A HREF="../format.html#frame_footer">format specification</A>)
+/** FLAC frame footer structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#frame_footer">format specification</A>)
  */
 typedef struct {
 	FLAC__uint16 crc;
@@ -468,7 +475,7 @@ typedef struct {
 extern FLAC_API const uint32_t FLAC__FRAME_FOOTER_CRC_LEN; /**< == 16 (bits) */
 
 
-/** FLAC frame structure.  (c.f. <A HREF="../format.html#frame">format specification</A>)
+/** FLAC frame structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#frame">format specification</A>)
  */
 typedef struct {
 	FLAC__FrameHeader header;
@@ -489,25 +496,25 @@ typedef struct {
 typedef enum {
 
 	FLAC__METADATA_TYPE_STREAMINFO = 0,
-	/**< <A HREF="../format.html#metadata_block_streaminfo">STREAMINFO</A> block */
+	/**< <A HREF="https://xiph.org/flac/format.html#metadata_block_streaminfo">STREAMINFO</A> block */
 
 	FLAC__METADATA_TYPE_PADDING = 1,
-	/**< <A HREF="../format.html#metadata_block_padding">PADDING</A> block */
+	/**< <A HREF="https://xiph.org/flac/format.html#metadata_block_padding">PADDING</A> block */
 
 	FLAC__METADATA_TYPE_APPLICATION = 2,
-	/**< <A HREF="../format.html#metadata_block_application">APPLICATION</A> block */
+	/**< <A HREF="https://xiph.org/flac/format.html#metadata_block_application">APPLICATION</A> block */
 
 	FLAC__METADATA_TYPE_SEEKTABLE = 3,
-	/**< <A HREF="../format.html#metadata_block_seektable">SEEKTABLE</A> block */
+	/**< <A HREF="https://xiph.org/flac/format.html#metadata_block_seektable">SEEKTABLE</A> block */
 
 	FLAC__METADATA_TYPE_VORBIS_COMMENT = 4,
-	/**< <A HREF="../format.html#metadata_block_vorbis_comment">VORBISCOMMENT</A> block (a.k.a. FLAC tags) */
+	/**< <A HREF="https://xiph.org/flac/format.html#metadata_block_vorbis_comment">VORBISCOMMENT</A> block (a.k.a. FLAC tags) */
 
 	FLAC__METADATA_TYPE_CUESHEET = 5,
-	/**< <A HREF="../format.html#metadata_block_cuesheet">CUESHEET</A> block */
+	/**< <A HREF="https://xiph.org/flac/format.html#metadata_block_cuesheet">CUESHEET</A> block */
 
 	FLAC__METADATA_TYPE_PICTURE = 6,
-	/**< <A HREF="../format.html#metadata_block_picture">PICTURE</A> block */
+	/**< <A HREF="https://xiph.org/flac/format.html#metadata_block_picture">PICTURE</A> block */
 
 	FLAC__METADATA_TYPE_UNDEFINED = 7,
 	/**< marker to denote beginning of undefined type range; this number will increase as new metadata types are added */
@@ -524,7 +531,7 @@ typedef enum {
 extern FLAC_API const char * const FLAC__MetadataTypeString[];
 
 
-/** FLAC STREAMINFO structure.  (c.f. <A HREF="../format.html#metadata_block_streaminfo">format specification</A>)
+/** FLAC STREAMINFO structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#metadata_block_streaminfo">format specification</A>)
  */
 typedef struct {
 	uint32_t min_blocksize, max_blocksize;
@@ -549,7 +556,7 @@ extern FLAC_API const uint32_t FLAC__STREAM_METADATA_STREAMINFO_MD5SUM_LEN; /**<
 /** The total stream length of the STREAMINFO block in bytes. */
 #define FLAC__STREAM_METADATA_STREAMINFO_LENGTH (34u)
 
-/** FLAC PADDING structure.  (c.f. <A HREF="../format.html#metadata_block_padding">format specification</A>)
+/** FLAC PADDING structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#metadata_block_padding">format specification</A>)
  */
 typedef struct {
 	int dummy;
@@ -560,7 +567,7 @@ typedef struct {
 } FLAC__StreamMetadata_Padding;
 
 
-/** FLAC APPLICATION structure.  (c.f. <A HREF="../format.html#metadata_block_application">format specification</A>)
+/** FLAC APPLICATION structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#metadata_block_application">format specification</A>)
  */
 typedef struct {
 	FLAC__byte id[4];
@@ -569,7 +576,7 @@ typedef struct {
 
 extern FLAC_API const uint32_t FLAC__STREAM_METADATA_APPLICATION_ID_LEN; /**< == 32 (bits) */
 
-/** SeekPoint structure used in SEEKTABLE blocks.  (c.f. <A HREF="../format.html#seekpoint">format specification</A>)
+/** SeekPoint structure used in SEEKTABLE blocks.  (c.f. <A HREF="https://xiph.org/flac/format.html#seekpoint">format specification</A>)
  */
 typedef struct {
 	FLAC__uint64 sample_number;
@@ -597,7 +604,7 @@ extern FLAC_API const uint32_t FLAC__STREAM_METADATA_SEEKPOINT_FRAME_SAMPLES_LEN
 extern FLAC_API const FLAC__uint64 FLAC__STREAM_METADATA_SEEKPOINT_PLACEHOLDER;
 
 
-/** FLAC SEEKTABLE structure.  (c.f. <A HREF="../format.html#metadata_block_seektable">format specification</A>)
+/** FLAC SEEKTABLE structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#metadata_block_seektable">format specification</A>)
  *
  * \note From the format specification:
  * - The seek points must be sorted by ascending sample number.
@@ -615,7 +622,7 @@ typedef struct {
 } FLAC__StreamMetadata_SeekTable;
 
 
-/** Vorbis comment entry structure used in VORBIS_COMMENT blocks.  (c.f. <A HREF="../format.html#metadata_block_vorbis_comment">format specification</A>)
+/** Vorbis comment entry structure used in VORBIS_COMMENT blocks.  (c.f. <A HREF="https://xiph.org/flac/format.html#metadata_block_vorbis_comment">format specification</A>)
  *
  *  For convenience, the APIs maintain a trailing NUL character at the end of
  *  \a entry which is not counted toward \a length, i.e.
@@ -629,7 +636,7 @@ typedef struct {
 extern FLAC_API const uint32_t FLAC__STREAM_METADATA_VORBIS_COMMENT_ENTRY_LENGTH_LEN; /**< == 32 (bits) */
 
 
-/** FLAC VORBIS_COMMENT structure.  (c.f. <A HREF="../format.html#metadata_block_vorbis_comment">format specification</A>)
+/** FLAC VORBIS_COMMENT structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#metadata_block_vorbis_comment">format specification</A>)
  */
 typedef struct {
 	FLAC__StreamMetadata_VorbisComment_Entry vendor_string;
@@ -641,7 +648,7 @@ extern FLAC_API const uint32_t FLAC__STREAM_METADATA_VORBIS_COMMENT_NUM_COMMENTS
 
 
 /** FLAC CUESHEET track index structure.  (See the
- * <A HREF="../format.html#cuesheet_track_index">format specification</A> for
+ * <A HREF="https://xiph.org/flac/format.html#cuesheet_track_index">format specification</A> for
  * the full description of each field.)
  */
 typedef struct {
@@ -660,7 +667,7 @@ extern FLAC_API const uint32_t FLAC__STREAM_METADATA_CUESHEET_INDEX_RESERVED_LEN
 
 
 /** FLAC CUESHEET track structure.  (See the
- * <A HREF="../format.html#cuesheet_track">format specification</A> for
+ * <A HREF="https://xiph.org/flac/format.html#cuesheet_track">format specification</A> for
  * the full description of each field.)
  */
 typedef struct {
@@ -697,7 +704,7 @@ extern FLAC_API const uint32_t FLAC__STREAM_METADATA_CUESHEET_TRACK_NUM_INDICES_
 
 
 /** FLAC CUESHEET structure.  (See the
- * <A HREF="../format.html#metadata_block_cuesheet">format specification</A>
+ * <A HREF="https://xiph.org/flac/format.html#metadata_block_cuesheet">format specification</A>
  * for the full description of each field.)
  */
 typedef struct {
@@ -763,7 +770,7 @@ typedef enum {
 extern FLAC_API const char * const FLAC__StreamMetadata_Picture_TypeString[];
 
 /** FLAC PICTURE structure.  (See the
- * <A HREF="../format.html#metadata_block_picture">format specification</A>
+ * <A HREF="https://xiph.org/flac/format.html#metadata_block_picture">format specification</A>
  * for the full description of each field.)
  */
 typedef struct {
@@ -829,9 +836,9 @@ typedef struct {
 } FLAC__StreamMetadata_Unknown;
 
 
-/** FLAC metadata block structure.  (c.f. <A HREF="../format.html#metadata_block">format specification</A>)
+/** FLAC metadata block structure.  (c.f. <A HREF="https://xiph.org/flac/format.html#metadata_block">format specification</A>)
  */
-typedef struct {
+typedef struct FLAC__StreamMetadata {
 	FLAC__MetadataType type;
 	/**< The type of the metadata block; used determine which member of the
 	 * \a data union to dereference.  If type >= FLAC__METADATA_TYPE_UNDEFINED

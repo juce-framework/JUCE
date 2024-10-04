@@ -92,6 +92,10 @@ public:
  * being alerted when a stream has an error or is disconnected
  * using `onError*` methods.
  *
+ * Note: This callback is only fired when an AudioStreamCallback is set.
+ * If you use AudioStream::write() you have to evaluate the return codes of
+ * AudioStream::write() to notice errors in the stream.
+ *
  * It is used with AudioStreamBuilder::setErrorCallback().
  */
 class AudioStreamErrorCallback {

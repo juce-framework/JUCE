@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -57,7 +66,7 @@ static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept
 }
 
 //==============================================================================
-struct HeaderItemComponent  : public PopupMenu::CustomComponent
+struct HeaderItemComponent final : public PopupMenu::CustomComponent
 {
     HeaderItemComponent (const String& name, const Options& opts)
         : CustomComponent (false), options (opts)
@@ -96,7 +105,7 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
 };
 
 //==============================================================================
-struct ItemComponent  : public Component
+struct ItemComponent final : public Component
 {
     ItemComponent (const PopupMenu::Item& i, const PopupMenu::Options& o, MenuWindow& parent)
         : item (i), parentWindow (parent), options (o), customComp (i.customComponent)
@@ -188,7 +197,7 @@ struct ItemComponent  : public Component
 
 private:
     //==============================================================================
-    class ItemAccessibilityHandler  : public AccessibilityHandler
+    class ItemAccessibilityHandler final : public AccessibilityHandler
     {
     public:
         explicit ItemAccessibilityHandler (ItemComponent& itemComponentToWrap)
@@ -322,7 +331,7 @@ private:
 };
 
 //==============================================================================
-struct MenuWindow  : public Component
+struct MenuWindow final : public Component
 {
     MenuWindow (const PopupMenu& menu,
                 MenuWindow* parentWindow,
@@ -333,7 +342,7 @@ struct MenuWindow  : public Component
                 float parentScaleFactor = 1.0f)
         : Component ("menu"),
           parent (parentWindow),
-          options (opts.withParentComponent (findLookAndFeel (menu, parentWindow)->getParentComponentForMenuOptions (opts))),
+          options (opts.withParentComponent (findNonNullLookAndFeel (menu, parentWindow).getParentComponentForMenuOptions (opts))),
           managerOfChosenCommand (manager),
           componentAttachedTo (options.getTargetComponent()),
           dismissOnMouseUp (shouldDismissOnMouseUp),
@@ -391,6 +400,7 @@ struct MenuWindow  : public Component
             if (i + 1 < menu.items.size() || ! item.isSeparator)
             {
                 auto* child = items.add (new ItemComponent (item, options, *this));
+                child->setExplicitFocusOrder (1 + i);
 
                 if (initialSelectedId != 0 && item.itemID == initialSelectedId)
                     setCurrentlyHighlightedChild (child);
@@ -796,7 +806,7 @@ struct MenuWindow  : public Component
 
     bool doesAnyJuceCompHaveFocus()
     {
-        if (! isForegroundOrEmbeddedProcess (componentAttachedTo))
+        if (! detail::WindowingHelpers::isForegroundOrEmbeddedProcess (componentAttachedTo))
             return false;
 
         if (Component::getCurrentlyFocusedComponent() != nullptr)
@@ -821,7 +831,7 @@ struct MenuWindow  : public Component
             targetPoint = relativeTo->localPointToGlobal (targetPoint);
 
         auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (targetPoint * scaleFactor);
-        auto parentArea = display->safeAreaInsets.subtractedFrom (display->totalArea);
+        auto parentArea = display->userArea.getIntersection (display->safeAreaInsets.subtractedFrom (display->totalArea));
 
         if (auto* pc = options.getParentComponent())
         {
@@ -1194,22 +1204,19 @@ struct MenuWindow  : public Component
     {
         activeSubMenu.reset();
 
-        if (childComp != nullptr
-             && hasActiveSubMenu (childComp->item))
-        {
-            activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
-                                                                options.withTargetScreenArea (childComp->getScreenBounds())
-                                                                       .withMinimumWidth (0)
-                                                                       .withTargetComponent (nullptr),
-                                                                false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
+        if (childComp == nullptr || ! hasActiveSubMenu (childComp->item))
+            return false;
 
-            activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
-            activeSubMenu->enterModalState (false);
-            activeSubMenu->toFront (false);
-            return true;
-        }
+        activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
+                                                            options.forSubmenu()
+                                                                   .withTargetScreenArea (childComp->getScreenBounds())
+                                                                   .withMinimumWidth (0),
+                                                            false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
 
-        return false;
+        activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
+        activeSubMenu->enterModalState (false);
+        activeSubMenu->toFront (false);
+        return true;
     }
 
     void triggerCurrentlyHighlightedItem()
@@ -1296,13 +1303,16 @@ struct MenuWindow  : public Component
 
     LookAndFeel* findLookAndFeel (const PopupMenu& menu, MenuWindow* parentWindow) const
     {
-        if (parentWindow != nullptr)
-            return &(parentWindow->getLookAndFeel());
+        return parentWindow != nullptr ? &(parentWindow->getLookAndFeel())
+                                       : menu.lookAndFeel.get();
+    }
 
-        if (auto* lnf = menu.lookAndFeel.get())
-            return lnf;
+    LookAndFeel& findNonNullLookAndFeel (const PopupMenu& menu, MenuWindow* parentWindow) const
+    {
+        if (auto* result = findLookAndFeel (menu, parentWindow))
+            return *result;
 
-        return &getLookAndFeel();
+        return getLookAndFeel();
     }
 
     //==============================================================================
@@ -1327,7 +1337,7 @@ struct MenuWindow  : public Component
 };
 
 //==============================================================================
-class MouseSourceState  : public Timer
+class MouseSourceState final : public Timer
 {
 public:
     MouseSourceState (MenuWindow& w, MouseInputSource s)
@@ -1403,7 +1413,9 @@ private:
                     && (ModifierKeys::currentModifiers.isAnyMouseButtonDown()
                          || ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown());
 
-        if (! window.doesAnyJuceCompHaveFocus())
+        const auto reallyContained = window.reallyContains (localMousePos, true);
+
+        if (! window.doesAnyJuceCompHaveFocus() && ! reallyContained)
         {
             if (timeNow > window.lastFocusedTime + 10)
             {
@@ -1412,10 +1424,9 @@ private:
                 // Note: This object may have been deleted by the previous call.
             }
         }
-        else if (wasDown && timeNow > window.windowCreationTime + 250
-                   && ! (isDown || overScrollArea))
+        else if (wasDown && timeNow > window.windowCreationTime + 250 && ! isDown && ! overScrollArea)
         {
-            if (window.reallyContains (localMousePos, true))
+            if (reallyContained)
                 window.triggerCurrentlyHighlightedItem();
             else if ((window.hasBeenOver || ! window.dismissOnMouseUp) && ! isOverAny)
                 window.dismissMenu (nullptr);
@@ -1569,7 +1580,7 @@ private:
 };
 
 //==============================================================================
-struct NormalComponentWrapper : public PopupMenu::CustomComponent
+struct NormalComponentWrapper final : public PopupMenu::CustomComponent
 {
     NormalComponentWrapper (Component& comp, int w, int h, bool triggerMenuItemAutomaticallyWhenClicked)
         : PopupMenu::CustomComponent (triggerMenuItemAutomaticallyWhenClicked),
@@ -1970,7 +1981,7 @@ static PopupMenu::Options with (PopupMenu::Options options, Member&& member, Ite
 
 PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
 {
-    auto o = with (*this, &Options::targetComponent, comp);
+    auto o = with (with (*this, &Options::targetComponent, comp), &Options::topLevelTarget, comp);
 
     if (comp != nullptr)
         o.targetArea = comp->getScreenBounds();
@@ -2040,6 +2051,11 @@ PopupMenu::Options PopupMenu::Options::withInitiallySelectedItem (int idOfItemTo
     return with (*this, &Options::initiallySelectedItemId, idOfItemToBeSelected);
 }
 
+PopupMenu::Options PopupMenu::Options::forSubmenu() const
+{
+    return with (*this, &Options::targetComponent, nullptr);
+}
+
 Component* PopupMenu::createWindow (const Options& options,
                                     ApplicationCommandManager** managerOfChosenCommand) const
 {
@@ -2063,7 +2079,7 @@ Component* PopupMenu::createWindow (const Options& options,
 
 //==============================================================================
 // This invokes any command manager commands and deletes the menu window when it is dismissed
-struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
+struct PopupMenuCompletionCallback final : public ModalComponentManager::Callback
 {
     PopupMenuCompletionCallback() = default;
 

@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -48,9 +52,9 @@
 
 
 //==============================================================================
-class OSCLogListBox    : public ListBox,
-                         private ListBoxModel,
-                         private AsyncUpdater
+class OSCLogListBox final : public ListBox,
+                            private ListBoxModel,
+                            private AsyncUpdater
 {
 public:
     OSCLogListBox()
@@ -152,13 +156,13 @@ public:
             typeAsString = "(unknown)";
         }
 
-        oscLogList.add (getIndentationString (level + 1) + "- " + typeAsString.paddedRight(' ', 12) + valueAsString);
+        oscLogList.add (getIndentationString (level + 1) + "- " + typeAsString.paddedRight (' ', 12) + valueAsString);
     }
 
     //==============================================================================
     void addInvalidOSCPacket (const char* /* data */, int dataSize)
     {
-        oscLogList.add ("- (" + String(dataSize) + "bytes with invalid format)");
+        oscLogList.add ("- (" + String (dataSize) + "bytes with invalid format)");
     }
 
     //==============================================================================
@@ -189,7 +193,7 @@ private:
 };
 
 //==============================================================================
-class OSCSenderDemo   : public Component
+class OSCSenderDemo final : public Component
 {
 public:
     OSCSenderDemo()
@@ -222,24 +226,25 @@ private:
     //==============================================================================
     void showConnectionErrorMessage (const String& messageText)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "Connection error",
-                                          messageText,
-                                          "OK");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "Connection error",
+                                                         messageText);
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
 
     //==============================================================================
     Slider rotaryKnob;
     OSCSender sender1, sender2;
     Label senderLabel { {}, "Sender" };
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCSenderDemo)
 };
 
 //==============================================================================
-class OSCReceiverDemo   : public Component,
-                          private OSCReceiver,
-                          private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
+class OSCReceiverDemo final : public Component,
+                              private OSCReceiver,
+                              private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
 public:
     //==============================================================================
@@ -273,22 +278,23 @@ private:
 
     void showConnectionErrorMessage (const String& messageText)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "Connection error",
-                                          messageText,
-                                          "OK");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "Connection error",
+                                                         messageText);
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
 
     //==============================================================================
     Slider rotaryKnob;
     Label receiverLabel { {}, "Receiver" };
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCReceiverDemo)
 };
 
 //==============================================================================
-class OSCMonitorDemo   : public Component,
-                         private OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>
+class OSCMonitorDemo final : public Component,
+                             private OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>
 {
 public:
     //==============================================================================
@@ -403,28 +409,28 @@ private:
     //==============================================================================
     void handleConnectError (int failedPort)
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "OSC Connection error",
-                                          "Error: could not connect to port " + String (failedPort),
-                                          "OK");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "OSC Connection error",
+                                                         "Error: could not connect to port " + String (failedPort));
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
 
     //==============================================================================
     void handleDisconnectError()
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "Unknown error",
-                                          "An unknown error occurred while trying to disconnect from UDP port.",
-                                          "OK");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "Unknown error",
+                                                         "An unknown error occurred while trying to disconnect from UDP port.");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
 
     //==============================================================================
     void handleInvalidPortNumberEntered()
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                          "Invalid port number",
-                                          "Error: you have entered an invalid UDP port number.",
-                                          "OK");
+        auto options = MessageBoxOptions::makeOptionsOk (MessageBoxIconType::WarningIcon,
+                                                         "Invalid port number",
+                                                         "Error: you have entered an invalid UDP port number.");
+        messageBox = AlertWindow::showScopedAsync (options, nullptr);
     }
 
     //==============================================================================
@@ -452,16 +458,18 @@ private:
         auto textColour = isConnected() ? Colours::green : Colours::red;
 
         connectionStatusLabel.setText (text, dontSendNotification);
-        connectionStatusLabel.setFont (Font (15.00f, Font::bold));
+        connectionStatusLabel.setFont (FontOptions (15.00f, Font::bold));
         connectionStatusLabel.setColour (Label::textColourId, textColour);
         connectionStatusLabel.setJustificationType (Justification::centredRight);
     }
+
+    ScopedMessageBox messageBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCMonitorDemo)
 };
 
 //==============================================================================
-class OSCDemo   : public Component
+class OSCDemo final : public Component
 {
 public:
     OSCDemo()

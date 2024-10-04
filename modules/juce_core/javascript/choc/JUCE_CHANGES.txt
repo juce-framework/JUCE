@@ -1,0 +1,12 @@
+The files in this directory were downloaded from the choc repository at
+https://github.com/Tracktion/choc.
+
+In order to avoid exposing any symbols in the choc implementation, the files were modified by
+prepending all `namespace choc...` lines with `namespace {`, and by adding corresponding closing
+brackets as well.
+
+Enclosing all choc definitions in an anonymous namespace allows JUCE based projects to use an
+external copy of choc without running into multiply defined symbol compilation errors.
+
+By placing the anonymous namespace encapsulation inside the choc header files we avoid the issue of
+including the system headers in the namespace as well.

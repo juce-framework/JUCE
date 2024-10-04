@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -88,7 +97,7 @@ void ApplicationCommandManager::registerAllCommandsForTarget (ApplicationCommand
 
         for (int i = 0; i < commandIDs.size(); ++i)
         {
-            ApplicationCommandInfo info (commandIDs.getUnchecked(i));
+            ApplicationCommandInfo info (commandIDs.getUnchecked (i));
             target->getCommandInfo (info.commandID, info);
 
             registerCommand (info);
@@ -122,8 +131,8 @@ void ApplicationCommandManager::commandStatusChanged()
 ApplicationCommandInfo* ApplicationCommandManager::getMutableCommandForID (CommandID commandID) const noexcept
 {
     for (int i = commands.size(); --i >= 0;)
-        if (commands.getUnchecked(i)->commandID == commandID)
-            return commands.getUnchecked(i);
+        if (commands.getUnchecked (i)->commandID == commandID)
+            return commands.getUnchecked (i);
 
     return nullptr;
 }
@@ -155,7 +164,7 @@ StringArray ApplicationCommandManager::getCommandCategories() const
     StringArray s;
 
     for (int i = 0; i < commands.size(); ++i)
-        s.addIfNotAlreadyThere (commands.getUnchecked(i)->categoryName, false);
+        s.addIfNotAlreadyThere (commands.getUnchecked (i)->categoryName, false);
 
     return s;
 }
@@ -165,8 +174,8 @@ Array<CommandID> ApplicationCommandManager::getCommandsInCategory (const String&
     Array<CommandID> results;
 
     for (int i = 0; i < commands.size(); ++i)
-        if (commands.getUnchecked(i)->categoryName == categoryName)
-            results.add (commands.getUnchecked(i)->commandID);
+        if (commands.getUnchecked (i)->categoryName == categoryName)
+            results.add (commands.getUnchecked (i)->commandID);
 
     return results;
 }
@@ -270,7 +279,7 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         // getting a bit desperate now: try all desktop comps..
         for (int i = desktop.getNumComponents(); --i >= 0;)
             if (auto* component = desktop.getComponent (i))
-                if (isForegroundOrEmbeddedProcess (component))
+                if (detail::WindowingHelpers::isForegroundOrEmbeddedProcess (component))
                     if (auto* peer = component->getPeer())
                         if (auto* target = findTargetForComponent (peer->getLastFocusedSubcomponent()))
                             return target;

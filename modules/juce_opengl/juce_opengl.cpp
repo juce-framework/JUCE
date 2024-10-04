@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -75,7 +84,7 @@
 #elif JUCE_WINDOWS
  #include <windowsx.h>
 
- #if ! JUCE_MINGW && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ #if ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment(lib, "OpenGL32.Lib")
  #endif
 
@@ -117,7 +126,7 @@ JUCE_GL_EXTENSION_FUNCTIONS
 JUCE_GL_VERTEXBUFFER_FUNCTIONS
 #undef X
 
-#if JUCE_DEBUG && ! defined (JUCE_CHECK_OPENGL_ERROR)
+#if JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS && ! defined (JUCE_CHECK_OPENGL_ERROR)
 static const char* getGLErrorMessage (const GLenum e) noexcept
 {
     switch (e)
@@ -188,7 +197,7 @@ static bool checkPeerIsValid (OpenGLContext* context)
     return false;
 }
 
-static void checkGLError (const char* file, const int line)
+static void checkGLError ([[maybe_unused]] const char* file, [[maybe_unused]] const int line)
 {
     for (;;)
     {
@@ -240,22 +249,6 @@ private:
     OpenGLTargetSaver& operator= (const OpenGLTargetSaver&);
 };
 
-static bool contextRequiresTexture2DEnableDisable()
-{
-   #if JUCE_OPENGL_ES
-    return false;
-   #else
-    clearGLError();
-    GLint mask = 0;
-    glGetIntegerv (GL_CONTEXT_PROFILE_MASK, &mask);
-
-    if (glGetError() == GL_INVALID_ENUM)
-        return true;
-
-    return (mask & (GLint) GL_CONTEXT_CORE_PROFILE_BIT) == 0;
-   #endif
-}
-
 } // namespace juce
 
 //==============================================================================
@@ -271,14 +264,14 @@ static bool contextRequiresTexture2DEnableDisable()
 #if JUCE_MAC || JUCE_IOS
 
  #if JUCE_MAC
-  #include "native/juce_OpenGL_osx.h"
+  #include "native/juce_OpenGL_mac.h"
  #else
   #include "native/juce_OpenGL_ios.h"
  #endif
 
 #elif JUCE_WINDOWS
  #include "opengl/juce_wgl.h"
- #include "native/juce_OpenGL_win32.h"
+ #include "native/juce_OpenGL_windows.h"
 
 #define JUCE_IMPL_WGL_EXTENSION_FUNCTION(name) \
     decltype (juce::OpenGLContext::NativeContext::name) juce::OpenGLContext::NativeContext::name = nullptr;
@@ -291,8 +284,8 @@ JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB)
 #undef JUCE_IMPL_WGL_EXTENSION_FUNCTION
 
 #elif JUCE_LINUX || JUCE_BSD
- #include <juce_gui_basics/native/x11/juce_linux_ScopedWindowAssociation.h>
- #include "native/juce_OpenGL_linux_X11.h"
+ #include <juce_gui_basics/native/juce_ScopedWindowAssociation_linux.h>
+ #include "native/juce_OpenGL_linux.h"
 
 #elif JUCE_ANDROID
  #include "native/juce_OpenGL_android.h"

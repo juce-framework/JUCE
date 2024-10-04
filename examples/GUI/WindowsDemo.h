@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -50,14 +54,14 @@
 
 //==============================================================================
 /** Just a simple window that deletes itself when closed. */
-class BasicWindow   : public DocumentWindow
+class BasicWindow final : public DocumentWindow
 {
 public:
     BasicWindow (const String& name, Colour backgroundColour, int buttonsNeeded)
         : DocumentWindow (name, backgroundColour, buttonsNeeded)
     {}
 
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         delete this;
     }
@@ -68,8 +72,8 @@ private:
 
 //==============================================================================
 /** This window contains a ColourSelector which can be used to change the window's colour. */
-class ColourSelectorWindow   : public DocumentWindow,
-                               private ChangeListener
+class ColourSelectorWindow final : public DocumentWindow,
+                                   private ChangeListener
 {
 public:
     ColourSelectorWindow (const String& name, Colour backgroundColour, int buttonsNeeded)
@@ -81,12 +85,12 @@ public:
         setContentOwned (&selector, false);
     }
 
-    ~ColourSelectorWindow()
+    ~ColourSelectorWindow() override
     {
         selector.removeChangeListener (this);
     }
 
-    void closeButtonPressed()
+    void closeButtonPressed() override
     {
         delete this;
     }
@@ -96,7 +100,7 @@ private:
                              | ColourSelector::showSliders
                              | ColourSelector::showColourspace };
 
-    void changeListenerCallback (ChangeBroadcaster* source)
+    void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (source == &selector)
             setBackgroundColour (selector.getCurrentColour());
@@ -106,8 +110,8 @@ private:
 };
 
 //==============================================================================
-class BouncingBallComponent : public Component,
-                              public Timer
+class BouncingBallComponent final : public Component,
+                                    public Timer
 {
 public:
     BouncingBallComponent()
@@ -159,7 +163,7 @@ private:
 };
 
 //==============================================================================
-class BouncingBallsContainer : public Component
+class BouncingBallsContainer final : public Component
 {
 public:
     BouncingBallsContainer (int numBalls)
@@ -207,7 +211,7 @@ private:
 };
 
 //==============================================================================
-class WindowsDemo   : public Component
+class WindowsDemo final : public Component
 {
 public:
     enum Windows
@@ -227,6 +231,9 @@ public:
 
         addAndMakeVisible (closeWindowsButton);
         closeWindowsButton.onClick = [this] { closeAllWindows(); };
+
+        addAndMakeVisible (alertWindowResult);
+        alertWindowResult.setJustificationType (Justification::centred);
 
         setSize (250, 250);
     }
@@ -253,14 +260,27 @@ public:
 
     void resized() override
     {
-        Rectangle<int> buttonSize (0, 0, 108, 28);
+        FlexBox flexBox;
+        flexBox.flexDirection = FlexBox::Direction::column;
+        flexBox.justifyContent = FlexBox::JustifyContent::center;
 
-        Rectangle<int> area ((getWidth()  / 2) - (buttonSize.getWidth() / 2),
-                             (getHeight() / 2) -  buttonSize.getHeight(),
-                             buttonSize.getWidth(), buttonSize.getHeight());
+        constexpr auto buttonWidth = 108.0f;
+        constexpr auto componentHeight = 24.0f;
+        constexpr auto gap = 4.0f;
 
-        showWindowsButton .setBounds (area.reduced (2));
-        closeWindowsButton.setBounds (area.translated (0, buttonSize.getHeight()).reduced (2));
+        flexBox.items.add (FlexItem { showWindowsButton }.withHeight (componentHeight)
+                                                         .withMinWidth (buttonWidth)
+                                                         .withAlignSelf (FlexItem::AlignSelf::center));
+
+        flexBox.items.add (FlexItem{}.withHeight (gap));
+        flexBox.items.add (FlexItem { closeWindowsButton }.withHeight (componentHeight)
+                                                          .withMinWidth (buttonWidth)
+                                                          .withAlignSelf (FlexItem::AlignSelf::center));
+
+        flexBox.items.add (FlexItem{}.withHeight (gap));
+        flexBox.items.add (FlexItem { alertWindowResult }.withHeight (componentHeight));
+
+        flexBox.performLayout (getLocalBounds());
     }
 
 private:
@@ -272,6 +292,7 @@ private:
 
     TextButton showWindowsButton   { "Show Windows" },
                closeWindowsButton  { "Close Windows" };
+    Label alertWindowResult { "Alert Window result" };
 
     void showAllWindows()
     {
@@ -280,6 +301,7 @@ private:
         showDocumentWindow (false);
         showDocumentWindow (true);
         showTransparentWindow();
+        showAlertWindow();
         showDialogWindow();
     }
 
@@ -289,6 +311,12 @@ private:
             window.deleteAndZero();
 
         windows.clear();
+        alertWindowResult.setText ("", dontSendNotification);
+    }
+
+    static auto getDisplayArea()
+    {
+        return Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea.reduced (20);
     }
 
     void showDialogWindow()
@@ -333,8 +361,7 @@ private:
                                        | RectanglePlacement::yTop
                                        | RectanglePlacement::doNotResize);
 
-        auto result = placement.appliedTo (area, Desktop::getInstance().getDisplays()
-                                                         .getPrimaryDisplay()->userArea.reduced (20));
+        auto result = placement.appliedTo (area, getDisplayArea());
         dw->setBounds (result);
 
         dw->setResizable (true, ! native);
@@ -354,12 +381,113 @@ private:
                                        | RectanglePlacement::yBottom
                                        | RectanglePlacement::doNotResize);
 
-        auto result = placement.appliedTo (area, Desktop::getInstance().getDisplays()
-                                                         .getPrimaryDisplay()->userArea.reduced (20));
+        auto result = placement.appliedTo (area, getDisplayArea());
         balls->setBounds (result);
 
         balls->setVisible (true);
     }
+
+    void showAlertWindow()
+    {
+        auto* alertWindow = new AlertWindow ("Alert Window",
+                                             "For more complex dialogs, you can easily add components to an AlertWindow, such as...",
+                                             MessageBoxIconType::InfoIcon);
+        windows.add (alertWindow);
+
+        alertWindow->addTextBlock ("Text block");
+        alertWindow->addComboBox ("Combo box", {"Combo box", "Item 2", "Item 3"});
+        alertWindow->addTextEditor ("Text editor", "Text editor");
+        alertWindow->addTextEditor ("Password", "password", "including for passwords", true);
+        alertWindowCustomComponent.emplace();
+        alertWindow->addCustomComponent (&(*alertWindowCustomComponent));
+        alertWindow->addTextBlock ("Progress bar");
+        alertWindow->addProgressBarComponent (alertWindowCustomComponent->value, ProgressBar::Style::linear);
+        alertWindow->addProgressBarComponent (alertWindowCustomComponent->value, ProgressBar::Style::circular);
+        alertWindow->addTextBlock ("Press any button, or the escape key, to close the window");
+
+        enum AlertWindowResult
+        {
+            noButtonPressed,
+            button1Pressed,
+            button2Pressed
+        };
+
+        alertWindow->addButton ("Button 1", AlertWindowResult::button1Pressed);
+        alertWindow->addButton ("Button 2", AlertWindowResult::button2Pressed);
+
+        RectanglePlacement placement { RectanglePlacement::yMid
+                                       | RectanglePlacement::xLeft
+                                       | RectanglePlacement::doNotResize };
+
+        alertWindow->setBounds (placement.appliedTo (alertWindow->getBounds(), getDisplayArea()));
+
+        alertWindowResult.setText ("", dontSendNotification);
+        alertWindow->enterModalState (false, ModalCallbackFunction::create ([ref = SafePointer { this }] (int result)
+        {
+            if (ref == nullptr)
+                return;
+
+            const auto text = [&]
+            {
+                switch (result)
+                {
+                    case noButtonPressed:
+                        return "Dismissed the Alert Window without pressing a button";
+                    case button1Pressed:
+                        return "Dismissed the Alert Window using Button 1";
+                    case button2Pressed:
+                        return "Dismissed the Alert Window using Button 2";
+                }
+
+                return "Unhandled event when dismissing the Alert Window";
+            }();
+
+            ref->alertWindowResult.setText (text, dontSendNotification);
+        }), true);
+    }
+
+    class AlertWindowCustomComponent final : public Component,
+                                             private Slider::Listener
+    {
+    public:
+        AlertWindowCustomComponent()
+        {
+            slider.setRange (0.0, 1.0);
+            slider.setValue (0.5, NotificationType::dontSendNotification);
+            slider.addListener (this);
+
+            addAndMakeVisible (label);
+            addAndMakeVisible (slider);
+
+            setSize (200, 50);
+        }
+
+        ~AlertWindowCustomComponent() override
+        {
+            slider.removeListener (this);
+        }
+
+        void resized() override
+        {
+            auto bounds =  getLocalBounds();
+            label.setBounds (bounds.removeFromTop (getHeight() / 2));
+            slider.setBounds (bounds);
+        }
+
+        void sliderValueChanged (Slider*) override
+        {
+            value = slider.getValue();
+        }
+
+        double value { -1.0 };
+
+    private:
+        Label label { "Label", "Custom component" };
+        Slider slider { Slider::SliderStyle::LinearHorizontal,
+                        Slider::TextEntryBoxPosition::NoTextBox };
+    };
+
+    std::optional<AlertWindowCustomComponent> alertWindowCustomComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsDemo)
 };

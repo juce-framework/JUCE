@@ -1,23 +1,32 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE library.
-#  Copyright (c) 2022 - Raw Material Software Limited
+#  This file is part of the JUCE framework.
+#  Copyright (c) Raw Material Software Limited
 #
-#  JUCE is an open source library subject to commercial or open-source
+#  JUCE is an open source framework subject to commercial or open source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-#  Agreement and JUCE Privacy Policy.
+#  By downloading, installing, or using the JUCE framework, or combining the
+#  JUCE framework with any other source code, object code, content or any other
+#  copyrightable work, you agree to the terms of the JUCE End User Licence
+#  Agreement, and all incorporated terms including the JUCE Privacy Policy and
+#  the JUCE Website Terms of Service, as applicable, which will bind you. If you
+#  do not agree to the terms of these agreements, we will not license the JUCE
+#  framework to you, and you must discontinue the installation or download
+#  process and cease use of the JUCE framework.
 #
-#  End User License Agreement: www.juce.com/juce-7-licence
-#  Privacy Policy: www.juce.com/juce-privacy-policy
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+#  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
-#  Or: You may also use this code under the terms of the GPL v3 (see
-#  www.gnu.org/licenses).
+#  Or:
 #
-#  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-#  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-#  DISCLAIMED.
+#  You may also use this code under the terms of the AGPLv3:
+#  https://www.gnu.org/licenses/agpl-3.0.en.html
+#
+#  THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+#  WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+#  MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 #
 # ==============================================================================
 
@@ -28,13 +37,17 @@
 
 if(JUCE_BUILD_HELPER_TOOLS)
     # Build the tool for the current system
-    juce_add_console_app(juceaide)
+    juce_add_console_app(juceaide _NO_RESOURCERC)
 
     target_sources(juceaide PRIVATE Main.cpp)
 
     target_compile_definitions(juceaide PRIVATE
         JUCE_DISABLE_JUCE_VERSION_PRINTING=1
-        JUCE_USE_CURL=0)
+        JUCE_USE_CURL=0
+        # This is a temporary workaround to allow builds to complete on Xcode 15.
+        # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
+        # deploy to older versions of macOS.
+        JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
 
     target_link_libraries(juceaide PRIVATE
         juce::juce_build_tools
@@ -49,14 +62,8 @@ if(JUCE_BUILD_HELPER_TOOLS)
            NAMESPACE juce_tools::
            FILE "${JUCE_BINARY_DIR}/JUCEToolsExport.cmake")
 else()
-    # If we're building using the NDK, the gradle wrapper will try to inject its own compiler using
-    # environment variables, which is unfortunate because we really don't want to cross-compile
-    # juceaide.
-    # Similarly, when cross-compiling from Linux->Windows (e.g. using
-    # Fedora's mingw64-cmake command), the environment might be configured
-    # for cross-compiling, and we'll need to attempt to put it back to the
-    # host settings in order to build an executable that can run on the host
-    # machine.
+    message(STATUS "Configuring juceaide")
+
     if(CMAKE_CROSSCOMPILING)
         unset(ENV{ADDR2LINE})
         unset(ENV{AR})
@@ -97,17 +104,12 @@ else()
         if(DEFINED ENV{PATH_ORIG})
             set(ENV{PATH} "$ENV{PATH_ORIG}")
         endif()
-    else()
-        # When building with clang-cl in Clion on Windows for an x64 target, the ABI detection phase
-        # of the inner build can fail unless we pass through these flags too
-        set(extra_configure_flags
-            "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
-            "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
-            "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_EXE_LINKER_FLAGS}"
-            "-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
     endif()
 
-    message(STATUS "Configuring juceaide")
+    # Generator platform is only supported on specific generators
+    if(CMAKE_GENERATOR MATCHES "^Visual Studio.*$")
+        set(ENV{CMAKE_GENERATOR_PLATFORM} "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    endif()
 
     # Looks like we're bootstrapping, reinvoke CMake
     execute_process(COMMAND "${CMAKE_COMMAND}"
@@ -118,7 +120,6 @@ else()
             "-DCMAKE_BUILD_TYPE=Debug"
             "-DJUCE_BUILD_HELPER_TOOLS=ON"
             "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-            ${extra_configure_flags}
         WORKING_DIRECTORY "${JUCE_SOURCE_DIR}"
         OUTPUT_VARIABLE command_output
         ERROR_VARIABLE command_output
@@ -159,4 +160,17 @@ else()
 
     get_filename_component(binary_name "${imported_location}" NAME)
     set(JUCE_JUCEAIDE_NAME "${binary_name}" CACHE INTERNAL "The name of the juceaide program")
+
+    message(STATUS "Testing juceaide")
+
+    execute_process(COMMAND "${imported_location}" version
+        RESULT_VARIABLE result_variable
+        OUTPUT_VARIABLE output
+        ERROR_VARIABLE output)
+
+    if(result_variable)
+        message(FATAL_ERROR "Testing juceaide failed:\noutput: ${output}")
+    endif()
+
+    message(STATUS "Finished setting up juceaide")
 endif()

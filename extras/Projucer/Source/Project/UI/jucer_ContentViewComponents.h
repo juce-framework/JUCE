@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -28,7 +37,7 @@
 #include "../../Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"
 
 //==============================================================================
-struct ContentViewHeader    : public Component
+struct ContentViewHeader final : public Component
 {
     ContentViewHeader (String headerName, Icon headerIcon)
         : name (headerName), icon (headerIcon)
@@ -45,7 +54,7 @@ struct ContentViewHeader    : public Component
         icon.withColour (Colours::white).draw (g, bounds.toFloat().removeFromRight (30), false);
 
         g.setColour (Colours::white);
-        g.setFont (Font (18.0f));
+        g.setFont (FontOptions (18.0f));
         g.drawFittedText (name, bounds, Justification::centredLeft, 1);
     }
 
@@ -54,7 +63,7 @@ struct ContentViewHeader    : public Component
 };
 
 //==============================================================================
-class ListBoxHeader    : public Component
+class ListBoxHeader final : public Component
 {
 public:
     ListBoxHeader (Array<String> columnHeaders)
@@ -72,11 +81,10 @@ public:
     {
         jassert (columnHeaders.size() == columnWidths.size());
 
-        auto index = 0;
-        for (auto s : columnHeaders)
+        for (const auto [index, s] : enumerate (columnHeaders))
         {
             addAndMakeVisible (headers.add (new Label (s, s)));
-            widths.add (columnWidths.getUnchecked (index++));
+            widths.add (columnWidths.getUnchecked ((int) index));
         }
 
         recalculateWidths();
@@ -136,7 +144,7 @@ private:
         for (auto w : widths)
             total += w;
 
-        if (total == 1.0f)
+        if (approximatelyEqual (total, 1.0f))
             return;
 
         auto diff = 1.0f - total;
@@ -154,7 +162,7 @@ private:
 };
 
 //==============================================================================
-class InfoButton  : public Button
+class InfoButton final : public Button
 {
 public:
     InfoButton (const String& infoToDisplay = {})
@@ -198,7 +206,7 @@ public:
         {
             info = infoToDisplay;
 
-            auto stringWidth = roundToInt (Font (14.0f).getStringWidthFloat (info));
+            auto stringWidth = roundToInt (GlyphArrangement::getStringWidth (FontOptions (14.0f), info));
             width = jmin (300, stringWidth);
 
             numLines += static_cast<int> (stringWidth / width);
@@ -217,7 +225,7 @@ private:
     int numLines = 1;
 
     //==============================================================================
-    struct InfoWindow    : public Component
+    struct InfoWindow final : public Component
     {
         InfoWindow (const String& s)
             : stringToDisplay (s)
@@ -230,7 +238,7 @@ private:
             g.fillAll (findColour (secondaryBackgroundColourId));
 
             g.setColour (findColour (defaultTextColourId));
-            g.setFont (Font (14.0f));
+            g.setFont (FontOptions (14.0f));
             g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 15, 0.75f);
         }
 
@@ -241,8 +249,8 @@ private:
 };
 
 //==============================================================================
-class PropertyGroupComponent  : public Component,
-                                private TextPropertyComponent::Listener
+class PropertyGroupComponent final : public Component,
+                                     private TextPropertyComponent::Listener
 {
 public:
     PropertyGroupComponent (String name, Icon icon, String desc = {})
@@ -257,7 +265,7 @@ public:
         clearProperties();
 
         if (description.isNotEmpty())
-            properties.push_back (std::make_unique<LabelPropertyComponent> (description, 16, Font (16.0f),
+            properties.push_back (std::make_unique<LabelPropertyComponent> (description, 16, FontOptions (16.0f),
                                                                             Justification::centredLeft));
 
         for (auto* comp : newProps.components)
@@ -344,7 +352,7 @@ public:
 
 private:
     //==============================================================================
-    struct PropertyAndInfoWrapper  : public Component
+    struct PropertyAndInfoWrapper final : public Component
     {
         PropertyAndInfoWrapper (PropertyComponent& c, InfoButton& i)
             : propertyComponent (c),
@@ -425,7 +433,7 @@ private:
             return 0;
 
         const auto font = ProjucerLookAndFeel::getPropertyComponentFont();
-        const auto labelWidth = font.getStringWidthFloat (pp.getName());
+        const auto labelWidth = GlyphArrangement::getStringWidth (font, pp.getName());
         const auto numLines = (int) (labelWidth / (float) availableTextWidth) + 1;
         return (int) std::round ((float) numLines * font.getHeight() * 1.1f);
     }

@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -49,7 +53,7 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-class XmlTreeItem  : public TreeViewItem
+class XmlTreeItem final : public TreeViewItem
 {
 public:
     XmlTreeItem (XmlElement& x)  : xml (x)    {}
@@ -115,7 +119,7 @@ private:
 };
 
 //==============================================================================
-class JsonTreeItem  : public TreeViewItem
+class JsonTreeItem final : public TreeViewItem
 {
 public:
     JsonTreeItem (Identifier i, var value)
@@ -228,8 +232,8 @@ private:
 };
 
 //==============================================================================
-class XMLandJSONDemo   : public Component,
-                         private CodeDocument::Listener
+class XMLandJSONDemo final : public Component,
+                             private CodeDocument::Listener
 {
 public:
     /** The type of database to parse. */
@@ -292,7 +296,7 @@ public:
         auto area = getLocalBounds();
 
         typeBox.setBounds (area.removeFromTop (36).removeFromRight (150).reduced (8));
-        codeDocumentComponent.setBounds (area.removeFromTop(area.getHeight() / 2).reduced (8));
+        codeDocumentComponent.setBounds (area.removeFromTop (area.getHeight() / 2).reduced (8));
         resultsTree          .setBounds (area.reduced (8));
         errorMessage         .setBounds (resultsTree.getBounds());
     }
@@ -312,12 +316,12 @@ private:
     {
         std::unique_ptr<XmlElement> openness;
 
-        if (rootItem.get() != nullptr)
+        if (rootItem != nullptr)
             openness = rootItem->getOpennessState();
 
         createNewRootNode();
 
-        if (openness.get() != nullptr && rootItem.get() != nullptr)
+        if (openness != nullptr && rootItem != nullptr)
             rootItem->restoreOpennessState (*openness);
     }
 
@@ -336,7 +340,7 @@ private:
         }
 
         // if we have a valid TreeViewItem hide any old error messages and set our TreeView to use it
-        if (rootItem.get() != nullptr)
+        if (rootItem != nullptr)
             errorMessage.clear();
 
         errorMessage.setVisible (! errorMessage.isEmpty());

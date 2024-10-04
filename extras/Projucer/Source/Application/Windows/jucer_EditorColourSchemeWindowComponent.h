@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -28,7 +37,7 @@
 #include "../../Utility/UI/PropertyComponents/jucer_ColourPropertyComponent.h"
 
 //==============================================================================
-class EditorColourSchemeWindowComponent    : public Component
+class EditorColourSchemeWindowComponent final : public Component
 {
 public:
     EditorColourSchemeWindowComponent()
@@ -62,8 +71,8 @@ private:
     //==============================================================================
     struct AppearanceEditor
     {
-        struct FontScanPanel   : public Component,
-                                 private Timer
+        struct FontScanPanel final : public Component,
+                                     private Timer
         {
             FontScanPanel()
             {
@@ -107,21 +116,21 @@ private:
             // This is unfortunately a bit slow, but will work on all platforms.
             static bool isMonospacedTypeface (const String& name)
             {
-                const Font font (name, 20.0f, Font::plain);
+                const Font font = FontOptions (name, 20.0f, Font::plain);
 
-                const auto width = font.getStringWidth ("....");
+                const auto width = GlyphArrangement::getStringWidthInt (font, "....");
 
-                return width == font.getStringWidth ("WWWW")
-                    && width == font.getStringWidth ("0000")
-                    && width == font.getStringWidth ("1111")
-                    && width == font.getStringWidth ("iiii");
+                return width == GlyphArrangement::getStringWidthInt (font, "WWWW")
+                    && width == GlyphArrangement::getStringWidthInt (font, "0000")
+                    && width == GlyphArrangement::getStringWidthInt (font, "1111")
+                    && width == GlyphArrangement::getStringWidthInt (font, "iiii");
             }
 
             StringArray fontsToScan, fontsFound;
         };
 
         //==============================================================================
-        struct EditorPanel  : public Component
+        struct EditorPanel final : public Component
         {
             EditorPanel()
                 : loadButton ("Load Scheme..."),
@@ -179,7 +188,7 @@ private:
             PropertyPanel panel;
             TextButton loadButton, saveButton;
 
-            Font codeFont;
+            Font codeFont { FontOptions{} };
             Array<var> colourValues;
 
             void saveScheme (bool isExit)
@@ -282,7 +291,7 @@ private:
         };
 
         //==============================================================================
-        struct FontNameValueSource   : public ValueSourceFilter
+        struct FontNameValueSource final : public ValueSourceFilter
         {
             FontNameValueSource (const Value& source)  : ValueSourceFilter (source) {}
 
@@ -321,7 +330,7 @@ private:
         };
 
         //==============================================================================
-        struct FontSizeValueSource   : public ValueSourceFilter
+        struct FontSizeValueSource final : public ValueSourceFilter
         {
             FontSizeValueSource (const Value& source)  : ValueSourceFilter (source) {}
 

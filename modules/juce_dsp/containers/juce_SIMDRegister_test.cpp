@@ -1,31 +1,38 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
-namespace juce
-{
-namespace dsp
+namespace juce::dsp
 {
 
 namespace SIMDRegister_test_internal
@@ -103,7 +110,7 @@ namespace SIMDRegister_test_internal
 // These tests need to be strictly run on all platforms supported by JUCE as the
 // SIMD code is highly platform dependent.
 
-class SIMDRegisterUnitTests   : public UnitTest
+class SIMDRegisterUnitTests final : public UnitTest
 {
 public:
     template <typename> struct Tag {};
@@ -117,19 +124,12 @@ public:
     template <typename type>
     static bool allValuesEqualTo (const SIMDRegister<type>& vec, const type scalar)
     {
-       #ifdef _MSC_VER
-        __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
-       #else
-        type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
-       #endif
+        alignas (sizeof (SIMDRegister<type>)) type elements[SIMDRegister<type>::SIMDNumElements];
 
         vec.copyToRawArray (elements);
 
         // as we do not want to rely on the access operator we cast this to a primitive pointer
-        for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
-            if (elements[i] != scalar) return false;
-
-        return true;
+        return std::all_of (std::begin (elements), std::end (elements), [scalar] (const auto x) { return exactlyEqual (x, scalar); });
     }
 
     template <typename type>
@@ -269,9 +269,9 @@ public:
 
             {
                #ifdef _MSC_VER
-                __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
+                __declspec (align (sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
                #else
-                type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
+                type elements[SIMDRegister<type>::SIMDNumElements] __attribute__ ((aligned (sizeof (SIMDRegister<type>))));
                #endif
                 SIMDRegister_test_internal::fillVec (elements, random);
                 SIMDRegister<type> a (SIMDRegister<type>::fromRawArray (elements));
@@ -307,7 +307,7 @@ public:
             const SIMDRegister<type>& b = a;
 
             for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
-                u.expect (b[i] == array[i]);
+                u.expect (exactlyEqual (b[i], array[i]));
         }
     };
 
@@ -419,9 +419,9 @@ public:
                     Operation::template inplace<vMaskType, vMaskType> (b.intVersion, bitmask);
 
                    #ifdef _MSC_VER
-                    __declspec(align(sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
+                    __declspec (align (sizeof (SIMDRegister<type>))) type elements[SIMDRegister<type>::SIMDNumElements];
                    #else
-                    type elements[SIMDRegister<type>::SIMDNumElements] __attribute__((aligned(sizeof (SIMDRegister<type>))));
+                    type elements[SIMDRegister<type>::SIMDNumElements] __attribute__ ((aligned (sizeof (SIMDRegister<type>))));
                    #endif
                     b.floatVersion.copyToRawArray (elements);
 
@@ -539,8 +539,8 @@ public:
                 // do check
                 for (size_t j = 0; j < SIMDRegister<type>::SIMDNumElements; ++j)
                 {
-                    array_eq  [j] = (array_a[j] == array_b[j]) ? static_cast<MaskType> (-1) : 0;
-                    array_neq [j] = (array_a[j] != array_b[j]) ? static_cast<MaskType> (-1) : 0;
+                    array_eq  [j] = (  exactlyEqual (array_a[j], array_b[j])) ? static_cast<MaskType> (-1) : 0;
+                    array_neq [j] = (! exactlyEqual (array_a[j], array_b[j])) ? static_cast<MaskType> (-1) : 0;
                     array_lt  [j] = (array_a[j] <  array_b[j]) ? static_cast<MaskType> (-1) : 0;
                     array_le  [j] = (array_a[j] <= array_b[j]) ? static_cast<MaskType> (-1) : 0;
                     array_gt  [j] = (array_a[j] >  array_b[j]) ? static_cast<MaskType> (-1) : 0;
@@ -854,7 +854,7 @@ public:
         TheTest::run (*this, random, Tag<int64_t>{});
     }
 
-    void runTest()
+    void runTest() override
     {
         runTestForAllTypes ("InitializationTest", InitializationTest{});
 
@@ -883,5 +883,4 @@ public:
 
 static SIMDRegisterUnitTests SIMDRegisterUnitTests;
 
-} // namespace dsp
-} // namespace juce
+} // namespace juce::dsp

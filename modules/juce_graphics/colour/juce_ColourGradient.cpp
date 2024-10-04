@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -30,7 +39,7 @@ ColourGradient::ColourGradient() noexcept  : isRadial (false)
 {
    #if JUCE_DEBUG
     point1.setX (987654.0f);
-    #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED   jassert (point1.x != 987654.0f);
+    #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED jassert (! exactlyEqual (point1.x, 987654.0f));
    #else
     #define JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED
    #endif
@@ -80,8 +89,6 @@ ColourGradient::ColourGradient (Colour colour1, Point<float> p1,
                  ColourPoint { 1.0, colour2 });
 }
 
-ColourGradient::~ColourGradient() {}
-
 ColourGradient ColourGradient::vertical (Colour c1, float y1, Colour c2, float y2)
 {
     return { c1, 0, y1, c2, 0, y2, false };
@@ -92,17 +99,45 @@ ColourGradient ColourGradient::horizontal (Colour c1, float x1, Colour c2, float
     return { c1, x1, 0, c2, x2, 0, false };
 }
 
-bool ColourGradient::operator== (const ColourGradient& other) const noexcept
+struct PointComparisons
 {
-    return point1 == other.point1 && point2 == other.point2
-            && isRadial == other.isRadial
-            && colours == other.colours;
+    auto tie() const { return std::tie (point->x, point->y); }
+
+    bool operator== (const PointComparisons& other) const { return tie() == other.tie(); }
+    bool operator!= (const PointComparisons& other) const { return tie() != other.tie(); }
+    bool operator<  (const PointComparisons& other) const { return tie() <  other.tie(); }
+
+    const Point<float>* point = nullptr;
+};
+
+struct ColourGradient::ColourPointArrayComparisons
+{
+    bool operator== (const ColourPointArrayComparisons& other) const { return *array == *other.array; }
+    bool operator!= (const ColourPointArrayComparisons& other) const { return *array != *other.array; }
+
+    bool operator<  (const ColourPointArrayComparisons& other) const
+    {
+        return std::lexicographical_compare (array->begin(), array->end(), other.array->begin(), other.array->end());
+    }
+
+    const Array<ColourGradient::ColourPoint>* array = nullptr;
+};
+
+auto ColourGradient::tie() const
+{
+    return std::tuple (PointComparisons { &point1 },
+                       PointComparisons { &point2 },
+                       isRadial,
+                       ColourPointArrayComparisons { &colours });
 }
 
-bool ColourGradient::operator!= (const ColourGradient& other) const noexcept
-{
-    return ! operator== (other);
-}
+bool ColourGradient::operator== (const ColourGradient& other) const noexcept { return tie() == other.tie(); }
+bool ColourGradient::operator!= (const ColourGradient& other) const noexcept { return tie() != other.tie(); }
+
+bool ColourGradient::operator<  (const ColourGradient& other) const noexcept { return tie() <  other.tie(); }
+bool ColourGradient::operator<= (const ColourGradient& other) const noexcept { return tie() <= other.tie(); }
+bool ColourGradient::operator>  (const ColourGradient& other) const noexcept { return tie() >  other.tie(); }
+bool ColourGradient::operator>= (const ColourGradient& other) const noexcept { return tie() >= other.tie(); }
 
 //==============================================================================
 void ColourGradient::clearColours()
@@ -125,7 +160,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
 
     int i;
     for (i = 0; i < colours.size(); ++i)
-        if (colours.getReference(i).position > pos)
+        if (colours.getReference (i).position > pos)
             break;
 
     colours.insert (i, { pos, colour });
@@ -134,7 +169,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
 
 void ColourGradient::removeColour (int index)
 {
-    jassert (index > 0 && index < colours.size() - 1);
+    jassert (isPositiveAndBelow (index, colours.size()));
     colours.remove (index);
 }
 
@@ -174,13 +209,13 @@ void ColourGradient::setColour (int index, Colour newColour) noexcept
 
 Colour ColourGradient::getColourAtPosition (double position) const noexcept
 {
-    jassert (colours.getReference(0).position == 0.0); // the first colour specified has to go at position 0
+    jassert (approximatelyEqual (colours.getReference (0).position, 0.0)); // the first colour specified has to go at position 0
 
     if (position <= 0 || colours.size() <= 1)
-        return colours.getReference(0).colour;
+        return colours.getReference (0).colour;
 
     int i = colours.size() - 1;
-    while (position < colours.getReference(i).position)
+    while (position < colours.getReference (i).position)
         --i;
 
     auto& p1 = colours.getReference (i);
@@ -199,31 +234,30 @@ void ColourGradient::createLookupTable (PixelARGB* const lookupTable, const int 
     JUCE_COLOURGRADIENT_CHECK_COORDS_INITIALISED // Trying to use this object without setting its coordinates?
     jassert (colours.size() >= 2);
     jassert (numEntries > 0);
-    jassert (colours.getReference(0).position == 0.0); // The first colour specified has to go at position 0
+    jassert (approximatelyEqual (colours.getReference (0).position, 0.0)); // The first colour specified has to go at position 0
 
-    auto pix1 = colours.getReference (0).colour.getPixelARGB();
     int index = 0;
 
-    for (int j = 1; j < colours.size(); ++j)
+    for (int j = 0; j < colours.size() - 1; ++j)
     {
-        auto& p = colours.getReference (j);
-        auto numToDo = roundToInt (p.position * (numEntries - 1)) - index;
-        auto pix2 = p.colour.getPixelARGB();
+        const auto& o = colours.getReference (j + 0);
+        const auto& p = colours.getReference (j + 1);
+        const auto numToDo = roundToInt (p.position * (numEntries - 1)) - index;
+        const auto pix1 = o.colour.getNonPremultipliedPixelARGB();
+        const auto pix2 = p.colour.getNonPremultipliedPixelARGB();
 
-        for (int i = 0; i < numToDo; ++i)
+        for (auto i = 0; i < numToDo; ++i)
         {
-            jassert (index >= 0 && index < numEntries);
+            auto blended = pix1;
+            blended.tween (pix2, (uint32) ((i << 8) / numToDo));
+            blended.premultiply();
 
-            lookupTable[index] = pix1;
-            lookupTable[index].tween (pix2, (uint32) ((i << 8) / numToDo));
-            ++index;
+            jassert (0 <= index && index < numEntries);
+            lookupTable[index++] = blended;
         }
-
-        pix1 = pix2;
     }
 
-    while (index < numEntries)
-        lookupTable [index++] = pix1;
+    std::fill (lookupTable + index, lookupTable + numEntries, colours.getLast().colour.getPixelARGB());
 }
 
 int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlock<PixelARGB>& lookupTable) const
@@ -255,16 +289,6 @@ bool ColourGradient::isInvisible() const noexcept
             return false;
 
     return true;
-}
-
-bool ColourGradient::ColourPoint::operator== (ColourPoint other) const noexcept
-{
-    return position == other.position && colour == other.colour;
-}
-
-bool ColourGradient::ColourPoint::operator!= (ColourPoint other) const noexcept
-{
-    return position != other.position || colour != other.colour;
 }
 
 } // namespace juce

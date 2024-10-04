@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -31,8 +40,8 @@
  #error "If you're building the audio plugin host, you probably want to enable VST and/or AU support"
 #endif
 
-class PluginScannerSubprocess : private ChildProcessWorker,
-                                private AsyncUpdater
+class PluginScannerSubprocess final : private ChildProcessWorker,
+                                      private AsyncUpdater
 {
 public:
     PluginScannerSubprocess()
@@ -48,13 +57,15 @@ private:
         if (mb.isEmpty())
             return;
 
-        if (! doScan (mb))
-        {
-            {
-                const std::lock_guard<std::mutex> lock (mutex);
-                pendingBlocks.emplace (mb);
-            }
+        const std::lock_guard<std::mutex> lock (mutex);
 
+        if (const auto results = doScan (mb); ! results.isEmpty())
+        {
+            sendResults (results);
+        }
+        else
+        {
+            pendingBlocks.emplace (mb);
             triggerAsyncUpdate();
         }
     }
@@ -68,26 +79,17 @@ private:
     {
         for (;;)
         {
-            const auto block = [&]() -> MemoryBlock
-            {
-                const std::lock_guard<std::mutex> lock (mutex);
+            const std::lock_guard<std::mutex> lock (mutex);
 
-                if (pendingBlocks.empty())
-                    return {};
-
-                auto out = std::move (pendingBlocks.front());
-                pendingBlocks.pop();
-                return out;
-            }();
-
-            if (block.isEmpty())
+            if (pendingBlocks.empty())
                 return;
 
-            doScan (block);
+            sendResults (doScan (pendingBlocks.front()));
+            pendingBlocks.pop();
         }
     }
 
-    bool doScan (const MemoryBlock& block)
+    OwnedArray<PluginDescription> doScan (const MemoryBlock& block)
     {
         MemoryInputStream stream { block, false };
         const auto formatName = stream.readString();
@@ -106,20 +108,19 @@ private:
             return nullptr;
         }();
 
-        if (matchingFormat == nullptr
-            || (! MessageManager::getInstance()->isThisTheMessageThread()
-                && ! matchingFormat->requiresUnblockedMessageThreadDuringCreation (pd)))
+        OwnedArray<PluginDescription> results;
+
+        if (matchingFormat != nullptr
+            && (MessageManager::getInstance()->isThisTheMessageThread()
+                || matchingFormat->requiresUnblockedMessageThreadDuringCreation (pd)))
         {
-            return false;
+            matchingFormat->findAllTypesForFile (results, identifier);
         }
 
-        OwnedArray<PluginDescription> results;
-        matchingFormat->findAllTypesForFile (results, identifier);
-        sendPluginDescriptions (results);
-        return true;
+        return results;
     }
 
-    void sendPluginDescriptions (const OwnedArray<PluginDescription>& results)
+    void sendResults (const OwnedArray<PluginDescription>& results)
     {
         XmlElement xml ("LIST");
 
@@ -132,15 +133,12 @@ private:
 
     std::mutex mutex;
     std::queue<MemoryBlock> pendingBlocks;
-
-    // After construction, this will only be accessed by doScan so there's no need
-    // to worry about synchronisation.
     AudioPluginFormatManager formatManager;
 };
 
 //==============================================================================
-class PluginHostApp  : public JUCEApplication,
-                       private AsyncUpdater
+class PluginHostApp final : public JUCEApplication,
+                            private AsyncUpdater
 {
 public:
     PluginHostApp() = default;
@@ -258,7 +256,7 @@ private:
     std::unique_ptr<PluginScannerSubprocess> storedScannerSubprocess;
 };
 
-static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }
+static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*> (JUCEApplication::getInstance()); }
 
 ApplicationProperties& getAppProperties()         { return *getApp().appProperties; }
 ApplicationCommandManager& getCommandManager()    { return getApp().commandManager; }

@@ -1,27 +1,41 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
 namespace juce
 {
+
+constexpr auto minimumDecibels = -300.0f;
 
 IIRCoefficients::IIRCoefficients() noexcept
 {
@@ -44,7 +58,7 @@ IIRCoefficients& IIRCoefficients::operator= (const IIRCoefficients& other) noexc
 IIRCoefficients::IIRCoefficients (double c1, double c2, double c3,
                                   double c4, double c5, double c6) noexcept
 {
-    auto a = 1.0 / c4;
+    const auto a = 1.0 / c4;
 
     coefficients[0] = (float) (c1 * a);
     coefficients[1] = (float) (c2 * a);
@@ -67,9 +81,9 @@ IIRCoefficients IIRCoefficients::makeLowPass (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    auto nSquared = n * n;
-    auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+    const auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    const auto nSquared = n * n;
+    const auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1,
                             c1 * 2.0,
@@ -82,7 +96,7 @@ IIRCoefficients IIRCoefficients::makeLowPass (double sampleRate,
 IIRCoefficients IIRCoefficients::makeHighPass (double sampleRate,
                                                double frequency) noexcept
 {
-    return makeHighPass (sampleRate, frequency, 1.0 / std::sqrt(2.0));
+    return makeHighPass (sampleRate, frequency, 1.0 / std::sqrt (2.0));
 }
 
 IIRCoefficients IIRCoefficients::makeHighPass (double sampleRate,
@@ -93,9 +107,9 @@ IIRCoefficients IIRCoefficients::makeHighPass (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto n = std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    auto nSquared = n * n;
-    auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+    const auto n = std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    const auto nSquared = n * n;
+    const auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1,
                             c1 * -2.0,
@@ -119,9 +133,9 @@ IIRCoefficients IIRCoefficients::makeBandPass (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    auto nSquared = n * n;
-    auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+    const auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    const auto nSquared = n * n;
+    const auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1 * n / Q,
                             0.0,
@@ -145,9 +159,9 @@ IIRCoefficients IIRCoefficients::makeNotchFilter (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    auto nSquared = n * n;
-    auto c1 = 1.0 / (1.0 + n / Q + nSquared);
+    const auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    const auto nSquared = n * n;
+    const auto c1 = 1.0 / (1.0 + n / Q + nSquared);
 
     return IIRCoefficients (c1 * (1.0 + nSquared),
                             2.0 * c1 * (1.0 - nSquared),
@@ -171,9 +185,9 @@ IIRCoefficients IIRCoefficients::makeAllPass (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
-    auto nSquared = n * n;
-    auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
+    const auto n = 1.0 / std::tan (MathConstants<double>::pi * frequency / sampleRate);
+    const auto nSquared = n * n;
+    const auto c1 = 1.0 / (1.0 + 1.0 / Q * n + nSquared);
 
     return IIRCoefficients (c1 * (1.0 - n / Q + nSquared),
                             c1 * 2.0 * (1.0 - nSquared),
@@ -192,13 +206,13 @@ IIRCoefficients IIRCoefficients::makeLowShelf (double sampleRate,
     jassert (cutOffFrequency > 0.0 && cutOffFrequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto A = jmax (0.0f, std::sqrt (gainFactor));
-    auto aminus1 = A - 1.0;
-    auto aplus1 = A + 1.0;
-    auto omega = (MathConstants<double>::twoPi * jmax (cutOffFrequency, 2.0)) / sampleRate;
-    auto coso = std::cos (omega);
-    auto beta = std::sin (omega) * std::sqrt (A) / Q;
-    auto aminus1TimesCoso = aminus1 * coso;
+    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, minimumDecibels));
+    const auto aminus1 = A - 1.0;
+    const auto aplus1 = A + 1.0;
+    const auto omega = (MathConstants<double>::twoPi * jmax (cutOffFrequency, 2.0)) / sampleRate;
+    const auto coso = std::cos (omega);
+    const auto beta = std::sin (omega) * std::sqrt (A) / Q;
+    const auto aminus1TimesCoso = aminus1 * coso;
 
     return IIRCoefficients (A * (aplus1 - aminus1TimesCoso + beta),
                             A * 2.0 * (aminus1 - aplus1 * coso),
@@ -217,13 +231,13 @@ IIRCoefficients IIRCoefficients::makeHighShelf (double sampleRate,
     jassert (cutOffFrequency > 0.0 && cutOffFrequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto A = jmax (0.0f, std::sqrt (gainFactor));
-    auto aminus1 = A - 1.0;
-    auto aplus1 = A + 1.0;
-    auto omega = (MathConstants<double>::twoPi * jmax (cutOffFrequency, 2.0)) / sampleRate;
-    auto coso = std::cos (omega);
-    auto beta = std::sin (omega) * std::sqrt (A) / Q;
-    auto aminus1TimesCoso = aminus1 * coso;
+    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, minimumDecibels));
+    const auto aminus1 = A - 1.0;
+    const auto aplus1 = A + 1.0;
+    const auto omega = (MathConstants<double>::twoPi * jmax (cutOffFrequency, 2.0)) / sampleRate;
+    const auto coso = std::cos (omega);
+    const auto beta = std::sin (omega) * std::sqrt (A) / Q;
+    const auto aminus1TimesCoso = aminus1 * coso;
 
     return IIRCoefficients (A * (aplus1 + aminus1TimesCoso + beta),
                             A * -2.0 * (aminus1 + aplus1 * coso),
@@ -242,12 +256,12 @@ IIRCoefficients IIRCoefficients::makePeakFilter (double sampleRate,
     jassert (frequency > 0.0 && frequency <= sampleRate * 0.5);
     jassert (Q > 0.0);
 
-    auto A = jmax (0.0f, std::sqrt (gainFactor));
-    auto omega = (MathConstants<double>::twoPi * jmax (frequency, 2.0)) / sampleRate;
-    auto alpha = 0.5 * std::sin (omega) / Q;
-    auto c2 = -2.0 * std::cos (omega);
-    auto alphaTimesA = alpha * A;
-    auto alphaOverA = alpha / A;
+    const auto A = std::sqrt (Decibels::gainWithLowerBound (gainFactor, minimumDecibels));
+    const auto omega = (MathConstants<double>::twoPi * jmax (frequency, 2.0)) / sampleRate;
+    const auto alpha = 0.5 * std::sin (omega) / Q;
+    const auto c2 = -2.0 * std::cos (omega);
+    const auto alphaTimesA = alpha * A;
+    const auto alphaOverA = alpha / A;
 
     return IIRCoefficients (1.0 + alphaTimesA,
                             c2,

@@ -1,23 +1,32 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE library.
-#  Copyright (c) 2022 - Raw Material Software Limited
+#  This file is part of the JUCE framework.
+#  Copyright (c) Raw Material Software Limited
 #
-#  JUCE is an open source library subject to commercial or open-source
+#  JUCE is an open source framework subject to commercial or open source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-#  Agreement and JUCE Privacy Policy.
+#  By downloading, installing, or using the JUCE framework, or combining the
+#  JUCE framework with any other source code, object code, content or any other
+#  copyrightable work, you agree to the terms of the JUCE End User Licence
+#  Agreement, and all incorporated terms including the JUCE Privacy Policy and
+#  the JUCE Website Terms of Service, as applicable, which will bind you. If you
+#  do not agree to the terms of these agreements, we will not license the JUCE
+#  framework to you, and you must discontinue the installation or download
+#  process and cease use of the JUCE framework.
 #
-#  End User License Agreement: www.juce.com/juce-7-licence
-#  Privacy Policy: www.juce.com/juce-privacy-policy
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+#  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
-#  Or: You may also use this code under the terms of the GPL v3 (see
-#  www.gnu.org/licenses).
+#  Or:
 #
-#  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-#  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-#  DISCLAIMED.
+#  You may also use this code under the terms of the AGPLv3:
+#  https://www.gnu.org/licenses/agpl-3.0.en.html
+#
+#  THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+#  WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+#  MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 #
 # ==============================================================================
 
@@ -40,28 +49,6 @@ target_sources(Projucer PRIVATE
     Source/CodeEditor/jucer_DocumentEditorComponent.cpp
     Source/CodeEditor/jucer_OpenDocumentManager.cpp
     Source/CodeEditor/jucer_SourceCodeEditor.cpp
-    Source/ComponentEditor/Components/jucer_ComponentTypeHandler.cpp
-    Source/ComponentEditor/Documents/jucer_ButtonDocument.cpp
-    Source/ComponentEditor/Documents/jucer_ComponentDocument.cpp
-    Source/ComponentEditor/PaintElements/jucer_ColouredElement.cpp
-    Source/ComponentEditor/PaintElements/jucer_PaintElement.cpp
-    Source/ComponentEditor/PaintElements/jucer_PaintElementGroup.cpp
-    Source/ComponentEditor/PaintElements/jucer_PaintElementImage.cpp
-    Source/ComponentEditor/PaintElements/jucer_PaintElementPath.cpp
-    Source/ComponentEditor/UI/jucer_ComponentLayoutEditor.cpp
-    Source/ComponentEditor/UI/jucer_ComponentOverlayComponent.cpp
-    Source/ComponentEditor/UI/jucer_EditingPanelBase.cpp
-    Source/ComponentEditor/UI/jucer_JucerDocumentEditor.cpp
-    Source/ComponentEditor/UI/jucer_PaintRoutineEditor.cpp
-    Source/ComponentEditor/UI/jucer_PaintRoutinePanel.cpp
-    Source/ComponentEditor/UI/jucer_ResourceEditorPanel.cpp
-    Source/ComponentEditor/UI/jucer_TestComponent.cpp
-    Source/ComponentEditor/jucer_BinaryResources.cpp
-    Source/ComponentEditor/jucer_ComponentLayout.cpp
-    Source/ComponentEditor/jucer_GeneratedCode.cpp
-    Source/ComponentEditor/jucer_JucerDocument.cpp
-    Source/ComponentEditor/jucer_ObjectTypes.cpp
-    Source/ComponentEditor/jucer_PaintRoutine.cpp
     Source/Project/Modules/jucer_Modules.cpp
     Source/Project/UI/jucer_HeaderComponent.cpp
     Source/Project/jucer_Project.cpp
@@ -87,16 +74,18 @@ target_compile_definitions(Projucer PRIVATE
     JUCE_LOG_ASSERTIONS=1
     JUCE_STRICT_REFCOUNTEDPOINTER=1
     JUCE_USE_CURL=1
-    JUCE_WEB_BROWSER=0)
+    JUCE_WEB_BROWSER=0
+    # This is a temporary workaround to allow builds to complete on Xcode 15.
+    # Add -Wl,-ld_classic to the OTHER_LDFLAGS build setting if you need to
+    # deploy to older versions of macOS.
+    JUCE_SILENCE_XCODE_15_LINKER_WARNING=1)
 
 juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Icons/background_logo.svg
     Source/BinaryData/Icons/export_android.svg
-    Source/BinaryData/Icons/export_codeBlocks.svg
     Source/BinaryData/Icons/export_linux.svg
     Source/BinaryData/Icons/export_visualStudio.svg
     Source/BinaryData/Icons/export_xcode.svg
-    Source/BinaryData/Icons/gpl_logo.svg
     Source/BinaryData/Icons/juce_icon.png
     Source/BinaryData/Icons/wizard_AnimatedApp.svg
     Source/BinaryData/Icons/wizard_AudioApp.svg
@@ -120,8 +109,11 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.h
     Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.cpp
     Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.h
+    Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.cpp
+    Source/BinaryData/Templates/jucer_AudioPluginARAEditorTemplate.h
     Source/BinaryData/Templates/jucer_AudioPluginFilterTemplate.cpp
     Source/BinaryData/Templates/jucer_AudioPluginFilterTemplate.h
+    Source/BinaryData/Templates/jucer_AudioPluginARAFilterTemplate.h
     Source/BinaryData/Templates/jucer_ComponentTemplate.cpp
     Source/BinaryData/Templates/jucer_ComponentTemplate.h
     Source/BinaryData/Templates/jucer_ContentCompSimpleTemplate.h
@@ -147,6 +139,7 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/gradle/gradle-wrapper.jar
     Source/BinaryData/gradle/gradlew
     Source/BinaryData/gradle/gradlew.bat
+    Source/BinaryData/juce_SimpleBinaryBuilder.cpp
 
     ../Build/CMake/JuceLV2Defines.h.in
     ../Build/CMake/LaunchScreen.storyboard
@@ -156,7 +149,8 @@ juce_add_binary_data(ProjucerData SOURCES
     ../Build/CMake/PIPConsole.cpp.in
     ../Build/CMake/RecentFilesMenuTemplate.nib
     ../Build/CMake/UnityPluginGUIScript.cs.in
-    ../Build/CMake/juce_runtime_arch_detection.cpp)
+    ../Build/CMake/juce_runtime_arch_detection.cpp
+    ../Build/CMake/juce_LinuxSubprocessHelper.cpp)
 
 target_link_libraries(Projucer PRIVATE
     ProjucerData

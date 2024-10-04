@@ -60,7 +60,7 @@ private:
 #if defined(__i386__) || defined(__x86_64__)
 #define cpu_relax() asm volatile("rep; nop" ::: "memory");
 
-#elif defined(__arm__) || defined(__mips__)
+#elif defined(__arm__) || defined(__mips__) || defined(__riscv)
     #define cpu_relax() asm volatile("":::"memory")
 
 #elif defined(__aarch64__)

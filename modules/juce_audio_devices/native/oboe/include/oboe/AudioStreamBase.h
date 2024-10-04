@@ -158,6 +158,41 @@ public:
     SessionId getSessionId() const { return mSessionId; }
 
     /**
+     * @return whether the content of the stream is spatialized.
+     */
+    bool isContentSpatialized() const { return mIsContentSpatialized; }
+
+    /**
+     * @return the spatialization behavior for the stream.
+     */
+    SpatializationBehavior getSpatializationBehavior() const { return mSpatializationBehavior; }
+
+    /**
+     * Return the policy that determines whether the audio may or may not be captured
+     * by other apps or the system.
+     *
+     * See AudioStreamBuilder_setAllowedCapturePolicy().
+     *
+     * Added in API level 29 to AAudio.
+     *
+     * @return the allowed capture policy, for example AllowedCapturePolicy::All
+     */
+    AllowedCapturePolicy getAllowedCapturePolicy() const { return mAllowedCapturePolicy; }
+
+    /**
+     * Return whether this input stream is marked as privacy sensitive.
+     *
+     * See AudioStreamBuilder_setPrivacySensitiveMode().
+     *
+     * Added in API level 30 to AAudio.
+     *
+     * @return PrivacySensitiveMode::Enabled if privacy sensitive,
+     * PrivacySensitiveMode::Disabled if not privacy sensitive, and
+     * PrivacySensitiveMode::Unspecified if API is not supported.
+     */
+    PrivacySensitiveMode getPrivacySensitiveMode() const { return mPrivacySensitiveMode; }
+
+    /**
      * @return true if Oboe can convert channel counts to achieve optimal results.
      */
     bool isChannelConversionAllowed() const {
@@ -178,12 +213,36 @@ public:
         return mSampleRateConversionQuality;
     }
 
+    /**
+     * @return the stream's channel mask.
+     */
+    ChannelMask getChannelMask() const {
+        return mChannelMask;
+    }
+
+    /**
+     * @return number of channels for the hardware, for example 2 for stereo, or kUnspecified.
+     */
+    int32_t getHardwareChannelCount() const { return mHardwareChannelCount; }
+
+    /**
+     * @return hardware sample rate for the stream or kUnspecified
+     */
+    int32_t getHardwareSampleRate() const { return mHardwareSampleRate; }
+
+    /**
+     * @return the audio sample format of the hardware (e.g. Float or I16)
+     */
+    AudioFormat getHardwareFormat() const { return mHardwareFormat; }
+
 protected:
     /** The callback which will be fired when new data is ready to be read/written. **/
     AudioStreamDataCallback        *mDataCallback = nullptr;
+    std::shared_ptr<AudioStreamDataCallback> mSharedDataCallback;
 
     /** The callback which will be fired when an error or a disconnect occurs. **/
     AudioStreamErrorCallback       *mErrorCallback = nullptr;
+    std::shared_ptr<AudioStreamErrorCallback> mSharedErrorCallback;
 
     /** Number of audio frames which will be requested in each callback */
     int32_t                         mFramesPerCallback = kUnspecified;
@@ -197,6 +256,8 @@ protected:
     int32_t                         mBufferCapacityInFrames = kUnspecified;
     /** Stream buffer size specified as a number of audio frames */
     int32_t                         mBufferSizeInFrames = kUnspecified;
+    /** Stream channel mask. Only active on Android 32+ */
+    ChannelMask                     mChannelMask = ChannelMask::Unspecified;
 
     /** Stream sharing mode */
     SharingMode                     mSharingMode = SharingMode::Shared;
@@ -218,10 +279,28 @@ protected:
     /** Stream session ID allocation strategy. Only active on Android 28+ */
     SessionId                       mSessionId = SessionId::None;
 
+    /** Allowed Capture Policy. Only active on Android 29+ */
+    AllowedCapturePolicy            mAllowedCapturePolicy = AllowedCapturePolicy::Unspecified;
+
+    /** Privacy Sensitive Mode. Only active on Android 30+ */
+    PrivacySensitiveMode            mPrivacySensitiveMode = PrivacySensitiveMode::Unspecified;
+
     /** Control the name of the package creating the stream. Only active on Android 31+ */
     std::string                     mPackageName;
     /** Control the attribution tag of the context creating the stream. Only active on Android 31+ */
     std::string                     mAttributionTag;
+
+    /** Whether the content is already spatialized. Only used on Android 32+ */
+    bool                            mIsContentSpatialized = false;
+    /** Spatialization Behavior. Only active on Android 32+ */
+    SpatializationBehavior          mSpatializationBehavior = SpatializationBehavior::Unspecified;
+
+    /** Hardware channel count. Only specified on Android 34+ AAudio streams */
+    int32_t                         mHardwareChannelCount = kUnspecified;
+    /** Hardware sample rate. Only specified on Android 34+ AAudio streams */
+    int32_t                         mHardwareSampleRate = kUnspecified;
+    /** Hardware format. Only specified on Android 34+ AAudio streams */
+    AudioFormat                     mHardwareFormat = AudioFormat::Unspecified;
 
     // Control whether Oboe can convert channel counts to achieve optimal results.
     bool                            mChannelConversionAllowed = false;
@@ -238,10 +317,9 @@ protected:
             case AudioFormat::Float:
             case AudioFormat::I24:
             case AudioFormat::I32:
+            case AudioFormat::IEC61937:
                 break;
-            // JUCE CHANGE STARTS HERE
-            case AudioFormat::Invalid:
-            // JUCE CHANGE ENDS HERE
+
             default:
                 return Result::ErrorInvalidFormat;
         }

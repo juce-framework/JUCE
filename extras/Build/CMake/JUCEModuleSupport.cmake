@@ -1,23 +1,32 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE library.
-#  Copyright (c) 2022 - Raw Material Software Limited
+#  This file is part of the JUCE framework.
+#  Copyright (c) Raw Material Software Limited
 #
-#  JUCE is an open source library subject to commercial or open-source
+#  JUCE is an open source framework subject to commercial or open source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-#  Agreement and JUCE Privacy Policy.
+#  By downloading, installing, or using the JUCE framework, or combining the
+#  JUCE framework with any other source code, object code, content or any other
+#  copyrightable work, you agree to the terms of the JUCE End User Licence
+#  Agreement, and all incorporated terms including the JUCE Privacy Policy and
+#  the JUCE Website Terms of Service, as applicable, which will bind you. If you
+#  do not agree to the terms of these agreements, we will not license the JUCE
+#  framework to you, and you must discontinue the installation or download
+#  process and cease use of the JUCE framework.
 #
-#  End User License Agreement: www.juce.com/juce-7-licence
-#  Privacy Policy: www.juce.com/juce-privacy-policy
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+#  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
-#  Or: You may also use this code under the terms of the GPL v3 (see
-#  www.gnu.org/licenses).
+#  Or:
 #
-#  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-#  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-#  DISCLAIMED.
+#  You may also use this code under the terms of the AGPLv3:
+#  https://www.gnu.org/licenses/agpl-3.0.en.html
+#
+#  THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+#  WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+#  MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 #
 # ==============================================================================
 
@@ -33,7 +42,7 @@
 # ==================================================================================================
 
 include_guard(GLOBAL)
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 
 # ==================================================================================================
 
@@ -73,9 +82,10 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_add_standard_defs juce_target)
+    _juce_get_debug_config_genex(debug_config)
     target_compile_definitions(${juce_target} INTERFACE
         JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
-        $<IF:$<CONFIG:DEBUG>,DEBUG=1 _DEBUG=1,NDEBUG=1 _NDEBUG=1>
+        $<IF:${debug_config},DEBUG=1 _DEBUG=1,NDEBUG=1 _NDEBUG=1>
         $<$<PLATFORM_ID:Android>:JUCE_ANDROID=1>)
 endfunction()
 
@@ -149,30 +159,33 @@ endfunction()
 function(_juce_get_metadata target key out_var)
     get_target_property(content "${target}" "INTERFACE_JUCE_${key}")
 
-    if(NOT "${content}" STREQUAL "content-NOTFOUND")
+    if("${content}" STREQUAL "content-NOTFOUND")
+        set(${out_var} PARENT_SCOPE)
+    else()
         set(${out_var} "${content}" PARENT_SCOPE)
     endif()
 endfunction()
 
 # ==================================================================================================
-
 function(_juce_should_build_module_source filename output_var)
-    get_filename_component(trimmed_name "${filename}" NAME_WE)
+    get_filename_component(trimmed_filename "${filename}" NAME_WE)
+    string(TOLOWER "${trimmed_filename}" trimmed_filename_lowercase)
+
+    set(system_name_regex_for_suffix
+        "android\;Android"
+        "ios\;iOS"
+        "linux\;Linux|.*BSD"
+        "mac\;Darwin"
+        "osx\;Darwin"
+        "windows\;Windows")
 
     set(result TRUE)
 
-    set(pairs
-        "OSX\;Darwin"
-        "Windows\;Windows"
-        "Linux\;Linux"
-        "Android\;Android"
-        "iOS\;iOS")
-
-    foreach(pair IN LISTS pairs)
+    foreach(pair IN LISTS system_name_regex_for_suffix)
         list(GET pair 0 suffix)
-        list(GET pair 1 system_name)
+        list(GET pair 1 regex)
 
-        if((trimmed_name MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME STREQUAL "${system_name}"))
+        if((trimmed_filename_lowercase MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME MATCHES "${regex}"))
             set(result FALSE)
         endif()
     endforeach()
@@ -251,10 +264,13 @@ function(_juce_get_platform_plugin_kinds out)
     endif()
 
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-        list(APPEND result Unity VST VST3 LV2)
+        list(APPEND result VST LV2)
+        if(NOT (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
+            list(APPEND result Unity VST3)
+        endif()
     endif()
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows") AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
         list(APPEND result AAX)
     endif()
 
@@ -293,8 +309,7 @@ function(_juce_link_frameworks target visibility)
                 set(framework_flags "${juce_found_${framework}}")
             endif()
         elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-            # CoreServices is only available on iOS 12+, we must link it weakly on earlier platforms
-            if(JUCE_LINK_FRAMEWORKS_WEAK OR ((framework STREQUAL "CoreServices") AND (CMAKE_OSX_DEPLOYMENT_TARGET LESS 12.0)))
+            if(JUCE_LINK_FRAMEWORKS_WEAK)
                 set(framework_flags "-weak_framework ${framework}")
             else()
                 set(framework_flags "-framework ${framework}")
@@ -310,7 +325,6 @@ endfunction()
 
 function(_juce_add_plugin_wrapper_target format path out_path)
     _juce_module_sources("${path}" "${out_path}" out_var headers)
-    list(FILTER out_var EXCLUDE REGEX "/juce_audio_plugin_client_utils.cpp$")
     set(target_name juce_audio_plugin_client_${format})
 
     _juce_add_interface_library("${target_name}" ${out_var})
@@ -402,8 +416,6 @@ function(_juce_add_module_staticlib_paths module_target module_path)
             set(subfolder "$<IF:$<STREQUAL:${runtime_lib},MultiThreaded>,MT,${subfolder}>")
             target_link_directories(${module_target} INTERFACE
                 "${module_path}/libs/VisualStudio${CMAKE_MATCH_1}/${arch}/${subfolder}")
-        elseif(MSYS OR MINGW)
-            _juce_add_library_path(${module_target} "${module_path}/libs/MinGW/${JUCE_TARGET_ARCHITECTURE}")
         endif()
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
         _juce_add_library_path(${module_target} "${module_path}/libs/Android/${CMAKE_ANDROID_ARCH_ABI}")
@@ -440,24 +452,19 @@ function(juce_add_module module_path)
 
     _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
 
+    set(all_module_sources)
+
     if(${module_name} STREQUAL "juce_audio_plugin_client")
-        list(REMOVE_ITEM headers "${module_path}/LV2/juce_LV2TurtleDumpProgram.cpp")
+        list(REMOVE_ITEM headers
+            "${module_path}/LV2/juce_LV2ManifestHelper.cpp"
+            "${module_path}/VST3/juce_VST3ManifestHelper.mm"
+            "${module_path}/VST3/juce_VST3ManifestHelper.cpp")
 
         _juce_get_platform_plugin_kinds(plugin_kinds)
 
         foreach(kind IN LISTS plugin_kinds)
             _juce_add_plugin_wrapper_target(${kind} "${module_path}" "${base_path}")
         endforeach()
-
-        set(utils_source
-            "${base_path}/${module_name}/juce_audio_plugin_client_utils.cpp")
-        add_library(juce_audio_plugin_client_utils INTERFACE)
-        target_sources(juce_audio_plugin_client_utils INTERFACE "${utils_source}")
-
-        if(JUCE_ARG_ALIAS_NAMESPACE)
-            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_audio_plugin_client_utils
-                ALIAS juce_audio_plugin_client_utils)
-        endif()
 
         file(GLOB_RECURSE all_module_files
             CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE
@@ -612,7 +619,7 @@ function(juce_add_module module_path)
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" linuxLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
-            if(module_name STREQUAL "juce_gui_basics")
+            if(module_name MATCHES "juce_gui_basics|juce_audio_processors|juce_core|juce_graphics")
                 target_compile_options(${module_name} INTERFACE /bigobj)
             endif()
 

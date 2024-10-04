@@ -1,29 +1,38 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE library.
-#  Copyright (c) 2022 - Raw Material Software Limited
+#  This file is part of the JUCE framework.
+#  Copyright (c) Raw Material Software Limited
 #
-#  JUCE is an open source library subject to commercial or open-source
+#  JUCE is an open source framework subject to commercial or open source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-#  Agreement and JUCE Privacy Policy.
+#  By downloading, installing, or using the JUCE framework, or combining the
+#  JUCE framework with any other source code, object code, content or any other
+#  copyrightable work, you agree to the terms of the JUCE End User Licence
+#  Agreement, and all incorporated terms including the JUCE Privacy Policy and
+#  the JUCE Website Terms of Service, as applicable, which will bind you. If you
+#  do not agree to the terms of these agreements, we will not license the JUCE
+#  framework to you, and you must discontinue the installation or download
+#  process and cease use of the JUCE framework.
 #
-#  End User License Agreement: www.juce.com/juce-7-licence
-#  Privacy Policy: www.juce.com/juce-privacy-policy
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+#  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
-#  Or: You may also use this code under the terms of the GPL v3 (see
-#  www.gnu.org/licenses).
+#  Or:
 #
-#  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-#  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-#  DISCLAIMED.
+#  You may also use this code under the terms of the AGPLv3:
+#  https://www.gnu.org/licenses/agpl-3.0.en.html
+#
+#  THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+#  WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+#  MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 #
 # ==============================================================================
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 
-project(JUCE VERSION 7.0.5 LANGUAGES C CXX)
+project(JUCE VERSION 8.0.2 LANGUAGES C CXX)
 
 include(CMakeDependentOption)
 
@@ -64,7 +73,7 @@ set_directory_properties(PROPERTIES
     JUCE_COMPANY_NAME       "JUCE"
     JUCE_COMPANY_WEBSITE    "https://juce.com"
     JUCE_COMPANY_EMAIL      "info@juce.com"
-    JUCE_COMPANY_COPYRIGHT  "Copyright (c) 2020 - Raw Material Software Limited")
+    JUCE_COMPANY_COPYRIGHT  "Copyright (c) - Raw Material Software Limited")
 
 option(JUCE_COPY_PLUGIN_AFTER_BUILD
     "Whether or not plugins should be installed to the system after building" OFF)
@@ -114,14 +123,19 @@ if(JUCE_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
+string(CONCAT webview2_option_message "Location that overrides the default directory where our "
+                                      "FindWebView2 script is looking for the "
+                                      "*Microsoft.Web.WebView2* directory")
+
+option(JUCE_WEBVIEW2_PACKAGE_LOCATION ${webview2_option_message} "")
+
 # ==================================================================================================
 # Install configuration
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
     VERSION ${JUCE_VERSION}
-    COMPATIBILITY ExactVersion
-    ${extra_version_arg})
+    COMPATIBILITY ExactVersion)
 
 set(JUCE_INSTALL_DESTINATION "lib/cmake/JUCE-${JUCE_VERSION}" CACHE STRING
     "The location, relative to the install prefix, where the JUCE config file will be installed")
@@ -160,14 +174,21 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/copyDir.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp"
+              "${JUCE_CMAKE_UTILS_DIR}/juce_LinuxSubprocessHelper.cpp"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${JUCE_SOURCE_DIR}")
+if(("${CMAKE_SOURCE_DIR}" STREQUAL "${JUCE_SOURCE_DIR}") AND (NOT JUCE_BUILD_HELPER_TOOLS))
     _juce_add_lv2_manifest_helper_target()
 
     if(TARGET juce_lv2_helper)
         install(TARGETS juce_lv2_helper EXPORT LV2_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
         install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
     endif()
-endif()
 
+    _juce_add_vst3_manifest_helper_target()
+
+    if(TARGET juce_vst3_helper)
+        install(TARGETS juce_vst3_helper EXPORT VST3_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
+        install(EXPORT VST3_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
+    endif()
+endif()

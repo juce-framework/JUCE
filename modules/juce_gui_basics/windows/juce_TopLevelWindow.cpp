@@ -1,134 +1,39 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
 namespace juce
 {
-
-/** Keeps track of the active top level window. */
-class TopLevelWindowManager  : private Timer,
-                               private DeletedAtShutdown
-{
-public:
-    TopLevelWindowManager() {}
-    ~TopLevelWindowManager() override    { clearSingletonInstance(); }
-
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (TopLevelWindowManager)
-
-    void checkFocusAsync()
-    {
-        startTimer (10);
-    }
-
-    void checkFocus()
-    {
-        startTimer (jmin (1731, getTimerInterval() * 2));
-
-        auto* newActive = findCurrentlyActiveWindow();
-
-        if (newActive != currentActive)
-        {
-            currentActive = newActive;
-
-            for (int i = windows.size(); --i >= 0;)
-                if (auto* tlw = windows[i])
-                    tlw->setWindowActive (isWindowActive (tlw));
-
-            Desktop::getInstance().triggerFocusCallback();
-        }
-    }
-
-    bool addWindow (TopLevelWindow* const w)
-    {
-        windows.add (w);
-        checkFocusAsync();
-
-        return isWindowActive (w);
-    }
-
-    void removeWindow (TopLevelWindow* const w)
-    {
-        checkFocusAsync();
-
-        if (currentActive == w)
-            currentActive = nullptr;
-
-        windows.removeFirstMatchingValue (w);
-
-        if (windows.isEmpty())
-            deleteInstance();
-    }
-
-    Array<TopLevelWindow*> windows;
-
-private:
-    TopLevelWindow* currentActive = nullptr;
-
-    void timerCallback() override
-    {
-        checkFocus();
-    }
-
-    bool isWindowActive (TopLevelWindow* const tlw) const
-    {
-        return (tlw == currentActive
-                 || tlw->isParentOf (currentActive)
-                 || tlw->hasKeyboardFocus (true))
-                && tlw->isShowing();
-    }
-
-    TopLevelWindow* findCurrentlyActiveWindow() const
-    {
-        if (Process::isForegroundProcess())
-        {
-            auto* focusedComp = Component::getCurrentlyFocusedComponent();
-            auto* w = dynamic_cast<TopLevelWindow*> (focusedComp);
-
-            if (w == nullptr && focusedComp != nullptr)
-                w = focusedComp->findParentComponentOfClass<TopLevelWindow>();
-
-            if (w == nullptr)
-                w = currentActive;
-
-            if (w != nullptr && w->isShowing())
-                return w;
-        }
-
-        return nullptr;
-    }
-
-    JUCE_DECLARE_NON_COPYABLE (TopLevelWindowManager)
-};
-
-JUCE_IMPLEMENT_SINGLETON (TopLevelWindowManager)
-
-void juce_checkCurrentlyFocusedTopLevelWindow();
-void juce_checkCurrentlyFocusedTopLevelWindow()
-{
-    if (auto* wm = TopLevelWindowManager::getInstanceWithoutCreating())
-        wm->checkFocusAsync();
-}
 
 //==============================================================================
 TopLevelWindow::TopLevelWindow (const String& name, const bool shouldAddToDesktop)
@@ -145,19 +50,19 @@ TopLevelWindow::TopLevelWindow (const String& name, const bool shouldAddToDeskto
 
     setWantsKeyboardFocus (true);
     setBroughtToFrontOnMouseClick (true);
-    isCurrentlyActive = TopLevelWindowManager::getInstance()->addWindow (this);
+    isCurrentlyActive = detail::TopLevelWindowManager::getInstance()->addWindow (this);
 }
 
 TopLevelWindow::~TopLevelWindow()
 {
     shadower = nullptr;
-    TopLevelWindowManager::getInstance()->removeWindow (this);
+    detail::TopLevelWindowManager::getInstance()->removeWindow (this);
 }
 
 //==============================================================================
 void TopLevelWindow::focusOfChildComponentChanged (FocusChangeType)
 {
-    auto* wm = TopLevelWindowManager::getInstance();
+    auto* wm = detail::TopLevelWindowManager::getInstance();
 
     if (hasKeyboardFocus (true))
         wm->checkFocus();
@@ -239,7 +144,7 @@ void TopLevelWindow::setUsingNativeTitleBar (const bool shouldUseNativeTitleBar)
 {
     if (useNativeTitleBar != shouldUseNativeTitleBar)
     {
-        FocusRestorer focusRestorer;
+        detail::FocusRestorer focusRestorer;
         useNativeTitleBar = shouldUseNativeTitleBar;
         recreateDesktopWindow();
         sendLookAndFeelChange();
@@ -320,12 +225,12 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
 //==============================================================================
 int TopLevelWindow::getNumTopLevelWindows() noexcept
 {
-    return TopLevelWindowManager::getInstance()->windows.size();
+    return detail::TopLevelWindowManager::getInstance()->windows.size();
 }
 
 TopLevelWindow* TopLevelWindow::getTopLevelWindow (const int index) noexcept
 {
-    return TopLevelWindowManager::getInstance()->windows [index];
+    return detail::TopLevelWindowManager::getInstance()->windows [index];
 }
 
 TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() noexcept

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -41,8 +50,10 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 
 #if JUCE_MAC
-  #import <DiscRecording/DiscRecording.h>
-  #import <CoreAudioKit/CABTLEMIDIWindowController.h>
+ #import <DiscRecording/DiscRecording.h>
+ #import <CoreAudioKit/CABTLEMIDIWindowController.h>
+#elif JUCE_IOS
+ #import <CoreAudioKit/CoreAudioKit.h>
 #elif JUCE_WINDOWS
  #if JUCE_USE_CDBURNER
   /* You'll need the Platform SDK for these headers - if you don't have it and don't
@@ -67,38 +78,38 @@
 #include "audio_cd/juce_AudioCDReader.cpp"
 
 #if JUCE_MAC
- #include "native/juce_mac_BluetoothMidiDevicePairingDialogue.mm"
+ #include "native/juce_BluetoothMidiDevicePairingDialogue_mac.mm"
 
  #if JUCE_USE_CDREADER
-  #include "native/juce_mac_AudioCDReader.mm"
+  #include "native/juce_AudioCDReader_mac.mm"
  #endif
 
  #if JUCE_USE_CDBURNER
-  #include "native/juce_mac_AudioCDBurner.mm"
+  #include "native/juce_AudioCDBurner_mac.mm"
  #endif
 
 #elif JUCE_IOS
- #include "native/juce_ios_BluetoothMidiDevicePairingDialogue.mm"
+ #include "native/juce_BluetoothMidiDevicePairingDialogue_ios.mm"
 
 #elif JUCE_ANDROID
- #include "native/juce_android_BluetoothMidiDevicePairingDialogue.cpp"
+ #include "native/juce_BluetoothMidiDevicePairingDialogue_android.cpp"
 
 #elif JUCE_LINUX || JUCE_BSD
  #if JUCE_USE_CDREADER
-  #include "native/juce_linux_AudioCDReader.cpp"
+  #include "native/juce_AudioCDReader_linux.cpp"
  #endif
 
- #include "native/juce_linux_BluetoothMidiDevicePairingDialogue.cpp"
+ #include "native/juce_BluetoothMidiDevicePairingDialogue_linux.cpp"
 
 #elif JUCE_WINDOWS
- #include "native/juce_win_BluetoothMidiDevicePairingDialogue.cpp"
+ #include "native/juce_BluetoothMidiDevicePairingDialogue_windows.cpp"
 
  #if JUCE_USE_CDREADER
-  #include "native/juce_win32_AudioCDReader.cpp"
+  #include "native/juce_AudioCDReader_windows.cpp"
  #endif
 
  #if JUCE_USE_CDBURNER
-  #include "native/juce_win32_AudioCDBurner.cpp"
+  #include "native/juce_AudioCDBurner_windows.cpp"
  #endif
 
 #endif

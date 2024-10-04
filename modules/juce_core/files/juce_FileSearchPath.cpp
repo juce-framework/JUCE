@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -63,7 +75,12 @@ int FileSearchPath::getNumPaths() const
 
 File FileSearchPath::operator[] (int index) const
 {
-    return File (directories[index]);
+    return File (getRawString (index));
+}
+
+String FileSearchPath::getRawString (int index) const
+{
+    return directories[index];
 }
 
 String FileSearchPath::toString() const
@@ -110,21 +127,30 @@ void FileSearchPath::addPath (const FileSearchPath& other)
 
 void FileSearchPath::removeRedundantPaths()
 {
-    for (int i = directories.size(); --i >= 0;)
+    std::vector<String> reduced;
+
+    for (const auto& directory : directories)
     {
-        const File d1 (directories[i]);
-
-        for (int j = directories.size(); --j >= 0;)
+        const auto checkedIsChildOf = [&] (const auto& a, const auto& b)
         {
-            const File d2 (directories[j]);
+            return File::isAbsolutePath (a) && File::isAbsolutePath (b) && File (a).isAChildOf (b);
+        };
 
-            if (i != j && (d1.isAChildOf (d2) || d1 == d2))
-            {
-                directories.remove (i);
-                break;
-            }
-        }
+        const auto fContainsDirectory = [&] (const auto& f)
+        {
+            return f == directory || checkedIsChildOf (directory, f);
+        };
+
+        if (std::find_if (reduced.begin(), reduced.end(), fContainsDirectory) != reduced.end())
+            continue;
+
+        const auto directoryContainsF = [&] (const auto& f) { return checkedIsChildOf (f, directory); };
+
+        reduced.erase (std::remove_if (reduced.begin(), reduced.end(), directoryContainsF), reduced.end());
+        reduced.push_back (directory);
     }
+
+    directories = StringArray (reduced.data(), (int) reduced.size());
 }
 
 void FileSearchPath::removeNonExistentPaths()
@@ -171,5 +197,55 @@ bool FileSearchPath::isFileInPath (const File& fileToCheck,
 
     return false;
 }
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class FileSearchPathTests final : public UnitTest
+{
+public:
+    FileSearchPathTests() : UnitTest ("FileSearchPath", UnitTestCategories::files) {}
+
+    void runTest() override
+    {
+        beginTest ("removeRedundantPaths");
+        {
+           #if JUCE_WINDOWS
+            const String prefix = "C:";
+           #else
+            const String prefix = "";
+           #endif
+
+            {
+                FileSearchPath fsp { prefix + "/a/b/c/d;" + prefix + "/a/b/c/e;" + prefix + "/a/b/c" };
+                fsp.removeRedundantPaths();
+                expectEquals (fsp.toString(), prefix + "/a/b/c");
+            }
+
+            {
+                FileSearchPath fsp { prefix + "/a/b/c;" + prefix + "/a/b/c/d;" + prefix + "/a/b/c/e" };
+                fsp.removeRedundantPaths();
+                expectEquals (fsp.toString(), prefix + "/a/b/c");
+            }
+
+            {
+                FileSearchPath fsp { prefix + "/a/b/c/d;" + prefix + "/a/b/c;" + prefix + "/a/b/c/e" };
+                fsp.removeRedundantPaths();
+                expectEquals (fsp.toString(), prefix + "/a/b/c");
+            }
+
+            {
+                FileSearchPath fsp { "%FOO%;" + prefix + "/a/b/c;%FOO%;" + prefix + "/a/b/c/d" };
+                fsp.removeRedundantPaths();
+                expectEquals (fsp.toString(), "%FOO%;" + prefix + "/a/b/c");
+            }
+        }
+    }
+};
+
+static FileSearchPathTests fileSearchPathTests;
+
+#endif
 
 } // namespace juce

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -89,13 +98,13 @@ public:
 
                 if (! CharacterFunctions::isWhitespace (lastAtom.atomText.getLastCharacter()))
                 {
-                    auto& first = other.atoms.getReference(0);
+                    auto& first = other.atoms.getReference (0);
 
                     if (! CharacterFunctions::isWhitespace (first.atomText[0]))
                     {
                         lastAtom.atomText += first.atomText;
                         lastAtom.numChars = (uint16) (lastAtom.numChars + first.numChars);
-                        lastAtom.width = font.getStringWidthFloat (lastAtom.getText (passwordChar));
+                        lastAtom.width = GlyphArrangement::getStringWidth (font, lastAtom.getText (passwordChar));
                         ++i;
                     }
                 }
@@ -105,7 +114,7 @@ public:
 
             while (i < other.atoms.size())
             {
-                atoms.add (other.atoms.getReference(i));
+                atoms.add (other.atoms.getReference (i));
                 ++i;
             }
         }
@@ -118,7 +127,7 @@ public:
 
         for (int i = 0; i < atoms.size(); ++i)
         {
-            auto& atom = atoms.getReference(i);
+            auto& atom = atoms.getReference (i);
             auto nextIndex = index + atom.numChars;
 
             if (index == indexToBreakAt)
@@ -134,13 +143,13 @@ public:
             {
                 TextAtom secondAtom;
                 secondAtom.atomText = atom.atomText.substring (indexToBreakAt - index);
-                secondAtom.width = font.getStringWidthFloat (secondAtom.getText (passwordChar));
+                secondAtom.width = GlyphArrangement::getStringWidth (font, secondAtom.getText (passwordChar));
                 secondAtom.numChars = (uint16) secondAtom.atomText.length();
 
                 section2->atoms.add (secondAtom);
 
                 atom.atomText = atom.atomText.substring (0, indexToBreakAt - index);
-                atom.width = font.getStringWidthFloat (atom.getText (passwordChar));
+                atom.width = GlyphArrangement::getStringWidth (font, atom.getText (passwordChar));
                 atom.numChars = (uint16) (indexToBreakAt - index);
 
                 for (int j = i + 1; j < atoms.size(); ++j)
@@ -203,7 +212,7 @@ public:
             passwordChar = passwordCharToUse;
 
             for (auto& atom : atoms)
-                atom.width = newFont.getStringWidthFloat (atom.getText (passwordChar));
+                atom.width = GlyphArrangement::getStringWidth (newFont, atom.getText (passwordChar));
         }
     }
 
@@ -263,7 +272,7 @@ private:
 
             TextAtom atom;
             atom.atomText = String (start, numChars);
-            atom.width = (atom.isNewLine() ? 0.0f : font.getStringWidthFloat (atom.getText (passwordChar)));
+            atom.width = (atom.isNewLine() ? 0.0f : GlyphArrangement::getStringWidth (font, atom.getText (passwordChar)));
             atom.numChars = (uint16) numChars;
             atoms.add (atom);
         }
@@ -587,7 +596,7 @@ struct TextEditor::Iterator
         int j;
         for (j = 0; j < numGlyphs; ++j)
         {
-            auto& pg = g.getGlyph(j);
+            auto& pg = g.getGlyph (j);
 
             if ((pg.getLeft() + pg.getRight()) / 2 > xToFind)
                 break;
@@ -741,7 +750,7 @@ private:
 
 
 //==============================================================================
-struct TextEditor::InsertAction  : public UndoableAction
+struct TextEditor::InsertAction final : public UndoableAction
 {
     InsertAction (TextEditor& ed, const String& newText, int insertPos,
                   const Font& newFont, Colour newColour, int oldCaret, int newCaret)
@@ -783,7 +792,7 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::RemoveAction  : public UndoableAction
+struct TextEditor::RemoveAction final : public UndoableAction
 {
     RemoveAction (TextEditor& ed, Range<int> rangeToRemove, int oldCaret, int newCaret,
                   const Array<UniformTextSection*>& oldSections)
@@ -828,9 +837,9 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::TextHolderComponent  : public Component,
-                                          public Timer,
-                                          public Value::Listener
+struct TextEditor::TextHolderComponent final : public Component,
+                                               public Timer,
+                                               public Value::Listener
 {
     TextHolderComponent (TextEditor& ed)  : owner (ed)
     {
@@ -878,7 +887,7 @@ private:
 };
 
 //==============================================================================
-struct TextEditor::TextEditorViewport  : public Viewport
+struct TextEditor::TextEditorViewport final : public Viewport
 {
     TextEditorViewport (TextEditor& ed) : owner (ed) {}
 
@@ -948,8 +957,6 @@ TextEditor::TextEditor (const String& name, juce_wchar passwordChar)
 
 TextEditor::~TextEditor()
 {
-    giveAwayKeyboardFocus();
-
     if (auto* peer = getPeer())
         peer->refreshTextInputTarget();
 
@@ -1122,7 +1129,6 @@ void TextEditor::lookAndFeelChanged()
 {
     caret.reset();
     recreateCaret();
-    repaint();
 }
 
 void TextEditor::parentHierarchyChanged()
@@ -1810,20 +1816,20 @@ void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
 
     if (passwordCharacter == 0)
     {
-        m.addItem (StandardApplicationCommandIDs::cut,   TRANS("Cut"), writable);
-        m.addItem (StandardApplicationCommandIDs::copy,  TRANS("Copy"), ! selection.isEmpty());
+        m.addItem (StandardApplicationCommandIDs::cut,   TRANS ("Cut"), writable);
+        m.addItem (StandardApplicationCommandIDs::copy,  TRANS ("Copy"), ! selection.isEmpty());
     }
 
-    m.addItem (StandardApplicationCommandIDs::paste,     TRANS("Paste"), writable);
-    m.addItem (StandardApplicationCommandIDs::del,       TRANS("Delete"), writable);
+    m.addItem (StandardApplicationCommandIDs::paste,     TRANS ("Paste"), writable);
+    m.addItem (StandardApplicationCommandIDs::del,       TRANS ("Delete"), writable);
     m.addSeparator();
-    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS("Select All"));
+    m.addItem (StandardApplicationCommandIDs::selectAll, TRANS ("Select All"));
     m.addSeparator();
 
     if (getUndoManager() != nullptr)
     {
-        m.addItem (StandardApplicationCommandIDs::undo, TRANS("Undo"), undoManager.canUndo());
-        m.addItem (StandardApplicationCommandIDs::redo, TRANS("Redo"), undoManager.canRedo());
+        m.addItem (StandardApplicationCommandIDs::undo, TRANS ("Undo"), undoManager.canUndo());
+        m.addItem (StandardApplicationCommandIDs::redo, TRANS ("Redo"), undoManager.canRedo());
     }
 }
 
@@ -2074,7 +2080,7 @@ bool TextEditor::moveCaretToTop (bool selecting)
 bool TextEditor::moveCaretToStartOfLine (bool selecting)
 {
     const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
-    return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getY()), selecting);
+    return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getCentreY()), selecting);
 }
 
 bool TextEditor::moveCaretToEnd (bool selecting)
@@ -2085,7 +2091,7 @@ bool TextEditor::moveCaretToEnd (bool selecting)
 bool TextEditor::moveCaretToEndOfLine (bool selecting)
 {
     const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
-    return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()), selecting);
+    return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getCentreY()), selecting);
 }
 
 bool TextEditor::deleteBackwards (bool moveInWholeWordSteps)
@@ -2392,7 +2398,7 @@ void TextEditor::reinsert (int insertIndex, const OwnedArray<UniformTextSection>
         if (insertIndex == index)
         {
             for (int j = sectionsToInsert.size(); --j >= 0;)
-                sections.insert (i, new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
+                sections.insert (i, new UniformTextSection (*sectionsToInsert.getUnchecked (j)));
 
             break;
         }
@@ -2402,7 +2408,7 @@ void TextEditor::reinsert (int insertIndex, const OwnedArray<UniformTextSection>
             splitSection (i, insertIndex - index);
 
             for (int j = sectionsToInsert.size(); --j >= 0;)
-                sections.insert (i + 1, new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
+                sections.insert (i + 1, new UniformTextSection (*sectionsToInsert.getUnchecked (j)));
 
             break;
         }
@@ -2427,7 +2433,7 @@ void TextEditor::remove (Range<int> range, UndoManager* const um, const int care
 
         for (int i = 0; i < sections.size(); ++i)
         {
-            auto nextIndex = index + sections.getUnchecked(i)->getTotalLength();
+            auto nextIndex = index + sections.getUnchecked (i)->getTotalLength();
 
             if (range.getStart() > index && range.getStart() < nextIndex)
             {
@@ -2693,7 +2699,7 @@ void TextEditor::coalesceSimilarSections()
 }
 
 //==============================================================================
-class TextEditor::EditorAccessibilityHandler  : public AccessibilityHandler
+class TextEditor::EditorAccessibilityHandler final : public AccessibilityHandler
 {
 public:
     explicit EditorAccessibilityHandler (TextEditor& textEditorToWrap)
@@ -2708,7 +2714,7 @@ public:
     String getHelp() const override  { return textEditor.getTooltip(); }
 
 private:
-    class TextEditorTextInterface  : public AccessibilityTextInterface
+    class TextEditorTextInterface final : public AccessibilityTextInterface
     {
     public:
         explicit TextEditorTextInterface (TextEditor& editor)
