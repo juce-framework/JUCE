@@ -80,8 +80,23 @@ public:
 
     /** Calls Animator::update() for all registered Animators that are still alive. References to
         deleted Animators are removed.
+
+        Uses Time::getMillisecondCounterHiRes() to calculate the necessary timestamp. Consider using
+        a VBlankAnimatorUpdater instead for using timestamps that are synchronised across all
+        VBlankAnimatorUpdater instances.
     */
     void update();
+
+    /** Calls Animator::update() for all registered Animators that are still alive. References to
+        deleted Animators are removed.
+
+        The supplied timestamp should be monotonically increasing for correct behaviour. Ideally
+        this should be a timestamp supplied by a VBlankAttachment. Consider using the
+        VBlankAnimatorUpdater class, which takes care of supplying the right timestamp.
+
+        @see VBlankAnimatorUpdater
+    */
+    void update (double timestampMs);
 
 private:
     struct JUCE_API  Entry

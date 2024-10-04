@@ -63,6 +63,11 @@ void AnimatorUpdater::removeAnimator (const Animator& animator)
 
 void AnimatorUpdater::update()
 {
+    update (Time::getMillisecondCounterHiRes());
+}
+
+void AnimatorUpdater::update (double timestampMs)
+{
     if (reentrancyGuard)
     {
         // If this is hit, one of the animators is trying to update itself
@@ -73,8 +78,6 @@ void AnimatorUpdater::update()
     }
 
     const ScopedValueSetter setter { reentrancyGuard, true };
-
-    const auto timestampMs = Time::getMillisecondCounterHiRes();
 
     for (currentIterator = animators.begin(); currentIterator != animators.end();)
     {

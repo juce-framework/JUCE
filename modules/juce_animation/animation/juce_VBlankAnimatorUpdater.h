@@ -46,7 +46,11 @@ public:
     /** Constructs a VBlankAnimatorUpdater that is synchronised to the refresh rate of the monitor
         that the provided Component is being displayed on.
     */
-    explicit VBlankAnimatorUpdater (Component* c) : vBlankAttachment (c, [this] { update(); })
+    explicit VBlankAnimatorUpdater (Component* c)
+        : vBlankAttachment (c, [this] (double timestampSec)
+                               {
+                                   update (timestampSec * 1000.0);
+                               })
     {
     }
 
