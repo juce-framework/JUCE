@@ -234,17 +234,17 @@ static auto createFittedText (const Font& f,
                               float height,
                               Justification layout,
                               int maximumLines,
-                              float minimumHorizontalScale,
+                              float minimumRelativeHorizontalScale,
                               ShapedText::Options baseOptions = {})
 {
     if (! layout.testFlags (Justification::bottom | Justification::top))
         layout = layout.getOnlyHorizontalFlags() | Justification::verticallyCentred;
 
-    if (approximatelyEqual (minimumHorizontalScale, 0.0f))
-        minimumHorizontalScale = Font::getDefaultMinimumHorizontalScaleFactor();
+    if (approximatelyEqual (minimumRelativeHorizontalScale, 0.0f))
+        minimumRelativeHorizontalScale = Font::getDefaultMinimumHorizontalScaleFactor();
 
     // doesn't make much sense if this is outside a sensible range of 0.5 to 1.0
-    jassert (minimumHorizontalScale > 0 && minimumHorizontalScale <= 1.0f);
+    jassert (0 < minimumRelativeHorizontalScale && minimumRelativeHorizontalScale <= 1.0f);
 
     if (text.containsAnyOf ("\r\n"))
     {
@@ -278,11 +278,13 @@ static auto createFittedText (const Font& f,
             return st;
 
         // If we can fit the entire line, squash by just enough and insert
-        if (requiredWidths.front() * minimumHorizontalScale < width)
+        if (requiredWidths.front() * minimumRelativeHorizontalScale < width)
         {
+            const auto requiredRelativeScale = width / (requiredWidths.front() + widthFittingTolerance);
+
             ShapedText squashed { trimmed,
                                   baseOptions
-                                      .withFont (f.withHorizontalScale (width / (requiredWidths.front() + widthFittingTolerance)))
+                                      .withFont (f.withHorizontalScale (f.getHorizontalScale() * requiredRelativeScale))
                                       .withMaxWidth (width)
                                       .withHeight (height)
                                       .withJustification (layout)
@@ -291,6 +293,8 @@ static auto createFittedText (const Font& f,
             return squashed;
         }
     }
+
+    const auto minimumHorizontalScale = minimumRelativeHorizontalScale * f.getHorizontalScale();
 
     if (maximumLines <= 1)
     {
