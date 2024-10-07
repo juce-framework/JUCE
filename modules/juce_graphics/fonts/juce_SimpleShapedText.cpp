@@ -1035,7 +1035,7 @@ void SimpleShapedText::shape (const String& data,
         ConsumableGlyphs glyphsToConsume { data, range, shapingParams };
 
         const auto appendingToFirstLine = [&] { return lineNumbers.isEmpty(); };
-        const auto appendingToLastLine  = [&] { return (int64) lineNumbers.size() == options.getMaxNumLines() - 1; };
+        const auto appendingToBeforeLastLine  = [&] { return (int64) lineNumbers.size() < options.getMaxNumLines() - 1; };
 
         while (! glyphsToConsume.isEmpty())
         {
@@ -1060,7 +1060,7 @@ void SimpleShapedText::shape (const String& data,
             static constexpr auto floatMax = std::numeric_limits<float>::max();
 
             for (auto breakBefore = softBreakIterator.next();
-                 breakBefore.has_value() && (appendingToFirstLine() || ! appendingToLastLine());
+                 breakBefore.has_value() && (appendingToFirstLine() || appendingToBeforeLastLine());
                  breakBefore = softBreakIterator.next())
             {
                 if (auto safeAdvance = glyphsToConsume.getAdvanceXUpToBreakPointIfSafe (*breakBefore,
@@ -1218,9 +1218,11 @@ void SimpleShapedText::shape (const String& data,
 
                     while (! glyphsToAdd.glyphs.empty())
                     {
+                        const auto appendingToLastLine = ! appendingToBeforeLastLine();
+
                         glyphsToAdd = addGlyphsToLine (glyphsToAdd,
-                                                       (appendingToLastLine() || ! options.getAllowBreakingInsideWord()) ? CanAddGlyphsBeyondLineLimits::yes
-                                                                                                                         : CanAddGlyphsBeyondLineLimits::no);
+                                                       (appendingToLastLine || ! options.getAllowBreakingInsideWord()) ? CanAddGlyphsBeyondLineLimits::yes
+                                                                                                                       : CanAddGlyphsBeyondLineLimits::no);
 
                         if (! glyphsToAdd.glyphs.empty())
                             commitLine (bidiParagraph);
