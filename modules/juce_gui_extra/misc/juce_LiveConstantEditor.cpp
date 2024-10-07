@@ -45,7 +45,7 @@ public:
     AllComponentRepainter()  {}
     ~AllComponentRepainter() override  { clearSingletonInstance(); }
 
-    JUCE_DECLARE_SINGLETON (AllComponentRepainter, false)
+    JUCE_DECLARE_SINGLETON_INLINE (AllComponentRepainter, false)
 
     void trigger()
     {
@@ -93,9 +93,6 @@ private:
         }
     }
 };
-
-JUCE_IMPLEMENT_SINGLETON (AllComponentRepainter)
-JUCE_IMPLEMENT_SINGLETON (ValueList)
 
 //==============================================================================
 int64 parseInt (String s)

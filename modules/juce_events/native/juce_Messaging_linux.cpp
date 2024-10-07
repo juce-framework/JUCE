@@ -85,7 +85,7 @@ public:
     }
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON (InternalMessageQueue, false)
+    JUCE_DECLARE_SINGLETON_INLINE (InternalMessageQueue, false)
 
 private:
     CriticalSection lock;
@@ -114,8 +114,6 @@ private:
         return queue.removeAndReturn (0);
     }
 };
-
-JUCE_IMPLEMENT_SINGLETON (InternalMessageQueue)
 
 //==============================================================================
 /*
@@ -230,7 +228,7 @@ public:
     void removeListener (LinuxEventLoopInternal::Listener& listener)         { listeners.remove (&listener); }
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON (InternalRunLoop, false)
+    JUCE_DECLARE_SINGLETON_INLINE (InternalRunLoop, false)
 
 private:
     using SharedCallback = std::shared_ptr<std::function<void()>>;
@@ -281,8 +279,6 @@ private:
 
     ListenerList<LinuxEventLoopInternal::Listener> listeners;
 };
-
-JUCE_IMPLEMENT_SINGLETON (InternalRunLoop)
 
 //==============================================================================
 namespace LinuxErrorHandling

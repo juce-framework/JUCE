@@ -85,7 +85,7 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (ModalComponentManager)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (ModalComponentManager)
    #endif
 
     //==============================================================================

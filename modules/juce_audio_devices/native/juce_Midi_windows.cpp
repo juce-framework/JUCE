@@ -1879,7 +1879,7 @@ struct MidiService final : public DeletedAtShutdown
         return *getInstance()->internal.get();
     }
 
-    JUCE_DECLARE_SINGLETON (MidiService, false)
+    JUCE_DECLARE_SINGLETON_INLINE (MidiService, false)
 
 private:
     std::unique_ptr<MidiServiceType> internal;
@@ -1888,8 +1888,6 @@ private:
         MidiDeviceListConnectionBroadcaster::get().notify();
     } };
 };
-
-JUCE_IMPLEMENT_SINGLETON (MidiService)
 
 //==============================================================================
 static int findDefaultDeviceIndex (const Array<MidiDeviceInfo>& available, const MidiDeviceInfo& defaultDevice)

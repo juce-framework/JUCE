@@ -85,15 +85,12 @@ namespace
                                   : configureArrangement (args);
         }
 
-        JUCE_DECLARE_SINGLETON (GlyphArrangementCache<ArrangementArgs>, false)
+        JUCE_DECLARE_SINGLETON_INLINE (GlyphArrangementCache<ArrangementArgs>, false)
 
     private:
         LruCache<ArrangementArgs, ConfiguredArrangement> cache;
         CriticalSection lock;
     };
-
-    template <typename ArrangementArgs>
-    juce::SingletonHolder<GlyphArrangementCache<ArrangementArgs>, juce::CriticalSection, false> GlyphArrangementCache<ArrangementArgs>::singletonHolder;
 
     //==============================================================================
     template <typename Type>

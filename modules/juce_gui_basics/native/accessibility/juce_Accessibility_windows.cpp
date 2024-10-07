@@ -263,10 +263,8 @@ struct SpVoiceWrapper final : public DeletedAtShutdown
 
     ComSmartPtr<ISpVoice> voice;
 
-    JUCE_DECLARE_SINGLETON (SpVoiceWrapper, false)
+    JUCE_DECLARE_SINGLETON_INLINE (SpVoiceWrapper, false)
 };
-
-JUCE_IMPLEMENT_SINGLETON (SpVoiceWrapper)
 
 
 void AccessibilityHandler::postAnnouncement (const String& announcementString, AnnouncementPriority priority)
@@ -328,8 +326,6 @@ namespace WindowsAccessibility
     }
 }
 
-
-JUCE_IMPLEMENT_SINGLETON (WindowsUIAWrapper)
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 

@@ -65,7 +65,7 @@ namespace Android
         Handler() : nativeHandler (LocalRef<jobject> (getEnv()->NewObject (AndroidHandler, AndroidHandler.constructor))) {}
         ~Handler() { clearSingletonInstance(); }
 
-        JUCE_DECLARE_SINGLETON (Handler, false)
+        JUCE_DECLARE_SINGLETON_INLINE (Handler, false)
 
         bool post (jobject runnable)
         {
@@ -74,14 +74,12 @@ namespace Android
 
         GlobalRef nativeHandler;
     };
-
-    JUCE_IMPLEMENT_SINGLETON (Handler)
 }
 
 //==============================================================================
 struct AndroidMessageQueue final : private Android::Runnable
 {
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED (AndroidMessageQueue, true)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_INLINE (AndroidMessageQueue, true)
 
     AndroidMessageQueue()
         : self (CreateJavaInterface (this, "java/lang/Runnable"))
@@ -123,8 +121,6 @@ private:
     ReferenceCountedArray<MessageManager::MessageBase, CriticalSection> queue;
     Android::Handler handler;
 };
-
-JUCE_IMPLEMENT_SINGLETON (AndroidMessageQueue)
 
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation() { AndroidMessageQueue::getInstance(); }

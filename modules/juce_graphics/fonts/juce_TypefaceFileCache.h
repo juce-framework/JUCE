@@ -61,13 +61,11 @@ public:
         return cachedTypefaces.get (key, std::forward<Fn> (getTypeface));
     }
 
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (TypefaceFileCache)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (TypefaceFileCache)
 
 private:
     LruCache<TypefaceFileAndIndex, Typeface::Ptr> cachedTypefaces;
 };
-
-JUCE_IMPLEMENT_SINGLETON (TypefaceFileCache)
 
 } // namespace juce
 

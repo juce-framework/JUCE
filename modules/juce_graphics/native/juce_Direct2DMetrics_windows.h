@@ -260,7 +260,7 @@ public:
 
     static constexpr int magicNumber = 0xd2d1;
 
-    JUCE_DECLARE_SINGLETON (Direct2DMetricsHub, false)
+    JUCE_DECLARE_SINGLETON_INLINE (Direct2DMetricsHub, false)
 
 private:
     static String getProcessString() noexcept;

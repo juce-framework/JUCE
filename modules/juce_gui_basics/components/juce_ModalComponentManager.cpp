@@ -108,9 +108,6 @@ ModalComponentManager::~ModalComponentManager()
     clearSingletonInstance();
 }
 
-JUCE_IMPLEMENT_SINGLETON (ModalComponentManager)
-
-
 //==============================================================================
 void ModalComponentManager::startModal (Key, Component* component, bool autoDelete)
 {

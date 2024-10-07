@@ -261,7 +261,7 @@ public:
     bool isParentWindowOf (::Window, ::Window possibleChild) const;
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON (XWindowSystem, false)
+    JUCE_DECLARE_SINGLETON_INLINE (XWindowSystem, false)
 
 private:
     XWindowSystem();

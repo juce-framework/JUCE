@@ -265,7 +265,7 @@ public:
                        threads.end());
     }
 
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED (VBlankDispatcher, false)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_INLINE (VBlankDispatcher, false)
 
 private:
     //==============================================================================
@@ -303,7 +303,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VBlankDispatcher)
     JUCE_DECLARE_NON_MOVEABLE (VBlankDispatcher)
 };
-
-JUCE_IMPLEMENT_SINGLETON (VBlankDispatcher)
 
 } // namespace juce

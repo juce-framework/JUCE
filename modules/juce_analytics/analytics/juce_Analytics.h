@@ -104,7 +104,7 @@ public:
     void setSuspended (bool shouldBeSuspended);
 
    #ifndef DOXYGEN
-    JUCE_DECLARE_SINGLETON (Analytics, false)
+    JUCE_DECLARE_SINGLETON_INLINE (Analytics, false)
    #endif
 
 private:

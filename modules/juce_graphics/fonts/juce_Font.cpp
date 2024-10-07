@@ -63,7 +63,7 @@ public:
         clearSingletonInstance();
     }
 
-    JUCE_DECLARE_SINGLETON (TypefaceCache, false)
+    JUCE_DECLARE_SINGLETON_INLINE (TypefaceCache, false)
 
     void setSize (const int numToCache)
     {
@@ -169,8 +169,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TypefaceCache)
 };
-
-JUCE_IMPLEMENT_SINGLETON (TypefaceCache)
 
 void Typeface::setTypefaceCacheSize (int numFontsToCache)
 {

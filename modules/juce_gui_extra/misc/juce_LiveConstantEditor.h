@@ -203,7 +203,7 @@ namespace juce::LiveConstantEditor
         ValueList();
         ~ValueList() override;
 
-        JUCE_DECLARE_SINGLETON (ValueList, false)
+        JUCE_DECLARE_SINGLETON_INLINE (ValueList, false)
 
         template <typename Type>
         LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)

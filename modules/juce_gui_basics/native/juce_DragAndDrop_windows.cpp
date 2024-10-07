@@ -311,14 +311,12 @@ namespace DragAndDropHelpers
             clearSingletonInstance();
         }
 
-        JUCE_DECLARE_SINGLETON_SINGLETHREADED (ThreadPoolHolder, false)
+        JUCE_DECLARE_SINGLETON_SINGLETHREADED_INLINE (ThreadPoolHolder, false)
 
         // We need to make sure we don't do simultaneous text and file drag and drops,
         // so use a pool that can only run a single job.
         ThreadPool pool { ThreadPoolOptions{}.withNumberOfThreads (1) };
     };
-
-    JUCE_IMPLEMENT_SINGLETON (ThreadPoolHolder)
 }
 
 //==============================================================================
