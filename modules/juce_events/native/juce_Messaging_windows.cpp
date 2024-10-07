@@ -63,7 +63,7 @@ public:
         clearSingletonInstance();
     }
 
-    JUCE_DECLARE_SINGLETON (InternalMessageQueue, false)
+    JUCE_DECLARE_SINGLETON_INLINE (InternalMessageQueue, false)
 
     //==============================================================================
     void broadcastMessage (const String& message)
@@ -259,8 +259,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalMessageQueue)
 };
-
-JUCE_IMPLEMENT_SINGLETON (InternalMessageQueue)
 
 const TCHAR InternalMessageQueue::messageWindowName[] = _T("JUCEWindow");
 

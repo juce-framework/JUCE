@@ -596,7 +596,7 @@ public:
    #endif
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON (X11Symbols, false)
+    JUCE_DECLARE_SINGLETON_INLINE (X11Symbols, false)
 
 private:
     X11Symbols() = default;

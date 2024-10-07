@@ -57,7 +57,7 @@ namespace juce
     {
     public:
        #ifndef DOXYGEN
-        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (ChildProcessManager)
+        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (ChildProcessManager)
        #endif
 
         /** Creates a new ChildProcess and starts it with the provided arguments.

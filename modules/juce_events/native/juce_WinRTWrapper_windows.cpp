@@ -88,7 +88,4 @@ String WinRTWrapper::hStringToString (HSTRING hstr)
     return {};
 }
 
-
-JUCE_IMPLEMENT_SINGLETON (WinRTWrapper)
-
 }

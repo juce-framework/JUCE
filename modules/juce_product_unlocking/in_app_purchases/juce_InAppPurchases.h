@@ -50,7 +50,7 @@ class JUCE_API  InAppPurchases  : private DeletedAtShutdown
 {
 public:
     #ifndef DOXYGEN
-     JUCE_DECLARE_SINGLETON (InAppPurchases, false)
+     JUCE_DECLARE_SINGLETON_INLINE (InAppPurchases, false)
     #endif
 
     //==============================================================================

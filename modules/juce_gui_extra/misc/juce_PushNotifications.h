@@ -55,7 +55,7 @@ class JUCE_API PushNotifications    : private DeletedAtShutdown
 {
 public:
    #ifndef DOXYGEN
-    JUCE_DECLARE_SINGLETON (PushNotifications, false)
+    JUCE_DECLARE_SINGLETON_INLINE (PushNotifications, false)
    #endif
 
     //==============================================================================

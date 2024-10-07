@@ -81,8 +81,6 @@ PushNotifications::Notification::Notification (const Notification& other)
 }
 
 //==============================================================================
-JUCE_IMPLEMENT_SINGLETON (PushNotifications)
-
 PushNotifications::PushNotifications()
   #if JUCE_PUSH_NOTIFICATIONS
     : pimpl (new Pimpl (*this))

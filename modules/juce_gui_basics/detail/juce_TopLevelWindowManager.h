@@ -47,7 +47,7 @@ public:
         clearSingletonInstance();
     }
 
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (TopLevelWindowManager)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (TopLevelWindowManager)
 
     static void checkCurrentlyFocusedTopLevelWindow()
     {
@@ -139,7 +139,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (TopLevelWindowManager)
 };
-
-JUCE_IMPLEMENT_SINGLETON (TopLevelWindowManager)
 
 } // namespace juce::detail

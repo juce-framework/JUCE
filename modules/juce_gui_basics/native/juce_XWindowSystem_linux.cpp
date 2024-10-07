@@ -3999,8 +3999,6 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
 }
 
 //==============================================================================
-JUCE_IMPLEMENT_SINGLETON (XWindowSystem)
-
 Image createSnapshotOfNativeWindow (void* window)
 {
     ::Window root;

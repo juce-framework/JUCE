@@ -35,10 +35,6 @@
 namespace juce
 {
 
-#if JUCE_DIRECT2D_METRICS
-JUCE_IMPLEMENT_SINGLETON (Direct2DMetricsHub)
-#endif
-
 struct ScopedBlendCopy
 {
     explicit ScopedBlendCopy (ComSmartPtr<ID2D1DeviceContext1> c)

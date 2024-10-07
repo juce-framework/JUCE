@@ -424,11 +424,9 @@ struct DisplaySettingsChangeCallback final : private DeletedAtShutdown
 
     std::function<void()> forceDisplayUpdate;
 
-    JUCE_DECLARE_SINGLETON (DisplaySettingsChangeCallback, false)
+    JUCE_DECLARE_SINGLETON_INLINE (DisplaySettingsChangeCallback, false)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DisplaySettingsChangeCallback)
 };
-
-JUCE_IMPLEMENT_SINGLETON (DisplaySettingsChangeCallback)
 
 static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
 {

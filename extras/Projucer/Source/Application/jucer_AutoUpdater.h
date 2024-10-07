@@ -48,7 +48,7 @@ public:
     void checkForNewVersion (bool isBackgroundCheck);
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (LatestVersionCheckerAndUpdater)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (LatestVersionCheckerAndUpdater)
 
 private:
     //==============================================================================

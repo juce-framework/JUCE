@@ -109,7 +109,7 @@ public:
     }
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (WindowsUIAWrapper)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (WindowsUIAWrapper)
 
 private:
     //==============================================================================

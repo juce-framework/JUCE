@@ -36,8 +36,6 @@ namespace juce
 {
 
 //==============================================================================
-JUCE_IMPLEMENT_SINGLETON (InAppPurchases)
-
 InAppPurchases::InAppPurchases()
    #if JUCE_ANDROID || JUCE_IOS || JUCE_MAC
     : pimpl (new Pimpl (*this))

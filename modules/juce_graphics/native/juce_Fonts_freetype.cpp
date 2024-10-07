@@ -316,7 +316,7 @@ public:
             faces.erase (iter);
     }
 
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (FTTypefaceList)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (FTTypefaceList)
 
     FTLibWrapper::Ptr getLibrary() const { return library; }
 
@@ -372,8 +372,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTTypefaceList)
 };
-
-JUCE_IMPLEMENT_SINGLETON (FTTypefaceList)
 
 //==============================================================================
 class FreeTypeTypeface final : public Typeface

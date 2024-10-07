@@ -591,6 +591,3 @@ void LatestVersionCheckerAndUpdater::downloadAndInstall (const VersionInfo::Asse
         }
     }));
 }
-
-//==============================================================================
-JUCE_IMPLEMENT_SINGLETON (LatestVersionCheckerAndUpdater)

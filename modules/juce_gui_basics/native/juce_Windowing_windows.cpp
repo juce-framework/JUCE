@@ -2290,7 +2290,7 @@ private:
 
         LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) (pointer_sized_uint) atom; }
 
-        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (WindowClassHolder)
+        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (WindowClassHolder)
 
     private:
         ATOM atom;
@@ -5555,8 +5555,6 @@ JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& compo
 
     return nullptr;
 }
-
-JUCE_IMPLEMENT_SINGLETON (HWNDComponentPeer::WindowClassHolder)
 
 //==============================================================================
 bool KeyPress::isKeyCurrentlyDown (const int keyCode)

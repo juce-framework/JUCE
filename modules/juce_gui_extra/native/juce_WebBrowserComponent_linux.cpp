@@ -255,7 +255,7 @@ public:
                                          (gpointer), void)
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (WebKitSymbols)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL_INLINE (WebKitSymbols)
 
 private:
     WebKitSymbols() = default;
@@ -416,8 +416,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebKitSymbols)
 };
-
-JUCE_IMPLEMENT_SINGLETON (WebKitSymbols)
 
 //==============================================================================
 extern "C" int juce_gtkWebkitMain (int argc, const char* const* argv);
