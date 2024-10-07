@@ -2373,7 +2373,8 @@ public:
         {
             String s (createRandomWideCharString (r));
 
-            typename CharPointerType::CharType buffer [300];
+            using CharType = typename CharPointerType::CharType;
+            CharType buffer[300];
 
             memset (buffer, 0xff, sizeof (buffer));
             CharPointerType (buffer).writeAll (s.toUTF32());
@@ -2387,7 +2388,10 @@ public:
             CharPointerType (buffer).writeAll (s.toUTF8());
             test.expectEquals (String (CharPointerType (buffer)), s);
 
-            test.expect (CharPointerType::isValidString (buffer, (int) strlen ((const char*) buffer)));
+            const auto nullTerminator = std::find (buffer, buffer + std::size (buffer), (CharType) 0);
+            const auto numValidBytes = (int) std::distance (buffer, nullTerminator) * (int) sizeof (CharType);
+
+            test.expect (CharPointerType::isValidString (buffer, numValidBytes));
         }
     };
 
