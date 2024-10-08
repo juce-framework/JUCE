@@ -1590,6 +1590,13 @@ public:
     bool launchProject() override
     {
        #if JUCE_WINDOWS
+        // Don't launch if already open
+        if (getSLNFile().getSiblingFile (".vs").findChildFiles (File::findFiles, true, "*.opendb", File::FollowSymlinks::no).size() > 0)
+            return false;
+
+        if (launchViaVSWhere())
+            return true;
+
         return getSLNFile().startAsProcess();
        #else
         return false;
@@ -1702,6 +1709,41 @@ private:
         return getVisualStudioVersion() < 10  // (VS10 automatically adds escape characters to the quotes for this definition)
                                           ? CppTokeniserFunctions::addEscapeChars (rebasedPath.quoted())
                                           : CppTokeniserFunctions::addEscapeChars (rebasedPath).quoted();
+    }
+
+    bool launchViaVSWhere()
+    {
+        auto vswhere = juce::File::getSpecialLocation (juce::File::globalApplicationsDirectoryX86).getChildFile ("Microsoft Visual Studio\\Installer\\vswhere.exe");
+        if (! vswhere.existsAsFile())
+            return false;
+
+        juce::ChildProcess proc;
+        proc.start ({vswhere.getFullPathName(), "-format", "json"});
+        proc.waitForProcessToFinish (1000);
+        
+        auto json = JSON::parse (proc.readAllProcessOutput());
+        if (! json.isArray())
+            return false;
+
+        for (auto ver : *json.getArray())
+        {
+            if (! ver.isObject())
+                continue;
+
+            auto catalog = ver.getProperty ("catalog", {});
+            if (catalog.isObject())
+            {
+                if (catalog.getProperty ("buildVersion", {}).toString().startsWith (juce::String (getVisualStudioVersion())))
+                {
+                    auto vs = File (ver.getProperty ("productPath", {}).toString());
+                    if (vs.existsAsFile())
+                        if (vs.startAsProcess (getSLNFile().getFullPathName().quoted()))
+                            return true;
+                }
+            }
+        }
+
+        return false;
     }
 
 protected:
