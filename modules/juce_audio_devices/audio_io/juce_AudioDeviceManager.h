@@ -558,8 +558,6 @@ private:
     void audioDeviceListChanged();
     void midiDeviceListChanged();
 
-    String restartDevice (int blockSizeToUse, double sampleRateToUse,
-                          const BigInteger& ins, const BigInteger& outs);
     void stopDevice();
 
     void updateXml();
