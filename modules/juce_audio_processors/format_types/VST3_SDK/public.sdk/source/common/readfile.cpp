@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -40,11 +40,14 @@
 #include "pluginterfaces/base/fplatform.h"
 
 #if SMTG_OS_WINDOWS
-#include "public.sdk/source/vst/utility/stringconvert.h"
+#include "commonstringconvert.h"
 #endif
 
 #include <fstream>
+
+#if !SMTG_CPP17
 #include <sstream>
+#endif
 
 namespace Steinberg {
 
@@ -52,7 +55,7 @@ namespace Steinberg {
 std::string readFile (const std::string& path)
 {
 #if SMTG_OS_WINDOWS
-	auto u16Path = VST3::StringConvert::convert (path);
+	auto u16Path = StringConvert::convert (path);
 	std::ifstream file (reinterpret_cast<const wchar_t*> (u16Path.data ()),
 	                    std::ios_base::in | std::ios_base::binary);
 #else
@@ -74,7 +77,7 @@ std::string readFile (const std::string& path)
 	std::stringstream buffer;
 	buffer << file.rdbuf ();
 	return buffer.str ();
-#endif
+#endif // SMTG_CPP17
 }
 
 //------------------------------------------------------------------------

@@ -438,35 +438,32 @@ public:
     /** Returns true if the given unicode character can be represented in this encoding. */
     static bool canRepresent (juce_wchar character) noexcept
     {
-        auto n = (uint32) character;
-        return n < 0x10ffff && (n < 0xd800 || n > 0xdfff);
+        return CharacterFunctions::isNonSurrogateCodePoint (character);
     }
 
     /** Returns true if this data contains a valid string in this encoding. */
-    static bool isValidString (const CharType* dataToTest, int maxBytesToRead)
+    static bool isValidString (const CharType* codeUnits, int maxBytesToRead)
     {
-        maxBytesToRead /= (int) sizeof (CharType);
+        const auto maxCodeUnitsToRead = (size_t) maxBytesToRead / sizeof (CharType);
 
-        while (--maxBytesToRead >= 0 && *dataToTest != 0)
+        for (size_t codeUnitIndex = 0; codeUnitIndex < maxCodeUnitsToRead; ++codeUnitIndex)
         {
-            auto n = (uint32) (uint16) *dataToTest++;
+            const auto c = toCodePoint (codeUnits[codeUnitIndex]);
 
-            if (n >= 0xd800)
-            {
-                if (n > 0x10ffff)
-                    return false;
+            if (c == 0)
+                return true;
 
-                if (n <= 0xdfff)
-                {
-                    if (n > 0xdc00)
-                        return false;
+            if (canRepresent (c))
+                continue;
 
-                    auto nextChar = (uint32) (uint16) *dataToTest++;
+            if (! CharacterFunctions::isHighSurrogate (c))
+                return false;
 
-                    if (nextChar < 0xdc00 || nextChar > 0xdfff)
-                        return false;
-                }
-            }
+            if (++codeUnitIndex >= maxCodeUnitsToRead)
+                return false;
+
+            if (! CharacterFunctions::isLowSurrogate (toCodePoint (codeUnits[codeUnitIndex])))
+                return false;
         }
 
         return true;
@@ -526,6 +523,16 @@ private:
             ++n;
 
         return n;
+    }
+
+    static inline uint32 toUint32 (CharType c) noexcept
+    {
+        return (uint32) (uint16) c;
+    }
+
+    static inline juce_wchar toCodePoint (CharType c) noexcept
+    {
+        return (juce_wchar) toUint32 (c);
     }
 };
 

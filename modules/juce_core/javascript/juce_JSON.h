@@ -107,6 +107,12 @@ public:
         multiLine,      ///< Newlines and spaces will be included in the output, in order to make it easy to read for humans
     };
 
+    enum class Encoding
+    {
+        utf8,           ///< Use UTF-8 avoiding escape sequences for non-ASCII characters, this is the default behaviour
+        ascii,          ///< Use ASCII characters only, unicode characters will be encoded using UTF-16 escape sequences
+    };
+
     /**
         Allows formatting var objects as JSON with various configurable options.
     */
@@ -114,17 +120,34 @@ public:
     {
     public:
         /** Returns a copy of this Formatter with the specified spacing. */
-        FormatOptions withSpacing (Spacing x)      const { return withMember (*this, &FormatOptions::spacing, x); }
+        FormatOptions withSpacing (Spacing x) const
+        {
+            return withMember (*this, &FormatOptions::spacing, x);
+        }
 
         /** Returns a copy of this Formatter with the specified maximum number of decimal places.
             This option determines the precision of floating point numbers in scientific notation.
         */
-        FormatOptions withMaxDecimalPlaces (int x) const { return withMember (*this, &FormatOptions::maxDecimalPlaces, x); }
+        FormatOptions withMaxDecimalPlaces (int x) const
+        {
+            return withMember (*this, &FormatOptions::maxDecimalPlaces, x);
+        }
 
         /** Returns a copy of this Formatter with the specified indent level.
             This should only be necessary when serialising multiline nested types.
         */
-        FormatOptions withIndentLevel (int x)      const { return withMember (*this, &FormatOptions::indent, x); }
+        FormatOptions withIndentLevel (int x) const
+        {
+            return withMember (*this, &FormatOptions::indent, x);
+        }
+
+        /** Returns a copy of this Formatter with the specified encoding.
+            Use this to force a JSON to be ASCII characters only.
+        */
+        FormatOptions withEncoding (Encoding x) const
+        {
+            return withMember (*this, &FormatOptions::encoding, x);
+        }
 
         /** Returns the spacing used by this Formatter. */
         Spacing getSpacing()      const { return spacing; }
@@ -135,8 +158,12 @@ public:
         /** Returns the indent level of this Formatter. */
         int getIndentLevel()      const { return indent; }
 
+        /** Returns the encoding of this Formatter. */
+        Encoding getEncoding()    const { return encoding; }
+
     private:
         Spacing spacing = Spacing::multiLine;
+        Encoding encoding = Encoding::utf8;
         int maxDecimalPlaces = 15;
         int indent = 0;
     };

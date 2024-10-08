@@ -263,7 +263,7 @@ void AudioPluginInstance::addHostedParameterGroup (std::unique_ptr<AudioProcesso
     // garbage and your host will crash and burn
     for (auto* param : group->getParameters (true))
     {
-        jassert (dynamic_cast<HostedParameter*> (param) != nullptr);
+        jassertquiet (dynamic_cast<HostedParameter*> (param) != nullptr);
     }
    #endif
 
@@ -277,7 +277,7 @@ void AudioPluginInstance::setHostedParameterTree (AudioProcessorParameterGroup g
     // garbage and your host will crash and burn
     for (auto* param : group.getParameters (true))
     {
-        jassert (dynamic_cast<HostedParameter*> (param) != nullptr);
+        jassertquiet (dynamic_cast<HostedParameter*> (param) != nullptr);
     }
    #endif
 

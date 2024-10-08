@@ -207,9 +207,9 @@ function(_juce_create_embedded_linux_subprocess_target output_target_name target
     get_target_property(generated_sources_directory ${target} JUCE_GENERATED_SOURCES_DIRECTORY)
 
     if(generated_sources_directory)
-        set(juce_linux_subprocess_helper_binary_dir "${generated_sources_directory}")
+        set(juce_linux_subprocess_helper_binary_dir "${generated_sources_directory}/$<CONFIG>/")
     else()
-        set(juce_linux_subprocess_helper_binary_dir "${CMAKE_CURRENT_BINARY_DIR}/juce_LinuxSubprocessHelper")
+        set(juce_linux_subprocess_helper_binary_dir "${CMAKE_CURRENT_BINARY_DIR}/juce_LinuxSubprocessHelper/$<CONFIG>/")
     endif()
 
     set(binary_header_file  "${juce_linux_subprocess_helper_binary_dir}/juce_LinuxSubprocessHelperBinaryData.h")
@@ -689,7 +689,10 @@ function(_juce_add_xcode_entitlements source_target dest_target)
 
     _juce_execute_juceaide(entitlements "${juce_kind_string}" "${input_info_file}" "${entitlements_file}")
     set_target_properties(${dest_target} PROPERTIES
-        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${entitlements_file}")
+        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS
+        "${entitlements_file}"
+        XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME
+        "$<TARGET_PROPERTY:${source_target},JUCE_HARDENED_RUNTIME_ENABLED>")
 endfunction()
 
 function(_juce_configure_bundle source_target dest_target)
@@ -759,8 +762,6 @@ function(_juce_configure_bundle source_target dest_target)
     endif()
 
     set_target_properties(${dest_target} PROPERTIES
-        XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME
-            "$<TARGET_PROPERTY:${source_target},JUCE_HARDENED_RUNTIME_ENABLED>"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY
             "$<TARGET_PROPERTY:${source_target},JUCE_TARGETED_DEVICE_FAMILY>")
 
@@ -2106,8 +2107,10 @@ function(juce_add_console_app target)
     _juce_initialise_target(${target} ${ARGN})
 
     if(NOT JUCE_ARG__NO_RESOURCERC)
+        set_target_properties(${target} PROPERTIES JUCE_TARGET_KIND_STRING "ConsoleApp")
         _juce_write_configure_time_info(${target})
         _juce_add_resources_rc(${target} ${target})
+        _juce_add_xcode_entitlements(${target} ${target})
     endif()
 endfunction()
 

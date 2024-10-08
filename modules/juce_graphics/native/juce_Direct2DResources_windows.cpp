@@ -332,22 +332,16 @@ public:
         return desc.AdapterLuid;
     }
 
-    static std::optional<Direct2DDeviceResources> create (DxgiAdapter::Ptr adapter)
-    {
-        return create (Direct2DDeviceContext::create (adapter));
-    }
-
     static std::optional<Direct2DDeviceResources> create (ComSmartPtr<ID2D1DeviceContext1> context)
     {
         if (context == nullptr)
             return {};
 
         Direct2DDeviceResources result;
-        result.deviceContext = context;
 
-        if (const auto hr = result.deviceContext->CreateSolidColorBrush (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f),
-                                                                         result.colourBrush.resetAndGetPointerAddress());
-                FAILED (hr))
+        if (const auto hr = context->CreateSolidColorBrush (D2D1::ColorF (0.0f, 0.0f, 0.0f, 1.0f),
+                                                            result.colourBrush.resetAndGetPointerAddress());
+            FAILED (hr))
         {
             jassertfalse;
             return {};
@@ -358,12 +352,6 @@ public:
         return result;
     }
 
-    DxgiAdapter::Ptr findAdapter (const DxgiAdapters& adapters) const
-    {
-        return findAdapter (adapters, deviceContext);
-    }
-
-    ComSmartPtr<ID2D1DeviceContext1> deviceContext;
     ComSmartPtr<ID2D1SolidColorBrush> colourBrush;
     LinearGradientCache linearGradientCache;
     RadialGradientCache radialGradientCache;

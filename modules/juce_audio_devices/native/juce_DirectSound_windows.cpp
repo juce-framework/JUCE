@@ -759,7 +759,7 @@ public:
                          const int outputDeviceIndex_,
                          const int inputDeviceIndex_)
         : AudioIODevice (deviceName, "DirectSound"),
-          Thread ("JUCE DSound"),
+          Thread (SystemStats::getJUCEVersion() + ": DSound"),
           outputDeviceIndex (outputDeviceIndex_),
           inputDeviceIndex (inputDeviceIndex_)
     {

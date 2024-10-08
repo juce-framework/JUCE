@@ -294,6 +294,12 @@ public:
     Rectangle<int> getTitleBarArea() const;
     /** @internal */
     WindowControlKind findControlAtPoint (Point<float>) const override;
+    /** @internal */
+    void windowControlClickedClose() override;
+    /** @internal */
+    void windowControlClickedMinimise() override;
+    /** @internal */
+    void windowControlClickedMaximise() override;
    #endif
 
 private:

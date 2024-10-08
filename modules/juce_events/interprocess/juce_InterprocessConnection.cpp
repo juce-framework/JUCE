@@ -37,7 +37,7 @@ namespace juce
 
 struct InterprocessConnection::ConnectionThread final : public Thread
 {
-    ConnectionThread (InterprocessConnection& c)  : Thread ("JUCE IPC"), owner (c) {}
+    ConnectionThread (InterprocessConnection& c)  : Thread (SystemStats::getJUCEVersion() + ": IPC"), owner (c) {}
     void run() override     { owner.runThread(); }
 
     InterprocessConnection& owner;

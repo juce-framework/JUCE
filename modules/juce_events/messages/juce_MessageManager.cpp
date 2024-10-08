@@ -41,7 +41,7 @@ MessageManager::MessageManager() noexcept
     JUCE_VERSION_ID
 
     if (JUCEApplicationBase::isStandaloneApp())
-        Thread::setCurrentThreadName ("JUCE Message Thread");
+        Thread::setCurrentThreadName (SystemStats::getJUCEVersion() + ": Message Thread");
 }
 
 MessageManager::~MessageManager() noexcept

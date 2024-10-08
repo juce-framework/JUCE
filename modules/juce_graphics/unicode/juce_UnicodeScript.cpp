@@ -104,10 +104,6 @@ enum class TextScript
     vai,
     wancho,
     yi,
-
-    emoji,
-
-    scriptCount
 };
 
 // https://www.unicode.org/reports/tr24/tr24-32.html
@@ -120,25 +116,21 @@ public:
     static void analyseScripts (Span<const UnicodeAnalysisPoint> points, Callback&& callback)
     {
         bool once = false;
-        auto previousBaseTextScript = UnicodeScriptType::common;
+        SBScript previousBaseTextScript = SBScriptZYYY;
 
         for (const auto [i, value] : enumerate (points))
         {
-            const auto& entry = value.data;
-            auto script       = entry.script;
+            auto script = value.getScriptType();
 
             if (! std::exchange (once, true))
             {
-                if (script == UnicodeScriptType::inherited)
-                    script = UnicodeScriptType::common;
+                if (script == SBScriptZINH)
+                    script = SBScriptZYYY;
 
                 previousBaseTextScript = script;
             }
 
-            if (script == UnicodeScriptType::common && entry.emoji == EmojiType::extended)
-                script = UnicodeScriptType::emoji;
-
-            if (script == UnicodeScriptType::common || script == UnicodeScriptType::inherited)
+            if (script == SBScriptZYYY || script == SBScriptZINH)
                 script = previousBaseTextScript;
 
             callback ((int) i, mapTextScript (script));
@@ -149,79 +141,78 @@ public:
 private:
     // The Unicode script spec lists a large number of scripts, some of which are recommended to be ignored.
     // We map them to a script that we support here.
-    static TextScript mapTextScript (UnicodeScriptType type)
+    static TextScript mapTextScript (SBScript type)
     {
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wswitch-enum")
 
         switch (type)
         {
-            case UnicodeScriptType::common:         return TextScript::common;
-            case UnicodeScriptType::emoji:          return TextScript::emoji;
-            case UnicodeScriptType::arabic:         return TextScript::arabic;
-            case UnicodeScriptType::armenian:       return TextScript::armenian;
-            case UnicodeScriptType::bengali:        return TextScript::bengali;
-            case UnicodeScriptType::bopomofo:       return TextScript::bopomofo;
-            case UnicodeScriptType::cyrillic:       return TextScript::cyrillic;
-            case UnicodeScriptType::devanagari:     return TextScript::devanagari;
-            case UnicodeScriptType::ethiopic:       return TextScript::ethiopic;
-            case UnicodeScriptType::georgian:       return TextScript::georgian;
-            case UnicodeScriptType::greek:          return TextScript::greek;
-            case UnicodeScriptType::gujarati:       return TextScript::gujarati;
-            case UnicodeScriptType::gurmukhi:       return TextScript::gurmukhi;
-            case UnicodeScriptType::hangul:         return TextScript::hangul;
-            case UnicodeScriptType::han:            return TextScript::han;
-            case UnicodeScriptType::hebrew:         return TextScript::hebrew;
-            case UnicodeScriptType::hiragana:       return TextScript::hiragana;
-            case UnicodeScriptType::katakana:       return TextScript::katakana;
-            case UnicodeScriptType::kannada:        return TextScript::kannada;
-            case UnicodeScriptType::khmer:          return TextScript::khmer;
-            case UnicodeScriptType::lao:            return TextScript::lao;
-            case UnicodeScriptType::latin:          return TextScript::latin;
-            case UnicodeScriptType::malayalam:      return TextScript::malayalam;
-            case UnicodeScriptType::myanmar:        return TextScript::myanmar;
-            case UnicodeScriptType::oriya:          return TextScript::oriya;
-            case UnicodeScriptType::sinhala:        return TextScript::sinhala;
-            case UnicodeScriptType::tamil:          return TextScript::tamil;
-            case UnicodeScriptType::telugu:         return TextScript::telugu;
-            case UnicodeScriptType::thaana:         return TextScript::thaana;
-            case UnicodeScriptType::thai:           return TextScript::thai;
-            case UnicodeScriptType::tibetan:        return TextScript::tibetan;
+            case SBScriptZYYY:          return TextScript::common;
+            case SBScriptARAB:          return TextScript::arabic;
+            case SBScriptARMN:          return TextScript::armenian;
+            case SBScriptBENG:          return TextScript::bengali;
+            case SBScriptBOPO:          return TextScript::bopomofo;
+            case SBScriptCYRL:          return TextScript::cyrillic;
+            case SBScriptDEVA:          return TextScript::devanagari;
+            case SBScriptETHI:          return TextScript::ethiopic;
+            case SBScriptGEOR:          return TextScript::georgian;
+            case SBScriptGREK:          return TextScript::greek;
+            case SBScriptGUJR:          return TextScript::gujarati;
+            case SBScriptGURU:          return TextScript::gurmukhi;
+            case SBScriptHANG:          return TextScript::hangul;
+            case SBScriptHANI:          return TextScript::han;
+            case SBScriptHEBR:          return TextScript::hebrew;
+            case SBScriptHIRA:          return TextScript::hiragana;
+            case SBScriptKANA:          return TextScript::katakana;
+            case SBScriptKNDA:          return TextScript::kannada;
+            case SBScriptKHMR:          return TextScript::khmer;
+            case SBScriptLAOO:          return TextScript::lao;
+            case SBScriptLATN:          return TextScript::latin;
+            case SBScriptMLYM:          return TextScript::malayalam;
+            case SBScriptMYMR:          return TextScript::myanmar;
+            case SBScriptORYA:          return TextScript::oriya;
+            case SBScriptSINH:          return TextScript::sinhala;
+            case SBScriptTAML:          return TextScript::tamil;
+            case SBScriptTELU:          return TextScript::telugu;
+            case SBScriptTHAA:          return TextScript::thaana;
+            case SBScriptTHAI:          return TextScript::thai;
+            case SBScriptTIBT:          return TextScript::tibetan;
 
-            case UnicodeScriptType::adlam:          return TextScript::adlam;
-            case UnicodeScriptType::balinese:       return TextScript::balinese;
-            case UnicodeScriptType::bamum:          return TextScript::bamum;
-            case UnicodeScriptType::batak:          return TextScript::batak;
-            case UnicodeScriptType::chakma:         return TextScript::chakma;
-            case UnicodeScriptType::cham:           return TextScript::cham;
-            case UnicodeScriptType::cherokee:       return TextScript::cherokee;
-            case UnicodeScriptType::javanese:       return TextScript::javanese;
-            case UnicodeScriptType::kayah_li:       return TextScript::kayahLi;
-            case UnicodeScriptType::tai_tham:       return TextScript::taiTham;
-            case UnicodeScriptType::lepcha:         return TextScript::lepcha;
-            case UnicodeScriptType::limbu:          return TextScript::limbu;
-            case UnicodeScriptType::lisu:           return TextScript::lisu;
-            case UnicodeScriptType::mandaic:        return TextScript::mandaic;
-            case UnicodeScriptType::meetei_mayek:   return TextScript::meeteiMayek;
-            case UnicodeScriptType::newa:           return TextScript::newa;
-            case UnicodeScriptType::nko:            return TextScript::nko;
-            case UnicodeScriptType::ol_chiki:       return TextScript::olChiki;
-            case UnicodeScriptType::osage:          return TextScript::osage;
-            case UnicodeScriptType::miao:           return TextScript::miao;
-            case UnicodeScriptType::saurashtra:     return TextScript::saurashtra;
-            case UnicodeScriptType::sundanese:      return TextScript::sundanese;
-            case UnicodeScriptType::syloti_nagri:   return TextScript::sylotiNagri;
-            case UnicodeScriptType::syriac:         return TextScript::syriac;
-            case UnicodeScriptType::tai_le:         return TextScript::taiLe;
-            case UnicodeScriptType::new_tai_lue:    return TextScript::newTaiLue;
-            case UnicodeScriptType::tai_viet:       return TextScript::taiViet;
-            case UnicodeScriptType::tifinagh:       return TextScript::tifinagh;
-            case UnicodeScriptType::vai:            return TextScript::vai;
-            case UnicodeScriptType::wancho:         return TextScript::wancho;
-            case UnicodeScriptType::yi:             return TextScript::yi;
+            case SBScriptADLM:          return TextScript::adlam;
+            case SBScriptBALI:          return TextScript::balinese;
+            case SBScriptBAMU:          return TextScript::bamum;
+            case SBScriptBATK:          return TextScript::batak;
+            case SBScriptCAKM:          return TextScript::chakma;
+            case SBScriptCHAM:          return TextScript::cham;
+            case SBScriptCHER:          return TextScript::cherokee;
+            case SBScriptJAVA:          return TextScript::javanese;
+            case SBScriptKALI:          return TextScript::kayahLi;
+            case SBScriptLANA:          return TextScript::taiTham;
+            case SBScriptLEPC:          return TextScript::lepcha;
+            case SBScriptLIMB:          return TextScript::limbu;
+            case SBScriptLISU:          return TextScript::lisu;
+            case SBScriptMAND:          return TextScript::mandaic;
+            case SBScriptMTEI:          return TextScript::meeteiMayek;
+            case SBScriptNEWA:          return TextScript::newa;
+            case SBScriptNKOO:          return TextScript::nko;
+            case SBScriptOLCK:          return TextScript::olChiki;
+            case SBScriptOSGE:          return TextScript::osage;
+            case SBScriptPLRD:          return TextScript::miao;
+            case SBScriptSAUR:          return TextScript::saurashtra;
+            case SBScriptSUND:          return TextScript::sundanese;
+            case SBScriptSYLO:          return TextScript::sylotiNagri;
+            case SBScriptSYRC:          return TextScript::syriac;
+            case SBScriptTALE:          return TextScript::taiLe;
+            case SBScriptTALU:          return TextScript::newTaiLue;
+            case SBScriptTAVT:          return TextScript::taiViet;
+            case SBScriptTFNG:          return TextScript::tifinagh;
+            case SBScriptVAII:          return TextScript::vai;
+            case SBScriptWCHO:          return TextScript::wancho;
+            case SBScriptYIII:          return TextScript::yi;
 
-            case UnicodeScriptType::hanifi_rohingya:        return TextScript::hanifiRohingya;
-            case UnicodeScriptType::nyiakeng_puachue_hmong: return TextScript::nyiakengPuachueHmong;
-            case UnicodeScriptType::canadian_aboriginal:    return TextScript::canadianAboriginalSyllabics;
+            case SBScriptROHG:          return TextScript::hanifiRohingya;
+            case SBScriptHMNP:          return TextScript::nyiakengPuachueHmong;
+            case SBScriptCANS:          return TextScript::canadianAboriginalSyllabics;
 
             default: break;
         }

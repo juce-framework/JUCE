@@ -139,6 +139,9 @@ public: // AAX_IACFCollection
 
 			See \ref AAXATTR_Client_Version for information about the version data format
 
+			\warning Do not use this method to infer host feature support. Instead, use
+			\ref AAX_IDescriptionHost to query the host for specific features.
+
 			@param[in]	outVersion
 						Host version
 			

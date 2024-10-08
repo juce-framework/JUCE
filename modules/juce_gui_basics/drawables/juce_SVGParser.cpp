@@ -1204,7 +1204,7 @@ private:
                     const auto y = optY.value_or (layoutState.getNextStartingPos().getY());
 
                     Rectangle<float> bounds (x, y - font.getAscent(),
-                                             font.getStringWidthFloat (text), font.getHeight());
+                                             GlyphArrangement::getStringWidth (font, text), font.getHeight());
 
                     if (anchorStr == "middle")   bounds.setX (bounds.getX() - bounds.getWidth() / 2.0f);
                     else if (anchorStr == "end") bounds.setX (bounds.getX() - bounds.getWidth());

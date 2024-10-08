@@ -104,7 +104,7 @@ public:
                     {
                         lastAtom.atomText += first.atomText;
                         lastAtom.numChars = (uint16) (lastAtom.numChars + first.numChars);
-                        lastAtom.width = font.getStringWidthFloat (lastAtom.getText (passwordChar));
+                        lastAtom.width = GlyphArrangement::getStringWidth (font, lastAtom.getText (passwordChar));
                         ++i;
                     }
                 }
@@ -143,13 +143,13 @@ public:
             {
                 TextAtom secondAtom;
                 secondAtom.atomText = atom.atomText.substring (indexToBreakAt - index);
-                secondAtom.width = font.getStringWidthFloat (secondAtom.getText (passwordChar));
+                secondAtom.width = GlyphArrangement::getStringWidth (font, secondAtom.getText (passwordChar));
                 secondAtom.numChars = (uint16) secondAtom.atomText.length();
 
                 section2->atoms.add (secondAtom);
 
                 atom.atomText = atom.atomText.substring (0, indexToBreakAt - index);
-                atom.width = font.getStringWidthFloat (atom.getText (passwordChar));
+                atom.width = GlyphArrangement::getStringWidth (font, atom.getText (passwordChar));
                 atom.numChars = (uint16) (indexToBreakAt - index);
 
                 for (int j = i + 1; j < atoms.size(); ++j)
@@ -212,7 +212,7 @@ public:
             passwordChar = passwordCharToUse;
 
             for (auto& atom : atoms)
-                atom.width = newFont.getStringWidthFloat (atom.getText (passwordChar));
+                atom.width = GlyphArrangement::getStringWidth (newFont, atom.getText (passwordChar));
         }
     }
 
@@ -272,7 +272,7 @@ private:
 
             TextAtom atom;
             atom.atomText = String (start, numChars);
-            atom.width = (atom.isNewLine() ? 0.0f : font.getStringWidthFloat (atom.getText (passwordChar)));
+            atom.width = (atom.isNewLine() ? 0.0f : GlyphArrangement::getStringWidth (font, atom.getText (passwordChar)));
             atom.numChars = (uint16) numChars;
             atoms.add (atom);
         }

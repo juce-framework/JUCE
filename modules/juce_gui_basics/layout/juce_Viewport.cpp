@@ -247,12 +247,20 @@ Point<int> Viewport::viewportPosToCompPos (Point<int> pos) const
 {
     jassert (contentComp != nullptr);
 
-    auto contentBounds = contentHolder.getLocalArea (contentComp.get(), contentComp->getLocalBounds());
+    const auto contentBounds = getContentBounds();
 
-    Point<int> p (jmax (jmin (0, contentHolder.getWidth()  - contentBounds.getWidth()),  jmin (0, -(pos.x))),
-                  jmax (jmin (0, contentHolder.getHeight() - contentBounds.getHeight()), jmin (0, -(pos.y))));
+    const Point p (jmax (jmin (0, contentHolder.getWidth()  - contentBounds.getWidth()),  jmin (0, -(pos.x))),
+                   jmax (jmin (0, contentHolder.getHeight() - contentBounds.getHeight()), jmin (0, -(pos.y))));
 
     return p.transformedBy (contentComp->getTransform().inverted());
+}
+
+Rectangle<int> Viewport::getContentBounds() const
+{
+    if (auto* cc = contentComp.get())
+        return contentHolder.getLocalArea (cc, cc->getLocalBounds());
+
+    return {};
 }
 
 void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset)
@@ -406,11 +414,7 @@ void Viewport::updateVisibleArea()
             break;
     }
 
-    Rectangle<int> contentBounds;
-
-    if (auto cc = contentComp.get())
-        contentBounds = contentHolder.getLocalArea (cc, cc->getLocalBounds());
-
+    const auto contentBounds = getContentBounds();
     auto visibleOrigin = -contentBounds.getPosition();
 
     auto& hbar = getHorizontalScrollBar();
@@ -521,15 +525,22 @@ int Viewport::getScrollBarThickness() const
 
 void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
-    auto newRangeStartInt = roundToInt (newRangeStart);
+    const auto contentOrigin = -getContentBounds().getPosition();
+    const auto newRangeStartInt = roundToInt (newRangeStart);
 
-    if (scrollBarThatHasMoved == horizontalScrollBar.get())
+    for (const auto& [member, bar] : { std::tuple (&Point<int>::x, horizontalScrollBar.get()),
+                                       std::tuple (&Point<int>::y, verticalScrollBar.get()) })
     {
-        setViewPosition (newRangeStartInt, getViewPositionY());
-    }
-    else if (scrollBarThatHasMoved == verticalScrollBar.get())
-    {
-        setViewPosition (getViewPositionX(), newRangeStartInt);
+        if (scrollBarThatHasMoved != bar)
+            continue;
+
+        if (contentOrigin.*member == newRangeStartInt)
+            return;
+
+        auto pt = getViewPosition();
+        pt.*member = newRangeStartInt;
+        setViewPosition (pt);
+        return;
     }
 }
 

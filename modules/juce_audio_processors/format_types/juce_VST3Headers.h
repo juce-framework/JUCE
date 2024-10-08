@@ -38,6 +38,11 @@
  #error To build JUCE VST3 plug-ins on BSD you must use an external BSD-compatible VST3 SDK with JUCE_CUSTOM_VST3_SDK=1
 #endif
 
+// It's important to include this *before* any of the Steinberg headers.
+// On Windows, the VST3 headers might end up defining `stricmp` as `_stricmp` before including
+// <cstring> or <string.h>, which prevents the use of stricmp in JUCE source.
+#include <cstring>
+
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
 JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702 6011 6031 6221 6386 6387 6330 6001 28199)
 
@@ -83,19 +88,23 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
                                      "-Wunused-but-set-variable",
                                      "-Wunused-function",
                                      "-Wunused-parameter",
-                                     "-Wzero-as-null-pointer-constant")
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wdangling-else")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
 
-/*  These files come with the Steinberg VST3 SDK - to get them, you'll need to
-    visit the Steinberg website and agree to whatever is currently required to
-    get them.
+// As of at least 3.7.12 there is a bug in fplatform.h that leads to SMTG_CPP20
+// having the wrong value when the /Zc:__cplusplus is not enabled. This work
+// around prevents needing to provide that flag
 
-    Then, you'll need to make sure your include path contains your "VST3 SDK"
-    directory (or whatever you've named it on your machine). The Projucer has
-    a special box for setting this path.
-*/
+#include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/fplatform.h>
+
+#ifdef SMTG_CPP20
+ #undef SMTG_CPP20
+ #define SMTG_CPP20 JUCE_CXX20_IS_AVAILABLE
+#endif
+
 #if JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #include <base/source/fstring.h>
  #include <pluginterfaces/base/conststringtable.h>
@@ -123,6 +132,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <public.sdk/source/common/memorystream.h>
  #include <public.sdk/source/vst/utility/uid.h>
+ #include <public.sdk/source/vst/utility/vst2persistence.h>
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
 
@@ -157,10 +167,10 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
   #include <base/source/flock.cpp>
  #endif
 
-#pragma push_macro ("True")
-#undef True
-#pragma push_macro ("False")
-#undef False
+ #pragma push_macro ("True")
+ #undef True
+ #pragma push_macro ("False")
+ #undef False
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmultichar", "-Wfour-char-constants")
 
@@ -173,6 +183,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
  #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
  #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
+ #include <public.sdk/source/common/commonstringconvert.cpp>
  #include <public.sdk/source/common/memorystream.cpp>
  #include <public.sdk/source/common/pluginview.cpp>
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
@@ -190,8 +201,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-W#warnings",
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-#pragma pop_macro ("True")
-#pragma pop_macro ("False")
+ #pragma pop_macro ("True")
+ #pragma pop_macro ("False")
 
  #if VST_VERSION >= 0x03060c   // 3.6.12
   #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>

@@ -844,4 +844,22 @@ std::string AAX::AsStringResult(AAX_Result inResult)
 	return std::string("<unknown error code>");
 }
 
+std::string AAX::AsStringSupportLevel(AAX_ESupportLevel inSupportLevel)
+{
+	switch (inSupportLevel)
+	{
+		case AAX_eSupportLevel_Uninitialized:
+			return "AAX_eSupportLevel_Uninitialized";
+		case AAX_eSupportLevel_Unsupported:
+			return "AAX_eSupportLevel_Unsupported";
+		case AAX_eSupportLevel_Supported:
+			return "AAX_eSupportLevel_Supported";
+		case AAX_eSupportLevel_Disabled:
+			return "AAX_eSupportLevel_Disabled";
+		case AAX_eSupportLevel_ByProperty:
+			return "AAX_eSupportLevel_ByProperty";
+	}
+	return std::to_string(inSupportLevel);
+}
+
 #endif

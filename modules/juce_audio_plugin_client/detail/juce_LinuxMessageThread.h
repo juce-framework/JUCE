@@ -43,7 +43,7 @@ bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 class MessageThread : public Thread
 {
 public:
-    MessageThread() : Thread ("JUCE Plugin Message Thread")
+    MessageThread() : Thread (SystemStats::getJUCEVersion() + ": Plugin Message Thread")
     {
         start();
     }

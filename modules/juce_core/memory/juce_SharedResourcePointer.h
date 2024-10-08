@@ -175,7 +175,7 @@ private:
         std::weak_ptr<SharedObjectType> ptr;
     };
 
-    inline static Weak& weak()
+    static inline Weak& weak()
     {
         static Weak weak;
         return weak;

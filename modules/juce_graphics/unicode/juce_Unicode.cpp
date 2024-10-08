@@ -41,14 +41,7 @@ namespace juce
 */
 class Unicode
 {
-    struct Key
-    {
-        String text;
-        std::optional<TextDirection> directionOverride;
-
-        auto tie() const { return std::tie (text, directionOverride); }
-        bool operator< (const Key& other) const { return tie() < other.tie(); }
-    };
+    using Key = String;
 
 public:
     Unicode() = delete;
@@ -61,12 +54,7 @@ public:
     {
         uint32_t codepoint;
 
-        size_t logicalIndex;     // Index of the character in the source string
-        size_t visualIndex;
-
         TextBreakType breaking;  // Breaking characteristics of this codepoint
-
-        TextDirection direction; // Direction of this codepoint
 
         TextScript script;       // Script class for this codepoint
     };
@@ -88,14 +76,14 @@ public:
     /*  Performs unicode analysis on a piece of text and returns an array of Codepoints
         in logical order.
     */
-    static Array<Codepoint> performAnalysis (const String& string, std::optional<TextDirection> textDirection = {})
+    static Array<Codepoint> performAnalysis (const String& string)
     {
         if (string.isEmpty())
             return {};
 
         thread_local LruCache<Key, Array<Unicode::Codepoint>> cache;
 
-        return cache.get ({ string, textDirection }, analysisCallback);
+        return cache.get (string, analysisCallback);
     }
 
     //==============================================================================
@@ -124,20 +112,6 @@ public:
     private:
         Span<ValueType> data;
     };
-
-    struct BidiTraits
-    {
-        using ValueType = const Codepoint;
-
-        static bool compare (const Codepoint& t1, const Codepoint& t2)
-        {
-            return t1.direction == t2.direction;
-        }
-
-        static bool includeBreakingIndex() { return false; }
-    };
-
-    using BidiRunIterator = Iterator<BidiTraits>;
 
     struct LineTraits
     {
@@ -182,43 +156,13 @@ public:
     using ScriptRunIterator = Iterator<ScriptTraits>;
 
 private:
-    struct ParagraphIterator
-    {
-        explicit ParagraphIterator (Span<UnicodeAnalysisPoint> Span) : data (Span) {}
-
-        std::optional<Range<int>> next()
-        {
-            const auto start = head;
-            auto end = start;
-
-            if ((size_t) start >= data.size())
-                return std::nullopt;
-
-            while ((size_t) end < data.size())
-            {
-                constexpr auto paragraphSeparator = 0x2029;
-
-                if (data[(size_t) end].character == paragraphSeparator)
-                    break;
-
-                end++;
-            }
-
-            head = end + 1;
-            return std::make_optional (Range<int> { start, end });
-        }
-
-        Span<UnicodeAnalysisPoint> data;
-        int head = 0;
-    };
-
     static Array<Unicode::Codepoint> analysisCallback (const Key& key)
     {
         auto analysisBuffer = [&key]
         {
             std::vector<UnicodeAnalysisPoint> points;
 
-            const auto data   = key.text.toUTF32();
+            const auto data   = key.toUTF32();
             const auto length = data.length();
 
             points.reserve (length);
@@ -256,76 +200,8 @@ private:
             result.getReference (index).breaking = type;
         });
 
-        ParagraphIterator iter { analysisBuffer };
-
-        TR9::BidiOutput bidiOutput;
-
-        while (auto range = iter.next())
-        {
-            const auto run  = Span { analysisBuffer.data() + (size_t) range->getStart(), (size_t) range->getLength() };
-
-            TR9::analyseBidiRun (bidiOutput, run, key.directionOverride);
-
-            for (size_t i = 0; i < (size_t) range->getLength(); i++)
-            {
-                auto& point = result.getReference ((int) i + range->getStart());
-
-                point.direction      = bidiOutput.resolvedLevels[i] % 2 == 0 ? TextDirection::ltr : TextDirection::rtl;
-                point.logicalIndex   = (size_t) range->getStart() + i;
-                point.visualIndex    = (size_t) bidiOutput.visualOrder[i];
-            }
-        }
-
         return result;
     }
 };
-
-#if JUCE_UNIT_TESTS
-
-class NumericalVisualOrderTest : UnitTest
-{
-public:
-    NumericalVisualOrderTest() : UnitTest ("NumericalVisualOrderTest", UnitTestCategories::text)
-    {
-    }
-
-    void runTest() override
-    {
-        auto doTest = [this] (const String& text)
-        {
-            String visual;
-            String logical;
-
-            for (auto cp : Unicode::performAnalysis (text))
-            {
-                visual << text[(int) cp.visualIndex];
-                logical << text[(int) cp.logicalIndex];
-            }
-
-            beginTest (text);
-            expectEquals (visual, logical);
-        };
-
-        doTest ("12345");
-        doTest ("12345_00001");
-        doTest ("1_3(1)");
-        doTest ("-12323");
-        doTest ("8784-43_-33");
-        doTest ("[v = get()](vector<int1> _arr) -> v2 { return _arr[5]; };");
-        doTest (R"([(lambda x: (x, len(x), x.upper(), x[::-1]))(word) for word in "JUCE is great".split()])");
-        doTest (R"(table.concat({table.unpack({string.reverse(string.gsub("JUCE is great", "%a", string.upper))})}, " "))");
-        doTest (R"(result = sum([(mod(i, 2) * i**2, i = 1, 100)], mask = [(mod(i, 2) == 0, i = 1, 100)]))");
-        doTest ("100     +100");
-        doTest ("100+     100");
-        doTest ("100   -  +100");
-        doTest ("abs=     +100");
-        doTest ("1.19.0 [1]");
-    }
-};
-
-static NumericalVisualOrderTest visualOrderTest;
-
-#endif
-
 
 } // namespace juce

@@ -618,7 +618,7 @@ private:
         ConnectionThread (Platform& ownerToUse,
                           URL& url,
                           const StringArray& headers)
-            : Thread ("WebBrowserComponent::Platform::ConnectionThread"),
+            : Thread (SystemStats::getJUCEVersion() + ": WebBrowserComponent::Platform::ConnectionThread"),
               owner (ownerToUse),
               webInputStream (new WebInputStream (url, true))
         {

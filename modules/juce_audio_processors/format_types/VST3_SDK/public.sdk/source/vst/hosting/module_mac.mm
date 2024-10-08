@@ -286,7 +286,7 @@ void getApplicationModules (Module::PathList& result)
 //------------------------------------------------------------------------
 void getModuleSnapshots (const std::string& path, Module::SnapshotList& result)
 {
-	auto nsString = [NSString stringWithUTF8String:path.data ()];
+	auto* nsString = [NSString stringWithUTF8String:path.data ()];
 	if (!nsString)
 		return;
 	auto bundleUrl = [NSURL fileURLWithPath:nsString];
@@ -372,7 +372,7 @@ Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 //------------------------------------------------------------------------
 Optional<std::string> Module::getModuleInfoPath (const std::string& modulePath)
 {
-	auto nsString = [NSString stringWithUTF8String:modulePath.data ()];
+	auto* nsString = [NSString stringWithUTF8String:modulePath.data ()];
 	if (!nsString)
 		return {};
 	auto bundleUrl = [NSURL fileURLWithPath:nsString];

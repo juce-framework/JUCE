@@ -84,7 +84,7 @@ public:
     //==============================================================================
     AndroidAudioIODevice (const String& deviceName)
         : AudioIODevice (deviceName, javaAudioTypeName),
-          Thread ("audio"),
+          Thread (SystemStats::getJUCEVersion() + ": audio"),
           minBufferSizeOut (0), minBufferSizeIn (0), callback (nullptr), sampleRate (0),
           numClientInputChannels (0), numDeviceInputChannels (0), numDeviceInputChannelsAvailable (2),
           numClientOutputChannels (0), numDeviceOutputChannels (0),

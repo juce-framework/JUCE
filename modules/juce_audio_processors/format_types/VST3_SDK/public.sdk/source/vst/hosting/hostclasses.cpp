@@ -53,7 +53,7 @@ HostApplication::HostApplication ()
 //-----------------------------------------------------------------------------
 tresult PLUGIN_API HostApplication::getName (String128 name)
 {
-	return VST3::StringConvert::convert ("My VST3 HostApplication", name) ? kResultTrue :
+	return StringConvert::convert ("My VST3 HostApplication", name) ? kResultTrue :
 	                                                                        kInternalError;
 }
 

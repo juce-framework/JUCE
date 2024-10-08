@@ -1222,7 +1222,7 @@ public:
     Platform (WebBrowserComponent& browserIn,
               const WebBrowserComponent::Options& optionsIn,
               const StringArray& userStrings)
-        : Thread ("Webview"), browser (browserIn), userAgent (optionsIn.getUserAgent())
+        : Thread (SystemStats::getJUCEVersion() + ": Webview"), browser (browserIn), userAgent (optionsIn.getUserAgent())
     {
         webKitIsAvailable = WebKitSymbols::getInstance()->isWebKitAvailable();
         init (InitialisationData { optionsIn.getNativeIntegrationsEnabled(),

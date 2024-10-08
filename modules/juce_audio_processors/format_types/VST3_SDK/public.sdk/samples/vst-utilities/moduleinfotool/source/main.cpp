@@ -353,7 +353,7 @@ int run (int argc, char* argv[])
 		{
 			writeToFile = true;
 #if SMTG_OS_WINDOWS
-			auto tmp = VST3::StringConvert::convert (valueMap[optOutputPath]);
+			auto tmp = Vst::StringConvert::convert (valueMap[optOutputPath]);
 			auto outputFile = reinterpret_cast<const wchar_t*> (tmp.data ());
 #else
 			auto outputFile = valueMap[optOutputPath];
@@ -400,7 +400,7 @@ Utf8Args toUtf8Args (int argc, wchar_t* wargv[])
 	for (int i = 0; i < argc; i++)
 	{
 		auto str = reinterpret_cast<const Steinberg::Vst::TChar*> (wargv[i]);
-		utf8Args.push_back (VST3::StringConvert::convert (str));
+		utf8Args.push_back (Steinberg::Vst::StringConvert::convert (str));
 	}
 
 	return utf8Args;

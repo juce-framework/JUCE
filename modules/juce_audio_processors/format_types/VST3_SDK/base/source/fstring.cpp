@@ -233,7 +233,7 @@ static inline Steinberg::int32 sprintf16 (Steinberg::char16* str, const Steinber
 {
 	va_list marker;
 	va_start (marker, format);
-	return vsnwprintf (str, -1, format, marker);
+	return vsnwprintf (str, static_cast<size_t> (-1), format, marker);
 }
 
 #elif SMTG_OS_LINUX
@@ -3562,6 +3562,14 @@ bool String::fromVariant (const FVariant& var)
 
 		case FVariant::kInteger:
 			printInt64 (var.getInt ());
+			return true;
+
+		case FVariant::kObject:
+			if (auto string = ICast<Steinberg::IString> (var.getObject ()))
+				if (string->isWideString ())
+					assign (string->getText16 ());
+				else
+					assign (string->getText8 ());
 			return true;
 
 		default:

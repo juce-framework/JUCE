@@ -247,7 +247,7 @@ void LookAndFeel_V4::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
     Font font (withDefaultMetrics (FontOptions { (float) h * 0.65f, Font::plain }));
     g.setFont (font);
 
-    auto textW = font.getStringWidth (window.getName());
+    auto textW = GlyphArrangement::getStringWidthInt (font, window.getName());
     auto iconW = 0;
     auto iconH = 0;
 
@@ -386,7 +386,7 @@ void LookAndFeel_V4::changeToggleButtonWidthToFitText (ToggleButton& button)
 
     Font font (withDefaultMetrics (FontOptions { fontSize }));
 
-    button.setSize (font.getStringWidth (button.getButtonText()) + roundToInt (tickWidth) + 14, button.getHeight());
+    button.setSize (GlyphArrangement::getStringWidthInt (font, button.getButtonText()) + roundToInt (tickWidth) + 14, button.getHeight());
 }
 
 //==============================================================================
@@ -882,7 +882,7 @@ void LookAndFeel_V4::getIdealPopupMenuItemSize (const String& text, const bool i
             font.setHeight ((float) standardMenuItemHeight / 1.3f);
 
         idealHeight = standardMenuItemHeight > 0 ? standardMenuItemHeight : roundToInt (font.getHeight() * 1.3f);
-        idealWidth = font.getStringWidth (text) + idealHeight * 2;
+        idealWidth = GlyphArrangement::getStringWidthInt (font, text) + idealHeight * 2;
     }
 }
 

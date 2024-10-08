@@ -373,6 +373,15 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharacterFunctions.cpp">
       <Filter>JUCE Modules\juce_core\text</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF8_test.cpp">
+      <Filter>JUCE Modules\juce_core\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF16_test.cpp">
+      <Filter>JUCE Modules\juce_core\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_CharPointer_UTF32_test.cpp">
+      <Filter>JUCE Modules\juce_core\text</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\text\juce_Identifier.cpp">
       <Filter>JUCE Modules\juce_core\text</Filter>
     </ClCompile>
@@ -679,6 +688,9 @@
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ContainerDeletePolicy.h">
+      <Filter>JUCE Modules\juce_core\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_CopyableHeapBlock.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_HeapBlock.h">

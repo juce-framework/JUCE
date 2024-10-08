@@ -106,9 +106,7 @@ class ShapedText::Impl
 public:
     Impl (String textIn, Options optionsIn)
         : options { std::move (optionsIn) },
-          text { std::move (textIn) },
-          simpleShapedText { &text, options },
-          justifiedText { simpleShapedText, options }
+          text { std::move (textIn) }
     {
     }
 
@@ -145,8 +143,8 @@ public:
 private:
     ShapedTextOptions options;
     String text;
-    SimpleShapedText simpleShapedText;
-    JustifiedText justifiedText;
+    SimpleShapedText simpleShapedText { &text, options };
+    JustifiedText justifiedText { simpleShapedText, options };
 };
 
 ShapedText::ShapedText() : ShapedText ("", {})

@@ -47,7 +47,7 @@ public:
                    bool /*useMultisampling*/,
                    OpenGLVersion version)
     {
-        dummyComponent.reset (new DummyComponent (*this));
+        placeholderComponent.reset (new PlaceholderComponent (*this));
         createNativeWindow (component);
 
         PIXELFORMATDESCRIPTOR pfd;
@@ -263,9 +263,13 @@ private:
     }
 
     //==============================================================================
-    struct DummyComponent  : public Component
+    struct PlaceholderComponent  : public Component
     {
-        DummyComponent (NativeContext& c) : context (c) {}
+        explicit PlaceholderComponent (NativeContext& c)
+            : context (c)
+        {
+            setOpaque (true);
+        }
 
         // The windowing code will call this when a paint callback happens
         void handleCommandMessage (int) override   { context.triggerRepaint(); }
@@ -295,7 +299,7 @@ private:
             auto* parentHWND = topComp->getWindowHandle();
 
             ScopedThreadDPIAwarenessSetter setter { parentHWND };
-            nativeWindow.reset (createNonRepaintingEmbeddedWindowsPeer (*dummyComponent, topComp));
+            nativeWindow.reset (createNonRepaintingEmbeddedWindowsPeer (*placeholderComponent, topComp));
         }
 
         if (auto* peer = topComp->getPeer())
@@ -383,7 +387,7 @@ private:
     };
 
     CriticalSection mutex;
-    std::unique_ptr<DummyComponent> dummyComponent;
+    std::unique_ptr<PlaceholderComponent> placeholderComponent;
     std::unique_ptr<ComponentPeer> nativeWindow;
     std::unique_ptr<ScopedThreadDPIAwarenessSetter> threadAwarenessSetter;
     Component::SafePointer<Component> safeComponent;

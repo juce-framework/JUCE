@@ -45,7 +45,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
      previewComp (previewComp_),
      currentPathBox ("path"),
      fileLabel ("f", TRANS ("file:")),
-     thread ("JUCE FileBrowser"),
+     thread (SystemStats::getJUCEVersion() + ": FileBrowser"),
      wasProcessActive (true)
 {
     // You need to specify one or other of the open/save flags..

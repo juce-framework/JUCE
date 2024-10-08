@@ -1117,7 +1117,7 @@ public:
             {
                 auto text = rowElement->getStringAttribute (getAttributeNameForColumnId (columnId));
 
-                widest = jmax (widest, font.getStringWidth (text));
+                widest = jmax (widest, GlyphArrangement::getStringWidthInt (font, text));
             }
         }
 

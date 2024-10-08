@@ -38,6 +38,7 @@
 #endif
 
 #include <juce_core/system/juce_CompilerWarnings.h>
+#include <juce_core/system/juce_CompilerSupport.h>
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc++98-compat-extra-semi",
                                      "-Wdeprecated-declarations",
@@ -55,6 +56,21 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wc++98-compat-extra-semi",
 
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387 6031)
 
+// As of at least 3.7.12 there is a bug in fplatform.h that leads to SMTG_CPP20
+// having the wrong value when the /Zc:__cplusplus is not enabled. This work
+// around prevents needing to provide that flag
+
+#include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/fplatform.h>
+
+#ifdef SMTG_CPP20
+ #undef SMTG_CPP20
+ #define SMTG_CPP20 JUCE_CXX20_IS_AVAILABLE
+#endif
+
+#ifndef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+ #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#endif
+
 #ifndef NOMINMAX
  #define NOMINMAX 1
 #endif
@@ -70,6 +86,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387 6031)
 #include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/coreiids.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/pluginterfaces/base/funknown.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/public.sdk/samples/vst-utilities/moduleinfotool/source/main.cpp>
+#include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/commonstringconvert.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/memorystream.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/common/readfile.cpp>
 #include <juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/hosting/module.cpp>

@@ -129,11 +129,8 @@ public:
 
                 for (const auto& area : preparing->getPaintAreas())
                 {
-                    D2D1_POINT_2U destPoint { (uint32) area.getX(), (uint32) area.getY() };
-                    D2D1_RECT_U sourceRect { (uint32) area.getX(),
-                                             (uint32) area.getY(),
-                                             (uint32) area.getRight(),
-                                             (uint32) area.getBottom() };
+                    const auto destPoint = D2DUtilities::toPOINT_2U (area.getPosition());
+                    const auto sourceRect = D2DUtilities::toRECT_U (area);
                     readyToDisplay->getPresentationBitmap()->CopyFromBitmap (&destPoint, preparing->getPresentationBitmap(), &sourceRect);
                 }
 
@@ -313,40 +310,46 @@ private:
     };
 
     SwapChain swap;
+    ComSmartPtr<ID2D1DeviceContext1> deviceContext;
     std::unique_ptr<SwapChainThread> swapChainThread;
     BackBufferLock presentation;
     std::optional<CompositionTree> compositionTree;
     RectangleList<int> deferredRepaints;
-    Rectangle<int> frameSize;
     std::vector<RECT> dirtyRectangles;
     bool resizing = false;
     int64 lastFinishFrameTicks = 0;
 
     HWND hwnd = nullptr;
 
-    HRESULT prepare() override
+    bool prepare() override
     {
         const auto adapter = directX->adapters.getAdapterForHwnd (hwnd);
 
         if (adapter == nullptr)
-            return E_FAIL;
+            return false;
+
+        if (deviceContext == nullptr)
+            deviceContext = Direct2DDeviceContext::create (adapter);
+
+        if (deviceContext == nullptr)
+            return false;
 
         if (! deviceResources.has_value())
-            deviceResources = Direct2DDeviceResources::create (adapter);
+            deviceResources = Direct2DDeviceResources::create (deviceContext);
 
         if (! deviceResources.has_value())
-            return E_FAIL;
+            return false;
 
-        if (! hwnd || frameSize.isEmpty())
-            return E_FAIL;
+        if (! hwnd || getClientRect().isEmpty())
+            return false;
 
         if (! swap.canPaint())
         {
-            if (auto hr = swap.create (hwnd, frameSize, adapter); FAILED (hr))
-                return hr;
+            if (auto hr = swap.create (hwnd, getClientRect(), adapter); FAILED (hr))
+                return false;
 
-            if (auto hr = swap.createBuffer (deviceResources->deviceContext); FAILED (hr))
-                return hr;
+            if (auto hr = swap.createBuffer (getDeviceContext()); FAILED (hr))
+                return false;
         }
 
         if (! swapChainThread && swap.swapChainEvent.has_value())
@@ -356,15 +359,16 @@ private:
             compositionTree = CompositionTree::create (adapter->dxgiDevice, hwnd, swap.chain);
 
         if (! compositionTree.has_value())
-            return E_FAIL;
+            return false;
 
-        return S_OK;
+        return true;
     }
 
     void teardown() override
     {
         compositionTree.reset();
         swapChainThread = nullptr;
+        deviceContext = nullptr;
         swap.release();
 
         Pimpl::teardown();
@@ -386,7 +390,8 @@ private:
             return false;
 
         if (presentation.getPresentation() == nullptr)
-            presentation = swapChainThread->getFreshPresentation();
+            if (swapChainThread != nullptr)
+                presentation = swapChainThread->getFreshPresentation();
 
         // Paint if:
         //      resources are allocated
@@ -395,7 +400,7 @@ private:
         bool ready = Pimpl::checkPaintReady();
         ready &= swap.canPaint();
         ready &= compositionTree.has_value();
-        ready &= deferredRepaints.getNumRectangles() > 0 || resizing;
+        ready &= ! getPaintAreas().isEmpty();
         ready &= presentation.getPresentation() != nullptr;
         return ready;
     }
@@ -417,9 +422,7 @@ public:
         // that's not really spelled out in the documentation.
         // This method is called when the component peer receives WM_SHOWWINDOW
         prepare();
-
-        frameSize = getClientRect();
-        deferredRepaints = frameSize;
+        deferredRepaints = getClientRect();
     }
 
     Rectangle<int> getClientRect() const
@@ -435,10 +438,15 @@ public:
         return getClientRect();
     }
 
+    ComSmartPtr<ID2D1DeviceContext1> getDeviceContext() const override
+    {
+        return deviceContext;
+    }
+
     ComSmartPtr<ID2D1Image> getDeviceContextTarget() const override
     {
         if (auto* p = presentation.getPresentation())
-            return p->getPresentationBitmap (swap.getSize(), deviceResources->deviceContext);
+            return p->getPresentationBitmap (swap.getSize(), getDeviceContext());
 
         return {};
     }
@@ -455,22 +463,21 @@ public:
 
     void setSize (Rectangle<int> size)
     {
-        if (size == frameSize || size.isEmpty())
+        if (size == swap.getSize() || size.isEmpty())
             return;
 
         // Require the entire window to be repainted
-        frameSize = size;
         deferredRepaints = size;
         InvalidateRect (hwnd, nullptr, TRUE);
 
         // Resize/scale the swap chain
         prepare();
 
-        if (auto deviceContext = deviceResources->deviceContext)
+        if (auto dc = getDeviceContext())
         {
             ScopedMultithread scopedMultithread { directX->getD2DMultithread() };
 
-            auto hr = swap.resize (size, deviceContext);
+            auto hr = swap.resize (size, dc);
             jassert (SUCCEEDED (hr));
             if (FAILED (hr))
                 teardown();
@@ -491,8 +498,9 @@ public:
     {
         if (resizing)
         {
-            deferredRepaints = frameSize;
-            setSize (getClientRect());
+            const auto size = getClientRect();
+            setSize (size);
+            deferredRepaints = size;
         }
 
         auto* savedState = Pimpl::startFrame (dpiScale);
@@ -609,7 +617,9 @@ public:
         // This won't capture child windows. Perhaps a better approach would be to use
         // IGraphicsCaptureItemInterop, although this is only supported on Windows 10 v1903+
 
-        if (frameSize.isEmpty() || deviceResources->deviceContext == nullptr || swap.buffer == nullptr)
+        const auto context = getDeviceContext();
+
+        if (context == nullptr || swap.buffer == nullptr)
             return {};
 
         // Create the bitmap to receive the snapshot
@@ -617,11 +627,12 @@ public:
         bitmapProperties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET;
         bitmapProperties.pixelFormat = swap.buffer->GetPixelFormat();
 
-        const D2D_SIZE_U size { (UINT32) frameSize.getWidth(), (UINT32) frameSize.getHeight() };
+        const auto swapRect = swap.getSize();
+        const auto size = D2D1::SizeU ((UINT32) swapRect.getWidth(), (UINT32) swapRect.getHeight());
 
         ComSmartPtr<ID2D1Bitmap1> snapshot;
 
-        if (const auto hr = deviceResources->deviceContext->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
+        if (const auto hr = context->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
             return {};
 
         const ScopedMultithread scope { directX->getD2DMultithread() };
@@ -630,14 +641,12 @@ public:
 
         // Copy the swap chain buffer to the bitmap snapshot
         D2D_POINT_2U p { 0, 0 };
-        const auto sourceRect = D2DUtilities::toRECT_U (frameSize);
+        const auto sourceRect = D2DUtilities::toRECT_U (swapRect);
 
         if (const auto hr = snapshot->CopyFromBitmap (&p, swap.buffer, &sourceRect); FAILED (hr))
             return {};
 
-        const Image result { Direct2DPixelData::fromDirect2DBitmap (directX->adapters.getAdapterForHwnd (hwnd),
-                                                                    deviceResources->deviceContext,
-                                                                    snapshot) };
+        const Image result { new Direct2DPixelData { context, snapshot } };
 
         swap.chain->Present (0, DXGI_PRESENT_DO_NOT_WAIT);
 

@@ -637,7 +637,7 @@ public:
 
         gl::loadFunctions();
 
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS
         if (getOpenGLVersion() >= Version { 4, 3 } && glDebugMessageCallback != nullptr)
         {
             glEnable (GL_DEBUG_OUTPUT);

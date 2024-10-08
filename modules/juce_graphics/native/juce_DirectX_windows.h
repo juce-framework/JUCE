@@ -39,53 +39,50 @@ struct DxgiAdapter : public ReferenceCountedObject
 {
     using Ptr = ReferenceCountedObjectPtr<DxgiAdapter>;
 
-    DxgiAdapter (ComSmartPtr<ID2D1Factory2> d2dFactory, ComSmartPtr<IDXGIAdapter1> dxgiAdapterIn)
-        : dxgiAdapter (dxgiAdapterIn)
+    static Ptr create (ComSmartPtr<ID2D1Factory2> d2dFactory, ComSmartPtr<IDXGIAdapter1> dxgiAdapterIn)
     {
+        if (dxgiAdapterIn == nullptr || d2dFactory == nullptr)
+            return {};
+
+        Ptr result = new DxgiAdapter;
+        result->dxgiAdapter = dxgiAdapterIn;
+
         for (UINT i = 0;; ++i)
         {
             ComSmartPtr<IDXGIOutput> output;
-            const auto hr = dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress());
+            const auto hr = result->dxgiAdapter->EnumOutputs (i, output.resetAndGetPointerAddress());
 
             if (hr == DXGI_ERROR_NOT_FOUND || hr == DXGI_ERROR_NOT_CURRENTLY_AVAILABLE)
                 break;
 
-            dxgiOutputs.push_back (output);
+            result->dxgiOutputs.push_back (output);
         }
 
         // This flag adds support for surfaces with a different color channel ordering
         // than the API default. It is required for compatibility with Direct2D.
         const auto creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-        jassert (dxgiAdapter);
 
-        if (const auto hr = D3D11CreateDevice (dxgiAdapter,
+        if (const auto hr = D3D11CreateDevice (result->dxgiAdapter,
                                                D3D_DRIVER_TYPE_UNKNOWN,
                                                nullptr,
                                                creationFlags,
                                                nullptr,
                                                0,
                                                D3D11_SDK_VERSION,
-                                               direct3DDevice.resetAndGetPointerAddress(),
+                                               result->direct3DDevice.resetAndGetPointerAddress(),
                                                nullptr,
                                                nullptr); FAILED (hr))
         {
-            return;
+            return {};
         }
 
-        if (const auto hr = direct3DDevice->QueryInterface (dxgiDevice.resetAndGetPointerAddress()); FAILED (hr))
-            return;
+        if (const auto hr = result->direct3DDevice->QueryInterface (result->dxgiDevice.resetAndGetPointerAddress()); FAILED (hr))
+            return {};
 
-        if (const auto hr = d2dFactory->CreateDevice (dxgiDevice, direct2DDevice.resetAndGetPointerAddress()); FAILED (hr))
-            return;
-    }
+        if (const auto hr = d2dFactory->CreateDevice (result->dxgiDevice, result->direct2DDevice.resetAndGetPointerAddress()); FAILED (hr))
+            return {};
 
-    void release()
-    {
-        direct2DDevice = nullptr;
-        dxgiDevice = nullptr;
-        dxgiOutputs.clear();
-        dxgiAdapter = nullptr;
-        direct3DDevice = nullptr; // release the Direct3D device after the adapter to avoid an exception with AMD
+        return result;
     }
 
     bool uniqueIDMatches (ReferenceCountedObjectPtr<DxgiAdapter> other) const
@@ -113,6 +110,9 @@ struct DxgiAdapter : public ReferenceCountedObject
     ComSmartPtr<ID2D1Device1> direct2DDevice;
     ComSmartPtr<IDXGIAdapter1> dxgiAdapter;
     std::vector<ComSmartPtr<IDXGIOutput>> dxgiOutputs;
+
+private:
+    DxgiAdapter() = default;
 };
 
 struct DxgiAdapterListener
@@ -162,8 +162,11 @@ public:
             if (factory->EnumAdapters1 (i, dxgiAdapter.resetAndGetPointerAddress()) == DXGI_ERROR_NOT_FOUND)
                 break;
 
-            const auto adapter = adapterArray.add (new DxgiAdapter { d2dFactory, dxgiAdapter });
-            listeners.call ([adapter] (DxgiAdapterListener& l) { l.adapterCreated (adapter); });
+            if (const auto adapter = DxgiAdapter::create (d2dFactory, dxgiAdapter))
+            {
+                adapterArray.add (adapter);
+                listeners.call ([adapter] (DxgiAdapterListener& l) { l.adapterCreated (adapter); });
+            }
         }
     }
 
@@ -319,6 +322,8 @@ struct D2DUtilities
     static Point<int> toPoint (POINT p) noexcept          { return { p.x, p.y }; }
     static POINT toPOINT (Point<int> p) noexcept          { return { p.x, p.y }; }
 
+    static D2D1_POINT_2U toPOINT_2U (Point<int> p)        { return D2D1::Point2U ((UINT32) p.x, (UINT32) p.y); }
+
     static D2D1_COLOR_F toCOLOR_F (Colour c)
     {
         return { c.getFloatRed(), c.getFloatGreen(), c.getFloatBlue(), c.getFloatAlpha() };
@@ -328,45 +333,38 @@ struct D2DUtilities
     {
         return { transform.mat00, transform.mat10, transform.mat01, transform.mat11, transform.mat02, transform.mat12 };
     }
+
+    static Rectangle<int> rectFromSize (D2D1_SIZE_U s)
+    {
+        return { (int) s.width, (int) s.height };
+    }
 };
 
 //==============================================================================
 struct Direct2DDeviceContext
 {
-    static ComSmartPtr<ID2D1DeviceContext1> create (DxgiAdapter::Ptr adapter)
+    static ComSmartPtr<ID2D1DeviceContext1> create (ComSmartPtr<ID2D1Device1> device)
     {
-        if (adapter == nullptr)
-            return {};
-
         ComSmartPtr<ID2D1DeviceContext1> result;
 
-        if (const auto hr = adapter->direct2DDevice->CreateDeviceContext (D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
-                                                                          result.resetAndGetPointerAddress());
-                FAILED (hr))
+        if (const auto hr = device->CreateDeviceContext (D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
+                                                         result.resetAndGetPointerAddress());
+            FAILED (hr))
         {
             jassertfalse;
             return {};
         }
 
-        const auto textAntialiasing = [&]
-        {
-            BOOL smoothingEnabled{};
-            SystemParametersInfo (SPI_GETFONTSMOOTHING, 0, &smoothingEnabled, 0);
-
-            if (! smoothingEnabled)
-                return D2D1_TEXT_ANTIALIAS_MODE_ALIASED;
-
-            UINT smoothingKind{};
-            SystemParametersInfo (SPI_GETFONTSMOOTHINGTYPE, 0, &smoothingKind, 0);
-            return smoothingKind == FE_FONTSMOOTHINGCLEARTYPE ? D2D1_TEXT_ANTIALIAS_MODE_CLEARTYPE
-                                                              : D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE;
-        }();
-
-        result->SetTextAntialiasMode (textAntialiasing);
+        result->SetTextAntialiasMode (D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
         result->SetAntialiasMode (D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
         result->SetUnitMode (D2D1_UNIT_MODE_PIXELS);
 
         return result;
+    }
+
+    static ComSmartPtr<ID2D1DeviceContext1> create (DxgiAdapter::Ptr adapter)
+    {
+        return adapter != nullptr ? create (adapter->direct2DDevice) : nullptr;
     }
 
     Direct2DDeviceContext() = delete;
@@ -432,14 +430,12 @@ struct Direct2DBitmap
 
         JUCE_D2DMETRICS_SCOPED_ELAPSED_TIME (Direct2DMetricsHub::getInstance()->imageContextMetrics, createBitmapTime);
 
-       #if JUCE_DEBUG
         // Verify that the GPU can handle a bitmap of this size
         //
         // If you need a bitmap larger than this, you'll need to either split it up into multiple bitmaps
         // or use a software image (see SoftwareImageType).
-        auto maxBitmapSize = deviceContext->GetMaximumBitmapSize();
-        jassert (size.width <= maxBitmapSize && size.height <= maxBitmapSize);
-       #endif
+        const auto maxBitmapSize = deviceContext->GetMaximumBitmapSize();
+        jassertquiet (size.width <= maxBitmapSize && size.height <= maxBitmapSize);
 
         const auto pixelFormat = D2D1::PixelFormat (format == Image::SingleChannel
                                                         ? DXGI_FORMAT_A8_UNORM

@@ -273,7 +273,7 @@ public:
         setFont (font);
         setText (message, false);
 
-        bestWidth = 2 * (int) std::sqrt (font.getHeight() * (float) font.getStringWidth (message));
+        bestWidth = 2 * (int) std::sqrt (font.getHeight() * GlyphArrangement::getStringWidth (font, message));
     }
 
     void updateLayout (const int width)
@@ -386,8 +386,8 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     auto& lf = getLookAndFeel();
     auto messageFont (lf.getAlertWindowMessageFont());
 
-    auto wid = jmax (messageFont.getStringWidth (text),
-                     messageFont.getStringWidth (getName()));
+    auto wid = jmax (GlyphArrangement::getStringWidth (messageFont, text),
+                     GlyphArrangement::getStringWidth (messageFont, getName()));
 
     auto sw = (int) std::sqrt (messageFont.getHeight() * (float) wid);
     auto w = jmin (300 + sw * 2, (int) ((float) getParentWidth() * 0.7f));

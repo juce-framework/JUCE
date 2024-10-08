@@ -316,7 +316,7 @@ private:
     {
         PairDeviceThread (const String& bluetoothAddressOfDeviceToPair,
                           AndroidBluetoothMidiDevicesListBox& ownerListBox)
-            : Thread ("JUCE Bluetooth MIDI Device Pairing Thread"),
+            : Thread (SystemStats::getJUCEVersion() + ": Bluetooth MIDI Device Pairing Thread"),
               bluetoothAddress (bluetoothAddressOfDeviceToPair),
               owner (&ownerListBox)
         {

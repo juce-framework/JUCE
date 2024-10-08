@@ -1696,7 +1696,13 @@ int CodeEditorComponent::columnToIndex (int lineNum, int column) const noexcept
 void CodeEditorComponent::setFont (const Font& newFont)
 {
     font = newFont;
+
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     charWidth = font.getStringWidthFloat ("0");
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    JUCE_END_IGNORE_WARNINGS_MSVC
+
     lineHeight = roundToInt (font.getHeight());
     resized();
 }

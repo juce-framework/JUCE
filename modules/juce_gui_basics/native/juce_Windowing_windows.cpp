@@ -69,7 +69,6 @@ void* getUser32Function (const char*);
 
 #if JUCE_DEBUG
  int numActiveScopedDpiAwarenessDisablers = 0;
- static bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
  extern HWND juce_messageWindowHandle;
 #endif
 
@@ -1721,6 +1720,11 @@ public:
         return wp.showCmd == SW_SHOWMINIMIZED;
     }
 
+    bool isShowing() const override
+    {
+        return IsWindowVisible (hwnd) && ! isMinimised();
+    }
+
     void setFullScreen (bool shouldBeFullScreen) override
     {
         const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
@@ -1789,11 +1793,7 @@ public:
 
         const auto screenPos = convertLogicalScreenPointToPhysical (localPos + getScreenPosition(), hwnd);
 
-        if (trueIfInAChildWindow)
-            return getClientRectInScreen().contains (screenPos);
-
         auto w = WindowFromPoint (D2DUtilities::toPOINT (screenPos));
-
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
@@ -2465,7 +2465,7 @@ private:
         // You normally want these to match otherwise timer events and async messages will happen
         // in a different context to normal HWND messages which can cause issues with UI scaling.
         jassert (isPerMonitorDPIAwareWindow (hwnd) == isPerMonitorDPIAwareWindow (juce_messageWindowHandle)
-                   || isInScopedDPIAwarenessDisabler());
+                   || numActiveScopedDpiAwarenessDisablers > 0);
        #endif
 
         if (hwnd != nullptr)
@@ -3393,8 +3393,7 @@ private:
             r = D2DUtilities::toRECT (modifiedPhysicalBounds);
         }
 
-        if (renderContext != nullptr)
-            renderContext->setSize (r.right - r.left, r.bottom - r.top);
+        updateBorderSize();
 
         return TRUE;
     }
@@ -3938,8 +3937,17 @@ private:
                 // so that the client area exactly fills the available space.
                 if (isFullScreen())
                 {
-                    const auto padX = -param->left;
-                    const auto padY = -param->top;
+                    const auto monitor = MonitorFromWindow (hwnd, MONITOR_DEFAULTTONULL);
+
+                    if (monitor == nullptr)
+                        return 0;
+
+                    MONITORINFOEX info{};
+                    info.cbSize = sizeof (info);
+                    GetMonitorInfo (monitor, &info);
+
+                    const auto padX = info.rcMonitor.left - param->left;
+                    const auto padY = info.rcMonitor.top - param->top;
 
                     param->left  += padX;
                     param->right -= padX;
@@ -4291,17 +4299,33 @@ private:
                 switch (wParam)
                 {
                     case HTCLOSE:
-                        PostMessage (h, WM_CLOSE, 0, 0);
+                        if ((styleFlags & windowHasCloseButton) != 0 && ! sendInputAttemptWhenModalMessage())
+                        {
+                            if (hasTitleBar())
+                                PostMessage (h, WM_CLOSE, 0, 0);
+                            else
+                                component.windowControlClickedClose();
+                        }
                         return 0;
 
                     case HTMAXBUTTON:
                         if ((styleFlags & windowHasMaximiseButton) != 0 && ! sendInputAttemptWhenModalMessage())
-                            setFullScreen (! isFullScreen());
+                        {
+                            if (hasTitleBar())
+                                setFullScreen (! isFullScreen());
+                            else
+                                component.windowControlClickedMaximise();
+                        }
                         return 0;
 
                     case HTMINBUTTON:
                         if ((styleFlags & windowHasMinimiseButton) != 0 && ! sendInputAttemptWhenModalMessage())
-                            setMinimised (true);
+                        {
+                            if (hasTitleBar())
+                                setMinimised (true);
+                            else
+                                component.windowControlClickedMinimise();
+                        }
                         return 0;
                 }
                 break;
@@ -4650,7 +4674,12 @@ private:
 
                 constexpr auto maskToCheck = SWP_NOMOVE | SWP_NOSIZE;
 
-                if ((windowPosFlags & maskToCheck) == maskToCheck)
+                // This undocumented bit seems to get set when minimising/maximising windows with Win+D.
+                // If we attempt to dismiss modals while this bit is set, we might end up bringing
+                // modals to the front, which in turn may attempt to un-minimise them.
+                constexpr auto SWP_STATECHANGED = 0x8000;
+
+                if ((windowPosFlags & maskToCheck) == maskToCheck || (windowPosFlags & SWP_STATECHANGED) != 0)
                     return;
             }
 
@@ -5237,7 +5266,7 @@ private:
     public:
         LowLevelGraphicsContext* startFrame (HWND hwnd, float scale, const RectangleList<int>& dirty)
         {
-            RECT r;
+            RECT r{};
             GetClientRect (hwnd, &r);
 
             const auto w = r.right - r.left;
@@ -5300,7 +5329,7 @@ private:
 
         Image getImage() const
         {
-            return Image { Direct2DPixelData::fromDirect2DBitmap (adapter, deviceContext, bitmap) };
+            return Image { new Direct2DPixelData { deviceContext, bitmap } };
         }
 
         ComSmartPtr<ID2D1Bitmap1> getBitmap() const

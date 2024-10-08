@@ -1170,8 +1170,8 @@ struct DescriptionLister
 //==============================================================================
 struct DLLHandle
 {
-    DLLHandle (const File& fileToOpen)
-       : dllFile (fileToOpen)
+    explicit DLLHandle (const File& fileToOpen)
+        : dllFile (fileToOpen)
     {
         open();
     }
@@ -1182,8 +1182,7 @@ struct DLLHandle
         if (bundleRef != nullptr)
        #endif
         {
-            if (factory != nullptr)
-                factory->release();
+            factory = nullptr;
 
             using ExitModuleFn = bool (PLUGIN_API*)();
 
@@ -1197,14 +1196,11 @@ struct DLLHandle
     }
 
     //==============================================================================
-    /** The factory should begin with a refCount of 1, so don't increment the reference count
-        (ie: don't use a VSTComSmartPtr in here)! Its lifetime will be handled by this DLLHandle.
-    */
-    IPluginFactory* JUCE_CALLTYPE getPluginFactory()
+    VSTComSmartPtr<IPluginFactory> getPluginFactory()
     {
         if (factory == nullptr)
             if (auto* proc = (GetFactoryProc) getFunction (factoryFnName))
-                factory = proc();
+                factory = becomeVSTComSmartPtrOwner (proc());
 
         // The plugin NEEDS to provide a factory to be able to be called a VST3!
         // Most likely you are trying to load a 32-bit VST3 from a 64-bit host
@@ -1230,7 +1226,7 @@ struct DLLHandle
 
 private:
     File dllFile;
-    IPluginFactory* factory = nullptr;
+    VSTComSmartPtr<IPluginFactory> factory;
 
     static constexpr const char* factoryFnName = "GetPluginFactory";
 
@@ -1318,162 +1314,158 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DLLHandle)
 };
 
-struct DLLHandleCache final : public DeletedAtShutdown
+struct RefCountedDllHandle final : public ReferenceCountedObject
 {
-    DLLHandleCache() = default;
-    ~DLLHandleCache() override { clearSingletonInstance(); }
+public:
+    using Ptr = ReferenceCountedObjectPtr<RefCountedDllHandle>;
 
-    JUCE_DECLARE_SINGLETON (DLLHandleCache, false)
-
-    DLLHandle& findOrCreateHandle (const String& modulePath)
+    ~RefCountedDllHandle() override
     {
-       #if JUCE_LINUX || JUCE_BSD
-        File file (getDLLFileFromBundle (modulePath));
-       #else
-        File file (modulePath);
-       #endif
+        getHandles().erase (this);
+    }
 
-        auto it = std::find_if (openHandles.begin(), openHandles.end(),
-                                [&] (const std::unique_ptr<DLLHandle>& handle)
-                                {
-                                     return file == handle->getFile();
-                                });
+    VSTComSmartPtr<IPluginFactory> getPluginFactory()
+    {
+        return handle.getPluginFactory();
+    }
 
-        if (it != openHandles.end())
-            return *it->get();
+    File getFile() const
+    {
+        return handle.getFile();
+    }
 
-        openHandles.push_back (std::make_unique<DLLHandle> (file));
-        return *openHandles.back().get();
+    static Ptr getHandle (const File& f)
+    {
+        auto& bundles = getHandles();
+
+        const auto iter = std::find_if (bundles.begin(), bundles.end(), [&] (Ptr x)
+        {
+            return x->handle.getFile() == f;
+        });
+
+        if (iter != bundles.end())
+            return *iter;
+
+        return new RefCountedDllHandle { f };
     }
 
 private:
-   #if JUCE_LINUX || JUCE_BSD
-    File getDLLFileFromBundle (const String& bundlePath) const
+    explicit RefCountedDllHandle (const File& f)
+        : handle (f)
     {
-        auto machineName = []() -> String
-        {
-            struct utsname unameData;
-            auto res = uname (&unameData);
-
-            if (res != 0)
-                return {};
-
-            return unameData.machine;
-        }();
-
-        File file (bundlePath);
-
-        return file.getChildFile ("Contents")
-                   .getChildFile (machineName + "-linux")
-                   .getChildFile (file.getFileNameWithoutExtension() + ".so");
+        getHandles().insert (this);
     }
-   #endif
 
-    std::vector<std::unique_ptr<DLLHandle>> openHandles;
+    static std::set<RefCountedDllHandle*>& getHandles()
+    {
+        static std::set<RefCountedDllHandle*> bundles;
+        return bundles;
+    }
 
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DLLHandleCache)
+    DLLHandle handle;
 };
 
-
-JUCE_IMPLEMENT_SINGLETON (DLLHandleCache)
-
 //==============================================================================
 //==============================================================================
-struct VST3ModuleHandle final : public ReferenceCountedObject
+struct VST3ModuleHandle final
 {
-    explicit VST3ModuleHandle (const File& pluginFile, const PluginDescription& pluginDesc)
-        : file (pluginFile)
+public:
+    static VST3ModuleHandle create (const File& pluginFile, const PluginDescription& desc)
     {
-        if (open (pluginDesc))
-        {
-            isOpen = true;
-            getActiveModules().add (this);
-        }
+        VST3ModuleHandle result;
+        result.handle = RefCountedDllHandle::getHandle (pluginFile);
+
+        if (result.handle == nullptr)
+            return {};
+
+        auto factory = result.handle->getPluginFactory();
+
+        if (factory == nullptr)
+            return {};
+
+        const auto numClasses = factory->countClasses();
+        result.classIndex = findClassMatchingDescription (factory, desc);
+
+        if (result.classIndex == numClasses)
+            return {};
+
+        return result;
     }
 
-    ~VST3ModuleHandle()
+    VSTComSmartPtr<IPluginFactory> getPluginFactory() const
     {
-        if (isOpen)
-            getActiveModules().removeFirstMatchingValue (this);
+        return handle != nullptr ? handle->getPluginFactory() : VSTComSmartPtr<IPluginFactory>{};
     }
 
-    //==============================================================================
-    using Ptr = ReferenceCountedObjectPtr<VST3ModuleHandle>;
-
-    static VST3ModuleHandle::Ptr findOrCreateModule (const File& file,
-                                                     const PluginDescription& description)
+    Steinberg::int32 getClassIndex() const
     {
-        for (auto* module : getActiveModules())
-        {
-            // VST3s are basically shells, you must therefore check their name along with their file:
-            if (module->file == file && module->name == description.name)
-                return module;
-        }
-
-        VST3ModuleHandle::Ptr modulePtr (new VST3ModuleHandle (file, description));
-
-        if (! modulePtr->isOpen)
-            modulePtr = nullptr;
-
-        return modulePtr;
+        return classIndex;
     }
 
-    //==============================================================================
-    IPluginFactory* getPluginFactory()
+    String getName() const
     {
-        return DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory();
+        auto factory = getPluginFactory();
+
+        if (factory == nullptr)
+            return {};
+
+        PClassInfo info{};
+        factory->getClassInfo (classIndex, &info);
+
+        return toString (info.name).trim();
     }
 
-    File getFile() const noexcept    { return file; }
-    String getName() const noexcept  { return name; }
+    File getFile() const
+    {
+        return handle != nullptr ? handle->getFile() : File{};
+    }
+
+    bool isValid() const
+    {
+        if (handle == nullptr)
+            return false;
+
+        const auto factory = handle->getPluginFactory();
+
+        if (factory == nullptr)
+            return false;
+
+        return isPositiveAndBelow (classIndex, factory->countClasses());
+    }
 
 private:
-    //==============================================================================
-    static Array<VST3ModuleHandle*>& getActiveModules()
+    static Steinberg::int32 findClassMatchingDescription (VSTComSmartPtr<IPluginFactory> factory, const PluginDescription& desc)
     {
-        static Array<VST3ModuleHandle*> activeModules;
-        return activeModules;
-    }
+        const auto numClasses = factory->countClasses();
 
-    //==============================================================================
-    bool open (const PluginDescription& description)
-    {
-        auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory());
-
-        if (pluginFactory != nullptr)
+        for (auto i = decltype (numClasses){}; i < numClasses; ++i)
         {
-            auto numClasses = pluginFactory->countClasses();
+            PClassInfo info{};
+            factory->getClassInfo (i, &info);
 
-            for (Steinberg::int32 i = 0; i < numClasses; ++i)
-            {
-                PClassInfo info;
-                pluginFactory->getClassInfo (i, &info);
+            if (std::strcmp (info.category, kVstAudioEffectClass) != 0)
+                continue;
 
-                if (std::strcmp (info.category, kVstAudioEffectClass) != 0)
-                    continue;
+            const auto uniqueId = getHashForRange (getNormalisedTUID (info.cid));
+            const auto deprecatedUid = getHashForRange (info.cid);
 
-                const auto uniqueId = getHashForRange (getNormalisedTUID (info.cid));
-                const auto deprecatedUid = getHashForRange (info.cid);
+            if (toString (info.name).trim() != desc.name)
+                continue;
 
-                if (toString (info.name).trim() == description.name
-                    && (uniqueId == description.uniqueId || deprecatedUid == description.deprecatedUid))
-                {
-                    name = description.name;
-                    return true;
-                }
-            }
+            if (uniqueId != desc.uniqueId && deprecatedUid != desc.deprecatedUid)
+                continue;
+
+            return i;
         }
 
-        return false;
+        return numClasses;
     }
 
-    File file;
-    String name;
-    bool isOpen = false;
+    RefCountedDllHandle::Ptr handle;
+    Steinberg::int32 classIndex{};
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3ModuleHandle)
+    JUCE_LEAK_DETECTOR (VST3ModuleHandle)
 };
 
 template <typename Type, size_t N>
@@ -1535,8 +1527,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory ([[maybe_unused]] IP
 
 static std::shared_ptr<const ARA::ARAFactory> getARAFactory (VST3ModuleHandle& module)
 {
-    auto* pluginFactory = module.getPluginFactory();
-    return getARAFactory (pluginFactory, module.getName());
+    return getARAFactory (module.getPluginFactory().get(), module.getName());
 }
 
 //==============================================================================
@@ -1646,14 +1637,17 @@ private:
     /*  Convert from the component's coordinate system to the hosted VST3's coordinate system. */
     ViewRect componentToVST3Rect (Rectangle<int> r) const
     {
-        const auto physical = localAreaToGlobal (r) * nativeScaleFactor * getDesktopScaleFactor();
+        const auto combinedScale = nativeScaleFactor * getDesktopScaleFactor();
+        const auto physical = (localAreaToGlobal (r.toFloat()) * combinedScale).toNearestInt();
         return { 0, 0, physical.getWidth(), physical.getHeight() };
     }
 
     /*  Convert from the hosted VST3's coordinate system to the component's coordinate system. */
     Rectangle<int> vst3ToComponentRect (const ViewRect& vr) const
     {
-        return getLocalArea (nullptr, Rectangle<int> { vr.right, vr.bottom } / (nativeScaleFactor * getDesktopScaleFactor()));
+        const auto combinedScale = nativeScaleFactor * getDesktopScaleFactor();
+        const auto floatRect = Rectangle { (float) vr.right, (float) vr.bottom } / combinedScale;
+        return getLocalArea (nullptr, floatRect).toNearestInt();
     }
 
     void componentMovedOrResized (bool, bool wasResized) override
@@ -1938,7 +1932,8 @@ static bool hasARAExtension (IPluginFactory* pluginFactory, const String& plugin
 //==============================================================================
 struct VST3ComponentHolder
 {
-    VST3ComponentHolder (const VST3ModuleHandle::Ptr& m)  : module (m)
+    explicit VST3ComponentHolder (const VST3ModuleHandle& m)
+        : module (m)
     {
         host = addVSTComSmartPtrOwner (new VST3HostContext());
     }
@@ -1973,12 +1968,14 @@ struct VST3ComponentHolder
             && component->getControllerClassId (controllerCID) == kResultTrue
             && FUID (controllerCID).isValid())
         {
+            auto factory = module.getPluginFactory();
             editController.loadFrom (factory.get(), controllerCID);
         }
 
         if (editController == nullptr)
         {
             // Try finding the IEditController the long way around:
+            auto factory = module.getPluginFactory();
             auto numClasses = factory->countClasses();
 
             for (Steinberg::int32 i = 0; i < numClasses; ++i)
@@ -1997,71 +1994,78 @@ struct VST3ComponentHolder
     //==============================================================================
     void fillInPluginDescription (PluginDescription& description) const
     {
-        jassert (module != nullptr && isComponentInitialised);
+        jassert (module.isValid() && isComponentInitialised);
+
+        const auto factory = module.getPluginFactory();
+
+        if (factory == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
 
         PFactoryInfo factoryInfo;
         factory->getFactoryInfo (&factoryInfo);
 
-        auto classIdx = getClassIndex (module->getName());
+        const auto classIdx = module.getClassIndex();
 
-        if (classIdx >= 0)
+        if (classIdx == factory->countClasses())
         {
-            PClassInfo info;
-            [[maybe_unused]] bool success = (factory->getClassInfo (classIdx, &info) == kResultOk);
-            jassert (success);
-
-            VSTComSmartPtr<IPluginFactory2> pf2;
-            VSTComSmartPtr<IPluginFactory3> pf3;
-
-            std::unique_ptr<PClassInfo2> info2;
-            std::unique_ptr<PClassInfoW> infoW;
-
-            if (pf2.loadFrom (factory.get()))
-            {
-                info2.reset (new PClassInfo2());
-                pf2->getClassInfo2 (classIdx, info2.get());
-            }
-            else
-            {
-                info2.reset();
-            }
-
-            if (pf3.loadFrom (factory.get()))
-            {
-                pf3->setHostContext (host->getFUnknown());
-                infoW.reset (new PClassInfoW());
-                pf3->getClassInfoUnicode (classIdx, infoW.get());
-            }
-            else
-            {
-                infoW.reset();
-            }
-
-            Vst::BusInfo bus;
-            int totalNumInputChannels = 0, totalNumOutputChannels = 0;
-
-            int n = component->getBusCount (Vst::kAudio, Vst::kInput);
-            for (int i = 0; i < n; ++i)
-                if (component->getBusInfo (Vst::kAudio, Vst::kInput, i, bus) == kResultOk)
-                    totalNumInputChannels += ((bus.flags & Vst::BusInfo::kDefaultActive) != 0 ? bus.channelCount : 0);
-
-            n = component->getBusCount (Vst::kAudio, Vst::kOutput);
-            for (int i = 0; i < n; ++i)
-                if (component->getBusInfo (Vst::kAudio, Vst::kOutput, i, bus) == kResultOk)
-                    totalNumOutputChannels += ((bus.flags & Vst::BusInfo::kDefaultActive) != 0 ? bus.channelCount : 0);
-
-            createPluginDescription (description, module->getFile(),
-                                     factoryInfo.vendor, module->getName(),
-                                     info, info2.get(), infoW.get(),
-                                     totalNumInputChannels,
-                                     totalNumOutputChannels);
-
-            description.hasARAExtension = hasARAExtension (factory.get(), description.name);
-
+            jassertfalse;
             return;
         }
 
-        jassertfalse;
+        PClassInfo info;
+        [[maybe_unused]] bool success = (factory->getClassInfo (classIdx, &info) == kResultOk);
+        jassert (success);
+
+        VSTComSmartPtr<IPluginFactory2> pf2;
+        VSTComSmartPtr<IPluginFactory3> pf3;
+
+        std::unique_ptr<PClassInfo2> info2;
+        std::unique_ptr<PClassInfoW> infoW;
+
+        if (pf2.loadFrom (factory.get()))
+        {
+            info2.reset (new PClassInfo2());
+            pf2->getClassInfo2 (classIdx, info2.get());
+        }
+        else
+        {
+            info2.reset();
+        }
+
+        if (pf3.loadFrom (factory.get()))
+        {
+            pf3->setHostContext (host->getFUnknown());
+            infoW.reset (new PClassInfoW());
+            pf3->getClassInfoUnicode (classIdx, infoW.get());
+        }
+        else
+        {
+            infoW.reset();
+        }
+
+        Vst::BusInfo bus;
+        int totalNumInputChannels = 0, totalNumOutputChannels = 0;
+
+        int n = component->getBusCount (Vst::kAudio, Vst::kInput);
+        for (int i = 0; i < n; ++i)
+            if (component->getBusInfo (Vst::kAudio, Vst::kInput, i, bus) == kResultOk)
+                totalNumInputChannels += ((bus.flags & Vst::BusInfo::kDefaultActive) != 0 ? bus.channelCount : 0);
+
+        n = component->getBusCount (Vst::kAudio, Vst::kOutput);
+        for (int i = 0; i < n; ++i)
+            if (component->getBusInfo (Vst::kAudio, Vst::kOutput, i, bus) == kResultOk)
+                totalNumOutputChannels += ((bus.flags & Vst::BusInfo::kDefaultActive) != 0 ? bus.channelCount : 0);
+
+        createPluginDescription (description, module.getFile(),
+                                 factoryInfo.vendor, module.getName(),
+                                 info, info2.get(), infoW.get(),
+                                 totalNumInputChannels,
+                                 totalNumOutputChannels);
+
+        description.hasARAExtension = hasARAExtension (factory.get(), description.name);
     }
 
     //==============================================================================
@@ -2075,7 +2079,10 @@ struct VST3ComponentHolder
         // initialisation are only called from the message thread.
         JUCE_ASSERT_MESSAGE_THREAD
 
-        factory = addVSTComSmartPtrOwner (module->getPluginFactory());
+        const auto factory = module.getPluginFactory();
+
+        if (factory == nullptr)
+            return false;
 
         VSTComSmartPtr<IPluginFactory3> pf3;
         pf3.loadFrom (factory.get());
@@ -2083,8 +2090,9 @@ struct VST3ComponentHolder
         if (pf3 != nullptr)
             pf3->setHostContext (host->getFUnknown());
 
-        int classIdx;
-        if ((classIdx = getClassIndex (module->getName())) < 0)
+        const auto classIdx = module.getClassIndex();
+
+        if (classIdx == factory->countClasses())
             return false;
 
         PClassInfo info;
@@ -2116,23 +2124,7 @@ struct VST3ComponentHolder
     }
 
     //==============================================================================
-    int getClassIndex (const String& className) const
-    {
-        PClassInfo info;
-        const Steinberg::int32 numClasses = factory->countClasses();
-
-        for (Steinberg::int32 j = 0; j < numClasses; ++j)
-            if (factory->getClassInfo (j, &info) == kResultOk
-                 && std::strcmp (info.category, kVstAudioEffectClass) == 0
-                 && toString (info.name).trim() == className)
-                return j;
-
-        return -1;
-    }
-
-    //==============================================================================
-    VST3ModuleHandle::Ptr module;
-    VSTComSmartPtr<IPluginFactory> factory;
+    VST3ModuleHandle module;
     VSTComSmartPtr<VST3HostContext> host;
     VSTComSmartPtr<Vst::IComponent> component;
     FUID cidOfComponent;
@@ -2556,7 +2548,7 @@ public:
 
             void createARAFactoryAsync (std::function<void (ARAFactoryWrapper)> cb) const noexcept override
             {
-                cb (ARAFactoryWrapper { ::juce::getARAFactory (*(instance->holder->module)) });
+                cb (ARAFactoryWrapper { ::juce::getARAFactory (instance->holder->module) });
             }
 
             const VST3PluginInstance* instance = nullptr;
@@ -2565,7 +2557,7 @@ public:
         Extensions extensions { this };
         visitor.visitVST3Client (extensions);
 
-        if (::juce::getARAFactory (*(holder->module)))
+        if (::juce::getARAFactory (holder->module))
         {
             visitor.visitARAClient (extensions);
         }
@@ -2586,8 +2578,7 @@ public:
     //==============================================================================
     const String getName() const override
     {
-        auto& module = holder->module;
-        return module != nullptr ? module->getName() : String();
+        return holder->module.getName();
     }
 
     std::vector<Vst::SpeakerArrangement> getActualArrangements (bool isInput) const
@@ -3948,7 +3939,12 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
             for every housed plugin.
         */
 
-        auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file).getPluginFactory());
+        auto handle = RefCountedDllHandle::getHandle (file);
+
+        if (handle == nullptr)
+            continue;
+
+        auto pluginFactory = handle->getPluginFactory();
 
         if (pluginFactory == nullptr)
             continue;
@@ -3968,8 +3964,9 @@ void VST3PluginFormat::createARAFactoryAsync (const PluginDescription& descripti
         callback ({ {}, "The provided plugin does not support ARA features" });
     }
 
-    File file (description.fileOrIdentifier);
-    auto pluginFactory = addVSTComSmartPtrOwner (DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory());
+    const File file (description.fileOrIdentifier);
+    auto handle = RefCountedDllHandle::getHandle (file.getFullPathName());
+    auto pluginFactory = handle->getPluginFactory();
     const auto* pluginName = description.name.toRawUTF8();
 
     callback ({ ARAFactoryWrapper { ::juce::getARAFactory (pluginFactory.get(), pluginName) }, {} });
@@ -3991,9 +3988,9 @@ static std::unique_ptr<AudioPluginInstance> createVST3Instance (VST3PluginFormat
     const ScopedWorkingDirectory scope;
     file.getParentDirectory().setAsCurrentWorkingDirectory();
 
-    const VST3ModuleHandle::Ptr module { VST3ModuleHandle::findOrCreateModule (file, description) };
+    const auto module = VST3ModuleHandle::create (file, description);
 
-    if (module == nullptr)
+    if (! module.isValid())
         return nullptr;
 
     auto holder = std::make_unique<VST3ComponentHolder> (module);

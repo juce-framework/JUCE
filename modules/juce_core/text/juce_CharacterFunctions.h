@@ -150,6 +150,70 @@ public:
     /** Converts a byte of Windows 1252 codepage to unicode. */
     static juce_wchar getUnicodeCharFromWindows1252Codepage (uint8 windows1252Char) noexcept;
 
+    /** Returns true if a unicode code point is part of the basic multilingual plane.
+
+        @see isAscii, isNonSurrogateCodePoint
+    */
+    static constexpr bool isPartOfBasicMultilingualPlane (juce_wchar character) noexcept
+    {
+        return (uint32) character < 0x10000;
+    }
+
+    /** Returns true if a unicode code point is in the range os ASCII characters.
+
+        @see isAsciiControlCharacter, isPartOfBasicMultilingualPlane
+    */
+    static constexpr bool isAscii (juce_wchar character) noexcept
+    {
+        return (uint32) character < 128;
+    }
+
+    /** Returns true if a unicode code point is in the range of ASCII control characters.
+
+        @see isAscii
+    */
+    static constexpr bool isAsciiControlCharacter (juce_wchar character) noexcept
+    {
+        return (uint32) character < 32;
+    }
+
+    /** Returns true if a unicode code point is in the range of UTF-16 surrogate code units.
+
+        @see isHighSurrogate, isLowSurrogate
+    */
+    static constexpr bool isSurrogate (juce_wchar character) noexcept
+    {
+        const auto n = (uint32) character;
+        return 0xd800 <= n && n <= 0xdfff;
+    }
+
+    /** Returns true if a unicode code point is in the range of UTF-16 high surrogate code units.
+
+        @see isLowSurrogate, isSurrogate
+    */
+    static constexpr bool isHighSurrogate (juce_wchar character) noexcept
+    {
+        const auto n = (uint32) character;
+        return 0xd800 <= n && n <= 0xdbff;
+    }
+
+    /** Returns true if a unicode code point is in the range of UTF-16 low surrogate code units.
+
+        @see isHighSurrogate, isSurrogate
+    */
+    static constexpr bool isLowSurrogate (juce_wchar character) noexcept
+    {
+        const auto n = (uint32) character;
+        return 0xdc00 <= n && n <= 0xdfff;
+    }
+
+    /** Returns true if a unicode code point is in the range of valid unicode code points. */
+    static constexpr bool isNonSurrogateCodePoint (juce_wchar character) noexcept
+    {
+        const auto n = (uint32) character;
+        return n <= 0x10ffff && ! isSurrogate (character);
+    }
+
     //==============================================================================
     /** Parses a character string to read a floating-point number.
         Note that this will advance the pointer that is passed in, leaving it at

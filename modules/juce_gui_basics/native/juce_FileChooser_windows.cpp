@@ -49,7 +49,7 @@ public:
     Win32NativeFileChooser (Component* parent, int flags, FilePreviewComponent* previewComp,
                             const File& startingFile, const String& titleToUse,
                             const String& filtersToUse)
-        : Thread ("Native Win32 FileChooser"),
+        : Thread (SystemStats::getJUCEVersion() + ": Native Win32 FileChooser"),
           owner (parent),
           title (titleToUse),
           filtersString (filtersToUse.replaceCharacter (',', ';')),

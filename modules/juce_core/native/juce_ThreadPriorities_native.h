@@ -56,7 +56,7 @@ struct ThreadPriorities
     };
    #endif
 
-    inline static constexpr Entry table[]
+    static inline constexpr Entry table[]
     {
        #if JUCE_ANDROID
         { Thread::Priority::highest,    AndroidThreadPriority::THREAD_PRIORITY_AUDIO },

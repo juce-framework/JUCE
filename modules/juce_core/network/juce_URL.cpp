@@ -42,7 +42,7 @@ struct FallbackDownloadTask final : public URL::DownloadTask,
                           size_t bufferSizeToUse,
                           std::unique_ptr<WebInputStream> streamToUse,
                           URL::DownloadTask::Listener* listenerToUse)
-        : Thread ("DownloadTask thread"),
+        : Thread (SystemStats::getJUCEVersion() + ": DownloadTask thread"),
           fileStream (std::move (outputStreamToUse)),
           stream (std::move (streamToUse)),
           bufferSize (bufferSizeToUse),

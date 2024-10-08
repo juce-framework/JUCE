@@ -53,11 +53,11 @@
  *  - SDK 10.2.1 > \c 0x0A02
  *
  */
-#define AAX_SDK_VERSION ( 0x0206 )
+#define AAX_SDK_VERSION ( 0x0208 )
 
 /** \brief An atomic revision number for the source included in this SDK
  */
-#define AAX_SDK_CURRENT_REVISION ( 20207000 )
+#define AAX_SDK_CURRENT_REVISION ( 20208000 )
 
 
 #define AAX_SDK_1p0p1_REVISION ( 3712639 )
@@ -84,6 +84,7 @@
 #define AAX_SDK_2p6p0_REVISION ( 20206000 )
 #define AAX_SDK_2p6p1_REVISION ( 20206001 )
 #define AAX_SDK_2p7p0_REVISION ( 20207000 )
+#define AAX_SDK_2p8p0_REVISION ( 20208000 )
 //CURREVSTAMP < do not remove this comment
 
 

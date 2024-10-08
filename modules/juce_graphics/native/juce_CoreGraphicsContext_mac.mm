@@ -638,7 +638,10 @@ void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float
         CGContextSetLineCap (context.get(), kCGLineCapButt);
         CGContextSetLineJoin (context.get(), kCGLineJoinMiter);
 
-        detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr) };
+        detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r),
+                                                            std::clamp (cornerSize, 0.0f, r.getWidth() / 2.0f),
+                                                            std::clamp (cornerSize, 0.0f, r.getHeight() / 2.0f),
+                                                            nullptr) };
         CGContextAddPath (context.get(), path.get());
         drawCurrentPath (kCGPathStroke);
     }
@@ -669,7 +672,10 @@ void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float
 void CoreGraphicsContext::fillRoundedRectangle (const Rectangle<float>& r, float cornerSize)
 {
     CGContextBeginPath (context.get());
-    detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r), cornerSize, cornerSize, nullptr) };
+    detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r),
+                                                        std::clamp (cornerSize, 0.0f, r.getWidth() / 2.0f),
+                                                        std::clamp (cornerSize, 0.0f, r.getHeight() / 2.0f),
+                                                        nullptr) };
     CGContextAddPath (context.get(), path.get());
     drawCurrentPath (kCGPathFill);
 }
@@ -838,21 +844,20 @@ void CoreGraphicsContext::drawGlyphs (Span<const uint16_t> glyphs,
         flip();
         applyTransform (AffineTransform::scale (1.0f, -1.0f).followedBy (transform));
 
-        std::vector<CGPoint> pos (glyphs.size());
+        CopyableHeapBlock<CGPoint> pos (glyphs.size());
         std::transform (positions.begin(), positions.end(), pos.begin(), [scale] (const auto& p) { return CGPointMake (p.x / scale, -p.y); });
 
         CTFontDrawGlyphs (state->fontRef.get(), glyphs.data(), pos.data(), glyphs.size(), context.get());
+        return;
     }
-    else
+
+    for (const auto [index, glyph] : enumerate (glyphs, size_t{}))
     {
-        for (const auto [index, glyph] : enumerate (glyphs, size_t{}))
-        {
-            Path p;
-            auto& f = state->font;
-            f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyph, p);
-            const auto scale = f.getHeight();
-            fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).translated (positions[index]).followedBy (transform));
-        }
+        Path p;
+        auto& f = state->font;
+        f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyph, p);
+        const auto scale = f.getHeight();
+        fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).translated (positions[index]).followedBy (transform));
     }
 }
 

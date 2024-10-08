@@ -114,6 +114,28 @@ public:
         return stringArrayFromRange (strings);
     }
 
+    static std::vector<ComSmartPtr<IDWriteFont>> getAllFontsInFamily (IDWriteFontFamily* fontFamily)
+    {
+        const auto fontFacesCount = fontFamily->GetFontCount();
+        std::vector<ComSmartPtr<IDWriteFont>> result;
+        result.reserve (fontFacesCount);
+
+        for (UINT32 i = 0; i < fontFacesCount; ++i)
+        {
+            ComSmartPtr<IDWriteFont> dwFont;
+
+            if (FAILED (fontFamily->GetFont (i, dwFont.resetAndGetPointerAddress())))
+                continue;
+
+            if (dwFont->GetSimulations() != DWRITE_FONT_SIMULATIONS_NONE)
+                continue;
+
+            result.push_back (dwFont);
+        }
+
+        return result;
+    }
+
     StringArray findAllTypefaceStyles (const String& family)
     {
         const std::scoped_lock lock { mutex };
@@ -131,21 +153,18 @@ public:
             if (FAILED (collection->GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress())) || fontFamily == nullptr)
                 continue;
 
-            // Get the font faces
-            const auto fontFacesCount = fontFamily->GetFontCount();
-            std::set<String> results;
+            std::set<String> uniqueResults;
+            StringArray orderedResults;
 
-            for (uint32 i = 0; i < fontFacesCount; ++i)
+            for (const auto& font : getAllFontsInFamily (fontFamily))
             {
-                ComSmartPtr<IDWriteFont> dwFont;
+                const auto name = getFontFaceName (font);
 
-                if (FAILED (fontFamily->GetFont (i, dwFont.resetAndGetPointerAddress())) || dwFont->GetSimulations() != DWRITE_FONT_SIMULATIONS_NONE)
-                    continue;
-
-                results.insert (getFontFaceName (dwFont));
+                if (uniqueResults.insert (name).second)
+                    orderedResults.add (name);
             }
 
-            return stringArrayFromRange (results);
+            return orderedResults;
         }
 
         return {};
@@ -153,6 +172,8 @@ public:
 
     ComSmartPtr<IDWriteFontFamily> getFamilyByName (const wchar_t* name)
     {
+        const std::scoped_lock lock { mutex };
+
         for (const auto& collection : collections)
         {
             const auto fontIndex = [&]
@@ -174,6 +195,19 @@ public:
                 continue;
 
             return family;
+        }
+
+        return {};
+    }
+
+    ComSmartPtr<IDWriteFont> findFontForFace (IDWriteFontFace* face)
+    {
+        for (const auto& collection : collections)
+        {
+            ComSmartPtr<IDWriteFont> result;
+
+            if (SUCCEEDED (collection->GetFontFromFontFace (face, result.resetAndGetPointerAddress())))
+                return result;
         }
 
         return {};
@@ -550,8 +584,19 @@ public:
         const auto family = factories->getFonts().getFamilyByName (name.toWideCharPointer());
 
         if (family == nullptr)
-            return {};
+            return getLastResortTypeface (f);
 
+        // Try matching the typeface style first
+        const auto fonts = AggregateFontCollection::getAllFontsInFamily (family);
+        const auto matchingStyle = std::find_if (fonts.begin(), fonts.end(), [&] (const auto& ptr)
+        {
+            return style.compareIgnoreCase (getFontFaceName (ptr)) == 0;
+        });
+
+        if (matchingStyle != fonts.end())
+            return fromFont (*matchingStyle, nullptr, &f, MetricsMechanism::dwriteOnly);
+
+        // No matching typeface style, so let dwrite try to find a reasonable substitute
         const auto weight = f.isBold() ? DWRITE_FONT_WEIGHT_BOLD : DWRITE_FONT_WEIGHT_NORMAL;
         const auto italic = f.isItalic() ? DWRITE_FONT_STYLE_ITALIC : DWRITE_FONT_STYLE_NORMAL;
 
@@ -560,21 +605,7 @@ public:
         if (FAILED (family->GetFirstMatchingFont (weight, DWRITE_FONT_STRETCH_NORMAL, italic, dwFont.resetAndGetPointerAddress())) || dwFont == nullptr)
             return {};
 
-        ComSmartPtr<IDWriteFontFace> dwFontFace;
-
-        if (FAILED (dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress())) || dwFontFace == nullptr)
-            return {};
-
-        const HbFace hbFace { hb_directwrite_face_create (dwFontFace) };
-        HbFont hbFont { hb_font_create (hbFace.get()) };
-
-        FontStyleHelpers::initSynthetics (hbFont.get(), f);
-        return new WindowsDirectWriteTypeface (name,
-                                               style,
-                                               dwFont,
-                                               dwFontFace,
-                                               std::move (hbFont),
-                                               getDwriteMetrics (dwFontFace));
+        return fromFont (dwFont, nullptr, &f, MetricsMechanism::dwriteOnly);
     }
 
     static Typeface::Ptr from (Span<const std::byte> blob)
@@ -610,25 +641,7 @@ public:
         if (FAILED (fontFamily->GetFont (0, dwFont.resetAndGetPointerAddress())) || dwFont == nullptr)
             return {};
 
-        ComSmartPtr<IDWriteFontFace> dwFontFace;
-
-        if (FAILED (dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress())) || dwFontFace == nullptr)
-            return {};
-
-        const auto name = getLocalisedFamilyName (*fontFamily);
-        const auto style = getLocalisedStyle (*dwFont);
-
-        const HbFace hbFace { hb_directwrite_face_create (dwFontFace) };
-        HbFont font { hb_font_create (hbFace.get()) };
-        const auto metrics = getGdiMetrics (font.get()).value_or (getDwriteMetrics (dwFontFace));
-
-        return new WindowsDirectWriteTypeface (name,
-                                               style,
-                                               dwFont,
-                                               dwFontFace,
-                                               std::move (font),
-                                               metrics,
-                                               customFontCollection);
+        return fromFont (dwFont, customFontCollection, nullptr, MetricsMechanism::gdiWithDwriteFallback);
     }
 
     Native getNativeDetails() const override
@@ -666,15 +679,7 @@ public:
         if (mapped.font == nullptr)
             return {};
 
-        ComSmartPtr<IDWriteFontFace> mappedFace;
-        if (FAILED (mapped.font->CreateFontFace (mappedFace.resetAndGetPointerAddress())) || mappedFace == nullptr)
-            return {};
-
-        const HbFace hbFace { hb_directwrite_face_create (mappedFace) };
-
-        const auto mappedName = getLocalisedFamilyName (*mapped.font);
-        const auto mappedStyle = getLocalisedStyle (*mapped.font);
-        return new WindowsDirectWriteTypeface (mappedName, mappedStyle, mapped.font, mappedFace, HbFont { hb_font_create (hbFace.get()) }, {});
+        return fromFont (mapped.font, nullptr, nullptr, MetricsMechanism::dwriteOnly);
     }
 
     ComSmartPtr<IDWriteFontFace> getIDWriteFontFace() const { return dwFontFace; }
@@ -697,26 +702,7 @@ public:
         if (FAILED (interop->CreateFontFromLOGFONT (&nonClientMetrics.lfMessageFont, dwFont.resetAndGetPointerAddress())) || dwFont == nullptr)
             return {};
 
-        ComSmartPtr<IDWriteFontFace> dwFontFace;
-        if (FAILED (dwFont->CreateFontFace (dwFontFace.resetAndGetPointerAddress())) || dwFontFace == nullptr)
-            return {};
-
-        const auto name = getLocalisedFamilyName (*dwFont);
-        const auto style = getLocalisedStyle (*dwFont);
-
-        const HbFace hbFace { hb_directwrite_face_create (dwFontFace) };
-        HbFont font { hb_font_create (hbFace.get()) };
-        const auto gdiMetrics = getGdiMetrics (font.get());
-        const auto dwMetrics = getDwriteMetrics (dwFontFace);
-        const auto metrics = gdiMetrics.value_or (dwMetrics);
-
-        return new WindowsDirectWriteTypeface (name,
-                                               style,
-                                               dwFont,
-                                               dwFontFace,
-                                               std::move (font),
-                                               metrics,
-                                               {});
+        return fromFont (dwFont, nullptr, nullptr, MetricsMechanism::gdiWithDwriteFallback);
     }
 
 private:
@@ -829,10 +815,10 @@ private:
             factories->getFonts().addCollection (collection);
     }
 
-    static TypefaceAscentDescent getDwriteMetrics (ComSmartPtr<IDWriteFontFace> face)
+    static TypefaceAscentDescent getDwriteMetrics (IDWriteFontFace& face)
     {
         DWRITE_FONT_METRICS dwriteFontMetrics{};
-        face->GetMetrics (&dwriteFontMetrics);
+        face.GetMetrics (&dwriteFontMetrics);
         return TypefaceAscentDescent { (float) dwriteFontMetrics.ascent  / (float) dwriteFontMetrics.designUnitsPerEm,
                                        (float) dwriteFontMetrics.descent / (float) dwriteFontMetrics.designUnitsPerEm };
     }
@@ -847,6 +833,91 @@ private:
 
         const auto upem = (float) hb_face_get_upem (hb_font_get_face (font));
         return TypefaceAscentDescent { (float) std::abs (ascent) / upem, (float) std::abs (descent) / upem };
+    }
+
+    enum class MetricsMechanism
+    {
+        dwriteOnly,
+        gdiWithDwriteFallback,
+    };
+
+    static Typeface::Ptr fromFont (ComSmartPtr<IDWriteFont> dwFont,
+                                   ComSmartPtr<IDWriteFontCollection> collection,
+                                   const Font* fontForSynthetics,
+                                   MetricsMechanism mm)
+    {
+        ComSmartPtr<IDWriteFontFace> dwFace;
+
+        if (FAILED (dwFont->CreateFontFace (dwFace.resetAndGetPointerAddress())) || dwFace == nullptr)
+            return {};
+
+        const auto name = getLocalisedFamilyName (*dwFont);
+        const auto style = getLocalisedStyle (*dwFont);
+
+        const HbFace hbFace { hb_directwrite_face_create (dwFace) };
+        HbFont font { hb_font_create (hbFace.get()) };
+        const auto dwMetrics = getDwriteMetrics (*dwFace);
+
+        const auto metrics = mm == MetricsMechanism::gdiWithDwriteFallback
+                           ? getGdiMetrics (font.get()).value_or (dwMetrics)
+                           : dwMetrics;
+
+        if (fontForSynthetics != nullptr)
+            FontStyleHelpers::initSynthetics (font.get(), *fontForSynthetics);
+
+        return new WindowsDirectWriteTypeface (name,
+                                               style,
+                                               dwFont,
+                                               dwFace,
+                                               std::move (font),
+                                               metrics,
+                                               collection);
+    }
+
+    // This attempts to replicate the behaviour of the non-directwrite typeface lookup in JUCE 7 and older
+    static Typeface::Ptr getLastResortTypeface (const Font& font)
+    {
+        auto* dc = CreateCompatibleDC (nullptr);
+        const ScopeGuard deleteDC { [&] { DeleteDC (dc); } };
+
+        SetMapperFlags (dc, 0);
+        SetMapMode (dc, MM_TEXT);
+
+        const auto style = font.getTypefaceStyle();
+
+        LOGFONTW lf{};
+        lf.lfCharSet = DEFAULT_CHARSET;
+        lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+        lf.lfOutPrecision = OUT_OUTLINE_PRECIS;
+        lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+        lf.lfQuality = PROOF_QUALITY;
+        lf.lfItalic = (BYTE) (style.contains ("Italic") ? TRUE : FALSE);
+        lf.lfWeight = style.contains ("Bold") ? FW_BOLD : FW_NORMAL;
+        lf.lfHeight = -256;
+        font.getTypefaceName().copyToUTF16 (lf.lfFaceName, sizeof (lf.lfFaceName));
+
+        auto* hfont = CreateFontIndirectW (&lf);
+        const ScopeGuard deleteFont { [&] { DeleteObject (hfont); } };
+
+        auto* prevFont = hfont != nullptr ? SelectObject (dc, hfont) : nullptr;
+        const ScopeGuard reinstateFont { [&] { if (prevFont != nullptr) SelectObject (dc, prevFont); } };
+
+        SharedResourcePointer<Direct2DFactories> factories;
+
+        ComSmartPtr<IDWriteGdiInterop> interop;
+        if (FAILED (factories->getDWriteFactory()->GetGdiInterop (interop.resetAndGetPointerAddress())) || interop == nullptr)
+            return {};
+
+        ComSmartPtr<IDWriteFontFace> dwFontFace;
+        if (FAILED (interop->CreateFontFaceFromHdc (dc, dwFontFace.resetAndGetPointerAddress())) || dwFontFace == nullptr)
+            return {};
+
+        const auto dwFont = factories->getFonts().findFontForFace (dwFontFace);
+
+        if (dwFont == nullptr)
+            return {};
+
+        return fromFont (dwFont, nullptr, nullptr, MetricsMechanism::gdiWithDwriteFallback);
     }
 
     SharedResourcePointer<Direct2DFactories> factories;

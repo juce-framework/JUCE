@@ -723,7 +723,7 @@ char8* FStreamer::readStr8 ()
 	if (length > 262144)
 		return nullptr;
 
-	char8* s = (length > 0) ? NEWVEC char8[length] : nullptr;
+	char8* s = (length > 0) ? NEWSTR8 (length) : nullptr;
 	if (s)
 		readRaw (s, length * sizeof (char8));
 	return s;

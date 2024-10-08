@@ -39,6 +39,7 @@
 #include "base/source/fobject.h"
 #include "base/thread/include/flock.h"
 
+#include <functional>
 #include <vector>
 #define SMTG_VALIDATE_DEPENDENCY_COUNT DEVELOPMENT // validating dependencyCount
 
@@ -48,6 +49,13 @@
 #endif // SMTG_DEPENDENCY_COUNT
 
 namespace Steinberg {
+
+// Entry point for addRef/release tracking. See fobjecttracker.h
+//------------------------------------------------------------------------
+#if DEVELOPMENT
+using FObjectTrackerFn = std::function<void (FObject*, bool)>;
+FObjectTrackerFn gFObjectTracker = nullptr;
+#endif
 
 IUpdateHandler* FObject::gUpdateHandler = nullptr;
 
@@ -112,12 +120,26 @@ FObject::~FObject ()
 //------------------------------------------------------------------------
 uint32 PLUGIN_API FObject::addRef ()
 {
+#if DEVELOPMENT
+	if (gFObjectTracker)
+	{
+		gFObjectTracker (this, true);
+	}
+#endif
+
 	return FUnknownPrivate::atomicAdd (refCount, 1);
 }
 
 //------------------------------------------------------------------------
 uint32 PLUGIN_API FObject::release ()
 {
+#if DEVELOPMENT
+	if (gFObjectTracker)
+	{
+		gFObjectTracker (this, false);
+	}
+#endif
+
 	if (FUnknownPrivate::atomicAdd (refCount, -1) == 0)
 	{
 		refCount = -1000;

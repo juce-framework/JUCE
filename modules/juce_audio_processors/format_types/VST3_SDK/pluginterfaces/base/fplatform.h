@@ -82,14 +82,9 @@
 	#define SMTG_EXPORT_SYMBOL __declspec (dllexport)
 	#define SMTG_HIDDEN_SYMBOL
 
-	#ifndef _CRT_SECURE_NO_WARNINGS
-		#define _CRT_SECURE_NO_WARNINGS
-	#endif
-
 	#ifdef _MSC_VER
 		#pragma warning (disable : 4244) //! @brief warning C4244: Conversion from 'type1' to 'type2', possible loss of data.
 		#pragma warning (disable : 4250) //! @brief warning C4250: Inheritance via dominance is allowed
-		#pragma warning (disable : 4996) //! @brief warning C4996: deprecated functions
 
 		#pragma warning (3 : 4189) //! @brief warning C4189: local variable is initialized but not referenced
 		#pragma warning (3 : 4238) //! @brief warning C4238: nonstandard extension used : class rvalue used as lvalue
