@@ -226,6 +226,7 @@
  #include "native/juce_Registry_windows.cpp"
  #include "native/juce_SystemStats_windows.cpp"
  #include "native/juce_Threads_windows.cpp"
+ #include "native/juce_PlatformTimer_generic.cpp"
  #include "native/juce_PlatformTimer_windows.cpp"
 
 //==============================================================================

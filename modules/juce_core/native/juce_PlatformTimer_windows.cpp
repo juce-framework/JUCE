@@ -51,27 +51,59 @@ public:
         };
 
         timerId = timeSetEvent ((UINT) newIntervalMs, 1, callback, (DWORD_PTR) &listener, TIME_PERIODIC | TIME_CALLBACK_FUNCTION);
-        intervalMs = timerId != 0 ? newIntervalMs : 0;
+        const auto timerStarted = timerId != 0;
+
+        if (timerStarted)
+        {
+            intervalMs = newIntervalMs;
+            return;
+        }
+
+        if (fallbackTimer == nullptr)
+        {
+            // This assertion indicates that the creation of a high-resolution timer
+            // failed, and the timer is falling back to a less accurate implementation.
+            // Timer callbacks will still fire but the timing precision of the callbacks
+            // will be significantly compromised!
+            // The most likely reason for this is that more than the system limit of 16
+            // HighResolutionTimers are trying to run simultaneously in the same process.
+            // You may be able to reduce the number of HighResolutionTimer instances by
+            // only creating one instance that is shared (see SharedResourcePointer).
+            //
+            // However, if this is a plugin running inside a host, other plugins could
+            // be creating timers in the same process. In most cases it's best to find
+            // an alternative approach than relying on the precision of any timer!
+           #if ! JUCE_UNIT_TESTS
+            jassertfalse;
+           #endif
+
+            fallbackTimer = std::make_unique<GenericPlatformTimer> (listener);
+        }
+
+        fallbackTimer->startTimer (newIntervalMs);
+        intervalMs = fallbackTimer->getIntervalMs();
     }
 
     void cancelTimer()
     {
-        jassert (timerId != 0);
+        if (timerId != 0)
+            timeKillEvent (timerId);
+        else if (fallbackTimer != nullptr)
+            fallbackTimer->cancelTimer();
+        else
+            jassertfalse;
 
-        timeKillEvent (timerId);
         timerId = 0;
         intervalMs = 0;
     }
 
-    int getIntervalMs() const
-    {
-        return intervalMs;
-    }
+    int getIntervalMs() const { return intervalMs; }
 
 private:
     PlatformTimerListener& listener;
     UINT timerId { 0 };
     int intervalMs { 0 };
+    std::unique_ptr<GenericPlatformTimer> fallbackTimer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlatformTimer)
     JUCE_DECLARE_NON_MOVEABLE (PlatformTimer)

@@ -35,17 +35,21 @@
 namespace juce
 {
 
-class PlatformTimer final : private Thread
+class GenericPlatformTimer final : private Thread
 {
 public:
-    explicit PlatformTimer (PlatformTimerListener& ptl)
+    explicit GenericPlatformTimer (PlatformTimerListener& ptl)
         : Thread { "HighResolutionTimerThread" },
           listener { ptl }
     {
-        startThread (Priority::highest);
+        if (startThread (Priority::highest))
+            return;
+
+        // This likely suggests there are too many threads running!
+        jassertfalse;
     }
 
-    ~PlatformTimer()
+    ~GenericPlatformTimer() override
     {
         stopThread (-1);
     }
@@ -154,8 +158,12 @@ private:
     mutable std::mutex runCopyMutex;
     std::shared_ptr<Timer> timer;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlatformTimer)
-    JUCE_DECLARE_NON_MOVEABLE (PlatformTimer)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenericPlatformTimer)
+    JUCE_DECLARE_NON_MOVEABLE (GenericPlatformTimer)
 };
+
+#if ! JUCE_WINDOWS
+using PlatformTimer = GenericPlatformTimer;
+#endif
 
 } // namespace juce
