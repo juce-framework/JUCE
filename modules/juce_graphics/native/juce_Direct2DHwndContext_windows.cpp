@@ -170,10 +170,6 @@ private:
 
     RectangleList<int> getPaintAreas() const override
     {
-        // Does the entire buffer need to be filled?
-        if (swap.state == SwapChain::State::bufferAllocated)
-            return swap.getSize();
-
         return deferredRepaints;
     }
 
@@ -422,6 +418,7 @@ Image Direct2DHwndContext::createSnapshot() const
 
 void Direct2DHwndContext::clearTargetBuffer()
 {
+    applyPendingClipList();
     pimpl->getDeviceContext()->Clear();
 }
 
