@@ -336,6 +336,8 @@ public:
 
     Image createSnapshot() const
     {
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
         // This won't capture child windows. Perhaps a better approach would be to use
         // IGraphicsCaptureItemInterop, although this is only supported on Windows 10 v1903+
 
@@ -356,8 +358,6 @@ public:
 
         if (const auto hr = context->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
             return {};
-
-        const ScopedMultithread scope { directX->getD2DMultithread() };
 
         swap.chain->Present (0, DXGI_PRESENT_DO_NOT_WAIT);
 

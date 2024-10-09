@@ -261,7 +261,6 @@ public:
     DirectX() = default;
 
     auto getD2DFactory() const { return d2dSharedFactory; }
-    auto getD2DMultithread() const { return multithread; }
 
 private:
     ComSmartPtr<ID2D1Factory2> d2dSharedFactory = [&]
@@ -270,20 +269,13 @@ private:
         options.debugLevel = D2D1_DEBUG_LEVEL_NONE;
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
         ComSmartPtr<ID2D1Factory2> result;
-        auto hr = D2D1CreateFactory (D2D1_FACTORY_TYPE_MULTI_THREADED,
+        auto hr = D2D1CreateFactory (D2D1_FACTORY_TYPE_SINGLE_THREADED,
                                      __uuidof (ID2D1Factory2),
                                      &options,
                                      (void**) result.resetAndGetPointerAddress());
         jassertquiet (SUCCEEDED (hr));
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        return result;
-    }();
-
-    ComSmartPtr<ID2D1Multithread> multithread = [&]
-    {
-        ComSmartPtr<ID2D1Multithread> result;
-        d2dSharedFactory->QueryInterface<ID2D1Multithread> (result.resetAndGetPointerAddress());
         return result;
     }();
 
