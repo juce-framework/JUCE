@@ -245,6 +245,10 @@ public:
 
         // Require the entire window to be repainted
         deferredRepaints = size;
+
+        // The backbuffer has no valid content until we paint a full frame
+        dirtyRegionsInBackBuffer.clear();
+
         InvalidateRect (hwnd, nullptr, TRUE);
 
         // Resize/scale the swap chain
