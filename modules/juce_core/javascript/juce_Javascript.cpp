@@ -364,7 +364,7 @@ static var tryQuickJSToJuce (const qjs::QuickJSContext::ValuePtr& ptr,
             JSPropertyEnum* properties = nullptr;
             uint32_t numProps = 0;
 
-            if (JS_GetOwnPropertyNames (ptr.context, &properties, &numProps, obj.get(), JS_GPN_STRING_MASK | JS_GPN_ENUM_ONLY) != 0
+            if (JS_GetOwnPropertyNames (ptr.context, &properties, &numProps, obj.get(), JS_GPN_STRING_MASK) != 0
                 || properties == nullptr)
             {
                 return new DynamicObject;
