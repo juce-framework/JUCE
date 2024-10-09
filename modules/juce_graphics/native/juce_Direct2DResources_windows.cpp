@@ -416,48 +416,18 @@ public:
         if (swapChainEvent->getHandle() == INVALID_HANDLE_VALUE)
             return E_NOINTERFACE;
 
-        if (const auto hr = chain2->SetMaximumFrameLatency (1); SUCCEEDED (hr))
-            state = State::chainAllocated;
+        chain2->SetMaximumFrameLatency (1);
 
-        return S_OK;
-    }
-
-    HRESULT createBuffer (ComSmartPtr<ID2D1DeviceContext> deviceContext)
-    {
-        if (deviceContext == nullptr || chain == nullptr || buffer != nullptr)
-            return S_OK;
-
-        ComSmartPtr<IDXGISurface> surface;
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-        if (const auto hr = chain->GetBuffer (0, __uuidof (surface), reinterpret_cast<void**> (surface.resetAndGetPointerAddress())); FAILED (hr))
-            return hr;
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-        D2D1_BITMAP_PROPERTIES1 bitmapProperties{};
-        bitmapProperties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
-        bitmapProperties.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        bitmapProperties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
-
-        if (const auto hr = deviceContext->CreateBitmapFromDxgiSurface (surface, bitmapProperties, buffer.resetAndGetPointerAddress()); FAILED (hr))
-            return hr;
-
-        state = State::bufferAllocated;
-        return S_OK;
-    }
-
-    void release()
-    {
-        buffer = nullptr;
-        chain = nullptr;
-        state = State::idle;
+        createBuffer (adapter);
+        return buffer != nullptr ? S_OK : E_FAIL;
     }
 
     bool canPaint() const
     {
-        return chain != nullptr && buffer != nullptr && state >= State::bufferAllocated;
+        return chain != nullptr && buffer != nullptr;
     }
 
-    HRESULT resize (Rectangle<int> newSize, ComSmartPtr<ID2D1DeviceContext> deviceContext)
+    HRESULT resize (Rectangle<int> newSize)
     {
         if (chain == nullptr)
             return E_FAIL;
@@ -466,43 +436,97 @@ public:
                                  .getIntersection ({ Direct2DGraphicsContext::maxFrameSize, Direct2DGraphicsContext::maxFrameSize });
 
         buffer = nullptr;
-        state = State::chainAllocated;
 
         if (const auto hr = chain->ResizeBuffers (0, (UINT) scaledSize.getWidth(), (UINT) scaledSize.getHeight(), DXGI_FORMAT_B8G8R8A8_UNORM, swapChainFlags); FAILED (hr))
             return hr;
 
-        if (const auto hr = createBuffer (deviceContext); FAILED (hr))
-        {
-            release();
-            return hr;
-        }
+        ComSmartPtr<IDXGIDevice> device;
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        chain->GetDevice (__uuidof (device), (void**) device.resetAndGetPointerAddress());
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        return S_OK;
+        SharedResourcePointer<DirectX> directX;
+        createBuffer (Direct2DDeviceResources::findAdapter (directX->adapters, device));
+
+        return buffer != nullptr ? S_OK : E_FAIL;
     }
 
     Rectangle<int> getSize() const
     {
-        if (buffer == nullptr)
+        const auto surface = getSurface();
+
+        if (surface == nullptr)
             return {};
 
-        auto size = buffer->GetPixelSize();
-        return { (int) size.width, (int) size.height };
+        DXGI_SURFACE_DESC desc{};
+        if (FAILED (surface->GetDesc (&desc)))
+            return {};
+
+        return { (int) desc.Width, (int) desc.Height };
+    }
+
+    WindowsScopedEvent* getEvent()
+    {
+        if (swapChainEvent.has_value())
+            return &*swapChainEvent;
+
+        return nullptr;
+    }
+
+    auto getChain() const
+    {
+        return chain;
+    }
+
+    ComSmartPtr<ID2D1Bitmap1> getBuffer() const
+    {
+        return buffer;
     }
 
     static constexpr uint32 swapChainFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
     static constexpr uint32 presentSyncInterval = 1;
     static constexpr uint32 presentFlags = 0;
+
+private:
+    ComSmartPtr<IDXGISurface> getSurface() const
+    {
+        if (chain == nullptr)
+            return nullptr;
+
+        ComSmartPtr<IDXGISurface> surface;
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+        if (const auto hr = chain->GetBuffer (0, __uuidof (surface), reinterpret_cast<void**> (surface.resetAndGetPointerAddress())); FAILED (hr))
+            return nullptr;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return surface;
+    }
+
+    void createBuffer (DxgiAdapter::Ptr adapter)
+    {
+        buffer = nullptr;
+
+        const auto deviceContext = Direct2DDeviceContext::create (adapter);
+
+        if (deviceContext == nullptr)
+            return;
+
+        const auto surface = getSurface();
+
+        if (surface == nullptr)
+            return;
+
+        D2D1_BITMAP_PROPERTIES1 bitmapProperties{};
+        bitmapProperties.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
+        bitmapProperties.pixelFormat.format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        bitmapProperties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
+
+        deviceContext->CreateBitmapFromDxgiSurface (surface, bitmapProperties, buffer.resetAndGetPointerAddress());
+    }
+
     ComSmartPtr<IDXGISwapChain1> chain;
     ComSmartPtr<ID2D1Bitmap1> buffer;
     std::optional<WindowsScopedEvent> swapChainEvent;
-
-    enum class State
-    {
-        idle,
-        chainAllocated,
-        bufferAllocated,
-    };
-    State state = State::idle;
 };
 
 //==============================================================================
