@@ -43,11 +43,6 @@ public:
 
     void handleShowWindow();
 
-    void setResizing (bool);
-    bool getResizing() const;
-    void setSize (int width, int height);
-    void updateSize();
-
     void addDeferredRepaint (Rectangle<int> deferredRepaint);
 
     Image createSnapshot() const override;
