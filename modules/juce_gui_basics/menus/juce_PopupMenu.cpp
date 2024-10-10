@@ -713,11 +713,6 @@ struct MenuWindow final : public Component
         alterChildYPos (roundToInt (-10.0f * wheel.deltaY * PopupMenuSettings::scrollZone));
     }
 
-    void handleMouseEvent (const MouseEvent& e)
-    {
-        getMouseState (e.source).handleMouseEvent (e);
-    }
-
     bool windowIsStillValid()
     {
         if (! isVisible())
@@ -1315,6 +1310,8 @@ struct MenuWindow final : public Component
         return getLookAndFeel();
     }
 
+    bool mouseHasBeenOver() const { return mouseWasOver; }
+
     //==============================================================================
     MenuWindow* parent;
     const Options options;
@@ -1322,7 +1319,7 @@ struct MenuWindow final : public Component
     ApplicationCommandManager** managerOfChosenCommand;
     WeakReference<Component> componentAttachedTo;
     Rectangle<int> windowPos;
-    bool hasBeenOver = false, needsToScroll = false;
+    bool needsToScroll = false;
     bool dismissOnMouseUp, hideOnExit = false, disableMouseMoves = false, hasAnyJuceCompHadFocus = false;
     int numColumns = 0, contentHeight = 0, childYOffset = 0;
     Component::SafePointer<ItemComponent> currentChild;
@@ -1332,6 +1329,15 @@ struct MenuWindow final : public Component
     OwnedArray<MouseSourceState> mouseSourceStates;
     float scaleFactor;
     bool exitingModalState = false;
+
+private:
+    void handleMouseEvent (const MouseEvent& e)
+    {
+        mouseWasOver |= reallyContains (getLocalPoint (nullptr, e.getScreenPosition()), true);
+        getMouseState (e.source).handleMouseEvent (e);
+    }
+
+    bool mouseWasOver = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuWindow)
 };
@@ -1400,7 +1406,7 @@ private:
         const bool overScrollArea = scrollIfNecessary (localMousePos, timeNow);
         const bool isOverAny = window.isOverAnyMenu();
 
-        if (window.hideOnExit && window.hasBeenOver && ! isOverAny)
+        if (window.hideOnExit && window.mouseHasBeenOver() && ! isOverAny)
             window.hide (nullptr, true);
         else
             checkButtonState (localMousePos, timeNow, isDown, overScrollArea, isOverAny);
@@ -1409,7 +1415,7 @@ private:
     void checkButtonState (Point<int> localMousePos, const uint32 timeNow,
                            const bool wasDown, const bool overScrollArea, const bool isOverAny)
     {
-        isDown = window.hasBeenOver
+        isDown = window.mouseHasBeenOver()
                     && (ModifierKeys::currentModifiers.isAnyMouseButtonDown()
                          || ComponentPeer::getCurrentModifiersRealtime().isAnyMouseButtonDown());
 
@@ -1428,7 +1434,7 @@ private:
         {
             if (reallyContained)
                 window.triggerCurrentlyHighlightedItem();
-            else if ((window.hasBeenOver || ! window.dismissOnMouseUp) && ! isOverAny)
+            else if ((window.mouseHasBeenOver() || ! window.dismissOnMouseUp) && ! isOverAny)
                 window.dismissMenu (nullptr);
 
             // Note: This object may have been deleted by the previous call.
@@ -1444,9 +1450,6 @@ private:
         if (globalMousePos != lastMousePos || timeNow > lastMouseMoveTime + 350)
         {
             const auto isMouseOver = window.reallyContains (localMousePos, true);
-
-            if (isMouseOver)
-                window.hasBeenOver = true;
 
             if (lastMousePos.getDistanceFrom (globalMousePos) > 2)
             {
@@ -1484,7 +1487,7 @@ private:
 
                     if (! isMouseOver)
                     {
-                        if (! window.hasBeenOver)
+                        if (! window.mouseHasBeenOver())
                             return;
 
                         itemUnderMouse = nullptr;
