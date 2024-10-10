@@ -477,7 +477,7 @@ static qjs::JSCFunctionListEntry makeFunctionListEntry (const char* name,
                                                         SetterFn setter,
                                                         int16_t magic)
 {
-    qjs::JSCFunctionListEntry e { name, JS_PROP_CONFIGURABLE, qjs::JS_DEF_CGETSET_MAGIC, magic, {} };
+    qjs::JSCFunctionListEntry e { name, JS_PROP_CONFIGURABLE | JS_PROP_ENUMERABLE, qjs::JS_DEF_CGETSET_MAGIC, magic, {} };
     e.u.getset.get.getter_magic = getter;
     e.u.getset.set.setter_magic = setter;
     return e;
@@ -1617,6 +1617,72 @@ public:
             auto res = juce::Result::fail ("");
             const auto val = temporaryEngine.evaluate ("let foo = Obj.getObj(); foo.mutate(); foo.mutate();", &res);
             expect (res.wasOk());
+
+            expect (numCalls == 2);
+        }
+
+        beginTest ("Properties of registered native objects are enumerable");
+        {
+            auto obj = rawToUniquePtr (new DynamicObject);
+            obj->setMethod ("methodA", nullptr);
+            obj->setProperty ("one", 1);
+            obj->setMethod ("methodB", nullptr);
+            obj->setProperty ("hello", "world");
+            obj->setMethod ("methodC", nullptr);
+            obj->setProperty ("nested",
+                              std::invoke ([]
+                                           {
+                                               auto result = rawToUniquePtr (new DynamicObject);
+                                               result->setProperty ("present", true);
+                                               return result.release();
+                                           }));
+
+            JavascriptEngine temporaryEngine;
+            temporaryEngine.registerNativeObject ("obj", obj.release());
+
+            auto res = juce::Result::fail ("");
+            const auto val = temporaryEngine.evaluate ("JSON.stringify (obj);", &res);
+            expect (res.wasOk());
+            expectEquals (val.toString(), String (R"({"nested":{"present":true},"one":1,"hello":"world"})"));
+        }
+
+        beginTest ("native objects survive being passed as arguments and return values");
+        {
+            JavascriptEngine temporaryEngine;
+
+            int numCalls = 0;
+
+            auto objWithProps = rawToUniquePtr (new DynamicObject);
+            objWithProps->setProperty ("one", 1);
+            objWithProps->setProperty ("hello", "world");
+            objWithProps->setMethod ("nativeFn", [&numCalls] (const auto&)
+            {
+                ++numCalls;
+                return "called a native fn";
+            });
+
+            auto objWithFn = rawToUniquePtr (new DynamicObject);
+
+            var passedToFn;
+            objWithFn->setMethod ("fn", [&passedToFn] (const auto& v)
+            {
+                passedToFn = v.arguments[0];
+                return passedToFn;
+            });
+
+            temporaryEngine.registerNativeObject ("withProps", objWithProps.release());
+            temporaryEngine.registerNativeObject ("withFn", objWithFn.release());
+
+            auto res = juce::Result::fail ("");
+            const auto val = temporaryEngine.evaluate ("withFn.fn (withProps);", &res);
+            expect (res.wasOk());
+
+            for (auto& v : { val, passedToFn })
+            {
+                expect (v.getProperty ("one", 0) == var { 1 });
+                expect (v.getProperty ("hello", "") == var { "world" });
+                expect (v.call ("nativeFn") == var ("called a native fn"));
+            }
 
             expect (numCalls == 2);
         }
