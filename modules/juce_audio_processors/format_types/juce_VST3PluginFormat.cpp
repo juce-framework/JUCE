@@ -1334,8 +1334,10 @@ public:
         return handle.getFile();
     }
 
-    static Ptr getHandle (const File& f)
+    static Ptr getHandle (const String& modulePath)
     {
+        const auto f = getDLLFileFromBundle (modulePath);
+
         auto& bundles = getHandles();
 
         const auto iter = std::find_if (bundles.begin(), bundles.end(), [&] (Ptr x)
@@ -1356,6 +1358,30 @@ private:
         getHandles().insert (this);
     }
 
+    static File getDLLFileFromBundle (const String& bundlePath)
+    {
+       #if JUCE_LINUX || JUCE_BSD
+        const auto machineName = []() -> String
+        {
+            struct utsname unameData;
+            const auto res = uname (&unameData);
+
+            if (res != 0)
+                return {};
+
+            return unameData.machine;
+        }();
+
+        const File file { bundlePath };
+
+        return file.getChildFile ("Contents")
+                   .getChildFile (machineName + "-linux")
+                   .getChildFile (file.getFileNameWithoutExtension() + ".so");
+       #else
+        return File { bundlePath };
+       #endif
+    }
+
     static std::set<RefCountedDllHandle*>& getHandles()
     {
         static std::set<RefCountedDllHandle*> bundles;
@@ -1373,7 +1399,7 @@ public:
     static VST3ModuleHandle create (const File& pluginFile, const PluginDescription& desc)
     {
         VST3ModuleHandle result;
-        result.handle = RefCountedDllHandle::getHandle (pluginFile);
+        result.handle = RefCountedDllHandle::getHandle (pluginFile.getFullPathName());
 
         if (result.handle == nullptr)
             return {};
