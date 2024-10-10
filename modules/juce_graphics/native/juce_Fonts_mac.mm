@@ -406,13 +406,17 @@ StringArray Font::findAllTypefaceStyles (const String& family)
     if (FontStyleHelpers::isPlaceholderFamilyName (family))
         return findAllTypefaceStyles (FontStyleHelpers::getConcreteFamilyNameFromPlaceholder (family));
 
-    std::set<String> results;
+    std::set<String> uniqueResults;
+    StringArray orderedResults;
 
     for (const auto& font : CoreTextTypeface::findRegisteredStylesForFamily (family))
     {
         const CFUniquePtr<CTFontDescriptorRef> descriptor (CTFontCopyFontDescriptor (font.get()));
         const CFUniquePtr<CFStringRef> cfsFontStyle ((CFStringRef) CTFontDescriptorCopyAttribute (descriptor.get(), kCTFontStyleNameAttribute));
-        results.insert (String::fromCFString (cfsFontStyle.get()));
+        const auto name = String::fromCFString (cfsFontStyle.get());
+
+        if (uniqueResults.insert (name).second)
+            orderedResults.add (name);
     }
 
     CFUniquePtr<CFStringRef> cfsFontFamily (family.toCFString());
@@ -433,16 +437,14 @@ StringArray Font::findAllTypefaceStyles (const String& family)
         {
             auto ctFontDescriptorRef = (CTFontDescriptorRef) CFArrayGetValueAtIndex (fontDescriptorArray.get(), i);
             CFUniquePtr<CFStringRef> cfsFontStyle ((CFStringRef) CTFontDescriptorCopyAttribute (ctFontDescriptorRef, kCTFontStyleNameAttribute));
-            results.insert (String::fromCFString (cfsFontStyle.get()));
+            const auto name = String::fromCFString (cfsFontStyle.get());
+
+            if (uniqueResults.insert (name).second)
+                orderedResults.add (name);
         }
     }
 
-    StringArray stringArray;
-
-    for (const auto& result : results)
-        stringArray.add (result);
-
-    return stringArray;
+    return orderedResults;
 }
 
 struct DefaultFontNames
