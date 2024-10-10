@@ -507,7 +507,11 @@ void MPEKeyboardComponent::noteReleased (MPENote finishedNote)
 
 void MPEKeyboardComponent::zoneLayoutChanged()
 {
-    MessageManager::callAsync ([this] { updateZoneLayout(); });
+    MessageManager::callAsync ([ref = SafePointer<MPEKeyboardComponent> { this }]
+    {
+        if (ref != nullptr)
+            ref->updateZoneLayout();
+    });
 }
 
 } // namespace juce
