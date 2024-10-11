@@ -301,20 +301,23 @@ public:
         if (swap.buffer == nullptr || dirtyRegionsInBackBuffer.isEmpty() || ! swapEventReceived)
             return;
 
-        // Allocate enough memory for the array of dirty rectangles
-        dirtyRectangles.resize ((size_t) dirtyRegionsInBackBuffer.getNumRectangles());
-
-        // Fill the array of dirty rectangles, intersecting each paint area with the swap chain buffer
-        DXGI_PRESENT_PARAMETERS presentParameters{};
-        presentParameters.pDirtyRects = dirtyRectangles.data();
-        presentParameters.DirtyRectsCount = 0;
-
         auto const swapChainSize = swap.getSize();
+        DXGI_PRESENT_PARAMETERS presentParameters{};
 
-        for (const auto& area : dirtyRegionsInBackBuffer)
+        if (! dirtyRegionsInBackBuffer.containsRectangle (swapChainSize))
         {
-            if (const auto intersection = area.getIntersection (swapChainSize); ! intersection.isEmpty())
-                presentParameters.pDirtyRects[presentParameters.DirtyRectsCount++] = D2DUtilities::toRECT (intersection);
+            // Allocate enough memory for the array of dirty rectangles
+            dirtyRectangles.resize ((size_t) dirtyRegionsInBackBuffer.getNumRectangles());
+
+            // Fill the array of dirty rectangles, intersecting each paint area with the swap chain buffer
+            presentParameters.pDirtyRects = dirtyRectangles.data();
+            presentParameters.DirtyRectsCount = 0;
+
+            for (const auto& area : dirtyRegionsInBackBuffer)
+            {
+                if (const auto intersection = area.getIntersection (swapChainSize); ! intersection.isEmpty())
+                    presentParameters.pDirtyRects[presentParameters.DirtyRectsCount++] = D2DUtilities::toRECT (intersection);
+            }
         }
 
         // Present the freshly painted buffer
