@@ -261,7 +261,6 @@ public:
     DirectX() = default;
 
     auto getD2DFactory() const { return d2dSharedFactory; }
-    auto getD2DMultithread() const { return multithread; }
 
 private:
     ComSmartPtr<ID2D1Factory2> d2dSharedFactory = [&]
@@ -277,13 +276,6 @@ private:
         jassertquiet (SUCCEEDED (hr));
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        return result;
-    }();
-
-    ComSmartPtr<ID2D1Multithread> multithread = [&]
-    {
-        ComSmartPtr<ID2D1Multithread> result;
-        d2dSharedFactory->QueryInterface<ID2D1Multithread> (result.resetAndGetPointerAddress());
         return result;
     }();
 

@@ -170,10 +170,6 @@ private:
 
     RectangleList<int> getPaintAreas() const override
     {
-        // Does the entire buffer need to be filled?
-        if (swap.state == SwapChain::State::bufferAllocated)
-            return swap.getSize();
-
         return deferredRepaints;
     }
 
@@ -245,6 +241,10 @@ public:
 
         // Require the entire window to be repainted
         deferredRepaints = size;
+
+        // The backbuffer has no valid content until we paint a full frame
+        dirtyRegionsInBackBuffer.clear();
+
         InvalidateRect (hwnd, nullptr, TRUE);
 
         // Resize/scale the swap chain
@@ -336,6 +336,8 @@ public:
 
     Image createSnapshot() const
     {
+        JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
         // This won't capture child windows. Perhaps a better approach would be to use
         // IGraphicsCaptureItemInterop, although this is only supported on Windows 10 v1903+
 
@@ -356,8 +358,6 @@ public:
 
         if (const auto hr = context->CreateBitmap (size, nullptr, 0, bitmapProperties, snapshot.resetAndGetPointerAddress()); FAILED (hr))
             return {};
-
-        const ScopedMultithread scope { directX->getD2DMultithread() };
 
         swap.chain->Present (0, DXGI_PRESENT_DO_NOT_WAIT);
 
@@ -418,6 +418,7 @@ Image Direct2DHwndContext::createSnapshot() const
 
 void Direct2DHwndContext::clearTargetBuffer()
 {
+    applyPendingClipList();
     pimpl->getDeviceContext()->Clear();
 }
 

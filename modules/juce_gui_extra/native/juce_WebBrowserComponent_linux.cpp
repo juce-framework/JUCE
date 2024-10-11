@@ -32,6 +32,11 @@
   ==============================================================================
 */
 
+// This type isn't in the headers until v2.36
+#if ! WEBKIT_CHECK_VERSION (2, 36, 0)
+struct WebKitURISchemeResponse;
+#endif
+
 namespace juce
 {
 
