@@ -511,11 +511,28 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
         const auto glyphId = infos[j].codepoint;
         const auto xAdvance = positions[j].x_advance;
 
+        // For certain OS, Font and glyph ID combinations harfbuzz will not find extents data and
+        // hb_font_get_glyph_extents will return false. In such cases Typeface::getGlyphBounds
+        // will return an empty rectangle. Here we need to distinguish this situation from the one
+        // where extents information is available and is an empty rectangle, which indicates a
+        // whitespace.
+        const auto extentsDataAvailable = std::invoke ([&]
+        {
+            hb_glyph_extents_t extents{};
+            return hb_font_get_glyph_extents (font.getTypefacePtr()->getNativeDetails().getFont(),
+                                              (hb_codepoint_t) glyphId,
+                                              &extents);
+        });
+
+        const auto whitespace = extentsDataAvailable
+                                && font.getTypefacePtr()->getGlyphBounds (font.getMetricsKind(), (int) glyphId).isEmpty()
+                                && xAdvance > 0;
+
         glyphs.push_back ({
             glyphId,
             (int64) infos[j].cluster + range.getStart(),
             (infos[j].mask & HB_GLYPH_FLAG_UNSAFE_TO_BREAK) != 0,
-            font.getTypefacePtr()->getGlyphBounds (font.getMetricsKind(), (int) glyphId).isEmpty() && xAdvance > 0,
+            whitespace,
             Point<float> { HbScale::hbToJuce (xAdvance) + trackingAmount, -HbScale::hbToJuce (positions[j].y_advance) },
             Point<float> { HbScale::hbToJuce (positions[j].x_offset), -HbScale::hbToJuce (positions[j].y_offset) },
         });
