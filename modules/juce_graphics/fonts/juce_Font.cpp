@@ -765,8 +765,13 @@ int Font::getStringWidth (const String& text) const
 
 float Font::getStringWidthFloat (const String& text) const
 {
-    const auto w = getTypefacePtr()->getStringWidth (getMetricsKind(), text, getHeight(), getHorizontalScale());
-    return w + (getHeight() * getHorizontalScale() * getExtraKerningFactor() * (float) text.length());
+    if (auto typeface = getTypefacePtr())
+    {
+        const auto w = typeface->getStringWidth (getMetricsKind(), text, getHeight(), getHorizontalScale());
+        return w + (getHeight() * getHorizontalScale() * getExtraKerningFactor() * (float) text.length());
+    }
+
+    return 0;
 }
 
 void Font::findFonts (Array<Font>& destArray)
