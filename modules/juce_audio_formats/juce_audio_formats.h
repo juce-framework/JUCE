@@ -44,7 +44,7 @@
 
   ID:                 juce_audio_formats
   vendor:             juce
-  version:            8.0.2
+  version:            8.0.3
   name:               JUCE audio file format codecs
   description:        Classes for reading and writing various audio file formats.
   website:            http://www.juce.com/juce

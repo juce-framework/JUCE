@@ -3,6 +3,12 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.3
+
+  - Updated the AAX SDK to 2.8.0
+  - Fixed multiple Direct2D drawing issues
+  - Fixed buffer size and sample rate selection on iOS 18
+
 ## Version 8.0.2
 
   - Fixed some issues handling large images in Direct2D
