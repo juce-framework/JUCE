@@ -497,7 +497,7 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     jassert (unknownGlyph == infos.end());
 
     [[maybe_unused]] const auto trackingAmount = ! trackingIsDefault
-                                               ? font.getHeight() * tracking
+                                               ? font.getHeight() * font.getHorizontalScale() * tracking
                                                : 0;
 
     std::vector<size_t> clusterLookup;
