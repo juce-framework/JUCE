@@ -54,7 +54,6 @@ public:
     //==============================================================================
     DynamicObject();
     DynamicObject (const DynamicObject&);
-    ~DynamicObject() override;
 
     using Ptr = ReferenceCountedObjectPtr<DynamicObject>;
 
@@ -76,11 +75,8 @@ public:
     void removeProperty (const Identifier& propertyName);
 
     //==============================================================================
-    /** Checks whether this object has the specified method.
-
-        The default implementation of this just checks whether there's a property
-        with this name that's actually a method, but this can be overridden for
-        building objects with dynamic invocation.
+    /** Checks whether this object has a property with the given name that has a
+        value of type NativeFunction.
     */
     bool hasMethod (const Identifier& methodName) const;
 
@@ -88,9 +84,6 @@ public:
 
         The default implementation looks up the named property, and if it's a method
         call, then it invokes it.
-
-        This method is virtual to allow more dynamic invocation to used for objects
-        where the methods may not already be set as properties.
     */
     var invokeMethod (Identifier methodName,
                       const var::NativeFunctionArgs& args);
@@ -133,6 +126,16 @@ public:
     virtual void writeAsJSON (OutputStream&, const JSON::FormatOptions&);
 
 private:
+    /** Derived classes may override this function to take additional actions after
+        properties are assigned or removed.
+
+        @param name         the name of the property that changed
+        @param value        if non-null, the value of the property after assignment
+                            if null, indicates that the property was removed
+    */
+    virtual void didModifyProperty ([[maybe_unused]] const Identifier& name,
+                                    [[maybe_unused]] const std::optional<var>& value) {}
+
     //==============================================================================
     NamedValueSet properties;
 

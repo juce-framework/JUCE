@@ -35,16 +35,10 @@
 namespace juce
 {
 
-DynamicObject::DynamicObject()
-{
-}
+DynamicObject::DynamicObject() = default;
 
 DynamicObject::DynamicObject (const DynamicObject& other)
    : ReferenceCountedObject(), properties (other.properties)
-{
-}
-
-DynamicObject::~DynamicObject()
 {
 }
 
@@ -62,11 +56,13 @@ const var& DynamicObject::getProperty (const Identifier& propertyName) const
 void DynamicObject::setProperty (const Identifier& propertyName, const var& newValue)
 {
     properties.set (propertyName, newValue);
+    didModifyProperty (propertyName, newValue);
 }
 
 void DynamicObject::removeProperty (const Identifier& propertyName)
 {
     properties.remove (propertyName);
+    didModifyProperty (propertyName, std::nullopt);
 }
 
 bool DynamicObject::hasMethod (const Identifier& methodName) const
@@ -84,12 +80,16 @@ var DynamicObject::invokeMethod (Identifier method, const var::NativeFunctionArg
 
 void DynamicObject::setMethod (Identifier name, var::NativeFunction function)
 {
-    properties.set (name, var (function));
+    setProperty (name, var (function));
 }
 
 void DynamicObject::clear()
 {
+    auto copy = properties;
     properties.clear();
+
+    for (auto& prop : copy)
+        didModifyProperty (prop.name, std::nullopt);
 }
 
 void DynamicObject::cloneAllProperties()
@@ -150,5 +150,129 @@ void DynamicObject::writeAsJSON (OutputStream& out, const JSON::FormatOptions& f
 
     out << '}';
 }
+
+//==============================================================================
+//==============================================================================
+
+#if JUCE_UNIT_TESTS
+
+class DynamicObjectTests : public UnitTest
+{
+public:
+    DynamicObjectTests() : UnitTest { "DynamicObject", UnitTestCategories::containers } {}
+
+    void runTest() override
+    {
+        struct Action
+        {
+            Identifier key;
+            std::optional<var> value;
+
+            bool operator== (const Action& other) const
+            {
+                return other.key == key && other.value == value;
+            }
+        };
+
+        using Actions = std::vector<Action>;
+
+        struct DerivedObject : public DynamicObject
+        {
+            explicit DerivedObject (Actions& a) : actions (a) {}
+
+            void didModifyProperty (const Identifier& key, const std::optional<var>& value) override
+            {
+                actions.push_back (Action { key, value });
+            }
+
+            Actions& actions;
+        };
+
+        Actions actions;
+        DerivedObject object { actions };
+
+        beginTest ("didModifyProperty is emitted on setProperty");
+        {
+            expect (object.getProperties().isEmpty());
+
+            const Identifier key = "foo";
+            const var value = 123;
+            object.setProperty (key, value);
+
+            expect (actions == Actions { Action { key, value } });
+            expect (object.getProperties() == NamedValueSet { { key, value } });
+        }
+
+        object.clear();
+        actions.clear();
+
+        beginTest ("didModifyProperty is emitted on setMethod");
+        {
+            expect (object.getProperties().isEmpty());
+
+            const Identifier key = "foo";
+            const var::NativeFunction value = [] (const var::NativeFunctionArgs&) { return var{}; };
+            object.setMethod (key, value);
+
+            expect (actions.size() == 1);
+            expect (actions.back().key == key);
+
+            expect (object.getProperties().size() == 1);
+            expect (object.hasMethod (key));
+        }
+
+        object.clear();
+        actions.clear();
+
+        beginTest ("didModifyProperty is emitted on removeProperty");
+        {
+            expect (object.getProperties().isEmpty());
+
+            const Identifier key = "bar";
+            object.removeProperty (key);
+
+            expect (actions == Actions { Action { key, std::nullopt } });
+            expect (object.getProperties().isEmpty());
+        }
+
+        object.clear();
+        actions.clear();
+
+        beginTest ("didModifyProperty is emitted on clear");
+        {
+            expect (object.getProperties().isEmpty());
+
+            object.clear();
+
+            expect (actions.empty());
+
+            const Identifier keys[] { "foo", "bar", "baz" };
+
+            for (auto [index, key] : enumerate (keys, int{}))
+                object.setProperty (key, index);
+
+            for (auto& key : keys)
+                expect (object.hasProperty (key));
+
+            actions.clear();
+
+            object.clear();
+
+            expect (actions.size() == std::size (keys));
+
+            for (auto& key : keys)
+            {
+                expect (std::find_if (actions.begin(), actions.end(), [&key] (auto& action)
+                {
+                    return action.key == key && action.value == std::nullopt;
+                }) != actions.end());
+            }
+        }
+    }
+};
+
+static DynamicObjectTests dynamicObjectTests;
+
+#endif
 
 } // namespace juce
