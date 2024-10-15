@@ -774,7 +774,9 @@ private:
 };
 
 //==============================================================================
-JavascriptEngine::JavascriptEngine() : impl (std::make_unique<Impl>())
+JavascriptEngine::JavascriptEngine()
+    : maximumExecutionTime (15.0),
+      impl (std::make_unique<Impl>())
 {
 }
 
