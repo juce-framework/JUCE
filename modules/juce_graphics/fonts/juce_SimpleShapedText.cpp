@@ -504,6 +504,8 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
     std::vector<size_t> characterLookup;
     std::vector<ShapedGlyph> glyphs;
 
+    std::optional<uint32_t> lastCluster;
+
     for (size_t i = 0; i < infos.size(); ++i)
     {
         const auto j = (embeddingLevel % 2) == 0 ? i : infos.size() - 1 - i;
@@ -528,12 +530,18 @@ static std::vector<ShapedGlyph> lowLevelShape (const String& string,
                                 && font.getTypefacePtr()->getGlyphBounds (font.getMetricsKind(), (int) glyphId).isEmpty()
                                 && xAdvance > 0;
 
+        // Tracking is only applied at the beginning of a new cluster to avoid inserting it before
+        // diacritic marks.
+        const auto appliedTracking = std::exchange (lastCluster, infos[j].cluster) != infos[j].cluster
+                                   ? trackingAmount
+                                   : 0;
+
         glyphs.push_back ({
             glyphId,
             (int64) infos[j].cluster + range.getStart(),
             (infos[j].mask & HB_GLYPH_FLAG_UNSAFE_TO_BREAK) != 0,
             whitespace,
-            Point<float> { HbScale::hbToJuce (xAdvance) + trackingAmount, -HbScale::hbToJuce (positions[j].y_advance) },
+            Point<float> { HbScale::hbToJuce (xAdvance) + appliedTracking, -HbScale::hbToJuce (positions[j].y_advance) },
             Point<float> { HbScale::hbToJuce (positions[j].x_offset), -HbScale::hbToJuce (positions[j].y_offset) },
         });
     }
