@@ -337,7 +337,6 @@ struct MenuWindow final : public Component
                 MenuWindow* parentWindow,
                 Options opts,
                 bool alignToRectangle,
-                bool shouldDismissOnMouseUp,
                 ApplicationCommandManager** manager,
                 float parentScaleFactor = 1.0f)
         : Component ("menu"),
@@ -348,8 +347,7 @@ struct MenuWindow final : public Component
           windowCreationTime (Time::getMillisecondCounter()),
           lastFocusedTime (windowCreationTime),
           timeEnteredCurrentChildComp (windowCreationTime),
-          scaleFactor (parentWindow != nullptr ? parentScaleFactor : 1.0f),
-          dismissOnMouseUp (shouldDismissOnMouseUp)
+          scaleFactor (parentWindow != nullptr ? parentScaleFactor : 1.0f)
     {
         setWantsKeyboardFocus (false);
         setMouseClickGrabsKeyboardFocus (false);
@@ -703,10 +701,29 @@ struct MenuWindow final : public Component
     }
 
     //==============================================================================
-    void mouseMove  (const MouseEvent& e) override    { handleMouseEvent (e); }
     void mouseDown  (const MouseEvent& e) override    { handleMouseEvent (e); }
-    void mouseDrag  (const MouseEvent& e) override    { handleMouseEvent (e); }
-    void mouseUp    (const MouseEvent& e) override    { handleMouseEvent (e); }
+
+    void mouseUp (const MouseEvent& e) override
+    {
+        SafePointer self { this };
+
+        handleMouseEvent (e);
+
+        // Check whether this menu was deleted as a result of the mouse being released.
+        if (self == nullptr)
+            return;
+
+        // If the mouse was down when the menu was created, releasing the mouse should
+        // not trigger the item under the mouse, because we might still be handling the click
+        // that caused the menu to show in the first place. Once the mouse has been released once,
+        // then the user must have clicked the mouse again, so they are attempting to trigger or
+        // dismiss the menu.
+        mouseUpCanTrigger |= true;
+    }
+
+    // Any move/drag after the menu is created will allow the mouse to trigger a highlighted item
+    void mouseDrag  (const MouseEvent& e) override    { mouseUpCanTrigger |= true; handleMouseEvent (e); }
+    void mouseMove  (const MouseEvent& e) override    { mouseUpCanTrigger |= true; handleMouseEvent (e); }
 
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel) override
     {
@@ -1206,7 +1223,7 @@ struct MenuWindow final : public Component
                                                             options.forSubmenu()
                                                                    .withTargetScreenArea (childComp->getScreenBounds())
                                                                    .withMinimumWidth (0),
-                                                            false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
+                                                            false, managerOfChosenCommand, scaleFactor));
 
         activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
         activeSubMenu->enterModalState (false);
@@ -1217,9 +1234,7 @@ struct MenuWindow final : public Component
     void triggerCurrentlyHighlightedItem()
     {
         if (currentChild != nullptr && canBeTriggered (currentChild->item))
-        {
             dismissMenu (&currentChild->item);
-        }
     }
 
     enum class MenuSelectionDirection
@@ -1311,7 +1326,7 @@ struct MenuWindow final : public Component
     }
 
     bool mouseHasBeenOver() const { return mouseWasOver; }
-    bool shouldDismissOnMouseUp() const { return dismissOnMouseUp; }
+    bool allowMouseUpToTriggerItem() const { return mouseUpCanTrigger; }
 
     //==============================================================================
     MenuWindow* parent;
@@ -1339,7 +1354,7 @@ private:
     }
 
     bool mouseWasOver = false;
-    bool dismissOnMouseUp = false;
+    bool mouseUpCanTrigger = ! ModifierKeys::currentModifiers.isAnyMouseButtonDown();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuWindow)
 };
@@ -1434,9 +1449,9 @@ private:
         }
         else if (wasDown && timeNow > window.windowCreationTime + 250 && ! isDown && ! overScrollArea)
         {
-            if (reallyContained)
+            if (reallyContained && window.allowMouseUpToTriggerItem())
                 window.triggerCurrentlyHighlightedItem();
-            else if ((window.mouseHasBeenOver() || ! window.shouldDismissOnMouseUp()) && ! isOverAny)
+            else if ((window.mouseHasBeenOver() || ! window.allowMouseUpToTriggerItem()) && ! isOverAny)
                 window.dismissMenu (nullptr);
 
             // Note: This object may have been deleted by the previous call.
@@ -2078,7 +2093,6 @@ Component* PopupMenu::createWindow (const Options& options,
     return items.isEmpty() ? nullptr
                            : new HelperClasses::MenuWindow (*this, nullptr, options,
                                                             ! options.getTargetScreenArea().isEmpty(),
-                                                            ModifierKeys::currentModifiers.isAnyMouseButtonDown(),
                                                             managerOfChosenCommand);
 }
 
