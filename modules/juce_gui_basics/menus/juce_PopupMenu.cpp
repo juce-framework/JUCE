@@ -345,11 +345,11 @@ struct MenuWindow final : public Component
           options (opts.withParentComponent (findNonNullLookAndFeel (menu, parentWindow).getParentComponentForMenuOptions (opts))),
           managerOfChosenCommand (manager),
           componentAttachedTo (options.getTargetComponent()),
-          dismissOnMouseUp (shouldDismissOnMouseUp),
           windowCreationTime (Time::getMillisecondCounter()),
           lastFocusedTime (windowCreationTime),
           timeEnteredCurrentChildComp (windowCreationTime),
-          scaleFactor (parentWindow != nullptr ? parentScaleFactor : 1.0f)
+          scaleFactor (parentWindow != nullptr ? parentScaleFactor : 1.0f),
+          dismissOnMouseUp (shouldDismissOnMouseUp)
     {
         setWantsKeyboardFocus (false);
         setMouseClickGrabsKeyboardFocus (false);
@@ -1311,6 +1311,7 @@ struct MenuWindow final : public Component
     }
 
     bool mouseHasBeenOver() const { return mouseWasOver; }
+    bool shouldDismissOnMouseUp() const { return dismissOnMouseUp; }
 
     //==============================================================================
     MenuWindow* parent;
@@ -1320,7 +1321,7 @@ struct MenuWindow final : public Component
     WeakReference<Component> componentAttachedTo;
     Rectangle<int> windowPos;
     bool needsToScroll = false;
-    bool dismissOnMouseUp, hideOnExit = false, disableMouseMoves = false, hasAnyJuceCompHadFocus = false;
+    bool hideOnExit = false, disableMouseMoves = false, hasAnyJuceCompHadFocus = false;
     int numColumns = 0, contentHeight = 0, childYOffset = 0;
     Component::SafePointer<ItemComponent> currentChild;
     std::unique_ptr<MenuWindow> activeSubMenu;
@@ -1338,6 +1339,7 @@ private:
     }
 
     bool mouseWasOver = false;
+    bool dismissOnMouseUp = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuWindow)
 };
@@ -1434,7 +1436,7 @@ private:
         {
             if (reallyContained)
                 window.triggerCurrentlyHighlightedItem();
-            else if ((window.mouseHasBeenOver() || ! window.dismissOnMouseUp) && ! isOverAny)
+            else if ((window.mouseHasBeenOver() || ! window.shouldDismissOnMouseUp()) && ! isOverAny)
                 window.dismissMenu (nullptr);
 
             // Note: This object may have been deleted by the previous call.
