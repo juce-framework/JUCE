@@ -1585,6 +1585,12 @@ public:
     bool launchProject() override
     {
        #if JUCE_WINDOWS
+        // Don't launch if already open
+        const auto foundDBFiles = getSLNFile().getSiblingFile (".vs").findChildFiles (File::findFiles, true, "*.opendb", File::FollowSymlinks::no);
+
+        if (! foundDBFiles.isEmpty())
+            return false;
+
         return getSLNFile().startAsProcess();
        #else
         return false;
