@@ -44,6 +44,10 @@
 include_guard(GLOBAL)
 cmake_minimum_required(VERSION 3.22)
 
+if(NOT CMAKE_C_COMPILE_OBJECT)
+    message(FATAL_ERROR "A C compiler is required to build JUCE. Add 'C' to your project's LANGUAGES.")
+endif()
+
 # ==================================================================================================
 
 set(JUCE_CMAKE_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR}
