@@ -44,7 +44,7 @@
 
   ID:                 juce_midi_ci
   vendor:             juce
-  version:            8.0.2
+  version:            8.0.3
   name:               JUCE MIDI CI Classes
   description:        Classes facilitating communication via MIDI Capability Inquiry
   website:            http://www.juce.com/juce
