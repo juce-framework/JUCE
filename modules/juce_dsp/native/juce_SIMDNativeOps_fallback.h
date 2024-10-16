@@ -270,4 +270,54 @@ struct SIMDFallbackOps
     }
 };
 
+/**
+    Fallback implementation of SIMD ops. This will be overridden by the
+    specializations in architecture-specific files.
+
+    @tags{DSP}
+*/
+template <typename ScalarType>
+struct SIMDNativeOps
+{
+    using vSIMDType = std::array<uint64_t, 2>;
+    using fb = SIMDFallbackOps<ScalarType, vSIMDType>;
+
+    static forcedinline vSIMDType expand (ScalarType s) noexcept                                { return fb::expand (s); }
+    static forcedinline vSIMDType load (const ScalarType* a) noexcept                           { return fb::load (a); }
+    static forcedinline void store (vSIMDType value, ScalarType* dest) noexcept                 { return fb::store (value, dest); }
+    static forcedinline vSIMDType add (vSIMDType a, vSIMDType b) noexcept                       { return fb::add (a, b); }
+    static forcedinline vSIMDType sub (vSIMDType a, vSIMDType b) noexcept                       { return fb::sub (a, b); }
+    static forcedinline vSIMDType mul (vSIMDType a, vSIMDType b) noexcept                       { return fb::mul (a, b); }
+    static forcedinline vSIMDType bit_and (vSIMDType a, vSIMDType b) noexcept                   { return fb::bit_and (a, b); }
+    static forcedinline vSIMDType bit_or (vSIMDType a, vSIMDType b) noexcept                    { return fb::bit_or (a, b); }
+    static forcedinline vSIMDType bit_xor (vSIMDType a, vSIMDType b) noexcept                   { return fb::bit_xor (a, b); }
+    static forcedinline vSIMDType bit_notand (vSIMDType a, vSIMDType b) noexcept                { return fb::bit_notand (a, b); }
+    static forcedinline vSIMDType bit_not (vSIMDType a) noexcept                                { return fb::bit_not (a); }
+    static forcedinline vSIMDType min (vSIMDType a, vSIMDType b) noexcept                       { return fb::min (a, b); }
+    static forcedinline vSIMDType max (vSIMDType a, vSIMDType b) noexcept                       { return fb::max (a, b); }
+    static forcedinline vSIMDType equal (vSIMDType a, vSIMDType b) noexcept                     { return fb::equal (a, b); }
+    static forcedinline vSIMDType notEqual (vSIMDType a, vSIMDType b) noexcept                  { return fb::notEqual (a, b); }
+    static forcedinline vSIMDType greaterThan (vSIMDType a, vSIMDType b) noexcept               { return fb::greaterThan (a, b); }
+    static forcedinline vSIMDType greaterThanOrEqual (vSIMDType a, vSIMDType b) noexcept        { return fb::greaterThanOrEqual (a, b); }
+    static forcedinline bool allEqual (vSIMDType a, vSIMDType b) noexcept                       { return fb::allEqual (a, b); }
+    static forcedinline vSIMDType multiplyAdd (vSIMDType a, vSIMDType b, vSIMDType c) noexcept  { return fb::multiplyAdd (a, b, c); }
+    static forcedinline ScalarType get (vSIMDType v, size_t i) noexcept                         { return fb::get (v, i); }
+    static forcedinline vSIMDType set (vSIMDType v, size_t i, ScalarType s) noexcept            { return fb::set (v, i, s); }
+    static forcedinline vSIMDType truncate (vSIMDType a) noexcept                               { return fb::truncate (a); }
+    static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept                  { return fb::cmplxmul (a, b); }
+    static forcedinline ScalarType sum (vSIMDType a) noexcept                                   { return fb::sum (a); }
+
+    static forcedinline vSIMDType oddevensum (vSIMDType a) noexcept
+    {
+        if (fb::n <= 2)
+            return a;
+        ScalarType sums[2] = {};
+        for (size_t i = 0; i < fb::n; ++i)
+            sums[i % 2] += get (a, i);
+        for (size_t i = 0; i < fb::n; ++i)
+            a = set (a, i, sums[i % 2]);
+        return a;
+    }
+};
+
 } // namespace juce::dsp
