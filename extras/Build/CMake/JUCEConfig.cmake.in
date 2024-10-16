@@ -21,6 +21,7 @@
 @PACKAGE_INIT@
 
 include("${CMAKE_CURRENT_LIST_DIR}/LV2_HELPER.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/VST3_HELPER.cmake")
 
 if(NOT TARGET juce::juceaide)
     add_executable(juce::juceaide IMPORTED)
