@@ -337,6 +337,12 @@ public:
         bool isFastMathEnabled() const                    { return fastMathValue.get(); }
         bool isPluginBinaryCopyStepEnabled() const        { return pluginBinaryCopyStepValue.get(); }
 
+        static bool shouldBuildTarget (build_tools::ProjectType::Target::Type targetType, Architecture arch)
+        {
+            return targetType != build_tools::ProjectType::Target::AAXPlugIn
+                || (arch != Architecture::arm64 && arch != Architecture::arm64ec);
+        }
+
         //==============================================================================
         String createMSVCConfigName (Architecture arch) const
         {
@@ -2087,7 +2093,7 @@ protected:
 
                     out << "\t\t" << target->getProjectGuid() << "." << configName << "." << "ActiveCfg" << " = " << configName << newLine;
 
-                    const auto shouldBuild = config.getArchitectures().contains (arch);
+                    const auto shouldBuild = config.shouldBuildTarget (target->type, arch) && config.getArchitectures().contains (arch);
 
                     if (shouldBuild)
                         out << "\t\t" << target->getProjectGuid() << "." << configName << "." << "Build.0" << " = " << configName << newLine;
