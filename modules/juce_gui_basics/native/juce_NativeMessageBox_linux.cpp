@@ -66,7 +66,13 @@ std::unique_ptr<ScopedMessageBoxInterface> ScopedMessageBoxInterface::create (co
         }
 
     private:
-        static int map (int button, int numButtons) { return (button + numButtons - 1) % numButtons; }
+        static int map (int button, int numButtons)
+        {
+            if (numButtons <= 0)
+                return 0;
+
+            return (button + numButtons - 1) % numButtons;
+        }
 
         std::unique_ptr<ScopedMessageBoxInterface> inner;
         int numButtons = 0;
