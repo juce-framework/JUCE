@@ -688,16 +688,19 @@ public:
         wrapper.release();
     }
 
-    var evaluate (const String& code, Result* errorMessage, RelativeTime maxExecTime)
+    var evaluate (const String& code, Result* errorMessage, RelativeTime maxExecutionTime)
     {
         shouldStop = false;
 
-        engine.setInterruptHandler ([this, maxExecTime, started = Time::getMillisecondCounterHiRes()]()
+        timeAtLastStart = Time::getMillisecondCounterHiRes();
+        maxExecTime = maxExecutionTime;
+
+        engine.setInterruptHandler ([this]()
                                     {
                                         if (shouldStop)
                                             return 1;
 
-                                        const auto elapsed = RelativeTime::milliseconds ((int64) (Time::getMillisecondCounterHiRes() - started));
+                                        const auto elapsed = RelativeTime::milliseconds ((int64) (Time::getMillisecondCounterHiRes() - timeAtLastStart));
                                         return elapsed > maxExecTime ? 1 : 0;
                                     });
 
@@ -716,15 +719,18 @@ public:
         return var::undefined();
     }
 
-    Result execute (const String& code, RelativeTime maxExecTime)
+    Result execute (const String& code, RelativeTime maxExecutionTime)
     {
         auto result = Result::ok();
-        evaluate (code, &result, maxExecTime);
+        evaluate (code, &result, maxExecutionTime);
         return result;
     }
 
-    var callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* errorMessage)
+    var callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* errorMessage, RelativeTime maxExecutionTime)
     {
+        timeAtLastStart = Time::getMillisecondCounterHiRes();
+        maxExecTime = maxExecutionTime;
+
         auto* ctx = engine.getQuickJSContext();
         const auto functionStr = function.toString();
 
@@ -771,6 +777,12 @@ private:
     //==============================================================================
     detail::QuickJSWrapper engine;
     std::atomic<bool> shouldStop = false;
+
+    /** This value stores the last time a execute, eval or callFunction has been started.
+        This allows to update the interrupt check when using callFunction() after execute() without having to always override the interrupt handler
+    */
+    double timeAtLastStart = 0;
+    RelativeTime maxExecTime;
 };
 
 //==============================================================================
@@ -801,7 +813,7 @@ var JavascriptEngine::callFunction (const Identifier& function,
                                     const var::NativeFunctionArgs& args,
                                     Result* errorMessage)
 {
-    return impl->callFunction (function, args, errorMessage);
+    return impl->callFunction (function, args, errorMessage, maximumExecutionTime);
 }
 
 void JavascriptEngine::stop() noexcept
