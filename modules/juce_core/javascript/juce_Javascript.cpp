@@ -621,6 +621,11 @@ public:
     Impl()
     {
         DynamicObjectWrapper::createClass (engine.getQuickJSRuntime());
+
+        engine.setInterruptHandler ([this]
+        {
+            return (int64) Time::getMillisecondCounterHiRes() >= timeout;
+        });
     }
 
     void registerNativeObject (const Identifier& name,
@@ -750,7 +755,7 @@ public:
 
     void stop() noexcept
     {
-        shouldStop = true;
+        timeout = (int64) Time::getMillisecondCounterHiRes();
     }
 
     JSObject getRootObject() const
@@ -758,33 +763,15 @@ public:
         return JSObject { &engine };
     }
 
-    const detail::QuickJSWrapper& getEngine() const
-    {
-        return engine;
-    }
-
 private:
     //==============================================================================
     void resetTimeout (RelativeTime maxExecTime)
     {
-        shouldStop = false;
-
-        engine.setInterruptHandler ([this, maxExecTime, started = Time::getMillisecondCounterHiRes()]()
-        {
-            if (shouldStop)
-                return 1;
-
-            const auto elapsed = RelativeTime::milliseconds ((int64) (Time::getMillisecondCounterHiRes() - started));
-
-            if (elapsed > maxExecTime)
-                return 1;
-
-            return 0;
-        });
+        timeout = (int64) Time::getMillisecondCounterHiRes() + maxExecTime.inMilliseconds();
     }
 
     detail::QuickJSWrapper engine;
-    std::atomic<bool> shouldStop = false;
+    std::atomic<int64> timeout{};
 };
 
 //==============================================================================
