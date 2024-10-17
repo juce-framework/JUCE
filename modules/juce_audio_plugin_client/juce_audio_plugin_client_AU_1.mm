@@ -264,19 +264,22 @@ public:
      #ifdef JucePlugin_PreferredChannelConfigurations
         return false;
      #else
-        bool isInput;
+        const auto optIsInput = scopeToDirection (scope);
 
-        if (scopeToDirection (scope, isInput) != noErr)
+        if (! optIsInput.has_value())
             return false;
 
       #if JucePlugin_IsMidiEffect
         return false;
       #else
-       #if JucePlugin_IsSynth
-        if (isInput) return false;
+        const auto isInput = *optIsInput;
+
+        #if JucePlugin_IsSynth
+        if (isInput)
+            return false;
        #endif
 
-        const int busCount = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
+        const auto busCount = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
         return (juceFilter->canAddBus (isInput) || (busCount > 0 && juceFilter->canRemoveBus (isInput)));
       #endif
      #endif
@@ -284,11 +287,12 @@ public:
 
     OSStatus SetBusCount (AudioUnitScope scope, UInt32 count) override
     {
-        OSStatus err = noErr;
-        bool isInput;
+        const auto optIsInput = scopeToDirection (scope);
 
-        if ((err = scopeToDirection (scope, isInput)) != noErr)
-            return err;
+        if (! optIsInput.has_value())
+            return kAudioUnitErr_InvalidScope;
+
+        const auto isInput = *optIsInput;
 
         if (count != (UInt32) AudioUnitHelpers::getBusCount (*juceFilter, isInput))
         {
@@ -301,7 +305,7 @@ public:
                 return kAudioUnitErr_PropertyNotWritable;
 
             // we need to already create the underlying elements so that we can change their formats
-            err = MusicDeviceBase::SetBusCount (scope, count);
+            auto err = MusicDeviceBase::SetBusCount (scope, count);
 
             if (err != noErr)
                 return err;
@@ -2271,13 +2275,12 @@ private:
     }
 
     //==============================================================================
-    static OSStatus scopeToDirection (AudioUnitScope scope, bool& isInput) noexcept
+    static std::optional<bool> scopeToDirection (AudioUnitScope scope) noexcept
     {
-        isInput = (scope == kAudioUnitScope_Input);
+        if (scope != kAudioUnitScope_Input && scope != kAudioUnitScope_Output)
+            return {};
 
-        return (scope != kAudioUnitScope_Input
-             && scope != kAudioUnitScope_Output)
-              ? (OSStatus) kAudioUnitErr_InvalidScope : (OSStatus) noErr;
+        return scope == kAudioUnitScope_Input;
     }
 
     enum class BusKind
@@ -2296,12 +2299,12 @@ private:
 
     ElementInfo getElementInfo (AudioUnitScope scope, AudioUnitElement element) noexcept
     {
-        bool isInput = false;
-        OSStatus err;
+        const auto optIsInput = scopeToDirection (scope);
 
-        if ((err = scopeToDirection (scope, isInput)) != noErr)
-            return { {}, {}, {}, err };
+        if (! optIsInput.has_value())
+            return { {}, {}, {}, kAudioUnitErr_InvalidScope };
 
+        const auto isInput = *optIsInput;
         const auto busIdx = static_cast<int> (element);
 
         if (isPositiveAndBelow (busIdx, AudioUnitHelpers::getBusCount (*juceFilter, isInput)))
