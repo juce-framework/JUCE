@@ -719,10 +719,10 @@ public:
         return var::undefined();
     }
 
-    Result execute (const String& code, RelativeTime maxExecTime)
+    Result execute (const String& code, RelativeTime maxExecutionTime)
     {
         auto result = Result::ok();
-        evaluate (code, &result, maxExecTime);
+        evaluate (code, &result, maxExecutionTime);
         return result;
     }
 
