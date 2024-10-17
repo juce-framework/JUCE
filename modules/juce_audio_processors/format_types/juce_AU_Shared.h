@@ -366,11 +366,16 @@ struct AudioUnitHelpers
 
     static Array<AUChannelInfo> getAUChannelInfo (const AudioProcessor& processor)
     {
-       #if JucePlugin_IsMidiEffect
-        // A MIDI effect requires an output bus in order to determine the sample rate.
-        // No audio will be written to the output bus, so it can have any number of channels.
-        // No input bus is required.
-        return { AUChannelInfo { 0, -1 } };
+       #ifdef JucePlugin_AUMainType
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
+        if constexpr (JucePlugin_AUMainType == kAudioUnitType_MIDIProcessor)
+        {
+            // A MIDI effect requires an output bus in order to determine the sample rate.
+            // No audio will be written to the output bus, so it can have any number of channels.
+            // No input bus is required.
+            return { AUChannelInfo { 0, -1 } };
+        }
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
        #endif
 
         Array<AUChannelInfo> channelInfo;
@@ -527,11 +532,15 @@ struct AudioUnitHelpers
 
     static int getBusCountForWrapper (const AudioProcessor& juceFilter, bool isInput)
     {
-       #if JucePlugin_IsMidiEffect
-        const auto numRequiredBuses = isInput ? 0 : 1;
+       #ifdef JucePlugin_AUMainType
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
+        constexpr auto pluginIsMidiEffect = JucePlugin_AUMainType == kAudioUnitType_MIDIProcessor;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
        #else
-        const auto numRequiredBuses = 0;
+        constexpr auto pluginIsMidiEffect = false;
        #endif
+
+        const auto numRequiredBuses = (isInput || ! pluginIsMidiEffect) ? 0 : 1;
 
         return jmax (numRequiredBuses, getBusCount (juceFilter, isInput));
     }

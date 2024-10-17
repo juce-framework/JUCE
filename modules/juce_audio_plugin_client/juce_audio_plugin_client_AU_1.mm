@@ -86,6 +86,24 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #include <set>
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
+constexpr auto pluginIsMidiEffect = JucePlugin_AUMainType == kAudioUnitType_MIDIProcessor;
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+constexpr auto pluginProducesMidiOutput =
+#if JucePlugin_ProducesMidiOutput
+        true;
+#else
+        pluginIsMidiEffect;
+#endif
+
+constexpr auto pluginWantsMidiInput =
+#if JucePlugin_WantsMidiInput
+        true;
+#else
+        pluginIsMidiEffect;
+#endif
+
 //==============================================================================
 using namespace juce;
 
@@ -264,24 +282,23 @@ public:
      #ifdef JucePlugin_PreferredChannelConfigurations
         return false;
      #else
+        if constexpr (pluginIsMidiEffect)
+            return false;
+
         const auto optIsInput = scopeToDirection (scope);
 
         if (! optIsInput.has_value())
             return false;
 
-      #if JucePlugin_IsMidiEffect
-        return false;
-      #else
         const auto isInput = *optIsInput;
 
-        #if JucePlugin_IsSynth
+       #if JucePlugin_IsSynth
         if (isInput)
             return false;
        #endif
 
         const auto busCount = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
         return (juceFilter->canAddBus (isInput) || (busCount > 0 && juceFilter->canRemoveBus (isInput)));
-      #endif
      #endif
     }
 
@@ -430,24 +447,34 @@ public:
                     return noErr;
                #endif
 
-              #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
-                    outDataSize = sizeof (CFArrayRef);
-                    outWritable = false;
-                    return noErr;
+                    if constexpr (pluginProducesMidiOutput)
+                    {
+                        outDataSize = sizeof (CFArrayRef);
+                        outWritable = false;
+                        return noErr;
+                    }
+                    break;
 
                 case kAudioUnitProperty_MIDIOutputCallback:
-                    outDataSize = sizeof (AUMIDIOutputCallbackStruct);
-                    outWritable = true;
-                    return noErr;
+                    if constexpr (pluginProducesMidiOutput)
+                    {
+                        outDataSize = sizeof (AUMIDIOutputCallbackStruct);
+                        outWritable = true;
+                        return noErr;
+                    }
+                    break;
 
                #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
                 case kAudioUnitProperty_MIDIOutputEventListCallback:
-                    outDataSize = sizeof (AUMIDIEventListBlock);
-                    outWritable = true;
-                    return noErr;
+                    if constexpr (pluginProducesMidiOutput)
+                    {
+                        outDataSize = sizeof (AUMIDIEventListBlock);
+                        outWritable = true;
+                        return noErr;
+                    }
+                    break;
                #endif
-              #endif
 
                 case kAudioUnitProperty_ParameterStringFromValue:
                      outDataSize = sizeof (AudioUnitParameterStringFromValue);
@@ -615,17 +642,17 @@ public:
                 }
                #endif
 
-               #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallbackInfo:
-                {
-                    CFStringRef strs[1];
-                    strs[0] = CFSTR ("MIDI Callback");
+                    if constexpr (pluginProducesMidiOutput)
+                    {
+                        CFStringRef strs[1];
+                        strs[0] = CFSTR ("MIDI Callback");
 
-                    CFArrayRef callbackArray = CFArrayCreate (nullptr, (const void**) strs, 1, &kCFTypeArrayCallBacks);
-                    *(CFArrayRef*) outData = callbackArray;
-                    return noErr;
-                }
-               #endif
+                        CFArrayRef callbackArray = CFArrayCreate (nullptr, (const void**) strs, 1, &kCFTypeArrayCallBacks);
+                        *(CFArrayRef*) outData = callbackArray;
+                        return noErr;
+                    }
+                    break;
 
                 case kAudioUnitProperty_ParameterValueFromString:
                 {
@@ -693,27 +720,31 @@ public:
         {
             switch (inID)
             {
-              #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
                 case kAudioUnitProperty_MIDIOutputCallback:
-                    if (inDataSize < sizeof (AUMIDIOutputCallbackStruct))
-                        return kAudioUnitErr_InvalidPropertyValue;
+                    if constexpr (pluginProducesMidiOutput)
+                    {
+                        if (inDataSize < sizeof (AUMIDIOutputCallbackStruct))
+                            return kAudioUnitErr_InvalidPropertyValue;
 
-                    if (AUMIDIOutputCallbackStruct* callbackStruct = (AUMIDIOutputCallbackStruct*) inData)
-                        midiCallback = *callbackStruct;
+                        if (AUMIDIOutputCallbackStruct* callbackStruct = (AUMIDIOutputCallbackStruct*) inData)
+                            midiCallback = *callbackStruct;
 
-                    return noErr;
+                        return noErr;
+                    }
+                    break;
 
                #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
                 case kAudioUnitProperty_MIDIOutputEventListCallback:
-                {
-                    if (inDataSize != sizeof (AUMIDIEventListBlock))
-                        return kAudioUnitErr_InvalidPropertyValue;
+                    if constexpr (pluginProducesMidiOutput)
+                    {
+                        if (inDataSize != sizeof (AUMIDIEventListBlock))
+                            return kAudioUnitErr_InvalidPropertyValue;
 
-                    midiEventListBlock = ScopedMIDIEventListBlock::copy (*static_cast<const AUMIDIEventListBlock*> (inData));
-                    return noErr;
-                }
+                        midiEventListBlock = ScopedMIDIEventListBlock::copy (*static_cast<const AUMIDIEventListBlock*> (inData));
+                        return noErr;
+                    }
+                    break;
                #endif
-              #endif
 
                #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
                 case kAudioUnitProperty_HostMIDIProtocol:
@@ -1500,9 +1531,8 @@ public:
         }
 
         // process midi output
-      #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-        pushMidiOutput (nFrames);
-      #endif
+        if constexpr (pluginProducesMidiOutput)
+            pushMidiOutput (nFrames);
 
         midiEvents.clear();
 
@@ -1520,28 +1550,30 @@ public:
                               [[maybe_unused]] UInt8 inData2,
                               [[maybe_unused]] UInt32 inStartFrame) override
     {
-       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
-        const juce::uint8 data[] = { (juce::uint8) (inStatus | inChannel),
-                                     (juce::uint8) inData1,
-                                     (juce::uint8) inData2 };
+        if constexpr (pluginWantsMidiInput)
+        {
+            const juce::uint8 data[] = { (juce::uint8) (inStatus | inChannel),
+                                         (juce::uint8) inData1,
+                                         (juce::uint8) inData2 };
 
-        const ScopedLock sl (incomingMidiLock);
-        incomingEvents.addEvent (data, 3, (int) inStartFrame);
-        return noErr;
-       #else
+            const ScopedLock sl (incomingMidiLock);
+            incomingEvents.addEvent (data, 3, (int) inStartFrame);
+            return noErr;
+        }
+
         return kAudioUnitErr_PropertyNotInUse;
-       #endif
     }
 
     OSStatus HandleSysEx ([[maybe_unused]] const UInt8* inData, [[maybe_unused]] UInt32 inLength) override
     {
-       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
-        const ScopedLock sl (incomingMidiLock);
-        incomingEvents.addEvent (inData, (int) inLength, 0);
-        return noErr;
-       #else
+        if constexpr (pluginWantsMidiInput)
+        {
+            const ScopedLock sl (incomingMidiLock);
+            incomingEvents.addEvent (inData, (int) inLength, 0);
+            return noErr;
+        }
+
         return kAudioUnitErr_PropertyNotInUse;
-       #endif
     }
 
    #if JUCE_APPLE_MIDI_EVENT_LIST_SUPPORTED
@@ -2665,13 +2697,14 @@ private:
 };
 
 //==============================================================================
-#if JucePlugin_ProducesMidiOutput || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
- #define FACTORY_BASE_CLASS ausdk::AUMusicDeviceFactory
-#else
- #define FACTORY_BASE_CLASS ausdk::AUBaseFactory
-#endif
-
-AUSDK_COMPONENT_ENTRY (FACTORY_BASE_CLASS, JuceAU)
+             extern "C" void* JuceAUFactory (const AudioComponentDescription* inDesc);
+AUSDK_EXPORT extern "C" void* JuceAUFactory (const AudioComponentDescription* inDesc)
+{
+    if constexpr (pluginWantsMidiInput || pluginProducesMidiOutput)
+        return ausdk::AUMusicDeviceFactory<JuceAU>::Factory (inDesc);
+    else
+        return ausdk::AUBaseFactory<JuceAU>::Factory (inDesc);
+}
 
 #define JUCE_AU_ENTRY_POINT_NAME JUCE_CONCAT (JucePlugin_AUExportPrefix, Factory)
 
