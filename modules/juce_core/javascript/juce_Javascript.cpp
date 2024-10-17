@@ -688,13 +688,14 @@ public:
         wrapper.release();
     }
 
-    var evaluate (const String& code, Result* errorMessage, RelativeTime maxExecTime)
+    var evaluate (const String& code, Result* errorMessage, RelativeTime maxExecutionTime)
     {
         shouldStop = false;
 
         timeAtLastStart = Time::getMillisecondCounterHiRes();
+        maxExecTime = maxExecutionTime;
 
-        engine.setInterruptHandler ([this, maxExecTime]()
+        engine.setInterruptHandler ([this]()
                                     {
                                         if (shouldStop)
                                             return 1;
@@ -725,9 +726,10 @@ public:
         return result;
     }
 
-    var callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* errorMessage, RelativeTime maxExecTime)
+    var callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* errorMessage, RelativeTime maxExecutionTime)
     {
         timeAtLastStart = Time::getMillisecondCounterHiRes();
+        maxExecTime = maxExecutionTime;
 
         auto* ctx = engine.getQuickJSContext();
         const auto functionStr = function.toString();
@@ -780,6 +782,7 @@ private:
         This allows to update the interrupt check when using callFunction() after execute() without having to always override the interrupt handler
     */
     double timeAtLastStart = 0;
+    RelativeTime maxExecTime;
 };
 
 //==============================================================================
