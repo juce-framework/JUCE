@@ -774,6 +774,9 @@ public:
 
             const auto& displays = Desktop::getInstance().getDisplays();
 
+            if (displays.displays.isEmpty())
+                return { width, height };
+
             if (auto* props = pluginHolder->settings.get())
             {
                 constexpr int defaultValue = -100;
