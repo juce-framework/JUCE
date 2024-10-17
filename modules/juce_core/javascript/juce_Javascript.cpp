@@ -690,16 +690,7 @@ public:
 
     var evaluate (const String& code, Result* errorMessage, RelativeTime maxExecTime)
     {
-        shouldStop = false;
-
-        engine.setInterruptHandler ([this, maxExecTime, started = Time::getMillisecondCounterHiRes()]()
-                                    {
-                                        if (shouldStop)
-                                            return 1;
-
-                                        const auto elapsed = RelativeTime::milliseconds ((int64) (Time::getMillisecondCounterHiRes() - started));
-                                        return elapsed > maxExecTime ? 1 : 0;
-                                    });
+        resetTimeout (maxExecTime);
 
         if (errorMessage != nullptr)
             *errorMessage = Result::ok();
@@ -723,8 +714,13 @@ public:
         return result;
     }
 
-    var callFunction (const Identifier& function, const var::NativeFunctionArgs& args, Result* errorMessage)
+    var callFunction (const Identifier& function,
+                      const var::NativeFunctionArgs& args,
+                      Result* errorMessage,
+                      RelativeTime maxExecTime)
     {
+        resetTimeout (maxExecTime);
+
         auto* ctx = engine.getQuickJSContext();
         const auto functionStr = function.toString();
 
@@ -769,6 +765,24 @@ public:
 
 private:
     //==============================================================================
+    void resetTimeout (RelativeTime maxExecTime)
+    {
+        shouldStop = false;
+
+        engine.setInterruptHandler ([this, maxExecTime, started = Time::getMillisecondCounterHiRes()]()
+        {
+            if (shouldStop)
+                return 1;
+
+            const auto elapsed = RelativeTime::milliseconds ((int64) (Time::getMillisecondCounterHiRes() - started));
+
+            if (elapsed > maxExecTime)
+                return 1;
+
+            return 0;
+        });
+    }
+
     detail::QuickJSWrapper engine;
     std::atomic<bool> shouldStop = false;
 };
@@ -801,7 +815,7 @@ var JavascriptEngine::callFunction (const Identifier& function,
                                     const var::NativeFunctionArgs& args,
                                     Result* errorMessage)
 {
-    return impl->callFunction (function, args, errorMessage);
+    return impl->callFunction (function, args, errorMessage, maximumExecutionTime);
 }
 
 void JavascriptEngine::stop() noexcept
