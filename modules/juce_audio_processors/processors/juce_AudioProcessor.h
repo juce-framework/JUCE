@@ -852,16 +852,36 @@ public:
     /** Returns the length of the processor's tail, in seconds. */
     virtual double getTailLengthSeconds() const = 0;
 
-    /** Returns true if the processor wants MIDI messages. */
+    /** Returns true if the processor wants MIDI messages.
+
+        This must return the same value every time it is called.
+        This may be called by the audio thread, so this should be fast.
+        Ideally, just return a constant.
+    */
     virtual bool acceptsMidi() const = 0;
 
-    /** Returns true if the processor produces MIDI messages. */
+    /** Returns true if the processor produces MIDI messages.
+
+        This must return the same value every time it is called.
+        This may be called by the audio thread, so this should be fast.
+        Ideally, just return a constant.
+    */
     virtual bool producesMidi() const = 0;
 
-    /** Returns true if the processor supports MPE. */
+    /** Returns true if the processor supports MPE.
+
+        This must return the same value every time it is called.
+        This may be called by the audio thread, so this should be fast.
+        Ideally, just return a constant.
+    */
     virtual bool supportsMPE() const                            { return false; }
 
-    /** Returns true if this is a MIDI effect plug-in and does no audio processing. */
+    /** Returns true if this is a MIDI effect plug-in and does no audio processing.
+
+        This must return the same value every time it is called.
+        This may be called by the audio thread, so this should be fast.
+        Ideally, just return a constant.
+    */
     virtual bool isMidiEffect() const                           { return false; }
 
     //==============================================================================
