@@ -375,9 +375,7 @@ public:
            #endif
         }
 
-       #if JUCE_DEBUG && ! (JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect)
-        const int numMidiEventsComingIn = midiEvents.getNumEvents();
-       #endif
+        const auto numMidiEventsComingIn = midiEvents.getNumEvents();
 
         {
             const int numIn  = processor->getTotalNumInputChannels();
@@ -462,38 +460,41 @@ public:
 
         if (! midiEvents.isEmpty())
         {
-           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-            auto numEvents = midiEvents.getNumEvents();
-
-            outgoingEvents.ensureSize (numEvents);
-            outgoingEvents.clear();
-
-            for (const auto metadata : midiEvents)
+            if (supportsMidiOut)
             {
-                jassert (metadata.samplePosition >= 0 && metadata.samplePosition < numSamples);
+                auto numEvents = midiEvents.getNumEvents();
 
-                outgoingEvents.addEvent (metadata.data, metadata.numBytes, metadata.samplePosition);
+                outgoingEvents.ensureSize (numEvents);
+                outgoingEvents.clear();
+
+                for (const auto metadata : midiEvents)
+                {
+                    jassert (metadata.samplePosition >= 0 && metadata.samplePosition < numSamples);
+
+                    outgoingEvents.addEvent (metadata.data, metadata.numBytes, metadata.samplePosition);
+                }
+
+                // Send VST events to the host.
+                NullCheckedInvocation::invoke (hostCallback, &vstEffect, Vst2::audioMasterProcessEvents, 0, 0, outgoingEvents.events, 0.0f);
             }
+            else
+            {
+                /*  This assertion is caused when you've added some events to the
+                    midiMessages array in your processBlock() method, which usually means
+                    that you're trying to send them somewhere. But in this case they're
+                    getting thrown away.
 
-            // Send VST events to the host.
-            NullCheckedInvocation::invoke (hostCallback, &vstEffect, Vst2::audioMasterProcessEvents, 0, 0, outgoingEvents.events, 0.0f);
-           #elif JUCE_DEBUG
-            /*  This assertion is caused when you've added some events to the
-                midiMessages array in your processBlock() method, which usually means
-                that you're trying to send them somewhere. But in this case they're
-                getting thrown away.
+                    If your plugin does want to send midi messages, you'll need to set
+                    the JucePlugin_ProducesMidiOutput macro to 1 in your
+                    JucePluginCharacteristics.h file.
 
-                If your plugin does want to send midi messages, you'll need to set
-                the JucePlugin_ProducesMidiOutput macro to 1 in your
-                JucePluginCharacteristics.h file.
-
-                If you don't want to produce any midi output, then you should clear the
-                midiMessages array at the end of your processBlock() method, to
-                indicate that you don't want any of the events to be passed through
-                to the output.
-            */
-            jassert (midiEvents.getNumEvents() <= numMidiEventsComingIn);
-           #endif
+                    If you don't want to produce any midi output, then you should clear the
+                    midiMessages array at the end of your processBlock() method, to
+                    indicate that you don't want any of the events to be passed through
+                    to the output.
+                */
+                jassertquiet (midiEvents.getNumEvents() <= numMidiEventsComingIn);
+            }
 
             midiEvents.clear();
         }
@@ -553,7 +554,7 @@ public:
                 host that we want midi. In the SDK this method is marked as deprecated, but
                 some hosts rely on this behaviour.
             */
-            if (vstEffect.flags & Vst2::effFlagsIsSynth || JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect)
+            if (vstEffect.flags & Vst2::effFlagsIsSynth || supportsMidiIn)
                 NullCheckedInvocation::invoke (hostCallback, &vstEffect, Vst2::audioMasterWantMidi, 0, 1, nullptr, 0.0f);
 
             if (detail::PluginUtilities::getHostType().isAbletonLive()
@@ -570,9 +571,8 @@ public:
                 hostCallback (&vstEffect, Vst2::audioMasterVendorSpecific, 0, 0, &hostCmd, 0.0f);
             }
 
-           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-            outgoingEvents.ensureSize (512);
-           #endif
+            if (supportsMidiOut)
+                outgoingEvents.ensureSize (512);
         }
     }
 
@@ -1680,12 +1680,13 @@ private:
 
     pointer_sized_int handlePreAudioProcessingEvents ([[maybe_unused]] VstOpCodeArguments args)
     {
-       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
-        VSTMidiEventList::addEventsToMidiBuffer ((Vst2::VstEvents*) args.ptr, midiEvents);
-        return 1;
-       #else
+        if (supportsMidiIn)
+        {
+            VSTMidiEventList::addEventsToMidiBuffer ((Vst2::VstEvents*) args.ptr, midiEvents);
+            return 1;
+        }
+
         return 0;
-       #endif
     }
 
     pointer_sized_int handleIsParameterAutomatable (VstOpCodeArguments args)
@@ -1841,22 +1842,14 @@ private:
          || matches ("receiveVstMidiEvent")
          || matches ("receiveVstMidiEvents"))
         {
-           #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
-            return 1;
-           #else
-            return -1;
-           #endif
+            return supportsMidiIn ? 1 : -1;
         }
 
         if (matches ("sendVstEvents")
          || matches ("sendVstMidiEvent")
          || matches ("sendVstMidiEvents"))
         {
-           #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-            return 1;
-           #else
-            return -1;
-           #endif
+            return supportsMidiOut ? 1 : -1;
         }
 
         if (matches ("receiveVstTimeInfo")
@@ -2023,28 +2016,30 @@ private:
     //==============================================================================
     pointer_sized_int handleGetNumMidiInputChannels()
     {
-       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
-        #ifdef JucePlugin_VSTNumMidiInputs
-         return JucePlugin_VSTNumMidiInputs;
-        #else
-         return 16;
-        #endif
-       #else
+        if (supportsMidiIn)
+        {
+           #ifdef JucePlugin_VSTNumMidiInputs
+            return JucePlugin_VSTNumMidiInputs;
+           #else
+            return 16;
+           #endif
+        }
+
         return 0;
-       #endif
     }
 
     pointer_sized_int handleGetNumMidiOutputChannels()
     {
-       #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-        #ifdef JucePlugin_VSTNumMidiOutputs
-         return JucePlugin_VSTNumMidiOutputs;
-        #else
-         return 16;
-        #endif
-       #else
+        if (supportsMidiOut)
+        {
+           #ifdef JucePlugin_VSTNumMidiOutputs
+            return JucePlugin_VSTNumMidiOutputs;
+           #else
+            return 16;
+           #endif
+        }
+
         return 0;
-       #endif
     }
 
     pointer_sized_int handleEditIdle()
@@ -2083,6 +2078,8 @@ private:
 
     bool isProcessing = false, isBypassed = false, hasShutdown = false;
     bool firstProcessCallback = true, shouldDeleteEditor = false;
+    const bool supportsMidiIn  = processor->isMidiEffect() || processor->acceptsMidi();
+    const bool supportsMidiOut = processor->isMidiEffect() || processor->producesMidi();
 
     VstTempBuffers<float> floatTempBuffers;
     VstTempBuffers<double> doubleTempBuffers;
