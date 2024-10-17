@@ -723,26 +723,11 @@ public:
     //==============================================================================
     typedef StandalonePluginHolder::PluginInOuts PluginInOuts;
 
-    //==============================================================================
-    /** Creates a window with a given title and colour.
-        The settings object can be a PropertySet that the class should use to
-        store its settings (it can also be null). If takeOwnershipOfSettings is
-        true, then the settings object will be owned and deleted by this object.
-    */
     StandaloneFilterWindow (const String& title,
                             Colour backgroundColour,
-                            PropertySet* settingsToUse,
-                            bool takeOwnershipOfSettings,
-                            const String& preferredDefaultDeviceName = String(),
-                            const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const Array<PluginInOuts>& constrainToConfiguration = {},
-                           #if JUCE_ANDROID || JUCE_IOS
-                            bool autoOpenMidiDevices = true
-                           #else
-                            bool autoOpenMidiDevices = false
-                           #endif
-                            )
+                            std::unique_ptr<StandalonePluginHolder> pluginHolderIn)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
+          pluginHolder (std::move (pluginHolderIn)),
           optionsButton ("Options")
     {
         setConstrainer (&decoratorConstrainer);
@@ -756,10 +741,6 @@ public:
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
        #endif
-
-        pluginHolder.reset (new StandalonePluginHolder (settingsToUse, takeOwnershipOfSettings,
-                                                        preferredDefaultDeviceName, preferredSetupOptions,
-                                                        constrainToConfiguration, autoOpenMidiDevices));
 
        #if JUCE_IOS || JUCE_ANDROID
         setFullScreen (true);
@@ -807,6 +788,36 @@ public:
             if (auto* editor = processor->getActiveEditor())
                 setResizable (editor->isResizable(), false);
        #endif
+    }
+
+    //==============================================================================
+    /** Creates a window with a given title and colour.
+        The settings object can be a PropertySet that the class should use to
+        store its settings (it can also be null). If takeOwnershipOfSettings is
+        true, then the settings object will be owned and deleted by this object.
+    */
+    StandaloneFilterWindow (const String& title,
+                            Colour backgroundColour,
+                            PropertySet* settingsToUse,
+                            bool takeOwnershipOfSettings,
+                            const String& preferredDefaultDeviceName = String(),
+                            const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
+                            const Array<PluginInOuts>& constrainToConfiguration = {},
+                           #if JUCE_ANDROID || JUCE_IOS
+                            bool autoOpenMidiDevices = true
+                           #else
+                            bool autoOpenMidiDevices = false
+                           #endif
+                            )
+        : StandaloneFilterWindow (title,
+                                  backgroundColour,
+                                  std::make_unique<StandalonePluginHolder> (settingsToUse,
+                                                                            takeOwnershipOfSettings,
+                                                                            preferredDefaultDeviceName,
+                                                                            preferredSetupOptions,
+                                                                            constrainToConfiguration,
+                                                                            autoOpenMidiDevices))
+    {
     }
 
     ~StandaloneFilterWindow() override

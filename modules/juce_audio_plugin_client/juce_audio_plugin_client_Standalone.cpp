@@ -70,7 +70,7 @@ public:
     {
         PropertiesFile::Options options;
 
-        options.applicationName     = appName;
+        options.applicationName     = CharPointer_UTF8 (JucePlugin_Name);
         options.filenameSuffix      = ".settings";
         options.osxLibrarySubFolder = "Application Support";
        #if JUCE_LINUX || JUCE_BSD
@@ -82,46 +82,72 @@ public:
         appProperties.setStorageParameters (options);
     }
 
-    const String getApplicationName() override              { return appName; }
+    const String getApplicationName() override              { return CharPointer_UTF8 (JucePlugin_Name); }
     const String getApplicationVersion() override           { return JucePlugin_VersionString; }
     bool moreThanOneInstanceAllowed() override              { return true; }
     void anotherInstanceStarted (const String&) override    {}
 
     virtual StandaloneFilterWindow* createWindow()
     {
-       #ifdef JucePlugin_PreferredChannelConfigurations
-        StandalonePluginHolder::PluginInOuts channels[] = { JucePlugin_PreferredChannelConfigurations };
-       #endif
+        if (Desktop::getInstance().getDisplays().displays.isEmpty())
+        {
+            // No displays are available, so no window will be created!
+            jassertfalse;
+            return nullptr;
+        }
 
         return new StandaloneFilterWindow (getApplicationName(),
                                            LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
-                                           appProperties.getUserSettings(),
-                                           false, {}, nullptr
-                                          #ifdef JucePlugin_PreferredChannelConfigurations
-                                           , juce::Array<StandalonePluginHolder::PluginInOuts> (channels, juce::numElementsInArray (channels))
-                                          #else
-                                           , {}
-                                          #endif
-                                          #if JUCE_DONT_AUTO_OPEN_MIDI_DEVICES_ON_MOBILE
-                                           , false
-                                          #endif
-                                           );
+                                           createPluginHolder());
+    }
+
+    virtual std::unique_ptr<StandalonePluginHolder> createPluginHolder()
+    {
+        constexpr auto autoOpenMidiDevices =
+       #if (JUCE_ANDROID || JUCE_IOS) && ! JUCE_DONT_AUTO_OPEN_MIDI_DEVICES_ON_MOBILE
+                true;
+       #else
+                false;
+       #endif
+
+
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        constexpr StandalonePluginHolder::PluginInOuts channels[] { JucePlugin_PreferredChannelConfigurations };
+        const Array<StandalonePluginHolder::PluginInOuts> channelConfig {channels, juce::numElementsInArray (channels));
+       #else
+        const Array<StandalonePluginHolder::PluginInOuts> channelConfig;
+       #endif
+
+        return std::make_unique<StandalonePluginHolder> (appProperties.getUserSettings(),
+                                                         false,
+                                                         String{},
+                                                         nullptr,
+                                                         channelConfig,
+                                                         autoOpenMidiDevices);
     }
 
     //==============================================================================
     void initialise (const String&) override
     {
-        mainWindow.reset (createWindow());
+        mainWindow = rawToUniquePtr (createWindow());
 
-       #if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
-        Desktop::getInstance().setKioskModeComponent (mainWindow.get(), false);
-       #endif
+        if (mainWindow != nullptr)
+        {
+           #if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
+            Desktop::getInstance().setKioskModeComponent (mainWindow.get(), false);
+           #endif
 
-        mainWindow->setVisible (true);
+            mainWindow->setVisible (true);
+        }
+        else
+        {
+            pluginHolder = createPluginHolder();
+        }
     }
 
     void shutdown() override
     {
+        pluginHolder = nullptr;
         mainWindow = nullptr;
         appProperties.saveIfNeeded();
     }
@@ -129,6 +155,9 @@ public:
     //==============================================================================
     void systemRequestedQuit() override
     {
+        if (pluginHolder != nullptr)
+            pluginHolder->savePluginState();
+
         if (mainWindow != nullptr)
             mainWindow->pluginHolder->savePluginState();
 
@@ -151,7 +180,7 @@ protected:
     std::unique_ptr<StandaloneFilterWindow> mainWindow;
 
 private:
-    const String appName { CharPointer_UTF8 (JucePlugin_Name) };
+    std::unique_ptr<StandalonePluginHolder> pluginHolder;
 };
 
 } // namespace juce
