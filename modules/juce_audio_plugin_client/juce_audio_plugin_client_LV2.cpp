@@ -1291,8 +1291,8 @@ private:
               "\t\tatom:bufferType atom:Sequence ;\n"
               "\t\tatom:supports\n";
 
-       #if ! JucePlugin_IsSynth && ! JucePlugin_IsMidiEffect
-        if (proc.acceptsMidi())
+       #if ! JucePlugin_IsSynth
+        if (proc.acceptsMidi() || proc.isMidiEffect())
        #endif
             os << "\t\t\tmidi:MidiEvent ,\n";
 
@@ -1308,9 +1308,7 @@ private:
               "\t\tatom:bufferType atom:Sequence ;\n"
               "\t\tatom:supports\n";
 
-       #if ! JucePlugin_IsMidiEffect
-        if (proc.producesMidi())
-       #endif
+        if (proc.producesMidi() || proc.isMidiEffect())
             os << "\t\t\tmidi:MidiEvent ,\n";
 
         os << "\t\t\tpatch:Message ;\n"
