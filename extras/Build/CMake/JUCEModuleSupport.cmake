@@ -62,13 +62,28 @@ function(_juce_find_target_architecture result)
     set("${result}" "${match_result}" PARENT_SCOPE)
 endfunction()
 
-if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD") OR MSYS OR MINGW)
+if((CMAKE_SYSTEM_NAME STREQUAL "Windows")
+   OR (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+   OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD")
+   OR MSYS
+   OR MINGW)
     # If you really need to override the detected arch for some reason,
     # you can configure the build with -DJUCE_TARGET_ARCHITECTURE=<custom arch>
     if(NOT DEFINED JUCE_TARGET_ARCHITECTURE)
         _juce_find_target_architecture(target_arch)
         set(JUCE_TARGET_ARCHITECTURE "${target_arch}"
             CACHE INTERNAL "The target architecture, used to name internal folders in VST3 bundles, and to locate bundled libraries in modules")
+    endif()
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        if ((CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "X86" AND NOT JUCE_TARGET_ARCHITECTURE STREQUAL "i386")
+            OR (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64"
+                AND NOT (JUCE_TARGET_ARCHITECTURE STREQUAL "i386"
+                         OR JUCE_TARGET_ARCHITECTURE STREQUAL "x86_64")))
+            set(JUCE_WINDOWS_HELPERS_CAN_RUN FALSE)
+        else()
+            set(JUCE_WINDOWS_HELPERS_CAN_RUN TRUE)
+        endif()
     endif()
 endif()
 
@@ -270,7 +285,9 @@ function(_juce_get_platform_plugin_kinds out)
         endif()
     endif()
 
-    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows") AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"))
+    if(NOT (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+       AND (CMAKE_SYSTEM_NAME STREQUAL "Darwin"
+            OR (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND JUCE_TARGET_ARCHITECTURE STREQUAL "x86_64")))
         list(APPEND result AAX)
     endif()
 

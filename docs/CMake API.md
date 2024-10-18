@@ -799,8 +799,8 @@ CMakeLists in the `modules` directory.
 
 This function parses the PIP metadata block in the provided header, and adds appropriate build
 targets for a console app, GUI app, or audio plugin. For audio plugin targets, it builds as many
-plugin formats as possible. To build AAX or VST2 targets, call `juce_set_aax_sdk_path` and/or
-`juce_set_vst2_sdk_path` *before* calling `juce_add_pip`.
+plugin formats as possible. To build VST2 targets, call `juce_set_vst2_sdk_path` *before* calling
+`juce_add_pip`.
 
 This is mainly provided to build the built-in example projects in the JUCE repo, and for building
 quick proof-of-concept demo apps with minimal set-up. For any use-case more complex than a

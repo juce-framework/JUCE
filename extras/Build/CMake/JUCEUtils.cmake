@@ -851,18 +851,11 @@ endfunction()
 
 # ==================================================================================================
 
-function(_juce_create_windows_package source_target dest_target extension default_icon x32folder x64folder)
-    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        return()
-    endif()
-
+function(_juce_create_windows_package source_target dest_target extension default_icon arch_string)
     get_target_property(products_folder ${dest_target} LIBRARY_OUTPUT_DIRECTORY)
 
     set(product_name $<TARGET_PROPERTY:${source_target},JUCE_PRODUCT_NAME>)
     set(output_folder "${products_folder}/${product_name}.${extension}")
-
-    set(is_x64 $<EQUAL:${CMAKE_SIZEOF_VOID_P},8>)
-    set(arch_string $<IF:${is_x64},${x64folder},${x32folder}>)
 
     set_target_properties(${dest_target}
         PROPERTIES
@@ -1090,6 +1083,13 @@ function(juce_enable_vst3_manifest_step shared_code_target)
         return()
     endif()
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT JUCE_WINDOWS_HELPERS_CAN_RUN)
+        message(WARNING "VST3 manifest generation is disabled for ${shared_code_target} because a "
+            "${JUCE_TARGET_ARCHITECTURE} manifest helper cannot run on a host system processor detected to be "
+            "${CMAKE_HOST_SYSTEM_PROCESSOR}.")
+        return()
+    endif()
+
     set(target_name ${shared_code_target}_VST3)
     get_target_property(product ${target_name} JUCE_PLUGIN_ARTEFACT_FILE)
 
@@ -1102,14 +1102,17 @@ function(juce_enable_vst3_manifest_step shared_code_target)
 
     get_target_property(target_version_string ${shared_code_target} JUCE_VERSION)
 
+    set(ouput_path "${product}/Contents/Resources/moduleinfo.json")
+
     # Use the helper tool to write out the moduleinfo.json
     add_custom_command(TARGET ${target_name} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "creating ${ouput_path}"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${product}/Contents/Resources"
         COMMAND juce_vst3_helper
             -create
             -version "${target_version_string}"
             -path "${product}"
-            -output "${product}/Contents/Resources/moduleinfo.json"
+            -output "${ouput_path}"
         VERBATIM)
 
     set_target_properties(${shared_code_target} PROPERTIES _JUCE_VST3_MANIFEST_STEP_ADDED TRUE)
@@ -1194,7 +1197,21 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
             XCODE_ATTRIBUTE_LIBRARY_STYLE Bundle
             XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE YES)
 
-        _juce_create_windows_package(${shared_code_target} ${target_name} vst3 "" x86-win x86_64-win)
+        if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+            if(JUCE_TARGET_ARCHITECTURE STREQUAL "x86_64")
+                set(windows_arch "x86_64")
+            elseif(JUCE_TARGET_ARCHITECTURE STREQUAL "i386")
+                set(windows_arch "x86")
+            elseif(JUCE_TARGET_ARCHITECTURE STREQUAL "arm64ec")
+                set(windows_arch "arm64ec")
+            elseif(JUCE_TARGET_ARCHITECTURE STREQUAL "aarch64")
+                set(windows_arch "arm64")
+            else()
+                message(FATAL_ERROR "Unsupported target architecture for VST3: ${JUCE_TARGET_ARCHITECTURE}")
+            endif()
+            
+            _juce_create_windows_package(${shared_code_target} ${target_name} vst3 "" "${windows_arch}-win")
+        endif()
 
         set(output_path "${products_folder}/${product_name}.vst3")
 
@@ -1262,7 +1279,18 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         _juce_init_bundled_aax_sdk()
         get_target_property(default_icon juce_aax_sdk INTERFACE_JUCE_AAX_DEFAULT_ICON)
-        _juce_create_windows_package(${shared_code_target} ${target_name} aaxplugin "${default_icon}" Win32 x64)
+
+        if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+            if(JUCE_TARGET_ARCHITECTURE STREQUAL "x86_64")
+                set(windows_arch "x64")
+            elseif(JUCE_TARGET_ARCHITECTURE STREQUAL "i386")
+                set(windows_arch "Win32")
+            else()
+                message(FATAL_ERROR "Unsupported target architecture for AAX: ${JUCE_TARGET_ARCHITECTURE}")
+            endif()
+            
+            _juce_create_windows_package(${shared_code_target} ${target_name} aaxplugin "${default_icon}" "${windows_arch}")
+        endif()
 
         set(output_path "${products_folder}/${product_name}.aaxplugin")
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_AAX_COPY_DIR)
@@ -1300,6 +1328,11 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
                 JUCE_UNITY_COPY_DIR)
         endif()
     elseif(kind STREQUAL "LV2")
+        if (CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT JUCE_WINDOWS_HELPERS_CAN_RUN)
+            message(FATAL_ERROR "You cannot build a ${JUCE_TARGET_ARCHITECTURE} LV2 plug-in on a host "
+                "system processor detected to be ${CMAKE_HOST_SYSTEM_PROCESSOR}.")
+        endif()
+
         set_target_properties(${target_name} PROPERTIES BUNDLE FALSE)
 
         get_target_property(JUCE_LV2URI "${shared_code_target}" JUCE_LV2URI)
@@ -2251,23 +2284,22 @@ function(juce_add_pip header)
         else()
             set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
 
+            set(formats AAX AU AUv3 LV2 Standalone Unity VST3)
+
             # We add VST2 targets too, if the user has set up those SDKs
-
-            set(extra_formats)
-
             if(TARGET juce_vst2_sdk)
-                list(APPEND extra_formats VST)
+                list(APPEND formats VST)
             endif()
 
-            if(NOT (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
-                list(APPEND extra_formats VST3)
+            if(CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT JUCE_WINDOWS_HELPERS_CAN_RUN)
+                list(REMOVE_ITEM formats LV2)
             endif()
 
             # Standalone plugins might want to access the mic
             list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
 
             juce_add_plugin(${JUCE_PIP_NAME}
-                FORMATS AU AUv3 LV2 Standalone Unity AAX ${extra_formats}
+                FORMATS ${formats}
                 ${extra_target_args})
         endif()
     elseif(pip_kind STREQUAL "Component")

@@ -8466,23 +8466,22 @@ static const unsigned char temp_binary_data_66[] =
 "  ==============================================================================\r\n"
 "*/\r\n"
 "\r\n"
-"#if defined(__arm__) || defined(__TARGET_ARCH_ARM) || defined(_M_ARM) || defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
-"\r\n"
-"  #if defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
-"    #error JUCE_ARCH aarch64\r\n"
-"  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 8) || defined(__ARMv8__) || defined(__ARMv8_A__)\r\n"
-"    #error JUCE_ARCH armv8l\r\n"
-"  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 7) || defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__) || defined(_ARM_ARCH_7) || defined(__CORE_CORTEX"
-"A__)\r\n"
-"    #error JUCE_ARCH armv7l\r\n"
-"  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 6) || defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6ZK__) || defined(__ARM_A"
-"RCH_6M__)\r\n"
-"    #error JUCE_ARCH armv6l\r\n"
-"  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 5) || defined(__ARM_ARCH_5TEJ__)\r\n"
-"    #error JUCE_ARCH armv5l\r\n"
-"  #else\r\n"
-"    #error JUCE_ARCH arm\r\n"
-"  #endif\r\n"
+"#if defined(_M_ARM64EC)\r\n"
+"  #error JUCE_ARCH arm64ec\r\n"
+"#elif defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
+"  #error JUCE_ARCH aarch64\r\n"
+"#elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 8) || defined(__ARMv8__) || defined(__ARMv8_A__)\r\n"
+"  #error JUCE_ARCH armv8l\r\n"
+"#elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 7) || defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__) || defined(_ARM_ARCH_7) || defined(__CORE_CORTEXA_"
+"_)\r\n"
+"  #error JUCE_ARCH armv7l\r\n"
+"#elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 6) || defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6ZK__) || defined(__ARM_ARC"
+"H_6M__)\r\n"
+"  #error JUCE_ARCH armv6l\r\n"
+"#elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 5) || defined(__ARM_ARCH_5TEJ__)\r\n"
+"  #error JUCE_ARCH armv5l\r\n"
+"#elif defined(__arm__) || defined(_M_ARM)\r\n"
+"  #error JUCE_ARCH arm\r\n"
 "\r\n"
 "#elif defined(__i386) || defined(__i386__) || defined(_M_IX86)\r\n"
 "\r\n"
@@ -9051,7 +9050,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
-        case 0x7c03d519:  numBytes = 3658; return juce_runtime_arch_detection_cpp;
+        case 0x7c03d519:  numBytes = 3575; return juce_runtime_arch_detection_cpp;
         case 0x295b6f43:  numBytes = 1865; return juce_LinuxSubprocessHelper_cpp;
         case 0xef269d3a:  numBytes = 12997; return juce_SimpleBinaryBuilder_cpp;
         default: break;

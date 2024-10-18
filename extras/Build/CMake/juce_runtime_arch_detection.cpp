@@ -32,21 +32,20 @@
   ==============================================================================
 */
 
-#if defined(__arm__) || defined(__TARGET_ARCH_ARM) || defined(_M_ARM) || defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)
-
-  #if defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)
-    #error JUCE_ARCH aarch64
-  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 8) || defined(__ARMv8__) || defined(__ARMv8_A__)
-    #error JUCE_ARCH armv8l
-  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 7) || defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__) || defined(_ARM_ARCH_7) || defined(__CORE_CORTEXA__)
-    #error JUCE_ARCH armv7l
-  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 6) || defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6ZK__) || defined(__ARM_ARCH_6M__)
-    #error JUCE_ARCH armv6l
-  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 5) || defined(__ARM_ARCH_5TEJ__)
-    #error JUCE_ARCH armv5l
-  #else
-    #error JUCE_ARCH arm
-  #endif
+#if defined(_M_ARM64EC)
+  #error JUCE_ARCH arm64ec
+#elif defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)
+  #error JUCE_ARCH aarch64
+#elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 8) || defined(__ARMv8__) || defined(__ARMv8_A__)
+  #error JUCE_ARCH armv8l
+#elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 7) || defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__) || defined(_ARM_ARCH_7) || defined(__CORE_CORTEXA__)
+  #error JUCE_ARCH armv7l
+#elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 6) || defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6ZK__) || defined(__ARM_ARCH_6M__)
+  #error JUCE_ARCH armv6l
+#elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 5) || defined(__ARM_ARCH_5TEJ__)
+  #error JUCE_ARCH armv5l
+#elif defined(__arm__) || defined(_M_ARM)
+  #error JUCE_ARCH arm
 
 #elif defined(__i386) || defined(__i386__) || defined(_M_IX86)
 
