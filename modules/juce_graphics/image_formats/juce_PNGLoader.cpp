@@ -275,6 +275,9 @@ namespace pnglibNamespace
   #define PNG_LINKAGE_FUNCTION
 
   #define PNG_ARM_NEON_OPT 0
+  #define PNG_POWERPC_VSX_OPT 0
+  #define PNG_INTEL_SSE_OPT 0
+  #define PNG_MIPS_MSA_OPT 0
 
   #if ! defined (PNG_USER_WIDTH_MAX)
    #define PNG_USER_WIDTH_MAX 1000000
