@@ -67,7 +67,8 @@ namespace juce
     @tags{Core}
 */
 template <typename ListenerClass,
-          typename ArrayType = Array<ListenerClass*>>
+          typename ArrayType = Array<ListenerClass*>,
+          typename LockMode = ScopedTryLock>
 class ListenerList
 {
 public:
@@ -230,13 +231,16 @@ public:
                                Callback&& callback)
     {
        #if JUCE_ASSERTIONS_ENABLED_OR_LOGGED
-        const ScopedTryLock callCheckedExcludingLock (*callCheckedExcludingMutex);
+        const LockMode callCheckedExcludingLock (*callCheckedExcludingMutex);
 
         // If you hit this assertion it means you're trying to call the listeners from multiple
         // threads concurrently. If you need to do this either use a LightweightListenerList, for a
         // lock free option, or a ThreadSafeListenerList if you also need the extra guarantees
         // provided by ListenerList. See the class descriptions for more details.
-        jassert (callCheckedExcludingLock.isLocked());
+        if (std::is_same<ScopedTryLock, LockMode>())
+        {
+            jassert(((const ScopedTryLock*)&callCheckedExcludingLock)->isLocked());
+        }
        #endif
 
         if (! initialised())
@@ -415,6 +419,9 @@ private:
 */
 template <typename ListenerClass>
 using ThreadSafeListenerList = ListenerList<ListenerClass, Array<ListenerClass*, CriticalSection>>;
+template <typename ListenerClass>
+using ThreadSafeBlockingListenerList = ListenerList<ListenerClass, Array<ListenerClass*, CriticalSection>, ScopedLock>;
+
 
 //==============================================================================
 /**
