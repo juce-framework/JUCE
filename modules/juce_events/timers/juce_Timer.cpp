@@ -95,6 +95,9 @@ public:
 
     ~TimerThread() override
     {
+        // If this is hit, a timer has outlived the platform event system.
+        jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
+
         stopThreadAsync();
         ShutdownDetector::removeListener (this);
         stopThread (-1);
