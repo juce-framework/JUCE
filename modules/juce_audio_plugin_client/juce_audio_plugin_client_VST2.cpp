@@ -208,7 +208,6 @@ struct AbletonLiveHostSpecific
 */
 class JuceVSTWrapper final : public AudioProcessorListener,
                              public AudioPlayHead,
-                             private Timer,
                              private AudioProcessorParameter::Listener
 {
 private:
@@ -324,7 +323,7 @@ public:
             MessageManagerLock mmLock;
            #endif
 
-            stopTimer();
+            timedCallback.stopTimer();
             deleteEditor (false);
 
             hasShutdown = true;
@@ -779,27 +778,6 @@ public:
     }
 
     //==============================================================================
-    void timerCallback() override
-    {
-        if (shouldDeleteEditor)
-        {
-            shouldDeleteEditor = false;
-            deleteEditor (true);
-        }
-
-        {
-            ScopedLock lock (stateInformationLock);
-
-            if (chunkMemoryTime > 0
-                 && chunkMemoryTime < juce::Time::getApproximateMillisecondCounter() - 2000
-                 && ! recursionCheck)
-            {
-                chunkMemory.reset();
-                chunkMemoryTime = 0;
-            }
-        }
-    }
-
     void setHasEditorFlag (bool shouldSetHasEditor)
     {
         auto hasEditor = (vstEffect.flags & Vst2::effFlagsHasEditor) != 0;
@@ -1472,7 +1450,7 @@ private:
     pointer_sized_int handleClose (VstOpCodeArguments)
     {
         // Note: most hosts call this on the UI thread, but wavelab doesn't, so be careful in here.
-        stopTimer();
+        timedCallback.stopTimer();
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
             deleteEditor (false);
@@ -1594,7 +1572,7 @@ private:
        #endif
         jassert (! recursionCheck);
 
-        startTimerHz (4); // performs misc housekeeping chores
+        timedCallback.startTimerHz (4); // performs misc housekeeping chores
 
         deleteEditor (true);
         createEditorComp();
@@ -2058,6 +2036,27 @@ private:
    #if JUCE_LINUX || JUCE_BSD
     SharedResourcePointer<detail::MessageThread> messageThread;
    #endif
+
+    TimedCallback timedCallback { [this]
+    {
+        if (shouldDeleteEditor)
+        {
+            shouldDeleteEditor = false;
+            deleteEditor (true);
+        }
+
+        {
+            ScopedLock lock (stateInformationLock);
+
+            if (chunkMemoryTime > 0
+                && chunkMemoryTime < juce::Time::getApproximateMillisecondCounter() - 2000
+                && ! recursionCheck)
+            {
+                chunkMemory.reset();
+                chunkMemoryTime = 0;
+            }
+        }
+    } };
 
     Vst2::audioMasterCallback hostCallback;
     std::unique_ptr<AudioProcessor> processor;
