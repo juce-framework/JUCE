@@ -520,6 +520,10 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
         availableSampleRates.addIfNotAlreadyThere (highestRate);
 
+        // Reset sample rate back to the original, so that we don't end up stuck on the highest rate
+        sampleRate = trySampleRate (sampleRate);
+        bufferSize = getBufferSize (sampleRate);
+
         AudioUnitAddPropertyListener (audioUnit,
                                       kAudioUnitProperty_StreamFormat,
                                       dispatchAudioUnitPropertyChange,
