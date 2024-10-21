@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -48,9 +57,9 @@ public:
             expect (map.getJuceChannelForVst3Channel (1) == 1); // R -> right
         }
 
-        beginTest ("ChannelMapping for a 9.1.6 bus remaps the channels appropriately");
+        beginTest ("ChannelMapping for a k91_6 bus remaps the channels appropriately");
         {
-            ChannelMapping map (AudioChannelSet::create9point1point6());
+            ChannelMapping map (AudioChannelSet::create9point1point6ITU());
             expect (map.size() == 16);
 
             // VST3 order is:
@@ -71,6 +80,64 @@ public:
             //      Tsl
             //      Tsr
             // JUCE order is:
+            //      left
+            //      right
+            //      centre
+            //      LFE
+            //      leftSurround
+            //      rightSurround
+            //      leftCentre
+            //      rightCentre
+            //      leftSurroundSide
+            //      rightSurroundSide
+            //      topFrontLeft
+            //      topRearRight
+            //      topRearLeft
+            //      topRearRight
+            //      topSideLeft
+            //      topSideRight
+
+            expect (map.getJuceChannelForVst3Channel (0)  == 0);  // L   -> left
+            expect (map.getJuceChannelForVst3Channel (1)  == 1);  // R   -> right
+            expect (map.getJuceChannelForVst3Channel (2)  == 2);  // C   -> centre
+            expect (map.getJuceChannelForVst3Channel (3)  == 3);  // Lfe -> LFE
+            expect (map.getJuceChannelForVst3Channel (4)  == 4);  // Ls  -> leftSurround
+            expect (map.getJuceChannelForVst3Channel (5)  == 5);  // Rs  -> rightSurround
+            expect (map.getJuceChannelForVst3Channel (6)  == 6);  // Lc  -> leftCentre
+            expect (map.getJuceChannelForVst3Channel (7)  == 7);  // Rc  -> rightCentre
+            expect (map.getJuceChannelForVst3Channel (8)  == 8);  // Sl  -> leftSurroundSide
+            expect (map.getJuceChannelForVst3Channel (9)  == 9);  // Sr  -> rightSurroundSide
+            expect (map.getJuceChannelForVst3Channel (10) == 10); // Tfl -> topFrontLeft
+            expect (map.getJuceChannelForVst3Channel (11) == 11); // Tfr -> topFrontRight
+            expect (map.getJuceChannelForVst3Channel (12) == 12); // Trl -> topRearLeft
+            expect (map.getJuceChannelForVst3Channel (13) == 13); // Trr -> topRearRight
+            expect (map.getJuceChannelForVst3Channel (14) == 14); // Tsl -> topSideLeft
+            expect (map.getJuceChannelForVst3Channel (15) == 15); // Tsr -> topSideRight
+        }
+
+        beginTest ("ChannelMapping for a k91_6_W bus remaps the channels appropriately");
+        {
+            ChannelMapping map (AudioChannelSet::create9point1point6());
+            expect (map.size() == 16);
+
+            // VST3 order is:
+            //      L
+            //      R
+            //      C
+            //      Lfe
+            //      Ls
+            //      Rs
+            //      Sl
+            //      Sr
+            //      Tfl
+            //      Tfr
+            //      Trl
+            //      Trr
+            //      Tsl
+            //      Tsr
+            //      Lw
+            //      Rw
+            // JUCE order is:
             //      Left
             //      Right
             //      Centre
@@ -88,22 +155,22 @@ public:
             //      Top Side Left
             //      Top Side Right
 
-            expect (map.getJuceChannelForVst3Channel (0)  == 12); // L   -> wideLeft
-            expect (map.getJuceChannelForVst3Channel (1)  == 13); // R   -> wideRight
+            expect (map.getJuceChannelForVst3Channel (0)  == 0);  // L   -> left
+            expect (map.getJuceChannelForVst3Channel (1)  == 1);  // R   -> right
             expect (map.getJuceChannelForVst3Channel (2)  == 2);  // C   -> centre
             expect (map.getJuceChannelForVst3Channel (3)  == 3);  // Lfe -> LFE
             expect (map.getJuceChannelForVst3Channel (4)  == 10); // Ls  -> leftSurroundRear
             expect (map.getJuceChannelForVst3Channel (5)  == 11); // Rs  -> rightSurroundRear
-            expect (map.getJuceChannelForVst3Channel (6)  == 0);  // Lc  -> left
-            expect (map.getJuceChannelForVst3Channel (7)  == 1);  // Rc  -> right
-            expect (map.getJuceChannelForVst3Channel (8)  == 4);  // Sl  -> leftSurroundSide
-            expect (map.getJuceChannelForVst3Channel (9)  == 5);  // Sl  -> leftSurroundSide
-            expect (map.getJuceChannelForVst3Channel (10) == 6);  // Tfl -> topFrontLeft
-            expect (map.getJuceChannelForVst3Channel (11) == 7);  // Tfr -> topFrontRight
-            expect (map.getJuceChannelForVst3Channel (12) == 8);  // Trl -> topRearLeft
-            expect (map.getJuceChannelForVst3Channel (13) == 9);  // Trr -> topRearRight
-            expect (map.getJuceChannelForVst3Channel (14) == 14); // Tsl -> topSideLeft
-            expect (map.getJuceChannelForVst3Channel (15) == 15); // Tsr -> topSideRight
+            expect (map.getJuceChannelForVst3Channel (6)  == 4);  // Sl  -> leftSurroundSide
+            expect (map.getJuceChannelForVst3Channel (7)  == 5);  // Sr  -> rightSurroundSide
+            expect (map.getJuceChannelForVst3Channel (8)  == 6);  // Tfl -> topFrontLeft
+            expect (map.getJuceChannelForVst3Channel (9)  == 7);  // Tfr -> topFrontRight
+            expect (map.getJuceChannelForVst3Channel (10) == 8);  // Trl -> topRearLeft
+            expect (map.getJuceChannelForVst3Channel (11) == 9);  // Trr -> topRearRight
+            expect (map.getJuceChannelForVst3Channel (12) == 14); // Tsl -> topSideLeft
+            expect (map.getJuceChannelForVst3Channel (13) == 15); // Tsr -> topSideRight
+            expect (map.getJuceChannelForVst3Channel (14) == 12); // Lw  -> wideLeft
+            expect (map.getJuceChannelForVst3Channel (15) == 13); // Lw  -> wideRight
         }
 
         const auto blockSize = 128;

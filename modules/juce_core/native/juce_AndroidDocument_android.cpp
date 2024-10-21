@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -206,9 +218,6 @@ struct AndroidDocumentDetail
 
     static void setPermissions (const URL& url, jmethodID func)
     {
-        if (getAndroidSDKVersion() < 19)
-            return;
-
         const auto javaUri = urlToUri (url);
 
         if (const auto resolver = AndroidContentUriResolver::getContentResolver())
@@ -390,18 +399,17 @@ struct AndroidDocument::Utils
                                                                               AndroidMimeTypeMap.getSingleton) } };
     };
 
-    class AndroidDocumentPimplApi19 : public Pimpl
+    //==============================================================================
+    class AndroidDocumentPimplApi21 : public Pimpl
     {
     public:
-        AndroidDocumentPimplApi19() = default;
+        AndroidDocumentPimplApi21() = default;
 
-        explicit AndroidDocumentPimplApi19 (const URL& uriIn)
-            : AndroidDocumentPimplApi19 (urlToUri (uriIn)) {}
+        explicit AndroidDocumentPimplApi21 (const URL& uriIn)
+            : AndroidDocumentPimplApi21 (urlToUri (uriIn)) {}
 
-        explicit AndroidDocumentPimplApi19 (const LocalRef<jobject>& uriIn)
+        explicit AndroidDocumentPimplApi21 (const LocalRef<jobject>& uriIn)
             : uri (uriIn) {}
-
-        std::unique_ptr<Pimpl> clone() const override { return std::make_unique<AndroidDocumentPimplApi19> (*this); }
 
         bool deleteDocument() const override
         {
@@ -418,8 +426,10 @@ struct AndroidDocument::Utils
 
         std::unique_ptr<InputStream> createInputStream() const override
         {
-            auto result = std::make_unique<AndroidContentUriInputStream> (uri);
-            return result->openedSuccessfully() ? std::move (result) : nullptr;
+            if (auto opened = AndroidContentUriInputStream::fromUri (uri))
+                return std::make_unique<AndroidContentUriInputStream> (std::move (*opened));
+
+            return {};
         }
 
         std::unique_ptr<OutputStream> createOutputStream() const override
@@ -509,16 +519,6 @@ struct AndroidDocument::Utils
 
         NativeInfo getNativeInfo() const override { return { uri }; }
 
-    private:
-        GlobalRef uri;
-    };
-
-    //==============================================================================
-    class AndroidDocumentPimplApi21 : public AndroidDocumentPimplApi19
-    {
-    public:
-        using AndroidDocumentPimplApi19::AndroidDocumentPimplApi19;
-
         std::unique_ptr<Pimpl> clone() const override { return std::make_unique<AndroidDocumentPimplApi21> (*this); }
 
         std::unique_ptr<Pimpl> createChildDocumentWithTypeAndName (const String& type, const String& name) const override
@@ -544,6 +544,9 @@ struct AndroidDocument::Utils
 
             return nullptr;
         }
+
+    private:
+        GlobalRef uri;
     };
 
     //==============================================================================
@@ -593,8 +596,7 @@ struct AndroidDocument::Utils
 
         return createPimplForSdkImpl (uri,
                                       VersionTag<AndroidDocumentPimplApi24> { 24 },
-                                      VersionTag<AndroidDocumentPimplApi21> { 21 },
-                                      VersionTag<AndroidDocumentPimplApi19> { 19 });
+                                      VersionTag<AndroidDocumentPimplApi21> { 21 });
     }
 
     static std::unique_ptr<Pimpl> createPimplForSdkImpl (const LocalRef<jobject>&)
@@ -763,9 +765,6 @@ std::vector<AndroidDocumentPermission> AndroidDocumentPermission::getPersistedPe
    #if ! JUCE_ANDROID
     return {};
    #else
-    if (getAndroidSDKVersion() < 19)
-        return {};
-
     auto* env = getEnv();
     const LocalRef<jobject> permissions { env->CallObjectMethod (AndroidContentUriResolver::getContentResolver().get(),
                                                                  ContentResolver19.getPersistedUriPermissions) };
@@ -815,13 +814,6 @@ AndroidDocument AndroidDocument::fromFile (const File& filePath)
 AndroidDocument AndroidDocument::fromDocument ([[maybe_unused]] const URL& documentUrl)
 {
    #if JUCE_ANDROID
-    if (getAndroidSDKVersion() < 19)
-    {
-        // This function is unsupported on this platform.
-        jassertfalse;
-        return AndroidDocument{};
-    }
-
     const auto javaUri = urlToUri (documentUrl);
 
     if (! getEnv()->CallStaticBooleanMethod (DocumentsContract19,
@@ -841,13 +833,6 @@ AndroidDocument AndroidDocument::fromDocument ([[maybe_unused]] const URL& docum
 AndroidDocument AndroidDocument::fromTree ([[maybe_unused]] const URL& treeUrl)
 {
    #if JUCE_ANDROID
-    if (getAndroidSDKVersion() < 21)
-    {
-        // This function is unsupported on this platform.
-        jassertfalse;
-        return AndroidDocument{};
-    }
-
     const auto javaUri = urlToUri (treeUrl);
     LocalRef<jobject> treeDocumentId { getEnv()->CallStaticObjectMethod (DocumentsContract21,
                                                                          DocumentsContract21.getTreeDocumentId,
@@ -1028,7 +1013,7 @@ AndroidDocumentIterator AndroidDocumentIterator::makeNonRecursive (const Android
     using Detail = AndroidDocumentDetail;
 
    #if JUCE_ANDROID
-    if (21 <= getAndroidSDKVersion())
+    if (getAndroidSDKVersion() == 21)
     {
         if (auto uri = dir.getNativeInfo().uri)
             return Utils::makeWithEngine (Detail::makeDocumentsContractIteratorEngine (uri));
@@ -1046,7 +1031,7 @@ AndroidDocumentIterator AndroidDocumentIterator::makeRecursive (const AndroidDoc
     using Detail = AndroidDocumentDetail;
 
    #if JUCE_ANDROID
-    if (21 <= getAndroidSDKVersion())
+    if (getAndroidSDKVersion() == 21)
     {
         if (auto uri = dir.getNativeInfo().uri)
             return Utils::makeWithEngine (Detail::RecursiveEngine { uri });

@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -40,8 +52,8 @@
   #endif
  #endif
 
- #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
+ #define JUCE_CXX20_IS_AVAILABLE (__cplusplus >= 202002L)
 
 #endif
 
@@ -65,39 +77,15 @@
 
  #if ! defined (JUCE_SILENCE_XCODE_15_LINKER_WARNING)                          \
      && defined (__apple_build_version__)                                      \
-     && __clang_major__ == 15                                                  \
-     && __clang_minor__ == 0
-  // This is a warning because builds may be usable when LTO is disabled
-  #pragma GCC warning "If you are using Link Time Optimisation (LTO), the "    \
-      "new linker introduced in Xcode 15 may produce a broken binary.\n"       \
-      "As a workaround, add either '-Wl,-weak_reference_mismatches,weak' or "  \
-      "'-Wl,-ld_classic' to your linker flags.\n"                              \
-      "Once you've selected a workaround, you can add "                        \
-      "JUCE_SILENCE_XCODE_15_LINKER_WARNING to your preprocessor definitions " \
-      "to silence this warning."
+     && __apple_build_version__ >= 15000000                                    \
+     && __apple_build_version__ <  15000100
 
-  #if ((defined (MAC_OS_X_VERSION_MIN_REQUIRED)                                \
-        && MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_VERSION_13_0)                \
-       || (defined (__IPHONE_OS_VERSION_MIN_REQUIRED)                          \
-           && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_15_0))
-   // This is an error because the linker _will_ produce a binary that is
-   // broken on older platforms
-   static_assert (std::string_view (__clang_version__)
-                      != std::string_view ("15.0.0 (clang-1500.0.40.1)"),
-                  "The new linker introduced in Xcode 15.0 will produce "
-                  "broken binaries when targeting older platforms.\n"
-                  "To work around this issue, bump your deployment target to "
-                  "macOS 13 or iOS 15, re-enable the old linker by adding "
-                  "'-Wl,-ld_classic' to your link flags, or update to Xcode "
-                  "15.1.\n"
-                  "Once you've selected a workaround, you can add "
-                  "JUCE_SILENCE_XCODE_15_LINKER_WARNING to your preprocessor "
-                  "definitions to silence this warning.");
-  #endif
+  // Due to known issues, the linker in Xcode 15.0 may produce broken binaries.
+  #error Please upgrade to Xcode 15.1 or higher
  #endif
 
- #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
+ #define JUCE_CXX20_IS_AVAILABLE (__cplusplus >= 202002L)
 
 #endif
 
@@ -115,8 +103,8 @@
   #endif
  #endif
 
-  #define JUCE_CXX14_IS_AVAILABLE (_MSVC_LANG >= 201402L)
   #define JUCE_CXX17_IS_AVAILABLE (_MSVC_LANG >= 201703L)
+  #define JUCE_CXX20_IS_AVAILABLE (_MSVC_LANG >= 202002L)
 #endif
 
 //==============================================================================
@@ -127,6 +115,7 @@
 //==============================================================================
 #ifndef DOXYGEN
  // These are old flags that are now supported on all compatible build targets
+ #define JUCE_CXX14_IS_AVAILABLE 1
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
  #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1

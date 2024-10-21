@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -172,10 +172,7 @@ inline UID& UID::operator= (const UID& uid) noexcept
 //------------------------------------------------------------------------
 inline UID& UID::operator= (const TUID& uid) noexcept
 {
-	uint64_t* p1 = reinterpret_cast<uint64_t*> (_data);
-	const uint64_t* p2 = reinterpret_cast<const uint64_t*> (uid);
-	p1[0] = p2[0];
-	p1[1] = p2[1];
+    memcpy (_data, reinterpret_cast<const void*>(uid), 16);
 	return *this;
 }
 
@@ -281,12 +278,7 @@ inline Optional<UID> UID::fromString (const StringT& str, bool comFormat) noexce
 inline UID UID::fromTUID (const TUID _uid) noexcept
 {
 	UID result;
-
-	uint64_t* p1 = reinterpret_cast<uint64_t*> (result._data);
-	const uint64_t* p2 = reinterpret_cast<const uint64_t*> (_uid);
-	p1[0] = p2[0];
-	p1[1] = p2[1];
-
+	memcpy (result._data, reinterpret_cast<const void*>(_uid), 16);
 	return result;
 }
 

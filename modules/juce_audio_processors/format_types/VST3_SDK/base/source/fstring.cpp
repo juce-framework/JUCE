@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -233,7 +233,7 @@ static inline Steinberg::int32 sprintf16 (Steinberg::char16* str, const Steinber
 {
 	va_list marker;
 	va_start (marker, format);
-	return vsnwprintf (str, -1, format, marker);
+	return vsnwprintf (str, static_cast<size_t> (-1), format, marker);
 }
 
 #elif SMTG_OS_LINUX
@@ -2245,7 +2245,8 @@ bool String::toMultiByte (uint32 destCodePage)
 //-----------------------------------------------------------------------------
 void String::fromUTF8 (const char8* utf8String)
 {
-	resize (0, false);
+	if (buffer8 != utf8String)
+		resize (0, false);
 	_toWideString (utf8String, static_cast<int32> (strlen (utf8String)), kCP_Utf8);
 }
 
@@ -3561,6 +3562,14 @@ bool String::fromVariant (const FVariant& var)
 
 		case FVariant::kInteger:
 			printInt64 (var.getInt ());
+			return true;
+
+		case FVariant::kObject:
+			if (auto string = ICast<Steinberg::IString> (var.getObject ()))
+				if (string->isWideString ())
+					assign (string->getText16 ());
+				else
+					assign (string->getText8 ());
 			return true;
 
 		default:

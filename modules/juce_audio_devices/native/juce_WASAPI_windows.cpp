@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -96,21 +108,6 @@ static bool check (HRESULT hr)
 
 //==============================================================================
 }
-
-#if JUCE_MINGW
- struct PROPERTYKEY
- {
-    GUID fmtid;
-    DWORD pid;
- };
-
- WINOLEAPI PropVariantClear (PROPVARIANT*);
-#endif
-
-#if JUCE_MINGW && defined (KSDATAFORMAT_SUBTYPE_PCM)
- #undef KSDATAFORMAT_SUBTYPE_PCM
- #undef KSDATAFORMAT_SUBTYPE_IEEE_FLOAT
-#endif
 
 #ifndef KSDATAFORMAT_SUBTYPE_PCM
  #define KSDATAFORMAT_SUBTYPE_PCM         uuidFromString ("00000001-0000-0010-8000-00aa00389b71")
@@ -564,13 +561,13 @@ private:
     {
         SessionEventCallback (WASAPIDeviceBase& d) : owner (d) {}
 
-        JUCE_COMRESULT OnDisplayNameChanged (LPCWSTR, LPCGUID)                 { return S_OK; }
-        JUCE_COMRESULT OnIconPathChanged (LPCWSTR, LPCGUID)                    { return S_OK; }
-        JUCE_COMRESULT OnSimpleVolumeChanged (float, BOOL, LPCGUID)            { return S_OK; }
-        JUCE_COMRESULT OnChannelVolumeChanged (DWORD, float*, DWORD, LPCGUID)  { return S_OK; }
-        JUCE_COMRESULT OnGroupingParamChanged (LPCGUID, LPCGUID)               { return S_OK; }
+        JUCE_COMRESULT OnDisplayNameChanged (LPCWSTR, LPCGUID)                 override { return S_OK; }
+        JUCE_COMRESULT OnIconPathChanged (LPCWSTR, LPCGUID)                    override { return S_OK; }
+        JUCE_COMRESULT OnSimpleVolumeChanged (float, BOOL, LPCGUID)            override { return S_OK; }
+        JUCE_COMRESULT OnChannelVolumeChanged (DWORD, float*, DWORD, LPCGUID)  override { return S_OK; }
+        JUCE_COMRESULT OnGroupingParamChanged (LPCGUID, LPCGUID)               override { return S_OK; }
 
-        JUCE_COMRESULT OnStateChanged (AudioSessionState state)
+        JUCE_COMRESULT OnStateChanged (AudioSessionState state) override
         {
             switch (state)
             {
@@ -588,7 +585,7 @@ private:
             return S_OK;
         }
 
-        JUCE_COMRESULT OnSessionDisconnected (AudioSessionDisconnectReason reason)
+        JUCE_COMRESULT OnSessionDisconnected (AudioSessionDisconnectReason reason) override
         {
             if (reason == DisconnectReasonFormatChanged)
                 owner.deviceSampleRateChanged();
@@ -611,9 +608,8 @@ private:
 
         if (audioSessionControl != nullptr)
         {
-            sessionEventCallback = new SessionEventCallback (*this);
+            sessionEventCallback = becomeComSmartPtrOwner (new SessionEventCallback (*this));
             audioSessionControl->RegisterAudioSessionNotification (sessionEventCallback);
-            sessionEventCallback->Release(); // (required because ComBaseClassHelper objects are constructed with a ref count of 1)
         }
     }
 
@@ -833,7 +829,7 @@ private:
         return result;
     }
 
-    DWORD getStreamFlags()
+    DWORD getStreamFlags() const
     {
         DWORD streamFlags = 0x40000; /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/
 
@@ -1199,8 +1195,8 @@ private:
 
 //==============================================================================
 class WASAPIAudioIODevice final : public AudioIODevice,
-                             public Thread,
-                             private AsyncUpdater
+                                  public Thread,
+                                  private AsyncUpdater
 {
 public:
     WASAPIAudioIODevice (const String& deviceName,
@@ -1209,7 +1205,7 @@ public:
                          const String& inputDeviceID,
                          WASAPIDeviceMode mode)
         : AudioIODevice (deviceName, typeNameIn),
-          Thread ("JUCE WASAPI"),
+          Thread (SystemStats::getJUCEVersion() + ": WASAPI"),
           outputDeviceId (outputDeviceID),
           inputDeviceId (inputDeviceID),
           deviceMode (mode)
@@ -1819,13 +1815,13 @@ private:
     {
     public:
         explicit ChangeNotificationClient (WASAPIAudioIODeviceType* d)
-            : ComBaseClassHelper (0), device (d) {}
+            : device (d) {}
 
-        JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             { return notify(); }
-        JUCE_COMRESULT OnDeviceRemoved (LPCWSTR)                           { return notify(); }
-        JUCE_COMRESULT OnDeviceStateChanged (LPCWSTR, DWORD)               { return notify(); }
-        JUCE_COMRESULT OnDefaultDeviceChanged (EDataFlow, ERole, LPCWSTR)  { return notify(); }
-        JUCE_COMRESULT OnPropertyValueChanged (LPCWSTR, const PROPERTYKEY) { return notify(); }
+        JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             override { return notify(); }
+        JUCE_COMRESULT OnDeviceRemoved (LPCWSTR)                           override { return notify(); }
+        JUCE_COMRESULT OnDeviceStateChanged (LPCWSTR, DWORD)               override { return notify(); }
+        JUCE_COMRESULT OnDefaultDeviceChanged (EDataFlow, ERole, LPCWSTR)  override { return notify(); }
+        JUCE_COMRESULT OnPropertyValueChanged (LPCWSTR, const PROPERTYKEY) override { return notify(); }
 
     private:
         WeakReference<WASAPIAudioIODeviceType> device;
@@ -1847,10 +1843,10 @@ private:
     static String getDefaultEndpoint (IMMDeviceEnumerator* enumerator, bool forCapture)
     {
         String s;
-        IMMDevice* dev = nullptr;
+        ComSmartPtr<IMMDevice> dev;
 
         if (check (enumerator->GetDefaultAudioEndpoint (forCapture ? eCapture : eRender,
-                                                        eMultimedia, &dev)))
+                                                        eMultimedia, dev.resetAndGetPointerAddress())))
         {
             WCHAR* deviceId = nullptr;
 
@@ -1859,8 +1855,6 @@ private:
                 s = deviceId;
                 CoTaskMemFree (deviceId);
             }
-
-            dev->Release();
         }
 
         return s;
@@ -1874,7 +1868,7 @@ private:
             if (! check (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
                 return {};
 
-            notifyClient = new ChangeNotificationClient (this);
+            notifyClient = becomeComSmartPtrOwner (new ChangeNotificationClient (this));
             enumerator->RegisterEndpointNotificationCallback (notifyClient);
         }
 

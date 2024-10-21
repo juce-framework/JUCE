@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -183,6 +192,33 @@ struct ScopedCGContextState
     CGContextRef context;
 };
 
+struct CoreGraphicsContext::SavedState
+{
+    SavedState() = default;
+
+    SavedState (const SavedState& other)
+        : fillType (other.fillType), font (other.font),
+          textMatrix (other.textMatrix), inverseTextMatrix (other.inverseTextMatrix),
+          gradient (other.gradient.get() != nullptr ? CGGradientRetain (other.gradient.get()) : nullptr)
+    {
+    }
+
+    ~SavedState() = default;
+
+    void setFill (const FillType& newFill)
+    {
+        fillType = newFill;
+        gradient = nullptr;
+    }
+
+    FillType fillType;
+    Font font { FontOptions { 1.0f } };
+    CFUniquePtr<CTFontRef> fontRef{};
+    CGAffineTransform textMatrix = CGAffineTransformIdentity,
+               inverseTextMatrix = CGAffineTransformIdentity;
+    detail::GradientPtr gradient = {};
+};
+
 //==============================================================================
 CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, float h)
     : context (c),
@@ -208,7 +244,7 @@ CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, float h)
     CGContextSetBlendMode (context.get(), kCGBlendModeNormal);
     rgbColourSpace.reset (CGColorSpaceCreateWithName (kCGColorSpaceSRGB));
     greyColourSpace.reset (CGColorSpaceCreateWithName (kCGColorSpaceGenericGrayGamma2_2));
-    setFont (Font());
+    setFont (FontOptions());
 }
 
 CoreGraphicsContext::~CoreGraphicsContext()
@@ -236,7 +272,7 @@ void CoreGraphicsContext::addTransform (const AffineTransform& transform)
     jassert (getPhysicalPixelScaleFactor() > 0.0f);
 }
 
-float CoreGraphicsContext::getPhysicalPixelScaleFactor()
+float CoreGraphicsContext::getPhysicalPixelScaleFactor() const
 {
     auto t = CGContextGetUserSpaceToDeviceSpaceTransform (context.get());
     auto determinant = (t.a * t.d) - (t.c * t.b);
@@ -262,7 +298,7 @@ bool CoreGraphicsContext::clipToRectangle (const Rectangle<int>& r)
     return ! isClipEmpty();
 }
 
-bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<int>& clipRegion)
+bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<float>& clipRegion)
 {
     if (clipRegion.isEmpty())
     {
@@ -271,35 +307,54 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<in
         return false;
     }
 
-    auto numRects = (size_t) clipRegion.getNumRectangles();
-    HeapBlock<CGRect> rects (numRects);
+    std::vector<CGRect> rects ((size_t) clipRegion.getNumRectangles());
+    std::transform (clipRegion.begin(), clipRegion.end(), rects.begin(), [this] (const auto& r)
+    {
+        return CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
+    });
 
-    int i = 0;
-    for (auto& r : clipRegion)
-        rects[i++] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
-
-    CGContextClipToRects (context.get(), rects, numRects);
+    CGContextClipToRects (context.get(), rects.data(), rects.size());
     lastClipRect.reset();
     return true;
 }
 
 bool CoreGraphicsContext::clipToRectangleList (const RectangleList<int>& clipRegion)
 {
-    return clipToRectangleListWithoutTest (clipRegion) && ! isClipEmpty();
+    RectangleList<float> converted;
+
+    for (auto& rect : clipRegion)
+        converted.add (rect.toFloat());
+
+    return clipToRectangleListWithoutTest (converted) && ! isClipEmpty();
 }
 
 void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
 {
-    RectangleList<int> remaining (getClipBounds());
-    remaining.subtract (r);
+    const auto cgTransform = CGContextGetUserSpaceToDeviceSpaceTransform (context.get());
+    const auto transform = AffineTransform { (float) cgTransform.a,
+                                             (float) cgTransform.c,
+                                             (float) cgTransform.tx,
+                                             (float) cgTransform.b,
+                                             (float) cgTransform.d,
+                                             (float) cgTransform.ty };
+
+    const auto flip = [this] (auto rect) { return rect.withY ((float) (flipHeight - rect.getBottom())); };
+    const auto flipped = flip (r.toFloat());
+
+    const auto snapped = flipped.toFloat().transformedBy (transform).getLargestIntegerWithin().toFloat();
+
+    const auto correctedRect = transform.isOnlyTranslationOrScale()
+                             ? snapped.transformedBy (transform.inverted())
+                             : flipped.toFloat();
+
+    RectangleList<float> remaining (getClipBounds().toFloat());
+    remaining.subtract (flip (correctedRect));
     clipToRectangleListWithoutTest (remaining);
 }
 
-void CoreGraphicsContext::setContextClipToPath (const Path& path, const AffineTransform& transform)
+void CoreGraphicsContext::setContextClipToCurrentPath (bool useNonZeroWinding)
 {
-    createPath (path, transform);
-
-    if (path.isUsingNonZeroWinding())
+    if (useNonZeroWinding)
         CGContextClip (context.get());
     else
         CGContextEOClip (context.get());
@@ -307,7 +362,8 @@ void CoreGraphicsContext::setContextClipToPath (const Path& path, const AffineTr
 
 void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& transform)
 {
-    setContextClipToPath (path, transform);
+    createPath (path, transform);
+    setContextClipToCurrentPath (path.isUsingNonZeroWinding());
     lastClipRect.reset();
 }
 
@@ -328,6 +384,7 @@ void CoreGraphicsContext::clipToImageAlpha (const Image& sourceImage, const Affi
 
         auto r = convertToCGRect (sourceImage.getBounds());
         CGContextClipToMask (context.get(), r, image.get());
+        CGContextClipToRect (context.get(), r);
 
         applyTransform (t.inverted());
         flip();
@@ -413,6 +470,7 @@ void CoreGraphicsContext::setFill (const FillType& fillType)
 
         const detail::ColorPtr color { CGColorCreate (rgbColourSpace.get(), components) };
         CGContextSetFillColorWithColor (context.get(), color.get());
+        CGContextSetStrokeColorWithColor (context.get(), color.get());
         CGContextSetAlpha (context.get(), 1.0f);
     }
 }
@@ -457,16 +515,19 @@ void CoreGraphicsContext::fillAll()
 
 void CoreGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExistingContents)
 {
-    fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), replaceExistingContents);
+    fillCGRect (convertToCGRectFlipped (r), replaceExistingContents);
 }
 
 void CoreGraphicsContext::fillRect (const Rectangle<float>& r)
 {
-    fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), false);
+    fillCGRect (convertToCGRectFlipped (r), false);
 }
 
 void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExistingContents)
 {
+    if (CGRectIsEmpty (cgRect))
+        return;
+
     if (replaceExistingContents)
     {
         CGContextSetBlendMode (context.get(), kCGBlendModeCopy);
@@ -490,27 +551,152 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExisting
         drawImage (state->fillType.image, state->fillType.transform, true);
 }
 
-void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& transform)
+void CoreGraphicsContext::drawCurrentPath (CGPathDrawingMode mode)
 {
     if (state->fillType.isColour())
     {
-        createPath (path, transform);
-
-        if (path.isUsingNonZeroWinding())
-            CGContextFillPath (context.get());
-        else
-            CGContextEOFillPath (context.get());
-
+        CGContextDrawPath (context.get(), mode);
         return;
     }
 
+    if (mode == kCGPathStroke)
+        CGContextReplacePathWithStrokedPath (context.get());
+
     ScopedCGContextState scopedState (context.get());
-    setContextClipToPath (path, transform);
+    setContextClipToCurrentPath (  mode == kCGPathFill
+                                 || mode == kCGPathStroke
+                                 || mode == kCGPathFillStroke);
 
     if (state->fillType.isGradient())
         drawGradient();
     else
         drawImage (state->fillType.image, state->fillType.transform, true);
+}
+
+void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& transform)
+{
+    createPath (path, transform);
+    drawCurrentPath (path.isUsingNonZeroWinding() ? kCGPathFill : kCGPathEOFill);
+}
+
+void CoreGraphicsContext::strokePath (const Path& path, const PathStrokeType& strokeType, const AffineTransform& transform)
+{
+    const auto lineCap = [&]
+    {
+        switch (strokeType.getEndStyle())
+        {
+            case PathStrokeType::EndCapStyle::butt:    return kCGLineCapButt;
+            case PathStrokeType::EndCapStyle::square:  return kCGLineCapSquare;
+            case PathStrokeType::EndCapStyle::rounded: return kCGLineCapRound;
+            default: jassertfalse;                     return kCGLineCapButt;
+        }
+    }();
+
+    const auto lineJoin = [&]
+    {
+        switch (strokeType.getJointStyle())
+        {
+            case PathStrokeType::JointStyle::mitered: return kCGLineJoinMiter;
+            case PathStrokeType::JointStyle::curved:  return kCGLineJoinRound;
+            case PathStrokeType::JointStyle::beveled: return kCGLineJoinBevel;
+            default: jassertfalse;                    return kCGLineJoinMiter;
+        }
+    }();
+
+    CGContextSetLineWidth (context.get(), strokeType.getStrokeThickness());
+    CGContextSetLineCap (context.get(), lineCap);
+    CGContextSetLineJoin (context.get(), lineJoin);
+
+    createPath (path, transform);
+    drawCurrentPath (kCGPathStroke);
+}
+
+void CoreGraphicsContext::drawEllipse (const Rectangle<float>& area, float lineThickness)
+{
+    CGContextBeginPath (context.get());
+    CGContextSetLineWidth (context.get(), lineThickness);
+    CGContextSetLineCap (context.get(), kCGLineCapButt);
+    CGContextSetLineJoin (context.get(), kCGLineJoinMiter);
+    CGContextAddEllipseInRect (context.get(), convertToCGRectFlipped (area));
+    drawCurrentPath (kCGPathStroke);
+}
+
+void CoreGraphicsContext::fillEllipse (const Rectangle<float>& area)
+{
+    CGContextBeginPath (context.get());
+    CGContextAddEllipseInRect (context.get(), convertToCGRectFlipped (area));
+    drawCurrentPath (kCGPathFill);
+}
+
+void CoreGraphicsContext::drawRoundedRectangle (const Rectangle<float>& r, float cornerSize, float lineThickness)
+{
+    CGContextBeginPath (context.get());
+
+    if (state->fillType.isColour())
+    {
+        CGContextSetLineWidth (context.get(), lineThickness);
+        CGContextSetLineCap (context.get(), kCGLineCapButt);
+        CGContextSetLineJoin (context.get(), kCGLineJoinMiter);
+
+        detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r),
+                                                            std::clamp (cornerSize, 0.0f, r.getWidth() / 2.0f),
+                                                            std::clamp (cornerSize, 0.0f, r.getHeight() / 2.0f),
+                                                            nullptr) };
+        CGContextAddPath (context.get(), path.get());
+        drawCurrentPath (kCGPathStroke);
+    }
+    else
+    {
+        lineThickness *= 0.5f;
+
+        const auto outsideRect = r.expanded (lineThickness);
+        const auto outsideCornerSize = cornerSize + lineThickness;
+
+        const auto insideRect = r.reduced (lineThickness);
+        const auto insideCornerSize = cornerSize - lineThickness;
+
+        detail::MutablePathPtr path { CGPathCreateMutable() };
+        CGPathAddRoundedRect (path.get(), nullptr, convertToCGRectFlipped (outsideRect),
+                              std::clamp (outsideCornerSize, 0.0f, outsideRect.getWidth() / 2.0f),
+                              std::clamp (outsideCornerSize, 0.0f, outsideRect.getHeight() / 2.0f));
+
+        CGPathAddRoundedRect (path.get(), nullptr, convertToCGRectFlipped (insideRect),
+                              std::clamp (insideCornerSize, 0.0f, insideRect.getWidth() / 2.0f),
+                              std::clamp (insideCornerSize, 0.0f, insideRect.getHeight() / 2.0f));
+
+        CGContextAddPath (context.get(), path.get());
+        drawCurrentPath (kCGPathEOFill);
+    }
+}
+
+void CoreGraphicsContext::fillRoundedRectangle (const Rectangle<float>& r, float cornerSize)
+{
+    CGContextBeginPath (context.get());
+    detail::PathPtr path { CGPathCreateWithRoundedRect (convertToCGRectFlipped (r),
+                                                        std::clamp (cornerSize, 0.0f, r.getWidth() / 2.0f),
+                                                        std::clamp (cornerSize, 0.0f, r.getHeight() / 2.0f),
+                                                        nullptr) };
+    CGContextAddPath (context.get(), path.get());
+    drawCurrentPath (kCGPathFill);
+}
+
+void CoreGraphicsContext::drawLineWithThickness (const Line<float>& line, float lineThickness)
+{
+    const auto reversed = line.reversed();
+    lineThickness *= 0.5f;
+    const auto p1 = line.getPointAlongLine (0, lineThickness);
+    const auto p2 = line.getPointAlongLine (0, -lineThickness);
+    const auto p3 = reversed.getPointAlongLine (0, lineThickness);
+    const auto p4 = reversed.getPointAlongLine (0, -lineThickness);
+
+    CGContextBeginPath      (context.get());
+    CGContextMoveToPoint    (context.get(), (CGFloat) p1.getX(), flipHeight - (CGFloat) p1.getY());
+    CGContextAddLineToPoint (context.get(), (CGFloat) p2.getX(), flipHeight - (CGFloat) p2.getY());
+    CGContextAddLineToPoint (context.get(), (CGFloat) p3.getX(), flipHeight - (CGFloat) p3.getY());
+    CGContextAddLineToPoint (context.get(), (CGFloat) p4.getX(), flipHeight - (CGFloat) p4.getY());
+    CGContextClosePath      (context.get());
+
+    drawCurrentPath (kCGPathFill);
 }
 
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform)
@@ -593,6 +779,9 @@ void CoreGraphicsContext::drawLine (const Line<float>& line)
 
 void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
 {
+    if (list.isEmpty())
+        return;
+
     std::vector<CGRect> rects;
     rects.reserve ((size_t) list.getNumRectangles());
 
@@ -618,22 +807,8 @@ void CoreGraphicsContext::setFont (const Font& newFont)
 {
     if (state->font != newFont)
     {
-        state->fontRef = nullptr;
         state->font = newFont;
-
-        auto typeface = state->font.getTypefacePtr();
-
-        if (auto osxTypeface = dynamic_cast<OSXTypeface*> (typeface.get()))
-        {
-            state->fontRef = osxTypeface->fontRef;
-            CGContextSetFont (context.get(), state->fontRef);
-            CGContextSetFontSize (context.get(), state->font.getHeight() * osxTypeface->fontHeightToPointsFactor);
-
-            state->textMatrix = osxTypeface->renderingTransform;
-            state->textMatrix.a *= state->font.getHorizontalScale();
-            CGContextSetTextMatrix (context.get(), state->textMatrix);
-            state->inverseTextMatrix = CGAffineTransformInvert (state->textMatrix);
-         }
+        state->fontRef = nullptr;
     }
 }
 
@@ -642,74 +817,48 @@ const Font& CoreGraphicsContext::getFont()
     return state->font;
 }
 
-void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& transform)
+void CoreGraphicsContext::drawGlyphs (Span<const uint16_t> glyphs,
+                                      Span<const Point<float>> positions,
+                                      const AffineTransform& transform)
 {
-    if (state->fontRef != nullptr && state->fillType.isColour())
+    jassert (glyphs.size() == positions.size());
+
+    if (state->fillType.isColour())
     {
-        auto cgTransformIsOnlyTranslation = [] (CGAffineTransform t)
-        {
-            return t.a == 1.0f && t.d == 1.0f && t.b == 0.0f && t.c == 0.0f;
-        };
+        const auto scale = state->font.getHorizontalScale();
 
-        if (transform.isOnlyTranslation() && cgTransformIsOnlyTranslation (state->inverseTextMatrix))
+        if (state->fontRef == nullptr)
         {
-            auto x = transform.mat02 + state->inverseTextMatrix.tx;
-            auto y = transform.mat12 + state->inverseTextMatrix.ty;
+            const auto hbFont = state->font.getNativeDetails().font;
+            state->fontRef.reset (hb_coretext_font_get_ct_font (hbFont.get()));
+            CFRetain (state->fontRef.get());
 
-            CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
-            CGPoint positions[1] = { { x, flipHeight - roundToInt (y) } };
-            CGContextShowGlyphsAtPositions (context.get(), glyphs, positions, 1);
+            const auto slant = hb_font_get_synthetic_slant (hbFont.get());
+
+            state->textMatrix = CGAffineTransformMake (scale, 0, slant * scale, 1.0f, 0, 0);
+            CGContextSetTextMatrix (context.get(), state->textMatrix);
+            state->inverseTextMatrix = CGAffineTransformInvert (state->textMatrix);
         }
-        else
-        {
-            ScopedCGContextState scopedState (context.get());
 
-            flip();
-            applyTransform (transform);
-            CGContextConcatCTM (context.get(), state->inverseTextMatrix);
-            auto cgTransform = state->textMatrix;
-            cgTransform.d = -cgTransform.d;
-            CGContextConcatCTM (context.get(), cgTransform);
+        ScopedCGContextState scopedState (context.get());
+        flip();
+        applyTransform (AffineTransform::scale (1.0f, -1.0f).followedBy (transform));
 
-            CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
-            CGPoint positions[1] = { { 0.0f, 0.0f } };
-            CGContextShowGlyphsAtPositions (context.get(), glyphs, positions, 1);
-        }
+        CopyableHeapBlock<CGPoint> pos (glyphs.size());
+        std::transform (positions.begin(), positions.end(), pos.begin(), [scale] (const auto& p) { return CGPointMake (p.x / scale, -p.y); });
+
+        CTFontDrawGlyphs (state->fontRef.get(), glyphs.data(), pos.data(), glyphs.size(), context.get());
+        return;
     }
-    else
+
+    for (const auto [index, glyph] : enumerate (glyphs, size_t{}))
     {
         Path p;
         auto& f = state->font;
-        f.getTypefacePtr()->getOutlineForGlyph (glyphNumber, p);
-
-        fillPath (p, AffineTransform::scale (f.getHeight() * f.getHorizontalScale(), f.getHeight())
-                                     .followedBy (transform));
+        f.getTypefacePtr()->getOutlineForGlyph (f.getMetricsKind(), glyph, p);
+        const auto scale = f.getHeight();
+        fillPath (p, AffineTransform::scale (scale * f.getHorizontalScale(), scale).translated (positions[index]).followedBy (transform));
     }
-}
-
-bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Rectangle<float>& area)
-{
-    return CoreTextTypeLayout::drawToCGContext (text, area, context.get(), (float) flipHeight);
-}
-
-CoreGraphicsContext::SavedState::SavedState()
-    : font (1.0f)
-{
-}
-
-CoreGraphicsContext::SavedState::SavedState (const SavedState& other)
-    : fillType (other.fillType), font (other.font), fontRef (other.fontRef),
-      textMatrix (other.textMatrix), inverseTextMatrix (other.inverseTextMatrix),
-      gradient (other.gradient.get() != nullptr ? CGGradientRetain (other.gradient.get()) : nullptr)
-{
-}
-
-CoreGraphicsContext::SavedState::~SavedState() = default;
-
-void CoreGraphicsContext::SavedState::setFill (const FillType& newFill)
-{
-    fillType = newFill;
-    gradient = nullptr;
 }
 
 static CGGradientRef createGradient (const ColourGradient& g, CGColorSpaceRef colourSpace)
@@ -807,6 +956,15 @@ void CoreGraphicsContext::applyTransform (const AffineTransform& transform) cons
     t.tx = transform.mat02;
     t.ty = transform.mat12;
     CGContextConcatCTM (context.get(), t);
+}
+
+template <class RectType>
+CGRect CoreGraphicsContext::convertToCGRectFlipped (RectType r) const noexcept
+{
+    return CGRectMake ((CGFloat) r.getX(),
+                       flipHeight - (CGFloat) r.getBottom(),
+                       (CGFloat) r.getWidth(),
+                       (CGFloat) r.getHeight());
 }
 
 //==============================================================================

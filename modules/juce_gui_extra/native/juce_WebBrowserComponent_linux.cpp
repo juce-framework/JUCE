@@ -1,27 +1,41 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
+
+// This type isn't in the headers until v2.36
+#if ! WEBKIT_CHECK_VERSION (2, 36, 0)
+struct WebKitURISchemeResponse;
+#endif
 
 namespace juce
 {
@@ -82,6 +96,93 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_get_uri, juce_webkit_web_view_get_uri,
                                          (WebKitWebView*), const gchar*)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_run_javascript, juce_webkit_web_view_run_javascript,
+                                         (WebKitWebView*, const gchar*, GCancellable*, GAsyncReadyCallback, gpointer), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_javascript_result_unref, juce_webkit_javascript_result_unref,
+                                         (WebKitJavascriptResult*), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_run_javascript_finish, juce_webkit_web_view_run_javascript_finish,
+                                         (WebKitWebView*, GAsyncResult*, GError**), WebKitJavascriptResult*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_javascript_result_get_js_value, juce_webkit_javascript_result_get_js_value,
+                                         (WebKitJavascriptResult*), JSCValue*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (jsc_value_to_string, juce_jsc_value_to_string,
+                                         (JSCValue*), char*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_get_user_content_manager,
+                                         juce_webkit_web_view_get_user_content_manager,
+                                         (WebKitWebView*), WebKitUserContentManager*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_settings_set_javascript_can_access_clipboard,
+                                         juce_webkit_settings_set_javascript_can_access_clipboard,
+                                         (WebKitSettings*, gboolean), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_settings_set_enable_write_console_messages_to_stdout,
+                                         juce_webkit_settings_set_enable_write_console_messages_to_stdout,
+                                         (WebKitSettings*, gboolean), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_settings_set_enable_developer_extras,
+                                         juce_webkit_settings_set_enable_developer_extras,
+                                         (WebKitSettings*, gboolean), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_user_content_manager_register_script_message_handler,
+                                         juce_webkit_user_content_manager_register_script_message_handler,
+                                         (WebKitUserContentManager*, const gchar*), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_user_script_new,
+                                         juce_webkit_user_script_new,
+                                         (const gchar*,
+                                          WebKitUserContentInjectedFrames,
+                                          WebKitUserScriptInjectionTime,
+                                          const gchar* const*,
+                                          const gchar* const*),
+                                         WebKitUserScript*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_user_content_manager_add_script,
+                                         juce_webkit_user_content_manager_add_script,
+                                         (WebKitUserContentManager*, WebKitUserScript*), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_context_register_uri_scheme,
+                                         juce_webkit_web_context_register_uri_scheme,
+                                         (WebKitWebContext*,
+                                          const gchar*,
+                                          WebKitURISchemeRequestCallback,
+                                          gpointer,
+                                          GDestroyNotify),
+                                         void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_web_view_get_context,
+                                         juce_webkit_web_view_get_context,
+                                         (WebKitWebView*),
+                                         WebKitWebContext*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_scheme_request_get_path,
+                                         juce_webkit_uri_scheme_request_get_path,
+                                         (WebKitURISchemeRequest*),
+                                         const gchar*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_scheme_response_new,
+                                         juce_webkit_uri_scheme_response_new,
+                                         (GInputStream*, gint64),
+                                         WebKitURISchemeResponse*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_scheme_response_set_http_headers,
+                                         juce_webkit_uri_scheme_response_set_http_headers,
+                                         (WebKitURISchemeResponse*, SoupMessageHeaders*),
+                                         void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_scheme_response_set_status,
+                                         juce_webkit_uri_scheme_response_set_status,
+                                         (WebKitURISchemeResponse*, guint, const gchar*),
+                                         void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (webkit_uri_scheme_request_finish_with_response,
+                                         juce_webkit_uri_scheme_request_finish_with_response,
+                                         (WebKitURISchemeRequest*, WebKitURISchemeResponse*),
+                                         void)
+
     //==============================================================================
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (gtk_init, juce_gtk_init,
                                          (int*, char***), void)
@@ -116,12 +217,42 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_object_unref, juce_g_object_unref,
                                          (gpointer), void)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_memory_input_stream_new, juce_g_memory_input_stream_new,
+                                         (), GInputStream*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_memory_input_stream_new_from_bytes, juce_g_memory_input_stream_new_from_bytes,
+                                         (GBytes*), GInputStream*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_bytes_new, juce_g_bytes_new,
+                                         (gconstpointer, gsize), GBytes*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_bytes_unref, juce_g_bytes_unref,
+                                         (GBytes*), void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_error_free, juce_g_error_free,
+                                         (GError*), void)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_signal_connect_data, juce_g_signal_connect_data,
                                          (gpointer, const gchar*, GCallback, gpointer, GClosureNotify, GConnectFlags), gulong)
 
     //==============================================================================
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (gdk_set_allowed_backends, juce_gdk_set_allowed_backends,
                                          (const char*), void)
+
+    //==============================================================================
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (jsc_value_to_json, juce_jsc_value_to_json,
+                                         (JSCValue*, guint), char*)
+
+    //==============================================================================
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (soup_message_headers_new, juce_soup_message_headers_new,
+                                         (SoupMessageHeadersType), SoupMessageHeaders*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (soup_message_headers_append, juce_soup_message_headers_append,
+                                         (SoupMessageHeaders*, const char*, const char*), void)
+
+    //==============================================================================
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (g_free, juce_g_free,
+                                         (gpointer), void)
 
     //==============================================================================
     JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (WebKitSymbols)
@@ -169,45 +300,119 @@ private:
     bool loadWebkitSymbols()
     {
         return loadSymbols (webkitLib,
-                            makeSymbolBinding (juce_webkit_settings_new,                                     "webkit_settings_new"),
-                            makeSymbolBinding (juce_webkit_settings_set_hardware_acceleration_policy,        "webkit_settings_set_hardware_acceleration_policy"),
-                            makeSymbolBinding (juce_webkit_settings_set_user_agent,                          "webkit_settings_set_user_agent"),
-                            makeSymbolBinding (juce_webkit_web_view_new_with_settings,                       "webkit_web_view_new_with_settings"),
-                            makeSymbolBinding (juce_webkit_policy_decision_use,                              "webkit_policy_decision_use"),
-                            makeSymbolBinding (juce_webkit_policy_decision_ignore,                           "webkit_policy_decision_ignore"),
-                            makeSymbolBinding (juce_webkit_web_view_go_back,                                 "webkit_web_view_go_back"),
-                            makeSymbolBinding (juce_webkit_web_view_go_forward,                              "webkit_web_view_go_forward"),
-                            makeSymbolBinding (juce_webkit_web_view_reload,                                  "webkit_web_view_reload"),
-                            makeSymbolBinding (juce_webkit_web_view_stop_loading,                            "webkit_web_view_stop_loading"),
-                            makeSymbolBinding (juce_webkit_uri_request_get_uri,                              "webkit_uri_request_get_uri"),
-                            makeSymbolBinding (juce_webkit_web_view_load_uri,                                "webkit_web_view_load_uri"),
-                            makeSymbolBinding (juce_webkit_navigation_action_get_request,                    "webkit_navigation_action_get_request"),
-                            makeSymbolBinding (juce_webkit_navigation_policy_decision_get_frame_name,        "webkit_navigation_policy_decision_get_frame_name"),
-                            makeSymbolBinding (juce_webkit_navigation_policy_decision_get_navigation_action, "webkit_navigation_policy_decision_get_navigation_action"),
-                            makeSymbolBinding (juce_webkit_web_view_get_uri,                                 "webkit_web_view_get_uri"));
+                            makeSymbolBinding (juce_webkit_settings_new,                                         "webkit_settings_new"),
+                            makeSymbolBinding (juce_webkit_settings_set_hardware_acceleration_policy,            "webkit_settings_set_hardware_acceleration_policy"),
+                            makeSymbolBinding (juce_webkit_settings_set_user_agent,                              "webkit_settings_set_user_agent"),
+                            makeSymbolBinding (juce_webkit_web_view_new_with_settings,                           "webkit_web_view_new_with_settings"),
+                            makeSymbolBinding (juce_webkit_policy_decision_use,                                  "webkit_policy_decision_use"),
+                            makeSymbolBinding (juce_webkit_policy_decision_ignore,                               "webkit_policy_decision_ignore"),
+                            makeSymbolBinding (juce_webkit_web_view_go_back,                                     "webkit_web_view_go_back"),
+                            makeSymbolBinding (juce_webkit_web_view_go_forward,                                  "webkit_web_view_go_forward"),
+                            makeSymbolBinding (juce_webkit_web_view_reload,                                      "webkit_web_view_reload"),
+                            makeSymbolBinding (juce_webkit_web_view_stop_loading,                                "webkit_web_view_stop_loading"),
+                            makeSymbolBinding (juce_webkit_uri_request_get_uri,                                  "webkit_uri_request_get_uri"),
+                            makeSymbolBinding (juce_webkit_web_view_load_uri,                                    "webkit_web_view_load_uri"),
+                            makeSymbolBinding (juce_webkit_navigation_action_get_request,                        "webkit_navigation_action_get_request"),
+                            makeSymbolBinding (juce_webkit_navigation_policy_decision_get_frame_name,            "webkit_navigation_policy_decision_get_frame_name"),
+                            makeSymbolBinding (juce_webkit_navigation_policy_decision_get_navigation_action,     "webkit_navigation_policy_decision_get_navigation_action"),
+                            makeSymbolBinding (juce_webkit_web_view_get_uri,                                     "webkit_web_view_get_uri"),
+                            makeSymbolBinding (juce_webkit_web_view_run_javascript,                              "webkit_web_view_run_javascript"),
+                            makeSymbolBinding (juce_webkit_javascript_result_unref,                              "webkit_javascript_result_unref"),
+                            makeSymbolBinding (juce_webkit_web_view_get_user_content_manager,                    "webkit_web_view_get_user_content_manager"),
+                            makeSymbolBinding (juce_webkit_settings_set_javascript_can_access_clipboard,         "webkit_settings_set_javascript_can_access_clipboard"),
+                            makeSymbolBinding (juce_webkit_settings_set_enable_write_console_messages_to_stdout, "webkit_settings_set_enable_write_console_messages_to_stdout"),
+                            makeSymbolBinding (juce_webkit_settings_set_enable_developer_extras,                 "webkit_settings_set_enable_developer_extras"),
+                            makeSymbolBinding (juce_webkit_user_content_manager_register_script_message_handler, "webkit_user_content_manager_register_script_message_handler"),
+                            makeSymbolBinding (juce_webkit_user_script_new,                                      "webkit_user_script_new"),
+                            makeSymbolBinding (juce_webkit_user_content_manager_add_script,                      "webkit_user_content_manager_add_script"),
+                            makeSymbolBinding (juce_webkit_javascript_result_get_js_value,                       "webkit_javascript_result_get_js_value"),
+                            makeSymbolBinding (juce_jsc_value_to_string,                                         "jsc_value_to_string"),
+                            makeSymbolBinding (juce_webkit_web_view_run_javascript_finish,                       "webkit_web_view_run_javascript_finish"),
+                            makeSymbolBinding (juce_webkit_web_context_register_uri_scheme,                      "webkit_web_context_register_uri_scheme"),
+                            makeSymbolBinding (juce_webkit_web_view_get_context,                                 "webkit_web_view_get_context"),
+                            makeSymbolBinding (juce_webkit_uri_scheme_request_get_path,                          "webkit_uri_scheme_request_get_path"),
+                            makeSymbolBinding (juce_webkit_uri_scheme_response_new,                              "webkit_uri_scheme_response_new"),
+                            makeSymbolBinding (juce_webkit_uri_scheme_response_set_http_headers,                 "webkit_uri_scheme_response_set_http_headers"),
+                            makeSymbolBinding (juce_webkit_uri_scheme_response_set_status,                       "webkit_uri_scheme_response_set_status"),
+                            makeSymbolBinding (juce_webkit_uri_scheme_request_finish_with_response,              "webkit_uri_scheme_request_finish_with_response"));
     }
 
     bool loadGtkSymbols()
     {
         return loadSymbols (gtkLib,
-                            makeSymbolBinding (juce_gtk_init,                 "gtk_init"),
-                            makeSymbolBinding (juce_gtk_plug_new,             "gtk_plug_new"),
-                            makeSymbolBinding (juce_gtk_scrolled_window_new,  "gtk_scrolled_window_new"),
-                            makeSymbolBinding (juce_gtk_container_add,        "gtk_container_add"),
-                            makeSymbolBinding (juce_gtk_widget_show_all,      "gtk_widget_show_all"),
-                            makeSymbolBinding (juce_gtk_plug_get_id,          "gtk_plug_get_id"),
-                            makeSymbolBinding (juce_gtk_main,                 "gtk_main"),
-                            makeSymbolBinding (juce_gtk_main_quit,            "gtk_main_quit"),
-                            makeSymbolBinding (juce_g_unix_fd_add,            "g_unix_fd_add"),
-                            makeSymbolBinding (juce_g_object_ref,             "g_object_ref"),
-                            makeSymbolBinding (juce_g_object_unref,           "g_object_unref"),
-                            makeSymbolBinding (juce_g_signal_connect_data,    "g_signal_connect_data"),
-                            makeSymbolBinding (juce_gdk_set_allowed_backends, "gdk_set_allowed_backends"));
+                            makeSymbolBinding (juce_gtk_init,                             "gtk_init"),
+                            makeSymbolBinding (juce_gtk_plug_new,                         "gtk_plug_new"),
+                            makeSymbolBinding (juce_gtk_scrolled_window_new,              "gtk_scrolled_window_new"),
+                            makeSymbolBinding (juce_gtk_container_add,                    "gtk_container_add"),
+                            makeSymbolBinding (juce_gtk_widget_show_all,                  "gtk_widget_show_all"),
+                            makeSymbolBinding (juce_gtk_plug_get_id,                      "gtk_plug_get_id"),
+                            makeSymbolBinding (juce_gtk_main,                             "gtk_main"),
+                            makeSymbolBinding (juce_gtk_main_quit,                        "gtk_main_quit"),
+                            makeSymbolBinding (juce_g_unix_fd_add,                        "g_unix_fd_add"),
+                            makeSymbolBinding (juce_g_object_ref,                         "g_object_ref"),
+                            makeSymbolBinding (juce_g_object_unref,                       "g_object_unref"),
+                            makeSymbolBinding (juce_g_bytes_new,                          "g_bytes_new"),
+                            makeSymbolBinding (juce_g_bytes_unref,                        "g_bytes_unref"),
+                            makeSymbolBinding (juce_g_signal_connect_data,                "g_signal_connect_data"),
+                            makeSymbolBinding (juce_gdk_set_allowed_backends,             "gdk_set_allowed_backends"),
+                            makeSymbolBinding (juce_g_memory_input_stream_new,            "g_memory_input_stream_new"),
+                            makeSymbolBinding (juce_g_memory_input_stream_new_from_bytes, "g_memory_input_stream_new_from_bytes"));
+    }
+
+    bool loadJsLibSymbols()
+    {
+        return loadSymbols (jsLib,
+                            makeSymbolBinding (juce_jsc_value_to_json, "jsc_value_to_json"));
+    }
+
+    bool loadSoupLibSymbols()
+    {
+        return loadSymbols (soupLib,
+                            makeSymbolBinding (juce_soup_message_headers_new, "soup_message_headers_new"),
+                            makeSymbolBinding (juce_soup_message_headers_append, "soup_message_headers_append"));
+    }
+
+    bool loadGlibSymbols()
+    {
+        return loadSymbols (glib,
+                            makeSymbolBinding (juce_g_free, "g_free"));
+    }
+
+    struct WebKitAndDependencyLibraryNames
+    {
+        const char* webkitLib;
+        const char* jsLib;
+        const char* soupLib;
+    };
+
+    bool openWebKitAndDependencyLibraries (const WebKitAndDependencyLibraryNames& names)
+    {
+        if (webkitLib.open (names.webkitLib) && jsLib.open (names.jsLib) && soupLib.open (names.soupLib))
+            return true;
+
+        for (auto* l : { &webkitLib, &jsLib, &soupLib })
+            l->close();
+
+        return false;
     }
 
     //==============================================================================
-    DynamicLibrary gtkLib { "libgtk-3.so" }, webkitLib { "libwebkit2gtk-4.0.so" };
-    const bool webKitIsAvailable = loadWebkitSymbols() && loadGtkSymbols();
+    DynamicLibrary webkitLib, jsLib, soupLib;
+
+    DynamicLibrary gtkLib    { "libgtk-3.so" },
+                   glib      { "libglib-2.0.so" };
+
+    const bool webKitIsAvailable =    (   openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.1.so",
+                                                                              "libjavascriptcoregtk-4.1.so",
+                                                                              "libsoup-3.0.so" })
+                                       || openWebKitAndDependencyLibraries ({ "libwebkit2gtk-4.0.so",
+                                                                              "libjavascriptcoregtk-4.0.so",
+                                                                              "libsoup-2.4.so" }))
+                                   && loadWebkitSymbols()
+                                   && loadGtkSymbols()
+                                   && loadJsLibSymbols()
+                                   && loadSoupLibSymbols()
+                                   && loadGlibSymbols();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebKitSymbols)
 };
@@ -228,6 +433,12 @@ public:
         virtual void receiverHadError() = 0;
     };
 
+    enum class ReturnAfterMessageReceived
+    {
+        no,
+        yes
+    };
+
     CommandReceiver (Responder* responderToUse, int inputChannelToUse)
         : responder (responderToUse), inChannel (inputChannelToUse)
     {
@@ -243,7 +454,7 @@ public:
 
     int getFd() const     { return inChannel; }
 
-    void tryNextRead()
+    void tryNextRead (ReturnAfterMessageReceived ret = ReturnAfterMessageReceived::no)
     {
         for (;;)
         {
@@ -270,10 +481,13 @@ public:
             {
                 pos = 0;
 
-                if (! receivingLength)
+                if (! std::exchange (receivingLength, ! receivingLength))
+                {
                     parseJSON (String (buffer.getData(), bufferLength.len));
 
-                receivingLength = (! receivingLength);
+                    if (ret == ReturnAfterMessageReceived::yes)
+                        return;
+                }
             }
         }
 
@@ -343,6 +557,120 @@ private:
 #define juce_g_signal_connect(instance, detailed_signal, c_handler, data) \
     WebKitSymbols::getInstance()->juce_g_signal_connect_data (instance, detailed_signal, c_handler, data, nullptr, (GConnectFlags) 0)
 
+static constexpr const char* platformSpecificIntegrationScript = R"(
+window.__JUCE__ = {
+  postMessage: function (object) {
+    window.webkit.messageHandlers.__JUCE__.postMessage(object);
+  },
+};
+)";
+
+struct InitialisationData
+{
+    bool nativeIntegrationsEnabled;
+    String userAgent;
+    String userScript;
+    String allowedOrigin;
+
+    static constexpr std::optional<int> marshallingVersion = std::nullopt;
+
+    template <typename Archive, typename Item>
+    static void serialise (Archive& archive, Item& item)
+    {
+        archive (named ("nativeIntegrationsEnabled", item.nativeIntegrationsEnabled),
+                 named ("userAgent", item.userAgent),
+                 named ("userScript", item.userScript),
+                 named ("allowedOrigin", item.allowedOrigin));
+    }
+};
+
+struct EvaluateJavascriptParams
+{
+    String script;
+    bool requireCallback;
+
+    static constexpr std::optional<int> marshallingVersion = std::nullopt;
+
+    template <typename Archive, typename Item>
+    static void serialise (Archive& archive, Item& item)
+    {
+        archive (named ("script", item.script),
+                 named ("requireCallback", item.requireCallback));
+    }
+};
+
+struct EvaluateJavascriptCallbackParams
+{
+    bool success;
+
+    // This is necessary because a DynamicObject with a property value of var::undefined()
+    // cannot be unserialised. So we need to signal this case with an extra variable.
+    bool hasPayload;
+
+    var payload;
+    String error;
+
+    static constexpr std::optional<int> marshallingVersion = std::nullopt;
+
+    template <typename Archive, typename Item>
+    static void serialise (Archive& archive, Item& item)
+    {
+        archive(named ("success", item.success),
+                named ("hasPayload", item.hasPayload),
+                named ("payload", item.payload),
+                named ("error", item.error));
+    }
+
+    static inline String key { "evaluateJavascriptCallbackParams" };
+};
+
+struct ResourceRequest
+{
+    int64 requestId;
+    String path;
+
+    static constexpr std::optional<int> marshallingVersion = std::nullopt;
+
+    template <typename Archive, typename Item>
+    static void serialise (Archive& archive, Item& item)
+    {
+        archive (named ("requestId", item.requestId),
+                 named ("path", item.path));
+    }
+
+    static inline const String key { "resourceRequest" };
+};
+
+template <>
+struct SerialisationTraits<WebBrowserComponent::Resource>
+{
+    static constexpr auto marshallingVersion = std::nullopt;
+
+    template <typename Archive, typename T>
+    static void serialise (Archive& archive, T& item)
+    {
+        archive (named ("data", item.data),
+                 named ("mimeType", item.mimeType));
+    }
+};
+
+struct ResourceRequestResponse
+{
+    int64 requestId;
+    std::optional<WebBrowserComponent::Resource> resource;
+
+    static constexpr std::optional<int> marshallingVersion = std::nullopt;
+
+    template <typename Archive, typename T>
+    static void serialise (Archive& archive, T& item)
+    {
+        archive (named ("requestId", item.requestId),
+                 named ("resource", item.resource));
+    }
+
+    static inline const String key { "resourceRequestResponse" };
+};
+
 //==============================================================================
 class GtkChildProcess final : private CommandReceiver::Responder
 {
@@ -358,22 +686,76 @@ public:
     {
         CommandReceiver::setBlocking (outChannel, true);
 
+        {
+            const ScopeGuard scope { [this] { CommandReceiver::setBlocking (receiver.getFd(), false); } };
+            CommandReceiver::setBlocking (receiver.getFd(), true);
+            receiver.tryNextRead (CommandReceiver::ReturnAfterMessageReceived::yes);
+
+            if (! initialisationData.has_value())
+            {
+                std::cerr << "The first message received by GtkChildProcess should have been "
+                             "the initialisationData, but it wasn't." << std::endl;
+
+                return 1;
+            }
+        }
+
+        auto& wk = *WebKitSymbols::getInstance();
+
         // webkit2gtk crashes when using the wayland backend embedded into an x11 window
-        WebKitSymbols::getInstance()->juce_gdk_set_allowed_backends ("x11");
+        wk.juce_gdk_set_allowed_backends ("x11");
 
-        WebKitSymbols::getInstance()->juce_gtk_init (nullptr, nullptr);
+        wk.juce_gtk_init (nullptr, nullptr);
 
-        auto* settings = WebKitSymbols::getInstance()->juce_webkit_settings_new();
+        auto* settings = wk.juce_webkit_settings_new();
+
+        static constexpr int webkitHadwareAccelerationPolicyNeverFlag = 2;
+
         WebKitSymbols::getInstance()->juce_webkit_settings_set_hardware_acceleration_policy (settings,
-                                                                                             /* WEBKIT_HARDWARE_ACCELERATION_POLICY_NEVER */ 2);
-        if (userAgent.isNotEmpty())
-            WebKitSymbols::getInstance()->juce_webkit_settings_set_user_agent (settings, userAgent.toRawUTF8());
+                                                                                             webkitHadwareAccelerationPolicyNeverFlag);
+        if (initialisationData->userAgent.isNotEmpty())
+            WebKitSymbols::getInstance()->juce_webkit_settings_set_user_agent (settings,
+                                                                               initialisationData->userAgent.toRawUTF8());
 
         auto* plug      = WebKitSymbols::getInstance()->juce_gtk_plug_new (0);
         auto* container = WebKitSymbols::getInstance()->juce_gtk_scrolled_window_new (nullptr, nullptr);
 
+       #if JUCE_DEBUG
+        wk.juce_webkit_settings_set_enable_write_console_messages_to_stdout (settings, true);
+        wk.juce_webkit_settings_set_enable_developer_extras (settings, true);
+       #endif
+
         auto* webviewWidget = WebKitSymbols::getInstance()->juce_webkit_web_view_new_with_settings (settings);
         webview = (WebKitWebView*) webviewWidget;
+
+        if (initialisationData->nativeIntegrationsEnabled)
+        {
+            manager = wk.juce_webkit_web_view_get_user_content_manager (webview);
+
+            // It's probably fine to not disconnect these signals, given that upon closing the
+            // WebBrowserComponent the entire subprocess is cleaned up with the manager and
+            // everything.
+            juce_g_signal_connect (manager,
+                                   "script-message-received::__JUCE__",
+                                   G_CALLBACK (+[] (WebKitUserContentManager*, WebKitJavascriptResult* r, gpointer arg)
+                                   {
+                                       static_cast<GtkChildProcess*> (arg)->invokeCallback (r);
+                                   }),
+                                   this);
+
+            wk.juce_webkit_user_content_manager_register_script_message_handler (manager, "__JUCE__");
+
+            auto* context = wk.juce_webkit_web_view_get_context (webview);
+            wk.juce_webkit_web_context_register_uri_scheme (context, "juce", resourceRequestedCallback, this, nullptr);
+
+            const StringArray userScripts { platformSpecificIntegrationScript,
+                                            initialisationData->userScript };
+
+            wk.juce_webkit_user_content_manager_add_script (manager, wk.juce_webkit_user_script_new (userScripts.joinIntoString ("\n").toRawUTF8(),
+                                                                                                           WEBKIT_USER_CONTENT_INJECT_TOP_FRAME,
+                                                                                                           WEBKIT_USER_SCRIPT_INJECT_AT_DOCUMENT_START,
+                                                                                                           nullptr, nullptr));
+        }
 
         WebKitSymbols::getInstance()->juce_gtk_container_add ((GtkContainer*) container, webviewWidget);
         WebKitSymbols::getInstance()->juce_gtk_container_add ((GtkContainer*) plug,      container);
@@ -411,6 +793,15 @@ public:
         return 0;
     }
 
+    void invokeCallback (WebKitJavascriptResult* r)
+    {
+        auto& wk = *WebKitSymbols::getInstance();
+
+        auto s = wk.juce_jsc_value_to_string (wk.juce_webkit_javascript_result_get_js_value (r));
+        CommandReceiver::sendCommand (outChannel, "invokeCallback", var (s));
+        wk.juce_g_free (s);
+    }
+
     void goToURL (const var& params)
     {
         static Identifier urlIdentifier ("url");
@@ -436,16 +827,91 @@ public:
         }
     }
 
+    void evaluateJavascript (const var& params)
+    {
+        const auto jsParams = FromVar::convert<EvaluateJavascriptParams> (params);
+
+        if (! jsParams.has_value())
+        {
+            std::cerr << "Wrong params received by evaluateJavascript()" << std::endl;
+            return;
+        }
+
+        WebKitSymbols::getInstance()->juce_webkit_web_view_run_javascript (webview,
+                                                                           jsParams->script.toRawUTF8(),
+                                                                           nullptr,
+                                                                           javascriptFinishedCallback,
+                                                                           this);
+    }
+
+    void handleResourceRequesteResponse (const var& params)
+    {
+        auto& wk = *WebKitSymbols::getInstance();
+
+        const auto response = FromVar::convert<ResourceRequestResponse> (params);
+
+        if (! response.has_value())
+        {
+            std::cerr << "Bad request response received" << std::endl;
+            return;
+        }
+
+        auto* request = requestIds.remove (response->requestId);
+
+        // The WebKitURISchemeResponse object will take ownership of the headers
+        auto* headers = wk.juce_soup_message_headers_new (SoupMessageHeadersType::SOUP_MESSAGE_HEADERS_RESPONSE);
+
+        if (initialisationData->allowedOrigin.isNotEmpty())
+            wk.juce_soup_message_headers_append (headers, "Access-Control-Allow-Origin", initialisationData->allowedOrigin.toRawUTF8());
+
+        if (response->resource.has_value())
+        {
+            auto* streamBytes = wk.juce_g_bytes_new (response->resource->data.data(),
+                                                        static_cast<gsize> (response->resource->data.size()));
+            ScopeGuard bytesScope { [&] { wk.juce_g_bytes_unref (streamBytes); } };
+
+            auto* stream = wk.juce_g_memory_input_stream_new_from_bytes (streamBytes);
+            ScopeGuard streamScope { [&] { wk.juce_g_object_unref (stream); } };
+
+            auto* webkitResponse = wk.juce_webkit_uri_scheme_response_new (stream,
+                                                                              static_cast<gint64> (response->resource->data.size()));
+            ScopeGuard webkitResponseScope { [&] { wk.juce_g_object_unref (webkitResponse); } };
+
+            wk.juce_soup_message_headers_append (headers, "Content-Type", response->resource->mimeType.toRawUTF8());
+
+            wk.juce_webkit_uri_scheme_response_set_http_headers (webkitResponse, headers);
+            wk.juce_webkit_uri_scheme_response_set_status (webkitResponse, 200, nullptr);
+            wk.juce_webkit_uri_scheme_request_finish_with_response (request, webkitResponse);
+
+            return;
+        }
+
+        auto* stream = wk.juce_g_memory_input_stream_new();
+        ScopeGuard streamScope { [&] { wk.juce_g_object_unref (stream); } };
+
+        auto* webkitResponse = wk.juce_webkit_uri_scheme_response_new (stream, 0);
+        ScopeGuard webkitResponseScope { [&] { wk.juce_g_object_unref (webkitResponse); } };
+
+        wk.juce_webkit_uri_scheme_response_set_http_headers (webkitResponse, headers);
+        wk.juce_webkit_uri_scheme_response_set_status (webkitResponse, 404, nullptr);
+        wk.juce_webkit_uri_scheme_request_finish_with_response (request, webkitResponse);
+    }
+
     //==============================================================================
     void handleCommand (const String& cmd, const var& params) override
     {
-        if      (cmd == "quit")      quit();
-        else if (cmd == "goToURL")   goToURL (params);
-        else if (cmd == "goBack")    WebKitSymbols::getInstance()->juce_webkit_web_view_go_back      (webview);
-        else if (cmd == "goForward") WebKitSymbols::getInstance()->juce_webkit_web_view_go_forward   (webview);
-        else if (cmd == "refresh")   WebKitSymbols::getInstance()->juce_webkit_web_view_reload       (webview);
-        else if (cmd == "stop")      WebKitSymbols::getInstance()->juce_webkit_web_view_stop_loading (webview);
-        else if (cmd == "decision")  handleDecisionResponse (params);
+        auto& wk = *WebKitSymbols::getInstance();
+
+        if      (cmd == "quit")                       quit();
+        else if (cmd == "goToURL")                    goToURL (params);
+        else if (cmd == "goBack")                     wk.juce_webkit_web_view_go_back      (webview);
+        else if (cmd == "goForward")                  wk.juce_webkit_web_view_go_forward   (webview);
+        else if (cmd == "refresh")                    wk.juce_webkit_web_view_reload       (webview);
+        else if (cmd == "stop")                       wk.juce_webkit_web_view_stop_loading (webview);
+        else if (cmd == "decision")                   handleDecisionResponse (params);
+        else if (cmd == "init")                       initialisationData = FromVar::convert<InitialisationData> (params);
+        else if (cmd == "evaluateJavascript")         evaluateJavascript (params);
+        else if (cmd == ResourceRequestResponse::key) handleResourceRequesteResponse (params);
     }
 
     void receiverHadError() override
@@ -578,6 +1044,27 @@ public:
     }
 
 private:
+    void handleEvaluationCallback (const std::optional<var>& value, const String& error)
+    {
+        const auto success = value.has_value();
+        const auto hasPayload = success && ! value->isUndefined();
+
+        CommandReceiver::sendCommand (outChannel,
+                                      EvaluateJavascriptCallbackParams::key,
+                                      *ToVar::convert (EvaluateJavascriptCallbackParams { success,
+                                                                                          hasPayload,
+                                                                                          hasPayload ? *value : var{},
+                                                                                          error }));
+    }
+
+    void handleResourceRequestedCallback (WebKitURISchemeRequest* request, const String& path)
+    {
+        const auto requestId = requestIds.insert (request);
+        CommandReceiver::sendCommand (outChannel,
+                                      ResourceRequest::key,
+                                      *ToVar::convert (ResourceRequest { requestId, path }));
+    }
+
     static gboolean pipeReadyStatic (gint fd, GIOCondition condition, gpointer user)
     {
         return (reinterpret_cast<GtkChildProcess*> (user)->pipeReady (fd, condition) ? TRUE : FALSE);
@@ -610,31 +1097,223 @@ private:
         owner.onLoadFailed (error);
     }
 
+    static var fromJSCValue (JSCValue* value)
+    {
+        auto* json = WebKitSymbols::getInstance()->juce_jsc_value_to_json (value, 0);
+        ScopeGuard jsonFreeGuard { [&json]
+                                   {
+                                       if (json != nullptr)
+                                           WebKitSymbols::getInstance()->juce_g_free (json);
+                                   } };
+
+        if (json == nullptr)
+            return var::undefined();
+
+        return JSON::fromString (CharPointer_UTF8 { json });
+    }
+
+    struct WebKitJavascriptResultDeleter
+    {
+        void operator() (WebKitJavascriptResult* ptr) const noexcept
+        {
+            if (ptr != nullptr)
+                WebKitSymbols::getInstance()->juce_webkit_javascript_result_unref (ptr);
+        }
+    };
+
+    using WebKitJavascriptResultUniquePtr = std::unique_ptr<WebKitJavascriptResult, WebKitJavascriptResultDeleter>;
+
+    static void javascriptFinishedCallback (GObject*, GAsyncResult* result, gpointer user)
+    {
+        auto& wk = *WebKitSymbols::getInstance();
+
+        GError* error = nullptr;
+        ScopeGuard errorFreeGuard { [&error, &wk]
+                                    {
+                                        if (error != nullptr)
+                                            wk.juce_g_error_free (error);
+                                    } };
+
+        auto* owner = reinterpret_cast<GtkChildProcess*> (user);
+
+        // Using the non-deprecated webkit_javascript_result_get_js_value() functions seems easier
+        // but returned values fail the JS_IS_VALUE() internal assertion. The example code from the
+        // documentation doesn't seem to work either.
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        WebKitJavascriptResultUniquePtr jsResult { wk.juce_webkit_web_view_run_javascript_finish (owner->webview,
+                                                                                                     result,
+                                                                                                     &error) };
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        if (jsResult == nullptr)
+        {
+            owner->handleEvaluationCallback (std::nullopt,
+                                             error != nullptr ? String { CharPointer_UTF8 { error->message } }
+                                                              : String{});
+
+            return;
+        }
+
+        const auto jsValueResult = [&]() -> std::tuple<std::optional<var>, String>
+        {
+            auto* jsValue = wk.juce_webkit_javascript_result_get_js_value (jsResult.get());
+
+            if (jsValue == nullptr)
+                return { std::nullopt, String{} };
+
+            return { fromJSCValue (jsValue), String{} };
+        }();
+
+        owner->handleEvaluationCallback (std::get<0> (jsValueResult), std::get<1> (jsValueResult));
+    }
+
+    static void resourceRequestedCallback (WebKitURISchemeRequest* request, gpointer user)
+    {
+        String path { CharPointer_UTF8 { WebKitSymbols::getInstance()->juce_webkit_uri_scheme_request_get_path (request) } };
+        reinterpret_cast<GtkChildProcess*> (user)->handleResourceRequestedCallback (request, path);
+    }
+
+    class RequestIds
+    {
+    public:
+        int64 insert (WebKitURISchemeRequest* request)
+        {
+            const auto requestId = nextRequestId++;
+
+            if (nextRequestId == std::numeric_limits<int64>::max())
+                nextRequestId = 0;
+
+            requests[requestId] = request;
+            return requestId;
+        }
+
+        WebKitURISchemeRequest* remove (int64 requestId)
+        {
+            auto it = requests.find (requestId);
+
+            if (it == requests.end())
+            {
+                std::cerr << "Outstanding request not found for id " << requestId << std::endl;
+                return nullptr;
+            }
+
+            auto r = it->second;
+            requests.erase (it);
+
+            return r;
+        }
+
+    private:
+        std::map<int64, WebKitURISchemeRequest*> requests;
+        int64 nextRequestId = 0;
+    };
+
     int outChannel = 0;
     CommandReceiver receiver;
     String userAgent;
     WebKitWebView* webview = nullptr;
     Array<WebKitPolicyDecision*> decisions;
+    WebKitUserContentManager* manager = nullptr;
+    std::optional<InitialisationData> initialisationData;
+    RequestIds requestIds;
 };
 
 //==============================================================================
-class WebBrowserComponent::Pimpl  : private Thread,
-                                    private CommandReceiver::Responder
+struct WebBrowserComponent::Impl::Platform  : public PlatformInterface,
+                                              private Thread,
+                                              private CommandReceiver::Responder
 {
 public:
-    Pimpl (WebBrowserComponent& parent, const String& userAgentToUse)
-        : Thread ("Webview"), owner (parent), userAgent (userAgentToUse)
+    Platform (WebBrowserComponent& browserIn,
+              const WebBrowserComponent::Options& optionsIn,
+              const StringArray& userStrings)
+        : Thread (SystemStats::getJUCEVersion() + ": Webview"), browser (browserIn), userAgent (optionsIn.getUserAgent())
     {
         webKitIsAvailable = WebKitSymbols::getInstance()->isWebKitAvailable();
+        init (InitialisationData { optionsIn.getNativeIntegrationsEnabled(),
+                                   userAgent,
+                                   userStrings.joinIntoString ("\n"),
+                                   optionsIn.getAllowedOrigin() ? *optionsIn.getAllowedOrigin() : "" });
     }
 
-    ~Pimpl() override
+    ~Platform() override
     {
         quit();
     }
 
+    void fallbackPaint (Graphics& g) override
+    {
+        g.fillAll (Colours::white);
+    }
+
+    void evaluateJavascript (const String& script, WebBrowserComponent::EvaluationCallback callback) override
+    {
+        if (callback != nullptr)
+            evaluationCallbacks.push_back (std::move (callback));
+
+        CommandReceiver::sendCommand (outChannel,
+                                      "evaluateJavascript",
+                                      *ToVar::convert (EvaluateJavascriptParams { script, callback != nullptr }));
+    }
+
+    void handleJavascriptEvaluationCallback (const var& paramsIn)
+    {
+        const auto params = FromVar::convert<EvaluateJavascriptCallbackParams> (paramsIn);
+
+        if (! params.has_value() || evaluationCallbacks.size() == 0)
+        {
+            jassertfalse;
+            return;
+        }
+
+        const auto result = [&]
+        {
+            using Error = EvaluationResult::Error;
+
+            if (! params->success)
+            {
+                if (params->error.isNotEmpty())
+                    return EvaluationResult { Error { Error::Type::javascriptException, params->error } };
+
+                return EvaluationResult { Error { Error::Type::unknown, {} } };
+            }
+
+            return EvaluationResult { params->hasPayload ? params->payload : var::undefined() };
+        }();
+
+        auto& cb = evaluationCallbacks.front();
+        cb (result);
+        evaluationCallbacks.pop_front();
+    }
+
+    void handleResourceRequest (const var& paramsIn)
+    {
+        const auto params = FromVar::convert<ResourceRequest> (paramsIn);
+
+        if (! params.has_value())
+        {
+            jassertfalse;
+            return;
+        }
+
+        const auto response = browser.impl->handleResourceRequest (params->path);
+
+        CommandReceiver::sendCommand (outChannel,
+                                      ResourceRequestResponse::key,
+                                      *ToVar::convert (ResourceRequestResponse { params->requestId, response }));
+    }
+
+    void setWebViewSize (int, int) override
+    {
+        resized();
+    }
+
+    void checkWindowAssociation() override
+    {
+    }
+
     //==============================================================================
-    void init()
+    void init (const InitialisationData& initialisationData)
     {
         if (! webKitIsAvailable)
             return;
@@ -649,6 +1328,8 @@ public:
         CommandReceiver::setBlocking (outChannel,       true);
         CommandReceiver::setBlocking (threadControl[0], false);
         CommandReceiver::setBlocking (threadControl[1], true);
+
+        CommandReceiver::sendCommand (outChannel, "init", *ToVar::convert (initialisationData));
 
         unsigned long windowHandle;
         auto actual = read (inChannel, &windowHandle, sizeof (windowHandle));
@@ -667,7 +1348,7 @@ public:
         startThread();
 
         xembed.reset (new XEmbedComponent (windowHandle));
-        owner.addAndMakeVisible (xembed.get());
+        browser.addAndMakeVisible (xembed.get());
     }
 
     void quit()
@@ -702,7 +1383,7 @@ public:
     }
 
     //==============================================================================
-    void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
+    void goToURL (const String& url, const StringArray* headers, const MemoryBlock* postData) override
     {
         if (! webKitIsAvailable)
             return;
@@ -720,15 +1401,15 @@ public:
         CommandReceiver::sendCommand (outChannel, "goToURL", var (params.get()));
     }
 
-    void goBack()      { if (webKitIsAvailable) CommandReceiver::sendCommand (outChannel, "goBack",    {}); }
-    void goForward()   { if (webKitIsAvailable) CommandReceiver::sendCommand (outChannel, "goForward", {}); }
-    void refresh()     { if (webKitIsAvailable) CommandReceiver::sendCommand (outChannel, "refresh",   {}); }
-    void stop()        { if (webKitIsAvailable) CommandReceiver::sendCommand (outChannel, "stop",      {}); }
+    void goBack() override    { if (webKitIsAvailable) CommandReceiver::sendCommand (outChannel, "goBack",    {}); }
+    void goForward() override { if (webKitIsAvailable) CommandReceiver::sendCommand (outChannel, "goForward", {}); }
+    void refresh() override   { if (webKitIsAvailable) CommandReceiver::sendCommand (outChannel, "refresh",   {}); }
+    void stop() override      { if (webKitIsAvailable) CommandReceiver::sendCommand (outChannel, "stop",      {}); }
 
     void resized()
     {
         if (xembed != nullptr)
-            xembed->setBounds (owner.getLocalBounds());
+            xembed->setBounds (browser.getLocalBounds());
     }
 
 private:
@@ -883,11 +1564,19 @@ private:
     {
         auto url = params.getProperty ("url", var()).toString();
 
-        if      (cmd == "pageAboutToLoad")           handlePageAboutToLoad (url, params);
-        else if (cmd == "pageFinishedLoading")       owner.pageFinishedLoading (url);
-        else if (cmd == "windowCloseRequest")        owner.windowCloseRequest();
-        else if (cmd == "newWindowAttemptingToLoad") owner.newWindowAttemptingToLoad (url);
-        else if (cmd == "pageLoadHadNetworkError")   handlePageLoadHadNetworkError (params);
+        if      (cmd == "pageAboutToLoad")                      handlePageAboutToLoad (url, params);
+        else if (cmd == "pageFinishedLoading")                  browser.pageFinishedLoading (url);
+        else if (cmd == "windowCloseRequest")                   browser.windowCloseRequest();
+        else if (cmd == "newWindowAttemptingToLoad")            browser.newWindowAttemptingToLoad (url);
+        else if (cmd == "pageLoadHadNetworkError")              handlePageLoadHadNetworkError (params);
+        else if (cmd == "invokeCallback")                       invokeCallback (params);
+        else if (cmd == EvaluateJavascriptCallbackParams::key)  handleJavascriptEvaluationCallback (params);
+        else if (cmd == ResourceRequest::key)                   handleResourceRequest (params);
+    }
+
+    void invokeCallback (const var& params)
+    {
+        browser.impl->handleNativeEvent (JSON::fromString (params.toString()));
     }
 
     void handlePageAboutToLoad (const String& url, const var& inputParams)
@@ -899,7 +1588,7 @@ private:
             DynamicObject::Ptr params = new DynamicObject;
 
             params->setProperty ("decision_id", decision_id);
-            params->setProperty ("allow", owner.pageAboutToLoad (url));
+            params->setProperty ("allow", browser.pageAboutToLoad (url));
 
             CommandReceiver::sendCommand (outChannel, "decision", var (params.get()));
         }
@@ -909,7 +1598,7 @@ private:
     {
         String error = params.getProperty ("error", "Unknown error");
 
-        if (owner.pageLoadHadNetworkError (error))
+        if (browser.pageLoadHadNetworkError (error))
             goToURL (String ("data:text/plain,") + error, nullptr, nullptr);
     }
 
@@ -927,7 +1616,7 @@ private:
     //==============================================================================
     bool webKitIsAvailable = false;
 
-    WebBrowserComponent& owner;
+    WebBrowserComponent& browser;
     String userAgent;
     std::unique_ptr<CommandReceiver> receiver;
     int childProcess = 0, inChannel = 0, outChannel = 0;
@@ -936,104 +1625,16 @@ private:
     std::shared_ptr<int> livenessProbe = std::make_shared<int> (0);
     std::vector<pollfd> pfds;
     std::optional<TemporaryFile> subprocessFile;
+    std::deque<EvaluationCallback> evaluationCallbacks;
 };
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent (const Options& options)
-    : browser (new Pimpl (*this, options.getUserAgent()))
+auto WebBrowserComponent::Impl::createAndInitPlatformDependentPart (WebBrowserComponent::Impl& impl,
+                                                                    const WebBrowserComponent::Options& options,
+                                                                    const StringArray& userStrings)
+    -> std::unique_ptr<PlatformInterface>
 {
-    ignoreUnused (blankPageShown);
-    ignoreUnused (unloadPageWhenHidden);
-
-    setOpaque (true);
-
-    browser->init();
-}
-
-WebBrowserComponent::~WebBrowserComponent()
-{
-}
-
-//==============================================================================
-void WebBrowserComponent::goToURL (const String& url,
-                                   const StringArray* headers,
-                                   const MemoryBlock* postData)
-{
-    lastURL = url;
-
-    if (headers != nullptr)
-        lastHeaders = *headers;
-    else
-        lastHeaders.clear();
-
-    if (postData != nullptr)
-        lastPostData = *postData;
-    else
-        lastPostData.reset();
-
-    browser->goToURL (url, headers, postData);
-}
-
-void WebBrowserComponent::stop()
-{
-    browser->stop();
-}
-
-void WebBrowserComponent::goBack()
-{
-    lastURL.clear();
-
-    browser->goBack();
-}
-
-void WebBrowserComponent::goForward()
-{
-    lastURL.clear();
-    browser->goForward();
-}
-
-void WebBrowserComponent::refresh()
-{
-    browser->refresh();
-}
-
-//==============================================================================
-void WebBrowserComponent::paint (Graphics& g)
-{
-    g.fillAll (Colours::white);
-}
-
-void WebBrowserComponent::checkWindowAssociation()
-{
-}
-
-void WebBrowserComponent::reloadLastURL()
-{
-    if (lastURL.isNotEmpty())
-    {
-        goToURL (lastURL, &lastHeaders, &lastPostData);
-        lastURL.clear();
-    }
-}
-
-void WebBrowserComponent::parentHierarchyChanged()
-{
-    checkWindowAssociation();
-}
-
-void WebBrowserComponent::resized()
-{
-    if (browser != nullptr)
-        browser->resized();
-}
-
-void WebBrowserComponent::visibilityChanged()
-{
-    checkWindowAssociation();
-}
-
-void WebBrowserComponent::focusGainedWithDirection (FocusChangeType, FocusChangeDirection)
-{
+    return std::make_unique<Platform> (impl.owner, options, userStrings);
 }
 
 void WebBrowserComponent::clearCookies()

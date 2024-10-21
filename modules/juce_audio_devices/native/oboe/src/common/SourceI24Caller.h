@@ -33,8 +33,9 @@ class SourceI24Caller : public AudioSourceCaller {
 public:
     SourceI24Caller(int32_t channelCount, int32_t framesPerCallback)
     : AudioSourceCaller(channelCount, framesPerCallback, kBytesPerI24Packed) {
-        mConversionBuffer = std::make_unique<uint8_t[]>(
-                kBytesPerI24Packed * channelCount * output.getFramesPerBuffer());
+        mConversionBuffer = std::make_unique<uint8_t[]>(static_cast<size_t>(kBytesPerI24Packed)
+                * static_cast<size_t>(channelCount)
+                * static_cast<size_t>(output.getFramesPerBuffer()));
     }
 
     int32_t onProcess(int32_t numFrames) override;

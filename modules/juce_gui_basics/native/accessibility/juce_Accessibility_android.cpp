@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -151,19 +160,12 @@ static void loadSDKDependentMethods()
         hasChecked = true;
 
         auto* env = getEnv();
-        const auto sdkVersion = getAndroidSDKVersion();
 
-        if (sdkVersion >= 18)
-        {
-            nodeInfoSetEditable      = env->GetMethodID (AndroidAccessibilityNodeInfo, "setEditable",      "(Z)V");
-            nodeInfoSetTextSelection = env->GetMethodID (AndroidAccessibilityNodeInfo, "setTextSelection", "(II)V");
-        }
+        nodeInfoSetEditable      = env->GetMethodID (AndroidAccessibilityNodeInfo, "setEditable",      "(Z)V");
+        nodeInfoSetTextSelection = env->GetMethodID (AndroidAccessibilityNodeInfo, "setTextSelection", "(II)V");
 
-        if (sdkVersion >= 19)
-        {
-            nodeInfoSetLiveRegion                   = env->GetMethodID (AndroidAccessibilityNodeInfo, "setLiveRegion",         "(I)V");
-            accessibilityEventSetContentChangeTypes = env->GetMethodID (AndroidAccessibilityEvent,    "setContentChangeTypes", "(I)V");
-        }
+        nodeInfoSetLiveRegion                   = env->GetMethodID (AndroidAccessibilityNodeInfo, "setLiveRegion",         "(I)V");
+        accessibilityEventSetContentChangeTypes = env->GetMethodID (AndroidAccessibilityEvent,    "setContentChangeTypes", "(I)V");
     }
 }
 
@@ -489,58 +491,55 @@ public:
             }
         }
 
-        if (getAndroidSDKVersion() >= 19)
+        if (auto* tableInterface = accessibilityHandler.getTableInterface())
         {
-            if (auto* tableInterface = accessibilityHandler.getTableInterface())
+            const auto rows    = tableInterface->getNumRows();
+            const auto columns = tableInterface->getNumColumns();
+            const LocalRef<jobject> collectionInfo { env->CallStaticObjectMethod (AndroidAccessibilityNodeInfoCollectionInfo,
+                                                                                  AndroidAccessibilityNodeInfoCollectionInfo.obtain,
+                                                                                  (jint) rows,
+                                                                                  (jint) columns,
+                                                                                  (jboolean) false) };
+            env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionInfo, collectionInfo.get());
+        }
+
+        if (auto* enclosingTableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (&accessibilityHandler, &AccessibilityHandler::getTableInterface))
+        {
+            auto* interface = enclosingTableHandler->getTableInterface();
+            jassert (interface != nullptr);
+            const auto rowSpan    = interface->getRowSpan    (accessibilityHandler);
+            const auto columnSpan = interface->getColumnSpan (accessibilityHandler);
+
+            enum class IsHeader { no, yes };
+
+            const auto addCellInfo = [env, &info] (AccessibilityTableInterface::Span rows, AccessibilityTableInterface::Span columns, IsHeader header)
             {
-                const auto rows    = tableInterface->getNumRows();
-                const auto columns = tableInterface->getNumColumns();
-                const LocalRef<jobject> collectionInfo { env->CallStaticObjectMethod (AndroidAccessibilityNodeInfoCollectionInfo,
-                                                                                      AndroidAccessibilityNodeInfoCollectionInfo.obtain,
-                                                                                      (jint) rows,
-                                                                                      (jint) columns,
-                                                                                      (jboolean) false) };
-                env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionInfo, collectionInfo.get());
+                const LocalRef<jobject> collectionItemInfo { env->CallStaticObjectMethod (AndroidAccessibilityNodeInfoCollectionItemInfo,
+                                                                                          AndroidAccessibilityNodeInfoCollectionItemInfo.obtain,
+                                                                                          (jint) rows.begin,
+                                                                                          (jint) rows.num,
+                                                                                          (jint) columns.begin,
+                                                                                          (jint) columns.num,
+                                                                                          (jboolean) (header == IsHeader::yes)) };
+                env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionItemInfo, collectionItemInfo.get());
+            };
+
+            if (rowSpan.hasValue() && columnSpan.hasValue())
+            {
+                addCellInfo (*rowSpan, *columnSpan, IsHeader::no);
             }
-
-            if (auto* enclosingTableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (&accessibilityHandler, &AccessibilityHandler::getTableInterface))
+            else
             {
-                auto* interface = enclosingTableHandler->getTableInterface();
-                jassert (interface != nullptr);
-                const auto rowSpan    = interface->getRowSpan    (accessibilityHandler);
-                const auto columnSpan = interface->getColumnSpan (accessibilityHandler);
-
-                enum class IsHeader { no, yes };
-
-                const auto addCellInfo = [env, &info] (AccessibilityTableInterface::Span rows, AccessibilityTableInterface::Span columns, IsHeader header)
+                if (auto* tableHeader = interface->getHeaderHandler())
                 {
-                    const LocalRef<jobject> collectionItemInfo { env->CallStaticObjectMethod (AndroidAccessibilityNodeInfoCollectionItemInfo,
-                                                                                              AndroidAccessibilityNodeInfoCollectionItemInfo.obtain,
-                                                                                              (jint) rows.begin,
-                                                                                              (jint) rows.num,
-                                                                                              (jint) columns.begin,
-                                                                                              (jint) columns.num,
-                                                                                              (jboolean) (header == IsHeader::yes)) };
-                    env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionItemInfo, collectionItemInfo.get());
-                };
-
-                if (rowSpan.hasValue() && columnSpan.hasValue())
-                {
-                    addCellInfo (*rowSpan, *columnSpan, IsHeader::no);
-                }
-                else
-                {
-                    if (auto* tableHeader = interface->getHeaderHandler())
+                    if (accessibilityHandler.getParent() == tableHeader)
                     {
-                        if (accessibilityHandler.getParent() == tableHeader)
-                        {
-                            const auto children = tableHeader->getChildren();
-                            const auto column = std::distance (children.cbegin(), std::find (children.cbegin(), children.cend(), &accessibilityHandler));
+                        const auto children = tableHeader->getChildren();
+                        const auto column = std::distance (children.cbegin(), std::find (children.cbegin(), children.cend(), &accessibilityHandler));
 
-                            // Talkback will only treat a row as a column header if its row index is zero
-                            // https://github.com/google/talkback/blob/acd0bc7631a3dfbcf183789c7557596a45319e1f/utils/src/main/java/CollectionState.java#L853
-                            addCellInfo ({ 0, 1 }, { (int) column, 1 }, IsHeader::yes);
-                        }
+                        // Talkback will only treat a row as a column header if its row index is zero
+                        // https://github.com/google/talkback/blob/acd0bc7631a3dfbcf183789c7557596a45319e1f/utils/src/main/java/CollectionState.java#L853
+                        addCellInfo ({ 0, 1 }, { (int) column, 1 }, IsHeader::yes);
                     }
                 }
             }

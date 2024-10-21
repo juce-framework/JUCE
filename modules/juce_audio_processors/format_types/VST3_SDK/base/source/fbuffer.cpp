@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -304,7 +304,7 @@ bool Buffer::makeHexString (String& result)
 	if (data == nullptr || bytes == 0)
 		return false;
 
-	char8* stringBuffer = (char8*)malloc ((bytes * 2) + 1);
+	char8* stringBuffer = NEWSTR8 ((bytes * 2) + 1);
 	if (!stringBuffer)
 		return false;
 

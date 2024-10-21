@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -31,7 +40,6 @@
 #include "jucer_ProjectExport_MSVC.h"
 #include "jucer_ProjectExport_Xcode.h"
 #include "jucer_ProjectExport_Android.h"
-#include "jucer_ProjectExport_CodeBlocks.h"
 
 #include "../Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"
 
@@ -45,6 +53,17 @@ static auto createIcon (const void* iconData, size_t iconDataSize)
     svgDrawable->drawWithin (g, image.getBounds().toFloat(), RectanglePlacement::fillDestination, 1.0f);
 
     return image;
+}
+
+std::vector<PackageDependency> makePackageDependencies (const StringArray& dependencies)
+{
+    std::vector<PackageDependency> result;
+    result.reserve ((size_t) dependencies.size());
+    std::transform (dependencies.begin(),
+                    dependencies.end(),
+                    std::back_inserter (result),
+                    [] (auto& d) { return PackageDependency { d }; });
+    return result;
 }
 
 template <typename Exporter>
@@ -73,20 +92,10 @@ std::vector<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypeI
 
         createExporterTypeInfo<MSVCProjectExporterVC2022> (export_visualStudio_svg, export_visualStudio_svgSize),
         createExporterTypeInfo<MSVCProjectExporterVC2019> (export_visualStudio_svg, export_visualStudio_svgSize),
-        createExporterTypeInfo<MSVCProjectExporterVC2017> (export_visualStudio_svg, export_visualStudio_svgSize),
 
         createExporterTypeInfo<MakefileProjectExporter> (export_linux_svg, export_linux_svgSize),
 
         createExporterTypeInfo<AndroidProjectExporter> (export_android_svg, export_android_svgSize),
-
-        { CodeBlocksProjectExporter::getValueTreeTypeNameWindows(),
-          CodeBlocksProjectExporter::getDisplayNameWindows(),
-          CodeBlocksProjectExporter::getTargetFolderNameWindows(),
-          createIcon (export_codeBlocks_svg, export_codeBlocks_svgSize) },
-        { CodeBlocksProjectExporter::getValueTreeTypeNameLinux(),
-          CodeBlocksProjectExporter::getDisplayNameLinux(),
-          CodeBlocksProjectExporter::getTargetFolderNameLinux(),
-          createIcon (export_codeBlocks_svg, export_codeBlocks_svgSize) }
     };
 
     return infos;
@@ -153,10 +162,8 @@ std::unique_ptr<ProjectExporter> ProjectExporter::createExporterFromSettings (Pr
                                 Tag<XcodeProjectExporter>{},
                                 Tag<MSVCProjectExporterVC2022>{},
                                 Tag<MSVCProjectExporterVC2019>{},
-                                Tag<MSVCProjectExporterVC2017>{},
                                 Tag<MakefileProjectExporter>{},
-                                Tag<AndroidProjectExporter>{},
-                                Tag<CodeBlocksProjectExporter>{});
+                                Tag<AndroidProjectExporter>{});
 }
 
 bool ProjectExporter::canProjectBeLaunched (Project* project)
@@ -171,7 +178,6 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             #elif JUCE_WINDOWS
              MSVCProjectExporterVC2022::getValueTreeTypeName(),
              MSVCProjectExporterVC2019::getValueTreeTypeName(),
-             MSVCProjectExporterVC2017::getValueTreeTypeName(),
             #endif
              AndroidProjectExporter::getValueTreeTypeName()
         };
@@ -451,16 +457,11 @@ build_tools::RelativePath ProjectExporter::getInternalVST3SDKPath()
 
 void ProjectExporter::addAAXFoldersToPath()
 {
-    auto aaxFolder = getAAXPathString();
+    const auto aaxFolder = getAAXPathRelative();
 
-    if (aaxFolder.isNotEmpty())
-    {
-        build_tools::RelativePath aaxFolderPath (aaxFolder, build_tools::RelativePath::projectFolder);
-
-        addToExtraSearchPaths (aaxFolderPath);
-        addToExtraSearchPaths (aaxFolderPath.getChildFile ("Interfaces"));
-        addToExtraSearchPaths (aaxFolderPath.getChildFile ("Interfaces").getChildFile ("ACF"));
-    }
+    addToExtraSearchPaths (aaxFolder);
+    addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces"));
+    addToExtraSearchPaths (aaxFolder.getChildFile ("Interfaces").getChildFile ("ACF"));
 }
 
 void ProjectExporter::addARAFoldersToPath()
@@ -597,9 +598,10 @@ static bool isLoadCurlSymbolsLazilyEnabled (Project& project)
             && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
 }
 
-StringArray ProjectExporter::getLinuxPackages (PackageDependencyType type) const
+std::vector<PackageDependency> ProjectExporter::getLinuxPackages (PackageDependencyType type) const
 {
     auto packages = linuxPackages;
+    std::vector<PackageDependency> dependencies;
 
     // don't add libcurl if curl symbols are loaded at runtime
     if (isCurlEnabled (project) && ! isLoadCurlSymbolsLazilyEnabled (project))
@@ -607,14 +609,17 @@ StringArray ProjectExporter::getLinuxPackages (PackageDependencyType type) const
 
     if (isWebBrowserComponentEnabled (project) && type == PackageDependencyType::compile)
     {
-        packages.add ("webkit2gtk-4.0");
         packages.add ("gtk+-x11-3.0");
+        dependencies.push_back (PackageDependency { "webkit2gtk-4.1", "webkit2gtk-4.0" });
     }
 
     packages.removeEmptyStrings();
     packages.removeDuplicates (false);
 
-    return packages;
+    const auto simpleDependencies = makePackageDependencies (packages);
+    dependencies.insert (dependencies.end(), simpleDependencies.begin(), simpleDependencies.end());
+
+    return dependencies;
 }
 
 void ProjectExporter::addProjectPathToBuildPathList (StringArray& pathList,
@@ -758,8 +763,7 @@ static bool areCompatibleExporters (const ProjectExporter& p1, const ProjectExpo
     return (p1.isVisualStudio() && p2.isVisualStudio())
         || (p1.isXcode() && p2.isXcode())
         || (p1.isMakefile() && p2.isMakefile())
-        || (p1.isAndroidStudio() && p2.isAndroidStudio())
-        || (p1.isCodeBlocks() && p2.isCodeBlocks() && p1.isWindows() != p2.isLinux());
+        || (p1.isAndroidStudio() && p2.isAndroidStudio());
 }
 
 void ProjectExporter::createDefaultModulePaths()
@@ -950,6 +954,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
                                 "-Wno-maybe-uninitialized",
                                 "-Wredundant-decls",
                                 "-Wno-strict-overflow",
+                                "-Wno-multichar",
                                 "-Wshadow" });
 }
 

@@ -490,7 +490,7 @@ protected:
 		if (inShouldRelease) {
 			ioInfo.flags |= kAudioUnitParameterFlag_CFNameRelease;
 		}
-		CFStringGetCString(inName, &ioInfo.name[0], offsetof(AudioUnitParameterInfo, clumpID),
+		CFStringGetCString(inName, std::data(ioInfo.name), std::size(ioInfo.name),
 			kCFStringEncodingUTF8);
 	}
 

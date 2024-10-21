@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -250,14 +259,17 @@ public:
     */
     Component* findComponentAt (Point<int> screenPosition) const;
 
-    /** The Desktop object has a ComponentAnimator instance which can be used for performing
+    /** The ComponentAnimator has been superseded, it is now recommended you use the Animator
+        class in the juce_animation module.
+
+        The Desktop object has a ComponentAnimator instance which can be used for performing
         your animations.
 
         Having a single shared ComponentAnimator object makes it more efficient when multiple
         components are being moved around simultaneously. It's also more convenient than having
         to manage your own instance of one.
 
-        @see ComponentAnimator
+        @see Animator, ComponentAnimator
     */
     ComponentAnimator& getAnimator() noexcept                       { return animator; }
 
@@ -399,6 +411,12 @@ public:
                   " isDarkModeActive() method.")]]
     static bool isOSXDarkModeActive()  { return Desktop::getInstance().isDarkModeActive(); }
    #endif
+
+    /** Returns true if the desktop environment allows resizing the window by clicking and dragging
+        just on/outside the window border.
+        MacOS and Windows 10+ both support this. Linux doesn't seem to. Mobile platforms do not.
+    */
+    bool supportsBorderlessNonClientResize() const;
 
     //==============================================================================
     /** Returns true on a headless system where there are no connected displays. */

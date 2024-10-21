@@ -1,32 +1,41 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
 namespace juce
 {
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
 namespace PushNotificationsDelegateDetailsOsx
 {
@@ -76,53 +85,47 @@ namespace PushNotificationsDelegateDetailsOsx
         if (n.actions.size() > 0)
             notification.actionButtonTitle = juceStringToNS (n.actions.getReference (0).title);
 
-        if (@available (macOS 10.9, *))
+        notification.identifier = juceStringToNS (n.identifier);
+
+        if (n.actions.size() > 0)
         {
-            notification.identifier = juceStringToNS (n.identifier);
+            notification.hasReplyButton = n.actions.getReference (0).style == Action::text;
+            notification.responsePlaceholder = juceStringToNS (n.actions.getReference (0).textInputPlaceholder);
+        }
 
-            if (n.actions.size() > 0)
-            {
-                notification.hasReplyButton = n.actions.getReference (0).style == Action::text;
-                notification.responsePlaceholder = juceStringToNS (n.actions.getReference (0).textInputPlaceholder);
-            }
+        auto* imageDirectory = n.icon.contains ("/")
+                             ? juceStringToNS (n.icon.upToLastOccurrenceOf ("/", false, true))
+                             : [NSString string];
 
-            auto* imageDirectory = n.icon.contains ("/")
-                                 ? juceStringToNS (n.icon.upToLastOccurrenceOf ("/", false, true))
-                                 : [NSString string];
+        auto* imageName      = juceStringToNS (n.icon.fromLastOccurrenceOf ("/", false, false)
+                                                     .upToLastOccurrenceOf (".", false, false));
+        auto* imageExtension = juceStringToNS (n.icon.fromLastOccurrenceOf (".", false, false));
 
-            auto* imageName      = juceStringToNS (n.icon.fromLastOccurrenceOf ("/", false, false)
-                                                         .upToLastOccurrenceOf (".", false, false));
-            auto* imageExtension = juceStringToNS (n.icon.fromLastOccurrenceOf (".", false, false));
+        NSString* imagePath = nil;
 
-            NSString* imagePath = nil;
+        if ([imageDirectory length] == NSUInteger (0))
+        {
+            imagePath = [[NSBundle mainBundle] pathForResource: imageName
+                                                        ofType: imageExtension];
+        }
+        else
+        {
+            imagePath = [[NSBundle mainBundle] pathForResource: imageName
+                                                        ofType: imageExtension
+                                                   inDirectory: imageDirectory];
+        }
 
-            if ([imageDirectory length] == NSUInteger (0))
-            {
-                imagePath = [[NSBundle mainBundle] pathForResource: imageName
-                                                            ofType: imageExtension];
-            }
-            else
-            {
-                imagePath = [[NSBundle mainBundle] pathForResource: imageName
-                                                            ofType: imageExtension
-                                                       inDirectory: imageDirectory];
-            }
+        notification.contentImage = [[NSImage alloc] initWithContentsOfFile: imagePath];
 
-            notification.contentImage = [[NSImage alloc] initWithContentsOfFile: imagePath];
+        if (n.actions.size() > 1)
+        {
+            auto additionalActions = [NSMutableArray arrayWithCapacity: (NSUInteger) n.actions.size() - 1];
 
-            if (@available (macOS 10.10, *))
-            {
-                if (n.actions.size() > 1)
-                {
-                    auto additionalActions = [NSMutableArray arrayWithCapacity: (NSUInteger) n.actions.size() - 1];
+            for (int a = 1; a < n.actions.size(); ++a)
+                [additionalActions addObject: [NSUserNotificationAction actionWithIdentifier: juceStringToNS (n.actions[a].identifier)
+                                                                                       title: juceStringToNS (n.actions[a].title)]];
 
-                    for (int a = 1; a < n.actions.size(); ++a)
-                        [additionalActions addObject: [NSUserNotificationAction actionWithIdentifier: juceStringToNS (n.actions[a].identifier)
-                                                                                               title: juceStringToNS (n.actions[a].title)]];
-
-                    notification.additionalActions = additionalActions;
-                }
-            }
+            notification.additionalActions = additionalActions;
         }
 
         [notification autorelease];
@@ -156,13 +159,10 @@ namespace PushNotificationsDelegateDetailsOsx
         notif.soundToPlay = URL (nsStringToJuce (n.soundName));
         notif.properties  = nsDictionaryToVar (n.userInfo);
 
-        if (@available (macOS 10.9, *))
-        {
-            notif.identifier = nsStringToJuce (n.identifier);
+        notif.identifier = nsStringToJuce (n.identifier);
 
-            if (n.contentImage != nil)
-                notif.icon = nsStringToJuce ([n.contentImage name]);
-        }
+        if (n.contentImage != nil)
+            notif.icon = nsStringToJuce ([n.contentImage name]);
 
         Array<Action> actions;
 
@@ -171,30 +171,24 @@ namespace PushNotificationsDelegateDetailsOsx
             Action action;
             action.title = nsStringToJuce (n.actionButtonTitle);
 
-            if (@available (macOS 10.9, *))
-            {
-                if (n.hasReplyButton)
-                    action.style = Action::text;
+            if (n.hasReplyButton)
+                action.style = Action::text;
 
-                if (n.responsePlaceholder != nil)
-                    action.textInputPlaceholder = nsStringToJuce (n.responsePlaceholder);
-            }
+            if (n.responsePlaceholder != nil)
+                action.textInputPlaceholder = nsStringToJuce (n.responsePlaceholder);
 
             actions.add (action);
         }
 
-        if (@available (macOS 10.10, *))
+        if (n.additionalActions != nil)
         {
-            if (n.additionalActions != nil)
+            for (NSUserNotificationAction* a in n.additionalActions)
             {
-                for (NSUserNotificationAction* a in n.additionalActions)
-                {
-                    Action action;
-                    action.identifier = nsStringToJuce (a.identifier);
-                    action.title      = nsStringToJuce (a.title);
+                Action action;
+                action.identifier = nsStringToJuce (a.identifier);
+                action.title      = nsStringToJuce (a.title);
 
-                    actions.add (action);
-                }
+                actions.add (action);
             }
         }
 
@@ -358,41 +352,24 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
     void requestPermissionsWithSettings (const PushNotifications::Settings& settingsToUse)
     {
-        if (@available (macOS 10.7, *))
-        {
-            settings = settingsToUse;
+        settings = settingsToUse;
 
-            NSRemoteNotificationType types = NSUInteger ((bool) settings.allowBadge);
+        NSRemoteNotificationType types = NSUInteger ((bool) settings.allowBadge);
 
-            if (@available (macOS 10.8, *))
-            {
-                types |= (NSUInteger) ((settings.allowSound ? NSRemoteNotificationTypeSound : 0)
-                                     | (settings.allowAlert ? NSRemoteNotificationTypeAlert : 0));
-            }
+        types |= (NSUInteger) ((settings.allowSound ? NSRemoteNotificationTypeSound : 0)
+                             | (settings.allowAlert ? NSRemoteNotificationTypeAlert : 0));
 
-            [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
-        }
+        [[NSApplication sharedApplication] registerForRemoteNotificationTypes: types];
     }
 
     void requestSettingsUsed()
     {
-        if (@available (macOS 10.7, *))
-        {
-            settings.allowBadge = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeBadge;
+        settings.allowBadge = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeBadge;
 
-            if (@available (macOS 10.8, *))
-            {
-                settings.allowSound = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeSound;
-                settings.allowAlert = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeAlert;
-            }
+        settings.allowSound = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeSound;
+        settings.allowAlert = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeAlert;
 
-            owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
-        }
-        else
-        {
-            // no settings available
-            owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
-        }
+        owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
     }
 
     bool areNotificationsEnabled() const { return true; }
@@ -520,9 +497,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         {
             const auto actionIdentifier = nsStringToJuce ([&]
             {
-                if (@available (macOS 10.10, *))
-                    if (notification.additionalActivationAction != nil)
-                        return notification.additionalActivationAction.identifier;
+                if (notification.additionalActivationAction != nil)
+                    return notification.additionalActivationAction.identifier;
 
                 return notification.actionButtonTitle;
             }());
@@ -558,6 +534,6 @@ private:
     PushNotifications::Settings settings;
 };
 
-} // namespace juce
-
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+} // namespace juce

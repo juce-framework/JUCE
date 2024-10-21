@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -128,7 +137,7 @@ public:
     class MakefileTarget final : public build_tools::ProjectType::Target
     {
     public:
-        MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
+        MakefileTarget (Type targetType, const MakefileProjectExporter& exporter)
             : Target (targetType), owner (exporter)
         {}
 
@@ -163,7 +172,7 @@ public:
         StringPairArray getDefines (const BuildConfiguration& config) const
         {
             StringPairArray result;
-            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified).getAllKeys();
+            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, unspecified).getAllKeys();
             auto targetSpecific = owner.getAllPreprocessorDefs (config, type);
 
             for (auto& key : targetSpecific.getAllKeys())
@@ -482,7 +491,6 @@ public:
 
     bool isXcode() const override                           { return false; }
     bool isVisualStudio() const override                    { return false; }
-    bool isCodeBlocks() const override                      { return false; }
     bool isMakefile() const override                        { return true; }
     bool isAndroidStudio() const override                   { return false; }
 
@@ -616,33 +624,56 @@ private:
         return result;
     }
 
-    StringArray getExtraPkgConfigPackages() const
+    std::vector<PackageDependency> getExtraPkgConfigPackages() const
     {
         auto packages = StringArray::fromTokens (extraPkgConfigValue.get().toString(), " ", "\"'");
         packages.removeEmptyStrings();
 
-        return packages;
+        return makePackageDependencies (packages);
     }
 
-    StringArray getCompilePackages() const
+    std::vector<PackageDependency> getCompilePackages() const
     {
         auto packages = getLinuxPackages (PackageDependencyType::compile);
-        packages.addArray (getExtraPkgConfigPackages());
+        const auto extra = getExtraPkgConfigPackages();
+        packages.insert (packages.end(), extra.begin(), extra.end());
 
         return packages;
     }
 
-    StringArray getLinkPackages() const
+    std::vector<PackageDependency> getLinkPackages() const
     {
         auto packages = getLinuxPackages (PackageDependencyType::link);
-        packages.addArray (getExtraPkgConfigPackages());
+        const auto extra = getExtraPkgConfigPackages();
+        packages.insert (packages.end(), extra.begin(), extra.end());
+
+        return packages;
+    }
+
+    static StringArray getPackagesCommand (const std::vector<PackageDependency>& dependencies)
+    {
+        StringArray packages;
+
+        for (const auto& d : dependencies)
+        {
+            if (d.fallback.has_value())
+            {
+                packages.add (String { "$(shell ($(PKG_CONFIG) --exists %VALUE% && echo %VALUE%) || echo %OR_ELSE%)" }
+                                  .replace ("%VALUE%", d.dependency)
+                                  .replace ("%OR_ELSE%", *d.fallback));
+            }
+            else
+            {
+                packages.add (d.dependency);
+            }
+        }
 
         return packages;
     }
 
     String getPreprocessorPkgConfigFlags() const
     {
-        auto compilePackages = getCompilePackages();
+        auto compilePackages = getPackagesCommand (getCompilePackages());
 
         if (compilePackages.size() > 0)
             return "$(shell $(PKG_CONFIG) --cflags " + compilePackages.joinIntoString (" ") + ")";
@@ -652,7 +683,7 @@ private:
 
     String getLinkerPkgConfigFlags() const
     {
-        auto linkPackages = getLinkPackages();
+        auto linkPackages = getPackagesCommand (getLinkPackages());
 
         if (linkPackages.size() > 0)
             return "$(shell $(PKG_CONFIG) --libs " + linkPackages.joinIntoString (" ") + ")";
@@ -831,47 +862,51 @@ private:
         out << " $(LDFLAGS)" << newLine;
     }
 
+    void writeLinesForAggregateTarget (OutputStream& out) const
+    {
+        const auto isPartOfAggregate = [&] (const MakefileTarget* x)
+        {
+            return x != nullptr
+                   && x->type != build_tools::ProjectType::Target::AggregateTarget
+                   && x->type != build_tools::ProjectType::Target::SharedCodeTarget;
+        };
+
+        std::vector<MakefileTarget*> dependencies;
+        std::copy_if (targets.begin(), targets.end(), std::back_inserter (dependencies), isPartOfAggregate);
+
+        out << "all :";
+
+        for (const auto& d : dependencies)
+            out << ' ' << d->getPhonyName();
+
+        out << newLine << newLine;
+
+        for (const auto& d : dependencies)
+            out << d->getPhonyName() << " : " << d->getBuildProduct() << newLine;
+
+        out << newLine << newLine;
+    }
+
+    void writeLinesForTarget (OutputStream& out, const StringArray& packages, MakefileTarget& target) const
+    {
+        if (target.type == build_tools::ProjectType::Target::AggregateTarget)
+        {
+            writeLinesForAggregateTarget (out);
+        }
+        else
+        {
+            if (! getProject().isAudioPluginProject())
+                out << "all : " << target.getBuildProduct() << newLine << newLine;
+
+            target.writeTargetLine (out, packages);
+        }
+    }
+
     void writeTargetLines (OutputStream& out, const StringArray& packages) const
     {
-        auto n = targets.size();
-
-        for (int i = 0; i < n; ++i)
-        {
-            if (auto* target = targets.getUnchecked (i))
-            {
-                if (target->type == build_tools::ProjectType::Target::AggregateTarget)
-                {
-                    StringArray dependencies;
-                    MemoryOutputStream subTargetLines;
-
-                    for (int j = 0; j < n; ++j)
-                    {
-                        if (i == j) continue;
-
-                        if (auto* dependency = targets.getUnchecked (j))
-                        {
-                            if (dependency->type != build_tools::ProjectType::Target::SharedCodeTarget)
-                            {
-                                auto phonyName = dependency->getPhonyName();
-
-                                subTargetLines << phonyName << " : " << dependency->getBuildProduct() << newLine;
-                                dependencies.add (phonyName);
-                            }
-                        }
-                    }
-
-                    out << "all : " << dependencies.joinIntoString (" ") << newLine << newLine;
-                    out << subTargetLines.toString()                     << newLine << newLine;
-                }
-                else
-                {
-                    if (! getProject().isAudioPluginProject())
-                        out << "all : " << target->getBuildProduct() << newLine << newLine;
-
-                    target->writeTargetLine (out, packages);
-                }
-            }
-        }
+        for (const auto& target : targets)
+            if (target != nullptr)
+                writeLinesForTarget (out, packages, *target);
     }
 
     void writeConfig (OutputStream& out, const MakeBuildConfiguration& config) const
@@ -945,7 +980,18 @@ private:
             return "";
         }();
 
-        out << "  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(TARGET) $(JUCE_OBJDIR)" << preBuildDirectory << newLine
+        const auto targetsToClean = [&]
+        {
+            StringArray result;
+
+            for (const auto& target : targets)
+                if (target->type != build_tools::ProjectType::Target::AggregateTarget)
+                    result.add (target->getBuildProduct());
+
+            return result;
+        }();
+
+        out << "  CLEANCMD = rm -rf " << targetsToClean.joinIntoString (" ") << " $(JUCE_OBJDIR)" << preBuildDirectory << newLine
             << "endif" << newLine
             << newLine;
     }
@@ -1217,7 +1263,7 @@ private:
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        writeTargetLines (out, getLinkPackages());
+        writeTargetLines (out, getPackagesCommand (getLinkPackages()));
 
         for (auto target : targets)
             target->addFiles (out, getFilesForTarget (filesToCompile, target, project));
@@ -1244,10 +1290,19 @@ private:
             << "\t$(V_AT)$(CLEANCMD)"             << newLine
             << newLine;
 
-        out << "strip:"                                                       << newLine
-            << "\t@echo Stripping " << projectName                            << newLine
-            << "\t-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)" << newLine
-            << newLine;
+        out << "strip:"                                                            << newLine
+            << "\t@echo Stripping " << projectName                                 << newLine;
+
+        for (const auto& target : targets)
+        {
+            if (target->type != build_tools::ProjectType::Target::AggregateTarget
+                && target->type != build_tools::ProjectType::Target::SharedCodeTarget)
+            {
+                out << "\t-$(V_AT)$(STRIP) --strip-unneeded " << target->getBuildProduct() << newLine;
+            }
+        }
+
+        out << newLine;
 
         writeIncludeLines (out);
     }
@@ -1269,6 +1324,7 @@ private:
     String getPhonyTargetLine() const
     {
         MemoryOutputStream phonyTargetLine;
+        phonyTargetLine.setNewLineString (getNewLineString());
 
         phonyTargetLine << ".PHONY: clean all strip";
 
@@ -1276,9 +1332,13 @@ private:
             return phonyTargetLine.toString();
 
         for (auto target : targets)
+        {
             if (target->type != build_tools::ProjectType::Target::SharedCodeTarget
                 && target->type != build_tools::ProjectType::Target::AggregateTarget)
+            {
                 phonyTargetLine << " " << target->getPhonyName();
+            }
+        }
 
         return phonyTargetLine.toString();
     }

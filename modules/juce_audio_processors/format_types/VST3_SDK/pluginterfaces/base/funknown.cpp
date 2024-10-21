@@ -411,12 +411,6 @@ void FUID::toRegistryString (char8* string) const
 }
 
 //------------------------------------------------------------------------
-void FUID::print (char8* string, int32 style) const
-{
-	print (style, string, 62);
-}
-
-//------------------------------------------------------------------------
 void FUID::print (int32 style, char8* string, size_t stringBufferSize) const
 {
 	if (!string || stringBufferSize == 0) // no string: debug output
@@ -439,22 +433,26 @@ void FUID::print (int32 style, char8* string, size_t stringBufferSize) const
 	switch (style)
 	{
 		case kINLINE_UID:
+			// length is 60 (with null-terminate)
 			snprintf (string, stringBufferSize, "INLINE_UID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1,
 			          l2, l3, l4);
 			break;
 
 		case kDECLARE_UID:
+			// length is 61 (with null-terminate)
 			snprintf (string, stringBufferSize, "DECLARE_UID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1,
 			          l2, l3, l4);
 			break;
 
 		case kFUID:
+			// length is 54 (with null-terminate)
 			snprintf (string, stringBufferSize, "FUID (0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1, l2, l3,
 			          l4);
 			break;
 
 		case kCLASS_UID:
 		default:
+			// length is 78 (with null-terminate)
 			snprintf (string, stringBufferSize,
 			          "DECLARE_CLASS_IID (Interface, 0x%08X, 0x%08X, 0x%08X, 0x%08X)", l1, l2, l3,
 			          l4);

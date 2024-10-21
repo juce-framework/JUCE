@@ -22,8 +22,7 @@
 
 #include "FlowGraphNode.h"
 
-namespace FLOWGRAPH_OUTER_NAMESPACE {
-namespace flowgraph {
+namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph {
 
 /**
  * Convert a monophonic stream to a multi-channel interleaved stream
@@ -33,7 +32,7 @@ class MonoToMultiConverter : public FlowGraphNode {
 public:
     explicit MonoToMultiConverter(int32_t outputChannelCount);
 
-    virtual ~MonoToMultiConverter();
+    virtual ~MonoToMultiConverter() = default;
 
     int32_t onProcess(int32_t numFrames) override;
 
@@ -45,7 +44,6 @@ public:
     FlowGraphPortFloatOutput output;
 };
 
-} /* namespace flowgraph */
-} /* namespace FLOWGRAPH_OUTER_NAMESPACE */
+} /* namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph */
 
 #endif //FLOWGRAPH_MONO_TO_MULTI_CONVERTER_H

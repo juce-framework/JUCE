@@ -86,10 +86,12 @@
 #define ENDLINE ENDLINE_A
 #endif
 
-#if SMTG_OS_WINDOWS && !defined(__GNUC__) && defined(_MSC_VER) && (_MSC_VER < 1900)
+#if SMTG_OS_WINDOWS && !defined(__GNUC__) && defined(_MSC_VER)
 #define stricmp _stricmp
 #define strnicmp _strnicmp
+#if (_MSC_VER < 1900)
 #define snprintf _snprintf
+#endif
 #endif
 
 namespace Steinberg {
@@ -246,7 +248,7 @@ inline SMTG_CONSTEXPR14 void str8ToStr16 (char16* dst, const char8* src, int32 n
 	int32 i = 0;
 	for (;;)
 	{
-		if (i == n)
+		if (i == (n - 1))
 		{
 			dst[i] = 0;
 			return;

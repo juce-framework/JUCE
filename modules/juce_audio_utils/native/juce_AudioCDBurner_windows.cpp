@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -87,7 +96,7 @@ namespace CDBurnerHelpers
 }
 
 //==============================================================================
-class AudioCDBurner::Pimpl  : public ComBaseClassHelper <IDiscMasterProgressEvents>,
+class AudioCDBurner::Pimpl  : public ComBaseClassHelper<IDiscMasterProgressEvents>,
                               public Timer
 {
 public:
@@ -104,8 +113,6 @@ public:
         startTimer (2000);
     }
 
-    ~Pimpl()  {}
-
     void releaseObjects()
     {
         discRecorder->Close();
@@ -116,7 +123,7 @@ public:
         Release();
     }
 
-    JUCE_COMRESULT QueryCancel (boolean* pbCancel)
+    JUCE_COMRESULT QueryCancel (boolean* pbCancel) override
     {
         if (listener != nullptr && ! shouldCancel)
             shouldCancel = listener->audioCDBurnProgress (progress);
@@ -126,7 +133,7 @@ public:
         return S_OK;
     }
 
-    JUCE_COMRESULT NotifyBlockProgress (long nCompleted, long nTotal)
+    JUCE_COMRESULT NotifyBlockProgress (long nCompleted, long nTotal) override
     {
         progress = nCompleted / (float) nTotal;
         shouldCancel = listener != nullptr && listener->audioCDBurnProgress (progress);
@@ -134,13 +141,13 @@ public:
         return E_NOTIMPL;
     }
 
-    JUCE_COMRESULT NotifyPnPActivity (void)                              { return E_NOTIMPL; }
-    JUCE_COMRESULT NotifyAddProgress (long /*nCompletedSteps*/, long /*nTotalSteps*/)    { return E_NOTIMPL; }
-    JUCE_COMRESULT NotifyTrackProgress (long /*nCurrentTrack*/, long /*nTotalTracks*/)   { return E_NOTIMPL; }
-    JUCE_COMRESULT NotifyPreparingBurn (long /*nEstimatedSeconds*/)      { return E_NOTIMPL; }
-    JUCE_COMRESULT NotifyClosingDisc (long /*nEstimatedSeconds*/)        { return E_NOTIMPL; }
-    JUCE_COMRESULT NotifyBurnComplete (HRESULT /*status*/)               { return E_NOTIMPL; }
-    JUCE_COMRESULT NotifyEraseComplete (HRESULT /*status*/)              { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyPnPActivity (void)                                            override  { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyAddProgress (long /*nCompletedSteps*/, long /*nTotalSteps*/)  override  { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyTrackProgress (long /*nCurrentTrack*/, long /*nTotalTracks*/) override  { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyPreparingBurn (long /*nEstimatedSeconds*/)                    override  { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyClosingDisc (long /*nEstimatedSeconds*/)                      override  { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyBurnComplete (HRESULT /*status*/)                             override  { return E_NOTIMPL; }
+    JUCE_COMRESULT NotifyEraseComplete (HRESULT /*status*/)                            override  { return E_NOTIMPL; }
 
     class ScopedDiscOpener
     {
@@ -173,30 +180,34 @@ public:
         return readOnlyDiskPresent;
     }
 
-    int getIntProperty (const LPOLESTR name, const int defaultReturn) const
+    int getIntProperty (const wchar_t* name, const int defaultReturn) const
     {
+        std::wstring copy { name };
+
         ComSmartPtr<IPropertyStorage> prop;
         if (FAILED (discRecorder->GetRecorderProperties (prop.resetAndGetPointerAddress())))
             return defaultReturn;
 
         PROPSPEC iPropSpec;
         iPropSpec.ulKind = PRSPEC_LPWSTR;
-        iPropSpec.lpwstr = name;
+        iPropSpec.lpwstr = copy.data();
 
         PROPVARIANT iPropVariant;
         return FAILED (prop->ReadMultiple (1, &iPropSpec, &iPropVariant))
                    ? defaultReturn : (int) iPropVariant.lVal;
     }
 
-    bool setIntProperty (const LPOLESTR name, const int value) const
+    bool setIntProperty (const wchar_t* name, const int value) const
     {
+        std::wstring copy { name };
+
         ComSmartPtr<IPropertyStorage> prop;
         if (FAILED (discRecorder->GetRecorderProperties (prop.resetAndGetPointerAddress())))
             return false;
 
         PROPSPEC iPropSpec;
         iPropSpec.ulKind = PRSPEC_LPWSTR;
-        iPropSpec.lpwstr = name;
+        iPropSpec.lpwstr = copy.data();
 
         PROPVARIANT iPropVariant;
         if (FAILED (prop->ReadMultiple (1, &iPropSpec, &iPropVariant)))
@@ -389,7 +400,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
         buffer.clear (bytesPerBlock);
 
         AudioData::interleaveSamples (AudioData::NonInterleavedSource<AudioData::Float32, AudioData::NativeEndian> { sourceBuffer.getArrayOfReadPointers(), 2 },
-                                      AudioData::InterleavedDest<AudioData::Int16, Audiodata::LittleEndian>        { reinterpret_cast<uint16*> (buffer),    2 },
+                                      AudioData::InterleavedDest<AudioData::Int16, AudioData::LittleEndian>        { reinterpret_cast<uint16*> (buffer.get()), 2 },
                                       samplesPerBlock);
 
         hr = pimpl->redbook->AddAudioTrackBlocks (buffer, bytesPerBlock);

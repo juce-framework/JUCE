@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -31,7 +40,7 @@ namespace DragAndDropHelpers
     //==============================================================================
     struct JuceDropSource final : public ComBaseClassHelper<IDropSource>
     {
-        JuceDropSource() {}
+        JuceDropSource() = default;
 
         JUCE_COMRESULT QueryContinueDrag (BOOL escapePressed, DWORD keys) override
         {
@@ -123,7 +132,7 @@ namespace DragAndDropHelpers
     };
 
     //==============================================================================
-    class JuceDataObject final : public ComBaseClassHelper <IDataObject>
+    class JuceDataObject final : public ComBaseClassHelper<IDataObject>
     {
     public:
         JuceDataObject (const FORMATETC* f, const STGMEDIUM* m)
@@ -131,12 +140,12 @@ namespace DragAndDropHelpers
         {
         }
 
-        ~JuceDataObject()
+        ~JuceDataObject() override
         {
             jassert (refCount == 0);
         }
 
-        JUCE_COMRESULT GetData (FORMATETC* pFormatEtc, STGMEDIUM* pMedium)
+        JUCE_COMRESULT GetData (FORMATETC* pFormatEtc, STGMEDIUM* pMedium) override
         {
             if ((pFormatEtc->tymed & format->tymed) != 0
                  && pFormatEtc->cfFormat == format->cfFormat
@@ -164,7 +173,7 @@ namespace DragAndDropHelpers
             return DV_E_FORMATETC;
         }
 
-        JUCE_COMRESULT QueryGetData (FORMATETC* f)
+        JUCE_COMRESULT QueryGetData (FORMATETC* f) override
         {
             if (f == nullptr)
                 return E_INVALIDARG;
@@ -177,13 +186,13 @@ namespace DragAndDropHelpers
             return DV_E_FORMATETC;
         }
 
-        JUCE_COMRESULT GetCanonicalFormatEtc (FORMATETC*, FORMATETC* pFormatEtcOut)
+        JUCE_COMRESULT GetCanonicalFormatEtc (FORMATETC*, FORMATETC* pFormatEtcOut) override
         {
             pFormatEtcOut->ptd = nullptr;
             return E_NOTIMPL;
         }
 
-        JUCE_COMRESULT EnumFormatEtc (DWORD direction, IEnumFORMATETC** result)
+        JUCE_COMRESULT EnumFormatEtc (DWORD direction, IEnumFORMATETC** result) override
         {
             if (result == nullptr)
                 return E_POINTER;
@@ -198,11 +207,11 @@ namespace DragAndDropHelpers
             return E_NOTIMPL;
         }
 
-        JUCE_COMRESULT GetDataHere (FORMATETC*, STGMEDIUM*)                  { return DATA_E_FORMATETC; }
-        JUCE_COMRESULT SetData (FORMATETC*, STGMEDIUM*, BOOL)                { return E_NOTIMPL; }
-        JUCE_COMRESULT DAdvise (FORMATETC*, DWORD, IAdviseSink*, DWORD*)     { return OLE_E_ADVISENOTSUPPORTED; }
-        JUCE_COMRESULT DUnadvise (DWORD)                                     { return E_NOTIMPL; }
-        JUCE_COMRESULT EnumDAdvise (IEnumSTATDATA**)                         { return OLE_E_ADVISENOTSUPPORTED; }
+        JUCE_COMRESULT GetDataHere (FORMATETC*, STGMEDIUM*)                  override { return DATA_E_FORMATETC; }
+        JUCE_COMRESULT SetData (FORMATETC*, STGMEDIUM*, BOOL)                override { return E_NOTIMPL; }
+        JUCE_COMRESULT DAdvise (FORMATETC*, DWORD, IAdviseSink*, DWORD*)     override { return OLE_E_ADVISENOTSUPPORTED; }
+        JUCE_COMRESULT DUnadvise (DWORD)                                     override { return E_NOTIMPL; }
+        JUCE_COMRESULT EnumDAdvise (IEnumSTATDATA**)                         override { return OLE_E_ADVISENOTSUPPORTED; }
 
     private:
         const FORMATETC* const format;

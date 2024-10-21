@@ -21,8 +21,7 @@
 
 #include "FlowGraphNode.h"
 
-namespace FLOWGRAPH_OUTER_NAMESPACE {
-namespace flowgraph {
+namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph {
 
 class SourceI32 : public FlowGraphSourceBuffered {
 public:
@@ -38,7 +37,6 @@ private:
     static constexpr float kScale = 1.0 / (1UL << 31);
 };
 
-} /* namespace flowgraph */
-} /* namespace FLOWGRAPH_OUTER_NAMESPACE */
+} /* namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph */
 
 #endif //FLOWGRAPH_SOURCE_I32_H

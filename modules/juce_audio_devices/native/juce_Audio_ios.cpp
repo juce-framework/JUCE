@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -245,6 +257,81 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSAudioIODeviceType)
 };
 
+class SubstituteAudioUnit
+{
+public:
+    /* Returns true if the audio callback was called. False if a timeout occurred. */
+    bool waitForAudioCallback()
+    {
+        if (audioUnit != nullptr)
+        {
+            AudioComponentInstanceDispose (audioUnit);
+            audioUnit = nullptr;
+        }
+
+        AudioComponentDescription desc;
+        desc.componentType = kAudioUnitType_Output;
+        desc.componentSubType = kAudioUnitSubType_RemoteIO;
+        desc.componentManufacturer = kAudioUnitManufacturer_Apple;
+        desc.componentFlags = 0;
+        desc.componentFlagsMask = 0;
+
+        AudioComponent comp = AudioComponentFindNext (nullptr, &desc);
+        AudioComponentInstanceNew (comp, &audioUnit);
+
+        if (audioUnit == nullptr)
+            return false;
+
+        {
+            AURenderCallbackStruct inputProc;
+            inputProc.inputProc = audioUnitCallback;
+            inputProc.inputProcRefCon = this;
+            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &inputProc, sizeof (inputProc));
+        }
+
+        {
+            AudioStreamBasicDescription format;
+            zerostruct (format);
+            format.mSampleRate = [AVAudioSession sharedInstance].sampleRate;
+            format.mFormatID = kAudioFormatLinearPCM;
+            format.mFormatFlags = kAudioFormatFlagIsFloat | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian | kLinearPCMFormatFlagIsPacked;
+            format.mBitsPerChannel = 8 * sizeof (float);
+            format.mFramesPerPacket = 1;
+            format.mChannelsPerFrame = 2;
+            format.mBytesPerFrame = format.mBytesPerPacket = sizeof (float);
+
+            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input,  0, &format, sizeof (format));
+            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &format, sizeof (format));
+        }
+
+        AudioUnitInitialize (audioUnit);
+        AudioOutputUnitStart (audioUnit);
+
+        const auto result = audioCallbackOccurred.wait (1000.0);
+
+        AudioComponentInstanceDispose (audioUnit);
+        audioUnit = nullptr;
+
+        return result;
+    }
+
+private:
+    static OSStatus audioUnitCallback (void* object,
+                                       AudioUnitRenderActionFlags*,
+                                       const AudioTimeStamp*,
+                                       UInt32,
+                                       UInt32,
+                                       AudioBufferList*)
+    {
+        static_cast<SubstituteAudioUnit*> (object)->audioCallbackOccurred.signal();
+
+        return noErr;
+    }
+
+    AudioUnit audioUnit{};
+    WaitableEvent audioCallbackOccurred;
+};
+
 //==============================================================================
 struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 {
@@ -286,10 +373,8 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         {
             options |= AVAudioSessionCategoryOptionDefaultToSpeaker
                      | AVAudioSessionCategoryOptionAllowBluetooth
-                     | AVAudioSessionCategoryOptionAllowAirPlay;
-
-            if (@available (iOS 10.0, *))
-                options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+                     | AVAudioSessionCategoryOptionAllowAirPlay
+                     | AVAudioSessionCategoryOptionAllowBluetoothA2DP;
         }
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
@@ -301,6 +386,16 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     {
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setActive: enabled
                                                                  error: &error]);
+
+        if (@available (ios 18, *))
+        {
+            if (enabled)
+            {
+                SubstituteAudioUnit au;
+                [[maybe_unused]] const auto success = au.waitForAudioCallback();
+                jassert (success);
+            }
+        }
     }
 
     int getBufferSize (const double currentSampleRate)
@@ -310,11 +405,34 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
 
     int tryBufferSize (const double currentSampleRate, const int newBufferSize)
     {
-        NSTimeInterval bufferDuration = currentSampleRate > 0 ? (NSTimeInterval) ((newBufferSize + 1) / currentSampleRate) : 0.0;
+        const auto extraOffset = std::invoke ([&]
+        {
+            // Older iOS versions (iOS 12) seem to require that the requested buffer size is a bit
+            // larger than the desired buffer size.
+            // This breaks on iOS 18, which needs the buffer duration to be as precise as possible.
+            if (@available (ios 18, *))
+                return 0;
+
+            return 1;
+        });
+
+        NSTimeInterval bufferDuration = currentSampleRate > 0 ? (NSTimeInterval) (newBufferSize + extraOffset) / currentSampleRate : 0.0;
 
         auto session = [AVAudioSession sharedInstance];
-        JUCE_NSERROR_CHECK ([session setPreferredIOBufferDuration: bufferDuration
-                                                            error: &error]);
+
+        // According to the apple docs, it's best to set preferred sample rates and block sizes
+        // while the device is inactive, and then to query the real values after activation.
+        // Unfortunately, on iOS 18.0, the real block size isn't immediately available after
+        // a call to setActive, so we also need to wait for the first audio callback.
+        // This will be slow!
+        // https://developer.apple.com/library/archive/qa/qa1631/_index.html
+        if (@available (ios 18, *))
+            setAudioSessionActive (false);
+
+        JUCE_NSERROR_CHECK ([session setPreferredIOBufferDuration: bufferDuration error: &error]);
+
+        if (@available (ios 18, *))
+            setAudioSessionActive (true);
 
         return getBufferSize (currentSampleRate);
     }
@@ -323,21 +441,29 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     {
         availableBufferSizes.clear();
 
-        auto newBufferSize = tryBufferSize (sampleRate, 64);
-        jassert (newBufferSize > 0);
-
-        const auto longestBufferSize  = tryBufferSize (sampleRate, 4096);
-
-        while (newBufferSize <= longestBufferSize)
+        const auto [minBufSize, maxBufSize] = std::invoke ([this]
         {
-            availableBufferSizes.add (newBufferSize);
-            newBufferSize *= 2;
-        }
+            constexpr auto suggestedMin = 64;
+            constexpr auto suggestedMax = 4096;
+
+            if (@available (ios 18, *))
+                return std::tuple (suggestedMin, suggestedMax);
+
+            const auto min = tryBufferSize (sampleRate, suggestedMin);
+            const auto max = tryBufferSize (sampleRate, suggestedMax);
+
+            bufferSize = tryBufferSize (sampleRate, bufferSize);
+
+            return std::tuple (min, max);
+        });
+
+        jassert (minBufSize > 0);
+
+        for (auto i = minBufSize; i <= maxBufSize; i *= 2)
+            availableBufferSizes.add (i);
 
         // Sometimes the largest supported buffer size is not a power of 2
-        availableBufferSizes.addIfNotAlreadyThere (longestBufferSize);
-
-        bufferSize = tryBufferSize (sampleRate, bufferSize);
+        availableBufferSizes.addIfNotAlreadyThere (maxBufSize);
 
        #if JUCE_IOS_AUDIO_LOGGING
         {
@@ -356,9 +482,7 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     double trySampleRate (double rate)
     {
         auto session = [AVAudioSession sharedInstance];
-        JUCE_NSERROR_CHECK ([session setPreferredSampleRate: rate
-                                                      error: &error]);
-
+        JUCE_NSERROR_CHECK ([session setPreferredSampleRate: rate error: &error]);
         return session.sampleRate;
     }
 
@@ -395,10 +519,6 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
         }
 
         availableSampleRates.addIfNotAlreadyThere (highestRate);
-
-        // Restore the original values.
-        sampleRate = trySampleRate (sampleRate);
-        bufferSize = tryBufferSize (sampleRate, bufferSize);
 
         AudioUnitAddPropertyListener (audioUnit,
                                       kAudioUnitProperty_StreamFormat,
@@ -727,18 +847,9 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
                                              &dataSize);
         if (err == noErr)
         {
-            if (@available (iOS 10.0, *))
-            {
-                [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl
-                                                   options: @{}
-                                         completionHandler: nil];
-
-                return;
-            }
-
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-            [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl];
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+            [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl
+                                               options: @{}
+                                     completionHandler: nil];
         }
     }
 
@@ -1120,9 +1231,6 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
     {
         const ScopedLock sl (callbackLock);
 
-        updateHardwareInfo();
-        setTargetSampleRateAndBufferSize();
-
         if (isRunning)
         {
             if (audioUnit != nullptr)
@@ -1134,6 +1242,13 @@ struct iOSAudioIODevice::Pimpl final : public AsyncUpdater
                     callback->audioDeviceStopped();
             }
 
+        }
+
+        updateHardwareInfo();
+        setTargetSampleRateAndBufferSize();
+
+        if (isRunning)
+        {
             channelData.reconfigure (requestedInputChannels, requestedOutputChannels);
 
             createAudioUnit();

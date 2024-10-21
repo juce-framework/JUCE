@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -1744,51 +1753,6 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
         }
     }
 
-    using GlyphCacheType = RenderingHelpers::GlyphCache<RenderingHelpers::CachedGlyphEdgeTable<SavedState>, SavedState>;
-
-    void drawGlyph (int glyphNumber, const AffineTransform& trans)
-    {
-        if (clip != nullptr)
-        {
-            if (trans.isOnlyTranslation() && ! transform.isRotated)
-            {
-                auto& cache = GlyphCacheType::getInstance();
-                Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
-
-                if (transform.isOnlyTranslated)
-                {
-                    cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
-                }
-                else
-                {
-                    pos = transform.transformed (pos);
-
-                    Font f (font);
-                    f.setHeight (font.getHeight() * transform.complexTransform.mat11);
-
-                    auto xScale = transform.complexTransform.mat00 / transform.complexTransform.mat11;
-
-                    if (std::abs (xScale - 1.0f) > 0.01f)
-                        f.setHorizontalScale (xScale);
-
-                    cache.drawGlyph (*this, f, glyphNumber, pos);
-                }
-            }
-            else
-            {
-                auto fontHeight = font.getHeight();
-
-                auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
-                                                                     .followedBy (trans));
-
-                const std::unique_ptr<EdgeTable> et (font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
-
-                if (et != nullptr)
-                    fillShape (*new EdgeTableRegionType (*et), false);
-            }
-        }
-    }
-
     Rectangle<int> getMaximumBounds() const     { return state->target.bounds; }
 
     void setFillType (const FillType& newFill)
@@ -1850,7 +1814,7 @@ struct SavedState final : public RenderingHelpers::SavedStateBase<SavedState>
     }
 
     //==============================================================================
-    Font font;
+    Font font { FontOptions{} };
     GLState* state;
     bool isUsingCustomShader = false;
 
@@ -1928,7 +1892,7 @@ private:
 
 static void clearOpenGLGlyphCacheCallback()
 {
-    SavedState::GlyphCacheType::getInstance().reset();
+    RenderingHelpers::GlyphCache::getInstance().reset();
 }
 
 static std::unique_ptr<LowLevelGraphicsContext> createOpenGLContext (const Target& target)

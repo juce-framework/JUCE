@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -285,33 +297,10 @@ bool File::moveToTrash() const
 
     JUCE_AUTORELEASEPOOL
     {
-        if (@available (macOS 10.8, iOS 11.0, *))
-        {
-            NSError* error = nil;
-            return [[NSFileManager defaultManager] trashItemAtURL: createNSURLFromFile (*this)
-                                                 resultingItemURL: nil
-                                                            error: &error];
-        }
-
-       #if JUCE_IOS
-        return deleteFile();
-       #else
-        [[NSWorkspace sharedWorkspace] recycleURLs: [NSArray arrayWithObject: createNSURLFromFile (*this)]
-                                 completionHandler: nil];
-
-        // recycleURLs is async, so we need to block until it has finished. We can't use a
-        // run-loop here because it'd dispatch unexpected messages, so have to do this very
-        // nasty bodge. But this is only needed for support of pre-10.8 versions.
-        for (int retries = 100; --retries >= 0;)
-        {
-            if (! exists())
-                return true;
-
-            Thread::sleep (5);
-        }
-
-        return false;
-       #endif
+        NSError* error = nil;
+        return [[NSFileManager defaultManager] trashItemAtURL: createNSURLFromFile (*this)
+                                             resultingItemURL: nil
+                                                        error: &error];
     }
 }
 
@@ -406,18 +395,11 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, [[maybe_unused
                                                                                        : [NSURL URLWithString: fileNameAsNS];
 
       #if JUCE_IOS
-        if (@available (iOS 10.0, *))
-        {
-            [[UIApplication sharedApplication] openURL: filenameAsURL
-                                               options: @{}
-                                     completionHandler: nil];
+        [[UIApplication sharedApplication] openURL: filenameAsURL
+                                           options: @{}
+                                 completionHandler: nil];
 
-            return true;
-        }
-
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-        return [[UIApplication sharedApplication] openURL: filenameAsURL];
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        return true;
       #else
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
 
@@ -436,7 +418,6 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, [[maybe_unused
             for (int i = 0; i < params.size(); ++i)
                 [paramArray addObject: juceStringToNS (params[i])];
 
-           #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_15
             if (@available (macOS 10.15, *))
             {
                 auto config = [NSWorkspaceOpenConfiguration configuration];
@@ -449,7 +430,6 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, [[maybe_unused
 
                 return true;
             }
-           #endif
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
@@ -522,9 +502,8 @@ void File::addToDock() const
 
 File File::getContainerForSecurityApplicationGroupIdentifier (const String& appGroup)
 {
-    if (@available (macOS 10.8, *))
-        if (auto* url = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: juceStringToNS (appGroup)])
-            return File (nsStringToJuce ([url path]));
+    if (auto* url = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: juceStringToNS (appGroup)])
+        return File (nsStringToJuce ([url path]));
 
     return File();
 }

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -44,6 +53,7 @@ namespace juce
 #endif
 {
     UIBackgroundTaskIdentifier appSuspendTask;
+    std::optional<ScopedJuceInitialiser_GUI> initialiser;
 }
 
 @property (strong, nonatomic) UIWindow *window;
@@ -74,24 +84,6 @@ namespace juce
                                forRemoteNotification: (NSDictionary*) userInfo
                                     withResponseInfo: (NSDictionary*) responseInfo
                                    completionHandler: (void(^)()) completionHandler;
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-- (void)                    application: (UIApplication*) application
-    didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
-- (void)                    application: (UIApplication*) application
-            didReceiveLocalNotification: (UILocalNotification*) notification;
-- (void)                    application: (UIApplication*) application
-             handleActionWithIdentifier: (NSString*) identifier
-                   forLocalNotification: (UILocalNotification*) notification
-                      completionHandler: (void(^)()) completionHandler;
-- (void)                    application: (UIApplication*) application
-             handleActionWithIdentifier: (NSString*) identifier
-                   forLocalNotification: (UILocalNotification*) notification
-                       withResponseInfo: (NSDictionary*) responseInfo
-                      completionHandler: (void(^)()) completionHandler;
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center
         willPresentNotification: (UNNotification*) notification
@@ -128,7 +120,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
     ignoreUnused (application);
-    initialiseJuce_GUI();
+    initialiser.emplace();
 
     if (auto* app = JUCEApplicationBase::createInstance())
     {
@@ -318,96 +310,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 }
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-- (void)                    application: (UIApplication*) application
-    didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
-{
-    ignoreUnused (application);
-
-    SEL selector = @selector (application:didRegisterUserNotificationSettings:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector:selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application atIndex: 2];
-        [invocation setArgument: &notificationSettings atIndex: 3];
-
-        [invocation invoke];
-    }
-}
-
-- (void)            application: (UIApplication*) application
-    didReceiveLocalNotification: (UILocalNotification*) notification
-{
-    ignoreUnused (application);
-
-    SEL selector = @selector (application:didReceiveLocalNotification:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application  atIndex: 2];
-        [invocation setArgument: &notification atIndex: 3];
-
-        [invocation invoke];
-    }
-}
-
-- (void)           application: (UIApplication*) application
-    handleActionWithIdentifier: (NSString*) identifier
-          forLocalNotification: (UILocalNotification*) notification
-             completionHandler: (void(^)()) completionHandler
-{
-    ignoreUnused (application);
-
-    SEL selector = @selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application       atIndex:2];
-        [invocation setArgument: &identifier        atIndex:3];
-        [invocation setArgument: &notification      atIndex:4];
-        [invocation setArgument: &completionHandler atIndex:5];
-
-        [invocation invoke];
-    }
-}
-
-- (void)           application: (UIApplication*) application
-    handleActionWithIdentifier: (NSString*) identifier
-          forLocalNotification: (UILocalNotification*) notification
-              withResponseInfo: (NSDictionary*) responseInfo
-             completionHandler: (void(^)()) completionHandler
-{
-    ignoreUnused (application);
-
-    SEL selector = @selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application       atIndex:2];
-        [invocation setArgument: &identifier        atIndex:3];
-        [invocation setArgument: &notification      atIndex:4];
-        [invocation setArgument: &responseInfo      atIndex:5];
-        [invocation setArgument: &completionHandler atIndex:6];
-
-        [invocation invoke];
-    }
-}
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center
         willPresentNotification: (UNNotification*) notification
           withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
@@ -535,10 +437,7 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 
 bool Desktop::isDarkModeActive() const
 {
-    if (@available (iOS 12.0, *))
-        return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
-
-    return false;
+    return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
 }
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
@@ -615,22 +514,11 @@ static Rectangle<int> getRecommendedWindowBounds()
 
 static BorderSize<int> getSafeAreaInsets (float masterScale)
 {
-    if (@available (iOS 11.0, *))
-    {
-        UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
-        return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
-                                                                          safeInsets.left,
-                                                                          safeInsets.bottom,
-                                                                          safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
-    }
-
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-    auto statusBarSize = [UIApplication sharedApplication].statusBarFrame.size;
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    auto statusBarHeight = jmin (statusBarSize.width, statusBarSize.height);
-
-    return { roundToInt (statusBarHeight / masterScale), 0, 0, 0 };
+    UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
+    return detail::WindowingHelpers::roundToInt (BorderSize<double> { safeInsets.top,
+                                                                      safeInsets.left,
+                                                                      safeInsets.bottom,
+                                                                      safeInsets.right }.multipliedBy (1.0 / (double) masterScale));
 }
 
 //==============================================================================

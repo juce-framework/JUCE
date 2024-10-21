@@ -1,23 +1,32 @@
 # ==============================================================================
 #
-#  This file is part of the JUCE library.
-#  Copyright (c) 2022 - Raw Material Software Limited
+#  This file is part of the JUCE framework.
+#  Copyright (c) Raw Material Software Limited
 #
-#  JUCE is an open source library subject to commercial or open-source
+#  JUCE is an open source framework subject to commercial or open source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-#  Agreement and JUCE Privacy Policy.
+#  By downloading, installing, or using the JUCE framework, or combining the
+#  JUCE framework with any other source code, object code, content or any other
+#  copyrightable work, you agree to the terms of the JUCE End User Licence
+#  Agreement, and all incorporated terms including the JUCE Privacy Policy and
+#  the JUCE Website Terms of Service, as applicable, which will bind you. If you
+#  do not agree to the terms of these agreements, we will not license the JUCE
+#  framework to you, and you must discontinue the installation or download
+#  process and cease use of the JUCE framework.
 #
-#  End User License Agreement: www.juce.com/juce-7-licence
-#  Privacy Policy: www.juce.com/juce-privacy-policy
+#  JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+#  JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+#  JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 #
-#  Or: You may also use this code under the terms of the GPL v3 (see
-#  www.gnu.org/licenses).
+#  Or:
 #
-#  JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-#  EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-#  DISCLAIMED.
+#  You may also use this code under the terms of the AGPLv3:
+#  https://www.gnu.org/licenses/agpl-3.0.en.html
+#
+#  THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+#  WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+#  MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 #
 # ==============================================================================
 
@@ -84,9 +93,21 @@ define_property(TARGET PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD INHERITED
     FULL_DOCS "Whether or not plugins should be copied after building")
 set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
 
+function(_juce_available_pkgconfig_module_or_else out package alternative_package)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(package_to_be_found ${package} QUIET)
+
+    if(package_to_be_found_FOUND)
+        set(${out} ${package} PARENT_SCOPE)
+    else()
+        set(${out} ${alternative_package} PARENT_SCOPE)
+    endif()
+endfunction()
+
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
-    _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS webkit2gtk-4.0 gtk+-x11-3.0)
+    _juce_available_pkgconfig_module_or_else(webkit_package_name webkit2gtk-4.1 webkit2gtk-4.0)
+    _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS ${webkit_package_name} gtk+-x11-3.0)
 endif()
 
 # We set up default/fallback copy dirs here. If you need different copy dirs, use
@@ -186,9 +207,9 @@ function(_juce_create_embedded_linux_subprocess_target output_target_name target
     get_target_property(generated_sources_directory ${target} JUCE_GENERATED_SOURCES_DIRECTORY)
 
     if(generated_sources_directory)
-        set(juce_linux_subprocess_helper_binary_dir "${generated_sources_directory}")
+        set(juce_linux_subprocess_helper_binary_dir "${generated_sources_directory}/$<CONFIG>/")
     else()
-        set(juce_linux_subprocess_helper_binary_dir "${CMAKE_CURRENT_BINARY_DIR}/juce_LinuxSubprocessHelper")
+        set(juce_linux_subprocess_helper_binary_dir "${CMAKE_CURRENT_BINARY_DIR}/juce_LinuxSubprocessHelper/$<CONFIG>/")
     endif()
 
     set(binary_header_file  "${juce_linux_subprocess_helper_binary_dir}/juce_LinuxSubprocessHelperBinaryData.h")
@@ -266,6 +287,17 @@ function(_juce_link_optional_libraries target)
         if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND needs_camera)
             _juce_link_frameworks("${target}" PRIVATE ImageIO)
         endif()
+    elseif(WIN32)
+        get_target_property(needs_webview2 ${target} JUCE_NEEDS_WEBVIEW2)
+
+        if (needs_webview2)
+            if(NOT ("${JUCE_CMAKE_UTILS_DIR}" IN_LIST CMAKE_MODULE_PATH))
+                list(APPEND CMAKE_MODULE_PATH "${JUCE_CMAKE_UTILS_DIR}")
+            endif()
+
+            find_package(WebView2 REQUIRED)
+            target_link_libraries(${target} PRIVATE juce::juce_webview2)
+        endif()
     endif()
 endfunction()
 
@@ -284,7 +316,14 @@ endfunction()
 function(_juce_append_record output key)
     string(ASCII 30 RS)
     string(ASCII 31 US)
-    set(${output} "${${output}}${key}${US}${ARGN}${RS}" PARENT_SCOPE)
+
+    set(prev)
+
+    if(DEFINED "${output}")
+        set(prev "${${output}}")
+    endif()
+
+    set(${output} "${prev}${key}${US}${ARGN}${RS}" PARENT_SCOPE)
 endfunction()
 
 function(_juce_append_target_property output key target property)
@@ -404,6 +443,8 @@ function(juce_add_binary_data target)
     endif()
 
     add_library(${target} STATIC)
+
+    set_target_properties(${target} PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
     set(juce_binary_data_folder "${CMAKE_CURRENT_BINARY_DIR}/juce_binarydata_${target}/JuceLibraryCode")
 
@@ -648,7 +689,10 @@ function(_juce_add_xcode_entitlements source_target dest_target)
 
     _juce_execute_juceaide(entitlements "${juce_kind_string}" "${input_info_file}" "${entitlements_file}")
     set_target_properties(${dest_target} PROPERTIES
-        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${entitlements_file}")
+        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS
+        "${entitlements_file}"
+        XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME
+        "$<TARGET_PROPERTY:${source_target},JUCE_HARDENED_RUNTIME_ENABLED>")
 endfunction()
 
 function(_juce_configure_bundle source_target dest_target)
@@ -712,9 +756,12 @@ function(_juce_configure_bundle source_target dest_target)
         endif()
     endif()
 
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        set_target_properties(${dest_target} PROPERTIES
+            XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp")
+    endif()
+
     set_target_properties(${dest_target} PROPERTIES
-        XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME
-            "$<TARGET_PROPERTY:${source_target},JUCE_HARDENED_RUNTIME_ENABLED>"
         XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY
             "$<TARGET_PROPERTY:${source_target},JUCE_TARGETED_DEVICE_FAMILY>")
 
@@ -1057,7 +1104,6 @@ function(juce_enable_vst3_manifest_step shared_code_target)
 
     # Use the helper tool to write out the moduleinfo.json
     add_custom_command(TARGET ${target_name} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E remove -f "${product}/Contents/moduleinfo.json"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${product}/Contents/Resources"
         COMMAND juce_vst3_helper
             -create
@@ -1067,6 +1113,54 @@ function(juce_enable_vst3_manifest_step shared_code_target)
         VERBATIM)
 
     set_target_properties(${shared_code_target} PROPERTIES _JUCE_VST3_MANIFEST_STEP_ADDED TRUE)
+endfunction()
+
+# ==================================================================================================
+
+function(_juce_disable_system_includes target)
+    if(CMAKE_VERSION VERSION_GREATER "3.25")
+        set_target_properties("${target}" PROPERTIES SYSTEM FALSE)
+    elseif(CMAKE_VERSION VERSION_GREATER "3.23")
+        set_target_properties("${target}" PROPERTIES IMPORTED_NO_SYSTEM TRUE)
+    endif()
+endfunction()
+
+# ==================================================================================================
+
+function(juce_set_aax_sdk_path path)
+    if(TARGET juce_aax_sdk)
+        message(FATAL_ERROR "juce_set_aax_sdk_path should only be called once")
+    endif()
+
+    _juce_make_absolute(path)
+
+    if((NOT EXISTS "${path}")
+       OR (NOT EXISTS "${path}/Interfaces")
+       OR (NOT EXISTS "${path}/Interfaces/ACF"))
+        message(FATAL_ERROR "Could not find AAX SDK at the specified path: ${path}")
+    endif()
+
+    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") OR (CMAKE_SYSTEM_NAME STREQUAL "Windows"))
+        add_library(juce_aax_sdk INTERFACE IMPORTED GLOBAL)
+    else()
+        return()
+    endif()
+
+    _juce_disable_system_includes(juce_aax_sdk)
+    target_include_directories(juce_aax_sdk INTERFACE
+        "${path}"
+        "${path}/Interfaces"
+        "${path}/Interfaces/ACF")
+    set_target_properties(juce_aax_sdk PROPERTIES INTERFACE_JUCE_AAX_DEFAULT_ICON "${path}/Utilities/PlugIn.ico")
+endfunction()
+
+function(_juce_init_bundled_aax_sdk)
+    if(TARGET juce_aax_sdk)
+        return()
+    endif()
+
+    get_target_property(module_path juce::juce_audio_plugin_client INTERFACE_JUCE_MODULE_PATH)
+    juce_set_aax_sdk_path("${module_path}/juce_audio_plugin_client/AAX/SDK")
 endfunction()
 
 # ==================================================================================================
@@ -1116,6 +1210,12 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         get_target_property(vst3_auto_manifest ${shared_code_target} JUCE_VST3_AUTO_MANIFEST)
 
+        add_custom_command(TARGET ${target_name} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E echo "removing moduleinfo.json"
+            COMMAND ${CMAKE_COMMAND} -E remove -f
+                "${output_path}/Contents/moduleinfo.json"
+                "${output_path}/Contents/Resources/moduleinfo.json")
+
         if(vst3_auto_manifest)
             juce_enable_vst3_manifest_step(${shared_code_target})
         endif()
@@ -1160,6 +1260,7 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
             XCODE_ATTRIBUTE_LIBRARY_STYLE Bundle
             XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE YES)
 
+        _juce_init_bundled_aax_sdk()
         get_target_property(default_icon juce_aax_sdk INTERFACE_JUCE_AAX_DEFAULT_ICON)
         _juce_create_windows_package(${shared_code_target} ${target_name} aaxplugin "${default_icon}" Win32 x64)
 
@@ -1371,8 +1472,6 @@ function(_juce_configure_plugin_targets target)
 
     if((VST IN_LIST active_formats) AND (NOT TARGET juce_vst2_sdk))
         message(FATAL_ERROR "Use juce_set_vst2_sdk_path to set up the VST sdk before adding VST targets")
-    elseif((AAX IN_LIST active_formats) AND (NOT TARGET juce_aax_sdk))
-        message(FATAL_ERROR "Use juce_set_aax_sdk_path to set up the AAX sdk before adding AAX targets")
     endif()
 
     _juce_add_standard_defs(${target})
@@ -1471,6 +1570,7 @@ function(_juce_configure_plugin_targets target)
     endif()
 
     if(TARGET ${target}_AAX)
+        _juce_init_bundled_aax_sdk()
         target_link_libraries(${target}_AAX PRIVATE juce_aax_sdk)
     endif()
 
@@ -1843,6 +1943,7 @@ function(_juce_initialise_target target)
         COMPANY_EMAIL
         NEEDS_CURL                      # Set this true if you want to link curl on Linux
         NEEDS_WEB_BROWSER               # Set this true if you want to link webkit on Linux
+        NEEDS_WEBVIEW2                  # Set this true if you want to link WebView2 statically on Windows
         NEEDS_STORE_KIT                 # Set this true if you want in-app-purchases on Mac
         PUSH_NOTIFICATIONS_ENABLED
         NETWORK_MULTICAST_ENABLED
@@ -1988,11 +2089,28 @@ function(juce_add_console_app target)
         target_compile_definitions(${target} PRIVATE _CONSOLE=1)
     endif()
 
+    # When building for iOS, these properties will be read in order to populate
+    # a plist for the app. We probably don't care whether these values are sane;
+    # if we wanted to run on iOS, we'd use juce_gui_app instead.
+    # We clear these explicitly to avoid warnings when configuring with
+    # --warn-uninitialized
+    set_target_properties(${target} PROPERTIES
+        MACOSX_BUNDLE_BUNDLE_NAME           ""
+        MACOSX_BUNDLE_BUNDLE_VERSION        ""
+        MACOSX_BUNDLE_COPYRIGHT             ""
+        MACOSX_BUNDLE_GUI_IDENTIFIER        ""
+        MACOSX_BUNDLE_ICON_FILE             ""
+        MACOSX_BUNDLE_INFO_STRING           ""
+        MACOSX_BUNDLE_LONG_VERSION_STRING   ""
+        MACOSX_BUNDLE_SHORT_VERSION_STRING  "")
+
     _juce_initialise_target(${target} ${ARGN})
 
     if(NOT JUCE_ARG__NO_RESOURCERC)
+        set_target_properties(${target} PROPERTIES JUCE_TARGET_KIND_STRING "ConsoleApp")
         _juce_write_configure_time_info(${target})
         _juce_add_resources_rc(${target} ${target})
+        _juce_add_xcode_entitlements(${target} ${target})
     endif()
 endfunction()
 
@@ -2109,6 +2227,10 @@ function(juce_add_pip header)
         list(APPEND extra_target_args PLUGINHOST_AU TRUE)
     endif()
 
+    if("JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1" IN_LIST pip_moduleflags)
+        list(APPEND extra_target_args NEEDS_WEBVIEW2 TRUE)
+    endif()
+
     if(pip_kind STREQUAL "AudioProcessor")
         _juce_get_metadata("${metadata_dict}" documentControllerClass JUCE_PIP_DOCUMENTCONTROLLER_CLASS)
 
@@ -2129,13 +2251,9 @@ function(juce_add_pip header)
         else()
             set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
 
-            # We add AAX/VST2 targets too, if the user has set up those SDKs
+            # We add VST2 targets too, if the user has set up those SDKs
 
             set(extra_formats)
-
-            if(TARGET juce_aax_sdk)
-                list(APPEND extra_formats AAX)
-            endif()
 
             if(TARGET juce_vst2_sdk)
                 list(APPEND extra_formats VST)
@@ -2149,7 +2267,7 @@ function(juce_add_pip header)
             list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
 
             juce_add_plugin(${JUCE_PIP_NAME}
-                FORMATS AU AUv3 LV2 Standalone Unity ${extra_formats}
+                FORMATS AU AUv3 LV2 Standalone Unity AAX ${extra_formats}
                 ${extra_target_args})
         endif()
     elseif(pip_kind STREQUAL "Component")
@@ -2240,32 +2358,6 @@ endfunction()
 
 # ==================================================================================================
 
-function(juce_set_aax_sdk_path path)
-    if(TARGET juce_aax_sdk)
-        message(FATAL_ERROR "juce_set_aax_sdk_path should only be called once")
-    endif()
-
-    _juce_make_absolute(path)
-
-    if((NOT EXISTS "${path}")
-       OR (NOT EXISTS "${path}/Interfaces")
-       OR (NOT EXISTS "${path}/Interfaces/ACF"))
-        message(FATAL_ERROR "Could not find AAX SDK at the specified path: ${path}")
-    endif()
-
-    if((CMAKE_SYSTEM_NAME STREQUAL "Darwin") OR (CMAKE_SYSTEM_NAME STREQUAL "Windows"))
-        add_library(juce_aax_sdk INTERFACE IMPORTED GLOBAL)
-    else()
-        return()
-    endif()
-
-    target_include_directories(juce_aax_sdk INTERFACE
-        "${path}"
-        "${path}/Interfaces"
-        "${path}/Interfaces/ACF")
-    set_target_properties(juce_aax_sdk PROPERTIES INTERFACE_JUCE_AAX_DEFAULT_ICON "${path}/Utilities/PlugIn.ico")
-endfunction()
-
 function(juce_set_vst2_sdk_path path)
     if(TARGET juce_vst2_sdk)
         message(FATAL_ERROR "juce_set_vst2_sdk_path should only be called once")
@@ -2279,6 +2371,7 @@ function(juce_set_vst2_sdk_path path)
 
     add_library(juce_vst2_sdk INTERFACE IMPORTED GLOBAL)
 
+    _juce_disable_system_includes(juce_vst2_sdk)
     # This is a bit of a hack, but we really need the VST2 paths to always follow the VST3 paths.
     target_include_directories(juce_vst2_sdk INTERFACE
         $<TARGET_PROPERTY:juce::juce_vst3_headers,INTERFACE_INCLUDE_DIRECTORIES>
@@ -2298,6 +2391,7 @@ function(juce_set_vst3_sdk_path path)
 
     add_library(juce_vst3_sdk INTERFACE IMPORTED GLOBAL)
 
+    _juce_disable_system_includes(juce_vst3_sdk)
     target_include_directories(juce_vst3_sdk INTERFACE "${path}")
 endfunction()
 
@@ -2314,6 +2408,7 @@ function(juce_set_ara_sdk_path path)
 
     add_library(juce_ara_sdk INTERFACE IMPORTED GLOBAL)
 
+    _juce_disable_system_includes(juce_ara_sdk)
     target_include_directories(juce_ara_sdk INTERFACE "${path}")
 endfunction()
 

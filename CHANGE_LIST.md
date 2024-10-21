@@ -3,6 +3,63 @@
 This file lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING_CHANGES.md.
 
+## Version 8.0.3
+
+  - Updated the AAX SDK to 2.8.0
+  - Fixed multiple Direct2D drawing issues
+  - Fixed buffer size and sample rate selection on iOS 18
+
+## Version 8.0.2
+
+  - Fixed some issues handling large images in Direct2D
+  - Enabled rounded window corners in Windows 11
+  - Fixed some compiler warnings in Xcode 16
+  - Improved macOS and Android GU rendering performance
+  - Added support for C++20 and C++23
+  - Fixed a Windows mouse response issue
+  - Updated the VST3 SDK to 3.7.12
+
+## Version 8.0.1
+
+  - Fixed some issues with text layout
+  - Removed source code for unsupported platforms
+  - Fixed some Direct2D issues
+  - Update the embedded version of harfbuzz
+  - Added more surround formats
+
+## Version 8.0.0
+
+  - Added a new Direct2D renderer
+  - Added support for WebView based UIs
+  - Added consistent unicode support across platforms
+  - Added a new animation module
+  - Bundled the AAX SDK
+
+## Version 7.0.12
+
+  - Fixed an issue with timers in Pro Tools
+  - Fixed an issue with Projucer Xcode code signing
+
+## Version 7.0.11
+
+  - Fixed an issue with paths containing a tilde in Xcode
+  - Multiple fixes for plug-in deployment and code signing in Xcode
+  - Fixed an issue painting an empty RectangleList
+  - Improved the performance of TreeView rendering
+
+## Version 7.0.10
+
+  - Fixed multiple issues selecting devices in AudioDeviceSelector
+  - Updated the bundled Oboe version
+  - Fixed multiple issues with Timer
+  - Updated the bundled version of FLAC
+  - Added configuration options for sockets
+  - Added new JSON::Formatter
+  - Added support for Xcode 15.1
+  - Update OpenGL compatibility headers
+  - Added ChildProcessManager
+  - Fixed multiple MIDI-CI issues
+
 ## Version 7.0.9
 
   - Added MIDI-CI support

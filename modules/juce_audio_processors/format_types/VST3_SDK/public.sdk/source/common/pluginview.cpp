@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,8 +51,6 @@ CPluginView::CPluginView (const ViewRect* _rect)
 //------------------------------------------------------------------------
 CPluginView::~CPluginView ()
 {
-	// NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
-    setFrame (nullptr);
 }
 
 //------------------------------------------------------------------------
@@ -98,4 +96,5 @@ tresult PLUGIN_API CPluginView::getSize (ViewRect* size)
 	return kInvalidArgument;
 }
 
-} // end of namespace
+//------------------------------------------------------------------------
+} // namespace Steinberg

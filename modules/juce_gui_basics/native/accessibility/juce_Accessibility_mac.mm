@@ -1,29 +1,37 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
-API_AVAILABLE (macos (10.10))
 static void juceFreeAccessibilityPlatformSpecificData (NSAccessibilityElement<NSAccessibility>*)  {}
 
 namespace juce
@@ -36,12 +44,10 @@ class AccessibilityHandler::AccessibilityNativeImpl
 {
 public:
     explicit AccessibilityNativeImpl (AccessibilityHandler& handler)
+        : accessibilityElement (AccessibilityElement::create (handler))
     {
-        if (@available (macOS 10.10, *))
-            accessibilityElement = AccessibilityElement::create (handler);
     }
 
-    API_AVAILABLE (macos (10.10))
     NSAccessibilityElement<NSAccessibility>* getAccessibilityElement() const noexcept
     {
         return accessibilityElement.get();
@@ -49,20 +55,15 @@ public:
 
 private:
     //==============================================================================
-    class API_AVAILABLE (macos (10.10)) AccessibilityElement final : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
+    class AccessibilityElement final : public AccessibleObjCClass<NSAccessibilityElement<NSAccessibility>>
     {
     public:
         static Holder create (AccessibilityHandler& handler)
         {
-            if (@available (macOS 10.10, *))
-            {
-                static AccessibilityElement cls;
-                Holder element ([cls.createInstance() init]);
-                object_setInstanceVariable (element.get(), "handler", &handler);
-                return element;
-            }
-
-            return {};
+            static AccessibilityElement cls;
+            Holder element ([cls.createInstance() init]);
+            object_setInstanceVariable (element.get(), "handler", &handler);
+            return element;
         }
 
     private:
@@ -816,7 +817,6 @@ private:
     };
 
     //==============================================================================
-    API_AVAILABLE (macos (10.10))
     AccessibilityElement::Holder accessibilityElement;
 
     //==============================================================================
@@ -826,10 +826,7 @@ private:
 //==============================================================================
 AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
 {
-    if (@available (macOS 10.10, *))
-        return (AccessibilityNativeHandle*) nativeImpl->getAccessibilityElement();
-
-    return nullptr;
+    return (AccessibilityNativeHandle*) nativeImpl->getAccessibilityElement();
 }
 
 static bool areAnyAccessibilityClientsActive()
@@ -863,25 +860,13 @@ static void sendHandlerNotification (const AccessibilityHandler& handler,
     if (! areAnyAccessibilityClientsActive() || notification == NSAccessibilityNotificationName{})
         return;
 
-    if (@available (macOS 10.9, *))
+    if (id accessibilityElement = static_cast<id> (handler.getNativeImplementation()))
     {
-        if (id accessibilityElement = static_cast<id> (handler.getNativeImplementation()))
-        {
-            sendAccessibilityEvent (accessibilityElement, notification,
-                                    (notification == NSAccessibilityLayoutChangedNotification
-                                         ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
-                                         : nil));
-        }
+        sendAccessibilityEvent (accessibilityElement, notification,
+                                (notification == NSAccessibilityLayoutChangedNotification
+                                     ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
+                                     : nil));
     }
-}
-
-static NSAccessibilityNotificationName layoutChangedNotification()
-{
-    if (@available (macOS 10.9, *))
-        return NSAccessibilityLayoutChangedNotification;
-
-    static NSString* layoutChangedString = @"AXLayoutChanged";
-    return layoutChangedString;
 }
 
 void detail::AccessibilityHelpers::notifyAccessibilityEvent (const AccessibilityHandler& handler, Event eventType)
@@ -892,7 +877,7 @@ void detail::AccessibilityHelpers::notifyAccessibilityEvent (const Accessibility
         {
             case Event::elementCreated:         return NSAccessibilityCreatedNotification;
             case Event::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
-            case Event::elementMovedOrResized:  return layoutChangedNotification();
+            case Event::elementMovedOrResized:  return NSAccessibilityLayoutChangedNotification;
             case Event::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
             case Event::windowOpened:           return NSAccessibilityWindowCreatedNotification;
             case Event::windowClosed:           break;
@@ -916,7 +901,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
             case AccessibilityEvent::textChanged:
             case AccessibilityEvent::valueChanged:          return NSAccessibilityValueChangedNotification;
             case AccessibilityEvent::titleChanged:          return NSAccessibilityTitleChangedNotification;
-            case AccessibilityEvent::structureChanged:      return layoutChangedNotification();
+            case AccessibilityEvent::structureChanged:      return NSAccessibilityLayoutChangedNotification;
         }
 
         return NSAccessibilityNotificationName{};
@@ -930,31 +915,28 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
     if (! areAnyAccessibilityClientsActive())
         return;
 
-    if (@available (macOS 10.9, *))
+    auto nsPriority = [priority]
     {
-        auto nsPriority = [priority]
+        // The below doesn't get noticed by the @available check above
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability")
+
+        switch (priority)
         {
-            // The below doesn't get noticed by the @available check above
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability")
+            case AnnouncementPriority::low:    return NSAccessibilityPriorityLow;
+            case AnnouncementPriority::medium: return NSAccessibilityPriorityMedium;
+            case AnnouncementPriority::high:   return NSAccessibilityPriorityHigh;
+        }
 
-            switch (priority)
-            {
-                case AnnouncementPriority::low:    return NSAccessibilityPriorityLow;
-                case AnnouncementPriority::medium: return NSAccessibilityPriorityMedium;
-                case AnnouncementPriority::high:   return NSAccessibilityPriorityHigh;
-            }
+        jassertfalse;
+        return NSAccessibilityPriorityLow;
 
-            jassertfalse;
-            return NSAccessibilityPriorityLow;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }();
 
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-        }();
-
-        sendAccessibilityEvent (static_cast<id> ([NSApp mainWindow]),
-                                NSAccessibilityAnnouncementRequestedNotification,
-                                @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
-                                   NSAccessibilityPriorityKey:     @(nsPriority) });
-     }
+    sendAccessibilityEvent (static_cast<id> ([NSApp mainWindow]),
+                            NSAccessibilityAnnouncementRequestedNotification,
+                            @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
+                               NSAccessibilityPriorityKey:     @(nsPriority) });
 }
 
 } // namespace juce

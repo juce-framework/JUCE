@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -51,20 +63,12 @@ namespace CoreMidiHelpers
         onlyOld
     };
 
-    #if (defined (MAC_OS_VERSION_11_0) || defined (__IPHONE_14_0))
-     #if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_11_0 || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_14_0)
-      #define JUCE_HAS_NEW_COREMIDI_API 1
-      #define JUCE_HAS_OLD_COREMIDI_API 0
-      constexpr auto implementationStrategy = ImplementationStrategy::onlyNew;
-     #else
-      #define JUCE_HAS_NEW_COREMIDI_API 1
-      #define JUCE_HAS_OLD_COREMIDI_API 1
-      constexpr auto implementationStrategy = ImplementationStrategy::both;
-     #endif
+    #if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_11_0 || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_14_0)
+     #define JUCE_HAS_OLD_COREMIDI_API 0
+     constexpr auto implementationStrategy = ImplementationStrategy::onlyNew;
     #else
-     #define JUCE_HAS_NEW_COREMIDI_API 0
      #define JUCE_HAS_OLD_COREMIDI_API 1
-     constexpr auto implementationStrategy = ImplementationStrategy::onlyOld;
+     constexpr auto implementationStrategy = ImplementationStrategy::both;
     #endif
 
     struct SenderBase
@@ -78,7 +82,6 @@ namespace CoreMidiHelpers
     template <ImplementationStrategy>
     struct Sender;
 
-   #if JUCE_HAS_NEW_COREMIDI_API
     template <>
     struct API_AVAILABLE (macos (11.0), ios (14.0)) Sender<ImplementationStrategy::onlyNew> final : public SenderBase
     {
@@ -163,7 +166,6 @@ namespace CoreMidiHelpers
             send();
         }
     };
-   #endif
 
    #if JUCE_HAS_OLD_COREMIDI_API
     template <>
@@ -252,7 +254,7 @@ namespace CoreMidiHelpers
     };
    #endif
 
-   #if JUCE_HAS_NEW_COREMIDI_API && JUCE_HAS_OLD_COREMIDI_API
+   #if JUCE_HAS_OLD_COREMIDI_API
     template <>
     struct Sender<ImplementationStrategy::both>
     {
@@ -569,8 +571,6 @@ namespace CoreMidiHelpers
     {
         static const auto globalMidiClient = [&]
         {
-            // Since OSX 10.6, the MIDIClientCreate function will only work
-            // correctly when called from the message thread!
             JUCE_ASSERT_MESSAGE_THREAD
 
             enableSimulatorMidiSession();
@@ -621,7 +621,6 @@ namespace CoreMidiHelpers
     template <ImplementationStrategy>
     struct Receiver;
 
-   #if JUCE_HAS_NEW_COREMIDI_API
     template <>
     struct Receiver<ImplementationStrategy::onlyNew>
     {
@@ -653,7 +652,6 @@ namespace CoreMidiHelpers
     private:
         std::unique_ptr<ump::U32InputHandler> u32InputHandler;
     };
-   #endif
 
    #if JUCE_HAS_OLD_COREMIDI_API
     template <>
@@ -685,7 +683,7 @@ namespace CoreMidiHelpers
     };
    #endif
 
-   #if JUCE_HAS_NEW_COREMIDI_API && JUCE_HAS_OLD_COREMIDI_API
+   #if JUCE_HAS_OLD_COREMIDI_API
     template <>
     struct Receiver<ImplementationStrategy::both>
     {
@@ -796,7 +794,6 @@ namespace CoreMidiHelpers
     template <ImplementationStrategy>
     struct CreatorFunctions;
 
-   #if JUCE_HAS_NEW_COREMIDI_API
     template <>
     struct API_AVAILABLE (macos (11.0), ios (14.0)) CreatorFunctions<ImplementationStrategy::onlyNew>
     {
@@ -860,7 +857,6 @@ namespace CoreMidiHelpers
             static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (list);
         }
     };
-   #endif
 
    #if JUCE_HAS_OLD_COREMIDI_API
     template <>
@@ -905,7 +901,7 @@ namespace CoreMidiHelpers
     };
    #endif
 
-   #if JUCE_HAS_NEW_COREMIDI_API && JUCE_HAS_OLD_COREMIDI_API
+   #if JUCE_HAS_OLD_COREMIDI_API
     template <>
     struct CreatorFunctions<ImplementationStrategy::both>
     {

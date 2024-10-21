@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -114,11 +123,13 @@
 #elif (JUCE_LINUX || JUCE_BSD) && JUCE_WEB_BROWSER
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant", "-Wparentheses", "-Wdeprecated-declarations")
 
- // If you're missing this header, you need to install the webkit2gtk-4.0 package
+ // If you're missing this header, you need to install the webkit2gtk-4.1 or webkit2gtk-4.0 package
  #include <gtk/gtk.h>
  #include <gtk/gtkx.h>
  #include <glib-unix.h>
  #include <webkit2/webkit2.h>
+ #include <jsc/jsc.h>
+ #include <libsoup/soup.h>
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
@@ -137,10 +148,21 @@
 #include "misc/juce_PushNotifications.cpp"
 #include "misc/juce_RecentlyOpenedFilesList.cpp"
 #include "misc/juce_SplashScreen.cpp"
+
+#if JUCE_MAC
+ #include "native/juce_SystemTrayIcon_mac.cpp"
+#elif JUCE_WINDOWS
+ #include "native/juce_ActiveXComponent_windows.cpp"
+ #include "native/juce_SystemTrayIcon_windows.cpp"
+#elif JUCE_LINUX || JUCE_BSD
+ #include "native/juce_SystemTrayIcon_linux.cpp"
+#endif
+
 #include "misc/juce_SystemTrayIconComponent.cpp"
 #include "misc/juce_LiveConstantEditor.cpp"
 #include "misc/juce_AnimatedAppComponent.cpp"
 #include "misc/juce_WebBrowserComponent.cpp"
+#include "misc/juce_WebControlRelays.cpp"
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -149,7 +171,6 @@
   #include "native/juce_NSViewFrameWatcher_mac.h"
   #include "native/juce_NSViewComponent_mac.mm"
   #include "native/juce_AppleRemote_mac.mm"
-  #include "native/juce_SystemTrayIcon_mac.cpp"
  #endif
 
  #if JUCE_IOS
@@ -162,12 +183,10 @@
 
 //==============================================================================
 #elif JUCE_WINDOWS
- #include "native/juce_ActiveXComponent_windows.cpp"
  #include "native/juce_HWNDComponent_windows.cpp"
  #if JUCE_WEB_BROWSER
   #include "native/juce_WebBrowserComponent_windows.cpp"
  #endif
- #include "native/juce_SystemTrayIcon_windows.cpp"
 
 //==============================================================================
 #elif JUCE_LINUX || JUCE_BSD
@@ -185,8 +204,6 @@
  #endif
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
- #include "native/juce_SystemTrayIcon_linux.cpp"
 
 //==============================================================================
 #elif JUCE_ANDROID

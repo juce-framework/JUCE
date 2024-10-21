@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -89,18 +98,14 @@ template <> struct ContainerDeletePolicy<const __CFString>   { static void destr
 // make sure the audio processor is initialized before the AUBase class
 struct AudioProcessorHolder
 {
-    AudioProcessorHolder (bool initialiseGUI)
+    AudioProcessorHolder()
     {
-        if (initialiseGUI)
-            initialiseJuce_GUI();
-
-        juceFilter = createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit);
-
         // audio units do not have a notion of enabled or un-enabled buses
         juceFilter->enableAllBuses();
     }
 
-    std::unique_ptr<AudioProcessor> juceFilter;
+    ScopedJuceInitialiser_GUI scopedInitialiser;
+    std::unique_ptr<AudioProcessor> juceFilter { createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit) };
 };
 
 //==============================================================================
@@ -109,10 +114,23 @@ class JuceAU final : public AudioProcessorHolder,
                      public AudioProcessorListener,
                      public AudioProcessorParameter::Listener
 {
+    auto& getSupportedBusLayouts (bool isInput, int bus) noexcept
+    {
+        auto& layout = isInput ? supportedInputLayouts : supportedOutputLayouts;
+        jassert (isPositiveAndBelow (bus, layout.size()));
+        return layout.getReference (bus);
+    }
+
+    auto& getCurrentLayout (bool isInput, int bus) noexcept
+    {
+        auto& layout = isInput ? currentInputLayout : currentOutputLayout;
+        jassert (isPositiveAndBelow (bus, layout.size()));
+        return layout.getReference (bus);
+    }
+
 public:
-    JuceAU (AudioUnit component)
-        : AudioProcessorHolder (activePlugins.size() + activeUIs.size() == 0),
-          MusicDeviceBase (component,
+    explicit JuceAU (AudioUnit component)
+        : MusicDeviceBase (component,
                            (UInt32) AudioUnitHelpers::getBusCountForWrapper (*juceFilter, true),
                            (UInt32) AudioUnitHelpers::getBusCountForWrapper (*juceFilter, false))
     {
@@ -173,9 +191,6 @@ public:
 
         jassert (activePlugins.contains (this));
         activePlugins.removeFirstMatchingValue (this);
-
-        if (activePlugins.size() + activeUIs.size() == 0)
-            shutdownJuce_GUI();
     }
 
     //==============================================================================
@@ -877,9 +892,14 @@ public:
         if (const AudioProcessor::Bus* bus = juceFilter->getBus (isInput, busNr))
         {
             AudioChannelSet discreteRangeSet;
+
+           // Suppressing clang-analyzer-optin.core.EnumCastOutOfRange
+           #ifndef __clang_analyzer__
             const int n = bus->getDefaultLayout().size();
+
             for (int i = 0; i < n; ++i)
                 discreteRangeSet.addChannel ((AudioChannelSet::ChannelType) (256 + i));
+           #endif
 
             // if the audioprocessor supports this it cannot
             // really be interested in the bus layouts
@@ -1723,6 +1743,7 @@ public:
         }
 
     private:
+        ScopedJuceInitialiser_GUI scopedInitialiser;
         Rectangle<int> lastBounds;
 
         JUCE_DECLARE_NON_COPYABLE (EditorCompHolder)
@@ -1822,9 +1843,8 @@ public:
             {
                 // there's some kind of component currently modal, but the host
                 // is trying to delete our plugin..
-                jassert (Component::getCurrentlyModalComponent() == nullptr);
-
-                shutdownJuce_GUI();
+                jassert (ModalComponentManager::getInstanceWithoutCreating() == nullptr
+                         || Component::getCurrentlyModalComponent() == nullptr);
             }
         }
     };
@@ -2560,12 +2580,6 @@ private:
     }
 
     //==============================================================================
-    std::vector<AudioChannelLayoutTag>&       getSupportedBusLayouts (bool isInput, int bus) noexcept       { return (isInput ? supportedInputLayouts : supportedOutputLayouts).getReference (bus); }
-    const std::vector<AudioChannelLayoutTag>& getSupportedBusLayouts (bool isInput, int bus) const noexcept { return (isInput ? supportedInputLayouts : supportedOutputLayouts).getReference (bus); }
-    AudioChannelLayoutTag& getCurrentLayout (bool isInput, int bus) noexcept               { return (isInput ? currentInputLayout : currentOutputLayout).getReference (bus); }
-    AudioChannelLayoutTag  getCurrentLayout (bool isInput, int bus) const noexcept         { return (isInput ? currentInputLayout : currentOutputLayout)[bus]; }
-
-    //==============================================================================
     std::vector<AudioChannelLayoutTag> getSupportedLayoutTagsForBus (bool isInput, int busNum) const
     {
         std::set<AudioChannelLayoutTag> tags;
@@ -2611,13 +2625,13 @@ private:
 
     void addSupportedLayoutTags()
     {
-        currentInputLayout.clear(); currentOutputLayout.clear();
-
-        currentInputLayout. resize (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, true));
-        currentOutputLayout.resize (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, false));
-
-        addSupportedLayoutTagsForDirection (true);
-        addSupportedLayoutTagsForDirection (false);
+        for (auto& [layout, isInput] : { std::tuple (&currentInputLayout,  true),
+                                         std::tuple (&currentOutputLayout, false) })
+        {
+            layout->clear();
+            layout->resize (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, isInput));
+            addSupportedLayoutTagsForDirection (isInput);
+        }
     }
 
     static int maxChannelsToProbeFor()

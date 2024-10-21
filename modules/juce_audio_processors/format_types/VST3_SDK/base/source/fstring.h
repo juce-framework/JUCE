@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,6 +45,7 @@
 #include "base/source/fobject.h"
 
 #include <cstdarg>
+#include <cstdlib>
 
 namespace Steinberg {
 
@@ -307,6 +308,10 @@ protected:
 
 Extends class ConstString by operations which allow modifications. 
 
+If allocated externally and passed in via take() or extracted via pass(), memory
+is expected to be allocated with C's malloc() (rather than new) and deallocated with free().
+Use the NEWSTR8/16 and DELETESTR8/16 macros below.
+
 \see ConstString */
 //-----------------------------------------------------------------------------
 class String : public ConstString
@@ -480,6 +485,12 @@ private:
 	void tryFreeBuffer ();
 	bool checkToMultiByte (uint32 destCodePage = kCP_Default) const; // to remove debug code from inline - const_cast inside!!!
 };
+
+// String memory allocation macros
+#define NEWSTR8(len)   ((char8*)::malloc(len))      // len includes trailing zero
+#define NEWSTR16(len)  ((char16*)::malloc(2*(len)))
+#define DELETESTR8(p)  (::free((char*)(p)))         // cast to strip const
+#define DELETESTR16(p) (::free((char16*)(p)))
 
 // String concatenation functions.
 inline String operator+ (const ConstString& s1, const ConstString& s2) {return String (s1).append (s2);}

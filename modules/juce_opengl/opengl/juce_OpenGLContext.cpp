@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -459,17 +468,22 @@ public:
             const auto localBounds = component.getLocalBounds();
             const auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
 
-            const auto newScale = [&]
-            {
-               #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                // Some hosts (Pro Tools 2022.7) do not take the window scaling into account when sizing
-                // plugin editor windows. The displayScale however seems to be correctly reported even in
-                // such cases.
-                return (float) displayScale * Desktop::getInstance().getGlobalScaleFactor();
-               #else
-                return (float) displayScale;
-               #endif
-            }();
+            // On Windows some hosts (Pro Tools 2022.7) do not take the current DPI into account
+            // when sizing plugin editor windows.
+            //
+            // Also in plugins on Windows, the plugin HWND's DPI settings generally don't reflect
+            // the desktop scaling setting and Displays::Display::scale will return an incorrect 1.0
+            // value. Our plugin wrappers will use a combination of querying the plugin HWND's
+            // parent HWND (the host HWND), and utilising the scale factor reported by the host
+            // through the plugin API. This scale is then added as a transformation to the
+            // AudioProcessorEditor.
+            //
+            // Hence, instead of querying the OS for the DPI of the editor window,
+            // we approximate based on the physical size of the window that was actually provided
+            // for the context to draw into. This may break if the OpenGL context's component is
+            // scaled differently in its width and height - but in this case, a single scale factor
+            // isn't that helpful anyway.
+            const auto newScale = (float) newArea.getWidth() / (float) localBounds.getWidth();
 
             areaAndScale.set ({ newArea, newScale }, [&]
             {
@@ -623,7 +637,7 @@ public:
 
         gl::loadFunctions();
 
-       #if JUCE_DEBUG
+       #if JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS
         if (getOpenGLVersion() >= Version { 4, 3 } && glDebugMessageCallback != nullptr)
         {
             glEnable (GL_DEBUG_OUTPUT);
@@ -665,7 +679,7 @@ public:
             : originalWorker (std::move (workerToUse))
         {}
 
-        void operator() (OpenGLContext& calleeContext)
+        void operator() (OpenGLContext& calleeContext) override
         {
             if (originalWorker != nullptr)
                 (*originalWorker) (calleeContext);
@@ -1183,7 +1197,8 @@ private:
 
         auto& comp = *getComponent();
 
-       #if JUCE_MAC
+       #if JUCE_MAC && (! defined (MAC_OS_VERSION_15_0) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_VERSION_15_0)
+        // According to a warning triggered on macOS 15 and above this doesn't do anything!
         [[(NSView*) comp.getWindowHandle() window] disableScreenUpdatesUntilFlush];
        #endif
 

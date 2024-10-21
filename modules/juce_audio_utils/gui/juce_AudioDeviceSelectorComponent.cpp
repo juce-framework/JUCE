@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -73,7 +82,7 @@ static void drawTextLayout (Graphics& g, Component& owner, StringRef text, const
 
     AttributedString attributedString { text };
     attributedString.setColour (textColour);
-    attributedString.setFont ((float) textBounds.getHeight() * 0.6f);
+    attributedString.setFont (owner.withDefaultMetrics (FontOptions { (float) textBounds.getHeight() * 0.6f }));
     attributedString.setJustification (Justification::centredLeft);
     attributedString.setWordWrap (AttributedString::WordWrap::none);
 
@@ -206,6 +215,63 @@ struct AudioDeviceSetupDetails
 };
 
 static String getNoDeviceString()   { return "<< " + TRANS ("none") + " >>"; }
+
+//==============================================================================
+class AudioDeviceSelectorComponent::MidiOutputSelector final : public Component,
+                                                               private ChangeListener
+{
+public:
+    explicit MidiOutputSelector (AudioDeviceManager& dm)
+        : deviceManager (dm)
+    {
+        deviceManager.addChangeListener (this);
+        selector.onChange = [&]
+        {
+            const auto selectedId = selector.getSelectedId();
+            jassert (selectedId != 0);
+
+            const auto deviceId = selectedId == -1
+                                ? String{}
+                                : MidiOutput::getAvailableDevices()[selectedId - 1].identifier;
+            deviceManager.setDefaultMidiOutputDevice (deviceId);
+        };
+
+        updateListOfDevices();
+        addAndMakeVisible (selector);
+    }
+
+    ~MidiOutputSelector() final
+    {
+        deviceManager.removeChangeListener (this);
+    }
+
+    void resized() final { selector.setBounds (getLocalBounds()); }
+
+private:
+    void updateListOfDevices()
+    {
+        selector.clear();
+
+        const auto midiOutputs = MidiOutput::getAvailableDevices();
+
+        selector.addItem (getNoDeviceString(), -1);
+        selector.setSelectedId (-1, dontSendNotification);
+        selector.addSeparator();
+
+        for (auto [id, midiOutput] : enumerate (midiOutputs, 1))
+        {
+            selector.addItem (midiOutput.name, id);
+
+            if (midiOutput.identifier == deviceManager.getDefaultMidiOutputIdentifier())
+                selector.setSelectedId (id, dontSendNotification);
+        }
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) final { updateListOfDevices(); }
+
+    ComboBox selector;
+    AudioDeviceManager& deviceManager;
+};
 
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
@@ -373,9 +439,8 @@ public:
 
             error = setup.manager->setAudioDeviceSetup (config, true);
 
-            showCorrectDeviceName (inputDeviceDropDown.get(), true);
-            showCorrectDeviceName (outputDeviceDropDown.get(), false);
-
+            updateSelectedInput();
+            updateSelectedOutput();
             updateControlPanelButton();
             resized();
         }
@@ -544,18 +609,34 @@ private:
     std::unique_ptr<Component> inputLevelMeter;
     std::unique_ptr<TextButton> showUIButton, showAdvancedSettingsButton, resetDeviceButton;
 
+    int findSelectedDeviceIndex (bool isInput) const
+    {
+        const auto device = setup.manager->getAudioDeviceSetup();
+        const auto deviceName = isInput ? device.inputDeviceName : device.outputDeviceName;
+        return type.getDeviceNames (isInput).indexOf (deviceName);
+    }
+
+    void updateSelectedInput()
+    {
+        showCorrectDeviceName (inputDeviceDropDown.get(), true);
+    }
+
+    void updateSelectedOutput()
+    {
+        constexpr auto isInput = false;
+        showCorrectDeviceName (outputDeviceDropDown.get(), isInput);
+
+        if (testButton != nullptr)
+            testButton->setEnabled (findSelectedDeviceIndex (isInput) >= 0);
+    }
+
     void showCorrectDeviceName (ComboBox* box, bool isInput)
     {
-        if (box != nullptr)
-        {
-            auto* currentDevice = setup.manager->getCurrentAudioDevice();
-            auto index = type.getIndexOfDevice (currentDevice, isInput);
+        if (box == nullptr)
+            return;
 
-            box->setSelectedId (index < 0 ? index : index + 1, dontSendNotification);
-
-            if (testButton != nullptr && ! isInput)
-                testButton->setEnabled (index >= 0);
-        }
+        const auto index = findSelectedDeviceIndex (isInput);
+        box->setSelectedId (index < 0 ? index : index + 1, dontSendNotification);
     }
 
     void addNamesToDeviceBox (ComboBox& combo, bool isInputs)
@@ -645,7 +726,7 @@ private:
             addNamesToDeviceBox (*outputDeviceDropDown, false);
         }
 
-        showCorrectDeviceName (outputDeviceDropDown.get(), false);
+        updateSelectedOutput();
     }
 
     void updateInputsComboBox()
@@ -668,7 +749,7 @@ private:
             addNamesToDeviceBox (*inputDeviceDropDown, true);
         }
 
-        showCorrectDeviceName (inputDeviceDropDown.get(), true);
+        updateSelectedInput();
     }
 
     void updateSampleRateComboBox (AudioIODevice* currentDevice)
@@ -1036,9 +1117,8 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
 
     if (showMidiOutputSelector)
     {
-        midiOutputSelector = std::make_unique<ComboBox>();
+        midiOutputSelector = std::make_unique<MidiOutputSelector> (deviceManager);
         addAndMakeVisible (midiOutputSelector.get());
-        midiOutputSelector->onChange = [this] { updateMidiOutput(); };
 
         midiOutputLabel = std::make_unique<Label> ("lm", TRANS ("MIDI Output:"));
         midiOutputLabel->attachToComponent (midiOutputSelector.get(), true);
@@ -1104,6 +1184,12 @@ void AudioDeviceSelectorComponent::resized()
     setSize (getWidth(), r.getY());
 }
 
+void AudioDeviceSelectorComponent::childBoundsChanged (Component* child)
+{
+    if (child == audioDeviceSettingsComp.get())
+        resized();
+}
+
 void AudioDeviceSelectorComponent::updateDeviceType()
 {
     if (auto* type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1])
@@ -1112,16 +1198,6 @@ void AudioDeviceSelectorComponent::updateDeviceType()
         deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
         updateAllControls(); // needed in case the type hasn't actually changed
     }
-}
-
-void AudioDeviceSelectorComponent::updateMidiOutput()
-{
-    auto selectedId = midiOutputSelector->getSelectedId();
-
-    if (selectedId == -1)
-        deviceManager.setDefaultMidiOutputDevice ({});
-    else
-        deviceManager.setDefaultMidiOutputDevice (currentMidiOutputs[selectedId - 1].identifier);
 }
 
 void AudioDeviceSelectorComponent::changeListenerCallback (ChangeBroadcaster*)
@@ -1161,29 +1237,6 @@ void AudioDeviceSelectorComponent::updateAllControls()
         midiInputsList->updateDevices();
         midiInputsList->updateContent();
         midiInputsList->repaint();
-    }
-
-    if (midiOutputSelector != nullptr)
-    {
-        midiOutputSelector->clear();
-
-        currentMidiOutputs = MidiOutput::getAvailableDevices();
-
-        midiOutputSelector->addItem (getNoDeviceString(), -1);
-        midiOutputSelector->addSeparator();
-
-        auto defaultOutputIdentifier = deviceManager.getDefaultMidiOutputIdentifier();
-        int i = 0;
-
-        for (auto& out : currentMidiOutputs)
-        {
-            midiOutputSelector->addItem (out.name, i + 1);
-
-            if (defaultOutputIdentifier.isNotEmpty() && out.identifier == defaultOutputIdentifier)
-                midiOutputSelector->setSelectedId (i + 1);
-
-            ++i;
-        }
     }
 
     resized();

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -119,76 +128,62 @@ private:
                 return nil;
             });
 
-            if (@available (iOS 11.0, *))
+            addMethod (@selector (accessibilityDataTableCellElementForRow:column:), [] (id self, SEL, NSUInteger row, NSUInteger column) -> id
             {
-                addMethod (@selector (accessibilityDataTableCellElementForRow:column:), [] (id self, SEL, NSUInteger row, NSUInteger column) -> id
+                if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+                    if (auto* tableInterface = tableHandler->getTableInterface())
+                        if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
+                            if (auto* parent = getAccessibleParent (cellHandler))
+                                return static_cast<id> (parent->getNativeImplementation());
+
+                return nil;
+            });
+
+            addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
+            addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
+
+            addMethod (@selector (accessibilityHeaderElementsForColumn:), [] (id self, SEL, NSUInteger column) -> NSArray*
+            {
+                if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
                 {
-                    if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
-                        if (auto* tableInterface = tableHandler->getTableInterface())
-                            if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
-                                if (auto* parent = getAccessibleParent (cellHandler))
-                                    return static_cast<id> (parent->getNativeImplementation());
-
-                    return nil;
-                });
-
-                addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
-                addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
-
-                addMethod (@selector (accessibilityHeaderElementsForColumn:), [] (id self, SEL, NSUInteger column) -> NSArray*
-                {
-                    if (auto* tableHandler = detail::AccessibilityHelpers::getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+                    if (auto* tableInterface = tableHandler->getTableInterface())
                     {
-                        if (auto* tableInterface = tableHandler->getTableInterface())
+                        if (auto* header = tableInterface->getHeaderHandler())
                         {
-                            if (auto* header = tableInterface->getHeaderHandler())
+                            if (isPositiveAndBelow (column, header->getChildren().size()))
                             {
-                                if (isPositiveAndBelow (column, header->getChildren().size()))
-                                {
-                                    auto* result = [NSMutableArray new];
-                                    [result addObject: static_cast<id> (header->getChildren()[(size_t) column]->getNativeImplementation())];
-                                    return result;
-                                }
+                                auto* result = [NSMutableArray new];
+                                [result addObject: static_cast<id> (header->getChildren()[(size_t) column]->getNativeImplementation())];
+                                return result;
                             }
                         }
                     }
+                }
 
-                    return nullptr;
-                });
+                return nullptr;
+            });
 
-                addProtocol (@protocol (UIAccessibilityContainerDataTable));
+            addProtocol (@protocol (UIAccessibilityContainerDataTable));
 
-                addMethod (@selector (accessibilityContainerType), [] (id self, SEL) -> NSInteger
+            addMethod (@selector (accessibilityContainerType), [] (id self, SEL) -> NSInteger
+            {
+                if (auto* handler = getHandler (self))
                 {
-                    if (auto* handler = getHandler (self))
+                    if (handler->getTableInterface() != nullptr)
+                        return UIAccessibilityContainerTypeDataTable;
+
+                    const auto handlerRole = handler->getRole();
+
+                    if (handlerRole == AccessibilityRole::popupMenu
+                        || handlerRole == AccessibilityRole::list
+                        || handlerRole == AccessibilityRole::tree)
                     {
-                        if (handler->getTableInterface() != nullptr)
-                        {
-                            if (@available (iOS 11.0, *))
-                                return UIAccessibilityContainerTypeDataTable;
-
-                            return 1; // UIAccessibilityContainerTypeDataTable
-                        }
-
-                        const auto handlerRole = handler->getRole();
-
-                        if (handlerRole == AccessibilityRole::popupMenu
-                            || handlerRole == AccessibilityRole::list
-                            || handlerRole == AccessibilityRole::tree)
-                        {
-                            if (@available (iOS 11.0, *))
-                                return UIAccessibilityContainerTypeList;
-
-                            return 2; // UIAccessibilityContainerTypeList
-                        }
+                        return UIAccessibilityContainerTypeList;
                     }
+                }
 
-                    if (@available (iOS 11.0, *))
-                        return UIAccessibilityContainerTypeNone;
-
-                    return 0; // UIAccessibilityContainerTypeNone
-                });
-            }
+                return UIAccessibilityContainerTypeNone;
+            });
 
             registerClass();
         }
@@ -502,12 +497,9 @@ private:
                 addProtocol (@protocol (UITextInput));
             }
 
-            if (@available (iOS 11.0, *))
-            {
-                addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
-                addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
-                addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
-            }
+            addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
+            addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
+            addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
 
             addIvar<UIAccessibilityElement*> ("container");
 

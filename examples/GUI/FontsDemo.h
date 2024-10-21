@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -214,20 +218,20 @@ public:
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
 
-        auto font = fonts[rowNumber];
+        auto font = getFont (rowNumber);
 
         AttributedString s;
         s.setWordWrap (AttributedString::none);
         s.setJustification (Justification::centredLeft);
         s.append (getNameForRow (rowNumber), font.withHeight ((float) height * 0.7f), Colours::black);
-        s.append ("   " + font.getTypefaceName(), Font ((float) height * 0.5f, Font::italic), Colours::grey);
+        s.append ("   " + font.getTypefaceName(), FontOptions ((float) height * 0.5f, Font::italic), Colours::grey);
 
         s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
     }
 
     String getNameForRow (int rowNumber) override
     {
-        return fonts[rowNumber].getTypefaceName();
+        return getFont (rowNumber).getTypefaceName();
     }
 
     void selectedRowsChanged (int /*lastRowselected*/) override
@@ -236,6 +240,11 @@ public:
     }
 
 private:
+    Font getFont (int rowNumber) const
+    {
+        return isPositiveAndBelow (rowNumber, fonts.size()) ? fonts.getUnchecked (rowNumber) : FontOptions{};
+    }
+
     Array<Font> fonts;
     StringArray currentStyleList;
 
@@ -313,7 +322,7 @@ private:
         auto italic = italicToggle.getToggleState();
         auto useStyle = ! (bold || italic);
 
-        auto font = fonts[listBox.getSelectedRow()];
+        auto font = getFont (listBox.getSelectedRow());
 
         font = font.withPointHeight        ((float) heightSlider .getValue())
                    .withExtraKerningFactor ((float) kerningSlider.getValue())

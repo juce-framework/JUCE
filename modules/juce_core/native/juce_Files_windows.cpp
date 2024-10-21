@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -899,39 +911,40 @@ static String readWindowsShortcutOrLink (const File& shortcut, bool wantsAbsolut
     if (! wantsAbsolutePath)
         return readWindowsLnkFile (shortcut, false);
 
-    typedef DWORD (WINAPI* GetFinalPathNameByHandleFunc) (HANDLE, LPTSTR, DWORD, DWORD);
+    auto* h = CreateFile (shortcut.getFullPathName().toWideCharPointer(),
+                          GENERIC_READ, FILE_SHARE_READ, nullptr,
+                          OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
 
-    static GetFinalPathNameByHandleFunc getFinalPathNameByHandle
-             = (GetFinalPathNameByHandleFunc) getUser32Function ("GetFinalPathNameByHandle");
-
-    if (getFinalPathNameByHandle != nullptr)
+    const ScopeGuard scope { [&]
     {
-        HANDLE h = CreateFile (shortcut.getFullPathName().toWideCharPointer(),
-                               GENERIC_READ, FILE_SHARE_READ, nullptr,
-                               OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
-
         if (h != INVALID_HANDLE_VALUE)
-        {
-            if (DWORD requiredSize = getFinalPathNameByHandle (h, nullptr, 0, 0 /* FILE_NAME_NORMALIZED */))
-            {
-                HeapBlock<WCHAR> buffer (requiredSize + 2, true);
-
-                if (getFinalPathNameByHandle (h, buffer, requiredSize, 0 /* FILE_NAME_NORMALIZED */) > 0)
-                {
-                    CloseHandle (h);
-
-                    const StringRef prefix ("\\\\?\\");
-                    const String path (buffer.get());
-
-                    // It turns out that GetFinalPathNameByHandleW prepends \\?\ to the path.
-                    // This is not a bug, it's feature. See MSDN for more information.
-                    return path.startsWith (prefix) ? path.substring (prefix.length()) : path;
-                }
-            }
-
             CloseHandle (h);
-        }
-    }
+    } };
+
+    const auto path = [&]() -> String
+    {
+        if (h == INVALID_HANDLE_VALUE)
+            return {};
+
+        const auto requiredSize = GetFinalPathNameByHandle (h, nullptr, 0, 0 /* FILE_NAME_NORMALIZED */);
+
+        if (requiredSize == 0)
+            return {};
+
+        std::vector<WCHAR> buffer (requiredSize + 2, 0);
+
+        if (GetFinalPathNameByHandle (h, buffer.data(), requiredSize, 0 /* FILE_NAME_NORMALIZED */) <= 0)
+            return {};
+
+        return buffer.data();
+    }();
+
+    static constexpr const char* prefix ("\\\\?\\");
+
+    // It turns out that GetFinalPathNameByHandleW prepends \\?\ to the path.
+    // This is not a bug, it's a feature. See MSDN for more information.
+    if (path.isNotEmpty())
+        return path.startsWith (prefix) ? path.substring (StringRef (prefix).length()) : path;
    #endif
 
     // as last resort try the resolve method of the ShellLink

@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,7 +35,7 @@
 namespace juce::midi_ci
 {
 
-class Device::Impl
+class Device::Impl : private SubscriptionManagerDelegate
 {
     template <typename This>
     static auto getProfileHostImpl (This& t) { return t.profileHost.has_value() ? &*t.profileHost : nullptr; }
@@ -48,7 +57,7 @@ public:
         outgoing.reserve (options.getMaxSysExSize());
     }
 
-    ~Impl()
+    ~Impl() override
     {
         if (concreteBufferOutput.hasSentMuid())
         {
@@ -151,11 +160,15 @@ public:
 
         if (numChannels > 0)
         {
+            const auto channelsToSend = address == ChannelInGroup::wholeBlock || address == ChannelInGroup::wholeGroup
+                                      ? 0
+                                      : numChannels;
+
             detail::MessageTypeUtils::send (concreteBufferOutput,
                                             options.getFunctionBlock().firstGroup,
                                             m,
                                             address,
-                                            Message::ProfileOn { profile, (uint16_t) numChannels });
+                                            Message::ProfileOn { profile, (uint16_t) channelsToSend });
         }
         else
         {
@@ -179,162 +192,146 @@ public:
                                         Message::PropertyExchangeCapabilities { std::byte { propertyDelegate.getNumSimultaneousRequestsSupported() }, {}, {} });
     }
 
-    ErasedScopeGuard sendPropertyGetInquiry (MUID m,
-                                             const PropertyRequestHeader& propertyHeader,
-                                             std::function<void (const PropertyExchangeResult&)> callback)
+    std::optional<RequestKey> sendPropertyGetInquiry (MUID m,
+                                                      const PropertyRequestHeader& header,
+                                                      std::function<void (const PropertyExchangeResult&)> onResult)
     {
         const auto iter = discovered.find (m);
 
         if (iter == discovered.end() || ! Features { iter->second.discovery.capabilities }.isPropertyExchangeSupported())
             return {};
 
-        auto primed = iter->second.initiatorPropertyCaches.primeCache (propertyDelegate.getNumSimultaneousRequestsSupported(),
-                                                                       std::move (callback),
-                                                                       detail::PropertyHostUtils::getTerminator (concreteBufferOutput, options.getFunctionBlock(), m));
+        const auto primed = iter->second.initiatorPropertyCaches.primeCache (propertyDelegate.getNumSimultaneousRequestsSupported(),
+                                                                             std::move (onResult));
 
-        if (! primed.isValid())
+        if (! primed.has_value())
             return {};
+
+        const auto id = iter->second.initiatorPropertyCaches.getRequestIdForToken (*primed);
+        jassert (id.has_value());
 
         detail::MessageTypeUtils::send (concreteBufferOutput,
                                         options.getFunctionBlock().firstGroup,
                                         m,
                                         ChannelInGroup::wholeBlock,
-                                        Message::PropertyGetData { { primed.id, Encodings::jsonTo7BitText (propertyHeader.toVarCondensed()) } });
+                                        Message::PropertyGetData { { id->asByte(), Encodings::jsonTo7BitText (header.toVarCondensed()) } });
 
-        return std::move (primed.token);
+        return RequestKey { m, *primed };
     }
 
-    void sendPropertySetInquiry (MUID m,
-                                 const PropertyRequestHeader& propertyHeader,
-                                 Span<const std::byte> propertyBody,
-                                 std::function<void (const PropertyExchangeResult&)> callback)
+    std::optional<RequestKey> sendPropertySetInquiry (MUID m,
+                                                      const PropertyRequestHeader& header,
+                                                      Span<const std::byte> body,
+                                                      std::function<void (const PropertyExchangeResult&)> onResult)
     {
+        const auto encoded = Encodings::tryEncode (body, header.mutualEncoding);
+
+        if (! encoded.has_value())
+            return {};
+
         const auto iter = discovered.find (m);
 
         if (iter == discovered.end() || ! Features { iter->second.discovery.capabilities }.isPropertyExchangeSupported())
-            return;
+            return {};
 
-        const auto encoded = Encodings::tryEncode (propertyBody, propertyHeader.mutualEncoding);
+        const auto primed = iter->second.initiatorPropertyCaches.primeCache (propertyDelegate.getNumSimultaneousRequestsSupported(),
+                                                                             std::move (onResult));
 
-        if (! encoded.has_value())
-        {
-            NullCheckedInvocation::invoke (callback, PropertyExchangeResult { PropertyExchangeResult::Error::invalidPayload });
-            return;
-        }
+        if (! primed.has_value())
+            return {};
 
-        auto primed = iter->second.initiatorPropertyCaches.primeCache (propertyDelegate.getNumSimultaneousRequestsSupported(),
-                                                                       std::move (callback),
-                                                                       detail::PropertyHostUtils::getTerminator (concreteBufferOutput, options.getFunctionBlock(), m));
-
-        if (! primed.isValid())
-            return;
+        const auto id = iter->second.initiatorPropertyCaches.getRequestIdForToken (*primed);
+        jassert (id.has_value());
 
         detail::PropertyHostUtils::send (concreteBufferOutput,
                                          options.getFunctionBlock().firstGroup,
                                          detail::MessageMeta::Meta<Message::PropertySetData>::subID2,
                                          m,
-                                         primed.id,
-                                         Encodings::jsonTo7BitText (propertyHeader.toVarCondensed()),
+                                         id->asByte(),
+                                         Encodings::jsonTo7BitText (header.toVarCondensed()),
                                          *encoded,
                                          cacheProvider.getMaxSysexSizeForMuid (m));
+
+        return RequestKey { m, *primed };
     }
 
-    void sendPropertySubscriptionStart (MUID m,
-                                        const PropertySubscriptionHeader& header,
-                                        std::function<void (const PropertyExchangeResult&)> cb)
+    void abortPropertyRequest (RequestKey k) override
     {
-        const auto resource = header.resource;
-        auto wrappedCallback = [this, m, resource, callback = std::move (cb)] (const PropertyExchangeResult& result)
+        const auto iter = discovered.find (k.getMuid());
+
+        if (iter == discovered.end())
+            return;
+
+        const auto id = iter->second.initiatorPropertyCaches.getRequestIdForToken (k.getKey());
+
+        if (! id.has_value() || ! iter->second.initiatorPropertyCaches.terminate (k.getKey()))
+            return;
+
+        const Message::Header notifyHeader
         {
-            if (! result.getError().has_value())
-            {
-                const auto foundMuid = discovered.find (m);
-
-                if (foundMuid != discovered.end())
-                {
-                    const auto parsed = result.getHeaderAsSubscriptionHeader();
-
-                    // The responder should have given us a subscription ID so that we can reference the original subscription
-                    // whenever we get updates in the future, or if we want to end the subscription.
-                    jassert (parsed.subscribeId.isNotEmpty());
-                    const auto emplaceResult = foundMuid->second.subscriptions.insert ({ parsed.subscribeId, resource });
-
-                    // If this fails, the device gave us a subscribeId that it was already using for another subscription.
-                    jassertquiet (emplaceResult.second);
-                }
-            }
-
-            NullCheckedInvocation::invoke (callback, result);
+            ChannelInGroup::wholeBlock,
+            detail::MessageMeta::Meta<Message::PropertyNotify>::subID2,
+            detail::MessageMeta::implementationVersion,
+            muid,
+            k.getMuid(),
         };
 
-        inquirePropertySubscribe (m, header, std::move (wrappedCallback));
+        const auto jsonHeader = Encodings::jsonTo7BitText (JSONUtils::makeObjectWithKeyFirst ({ { "status", 144 } }, "status"));
+        detail::MessageTypeUtils::send (concreteBufferOutput,
+                                        options.getFunctionBlock().firstGroup,
+                                        notifyHeader,
+                                        Message::PropertyNotify { { id->asByte(), jsonHeader, 1, 1, {} } });
     }
 
-    void sendPropertySubscriptionEnd (MUID m,
-                                      const String& subscribeId,
-                                      std::function<void (const PropertyExchangeResult&)> cb)
+    std::optional<RequestID> getIdForRequestKey (RequestKey key) const
     {
-        const auto iter = discovered.find (m);
-
-        if (iter == discovered.end() || ! Features { iter->second.discovery.capabilities }.isPropertyExchangeSupported())
-        {
-            // Trying to send a subscription message to a device that doesn't exist (maybe it got removed), or
-            // that doesn't support property exchange.
-            jassertfalse;
-            return;
-        }
-
-        if (iter->second.subscriptions.count ({ subscribeId, {} }) == 0)
-        {
-            // Trying to end a subscription that doesn't exist - perhaps it already ended.
-            jassertfalse;
-            return;
-        }
-
-        auto wrappedCallback = [this, m, subscribeId, callback = std::move (cb)] (const PropertyExchangeResult& result)
-        {
-            if (! result.getError().has_value())
-            {
-                const auto foundMuid = discovered.find (m);
-
-                if (foundMuid != discovered.end())
-                    foundMuid->second.subscriptions.erase ({ subscribeId, {} });
-            }
-
-            NullCheckedInvocation::invoke (callback, result);
-        };
-
-        PropertySubscriptionHeader header;
-        header.subscribeId = subscribeId;
-        header.command = PropertySubscriptionCommand::end;
-        inquirePropertySubscribe (m, header, std::move (wrappedCallback));
-    }
-
-    std::vector<Subscription> getOngoingSubscriptionsForMuid (MUID m) const
-    {
-        const auto iter = discovered.find (m);
+        const auto iter = discovered.find (key.getMuid());
 
         if (iter == discovered.end())
             return {};
 
-        std::vector<Subscription> result;
-        result.reserve (iter->second.subscriptions.size());
+        return iter->second.initiatorPropertyCaches.getRequestIdForToken (key.getKey());
+    }
 
-        for (const auto& [subscribeId, resource] : iter->second.subscriptions)
-            result.push_back ({ subscribeId, resource });
+    std::vector<RequestKey> getOngoingRequests() const
+    {
+        std::vector<RequestKey> result;
+
+        for (auto& i : discovered)
+            for (const auto& token : i.second.initiatorPropertyCaches.getOngoingTransactions())
+                result.emplace_back (i.first, token);
 
         return result;
     }
 
-    int countOngoingPropertyTransactions() const
+    SubscriptionKey beginSubscription (MUID m, const PropertySubscriptionHeader& header)
     {
-        return std::accumulate (discovered.begin(),
-                                discovered.end(),
-                                0,
-                                [] (auto acc, const auto& pair)
-                                {
-                                    return acc + pair.second.initiatorPropertyCaches.countOngoingTransactions();
-                                });
+        return subscriptionManager.beginSubscription (m, header);
+    }
+
+    void endSubscription (SubscriptionKey key)
+    {
+        subscriptionManager.endSubscription (key);
+    }
+
+    std::vector<SubscriptionKey> getOngoingSubscriptions() const
+    {
+        return subscriptionManager.getOngoingSubscriptions();
+    }
+
+    std::optional<String> getSubscribeIdForKey (SubscriptionKey key) const
+    {
+        return subscriptionManager.getSubscribeIdForKey (key);
+    }
+
+    std::optional<String> getResourceForKey (SubscriptionKey key) const
+    {
+        return subscriptionManager.getResourceForKey (key);
+    }
+
+    bool sendPendingMessages()
+    {
+        return subscriptionManager.sendPendingMessages();
     }
 
     void processMessage (ump::BytesOnGroup msg)
@@ -583,6 +580,7 @@ private:
 
                 if (iter != device->discovered.end())
                 {
+                    device->subscriptionManager.endSubscriptionsFromResponder (targetMuid);
                     device->discovered.erase (iter);
                     device->listeners.call ([&] (auto& l) { l.deviceRemoved (targetMuid); });
                 }
@@ -780,9 +778,7 @@ private:
                     return false;
                 };
 
-                const auto transaction = device->ongoingTransactions.emplace (device->ongoingTransactions.end());
-
-                const auto onResourceListReceived = [this, iter, source, hasResource, transaction] (const PropertyExchangeResult& result)
+                const auto onResourceListReceived = [this, iter, source, hasResource] (const PropertyExchangeResult& result)
                 {
                     const auto validateResponse = [] (const PropertyExchangeResult& r)
                     {
@@ -792,9 +788,8 @@ private:
                                && parsed.status == 200;
                     };
 
-                    const auto allDone = [this, source, transaction]
+                    const auto allDone = [this, source]
                     {
-                        device->ongoingTransactions.erase (transaction);
                         device->listeners.call ([source] (auto& l) { l.propertyExchangeCapabilitiesReceived (source); });
                     };
 
@@ -817,13 +812,13 @@ private:
                         return;
                     };
 
-                    const auto getChannelList = [this, bodyAsObj, source, allDone, hasResource, onChannelListReceived, transaction]
+                    const auto getChannelList = [this, bodyAsObj, source, allDone, hasResource, onChannelListReceived]
                     {
                         if (hasResource (bodyAsObj, "ChannelList"))
                         {
                             PropertyRequestHeader header;
                             header.resource = "ChannelList";
-                            *transaction = device->sendPropertyGetInquiry (source, header, onChannelListReceived);
+                            device->sendPropertyGetInquiry (source, header, onChannelListReceived);
                             return;
                         }
 
@@ -835,15 +830,15 @@ private:
                     {
                         PropertyRequestHeader header;
                         header.resource = "DeviceInfo";
-                        *transaction = device->sendPropertyGetInquiry (source,
-                                                                       header,
-                                                                       [iter, getChannelList, validateResponse] (const PropertyExchangeResult& r)
-                                                                       {
-                                                                           if (validateResponse (r))
-                                                                               iter->second.deviceInfo = Encodings::jsonFrom7BitText (r.getBody());
+                        device->sendPropertyGetInquiry (source,
+                                                        header,
+                                                        [iter, getChannelList, validateResponse] (const PropertyExchangeResult& r)
+                                                        {
+                                                            if (validateResponse (r))
+                                                                iter->second.deviceInfo = Encodings::jsonFrom7BitText (r.getBody());
 
-                                                                           getChannelList();
-                                                                       });
+                                                            getChannelList();
+                                                        });
                         return;
                     }
 
@@ -852,7 +847,7 @@ private:
 
                 PropertyRequestHeader header;
                 header.resource = "ResourceList";
-                *transaction = device->sendPropertyGetInquiry (source, header, onResourceListReceived);
+                device->sendPropertyGetInquiry (source, header, onResourceListReceived);
 
                 return true;
             }
@@ -865,7 +860,12 @@ private:
                 if (iter == device->discovered.end())
                     return false;
 
-                iter->second.initiatorPropertyCaches.addChunk (response.requestID, response);
+                const auto request = RequestID::create (response.requestID);
+
+                if (! request.has_value())
+                    return false;
+
+                iter->second.initiatorPropertyCaches.addChunk (*request, response);
 
                 return true;
             }
@@ -912,18 +912,12 @@ private:
                     data.body = result.getBody();
 
                     if (data.header.command == PropertySubscriptionCommand::end)
-                    {
-                        const auto foundMuid = device->discovered.find (source);
-
-                        if (foundMuid != device->discovered.end())
-                            foundMuid->second.subscriptions.erase ({ data.header.subscribeId, {} });
-                    }
+                        device->subscriptionManager.endSubscriptionFromResponder (source, subscribeId);
 
                     if (data.header.command != PropertySubscriptionCommand::start)
                         device->listeners.call ([source, &data] (auto& l) { l.propertySubscriptionDataReceived (source, data); });
 
                     PropertyReplyHeader header;
-                    header.extended["subscribeId"] = subscribeId;
                     const auto headerBytes = Encodings::jsonTo7BitText (header.toVarCondensed());
 
                     detail::MessageTypeUtils::send (device->concreteBufferOutput,
@@ -933,13 +927,18 @@ private:
                                                     Message::PropertySubscribeResponse { { request, headerBytes, 1, 1, {} } });
                 };
 
+                const auto requestID = RequestID::create (subscription.requestID);
+
+                if (! requestID.has_value())
+                    return false;
+
                 // Subscription events may be sent at any time by the responder, so there may not be
                 // an existing transaction ID for new subscription messages.
                 iter->second.responderPropertyCaches.primeCache (device->propertyDelegate.getNumSimultaneousRequestsSupported(),
                                                                  callback,
-                                                                 subscription.requestID);
+                                                                 *requestID);
 
-                iter->second.responderPropertyCaches.addChunk (subscription.requestID, subscription);
+                iter->second.responderPropertyCaches.addChunk (*requestID, subscription);
 
                 return true;
             }
@@ -958,12 +957,16 @@ private:
                 if (iter == device->discovered.end())
                     return false;
 
-                iter->second.initiatorPropertyCaches.notify (notify.requestID, notify.header);
-                iter->second.responderPropertyCaches.notify (notify.requestID, notify.header);
+                const auto requestID = RequestID::create (notify.requestID);
+
+                if (! requestID.has_value())
+                    return false;
+
+                iter->second.initiatorPropertyCaches.notify (*requestID, notify.header);
+                iter->second.responderPropertyCaches.notify (*requestID, notify.header);
 
                 return true;
             }
-
 
             Impl* device = nullptr;
             ResponderOutput* output = nullptr;
@@ -983,7 +986,6 @@ private:
         InitiatorPropertyExchangeCache initiatorPropertyCaches;
         ResponderPropertyExchangeCache responderPropertyCaches;
         var resourceList, deviceInfo, channelList;
-        std::set<Subscription> subscriptions; ///< subscribeIds of subscriptions that we initiated
     };
 
     class ConcreteBufferOutput : public BufferOutput
@@ -1045,7 +1047,7 @@ private:
             return iter != device.discovered.end() ? jmin (defaultResult, (int) iter->second.discovery.maximumSysexSize) : defaultResult;
         }
 
-    public:
+    private:
         Impl& device;
     };
 
@@ -1062,13 +1064,10 @@ private:
             if (! device.profileHost.has_value())
                 return;
 
-            if (enabled)
-                device.profileHost->enableProfile (profileAtAddress, numChannels);
-            else
-                device.profileHost->disableProfile (profileAtAddress);
+            device.profileHost->setProfileEnablement (profileAtAddress, enabled ? jmax (1, numChannels) : 0);
         }
 
-    public:
+    private:
         Impl& device;
     };
 
@@ -1127,9 +1126,44 @@ private:
                 d->subscriptionWillEnd (m, subscription);
         }
 
-    public:
+    private:
         Impl& device;
     };
+
+    std::optional<RequestKey> sendPropertySubscribe (MUID m,
+                                                     const PropertySubscriptionHeader& header,
+                                                     std::function<void (const PropertyExchangeResult&)> onResult) override
+    {
+        const auto iter = discovered.find (m);
+
+        if (iter == discovered.end())
+            return {};
+
+        const auto primed = iter->second.initiatorPropertyCaches.primeCache (propertyDelegate.getNumSimultaneousRequestsSupported(),
+                                                                             std::move (onResult));
+
+        if (! primed.has_value())
+            return {};
+
+        const auto id = iter->second.initiatorPropertyCaches.getRequestIdForToken (*primed);
+        jassert (id.has_value());
+
+        detail::PropertyHostUtils::send (concreteBufferOutput,
+                                         options.getFunctionBlock().firstGroup,
+                                         detail::MessageMeta::Meta<Message::PropertySubscribe>::subID2,
+                                         m,
+                                         id->asByte(),
+                                         Encodings::jsonTo7BitText (header.toVarCondensed()),
+                                         {},
+                                         cacheProvider.getMaxSysexSizeForMuid (m));
+
+        return RequestKey (m, *primed);
+    }
+
+    void propertySubscriptionChanged (SubscriptionKey key, const std::optional<String>& subscribeId) override
+    {
+        listeners.call ([&] (auto& l) { l.propertySubscriptionChanged (key, subscribeId); });
+    }
 
     static MUID getReallyRandomMuid()
     {
@@ -1170,41 +1204,11 @@ private:
         return supportsFlag (m, &Features::isPropertyExchangeSupported);
     }
 
-    void inquirePropertySubscribe (MUID m,
-                                   const PropertySubscriptionHeader& header,
-                                   std::function<void (const PropertyExchangeResult&)> cb)
-    {
-        const auto iter = discovered.find (m);
-
-        if (iter == discovered.end() || ! Features { iter->second.discovery.capabilities }.isPropertyExchangeSupported())
-        {
-            // Trying to send a subscription message to a device that doesn't exist (maybe it got removed), or
-            // that doesn't support property exchange.
-            jassertfalse;
-            return;
-        }
-
-        auto primed = iter->second.initiatorPropertyCaches.primeCache (propertyDelegate.getNumSimultaneousRequestsSupported(),
-                                                                       std::move (cb),
-                                                                       detail::PropertyHostUtils::getTerminator (concreteBufferOutput, options.getFunctionBlock(), m));
-
-        if (! primed.isValid())
-            return;
-
-        detail::PropertyHostUtils::send (concreteBufferOutput,
-                                         options.getFunctionBlock().firstGroup,
-                                         detail::MessageMeta::Meta<Message::PropertySubscribe>::subID2,
-                                         m,
-                                         primed.id,
-                                         Encodings::jsonTo7BitText (header.toVarCondensed()),
-                                         {},
-                                         cacheProvider.getMaxSysexSizeForMuid (m));
-    }
-
     DeviceOptions options;
     MUID muid;
     std::vector<std::byte> outgoing;
     std::map<MUID, Discovered> discovered;
+    SubscriptionManager subscriptionManager { *this };
     ListenerList<Listener> listeners;
     ConcreteBufferOutput concreteBufferOutput { *this };
     CacheProviderImpl cacheProvider { *this };
@@ -1212,7 +1216,6 @@ private:
     PropertyDelegateImpl propertyDelegate { *this };
     std::optional<ProfileHost> profileHost;
     std::optional<PropertyHost> propertyHost;
-    std::list<ErasedScopeGuard> ongoingTransactions;
 };
 
 //==============================================================================
@@ -1241,33 +1244,32 @@ void Device::sendPropertyCapabilitiesInquiry (MUID destination)
 {
     pimpl->sendPropertyCapabilitiesInquiry (destination);
 }
-ErasedScopeGuard Device::sendPropertyGetInquiry (MUID destination,
-                                                 const PropertyRequestHeader& header,
-                                                 std::function<void (const PropertyExchangeResult&)> onResult)
+
+std::optional<RequestKey> Device::sendPropertyGetInquiry (MUID m,
+                                                          const PropertyRequestHeader& header,
+                                                          std::function<void (const PropertyExchangeResult&)> onResult)
 {
-    return pimpl->sendPropertyGetInquiry (destination, header, std::move (onResult));
+    return pimpl->sendPropertyGetInquiry (m, header, std::move (onResult));
 }
-void Device::sendPropertySetInquiry (MUID destination,
-                                     const PropertyRequestHeader& header,
-                                     Span<const std::byte> body,
-                                     std::function<void (const PropertyExchangeResult&)> onResult)
+
+std::optional<RequestKey> Device::sendPropertySetInquiry (MUID m,
+                                                          const PropertyRequestHeader& header,
+                                                          Span<const std::byte> body,
+                                                          std::function<void (const PropertyExchangeResult&)> onResult)
 {
-    pimpl->sendPropertySetInquiry (destination, header, body, std::move (onResult));
+    return pimpl->sendPropertySetInquiry (m, header, body, std::move (onResult));
 }
-void Device::sendPropertySubscriptionStart (MUID destination,
-                                            const PropertySubscriptionHeader& header,
-                                            std::function<void (const PropertyExchangeResult&)> onResult)
-{
-    pimpl->sendPropertySubscriptionStart (destination, header, std::move (onResult));
-}
-void Device::sendPropertySubscriptionEnd (MUID destination,
-                                          const String& subscribeId,
-                                          std::function<void (const PropertyExchangeResult&)> onResult)
-{
-    pimpl->sendPropertySubscriptionEnd (destination, subscribeId, std::move (onResult));
-}
-std::vector<Subscription> Device::getOngoingSubscriptionsForMuid (MUID m) const { return pimpl->getOngoingSubscriptionsForMuid (m); }
-int Device::countOngoingPropertyTransactions() const { return pimpl->countOngoingPropertyTransactions(); }
+void Device::abortPropertyRequest (RequestKey key) { pimpl->abortPropertyRequest (key); }
+std::optional<RequestID> Device::getIdForRequestKey (RequestKey key) const { return pimpl->getIdForRequestKey (key); }
+std::vector<RequestKey> Device::getOngoingRequests() const { return pimpl->getOngoingRequests(); }
+
+SubscriptionKey Device::beginSubscription (MUID m, const PropertySubscriptionHeader& header) { return pimpl->beginSubscription (m, header); }
+void Device::endSubscription (SubscriptionKey key) { pimpl->endSubscription (key); }
+std::vector<SubscriptionKey> Device::getOngoingSubscriptions() const { return pimpl->getOngoingSubscriptions(); }
+std::optional<String> Device::getSubscribeIdForKey (SubscriptionKey key) const { return pimpl->getSubscribeIdForKey (key); }
+std::optional<String> Device::getResourceForKey (SubscriptionKey key) const { return pimpl->getResourceForKey (key); }
+bool Device::sendPendingMessages() { return pimpl->sendPendingMessages(); }
+
 void Device::addListener (Listener& l) { pimpl->addListener (l); }
 void Device::removeListener (Listener& l) { pimpl->removeListener (l); }
 MUID Device::getMuid() const { return pimpl->getMuid(); }
@@ -1755,8 +1757,7 @@ public:
 
             beginTest ("If a device has previously acted as a responder to profile inquiry, then modifying profiles emits events");
             {
-                const auto numChannels = 0;
-                device.getProfileHost()->enableProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, numChannels);
+                device.getProfileHost()->setProfileEnablement ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 1);
 
                 expect (output.messages.size() == 2);
                 expect (output.messages.back().bytes == getMessageBytes ({ ChannelInGroup::wholeBlock,
@@ -1764,7 +1765,7 @@ public:
                                                                            detail::MessageMeta::implementationVersion,
                                                                            device.getMuid(),
                                                                            MUID::getBroadcast() },
-                                                                         Message::ProfileEnabledReport { profile, numChannels }));
+                                                                         Message::ProfileEnabledReport { profile, 0 }));
             }
         }
 
@@ -1834,7 +1835,7 @@ public:
                                                            detail::MessageMeta::implementationVersion,
                                                            inquiryMUID,
                                                            device.getMuid() },
-                                                         Message::ProfileOn { profile, 1 }) });
+                                                         Message::ProfileOn { profile, 0 }) });
 
             expect (output.messages.size() == 1);
             expect (output.messages.back().bytes == getMessageBytes ({ ChannelInGroup::wholeBlock,
@@ -1842,7 +1843,7 @@ public:
                                                                        detail::MessageMeta::implementationVersion,
                                                                        device.getMuid(),
                                                                        MUID::getBroadcast() },
-                                                                     Message::ProfileEnabledReport { profile, 1 }));
+                                                                     Message::ProfileEnabledReport { profile, 0 }));
         }
 
         struct DoNothingProfileDelegate : public ProfileDelegate
@@ -1950,7 +1951,7 @@ public:
                                     std::byte { 0x05 } };
 
             device.getProfileHost()->addProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) });
-            device.getProfileHost()->enableProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 0);
+            device.getProfileHost()->setProfileEnablement ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 0);
 
             const auto inquiryMUID = MUID::makeRandom (random);
 
@@ -1991,7 +1992,7 @@ public:
                                     std::byte { 0x05 } };
 
             device.getProfileHost()->addProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) });
-            device.getProfileHost()->enableProfile ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 1);
+            device.getProfileHost()->setProfileEnablement ({ profile, ChannelAddress{}.withChannel (ChannelInGroup::wholeBlock) }, 1);
 
             const auto inquiryMUID = MUID::makeRandom (random);
 
@@ -2008,7 +2009,7 @@ public:
                                                                        detail::MessageMeta::implementationVersion,
                                                                        device.getMuid(),
                                                                        MUID::getBroadcast() },
-                                                                     Message::ProfileEnabledReport { profile, 1 }));
+                                                                     Message::ProfileEnabledReport { profile, 0 }));
         }
 
         beginTest ("If a device receives a set profile off for an unsupported profile, NAK is emitted");
@@ -2310,7 +2311,19 @@ public:
 
             output.messages.clear();
 
-            beginTest ("If a request is terminated via notify, the device responds with an error status code.");
+            const auto makeStatusHeader = [] (int status)
+            {
+                auto ptr = std::make_unique<DynamicObject>();
+                ptr->setProperty ("status", status);
+                return Encodings::jsonTo7BitText (ptr.release());
+            };
+
+            const auto successHeader = makeStatusHeader (200);
+            const auto retryHeader = makeStatusHeader (343);
+            const auto cancelHeader = makeStatusHeader (144);
+
+            // Common rules for PE section 10: There is no reply message associated with any Notify message.
+            beginTest ("If a request is terminated via notify, the device does not respond");
             {
                 auto obj = std::make_unique<DynamicObject>();
                 obj->setProperty ("resource", "X-CustomProp");
@@ -2324,30 +2337,544 @@ public:
                                                                device.getMuid() },
                                                              Message::PropertySetData { { requestID, header, 2, 1, {} } }) });
 
-                auto notifyHeader = std::make_unique<DynamicObject>();
-                notifyHeader->setProperty ("status", 144);
+                expect (device.getPropertyHost()->countOngoingTransactions() == 1);
+
                 device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
                                                                detail::MessageMeta::Meta<Message::PropertyNotify>::subID2,
                                                                detail::MessageMeta::implementationVersion,
                                                                inquiryMUID,
                                                                device.getMuid() },
-                                                             Message::PropertyNotify { { requestID, Encodings::jsonTo7BitText (notifyHeader.release()), 1, 1, {} } }) });
+                                                             Message::PropertyNotify { { requestID, cancelHeader, 1, 1, {} } }) });
 
-                expect (output.messages.size() == 1);
-                const auto parsed = Parser::parse (output.messages.back().bytes);
+                expect (device.getPropertyHost()->countOngoingTransactions() == 0);
 
-                expect (parsed.has_value());
-                expect (parsed->header == Message::Header { ChannelInGroup::wholeBlock,
-                                                            detail::MessageMeta::Meta<Message::PropertySetDataResponse>::subID2,
+                expect (output.messages.empty());
+            }
+
+            beginTest ("Sending too many property requests simultaneously fails");
+            {
+                PropertyRequestHeader header;
+                header.resource = "X-CustomProp";
+                const auto a = device.sendPropertyGetInquiry (inquiryMUID, header, [] (const PropertyExchangeResult&) {});
+
+                expect (a.has_value());
+                expect (device.getOngoingRequests() == std::vector { *a });
+
+                // Our device only supports 1 simultaneous request, so this should fail to send
+                const auto b = device.sendPropertyGetInquiry (inquiryMUID, header, [] (const PropertyExchangeResult&) {});
+                expect (! b.has_value());
+                expect (device.getOngoingRequests() == std::vector { *a });
+
+                // Reply to the first request
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertyGetDataResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertyGetDataResponse { { device.getIdForRequestKey (*a)->asByte(), successHeader, 1, 1, {} } }) });
+
+                // Now that a response to the first request has been received, there should be no
+                // requests in progress.
+                expect (device.getOngoingRequests().empty());
+            }
+
+            output.messages.clear();
+
+            beginTest ("Aborting a property request sends a property notify");
+            {
+                PropertyRequestHeader header;
+                header.resource = "X-CustomProp";
+
+                bool callbackCalled = false;
+                const auto a = device.sendPropertyGetInquiry (inquiryMUID, header, [&] (const PropertyExchangeResult&)
+                {
+                    callbackCalled = true;
+                });
+
+                expect (a.has_value());
+                expect (device.getOngoingRequests() == std::vector { *a });
+                expect (! callbackCalled);
+
+                const auto requestID = device.getIdForRequestKey (*a);
+                device.abortPropertyRequest (*a);
+
+                expect (device.getOngoingRequests().empty());
+                expect (! callbackCalled);
+
+                expect (output.messages.size() == 2);
+
+                const auto inquiry = Parser::parse (output.messages.front().bytes);
+                expect (inquiry.has_value());
+                expect (inquiry->header == Message::Header { ChannelInGroup::wholeBlock,
+                                                             detail::MessageMeta::Meta<Message::PropertyGetData>::subID2,
+                                                             detail::MessageMeta::implementationVersion,
+                                                             device.getMuid(),
+                                                             inquiryMUID });
+
+                const auto notify = Parser::parse (output.messages.back().bytes);
+                expect (notify.has_value());
+                expect (notify->header == Message::Header { ChannelInGroup::wholeBlock,
+                                                            detail::MessageMeta::Meta<Message::PropertyNotify>::subID2,
                                                             detail::MessageMeta::implementationVersion,
                                                             device.getMuid(),
                                                             inquiryMUID });
 
-                auto* body = std::get_if<Message::PropertySetDataResponse> (&parsed->body);
+                auto* body = std::get_if<Message::PropertyNotify> (&notify->body);
                 expect (body != nullptr);
-                expect (body->requestID == requestID);
-                auto replyHeader = Encodings::jsonFrom7BitText (body->header);
-                expect (replyHeader.getProperty ("status", "") == var (400));
+                expect (body->requestID == requestID->asByte());
+                expect (body->thisChunkNum == 1);
+                expect (body->totalNumChunks == 1);
+
+                const auto replyHeader = Encodings::jsonFrom7BitText (body->header);
+                expect (replyHeader.getProperty ("status", "") == var (144));
+            }
+
+            output.messages.clear();
+
+            beginTest ("Aborting a completed property request does nothing");
+            {
+                PropertyRequestHeader header;
+                header.resource = "X-CustomProp";
+
+                const auto a = device.sendPropertyGetInquiry (inquiryMUID, header, [&] (const PropertyExchangeResult&) {});
+
+                expect (a.has_value());
+                expect (device.getOngoingRequests() == std::vector { *a });
+
+                // Reply to the get data request
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertyGetDataResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertyGetDataResponse { { device.getIdForRequestKey (*a)->asByte(), successHeader, 1, 1, {} } }) });
+
+                // After replying, there should be no ongoing requests
+                expect (device.getOngoingRequests().empty());
+                expect (output.messages.size() == 1);
+
+                // This request has already finished
+                device.abortPropertyRequest (*a);
+
+                expect (device.getOngoingRequests().empty());
+                expect (output.messages.size() == 1);
+            }
+
+            output.messages.clear();
+
+            beginTest ("Beginning a subscription and ending it before the remote device replies causes a property notify to be sent");
+            {
+                PropertySubscriptionHeader header;
+                header.command = PropertySubscriptionCommand::start;
+                header.resource = "X-CustomProp";
+
+                const auto a = device.beginSubscription (inquiryMUID, header);
+
+                expect (device.getOngoingSubscriptions() == std::vector { a });
+                // Sending a subscription request uses a request slot
+                expect (device.getOngoingRequests().size() == 1);
+
+                // subscription id is empty until the responder confirms the subscription
+                expect (! device.getSubscribeIdForKey (a).has_value());
+                expect (device.getResourceForKey (a) == header.resource);
+
+                expect (output.messages.size() == 1);
+
+                {
+                    const auto parsed = Parser::parse (output.messages.back().bytes);
+                    expect (parsed.has_value());
+                    expect (parsed->header == Message::Header { ChannelInGroup::wholeBlock,
+                                                                detail::MessageMeta::Meta<Message::PropertySubscribe>::subID2,
+                                                                detail::MessageMeta::implementationVersion,
+                                                                device.getMuid(),
+                                                                inquiryMUID });
+                    auto* body = std::get_if<Message::PropertySubscribe> (&parsed->body);
+                    expect (body != nullptr);
+                    const auto bodyHeader = Encodings::jsonFrom7BitText (body->header);
+                    expect (bodyHeader.getProperty ("command", "") == var ("start"));
+                }
+
+                output.messages.clear();
+
+                const auto requestID = device.getIdForRequestKey (device.getOngoingRequests().back());
+
+                device.endSubscription (a);
+
+                expect (output.messages.size() == 1);
+
+                {
+                    const auto parsed = Parser::parse (output.messages.back().bytes);
+                    expect (parsed.has_value());
+                    expect (parsed->header == Message::Header { ChannelInGroup::wholeBlock,
+                                                                detail::MessageMeta::Meta<Message::PropertyNotify>::subID2,
+                                                                detail::MessageMeta::implementationVersion,
+                                                                device.getMuid(),
+                                                                inquiryMUID });
+                    auto* body = std::get_if<Message::PropertyNotify> (&parsed->body);
+                    expect (body != nullptr);
+                    const auto bodyHeader = Encodings::jsonFrom7BitText (body->header);
+                    expect (bodyHeader.getProperty ("status", "") == var (144));
+                }
+
+                expect (device.getOngoingSubscriptions().empty());
+                // The start request is no longer in progress because it was terminated by the notify
+                expect (device.getOngoingRequests().empty());
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertySubscribeResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertySubscribeResponse { { requestID->asByte(), successHeader, 1, 1, {} } }) });
+
+                expect (device.getOngoingRequests().empty());
+
+                output.messages.clear();
+
+                // There shouldn't be any queued messages.
+                device.sendPendingMessages();
+
+                expect (output.messages.empty());
+                expect (device.getOngoingRequests().empty());
+            }
+
+            output.messages.clear();
+
+            beginTest ("Starting a new subscription while the device is waiting for a previous subscription to be confirmed queues further requests");
+            {
+                PropertySubscriptionHeader header;
+                header.command = PropertySubscriptionCommand::start;
+                header.resource = "X-CustomProp";
+
+                const auto a = device.beginSubscription (inquiryMUID, header);
+                const auto b = device.beginSubscription (inquiryMUID, header);
+                const auto c = device.beginSubscription (inquiryMUID, header);
+
+                expect (device.getOngoingSubscriptions() == std::vector { a, b, c });
+                expect (device.getOngoingRequests().size() == 1);
+
+                // subscription id is empty until the responder confirms the subscription
+                expect (device.getResourceForKey (a) == header.resource);
+                expect (device.getResourceForKey (b) == header.resource);
+                expect (device.getResourceForKey (c) == header.resource);
+
+                expect (output.messages.size() == 1);
+
+                // The device has sent a subscription start for a, but not for c,
+                // so it should send a notify to end subscription a, but shouldn't emit any
+                // messages related to subscription c.
+                device.endSubscription (a);
+                device.endSubscription (c);
+
+                expect (device.getOngoingSubscriptions() == std::vector { b });
+
+                expect (output.messages.size() == 2);
+                expect (device.getOngoingRequests().empty());
+
+                // There should still be requests related to subscription b pending
+                device.sendPendingMessages();
+
+                expect (output.messages.size() == 3);
+                expect (device.getOngoingRequests().size() == 1);
+
+                // Now, we should send a terminate request for subscription b
+                device.endSubscription (b);
+
+                expect (device.getOngoingSubscriptions().empty());
+
+                expect (output.messages.size() == 4);
+                expect (device.getOngoingRequests().empty());
+            }
+
+            output.messages.clear();
+
+            beginTest ("If the device receives a retry or notify in response to a subscription start request, the subscription is retried or terminated as necessary");
+            {
+                PropertySubscriptionHeader header;
+                header.command = PropertySubscriptionCommand::start;
+                header.resource = "X-CustomProp";
+
+                const auto a = device.beginSubscription (inquiryMUID, header);
+
+                expect (device.getOngoingSubscriptions() == std::vector { a });
+                expect (device.getOngoingRequests().size() == 1);
+                expect (output.messages.size() == 1);
+
+                const auto request0 = device.getOngoingRequests().back();
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertySubscribeResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertySubscribeResponse { { device.getIdForRequestKey (request0)->asByte(), retryHeader, 1, 1, {} } }) });
+
+                // The subscription is still active from the perspective of the device, but the
+                // first request is over and should be retried
+                expect (device.getOngoingSubscriptions() == std::vector { a });
+                expect (device.getOngoingRequests().empty());
+                expect (output.messages.size() == 1);
+
+                device.sendPendingMessages();
+
+                expect (device.getOngoingSubscriptions() == std::vector { a });
+                expect (device.getOngoingRequests().size() == 1);
+                expect (output.messages.size() == 2);
+
+                const auto request1 = device.getOngoingRequests().back();
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertyNotify>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertyNotify { { device.getIdForRequestKey (request1)->asByte(), cancelHeader, 1, 1, {} } }) });
+
+                expect (device.getOngoingSubscriptions().empty());
+                expect (device.getOngoingRequests().empty());
+                expect (output.messages.size() == 2);
+            }
+
+            beginTest ("If the device receives a retry or notify in response to a subscription end request, the subscription is retried as necessary");
+            {
+                PropertySubscriptionHeader header;
+                header.command = PropertySubscriptionCommand::start;
+                header.resource = "X-CustomProp";
+
+                const auto a = device.beginSubscription (inquiryMUID, header);
+
+                expect (device.getOngoingSubscriptions() == std::vector { a });
+                expect (device.getResourceForKey (a) == header.resource);
+
+                const auto subscriptionResponseHeader = Encodings::jsonTo7BitText ([]
+                                                                                   {
+                                                                                       auto ptr = std::make_unique<DynamicObject>();
+                                                                                       ptr->setProperty ("status", 200);
+                                                                                       ptr->setProperty ("subscribeId", "newId");
+                                                                                       return ptr.release();
+                                                                                   }());
+
+                // Accept the subscription
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertySubscribeResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertySubscribeResponse { { device.getIdForRequestKey (device.getOngoingRequests().back())->asByte(), subscriptionResponseHeader, 1, 1, {} } }) });
+
+                // The subscription is still active from the perspective of the device, but the
+                // request is over and should be retried
+                expect (device.getOngoingSubscriptions() == std::vector { a });
+                // Now that the subscription was accepted, the subscription id should be non-empty
+                expect (device.getResourceForKey (a) == header.resource);
+                expect (device.getSubscribeIdForKey (a) == "newId");
+                expect (device.getOngoingRequests().empty());
+
+                device.endSubscription (a);
+
+                expect (device.getOngoingSubscriptions().empty());
+                expect (device.getOngoingRequests().size() == 1);
+
+                // The responder is busy, can't process the subscription end
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertySubscribeResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertySubscribeResponse { { device.getIdForRequestKey (device.getOngoingRequests().back())->asByte(), retryHeader, 1, 1, {} } }) });
+
+                expect (device.getOngoingSubscriptions().empty());
+                expect (device.getOngoingRequests().empty());
+
+                device.sendPendingMessages();
+
+                expect (device.getOngoingSubscriptions().empty());
+                expect (device.getOngoingRequests().size() == 1);
+
+                // The responder told us to immediately terminate our request to end the subscription!
+                // It's unclear how this should behave, so we'll just ignore the failure and assume
+                // the subscription is really over.
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertyNotify>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertyNotify { { device.getIdForRequestKey (device.getOngoingRequests().back())->asByte(), cancelHeader, 1, 1, {} } }) });
+
+                expect (device.getOngoingSubscriptions().empty());
+                expect (device.getOngoingRequests().empty());
+
+                output.messages.clear();
+
+                device.sendPendingMessages();
+
+                expect (device.getOngoingSubscriptions().empty());
+                expect (device.getOngoingRequests().empty());
+                expect (output.messages.empty());
+            }
+
+            output.messages.clear();
+
+            const auto startResponseHeader = [&]
+            {
+                auto ptr = std::make_unique<DynamicObject>();
+                ptr->setProperty ("status", 200);
+                ptr->setProperty ("subscribeId", "newId");
+                return Encodings::jsonTo7BitText (ptr.release());
+            }();
+
+            beginTest ("The responder can terminate a subscription");
+            {
+                PropertySubscriptionHeader header;
+                header.command = PropertySubscriptionCommand::start;
+                header.resource = "X-CustomProp";
+
+                const auto a = device.beginSubscription (inquiryMUID, header);
+
+                expect (device.getOngoingRequests().size() == 1);
+                expect (device.getOngoingSubscriptions().size() == 1);
+                expect (device.getResourceForKey (a) == "X-CustomProp");
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertySubscribeResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertySubscribeResponse { { device.getIdForRequestKey (device.getOngoingRequests().back())->asByte(),
+                                                                                                    startResponseHeader,
+                                                                                                    1,
+                                                                                                    1,
+                                                                                                    {} } }) });
+
+                expect (device.getOngoingRequests().empty());
+                expect (device.getOngoingSubscriptions().size() == 1);
+                expect (output.messages.size() == 1);
+
+                output.messages.clear();
+
+                expect (device.getResourceForKey (a) == "X-CustomProp");
+                expect (device.getSubscribeIdForKey (a) == "newId");
+
+                const auto endRequestHeader = [&]
+                {
+                    auto ptr = std::make_unique<DynamicObject>();
+                    ptr->setProperty ("command", "end");
+                    ptr->setProperty ("subscribeId", "newId");
+                    return Encodings::jsonTo7BitText (ptr.release());
+                }();
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertySubscribe>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertySubscribe { { std::byte { 0x42 }, endRequestHeader, 1, 1, {} } }) });
+
+                expect (device.getOngoingRequests().empty());
+                expect (device.getOngoingSubscriptions().empty());
+                expect (output.messages.size() == 1);
+
+                {
+                    const auto parsed = Parser::parse (output.messages.back().bytes);
+                    expect (parsed.has_value());
+                    expect (parsed->header == Message::Header { ChannelInGroup::wholeBlock,
+                                                                detail::MessageMeta::Meta<Message::PropertySubscribeResponse>::subID2,
+                                                                detail::MessageMeta::implementationVersion,
+                                                                device.getMuid(),
+                                                                inquiryMUID });
+                    auto* body = std::get_if<Message::PropertySubscribeResponse> (&parsed->body);
+                    expect (body != nullptr);
+                    const auto bodyHeader = Encodings::jsonFrom7BitText (body->header);
+                    expect (bodyHeader.getProperty ("status", "") == var (200));
+                }
+            }
+
+            beginTest ("Invalidating a MUID clears subscriptions to that MUID");
+            {
+                PropertySubscriptionHeader header;
+                header.command = PropertySubscriptionCommand::start;
+                header.resource = "X-CustomProp";
+
+                const auto a = device.beginSubscription (inquiryMUID, header);
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertySubscribeResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertySubscribeResponse { { device.getIdForRequestKey (device.getOngoingRequests().back())->asByte(),
+                                                                                                    startResponseHeader,
+                                                                                                    1,
+                                                                                                    1,
+                                                                                                    {} } }) });
+
+                expect (device.getOngoingSubscriptions() == std::vector { a });
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::InvalidateMUID>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               MUID::getBroadcast() },
+                                                             Message::InvalidateMUID { inquiryMUID }) });
+
+                expect (device.getOngoingSubscriptions().empty());
+            }
+
+            beginTest ("Disconnecting and then connecting with the same MUID doesn't reuse SubscribeKeys");
+            {
+                expect (device.getDiscoveredMuids().empty());
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::Discovery>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               MUID::getBroadcast() },
+                                                             Message::Discovery { {}, DeviceFeatures{}.withPropertyExchangeSupported (true).getSupportedCapabilities(), 512, {} }) });
+
+                expect (device.getDiscoveredMuids().size() == 1);
+
+                PropertySubscriptionHeader header;
+                header.command = PropertySubscriptionCommand::start;
+                header.resource = "X-CustomProp";
+
+                const auto subscription = device.beginSubscription (inquiryMUID, header);
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::PropertySubscribeResponse>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               device.getMuid() },
+                                                             Message::PropertySubscribeResponse { { device.getIdForRequestKey (device.getOngoingRequests().back())->asByte(),
+                                                                                                    startResponseHeader,
+                                                                                                    1,
+                                                                                                    1,
+                                                                                                    {} } }) });
+
+                expect (device.getSubscribeIdForKey (subscription) == "newId");
+                expect (device.getResourceForKey (subscription) == "X-CustomProp");
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::InvalidateMUID>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               MUID::getBroadcast() },
+                                                             Message::InvalidateMUID { inquiryMUID }) });
+
+                expect (device.getDiscoveredMuids().empty());
+
+                device.processMessage ({ 0, getMessageBytes ({ ChannelInGroup::wholeBlock,
+                                                               detail::MessageMeta::Meta<Message::Discovery>::subID2,
+                                                               detail::MessageMeta::implementationVersion,
+                                                               inquiryMUID,
+                                                               MUID::getBroadcast() },
+                                                             Message::Discovery { {}, DeviceFeatures{}.withPropertyExchangeSupported (true).getSupportedCapabilities(), 512, {} }) });
+
+                expect (device.getDiscoveredMuids().size() == 1);
+
+                const auto newSubscription = device.beginSubscription (inquiryMUID, header);
+
+                expect (subscription != newSubscription);
+                expect (device.getOngoingSubscriptions() == std::vector { newSubscription });
             }
         }
     }

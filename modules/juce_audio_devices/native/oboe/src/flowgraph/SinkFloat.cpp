@@ -26,7 +26,6 @@ SinkFloat::SinkFloat(int32_t channelCount)
 }
 
 int32_t SinkFloat::read(void *data, int32_t numFrames) {
-    // printf("SinkFloat::read(,,%d)\n", numFrames);
     float *floatData = (float *) data;
     const int32_t channelCount = input.getSamplesPerFrame();
 
@@ -34,7 +33,6 @@ int32_t SinkFloat::read(void *data, int32_t numFrames) {
     while (framesLeft > 0) {
         // Run the graph and pull data through the input port.
         int32_t framesPulled = pullData(framesLeft);
-        // printf("SinkFloat::read: framesLeft = %d, framesPulled = %d\n", framesLeft, framesPulled);
         if (framesPulled <= 0) {
             break;
         }
@@ -44,6 +42,5 @@ int32_t SinkFloat::read(void *data, int32_t numFrames) {
         floatData += numSamples;
         framesLeft -= framesPulled;
     }
-    // printf("SinkFloat returning %d\n", numFrames - framesLeft);
     return numFrames - framesLeft;
 }

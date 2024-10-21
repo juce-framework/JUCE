@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -127,6 +136,12 @@ public:
     void sendProfileSpecificData (MUID muid, ChannelInGroup address, Profile profile, Span<const std::byte>);
 
     /** Sets a profile on or off. Pass 0 or less to disable the profile, or a positive number to enable it.
+
+        This also goes for group/block profiles. If the request is addressed to a group/block, then
+        a positive number will cause a "profile on" message to be sent, and a non-positive number
+        will cause a "profile off" message to be sent. The channel count of the sent message will
+        always be zero for messages addressed to groups/blocks.regardless of the value of the
+        numChannels argument.
     */
     void sendProfileEnablement (MUID muid, ChannelInGroup address, Profile profile, int numChannels);
 
@@ -138,86 +153,74 @@ public:
     */
     void sendPropertyCapabilitiesInquiry (MUID destination);
 
-    /** Sends an inquiry to get a property value from another device, invoking a callback once
-        the full transaction has completed.
+    /** Initiates an inquiry to fetch a property from a particular device.
 
-        @param destination      the device whose property will be set
-        @param header           information about the property data that will be sent
-        @param onResult         this will be called once the result of the transaction is known.
-                                If the transaction cannot start for some reason (e.g. the request is
-                                malformed, or there are too many simultaneous requests) then the
-                                function will be called immediately. Otherwise, the function will be
-                                called once the destination device has confirmed receipt of the
-                                inquiry.
-        @return                 a token bounding the lifetime of the request.
-                                If you need to terminate the transaction before it has completed,
-                                you can call reset() on this token, or cause its destructor to run.
+        @param m         the MUID of the device to query
+        @param header    specifies the resource to query, along with format/encoding options
+        @param onResult  called when the transaction completes; not called if the transaction fails to start
+        @returns         a key uniquely identifying this request, if the transaction begins successfully, or nullopt otherwise
     */
-    ErasedScopeGuard sendPropertyGetInquiry (MUID destination,
-                                             const PropertyRequestHeader& header,
-                                             std::function<void (const PropertyExchangeResult&)> onResult);
+    std::optional<RequestKey> sendPropertyGetInquiry (MUID m,
+                                                      const PropertyRequestHeader& header,
+                                                      std::function<void (const PropertyExchangeResult&)> onResult);
 
-    /** Sends an inquiry to set a property value on another device, invoking a callback once
-        the full transaction has completed.
+    /** Initiates an inquiry to set a property on a particular device.
 
-        @param destination      the device whose property will be set
-        @param header           information about the property data that will be sent
-        @param body             the property data payload to send.
-                                If the header specifies 'ascii' encoding, then you are responsible
-                                for ensuring that no byte of the payload data has its most
-                                significant bit set. Sending the message will fail if this is not
-                                the case. Otherwise, if another encoding is specified then the
-                                payload data may contain any byte values. You should not attempt to
-                                encode the data yourself; the payload will be automatically encoded
-                                before being sent.
-        @param onResult         this will be called once the result of the transaction is known.
-                                If the transaction cannot start for some reason (e.g. the
-                                destination does not support property exchange, the request is
-                                malformed, or there are too many simultaneous requests) then the
-                                function will be called immediately. Otherwise, the function will be
-                                called once the destination device has confirmed receipt of the
-                                inquiry.
+        @param m         the MUID of the device to query
+        @param header    specifies the resource to query, along with format/encoding options
+        @param body      the unencoded body content of the message
+        @param onResult  called when the transaction completes; not called if the transaction fails to start
+        @returns         a key uniquely identifying this request, if the transaction begins successfully, or nullopt otherwise
     */
-    void sendPropertySetInquiry (MUID destination,
-                                 const PropertyRequestHeader& header,
-                                 Span<const std::byte> body,
-                                 std::function<void (const PropertyExchangeResult&)> onResult);
+    std::optional<RequestKey> sendPropertySetInquiry (MUID m,
+                                                      const PropertyRequestHeader& header,
+                                                      Span<const std::byte> body,
+                                                      std::function<void (const PropertyExchangeResult&)> onResult);
 
-    /** Sends an inquiry to start a subscription to a property on a device.
-        The provided callback will be called to indicate whether starting the subscription
-        succeeded or failed.
-        When the remote device indicates that its property value has changed,
-        DeviceListener::propertySubscriptionReceived will be called with information about the
-        update.
+    /** Cancels a request started with sendPropertyGetInquiry() or sendPropertySetInquiry().
+
+        This sends a property notify message indicating that the responder no longer needs to
+        process the initial request.
     */
-    void sendPropertySubscriptionStart (MUID,
-                                        const PropertySubscriptionHeader& header,
-                                        std::function<void (const PropertyExchangeResult&)>);
+    void abortPropertyRequest (RequestKey);
 
-    /** Sends an inquiry to end a subscription to a property on a device.
-        The provided callback will be called to indicate whether the subscriber acknowledged
-        receipt of the message.
-        Note that the remote device may also choose to terminate the subscription of its own
-        accord - in this case, the end request will be sent to
-        DeviceListener::propertySubscriptionReceived.
+    /** Returns the request id corresponding to a particular request.
+
+        If the request could not be found (it never started, or already finished), then this
+        returns nullopt.
     */
-    void sendPropertySubscriptionEnd (MUID,
-                                      const String& subscribeId,
-                                      std::function<void (const PropertyExchangeResult&)>);
+    std::optional<RequestID> getIdForRequestKey (RequestKey) const;
 
-    /** Returns all of the subscriptions that we have requested from another device.
+    /** Returns all the ongoing requests. */
+    std::vector<RequestKey> getOngoingRequests() const;
 
-        Does *not* include subscriptions that other devices have requested from us.
+    /** Attempts to begin a subscription with the provided attributes.
+
+        Once the subscription is no longer required, cancel it by passing the SubscriptionKey to endSubscription().
     */
-    std::vector<Subscription> getOngoingSubscriptionsForMuid (MUID m) const;
+    SubscriptionKey beginSubscription (MUID m, const PropertySubscriptionHeader& header);
 
-    /** Returns the number of transactions initiated by us that are yet to receive complete replies.
+    /** Ends a previously-started subscription. */
+    void endSubscription (SubscriptionKey);
 
-        Does *not* include the count of unfinished requests addressed to us by other devices.
+    /** Returns all the subscriptions that have been initiated by this device. */
+    std::vector<SubscriptionKey> getOngoingSubscriptions() const;
 
-        @see PropertyHost::countOngoingTransactions()
+    /** If the provided subscription has started successfully, this returns the subscribeId assigned
+        to the subscription by the remote device.
     */
-    int countOngoingPropertyTransactions() const;
+    std::optional<String> getSubscribeIdForKey (SubscriptionKey key) const;
+
+    /** If the provided subscription has not been cancelled, this returns the name of the
+        subscribed resource.
+    */
+    std::optional<String> getResourceForKey (SubscriptionKey key) const;
+
+    /** Sends any cached messages that need retrying.
+
+        @returns true if there are no more messages to send, or false otherwise
+    */
+    bool sendPendingMessages();
 
     //==============================================================================
     /** Adds a listener that will be notified when particular events occur.

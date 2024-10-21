@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -32,12 +41,12 @@ int AccessibilityNativeHandle::idCounter = 0;
 
 //==============================================================================
 class UIAScrollProvider final : public UIAProviderBase,
-                                public ComBaseClassHelper<ComTypes::IScrollProvider>
+                                public ComBaseClassHelper<IScrollProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;
 
-    JUCE_COMCALL Scroll (ComTypes::ScrollAmount, ComTypes::ScrollAmount) override { return E_FAIL; }
+    JUCE_COMCALL Scroll (ScrollAmount, ScrollAmount) override { return E_FAIL; }
     JUCE_COMCALL SetScrollPercent (double, double) override { return E_FAIL; }
     JUCE_COMCALL get_HorizontalScrollPercent (double*) override { return E_FAIL; }
     JUCE_COMCALL get_VerticalScrollPercent (double*) override { return E_FAIL; }
@@ -51,7 +60,7 @@ private:
 };
 
 class UIAScrollItemProvider final : public UIAProviderBase,
-                                    public ComBaseClassHelper<ComTypes::IScrollItemProvider>
+                                    public ComBaseClassHelper<IScrollItemProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;
@@ -96,8 +105,6 @@ static String getAutomationId (const AccessibilityHandler& handler)
 
 static auto roleToControlTypeId (AccessibilityRole roleType)
 {
-    using namespace ComTypes::Constants;
-
     switch (roleType)
     {
         case AccessibilityRole::popupMenu:
@@ -142,8 +149,7 @@ static auto roleToControlTypeId (AccessibilityRole roleType)
 
 //==============================================================================
 AccessibilityNativeHandle::AccessibilityNativeHandle (AccessibilityHandler& handler)
-    : ComBaseClassHelper (0),
-      accessibilityHandler (handler)
+    : accessibilityHandler (handler)
 {
 }
 
@@ -155,7 +161,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::QueryInterface (REFIID refId, void** r
     if (! isElementValid())
         return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
-    if ((refId == __uuidof (ComTypes::IRawElementProviderFragmentRoot) && ! isFragmentRoot()))
+    if ((refId == __uuidof (IRawElementProviderFragmentRoot) && ! isFragmentRoot()))
         return E_NOINTERFACE;
 
     return ComBaseClassHelper::QueryInterface (refId, result);
@@ -216,8 +222,6 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
                 return false;
             };
-
-            using namespace ComTypes::Constants;
 
             switch (pId)
             {
@@ -298,7 +302,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 {
                     if (accessibilityHandler.getTableInterface() != nullptr
                         && (pId == UIA_GridPatternId || accessibilityHandler.getRole() == AccessibilityRole::table))
-                        return static_cast<ComTypes::IGridProvider*> (new UIAGridProvider (this));
+                        return static_cast<IGridProvider*> (new UIAGridProvider (this));
 
                     break;
                 }
@@ -306,7 +310,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 case UIA_GridItemPatternId:
                 {
                     if (isListOrTableCell (accessibilityHandler))
-                        return static_cast<ComTypes::IGridItemProvider*> (new UIAGridItemProvider (this));
+                        return static_cast<IGridItemProvider*> (new UIAGridItemProvider (this));
 
                     break;
                 }
@@ -357,8 +361,6 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
         const auto role    = accessibilityHandler.getRole();
         const auto state   = accessibilityHandler.getCurrentState();
         const auto ignored = accessibilityHandler.isIgnored();
-
-        using namespace ComTypes::Constants;
 
         switch (propertyId)
         {
@@ -430,27 +432,27 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
 }
 
 //==============================================================================
-JUCE_COMRESULT AccessibilityNativeHandle::Navigate (ComTypes::NavigateDirection direction, ComTypes::IRawElementProviderFragment** pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::Navigate (NavigateDirection direction, IRawElementProviderFragment** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
         auto* handler = [&]() -> AccessibilityHandler*
         {
-            if (direction == ComTypes::NavigateDirection_Parent)
+            if (direction == NavigateDirection_Parent)
                 return accessibilityHandler.getParent();
 
-            if (direction == ComTypes::NavigateDirection_FirstChild
-                || direction == ComTypes::NavigateDirection_LastChild)
+            if (direction == NavigateDirection_FirstChild
+                || direction == NavigateDirection_LastChild)
             {
                 auto children = accessibilityHandler.getChildren();
 
                 return children.empty() ? nullptr
-                                        : (direction == ComTypes::NavigateDirection_FirstChild ? children.front()
-                                                                                               : children.back());
+                                        : (direction == NavigateDirection_FirstChild ? children.front()
+                                                                                     : children.back());
             }
 
-            if (direction == ComTypes::NavigateDirection_NextSibling
-                || direction == ComTypes::NavigateDirection_PreviousSibling)
+            if (direction == NavigateDirection_NextSibling
+                || direction == NavigateDirection_PreviousSibling)
             {
                 if (auto* parent = accessibilityHandler.getParent())
                 {
@@ -460,10 +462,10 @@ JUCE_COMRESULT AccessibilityNativeHandle::Navigate (ComTypes::NavigateDirection 
                     if (iter == siblings.end())
                         return nullptr;
 
-                    if (direction == ComTypes::NavigateDirection_NextSibling && iter != std::prev (siblings.cend()))
+                    if (direction == NavigateDirection_NextSibling && iter != std::prev (siblings.cend()))
                         return *std::next (iter);
 
-                    if (direction == ComTypes::NavigateDirection_PreviousSibling && iter != siblings.cbegin())
+                    if (direction == NavigateDirection_PreviousSibling && iter != siblings.cbegin())
                         return *std::prev (iter);
                 }
             }
@@ -504,7 +506,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetRuntimeId (SAFEARRAY** pRetVal)
     });
 }
 
-JUCE_COMRESULT AccessibilityNativeHandle::get_BoundingRectangle (ComTypes::UiaRect* pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::get_BoundingRectangle (UiaRect* pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
@@ -543,7 +545,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::SetFocus()
     return S_OK;
 }
 
-JUCE_COMRESULT AccessibilityNativeHandle::get_FragmentRoot (ComTypes::IRawElementProviderFragmentRoot** pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::get_FragmentRoot (IRawElementProviderFragmentRoot** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]() -> HRESULT
     {
@@ -569,7 +571,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::get_FragmentRoot (ComTypes::IRawElemen
 }
 
 //==============================================================================
-JUCE_COMRESULT AccessibilityNativeHandle::ElementProviderFromPoint (double x, double y, ComTypes::IRawElementProviderFragment** pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::ElementProviderFromPoint (double x, double y, IRawElementProviderFragment** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
@@ -591,7 +593,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::ElementProviderFromPoint (double x, do
     });
 }
 
-JUCE_COMRESULT AccessibilityNativeHandle::GetFocus (ComTypes::IRawElementProviderFragment** pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::GetFocus (IRawElementProviderFragment** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {

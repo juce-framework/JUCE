@@ -314,11 +314,6 @@ public:
 	    \param stringBufferSize is the size of the output string  */
 	void print (int32 style, char8* string = nullptr, size_t stringBufferSize = 0) const;
 
-#if SMTG_CPP17
-	[[deprecated ("Use the print method with the buffer size")]]
-#endif
-	void print (char8* string = nullptr, int32 style = kINLINE_UID) const;
-
 	template <size_t N>
 	inline explicit FUID (const char (&uid)[N])
 	{

@@ -25,7 +25,7 @@ MultiToMonoConverter::MultiToMonoConverter(int32_t inputChannelCount)
         , output(*this, 1) {
 }
 
-MultiToMonoConverter::~MultiToMonoConverter() { }
+MultiToMonoConverter::~MultiToMonoConverter() = default;
 
 int32_t MultiToMonoConverter::onProcess(int32_t numFrames) {
     const float *inputBuffer = input.getBuffer();

@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,16 +35,17 @@
 // OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
-#include "base/source/fcommandline.h"
-#include "pluginterfaces/base/fplatform.h"
 #include "pluginterfaces/base/iplugincompatibility.h"
-#include "pluginterfaces/vst/vsttypes.h"
 #include "public.sdk/source/common/memorystream.h"
+
 #include "public.sdk/source/common/readfile.h"
 #include "public.sdk/source/vst/hosting/module.h"
 #include "public.sdk/source/vst/moduleinfo/moduleinfocreator.h"
 #include "public.sdk/source/vst/moduleinfo/moduleinfoparser.h"
 #include "public.sdk/source/vst/utility/stringconvert.h"
+#include "base/source/fcommandline.h"
+#include "pluginterfaces/base/fplatform.h"
+#include "pluginterfaces/vst/vsttypes.h"
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -352,13 +353,13 @@ int run (int argc, char* argv[])
 		{
 			writeToFile = true;
 #if SMTG_OS_WINDOWS
-			auto tmp = VST3::StringConvert::convert (valueMap[optOutputPath]);
+			auto tmp = Vst::StringConvert::convert (valueMap[optOutputPath]);
 			auto outputFile = reinterpret_cast<const wchar_t*> (tmp.data ());
 #else
 			auto outputFile = valueMap[optOutputPath];
 #endif
 			auto ostream = new std::ofstream (outputFile);
-			
+
 			if (ostream->is_open ())
 				outputStream = ostream;
 			else
@@ -389,10 +390,6 @@ int run (int argc, char* argv[])
 //------------------------------------------------------------------------
 #if SMTG_OS_WINDOWS
 //------------------------------------------------------------------------
-#include <Windows.h>
-#include <vector>
-
-//------------------------------------------------------------------------
 using Utf8String = std::string;
 
 //------------------------------------------------------------------------
@@ -402,8 +399,8 @@ Utf8Args toUtf8Args (int argc, wchar_t* wargv[])
 	Utf8Args utf8Args;
 	for (int i = 0; i < argc; i++)
 	{
-		auto str = reinterpret_cast<const Steinberg::Vst::TChar*>(wargv[i]);
-		utf8Args.push_back (VST3::StringConvert::convert (str));
+		auto str = reinterpret_cast<const Steinberg::Vst::TChar*> (wargv[i]);
+		utf8Args.push_back (Steinberg::Vst::StringConvert::convert (str));
 	}
 
 	return utf8Args;
@@ -431,9 +428,14 @@ int wmain (int argc, wchar_t* wargv[])
 	char** argv = &(utf8ArgPtrs.at (0));
 	return Steinberg::ModuleInfoTool::run (argc, argv);
 }
+
 #else
+
+//------------------------------------------------------------------------
 int main (int argc, char* argv[])
 {
 	return Steinberg::ModuleInfoTool::run (argc, argv);
 }
-#endif
+
+//------------------------------------------------------------------------
+#endif // SMTG_OS_WINDOWS

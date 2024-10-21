@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -32,7 +44,6 @@ namespace juce
  bool isIOSAppActive = true;
 #endif
 
-API_AVAILABLE (macos (10.10))
 static auto getNativeQOS (Thread::Priority priority)
 {
     switch (priority)
@@ -47,7 +58,6 @@ static auto getNativeQOS (Thread::Priority priority)
     return QOS_CLASS_DEFAULT;
 }
 
-API_AVAILABLE (macos (10.10))
 static auto getJucePriority (qos_class_t qos)
 {
     switch (qos)
@@ -120,10 +130,7 @@ bool Thread::createNativeThread (Priority priority)
 {
     PosixThreadAttribute attribute { threadStackSize };
 
-    if (@available (macos 10.10, *))
-        pthread_attr_set_qos_class_np (attribute.get(), getNativeQOS (priority), 0);
-    else
-        PosixSchedulerPriority::getNativeSchedulerAndPriority (realtimeOptions, priority).apply (attribute);
+    pthread_attr_set_qos_class_np (attribute.get(), getNativeQOS (priority), 0);
 
     struct ThreadData
     {
@@ -170,21 +177,7 @@ Thread::Priority Thread::getPriority() const
     jassert (Thread::getCurrentThreadId() == getThreadId());
 
     if (! isRealtime())
-    {
-        if (@available (macOS 10.10, *))
-            return getJucePriority (qos_class_self());
-
-        // fallback for older versions of macOS
-        const auto min = jmax (0, sched_get_priority_min (SCHED_OTHER));
-        const auto max = jmax (0, sched_get_priority_max (SCHED_OTHER));
-
-        if (min != 0 && max != 0)
-        {
-            const auto native = PosixSchedulerPriority::findCurrentSchedulerAndPriority().getPriority();
-            const auto mapped = jmap (native, min, max, 0, 4);
-            return ThreadPriorities::getJucePriority (mapped);
-        }
-    }
+        return getJucePriority (qos_class_self());
 
     return {};
 }
@@ -193,20 +186,7 @@ bool Thread::setPriority (Priority priority)
 {
     jassert (Thread::getCurrentThreadId() == getThreadId());
 
-    if (@available (macOS 10.10, *))
-        return pthread_set_qos_class_self_np (getNativeQOS (priority), 0) == 0;
-
-   #if JUCE_ARM
-    // M1 platforms should never reach this code!!!!!!
-    jassertfalse;
-   #endif
-
-    // Just in case older versions of macOS support SCHED_OTHER priorities.
-    const auto psp = PosixSchedulerPriority::getNativeSchedulerAndPriority ({}, priority);
-
-    struct sched_param param;
-    param.sched_priority = psp.getPriority();
-    return pthread_setschedparam (pthread_self(), psp.getScheduler(), &param) == 0;
+    return pthread_set_qos_class_self_np (getNativeQOS (priority), 0) == 0;
 }
 
 //==============================================================================

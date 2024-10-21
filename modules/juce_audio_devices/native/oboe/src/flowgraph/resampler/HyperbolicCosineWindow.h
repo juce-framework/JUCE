@@ -19,7 +19,9 @@
 
 #include <math.h>
 
-namespace resampler {
+#include "ResamplerDefinitions.h"
+
+namespace RESAMPLER_OUTER_NAMESPACE::resampler {
 
 /**
  * Calculate a HyperbolicCosineWindow window centered at 0.
@@ -64,5 +66,6 @@ private:
     double mInverseCoshAlpha = 1.0;
 };
 
-} // namespace resampler
+} /* namespace RESAMPLER_OUTER_NAMESPACE::resampler */
+
 #endif //RESAMPLER_HYPERBOLIC_COSINE_WINDOW_H

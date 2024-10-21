@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -180,7 +180,12 @@ public:
 			{
 				std::string wd (workDir);
 				wd += "/";
-				return loadInternal (wd + path, errorDescription);
+				if (loadInternal (wd + path, errorDescription))
+				{
+					name = path;
+					return true;
+				}
+				return false;
 			}
 		}
 		return loadInternal (path, errorDescription);
@@ -281,7 +286,7 @@ void getApplicationModules (Module::PathList& result)
 //------------------------------------------------------------------------
 void getModuleSnapshots (const std::string& path, Module::SnapshotList& result)
 {
-	auto nsString = [NSString stringWithUTF8String:path.data ()];
+	auto* nsString = [NSString stringWithUTF8String:path.data ()];
 	if (!nsString)
 		return;
 	auto bundleUrl = [NSURL fileURLWithPath:nsString];
@@ -367,7 +372,7 @@ Module::SnapshotList Module::getSnapshots (const std::string& modulePath)
 //------------------------------------------------------------------------
 Optional<std::string> Module::getModuleInfoPath (const std::string& modulePath)
 {
-	auto nsString = [NSString stringWithUTF8String:modulePath.data ()];
+	auto* nsString = [NSString stringWithUTF8String:modulePath.data ()];
 	if (!nsString)
 		return {};
 	auto bundleUrl = [NSURL fileURLWithPath:nsString];

@@ -1,30 +1,72 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
 namespace juce::midi_ci
 {
+
+/**
+    A key used to uniquely identify ongoing transactions initiated by a ci::Device.
+
+    @tags{Audio}
+*/
+class RequestKey
+{
+    auto tie() const { return std::tuple (m, v); }
+
+public:
+    /** Constructor. */
+    RequestKey (MUID muid, Token64 key) : m (muid), v (key) {}
+
+    /** Returns the muid of the device to which we are subscribed. */
+    MUID getMuid() const { return m; }
+
+    /** Returns an identifier unique to this subscription. */
+    Token64 getKey() const { return v; }
+
+    /** Equality operator. */
+    bool operator== (const RequestKey& other) const { return tie() == other.tie(); }
+
+    /** Inequality operator. */
+    bool operator!= (const RequestKey& other) const { return tie() != other.tie(); }
+
+    /** Less-than operator. */
+    bool operator<  (const RequestKey& other) const { return tie() <  other.tie(); }
+
+private:
+    MUID m;
+    Token64 v{};
+};
 
 /**
     Acting as a ResponderListener, instances of this class can formulate
@@ -67,13 +109,12 @@ public:
         The provided callback will be called once the remote device has confirmed
         receipt of the subscription update. If the state of your application
         changes such that you no longer need to respond/wait for confirmation,
-        you can allow the returned Guard to fall out of scope, or reset it
-        manually.
+        you can pass the request key to Device::abortPropertyRequest().
     */
-    ErasedScopeGuard sendSubscriptionUpdate (MUID device,
-                                             const PropertySubscriptionHeader& header,
-                                             Span<const std::byte> body,
-                                             std::function<void (const PropertyExchangeResult&)> callback);
+    std::optional<RequestKey> sendSubscriptionUpdate (MUID device,
+                                                      const PropertySubscriptionHeader& header,
+                                                      Span<const std::byte> body,
+                                                      std::function<void (const PropertyExchangeResult&)> callback);
 
     /** Terminates a subscription that was started by a remote device.
 

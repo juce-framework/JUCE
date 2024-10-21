@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -161,6 +170,50 @@ private:
     int numDeepMouseListeners = 0;
 
     JUCE_DECLARE_NON_COPYABLE (MouseListenerList)
+};
+
+class Component::EffectState
+{
+public:
+    explicit EffectState (ImageEffectFilter& i) : effect (&i) {}
+
+    ImageEffectFilter& getEffect() const
+    {
+        return *effect;
+    }
+
+    bool setEffect (ImageEffectFilter& i)
+    {
+        return std::exchange (effect, &i) != &i;
+    }
+
+    void paint (Graphics& g, Component& c, bool ignoreAlphaLevel)
+    {
+        auto scale = g.getInternalContext().getPhysicalPixelScaleFactor();
+        auto scaledBounds = c.getLocalBounds() * scale;
+
+        if (effectImage.getBounds() != scaledBounds)
+            effectImage = Image { c.isOpaque() ? Image::RGB : Image::ARGB, scaledBounds.getWidth(), scaledBounds.getHeight(), false };
+
+        if (! c.isOpaque())
+            effectImage.clear (effectImage.getBounds());
+
+        {
+            Graphics g2 (effectImage);
+            g2.addTransform (AffineTransform::scale ((float) scaledBounds.getWidth()  / (float) c.getWidth(),
+                                                     (float) scaledBounds.getHeight() / (float) c.getHeight()));
+            c.paintComponentAndChildren (g2);
+        }
+
+        Graphics::ScopedSaveState ss (g);
+
+        g.addTransform (AffineTransform::scale (1.0f / scale));
+        effect->applyEffect (effectImage, g, scale, ignoreAlphaLevel ? 1.0f : c.getAlpha());
+    }
+
+private:
+    Image effectImage;
+    ImageEffectFilter* effect;
 };
 
 //==============================================================================
@@ -496,67 +549,6 @@ bool Component::isOpaque() const noexcept
 }
 
 //==============================================================================
-struct StandardCachedComponentImage final : public CachedComponentImage
-{
-    StandardCachedComponentImage (Component& c) noexcept : owner (c)  {}
-
-    void paint (Graphics& g) override
-    {
-        scale = g.getInternalContext().getPhysicalPixelScaleFactor();
-        auto compBounds = owner.getLocalBounds();
-        auto imageBounds = compBounds * scale;
-
-        if (image.isNull() || image.getBounds() != imageBounds)
-        {
-            image = Image (owner.isOpaque() ? Image::RGB
-                                            : Image::ARGB,
-                           jmax (1, imageBounds.getWidth()),
-                           jmax (1, imageBounds.getHeight()),
-                           ! owner.isOpaque());
-
-            validArea.clear();
-        }
-
-        if (! validArea.containsRectangle (compBounds))
-        {
-            Graphics imG (image);
-            auto& lg = imG.getInternalContext();
-
-            lg.addTransform (AffineTransform::scale (scale));
-
-            for (auto& i : validArea)
-                lg.excludeClipRectangle (i);
-
-            if (! owner.isOpaque())
-            {
-                lg.setFill (Colours::transparentBlack);
-                lg.fillRect (compBounds, true);
-                lg.setFill (Colours::black);
-            }
-
-            owner.paintEntireComponent (imG, true);
-        }
-
-        validArea = compBounds;
-
-        g.setColour (Colours::black.withAlpha (owner.getAlpha()));
-        g.drawImageTransformed (image, AffineTransform::scale ((float) compBounds.getWidth()  / (float) imageBounds.getWidth(),
-                                                               (float) compBounds.getHeight() / (float) imageBounds.getHeight()), false);
-    }
-
-    bool invalidateAll() override                            { validArea.clear(); return true; }
-    bool invalidate (const Rectangle<int>& area) override    { validArea.subtract (area); return true; }
-    void releaseResources() override                         { image = Image(); }
-
-private:
-    Image image;
-    RectangleList<int> validArea;
-    Component& owner;
-    float scale = 1.0f;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandardCachedComponentImage)
-};
-
 void Component::setCachedComponentImage (CachedComponentImage* newCachedImage)
 {
     if (cachedImage.get() != newCachedImage)
@@ -572,12 +564,12 @@ void Component::setBufferedToImage (bool shouldBeBuffered)
     // so by calling setBufferedToImage, you'll be deleting the custom one - this is almost certainly
     // not what you wanted to happen... If you really do know what you're doing here, and want to
     // avoid this assertion, just call setCachedComponentImage (nullptr) before setBufferedToImage().
-    jassert (cachedImage == nullptr || dynamic_cast<StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
+    jassert (cachedImage == nullptr || dynamic_cast<detail::StandardCachedComponentImage*> (cachedImage.get()) != nullptr);
 
     if (shouldBeBuffered)
     {
         if (cachedImage == nullptr)
-            cachedImage.reset (new StandardCachedComponentImage (*this));
+            cachedImage = std::make_unique<detail::StandardCachedComponentImage> (*this);
     }
     else
     {
@@ -1436,7 +1428,7 @@ void Component::enterModalState (bool shouldTakeKeyboardFocus,
         }
 
         auto& mcm = *ModalComponentManager::getInstance();
-        mcm.startModal (this, deleteWhenDismissed);
+        mcm.startModal ({}, this, deleteWhenDismissed);
         mcm.attachCallback (this, callback);
 
         setVisible (true);
@@ -1460,7 +1452,7 @@ void Component::exitModalState (int returnValue)
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             auto& mcm = *ModalComponentManager::getInstance();
-            mcm.endModal (this, returnValue);
+            mcm.endModal ({}, this, returnValue);
             mcm.bringModalComponentsToFront();
 
             // While this component is in modal state it may block other components from receiving
@@ -1495,12 +1487,18 @@ bool Component::isCurrentlyBlockedByAnotherModalComponent() const
 
 int JUCE_CALLTYPE Component::getNumCurrentlyModalComponents() noexcept
 {
-    return ModalComponentManager::getInstance()->getNumModalComponents();
+    if (auto* manager = ModalComponentManager::getInstanceWithoutCreating())
+        return manager->getNumModalComponents();
+
+    return {};
 }
 
 Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent (int index) noexcept
 {
-    return ModalComponentManager::getInstance()->getModalComponent (index);
+    if (auto* manager = ModalComponentManager::getInstanceWithoutCreating())
+        return manager->getModalComponent (index);
+
+    return {};
 }
 
 //==============================================================================
@@ -1664,6 +1662,20 @@ void Component::paintWithinParentContext (Graphics& g)
 
 void Component::paintComponentAndChildren (Graphics& g)
 {
+   #if JUCE_ETW_TRACELOGGING
+    {
+        int depth = 0;
+        auto parent = getParentComponent();
+        while (parent)
+        {
+            parent = parent->getParentComponent();
+            depth++;
+        }
+
+        JUCE_TRACE_LOG_PAINT_COMPONENT_AND_CHILDREN (depth);
+    }
+   #endif
+
     auto clipBounds = g.getClipBounds();
 
     if (flags.dontClipGraphicsFlag && getNumChildComponents() == 0)
@@ -1741,25 +1753,9 @@ void Component::paintEntireComponent (Graphics& g, bool ignoreAlphaLevel)
     flags.isInsidePaintCall = true;
    #endif
 
-    if (effect != nullptr)
+    if (effectState != nullptr)
     {
-        auto scale = g.getInternalContext().getPhysicalPixelScaleFactor();
-
-        auto scaledBounds = getLocalBounds() * scale;
-
-        Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                           scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag);
-        {
-            Graphics g2 (effectImage);
-            g2.addTransform (AffineTransform::scale ((float) scaledBounds.getWidth()  / (float) getWidth(),
-                                                     (float) scaledBounds.getHeight() / (float) getHeight()));
-            paintComponentAndChildren (g2);
-        }
-
-        Graphics::ScopedSaveState ss (g);
-
-        g.addTransform (AffineTransform::scale (1.0f / scale));
-        effect->applyEffect (effectImage, g, scale, ignoreAlphaLevel ? 1.0f : getAlpha());
+        effectState->paint (g, *this, ignoreAlphaLevel);
     }
     else if (componentTransparency > 0 && ! ignoreAlphaLevel)
     {
@@ -1819,13 +1815,35 @@ Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
     return image;
 }
 
+ImageEffectFilter* Component::getComponentEffect() const noexcept
+{
+    return effectState != nullptr ? &effectState->getEffect() : nullptr;
+}
+
 void Component::setComponentEffect (ImageEffectFilter* newEffect)
 {
-    if (effect != newEffect)
+    if (newEffect == nullptr && effectState == nullptr)
+        return;
+
+    const auto needsRepaint = [&]
     {
-        effect = newEffect;
+        if (newEffect == nullptr)
+        {
+            effectState.reset();
+            return true;
+        }
+
+        if (effectState == nullptr)
+        {
+            effectState = std::make_unique<EffectState> (*newEffect);
+            return true;
+        }
+
+        return effectState->setEffect (*newEffect);
+    }();
+
+    if (needsRepaint)
         repaint();
-    }
 }
 
 //==============================================================================
@@ -1845,6 +1863,11 @@ void Component::setLookAndFeel (LookAndFeel* newLookAndFeel)
         lookAndFeel = newLookAndFeel;
         sendLookAndFeelChange();
     }
+}
+
+FontOptions Component::withDefaultMetrics (FontOptions opt) const
+{
+    return getLookAndFeel().withDefaultMetrics (std::move (opt));
 }
 
 void Component::lookAndFeelChanged() {}
@@ -2180,13 +2203,10 @@ void Component::internalMouseDown (MouseInputSource source,
         }
     }
 
-    if (! flags.dontFocusOnMouseClickFlag)
-    {
-        grabKeyboardFocusInternal (focusChangedByMouseClick, true, FocusChangeDirection::unknown);
+    grabKeyboardFocusInternal (focusChangedByMouseClick, true, FocusChangeDirection::unknown);
 
-        if (checker.shouldBailOut())
-            return;
-    }
+    if (checker.shouldBailOut())
+        return;
 
     if (flags.repaintOnMouseActivityFlag)
         repaint();
@@ -2623,6 +2643,9 @@ void Component::takeKeyboardFocus (FocusChangeType cause, FocusChangeDirection d
 
 void Component::grabKeyboardFocusInternal (FocusChangeType cause, bool canTryParent, FocusChangeDirection direction)
 {
+    if (flags.dontFocusOnMouseClickFlag && cause == FocusChangeType::focusChangedByMouseClick)
+        return;
+
     if (! isShowing())
         return;
 

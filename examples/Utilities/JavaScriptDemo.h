@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -48,6 +52,28 @@
 
 #include "../Assets/DemoUtilities.h"
 
+static constexpr const char javascriptSource[] = R"x(/*
+    Javascript! In this simple demo, the native
+    code provides an object called 'Demo' which
+    has a method 'print' that writes to the
+    console below...
+*/
+
+Demo.print ("Hello World in JUCE + Javascript!");
+Demo.print ("");
+
+function factorial (n)
+{
+    var total = 1;
+    while (n > 0)
+        total = total * n--;
+    return total;
+}
+
+for (var i = 1; i < 10; ++i)
+    Demo.print ("Factorial of " + i + " = " + factorial (i));
+)x";
+
 //==============================================================================
 class JavaScriptDemo final : public Component,
                              private CodeDocument::Listener,
@@ -60,39 +86,18 @@ public:
 
         editor.reset (new CodeEditorComponent (codeDocument, nullptr));
         addAndMakeVisible (editor.get());
-        editor->setFont ({ Font::getDefaultMonospacedFontName(), 14.0f, Font::plain });
+        editor->setFont (FontOptions { Font::getDefaultMonospacedFontName(), 14.0f, Font::plain });
         editor->setTabSize (4, true);
 
         outputDisplay.setMultiLine (true);
         outputDisplay.setReadOnly (true);
         outputDisplay.setCaretVisible (false);
-        outputDisplay.setFont ({ Font::getDefaultMonospacedFontName(), 14.0f, Font::plain });
+        outputDisplay.setFont (FontOptions { Font::getDefaultMonospacedFontName(), 14.0f, Font::plain });
         addAndMakeVisible (outputDisplay);
 
         codeDocument.addListener (this);
 
-        editor->loadContent (
-            "/*\n"
-            "    Javascript! In this simple demo, the native\n"
-            "    code provides an object called \'Demo\' which\n"
-            "    has a method \'print\' that writes to the\n"
-            "    console below...\n"
-            "*/\n"
-            "\n"
-            "Demo.print (\"Hello World in JUCE + Javascript!\");\n"
-            "Demo.print (\"\");\n"
-            "\n"
-            "function factorial (n)\n"
-            "{\n"
-            "    var total = 1;\n"
-            "    while (n > 0)\n"
-            "        total = total * n--;\n"
-            "    return total;\n"
-            "}\n"
-            "\n"
-            "for (var i = 1; i < 10; ++i)\n"
-            "    Demo.print (\"Factorial of \" + i \n"
-            "                   + \" = \" + factorial (i));\n");
+        editor->loadContent (javascriptSource);
 
         setSize (600, 750);
     }

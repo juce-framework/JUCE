@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -380,28 +389,6 @@ void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<Lib
         out << newLine << CodeHelpers::createIncludeStatement (Project::getPluginDefinesFilename()) << newLine;
 
     out << newLine
-        << "/*" << newLine
-        << "  ==============================================================================" << newLine
-        << newLine
-        << "   In accordance with the terms of the JUCE 7 End-Use License Agreement, the" << newLine
-        << "   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered" << newLine
-        << "   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE" << newLine
-        << "   under the GPL v3 license." << newLine
-        << newLine
-        << "   End User License Agreement: www.juce.com/juce-7-licence" << newLine
-        << newLine
-        << "  ==============================================================================" << newLine
-        << "*/" << newLine
-        << newLine
-        << "// BEGIN SECTION A" << newLine
-        << newLine
-        << "#ifndef JUCE_DISPLAY_SPLASH_SCREEN" << newLine
-        << " #define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen() ? "1" : "0") << newLine
-        << "#endif" << newLine << newLine
-        << "// END SECTION A" << newLine
-        << newLine
-        << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.getSplashScreenColourString() == "Dark" ? "1" : "0") << newLine
-        << newLine
         << "#define JUCE_PROJUCER_VERSION 0x" << String::toHexString (ProjectInfo::versionNumber) << newLine;
 
     out << newLine

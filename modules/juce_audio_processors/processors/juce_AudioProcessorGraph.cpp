@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -1046,12 +1055,13 @@ private:
 
     enum { readOnlyEmptyBufferIndex = 0 };
 
-    HashMap<uint32, int> delays;
+    std::unordered_map<uint32, int> delays;
     int totalLatency = 0;
 
     int getNodeDelay (NodeID nodeID) const noexcept
     {
-        return delays[nodeID.uid];
+        const auto iter = delays.find (nodeID.uid);
+        return iter != delays.end() ? iter->second : 0;
     }
 
     int getInputLatencyForNode (const Connections& c, NodeID nodeID) const
@@ -1379,7 +1389,7 @@ private:
         auto totalChans = jmax (numIns, numOuts);
 
         Array<int> audioChannelsToUse;
-        auto maxLatency = getInputLatencyForNode (c, node.nodeID);
+        const auto maxInputLatency = getInputLatencyForNode (c, node.nodeID);
 
         for (int inputChan = 0; inputChan < numIns; ++inputChan)
         {
@@ -1390,7 +1400,7 @@ private:
                                                          node,
                                                          inputChan,
                                                          ourRenderingIndex,
-                                                         maxLatency);
+                                                         maxInputLatency);
             jassert (index >= 0);
 
             audioChannelsToUse.add (index);
@@ -1413,10 +1423,11 @@ private:
         if (processor.producesMidi())
             midiBuffers.getReference (midiBufferToUse).channel = { node.nodeID, midiChannelIndex };
 
-        delays.set (node.nodeID.uid, maxLatency + processor.getLatencySamples());
+        const auto thisNodeLatency = maxInputLatency + processor.getLatencySamples();
+        delays[node.nodeID.uid] = thisNodeLatency;
 
         if (numOuts == 0)
-            totalLatency = maxLatency;
+            totalLatency = jmax (totalLatency, thisNodeLatency);
 
         sequence.addProcessOp (node, audioChannelsToUse, totalChans, midiBufferToUse);
     }
@@ -1549,6 +1560,25 @@ private:
 };
 
 //==============================================================================
+/*  Holds information about the properties of a graph node at the point it was prepared.
+
+    If the bus layout or latency of a given node changes, the graph should be rebuilt so
+    that channel connections are ordered correctly, and the graph's internal delay lines have
+    the correct delay.
+*/
+class NodeAttributes
+{
+    auto tie() const { return std::tie (layout, latencySamples); }
+
+public:
+    AudioProcessor::BusesLayout layout;
+    int latencySamples = 0;
+
+    bool operator== (const NodeAttributes& other) const { return tie() == other.tie(); }
+    bool operator!= (const NodeAttributes& other) const { return tie() != other.tie(); }
+};
+
+//==============================================================================
 /*  Holds information about a particular graph configuration, without sharing ownership of any
     graph nodes. Can be checked for equality with other RenderSequenceSignature instances to see
     whether two graph configurations match.
@@ -1565,7 +1595,7 @@ public:
     bool operator!= (const RenderSequenceSignature& other) const { return tie() != other.tie(); }
 
 private:
-    using NodeMap = std::map<AudioProcessorGraph::NodeID, AudioProcessor::BusesLayout>;
+    using NodeMap = std::map<AudioProcessorGraph::NodeID, NodeAttributes>;
 
     static NodeMap getNodeMap (const Nodes& n)
     {
@@ -1573,7 +1603,12 @@ private:
         NodeMap result;
 
         for (const auto& node : nodeRefs)
-            result.emplace (node->nodeID, node->getProcessor()->getBusesLayout());
+        {
+            auto* proc = node->getProcessor();
+            result.emplace (node->nodeID,
+                            NodeAttributes { proc->getBusesLayout(),
+                                             proc->getLatencySamples() });
+        }
 
         return result;
     }
@@ -1694,7 +1729,7 @@ public:
     }
 
     Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor,
-                       const NodeID nodeID,
+                       std::optional<NodeID> nodeID,
                        UpdateKind updateKind)
     {
         if (newProcessor.get() == owner)
@@ -1703,7 +1738,7 @@ public:
             return nullptr;
         }
 
-        const auto idToUse = nodeID == NodeID() ? NodeID { ++(lastNodeID.uid) } : nodeID;
+        const auto idToUse = nodeID.value_or (NodeID { lastNodeID.uid + 1 });
 
         auto added = nodes.addNode (std::move (newProcessor), idToUse);
 
@@ -1912,7 +1947,6 @@ private:
         }
     }
 
-
     AudioProcessorGraph* owner = nullptr;
     Nodes nodes;
     Connections connections;
@@ -1957,7 +1991,7 @@ bool AudioProcessorGraph::isAnInputTo (const Node& source, const Node& destinati
 bool AudioProcessorGraph::isAnInputTo (NodeID source, NodeID destination) const noexcept                    { return pimpl->isAnInputTo (source, destination); }
 
 AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (std::unique_ptr<AudioProcessor> newProcessor,
-                                                             NodeID nodeId,
+                                                             std::optional<NodeID> nodeId,
                                                              UpdateKind updateKind)
 {
     return pimpl->addNode (std::move (newProcessor), nodeId, updateKind);
@@ -2204,6 +2238,42 @@ public:
             }
         }
 
+        beginTest ("rebuilding the graph recalculates overall latency");
+        {
+            AudioProcessorGraph graph;
+
+            const auto nodeA = graph.addNode (BasicProcessor::make (BasicProcessor::getStereoProperties(), MidiIn::no, MidiOut::no))->nodeID;
+            const auto nodeB = graph.addNode (BasicProcessor::make (BasicProcessor::getStereoProperties(), MidiIn::no, MidiOut::no))->nodeID;
+            const auto final = graph.addNode (BasicProcessor::make (BasicProcessor::getInputOnlyProperties(), MidiIn::no, MidiOut::no))->nodeID;
+
+            expect (graph.addConnection ({ { nodeA, 0 }, { nodeB, 0 } }));
+            expect (graph.addConnection ({ { nodeA, 1 }, { nodeB, 1 } }));
+            expect (graph.addConnection ({ { nodeB, 0 }, { final, 0 } }));
+            expect (graph.addConnection ({ { nodeB, 1 }, { final, 1 } }));
+
+            expect (graph.getLatencySamples() == 0);
+
+            // Graph isn't built, latency is 0 if prepareToPlay hasn't been called yet
+            const auto nodeALatency = 100;
+            graph.getNodeForId (nodeA)->getProcessor()->setLatencySamples (nodeALatency);
+            graph.rebuild();
+            expect (graph.getLatencySamples() == 0);
+
+            graph.prepareToPlay (44100, 512);
+
+            expect (graph.getLatencySamples() == nodeALatency);
+
+            const auto nodeBLatency = 200;
+            graph.getNodeForId (nodeB)->getProcessor()->setLatencySamples (nodeBLatency);
+            graph.rebuild();
+            expect (graph.getLatencySamples() == nodeALatency + nodeBLatency);
+
+            const auto finalLatency = 300;
+            graph.getNodeForId (final)->getProcessor()->setLatencySamples (finalLatency);
+            graph.rebuild();
+            expect (graph.getLatencySamples() == nodeALatency + nodeBLatency + finalLatency);
+        }
+
         beginTest ("large render sequence can be built");
         {
             AudioProcessorGraph graph;
@@ -2273,6 +2343,11 @@ private:
                                                      MidiOut midiOut)
         {
             return std::make_unique<BasicProcessor> (layout, midiIn, midiOut);
+        }
+
+        static BusesProperties getInputOnlyProperties()
+        {
+            return BusesProperties().withInput  ("in", AudioChannelSet::stereo());
         }
 
         static BusesProperties getStereoProperties()

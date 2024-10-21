@@ -20,8 +20,8 @@ distribution, visit the Flac homepage: https://xiph.org/flac/
 =====================================================================
 
 libFLAC - Free Lossless Audio Codec library
-Copyright (C) 2001-2009  Josh Coalson
-Copyright (C) 2011-2016  Xiph.Org Foundation
+Copyright (C) 2000-2009  Josh Coalson
+Copyright (C) 2011-2023  Xiph.Org Foundation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -34,7 +34,7 @@ notice, this list of conditions and the following disclaimer.
 notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
 
-- Neither the name of the Xiph.org Foundation nor the names of its
+- Neither the name of the Xiph.Org Foundation nor the names of its
 contributors may be used to endorse or promote products derived from
 this software without specific prior written permission.
 

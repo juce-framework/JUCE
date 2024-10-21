@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -65,7 +74,7 @@ public:
                                                                            close button on it. */
         windowHasDropShadow                             = (1 << 8),   /**< Indicates that the window should have a drop-shadow (this may
                                                                            not be possible on all platforms). */
-        windowRepaintedExplictly                        = (1 << 9),   /**< Not intended for public use - this tells a window not to
+        windowRepaintedExplicitly                       = (1 << 9),   /**< Not intended for public use - this tells a window not to
                                                                            do its own repainting, but only to repaint when the
                                                                            performAnyPendingRepaintsNow() method is called. */
         windowIgnoresKeyPresses                         = (1 << 10),  /**< Tells the window not to catch any keypresses. This can
@@ -235,6 +244,9 @@ public:
     /** True if the window is currently minimised. */
     virtual bool isMinimised() const = 0;
 
+    /** True if the window is being displayed on-screen. */
+    virtual bool isShowing() const = 0;
+
     /** Enable/disable fullscreen mode for the window. */
     virtual void setFullScreen (bool shouldBeFullScreen) = 0;
 
@@ -313,7 +325,10 @@ public:
     virtual void handleScreenSizeChange();
 
     //==============================================================================
-    /** This is called to repaint the component into the given context. */
+    /** This is called to repaint the component into the given context.
+
+        Increments the result of getNumFramesPainted().
+    */
     void handlePaint (LowLevelGraphicsContext& contextToPaintTo);
 
     //==============================================================================
@@ -552,6 +567,13 @@ public:
     /** Returns the style requested for this app. */
     Style getAppStyle() const { return style; }
 
+    /** Returns the number of times that this peer has been painted.
+
+        This is mainly useful when debugging component painting. For example, you might use this to
+        match logging calls to specific frames.
+    */
+    uint64_t getNumFramesPainted() const { return peerFrameNumber; }
+
 protected:
     //==============================================================================
     static void forceDisplayUpdate();
@@ -594,6 +616,7 @@ private:
     Component* lastDragAndDropCompUnderMouse = nullptr;
     TextInputTarget* textInputTarget = nullptr;
     const uint32 uniqueID;
+    uint64_t peerFrameNumber = 0;
     bool isWindowMinimised = false;
 
     //==============================================================================

@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -297,7 +309,7 @@ private:
 
             if (jniCheckHasExceptionOccurredAndClear())
             {
-                // An exception has occurred, have you acquired RuntimePermission::readExternalStorage permission?
+                // An exception has occurred, have you acquired RuntimePermissions::readExternalStorage permission?
                 jassertfalse;
                 return {};
             }
@@ -347,45 +359,18 @@ private:
 
     static Array<File> getSecondaryStorageDirectories()
     {
+        auto* env = getEnv();
+        static jmethodID m = (env->GetMethodID (AndroidContext, "getExternalFilesDirs",
+                                                "(Ljava/lang/String;)[Ljava/io/File;"));
+        if (m == nullptr)
+            return {};
+
+        auto paths = convertFileArray (LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(), m, nullptr)));
+
         Array<File> results;
 
-        if (getAndroidSDKVersion() >= 19)
-        {
-            auto* env = getEnv();
-            static jmethodID m = (env->GetMethodID (AndroidContext, "getExternalFilesDirs",
-                                                    "(Ljava/lang/String;)[Ljava/io/File;"));
-            if (m == nullptr)
-                return {};
-
-            auto paths = convertFileArray (LocalRef<jobject> (env->CallObjectMethod (getAppContext().get(), m, nullptr)));
-
-            for (auto path : paths)
-                results.add (getMountPointForFile (path));
-        }
-        else
-        {
-            // on older SDKs other external storages are located "next" to the primary
-            // storage mount point
-            auto mountFolder = getMountPointForFile (getPrimaryStorageDirectory())
-                                    .getParentDirectory();
-
-            // don't include every folder. Only folders which are actually mountpoints
-            juce_statStruct info;
-            if (! juce_stat (mountFolder.getFullPathName(), info))
-                return {};
-
-            auto rootFsDevice = info.st_dev;
-
-            for (const auto& iter : RangedDirectoryIterator (mountFolder, false, "*", File::findDirectories))
-            {
-                auto candidate = iter.getFile();
-
-                if (juce_stat (candidate.getFullPathName(), info)
-                      && info.st_dev != rootFsDevice)
-                    results.add (candidate);
-            }
-
-        }
+        for (auto path : paths)
+            results.add (getMountPointForFile (path));
 
         return results;
     }
@@ -572,15 +557,37 @@ struct AndroidStreamHelpers
 };
 
 //==============================================================================
-struct AndroidContentUriInputStream final :  public InputStream
+class AndroidInputStreamWrapper final : public InputStream
 {
-    explicit AndroidContentUriInputStream (const GlobalRef& uriIn)
-        : uri (uriIn),
-          stream (AndroidStreamHelpers::createStream (uri, AndroidStreamHelpers::StreamKind::input))
-    {}
-
-    ~AndroidContentUriInputStream() override
+public:
+    explicit AndroidInputStreamWrapper (LocalRef<jobject> streamIn)
+        : stream (std::move (streamIn))
     {
+    }
+
+    AndroidInputStreamWrapper (AndroidInputStreamWrapper&& other) noexcept
+        : byteArray (std::exchange (other.byteArray, {})),
+          stream (std::exchange (other.stream, {})),
+          pos (std::exchange (other.pos, {})),
+          exhausted (std::exchange (other.exhausted, {}))
+    {
+    }
+
+    AndroidInputStreamWrapper (const AndroidInputStreamWrapper&) = delete;
+
+    AndroidInputStreamWrapper& operator= (AndroidInputStreamWrapper&& other) noexcept
+    {
+        AndroidInputStreamWrapper { std::move (other) }.swap (*this);
+        return *this;
+    }
+
+    AndroidInputStreamWrapper& operator= (const AndroidInputStreamWrapper&) = delete;
+
+    ~AndroidInputStreamWrapper() override
+    {
+        if (stream == nullptr)
+            return;
+
         getEnv()->CallVoidMethod (stream.get(), AndroidInputStream.close);
         jniCheckHasExceptionOccurredAndClear();
     }
@@ -613,24 +620,15 @@ struct AndroidContentUriInputStream final :  public InputStream
         return result;
     }
 
-    bool setPosition (int64 newPos) override
+    bool setPosition (int64) override
     {
-        if (newPos == pos)
-            return true;
-
-        if (pos < newPos)
-            return skipImpl (newPos - pos);
-
-        AndroidContentUriInputStream (uri).swap (*this);
-        return skipImpl (newPos);
+        return false;
     }
 
     int64 getPosition() override
     {
         return pos;
     }
-
-    bool openedSuccessfully() const { return stream != nullptr; }
 
     void skipNextBytes (int64 num) override
     {
@@ -652,19 +650,119 @@ private:
         return skipped == num;
     }
 
-    auto tie() { return std::tie (uri, byteArray, stream, pos, exhausted); }
-
-    void swap (AndroidContentUriInputStream& other) noexcept
+    void swap (AndroidInputStreamWrapper& other) noexcept
     {
-        auto toSwap = other.tie();
-        tie().swap (toSwap);
+        std::swap (other.byteArray, byteArray);
+        std::swap (other.stream, stream);
+        std::swap (other.pos, pos);
+        std::swap (other.exhausted, exhausted);
     }
 
-    GlobalRef uri;
     CachedByteArray byteArray;
     GlobalRef stream;
     int64 pos = 0;
     bool exhausted = false;
+};
+
+std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (LocalRef<jobject> stream);
+std::unique_ptr<InputStream> makeAndroidInputStreamWrapper (LocalRef<jobject> stream)
+{
+    return std::make_unique<AndroidInputStreamWrapper> (stream);
+}
+
+//==============================================================================
+struct AndroidContentUriInputStream final : public InputStream
+{
+    AndroidContentUriInputStream (AndroidContentUriInputStream&& other) noexcept
+        : stream (std::move (other.stream)),
+          uri (std::exchange (other.uri, {}))
+    {
+    }
+
+    AndroidContentUriInputStream (const AndroidContentUriInputStream&) = delete;
+
+    AndroidContentUriInputStream& operator= (AndroidContentUriInputStream&& other) noexcept
+    {
+        AndroidContentUriInputStream { std::move (other) }.swap (*this);
+        return *this;
+    }
+
+    AndroidContentUriInputStream& operator= (const AndroidContentUriInputStream&) = delete;
+
+    int64 getTotalLength() override
+    {
+        return stream.getTotalLength();
+    }
+
+    bool isExhausted() override
+    {
+        return stream.isExhausted();
+    }
+
+    int read (void* destBuffer, int maxBytesToRead) override
+    {
+        return stream.read (destBuffer, maxBytesToRead);
+    }
+
+    bool setPosition (int64 newPos) override
+    {
+        if (newPos == getPosition())
+            return true;
+
+        if (getPosition() < newPos)
+            return skipImpl (newPos - getPosition());
+
+        auto newStream = fromUri (uri);
+
+        if (! newStream.has_value())
+            return false;
+
+        *this = std::move (*newStream);
+        return skipImpl (newPos);
+    }
+
+    int64 getPosition() override
+    {
+        return stream.getPosition();
+    }
+
+    void skipNextBytes (int64 num) override
+    {
+        stream.skipNextBytes (num);
+    }
+
+    static std::optional<AndroidContentUriInputStream> fromUri (const GlobalRef& uriIn)
+    {
+        const auto nativeStream = AndroidStreamHelpers::createStream (uriIn, AndroidStreamHelpers::StreamKind::input);
+
+        if (nativeStream == nullptr)
+            return {};
+
+        return AndroidContentUriInputStream { AndroidInputStreamWrapper { nativeStream }, uriIn };
+    }
+
+private:
+    AndroidContentUriInputStream (AndroidInputStreamWrapper streamIn, const GlobalRef& uriIn)
+        : stream (std::move (streamIn)),
+          uri (uriIn)
+    {
+    }
+
+    bool skipImpl (int64 num)
+    {
+        const auto oldPosition = getPosition();
+        skipNextBytes (num);
+        return getPosition() == oldPosition + num;
+    }
+
+    void swap (AndroidContentUriInputStream& other) noexcept
+    {
+        std::swap (other.stream, stream);
+        std::swap (other.uri, uri);
+    }
+
+    AndroidInputStreamWrapper stream;
+    GlobalRef uri;
 };
 
 //==============================================================================
@@ -719,12 +817,7 @@ String File::getVersion() const
 
 static File getDocumentsDirectory()
 {
-    auto* env = getEnv();
-
-    if (getAndroidSDKVersion() >= 19)
-        return getWellKnownFolder ("DIRECTORY_DOCUMENTS");
-
-    return juceFile (LocalRef<jobject> (env->CallStaticObjectMethod (AndroidEnvironment, AndroidEnvironment.getDataDirectory)));
+    return getWellKnownFolder ("DIRECTORY_DOCUMENTS");
 }
 
 static File getAppDataDir (bool dataDir)

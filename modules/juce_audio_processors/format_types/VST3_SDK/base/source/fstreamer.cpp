@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2023, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2024, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -607,8 +607,10 @@ TSize FStreamer::readString8 (char8* ptr, TSize size)
 		if (i > 0 && ptr[i - 1] == '\r')
 			i--;
 	}
+	if (i >= size)
+		i = size - 1;
 	ptr[i] = 0;
-
+	
 	return i;
 }
 
@@ -721,7 +723,7 @@ char8* FStreamer::readStr8 ()
 	if (length > 262144)
 		return nullptr;
 
-	char8* s = (length > 0) ? NEWVEC char8[length] : nullptr;
+	char8* s = (length > 0) ? NEWSTR8 (length) : nullptr;
 	if (s)
 		readRaw (s, length * sizeof (char8));
 	return s;

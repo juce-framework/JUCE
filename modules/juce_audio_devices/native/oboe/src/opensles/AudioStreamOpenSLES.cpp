@@ -16,7 +16,6 @@
 #include <cassert>
 #include <android/log.h>
 
-
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 #include <oboe/AudioStream.h>
@@ -71,6 +70,13 @@ Result AudioStreamOpenSLES::open() {
 
     LOGI("AudioStreamOpenSLES::open() chans=%d, rate=%d", mChannelCount, mSampleRate);
 
+    // OpenSL ES only supports I16 and Float
+    if (mFormat != AudioFormat::I16 && mFormat != AudioFormat::Float) {
+        LOGW("%s() Android's OpenSL ES implementation only supports I16 and Float. Format: %d",
+             __func__, mFormat);
+        return Result::ErrorInvalidFormat;
+    }
+
     SLresult result = EngineOpenSLES::getInstance().open();
     if (SL_RESULT_SUCCESS != result) {
         return Result::ErrorInternal;
@@ -78,6 +84,7 @@ Result AudioStreamOpenSLES::open() {
 
     Result oboeResult = AudioStreamBuffered::open();
     if (oboeResult != Result::OK) {
+        EngineOpenSLES::getInstance().close();
         return oboeResult;
     }
     // Convert to defaults if UNSPECIFIED
@@ -87,41 +94,109 @@ Result AudioStreamOpenSLES::open() {
     if (mChannelCount == kUnspecified) {
         mChannelCount = DefaultStreamValues::ChannelCount;
     }
+    if (mContentType == kUnspecified) {
+        mContentType = ContentType::Music;
+    }
+    if (static_cast<const int32_t>(mUsage) == kUnspecified) {
+        mUsage = Usage::Media;
+    }
 
     mSharingMode = SharingMode::Shared;
 
     return Result::OK;
 }
 
+
+SLresult AudioStreamOpenSLES::finishCommonOpen(SLAndroidConfigurationItf configItf) {
+    // Setting privacy sensitive mode and allowed capture policy are not supported for OpenSL ES.
+    mPrivacySensitiveMode = PrivacySensitiveMode::Unspecified;
+    mAllowedCapturePolicy = AllowedCapturePolicy::Unspecified;
+
+    // Spatialization Behavior is not supported for OpenSL ES.
+    mSpatializationBehavior = SpatializationBehavior::Never;
+
+    SLresult result = registerBufferQueueCallback();
+    if (SL_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    result = updateStreamParameters(configItf);
+    if (SL_RESULT_SUCCESS != result) {
+        return result;
+    }
+
+    Result oboeResult = configureBufferSizes(mSampleRate);
+    if (Result::OK != oboeResult) {
+        return (SLresult) oboeResult;
+    }
+
+    allocateFifo();
+
+    calculateDefaultDelayBeforeCloseMillis();
+
+    return SL_RESULT_SUCCESS;
+}
+
+static int32_t roundUpDivideByN(int32_t x, int32_t n) {
+    return (x + n - 1) / n;
+}
+
+int32_t AudioStreamOpenSLES::calculateOptimalBufferQueueLength() {
+    int32_t queueLength = kBufferQueueLengthDefault;
+    int32_t likelyFramesPerBurst = estimateNativeFramesPerBurst();
+    int32_t minCapacity = mBufferCapacityInFrames; // specified by app or zero
+    // The buffer capacity needs to be at least twice the size of the requested callbackSize
+    // so that we can have double buffering.
+    minCapacity = std::max(minCapacity, kDoubleBufferCount * mFramesPerCallback);
+    if (minCapacity > 0) {
+        int32_t queueLengthFromCapacity = roundUpDivideByN(minCapacity, likelyFramesPerBurst);
+        queueLength = std::max(queueLength, queueLengthFromCapacity);
+    }
+    queueLength = std::min(queueLength, kBufferQueueLengthMax); // clip to max
+    // TODO Investigate the effect of queueLength on latency for normal streams. (not low latency)
+    return queueLength;
+}
+
+/**
+ * The best information we have is if DefaultStreamValues::FramesPerBurst
+ * was set by the app based on AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER.
+ * Without that we just have to guess.
+ * @return
+ */
+int32_t AudioStreamOpenSLES::estimateNativeFramesPerBurst() {
+    int32_t framesPerBurst = DefaultStreamValues::FramesPerBurst;
+    LOGD("AudioStreamOpenSLES:%s() DefaultStreamValues::FramesPerBurst = %d",
+            __func__, DefaultStreamValues::FramesPerBurst);
+    framesPerBurst = std::max(framesPerBurst, 16);
+    // Calculate the size of a fixed duration high latency buffer based on sample rate.
+    // Estimate sample based on default options in order of priority.
+    int32_t sampleRate = 48000;
+    sampleRate = (DefaultStreamValues::SampleRate > 0)
+            ? DefaultStreamValues::SampleRate : sampleRate;
+    sampleRate = (mSampleRate > 0) ? mSampleRate : sampleRate;
+    int32_t framesPerHighLatencyBuffer =
+            (kHighLatencyBufferSizeMillis * sampleRate) / kMillisPerSecond;
+    // For high latency streams, use a larger buffer size.
+    // Performance Mode support was added in N_MR1 (7.1)
+    if (getSdkVersion() >= __ANDROID_API_N_MR1__
+            && mPerformanceMode != PerformanceMode::LowLatency
+            && framesPerBurst < framesPerHighLatencyBuffer) {
+        // Find a multiple of framesPerBurst >= framesPerHighLatencyBuffer.
+        int32_t numBursts = roundUpDivideByN(framesPerHighLatencyBuffer, framesPerBurst);
+        framesPerBurst *= numBursts;
+        LOGD("AudioStreamOpenSLES:%s() NOT low latency, numBursts = %d, mSampleRate = %d, set framesPerBurst = %d",
+             __func__, numBursts, mSampleRate, framesPerBurst);
+    }
+    return framesPerBurst;
+}
+
 Result AudioStreamOpenSLES::configureBufferSizes(int32_t sampleRate) {
     LOGD("AudioStreamOpenSLES:%s(%d) initial mFramesPerBurst = %d, mFramesPerCallback = %d",
-            __func__, sampleRate, mFramesPerBurst, mFramesPerCallback);
-    // Decide frames per burst based on hints from caller.
-    if (mFramesPerCallback != kUnspecified) {
-        // Requested framesPerCallback must be honored.
-        mFramesPerBurst = mFramesPerCallback;
-    } else {
-        mFramesPerBurst = DefaultStreamValues::FramesPerBurst;
-
-        // Calculate the size of a fixed duration high latency buffer based on sample rate.
-        int32_t framesPerHighLatencyBuffer =
-                (kHighLatencyBufferSizeMillis * sampleRate) / kMillisPerSecond;
-
-        // For high latency streams, use a larger buffer size.
-        // Performance Mode support was added in N_MR1 (7.1)
-        if (getSdkVersion() >= __ANDROID_API_N_MR1__
-            && mPerformanceMode != PerformanceMode::LowLatency
-            && mFramesPerBurst < framesPerHighLatencyBuffer) {
-            // Find a multiple of framesPerBurst >= framesPerHighLatencyBuffer.
-            int32_t numBursts = (framesPerHighLatencyBuffer + mFramesPerBurst - 1) / mFramesPerBurst;
-            mFramesPerBurst *= numBursts;
-            LOGD("AudioStreamOpenSLES:%s() NOT low latency, set mFramesPerBurst = %d",
-                 __func__, mFramesPerBurst);
-        }
-        mFramesPerCallback = mFramesPerBurst;
-    }
+            __func__, mSampleRate, mFramesPerBurst, mFramesPerCallback);
+    mFramesPerBurst = estimateNativeFramesPerBurst();
+    mFramesPerCallback = (mFramesPerCallback > 0) ? mFramesPerCallback : mFramesPerBurst;
     LOGD("AudioStreamOpenSLES:%s(%d) final mFramesPerBurst = %d, mFramesPerCallback = %d",
-         __func__, sampleRate, mFramesPerBurst, mFramesPerCallback);
+         __func__, mSampleRate, mFramesPerBurst, mFramesPerCallback);
 
     mBytesPerCallback = mFramesPerCallback * getBytesPerFrame();
     if (mBytesPerCallback <= 0) {
@@ -130,10 +205,12 @@ Result AudioStreamOpenSLES::configureBufferSizes(int32_t sampleRate) {
         return Result::ErrorInvalidFormat; // causing bytesPerFrame == 0
     }
 
-    mCallbackBuffer = std::make_unique<uint8_t[]>(mBytesPerCallback);
+    for (int i = 0; i < mBufferQueueLength; ++i) {
+        mCallbackBuffer[i] = std::make_unique<uint8_t[]>(mBytesPerCallback);
+    }
 
     if (!usingFIFO()) {
-        mBufferCapacityInFrames = mFramesPerBurst * kBufferQueueLength;
+        mBufferCapacityInFrames = mFramesPerBurst * mBufferQueueLength;
         // Check for overflow.
         if (mBufferCapacityInFrames <= 0) {
             mBufferCapacityInFrames = 0;
@@ -215,6 +292,24 @@ void AudioStreamOpenSLES::logUnsupportedAttributes() {
         LOGW("SessionId [AudioStreamBuilder::setSessionId()] "
              "is not supported on OpenSLES streams.");
     }
+
+    // Privacy Sensitive Mode
+    if (mPrivacySensitiveMode != PrivacySensitiveMode::Unspecified) {
+        LOGW("PrivacySensitiveMode [AudioStreamBuilder::setPrivacySensitiveMode()] "
+             "is not supported on OpenSLES streams.");
+    }
+
+    // Spatialization Behavior
+    if (mSpatializationBehavior != SpatializationBehavior::Unspecified) {
+        LOGW("SpatializationBehavior [AudioStreamBuilder::setSpatializationBehavior()] "
+             "is not supported on OpenSLES streams.");
+    }
+
+    // Allowed Capture Policy
+    if (mAllowedCapturePolicy != AllowedCapturePolicy::Unspecified) {
+        LOGW("AllowedCapturePolicy [AudioStreamBuilder::setAllowedCapturePolicy()] "
+             "is not supported on OpenSLES streams.");
+    }
 }
 
 SLresult AudioStreamOpenSLES::configurePerformanceMode(SLAndroidConfigurationItf configItf) {
@@ -288,11 +383,15 @@ Result AudioStreamOpenSLES::close_l() {
     EngineOpenSLES::getInstance().close();
 
     setState(StreamState::Closed);
+
     return Result::OK;
 }
 
 SLresult AudioStreamOpenSLES::enqueueCallbackBuffer(SLAndroidSimpleBufferQueueItf bq) {
-    return (*bq)->Enqueue(bq, mCallbackBuffer.get(), mBytesPerCallback);
+    SLresult result = (*bq)->Enqueue(
+            bq, mCallbackBuffer[mCallbackBufferIndex].get(), mBytesPerCallback);
+    mCallbackBufferIndex = (mCallbackBufferIndex + 1) % mBufferQueueLength;
+    return result;
 }
 
 int32_t AudioStreamOpenSLES::getBufferDepth(SLAndroidSimpleBufferQueueItf bq) {
@@ -301,16 +400,17 @@ int32_t AudioStreamOpenSLES::getBufferDepth(SLAndroidSimpleBufferQueueItf bq) {
     return (result == SL_RESULT_SUCCESS) ? queueState.count : -1;
 }
 
-void AudioStreamOpenSLES::processBufferCallback(SLAndroidSimpleBufferQueueItf bq) {
-    bool stopStream = false;
+bool AudioStreamOpenSLES::processBufferCallback(SLAndroidSimpleBufferQueueItf bq) {
+    bool shouldStopStream = false;
     // Ask the app callback to process the buffer.
-    DataCallbackResult result = fireDataCallback(mCallbackBuffer.get(), mFramesPerCallback);
+    DataCallbackResult result =
+            fireDataCallback(mCallbackBuffer[mCallbackBufferIndex].get(), mFramesPerCallback);
     if (result == DataCallbackResult::Continue) {
         // Pass the buffer to OpenSLES.
         SLresult enqueueResult = enqueueCallbackBuffer(bq);
         if (enqueueResult != SL_RESULT_SUCCESS) {
             LOGE("%s() returned %d", __func__, enqueueResult);
-            stopStream = true;
+            shouldStopStream = true;
         }
         // Update Oboe client position with frames handled by the callback.
         if (getDirection() == Direction::Input) {
@@ -320,19 +420,24 @@ void AudioStreamOpenSLES::processBufferCallback(SLAndroidSimpleBufferQueueItf bq
         }
     } else if (result == DataCallbackResult::Stop) {
         LOGD("Oboe callback returned Stop");
-        stopStream = true;
+        shouldStopStream = true;
     } else {
         LOGW("Oboe callback returned unexpected value = %d", result);
-        stopStream = true;
+        shouldStopStream = true;
     }
-    if (stopStream) {
-        requestStop();
+    if (shouldStopStream) {
+        mCallbackBufferIndex = 0;
     }
+    return shouldStopStream;
 }
 
 // This callback handler is called every time a buffer has been processed by OpenSL ES.
 static void bqCallbackGlue(SLAndroidSimpleBufferQueueItf bq, void *context) {
-    (reinterpret_cast<AudioStreamOpenSLES *>(context))->processBufferCallback(bq);
+    bool shouldStopStream = (reinterpret_cast<AudioStreamOpenSLES *>(context))
+            ->processBufferCallback(bq);
+    if (shouldStopStream) {
+        (reinterpret_cast<AudioStreamOpenSLES *>(context))->requestStop();
+    }
 }
 
 SLresult AudioStreamOpenSLES::registerBufferQueueCallback() {

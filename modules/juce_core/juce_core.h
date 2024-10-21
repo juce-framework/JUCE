@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -32,18 +44,17 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            7.0.9
+  version:            8.0.3
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
-  license:            ISC
+  license:            AGPLv3/Commercial
   minimumCppStandard: 17
 
   dependencies:
   OSXFrameworks:      Cocoa Foundation IOKit Security
   iOSFrameworks:      Foundation
   linuxLibs:          rt dl pthread
-  mingwLibs:          uuid wsock32 wininet version ole32 ws2_32 oleaut32 imm32 comdlg32 shlwapi rpcrt4 winmm
 
  END_JUCE_MODULE_DECLARATION
 
@@ -217,6 +228,11 @@ namespace juce
 
     extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
     extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
+
+    namespace detail
+    {
+        class QuickJSWrapper;
+    }
 }
 
 #include "misc/juce_EnumHelpers.h"
@@ -242,6 +258,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_ContainerDeletePolicy.h"
 #include "memory/juce_HeapBlock.h"
 #include "memory/juce_MemoryBlock.h"
+#include "memory/juce_CopyableHeapBlock.h"
 #include "memory/juce_ReferenceCountedObject.h"
 #include "memory/juce_ScopedPointer.h"
 #include "memory/juce_OptionalScopedPointer.h"
@@ -285,6 +302,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "misc/juce_ConsoleApplication.h"
 #include "containers/juce_Variant.h"
 #include "containers/juce_NamedValueSet.h"
+#include "javascript/juce_JSON.h"
 #include "containers/juce_DynamicObject.h"
 #include "containers/juce_HashMap.h"
 #include "containers/juce_FixedSizeFunction.h"
@@ -309,7 +327,6 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "files/juce_WildcardFileFilter.h"
 #include "streams/juce_FileInputSource.h"
 #include "logging/juce_FileLogger.h"
-#include "javascript/juce_JSON.h"
 #include "javascript/juce_JSONUtils.h"
 #include "serialisation/juce_Serialisation.h"
 #include "javascript/juce_JSONSerialisation.h"
@@ -353,6 +370,9 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_Reservoir.h"
 #include "files/juce_AndroidDocument.h"
 #include "streams/juce_AndroidDocumentInputSource.h"
+#include "misc/juce_OptionsHelpers.h"
+
+#include "detail/juce_CallbackListenerList.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_CFHelpers_mac.h"

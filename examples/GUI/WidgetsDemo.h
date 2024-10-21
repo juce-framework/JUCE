@@ -1,18 +1,22 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE examples.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework examples.
+   Copyright (c) Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
+   to use, copy, modify, and/or distribute this software for any purpose with or
    without fee is hereby granted provided that the above copyright notice and
    this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES,
-   WHETHER EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR
-   PURPOSE, ARE DISCLAIMED.
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+   REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+   AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+   INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+   LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+   OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+   PERFORMANCE OF THIS SOFTWARE.
 
   ==============================================================================
 */
@@ -690,7 +694,7 @@ struct MenuPage final : public Component
     {
         void drawPopupMenuColumnSeparatorWithOptions (Graphics& g,
                                                       const Rectangle<int>& bounds,
-                                                      const PopupMenu::Options& opt)
+                                                      const PopupMenu::Options& opt) override
         {
             if (auto* target = opt.getTargetComponent())
             {
@@ -708,7 +712,7 @@ struct MenuPage final : public Component
             }
         }
 
-        void drawPopupMenuBackgroundWithOptions (Graphics& g, int, int, const PopupMenu::Options& opt)
+        void drawPopupMenuBackgroundWithOptions (Graphics& g, int, int, const PopupMenu::Options& opt) override
         {
             if (auto* target = opt.getTargetComponent())
             {
@@ -717,7 +721,7 @@ struct MenuPage final : public Component
         }
 
         // Return the amount of space that should be left between popup menu columns.
-        int getPopupMenuColumnSeparatorWidthWithOptions (const PopupMenu::Options&)
+        int getPopupMenuColumnSeparatorWidthWithOptions (const PopupMenu::Options&) override
         {
             return 10;
         }
@@ -1113,7 +1117,7 @@ public:
             {
                 auto text = rowElement->getStringAttribute (getAttributeNameForColumnId (columnId));
 
-                widest = jmax (widest, font.getStringWidth (text));
+                widest = jmax (widest, GlyphArrangement::getStringWidthInt (font, text));
             }
         }
 
@@ -1152,7 +1156,7 @@ public:
 
 private:
     TableListBox table;     // the table component itself
-    Font font  { 14.0f };
+    Font font { FontOptions { 14.0f } };
 
     std::unique_ptr<XmlElement> demoData;  // This is the XML document loaded from the embedded file "demo table data.xml"
     XmlElement* columnList = nullptr;     // A pointer to the sub-node of demoData that contains the list of columns
@@ -1511,12 +1515,12 @@ private:
 //==============================================================================
 struct DemoTabbedComponent final : public TabbedComponent
 {
-    DemoTabbedComponent (bool isRunningComponenTransformsDemo)
+    DemoTabbedComponent (bool isRunningComponentTransformsDemo)
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
         auto colour = findColour (ResizableWindow::backgroundColourId);
 
-        addTab ("Buttons",     colour, new ButtonsPage (isRunningComponenTransformsDemo), true);
+        addTab ("Buttons",     colour, new ButtonsPage (isRunningComponentTransformsDemo), true);
         addTab ("Sliders",     colour, new SlidersPage(),                                 true);
         addTab ("Toolbars",    colour, new ToolbarDemoComp(),                             true);
         addTab ("Misc",        colour, new MiscPage(),                                    true);
@@ -1524,7 +1528,7 @@ struct DemoTabbedComponent final : public TabbedComponent
         addTab ("Tables",      colour, new TableDemoComponent(),                          true);
         addTab ("Drag & Drop", colour, new DragAndDropDemo(),                             true);
 
-        getTabbedButtonBar().getTabButton (5)->setExtraComponent (new CustomTabButton (isRunningComponenTransformsDemo),
+        getTabbedButtonBar().getTabButton (5)->setExtraComponent (new CustomTabButton (isRunningComponentTransformsDemo),
                                                                   TabBarButton::afterText);
     }
 
@@ -1533,8 +1537,8 @@ struct DemoTabbedComponent final : public TabbedComponent
     class CustomTabButton final : public Component
     {
     public:
-        CustomTabButton (bool isRunningComponenTransformsDemo)
-            : runningComponenTransformsDemo (isRunningComponenTransformsDemo)
+        CustomTabButton (bool isRunningComponentTransformsDemo)
+            : runningComponentTransformsDemo (isRunningComponentTransformsDemo)
         {
             setSize (20, 20);
         }
@@ -1556,10 +1560,10 @@ struct DemoTabbedComponent final : public TabbedComponent
                                "You can use these to implement things like close-buttons "
                                "or status displays for your tabs.",
                                bubbleMessage,
-                               runningComponenTransformsDemo);
+                               runningComponentTransformsDemo);
         }
     private:
-        bool runningComponenTransformsDemo;
+        bool runningComponentTransformsDemo;
         std::unique_ptr<BubbleMessageComponent> bubbleMessage;
     };
 

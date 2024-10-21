@@ -1,30 +1,86 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
 
 namespace juce
 {
+
+/** A class for receiving callbacks from a Slider or WebSliderRelay.
+
+    To be told when a slider's value changes, you can register a Slider::Listener
+    object using Slider::addListener().
+
+    @see Slider::addListener, Slider::removeListener, WebSliderRelay::addListener,
+         WebSliderRelay::removeListener
+
+     @tags{GUI}
+*/
+template <typename Emitter>
+class JUCE_API  SliderListener
+{
+public:
+    //==============================================================================
+    /** Destructor. */
+    virtual ~SliderListener() = default;
+
+    //==============================================================================
+    /** Called when the slider's value is changed.
+
+        This may be caused by dragging it, or by typing in its text entry box,
+        or by a call to Slider::setValue().
+
+        You can find out the new value using Slider::getValue().
+
+        @see Slider::valueChanged
+    */
+    virtual void sliderValueChanged (Emitter*) = 0;
+
+    //==============================================================================
+    /** Called when the slider is about to be dragged.
+
+        This is called when a drag begins, then it's followed by multiple calls
+        to sliderValueChanged(), and then sliderDragEnded() is called after the
+        user lets go.
+
+        @see sliderDragEnded, Slider::startedDragging
+    */
+    virtual void sliderDragStarted (Emitter*) {}
+
+    /** Called after a drag operation has finished.
+        @see sliderDragStarted, Slider::stoppedDragging
+    */
+    virtual void sliderDragEnded (Emitter*) {}
+};
 
 //==============================================================================
 /**
@@ -548,48 +604,7 @@ public:
                              NotificationType notification = sendNotificationAsync);
 
     //==============================================================================
-    /** A class for receiving callbacks from a Slider.
-
-        To be told when a slider's value changes, you can register a Slider::Listener
-        object using Slider::addListener().
-
-        @see Slider::addListener, Slider::removeListener
-    */
-    class JUCE_API  Listener
-    {
-    public:
-        //==============================================================================
-        /** Destructor. */
-        virtual ~Listener() = default;
-
-        //==============================================================================
-        /** Called when the slider's value is changed.
-
-            This may be caused by dragging it, or by typing in its text entry box,
-            or by a call to Slider::setValue().
-
-            You can find out the new value using Slider::getValue().
-
-            @see Slider::valueChanged
-        */
-        virtual void sliderValueChanged (Slider* slider) = 0;
-
-        //==============================================================================
-        /** Called when the slider is about to be dragged.
-
-            This is called when a drag begins, then it's followed by multiple calls
-            to sliderValueChanged(), and then sliderDragEnded() is called after the
-            user lets go.
-
-            @see sliderDragEnded, Slider::startedDragging
-        */
-        virtual void sliderDragStarted (Slider*) {}
-
-        /** Called after a drag operation has finished.
-            @see sliderDragStarted, Slider::stoppedDragging
-        */
-        virtual void sliderDragEnded (Slider*) {}
-    };
+    using Listener = SliderListener<Slider>;
 
     /** Adds a listener to be called when this slider's value changes. */
     void addListener (Listener* listener);

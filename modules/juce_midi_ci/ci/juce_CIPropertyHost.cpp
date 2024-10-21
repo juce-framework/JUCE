@@ -1,24 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
-   Agreement and JUCE Privacy Policy.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   End User License Agreement: www.juce.com/juce-7-licence
-   Privacy Policy: www.juce.com/juce-privacy-policy
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+   Or:
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -36,7 +45,6 @@ public:
     void visit (const Message::PropertyGetData& body)               const override { visitImpl (body); }
     void visit (const Message::PropertySetData& body)               const override { visitImpl (body); }
     void visit (const Message::PropertySubscribe& body)             const override { visitImpl (body); }
-    void visit (const Message::PropertyNotify& body)                const override { visitImpl (body); }
     using MessageVisitor::visit;
 
 private:
@@ -88,43 +96,56 @@ private:
         const auto source = output->getIncomingHeader().source;
         const auto dest = output->getIncomingHeader().destination;
         const auto group = output->getIncomingGroup();
-        const auto request = data.requestID;
-        caches->primeCache (host->delegate.getNumSimultaneousRequestsSupported(), [this, source, dest, group, request] (const PropertyExchangeResult& result)
+        const auto request = RequestID::create (data.requestID);
+
+        if (! request.has_value())
+            return false;
+
+        caches->primeCache (host->delegate.getNumSimultaneousRequestsSupported(), [hostPtr = host, source, dest, group, request] (const PropertyExchangeResult& result)
         {
             const auto send = [&] (const PropertyReplyHeader& header)
             {
-                detail::MessageTypeUtils::send (host->output,
+                detail::MessageTypeUtils::send (hostPtr->output,
                                                 group,
                                                 Message::Header { ChannelInGroup::wholeBlock,
                                                                   detail::MessageMeta::Meta<Message::PropertySetDataResponse>::subID2,
                                                                   detail::MessageMeta::implementationVersion,
                                                                   dest,
                                                                   source },
-                                                Message::PropertySetDataResponse { { request, Encodings::jsonTo7BitText (header.toVarCondensed()) } });
+                                                Message::PropertySetDataResponse { { request->asByte(), Encodings::jsonTo7BitText (header.toVarCondensed()) } });
             };
 
-            if (result.getError() == PropertyExchangeResult::Error::tooManyTransactions)
+            const auto sendStatus = [&] (int status, StringRef message)
             {
                 PropertyReplyHeader header;
-                header.status = 343;
-                header.message = TRANS ("The device has initiated too many simultaneous requests");
+                header.status = status;
+                header.message = message;
                 send (header);
+            };
+
+            if (const auto error = result.getError())
+            {
+                switch (*error)
+                {
+                    case PropertyExchangeResult::Error::tooManyTransactions:
+                        sendStatus (343, TRANS ("The device has initiated too many simultaneous requests"));
+                        break;
+
+                    case PropertyExchangeResult::Error::partial:
+                        sendStatus (400, TRANS ("Request was incomplete"));
+                        break;
+
+                    case PropertyExchangeResult::Error::notify:
+                        break;
+                }
+
                 return;
             }
 
-            if (result.getError().has_value())
-            {
-                PropertyReplyHeader header;
-                header.status = 400;
-                header.message = TRANS ("Request was incomplete");
-                send (header);
-                return;
-            }
+            send (hostPtr->delegate.propertySetDataRequested (source, { result.getHeaderAsRequestHeader(), result.getBody() }));
+        }, *request);
 
-            send (host->delegate.propertySetDataRequested (source, { result.getHeaderAsRequestHeader(), result.getBody() }));
-        }, request);
-
-        caches->addChunk (data.requestID, data);
+        caches->addChunk (*request, data);
 
         return true;
     }
@@ -206,19 +227,6 @@ private:
         return false;
     }
 
-    bool messageReceived (const Message::PropertyNotify& n) const
-    {
-        const auto m = output->getIncomingHeader().source;
-
-        if (auto* it = host->cacheProvider.getCacheForMuidAsResponder (m))
-            it->notify (n.requestID, n.header);
-
-        if (auto* it = host->cacheProvider.getCacheForMuidAsInitiator (m))
-            it->notify (n.requestID, n.header);
-
-        return true;
-    }
-
     PropertyHost* host = nullptr;
     ResponderOutput* output = nullptr;
     bool* handled = nullptr;
@@ -263,10 +271,10 @@ bool PropertyHost::tryRespond (ResponderOutput& responderOutput, const Message::
     return result;
 }
 
-ErasedScopeGuard PropertyHost::sendSubscriptionUpdate (MUID device,
-                                                       const PropertySubscriptionHeader& header,
-                                                       Span<const std::byte> body,
-                                                       std::function<void (const PropertyExchangeResult&)> cb)
+std::optional<RequestKey> PropertyHost::sendSubscriptionUpdate (MUID device,
+                                                                const PropertySubscriptionHeader& header,
+                                                                Span<const std::byte> body,
+                                                                std::function<void (const PropertyExchangeResult&)> cb)
 {
     const auto deviceIter = registry.find (device);
 
@@ -309,7 +317,6 @@ ErasedScopeGuard PropertyHost::sendSubscriptionUpdate (MUID device,
     if (caches == nullptr)
         return {};
 
-    const auto terminator = detail::PropertyHostUtils::getTerminator (output, functionBlock, device);
     auto wrappedCallback = [&]() -> std::function<void (const PropertyExchangeResult&)>
     {
         if (header.command != PropertySubscriptionCommand::end)
@@ -331,27 +338,32 @@ ErasedScopeGuard PropertyHost::sendSubscriptionUpdate (MUID device,
 
     if (! encoded.has_value())
     {
-        NullCheckedInvocation::invoke (wrappedCallback, PropertyExchangeResult { PropertyExchangeResult::Error::invalidPayload });
+        // The data could not be encoded successfully
+        jassertfalse;
         return {};
     }
 
-    auto primed = caches->primeCache (delegate.getNumSimultaneousRequestsSupported(),
-                                      std::move (wrappedCallback),
-                                      std::move (terminator));
+    const auto primed = caches->primeCache (delegate.getNumSimultaneousRequestsSupported(),
+                                            std::move (wrappedCallback));
 
-    if (! primed.isValid())
+    if (! primed.has_value())
+        return {};
+
+    const auto id = caches->getRequestIdForToken (*primed);
+
+    if (! id.has_value())
         return {};
 
     detail::PropertyHostUtils::send (output,
                                      functionBlock.firstGroup,
                                      detail::MessageMeta::Meta<Message::PropertySubscribe>::subID2,
                                      device,
-                                     primed.id,
+                                     id->asByte(),
                                      Encodings::jsonTo7BitText (header.toVarCondensed()),
                                      *encoded,
                                      cacheProvider.getMaxSysexSizeForMuid (device));
 
-    return std::move (primed.token);
+    return RequestKey { device, *primed };
 }
 
 void PropertyHost::terminateSubscription (MUID device, const String& subscribeId)
@@ -380,7 +392,7 @@ void PropertyHost::terminateSubscription (MUID device, const String& subscribeId
     header.subscribeId = subscribeId;
     header.resource = subIter->second;
 
-    sendSubscriptionUpdate (device, header, {}, nullptr).release();
+    sendSubscriptionUpdate (device, header, {}, nullptr);
 }
 
 PropertyHost::SubscriptionToken PropertyHost::uidFromSubscribeId (String id)

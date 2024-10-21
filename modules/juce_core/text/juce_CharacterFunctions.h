@@ -1,21 +1,33 @@
 /*
   ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2022 - Raw Material Software Limited
+   This file is part of the JUCE framework.
+   Copyright (c) Raw Material Software Limited
 
-   JUCE is an open source library subject to commercial or open-source
+   JUCE is an open source framework subject to commercial or open source
    licensing.
 
-   The code included in this file is provided under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
-   To use, copy, modify, and/or distribute this software for any purpose with or
-   without fee is hereby granted provided that the above copyright notice and
-   this permission notice appear in all copies.
+   By downloading, installing, or using the JUCE framework, or combining the
+   JUCE framework with any other source code, object code, content or any other
+   copyrightable work, you agree to the terms of the JUCE End User Licence
+   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+   do not agree to the terms of these agreements, we will not license the JUCE
+   framework to you, and you must discontinue the installation or download
+   process and cease use of the JUCE framework.
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+
+   Or:
+
+   You may also use this code under the terms of the AGPLv3:
+   https://www.gnu.org/licenses/agpl-3.0.en.html
+
+   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
 
   ==============================================================================
 */
@@ -138,6 +150,70 @@ public:
     /** Converts a byte of Windows 1252 codepage to unicode. */
     static juce_wchar getUnicodeCharFromWindows1252Codepage (uint8 windows1252Char) noexcept;
 
+    /** Returns true if a unicode code point is part of the basic multilingual plane.
+
+        @see isAscii, isNonSurrogateCodePoint
+    */
+    static constexpr bool isPartOfBasicMultilingualPlane (juce_wchar character) noexcept
+    {
+        return (uint32) character < 0x10000;
+    }
+
+    /** Returns true if a unicode code point is in the range os ASCII characters.
+
+        @see isAsciiControlCharacter, isPartOfBasicMultilingualPlane
+    */
+    static constexpr bool isAscii (juce_wchar character) noexcept
+    {
+        return (uint32) character < 128;
+    }
+
+    /** Returns true if a unicode code point is in the range of ASCII control characters.
+
+        @see isAscii
+    */
+    static constexpr bool isAsciiControlCharacter (juce_wchar character) noexcept
+    {
+        return (uint32) character < 32;
+    }
+
+    /** Returns true if a unicode code point is in the range of UTF-16 surrogate code units.
+
+        @see isHighSurrogate, isLowSurrogate
+    */
+    static constexpr bool isSurrogate (juce_wchar character) noexcept
+    {
+        const auto n = (uint32) character;
+        return 0xd800 <= n && n <= 0xdfff;
+    }
+
+    /** Returns true if a unicode code point is in the range of UTF-16 high surrogate code units.
+
+        @see isLowSurrogate, isSurrogate
+    */
+    static constexpr bool isHighSurrogate (juce_wchar character) noexcept
+    {
+        const auto n = (uint32) character;
+        return 0xd800 <= n && n <= 0xdbff;
+    }
+
+    /** Returns true if a unicode code point is in the range of UTF-16 low surrogate code units.
+
+        @see isHighSurrogate, isSurrogate
+    */
+    static constexpr bool isLowSurrogate (juce_wchar character) noexcept
+    {
+        const auto n = (uint32) character;
+        return 0xdc00 <= n && n <= 0xdfff;
+    }
+
+    /** Returns true if a unicode code point is in the range of valid unicode code points. */
+    static constexpr bool isNonSurrogateCodePoint (juce_wchar character) noexcept
+    {
+        const auto n = (uint32) character;
+        return n <= 0x10ffff && ! isSurrogate (character);
+    }
+
     //==============================================================================
     /** Parses a character string to read a floating-point number.
         Note that this will advance the pointer that is passed in, leaving it at
@@ -149,12 +225,11 @@ public:
         constexpr auto inf = std::numeric_limits<double>::infinity();
 
         bool isNegative = false;
-       #if ! JUCE_MINGW
+
         constexpr const int maxSignificantDigits = 17 + 1; // An additional digit for rounding
         constexpr const int bufferSize = maxSignificantDigits + 7 + 1; // -.E-XXX and a trailing null-terminator
         char buffer[(size_t) bufferSize] = {};
         char* writePtr = &(buffer[0]);
-       #endif
 
         const auto endOfWhitspace = text.findEndOfWhitespace();
         text = endOfWhitspace;
@@ -165,9 +240,7 @@ public:
         {
             case '-':
                 isNegative = true;
-               #if ! JUCE_MINGW
                 *writePtr++ = '-';
-               #endif
                 JUCE_FALLTHROUGH
             case '+':
                 c = *++text;
@@ -207,113 +280,6 @@ public:
             default:
                 break;
         }
-
-       #if JUCE_MINGW
-        // MinGW does not have access to the locale functions required for strtold, so we parse the doubles
-        // ourselves. There are some edge cases where the least significant digit will be wrong!
-        double result[3] = { 0 }, accumulator[2] = { 0 };
-        int exponentAdjustment[2] = { 0 }, exponentAccumulator[2] = { -1, -1 };
-        int exponent = 0, decPointIndex = 0, digit = 0;
-        int lastDigit = 0, numSignificantDigits = 0;
-        bool digitsFound = false;
-        constexpr const int maxSignificantDigits = 17 + 1;
-
-        for (;;)
-        {
-            if (text.isDigit())
-            {
-                lastDigit = digit;
-                digit = (int) text.getAndAdvance() - '0';
-                digitsFound = true;
-
-                if (decPointIndex != 0)
-                    exponentAdjustment[1]++;
-
-                if (numSignificantDigits == 0 && digit == 0)
-                    continue;
-
-                if (++numSignificantDigits > maxSignificantDigits)
-                {
-                    if (digit > 5)
-                        ++accumulator [decPointIndex];
-                    else if (digit == 5 && (lastDigit & 1) != 0)
-                        ++accumulator [decPointIndex];
-
-                    if (decPointIndex > 0)
-                        exponentAdjustment[1]--;
-                    else
-                        exponentAdjustment[0]++;
-
-                    while (text.isDigit())
-                    {
-                        ++text;
-                        if (decPointIndex == 0)
-                            exponentAdjustment[0]++;
-                    }
-                }
-                else
-                {
-                    const auto maxAccumulatorValue = (double) ((std::numeric_limits<unsigned int>::max() - 9) / 10);
-                    if (accumulator [decPointIndex] > maxAccumulatorValue)
-                    {
-                        result [decPointIndex] = mulexp10 (result [decPointIndex], exponentAccumulator [decPointIndex])
-                                                 + accumulator [decPointIndex];
-                        accumulator [decPointIndex] = 0;
-                        exponentAccumulator [decPointIndex] = 0;
-                    }
-
-                    accumulator [decPointIndex] = accumulator[decPointIndex] * 10 + digit;
-                    exponentAccumulator [decPointIndex]++;
-                }
-            }
-            else if (decPointIndex == 0 && *text == '.')
-            {
-                ++text;
-                decPointIndex = 1;
-
-                if (numSignificantDigits > maxSignificantDigits)
-                {
-                    while (text.isDigit())
-                        ++text;
-                    break;
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        result[0] = mulexp10 (result[0], exponentAccumulator[0]) + accumulator[0];
-
-        if (decPointIndex != 0)
-            result[1] = mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
-
-        c = *text;
-        if ((c == 'e' || c == 'E') && digitsFound)
-        {
-            auto negativeExponent = false;
-
-            switch (*++text)
-            {
-                case '-':   negativeExponent = true; JUCE_FALLTHROUGH
-                case '+':   ++text;
-            }
-
-            while (text.isDigit())
-                exponent = (exponent * 10) + ((int) text.getAndAdvance() - '0');
-
-            if (negativeExponent)
-                exponent = -exponent;
-        }
-
-        auto r = mulexp10 (result[0], exponent + exponentAdjustment[0]);
-        if (decPointIndex != 0)
-            r += mulexp10 (result[1], exponent - exponentAdjustment[1]);
-
-        return isNegative ? -r : r;
-
-       #else   // ! JUCE_MINGW
 
         int numSigFigs = 0, extraExponent = 0;
         bool decimalPointFound = false, leadingZeros = false;
@@ -448,8 +414,6 @@ public:
         return strtod_l (&buffer[0], nullptr, locale);
         #endif
        #endif
-
-       #endif   // JUCE_MINGW
     }
 
     /** Parses a character string, to read a floating-point value. */
