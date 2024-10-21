@@ -2537,23 +2537,25 @@ private:
             // using an adhoc certificate.
             if (target->type == XcodeTarget::VST3PlugIn || target->type == XcodeTarget::LV2PlugIn)
             {
-                auto script = ScriptBuilder{}
-                    .run ("codesign --verbose=4 --force --sign -", doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${FULL_PRODUCT_NAME}"))
-                    .insertLine();
+                ScriptBuilder script;
 
                 if (target->type == XcodeTarget::LV2PlugIn)
                 {
                     // Note: LV2 has a non-standard config build dir
-                    script.run (doubleQuoted ("${CONFIGURATION_BUILD_DIR}/../" + Project::getLV2FileWriterName()),
-                                doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${FULL_PRODUCT_NAME}"));
+                    script.run ("codesign --verbose=4 --force --sign -", doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${EXECUTABLE_NAME}"))
+                          .insertLine()
+                          .run (doubleQuoted ("${CONFIGURATION_BUILD_DIR}/../" + Project::getLV2FileWriterName()),
+                                doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${EXECUTABLE_NAME}"));
                 }
                 else if (target->type == XcodeTarget::VST3PlugIn)
                 {
-                    script.run (doubleQuoted ("${CONFIGURATION_BUILD_DIR}/" + Project::getVST3FileWriterName()),
+                    script.run ("codesign --verbose=4 --force --sign -", doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}"))
+                          .insertLine()
+                          .run (doubleQuoted ("${CONFIGURATION_BUILD_DIR}/" + Project::getVST3FileWriterName()),
                                 "-create",
                                 "-version", doubleQuoted (project.getVersionString()),
-                                "-path",    doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${FULL_PRODUCT_NAME}"),
-                                "-output",  doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${FULL_PRODUCT_NAME}/Contents/Resources/moduleinfo.json"));
+                                "-path",    doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}"),
+                                "-output",  doubleQuoted ("${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json"));
                 }
 
                 target->addShellScriptBuildPhase ("Update manifest", script.toStringWithDefaultShellOptions());
@@ -2586,7 +2588,7 @@ private:
 
                 const auto sourcePlugin = target->type == XcodeTarget::Target::LV2PlugIn
                                         ? "${TARGET_BUILD_DIR}"
-                                        : "${TARGET_BUILD_DIR}/${FULL_PRODUCT_NAME}";
+                                        : "${TARGET_BUILD_DIR}/${WRAPPER_NAME}";
 
                 const auto copyScript = ScriptBuilder{}
                         .set ("destinationPlugin", installPath + "/$(basename " + doubleQuoted (sourcePlugin) + ")")
@@ -2594,8 +2596,8 @@ private:
                         .copy (sourcePlugin, "${destinationPlugin}");
 
                 const auto objectToSignTail = target->type == XcodeTarget::Target::LV2PlugIn
-                                            ? "/$(basename \"${TARGET_BUILD_DIR}\")/${FULL_PRODUCT_NAME}"
-                                            : "/${FULL_PRODUCT_NAME}";
+                                            ? "/$(basename \"${TARGET_BUILD_DIR}\")/${EXECUTABLE_NAME}"
+                                            : "/${WRAPPER_NAME}";
 
                 const auto codesignScript = ScriptBuilder{}
                         .ifSet ("EXPANDED_CODE_SIGN_IDENTITY",
