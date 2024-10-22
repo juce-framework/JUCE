@@ -50,7 +50,7 @@ class WebBrowserComponent;
     types using the WebBrowserComponent::Options::withOptionsFrom function as they have to be
     constructed before the WebBrowserComponent.
 */
-class WebViewLifetimeListener
+class JUCE_API WebViewLifetimeListener
 {
 public:
     virtual ~WebViewLifetimeListener() = default;

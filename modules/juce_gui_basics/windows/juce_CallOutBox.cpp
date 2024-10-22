@@ -83,7 +83,7 @@ public:
     std::unique_ptr<Component> content;
     CallOutBox callout;
 
-    JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBoxCallback)
 };
 
 CallOutBox& CallOutBox::launchAsynchronously (std::unique_ptr<Component> content, Rectangle<int> area, Component* parent)

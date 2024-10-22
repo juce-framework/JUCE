@@ -883,7 +883,7 @@ private:
         return createIgnoredAccessibilityHandler (*this);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (TextHolderComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextHolderComponent)
 };
 
 //==============================================================================

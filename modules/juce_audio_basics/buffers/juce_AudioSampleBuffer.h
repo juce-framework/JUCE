@@ -45,6 +45,8 @@ template <typename Type>
 class AudioBuffer
 {
 public:
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4661)
+
     //==============================================================================
     /** Creates an empty buffer with 0 channels and 0 length. */
     AudioBuffer() noexcept

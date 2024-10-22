@@ -53,6 +53,8 @@ private:
             thread.join();
         }
 
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SwapChainThread)
+
     private:
         Direct2DHwndContext::HwndPimpl& owner;
         HANDLE swapChainEventHandle = nullptr;

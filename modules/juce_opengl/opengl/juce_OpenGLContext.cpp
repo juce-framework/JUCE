@@ -1224,6 +1224,8 @@ private:
         if (auto* cachedImage = CachedImage::get (*getComponent()))
             cachedImage->checkViewportBounds();
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Attachment)
 };
 
 //==============================================================================

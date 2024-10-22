@@ -65,7 +65,7 @@ namespace juce
 
     @tags{ARA}
 */
-class ARAEditGuard
+class JUCE_API ARAEditGuard
 {
 public:
     explicit ARAEditGuard (ARA::Host::DocumentController& dcIn);
@@ -167,7 +167,7 @@ private:
 
     @tags{ARA}
 */
-class AudioSource : public ManagedARAHandle<AudioSource, ARA::ARAAudioSourceRef>
+class JUCE_API AudioSource : public ManagedARAHandle<AudioSource, ARA::ARAAudioSourceRef>
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -235,7 +235,7 @@ public:
 
     @tags{ARA}
 */
-class AudioModification : public ManagedARAHandle<AudioModification, ARA::ARAAudioModificationRef>
+class JUCE_API AudioModification : public ManagedARAHandle<AudioModification, ARA::ARAAudioModificationRef>
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -293,7 +293,7 @@ private:
 
     @tags{ARA}
 */
-struct DeletionListener
+struct JUCE_API DeletionListener
 {
     /** Destructor. */
     virtual ~DeletionListener() = default;
@@ -318,7 +318,7 @@ struct DeletionListener
 
     @tags{ARA}
 */
-struct PlaybackRegion
+struct JUCE_API PlaybackRegion
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -386,7 +386,7 @@ private:
 
     @tags{ARA}
 */
-class MusicalContext : public ManagedARAHandle<MusicalContext, ARA::ARAMusicalContextRef>
+class JUCE_API MusicalContext : public ManagedARAHandle<MusicalContext, ARA::ARAMusicalContextRef>
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -448,7 +448,7 @@ public:
 
     @tags{ARA}
 */
-class RegionSequence : public ManagedARAHandle<RegionSequence, ARA::ARARegionSequenceRef>
+class JUCE_API RegionSequence : public ManagedARAHandle<RegionSequence, ARA::ARARegionSequenceRef>
 {
 public:
     /** Returns an %ARA versioned struct with the `structSize` correctly set for the currently
@@ -669,7 +669,7 @@ using EditorRendererInterface   = PlaybackRegionRegistry<ARA::ARAEditorRendererR
 
     @tags{ARA}
 */
-class PlugInExtensionInstance final
+class JUCE_API PlugInExtensionInstance final
 {
 public:
     /** Creates an empty PlugInExtensionInstance object.
@@ -726,7 +726,7 @@ private:
 
     @tags{ARA}
 */
-class ARAHostDocumentController final
+class JUCE_API ARAHostDocumentController final
 {
 public:
     /** Factory function.
@@ -775,7 +775,7 @@ private:
     The object passed to the callback must be checked even if the plugin instance reports having
     ARA extensions.
 */
-void createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (ARAFactoryWrapper)> cb);
+void JUCE_API createARAFactoryAsync (AudioPluginInstance& instance, std::function<void (ARAFactoryWrapper)> cb);
 
 } // namespace juce
 

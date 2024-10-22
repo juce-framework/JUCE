@@ -728,6 +728,8 @@ private:
     CriticalSection activeCollectorLock;
     ReferenceCountedArray<MidiInCollector> activeCollectors;
     Array<MidiOutHandle*> activeOutputHandles;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Win32MidiService)
 };
 
 Array<Win32MidiService::MidiInCollector*, CriticalSection> Win32MidiService::MidiInCollector::activeMidiCollectors;

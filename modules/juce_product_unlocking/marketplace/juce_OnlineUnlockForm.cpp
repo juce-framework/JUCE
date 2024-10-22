@@ -45,6 +45,8 @@ struct Spinner final : public Component,
     {
         getLookAndFeel().drawSpinningWaitAnimation (g, Colours::darkgrey, 0, 0, getWidth(), getHeight());
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Spinner)
 };
 
 struct OnlineUnlockForm::OverlayComp final : public Component,

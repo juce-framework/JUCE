@@ -84,7 +84,7 @@ private:
     bool shouldBeShown() const;
     void timerCallback() override;
 
-    JUCE_DECLARE_NON_COPYABLE (CaretComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CaretComponent)
 };
 
 } // namespace juce

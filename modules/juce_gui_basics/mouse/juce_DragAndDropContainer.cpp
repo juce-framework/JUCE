@@ -404,7 +404,7 @@ private:
                 && sourceToCheck.getIndex() == originalInputSourceIndex);
     }
 
-    JUCE_DECLARE_NON_COPYABLE (DragImageComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragImageComponent)
 };
 
 
