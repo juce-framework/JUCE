@@ -226,10 +226,6 @@ void ResizableWindow::childBoundsChanged (Component* child)
 {
     if ((child == contentComponent) && (child != nullptr) && resizeToFitContent)
     {
-        // not going to look very good if this component has a zero size..
-        jassert (child->getWidth() > 0);
-        jassert (child->getHeight() > 0);
-
         auto borders = getContentComponentBorder();
 
         setSize (child->getWidth() + borders.getLeftAndRight(),
