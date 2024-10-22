@@ -110,7 +110,13 @@ public:
 
         WeakReference<Component> deletionChecker (&component);
 
-        XWindowSystem::getInstance()->setBounds (windowH, physicalBounds, isNowFullScreen);
+        // If we are in a ConfigureNotify handler then forceSetBounds is being called as a
+        // consequence of X11 telling us what the window size is. There's no need to report this
+        // size back again to X11. By this we are avoiding a pitfall, when we get many subsequent
+        // ConfigureNotify events, many of which has stale size information. By not calling
+        // XWindowSystem::setBounds we are not actualising these old, incorrect sizes.
+        if (! inConfigureNotifyHandler)
+            XWindowSystem::getInstance()->setBounds (windowH, physicalBounds, isNowFullScreen);
 
         fullScreen = isNowFullScreen;
 
@@ -421,6 +427,7 @@ public:
     //==============================================================================
     static bool isActiveApplication;
     bool focused = false;
+    bool inConfigureNotifyHandler = false;
 
 private:
     //==============================================================================
