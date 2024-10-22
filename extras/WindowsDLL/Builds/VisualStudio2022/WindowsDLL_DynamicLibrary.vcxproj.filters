@@ -7713,4 +7713,9 @@
       <Filter>JUCE Modules\juce_graphics\unicode\sheenbidi</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include=".\resources.rc">
+      <Filter>JUCE Library Code</Filter>
+    </ResourceCompile>
+  </ItemGroup>
 </Project>
