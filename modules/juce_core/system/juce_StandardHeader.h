@@ -143,15 +143,19 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
 // DLL building settings on Windows
-#if JUCE_MSVC
+#if JUCE_WINDOWS
  #ifdef JUCE_DLL_BUILD
   #define JUCE_API __declspec (dllexport)
-  #pragma warning (disable: 4251)
+  #ifdef _MSC_VER
+   #pragma warning (disable: 4251)
+  #endif
  #elif defined (JUCE_DLL)
   #define JUCE_API __declspec (dllimport)
-  #pragma warning (disable: 4251)
+  #ifdef _MSC_VER
+   #pragma warning (disable: 4251)
+  #endif
  #endif
- #ifdef __INTEL_COMPILER
+ #if JUCE_MSVC && defined(__INTEL_COMPILER)
   #pragma warning (disable: 1125) // (virtual override warning)
  #endif
 #elif defined (JUCE_DLL) || defined (JUCE_DLL_BUILD)
@@ -163,7 +167,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
  #define JUCE_API   /**< This macro is added to all JUCE public class declarations. */
 #endif
 
-#if JUCE_MSVC && JUCE_DLL_BUILD
+#if JUCE_WINDOWS && JUCE_DLL_BUILD
  #define JUCE_PUBLIC_IN_DLL_BUILD(declaration)  public: declaration; private:
 #else
  #define JUCE_PUBLIC_IN_DLL_BUILD(declaration)  declaration;
