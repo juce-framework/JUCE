@@ -160,7 +160,6 @@ namespace Ids
     DECLARE_ID (smallIcon);
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
-    DECLARE_ID (generateManifest);
     DECLARE_ID (useRuntimeLibDLL);
     DECLARE_ID (multiProcessorCompilation);
     DECLARE_ID (enableIncrementalLinking);

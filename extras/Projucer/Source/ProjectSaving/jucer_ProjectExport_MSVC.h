@@ -176,7 +176,6 @@ public:
               prebuildCommandValue           (config, Ids::prebuildCommand,            getUndoManager()),
               postbuildCommandValue          (config, Ids::postbuildCommand,           getUndoManager()),
               generateDebugSymbolsValue      (config, Ids::alwaysGenerateDebugSymbols, getUndoManager(), false),
-              generateManifestValue          (config, Ids::generateManifest,           getUndoManager(), true),
               enableIncrementalLinkingValue  (config, Ids::enableIncrementalLinking,   getUndoManager(), false),
               useRuntimeLibDLLValue          (config, Ids::useRuntimeLibDLL,           getUndoManager(), true),
               multiProcessorCompilationValue (config, Ids::multiProcessorCompilation,  getUndoManager(), true),
@@ -220,7 +219,6 @@ public:
         String getDebugInformationFormatString() const    { return debugInformationFormatValue.get(); }
 
         bool shouldGenerateDebugSymbols() const           { return generateDebugSymbolsValue.get(); }
-        bool shouldGenerateManifest() const               { return generateManifestValue.get(); }
         bool shouldLinkIncremental() const                { return enableIncrementalLinkingValue.get(); }
         bool isUsingRuntimeLibDLL() const                 { return useRuntimeLibDLLValue.get(); }
         bool shouldUseMultiProcessorCompilation() const   { return multiProcessorCompilationValue.get(); }
@@ -323,9 +321,6 @@ public:
             props.add (new TextPropertyComponent (postbuildCommandValue, "Post-build Command", 2048, true),
                        "Some command that will be run after a build starts.");
 
-            props.add (new ChoicePropertyComponent (generateManifestValue, "Generate Manifest"),
-                       "Enable this to generate a Manifest file.");
-
             props.add (new ChoicePropertyComponent (characterSetValue, "Character Set",
                                                     { "MultiByte", "Unicode" },
                                                     { "MultiByte", "Unicode" }),
@@ -351,7 +346,7 @@ public:
 
     private:
         ValueTreePropertyWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
-                                     generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
+                                     enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
                                      intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
                                      pluginBinaryCopyStepValue;
 
@@ -570,7 +565,7 @@ public:
                     {
                         auto* manifest = props->createNewChildElement ("GenerateManifest");
                         setConditionAttribute (*manifest, config);
-                        manifest->addTextElement (config.shouldGenerateManifest() ? "true" : "false");
+                        manifest->addTextElement ("true");
                     }
 
                     if (type != SharedCodeTarget)
