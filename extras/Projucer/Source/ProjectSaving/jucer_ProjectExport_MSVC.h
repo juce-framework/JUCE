@@ -243,7 +243,8 @@ public:
     }
 
     //==============================================================================
-    class MSVCBuildConfiguration final : public BuildConfiguration
+    class MSVCBuildConfiguration final : public BuildConfiguration,
+                                         private ValueTree::Listener
     {
     public:
         MSVCBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
@@ -285,6 +286,31 @@ public:
             }
 
             optimisationLevelValue.setDefault (isDebug() ? optimisationOff : optimiseFull);
+
+            config.addListener (this);
+        }
+
+        ~MSVCBuildConfiguration() override
+        {
+            config.removeListener (this);
+        }
+
+        void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
+        {
+            if (property != Ids::winArchitecture)
+                return;
+
+            project.removeProjectMessage (ProjectMessages::Ids::arm64Warning);
+
+            const auto selectedArchs = architectureTypeValue.get();
+
+            if (! selectedArchs.getArray()->contains (toString (Architecture::arm64)))
+                return;
+
+            if (selectedArchs.getArray()->contains (toString (Architecture::arm64ec)))
+                return;
+
+            project.addProjectMessage (ProjectMessages::Ids::arm64Warning, {});
         }
 
         String getBinaryPath (const Identifier& id, Architecture arch) const
