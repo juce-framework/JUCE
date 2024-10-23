@@ -38,7 +38,8 @@ namespace juce
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, Component* parent);
 
 //==============================================================================
-class OpenGLContext::NativeContext  : private ComponentPeer::ScaleFactorListener
+class OpenGLContext::NativeContext  : private ComponentPeer::ScaleFactorListener,
+                                      private AsyncUpdater
 {
 public:
     NativeContext (Component& component,
@@ -93,6 +94,7 @@ public:
 
     ~NativeContext() override
     {
+        cancelPendingUpdate();
         renderContext.reset();
         dc.reset();
 
@@ -118,7 +120,12 @@ public:
     static void deactivateCurrentContext()  { wglMakeCurrent (nullptr, nullptr); }
     bool makeActive() const noexcept        { return isActive() || wglMakeCurrent (dc.get(), renderContext.get()) != FALSE; }
     bool isActive() const noexcept          { return wglGetCurrentContext() == renderContext.get(); }
-    void swapBuffers() const noexcept       { SwapBuffers (dc.get()); }
+
+    void swapBuffers() noexcept
+    {
+        SwapBuffers (dc.get());
+        triggerAsyncUpdate();
+    }
 
     bool setSwapInterval (int numFramesPerSwap)
     {
@@ -171,6 +178,11 @@ public:
 
 private:
     //==============================================================================
+    void handleAsyncUpdate() override
+    {
+        nativeWindow->setVisible (true);
+    }
+
     static void initialiseWGLExtensions (HDC dcIn)
     {
         static bool initialised = false;
@@ -311,7 +323,6 @@ private:
             peer->addScaleFactorListener (this);
         }
 
-        nativeWindow->setVisible (true);
         dc = std::unique_ptr<std::remove_pointer_t<HDC>, DeviceContextDeleter> { GetDC ((HWND) nativeWindow->getNativeHandle()),
                                                                                  DeviceContextDeleter { (HWND) nativeWindow->getNativeHandle() } };
     }
