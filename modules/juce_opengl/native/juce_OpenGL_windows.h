@@ -47,6 +47,7 @@ public:
                    void* contextToShareWithIn,
                    bool /*useMultisampling*/,
                    OpenGLVersion version)
+        : sharedContext (contextToShareWithIn)
     {
         placeholderComponent.reset (new PlaceholderComponent (*this));
         createNativeWindow (component);
@@ -84,9 +85,6 @@ public:
                 }
             }
 
-            if (contextToShareWithIn != nullptr)
-                wglShareLists ((HGLRC) contextToShareWithIn, renderContext.get());
-
             component.getTopLevelComponent()->repaint();
             component.repaint();
         }
@@ -107,6 +105,26 @@ public:
     {
         threadAwarenessSetter = std::make_unique<ScopedThreadDPIAwarenessSetter> (nativeWindow->getNativeHandle());
         context = &c;
+
+        if (sharedContext != nullptr)
+        {
+            if (! wglShareLists ((HGLRC) sharedContext, renderContext.get()))
+            {
+                TCHAR messageBuffer[256] = {};
+
+                FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                               nullptr,
+                               GetLastError(),
+                               MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                               messageBuffer,
+                               (DWORD) numElementsInArray (messageBuffer) - 1,
+                               nullptr);
+
+                DBG (messageBuffer);
+                jassertfalse;
+            }
+        }
+
         return InitResult::success;
     }
 
@@ -405,6 +423,7 @@ private:
     std::unique_ptr<std::remove_pointer_t<HGLRC>, RenderContextDeleter> renderContext;
     std::unique_ptr<std::remove_pointer_t<HDC>, DeviceContextDeleter> dc;
     OpenGLContext* context = nullptr;
+    void* sharedContext = nullptr;
     double nativeScaleFactor = 1.0;
 
     //==============================================================================
