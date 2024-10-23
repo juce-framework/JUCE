@@ -113,7 +113,7 @@ public:
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         constexpr StandalonePluginHolder::PluginInOuts channels[] { JucePlugin_PreferredChannelConfigurations };
-        const Array<StandalonePluginHolder::PluginInOuts> channelConfig {channels, juce::numElementsInArray (channels));
+        const Array<StandalonePluginHolder::PluginInOuts> channelConfig (channels, juce::numElementsInArray (channels));
        #else
         const Array<StandalonePluginHolder::PluginInOuts> channelConfig;
        #endif
