@@ -1624,6 +1624,58 @@ endfunction()
 
 # ==================================================================================================
 
+# Only sets result if the categories list contains valid entries
+function(_juce_aax_categories_to_int categories_list result)
+    set(aax_category_strings
+        None
+        EQ
+        Dynamics
+        PitchShift
+        Reverb
+        Delay
+        Modulation
+        Harmonic
+        NoiseReduction
+        Dither
+        SoundField
+        HWGenerators
+        SWGenerators
+        WrappedPlugin
+        Effect
+        placeholder    # These placeholders are because there's a gap between Effect
+        placeholder    # and MIDIEffect in the definition of AAX_EPlugInCategory.
+        MIDIEffect)
+
+    unset(aax_category_int)
+
+    foreach(category_string IN LISTS categories_list)
+        string(REGEX REPLACE "^AAX_[eE]PlugInCategory_" "" category_string "${category_string}")
+        list(FIND aax_category_strings ${category_string} aax_index)
+
+        if(aax_index GREATER_EQUAL 0)
+            if(aax_index EQUAL 0)
+                set(aax_category_bit 0)
+            else()
+                set(aax_category_bit "1 << (${aax_index} - 1)")
+            endif()
+
+            if(NOT DEFINED aax_category_int)
+                set(aax_category_int 0)
+            endif()
+
+            math(EXPR aax_category_int "${aax_category_int} | (${aax_category_bit})")
+        else()
+            message(WARNING "Unrecognised AAX category: '${category_string}'. See the `CMake API.md` entry for `AAX_CATEGORY` for valid values.")
+        endif()
+    endforeach()
+
+    if(DEFINED aax_category_int)
+        set(${result} "${aax_category_int}" PARENT_SCOPE)
+    endif()
+endfunction()
+
+# ==================================================================================================
+
 function(_juce_set_generic_property_if_not_set target property)
     list(LENGTH ARGN num_extra_args)
 
@@ -1803,57 +1855,20 @@ function(_juce_set_fallback_properties target)
 
     # AAX category
 
-    # The order of these strings is important, as the index of each string
-    # will be used to set an appropriate bit in the category bitfield.
-    set(aax_category_strings
-        ePlugInCategory_None
-        ePlugInCategory_EQ
-        ePlugInCategory_Dynamics
-        ePlugInCategory_PitchShift
-        ePlugInCategory_Reverb
-        ePlugInCategory_Delay
-        ePlugInCategory_Modulation
-        ePlugInCategory_Harmonic
-        ePlugInCategory_NoiseReduction
-        ePlugInCategory_Dither
-        ePlugInCategory_SoundField
-        ePlugInCategory_HWGenerators
-        ePlugInCategory_SWGenerators
-        ePlugInCategory_WrappedPlugin
-        ePlugInCategory_Effect)
-
-    if(is_synth)
-        set(default_aax_category ePlugInCategory_SWGenerators)
+    if(is_midi_effect)
+        set(default_aax_category AAX_ePlugInCategory_MIDIEffect)
+    elseif(is_synth)
+        set(default_aax_category AAX_ePlugInCategory_SWGenerators)
     else()
-        set(default_aax_category ePlugInCategory_None)
+        set(default_aax_category AAX_ePlugInCategory_None)
     endif()
 
     _juce_set_property_if_not_set(${target} AAX_CATEGORY ${default_aax_category})
 
-    # Replace AAX category string with its integral representation
     get_target_property(actual_aax_category ${target} JUCE_AAX_CATEGORY)
+    _juce_aax_categories_to_int("${actual_aax_category}" aax_category_int)
 
-    set(aax_category_int "")
-
-    foreach(category_string IN LISTS actual_aax_category)
-        list(FIND aax_category_strings ${category_string} aax_index)
-
-        if(aax_index GREATER_EQUAL 0)
-            if(aax_index EQUAL 0)
-                set(aax_category_bit 0)
-            else()
-                set(aax_category_bit "1 << (${aax_index} - 1)")
-            endif()
-
-            if(aax_category_int STREQUAL "")
-                set(aax_category_int 0)
-            endif()
-
-            math(EXPR aax_category_int "${aax_category_int} | (${aax_category_bit})")
-        endif()
-    endforeach()
-
-    if(NOT aax_category_int STREQUAL "")
+    if(DEFINED aax_category_int)
         set_target_properties(${target} PROPERTIES JUCE_AAX_CATEGORY ${aax_category_int})
     endif()
 
