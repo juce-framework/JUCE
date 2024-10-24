@@ -47,7 +47,7 @@ namespace juce
 
     @tags{Audio}
 */
-class AudioProcessorParameterGroup
+class JUCE_API AudioProcessorParameterGroup
 {
 public:
     //==============================================================================
