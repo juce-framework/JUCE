@@ -53,6 +53,193 @@ inline StringArray msBuildEscape (StringArray range)
     return range;
 }
 
+class MSVCScriptBuilder
+{
+public:
+    struct StringOrBuilder
+    {
+        StringOrBuilder() = default;
+        StringOrBuilder (const String& s)             : value (s) {}
+        StringOrBuilder (const char* s)               : StringOrBuilder (String { s }) {}
+        StringOrBuilder (const MSVCScriptBuilder& sb) : StringOrBuilder (sb.build()) {}
+
+        bool isNotEmpty() const { return value.isNotEmpty(); }
+
+        String value;
+    };
+
+    MSVCScriptBuilder& exit (int code)
+    {
+        script << "exit /b " << code;
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& deleteFile (const StringOrBuilder& path)
+    {
+        script << "del /s /q " << path.value;
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& mkdir (const StringOrBuilder& path)
+    {
+        script << "mkdir " << path.value;
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& delay (int timeSeconds)
+    {
+        script << "timeout /t " << String { timeSeconds } << " /nobreak";
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& warning (const String& message)
+    {
+        script << "echo : Warning: " + message;
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& info (const String& message)
+    {
+        script << "echo : Info: " << message;
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& error (const String& message)
+    {
+        script << "echo : Error: " << message;
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& run (const StringOrBuilder& command, bool echo = false)
+    {
+        if (echo)
+            script << "echo \"running " << command.value << "\"" << newLine;
+
+        script << command.value;
+        script << newLine;
+        return *this;
+    }
+
+    template <typename T>
+    MSVCScriptBuilder& set (const String& name, T value)
+    {
+        script << "set " << name << "=" << value;
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& runAndCheck (const StringOrBuilder& command,
+                                    const StringOrBuilder& success,
+                                    const StringOrBuilder& failed = {})
+    {
+        run (command.value);
+        ifelse ("%ERRORLEVEL% equ 0", success.value, failed.value);
+        return *this;
+    }
+
+    MSVCScriptBuilder& ifAllConditionsTrue (const StringArray& conditions, const StringOrBuilder& left)
+    {
+        jassert (left.isNotEmpty());
+
+        for (const auto& string : conditions)
+            script << "if " << string << " ";
+
+        script << "(" << newLine << left.value << ")";
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& ifelse (const String& expr,
+                               const StringOrBuilder& left,
+                               const StringOrBuilder& right = {})
+    {
+        jassert (left.isNotEmpty());
+
+        script << "if " << expr << " (" << newLine << left.value;
+
+        if (right.isNotEmpty())
+            script << ") else (" << newLine << right.value << ")";
+        else
+            script << ")";
+
+        script << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& append (const StringOrBuilder& string)
+    {
+        script << string.value << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& labelledSection (const String& name, const StringOrBuilder& body)
+    {
+        script << ":" << name << newLine << body.value << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& call (const String& label)
+    {
+        script << "call :" << label << newLine;
+        return *this;
+    }
+
+    MSVCScriptBuilder& jump (const String& label)
+    {
+        script << "goto :" << label << newLine;
+        return *this;
+    }
+
+    String build() const
+    {
+        MemoryOutputStream stream;
+        build (stream);
+        return stream.toUTF8();
+    }
+
+private:
+    void build (OutputStream& stream) const
+    {
+        const auto genTab = [] (int depth, const int tabWidth = 4)
+        {
+            return String{}.paddedLeft (' ', depth * tabWidth);
+        };
+
+        int depth = 0;
+        auto lines = StringArray::fromLines (script);
+
+        for (auto [lineIndex, line] : enumerate (lines))
+        {
+            const auto trimmed = line.trim();
+            const auto enter = trimmed.endsWith ("(");
+            const auto leave = trimmed.startsWith (")");
+
+            if (leave && depth > 0)
+                depth--;
+
+            if (trimmed.isNotEmpty())
+            {
+                stream << genTab (depth) << trimmed;
+
+                if (lineIndex < lines.size() - 1)
+                    stream << newLine;
+            }
+
+            if (enter)
+                depth++;
+        }
+    }
+
+    String script;
+};
+
 enum class Architecture
 {
     win32,
@@ -61,7 +248,7 @@ enum class Architecture
     arm64ec
 };
 
-static String toString (Architecture arch)
+static String getArchitectureValueString (Architecture arch)
 {
     switch (arch)
     {
@@ -84,12 +271,40 @@ static std::optional<Architecture> architectureTypeFromString (const String& str
 
     for (auto value : values)
     {
-        if (toString (value) == string)
+        if (getArchitectureValueString (value) == string)
             return value;
     }
 
     jassertfalse;
     return {};
+}
+
+static String getVisualStudioArchitectureId (Architecture architecture)
+{
+    switch (architecture)
+    {
+        case Architecture::win32:   return "x86";
+        case Architecture::win64:   return "AMD64";
+        case Architecture::arm64:   return "ARM64";
+        case Architecture::arm64ec: return "ARM64";
+    }
+
+    jassertfalse;
+    return "";
+}
+
+static String getVisualStudioPlatformId (Architecture architecture)
+{
+    switch (architecture)
+    {
+        case Architecture::win32:   return "x86";
+        case Architecture::win64:   return "x64";
+        case Architecture::arm64:   return "ARM64";
+        case Architecture::arm64ec: return "ARM64EC";
+    }
+
+    jassertfalse;
+    return "";
 }
 
 //==============================================================================
@@ -259,7 +474,7 @@ public:
               multiProcessorCompilationValue (config, Ids::multiProcessorCompilation,  getUndoManager(), true),
               intermediatesPathValue         (config, Ids::intermediatesPath,          getUndoManager()),
               characterSetValue              (config, Ids::characterSet,               getUndoManager()),
-              architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), Array<var> { toString (Architecture::win64) }, ","),
+              architectureTypeValue          (config, Ids::winArchitecture,            getUndoManager(), Array<var> { getArchitectureValueString (Architecture::win64) }, ","),
               fastMathValue                  (config, Ids::fastMath,                   getUndoManager()),
               debugInformationFormatValue    (config, Ids::debugInformationFormat,     getUndoManager(), isDebug() ? "ProgramDatabase" : "None"),
               pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
@@ -304,10 +519,10 @@ public:
 
             const auto selectedArchs = architectureTypeValue.get();
 
-            if (! selectedArchs.getArray()->contains (toString (Architecture::arm64)))
+            if (! selectedArchs.getArray()->contains (getArchitectureValueString (Architecture::arm64)))
                 return;
 
-            if (selectedArchs.getArray()->contains (toString (Architecture::arm64ec)))
+            if (selectedArchs.getArray()->contains (getArchitectureValueString (Architecture::arm64ec)))
                 return;
 
             project.addProjectMessage (ProjectMessages::Ids::arm64Warning, {});
@@ -372,7 +587,7 @@ public:
         //==============================================================================
         String createMSVCConfigName (Architecture arch) const
         {
-            return getName() + "|" + toString (arch);
+            return getName() + "|" + getArchitectureValueString (arch);
         }
 
         String getOutputFilename (const String& suffix,
@@ -410,8 +625,8 @@ public:
 
             for (const auto& arch : architectureList)
             {
-                architectureListAsStrings.add (toString (arch));
-                architectureListAsVars.add (toString (arch));
+                architectureListAsStrings.add (getArchitectureValueString (arch));
+                architectureListAsVars.add (getArchitectureValueString (arch));
             }
 
             props.add (new MultiChoicePropertyComponent (architectureTypeValue, "Architecture", architectureListAsStrings, architectureListAsVars),
@@ -622,7 +837,7 @@ public:
                                                     std::tuple (&LocationProperties::arm64,   Architecture::arm64),
                                                     std::tuple (&LocationProperties::arm64ec, Architecture::arm64ec) })
                 {
-                    const auto archAndFormat = toString (arch) + " " + format;
+                    const auto archAndFormat = getArchitectureValueString (arch) + " " + format;
                     props.add (new TextPropertyComponentWithEnablement (locationProps.*member, pluginBinaryCopyStepValue, archAndFormat + " Binary Location", 1024, false),
                                "The folder in which the compiled " + archAndFormat + " binary should be placed.");
                 }
@@ -683,7 +898,7 @@ public:
                         auto* e = configsGroup->createNewChildElement ("ProjectConfiguration");
                         e->setAttribute ("Include", config.createMSVCConfigName (arch));
                         e->createNewChildElement ("Configuration")->addTextElement (config.getName());
-                        e->createNewChildElement ("Platform")->addTextElement (toString (arch));
+                        e->createNewChildElement ("Platform")->addTextElement (getArchitectureValueString (arch));
                     }
                 }
             }
@@ -1492,6 +1707,8 @@ public:
 
         String getExtraPostBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
         {
+            using Builder = MSVCScriptBuilder;
+
             const auto copyBuildOutputIntoBundle = [&] (const StringArray& segments)
             {
                 return "copy /Y "
@@ -1598,34 +1815,100 @@ public:
                     if (writerTarget == nullptr)
                         return "";
 
-                    const auto writer = writerTarget->getExpandedConfigTargetPath (config)
-                                      + "\\"
-                                      + writerTarget->getBinaryNameWithSuffix (config);
+                    const auto helperExecutablePath = writerTarget->getExpandedConfigTargetPath (config)
+                                                    + "\\"
+                                                    + writerTarget->getBinaryNameWithSuffix (config);
 
-                    // moduleinfotool doesn't handle Windows-style path separators properly when computing the bundle name
-                    const auto normalisedBundlePath = getOwner().getOutDirFile (config, segments[0]).replace ("\\", "/");
-                    const auto contentsDir = normalisedBundlePath + "\\Contents";
-                    const auto resourceDir = contentsDir + "\\Resources";
+                    {
+                        // moduleinfotool doesn't handle Windows-style path separators properly when computing the bundle name
+                        const auto normalisedBundlePath = getOwner().getOutDirFile (config, segments[0]).replace ("\\", "/");
+                        const auto contentsDir = normalisedBundlePath + "\\Contents";
+                        const auto resourceDir = contentsDir + "\\Resources";
+                        const auto manifestPath = (resourceDir + "\\moduleinfo.json");
+                        const auto resourceDirPath = resourceDir + "\\";
+                        const auto pluginName = getOwner().project.getPluginNameString();
 
-                    return "\r\ndel /s /q " + (contentsDir + "\\moduleinfo.json").quoted() + "\r\n"
-                           "if not exist \"" + resourceDir + "\\\" del /s /q " + resourceDir.quoted() + " && mkdir " + resourceDir.quoted() + "\r\n"
-                          + writer.quoted()
-                          + " -create -version "
-                          + getOwner().project.getVersionString().quoted()
-                          + " -path "
-                          + normalisedBundlePath.quoted()
-                          + " -output "
-                          + (resourceDir + "\\moduleinfo.json").quoted();
+                        const auto manifestInvocationString = StringArray
+                        {
+                            helperExecutablePath.quoted(),
+                            "-create",
+                            "-version", getOwner().project.getVersionString().quoted(),
+                            "-path",    normalisedBundlePath.quoted(),
+                            "-output",  manifestPath.quoted()
+                        }.joinIntoString (" ");
+
+                        const auto crossCompilationPairs =
+                        {
+                            // This catches ARM64 and EC for x64 manifest generation
+                            std::pair { Architecture::arm64, Architecture::win64 },
+                            std::pair { arch, arch }
+                        };
+
+                        Builder builder;
+
+                        builder.set ("manifest_generated", 0);
+
+                        for (auto [hostArch, targetArch] : crossCompilationPairs)
+                        {
+                            const StringArray expr
+                            {
+                                "\"$(PROCESSOR_ARCHITECTURE)\" == " + getVisualStudioArchitectureId (hostArch).quoted(),
+                                "\"$(Platform)\""            " == " + getVisualStudioPlatformId (targetArch).quoted()
+                            };
+
+                            builder.ifAllConditionsTrue (expr, Builder{}.call ("_generate_manifest")
+                                                                        .set ("manifest_generated", 1));
+                        }
+
+                        const auto archMismatchErrorString = StringArray
+                        {
+                            "VST3 manifest generation is disabled for",
+                            pluginName,
+                            "because a",
+                            getVisualStudioArchitectureId (arch),
+                            "manifest helper cannot run on a host system",
+                            "processor detected to be $(PROCESSOR_ARCHITECTURE)."
+                        }.joinIntoString (" ");
+
+                        const auto architectureMatched = Builder{}
+                            .ifelse ("exist " + manifestPath.quoted(),
+                                     Builder{}.deleteFile (manifestPath.quoted()))
+                            .ifelse ("not exist "  + resourceDirPath.quoted(),
+                                     Builder{}.mkdir (resourceDirPath.quoted()))
+                            .runAndCheck (manifestInvocationString,
+                                          Builder{}.info ("Successfully generated a manifest for " + pluginName)
+                                                   .jump ("_continue"),
+                                          Builder{}.info ("The manifest helper failed")
+                                                   .jump ("_continue"));
+
+                        builder.ifelse ("%manifest_generated% equ 0",
+                                        Builder{}.jump ("_arch_mismatch"));
+
+                        builder.jump ("_continue");
+                        builder.labelledSection ("_generate_manifest", architectureMatched);
+                        builder.labelledSection ("_arch_mismatch",     Builder{}.info (archMismatchErrorString));
+                        builder.labelledSection ("_continue", "");
+
+                        return builder.build();
+                    }
                 }();
 
                 const auto pkgScript = copyBuildOutputIntoBundle (segments);
                 const auto copyScript = copyBundleToInstallDirectory (segments, config.getBinaryPath (Ids::vst3BinaryLocation, arch));
 
-                return pkgScript + manifestScript + copyScript;
-            }
+                const auto binCopyScript = config.isPluginBinaryCopyStepEnabled()
+                                         ? MSVCScriptBuilder{}.append ("copy /Y \"$(OutDir)$(TargetFileName)\" \""
+                                                                       + config.getBinaryPath (Ids::vstBinaryLocation, arch)
+                                                                       + "\\$(TargetFileName)\"")
+                                         : MSVCScriptBuilder{};
 
-            if (type == VSTPlugIn && config.isPluginBinaryCopyStepEnabled())
-                return "copy /Y \"$(OutDir)$(TargetFileName)\" \"" + config.getBinaryPath (Ids::vstBinaryLocation, arch) + "\\$(TargetFileName)\"";
+                return MSVCScriptBuilder{}
+                    .append (pkgScript)
+                    .append (manifestScript)
+                    .append (copyScript)
+                    .append (binCopyScript)
+                    .build();
+            }
 
             return {};
         }
@@ -1635,15 +1918,18 @@ public:
             const auto createBundleStructure = [&] (const StringArray& segments)
             {
                 auto directory = getOwner().getOutDirFile (config, "");
-                String script;
+                MSVCScriptBuilder script;
 
                 std::for_each (segments.begin(), std::prev (segments.end()), [&] (const auto& s)
                 {
                     directory += (directory.isEmpty() ? "" : "\\") + s;
-                    script += "if not exist \"" + directory + "\\\" del /s /q " + directory.quoted() + " && mkdir " + directory.quoted() + "\r\n";
+
+                    script.ifelse ("not exist " + (directory + "\\").quoted(),
+                                   MSVCScriptBuilder{}.deleteFile (directory.quoted())
+                                                      .mkdir (directory.quoted()).build());
                 });
 
-                return script;
+                return script.build();
             };
 
             if (type == AAXPlugIn)
@@ -1657,18 +1943,38 @@ public:
 
         String getPostBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
         {
-            auto postBuild = config.getPostbuildCommandString().replace ("\n", "\r\n");;
-            auto extraPostBuild = getExtraPostBuildSteps (config, arch);
+            const auto post = config.getPostbuildCommandString();
+            const auto extra = getExtraPostBuildSteps (config, arch);
 
-            return postBuild + String (postBuild.isNotEmpty() && extraPostBuild.isNotEmpty() ? "\r\n" : "") + extraPostBuild;
+            if (post.isNotEmpty() || extra.isNotEmpty())
+            {
+                return MSVCScriptBuilder{}
+                    .append ("cmd /c (")
+                    .append (post.replace ("\n", "\r\n"))
+                    .append (extra)
+                    .append (")")
+                    .build();
+            }
+
+            return "";
         }
 
         String getPreBuildSteps (const MSVCBuildConfiguration& config, Architecture arch) const
         {
-            auto preBuild = config.getPrebuildCommandString().replace ("\n", "\r\n");;
-            auto extraPreBuild = getExtraPreBuildSteps (config, arch);
+            const auto pre = config.getPrebuildCommandString();
+            const auto extra = getExtraPreBuildSteps (config, arch);
 
-            return preBuild + String (preBuild.isNotEmpty() && extraPreBuild.isNotEmpty() ? "\r\n" : "") + extraPreBuild;
+            if (pre.isNotEmpty() || extra.isNotEmpty())
+            {
+                return MSVCScriptBuilder{}
+                    .append ("cmd /c (")
+                    .append (pre.replace ("\n", "\r\n"))
+                    .append (extra)
+                    .append (")")
+                    .build();
+            }
+
+            return "";
         }
 
         String getBinaryNameWithSuffix (const MSVCBuildConfiguration& config) const
@@ -1751,7 +2057,7 @@ public:
         StringArray getAaxBundleStructure (const MSVCBuildConfiguration& config, Architecture arch) const
         {
             const auto dllName = config.getOutputFilename (".aaxplugin", false, type);
-            return { dllName, "Contents", toString (arch), dllName };
+            return { dllName, "Contents", getArchitectureValueString (arch), dllName };
         }
 
         StringArray getVst3BundleStructure (const MSVCBuildConfiguration& config, Architecture arch) const
