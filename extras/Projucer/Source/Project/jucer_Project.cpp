@@ -37,6 +37,29 @@
 #include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "../Application/jucer_Application.h"
 
+static std::map<String, int> getAAXCategoryValues()
+{
+    return
+    {
+        { "None",           0x00000000 },
+        { "EQ",             0x00000001 },
+        { "Dynamics",       0x00000002 },
+        { "PitchShift",     0x00000004 },
+        { "Reverb",         0x00000008 },
+        { "Delay",          0x00000010 },
+        { "Modulation",     0x00000020 },
+        { "Harmonic",       0x00000040 },
+        { "NoiseReduction", 0x00000080 },
+        { "Dither",         0x00000100 },
+        { "SoundField",     0x00000200 },
+        { "HWGenerators",   0x00000400 },
+        { "SWGenerators",   0x00000800 },
+        { "WrappedPlugin",  0x00001000 },
+        { "Effect",         0x00002000 },
+        { "MIDIEffect",     0x00010000 },
+    };
+}
+
 //==============================================================================
 Project::ProjectFileModificationPoller::ProjectFileModificationPoller (Project& p)
     : project (p)
@@ -532,9 +555,22 @@ void Project::updatePluginCategories()
         auto aaxCategory = projectRoot.getProperty (Ids::pluginAAXCategory, {}).toString();
 
         if (getAllAAXCategoryVars().contains (aaxCategory))
+        {
             pluginAAXCategoryValue = aaxCategory;
-        else if (getAllAAXCategoryStrings().contains (aaxCategory))
-            pluginAAXCategoryValue = Array<var> (getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf (aaxCategory)]);
+        }
+        else
+        {
+            constexpr auto prefix = "AAX_ePlugInCategory_";
+
+            if (aaxCategory.startsWithIgnoreCase (prefix))
+                aaxCategory = aaxCategory.substring ((int) std::string_view (prefix).size());
+
+            const auto map = getAAXCategoryValues();
+            const auto iter = map.find (aaxCategory);
+
+            if (iter != map.end())
+                pluginAAXCategoryValue = Array<var> (iter->second);
+        }
     }
 
     {
@@ -2388,30 +2424,58 @@ Array<var> Project::getDefaultVST3Categories() const noexcept
 
 StringArray Project::getAllAAXCategoryStrings() noexcept
 {
-    static StringArray aaxCategoryStrings { "AAX_ePlugInCategory_None", "AAX_ePlugInCategory_EQ", "AAX_ePlugInCategory_Dynamics", "AAX_ePlugInCategory_PitchShift",
-                                            "AAX_ePlugInCategory_Reverb", "AAX_ePlugInCategory_Delay", "AAX_ePlugInCategory_Modulation", "AAX_ePlugInCategory_Harmonic",
-                                            "AAX_ePlugInCategory_NoiseReduction", "AAX_ePlugInCategory_Dither", "AAX_ePlugInCategory_SoundField", "AAX_ePlugInCategory_HWGenerators",
-                                            "AAX_ePlugInCategory_SWGenerators", "AAX_ePlugInCategory_WrappedPlugin", "AAX_EPlugInCategory_Effect" };
+    static auto result = std::invoke ([]
+    {
+        StringArray values;
 
-    return aaxCategoryStrings;
+        for (const auto& item : getAAXCategoryValues())
+            values.add (item.first);
+
+        return values;
+    });
+
+    return result;
 }
 
 Array<var> Project::getAllAAXCategoryVars() noexcept
 {
-    static Array<var> aaxCategoryVars { 0x00000000, 0x00000001, 0x00000002, 0x00000004,
-                                        0x00000008, 0x00000010, 0x00000020, 0x00000040,
-                                        0x00000080, 0x00000100, 0x00000200, 0x00000400,
-                                        0x00000800, 0x00001000, 0x00002000 };
+    static auto result = std::invoke ([]
+    {
+        Array<var> values;
 
-    return aaxCategoryVars;
+        for (const auto& item : getAAXCategoryValues())
+            values.add (item.second);
+
+        return values;
+    });
+
+    return result;
 }
 
 Array<var> Project::getDefaultAAXCategories() const noexcept
 {
-    if (isPluginSynth())
-        return getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf ("AAX_ePlugInCategory_SWGenerators")];
+    const auto stringToFind = std::invoke ([this]() -> String
+    {
+        if (isPluginMidiEffect())
+            return "MIDIEffect";
 
-    return getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf ("AAX_ePlugInCategory_None")];
+        if (isPluginSynth())
+            return "SWGenerators";
+
+        return "None";
+    });
+
+    const auto map = getAAXCategoryValues();
+    const auto iter = map.find (stringToFind);
+
+    if (iter == map.end())
+    {
+        // Invariant violation!
+        jassertfalse;
+        return {};
+    }
+
+    return var { iter->second };
 }
 
 bool Project::getDefaultEnableARA() const noexcept
