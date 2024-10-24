@@ -275,6 +275,11 @@ public:
     {
         TextLayout layout;
         layout.createLayout (string, std::numeric_limits<float>::max());
+
+        if (layout.getNumLines() == 0)
+        {
+            return Rectangle<float>{};
+        }
         return layout.getLine (0).getLineBounds();
     }
 
