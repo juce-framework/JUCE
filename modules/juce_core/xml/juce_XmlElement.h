@@ -144,7 +144,7 @@ public:
     /** A struct containing options for formatting the text when representing an
         XML element as a string.
     */
-    struct TextFormat
+    struct JUCE_API TextFormat
     {
         /** Default constructor. */
         TextFormat();

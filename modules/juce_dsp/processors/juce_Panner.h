@@ -55,7 +55,7 @@ enum class PannerRule
     @tags{DSP}
 */
 template <typename SampleType>
-class Panner
+class JUCE_API Panner
 {
 public:
     //==============================================================================
