@@ -275,6 +275,10 @@ public:
     {
         TextLayout layout;
         layout.createLayout (string, std::numeric_limits<float>::max());
+
+        if (layout.getNumLines() == 0)
+            return {};
+
         return layout.getLine (0).getLineBounds();
     }
 
