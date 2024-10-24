@@ -376,12 +376,15 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_create_pkgconfig_target name)
+    set(options NOLINK)
+    cmake_parse_arguments(JUCE_ARG "${options}" "" "" ${ARGN})
+
     if(TARGET juce::pkgconfig_${name})
         return()
     endif()
 
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(${name} ${ARGN})
+    pkg_check_modules(${name} ${JUCE_ARG_UNPARSED_ARGUMENTS})
 
     add_library(pkgconfig_${name} INTERFACE)
     add_library(juce::pkgconfig_${name} ALIAS pkgconfig_${name})
@@ -389,9 +392,12 @@ function(_juce_create_pkgconfig_target name)
 
     set(pairs
         "INCLUDE_DIRECTORIES\;INCLUDE_DIRS"
-        "LINK_LIBRARIES\;LINK_LIBRARIES"
         "LINK_OPTIONS\;LDFLAGS_OTHER"
         "COMPILE_OPTIONS\;CFLAGS_OTHER")
+
+    if(NOT JUCE_ARG_NOLINK)
+        list(APPEND pairs "LINK_LIBRARIES\;LINK_LIBRARIES")
+    endif()
 
     foreach(pair IN LISTS pairs)
         list(GET pair 0 key)
