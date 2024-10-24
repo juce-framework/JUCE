@@ -42,7 +42,7 @@ namespace juce
 
     @tags{GUI}
 */
-class ScopedMessageBox
+class JUCE_API ScopedMessageBox
 {
 public:
     /** @internal */
