@@ -80,10 +80,13 @@ if((CMAKE_SYSTEM_NAME STREQUAL "Windows")
             OR (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64"
                 AND NOT (JUCE_TARGET_ARCHITECTURE STREQUAL "i386"
                          OR JUCE_TARGET_ARCHITECTURE STREQUAL "x86_64")))
-            set(JUCE_WINDOWS_HELPERS_CAN_RUN FALSE)
+            set(windows_helpers_can_run FALSE)
         else()
-            set(JUCE_WINDOWS_HELPERS_CAN_RUN TRUE)
+            set(windows_helpers_can_run TRUE)
         endif()
+
+        set(JUCE_WINDOWS_HELPERS_CAN_RUN ${windows_helpers_can_run}
+            CACHE INTERNAL "Signals whether plugin related helper utilities can run on the build machine")
     endif()
 endif()
 
