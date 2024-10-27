@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		006DF460F8DF66EFFA80D968 /* Icon.icns */ = {isa = PBXBuildFile; fileRef = 70F1CAF3C4C561DD81E6AFC1; };
 		0977FEC02DAF29438583198A /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = 01E0EEF68A11C1CAF180E173; };
+		0E041BED84BAC24200949A78 /* UniformTypeIdentifiers.framework */ = {isa = PBXBuildFile; fileRef = 961965555B4DAA5BE2361933; settings = { ATTRIBUTES = (Weak, ); }; };
 		0E39AB2B15DCE39E1055A646 /* include_juce_audio_processors_lv2_libs.cpp */ = {isa = PBXBuildFile; fileRef = AB2DE62887E2F58D821F3217; };
 		0FA2A3321630EBE83E439D99 /* include_juce_cryptography.mm */ = {isa = PBXBuildFile; fileRef = AFF729977947528F3E4AAA96; };
 		1282A62308CD1AC3F88A5D03 /* Images.xcassets */ = {isa = PBXBuildFile; fileRef = 5273768FBB55D0DD57A5E70C; };
@@ -85,6 +86,7 @@
 		9193D2A3C463BEAA07FD424D /* CoreText.framework */ /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		92800676AF753D1A60108F11 /* BinaryData.h */ /* BinaryData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../JuceLibraryCode/BinaryData.h; sourceTree = SOURCE_ROOT; };
 		935CA85EF98714D3A17AE737 /* QuartzCore.framework */ /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		961965555B4DAA5BE2361933 /* UniformTypeIdentifiers.framework */ /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
 		9982F39121710EFFD5FEEAEF /* MasterComponent.h */ /* MasterComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MasterComponent.h; path = ../../Source/MasterComponent.h; sourceTree = SOURCE_ROOT; };
 		9C67BD1915C7FD5747C2BA8F /* juce_audio_formats */ /* juce_audio_formats */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_formats; path = ../../../../modules/juce_audio_formats; sourceTree = SOURCE_ROOT; };
 		9C689AFBF364CB167C422D29 /* juce_gui_extra */ /* juce_gui_extra */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_gui_extra; path = ../../../../modules/juce_gui_extra; sourceTree = SOURCE_ROOT; };
@@ -142,6 +144,7 @@
 				8ECB0767EE340DD83869E37D,
 				AC37CDB417E2D3FE619E5944,
 				64DEB67F9523F28D899D1821,
+				0E041BED84BAC24200949A78,
 				78CB229C1BA5093078BC6195,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -192,6 +195,7 @@
 				EC794872987FEA2E129C589A,
 				B57F11A8AC0C8D3A8BF3BDCF,
 				C8C4E9A4028028FF1F5B76F2,
+				961965555B4DAA5BE2361933,
 				E8976208A3585295BF93D50D,
 			);
 			name = Frameworks;

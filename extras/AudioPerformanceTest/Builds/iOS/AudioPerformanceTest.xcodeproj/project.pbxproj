@@ -18,6 +18,7 @@
 		48ADBEF873A610909D727C97 /* include_juce_audio_formats.mm */ = {isa = PBXBuildFile; fileRef = 9E05B63699A307598B66F829; };
 		537E779F6008999191B2920A /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = 3058871156B921B9E5946C4F; };
 		5482AA8D0FC9214839FD96A4 /* include_juce_graphics_Sheenbidi.c */ = {isa = PBXBuildFile; fileRef = A6DEFD86172F7F8BA64A77CC; };
+		56BEF006A35699533F758612 /* UniformTypeIdentifiers.framework */ = {isa = PBXBuildFile; fileRef = 7ED3F6975B2EBF16EEF12B3B; settings = { ATTRIBUTES = (Weak, ); }; };
 		5923A711C0020F2CDD598714 /* CoreMIDI.framework */ = {isa = PBXBuildFile; fileRef = 12C680C68A15B9A590264B18; };
 		5AFD011031C266431687C922 /* CoreAudio.framework */ = {isa = PBXBuildFile; fileRef = 9F28F179EF6B90EB9F4DBEE9; };
 		65FC2E13B65977FED63BDDE3 /* include_juce_graphics.mm */ = {isa = PBXBuildFile; fileRef = 7E951216B6138C76653B1460; };
@@ -71,6 +72,7 @@
 		732FE1B1B951AB410C8153BD /* Metal.framework */ /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		77AA9722BAADD4108205501A /* juce_data_structures */ /* juce_data_structures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_data_structures; path = ../../../../modules/juce_data_structures; sourceTree = SOURCE_ROOT; };
 		7E951216B6138C76653B1460 /* include_juce_graphics.mm */ /* include_juce_graphics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_graphics.mm; path = ../../JuceLibraryCode/include_juce_graphics.mm; sourceTree = SOURCE_ROOT; };
+		7ED3F6975B2EBF16EEF12B3B /* UniformTypeIdentifiers.framework */ /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
 		81017699F857F5BBFCA6E055 /* juce_events */ /* juce_events */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_events; path = ../../../../modules/juce_events; sourceTree = SOURCE_ROOT; };
 		8693552B5FA53C2003A66302 /* Images.xcassets */ /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = AudioPerformanceTest/Images.xcassets; sourceTree = SOURCE_ROOT; };
 		89B3243200BAA6BD72905DBB /* include_juce_audio_basics.mm */ /* include_juce_audio_basics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_basics.mm; path = ../../JuceLibraryCode/include_juce_audio_basics.mm; sourceTree = SOURCE_ROOT; };
@@ -121,6 +123,7 @@
 				537E779F6008999191B2920A,
 				A545463A201EC7C2F79A330A,
 				0CB3EC8D832F5781D3BD7827,
+				56BEF006A35699533F758612,
 				E4CFFE22717FF2B0A12BAB32,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -147,6 +150,7 @@
 				3058871156B921B9E5946C4F,
 				732FE1B1B951AB410C8153BD,
 				19CEFCBBBEBC6F0DAE2376BB,
+				7ED3F6975B2EBF16EEF12B3B,
 				F454EA288AEBA354CF288214,
 			);
 			name = Frameworks;

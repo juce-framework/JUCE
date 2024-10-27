@@ -92,8 +92,7 @@ public:
     //==============================================================================
     void didPickDocumentsAtURLs (NSArray<NSURL*>* urls)
     {
-        const auto isWriting =  controller.get().documentPickerMode == UIDocumentPickerModeExportToService
-                             || controller.get().documentPickerMode == UIDocumentPickerModeMoveToService;
+        const auto isWriting = (savedFlags & FileBrowserComponent::saveMode) != 0;
         const auto accessOptions = isWriting ? 0 : NSFileCoordinatorReadingWithoutChanges;
 
         auto* fileCoordinator = [[[NSFileCoordinator alloc] initWithFilePresenter: nil] autorelease];
@@ -165,23 +164,96 @@ public:
 private:
     UIViewController* getViewController() const override { return controller.get(); }
 
+    struct CreateSaveControllerTrait
+    {
+        API_AVAILABLE (ios (14))
+        static FileChooserControllerClass* newFn (NSURL* url, const File& currentFileOrDirectory)
+        {
+            return [[FileChooserControllerClass alloc] initForExportingURLs: @[url] asCopy: currentFileOrDirectory.existsAsFile()];
+        }
+
+        static FileChooserControllerClass* oldFn (NSURL* url, const File& currentFileOrDirectory)
+        {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            const auto pickerMode = currentFileOrDirectory.existsAsFile()
+                                  ? UIDocumentPickerModeExportToService
+                                  : UIDocumentPickerModeMoveToService;
+            return [[FileChooserControllerClass alloc] initWithURL: url inMode: pickerMode];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        }
+    };
+
+    struct CreateOpenControllerTrait
+    {
+        API_AVAILABLE (ios (14))
+        static FileChooserControllerClass* newFn (int flags, const StringArray& validExtensions)
+        {
+            NSUniquePtr<NSMutableArray> types ([[NSMutableArray alloc] init]);
+
+            if ((flags & FileBrowserComponent::canSelectDirectories) != 0)
+            {
+                if (NSUniquePtr<UTType> ptr {[UTType typeWithIdentifier: @"public.folder"]})
+                    [types.get() addObject: ptr.get()];
+            }
+            else
+            {
+                if (validExtensions.isEmpty())
+                    if (NSUniquePtr<UTType> ptr {[UTType typeWithIdentifier: @"public.data"]})
+                        [types.get() addObject: ptr.get()];
+
+                for (const auto& extension : validExtensions)
+                    if (NSUniquePtr<UTType> ptr {[UTType typeWithFilenameExtension: juceStringToNS (extension)]})
+                        [types.get() addObject: ptr.get()];
+            }
+
+            return [[FileChooserControllerClass alloc] initForOpeningContentTypes: types.get()];
+        }
+
+        static FileChooserControllerClass* oldFn (int flags, const StringArray& validExtensions)
+        {
+            const NSUniquePtr<NSArray> utTypeArray { std::invoke ([&]
+            {
+                if ((flags & FileBrowserComponent::canSelectDirectories) != 0)
+                    return @[@"public.folder"];
+
+                if (validExtensions.isEmpty())
+                    return @[@"public.data"];
+
+                StringArray result;
+
+                for (const auto& extension : validExtensions)
+                {
+                    if (extension.isEmpty())
+                        continue;
+
+                    CFUniquePtr<CFStringRef> fileExtensionCF (extension.toCFString());
+
+                    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+                    if (CFUniquePtr<CFStringRef> tag { UTTypeCreatePreferredIdentifierForTag (kUTTagClassFilenameExtension, fileExtensionCF.get(), nullptr) })
+                        result.add (String::fromCFString (tag.get()));
+                    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+                }
+
+                return createNSArrayFromStringArray (result);
+            }) };
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            return [[FileChooserControllerClass alloc] initWithDocumentTypes: utTypeArray.get() inMode: UIDocumentPickerModeOpen];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        }
+    };
+
     Native (FileChooser& fileChooser, int flags)
-        : owner (fileChooser)
+        : owner (fileChooser),
+          savedFlags (flags)
     {
         delegate.reset ([[FileChooserDelegateClass alloc] initWithOwner: this]);
 
         const auto validExtensions = getValidExtensionsForWildcards (owner.filters);
-        const auto utTypeArray = (flags & FileBrowserComponent::canSelectDirectories) != 0
-                               ? @[@"public.folder"]
-                               : createNSArrayFromStringArray (getUTTypesForExtensions (validExtensions));
 
         if ((flags & FileBrowserComponent::saveMode) != 0)
         {
             auto currentFileOrDirectory = owner.startingFile;
-
-            UIDocumentPickerMode pickerMode = currentFileOrDirectory.existsAsFile()
-                                                ? UIDocumentPickerModeExportToService
-                                                : UIDocumentPickerModeMoveToService;
 
             if (! currentFileOrDirectory.existsAsFile())
             {
@@ -204,15 +276,12 @@ private:
                 }
             }
 
-            auto url = [[NSURL alloc] initFileURLWithPath: juceStringToNS (currentFileOrDirectory.getFullPathName())];
-
-            controller.reset ([[FileChooserControllerClass alloc] initWithURL: url inMode: pickerMode]);
-            [url release];
+            const NSUniquePtr<NSURL> url { [[NSURL alloc] initFileURLWithPath: juceStringToNS (currentFileOrDirectory.getFullPathName())] };
+            controller.reset (ifelse_14_0<CreateSaveControllerTrait> (url.get(), currentFileOrDirectory));
         }
         else
         {
-            controller.reset ([[FileChooserControllerClass alloc] initWithDocumentTypes: utTypeArray inMode: UIDocumentPickerModeOpen]);
-
+            controller.reset (ifelse_14_0<CreateOpenControllerTrait> (flags, validExtensions));
             [controller.get() setAllowsMultipleSelection: (flags & FileBrowserComponent::canSelectMultipleItems) != 0];
         }
 
@@ -267,27 +336,6 @@ private:
         return result;
     }
 
-    static StringArray getUTTypesForExtensions (const StringArray& extensions)
-    {
-        if (extensions.isEmpty())
-            return { "public.data" };
-
-        StringArray result;
-
-        for (const auto& extension : extensions)
-        {
-            if (extension.isEmpty())
-                continue;
-
-            CFUniquePtr<CFStringRef> fileExtensionCF (extension.toCFString());
-
-            if (const auto tag = CFUniquePtr<CFStringRef> (UTTypeCreatePreferredIdentifierForTag (kUTTagClassFilenameExtension, fileExtensionCF.get(), nullptr)))
-                result.add (String::fromCFString (tag.get()));
-        }
-
-        return result;
-    }
-
     static String getFilename (const File& path, const String& fallbackExtension)
     {
         auto filename  = path.getFileNameWithoutExtension();
@@ -309,6 +357,7 @@ private:
     FileChooser& owner;
     NSUniquePtr<NSObject<UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate>> delegate;
     NSUniquePtr<FileChooserControllerClass> controller;
+    int savedFlags = 0;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Native)

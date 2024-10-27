@@ -21,6 +21,7 @@
 		2F76CA28C8C0EFC7453D0EB8 /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = F5F2EA2238973488632FC322; };
 		34A4931AF1DD424D3A400EEF /* CoreGraphics.framework */ = {isa = PBXBuildFile; fileRef = 76A157A111866670A4678F04; };
 		36E115D98311F12AA06710E6 /* DemoPIPs2.cpp */ = {isa = PBXBuildFile; fileRef = 061AECBF1CC7056F4155812D; };
+		41AE56F8671DFE80720A6A18 /* UniformTypeIdentifiers.framework */ = {isa = PBXBuildFile; fileRef = AAF88452B7774FB605990B31; settings = { ATTRIBUTES = (Weak, ); }; };
 		46071CE2B98B562B7BF27CB1 /* CoreMedia.framework */ = {isa = PBXBuildFile; fileRef = 1CFE3935A3B810D5D68A2504; };
 		47ED2C78B05B8A6A00E36C46 /* Assets */ = {isa = PBXBuildFile; fileRef = 685A261BE78585293F3EAD36; };
 		48CF0B02E1D06E5DA51E6270 /* Accelerate.framework */ = {isa = PBXBuildFile; fileRef = A04E4408525F24F7DCBA000E; };
@@ -130,6 +131,7 @@
 		A5256778E2EBD206B337B555 /* juce_video */ /* juce_video */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_video; path = ../../../../modules/juce_video; sourceTree = SOURCE_ROOT; };
 		A6F555BE0DDF01C285BD8BF5 /* juce_dsp */ /* juce_dsp */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_dsp; path = ../../../../modules/juce_dsp; sourceTree = SOURCE_ROOT; };
 		A9315F8368A5771EC39631CB /* juce_gui_extra */ /* juce_gui_extra */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_gui_extra; path = ../../../../modules/juce_gui_extra; sourceTree = SOURCE_ROOT; };
+		AAF88452B7774FB605990B31 /* UniformTypeIdentifiers.framework */ /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
 		B28EFB9D1DF0B6D6499A7DEF /* CoreImage.framework */ /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		B2BC383CE102EECCF49C7AF7 /* IntroScreen.h */ /* IntroScreen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IntroScreen.h; path = ../../Source/Demos/IntroScreen.h; sourceTree = SOURCE_ROOT; };
 		B4389672DA4CC8E0A531062D /* CoreAudioKit.framework */ /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
@@ -180,6 +182,7 @@
 				89AD16514B1F4133FFEA1DF9,
 				EFD00925ED57B2C5EB5412FC,
 				10D769051F1431A67AD2CB40,
+				41AE56F8671DFE80720A6A18,
 				9641E7E4F0B5C2A1B3E8709A,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -210,6 +213,7 @@
 				96D99A08027CA35D6A4E5CFD,
 				3644EF58D9EB1AB436A04E77,
 				2992DB69DCFB7DADDE907385,
+				AAF88452B7774FB605990B31,
 				40D006CCDB1D33FF94B6ECAE,
 			);
 			name = Frameworks;

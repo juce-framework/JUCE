@@ -79,6 +79,7 @@
   #import <UserNotifications/UserNotifications.h>
  #endif
 
+ #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
  #import <MetalKit/MetalKit.h>
  #import <UIKit/UIActivityViewController.h>
 

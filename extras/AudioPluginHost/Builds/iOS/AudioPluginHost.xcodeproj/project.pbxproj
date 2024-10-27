@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0240E0ECC2771B8B854C49C2 /* UniformTypeIdentifiers.framework */ = {isa = PBXBuildFile; fileRef = 8C6CD9119127C4AEBADABA25; settings = { ATTRIBUTES = (Weak, ); }; };
 		025B22813EA4E34CE3630B9A /* IOConfigurationWindow.cpp */ = {isa = PBXBuildFile; fileRef = C37B2E77AAB6C9E13729BF99; };
 		075C54DDDBDEA5AAD2F60154 /* include_juce_graphics.mm */ = {isa = PBXBuildFile; fileRef = 82800DBA287EF4BAB13B42FB; };
 		08E08AEF1DFE00F06F5ED160 /* include_juce_core_CompilationTime.cpp */ = {isa = PBXBuildFile; fileRef = DB6C39B4C628E31A58A28675; };
@@ -104,6 +105,7 @@
 		86CA337014D3F67E906FFD28 /* Accelerate.framework */ /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		87A7AAB053051C49EAF4EE88 /* InternalPlugins.cpp */ /* InternalPlugins.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = InternalPlugins.cpp; path = ../../Source/Plugins/InternalPlugins.cpp; sourceTree = SOURCE_ROOT; };
 		89309C0C5F3269BD06BE7F27 /* QuartzCore.framework */ /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		8C6CD9119127C4AEBADABA25 /* UniformTypeIdentifiers.framework */ /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
 		8D8BBC353637DA442C5575DA /* App */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Plugin Host.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8FE7B37CDE0818DB27BDDEBD /* include_juce_gui_basics.mm */ /* include_juce_gui_basics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_gui_basics.mm; path = ../../JuceLibraryCode/include_juce_gui_basics.mm; sourceTree = SOURCE_ROOT; };
 		9320A145F2A8ACD687D6608E /* juce_dsp */ /* juce_dsp */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_dsp; path = ../../../../modules/juce_dsp; sourceTree = SOURCE_ROOT; };
@@ -166,6 +168,7 @@
 				4DB15177DDC357F4503F88CF,
 				1AD3A3C7CD2D1F6DC4B65205,
 				8390CF6AEF2090680E4535F7,
+				0240E0ECC2771B8B854C49C2,
 				A6A7B686501E826EB999A03C,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -316,6 +319,7 @@
 				B457EE687507BF1DEEA7581F,
 				3E94492697BD64D0F185D60E,
 				118ABD8E91DF2E400358D8CD,
+				8C6CD9119127C4AEBADABA25,
 				44D9D7F12D565AC038E17E2F,
 			);
 			name = Frameworks;

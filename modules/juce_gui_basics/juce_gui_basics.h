@@ -55,7 +55,7 @@
   OSXFrameworks:      Cocoa QuartzCore
   WeakOSXFrameworks:  Metal MetalKit
   iOSFrameworks:      CoreServices UIKit
-  WeakiOSFrameworks:  Metal MetalKit
+  WeakiOSFrameworks:  Metal MetalKit UniformTypeIdentifiers
 
  END_JUCE_MODULE_DECLARATION
 

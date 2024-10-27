@@ -564,4 +564,36 @@ private:
     Class klass = nullptr;
 };
 
+#if JUCE_IOS
+
+// Defines a function that will check the requested version both at
+// build time, and, if necessary, at runtime.
+// The function's first template argument is a trait type containing
+// two static member functions named newFn and oldFn.
+// When the deployment target is at least equal to major.minor,
+// newFn will be selected at compile time.
+// When the build sdk does not support iOS SDK major.minor,
+// oldFn will be selected at compile time.
+// Otherwise, the OS version will be checked at runtime and newFn
+// will be called if the OS version is at least equal to major.minor,
+// otherwise oldFn will be called.
+#define JUCE_DEFINE_IOS_VERSION_CHECKER_FOR_VERSION(major, minor)           \
+    template <typename Trait, typename... Args>                             \
+    auto ifelse_ ## major ## _ ## minor (Args&&... args)                    \
+    {                                                                       \
+        constexpr auto fullVersion = major * 10'000 + minor * 100;          \
+        if constexpr (fullVersion <= __IPHONE_OS_VERSION_MIN_REQUIRED)      \
+            return Trait::newFn (std::forward<Args> (args)...);             \
+        else if constexpr (__IPHONE_OS_VERSION_MAX_ALLOWED < fullVersion)   \
+            return Trait::oldFn (std::forward<Args> (args)...);             \
+        else if (@available (ios major ## . ## minor, *))                   \
+            return Trait::newFn (std::forward<Args> (args)...);             \
+        else                                                                \
+            return Trait::oldFn (std::forward<Args> (args)...);             \
+    }
+
+JUCE_DEFINE_IOS_VERSION_CHECKER_FOR_VERSION (14, 0)
+
+#endif
+
 } // namespace juce
