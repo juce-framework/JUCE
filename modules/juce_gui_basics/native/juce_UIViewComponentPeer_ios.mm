@@ -1019,16 +1019,26 @@ static bool doKeysUp (UIViewComponentPeer* owner, NSSet<UIPress*>* presses, UIPr
     return owner != nullptr && owner->canBecomeKeyWindow();
 }
 
-- (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection
+static void postTraitChangeNotification (UITraitCollection* previousTraitCollection)
 {
-    [super traitCollectionDidChange: previousTraitCollection];
-
     const auto wasDarkModeActive = ([previousTraitCollection userInterfaceStyle] == UIUserInterfaceStyleDark);
 
     if (wasDarkModeActive != Desktop::getInstance().isDarkModeActive())
         [[NSNotificationCenter defaultCenter] postNotificationName: UIViewComponentPeer::getDarkModeNotificationName()
                                                             object: nil];
 }
+
+#if ! defined (__IPHONE_17_0) || __IPHONE_OS_VERSION_MAX_ALLOWED < __IPHONE_17_0
+- (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection
+{
+    [super traitCollectionDidChange: previousTraitCollection];
+
+    if (@available (ios 17, *))
+        {} // do nothing
+    else
+        postTraitChangeNotification (previousTraitCollection);
+}
+#endif
 
 - (BOOL) isAccessibilityElement
 {
@@ -1671,6 +1681,23 @@ bool KeyPress::isKeyCurrentlyDown (int keyCode)
 
 Point<float> juce_lastMousePos;
 
+struct ChangeRegistrationTrait
+{
+   #if defined (__IPHONE_17_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_17_0
+    API_AVAILABLE (ios (17))
+    static void newFn (UIView* view)
+    {
+        [view registerForTraitChanges: @[UITraitUserInterfaceStyle.self]
+                          withHandler: ^(JuceUIView*, UITraitCollection* previousTraitCollection)
+        {
+            postTraitChangeNotification (previousTraitCollection);
+        }];
+    }
+   #endif
+
+    static void oldFn (UIView*) {}
+};
+
 //==============================================================================
 UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags, UIView* viewToAttachTo)
     : ComponentPeer (comp, windowStyleFlags),
@@ -1696,6 +1723,8 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
     if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         [[view layer] setDrawsAsynchronously: YES];
+
+    ifelse_17_0<ChangeRegistrationTrait> (view);
 
     if (isSharedWindow)
     {
