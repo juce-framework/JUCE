@@ -75,10 +75,7 @@
  #endif
 
 #elif JUCE_IOS
- #if JUCE_PUSH_NOTIFICATIONS
-  #import <UserNotifications/UserNotifications.h>
- #endif
-
+ #import <UserNotifications/UserNotifications.h>
  #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
  #import <MetalKit/MetalKit.h>
  #import <UIKit/UIActivityViewController.h>

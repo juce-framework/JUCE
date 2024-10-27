@@ -168,10 +168,27 @@ namespace juce
         app->resumed();
 }
 
+struct BadgeUpdateTrait
+{
+   #if defined (__IPHONE_16_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_16_0
+    API_AVAILABLE (ios (16))
+    static void newFn (UIApplication*)
+    {
+        [[UNUserNotificationCenter currentNotificationCenter] setBadgeCount: 0 withCompletionHandler: nil];
+    }
+   #endif
+
+    static void oldFn (UIApplication* app)
+    {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        app.applicationIconBadgeNumber = 0;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }
+};
+
 - (void) applicationDidBecomeActive: (UIApplication*) application
 {
-    application.applicationIconBadgeNumber = 0;
-
+    ifelse_17_0<BadgeUpdateTrait> (application);
     isIOSAppActive = true;
 }
 
