@@ -738,7 +738,6 @@ function(_juce_configure_bundle source_target dest_target)
         GENERATED TRUE)
     add_custom_command(TARGET ${dest_target} POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E copy "${this_output_pkginfo}" "${output_folder}"
-        DEPENDS "${this_output_pkginfo}"
         VERBATIM)
 
     _juce_add_xcode_entitlements(${source_target} ${dest_target})
