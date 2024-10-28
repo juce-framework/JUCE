@@ -820,7 +820,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     [self touchesEnded: touches withEvent: event];
 }
 
-- (void) onHover: (UIHoverGestureRecognizer*) gesture
+- (void) onHover: (UIHoverGestureRecognizer*) gesture API_AVAILABLE (ios (13))
 {
     if (owner != nullptr)
         owner->onHover (gesture);
