@@ -37,9 +37,9 @@ namespace juce
 
 //==============================================================================
 /**
-	A three-coordinate vector.
+A three-coordinate vector.
 
-	@tags{OpenGL}
+@tags{OpenGL}
 */
 template <typename Type>
 class Vector3D
