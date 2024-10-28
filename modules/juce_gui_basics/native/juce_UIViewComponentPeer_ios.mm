@@ -307,32 +307,6 @@ struct CADisplayLinkDeleter
     std::unique_ptr<CADisplayLink, CADisplayLinkDeleter> displayLink;
 }
 
-- (JuceUIView*) initWithOwner: (UIViewComponentPeer*) owner withFrame: (CGRect) frame;
-- (void) dealloc;
-
-+ (Class) layerClass;
-
-- (void) displayLinkCallback: (CADisplayLink*) dl;
-
-- (void) drawRect: (CGRect) r;
-
-- (void) touchesBegan:     (NSSet*) touches  withEvent: (UIEvent*) event;
-- (void) touchesMoved:     (NSSet*) touches  withEvent: (UIEvent*) event;
-- (void) touchesEnded:     (NSSet*) touches  withEvent: (UIEvent*) event;
-- (void) touchesCancelled: (NSSet*) touches  withEvent: (UIEvent*) event;
-
-- (void) onHover: (UIHoverGestureRecognizer*) gesture API_AVAILABLE (ios (13.0));
-- (void) onScroll: (UIPanGestureRecognizer*) gesture;
-
-- (BOOL) becomeFirstResponder;
-- (BOOL) resignFirstResponder;
-- (BOOL) canBecomeFirstResponder;
-
-- (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection;
-
-- (BOOL) isAccessibilityElement;
-- (CGRect) accessibilityFrame;
-- (NSArray*) accessibilityElements;
 @end
 
 //==============================================================================
