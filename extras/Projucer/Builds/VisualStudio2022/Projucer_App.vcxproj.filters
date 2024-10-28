@@ -5315,9 +5315,6 @@
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
       <Filter>Projucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_core\javascript\choc\JUCE_CHANGES.txt">
-      <Filter>JUCE Modules\juce_core\javascript\choc</Filter>
-    </None>
     <None Include="..\..\..\..\modules\juce_core\javascript\choc\LICENSE.md">
       <Filter>JUCE Modules\juce_core\javascript\choc</Filter>
     </None>

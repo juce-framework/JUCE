@@ -27,8 +27,6 @@
 #include <exception>
 #include "../platform/choc_Assert.h"
 
-namespace
-{
 namespace choc::value
 {
 
@@ -430,19 +428,36 @@ public:
 //==============================================================================
 /** A simple implementation of StringDictionary.
     This should have good performance for typical-sized dictionaries.
-    Adding new strings will require O(n) time where n = dictionary size, but
+    Adding new strings will require O(log n) time where n = dictionary size, but
     retrieving the string for a handle is fast with O(1).
 */
 struct SimpleStringDictionary  : public StringDictionary
 {
+    SimpleStringDictionary() = default;
+    SimpleStringDictionary (const SimpleStringDictionary& other) : strings (other.strings), stringMap (other.stringMap) {}
+    SimpleStringDictionary (SimpleStringDictionary&& other)      : strings (std::move (other.strings)), stringMap (std::move (other.stringMap)) {}
+    SimpleStringDictionary& operator= (const SimpleStringDictionary& other) { strings = other.strings; stringMap = other.stringMap; return *this; }
+    SimpleStringDictionary& operator= (SimpleStringDictionary&& other)      { strings = std::move (other.strings); stringMap = std::move (other.stringMap); return *this; }
+
     Handle getHandleForString (std::string_view) override;
     std::string_view getStringForHandle (Handle handle) const override;
 
+    bool empty() const { return strings.empty(); }
     void clear();
 
+    size_t getRawDataSize() const   { return strings.size(); }
+    const char* getRawData() const  { return strings.data(); }
+
+    void setRawData (const void*, size_t);
+
+private:
+    std::pair<std::vector<uint32_t>::const_iterator, bool> findGreaterThanOrEqual (std::string_view) const;
+
     /// The strings are stored in a single chunk, which can be saved and
-    /// reloaded if necessary.
+    /// reloaded if necessary. The stringMap is a sorted vector of handles
+    /// supporting fast lookup of strings in the map
     std::vector<char> strings;
+    std::vector<uint32_t> stringMap;
 };
 
 //==============================================================================
@@ -1654,15 +1669,17 @@ inline int Type::getObjectMemberIndex (std::string_view name) const
 template <typename PrimitiveType>
 inline constexpr Type::MainType Type::selectMainType()
 {
-    if constexpr (std::is_same<const PrimitiveType, const int32_t>::value)       return MainType::int32;
-    if constexpr (std::is_same<const PrimitiveType, const int64_t>::value)       return MainType::int64;
-    if constexpr (std::is_same<const PrimitiveType, const float>::value)         return MainType::float32;
-    if constexpr (std::is_same<const PrimitiveType, const double>::value)        return MainType::float64;
-    if constexpr (std::is_same<const PrimitiveType, const bool>::value)          return MainType::boolean;
-    if constexpr (std::is_same<const PrimitiveType, const char* const>::value)   return MainType::string;
-    if constexpr (std::is_same<const PrimitiveType, const std::string>::value)   return MainType::string;
+    Type::MainType result = MainType::void_;
 
-    return MainType::void_;
+    if constexpr (std::is_same<const PrimitiveType, const int32_t>::value)          result = MainType::int32;
+    else if constexpr (std::is_same<const PrimitiveType, const int64_t>::value)     result = MainType::int64;
+    else if constexpr (std::is_same<const PrimitiveType, const float>::value)       result = MainType::float32;
+    else if constexpr (std::is_same<const PrimitiveType, const double>::value)      result = MainType::float64;
+    else if constexpr (std::is_same<const PrimitiveType, const bool>::value)        result = MainType::boolean;
+    else if constexpr (std::is_same<const PrimitiveType, const char* const>::value) result = MainType::string;
+    else if constexpr (std::is_same<const PrimitiveType, const std::string>::value) result = MainType::string;
+
+    return result;
 }
 
 template <typename PrimitiveType>
@@ -2302,7 +2319,11 @@ inline StringDictionary::Handle ValueView::getStringHandle() const
 
 inline std::string_view ValueView::getString() const
 {
-    check (stringDictionary != nullptr, "No string dictionary supplied");
+    // To satisfy the MSVC code analyser this check needs to be handled directly
+    // from this function
+    if (stringDictionary == nullptr)
+        throwError ("No string dictionary supplied");
+        
     return stringDictionary->getStringForHandle (getStringHandle());
 }
 
@@ -2409,21 +2430,43 @@ void ValueView::serialise (OutputStream& output) const
     if (type.isVoid())
         return;
 
-    auto dataSize = type.getValueDataSize();
+     auto dataSize = type.getValueDataSize();
+     check (dataSize > 0, "Invalid data size");
 
-    if (stringDictionary == nullptr || ! type.usesStrings())
-    {
-        output.write (data, dataSize);
-        return;
-    }
+     if (stringDictionary == nullptr || ! type.usesStrings())
+     {
+         output.write (data, dataSize);
+         return;
+     }
 
-    static constexpr uint32_t maximumSize = 16384;
+     uint8_t* localCopy = nullptr;
 
-    if (dataSize > maximumSize)
-        throwError ("Out of local scratch space");
+    #if _MSC_VER
 
-    uint8_t localCopy[maximumSize];
-    std::memcpy (localCopy, data, dataSize);
+     #ifdef __clang__
+      #pragma clang diagnostic push
+      #pragma clang diagnostic ignored "-Wlanguage-extension-token"
+     #endif
+
+     __try
+     {
+         localCopy = (uint8_t*) _alloca (dataSize);
+     }
+     __except (GetExceptionCode() == STATUS_STACK_OVERFLOW)
+     {
+         throwError ("Stack overflow");
+     }
+
+     #ifdef __clang__
+      #pragma clang diagnostic pop
+     #endif
+
+    #else
+     localCopy = (uint8_t*) alloca (dataSize);
+    #endif
+
+     check (localCopy != nullptr, "Stack allocation failed");
+     std::memcpy (localCopy, data, dataSize);
 
     static constexpr uint32_t maxStrings = 128;
     uint32_t numStrings = 0, stringDataSize = 0;
@@ -2918,11 +2961,10 @@ template <typename OutputStream> void Value::serialise (OutputStream& o) const
     {
         o.write (getRawData(), value.type.getValueDataSize());
 
-        if (auto stringDataSize = static_cast<uint32_t> (dictionary.strings.size()))
+        if (auto stringDataSize = static_cast<uint32_t> (dictionary.getRawDataSize()))
         {
-            CHOC_ASSERT (dictionary.strings.back() == 0);
             Type::SerialisationHelpers::writeVariableLengthInt (o, stringDataSize);
-            o.write (dictionary.strings.data(), stringDataSize);
+            o.write (dictionary.getRawData(), stringDataSize);
         }
     }
 }
@@ -2947,9 +2989,7 @@ inline Value Value::deserialise (InputData& input)
     {
         auto stringDataSize = Type::SerialisationHelpers::readVariableLengthInt (input);
         Type::SerialisationHelpers::expect (stringDataSize <= static_cast<uint32_t> (input.end - input.start));
-        v.dictionary.strings.resize (stringDataSize);
-        std::memcpy (v.dictionary.strings.data(), input.start, stringDataSize);
-        Type::SerialisationHelpers::expect (v.dictionary.strings.back() == 0);
+        v.dictionary.setRawData (input.start, stringDataSize);
     }
 
     return v;
@@ -3207,20 +3247,20 @@ inline SimpleStringDictionary::Handle SimpleStringDictionary::getHandleForString
     if (text.empty())
         return {};
 
-    for (size_t i = 0; i < strings.size(); ++i)
-    {
-        std::string_view sv (strings.data() + i);
+    auto i = findGreaterThanOrEqual (text);
 
-        if (text == sv)
-            return { static_cast<decltype(Handle::handle)> (i + 1) };
-
-        i += sv.length();
-    }
+    if (i.second)
+        return { *i.first };
 
     auto newHandle = static_cast<decltype(Handle::handle)> (strings.size() + 1);
-    strings.reserve (strings.size() + text.length() + 1);
+
+    if (strings.size() > 100 && (strings.capacity() < (strings.size() + text.length() + 1)))
+        strings.reserve (strings.size() + 1000);
+
     strings.insert (strings.end(), text.begin(), text.end());
     strings.push_back (0);
+
+    stringMap.insert (i.first, newHandle);
     return { newHandle };
 }
 
@@ -3235,9 +3275,41 @@ inline std::string_view SimpleStringDictionary::getStringForHandle (Handle handl
     return std::string_view (strings.data() + (handle.handle - 1));
 }
 
-inline void SimpleStringDictionary::clear()     { strings.clear(); }
+inline void SimpleStringDictionary::clear()     { strings.clear(); stringMap.clear(); }
+
+inline void SimpleStringDictionary::setRawData (const void* p, size_t n)
+{
+    strings.resize (n);
+    std::memcpy (strings.data(), p, n);
+
+    // Populate string map
+    for (size_t i = 0; i < strings.size(); ++i)
+    {
+        std::string_view sv (strings.data() + i);
+        auto v = findGreaterThanOrEqual (sv);
+        stringMap.insert (v.first, static_cast<uint32_t> (i));
+        i += sv.length();
+    }
+}
+
+inline std::pair<std::vector<uint32_t>::const_iterator, bool> SimpleStringDictionary::findGreaterThanOrEqual (std::string_view v) const
+{
+    bool exactMatch = false;
+
+    auto it = std::lower_bound (stringMap.begin(), stringMap.end(), v, [&] (uint32_t i, std::string_view sv) -> bool
+    {
+        auto c = sv.compare (getStringForHandle ( { i }));
+
+        if (c == 0)
+            exactMatch = true;
+
+        return c > 0;
+    });
+
+    return std::pair (it, exactMatch);
+}
 
 } // namespace choc::value
-} // anonymous namespace
+
 
 #endif // CHOC_VALUE_POOL_HEADER_INCLUDED

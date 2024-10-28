@@ -7694,9 +7694,6 @@
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\README.md">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_core\javascript\choc\JUCE_CHANGES.txt">
-      <Filter>JUCE Modules\juce_core\javascript\choc</Filter>
-    </None>
     <None Include="..\..\..\..\modules\juce_core\javascript\choc\LICENSE.md">
       <Filter>JUCE Modules\juce_core\javascript\choc</Filter>
     </None>

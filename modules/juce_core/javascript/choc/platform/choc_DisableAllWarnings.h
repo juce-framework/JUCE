@@ -65,14 +65,37 @@
  #pragma GCC diagnostic ignored "-Wnarrowing"
  #pragma GCC diagnostic ignored "-Wparentheses"
  #pragma GCC diagnostic ignored "-Wwrite-strings"
+ #pragma GCC diagnostic ignored "-Wformat-overflow"
+ #pragma GCC diagnostic ignored "-Wdeprecated-copy-with-dtor"
+ #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+ #pragma GCC diagnostic ignored "-Wdeprecated"
+ #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+ #pragma GCC diagnostic ignored "-Wuse-after-free"
+ #pragma GCC diagnostic ignored "-Warray-bounds"
+ #pragma GCC diagnostic ignored "-Wvolatile"
  #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
  #pragma GCC diagnostic ignored "-Wfloat-equal"
-
  #ifndef __MINGW32__
   #pragma GCC diagnostic ignored "-Wredundant-move"
  #endif
 #else
  #pragma warning (push, 0)
+ #pragma warning (disable: 2440)
+ #pragma warning (disable: 2664)
+ #pragma warning (disable: 4244)
+ #pragma warning (disable: 4701)
  #pragma warning (disable: 4702)
  #pragma warning (disable: 4706)
+ #pragma warning (disable: 4722)
+ #pragma warning (disable: 6011)
+ #pragma warning (disable: 6246)
+ #pragma warning (disable: 6255)
+ #pragma warning (disable: 6262)
+ #pragma warning (disable: 6297)
+ #pragma warning (disable: 6308)
+ #pragma warning (disable: 6323)
+ #pragma warning (disable: 6340)
+ #pragma warning (disable: 6385)
+ #pragma warning (disable: 6386)
+ #pragma warning (disable: 28182)
 #endif

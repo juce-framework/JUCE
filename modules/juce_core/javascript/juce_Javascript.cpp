@@ -32,16 +32,9 @@
   ==============================================================================
 */
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-with-dtor",
-                                     "-Wunused-but-set-variable",
-                                     "-Wdeprecated",
-                                     "-Wunused-function",
-                                     "-Wpedantic")
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4163 6011 6246 6255 6262 6297 6308 6323 6340 6385 6386 28182)
+#define choc juce::detail::choc
 #include <juce_core/javascript/choc/javascript/choc_javascript_QuickJS.h>
-#include <juce_core/javascript/choc/javascript/choc_javascript.h>
-JUCE_END_IGNORE_WARNINGS_MSVC
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+#undef choc
 
 namespace juce
 {
@@ -56,7 +49,7 @@ template <typename T>
 static int64_t toJuceInt64   (const T& convertible) { return (int64) (int64_t) convertible; }
 
 //==============================================================================
-namespace qjs = choc::javascript::quickjs;
+namespace qjs = detail::choc::javascript::quickjs;
 
 using VarOrError = std::variant<var, String>;
 
@@ -412,7 +405,7 @@ static VarOrError quickJSToJuce (const qjs::QuickJSContext::ValuePtr& ptr)
     {
         return tryQuickJSToJuce (ptr);
     }
-    catch (const choc::javascript::Error& error)
+    catch (const detail::choc::javascript::Error& error)
     {
         return String (error.what());
     }
@@ -428,17 +421,12 @@ class detail::QuickJSWrapper
 public:
     qjs::JSContext* getQuickJSContext() const
     {
-        return static_cast<qjs::QuickJSContext*> (context.getPimpl())->context;
+        return impl->context;
     }
 
     qjs::JSRuntime* getQuickJSRuntime() const
     {
-        return static_cast<qjs::QuickJSContext*> (context.getPimpl())->runtime;
-    }
-
-    choc::javascript::Context& getContext()
-    {
-        return context;
+        return impl->runtime;
     }
 
     /*  Returning a value > 0 will interrupt the QuickJS engine.
@@ -460,7 +448,7 @@ private:
         return 0;
     }
 
-    choc::javascript::Context context = choc::javascript::createQuickJSContext();
+    std::unique_ptr<qjs::QuickJSContext> impl = std::make_unique<qjs::QuickJSContext>();
     std::function<int()> interruptHandler;
 };
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -558,11 +546,11 @@ struct DynamicObjectWrapper
     }
 
     //==============================================================================
-    static choc::javascript::quickjs::JSValue callDispatcher (qjs::JSContext* ctx,
-                                                              qjs::JSValueConst thisValue,
-                                                              int numArgs,
-                                                              qjs::JSValueConst* args,
-                                                              int ordinal)
+    static qjs::JSValue callDispatcher (qjs::JSContext* ctx,
+                                        qjs::JSValueConst thisValue,
+                                        int numArgs,
+                                        qjs::JSValueConst* args,
+                                        int ordinal)
     {
         auto& self = *static_cast<DynamicObjectWrapper*> (qjs::JS_GetOpaque2 (ctx, thisValue, getClassId()));
         const auto argList = quickJSToJuce (Span { args, (size_t) numArgs }, ctx);

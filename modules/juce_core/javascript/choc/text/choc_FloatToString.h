@@ -23,8 +23,6 @@
 #include <string>
 #include "../math/choc_MathHelpers.h"
 
-namespace
-{
 namespace choc::text
 {
 
@@ -395,6 +393,5 @@ inline std::string floatToString (float value, int maxDecimals, bool omitPointIf
 inline std::string floatToString (double value, int maxDecimals, bool omitPointIfPossible)  { return FloatToStringBuffer<double> (value, maxDecimals, omitPointIfPossible).toString(); }
 
 } // namespace choc::text
-} // anonymous namespace
 
 #endif

@@ -29,8 +29,6 @@
 #include <cwctype>
 #include "../platform/choc_Assert.h"
 
-namespace
-{
 namespace choc::text
 {
 
@@ -42,77 +40,80 @@ inline bool isDigit (char c)                                    { return static_
 /// The arguments must be a sequence of pairs of strings, where the first of each pair is the string to
 /// look for, followed by its replacement.
 template <typename StringType, typename... OtherReplacements>
-std::string replace (StringType textToSearch,
-                     std::string_view firstSubstringToReplace, std::string_view firstReplacement,
-                     OtherReplacements&&... otherPairsOfStringsToReplace);
+[[nodiscard]] std::string replace (StringType textToSearch,
+                                   std::string_view firstSubstringToReplace, std::string_view firstReplacement,
+                                   OtherReplacements&&... otherPairsOfStringsToReplace);
 
 /// Returns a string with any whitespace trimmed from its start and end.
-std::string trim (std::string textToTrim);
+[[nodiscard]] std::string trim (std::string textToTrim);
 
 /// Returns a string with any whitespace trimmed from its start and end.
-std::string_view trim (std::string_view textToTrim);
+[[nodiscard]] std::string_view trim (std::string_view textToTrim);
 
 /// Returns a string with any whitespace trimmed from its start and end.
-std::string_view trim (const char* textToTrim);
+[[nodiscard]] std::string_view trim (const char* textToTrim);
 
 /// Returns a string with any whitespace trimmed from its start.
-std::string trimStart (std::string textToTrim);
+[[nodiscard]] std::string trimStart (std::string textToTrim);
 
 /// Returns a string with any whitespace trimmed from its start.
-std::string_view trimStart (std::string_view textToTrim);
+[[nodiscard]] std::string_view trimStart (std::string_view textToTrim);
 
 /// Returns a string with any whitespace trimmed from its start.
-std::string_view trimStart (const char* textToTrim);
+[[nodiscard]] std::string_view trimStart (const char* textToTrim);
 
 /// Returns a string with any whitespace trimmed from its end.
-std::string trimEnd (std::string textToTrim);
+[[nodiscard]] std::string trimEnd (std::string textToTrim);
 
 /// Returns a string with any whitespace trimmed from its end.
-std::string_view trimEnd (std::string_view textToTrim);
+[[nodiscard]] std::string_view trimEnd (std::string_view textToTrim);
 
 /// Returns a string with any whitespace trimmed from its end.
-std::string_view trimEnd (const char* textToTrim);
+[[nodiscard]] std::string_view trimEnd (const char* textToTrim);
 
 /// If the string begins with one or more instances of the given character, this
 /// skips past them, returning the remainder of the string.
-std::string_view trimCharacterAtStart (std::string_view textToTrim, char characterToSkip);
+[[nodiscard]] std::string_view trimCharacterAtStart (std::string_view textToTrim, char characterToSkip);
 
 /// If the given character is at the start and end of the string, it trims it away.
-std::string removeOuterCharacter (std::string text, char outerChar);
+[[nodiscard]] std::string removeOuterCharacter (std::string text, char outerChar);
 
-inline std::string removeDoubleQuotes (std::string text)       { return removeOuterCharacter (std::move (text), '"'); }
-inline std::string removeSingleQuotes (std::string text)       { return removeOuterCharacter (std::move (text), '\''); }
+[[nodiscard]] inline std::string removeDoubleQuotes (std::string text)       { return removeOuterCharacter (std::move (text), '"'); }
+[[nodiscard]] inline std::string removeSingleQuotes (std::string text)       { return removeOuterCharacter (std::move (text), '\''); }
 
-inline std::string addDoubleQuotes (std::string text)          { return "\"" + std::move (text) + "\""; }
-inline std::string addSingleQuotes (std::string text)          { return "'" + std::move (text) + "'"; }
+[[nodiscard]] inline std::string addDoubleQuotes (std::string text)          { return "\"" + std::move (text) + "\""; }
+[[nodiscard]] inline std::string addSingleQuotes (std::string text)          { return "'" + std::move (text) + "'"; }
 
-std::string toLowerCase (std::string);
-std::string toUpperCase (std::string);
+[[nodiscard]] std::string toLowerCase (std::string);
+[[nodiscard]] std::string toUpperCase (std::string);
 
 template <typename IsDelimiterChar>
-std::vector<std::string> splitString (std::string_view textToSplit,
-                                      IsDelimiterChar&& isDelimiterChar,
-                                      bool includeDelimitersInResult);
+[[nodiscard]] std::vector<std::string> splitString (std::string_view textToSplit,
+                                                    IsDelimiterChar&& isDelimiterChar,
+                                                    bool includeDelimitersInResult);
 
 template <typename CharStartsDelimiter, typename CharIsInDelimiterBody>
-std::vector<std::string> splitString (std::string_view textToSplit,
-                                      CharStartsDelimiter&& isDelimiterStart,
-                                      CharIsInDelimiterBody&& isDelimiterBody,
-                                      bool includeDelimitersInResult);
+[[nodiscard]] std::vector<std::string> splitString (std::string_view textToSplit,
+                                                    CharStartsDelimiter&& isDelimiterStart,
+                                                    CharIsInDelimiterBody&& isDelimiterBody,
+                                                    bool includeDelimitersInResult);
 
-std::vector<std::string> splitString (std::string_view textToSplit,
-                                      char delimiterCharacter,
-                                      bool includeDelimitersInResult);
+[[nodiscard]] std::vector<std::string> splitString (std::string_view textToSplit,
+                                                    char delimiterCharacter,
+                                                    bool includeDelimitersInResult);
 
-std::vector<std::string> splitAtWhitespace (std::string_view text, bool keepDelimiters = false);
+[[nodiscard]] std::vector<std::string> splitAtWhitespace (std::string_view text,
+                                                          bool keepDelimiters = false);
 
 /// Splits a string at newline characters, returning an array of strings.
-std::vector<std::string> splitIntoLines (std::string_view text, bool includeNewLinesInResult);
+[[nodiscard]] std::vector<std::string> splitIntoLines (std::string_view text,
+                                                       bool includeNewLinesInResult);
 
 /// Joins some kind of array of strings into a single string, adding the given separator
 /// between them (but not adding it at the start or end)
 template <typename ArrayOfStrings>
-std::string joinStrings (const ArrayOfStrings& strings, std::string_view separator);
+[[nodiscard]] std::string joinStrings (const ArrayOfStrings& strings,
+                                       std::string_view separator);
 
 /// Returns true if this text contains the given sub-string.
 bool contains (std::string_view text, std::string_view possibleSubstring);
@@ -595,6 +596,5 @@ inline std::string percentEncodeURI (std::string_view text)
 
 
 } // namespace choc::text
-} // anonymous namespace
 
 #endif

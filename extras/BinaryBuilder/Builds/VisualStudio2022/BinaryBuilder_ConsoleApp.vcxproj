@@ -688,7 +688,6 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\modules\juce_core\javascript\choc\JUCE_CHANGES.txt"/>
     <None Include="..\..\..\..\modules\juce_core\javascript\choc\LICENSE.md"/>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt"/>
   </ItemGroup>

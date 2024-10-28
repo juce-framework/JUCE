@@ -22,8 +22,6 @@
 #include <cstddef>
 #include "choc_StringUtilities.h"
 
-namespace
-{
 namespace choc::text
 {
 
@@ -103,14 +101,14 @@ struct UTF8Pointer
 
     /// Returns a pointer to the first non-whitespace character in the given string (which may
     /// be the terminating null character if it's all whitespace).
-    UTF8Pointer findEndOfWhitespace() const;
+    [[nodiscard]] UTF8Pointer findEndOfWhitespace() const;
 
     /// Iterates backwards from this position to find the first character that follows
     /// a new-line. The pointer provided marks the furthest back that the function should search
-    UTF8Pointer findStartOfLine (UTF8Pointer startOfValidText) const;
+    [[nodiscard]] UTF8Pointer findStartOfLine (UTF8Pointer startOfValidText) const;
 
     /// Searches forwards for the next character that is followed by a new-line or a null-terminator.
-    UTF8Pointer findEndOfLine() const;
+    [[nodiscard]] UTF8Pointer findEndOfLine() const;
 
     //==============================================================================
     struct EndIterator {};
@@ -200,7 +198,7 @@ bool isValidCESU8 (std::string_view utf8);
 
 /// Converts any 32-bit characters in this UTF-8 string to surrogate pairs, which makes
 /// the resulting string suitable for use at CESU-8.
-std::string convertUTF8ToCESU8 (UTF8Pointer);
+[[nodiscard]] std::string convertUTF8ToCESU8 (UTF8Pointer);
 
 
 //==============================================================================
@@ -653,6 +651,5 @@ inline std::string convertUTF8ToCESU8 (UTF8Pointer utf8)
 
 
 } // namespace choc::text
-} // anonymous namespace
 
 #endif
