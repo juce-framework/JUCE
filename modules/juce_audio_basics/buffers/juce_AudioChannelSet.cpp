@@ -710,8 +710,18 @@ Array<AudioChannelSet> AudioChannelSet::channelSetsWithNumberOfChannels (int num
                     return { AudioChannelSet::create7point0point4() };
                 case 12:
                     return { AudioChannelSet::create7point1point4() };
+                case 13:
+                    return { AudioChannelSet::create7point0point6(),
+                             AudioChannelSet::create9point0point4(),
+                             AudioChannelSet::create9point0point4ITU() };
                 case 14:
-                    return { AudioChannelSet::create7point1point6() };
+                    return { AudioChannelSet::create7point1point6(),
+                             AudioChannelSet::create9point1point4(),
+                             AudioChannelSet::create9point1point4ITU() };
+                case 15:
+                    return {
+                            AudioChannelSet::create9point0point6(),
+                            AudioChannelSet::create9point0point6ITU() };
                 case 16:
                     return { AudioChannelSet::create9point1point6(),
                              AudioChannelSet::create9point1point6ITU() };
