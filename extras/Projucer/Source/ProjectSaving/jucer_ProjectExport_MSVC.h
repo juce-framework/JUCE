@@ -1027,6 +1027,15 @@ public:
                                 libPath->addTextElement ("$(LibraryPath);" + librarySearchPaths.joinIntoString (";"));
                             }
                         }
+
+                        const auto enabled = config.getArchitectures().contains (arch) ? "true" : "false";
+
+                        for (const auto optionName : { "PreBuildEventUseInBuild", "PostBuildEventUseInBuild" })
+                        {
+                            auto* tag = props->createNewChildElement (optionName);
+                            setConditionAttribute (*tag, config, arch);
+                            tag->addTextElement (enabled);
+                        }
                     }
                 }
             }
